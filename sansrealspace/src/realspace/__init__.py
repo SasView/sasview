@@ -1,6 +1,6 @@
 """
     Real-Space Modeling for SANS
-"""
+""" 
 ## \mainpage Real-Space Modeling for SANS
 #
 # \section intro_sec Introduction
