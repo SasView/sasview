@@ -423,6 +423,29 @@ PyObject * pypointsmodelpy_calculateI_Qxy(PyObject *, PyObject *args)
   return Py_BuildValue("d",I);
 }
 
+// method calculateI_Qxy(poitns, Qx,Qy)
+char pypointsmodelpy_calculateI_Qvxy__name__[] = "calculateI_Qvxy";
+char pypointsmodelpy_calculateI_Qvxy__doc__[] = "calculate scattering intensity on a 2D pixel";
+
+PyObject * pypointsmodelpy_calculateI_Qvxy(PyObject *, PyObject *args)
+{
+  PyObject *pylores = 0, *pypoint3dvec = 0;
+  double qx = 0, qy = 0;
+  double I = 0;
+
+  int ok = PyArg_ParseTuple(args, "OOdd", &pylores, &pypoint3dvec, &qx,&qy);
+  if(!ok) return NULL;
+
+  void *temp = PyCObject_AsVoidPtr(pylores);
+  LORESModel * thislores = static_cast<LORESModel *>(temp);
+  void *temp2 = PyCObject_AsVoidPtr(pypoint3dvec);
+  vector<Point3D> * thisvec = static_cast<vector<Point3D> *>(temp2);
+  
+  I = thislores->CalculateIQ_2D(*thisvec, qx,qy);
+
+  return Py_BuildValue("d",I);
+}
+
 // PDBModel method calculateIQ(iq)
 char pypointsmodelpy_get_pdb_iq__name__[] = "get_pdb_iq";
 char pypointsmodelpy_get_pdb_iq__doc__[] = "calculate scattering intensity for PDB model";
@@ -465,6 +488,29 @@ PyObject * pypointsmodelpy_get_pdb_Iqxy(PyObject *, PyObject *args)
   return Py_BuildValue("d",I);
 }
 
+// PDBModel method calculateIQ_2Dv(points,qx,qy)
+char pypointsmodelpy_get_pdb_Iqvxy__name__[] = "get_pdb_Iqvxy";
+char pypointsmodelpy_get_pdb_Iqvxy__doc__[] = "calculate scattering intensity by a given (qx,qy) for PDB model";
+
+PyObject * pypointsmodelpy_get_pdb_Iqvxy(PyObject *, PyObject *args)
+{
+  PyObject *pypdb = 0, *pypoint3dvec = 0;
+  double qx = 0, qy = 0;
+  double I = 0;
+
+  int ok = PyArg_ParseTuple(args, "OOdd", &pypdb, &pypoint3dvec, &qx,&qy);
+  if(!ok) return NULL;
+
+  void *temp = PyCObject_AsVoidPtr(pypdb);
+  PDBModel * thispdb = static_cast<PDBModel *>(temp);
+  void *temp2 = PyCObject_AsVoidPtr(pypoint3dvec);
+  vector<Point3D> * thisvec = static_cast<vector<Point3D> *>(temp2);
+
+  I = thispdb->CalculateIQ_2D(*thisvec,qx,qy);
+
+  return Py_BuildValue("d",I);
+}
+
 // ComplexModel method calculateIQ(iq)
 char pypointsmodelpy_get_complex_iq__name__[] = "get_complex_iq";
 char pypointsmodelpy_get_complex_iq__doc__[] = "calculate scattering intensity for COMPLEX model";
@@ -484,6 +530,27 @@ PyObject * pypointsmodelpy_get_complex_iq(PyObject *, PyObject *args)
   thiscomplex->CalculateIQ(thisiq);
 
   return Py_BuildValue("i",0);
+}
+
+//LORESModel method CalculateIQ_2D(points,qx,qy) 
+char pypointsmodelpy_get_complex_Iqxy__name__[] = "get_complex_iq_2D";
+char pypointsmodelpy_get_complex_Iqxy__doc__[] = "calculate averaged scattering intensity from a single q";
+
+PyObject * pypointsmodelpy_get_complex_Iqxy(PyObject *, PyObject *args)
+{
+  PyObject *pylores = 0, *pypoint3dvec = 0;
+  double qx = 0, qy = 0;
+  int ok = PyArg_ParseTuple(args, "OOdd", &pylores, &pypoint3dvec, &qx, &qy);
+  if(!ok) return NULL;
+
+  void *temp = PyCObject_AsVoidPtr(pylores);
+  ComplexModel * thiscomplex = static_cast<ComplexModel *>(temp);
+  void *temp2 = PyCObject_AsVoidPtr(pypoint3dvec);
+  vector<Point3D> * thisvec = static_cast<vector<Point3D> *>(temp2);
+
+  double I = thiscomplex->CalculateIQ_2D(*thisvec,qx,qy);
+
+  return Py_BuildValue("d",I);
 }
 
 //LORESModel method CalculateIQ(q) 

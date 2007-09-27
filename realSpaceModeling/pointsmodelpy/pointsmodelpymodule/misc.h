@@ -151,6 +151,12 @@ extern char pypointsmodelpy_calculateI_Qxy__doc__[];
 extern "C"
 PyObject * pypointsmodelpy_calculateI_Qxy(PyObject *, PyObject *);
 
+// method calculateI_Qvxy(points,Qx,Qy)
+extern char pypointsmodelpy_calculateI_Qvxy__name__[];
+extern char pypointsmodelpy_calculateI_Qvxy__doc__[];
+extern "C"
+PyObject * pypointsmodelpy_calculateI_Qvxy(PyObject *, PyObject *);
+
 // PDBModel method calculateIQ(iq)
 extern char pypointsmodelpy_get_pdb_iq__name__[];
 extern char pypointsmodelpy_get_pdb_iq__doc__[];
@@ -162,6 +168,18 @@ extern char pypointsmodelpy_get_pdb_Iqxy__name__[];
 extern char pypointsmodelpy_get_pdb_Iqxy__doc__[];
 extern "C"
 PyObject * pypointsmodelpy_get_pdb_Iqxy(PyObject *, PyObject *);
+
+// PDBModel method calculateIQ_2D(pts,qx,qy)
+extern char pypointsmodelpy_get_pdb_Iqvxy__name__[];
+extern char pypointsmodelpy_get_pdb_Iqvxy__doc__[];
+extern "C"
+PyObject * pypointsmodelpy_get_pdb_Iqvxy(PyObject *, PyObject *);
+
+// ComplexModel method calculateIQ_2D(pts,qx,qy)
+extern char pypointsmodelpy_get_complex_Iqxy__name__[];
+extern char pypointsmodelpy_get_complex_Iqxy__doc__[];
+extern "C"
+PyObject * pypointsmodelpy_get_complex_Iqxy(PyObject *, PyObject *);
 
 // ComplexModel method calculateIQ(iq)
 extern char pypointsmodelpy_get_complex_iq__name__[];

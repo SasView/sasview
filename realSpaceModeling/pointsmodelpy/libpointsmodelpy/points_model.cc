@@ -374,3 +374,40 @@ double PointsModel::CalculateIQ_2D(double qx, double qy)
   //return I, without normalization
   return I;
 }
+
+/*
+ * 2D simulation for oriented systems
+ * The beam direction is assumed to be in the z direction.
+ * 
+ * @param points: vector of space points
+ * @param qx: qx [A-1]
+ * @param qy: qy [A-1]
+ * @return: I(qx, qy) for the system described by the space points [cm-1]
+ * 
+ */
+double PointsModel::CalculateIQ_2D(const vector<Point3D>&points, double qx, double qy){
+	/*
+	 * TODO: the vector of points should really be part of the class
+	 * 	     This is a design flaw inherited from the original programmer.
+	 */
+	
+	int size = points.size();
+
+	double cos_term = 0;
+	double sin_term = 0;
+	for (int i = 0; i < size; i++) {
+	  	//the sld for the pair of points
+	
+		double phase = qx*points[i].getX() + qy*points[i].getY();
+			  	
+		cos_term += cos(phase) * points[i].getSLD();
+		sin_term += sin(phase) * points[i].getSLD();
+	
+	}   			
+
+	// P(q) = 1/V I(q) = (V/N)^2 (1/V) (cos_term^2 + sin_term^2) 
+	// We divide by N here and we will multiply by the density later.
+
+	return (cos_term*cos_term + sin_term*sin_term)/size;	
+}
+

@@ -96,17 +96,29 @@ struct PyMethodDef pypointsmodelpy_methods[] = {
     {pypointsmodelpy_calculateIQ_2D__name__, pypointsmodelpy_calculateIQ_2D,
      METH_VARARGS, pypointsmodelpy_calculateIQ_2D__doc__},
 
-    //calculateIQ 2D(Qx,Qy)
-    {pypointsmodelpy_calculateI_Qxy__name__, pypointsmodelpy_calculateI_Qxy,
-     METH_VARARGS, pypointsmodelpy_calculateI_Qxy__doc__},
+     //calculateIQ 2D(points, Qx,Qy)
+     {pypointsmodelpy_calculateI_Qvxy__name__, pypointsmodelpy_calculateI_Qvxy,
+      METH_VARARGS, pypointsmodelpy_calculateI_Qvxy__doc__},
+
+      //calculateIQ 2D(Qx,Qy)
+      {pypointsmodelpy_calculateI_Qxy__name__, pypointsmodelpy_calculateI_Qxy,
+       METH_VARARGS, pypointsmodelpy_calculateI_Qxy__doc__},
 
     //PDBModel calculateIQ
     {pypointsmodelpy_get_pdb_iq__name__, pypointsmodelpy_get_pdb_iq,
      METH_VARARGS, pypointsmodelpy_get_pdb_iq__doc__},
 
-    //PDBModel calculateIQ(Qx,Qy)
-    {pypointsmodelpy_get_pdb_Iqxy__name__, pypointsmodelpy_get_pdb_Iqxy,
-     METH_VARARGS, pypointsmodelpy_get_pdb_Iqxy__doc__},
+     //PDBModel calculateIQ(Qx,Qy)
+     {pypointsmodelpy_get_pdb_Iqxy__name__, pypointsmodelpy_get_pdb_Iqxy,
+      METH_VARARGS, pypointsmodelpy_get_pdb_Iqxy__doc__},
+
+      //PDBModel calculateIQ(pts,Qx,Qy)
+      {pypointsmodelpy_get_pdb_Iqvxy__name__, pypointsmodelpy_get_pdb_Iqvxy,
+       METH_VARARGS, pypointsmodelpy_get_pdb_Iqvxy__doc__},
+
+       //ComplexModel calculateIQ(pts,Qx,Qy)
+       {pypointsmodelpy_get_complex_Iqxy__name__, pypointsmodelpy_get_complex_Iqxy,
+        METH_VARARGS, pypointsmodelpy_get_complex_Iqxy__doc__},
 
     //ComplexModel calculateIQ
     {pypointsmodelpy_get_complex_iq__name__, pypointsmodelpy_get_complex_iq,
