@@ -91,11 +91,29 @@ def test_complex3():
   print "I(Q) is saved in testcomplex3.iq"
   print "pass"
 
-if __name__ == "__main__":
-    print "test 1, adding one nonempty loresmodel and one nonempty pdbmodel to complex model"
-    test_complex()
-    print "test 2, adding a nonempty pdbmodel, and adding an empty loresmodel"
-    test_complex2()
-    print "test 3, adding an empty pdbmodel, and adding a nonempty loresmodel"
-    test_complex3()
+# Test 2D complex model
+def test_complex4():
+
+
+    a = geoshapespy.new_sphere(10)
+    lm = pointsmodelpy.new_loresmodel(0.1)
+    pointsmodelpy.lores_add(lm,a,1.0)
+
+    vpcomplex = pointsmodelpy.new_point3dvec();
+    complex = pointsmodelpy.new_complexmodel()
+    pointsmodelpy.complexmodel_add(complex,lm,"LORES");
     
+    pointsmodelpy.get_complexpoints(complex,vpcomplex);
+ 
+    print pointsmodelpy.get_complex_iq_2D(complex,vpcomplex,0.1,0.1);
+    print pointsmodelpy.get_complex_iq_2D(complex,vpcomplex,0.01,0.1);
+
+
+if __name__ == "__main__":
+    #print "test 1, adding one nonempty loresmodel and one nonempty pdbmodel to complex model"
+    #test_complex()
+    #print "test 2, adding a nonempty pdbmodel, and adding an empty loresmodel"
+    #test_complex2()
+    #print "test 3, adding an empty pdbmodel, and adding a nonempty loresmodel"
+    #test_complex3()
+    test_complex4()
