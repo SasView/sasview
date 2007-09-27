@@ -169,6 +169,74 @@ def test_4():
         
         print "q=%g  sim=%g  ana=%g   ratio=%g" % (q, sim_1, ana_1, sim_1/ana_1)
 
+def test_5():
+    from sans.models.SphereModel import SphereModel
+    model = VolumeCanvas.VolumeCanvas()
+    
+    handle = model.add('sphere')
+    
+    radius = 10
+    density = .1
+    
+    ana = SphereModel()
+    ana.setParam('scale', 1.0)
+    ana.setParam('contrast', 1.0)
+    ana.setParam('background', 0.0)
+    ana.setParam('radius', radius)
+    
+    model.setParam('lores_density', density)
+    model.setParam('%s.radius' % handle, radius)
+    model.setParam('scale' , 1.0)
+    model.setParam('%s.contrast' % handle, 1.0)
+    model.setParam('background' , 0.0)
+    
+    ana = ana.runXY([0.1, 0.1])
+    sim = model.getIq2D(0.1, 0.1)
+    print ana, sim, sim/ana, ana/sim
+
+def test_6():
+    from sans.models.CylinderModel import CylinderModel
+    radius = 5
+    length = 40
+    density = 20
+    
+    ana = CylinderModel()
+    ana.setParam('scale', 1.0)
+    ana.setParam('contrast', 1.0)
+    ana.setParam('background', 0.0)
+    ana.setParam('radius', radius)
+    ana.setParam('length', length)
+    
+    # Along Y
+    #ana.setParam('cyl_theta', 1.57)
+    #ana.setParam('cyl_phi', 1.57)
+    
+    # Along Z
+    ana.setParam('cyl_theta', 0)
+    ana.setParam('cyl_phi', 0)
+    
+    model = VolumeCanvas.VolumeCanvas()    
+    handle = model.add('cylinder')
+    model.setParam('lores_density', density)
+    model.setParam('%s.radius' % handle, radius)
+    model.setParam('%s.length' % handle, length)
+    model.setParam('scale' , 1.0)
+    model.setParam('%s.contrast' % handle, 1.0)
+    model.setParam('background' , 0.0)
+    
+    # Along Y
+    #model.setParam('%s.orientation' % handle, [0,0,0])
+    
+    # Along Z
+    model.setParam('%s.orientation' % handle, [1.57,0,0])
+    
+    
+    ana = ana.runXY([0.1, 0.01])
+    sim = math.pi/2*model.getIq2D(0.1, 0.01)
+    print model.npts
+    print ana, sim, sim/ana, ana/sim
+    
+
     
 if __name__ == "__main__":
-    test_1()
+    test_6()
