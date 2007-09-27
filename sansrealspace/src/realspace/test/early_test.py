@@ -232,7 +232,7 @@ def test_6():
     
     
     ana = ana.runXY([0.1, 0.01])
-    sim = math.pi/2*model.getIq2D(0.1, 0.01)
+    sim = model.getIq2D(0.1, 0.01)
     print model.npts
     print ana, sim, sim/ana, ana/sim
     

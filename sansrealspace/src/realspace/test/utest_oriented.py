@@ -95,7 +95,7 @@ class TestCylinder(unittest.TestCase):
         self.model.setParam('%s.orientation' % self.handle, [0,0,0])
         
         ana_val = self.ana.runXY([0.1, 0.2])
-        sim_val = math.pi/2 * self.model.getIq2D(0.1, 0.2)
+        sim_val = self.model.getIq2D(0.1, 0.2)
         #print ana_val, sim_val, sim_val/ana_val
         
         self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
@@ -108,7 +108,7 @@ class TestCylinder(unittest.TestCase):
         self.model.setParam('%s.orientation' % self.handle, [90,0,0])
         
         ana_val = self.ana.runXY([0.1, 0.2])
-        sim_val = math.pi/2 * self.model.getIq2D(0.1, 0.2)
+        sim_val = self.model.getIq2D(0.1, 0.2)
         #print ana_val, sim_val, sim_val/ana_val
         
         self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
@@ -121,7 +121,7 @@ class TestCylinder(unittest.TestCase):
         self.model.setParam('%s.orientation' % self.handle, [0,0,90])
         
         ana_val = self.ana.runXY([0.1, 0.2])
-        sim_val = math.pi/2 * self.model.getIq2D(0.1, 0.2)
+        sim_val = self.model.getIq2D(0.1, 0.2)
         #print ana_val, sim_val, sim_val/ana_val
         
         self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
@@ -164,7 +164,7 @@ class TestEllipsoid(unittest.TestCase):
         self.canvas.setParam('%s.orientation' % self.handle, [0,0,0])
         
         ana_val = self.ana.runXY([0.1, 0.2])
-        sim_val = math.pi/2 * self.canvas.getIq2D(0.1, 0.2)
+        sim_val = self.canvas.getIq2D(0.1, 0.2)
         #print ana_val, sim_val, sim_val/ana_val
         
         self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
@@ -177,7 +177,7 @@ class TestEllipsoid(unittest.TestCase):
         self.canvas.setParam('%s.orientation' % self.handle, [0,90,0])
         
         ana_val = self.ana.runXY([0.1, 0.2])
-        sim_val = math.pi/2 * self.canvas.getIq2D(0.1, 0.2)
+        sim_val = self.canvas.getIq2D(0.1, 0.2)
         #print ana_val, sim_val, sim_val/ana_val
         
         self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
@@ -190,7 +190,7 @@ class TestEllipsoid(unittest.TestCase):
         self.canvas.setParam('%s.orientation' % self.handle, [0,0,90])
         
         ana_val = self.ana.runXY([0.05, 0.15])
-        sim_val = math.pi/2 * self.canvas.getIq2D(0.05, 0.15)
+        sim_val = self.canvas.getIq2D(0.05, 0.15)
         #print ana_val, sim_val, sim_val/ana_val
         
         try:
