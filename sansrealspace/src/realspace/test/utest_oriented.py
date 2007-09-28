@@ -253,5 +253,76 @@ class TestCoreShell(unittest.TestCase):
         
         self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
 
+class TestRunMethods(unittest.TestCase):
+    """ Tests run methods for oriented (2D) systems """
+
+    def setUp(self):
+        """ Set up ellipsoid """
+        from sans.models.EllipsoidModel import EllipsoidModel
+        
+        radius_a = 10
+        radius_b = 15
+        density = 1
+        
+        self.ana = EllipsoidModel()
+        self.ana.setParam('scale', 1.0)
+        self.ana.setParam('contrast', 1.0)
+        self.ana.setParam('background', 0.0)
+        self.ana.setParam('radius_a', radius_a)
+        self.ana.setParam('radius_b', radius_b)
+
+       
+        canvas = VolumeCanvas.VolumeCanvas()
+        canvas.setParam('lores_density', density)
+        self.handle = canvas.add('ellipsoid')
+        canvas.setParam('%s.radius_x' % self.handle, radius_a)
+        canvas.setParam('%s.radius_y' % self.handle, radius_b)
+        canvas.setParam('%s.radius_z' % self.handle, radius_b)
+        canvas.setParam('scale' , 1.0)
+        canvas.setParam('%s.contrast' % self.handle, 1.0)
+        canvas.setParam('background' , 0.0)
+        self.canvas = canvas     
+           
+        self.ana.setParam('axis_theta', 1.57)
+        self.ana.setParam('axis_phi', 0)
+        
+        self.canvas.setParam('%s.orientation' % self.handle, [0,0,0])
+        
+
+    def testRunXY_List(self):
+        """ Testing ellipsoid along X """
+        ana_val = self.ana.runXY([0.1, 0.2])
+        sim_val = self.canvas.runXY([0.1, 0.2])
+        #print ana_val, sim_val, sim_val/ana_val
+        
+        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+
+    def testRunXY_float(self):
+        """ Testing ellipsoid along X """
+        ana_val = self.ana.runXY(0.1)
+        sim_val = self.canvas.runXY(0.1)
+        #print ana_val, sim_val, sim_val/ana_val
+        
+        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+
+    def testRun_float(self):
+        """ Testing ellipsoid along X """
+        ana_val = self.ana.run(0.1)
+        sim_val = self.canvas.run(0.1)
+        #print ana_val, sim_val, sim_val/ana_val
+        
+        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+
+    def testRun_list(self):
+        """ Testing ellipsoid along X """
+        ana_val = self.ana.run([0.1, 33.0])
+        sim_val = self.canvas.run([0.1, 33.0])
+        #print ana_val, sim_val, sim_val/ana_val
+        
+        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+
+          
+
+
 if __name__ == '__main__':
     unittest.main()        

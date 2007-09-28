@@ -7,7 +7,7 @@ from sans.models.BaseComponent import BaseComponent
 from sansModeling.pointsmodelpy import pointsmodelpy
 from sansModeling.geoshapespy import geoshapespy
 
-import os.path
+import os.path, math
 
 class ShapeDescriptor:
     """
@@ -22,6 +22,7 @@ class ShapeDescriptor:
         ## Parameters of the object
         self.params = {}
         self.params["center"] = [0, 0, 0]
+        # Orientation are angular offsets in degrees with respect to X, Y, Z
         self.params["orientation"] = [0, 0, 0]
         # Default to lores shape
         self.params['is_lores'] = True
@@ -71,6 +72,7 @@ class SphereDescriptor(ShapeDescriptor):
 class CylinderDescriptor(ShapeDescriptor):
     """
         Descriptor for a cylinder
+        Orientation: Default cylinder is along Y
     """
     def __init__(self):
         """
@@ -477,13 +479,81 @@ class VolumeCanvas(BaseComponent):
     def run(self, q = 0):
         """
             Returns the value of I(q) for a given q-value
-            @param q: q-value [float]
-            @return: I(q) [float]
+            @param q: q-value ([float] or [list]) ([A-1] or [[A-1], [rad]])
+            @return: I(q) [float] [cm-1]
         """
-        #TODO: The right simulation function should be
-        # called according to the type of input we get.
-        # For now, only a q length is supported.
-        return getIq(q)
+        # Check for 1D q length
+        if q.__class__.__name__ == 'int' \
+            or q.__class__.__name__ == 'float':
+            return self.getIq(q)
+        # Check for 2D q-value
+        elif q.__class__.__name__ == 'list':
+            # Compute (Qx, Qy) from (Q, phi)
+            # Phi is in radian and Q-values are in A-1
+            qx = q[0]*math.cos(q[1])
+            qy = q[0]*math.sin(q[1])
+            return self.getIq2D(qx, qy)
+        # Through an exception if it's not a
+        # type we recognize
+        else:
+            raise ValueError, "run(q): bad type for q"
+    
+    def runXY(self, q = 0):
+        """
+            Standard run command for the canvas.
+            Redirects to the correct method 
+            according to the input type.
+            @param q: q-value [float] or [list] [A-1]
+            @return: I(q) [float] [cm-1]
+        """
+        # Check for 1D q length
+        if q.__class__.__name__ == 'int' \
+            or q.__class__.__name__ == 'float':
+            return self.getIq(q)
+        # Check for 2D q-value
+        elif q.__class__.__name__ == 'list':
+            return self.getIq2D(q[0], q[1])
+        # Through an exception if it's not a
+        # type we recognize
+        else:
+            raise ValueError, "runXY(q): bad type for q"
+    
+        
+    def getIq2D(self, qx, qy):
+        """
+            Returns simulate I(q) for given q_x and q_y values.
+            @param qx: q_x [A-1]
+            @param qy: q_y [A-1]
+            @return: I(q) [cm-1]
+        """
+        # To find a complete example of the correct call order:
+        # In LORES2, in actionclass.py, method CalculateAction._get_iq()
+        
+        # If there are not shapes, do nothing
+        if len(self.shapes) == 0:
+            self.hasPr = False
+            return 0
+        
+        # generate space filling points from shape list
+        self.createVolumeFromList()
+
+        self.points = pointsmodelpy.new_point3dvec()
+
+        pointsmodelpy.complexmodel_add(self.complex_model, 
+                                        self.lores_model, "LORES")
+        for shape in self.shapes:
+            if self.shapes[shape].params['is_lores'] == False:
+                pointsmodelpy.complexmodel_add(self.complex_model, 
+                    self.shapes[shape].shapeObject, "PDB")
+        
+        #pointsmodelpy.get_lorespoints(self.lores_model, self.points)
+        self.npts = pointsmodelpy.get_complexpoints(self.complex_model, self.points)
+                
+        norm =  1.0e8/self.params['lores_density']*self.params['scale']
+        #return norm*pointsmodelpy.get_lores_i(self.lores_model, q)
+        return norm*pointsmodelpy.get_complex_iq_2D(self.complex_model, self.points, qx, qy)\
+            + self.params['background']
+                
         
     def getIq(self, q):
         """
