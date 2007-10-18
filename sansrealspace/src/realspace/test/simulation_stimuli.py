@@ -89,7 +89,7 @@ class Simulation:
     class AddStimulus(Stimulus):
         """Add an object to the canvas"""
 
-        frequency = 1.0
+        frequency = 0.1
         
         def __call__(self, canvas):
             """Apply stimulus"""
@@ -114,7 +114,7 @@ class Simulation:
     class GetParamStimulus(Stimulus):
         """Get the value of a canvas or shape parameter"""
 
-        frequency = 1.0
+        frequency = 0.05
         
         def __call__(self, canvas):
             """Apply stimulus"""
@@ -144,7 +144,7 @@ class Simulation:
     class GetIqStimulus(Stimulus):
         """Calculate I(q)"""
 
-        frequency = 1.0
+        frequency = 0.25
         
         def __call__(self, canvas):
             report = generator.StimulusReport(tag=self.name)
@@ -166,7 +166,7 @@ class Simulation:
     class GetIq2DStimulus(Stimulus):
         """Calculate I(q)"""
 
-        frequency = 1.0
+        frequency = 0.25
         
         def __call__(self, canvas):
             report = generator.StimulusReport(tag=self.name)
@@ -188,7 +188,7 @@ class Simulation:
     class SetCanvasParamStimulus(Stimulus):
         """Set the value of a canvas parameter"""
 
-        frequency = 1.0
+        frequency = 0.05
         
         def __call__(self, canvas):
             """Apply stimulus"""
@@ -226,7 +226,7 @@ class Simulation:
     class SetShapeParamStimulus(Stimulus):
         """Set the value of a canvas parameter"""
 
-        frequency = 1.0
+        frequency = 0.1
         
         def __call__(self, canvas):
             """Apply stimulus"""
@@ -291,7 +291,7 @@ class Simulation:
     class RemoveStimulus(Stimulus):
         """Calculate I(q)"""
 
-        frequency = 1.0
+        frequency = 0.05
         
         def __call__(self, canvas):
             from random import random
