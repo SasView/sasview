@@ -59,6 +59,49 @@ class TestSphere(unittest.TestCase):
         sim_val = self.model.getIq2D(0.1, 0.1)
         self.assert_( math.fabs(sim_val/ana_val-1.0)<0.1 )
         
+class TestCylinderAddObject(unittest.TestCase):
+    """ Tests for oriented (2D) systems """
+        
+    def setUp(self):
+        """ Set up cylinder model """
+        from sans.models.CylinderModel import CylinderModel
+        radius = 5
+        length = 40
+        density = 20
+    
+        # Analytical model
+        self.ana = CylinderModel()
+        self.ana.setParam('scale', 1.0)
+        self.ana.setParam('contrast', 1.0)
+        self.ana.setParam('background', 0.0)
+        self.ana.setParam('radius', radius)
+        self.ana.setParam('length', length)
+    
+        # Simulation model
+        self.model = VolumeCanvas.VolumeCanvas()
+        cyl = VolumeCanvas.CylinderDescriptor()
+        self.handle = self.model.addObject(cyl)
+        self.model.setParam('lores_density', density)
+        self.model.setParam('%s.radius' % self.handle, radius)
+        self.model.setParam('%s.length' % self.handle, length)
+        self.model.setParam('scale' , 1.0)
+        self.model.setParam('%s.contrast' % self.handle, 1.0)
+        self.model.setParam('background' , 0.0)
+    
+    def testalongY(self):
+        """ Testing cylinder along Y axis """
+        self.ana.setParam('cyl_theta', math.pi/2.0)
+        self.ana.setParam('cyl_phi', math.pi/2.0)
+        
+        self.model.setParam('%s.orientation' % self.handle, [0,0,0])
+        
+        ana_val = self.ana.runXY([0.1, 0.2])
+        sim_val = self.model.getIq2D(0.1, 0.2)
+        #print ana_val, sim_val, sim_val/ana_val
+        
+        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        
+        
 class TestCylinder(unittest.TestCase):
     """ Tests for oriented (2D) systems """
         

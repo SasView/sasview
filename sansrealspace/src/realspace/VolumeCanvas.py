@@ -213,8 +213,40 @@ class VolumeCanvas(BaseComponent):
         self.npts = 0
         self.hasPr = False        
         
+    def addObject(self, shapeDesc, id = None):
+        """
+            Adds a real-space object to the canvas.
+        
+            @param shapeDesc: object to add to the canvas [ShapeDescriptor]
+            @param id: string handle for the object [string] [optional]
+            @return: string handle for the object
+        """
+        # If the handle is not provided, create one
+        if id == None:
+            id = shapeDesc.params["type"]+str(self.shapecount)
+         
+        # Self the order number
+        shapeDesc.params['order'] = self.shapecount
+        # Store the shape in a dictionary entry associated
+        # with the handle
+        self.shapes[id] = shapeDesc
+        self.shapecount += 1
+
+        #model changed, need to recalculate P(r)
+        self.hasPr = False
+
+        return id
+            
+    
     def add(self, shape, id = None):
         """
+            The intend of this method is to eventually be able to use it
+            as a factory for the canvas and unify the simulation with the
+            analytical solutions. For instance, if one adds a cylinder and
+            it is the only shape on the canvas, the analytical solution
+            could be called. If multiple shapes are involved, then 
+            simulation has to be performed.
+        
             @param shape: name of the object to add to the canvas [string]
             @param id: string handle for the object [string] [optional]
             @return: string handle for the object

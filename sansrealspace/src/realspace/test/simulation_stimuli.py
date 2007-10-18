@@ -163,6 +163,28 @@ class Simulation:
             report.trace = "I(q) = %g" % value
             return canvas, report
     
+    class GetIq2DStimulus(Stimulus):
+        """Calculate I(q)"""
+
+        frequency = 1.0
+        
+        def __call__(self, canvas):
+            report = generator.StimulusReport(tag=self.name)
+            
+            # Check that a float is returned
+            # Validation testing will be done elsewhere
+            value = canvas.getIq2D(0.01,0.01)
+            
+            # Check that it is in the list of objects
+            try:
+                float(value)
+                report.passed = 1
+            except:
+                report.log = "GetIq2D: bad value for Iq "+str(value)
+            
+            report.trace = "I(q) = %g" % value
+            return canvas, report
+    
     class SetCanvasParamStimulus(Stimulus):
         """Set the value of a canvas parameter"""
 
