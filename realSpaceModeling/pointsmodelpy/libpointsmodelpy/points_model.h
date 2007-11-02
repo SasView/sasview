@@ -27,6 +27,7 @@ class PointsModel : public SANSModel{
   
   // Fast 2D simulation
   double CalculateIQ_2D(const vector<Point3D>&, double qx, double qy);
+  double CalculateIQ_2D_Error(const vector<Point3D>&, double qx, double qy);
   
   //given a set of points, calculate distance correlation
   //function, and return the max dist

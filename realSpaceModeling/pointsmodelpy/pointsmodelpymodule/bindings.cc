@@ -120,6 +120,10 @@ struct PyMethodDef pypointsmodelpy_methods[] = {
        {pypointsmodelpy_get_complex_Iqxy__name__, pypointsmodelpy_get_complex_Iqxy,
         METH_VARARGS, pypointsmodelpy_get_complex_Iqxy__doc__},
 
+        //ComplexModel calculateIQ_2D_Error(pts,Qx,Qy)
+        {pypointsmodelpy_get_complex_Iqxy_err__name__, pypointsmodelpy_get_complex_Iqxy_err,
+         METH_VARARGS, pypointsmodelpy_get_complex_Iqxy_err__doc__},
+
     //ComplexModel calculateIQ
     {pypointsmodelpy_get_complex_iq__name__, pypointsmodelpy_get_complex_iq,
      METH_VARARGS, pypointsmodelpy_get_complex_iq__doc__},

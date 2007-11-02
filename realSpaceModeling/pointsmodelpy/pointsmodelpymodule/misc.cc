@@ -553,6 +553,27 @@ PyObject * pypointsmodelpy_get_complex_Iqxy(PyObject *, PyObject *args)
   return Py_BuildValue("d",I);
 }
 
+//LORESModel method CalculateIQ_2D_Error(points,qx,qy) 
+char pypointsmodelpy_get_complex_Iqxy_err__name__[] = "get_complex_iq_2D_err";
+char pypointsmodelpy_get_complex_Iqxy_err__doc__[] = "calculate averaged scattering intensity from a single q";
+
+PyObject * pypointsmodelpy_get_complex_Iqxy_err(PyObject *, PyObject *args)
+{
+  PyObject *pylores = 0, *pypoint3dvec = 0;
+  double qx = 0, qy = 0;
+  int ok = PyArg_ParseTuple(args, "OOdd", &pylores, &pypoint3dvec, &qx, &qy);
+  if(!ok) return NULL;
+
+  void *temp = PyCObject_AsVoidPtr(pylores);
+  ComplexModel * thiscomplex = static_cast<ComplexModel *>(temp);
+  void *temp2 = PyCObject_AsVoidPtr(pypoint3dvec);
+  vector<Point3D> * thisvec = static_cast<vector<Point3D> *>(temp2);
+
+  double I = thiscomplex->CalculateIQ_2D_Error(*thisvec,qx,qy);
+
+  return Py_BuildValue("d",I);
+}
+
 //LORESModel method CalculateIQ(q) 
 char pypointsmodelpy_get_complex_i__name__[] = "get_complex_i";
 char pypointsmodelpy_get_complex_i__doc__[] = "calculate averaged scattering intensity from a single q";

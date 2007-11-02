@@ -411,3 +411,41 @@ double PointsModel::CalculateIQ_2D(const vector<Point3D>&points, double qx, doub
 	return (cos_term*cos_term + sin_term*sin_term)/size;	
 }
 
+double PointsModel::CalculateIQ_2D_Error(const vector<Point3D>&points, double qx, double qy){
+	
+	int size = points.size();
+
+	double delta_x, delta_y;
+	double q_t2 = qx*qx + qy*qy;
+	double cos_term = 0;
+	double sin_term = 0;
+	double cos_err = 0;
+	double sin_err = 0;
+	
+	// Estimate the error on the position of each point
+	// in x or y as V^(1/3)/N
+	
+	for (int i = 0; i < size; i++) {
+		
+		
+		//the sld for the pair of points
+	
+		double phase = qx*points[i].getX() + qy*points[i].getY();
+		double sld_fac = points[i].getSLD() * points[i].getSLD();
+		
+		cos_term += cos(phase) * points[i].getSLD();
+		sin_term += sin(phase) * points[i].getSLD();
+
+		sin_err += cos(phase) * cos(phase) * sld_fac;
+		cos_err += sin(phase) * sin(phase) * sld_fac;
+	
+	}   			
+
+	// P(q) = 1/V I(q) = (V/N)^2 (1/V) (cos_term^2 + sin_term^2) 
+	// We divide by N here and we will multiply by the density later.
+
+	// We will need to multiply this error by V^(1/3)/N.
+	// We don't have access to V from within this class.
+	return 2*sqrt(cos_term*cos_term*cos_err*cos_err + sin_term*sin_term*sin_err*sin_err)/size;	
+}
+

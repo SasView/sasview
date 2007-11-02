@@ -181,6 +181,12 @@ extern char pypointsmodelpy_get_complex_Iqxy__doc__[];
 extern "C"
 PyObject * pypointsmodelpy_get_complex_Iqxy(PyObject *, PyObject *);
 
+// ComplexModel method calculateIQ_2D_Error(pts,qx,qy)
+extern char pypointsmodelpy_get_complex_Iqxy_err__name__[];
+extern char pypointsmodelpy_get_complex_Iqxy_err__doc__[];
+extern "C"
+PyObject * pypointsmodelpy_get_complex_Iqxy_err(PyObject *, PyObject *);
+
 // ComplexModel method calculateIQ(iq)
 extern char pypointsmodelpy_get_complex_iq__name__[];
 extern char pypointsmodelpy_get_complex_iq__doc__[];
