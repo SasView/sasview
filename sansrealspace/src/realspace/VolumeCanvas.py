@@ -550,13 +550,13 @@ class VolumeCanvas(BaseComponent):
         else:
             raise ValueError, "runXY(q): bad type for q"
     
-        
-    def getIq2D(self, qx, qy):
+    def _create_modelObject(self):
         """
             Returns simulate I(q) for given q_x and q_y values.
+            Also returns model object
             @param qx: q_x [A-1]
             @param qy: q_y [A-1]
-            @return: I(q) [cm-1]
+            @return: I(q) [cm-1], model object
         """
         # To find a complete example of the correct call order:
         # In LORES2, in actionclass.py, method CalculateAction._get_iq()
@@ -580,9 +580,18 @@ class VolumeCanvas(BaseComponent):
         
         #pointsmodelpy.get_lorespoints(self.lores_model, self.points)
         self.npts = pointsmodelpy.get_complexpoints(self.complex_model, self.points)
+        
+        
+    def getIq2D(self, qx, qy):
+        """
+            Returns simulate I(q) for given q_x and q_y values.
+            @param qx: q_x [A-1]
+            @param qy: q_y [A-1]
+            @return: I(q) [cm-1]
+        """
+        self._create_modelObject()
                 
         norm =  1.0e8/self.params['lores_density']*self.params['scale']
-        #return norm*pointsmodelpy.get_lores_i(self.lores_model, q)
         return norm*pointsmodelpy.get_complex_iq_2D(self.complex_model, self.points, qx, qy)\
             + self.params['background']
                 
@@ -623,7 +632,7 @@ class VolumeCanvas(BaseComponent):
         if self.hasPr == False:
             self.getPr()
 
-        # By dividing by the density instead of the actuall V/N, 
+        # By dividing by the density instead of the actual V/N, 
         # we have an uncertainty of +-1 on N because the number 
         # of points chosen for the simulation is int(density*volume).
         # Propagation of error gives:
@@ -652,4 +661,33 @@ class VolumeCanvas(BaseComponent):
         # Error on V/N
         simerr = 2*val/self.npts
         return val, err+simerr
+
+    def getIq2DError(self, qx, qy):
+        """
+            Return the simulated value along with its estimated
+            error for a given q-value
+            
+            Propagation of errors is used to evaluate the
+            uncertainty.
+            
+            @param q: q-value [float]
+            @return: mean, error [float, float]
+        """
+        self._create_modelObject()
+                
+        norm =  1.0e8/self.params['lores_density']*self.params['scale']
+        val = norm*pointsmodelpy.get_complex_iq_2D(self.complex_model, self.points, qx, qy)\
+            + self.params['background']
+        
+        # Simulation error (statistical)
+        norm =  1.0e8/self.params['lores_density']*self.params['scale'] \
+                * math.pow(self.npts/self.params['lores_density'], 1.0/3.0)/self.npts
+        err = norm*pointsmodelpy.get_complex_iq_2D_err(self.complex_model, self.points, qx, qy)
+        # Error on V/N
+        simerr = 2*val/self.npts
+        
+        # The error used for the position is over-simplified.
+        # The actual error was empirically found to be about
+        # an order of magnitude larger.
+        return val, 10.0*err+simerr
         

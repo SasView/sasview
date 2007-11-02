@@ -17,11 +17,26 @@ class Validator:
  
     def __init__(self):
         self.density = 0.1
+        self.canvas  = None
+        self.ana     = None
         self.create()
         
     def create(self):
         pass
          
+    def run_sim2D(self, qx, qy, density=None):
+        """
+            Calculate the mean and error of the simulation
+            @param q: q-value to calculate at
+            @param density: point density of simulation
+            #return: mean, error
+        """
+        if not density == None:
+            self.density = density
+            self.create()
+        
+        return self.canvas.getIq2DError(qx, qy)
+    
     def run_sim(self, q, density=None):
         """
             Calculate the mean and error of the simulation
@@ -34,6 +49,14 @@ class Validator:
             self.create()
         
         return self.canvas.getIqError(q)
+         
+    def run_ana2D(self, qx, qy):
+        """
+            Return analytical value
+            @param q: q-value to evaluate at [float]
+            @return: analytical output [float]
+        """
+        return self.ana.runXY([qx, qy]) 
          
     def run_ana(self, q):
         """
@@ -226,6 +249,35 @@ def validate_model(validator, q_min, q_max, n_q):
         output.write("%g  %g  %g  %g\n" % (q, ana, sim, err))
     output.close()
        
+def validate_model_2D(validator, q_min, q_max, phi, n_q):
+    """
+         Validate a model
+         An output file containing a comparison between
+         simulation and the analytical solution will be
+         produced.
+         
+         @param validator: validator object
+         @param q_min: minimum q
+         @param q_max: maximum q
+         @param n_q: number of q points
+         @param N: number of times to evaluate each simulation point
+    """
+    
+    q_list = pylab.arange(q_min, q_max*1.0001, (q_max-q_min)/(n_q-1))
+    
+    output = open('%s_d=%g_Iq2D.txt' % (validator.name, validator.density), 'w')
+    output.write("PARS: %s\n" % validator.ana.params)
+    output.write("<q>  <ana>  <sim>  <err>\n")
+    t_0 = time.time()
+    for q in q_list:
+        ana = validator.run_ana2D(q*math.cos(phi), q*math.sin(phi))
+        sim, err = validator.run_sim2D(q*math.cos(phi), q*math.sin(phi))
+        print "q=%-g  ana=%-g  sim=%-g  err=%-g  diff=%-g (%-g) %s" % (q, ana, sim, err, 
+                        (sim-ana), sim/ana, str(math.fabs(sim-ana)>err))
+        output.write("%g  %g  %g  %g\n" % (q, ana, sim, err))
+    print "Time elapsed: ", time.time()-t_0
+    output.close()
+       
 def check_density(validator, q, d_min, d_max, n_d): 
     """
        Check simulation output as a function of the density
@@ -256,17 +308,30 @@ def check_density(validator, q, d_min, d_max, n_d):
 
     
 if __name__ == '__main__':
-    #vali = CoreShellValidator(radius = 15, thickness=5, density = 0.01)
-    #validate_model(vali, q_min=0.001, q_max=1, n_q=50, N=40)
+    
+    # 2D: Density=5, 71.2 secs for 50 points
+    vali = CoreShellValidator(radius = 15, thickness=5, density = 5.0)
+    #validate_model(vali, q_min=0.001, q_max=1, n_q=50)
+    validate_model_2D(vali, q_min=0.001, q_max=1, phi=1.0, n_q=50)
 
+    # 2D: Density=2, 11.1 secs for 25 points
     #vali = SphereValidator(radius = 20, density = 0.02)
-    #validate_model(vali, q_min=0.001, q_max=0.5, n_q=25, N=20)
+    #validate_model(vali, q_min=0.001, q_max=0.5, n_q=25)
+    #vali = SphereValidator(radius = 20, density = 2.0)
+    #validate_model_2D(vali, q_min=0.001, q_max=0.5, phi=1.0, n_q=25)
     
-    vali = CylinderValidator(radius = 20, length=100, density = 0.1)
-    validate_model(vali, q_min=0.001, q_max=0.5, n_q=25)
+    # 2D: Density=1, 19.4 secs for 25 points
+    # 2D: Density=0.5, 9.8 secs for 25 points
+    #vali = CylinderValidator(radius = 20, length=100, density = 0.1)
+    #validate_model(vali, q_min=0.001, q_max=0.5, n_q=25)
+    #vali = CylinderValidator(radius = 20, length=100, density = 0.5)
+    #validate_model_2D(vali, q_min=0.001, q_max=0.2, phi=1.0, n_q=25)
     
+    # 2D: Density=0.5, 2.26 secs for 25 points
     #vali = EllipsoidValidator(radius_a = 20, radius_b=15, density = 0.05)
     #validate_model(vali, q_min=0.001, q_max=0.5, n_q=25)
+    #vali = EllipsoidValidator(radius_a = 20, radius_b=15, density = 0.5)
+    #validate_model_2D(vali, q_min=0.001, q_max=0.5, phi=1.0, n_q=25)
     
     #vali = HelixValidator(density = 0.05)
     #validate_model(vali, q_min=0.001, q_max=0.5, n_q=25)

@@ -239,7 +239,7 @@ class TestEllipsoid(unittest.TestCase):
         try:
             self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
         except:
-            print ana_val, sim_val, sim_val/ana_val
+            print "Error", ana_val, sim_val, sim_val/ana_val
             raise sys.exc_type, sys.exc_value
 
 class TestCoreShell(unittest.TestCase):
@@ -287,14 +287,66 @@ class TestCoreShell(unittest.TestCase):
         canvas.setParam('scale' , 1.0)
         canvas.setParam('background' , 0.0)
         self.canvas = canvas 
+           
+    def testdefault(self):
+        """ Testing default core-shell orientation """
+        ana_val = self.ana.runXY([0.1, 0.2])
+        sim_val, err = self.canvas.getIq2DError(0.1, 0.2)
+        
+        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+                   
+class TestCoreShellError(unittest.TestCase):
+    """ Tests for oriented (2D) systems """
+        
+    def setUp(self):
+        """ Set up zero-SLD-average core-shell model """
+        from sans.models.CoreShellModel import CoreShellModel
+        
+        radius = 15
+        thickness = 5
+        density = 5
+        
+        core_vol = 4.0/3.0*math.pi*radius*radius*radius
+        self.outer_radius = radius+thickness
+        shell_vol = 4.0/3.0*math.pi*self.outer_radius*self.outer_radius*self.outer_radius - core_vol
+        self.shell_sld = -1.0*core_vol/shell_vol
+
+        self.density = density
+           
+        # Core-shell
+        sphere = CoreShellModel()
+        # Core radius
+        sphere.setParam('radius', radius)
+        # Shell thickness
+        sphere.setParam('thickness', thickness)
+        sphere.setParam('core_sld', 1.0)
+        sphere.setParam('shell_sld', self.shell_sld)
+        sphere.setParam('solvent_sld', 0.0)
+        sphere.setParam('background', 0.0)
+        sphere.setParam('scale', 1.0)
+        self.ana = sphere
+       
+        canvas = VolumeCanvas.VolumeCanvas()        
+        canvas.setParam('lores_density', self.density)
+        
+        handle = canvas.add('sphere')
+        canvas.setParam('%s.radius' % handle, self.outer_radius)
+        canvas.setParam('%s.contrast' % handle, self.shell_sld)
+       
+        handle2 = canvas.add('sphere')
+        canvas.setParam('%s.radius' % handle2, radius)
+        canvas.setParam('%s.contrast' % handle2, 1.0)
+               
+        canvas.setParam('scale' , 1.0)
+        canvas.setParam('background' , 0.0)
+        self.canvas = canvas 
                    
     def testdefault(self):
         """ Testing default core-shell orientation """
         ana_val = self.ana.runXY([0.1, 0.2])
-        sim_val = self.canvas.getIq2D(0.1, 0.2)
-        #print ana_val, sim_val, sim_val/ana_val
+        sim_val, err = self.canvas.getIq2DError(0.1, 0.2)
         
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        self.assert_( math.fabs(sim_val-ana_val) < 3.0 * err )
 
 class TestRunMethods(unittest.TestCase):
     """ Tests run methods for oriented (2D) systems """
@@ -305,7 +357,7 @@ class TestRunMethods(unittest.TestCase):
         
         radius_a = 10
         radius_b = 15
-        density = 1
+        density = 5
         
         self.ana = EllipsoidModel()
         self.ana.setParam('scale', 1.0)
@@ -338,7 +390,11 @@ class TestRunMethods(unittest.TestCase):
         sim_val = self.canvas.runXY([0.1, 0.2])
         #print ana_val, sim_val, sim_val/ana_val
         
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        try:
+            self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        except:
+            print "Error", ana_val, sim_val, sim_val/ana_val
+            raise sys.exc_type, sys.exc_value
 
     def testRunXY_float(self):
         """ Testing ellipsoid along X """
@@ -346,7 +402,11 @@ class TestRunMethods(unittest.TestCase):
         sim_val = self.canvas.runXY(0.1)
         #print ana_val, sim_val, sim_val/ana_val
         
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        try:
+            self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        except:
+            print "Error", ana_val, sim_val, sim_val/ana_val
+            raise sys.exc_type, sys.exc_value
 
     def testRun_float(self):
         """ Testing ellipsoid along X """
@@ -354,7 +414,11 @@ class TestRunMethods(unittest.TestCase):
         sim_val = self.canvas.run(0.1)
         #print ana_val, sim_val, sim_val/ana_val
         
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        try:
+            self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        except:
+            print "Error", ana_val, sim_val, sim_val/ana_val
+            raise sys.exc_type, sys.exc_value
 
     def testRun_list(self):
         """ Testing ellipsoid along X """
@@ -362,7 +426,11 @@ class TestRunMethods(unittest.TestCase):
         sim_val = self.canvas.run([0.1, 33.0])
         #print ana_val, sim_val, sim_val/ana_val
         
-        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        try:
+            self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        except:
+            print "Error", ana_val, sim_val, sim_val/ana_val
+            raise sys.exc_type, sys.exc_value
 
           
 

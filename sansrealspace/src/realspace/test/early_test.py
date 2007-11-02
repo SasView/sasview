@@ -236,7 +236,55 @@ def test_6():
     print model.npts
     print ana, sim, sim/ana, ana/sim
     
+def test_7():
+    from sans.models.CoreShellModel import CoreShellModel
+    print "Testing core-shell"
+    radius = 15
+    thickness = 5
+    density = 5
+    
+    core_vol = 4.0/3.0*math.pi*radius*radius*radius
+    outer_radius = radius+thickness
+    shell_vol = 4.0/3.0*math.pi*outer_radius*outer_radius*outer_radius - core_vol
+    shell_sld = -1.0*core_vol/shell_vol
+
+    # Core-shell
+    sphere = CoreShellModel()
+    # Core radius
+    sphere.setParam('radius', radius)
+    # Shell thickness
+    sphere.setParam('thickness', thickness)
+    sphere.setParam('core_sld', 1.0)
+    sphere.setParam('shell_sld', shell_sld)
+    sphere.setParam('solvent_sld', 0.0)
+    sphere.setParam('background', 0.0)
+    sphere.setParam('scale', 1.0)
+    ana = sphere
+   
+    canvas = VolumeCanvas.VolumeCanvas()        
+    canvas.setParam('lores_density', density)
+    
+    handle = canvas.add('sphere')
+    canvas.setParam('%s.radius' % handle, outer_radius)
+    canvas.setParam('%s.contrast' % handle, shell_sld)
+   
+    handle2 = canvas.add('sphere')
+    canvas.setParam('%s.radius' % handle2, radius)
+    canvas.setParam('%s.contrast' % handle2, 1.0)
+           
+    canvas.setParam('scale' , 1.0)
+    canvas.setParam('background' , 0.0)
+    
+               
+    """ Testing default core-shell orientation """
+    qlist = [.0001, 0.002, .01, .1, 1.0, 5.]
+    for q in qlist:
+        ana_val = ana.runXY([q, 0.2])
+        sim_val, err = canvas.getIq2DError(q, 0.2)
+        print ana_val, sim_val, sim_val/ana_val, err, (sim_val-ana_val)/err
+    
 
     
+    
 if __name__ == "__main__":
-    test_6()
+    test_7()
