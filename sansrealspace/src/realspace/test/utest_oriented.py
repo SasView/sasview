@@ -186,7 +186,8 @@ class TestEllipsoid(unittest.TestCase):
         self.ana.setParam('background', 0.0)
         self.ana.setParam('radius_a', radius_a)
         self.ana.setParam('radius_b', radius_b)
-
+        # Default orientation is there=1.57, phi=0
+        # Radius_a is along the x direction
        
         canvas = VolumeCanvas.VolumeCanvas()
         canvas.setParam('lores_density', density)

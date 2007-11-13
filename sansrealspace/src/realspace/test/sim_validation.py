@@ -108,6 +108,8 @@ class CylinderValidator(Validator):
         self.ana.setParam('background', 0.0)
         self.ana.setParam('radius', radius)
         self.ana.setParam('length', length)
+        self.ana.setParam('cyl_theta', math.pi/2.0)
+        self.ana.setParam('cyl_phi', math.pi/2.0)
         self.create()
        
     def create(self):
@@ -140,6 +142,9 @@ class EllipsoidValidator(Validator):
         self.ana.setParam('radius_a', radius_a)
         self.ana.setParam('radius_b', radius_b)
         #self.ana.setParam('radius', radius_a)
+        
+        # Default orientation is there=1.57, phi=0
+        # Radius_a is along the x direction
 
         self.create()
        
@@ -310,9 +315,9 @@ def check_density(validator, q, d_min, d_max, n_d):
 if __name__ == '__main__':
     
     # 2D: Density=5, 71.2 secs for 50 points
-    vali = CoreShellValidator(radius = 15, thickness=5, density = 5.0)
+    #vali = CoreShellValidator(radius = 15, thickness=5, density = 5.0)
     #validate_model(vali, q_min=0.001, q_max=1, n_q=50)
-    validate_model_2D(vali, q_min=0.001, q_max=1, phi=1.0, n_q=50)
+    #validate_model_2D(vali, q_min=0.001, q_max=1, phi=1.0, n_q=50)
 
     # 2D: Density=2, 11.1 secs for 25 points
     #vali = SphereValidator(radius = 20, density = 0.02)
@@ -324,8 +329,8 @@ if __name__ == '__main__':
     # 2D: Density=0.5, 9.8 secs for 25 points
     #vali = CylinderValidator(radius = 20, length=100, density = 0.1)
     #validate_model(vali, q_min=0.001, q_max=0.5, n_q=25)
-    #vali = CylinderValidator(radius = 20, length=100, density = 0.5)
-    #validate_model_2D(vali, q_min=0.001, q_max=0.2, phi=1.0, n_q=25)
+    vali = CylinderValidator(radius = 20, length=100, density = 0.5)
+    validate_model_2D(vali, q_min=0.001, q_max=0.2, phi=1.0, n_q=25)
     
     # 2D: Density=0.5, 2.26 secs for 25 points
     #vali = EllipsoidValidator(radius_a = 20, radius_b=15, density = 0.05)

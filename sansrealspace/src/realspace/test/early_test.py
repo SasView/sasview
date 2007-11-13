@@ -208,12 +208,12 @@ def test_6():
     ana.setParam('length', length)
     
     # Along Y
-    #ana.setParam('cyl_theta', 1.57)
-    #ana.setParam('cyl_phi', 1.57)
+    ana.setParam('cyl_theta', 1.57)
+    ana.setParam('cyl_phi', 1.57)
     
     # Along Z
-    ana.setParam('cyl_theta', 0)
-    ana.setParam('cyl_phi', 0)
+    #ana.setParam('cyl_theta', 0)
+    #ana.setParam('cyl_phi', 0)
     
     model = VolumeCanvas.VolumeCanvas()    
     handle = model.add('cylinder')
@@ -225,16 +225,21 @@ def test_6():
     model.setParam('background' , 0.0)
     
     # Along Y
-    #model.setParam('%s.orientation' % handle, [0,0,0])
+    model.setParam('%s.orientation' % handle, [0,0,0])
     
     # Along Z
-    model.setParam('%s.orientation' % handle, [1.57,0,0])
+    #model.setParam('%s.orientation' % handle, [1.57,0,0])
     
     
-    ana = ana.runXY([0.1, 0.01])
-    sim = model.getIq2D(0.1, 0.01)
     print model.npts
-    print ana, sim, sim/ana, ana/sim
+    for i in range(40):
+        qmax = 0.5
+        anaX = ana.runXY([qmax*i/40.0, 0.0])
+        simX = model.getIq2D(qmax*i/40.0, 0.0)
+        
+        anaY = ana.runXY([0, qmax*i/40.0])
+        simY = model.getIq2D(0, qmax*i/40.0)
+        print anaX, simX, simX/anaX, '|', anaY, simY, simY/anaY
     
 def test_7():
     from sans.models.CoreShellModel import CoreShellModel
@@ -283,8 +288,7 @@ def test_7():
         sim_val, err = canvas.getIq2DError(q, 0.2)
         print ana_val, sim_val, sim_val/ana_val, err, (sim_val-ana_val)/err
     
-
     
     
 if __name__ == "__main__":
-    test_7()
+    test_6()
