@@ -21,10 +21,7 @@
 # \endverbatim
 #
 # \subsection depends External Dependencies
-# You have to have the DANSE distutils-adpt package installed:
-# \verbatime
-#$ svn co svn://danse.us/distutils-adpt
-# \endverbatim
+# None
 #
 # \subsection build Building the code
 # The standard python package can be built with distutils.
@@ -60,13 +57,15 @@
 #
 # To add an object:
 # \verbatim
-#    handle = canvas.add('sphere')
+#    sphare = VolumeCanvas.SphereDescriptor()
+#    handle = canvas.addObject(sphere)
 #    canvas.setParam('%s.radius' % handle, 15.0)
 # \endverbatim
 #
 # To evaluate the scattering intensity at a given q:
 # \verbatim
 #    output, error = canvas.getIqError(q=0.1)
+#    output, error = canvas.getIq2DError(qx=0.1, qy=0.1)
 # \endverbatim
 #
 # To get the value of a parameter:

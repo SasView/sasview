@@ -433,7 +433,53 @@ class TestRunMethods(unittest.TestCase):
             print "Error", ana_val, sim_val, sim_val/ana_val
             raise sys.exc_type, sys.exc_value
 
-          
+class TestParamChange(unittest.TestCase):
+    """ Tests for oriented (2D) systems """
+        
+    def setUp(self):
+        """ Set up cylinder model """
+        from sans.models.CylinderModel import CylinderModel
+        radius = 5
+        length = 40
+        density = 20
+    
+        # Analytical model
+        self.ana = CylinderModel()
+        self.ana.setParam('scale', 1.0)
+        self.ana.setParam('contrast', 1.0)
+        self.ana.setParam('background', 0.0)
+        self.ana.setParam('radius', radius)
+        self.ana.setParam('length', length)
+        self.ana.setParam('cyl_theta', math.pi/2.0)
+        self.ana.setParam('cyl_phi', math.pi/2.0)
+    
+        # Simulation model
+        self.model = VolumeCanvas.VolumeCanvas()
+        self.handle = self.model.add('cylinder')
+        self.model.setParam('lores_density', density)
+        self.model.setParam('%s.radius' % self.handle, radius)
+        self.model.setParam('%s.length' % self.handle, length)
+        self.model.setParam('scale' , 1.0)
+        self.model.setParam('%s.contrast' % self.handle, 1.0)
+        self.model.setParam('background' , 0.0)
+        self.model.setParam('%s.orientation' % self.handle, [0,0,0])
+    
+    def testalongY(self):
+        """ Test that a parameter change forces the generation
+            of new space points
+        """
+        ana_val = self.ana.runXY([0.1, 0.2])
+        sim_val = self.model.getIq2D(0.1, 0.2)
+        
+        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
+        
+        # Change the radius a re-evaluate
+        self.ana.setParam('radius', 10)
+        self.model.setParam('%s.radius' % self.handle, 10)
+        
+        ana_val = self.ana.runXY([0.1, 0.2])
+        sim_val = self.model.getIq2D(0.1, 0.2)
+        self.assert_( math.fabs(sim_val/ana_val-1.0)<0.05 )
 
 
 if __name__ == '__main__':

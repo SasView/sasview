@@ -1,17 +1,43 @@
 #!/usr/bin/env python
 """ Volume Canvas
-    Simulation canvas
+
+    Simulation canvas for real-space simulation of SANS scattering intensity.
+    The user can create an arrangement of basic shapes and estimate I(q) and
+    I(q_x, q_y). Error estimates on the simulation are also available. 
+    
+    Example:
+    
+    import sans.realspace.VolumeCanvas as VolumeCanvas
+    canvas = VolumeCanvas.VolumeCanvas()
+    canvas.setParam('lores_density', 0.01)
+    
+    sphere = SphereDescriptor()
+    handle = canvas.addObject(sphere)
+
+    output, error = canvas.getIqError(q=0.1)
+    output, error = canvas.getIq2DError(0.1, 0.1)
+    
+    or alternatively:
+    iq = canvas.run(0.1)
+    i2_2D = canvas.run([0.1, 1.57])
+    
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sansModeling.pointsmodelpy import pointsmodelpy
-from sansModeling.geoshapespy import geoshapespy
+from sans.simulation.pointsmodelpy import pointsmodelpy
+from sans.simulation.geoshapespy import geoshapespy
 
 import os.path, math
 
 class ShapeDescriptor:
     """
         Class to hold the information about a shape
+        The descriptor holds a dictionary of parameters.
+        
+        Note: if shape parameters are accessed directly
+        from outside VolumeCanvas. The getPr method
+        should be called before evaluating I(q).
+                
     """
     def __init__(self):
         """
@@ -47,6 +73,11 @@ class ShapeDescriptor:
 class SphereDescriptor(ShapeDescriptor):
     """
         Descriptor for a sphere
+        
+        The parameters are:
+            - radius [Angstroem] [default = 20 A]
+            - Contrast [A-2] [default = 1 A-2]
+            
     """
     def __init__(self):
         """
@@ -55,7 +86,9 @@ class SphereDescriptor(ShapeDescriptor):
         ShapeDescriptor.__init__(self)
         # Default parameters
         self.params["type"]   = "sphere"
+        # Radius of the sphere
         self.params["radius"] = 20.0
+        # Constrast parameter
         self.params["contrast"] = 1.0
 
     def create(self):
@@ -73,6 +106,11 @@ class CylinderDescriptor(ShapeDescriptor):
     """
         Descriptor for a cylinder
         Orientation: Default cylinder is along Y
+        
+        Parameters:
+            - Length [default = 40 A]
+            - Radius [default = 10 A]
+            - Contrast [default = 1 A-2]
     """
     def __init__(self):
         """
@@ -81,8 +119,11 @@ class CylinderDescriptor(ShapeDescriptor):
         ShapeDescriptor.__init__(self)
         # Default parameters
         self.params["type"]   = "cylinder"
+        # Length of the cylinder
         self.params["length"] = 40.0
+        # Radius of the cylinder
         self.params["radius"] = 10.0
+        # Constrast parameter
         self.params["contrast"] = 1.0
         
     def create(self):
@@ -100,6 +141,12 @@ class CylinderDescriptor(ShapeDescriptor):
 class EllipsoidDescriptor(ShapeDescriptor):
     """
         Descriptor for an ellipsoid
+        
+        Parameters:
+            - Radius_x along the x-axis [default = 30 A]
+            - Radius_y along the y-axis [default = 20 A]
+            - Radius_z along the z-axis [default = 10 A]
+            - contrast [default = 1 A-2]
     """
     def __init__(self):
         """
@@ -128,6 +175,13 @@ class EllipsoidDescriptor(ShapeDescriptor):
 class HelixDescriptor(ShapeDescriptor):
     """
         Descriptor for an helix
+        
+        Parameters:
+            -radius_helix: the radius of the helix [default = 10 A]
+            -radius_tube: radius of the "tube" that forms the helix [default = 3 A]
+            -pitch: distance between two consecutive turns of the helix [default = 34 A]
+            -turns: number of turns of the helix [default = 3]
+            -contrast: contrast parameter [default = 1 A-2]
     """
     def __init__(self):
         """
@@ -157,6 +211,9 @@ class HelixDescriptor(ShapeDescriptor):
 class PDBDescriptor(ShapeDescriptor):
     """
         Descriptor for a PDB set of points
+        
+        Parameter:
+            - file = name of the PDB file
     """
     def __init__(self, filename):
         """
@@ -191,6 +248,10 @@ class VolumeCanvas(BaseComponent):
     """
         Class representing an empty space volume to add 
         geometrical object to.
+        
+        For 1D I(q) simulation, getPr() is called internally for the
+        first call to getIq().
+        
     """
     
     def __init__(self):
@@ -213,6 +274,14 @@ class VolumeCanvas(BaseComponent):
         self.npts = 0
         self.hasPr = False        
         
+    def _model_changed(self):
+        """
+            Reset internal data members to reflect the fact that the 
+            real-space model has changed
+        """
+        self.hasPr  = False
+        self.points = None
+        
     def addObject(self, shapeDesc, id = None):
         """
             Adds a real-space object to the canvas.
@@ -233,7 +302,7 @@ class VolumeCanvas(BaseComponent):
         self.shapecount += 1
 
         #model changed, need to recalculate P(r)
-        self.hasPr = False
+        self._model_changed()
 
         return id
             
@@ -246,6 +315,8 @@ class VolumeCanvas(BaseComponent):
             it is the only shape on the canvas, the analytical solution
             could be called. If multiple shapes are involved, then 
             simulation has to be performed.
+            
+            This function is deprecated, use addObject().
         
             @param shape: name of the object to add to the canvas [string]
             @param id: string handle for the object [string] [optional]
@@ -264,17 +335,7 @@ class VolumeCanvas(BaseComponent):
         else:
             raise ValueError, "VolumeCanvas.add: Unknown shape %s" % shape
         
-        # Self the order number
-        shapeDesc.params['order'] = self.shapecount
-        # Store the shape in a dictionary entry associated
-        # with the handle
-        self.shapes[id] = shapeDesc
-        self.shapecount += 1
-
-        #model changed, need to recalculate P(r)
-        self.hasPr = False
-
-        return id
+        return self.addObject(shapeDesc, id)
 
     def delete(self, id):
         """
@@ -288,11 +349,22 @@ class VolumeCanvas(BaseComponent):
             raise KeyError, "VolumeCanvas.delete: could not find shape ID"
 
         #model changed, need to recalculate P(r)
-        self.hasPr = False
+        self._model_changed()
 
 
     def setParam(self, name, value):    
         """
+            Function to set the value of a parameter. 
+            Both VolumeCanvas parameters and shape parameters
+            are accessible. 
+            
+            Note: if shape parameters are accessed directly
+            from outside VolumeCanvas. The getPr method
+            should be called before evaluating I(q).
+        
+            TODO: implemented a check method to protect
+            against that.
+        
             @param name: name of the parameter to change
             @param value: value to give the parameter
         """
@@ -311,7 +383,7 @@ class VolumeCanvas(BaseComponent):
                 if toks[1] in self.shapes[toks[0]].params:
                     # The parameter was found, now change it
                     self.shapes[toks[0]].params[toks[1]] = value
-                    self.hasPr = False
+                    self._model_changed()
                 else:
                     raise ValueError, "Could not find parameter %s" % name
             else:
@@ -321,7 +393,7 @@ class VolumeCanvas(BaseComponent):
             # If we are not accessing the parameters of a 
             # shape, see if the parameter is part of this object
             BaseComponent.setParam(self, name, value)
-            self.hasPr = False
+            self._model_changed()
 
     def getParam(self, name):    
         """
@@ -411,7 +483,7 @@ class VolumeCanvas(BaseComponent):
         """
         return self.shapes.keys()
 
-    def addSingleShape(self, shapeDesc):
+    def _addSingleShape(self, shapeDesc):
         """
             create shapeobject based on shapeDesc
             @param shapeDesc: shape description
@@ -424,7 +496,7 @@ class VolumeCanvas(BaseComponent):
             pointsmodelpy.lores_add(self.lores_model, 
                 shapeDesc.shapeObject, shapeDesc.params['contrast'])  
 
-    def createVolumeFromList(self):
+    def _createVolumeFromList(self):
         """
             Create a new lores model with all the shapes in our internal list
             Whenever we change a parameter of a shape, we have to re-create
@@ -468,13 +540,16 @@ class VolumeCanvas(BaseComponent):
         len_list = len(obj_list)
         for i in range(len_list-1, -1, -1):
             shapedesc = self.shapes[obj_list[i][1]]
-            self.addSingleShape(shapedesc)
+            self._addSingleShape(shapedesc)
 
         return 0     
     
     def getPr(self):
         """
-            Calculate P(r)
+            Calculate P(r) from the objects on the canvas.
+            This method should always be called after the shapes
+            on the VolumeCanvas have changed.
+            
             @return: calculation output flag 
         """
         # To find a complete example of the correct call order:
@@ -482,11 +557,11 @@ class VolumeCanvas(BaseComponent):
         
         # If there are not shapes, do nothing
         if len(self.shapes) == 0:
-            self.hasPr = False
+            self._model_changed()
             return 0
         
         # generate space filling points from shape list
-        self.createVolumeFromList()
+        self._createVolumeFromList()
 
         self.points = pointsmodelpy.new_point3dvec()
 
@@ -552,22 +627,27 @@ class VolumeCanvas(BaseComponent):
     
     def _create_modelObject(self):
         """
-            Returns simulate I(q) for given q_x and q_y values.
-            Also returns model object
-            @param qx: q_x [A-1]
-            @param qy: q_y [A-1]
-            @return: I(q) [cm-1], model object
+            Create the simulation model obejct from the list
+            of shapes.
+            
+            This method needs to be called each time a parameter
+            changes because of the way the underlying library
+            was (badly) written. It is impossible to change a 
+            parameter, or remove a shape without having to 
+            refill the space points.
+            
+            TODO: improve that.
         """
         # To find a complete example of the correct call order:
         # In LORES2, in actionclass.py, method CalculateAction._get_iq()
         
         # If there are not shapes, do nothing
         if len(self.shapes) == 0:
-            self.hasPr = False
+            self._model_changed()
             return 0
         
         # generate space filling points from shape list
-        self.createVolumeFromList()
+        self._createVolumeFromList()
 
         self.points = pointsmodelpy.new_point3dvec()
 
@@ -589,8 +669,17 @@ class VolumeCanvas(BaseComponent):
             @param qy: q_y [A-1]
             @return: I(q) [cm-1]
         """
-        self._create_modelObject()
-                
+        
+        # If this is the first simulation call, we need to generate the
+        # space points
+        if self.points == None:
+            self._create_modelObject()
+            
+            # Protect against empty model
+            if self.points == None:
+                return 0
+               
+        # Evalute I(q) 
         norm =  1.0e8/self.params['lores_density']*self.params['scale']
         return norm*pointsmodelpy.get_complex_iq_2D(self.complex_model, self.points, qx, qy)\
             + self.params['background']
@@ -670,7 +759,8 @@ class VolumeCanvas(BaseComponent):
             Propagation of errors is used to evaluate the
             uncertainty.
             
-            @param q: q-value [float]
+            @param qx: qx-value [float]
+            @param qy: qy-value [float]
             @return: mean, error [float, float]
         """
         self._create_modelObject()

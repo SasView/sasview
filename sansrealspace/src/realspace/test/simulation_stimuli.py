@@ -45,7 +45,9 @@ class Simulation:
     
     def setup(self):
         """Setup the canvas for stimuli application"""
-        return VolumeCanvas.VolumeCanvas()
+        volume = VolumeCanvas.VolumeCanvas()
+        volume.params['lores_density'] = 0.05
+        return volume
     
     def getRandomStimulus(self):
         """Return the name of a random stimulus"""
