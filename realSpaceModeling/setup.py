@@ -23,6 +23,10 @@ def get_c_files(path):
             clist.append("%s/%s" % (path, file))
     return clist
 
+# Top package name
+#pck_top = "sansModeling"
+pck_top = "sans.simulation"
+
 # The temp directory that the compiled files will be put in
 tempdir = "build/temp."+util.get_platform()+'-'+sysconfig.get_python_version()
 if os.name=='nt':
@@ -32,10 +36,10 @@ if os.name=='nt':
 mod_list = ["iqPy", "geoshapespy", "pointsmodelpy", "analmodelpy"]
 
 # Define package directors, will be extended below
-pck_dirs = {"sansModeling":"."}
+pck_dirs = {pck_top:"."}
 
 # List of modules to install, will be extende below
-pck_list = ["sansModeling"]
+pck_list = [pck_top]
 
 # List of python extensions, will be extended below
 exts = []
@@ -57,8 +61,8 @@ deps["pointsmodelpy"] = ["iqPy", "geoshapespy"]
 libs = {}
 
 for module in mod_list:
-    pck_dirs["sansModeling.%s" % module] = "%s/%s" % (module, module)
-    pck_list.append("sansModeling.%s" % module)
+    pck_dirs["%s.%s" % (pck_top, module)] = "%s/%s" % (module, module)
+    pck_list.append("%s.%s" % (pck_top, module))
 
     src_m = "%s/%smodule" % (module, module)
     src_l = "%s/lib%s" % (module, module)
@@ -84,7 +88,7 @@ for module in mod_list:
     incl_dirs.append(src_l)
     
 for module in mod_list:
-    exts.append( Extension("sansModeling.%s.%s" % (module, module),
+    exts.append( Extension("%s.%s.%s" % (pck_top, module, module),
         sources = file_list[module],
         extra_objects=libs[module],
         include_dirs=incl_dirs) )
