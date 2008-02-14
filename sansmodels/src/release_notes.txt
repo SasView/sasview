@@ -1,0 +1,63 @@
+Release Notes
+=============
+
+SANS Models version 0.3.2
+
+Package name: sans.models 
+
+1- What's New in Version 0.3.2
+
+	- Release date: 2/14/2008
+	- Added models to be used in magnetic analysis.
+	   
+
+
+2- Downloading and Installing
+
+	2.1- System Requirements:
+		- Python version >= 2.4 should be running on the system
+
+	2.2- Installing:
+		- Get the code from svn://danse.us/sans/releases/sansmodels-0.3.2
+		- Execute the following: 
+			python setup.py install
+
+3- Known Issues
+
+	3.1- All systems:
+		- Q range validity of I(q) calculations.
+			Our 1D models of I(q) use the function of the NCNR library 
+			for their IGOR package (Klein, 2006). That library uses a
+			fsat integration technique in some of its models (cylinders
+			and ellipsoids). Integration is done using 76 points in the
+			angle between the axis of the object and the q-vector, which
+			translates in a larger inaccuracy at high q. Integratiing
+			the 2D model I(q,phi) over all orientations of the object
+			will not yield the exact same result as the NCNR calculation
+			for q > 0.3 A-1.
+
+	3.2- Windows:
+		- None
+
+	3.3- Linux:
+		- None
+
+4- Troubleshooting
+
+	- None
+
+5- Frequently Asked Questions
+
+	- None
+
+6- Other Resources
+
+	- See: http://danse.us/trac/sans/wiki/8_2_2_1DModelFitting
+	- See: http://danse.us/trac/sans/wiki/8_2_3_2DModeling
+	- See: http://danse.us/trac/sans/wiki/8_2_6_model_extensions
+
+	
+
+	
+
+
