@@ -158,7 +158,7 @@ double PointsModel::DistDistribution(const vector<Point3D> &vp)
       }
     }
   }
-
+  
   //normalize Pr
   for (int j = 0; j != sizeofpr; ++j){           //final column2 for P(r)
     //pr[j][1] = pr[j][1]/cormax_;

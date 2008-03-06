@@ -273,9 +273,11 @@ PyObject * pypointsmodelpy_distdistribution_xy(PyObject *, PyObject *args)
 
   LORESModel * thislores = static_cast<LORESModel *>(temp);
 
+  Py_BEGIN_ALLOW_THREADS
   vector<Point3D> * thisvec = static_cast<vector<Point3D> *>(temp2);
   thislores->DistDistributionXY(*thisvec);
-
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("i", 0);
 }
 
@@ -313,9 +315,11 @@ PyObject * pypointsmodelpy_get_pdb_pr(PyObject *, PyObject *args)
   void *temp2 = PyCObject_AsVoidPtr(pypoint3dvec);
   vector<Point3D> * thisvec = static_cast<vector<Point3D> *>(temp2);
 
+  Py_BEGIN_ALLOW_THREADS
   PDBModel * thispdb = static_cast<PDBModel *>(temp);
   thispdb->DistDistribution(*thisvec);
-
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("i", 0);
 }
 
@@ -334,8 +338,9 @@ PyObject * pypointsmodelpy_get_complex_pr(PyObject *, PyObject *args)
   vector<Point3D> * thisvec = static_cast<vector<Point3D> *>(temp2);
 
   ComplexModel * thiscomplex = static_cast<ComplexModel *>(temp);
+  Py_BEGIN_ALLOW_THREADS
   thiscomplex->DistDistribution(*thisvec);
-
+  Py_END_ALLOW_THREADS
   return Py_BuildValue("i", 0);
 }
 
@@ -355,8 +360,10 @@ PyObject * pypointsmodelpy_get_lores_iq(PyObject *, PyObject *args)
   LORESModel * thislores = static_cast<LORESModel *>(temp);
   IQ * thisiq = static_cast<IQ *>(temp2);
 
+  Py_BEGIN_ALLOW_THREADS
   thislores->CalculateIQ(thisiq);
-
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("i",0);
 }
 
@@ -374,9 +381,12 @@ PyObject * pypointsmodelpy_get_lores_i(PyObject *, PyObject *args)
   void *temp = PyCObject_AsVoidPtr(pylores);
 
   LORESModel * thislores = static_cast<LORESModel *>(temp);
-
-  double I = thislores->CalculateIQ(q);
-
+  
+  double I = 0.0;
+  Py_BEGIN_ALLOW_THREADS
+  I = thislores->CalculateIQ(q);
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("d",I);
 }
 
@@ -396,9 +406,11 @@ PyObject * pypointsmodelpy_calculateIQ_2D(PyObject *, PyObject *args)
 
   LORESModel * thislores = static_cast<LORESModel *>(temp);
   IQ * thisiq = static_cast<IQ *>(temp2);
-
+  
+  Py_BEGIN_ALLOW_THREADS
   thislores->CalculateIQ_2D(thisiq,theta);
-
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("i",0);
 }
 
@@ -417,9 +429,11 @@ PyObject * pypointsmodelpy_calculateI_Qxy(PyObject *, PyObject *args)
 
   void *temp = PyCObject_AsVoidPtr(pylores);
   LORESModel * thislores = static_cast<LORESModel *>(temp);
-
+  
+  Py_BEGIN_ALLOW_THREADS
   I = thislores->CalculateIQ_2D(qx,qy);
-
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("d",I);
 }
 
@@ -441,8 +455,10 @@ PyObject * pypointsmodelpy_calculateI_Qvxy(PyObject *, PyObject *args)
   void *temp2 = PyCObject_AsVoidPtr(pypoint3dvec);
   vector<Point3D> * thisvec = static_cast<vector<Point3D> *>(temp2);
   
+  Py_BEGIN_ALLOW_THREADS
   I = thislores->CalculateIQ_2D(*thisvec, qx,qy);
-
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("d",I);
 }
 
@@ -462,8 +478,10 @@ PyObject * pypointsmodelpy_get_pdb_iq(PyObject *, PyObject *args)
   PDBModel * thispdb = static_cast<PDBModel *>(temp);
   IQ * thisiq = static_cast<IQ *>(temp2);
 
+  Py_BEGIN_ALLOW_THREADS
   thispdb->CalculateIQ(thisiq);
-
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("i",0);
 }
 
@@ -483,8 +501,10 @@ PyObject * pypointsmodelpy_get_pdb_Iqxy(PyObject *, PyObject *args)
   void *temp = PyCObject_AsVoidPtr(pypdb);
   PDBModel * thispdb = static_cast<PDBModel *>(temp);
 
+  Py_BEGIN_ALLOW_THREADS
   I = thispdb->CalculateIQ_2D(qx,qy);
-
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("d",I);
 }
 
@@ -506,8 +526,10 @@ PyObject * pypointsmodelpy_get_pdb_Iqvxy(PyObject *, PyObject *args)
   void *temp2 = PyCObject_AsVoidPtr(pypoint3dvec);
   vector<Point3D> * thisvec = static_cast<vector<Point3D> *>(temp2);
 
+  Py_BEGIN_ALLOW_THREADS
   I = thispdb->CalculateIQ_2D(*thisvec,qx,qy);
-
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("d",I);
 }
 
@@ -527,8 +549,10 @@ PyObject * pypointsmodelpy_get_complex_iq(PyObject *, PyObject *args)
   ComplexModel * thiscomplex = static_cast<ComplexModel *>(temp);
   IQ * thisiq = static_cast<IQ *>(temp2);
 
+  Py_BEGIN_ALLOW_THREADS
   thiscomplex->CalculateIQ(thisiq);
-
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("i",0);
 }
 
@@ -548,8 +572,11 @@ PyObject * pypointsmodelpy_get_complex_Iqxy(PyObject *, PyObject *args)
   void *temp2 = PyCObject_AsVoidPtr(pypoint3dvec);
   vector<Point3D> * thisvec = static_cast<vector<Point3D> *>(temp2);
 
-  double I = thiscomplex->CalculateIQ_2D(*thisvec,qx,qy);
-
+  double I = 0.0;
+  Py_BEGIN_ALLOW_THREADS
+  I = thiscomplex->CalculateIQ_2D(*thisvec,qx,qy);
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("d",I);
 }
 
@@ -569,8 +596,11 @@ PyObject * pypointsmodelpy_get_complex_Iqxy_err(PyObject *, PyObject *args)
   void *temp2 = PyCObject_AsVoidPtr(pypoint3dvec);
   vector<Point3D> * thisvec = static_cast<vector<Point3D> *>(temp2);
 
-  double I = thiscomplex->CalculateIQ_2D_Error(*thisvec,qx,qy);
-
+  double I = 0.0;
+  Py_BEGIN_ALLOW_THREADS
+  I = thiscomplex->CalculateIQ_2D_Error(*thisvec,qx,qy);
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("d",I);
 }
 
@@ -588,9 +618,12 @@ PyObject * pypointsmodelpy_get_complex_i(PyObject *, PyObject *args)
   void *temp = PyCObject_AsVoidPtr(pylores);
 
   ComplexModel * thiscomplex = static_cast<ComplexModel *>(temp);
-
-  double I = thiscomplex->CalculateIQ(q);
-
+  
+  double I = 0.0;
+  Py_BEGIN_ALLOW_THREADS
+  I = thiscomplex->CalculateIQ(q);
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("d",I);
 }
 
@@ -608,8 +641,11 @@ PyObject * pypointsmodelpy_get_complex_i_error(PyObject *, PyObject *args)
 
   ComplexModel * thiscomplex = static_cast<ComplexModel *>(temp);
 
-  double I = thiscomplex->CalculateIQError(q);
-
+  double I = 0.0;
+  Py_BEGIN_ALLOW_THREADS
+  I = thiscomplex->CalculateIQError(q);
+  Py_END_ALLOW_THREADS
+  
   return Py_BuildValue("d",I);
 }
 
