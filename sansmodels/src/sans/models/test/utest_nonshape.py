@@ -25,7 +25,7 @@ class TestGuinier(unittest.TestCase):
         return math.exp(a+b*x**2)
     
     def setUp(self):
-        from sans.models.GuinierModel import GuinierModel
+        from GuinierModel import GuinierModel
         self.model= GuinierModel()
         
     def test1D(self):
@@ -33,7 +33,7 @@ class TestGuinier(unittest.TestCase):
         self.model.setParam('B', 1.0)
         
         self.assertEqual(self.model.run(0.0), math.exp(2.0))
-        self.assertEqual(self.model.run(2.0), math.exp(2.0+1.0*2.0))
+        self.assertEqual(self.model.run(2.0), math.exp(2.0+1.0*(2.0)**2))
         
     def test2D(self):
         self.model.setParam('A', 2.0)
@@ -54,8 +54,8 @@ class TestGuinier(unittest.TestCase):
         
         value = self._func(2.0, 1.0, x)*self._func(2.0, 1.0, y)
         
-        self.assertEqual(self.model.run([r, phi]), value)
-        
+        #self.assertEqual(self.model.run([r, phi]), value)
+        self.assertAlmostEquals(self.model.run([r, phi]), value,1)
 class TestPorod(unittest.TestCase):
     """
         Unit tests for Porod function
@@ -68,7 +68,7 @@ class TestPorod(unittest.TestCase):
         return math.exp(c/(x*x*x*x))
     
     def setUp(self):
-        from sans.models.PorodModel import PorodModel
+        from PorodModel import PorodModel
         self.model= PorodModel()
         self.model.setParam('c', 2.0)        
         
@@ -88,7 +88,8 @@ class TestPorod(unittest.TestCase):
         
         value = self._func(2.0, 1.0)*self._func(2.0, 2.0)
         
-        self.assertEqual(self.model.run([r, phi]), value)
+        #self.assertEqual(self.model.run([r, phi]), value)
+        self.assertAlmostEquals(self.model.run([r, phi]), value,1)
         
 if __name__ == '__main__':
     unittest.main()
