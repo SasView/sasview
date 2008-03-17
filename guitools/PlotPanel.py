@@ -9,6 +9,7 @@ import os
 
 from canvas import FigureCanvas
 #TODO: make the plottables interactive
+from plottables import Graph
 
 def show_tree(obj,d=0):
     """Handy function for displaying a tree of graph objects"""
@@ -45,7 +46,8 @@ class PlotPanel(wx.Panel):
         sizer.Add(self.canvas,1,wx.EXPAND)
         self.SetSizer(sizer)
 
-
+        # Graph object to manage the plottables
+        self.graph = Graph()
         
         self.Bind(wx.EVT_CONTEXT_MENU, self.onContextMenu)
 

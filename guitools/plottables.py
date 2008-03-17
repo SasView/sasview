@@ -122,11 +122,11 @@ class Graph:
     def yaxis(self,name,units):
         """Properties of the y axis.
         """
-        if self.prop["xunit"] and units != self.prop["xunit"]:
+        if self.prop["yunit"] and units != self.prop["yunit"]:
             pass
             #print "Plottable: how do we handle non-commensurate units"
         self.prop["ylabel"] = "%s (%s)"%(name,units)
-        self.prop["xunit"] = units
+        self.prop["yunit"] = units
         
     def title(self,name):
         """Graph title
@@ -347,7 +347,65 @@ class Plottable:
     def colors(self):
         """Return the number of colors need to render the object"""
         return 1
-
+    
+    class View:
+        """
+            Representation of the data that might include a transformation
+        """
+        x = None
+        y = None
+        dx = None
+        dy = None
+        
+        def __init__(self, x=None, y=None, dx=None, dy=None):
+            self.x = x
+            self.y = y
+            self.dx = dx
+            self.dy = dy
+            
+        def transform_x(self, func, errfunc, x, dx):
+            """
+                Transforms the x and dx vectors and stores the output.
+                
+                @param func: function to apply to the data
+                @param x: array of x values
+                @param dx: array of error values
+                @param errfunc: function to apply to errors
+            """
+            import copy
+            # Sanity check
+            if dx and not len(x)==len(dx):
+                raise ValueError, "Plottable.View: Given x and dx are not of the same length"
+            
+            self.x  = deepcopy(x)
+            self.dx = deepcopy(dx)
+            
+            for i in range(len(x)):
+                 self.x[i] = func(x[i])
+                 self.dx[i] = errfunc(dx[i])
+                      
+        def transform_y(self, func, errfunc, y, dy):
+            """
+                Transforms the x and dx vectors and stores the output.
+                
+                @param func: function to apply to the data
+                @param y: array of y values
+                @param dy: array of error values
+                @param errfunc: function to apply to errors
+            """
+            import copy
+            # Sanity check
+            if dy and not len(y)==len(dy):
+                raise ValueError, "Plottable.View: Given y and dy are not of the same length"
+            
+            self.y  = deepcopy(y)
+            self.dy = deepcopy(dy)
+            
+            for i in range(len(y)):
+                 self.y[i] = func(y[i])
+                 self.dy[i] = errfunc(dy[i])
+                      
+        
 
 class Data1D(Plottable):
     """Data plottable: scatter plot of x,y with errors in x and y.
@@ -361,18 +419,28 @@ class Data1D(Plottable):
         The title appears on the legend.
         The label, if it is different, appears on the status bar.
         """
+        self.name = "data"
         self.x = x
         self.y = y
         self.dx = dx
         self.dy = dy
+        
+        self.view = self.View(self.x, self.y, self.dx, self.dy)
 
     def render(self,plot,**kw):
-        Plottable.render(self,plot)
-        plot.points(self.x,self.y,dx=self.dx,dy=self.dy,**kw)
+        plot.points(self.view.x,self.view.y,dx=self.view.dx,dy=self.view.dy,**kw)
 
     def changed(self):
         return False
 
+    @classmethod
+    def labels(cls, collection):
+        """Build a label mostly unique within a collection"""
+        map = {}
+        for item in collection:
+            #map[item] = label(item, collection)
+            map[item] = r"$\rm{%s}$" % item.name
+        return map
     
 class Theory1D(Plottable):
     """Theory plottable: line plot of x,y with confidence interval y.
