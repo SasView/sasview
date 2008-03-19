@@ -210,7 +210,7 @@ class PlotPanel(wx.Panel):
         else:
             col = self._color(color)
             self.subplot.errorbar(x, y, yerr=dy, xerr=None,
-             ecolor=None, capsize=2,linestyle='', barsabove=False,
+             ecolor=col, capsize=2,linestyle='', barsabove=False,
              marker=self._symbol(symbol),
              lolims=False, uplims=False,
              xlolims=False, xuplims=False,label=label,
