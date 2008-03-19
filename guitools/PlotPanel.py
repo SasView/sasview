@@ -208,11 +208,13 @@ class PlotPanel(wx.Panel):
             h = self.subplot.plot(x,y,color=self._color(color),
                                    marker=self._symbol(symbol),linestyle='',label=label)
         else:
+            col = self._color(color)
             self.subplot.errorbar(x, y, yerr=dy, xerr=None,
-             ecolor=self._color(color), capsize=2,linestyle='', barsabove=False,
+             ecolor=None, capsize=2,linestyle='', barsabove=False,
              marker=self._symbol(symbol),
              lolims=False, uplims=False,
-             xlolims=False, xuplims=False,label=label)
+             xlolims=False, xuplims=False,label=label,
+             mec = col, mfc = col)
             
         self.subplot.set_yscale(self.yscale)
 
