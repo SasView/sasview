@@ -52,7 +52,7 @@ class TeubnerStreyModel(BaseComponent):
            
         """
         return 1/( self.params['scale']+ self.params['c1'] * math.pow(x ,2)\
-                + self.params['c2'] * math.pow(x ,4) ) + self.params['bkd']
+                + self.params['c2'] * math.pow(x ,4) ) + self.params['background']
        
    
     def run(self, x = 0.0):

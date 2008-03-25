@@ -53,8 +53,8 @@ class DebyeModel(BaseComponent):
         """
         # Note that a zero denominator value will raise
         # an exception
-        y = math.pow((x * self.params['rg']), 2)
-        D = 2*( math.exp(-y) + y -1 )/math.pow(y,2)
+        y = (x * self.params['rg'])**2.0
+        D = 2.0*( math.exp(-y) + y -1.0 )/y**2.0
         return self.params['scale']* D + self.params['background']
    
     def run(self, x = 0.0):

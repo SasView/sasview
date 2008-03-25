@@ -66,16 +66,18 @@ class FractalModel(BaseComponent):
     
     def _Block(self,x):
         
+        
+        
         return 1.0 + (math.sin((self.params['fractal_dim']-1.0) * math.atan(x * self.params['corr_length']))\
              * self.params['fractal_dim'] * gamma(self.params['fractal_dim']-1.0))\
-           /( math.pow( (x*self.params['radius']),self.params['fractal_dim'])*\
-           ( 1.0 + 1.0/((x**2)*(self.params['corr_length']**2)),(self.params['fractal_dim']-1.0)/2.0))      
+           /( math.pow( (x*self.params['radius']), self.params['fractal_dim'])*\
+           math.pow( 1.0 + 1.0/((x**2)*(self.params['corr_length']**2)),(self.params['fractal_dim']-1.0)/2.0))   
            
     def _Spherical(self,x):
         """
-            F(x) = [sin(x)-xcos(x)]/3*(x**3)
+            F(x) = 3*[sin(x)-xcos(x)]/x**3
         """
-        return (math.sin(x)-x*math.cos(x))/(3.0*math.pow(x,3.0))
+        return 3.0*(math.sin(x)-x*math.cos(x))/(math.pow(x,3.0))
         
     def _scatterRanDom(self,x):
         """
@@ -84,7 +86,7 @@ class FractalModel(BaseComponent):
         V =(4.0/3.0)*math.pi* math.pow(self.params['radius'],3.0) 
         delta = self.params['block_sld']-self.params['solvent_sld']
         
-        return self.params['scale']* V *(delta**2)*\
+        return 1.0e8*self.params['scale']* V *(delta**2)*\
                 (self._Spherical(x*self.params['radius'])**2)
         
     def run(self, x = 0.0):
