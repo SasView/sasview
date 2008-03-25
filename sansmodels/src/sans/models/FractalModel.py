@@ -16,13 +16,13 @@ class FractalModel(BaseComponent):
         
         F(x)= P(x)*S(x) + bkd
         The model has Seven parameters: 
-            scale   =  Volume fraction
-            Radius  =  Block radius
-            Fdim    =  Fractal dimension
-            L       =  correlation Length
-            SDLB    =  SDL block
-            SDLS    =  SDL solvent
-            bkd     =  background
+            scale        =  Volume fraction
+            radius       =  Block radius
+            fractal_dim  =  Fractal dimension
+            corr_length  =  correlation Length
+            block_sld    =  SDL block
+            solvent_sld  =  SDL solvent
+            background   =  background
            
     """
         
@@ -37,61 +37,59 @@ class FractalModel(BaseComponent):
 
         ## Define parameters
         self.params = {}
-        self.params['scale'] = 0.05
-        self.params['Radius']= 5
-        self.params['Fdim']  = 2
-        self.params['L']     = 100
-        self.params['SDLB']  = 2*math.exp(-6)
-        self.params['SDLS']  = 6.35*math.exp(-6)
-        self.params['bkd']   = 0.0
+        self.params['scale']       = 0.05
+        self.params['radius']      = 5.0
+        self.params['fractal_dim'] = 2.0
+        self.params['corr_length'] = 100.0
+        self.params['block_sld']   = 2.0e-6
+        self.params['solvent_sld'] = 6.0e-6
+        self.params['background']  = 0.0
         
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['scale']    = ['', None, None]
-        self.details['Radius']   = ['A', None, None]
-        self.details['Fdim']     = ['', None, None]
-        self.details['L']        = ['A', None, None]
-        self.details['SDLB']     = ['A^{-2}', None, None]
-        self.details['SDLS']     = ['A^{-2}', None, None]
-        self.details['bkd']      = ['cm^{-1} sr^{-1}', None, None]
+        self.details['scale']       = ['', None, None]
+        self.details['radius']      = ['A', None, None]
+        self.details['fractal_dim'] = ['', None, None]
+        self.details['corr_length'] = ['A', None, None]
+        self.details['block_sld']   = ['A-2', None, None]
+        self.details['solvent_sld'] = ['A-2', None, None]
+        self.details['background']  = ['cm-1', None, None]
        
                
     def _Fractal(self, x):
         """
             Evaluate  
-            F(x) = p(x)* s(x)+bkd  
+            F(x) = p(x) * s(x) + bkd  
         """
-        return self.params['bkd']+ self._scatterRanDom(x)* self._Block(x)
+        return self.params['background']+ self._scatterRanDom(x)* self._Block(x)
     
     def _Block(self,x):
         
-        return 1 + (math.sin((self.params['Fdim']-1) * math.atan(x * self.params['L']))\
-             * self.params['Fdim'] * gamma(self.params['Fdim']-1))\
-           /( math.pow( (x*self.params['Radius']),self.params['Fdim'])*\
-           ( 1 + 1/math.pow(((x**2)*(self.params['L']**2)),(self.params['Fdim']-1)/2)))      
+        return 1.0 + (math.sin((self.params['fractal_dim']-1.0) * math.atan(x * self.params['corr_length']))\
+             * self.params['fractal_dim'] * gamma(self.params['fractal_dim']-1.0))\
+           /( math.pow( (x*self.params['radius']),self.params['fractal_dim'])*\
+           ( 1.0 + 1.0/((x**2)*(self.params['corr_length']**2)),(self.params['fractal_dim']-1.0)/2.0))      
            
     def _Spherical(self,x):
         """
             F(x) = [sin(x)-xcos(x)]/3*(x**3)
         """
-        if x !=0:
-            return (math.sin(x)-x*math.cos(x))/(3*math.pow(x,3))
-        else:
-            return false
+        return (math.sin(x)-x*math.cos(x))/(3.0*math.pow(x,3.0))
+        
     def _scatterRanDom(self,x):
         """
              calculate p(x)= scale* V^(2)*delta^(2)* F(x*Radius)^(2)
         """
-        V =(4/3)*math.pi* math.pow(self.params['Radius'],3) 
-        delta = self.params['SDLB']-self.params['SDLS']
+        V =(4.0/3.0)*math.pi* math.pow(self.params['radius'],3.0) 
+        delta = self.params['block_sld']-self.params['solvent_sld']
         
-        return self.params['scale']* (V**2)*(delta**2)*\
-                (self._Spherical(x*self.params['Radius'])**2)
+        return self.params['scale']* V *(delta**2)*\
+                (self._Spherical(x*self.params['radius'])**2)
         
     def run(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [r, theta])
             @return: (Fractal value)
         """
         if x.__class__.__name__ == 'list':
@@ -103,7 +101,7 @@ class FractalModel(BaseComponent):
    
     def runXY(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [qx, qy])
             @return: Fractal value
         """
         if x.__class__.__name__ == 'list':

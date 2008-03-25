@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """ 
-    Provide F(x) = scale/( 1 + (x*L)^2 )^(2)
+    Provide F(x) = scale/( 1 + (x*L)^2 )^(2) + background
     DAB (Debye Anderson Brumberger) function as a BaseComponent model
 """
 
@@ -12,12 +12,12 @@ class DABModel(BaseComponent):
     """
         Class that evaluates a DAB model.
         
-        F(x) = scale/( 1 + (x*L)^2 )^(2) +bkd
+        F(x) = scale/( 1 + (x*L)^2 )^(2) + background
         
         The model has three parameters: 
-            L     =  Correlation Length
-            scale  =  scale factor
-            bkd    =  incoherent background
+            L             =  Correlation Length
+            scale         =  scale factor
+            background    =  incoherent background
     """
         
     def __init__(self):
@@ -27,32 +27,32 @@ class DABModel(BaseComponent):
         BaseComponent.__init__(self)
         
         ## Name of the model
-        self.name = " DAB_Model "
+        self.name = "DAB_Model"
 
         ## Define parameters
         self.params = {}
-        self.params['L']     = 40.0
-        self.params['scale'] = 10.0
-        self.params['bkd']   = 0.0
+        self.params['length']             = 50.0
+        self.params['scale']              = 1.0
+        self.params['background']         = 0.0
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['L']    = ['A', None, None]
-        self.details['scale'] = ['', None, None]
-        self.details['bkd']   = ['cm^{-1}', None, None]
+        self.details['length']            = ['', None, None]
+        self.details['scale']             = ['', None, None]
+        self.details['background']        = ['', None, None]
                
     def _DAB(self, x):
         """
-            Evaluate  F(x) = scale/( 1 + (x*L)^2 )^(2) + bkd
+            Evaluate  F(x) = scale/( 1 + (x*L)^2 )^(2) + background
            
         """
-        return self.params['scale']/math.pow(( 1 + math.pow(x * self.params['L'],2)),2) \
-         + self.params['bkd']
+        return self.params['scale']/math.pow(( 1 + math.pow(x * self.params['length'],2)),2) \
+         + self.params['background']
        
    
     def run(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [r, theta])
             @return: (DAB value)
         """
         if x.__class__.__name__ == 'list':
@@ -64,7 +64,7 @@ class DABModel(BaseComponent):
    
     def runXY(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [qx, qy])
             @return: DAB value
         """
         if x.__class__.__name__ == 'list':

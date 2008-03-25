@@ -1,17 +1,22 @@
 #!/usr/bin/env python
-""" Provide y=exp (ax^(2)+b),Guinier function as a BaseComponent model
+""" 
+    Provide I(q) = I_0 exp ( - R_g^2 q^2 / 3.0)
+    Guinier function as a BaseComponent model
 """
 
 from sans.models.BaseComponent import BaseComponent
 import math
 
 class GuinierModel(BaseComponent):
-    """ Class that evaluates a Guinier model.
+    """ 
+        Class that evaluates a Guinier model.
     
-        Info about the model
+        I(q) = I_0 exp ( - R_g^2 q^2 / 3.0 )
      
         List of default parameters:
-         value           = 1.0 
+         I_0 = Scale
+         R_g = Radius of gyration
+          
     """
         
     def __init__(self):
@@ -25,20 +30,20 @@ class GuinierModel(BaseComponent):
 
         ## Define parameters
         self.params = {}
-        self.params['A'] = 0.0
-        self.params['B'] = 0.0
+        self.params['scale']  = 1.0
+        self.params['rg']     = 0.1
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['A'] = ['', None, None]
-        self.details['B'] = ['', None, None]
+        self.details['scale'] = ['cm-1', None, None]
+        self.details['rg']    = ['A', None, None]
                
     def _guinier(self, x):
-        return math.exp(self.params['A'] + self.params['B']* math.pow(x, 2))  
+        return self.params['scale'] * math.exp( -(self.params['rg']*x)**2 / 3.0 )  
    
     def run(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [r, theta])
             @return: (guinier value)
         """
         if x.__class__.__name__ == 'list':
@@ -50,7 +55,7 @@ class GuinierModel(BaseComponent):
    
     def runXY(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [qx, qy])
             @return: guinier value
         """
         if x.__class__.__name__ == 'list':

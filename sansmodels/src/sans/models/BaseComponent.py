@@ -46,6 +46,7 @@ class BaseComponent:
         
         ## Parameters to be accessed by client
         self.params = {}
+        self.details = {}
            
     def __str__(self):
         """ Prints an XML representation of the model
@@ -66,6 +67,7 @@ class BaseComponent:
         
         obj = copy.deepcopy(self)
         obj.params = copy.deepcopy(self.params)
+        obj.details = copy.deepcopy(self.details)
     
         # Check for standard data members of arithmetics sub-classes
         if hasattr(self, 'operateOn') and \

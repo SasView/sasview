@@ -36,14 +36,14 @@ class TeubnerStreyModel(BaseComponent):
         self.params['c1']     = -30.0
         self.params['c2']     = 5000.0
         self.params['scale']  = 0.1
-        self.params['bkd']    = 0.1
+        self.params['background']    = 0.0
 
         ## Parameter details [units, min, max]
         self.details = {}
         self.details['c1']    = ['', None, None ]
         self.details['c2']    = ['', None, None ]
         self.details['scale'] = ['', None, None]
-        self.details['bkd']   = ['cm^{-1}', None, None]
+        self.details['background']   = ['', None, None]
     
                
     def _TeubnerStrey(self, x):
@@ -57,7 +57,7 @@ class TeubnerStreyModel(BaseComponent):
    
     def run(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [r, theta])
             @return: (PowerLaw value)
         """
         if x.__class__.__name__ == 'list':
@@ -70,7 +70,7 @@ class TeubnerStreyModel(BaseComponent):
    
     def runXY(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [qx, qy])
             @return: PowerLaw value
         """
         if x.__class__.__name__ == 'list':
@@ -80,27 +80,17 @@ class TeubnerStreyModel(BaseComponent):
         else:
             return self._TeubnerStrey(x)
         
-    def TeubnerStreyLengths(self):
+    def teubnerStreyLengths(self):
         """
             Calculate the correlation length (L) 
             @return L: the correlation distance 
         """
-        if (self.params['c2'] !=0) and \
-        ((2*math.pow(self.params['scale'],1/2)+self.params['c1'])>= 0):
-            L =  math.pow( 1/2 * math.pow( (self.params['scale']/self.params['c2']), 1/2 )\
+        return  math.pow( 1/2 * math.pow( (self.params['scale']/self.params['c2']), 1/2 )\
                             +(self.params['c1']/(4*self.params['c2'])),-1/2 )
-            return L
-        else:
-            return False
-    def TeubnerStreyDistance(self):
+    def teubnerStreyDistance(self):
         """
             Calculate the quasi-periodic repeat distance (D/(2*pi)) 
             @return D: quasi-periodic repeat distance
         """
-        if (self.params['c2'] !=0) and \
-        ((2*math.pow(self.params['scale'],1/2)-self.params['c1'])>= 0):
-            D =  math.pow( 1/2 * math.pow( (self.params['scale']/self.params['c2']), 1/2 )\
+        return  math.pow( 1/2 * math.pow( (self.params['scale']/self.params['c2']), 1/2 )\
                             -(self.params['c1']/(4*self.params['c2'])),-1/2 )
-            return D
-        else:
-            return False

@@ -37,6 +37,14 @@ class SubComponent(BaseComponent):
         """
         return self.operateOn.run(x) - self.other.run(x)
         
+    def runXY(self, x=0):
+        """
+            Evaluate each part of the component and sum the results
+            @param x: input parameter
+            @return: value of the model at x
+        """
+        return self.operateOn.runXY(x) - self.other.runXY(x)
+        
     def setParam(self, name, value):
         """ 
             Set the value of a model parameter

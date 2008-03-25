@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """ 
     
-    Provide F(x) = K*1/(4*pi()*Lb*(alpha)^(2)*(q^(2)+k2)/(1+(r02)^(2))*(q^(2)+k2)\
+    Provide F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k2)/(1+(r02)^(2))*(q^(2)+k2)\
                        *(q^(2)-(12*h*C/b^(2)))
     BEPolyelectrolyte as a BaseComponent model
 """
@@ -14,7 +14,7 @@ class BEPolyelectrolyte(BaseComponent):
     """
         Class that evaluates a BEPolyelectrolyte.
         
-        F(x) = K*1/(4*pi()*Lb*(alpha)^(2)*(q^(2)+k2)/(1+(r02)^(2))*(q^(2)+k2)\
+        F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k2)/(1+(r02)^(2))*(q^(2)+k2)\
                        *(q^(2)-(12*h*C/b^(2)))
         
         The model has Eight parameters: 
@@ -39,57 +39,57 @@ class BEPolyelectrolyte(BaseComponent):
 
         ## Define parameters
         self.params = {}
-        self.params['K']    = 10
-        self.params['Lb']   = 7.1
-        self.params['H']    = 12
-        self.params['B']    = 10
-        self.params['Cs']   = 0.0
+        self.params['k']    = 10
+        self.params['lb']   = 7.1
+        self.params['h']    = 12
+        self.params['b']    = 10
+        self.params['cs']   = 0.0
         self.params['alpha']= 0.05
-        self.params['C']    = 0.7
-        self.params['bkd']  = 0.001
+        self.params['c']    = 0.7
+        self.params['background']  = 0.0
         
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['K']    = ['barns', None, None]
-        self.details['Lb'] = ['A', None, None]
-        self.details['H']   = ['A^{-3}', None, None]
-        self.details['B']    = ['A', None, None]
-        self.details['Cs'] = ['mol/L', None, None]
+        self.details['k']    = ['barns', None, None]
+        self.details['lb'] = ['A', None, None]
+        self.details['h']   = ['A-3', None, None]
+        self.details['b']    = ['A', None, None]
+        self.details['cs'] = ['mol/L', None, None]
         self.details['alpha']   = ['', None, None]
-        self.details['C']    = ['mol/L', None, None]
-        self.details['bkd'] = ['', None, None]
+        self.details['c']    = ['mol/L', None, None]
+        self.details['background'] = ['cm-1', None, None]
        
                
     def _BEPoly(self, x):
         """
             Evaluate  
-            F(x) = K*1/(4*pi()*Lb*(alpha)^(2)*(q^(2)+k2)/(1+(r02)^(2))*(q^(2)+k2)\
+            F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k2)/(1+(r02)^(2))*(q^(2)+k2)\
                        *(q^(2)-(12*h*C/b^(2)))
         
             has 3 internal parameters :
                    The inverse Debye Length: K2 = 4*pi*Lb*(2*Cs+alpha*C)
                    r02 =1/alpha/Ca^(0.5)*(B/(48*pi*Lb)^(0.5))
-                   Ca = C*6.022136* exp(-4)
+                   Ca = C*6.022136e-4
         """
-        K2 = 4 * math.pi * self.params['Lb'] * (2*self.params['Cs'] + \
-                 self.params['alpha'] * self.params['C'])
+        Ca = self.params['c'] * 6.022136e-4
         
-        Ca = self.params['C'] * 6.022136 * math.exp(-4)
+        K2 = 4.0 * math.pi * self.params['lb'] * (2*self.params['cs'] + \
+                 self.params['alpha'] * Ca)
         
-        r02 =1/(self.params['alpha'] * math.pow(Ca,0.5) * \
-                (self.params['B']/math.pow((48*math.pi *self.params['Lb']),0.5)))
+        r02 = 1.0/self.params['alpha']/math.sqrt(Ca) * \
+                (self.params['b']/math.sqrt((48.0*math.pi *self.params['lb'])))
         
-        return ( self.params['K']/( ( 4 * math.pi *self.params['Lb']*\
-                (self.params['alpha']**2)*\
-                 ( x**2 + K2 )*( 1 + r02**2 ) * ( x**2 + K2 ) *\
-                 (x**2 - ( 12 * self.params['H'] * \
-                  self.params['C']/(self.params['B']**2) ))  )))+  self.params['bkd']
+        return self.params['k']/( 4.0 * math.pi * self.params['lb'] * self.params['alpha']**2 ) \
+               * ( x**2 + K2 ) / ( 1.0 + r02**2 * ( x**2 + K2 ) \
+                    * (x**2 - ( 12.0 * self.params['h'] \
+                    * Ca/(self.params['b']**2) ))) \
+                    + self.params['background']
         
    
     def run(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [r, theta])
             @return: (debye value)
         """
         if x.__class__.__name__ == 'list':
@@ -101,7 +101,7 @@ class BEPolyelectrolyte(BaseComponent):
    
     def runXY(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [qx, qy])
             @return: debye value
         """
         if x.__class__.__name__ == 'list':
@@ -109,4 +109,4 @@ class BEPolyelectrolyte(BaseComponent):
         elif x.__class__.__name__ == 'tuple':
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"
         else:
-            return self._BEPolye(x)
+            return self._BEPoly(x)

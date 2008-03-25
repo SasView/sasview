@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-""" Provide y=,Guinier function as a BaseComponent model
+""" 
+    Provide I(q) = C/q^4,
+    Porod function as a BaseComponent model
 """
 
 from sans.models.BaseComponent import BaseComponent
@@ -8,9 +10,8 @@ import math
 class PorodModel(BaseComponent):
     """ Class that evaluates a Porod model.
     
-       F(x) = exp[ [C]/Q**4 ]
+       I(q) = scale/q^4
         
-        The model has one parameter: C
     """
         
     def __init__(self):
@@ -20,24 +21,24 @@ class PorodModel(BaseComponent):
         BaseComponent.__init__(self)
         
         ## Name of the model
-        self.name = "Porod Model"
+        self.name = "PorodModel"
 
         ## Define parameters
         self.params = {}
-        self.params['C'] = 0.0
+        self.params['scale'] = 0.0
         
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['C'] = ['', None, None]
+        self.details['scale'] = ['', None, None]
       
                
     def _porod(self, x):
-        return math.exp(self.params['C']/ math.pow(x, 4))  
+        return self.params['scale']/x**4.0
    
     def run(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [r, theta])
             @return: (porod value)
         """
         if x.__class__.__name__ == 'list':
@@ -49,7 +50,7 @@ class PorodModel(BaseComponent):
    
     def runXY(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [qx, qy])
             @return: porod value
         """
         if x.__class__.__name__ == 'list':

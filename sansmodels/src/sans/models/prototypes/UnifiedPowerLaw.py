@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 """ 
-    Provide F(x) = scale/( 1 + (x*L)^2 ) + bkd
-    Lorentz function as a BaseComponent model
+    Failed attempt at a Beaucage model.
 """
+#TODO: Clean this up
+#TODO: Remove setValueParam, which doesn't belong in this class!
+#      It totally breaks the philosophy of this class
 
 from sans.models.BaseComponent import BaseComponent
 import math

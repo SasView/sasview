@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """ 
-    Provide F(x) = 2( exp(-x)+x -1 )/x**2
+    Provide F(x) = 2( exp(-x) + x - 1 )/x**2
+    with x = (q*R_g)**2
+    
     Debye function as a BaseComponent model
 """
 
@@ -12,7 +14,8 @@ class DebyeModel(BaseComponent):
     """
         Class that evaluates a Debye model.
         
-        F(x) = 2( exp(-x)+x -1 )/x**2
+        F(x) = 2( exp(-x) + x - 1 )/x**2
+        with x = (q*R_g)**2
         
         The model has three parameters: 
             Rg     =  radius of gyration
@@ -31,34 +34,32 @@ class DebyeModel(BaseComponent):
 
         ## Define parameters
         self.params = {}
-        self.params['Rg']    = 50.0
-        self.params['scale'] = 1.0
-        self.params['bkd']   = 0.001
+        self.params['rg']          = 50.0
+        self.params['scale']       = 1.0
+        self.params['background']  = 0.0
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['Rg']    = ['A', None, None]
-        self.details['scale'] = ['', None, None]
-        self.details['bkd']   = ['cm^{-1}', None, None]
+        self.details['rg']         = ['', None, None]
+        self.details['scale']      = ['', None, None]
+        self.details['background'] = ['', None, None]
                
     def _debye(self, x):
         """
             Evaluate F(x)= scale * D + bkd
             has 2 internal parameters :
-                    D = 2 * (exp(-y) +x -1)/y**2 
+                    D = 2 * (exp(-y) + y - 1)/y**2 
                     y = (x * Rg)^(2)
         """
-        # prevent a value zero in the denominator 
-        if x != 0.0 :
-            y = math.pow((x * self.params['Rg']), 2)
-            D = 2*( math.exp(-y) + y -1 )/math.pow(y,2)
-            return self.params['scale']* D + self.params['bkd']
-        else: 
-            return False
+        # Note that a zero denominator value will raise
+        # an exception
+        y = math.pow((x * self.params['rg']), 2)
+        D = 2*( math.exp(-y) + y -1 )/math.pow(y,2)
+        return self.params['scale']* D + self.params['background']
    
     def run(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [r, theta])
             @return: (debye value)
         """
         if x.__class__.__name__ == 'list':
@@ -70,7 +71,7 @@ class DebyeModel(BaseComponent):
    
     def runXY(self, x = 0.0):
         """ Evaluate the model
-            @param x: simple value
+            @param x: input q-value (float or [float, float] as [qx, qy])
             @return: debye value
         """
         if x.__class__.__name__ == 'list':
