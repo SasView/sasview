@@ -198,6 +198,8 @@ class Graph:
             labels.update(c.labels(sets[c]))
         
         return labels
+    def returnPlottable(self):
+        return self.plottables
 
     def render(self,plot):
         """Redraw the graph"""
@@ -331,7 +333,7 @@ class Plottable:
     # labels = classmethod(labels)
 
     def __init__(self):
-        pass
+        self.view = View()
     
     def render(self,plot):
         """The base class makes sure the correct units are being used for
@@ -341,12 +343,27 @@ class Plottable:
         put a Qx object on a Temperature graph then you had better hope 
         that it makes sense.
         """
-        plot.xaxis(self._xaxis, self._xunit)
-        plot.yaxis(self._yaxis, self._yunit)
+        self.view.render()
+        #plot.xaxis(self._xaxis, self._xunit)
+        #plot.yaxis(self._yaxis, self._yunit)
         
     def colors(self):
         """Return the number of colors need to render the object"""
         return 1
+    
+    def transform_x(self, func, errfunc):
+        """
+            @param func: reference to x transformation function
+            
+        """
+        self.view.transform_x(func, errfunc, self.x, self.dx)
+    
+    def transform_y(self, func, errfunc):
+        """
+            @param func: reference to y transformation function
+            
+        """
+        self.view.transform_y(func, errfunc, self.y, self.dy)
     
     class View:
         """
@@ -377,13 +394,13 @@ class Plottable:
             if dx and not len(x)==len(dx):
                 raise ValueError, "Plottable.View: Given x and dx are not of the same length"
             
-            self.x  = deepcopy(x)
-            self.dx = deepcopy(dx)
+            self.x  = copy.deepcopy(x)
+            self.dx = copy.deepcopy(dx)
             
             for i in range(len(x)):
                  self.x[i] = func(x[i])
                  self.dx[i] = errfunc(dx[i])
-                      
+                          
         def transform_y(self, func, errfunc, y, dy):
             """
                 Transforms the x and dx vectors and stores the output.
@@ -404,8 +421,18 @@ class Plottable:
             for i in range(len(y)):
                  self.y[i] = func(y[i])
                  self.dy[i] = errfunc(dy[i])
-                      
-        
+        def render(self,plot):
+            """The base class makes sure the correct units are being used for
+            subsequent plottable.  
+            
+            For now it is assumed that the graphs are commensurate, and if you 
+            put a Qx object on a Temperature graph then you had better hope 
+            that it makes sense.
+            """
+            plot.xaxis(self._xaxis, self._xunit)
+            plot.yaxis(self._yaxis, self._yunit)
+                          
+            
 
 class Data1D(Plottable):
     """Data plottable: scatter plot of x,y with errors in x and y.
