@@ -3,15 +3,23 @@
 # fitDialog.py
 
 import wx
-from sans.guitools.PlotPanel import PlotPanel
-
+from PlotPanel import PlotPanel
+from plottables import Theory1D
+import math,pylab,fittings
 class LinearFit(wx.Dialog):
-    def __init__(self, parent, id, title):
+    #def __init__(self, parent, id, title):
+    def __init__(self, parent, plottable, push_data, id, title):
         wx.Dialog.__init__(self, parent, id, title, size=(500, 300))
         """
             for the fit window
         """
         self.parent = parent
+        #dialog panel self call function to plot the fitting function
+        self.push_data = push_data
+        #dialog self plottable
+        self.plottable = plottable
+        
+        #Dialog interface
         panel = wx.Panel(self, -1, style=wx.SIMPLE_BORDER)   
         vbox  = wx.BoxSizer(wx.VERTICAL)
         sizer = wx.GridBagSizer(5,0)
@@ -39,24 +47,20 @@ class LinearFit(wx.Dialog):
         sizer.Add(wx.StaticText(panel, -1, '+/-'),(iy, ix))
         ix += 1
         sizer.Add(self.tcErrA, (iy, ix))
-        #self.tcErrA.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         iy += 1
         ix = 1
         sizer.Add(wx.StaticText(panel, -1, 'Param B'),(iy, ix))
         ix += 1
         sizer.Add(self.tcB, (iy, ix))
-        #self.tcB.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         ix += 1
-        # sizer.Add(wx.StaticText(panel, -1, '+/-'),(iy, ix))
+        sizer.Add(wx.StaticText(panel, -1, '+/-'),(iy, ix))
         ix += 1
         sizer.Add(self.tcErrB, (iy, ix))
-        self.tcErrB.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         iy += 1
         ix = 1
         sizer.Add(wx.StaticText(panel, -1, 'Chi ^{2}'),(iy, ix))
         ix += 1
         sizer.Add(self.tcChi, (iy, ix))
-        #self.tcChi.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         iy += 1
         ix = 1
         sizer.Add(wx.StaticText(panel, -1, 'Xmin'),(iy, ix))
@@ -65,26 +69,79 @@ class LinearFit(wx.Dialog):
         iy += 1
         ix = 1
         sizer.Add(self.tcXmin, (iy, ix))
-        #self.tcXmin.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         ix += 2
         sizer.Add(self.tcXmax, (iy, ix))
-        #self.tcXmax.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         iy += 1
         ix = 1
         sizer.Add(self.btFit, (iy, ix))
-        self.tcXmax.Bind(wx.EVT_KILL_FOCUS, self._onFit)
+        self.btFit.Bind(wx.EVT_BUTTON, self._onFit)
         ix += 2
         sizer.Add(btClose, (iy, ix))
        
         panel.SetSizer(sizer)
         self.SetSizer(vbox)
         self.Centre()
+        # Receives the type of model for the fitting
+        from LineModel import LineModel
+        self.model  = LineModel()
+        # new data for the fit 
+        self.file_data1 = Theory1D(x=[], y=[], dy=None)
+        self.file_data1.name = "y= exp(A + bx**2)"
+        
     def _onFit(self ,event):
-         param_evt1 = PlotPanel.FunctionFitEvent(\
-            Xmin=self._checkVal(self.tcXmin.GetValue()),\
-            Xmax=self._checkVal(self.tcXmax.GetValue())                                     )
-         wx.PostEvent(self, param_evt1)
-    
+       
+        print "we are on fit"
+        temp =[]
+        tempdx =[]
+        tempdy =[]
+        xmin = self._checkVal(self.tcXmin.GetValue())
+        xmax = self._checkVal(self.tcXmax.GetValue())
+        x= self.plottable.x
+        if x:
+            if xmin !=None  and xmax != None:
+                for j in range(len(x)):
+                    if x[j]>xmin and x[j]<xmax:
+                        temp.append(self.model.run(x[j]))
+                        tempdx.append(math.sqrt(x[j]))
+                        for y_i in temp:
+                            tempdy.append(math.sqrt(y_i)) 
+            else:
+                # x has a default value in case the user doesn't load data
+                for x_i in x:
+                    temp.append(self.model.run(x_i))
+                    tempdx.append(math.sqrt(x_i))
+                for y_i in temp:
+                    tempdy.append(math.sqrt(y_i))
+                    self.tcXmin.SetValue(str(min(self.plottable.x)))
+                    self.tcXmax.SetValue(str(max(self.plottable.x)))
+                    xmin = self._checkVal(self.tcXmin.GetValue())
+                    xmax = self._checkVal(self.tcXmax.GetValue())
+                
+            self.file_data1.x =x
+            self.file_data1.y =temp
+            self.file_data1.dx=tempdx
+            self.file_data1.dy=tempdy
+            
+        
+            # Display the fittings values
+            default_A = self.model.getParam('A') 
+            default_B = self.model.getParam('B') 
+            cstA = fittings.Parameter(self.model, 'A', default_A)
+            cstB  = fittings.Parameter(self.model, 'B', default_B)        
+            chisqr, out, cov = fittings.sansfit(self.model, 
+                [cstA, cstB], self.plottable.x, 
+                self.plottable.y, self.plottable.dy,xmin,xmax)
+            # Create new data plottable with result
+            
+            self.file_data1.y = []
+            for x_i in self.file_data1.x:
+                self.file_data1.y.append(self.model.run(x_i))
+                
+            self.push_data(self.file_data1)
+            
+            self._onsetValues(str(out[0]),str(out[1]),\
+            str(math.sqrt(cov[0][0])),str(math.sqrt(cov[1][1])),str(chisqr))
+       
     def _onsetValues(self,cstA,cstB,errA,errB,Chi):
         
          self.tcA.SetValue(cstA)
@@ -92,11 +149,10 @@ class LinearFit(wx.Dialog):
          self.tcErrA.SetValue(cstB)
          self.tcErrB.SetValue(cstA)
          self.tcChi.SetValue(Chi)
-    def _getXrange(self):
-        if self.tcXmin.GetValue() and self.tcXmax.GetValue():
-            return float(),float(self.tcXmax.GetValue())
-        else:
-            return None, None
+         
+    def _returnPlottable(self):
+        return self.file_data1
+    
     def _checkVal(self,value):
         """
                 Ensure that fields parameter contains a value 
