@@ -59,15 +59,25 @@ class PlotPanel(wx.Panel):
         #User scale
         self.xscales =""
         self.yscales =""
-        # keep track if the previous transformation
-        self.prevXtrans ="x"
-        self.prevYtrans ="Log(y)"
+        # keep track if the previous transformation of x and y in Property dialog
+        self.prevXtrans =" "
+        self.prevYtrans =" "
+        
+    def setTrans(self,xtrans,ytrans): 
+        """
+            @param xtrans: set x transformation on Property dialog
+            @param ytrans: set y transformation on Property dialog
+        """
+        self.prevXtrans =xtrans
+        self.prevYtrans =ytrans
         
     def onFitting(self, event): 
+        """
+            when clicking on linear Fit on context menu , display Fitting Dialog
+        """
         list =[]
         list = self.graph.returnPlottable()
         from fitDialog import LinearFit
-        
         print len(list)
         if len(list.keys())>0:
             first_item = list.keys()[0]
@@ -76,67 +86,90 @@ class PlotPanel(wx.Panel):
             dlg.ShowModal() 
 
     def _onProperties(self, event):
-       
+        """
+            when clicking on Properties on context menu ,The Property dialog is displayed
+            The user selects a transformation for x or y value and a new plot is displayed
+        """
         from PropertyDialog import Properties
         dial = Properties(self, -1, 'Properties')
+        dial.setValues( self.prevXtrans, self.prevYtrans )
         if dial.ShowModal() == wx.ID_OK:
             self.xscales, self.yscales = dial.getValues()
             self._onEVT_FUNC_PROPERTY()
         dial.Destroy()
             
     def toX(self,x):
+        """
+            This function is used to load value on Plottable.View
+            @param x: Float value
+            @return x,
+        """
         return x
     
     def toX2(self,x):
         """
+            This function is used to load value on Plottable.View
             Calculate x^(2)
             @param x: float value
         """
         return math.pow(x,2)
+    
     def fromX2(self,x):
          """
+             This function is used to load value on Plottable.View
             Calculate square root of x
             @param x: float value
          """
-         if x >=0 :
-             return math.sqrt(x)
+         if not x >=0 :
+             raise ValueError, "square root of a negative value "
          else:
-            return 0
-    def toLogXY(self,x):
+             return math.sqrt(x)
+         
+    def toLogXY(self,x,y):
         """
+            This function is used to load value on Plottable.View
             calculate log x
             @param x: float value
         """
-        if x > 0:
-            return math.log(x)
+        if not x*y > 0:
+            raise ValueError, "Log(X*Y)of a negative value "
         else:
-            return 0
+            return math.log(x*y)
+        
     def fromLogXY(self,x):
         """
+            This function is used to load value on Plottable.View
             Calculate e^(x)
             @param x: float value
         """
-        if x.__class__.__name__ == 'list':
-            temp =[]
-            for x_i in x:
-                temp.append(math.exp(x_i))
-            return temp
-        else:
-            return math.exp(x)
+        return math.exp(x*y)
     
-
     def set_yscale(self, scale='linear'):
+        """
+            Set the scale on Y-axis
+            @param scale: the scale of y-axis
+        """
         self.subplot.set_yscale(scale)
         self.yscale = scale
         
     def get_yscale(self):
+        """
+             @return: Y-axis scale
+        """
         return self.yscale
     
     def set_xscale(self, scale='linear'):
+        """
+            Set the scale on x-axis
+            @param scale: the scale of x-axis
+        """
         self.subplot.set_xscale(scale)
         self.xscale = scale
-        
+       
     def get_xscale(self):
+        """
+             @return: x-axis scale
+        """
         return self.xscale
 
     def SetColor(self, rgbtuple):
@@ -337,9 +370,9 @@ class PlotPanel(wx.Panel):
         for item in list:
             if ( self.xscales=="x" ):
                 if self.prevXtrans == "x^(2)":
-                    item.transform_x(  self.fromX2, self.errFunc )
+                    item.transform_x(  self.fromX2, self.errFuncfromX2 )
                 #elif self.prevXtrans == "Log(x)"
-                    #item.transform_x(  self.fromLogXY,self.errFunc )
+                    #item.transform_x(  self.fromLogXY,self.errFuncfromX2 )
                 print "Values of  x",item.x[0:5]
                 print "Values of view x",item.view.x[0:5]
                 self.set_xscale("linear")
@@ -349,7 +382,7 @@ class PlotPanel(wx.Panel):
                 #if self.prevXtrans == "Log(x)":
                     #item.transform_x(  self.fromLogXY, self.errFunc )
                 if  self.prevXtrans != "x^(2)":
-                    item.transform_x(  self.toX2, self.errFunc )
+                    item.transform_x(  self.toX2, self.errFuncToX2 )
                     print "Values of  x",item.x[0:5]
                     print "Values of view x^(2)",item.view.x[0:5]
                 self.set_xscale('linear')
@@ -357,7 +390,7 @@ class PlotPanel(wx.Panel):
                 
             if (self.xscales=="Log(x)" ):
                 if self.prevXtrans == "x^(2)":
-                    item.transform_x(  self.fromX2, self.errFunc )
+                    item.transform_x(  self.fromX2, self.errFuncfromX2 )
                 #elif self.prevXtrans == "Log(x)":
                     #item.transform_x(  self.toLogXY, self.errFunc )
                 #self.set_xscale("linear")
@@ -366,7 +399,7 @@ class PlotPanel(wx.Panel):
                 
             if ( self.yscales=="y" ):
                 if self.prevYtrans == "y^(2)":
-                    item.transform_y(  self.toX2, self.errFunc )
+                    item.transform_y(  self.toX2, self.errFuncToX2 )
                 #elif self.prevXtrans == "Log(y)"
                     #item.transform_y(  self.fromLogXY.errFunc )   
                 self.set_yscale("linear")
@@ -374,7 +407,7 @@ class PlotPanel(wx.Panel):
                 
             if ( self.yscales=="Log(y)" ):
                 if self.prevYtrans == "y^(2)":
-                     item.transform_y(  self.fromX2, self.errFunc )
+                     item.transform_y(  self.fromX2, self.errFuncfromX2 )
                 #elif self.prevYtrans != "Log(y)":
                     #item.transform_y(  self.toLogXY, self.errFunc )
                 #self.set_yscale("linear")  
@@ -385,7 +418,7 @@ class PlotPanel(wx.Panel):
                  #if self.prevYtrans == "Log(y)":
                        #item.transform_y(  self.fromLogXY, self.errFunc )
                 if self.prevYtrans != "y^(2)":
-                     item.transform_y(  self.toX2, self.errFunc )   
+                     item.transform_y(  self.toX2, self.errFuncToX2 )   
                 self.set_yscale("linear")
                 self.graph.yaxis("\\rm{Intensity^{2}} ","cm^{-2}")
             item.set_View(item.x,item.y) 
@@ -396,18 +429,63 @@ class PlotPanel(wx.Panel):
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
         
-    def errFunc(self,x):
+    def errFuncToX2(self,x,dx=None):
         """
-            calculate log x
+            calculate error of x**2
             @param x: float value
+            @param dx: float value
         """
-        if x >=0:
-            return math.sqrt(x)
+        if not dx == None:
+            return 2*x*dx
         else:
-            return 0
-   
-                
+            raise ValueError, "Can't  calculate the error"
+    def errFuncfromX2(self,x,dx=None):
+        """
+            calculate error of sqrt(x)
+            @param x: float value
+            @param dx: float value
+        """
+        if (x > 0) and (dx != None):
+            err= dx/2*math.sqrt(x)
+            
+        else:
+            raise ValueError, "Can't  calculate the error"
+    def errFuncToLogX(self,x,dx=None):
+        """
+            calculate error of Log(xy)
+            @param x: float value
+            @param dx: float value
+        """
+        if (x!=0) and ( dx != None):
+            err= dx/x
+            if err >= x:
+                err = 0.9*x
+            return err
+        elif x==0:
+            raise ValueError, "On calculate error: Can't divide by zero"
+        else:
+            raise ValueError, "Can't  calculate the error"
+        
+    def errFuncfromLogXY(self,x,dx=None):
+        """
+            calculate error of sqrt(x)
+            @param x: float value
+            @param dx: float value
+        """
+        if (x > 0) and (dx != None):
+            err= dx/2*math.sqrt(x)
+            if err >= x:
+                err = 0.9*x
+            return err
+        else:
+            raise ValueError, "Can't  calculate the error"
+                   
     def onFitDisplay(self, plottable):
+        """
+            Add a new plottable into the graph .In this case this plottable will be used 
+            to fit some data
+            @param plottable: the plottable to plot
+        """
         self.graph.add(plottable)
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()

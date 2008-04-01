@@ -338,8 +338,7 @@ class Plottable:
     def set_View(self,x,y):
         self.x= x
         self.y = y
-        self.dx= x
-        self.dy = y
+        
         self.reset_view()
         
     def reset_view(self):

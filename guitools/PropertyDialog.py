@@ -61,7 +61,6 @@ class Properties(wx.Dialog):
     def setValues(self,x,y):
         return  self.xvalue.SetValue(x),  self.yvalue.SetValue(y)
         
-        
     def getValues(self):
         return self.xvalue.GetValue(), self.yvalue.GetValue()
 
