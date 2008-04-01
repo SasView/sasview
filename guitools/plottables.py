@@ -343,9 +343,9 @@ class Plottable:
         put a Qx object on a Temperature graph then you had better hope 
         that it makes sense.
         """
-        self.view.render()
-        #plot.xaxis(self._xaxis, self._xunit)
-        #plot.yaxis(self._yaxis, self._yunit)
+        
+        plot.xaxis(self._xaxis, self._xunit)
+        plot.yaxis(self._yaxis, self._yunit)
         
     def colors(self):
         """Return the number of colors need to render the object"""
@@ -421,17 +421,7 @@ class Plottable:
             for i in range(len(y)):
                  self.y[i] = func(y[i])
                  self.dy[i] = errfunc(dy[i])
-        def render(self,plot):
-            """The base class makes sure the correct units are being used for
-            subsequent plottable.  
-            
-            For now it is assumed that the graphs are commensurate, and if you 
-            put a Qx object on a Temperature graph then you had better hope 
-            that it makes sense.
-            """
-            plot.xaxis(self._xaxis, self._xunit)
-            plot.yaxis(self._yaxis, self._yunit)
-                          
+                 
             
 
 class Data1D(Plottable):
