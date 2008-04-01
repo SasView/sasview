@@ -400,17 +400,18 @@ class Plottable:
                 @param errfunc: function to apply to errors
             """
             import copy
+            import numpy
             # Sanity check
             if dx and not len(x)==len(dx):
                 raise ValueError, "Plottable.View: Given x and dx are not of the same length"
             
-            self.x  = copy.deepcopy(x)
-            self.dx = copy.deepcopy(dx)
+            
+            self.x = numpy.zeros(len(x))
+            self.dx = numpy.zeros(len(x))
             
             for i in range(len(x)):
                  self.x[i] = func(x[i])
-            for i in range(len(dx)):
-                 self.dx[i] = errfunc(dx[i])
+                 self.dx[i] = errfunc(x[i], dx[i])
                           
         def transform_y(self, func, errfunc, y, dy):
             """
@@ -426,13 +427,12 @@ class Plottable:
             if dy and not len(y)==len(dy):
                 raise ValueError, "Plottable.View: Given y and dy are not of the same length"
             
-            self.y  = copy.deepcopy(y)
-            self.dy = copy.deepcopy(dy)
-            
+            self.y = numpy.zeros(len(y))
+            self.dy = numpy.zeros(len(y))
+           
             for i in range(len(y)):
                  self.y[i] = func(y[i])
-            for i in range(len(dy)):
-                 self.dy[i] = errfunc(dy[i])
+                 self.dy[i] = errfunc(y[i], dy[i])
      
 class Data1D(Plottable):
     """Data plottable: scatter plot of x,y with errors in x and y.
@@ -456,6 +456,7 @@ class Data1D(Plottable):
         
     def render(self,plot,**kw):
         plot.points(self.view.x,self.view.y,dx=self.view.dx,dy=self.view.dy,**kw)
+        #plot.points(self.x,self.y,dx=self.dx,dy=self.dy,**kw)
    
     def changed(self):
         return False
