@@ -198,6 +198,7 @@ class Graph:
             labels.update(c.labels(sets[c]))
         
         return labels
+    
     def returnPlottable(self):
         return self.plottables
 
@@ -334,6 +335,15 @@ class Plottable:
 
     def __init__(self):
         self.view = View()
+    def set_View(self,x,y):
+        self.x= x
+        self.y = y
+        self.dx= x
+        self.dy = y
+        self.reset_view()
+        
+    def reset_view(self):
+        self.view = self.View(self.x, self.y, self.dx, self.dy)
     
     def render(self,plot):
         """The base class makes sure the correct units are being used for
@@ -343,7 +353,7 @@ class Plottable:
         put a Qx object on a Temperature graph then you had better hope 
         that it makes sense.
         """
-        
+       
         plot.xaxis(self._xaxis, self._xunit)
         plot.yaxis(self._yaxis, self._yunit)
         
@@ -399,6 +409,7 @@ class Plottable:
             
             for i in range(len(x)):
                  self.x[i] = func(x[i])
+            for i in range(len(dx)):
                  self.dx[i] = errfunc(dx[i])
                           
         def transform_y(self, func, errfunc, y, dy):
@@ -415,15 +426,14 @@ class Plottable:
             if dy and not len(y)==len(dy):
                 raise ValueError, "Plottable.View: Given y and dy are not of the same length"
             
-            self.y  = deepcopy(y)
-            self.dy = deepcopy(dy)
+            self.y  = copy.deepcopy(y)
+            self.dy = copy.deepcopy(dy)
             
             for i in range(len(y)):
                  self.y[i] = func(y[i])
+            for i in range(len(dy)):
                  self.dy[i] = errfunc(dy[i])
-                 
-            
-
+     
 class Data1D(Plottable):
     """Data plottable: scatter plot of x,y with errors in x and y.
     """
@@ -443,10 +453,10 @@ class Data1D(Plottable):
         self.dy = dy
         
         self.view = self.View(self.x, self.y, self.dx, self.dy)
-
+        
     def render(self,plot,**kw):
         plot.points(self.view.x,self.view.y,dx=self.view.dx,dy=self.view.dy,**kw)
-
+   
     def changed(self):
         return False
 
@@ -523,7 +533,7 @@ def sample_graph():
     graph.add(data)
     graph.add(Theory1D(x,y,dy=dy))
 
-    return graph
+    return graph 
 
 def demo_plotter(graph):
     import wx

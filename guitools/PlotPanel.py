@@ -1,4 +1,4 @@
-import wx
+import wx.lib.newevent
 import matplotlib
 matplotlib.interactive(False)
 #Use the WxAgg back end. The Wx one takes too long to render
@@ -6,11 +6,13 @@ matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
 import os
-
+import fittings
 from canvas import FigureCanvas
 #TODO: make the plottables interactive
-from plottables import Graph
 
+from plottables import Graph
+#(FuncFitEvent, EVT_FUNC_FIT) = wx.lib.newevent.NewEvent()
+import math,pylab
 def show_tree(obj,d=0):
     """Handy function for displaying a tree of graph objects"""
     print "%s%s" % ("-"*d,obj.__class__.__name__)
@@ -28,7 +30,7 @@ class PlotPanel(wx.Panel):
     def __init__(self, parent, id = -1, color = None,\
         dpi = None, **kwargs):
         wx.Panel.__init__(self, parent, id = id, **kwargs)
-
+        self.parent = parent
         self.figure = Figure(None, dpi)
         #self.figure = pylab.Figure(None, dpi)
         #self.canvas = NoRepaintCanvas(self, -1, self.figure)
@@ -41,19 +43,87 @@ class PlotPanel(wx.Panel):
         self.subplot = self.figure.add_subplot(111)
         self.figure.subplots_adjust(left=.2, bottom=.2)
         self.yscale = 'linear'
-
+        self.xscale = 'linear'
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.canvas,1,wx.EXPAND)
         self.SetSizer(sizer)
 
         # Graph object to manage the plottables
         self.graph = Graph()
-        
+        #self.Bind(EVT_FUNC_FIT, self.onFitRange)
         self.Bind(wx.EVT_CONTEXT_MENU, self.onContextMenu)
-
+        #self.Bind(EVT_PROPERTY, self._onEVT_FUNC_PROPERTY)
         # Define some constants
         self.colorlist = ['b','g','r','c','m','y']
         self.symbollist = ['o','x','^','v','<','>','+','s','d','D','h','H','p']
+        #User scale
+        self.xscales =""
+        self.yscales =""
+        # keep track if the previous transformation
+        self.prevXtrans ="x"
+        self.prevYtrans ="Log(y)"
+        
+    def onFitting(self, event): 
+        list =[]
+        list = self.graph.returnPlottable()
+        from fitDialog import LinearFit
+        
+        print len(list)
+        if len(list.keys())>0:
+            first_item = list.keys()[0]
+            print first_item, list[first_item].__class__.__name__
+            dlg = LinearFit( None, first_item, self.onFitDisplay, -1, 'Fitting')
+            dlg.ShowModal() 
+
+    def _onProperties(self, event):
+       
+        from PropertyDialog import Properties
+        dial = Properties(self, -1, 'Properties')
+        if dial.ShowModal() == wx.ID_OK:
+            self.xscales, self.yscales = dial.getValues()
+            self._onEVT_FUNC_PROPERTY()
+        dial.Destroy()
+            
+    def toX(self,x):
+        return x
+    
+    def toX2(self,x):
+        """
+            Calculate x^(2)
+            @param x: float value
+        """
+        return math.pow(x,2)
+    def fromX2(self,x):
+         """
+            Calculate square root of x
+            @param x: float value
+         """
+         if x >=0 :
+             return math.sqrt(x)
+         else:
+            return 0
+    def toLogXY(self,x):
+        """
+            calculate log x
+            @param x: float value
+        """
+        if x > 0:
+            return math.log(x)
+        else:
+            return 0
+    def fromLogXY(self,x):
+        """
+            Calculate e^(x)
+            @param x: float value
+        """
+        if x.__class__.__name__ == 'list':
+            temp =[]
+            for x_i in x:
+                temp.append(math.exp(x_i))
+            return temp
+        else:
+            return math.exp(x)
+    
 
     def set_yscale(self, scale='linear'):
         self.subplot.set_yscale(scale)
@@ -61,6 +131,13 @@ class PlotPanel(wx.Panel):
         
     def get_yscale(self):
         return self.yscale
+    
+    def set_xscale(self, scale='linear'):
+        self.subplot.set_xscale(scale)
+        self.xscale = scale
+        
+    def get_xscale(self):
+        return self.xscale
 
     def SetColor(self, rgbtuple):
         """Set figure and canvas colours to be the same"""
@@ -119,7 +196,21 @@ class PlotPanel(wx.Panel):
         slicerpop = wx.Menu()
         slicerpop.Append(313,'&Save image', 'Save image as PNG')
         wx.EVT_MENU(self, 313, self.onSaveImage)
-
+        slicerpop.Append(316, '&Load 1D data file')
+       
+        wx.EVT_MENU(self, 314, self.onSave1DData)
+        wx.EVT_MENU(self, 316, self._onLoad1DData)
+        slicerpop.AppendSeparator()
+        slicerpop.Append(315, '&Properties')
+        
+        slicerpop.AppendSeparator()
+        slicerpop.Append(317, '&Linear Fit')
+       
+        wx.EVT_MENU(self, 314, self.onSave1DData)
+        wx.EVT_MENU(self, 316, self._onLoad1DData)
+        wx.EVT_MENU(self, 315, self._onProperties)
+        wx.EVT_MENU(self, 317, self.onFitting)
+       
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
@@ -198,6 +289,7 @@ class PlotPanel(wx.Panel):
     def points(self,x,y,dx=None,dy=None,color=0,symbol=0,label=None):
         """Draw markers with error bars"""
         self.subplot.set_yscale('linear')
+        self.subplot.set_xscale('linear')
         # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
         if dx != None and type(dx) == type(()):
             dx = nx.vstack((x-dx[0],dx[1]-x)).transpose()
@@ -208,24 +300,25 @@ class PlotPanel(wx.Panel):
             h = self.subplot.plot(x,y,color=self._color(color),
                                    marker=self._symbol(symbol),linestyle='',label=label)
         else:
-            col = self._color(color)
             self.subplot.errorbar(x, y, yerr=dy, xerr=None,
-             ecolor=col, capsize=2,linestyle='', barsabove=False,
+             ecolor=self._color(color), capsize=2,linestyle='', barsabove=False,
              marker=self._symbol(symbol),
              lolims=False, uplims=False,
-             xlolims=False, xuplims=False,label=label,
-             mec = col, mfc = col)
+             xlolims=False, xuplims=False,label=label)
             
         self.subplot.set_yscale(self.yscale)
+        self.subplot.set_xscale(self.xscale)
 
     def curve(self,x,y,dy=None,color=0,symbol=0,label=None):
         """Draw a line on a graph, possibly with confidence intervals."""
         c = self._color(color)
         self.subplot.set_yscale('linear')
+        self.subplot.set_xscale('linear')
         
         hlist = self.subplot.plot(x,y,color=c,marker='',linestyle='-',label=label)
         
         self.subplot.set_yscale(self.yscale)
+        self.subplot.set_xscale(self.xscale)
 
     def _color(self,c):
         """Return a particular colour"""
@@ -234,10 +327,92 @@ class PlotPanel(wx.Panel):
     def _symbol(self,s):
         """Return a particular symbol"""
         return self.symbollist[s%len(self.symbollist)]
-
-
+   
+    def _onEVT_FUNC_PROPERTY(self):
+        """
+             Receive the scale from myDialog and set the scale
+        """ 
+        list =[]
+        list = self.graph.returnPlottable()
+        for item in list:
+            if ( self.xscales=="x" ):
+                if self.prevXtrans == "x^(2)":
+                    item.transform_x(  self.fromX2, self.errFunc )
+                #elif self.prevXtrans == "Log(x)"
+                    #item.transform_x(  self.fromLogXY,self.errFunc )
+                print "Values of  x",item.x[0:5]
+                print "Values of view x",item.view.x[0:5]
+                self.set_xscale("linear")
+                self.graph.xaxis('\\rm{q} ', 'A^{-1}')
+                
+            if ( self.xscales=="x^(2)" ):
+                #if self.prevXtrans == "Log(x)":
+                    #item.transform_x(  self.fromLogXY, self.errFunc )
+                if  self.prevXtrans != "x^(2)":
+                    item.transform_x(  self.toX2, self.errFunc )
+                    print "Values of  x",item.x[0:5]
+                    print "Values of view x^(2)",item.view.x[0:5]
+                self.set_xscale('linear')
+                self.graph.xaxis('\\rm{q^{2}} ', 'A^{-2}')
+                
+            if (self.xscales=="Log(x)" ):
+                if self.prevXtrans == "x^(2)":
+                    item.transform_x(  self.fromX2, self.errFunc )
+                #elif self.prevXtrans == "Log(x)":
+                    #item.transform_x(  self.toLogXY, self.errFunc )
+                #self.set_xscale("linear")
+                self.set_xscale('log')
+                self.graph.xaxis('\\rm{log(q)} ', 'A^{-1}')
+                
+            if ( self.yscales=="y" ):
+                if self.prevYtrans == "y^(2)":
+                    item.transform_y(  self.toX2, self.errFunc )
+                #elif self.prevXtrans == "Log(y)"
+                    #item.transform_y(  self.fromLogXY.errFunc )   
+                self.set_yscale("linear")
+                self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
+                
+            if ( self.yscales=="Log(y)" ):
+                if self.prevYtrans == "y^(2)":
+                     item.transform_y(  self.fromX2, self.errFunc )
+                #elif self.prevYtrans != "Log(y)":
+                    #item.transform_y(  self.toLogXY, self.errFunc )
+                #self.set_yscale("linear")  
+                self.set_yscale("log")  
+                self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
+                
+            if ( self.yscales=="y^(2)" ):
+                 #if self.prevYtrans == "Log(y)":
+                       #item.transform_y(  self.fromLogXY, self.errFunc )
+                if self.prevYtrans != "y^(2)":
+                     item.transform_y(  self.toX2, self.errFunc )   
+                self.set_yscale("linear")
+                self.graph.yaxis("\\rm{Intensity^{2}} ","cm^{-2}")
+            item.set_View(item.x,item.y) 
+             
+        self.prevXtrans = self.xscales 
+        self.prevYtrans = self.yscales  
+       
+        self.graph.render(self)
+        self.subplot.figure.canvas.draw_idle()
+        
+    def errFunc(self,x):
+        """
+            calculate log x
+            @param x: float value
+        """
+        if x >=0:
+            return math.sqrt(x)
+        else:
+            return 0
+   
+                
+    def onFitDisplay(self, plottable):
+        self.graph.add(plottable)
+        self.graph.render(self)
+        self.subplot.figure.canvas.draw_idle()
+      
     
-
 class NoRepaintCanvas(FigureCanvasWxAgg):
     """We subclass FigureCanvasWxAgg, overriding the _onPaint method, so that
     the draw method is only called for the first two paint events. After that,
