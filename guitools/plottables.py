@@ -411,7 +411,7 @@ class Plottable:
             
             for i in range(len(x)):
                 self.x[i] = func(x[i])
-                if dx:
+                if dx !=None:
                     self.dx[i] = errfunc(x[i], dx[i])
                 else:
                    self.dx[i] = errfunc(x[i])       
@@ -435,7 +435,7 @@ class Plottable:
            
             for i in range(len(y)):
                  self.y[i] = func(y[i])
-                 if dy:
+                 if dy !=None:
                      self.dy[i] = errfunc(y[i], dy[i])
                  else:
                      self.dy[i] = errfunc(y[i])

@@ -370,57 +370,36 @@ class PlotPanel(wx.Panel):
         list = self.graph.returnPlottable()
         for item in list:
             if ( self.xscales=="x" ):
-                if self.prevXtrans == "x^(2)":
-                    item.transform_x(  self.fromX2, self.errFuncfromX2 )
-                if self.prevXtrans == "Log(x)":
-                    item.transform_x(  self.toX, self.errFuncfromLogXY )
-                    
                 item.transform_x(  self.toX, self.errFunctoX )
                 self.set_xscale("linear")
                 self.graph.xaxis('\\rm{q} ', 'A^{-1}')
                 
             if ( self.xscales=="x^(2)" ):
-                if  self.prevXtrans != "x^(2)":
-                    item.transform_x(  self.toX2, self.errFuncToX2 )
-                
-                item.transform_x(  self.toX, self.errFunctoX )
+                item.transform_x(  self.toX2, self.errFuncToX2 )
                 self.set_xscale('linear')
                 self.graph.xaxis('\\rm{q^{2}} ', 'A^{-2}')
                 
             if (self.xscales=="Log(x)" ):
-                if self.prevXtrans == "x^(2)":
-                    item.transform_x(  self.fromX2, self.errFuncfromX2 )
-                
                 item.transform_x(  self.toX, self.errFuncToLogX )
                 self.set_xscale("log")
                 self.graph.xaxis('\\rm{q} ', 'A^{-1}')
                 
             if ( self.yscales=="y" ):
-                if self.prevYtrans == "y^(2)":
-                    item.transform_y(  self.fromX2, self.errFuncfromX2 )
-                if self.prevYtrans == "Log(y)":
-                    item.transform_y(  self.toX, self.errFuncfromLogXY )
-                    
                 item.transform_y(  self.toX, self.errFunctoX )
                 self.set_yscale("linear")
                 self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
                 
-            if ( self.yscales=="Log(y)" ):
-                if self.prevYtrans == "y^(2)":
-                     item.transform_y(  self.fromX2, self.errFuncfromX2 )
-                     
+            if ( self.yscales=="Log(y)" ): 
                 item.transform_y(  self.toX, self.errFuncToLogX)
                 self.set_yscale("log")  
                 self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
                 
             if ( self.yscales=="y^(2)" ):
-                if self.prevYtrans != "y^(2)":
-                     item.transform_y(  self.toX2, self.errFuncToX2 )  
-                item.transform_y(  self.toX, self.errFunctoX )    
+                item.transform_y(  self.toX2, self.errFuncToX2 )    
                 self.set_yscale("linear")
                 self.graph.yaxis("\\rm{Intensity^{2}} ","cm^{-2}")
-            item.set_View(item.x,item.y) 
-             
+              
+        item.reset_view()
         self.prevXtrans = self.xscales 
         self.prevYtrans = self.yscales  
        
@@ -434,6 +413,8 @@ class PlotPanel(wx.Panel):
         """
         if dx >=x:
             return 0.9*x
+        if dx==None:
+             return 0
         return dx
     def errFuncToX2(self,x,dx=None):
         """
@@ -471,16 +452,20 @@ class PlotPanel(wx.Panel):
             @param x: float value
             @param dx: float value
         """
-        if (x != 0) and ( dx != None):
-            err= dx/x
+        #if (x != 0) and (dx != None):
+        #    err= dx/x
+        #elif :
+        if x!=0:
+            if dx==None:
+                err = 1/x
+            else:
+                err = dx/x
             if err >= x:
                 err = 0.9*x
-            return err
-        elif x==0:
-            err = 0.9*x
-            return err
         else:
-            return 0
+            err = 0.9*x
+        
+        return err
         
     def errFuncfromLogXY(self,x,dx=None):
         """
