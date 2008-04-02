@@ -410,9 +410,11 @@ class Plottable:
             self.dx = numpy.zeros(len(x))
             
             for i in range(len(x)):
-                 self.x[i] = func(x[i])
-                 self.dx[i] = errfunc(x[i], dx[i])
-                          
+                self.x[i] = func(x[i])
+                if dx:
+                    self.dx[i] = errfunc(x[i], dx[i])
+                else:
+                   self.dx[i] = errfunc(x[i])       
         def transform_y(self, func, errfunc, y, dy):
             """
                 Transforms the x and dx vectors and stores the output.
@@ -423,6 +425,7 @@ class Plottable:
                 @param errfunc: function to apply to errors
             """
             import copy
+            import numpy
             # Sanity check
             if dy and not len(y)==len(dy):
                 raise ValueError, "Plottable.View: Given y and dy are not of the same length"
@@ -432,7 +435,10 @@ class Plottable:
            
             for i in range(len(y)):
                  self.y[i] = func(y[i])
-                 self.dy[i] = errfunc(y[i], dy[i])
+                 if dy:
+                     self.dy[i] = errfunc(y[i], dy[i])
+                 else:
+                     self.dy[i] = errfunc(y[i])
      
 class Data1D(Plottable):
     """Data plottable: scatter plot of x,y with errors in x and y.
