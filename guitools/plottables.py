@@ -336,12 +336,13 @@ class Plottable:
     def __init__(self):
         self.view = View()
     def set_View(self,x,y):
+        """ Load View  """
         self.x= x
         self.y = y
-        
         self.reset_view()
         
     def reset_view(self):
+        """ Reload view with new value to plot"""
         self.view = self.View(self.x, self.y, self.dx, self.dy)
     
     def render(self,plot):

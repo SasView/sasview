@@ -363,7 +363,8 @@ class PlotPanel(wx.Panel):
    
     def _onEVT_FUNC_PROPERTY(self):
         """
-             Receive the scale from myDialog and set the scale
+             Receive the x and y transformation from myDialog,Transforms x and y in View
+              and set the scale    
         """ 
         list =[]
         list = self.graph.returnPlottable()
@@ -371,54 +372,44 @@ class PlotPanel(wx.Panel):
             if ( self.xscales=="x" ):
                 if self.prevXtrans == "x^(2)":
                     item.transform_x(  self.fromX2, self.errFuncfromX2 )
-                #elif self.prevXtrans == "Log(x)"
-                    #item.transform_x(  self.fromLogXY,self.errFuncfromX2 )
-                print "Values of  x",item.x[0:5]
-                print "Values of view x",item.view.x[0:5]
+                
+                item.transform_x(  self.toX, self.errFunctoX )
                 self.set_xscale("linear")
                 self.graph.xaxis('\\rm{q} ', 'A^{-1}')
                 
             if ( self.xscales=="x^(2)" ):
-                #if self.prevXtrans == "Log(x)":
-                    #item.transform_x(  self.fromLogXY, self.errFunc )
                 if  self.prevXtrans != "x^(2)":
                     item.transform_x(  self.toX2, self.errFuncToX2 )
-                    print "Values of  x",item.x[0:5]
-                    print "Values of view x^(2)",item.view.x[0:5]
+                item.transform_x(  self.toX, self.errFunctoX )
                 self.set_xscale('linear')
                 self.graph.xaxis('\\rm{q^{2}} ', 'A^{-2}')
                 
             if (self.xscales=="Log(x)" ):
-                if self.prevXtrans == "x^(2)":
-                    item.transform_x(  self.fromX2, self.errFuncfromX2 )
-                #elif self.prevXtrans == "Log(x)":
-                    #item.transform_x(  self.toLogXY, self.errFunc )
-                #self.set_xscale("linear")
-                self.set_xscale('log')
-                self.graph.xaxis('\\rm{log(q)} ', 'A^{-1}')
+                #if self.prevXtrans == "x^(2)":
+                   # item.transform_x(  self.fromX2, self.errFuncfromX2 )
+                
+#                item.transform_x(  self.toX, self.errFuncToLogX )
+                self.set_xscale("log")
+                self.graph.xaxis('\\rm{q} ', 'A^{-1}')
                 
             if ( self.yscales=="y" ):
                 if self.prevYtrans == "y^(2)":
                     item.transform_y(  self.toX2, self.errFuncToX2 )
-                #elif self.prevXtrans == "Log(y)"
-                    #item.transform_y(  self.fromLogXY.errFunc )   
+                item.transform_x(  self.toX, self.errFunctoX )
                 self.set_yscale("linear")
                 self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
                 
             if ( self.yscales=="Log(y)" ):
                 if self.prevYtrans == "y^(2)":
                      item.transform_y(  self.fromX2, self.errFuncfromX2 )
-                #elif self.prevYtrans != "Log(y)":
-                    #item.transform_y(  self.toLogXY, self.errFunc )
-                #self.set_yscale("linear")  
+                item.transform_x(  self.toX, self.errFuncToLogX)
                 self.set_yscale("log")  
                 self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
                 
             if ( self.yscales=="y^(2)" ):
-                 #if self.prevYtrans == "Log(y)":
-                       #item.transform_y(  self.fromLogXY, self.errFunc )
                 if self.prevYtrans != "y^(2)":
-                     item.transform_y(  self.toX2, self.errFuncToX2 )   
+                     item.transform_y(  self.toX2, self.errFuncToX2 )  
+                item.transform_x(  self.toX, self.errFunctoX )    
                 self.set_yscale("linear")
                 self.graph.yaxis("\\rm{Intensity^{2}} ","cm^{-2}")
             item.set_View(item.x,item.y) 
@@ -428,7 +419,15 @@ class PlotPanel(wx.Panel):
        
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
-        
+    def errFunctoX(self,x,dx=None):
+        """
+            calculate error of x**2
+            @param x: float value
+            @param dx: float value
+        """
+        if dx >=x:
+            return 0.9*x
+        return dx
     def errFuncToX2(self,x,dx=None):
         """
             calculate error of x**2
@@ -436,9 +435,12 @@ class PlotPanel(wx.Panel):
             @param dx: float value
         """
         if not dx == None:
-            return 2*x*dx
+            err = 2*x*dx
+            if err >= x:
+                err = 0.9*x
+            return err
         else:
-            raise ValueError, "Can't  calculate the error"
+            return 0.0
     def errFuncfromX2(self,x,dx=None):
         """
             calculate error of sqrt(x)
@@ -446,25 +448,32 @@ class PlotPanel(wx.Panel):
             @param dx: float value
         """
         if (x > 0) and (dx != None):
-            err= dx/2*math.sqrt(x)
-            
+            err = dx/(2*math.sqrt(x))
+            if err >= x:
+                err = 0.9*x
+            return err
+        elif x==0.0:
+            err = 0.9*x
+            return err
         else:
-            raise ValueError, "Can't  calculate the error"
+            return 0.0
+        
     def errFuncToLogX(self,x,dx=None):
         """
             calculate error of Log(xy)
             @param x: float value
             @param dx: float value
         """
-        if (x!=0) and ( dx != None):
+        if (x != 0) and ( dx != None):
             err= dx/x
             if err >= x:
                 err = 0.9*x
             return err
         elif x==0:
-            raise ValueError, "On calculate error: Can't divide by zero"
+            err = 0.9*x
+            return err
         else:
-            raise ValueError, "Can't  calculate the error"
+            return 0
         
     def errFuncfromLogXY(self,x,dx=None):
         """
@@ -477,6 +486,11 @@ class PlotPanel(wx.Panel):
             if err >= x:
                 err = 0.9*x
             return err
+        elif x == 0 :
+            err = 0.9*x
+            return err 
+        elif dx == None:
+            return 0
         else:
             raise ValueError, "Can't  calculate the error"
                    
