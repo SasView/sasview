@@ -344,6 +344,9 @@ class Plottable:
     def reset_view(self):
         """ Reload view with new value to plot"""
         self.view = self.View(self.x, self.y, self.dx, self.dy)
+        print "the value of view x",self.view.x
+        print "the value of view y",self.view.y
+       
     
     def render(self,plot):
         """The base class makes sure the correct units are being used for

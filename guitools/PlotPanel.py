@@ -112,7 +112,7 @@ class PlotPanel(wx.Panel):
             Calculate x^(2)
             @param x: float value
         """
-        return math.pow(x,2)
+        return x*x
     
     def fromX2(self,x):
          """
@@ -398,11 +398,10 @@ class PlotPanel(wx.Panel):
                 item.transform_y(  self.toX2, self.errFuncToX2 )    
                 self.set_yscale("linear")
                 self.graph.yaxis("\\rm{Intensity^{2}} ","cm^{-2}")
-              
-        item.reset_view()
+   
         self.prevXtrans = self.xscales 
         self.prevYtrans = self.yscales  
-       
+        
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
     def errFunctoX(self,x,dx=None):
@@ -422,7 +421,7 @@ class PlotPanel(wx.Panel):
             @param x: float value
             @param dx: float value
         """
-        if not dx == None:
+        if  dx != None:
             err = 2*x*dx
             if err >= x:
                 err = 0.9*x
@@ -435,16 +434,17 @@ class PlotPanel(wx.Panel):
             @param x: float value
             @param dx: float value
         """
-        if (x > 0) and (dx != None):
-            err = dx/(2*math.sqrt(x))
+        if (x > 0):
+            if(dx != None):
+                err = dx/(2*math.sqrt(x))
+            else:
+                err = 0
             if err >= x:
-                err = 0.9*x
-            return err
-        elif x==0.0:
-            err = 0.9*x
-            return err
+                err = 0.9*x    
         else:
-            return 0.0
+            err = 0.9*x
+           
+            return err
         
     def errFuncToLogX(self,x,dx=None):
         """
@@ -452,12 +452,10 @@ class PlotPanel(wx.Panel):
             @param x: float value
             @param dx: float value
         """
-        #if (x != 0) and (dx != None):
-        #    err= dx/x
-        #elif :
         if x!=0:
             if dx==None:
-                err = 1/x
+                #err = 1/x
+                err = 0
             else:
                 err = dx/x
             if err >= x:
@@ -469,22 +467,12 @@ class PlotPanel(wx.Panel):
         
     def errFuncfromLogXY(self,x,dx=None):
         """
-            calculate error of sqrt(x)
+            calculate error of Log(xy)
             @param x: float value
             @param dx: float value
         """
-        if (x > 0) and (dx != None):
-            err= math.exp(x)*dx
-            if err >= x:
-                err = 0.9*x
-            return err
-        elif x == 0 :
-            err = 0.9*x
-            return err 
-        elif dx == None:
-            return 0
-        else:
-            raise ValueError, "Can't  calculate the error"
+        return 
+       
                    
     def onFitDisplay(self, plottable):
         """
