@@ -25,11 +25,11 @@ class LinearFit(wx.Dialog):
         sizer = wx.GridBagSizer(5,0)
         vbox.Add(panel, 1, wx.EXPAND | wx.ALL)
  
-        self.tcA = wx.TextCtrl(panel, -1,style=wx.SIMPLE_BORDER)
-        self.tcErrA = wx.TextCtrl(panel, -1,style=wx.SIMPLE_BORDER)
-        self.tcB = wx.TextCtrl(panel, -1,style=wx.SIMPLE_BORDER)
-        self.tcErrB = wx.TextCtrl(panel, -1,style=wx.SIMPLE_BORDER)
-        self.tcChi = wx.TextCtrl(panel, -1,style=wx.SIMPLE_BORDER)
+        self.tcA = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.tcErrA = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.tcB = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.tcErrB = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.tcChi = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.tcXmin = wx.TextCtrl(panel,-1,style=wx.SIMPLE_BORDER)
         self.tcXmax = wx.TextCtrl(panel,-1,style=wx.SIMPLE_BORDER)
         self.btFit =wx.Button(panel,-1,'Fit' )
@@ -92,12 +92,14 @@ class LinearFit(wx.Dialog):
        
         print "we are on fit"
         temp =[]
-        #tempdx =[]
+        tempdx =[]
         tempdy =[]
         xmin = self._checkVal(self.tcXmin.GetValue())
         xmax = self._checkVal(self.tcXmax.GetValue())
-        x= self.plottable.x
-        if x:
+        #x= self.plottable.view.x
+        x=self.plottable.returnXvalueOfView()
+        print "x value :" ,x
+        if x != []:
             if xmin !=None  and xmax != None:
                 for j in range(len(x)):
                     if x[j]>xmin and x[j]<xmax:
@@ -112,8 +114,8 @@ class LinearFit(wx.Dialog):
                     tempdx.append(math.sqrt(x_i))
                 for y_i in temp:
                     tempdy.append(math.sqrt(y_i))
-                    self.tcXmin.SetValue(str(min(self.plottable.x)))
-                    self.tcXmax.SetValue(str(max(self.plottable.x)))
+                    self.tcXmin.SetValue(str(min(x)))
+                    self.tcXmax.SetValue(str(max(x)))
                     xmin = self._checkVal(self.tcXmin.GetValue())
                     xmax = self._checkVal(self.tcXmax.GetValue())
                 
@@ -131,25 +133,36 @@ class LinearFit(wx.Dialog):
             cstA = fittings.Parameter(self.model, 'A', default_A)
             cstB  = fittings.Parameter(self.model, 'B', default_B)        
             chisqr, out, cov = fittings.sansfit(self.model, 
-                [cstA, cstB], self.plottable.x, 
-                self.plottable.y, self.plottable.dy,xmin,xmax)
+                [cstA, cstB], self.plottable.view.x, 
+                self.plottable.view.y, self.plottable.view.dy,xmin,xmax)
             # Create new data plottable with result
             
             self.file_data1.y = []
+            #for x_i in self.file_data1.x:
             for x_i in self.file_data1.x:
                 self.file_data1.y.append(self.model.run(x_i))
                 
             self.push_data(self.file_data1)
-            
-            self._onsetValues(str(out[0]),str(out[1]),\
-            str(math.sqrt(cov[0][0])),str(math.sqrt(cov[1][1])),str(chisqr))
+            if cov ==None:
+                errA =str(0.0)
+                errB =str(0.0)
+            else:
+                errA= str(math.sqrt(cov[0][0]))
+                errB= str(math.sqrt(cov[1][1]))
+            if out==None:
+                cstA=str(0.0)
+                cstB=str(0.0)
+            else:
+                cstA=str(out[0])
+                cstB=str(out[1])
+            self._onsetValues(cstA, cstB, errA,errB,str(chisqr))
        
     def _onsetValues(self,cstA,cstB,errA,errB,Chi):
         
          self.tcA.SetValue(cstA)
          self.tcB.SetValue(cstB)
-         self.tcErrA.SetValue(cstB)
-         self.tcErrB.SetValue(cstA)
+         self.tcErrA.SetValue(errA)
+         self.tcErrB.SetValue(errB)
          self.tcChi.SetValue(Chi)
          
     def _returnPlottable(self):

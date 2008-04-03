@@ -377,7 +377,11 @@ class Plottable:
             
         """
         self.view.transform_y(func, errfunc, self.y, self.dy)
-    
+        
+    def returnXvalueOfView(self):
+        return self.view.returnXview()
+        
+        
     class View:
         """
             Representation of the data that might include a transformation
@@ -442,6 +446,9 @@ class Plottable:
                      self.dy[i] = errfunc(y[i], dy[i])
                  else:
                      self.dy[i] = errfunc(y[i])
+                     
+        def returnXview(self):
+            return self.x
      
 class Data1D(Plottable):
     """Data plottable: scatter plot of x,y with errors in x and y.

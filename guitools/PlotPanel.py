@@ -81,7 +81,7 @@ class PlotPanel(wx.Panel):
         print len(list)
         if len(list.keys())>0:
             first_item = list.keys()[0]
-            print first_item, list[first_item].__class__.__name__
+            #print first_item, list[first_item].__class__.__name__
             dlg = LinearFit( None, first_item, self.onFitDisplay, -1, 'Fitting')
             dlg.ShowModal() 
 
@@ -411,10 +411,10 @@ class PlotPanel(wx.Panel):
             @param dx: float value
         """
         if dx >=x:
-            return 0.9*x
+            return math.fabs(0.9*x)
         if dx==None:
              return 0
-        return dx
+        return math.fabs(dx)
     def errFuncToX2(self,x,dx=None):
         """
             calculate error of x**2
@@ -425,7 +425,7 @@ class PlotPanel(wx.Panel):
             err = 2*x*dx
             if err >= x:
                 err = 0.9*x
-            return err
+            return math.fabs(err)
         else:
             return 0.0
     def errFuncfromX2(self,x,dx=None):
@@ -444,7 +444,7 @@ class PlotPanel(wx.Panel):
         else:
             err = 0.9*x
            
-            return err
+            return math.fabs(err)
         
     def errFuncToLogX(self,x,dx=None):
         """
@@ -463,7 +463,7 @@ class PlotPanel(wx.Panel):
         else:
             err = 0.9*x
         
-        return err
+        return math.fabs(err)
         
     def errFuncfromLogXY(self,x,dx=None):
         """
@@ -484,7 +484,7 @@ class PlotPanel(wx.Panel):
         self.graph.add(plottable)
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
-      
+        
     
 class NoRepaintCanvas(FigureCanvasWxAgg):
     """We subclass FigureCanvasWxAgg, overriding the _onPaint method, so that
