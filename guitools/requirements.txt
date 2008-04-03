@@ -1,0 +1,12 @@
+- BUGS
+  1- After fitting, the fit panel is not updated with the output values of the fit.
+  2- Do this:
+      a) load a file
+      b) fit a straight line
+      c) change the scale using the "Properties" menu. 
+      You will see an exception that should be fixed.
+
+
+
+- IMPROVEMENTS
+  1- After loading a new file or changing the scale using the "Properties" menu, remove any previously displayed fit from the graph.
