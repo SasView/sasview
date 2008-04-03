@@ -9,7 +9,7 @@ import math,pylab,fittings
 class LinearFit(wx.Dialog):
     #def __init__(self, parent, id, title):
     def __init__(self, parent, plottable, push_data, id, title):
-        wx.Dialog.__init__(self, parent, id, title, size=(500, 300))
+        wx.Dialog.__init__(self, parent, id, title, size=(550, 300))
         """
             for the fit window
         """
@@ -37,9 +37,11 @@ class LinearFit(wx.Dialog):
         
         ix = 1
         iy = 1
+        
         sizer.Add(wx.StaticText(panel, -1, 'y = Ax +B'),(iy, ix))
         ix = 1
         iy += 2
+       
         sizer.Add(wx.StaticText(panel, -1, 'Param A'),(iy, ix))
         ix += 1
         sizer.Add(self.tcA, (iy, ix))
