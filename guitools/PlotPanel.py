@@ -480,6 +480,7 @@ class PlotPanel(wx.Panel):
             to fit some data
             @param plottable: the plottable to plot
         """
+        plottable.reset_view()
         self.graph.add(plottable)
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()

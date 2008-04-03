@@ -491,11 +491,12 @@ class Theory1D(Plottable):
         """
         self.x = x
         self.y = y
- 
         self.dy = dy
-
+        #Alina:added
+        self.view = self.View(self.x, self.y, None, self.dy)
     def render(self,plot,**kw):
-        plot.curve(self.x,self.y,dy=self.dy,**kw)
+        #plot.curve(self.x,self.y,dy=self.dy,**kw)
+        plot.curve(self.view.x,self.view.y,dy=self.view.dy,**kw)
 
     def changed(self):
         return False

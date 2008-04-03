@@ -92,7 +92,7 @@ class LinearFit(wx.Dialog):
        
         print "we are on fit"
         temp =[]
-        tempdx =[]
+        #tempdx =[]
         tempdy =[]
         xmin = self._checkVal(self.tcXmin.GetValue())
         xmax = self._checkVal(self.tcXmax.GetValue())
@@ -102,7 +102,7 @@ class LinearFit(wx.Dialog):
                 for j in range(len(x)):
                     if x[j]>xmin and x[j]<xmax:
                         temp.append(self.model.run(x[j]))
-                        tempdx.append(math.sqrt(x[j]))
+                        #tempdx.append(math.sqrt(x[j]))
                         for y_i in temp:
                             tempdy.append(math.sqrt(y_i)) 
             else:
@@ -119,8 +119,10 @@ class LinearFit(wx.Dialog):
                 
             self.file_data1.x =x
             self.file_data1.y =temp
-            self.file_data1.dx=tempdx
-            self.file_data1.dy=tempdy
+            #self.file_data1.dx=tempdx
+            self.file_data1.dx=None
+            #self.file_data1.dy=tempdy
+            self.file_data1.dy=None
             
         
             # Display the fittings values
