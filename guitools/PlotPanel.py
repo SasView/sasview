@@ -410,7 +410,7 @@ class PlotPanel(wx.Panel):
             @param x: float value
             @param dx: float value
         """
-        if dx >=x:
+        if math.fabs(dx) >= math.fabs(x):
             return math.fabs(0.9*x)
         if dx==None:
              return 0
@@ -423,7 +423,7 @@ class PlotPanel(wx.Panel):
         """
         if  dx != None:
             err = 2*x*dx
-            if err >= x:
+            if math.fabs(err) >= math.fabs(x):
                 err = 0.9*x
             return math.fabs(err)
         else:
@@ -439,7 +439,7 @@ class PlotPanel(wx.Panel):
                 err = dx/(2*math.sqrt(x))
             else:
                 err = 0
-            if err >= x:
+            if math.fabs(err) >= math.fabs(x):
                 err = 0.9*x    
         else:
             err = 0.9*x
@@ -458,7 +458,7 @@ class PlotPanel(wx.Panel):
                 err = 0
             else:
                 err = dx/x
-            if err >= x:
+            if math.fabs(err) >= math.fabs(x):
                 err = 0.9*x
         else:
             err = 0.9*x

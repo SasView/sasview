@@ -30,8 +30,8 @@ class LinearFit(wx.Dialog):
         self.tcB = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.tcErrB = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.tcChi = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
-        self.tcXmin = wx.TextCtrl(panel,-1,style=wx.SIMPLE_BORDER)
-        self.tcXmax = wx.TextCtrl(panel,-1,style=wx.SIMPLE_BORDER)
+        self.tcXmin = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.tcXmax = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.btFit =wx.Button(panel,-1,'Fit' )
         btClose =wx.Button(panel, wx.ID_CANCEL,'Close' )
         
