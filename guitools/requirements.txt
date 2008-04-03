@@ -6,7 +6,17 @@
       c) change the scale using the "Properties" menu. 
       You will see an exception that should be fixed.
 
-
+  3- Load the file line_in_x2_y.txt in miniView. Select x^2 and y for the scales. Fit it. 
+      a) The fit range is wrong, it's not update for the X^2 view.
+      b) the fit result is wrong
+      c) Even if you update the range, the fit and the plots are wrong.
+      
+- NOTES that might help for bugs
+  1- Make sure you are fitting the View data, not the underlying data
+  2- Since you are using the log scale from matplotlib, the fit for when one of 
+  		the axis is in log will NOT be a straight line
+  3- Make sure that you are filling the View of the fit result correctly.
+  
 
 - IMPROVEMENTS
   1- After loading a new file or changing the scale using the "Properties" menu, remove any previously displayed fit from the graph.
