@@ -1,15 +1,32 @@
 - BUGS
-  1- After fitting, the fit panel is not updated with the output values of the fit.
+
+  1- [DONE] After fitting, the fit panel is not updated with the output values of the fit. 
+  
   2- Do this:
-      a) load a file
-      b) fit a straight line
-      c) change the scale using the "Properties" menu. 
+      a) load the file line_in_x2_y.txt
+      b) fit a straight line, close the Fit Dialog
+      c) change the scale using the "Properties" menu to x vs y (linear vs linear)
       You will see an exception that should be fixed.
 
-  3- Load the file line_in_x2_y.txt in miniView. Select x^2 and y for the scales. Fit it. 
+  3- [DONE] Load the file line_in_x2_y.txt in miniView. Select x^2 and y for the scales. Fit it. 
       a) The fit range is wrong, it's not update for the X^2 view.
       b) the fit result is wrong
       c) Even if you update the range, the fit and the plots are wrong.
+      
+  4- At the python command prompt, try:
+       from sans.guitools.PlotPanel import PlotPanel
+       
+       You will get an exception: ImportError: No module named fittings
+       
+     Guitools should not depend on your miniView code.
+     
+  5- Each time you open and close the Fit Dialog, a new label "Theory1D" is created in the
+     legend. There should always be only one, for the _last_ fit, and the name should be "Fit".
+     
+  6- Do this:
+  		a) Load the file 'line_in_logy_x.txt'
+  		b) Fit a straight line
+  		c) The fit shown does not start from the first point and it's not a straight line. 
       
 - NOTES that might help for bugs
   1- Make sure you are fitting the View data, not the underlying data
@@ -18,7 +35,7 @@
   3- Make sure that you are filling the View of the fit result correctly.
   
 
-- IMPROVEMENTS
+- NEEDED IMPROVEMENTS
   1- After loading a new file or changing the scale using the "Properties" menu, remove any previously displayed fit from the graph.
   
   2- There are additional y scales we need: y, y^2, log(y), 1/y, 1/sqrt(y), log(y * x), log(y * x^2)
@@ -32,3 +49,8 @@
             self.graph.xaxis("(%s)^2" % name,  "(%s)^2" % units)
     
      That way it still works even if the user is not plotting Intensity versus Q.
+     
+  4- In the fit dialog, put the "fit" and "Close" button in the bottom right corner, like in a standard file dialog.
+  5- The layout of the Fit Dialog should be improved.
+  6- The code should be well documented and clean-up (no print statements).
+  
