@@ -25,10 +25,10 @@ class Properties(wx.Dialog):
         sizer.Add(wx.StaticText(panel, -1, 'View'),(iy, ix))
         iy += 1
         ix = 1
-        self.xvalue = wx.ComboBox(panel, -1, size=(60, -1))
+        self.xvalue = wx.ComboBox(panel, -1)
         sizer.Add(self.xvalue,(iy,ix))
         ix +=2
-        self.yvalue = wx.ComboBox(panel, -1, size=(60, -1))
+        self.yvalue = wx.ComboBox(panel, -1)
         sizer.Add( self.yvalue,(iy, ix))
         ix +=2
         view =wx.ComboBox(panel, -1, size=(60, -1))
@@ -52,6 +52,10 @@ class Properties(wx.Dialog):
         self.yvalue.Insert("y",0)
         self.yvalue.Insert("Log(y)",1)
         self.yvalue.Insert("y^(2)",2)
+        self.yvalue.Insert("1/y",3)
+        self.yvalue.Insert("1/sqrt(y)",4)
+        self.yvalue.Insert("Log(y*x)",5)
+        self.yvalue.Insert("Log(y*x^(2))",6)
         
         panel.SetSizer(sizer)
         self.SetSizer(vbox)

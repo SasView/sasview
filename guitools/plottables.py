@@ -173,6 +173,10 @@ class Graph:
         """Remove an existing plottable from the graph"""
         if plottable in self.plottables:
             del self.plottables[plottable]
+        if self.color > 0:
+            self.color =  self.color -1
+        else:
+            self.color =0 
 
     def reset(self):
         """Reset the graph."""
@@ -311,6 +315,10 @@ class Plottable:
     def yaxis(self, name, units):
         self._yaxis = name
         self._yunit = units
+    def get_xaxis(self):
+        return self._xaxis, self._xunit
+    def get_yaxis(self):
+        return self._yaxis, self._yunit
 
     @classmethod
     def labels(cls,collection):
@@ -335,6 +343,11 @@ class Plottable:
 
     def __init__(self):
         self.view = View()
+        self._xaxis = ""
+        self._xunit = ""
+        self._yaxis = ""
+        self._yunit = "" 
+        
     def set_View(self,x,y):
         """ Load View  """
         self.x= x
@@ -344,8 +357,7 @@ class Plottable:
     def reset_view(self):
         """ Reload view with new value to plot"""
         self.view = self.View(self.x, self.y, self.dx, self.dy)
-        print "the value of view x",self.view.x
-        print "the value of view y",self.view.y
+       
        
     
     def render(self,plot):
@@ -378,7 +390,7 @@ class Plottable:
         """
         self.view.transform_y(func, errfunc, self.y, self.dy)
         
-    def returnXvalueOfView(self):
+    def returnValuesOfView(self):
         return self.view.returnXview()
         
         
@@ -448,7 +460,8 @@ class Plottable:
                      self.dy[i] = errfunc(y[i])
                      
         def returnXview(self):
-            return self.x
+            return self.x,self.y,self.dx,self.dy
+           
      
 class Data1D(Plottable):
     """Data plottable: scatter plot of x,y with errors in x and y.
@@ -467,7 +480,8 @@ class Data1D(Plottable):
         self.y = y
         self.dx = dx
         self.dy = dy
-        
+        self.xaxis( 'q', 'A')
+        self.yaxis( 'intensity', 'cm')
         self.view = self.View(self.x, self.y, self.dx, self.dy)
         
     def render(self,plot,**kw):
@@ -496,10 +510,11 @@ class Theory1D(Plottable):
         
         The title is the name that will show up on the legend.
         """
+        self.name= "theo"
         self.x = x
         self.y = y
         self.dy = dy
-        #Alina:added
+       
         self.view = self.View(self.x, self.y, None, self.dy)
     def render(self,plot,**kw):
         #plot.curve(self.x,self.y,dy=self.dy,**kw)
@@ -507,7 +522,15 @@ class Theory1D(Plottable):
 
     def changed(self):
         return False
-
+    @classmethod
+    def labels(cls, collection):
+        """Build a label mostly unique within a collection"""
+        map = {}
+        for item in collection:
+            #map[item] = label(item, collection)
+            map[item] = r"$\rm{%s}$" % item.name
+        return map
+   
 
 
 class Fit1D(Plottable):

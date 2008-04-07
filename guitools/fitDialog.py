@@ -88,34 +88,31 @@ class LinearFit(wx.Dialog):
         self.model  = LineModel()
         # new data for the fit 
         self.file_data1 = Theory1D(x=[], y=[], dy=None)
-        self.file_data1.name = "y= exp(A + bx**2)"
+        self.file_data1.name = "Fit"
         
     def _onFit(self ,event):
        
         print "we are on fit"
         temp =[]
-        tempdx =[]
-        tempdy =[]
         xmin = self._checkVal(self.tcXmin.GetValue())
         xmax = self._checkVal(self.tcXmax.GetValue())
-        #x= self.plottable.view.x
-        x=self.plottable.returnXvalueOfView()
-        print "x value :" ,x
+        
+        #store the values of View in x,y, dx,dy
+        x,y,dx,dy=self.plottable.returnValuesOfView()
+       
         if x != []:
             if xmin !=None  and xmax != None:
                 for j in range(len(x)):
                     if x[j]>xmin and x[j]<xmax:
                         temp.append(self.model.run(x[j]))
-                        #tempdx.append(math.sqrt(x[j]))
+                    
                         for y_i in temp:
                             tempdy.append(math.sqrt(y_i)) 
             else:
                 # x has a default value in case the user doesn't load data
                 for x_i in x:
                     temp.append(self.model.run(x_i))
-                    tempdx.append(math.sqrt(x_i))
-                for y_i in temp:
-                    tempdy.append(math.sqrt(y_i))
+        
                     self.tcXmin.SetValue(str(min(x)))
                     self.tcXmax.SetValue(str(max(x)))
                     xmin = self._checkVal(self.tcXmin.GetValue())
@@ -123,11 +120,10 @@ class LinearFit(wx.Dialog):
                 
             self.file_data1.x =x
             self.file_data1.y =temp
-            #self.file_data1.dx=tempdx
+          
             self.file_data1.dx=None
-            #self.file_data1.dy=tempdy
             self.file_data1.dy=None
-            
+            self.file_data1.reset_view()
         
             # Display the fittings values
             default_A = self.model.getParam('A') 
@@ -135,16 +131,10 @@ class LinearFit(wx.Dialog):
             cstA = fittings.Parameter(self.model, 'A', default_A)
             cstB  = fittings.Parameter(self.model, 'B', default_B)        
             chisqr, out, cov = fittings.sansfit(self.model, 
-                [cstA, cstB], self.plottable.view.x, 
-                self.plottable.view.y, self.plottable.view.dy,xmin,xmax)
-            # Create new data plottable with result
+               [cstA, cstB],x, y,dy,min(x),max(x))
             
-            self.file_data1.y = []
-            #for x_i in self.file_data1.x:
-            for x_i in self.file_data1.x:
-                self.file_data1.y.append(self.model.run(x_i))
-                
-            self.push_data(self.file_data1)
+           
+            #Check that cov and out are iterable before displaying them
             if cov ==None:
                 errA =str(0.0)
                 errB =str(0.0)
@@ -157,6 +147,18 @@ class LinearFit(wx.Dialog):
             else:
                 cstA=str(out[0])
                 cstB=str(out[1])
+           
+            self.model.setParam('A', float(cstA))
+            self.model.setParam('B', float(cstB))
+             # Create new data plottable with result
+            self.file_data1.y = []
+           
+            for x_i in x:
+                self.file_data1.y.append(self.model.run(x_i))
+            #Send the data to display to the PlotPanel
+            self.file_data1.reset_view()
+            self.push_data(self.file_data1)
+            # Display the fitting value on the Fit Dialog
             self._onsetValues(cstA, cstB, errA,errB,str(chisqr))
        
     def _onsetValues(self,cstA,cstB,errA,errB,Chi):
