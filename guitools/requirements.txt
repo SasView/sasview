@@ -24,12 +24,17 @@
      legend. There should always be only one, for the _last_ fit, and the name should be "Fit".
      [alina] is it fine if I delete the fit line from the graph
       and remove  it when I close the Fit Dialog window?
+     [Mathieu] That might work. I kind of like it. Let's do it like that and see what the users
+      need. 
      
   6-[QUESTION ] Do this:
   		a) Load the file 'line_in_logy_x.txt'
   		b) Fit a straight line
   		c) The fit shown does not start from the first point and it's not a straight line. 
   	[ALINA] then for transformation to log Do I have to transform x to log and set x linear?
+  	[Mathieu] No. That would confuse the user, who expects a log scale. The answer here is to fit 
+  	 y = A * log(x) + B, which is a straight line in the y vs log(x) representation.
+  	 
       
 - NOTES that might help for bugs
   1- Make sure you are fitting the View data, not the underlying data
@@ -37,6 +42,7 @@
   		the axis is in log will NOT be a straight line
   3- Make sure that you are filling the View of the fit result correctly.
   [ALINA] not using the log of matplotlib anymore but the axis are never in the log scale by the value are in log10 x
+  [Mathieu] See my comment to point 6. The right answer is to go back to using the log scale of matplotlib.
 
 - NEEDED IMPROVEMENTS
   1-[DONE] After loading a new file or changing the scale using the "Properties" menu, remove any previously displayed fit from the graph.
