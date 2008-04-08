@@ -391,6 +391,7 @@ class Plottable:
         self.view.transform_y(func, errfunc, self.y, self.dy)
         
     def returnValuesOfView(self):
+        
         return self.view.returnXview()
         
         

@@ -35,6 +35,8 @@
   	[Mathieu] No. That would confuse the user, who expects a log scale. The answer here is to fit 
   	 y = A * log(x) + B, which is a straight line in the y vs log(x) representation.
   	 
+--> [ALINA] woring better...I am concerned how to fit a straight line when x is changing too?
+  	 
       
 - NOTES that might help for bugs
   1- Make sure you are fitting the View data, not the underlying data
@@ -48,7 +50,8 @@
   1-[DONE] After loading a new file or changing the scale using the "Properties" menu, remove any previously displayed fit from the graph.
   
   2- There are additional y scales we need: y, y^2, log(y), 1/y, 1/sqrt(y), log(y * x), log(y * x^2)
-  3- You should change the label according to what the user chose, and not hard-code them.
+  	
+  3-[DONE] You should change the label according to what the user chose, and not hard-code them.
      For example, in PlotPanel._onEVT_FUNC_PROPERTY, replace
           
             self.graph.xaxis('\\rm{q^{2}} ', 'A^{-2}')
@@ -59,7 +62,9 @@
     
      That way it still works even if the user is not plotting Intensity versus Q.
      
-  4- In the fit dialog, put the "fit" and "Close" button in the bottom right corner, like in a standard file dialog.
+  4- [DONE] In the fit dialog, put the "fit" and "Close" button in the bottom right corner, like in a standard file dialog.
+  
   5- The layout of the Fit Dialog should be improved.
+  
   6- The code should be well documented and clean-up (no print statements).
   
