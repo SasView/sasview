@@ -50,6 +50,9 @@
   1-[DONE] After loading a new file or changing the scale using the "Properties" menu, remove any previously displayed fit from the graph.
   
   2- There are additional y scales we need: y, y^2, log(y), 1/y, 1/sqrt(y), log(y * x), log(y * x^2)
+  [QUESTION] when plottong y=log(y*x) is the user allowed to do transformation on x at the same time 
+  for example x---> log X with  y=log(x*y)
+  [PROBLEM]WITH  log(y * x), log(y * x^2)
   	
   3-[DONE] You should change the label according to what the user chose, and not hard-code them.
      For example, in PlotPanel._onEVT_FUNC_PROPERTY, replace

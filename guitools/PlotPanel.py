@@ -147,11 +147,21 @@ class PlotPanel(wx.Panel):
             return 1/math.sqrt(x)
         else:
             raise ValueError,"cannot be computed"
-    def toLogYX2(self):
+    def toLogYX2(self,x,y):
         if y*(x**2) >0:
             return math.log(y*(x**2))
         else:
              raise ValueError,"cannot be computed"
+         
+         
+    def toYX2(self,x,y):
+        return (x**2)*y
+    
+    
+    def toXY(self,x,y):
+        return x*y
+    
+    
     def toLogXY(self,x,y):
         """
             This function is used to load value on Plottable.View
@@ -431,6 +441,28 @@ class PlotPanel(wx.Panel):
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s^2" % name,  "%s^{-2}" % units)
+            if ( self.yscales =="1/y"):
+                item.transform_y( self.toOneOverX ,self.errOneOverX )
+                self.set_yscale("linear")
+                name, units = item.get_yaxis()
+                self.graph.yaxis("%s" % name,  "%s" % units)
+            if ( self.yscales =="1/sqrt(y)" ):
+                item.transform_y( self.toOneOverSqrtX ,self.errOneOverSqrtX )
+                self.set_yscale("linear")
+                name, units = item.get_yaxis()
+                self.graph.yaxis("%s" %name,  "%s" % units)
+            if ( self.yscales =="Log(y*x)"):
+                item.transform_xy( self.toXY ,self.errToXY )
+                self.set_yscale("log")
+                yname, yunits = item.get_yaxis()
+                xname, xunits = item.get_xaxis()
+                self.graph.yaxis("%s"+"*"+"%s" % (yname,xname),  "%s^{-1}"+"*"+"s^{-1}" % (yunits,xunits))
+            if ( self.yscales =="Log(y*x^(2)"):
+                item.transform_xy( self.toYX2 ,self.errToYX2 )
+                self.set_yscale("log")
+                yname, yunits = item.get_yaxis()
+                xname, xunits = item.get_xaxis()
+                self.graph.yaxis("%s"+"*"+"%s^{2}" % (yname,xname),  "%s^{-1}"+"*"+"s^{-2}" % (yunits,xunits))
    
         self.prevXtrans = self.xscales 
         self.prevYtrans = self.yscales  
@@ -499,23 +531,89 @@ class PlotPanel(wx.Panel):
             err = 0.9*x
         
         return math.fabs(err)
+    def errToXY(self, x, y, dx=None, dy=None):
+        if dx==None:
+            dx=0
+        if dy==None:
+            dy=0
+        err =math.sqrt((y*dx)**2 +(x*dy)**2)
+        if err >= math.fabs(x):
+            err =0.9*x
+        return err 
+    def errToYX2(self, x, y, dx=None, dy=None):
+        if dx==None:
+            dx=0
+        if dy==None:
+            dy=0
+        err =math.sqrt((2*x*y*dx)**2 +((x**2)*dy)**2)
+        if err >= math.fabs(x):
+            err =0.9*x
+        return err 
         
     def errToLogXY(self,x,y,dx=None, dy=None):
         """
             calculate error of Log(xy)
         """
-        if dx==None:
-            err = x*(dy**2)/y
-        elif dy==None:
-            err = y*(dx**2)/x
-        elif (x!=0) and (y!=0):
-            err = y*(dx**2)/x + x*(dy**2)/y
-        if err >= 0:
-            if  math.sqrt(err)> x:
+        if (x!=0) and (y!=0):
+            if dx == None:
+                dx = 0
+            if dy == None:
+                dy = 0
+            err = (dx/x)**2 + (dy/y)**2
+            if  math.sqrt(math.fabs(err)) >= math.fabs(x):
                 err= 0.9*x
-            return math.sqrt(err)
         else:
             raise ValueError, "cannot compute this error"
+       
+        return math.sqrt(math.fabs(err))
+        
+    def errToLogYX2(self,x,y,dx=None, dy=None):
+        """
+            calculate error of Log(yx**2)
+        """
+        if (x > 0) and (y > 0):
+            if (dx == None):
+                dx = 0
+            if (dy == None):
+                dy = 0
+            err = 4*(dx**2)/(x**2) + (dy**2)/(y**2)
+            if math.fabs(err) >= math.fabs(x):
+                err =0.9*x
+        else:
+             raise ValueError, "cannot compute this error"
+         
+        return math.sqrt(math.fabs(err)) 
+            
+    def errOneOverX(self,x,dx):
+        """
+             calculate error on 1/x
+        """
+        if (x != 0) and (dx!=None):
+            if dx ==None:
+                dx= 0
+            err = -(dx)**2/x**2
+        else:
+            raise ValueError,"Cannot compute this error"
+        
+        if math.fabs(err)>= math.fabs(x):
+            err= 0.9*x
+        return math.fabs(err)
+    
+    def errOneOverSqrtX(self):
+        """
+            Calculate error on 1/sqrt(x)
+        """
+        if (x >0) and (dx!=None):
+            if dx==None:
+                dx =0
+            err= -1/2*math.pow(x, -3/2)* dx
+            if math.fabs(err)>= math.fabs(x):
+                err=0.9*x
+        else:
+            raise ValueError, "Cannot compute this error"
+        
+        return math.fabs(err)
+    
                       
     def onFitDisplay(self, plottable):
         """

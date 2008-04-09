@@ -390,6 +390,13 @@ class Plottable:
         """
         self.view.transform_y(func, errfunc, self.y, self.dy)
         
+    def transform_xy(self,func,errfunc):
+        """
+            @param func: reference to y transformation function
+            
+        """
+        self.view.transform_xy(func, errfunc, self.x, self.y,self.dx,self.dy)
+        
     def returnValuesOfView(self):
         
         return self.view.returnXview()
@@ -459,6 +466,43 @@ class Plottable:
                      self.dy[i] = errfunc(y[i], dy[i])
                  else:
                      self.dy[i] = errfunc(y[i])
+        def transform_xy(self, func, errfunc, x, y, dx, dy):
+            """
+                Transforms the x, y, dx,and dy vectors and stores the output.
+                
+                @param func: function to apply to the data
+                @param x: array of x values
+                @param dx: array of error values
+                @param y: array of y values
+                @param dy: array of error values
+                @param errfunc: function to apply to errors
+            """
+            import copy
+            import numpy
+            # Sanity check
+            if dx and not len(x)==len(dx):
+                raise ValueError, "Plottable.View: Given x and dx are not of the same length"
+            if dy and not len(y)==len(dy):
+                raise ValueError, "Plottable.View: Given y and dy are not of the same length"
+            if not len(x)==len(y):
+                raise ValueError, "Plottable.View: Given x and y are not of the same length"
+            
+            self.x = numpy.zeros(len(x))
+            self.dx = numpy.zeros(len(x))
+            self.y = numpy.zeros(len(y))
+            self.dy = numpy.zeros(len(y))
+            
+           
+            for i in range(len(y)):
+                 self.y[i] = func(x[i],y[i])
+                 if (dx!=None) and (dy !=None):
+                     self.dy[i] = errfunc(x[i], y[i], dx[i], dy[i])
+                 elif (dx != None):
+                     self.dy[i] = errfunc(x[i], y[i], dx[i])
+                 elif (dy != None):
+                     self.dy[i] = errfunc(x[i], y[i],dy[i])
+                 else:
+                     self.dy[i] = errfunc(x[i], y[i])
                      
         def returnXview(self):
             return self.x,self.y,self.dx,self.dy
