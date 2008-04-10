@@ -309,15 +309,29 @@ class Transform:
 
 class Plottable:
     def xaxis(self, name, units):
+        """
+            Set the name and unit of x_axis
+            @param name: the name of x-axis
+            @param units : the units of x_axis
+        """
         self._xaxis = name
         self._xunit = units
 
     def yaxis(self, name, units):
+        """
+            Set the name and unit of y_axis
+            @param name: the name of y-axis
+            @param units : the units of y_axis
+        """
         self._yaxis = name
         self._yunit = units
+        
     def get_xaxis(self):
+        """ Return the units and name of x-axis"""
         return self._xaxis, self._xunit
+    
     def get_yaxis(self):
+        """ Return the units and name of y- axis"""
         return self._yaxis, self._yunit
 
     @classmethod
