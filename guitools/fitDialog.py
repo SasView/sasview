@@ -20,7 +20,6 @@ class LinearFit(wx.Dialog):
         #dialog self plottable
         self.plottable = plottable
         
-        
         #Dialog interface
         panel = wx.Panel(self, -1, style=wx.SIMPLE_BORDER)   
         vbox  = wx.BoxSizer(wx.VERTICAL)
@@ -99,29 +98,53 @@ class LinearFit(wx.Dialog):
             A and B parameters of the best linear fit y=Ax +B
             Push a plottable to 
         """
-       
-        temp =[]
+        temp=[]
         tempx=[]
         tempy=[]
+        tempdy = []
+        
+        #Check if the field of Fit Dialog contain values and use the x max and min of the user
         xmin = self._checkVal(self.tcXmin.GetValue())
         xmax = self._checkVal(self.tcXmax.GetValue())
         
         #store the values of View in x,y, dx,dy
         x,y,dx,dy=self.plottable.returnValuesOfView()
+        # Receive transformations of x and y
         self.xtrans,self.ytrans= self.transform()
+        # The x array min and max
+        _min = min(x)
+        _max = max(x)
+       
+                        
+        if (xmin ==None)and (xmax == None):
+            #Display the min and the max of x on fit dialog fields
+            self.tcXmin.SetValue(str(min(x)))
+            self.tcXmax.SetValue(str(max(x)))
+        
+          
         #Display the fittings values
         default_A = self.model.getParam('A') 
         default_B = self.model.getParam('B') 
         cstA = fittings.Parameter(self.model, 'A', default_A)
         cstB  = fittings.Parameter(self.model, 'B', default_B)
+                  
         if  self.ytrans == "Log(y)":
             for y_i in y:
-                tempy.append(log(y_i))       
-            chisqr, out, cov = fittings.sansfit(self.model, 
-                            [cstA, cstB],x, tempy,dy,min(x),max(x))
+                temp.append(math.log(y_i)) 
+                tempdy.append(1.0)
+            if (xmin !=None and xmin>= _min) and (xmax != None and xmax<= _max):   
+                chisqr, out, cov = fittings.sansfit(self.model, 
+                            [cstA, cstB],x, temp,tempdy,xmin,xmax)
+            else:
+                chisqr, out, cov = fittings.sansfit(self.model, 
+                            [cstA, cstB],x, temp,tempdy,_min,_max)
         else :
-            chisqr, out, cov = fittings.sansfit(self.model, 
-                            [cstA, cstB],x, y,dy,min(x),max(x))
+            if (xmin !=None and xmin >= _min) and (xmax != None and xmax <= _max):   
+                chisqr, out, cov = fittings.sansfit(self.model, 
+                            [cstA, cstB],x, y,dy,xmin,xmax)
+            else:
+                chisqr, out, cov = fittings.sansfit(self.model, 
+                            [cstA, cstB],x, y,dy,_min,_max)
         #Check that cov and out are iterable before displaying them
         if cov ==None:
             errA =0.0
@@ -138,41 +161,36 @@ class LinearFit(wx.Dialog):
         self.model.setParam('A', float(cstA))
         self.model.setParam('B', float(cstB))
         
+        #Check if View contains a x array and makes transformation for y as a line to fit
         if x != []:
-            if xmin !=None  and xmax != None:
-                for j in range(len(x)):
-                    if x[j] > xmin and x[j] < xmax:
-                        temp.append(self.model.run(x[j]))
-            else:
-                # x has a default value in case the user doesn't load data
-                for x_i in x:
-                    temp.append(self.model.run(x_i))
-                self.tcXmin.SetValue(str(min(x)))
-                self.tcXmax.SetValue(str(max(x)))
-                xmin = self._checkVal(self.tcXmin.GetValue())
-                xmax = self._checkVal(self.tcXmax.GetValue())
-                
-            self.file_data1.x =x
+            for j in range(len(x)): 
+                    if (xmin !=None)and (xmax != None):
+                        if (x[j] > xmin and x[j] < xmax):
+                            y_model = self.model.run(x[j])
+                    else:
+                        # x has a default value in case the user doesn't load data
+                        y_model = self.model.run(x[j])
+                    if self.ytrans == "Log(y)":
+                        tempy.append(math.exp(y_model))
+                    else:
+                        tempy.append(y_model)
+           
             # Create new data plottable with result
             self.file_data1.y =[]
-            self.xtrans, self.ytrans= self.transform()
-            
-            if self.ytrans == "Log(y)":
-                for x_i in x:
-                    self.file_data1.y.append(exp(self.model.run(x_i)))
-            else:
-                self.file_data1.y =temp     
+            self.file_data1.x =x
+            self.file_data1.y =tempy     
             self.file_data1.dx=None
             self.file_data1.dy=None
             
+            #Load the view with the new values
             self.file_data1.reset_view()
             
             #Send the data to display to the PlotPanel
-            #
             self.push_data(self.file_data1)
+            
             # Display the fitting value on the Fit Dialog
             self._onsetValues(cstA, cstB, errA,errB,chisqr)
-       
+   
     def _onsetValues(self,cstA,cstB,errA,errB,Chi):
          """
               Display  the value on fit Dialog 

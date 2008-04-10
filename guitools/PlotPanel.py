@@ -62,6 +62,7 @@ class PlotPanel(wx.Panel):
         # keep track if the previous transformation of x and y in Property dialog
         self.prevXtrans =" "
         self.prevYtrans =" "
+        
     def returnTrans(self):
         return self.xscales,self.yscales
         
@@ -80,7 +81,7 @@ class PlotPanel(wx.Panel):
         list =[]
         list = self.graph.returnPlottable()
         from fitDialog import LinearFit
-        print len(list)
+        
         if len(list.keys())>0:
             first_item = list.keys()[0]
             #print first_item, list[first_item].__class__.__name__
@@ -100,7 +101,7 @@ class PlotPanel(wx.Panel):
             self._onEVT_FUNC_PROPERTY()
         dial.Destroy()
             
-    def toX(self,x):
+    def toX(self,x,y=None):
         """
             This function is used to load value on Plottable.View
             @param x: Float value
@@ -108,7 +109,7 @@ class PlotPanel(wx.Panel):
         """
         return x
     
-    def toX2(self,x):
+    def toX2(self,x,y=None):
         """
             This function is used to load value on Plottable.View
             Calculate x^(2)
@@ -116,7 +117,7 @@ class PlotPanel(wx.Panel):
         """
         return x*x
     
-    def fromX2(self,x):
+    def fromX2(self,x,y=None):
          """
              This function is used to load value on Plottable.View
             Calculate square root of x
@@ -126,7 +127,7 @@ class PlotPanel(wx.Panel):
              raise ValueError, "square root of a negative value "
          else:
              return math.sqrt(x)
-    def toLogX(self,x):
+    def toLogX(self,x,y=None):
         """
             This function is used to load value on Plottable.View
             calculate log x
@@ -137,16 +138,23 @@ class PlotPanel(wx.Panel):
         else:
             return math.log(x)
         
-    def toOneOverX(self,x):
+    def toOneOverX(self,x,y=None):
         if x !=0:
             return 1/x
         else:
             raise ValueError,"cannot divide by zero"
-    def toOneOverSqrtX(self,x):
-        if x > 0:
-            return 1/math.sqrt(x)
-        else:
-            raise ValueError,"cannot be computed"
+    def toOneOverSqrtX(self,x=None,y=None):
+        if y!=None:
+            if y > 0:
+                return 1/math.sqrt(y)
+            else:
+                raise ValueError,"cannot be computed"
+        if x!= None:
+            if x > 0:
+                return 1/math.sqrt(x)
+            else:
+                raise ValueError,"cannot be computed"
+        
     def toLogYX2(self,x,y):
         if y*(x**2) >0:
             return math.log(y*(x**2))
@@ -246,7 +254,7 @@ class PlotPanel(wx.Panel):
 
     def onSaveImage(self, evt):
         #figure.savefig
-        print "Save image not implemented"
+        #print "Save image not implemented"
         path = None
         dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", "*.png", wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
@@ -284,7 +292,6 @@ class PlotPanel(wx.Panel):
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
-        
     
     ## The following is plottable functionality
 
@@ -451,18 +458,19 @@ class PlotPanel(wx.Panel):
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s" %name,  "%s" % units)
+                
             if ( self.yscales =="Log(y*x)"):
-                item.transform_xy( self.toXY ,self.errToXY )
-                self.set_yscale("log")
+                item.transform_y( self.toLogXY ,self.errToLogXY )
+                self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
-                self.graph.yaxis("%s"+"*"+"%s" % (yname,xname),  "%s^{-1}"+"*"+"s^{-1}" % (yunits,xunits))
+                self.graph.yaxis("%s%s" % (yname,xname),  "%s^{-1}%s^{-1}" % (yunits,xunits))
             if ( self.yscales =="Log(y*x^(2)"):
-                item.transform_xy( self.toYX2 ,self.errToYX2 )
-                self.set_yscale("log")
+                item.transform_y( self.toYX2 ,self.errToYX2 )
+                self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
-                self.graph.yaxis("%s"+"*"+"%s^{2}" % (yname,xname),  "%s^{-1}"+"*"+"s^{-2}" % (yunits,xunits))
+                self.graph.yaxis("%s%s^{2}" % (yname,xname),  "%s^{-1}%s^{-2}" % (yunits,xunits))
    
         self.prevXtrans = self.xscales 
         self.prevYtrans = self.yscales  
@@ -470,19 +478,16 @@ class PlotPanel(wx.Panel):
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
         
-    def errToX(self,x,dx=None):
+    def errToX(self,x,y=None,dx=None,dy=None):
         """
             calculate error of x**2
             @param x: float value
             @param dx: float value
         """
-        if (dx != None) and (math.fabs(dx) >= math.fabs(x)):
-            return math.fabs(0.9*x)
-        if dx==None:
-             return 0
-        return math.fabs(dx)
+        return dx
     
-    def errToX2(self,x,dx=None):
+    
+    def errToX2(self,x,y=None,dx=None,dy=None):
         """
             calculate error of x**2
             @param x: float value
@@ -495,7 +500,7 @@ class PlotPanel(wx.Panel):
             return math.fabs(err)
         else:
             return 0.0
-    def errFromX2(self,x,dx=None):
+    def errFromX2(self,x,y=None,dx=None,dy=None):
         """
             calculate error of sqrt(x)
             @param x: float value
@@ -513,24 +518,16 @@ class PlotPanel(wx.Panel):
            
             return math.fabs(err)
         
-    def errToLogX(self,x,dx=None):
+    def errToLogX(self,x,y=None,dx=None,dy=None):
         """
-            calculate error of Log(xy)
+            calculate error of Log(x)
             @param x: float value
             @param dx: float value
         """
-        if x!=0:
-            if dx==None:
-                #err = 1/x
-                err = 0
-            else:
-                err = dx/x
-            if math.fabs(err) >= math.fabs(x):
-                err = 0.9*x
-        else:
-            err = 0.9*x
-        
-        return math.fabs(err)
+        if math.fabs(dx) >= math.fabs(x):
+            return 0.9*x
+        return dx
+    
     def errToXY(self, x, y, dx=None, dy=None):
         if dx==None:
             dx=0
@@ -540,6 +537,7 @@ class PlotPanel(wx.Panel):
         if err >= math.fabs(x):
             err =0.9*x
         return err 
+    
     def errToYX2(self, x, y, dx=None, dy=None):
         if dx==None:
             dx=0
@@ -584,11 +582,11 @@ class PlotPanel(wx.Panel):
          
         return math.sqrt(math.fabs(err)) 
             
-    def errOneOverX(self,x,dx):
+    def errOneOverX(self,x,y=None,dx=None, dy=None):
         """
              calculate error on 1/x
         """
-        if (x != 0) and (dx!=None):
+        if (x != 0):
             if dx ==None:
                 dx= 0
             err = -(dx)**2/x**2
@@ -599,11 +597,11 @@ class PlotPanel(wx.Panel):
             err= 0.9*x
         return math.fabs(err)
     
-    def errOneOverSqrtX(self):
+    def errOneOverSqrtX(self,x,y=None, dx=None,dy=None):
         """
             Calculate error on 1/sqrt(x)
         """
-        if (x >0) and (dx!=None):
+        if (x >0):
             if dx==None:
                 dx =0
             err= -1/2*math.pow(x, -3/2)* dx
@@ -624,8 +622,10 @@ class PlotPanel(wx.Panel):
         plottable.reset_view()
         self.graph.add(plottable)
         self.graph.render(self)
-        self.graph.delete(plottable)
         self.subplot.figure.canvas.draw_idle()
+        self.graph.delete(plottable)
+        
+     
         
     
 class NoRepaintCanvas(FigureCanvasWxAgg):

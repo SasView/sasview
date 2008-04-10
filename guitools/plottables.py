@@ -381,21 +381,15 @@ class Plottable:
             @param func: reference to x transformation function
             
         """
-        self.view.transform_x(func, errfunc, self.x, self.dx)
+        self.view.transform_x(func, errfunc, x=self.x, y=self.y, dx=self.dx, dy=self.dy)
     
     def transform_y(self, func, errfunc):
         """
             @param func: reference to y transformation function
             
         """
-        self.view.transform_y(func, errfunc, self.y, self.dy)
+        self.view.transform_y(func, errfunc, self.y, self.x, self.dx,  self.dy)
         
-    def transform_xy(self,func,errfunc):
-        """
-            @param func: reference to y transformation function
-            
-        """
-        self.view.transform_xy(func, errfunc, self.x, self.y,self.dx,self.dy)
         
     def returnValuesOfView(self):
         
@@ -417,7 +411,7 @@ class Plottable:
             self.dx = dx
             self.dy = dy
             
-        def transform_x(self, func, errfunc, x, dx):
+        def transform_x(self, func, errfunc, x,y=None,dx=None, dy=None):
             """
                 Transforms the x and dx vectors and stores the output.
                 
@@ -428,82 +422,91 @@ class Plottable:
             """
             import copy
             import numpy
-            # Sanity check
-            if dx and not len(x)==len(dx):
-                raise ValueError, "Plottable.View: Given x and dx are not of the same length"
             
+            # Sanity check
+            has_y = False
+            if dx and not len(x)==len(dx):
+                    raise ValueError, "Plottable.View: Given x and dx are not of the same length" 
+            # Check length of y array
+            if not y==None:
+                if not len(y)==len(x):
+                    raise ValueError, "Plottable.View: Given y and x are not of the same length"
+                else:
+                    has_y = True
+                if dy and not len(y)==len(dy):
+                    raise ValueError, "Plottable.View: Given y and dy are not of the same length"
             
             self.x = numpy.zeros(len(x))
             self.dx = numpy.zeros(len(x))
             
             for i in range(len(x)):
-                self.x[i] = func(x[i])
-                if dx !=None:
-                    self.dx[i] = errfunc(x[i], dx[i])
+                if has_y:
+                     self.x[i] = func(x[i],y[i])
+                     if (dx!=None) and (dy !=None):
+                         self.dx[i] = errfunc(x[i], y[i], dx[i], dy[i])
+                     elif (dx != None):
+                         self.dx[i] = errfunc(x[i], y[i], dx[i],0)
+                     elif (dy != None):
+                         self.dx[i] = errfunc(x[i], y[i],0,dy[i])
+                     else:
+                         self.dx[i] = errfunc(x[i],y[i],0, 0)
                 else:
-                   self.dx[i] = errfunc(x[i])       
-        def transform_y(self, func, errfunc, y, dy):
+                    self.x[i] = func(x[i])
+                    if (dx != None):
+                        self.dx[i] = errfunc(x[i], dx[i])
+                    else:
+                        self.dx[i] = errfunc(x[i],None)
+                    
+                         
+        def transform_y(self, func, errfunc, y, x=None,dx=None,dy=None):
             """
-                Transforms the x and dx vectors and stores the output.
+                Transforms the y and dy vectors and stores the output.
                 
-                @param func: function to apply to the data
-                @param y: array of y values
-                @param dy: array of error values
-                @param errfunc: function to apply to errors
-            """
-            import copy
-            import numpy
-            # Sanity check
-            if dy and not len(y)==len(dy):
-                raise ValueError, "Plottable.View: Given y and dy are not of the same length"
-            
-            self.y = numpy.zeros(len(y))
-            self.dy = numpy.zeros(len(y))
-           
-            for i in range(len(y)):
-                 self.y[i] = func(y[i])
-                 if dy !=None:
-                     self.dy[i] = errfunc(y[i], dy[i])
-                 else:
-                     self.dy[i] = errfunc(y[i])
-        def transform_xy(self, func, errfunc, x, y, dx, dy):
-            """
-                Transforms the x, y, dx,and dy vectors and stores the output.
-                
-                @param func: function to apply to the data
+                @param func: function to apply to the data y
                 @param x: array of x values
                 @param dx: array of error values
                 @param y: array of y values
                 @param dy: array of error values
-                @param errfunc: function to apply to errors
+                @param errfunc: function to apply to errors dy
             """
             import copy
             import numpy
             # Sanity check
-            if dx and not len(x)==len(dx):
-                raise ValueError, "Plottable.View: Given x and dx are not of the same length"
+            has_x = False
             if dy and not len(y)==len(dy):
                 raise ValueError, "Plottable.View: Given y and dy are not of the same length"
-            if not len(x)==len(y):
-                raise ValueError, "Plottable.View: Given x and y are not of the same length"
+            # Check length of x array
+            if not x==None:
+                if not len(y)==len(x):
+                    raise ValueError, "Plottable.View: Given y and x are not of the same length"
+                else:
+                    has_x = True
+                if dx and not len(x)==len(dx):
+                    raise ValueError, "Plottable.View: Given x and dx are not of the same length"
             
-            self.x = numpy.zeros(len(x))
-            self.dx = numpy.zeros(len(x))
             self.y = numpy.zeros(len(y))
             self.dy = numpy.zeros(len(y))
-            
            
             for i in range(len(y)):
-                 self.y[i] = func(x[i],y[i])
-                 if (dx!=None) and (dy !=None):
-                     self.dy[i] = errfunc(x[i], y[i], dx[i], dy[i])
-                 elif (dx != None):
-                     self.dy[i] = errfunc(x[i], y[i], dx[i])
-                 elif (dy != None):
-                     self.dy[i] = errfunc(x[i], y[i],dy[i])
+                
+                 if has_x:
+                     self.y[i] = func(y[i],x[i])
+                     if (dx!=None) and (dy !=None):
+                         self.dy[i] = errfunc(y[i], x[i], dy[i], dx[i])
+                     elif (dx != None):
+                         self.dy[i] = errfunc(y[i], x[i], 0, dx[i])
+                     elif (dy != None):
+                         self.dy[i] = errfunc(y[i], x[i], dy[i], 0)
+                     else:
+                         self.dy[i] = errfunc(y[i], None)
                  else:
-                     self.dy[i] = errfunc(x[i], y[i])
-                     
+                     self.y[i] = func(y[i])
+                     if (dy != None):
+                         self.dy[i] = errfunc( y[i],dy[i])
+                     else:
+                         self.dy[i] = errfunc( y[i],None)
+                
+     
         def returnXview(self):
             return self.x,self.y,self.dx,self.dy
            
