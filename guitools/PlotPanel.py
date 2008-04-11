@@ -622,8 +622,10 @@ class PlotPanel(wx.Panel):
         plottable.reset_view()
         self.graph.add(plottable)
         self.graph.render(self)
+        
         self.subplot.figure.canvas.draw_idle()
         self.graph.delete(plottable)
+      
         
      
         
