@@ -9,7 +9,7 @@ import math,pylab,fittings
 class LinearFit(wx.Dialog):
     #def __init__(self, parent, id, title):
     def __init__(self, parent, plottable, push_data,transform, id, title):
-        wx.Dialog.__init__(self, parent, id, title, size=(550, 300))
+        wx.Dialog.__init__(self, parent, id, title, size=(450, 300))
         """
             for the fit window
         """
@@ -23,7 +23,8 @@ class LinearFit(wx.Dialog):
         #Dialog interface
         panel = wx.Panel(self, -1, style=wx.SIMPLE_BORDER)   
         vbox  = wx.BoxSizer(wx.VERTICAL)
-        sizer = wx.GridBagSizer(5,0)
+        sizer = wx.GridBagSizer(5,5)
+       
         vbox.Add(panel, 1, wx.EXPAND | wx.ALL)
  
         self.tcA = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
@@ -33,54 +34,62 @@ class LinearFit(wx.Dialog):
         self.tcChi = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.tcXmin = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.tcXmax = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
-        self.btFit =wx.Button(panel,-1,'Fit' )
-        btClose =wx.Button(panel, wx.ID_CANCEL,'Close' )
-        
-        ix = 1
+        self.btFit =wx.Button(panel,-1,'Fit',size=(120, 30))
+        self.btClose =wx.Button(panel, wx.ID_CANCEL,'Close',size=(90, 30) )
+        self.static_line_1 = wx.StaticLine(panel, -1)
+        ix = 0
         iy = 1
         
-        sizer.Add(wx.StaticText(panel, -1, 'y = Ax +B'),(iy, ix))
-        ix = 1
-        iy += 2
+        sizer.Add(wx.StaticText(panel, -1, 'y = Ax +B'),(iy, ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        
+        iy+=1
+        sizer.Add(wx.StaticText(panel, -1, 'Param A'),(iy, ix),\
+                 (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        sizer.Add(self.tcA,(iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        sizer.Add(wx.StaticText(panel, -1, '+/-'),(iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        sizer.Add(self.tcErrA, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
        
-        sizer.Add(wx.StaticText(panel, -1, 'Param A'),(iy, ix))
+        iy += 1
+        ix = 0
+        sizer.Add(wx.StaticText(panel, -1, 'Param B'),(iy, ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer.Add(self.tcA, (iy, ix))
+        sizer.Add(self.tcB, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 1
-        sizer.Add(wx.StaticText(panel, -1, '+/-'),(iy, ix))
+        sizer.Add(wx.StaticText(panel, -1, '+/-'),(iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 1
-        sizer.Add(self.tcErrA, (iy, ix))
+        sizer.Add(self.tcErrB, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        iy += 1
+        ix = 0
+        sizer.Add(wx.StaticText(panel, -1, 'Chi ^{2}'),(iy, ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        sizer.Add(self.tcChi, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 1
-        sizer.Add(wx.StaticText(panel, -1, 'Param B'),(iy, ix))
-        ix += 1
-        sizer.Add(self.tcB, (iy, ix))
-        ix += 1
-        sizer.Add(wx.StaticText(panel, -1, '+/-'),(iy, ix))
-        ix += 1
-        sizer.Add(self.tcErrB, (iy, ix))
-        iy += 1
-        ix = 1
-        sizer.Add(wx.StaticText(panel, -1, 'Chi ^{2}'),(iy, ix))
-        ix += 1
-        sizer.Add(self.tcChi, (iy, ix))
-        iy += 1
-        ix = 1
-        sizer.Add(wx.StaticText(panel, -1, 'Xmin'),(iy, ix))
+        sizer.Add(wx.StaticText(panel, -1, 'Xmin'),(iy, ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 2
-        sizer.Add(wx.StaticText(panel, -1, 'Xmax'),(iy, ix))
+        sizer.Add(wx.StaticText(panel, -1, 'Xmax'),(iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 1
-        sizer.Add(self.tcXmin, (iy, ix))
+        sizer.Add(self.tcXmin, (iy, ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 2
-        sizer.Add(self.tcXmax, (iy, ix))
+        sizer.Add(self.tcXmax, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
-        ix = 3
-        sizer.Add(self.btFit, (iy, ix))
+        ix = 1
+        
+        sizer.Add(self.btFit, (iy, ix),(1,1), wx.LEFT|wx.ADJUST_MINSIZE, 0)
         self.btFit.Bind(wx.EVT_BUTTON, self._onFit)
-        iy +=1
-        ix = 3
-        sizer.Add(btClose, (iy, ix))
+        ix += 2
+        sizer.Add(self.btClose, (iy, ix),(1,1),\
+                  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
        
         panel.SetSizer(sizer)
         self.SetSizer(vbox)
@@ -102,8 +111,8 @@ class LinearFit(wx.Dialog):
         self.tcErrA.SetLabel(str(0.0))
         self.tcErrB.SetLabel(str(0.0))
         self.tcChi.SetLabel(str(0.0))
-        self.tcXmin.SetLabel(str(0.0))
-        self.tcXmax.SetLabel(str(0.0))
+        
+       
         
         # new data for the fit 
         self.file_data1 = Theory1D(x=[], y=[], dy=None)
@@ -129,57 +138,62 @@ class LinearFit(wx.Dialog):
         # Receive transformations of x and y
         self.xtrans,self.ytrans= self.transform()
         
-                        
-        if (xmin ==None)and (xmax == None):
-            #Display the min and the max of x on fit dialog fields
-            self.tcXmin.SetValue(str(min(x)))
-            self.tcXmax.SetValue(str(max(x)))
-      
-        
-        # Store the transformed values of view x, y,dy in variables  before the fit
-        if  self.ytrans == "Log(y)":
+        # Check if View contains a x array .we online fit when x exits
+        # makes transformation for y as a line to fit
+        if x != []:                
+            if (xmin ==None)and (xmax == None):
+                #Display the min and the max of x on fit dialog fields
+                self.tcXmin.SetValue(str(min(x)))
+                self.tcXmax.SetValue(str(max(x)))
+          
+            
+            # Store the transformed values of view x, y,dy in variables  before the fit
+            if  self.ytrans == "Log(y)":
+                for y_i in y:
+                    tempy.append(math.log(y_i)) 
+            else:
+                tempy = y
+                
             for y_i in y:
-                tempy.append(math.log(y_i)) 
                 dy = 1/y_i
                 if dy >= y_i:
                     dy = 0.9*y_i
                 tempdy.append(dy)
-        else:
-            tempy = y
-        if  self.xtrans == "Log(x)":
-            for x_i in x:
-                tempx.append(math.log(x_i)) 
-        else:
-            tempx = x
+                   
             
-        #Find the fitting parameters
-        if (xmin !=None and xmin >= min(tempx) ) and (xmax != None and xmax <= max(tempx)):   
-            chisqr, out, cov = fittings.sansfit(self.model, 
-                        [self.cstA, self.cstB],tempx, tempy,tempdy,xmin,xmax)
-        else:
-            chisqr, out, cov = fittings.sansfit(self.model, 
-                        [self.cstA, self.cstB],tempx, tempy,tempdy,min(tempx),max(tempx))
-       
-        #Check that cov and out are iterable before displaying them
-        if cov ==None:
-            errA =0.0
-            errB =0.0
-        else:
-            errA= math.sqrt(cov[0][0])
-            errB= math.sqrt(cov[1][1])
-        if out==None:
-            cstA=0.0
-            cstB=0.0
-        else:
-            cstA=out[0]
-            cstB=out[1]
-        # Reset model with the right values of A and B 
-        self.model.setParam('A', float(cstA))
-        self.model.setParam('B', float(cstB))
-        tempy = []
-        # Check if View contains a x array .we online fit when x exits
-        # makes transformation for y as a line to fit
-        if x != []:
+            if  self.xtrans == "Log(x)":
+                for x_i in x:
+                    tempx.append(math.log(x_i)) 
+            else:
+                tempx = x
+                
+            #Find the fitting parameters
+            if (xmin !=None and xmin >= min(tempx) ) and (xmax !=None and xmax <= max(tempx)):   
+                chisqr, out, cov = fittings.sansfit(self.model, 
+                            [self.cstA, self.cstB],tempx, tempy,tempdy,xmin,xmax)
+            else:
+                chisqr, out, cov = fittings.sansfit(self.model, 
+                            [self.cstA, self.cstB],tempx, tempy,tempdy,min(tempx),max(tempx))
+            
+            #Check that cov and out are iterable before displaying them
+            if cov ==None:
+                errA =0.0
+                errB =0.0
+            else:
+                errA= math.sqrt(cov[0][0])
+                errB= math.sqrt(cov[1][1])
+            if out==None:
+                cstA=0.0
+                cstB=0.0
+            else:
+                cstA=out[0]
+                cstB=out[1]
+            # Reset model with the right values of A and B 
+            self.model.setParam('A', float(cstA))
+            self.model.setParam('B', float(cstB))
+            tempy = []
+            y_model = 0.0
+            
             for j in range(len(x)): 
                     if (xmin !=None)and (xmax != None):
                         if (x[j] > xmin and x[j] < xmax):
@@ -202,7 +216,7 @@ class LinearFit(wx.Dialog):
             self.file_data1.y =tempy     
             self.file_data1.dx=None
             self.file_data1.dy=None
-           
+            
             #Load the view with the new values
             self.file_data1.reset_view()
             
@@ -227,14 +241,15 @@ class LinearFit(wx.Dialog):
     
     def _checkVal(self,value):
         """
-                Ensure that field parameter contains a value 
-                before sending to fit 
+                Ensure that fields parameter contains a value 
+                before sending to fit in Plotter1D
         """
         try:
             param = float(value)
         except:
             param = None
         return param
+   
 if __name__ == "__main__": 
     app = wx.App()
     dialog=LinearFit(None, -1, 'Fitting')
