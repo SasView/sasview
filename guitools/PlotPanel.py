@@ -274,19 +274,16 @@ class PlotPanel(wx.Panel):
         slicerpop = wx.Menu()
         slicerpop.Append(313,'&Save image', 'Save image as PNG')
         wx.EVT_MENU(self, 313, self.onSaveImage)
+        
         slicerpop.Append(316, '&Load 1D data file')
-       
-        wx.EVT_MENU(self, 314, self.onSave1DData)
         wx.EVT_MENU(self, 316, self._onLoad1DData)
+       
         slicerpop.AppendSeparator()
         slicerpop.Append(315, '&Properties')
+        wx.EVT_MENU(self, 315, self._onProperties)
         
         slicerpop.AppendSeparator()
         slicerpop.Append(317, '&Linear Fit')
-       
-        wx.EVT_MENU(self, 314, self.onSave1DData)
-        wx.EVT_MENU(self, 316, self._onLoad1DData)
-        wx.EVT_MENU(self, 315, self._onProperties)
         wx.EVT_MENU(self, 317, self.onFitting)
        
         pos = event.GetPosition()
