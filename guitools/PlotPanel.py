@@ -60,13 +60,14 @@ class PlotPanel(wx.Panel):
         #User scale
         self.xscales ="x"
         self.yscales ="log10(y)"
+        self.viewModel ="--"
         # keep track if the previous transformation of x and y in Property dialog
         self.prevXtrans =" "
         self.prevYtrans =" "
         
     def returnTrans(self):
         return self.xscales,self.yscales
-        
+    
     def setTrans(self,xtrans,ytrans): 
         """
             @param xtrans: set x transformation on Property dialog
@@ -74,7 +75,7 @@ class PlotPanel(wx.Panel):
         """
         self.prevXtrans =xtrans
         self.prevYtrans =ytrans
-        
+   
     def onFitting(self, event): 
         """
             when clicking on linear Fit on context menu , display Fitting Dialog
@@ -96,9 +97,14 @@ class PlotPanel(wx.Panel):
         """
         from PropertyDialog import Properties
         dial = Properties(self, -1, 'Properties')
-        dial.setValues( self.prevXtrans, self.prevYtrans )
+        dial.setValues( self.prevXtrans, self.prevYtrans,self.viewModel )
         if dial.ShowModal() == wx.ID_OK:
-            self.xscales, self.yscales = dial.getValues()
+            self.xscales, self.yscales,self.viewModel = dial.getValues()
+            if self.viewModel =="Guinier lny vs x^(2)":
+                self.xscales="x^(2)"
+                self.yscales="ln(y)"
+                self.viewModel = "--"
+                dial.setValues( self.xscales, self.yscales,self.viewModel )
             self._onEVT_FUNC_PROPERTY()
         dial.Destroy()
   
@@ -395,7 +401,19 @@ class PlotPanel(wx.Panel):
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
                 self.graph.yaxis("%s%s^{4}" % (yname,xname),  "%s^{-1}%s^{-4}" % (yunits,xunits))
-   
+            
+            if ( self.viewModel == "Guinier lny vs x^(2)"):
+                
+                item.transform_x( transform.toX2,transform.errToX2 )
+                self.set_xscale('linear')
+                name, units = item.get_xaxis()
+                self.graph.xaxis("%s^{2}" % name,  "%s^{-2}" % units)
+                
+                item.transform_y( transform.toLogX, transform.errToLogX )
+                self.set_yscale("linear")
+                name, units = item.get_yaxis()
+                self.graph.yaxis("%s" % name,  "%s^{-1}" % units)
+                 
         self.prevXtrans = self.xscales 
         self.prevYtrans = self.yscales  
         

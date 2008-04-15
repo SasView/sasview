@@ -61,18 +61,20 @@ class Properties(wx.Dialog):
         self.yvalue.Insert("ln(y*x^(4))",8)
         
         # type of view or model used 
-        self.view.SetValue("Guinier lny vs x^(2)")
-        self.view.Insert("Guinier lny vs x^(2)",0)
+        self.view.SetValue("--")
+        self.view.Insert("--",0)
+        self.view.Insert("Guinier lny vs x^(2)",1)
         panel.SetSizer(sizer)
         self.SetSizer(vbox)
         self.Centre()
            
         
-    def setValues(self,x,y):
-        return  self.xvalue.SetValue(x),  self.yvalue.SetValue(y)
+    def setValues(self,x,y,view):
+        return  self.xvalue.SetValue(x),  self.yvalue.SetValue(y),self.view.SetValue(view)
         
     def getValues(self):
-        return self.xvalue.GetValue(), self.yvalue.GetValue()
+        return self.xvalue.GetValue(), self.yvalue.GetValue(),self.view.GetValue()
+        
 
 if __name__ == "__main__": 
     app = wx.App()
