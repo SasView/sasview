@@ -48,12 +48,12 @@ class FractalModel(BaseComponent):
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['scale']       = ['', None, None]
-        self.details['radius']      = ['A', None, None]
-        self.details['fractal_dim'] = ['', None, None]
-        self.details['corr_length'] = ['A', None, None]
-        self.details['block_sld']   = ['A-2', None, None]
-        self.details['solvent_sld'] = ['A-2', None, None]
+        self.details['scale']       = ['',     None, None]
+        self.details['radius']      = ['A',    None, None]
+        self.details['fractal_dim'] = ['',       0,  None]
+        self.details['corr_length'] = ['A',    None, None]
+        self.details['block_sld']   = ['A-2',  None, None]
+        self.details['solvent_sld'] = ['A-2',  None, None]
         self.details['background']  = ['cm-1', None, None]
        
                
@@ -62,12 +62,13 @@ class FractalModel(BaseComponent):
             Evaluate  
             F(x) = p(x) * s(x) + bkd  
         """
+        if x<0 and self.params['fractal_dim']>0:
+            raise ValueError, "negative number cannot be raised to a fractional power"
+
         return self.params['background']+ self._scatterRanDom(x)* self._Block(x)
+
     
     def _Block(self,x):
-        
-        
-        
         return 1.0 + (math.sin((self.params['fractal_dim']-1.0) * math.atan(x * self.params['corr_length']))\
              * self.params['fractal_dim'] * gamma(self.params['fractal_dim']-1.0))\
            /( math.pow( (x*self.params['radius']), self.params['fractal_dim'])*\
@@ -95,7 +96,12 @@ class FractalModel(BaseComponent):
             @return: (Fractal value)
         """
         if x.__class__.__name__ == 'list':
-            return self._Fractal(x[0]*math.cos(x[1]))*self._Fractal(x[0]*math.sin(x[1]))
+            # Take absolute value of Q, since this model is really meant to
+            # be defined in 1D for a given length of Q
+            qx = math.fabs(x[0]*math.cos(x[1]))
+            qy = math.fabs(x[0]*math.sin(x[1]))
+            
+            return self._Fractal(qx)*self._Fractal(qy)
         elif x.__class__.__name__ == 'tuple':
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"
         else:

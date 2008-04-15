@@ -37,7 +37,7 @@ class PowerLawModel(BaseComponent):
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['m']           = ['', None, None ]
+        self.details['m']           = ['', 0,    None]
         self.details['scale']       = ['', None, None]
         self.details['background']  = ['', None, None]
                
@@ -46,17 +46,23 @@ class PowerLawModel(BaseComponent):
             Evaluate  F(x) = scale* (x)^(-m) + bkd
            
         """
-        return self.params['scale']*math.pow(x ,-self.params['m'])\
+        if x<0 and self.params['m']>0:
+            raise ValueError, "negative number cannot be raised to a fractional power"
+        
+        return self.params['scale']*math.pow(x ,-1.0*self.params['m'])\
                 + self.params['background']
        
-   
     def run(self, x = 0.0):
         """ Evaluate the model
             @param x: input q-value (float or [float, float] as [r, theta])
             @return: (PowerLaw value)
         """
         if x.__class__.__name__ == 'list':
-            return self._PowerLaw(x[0]*math.cos(x[1]))*self._PowerLaw(x[0]*math.sin(x[1]))
+            # Take absolute value of Q, since this model is really meant to
+            # be defined in 1D for a given length of Q
+            qx = math.fabs(x[0]*math.cos(x[1]))
+            qy = math.fabs(x[0]*math.sin(x[1]))
+            return self._PowerLaw(qx)*self._PowerLaw(qy)
         elif x.__class__.__name__ == 'tuple':
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"
         else:

@@ -343,6 +343,7 @@ class TestCase:
         self.reportCard += report
         
         if not self.passed:
+            print "\nFailure:"
             print report.trace
         return self.passed
         
@@ -352,8 +353,8 @@ def evalStimulus(model):
         @param model: model to apply the stimulus to
         @return: True if passed, False otherwise
     """
-    minval = 0
-    maxval = 20
+    minval = 0.001
+    maxval = 1.0
     # Call run with random input
     import random, math
     input_value = random.random()*(maxval-minval)+minval
@@ -367,23 +368,28 @@ def evalStimulus(model):
         else:
             output = model.run([input_value, 2*math.pi*random.random()])            
     except ZeroDivisionError:
-        output = -1
+        print "Error evaluating model %s: %g" % (model.name, input_value)
+        output = None
         
     #print "Eval: %g" % output
     
     # Oracle bit - just check that we have a number...
     passed = False
-    if math.fabs(output) >= 0: 
-        passed = True
+    try:
+        if output != None and math.fabs(output) >= 0: 
+            passed = True
+    except:
+        print "---> Could not compute abs val", output, model.name
+        
     
     report = ReportCard()
     report.n_eval = 1
     if passed:
         report.n_eval_pass = 1
     else:
-        report.log = "Eval: bad output value %g\n" % output
+        report.log = "Eval: bad output value %s\n" % str(output)
         
-    report.trace = "Eval(%g) = %g %i\n" % (input_value, output, passed)    
+    report.trace = "Eval(%g) = %s %i\n" % (input_value, str(output), passed)    
     return model, report
 
 def setStimulus(model):
@@ -394,7 +400,7 @@ def setStimulus(model):
     # Call run with random input
     import random, math
     minval = 1
-    maxval = 50
+    maxval = 5
     
     # Choose a parameter to change
     keys = model.getParamList()
@@ -406,7 +412,25 @@ def setStimulus(model):
     i_param = int(math.floor(random.random()*p_len))
     p_name  = keys[i_param]
     
-    # Chose a value
+    # Choose a value
+    # Check for min/max
+    if hasattr(model, "details"):
+        if model.details.has_key(p_name):
+            if model.details[p_name][1] != None:
+                minval = model.details[p_name][1]
+            if model.details[p_name][2] != None:
+                maxval = model.details[p_name][2]
+        elif model.other.details.has_key(p_name):
+            if model.other.details[p_name][1] != None:
+                minval = model.other.details[p_name][1]
+            if model.other.details[p_name][2] != None:
+                maxval = model.other.details[p_name][2]
+        elif model.operateOn.details.has_key(p_name):
+            if model.operateOn.details[p_name][1] != None:
+                minval = model.operateOn.details[p_name][1]
+            if model.operateOn.details[p_name][2] != None:
+                maxval = model.operateOn.details[p_name][2]
+            
     input_val = random.random()*(maxval-minval)+minval
     model.setParam(p_name, input_val)
     
@@ -612,9 +636,10 @@ def subStimulus(model):
     passed = False
     
     try:
-        value2 = tmp.run(1)
+        value2 = tmp.run(1.1 * (1.0 + random()))
         value2 = float(value2)
     except:
+        value2 = None
         passed = False
     
     # If we made it this far, we have a float
@@ -627,9 +652,9 @@ def subStimulus(model):
     else:
         report.log = "Sub: bad output from composite model\n"
 
-    report.trace = "Sub %s (%g - %g = %g) %i\n" % \
+    report.trace = "Sub %s (%g - %g = %s) %i\n" % \
         (model.name, model.run(1), \
-         sub_model.run(1), value2, passed)                
+         sub_model.run(1), str(value2), passed)                
     return tmp, report
 
 def mulStimulus(model):
@@ -646,12 +671,18 @@ def mulStimulus(model):
     
     # Oracle bit
     passed = False
-
+    
+    from random import random
+    input_val = 1.1 * (1.0 + random())
+    v1 = None
+    v2 = None
     try:
-        value2 = tmp.run(1)
+        v1 = mul_model.run(input_val)
+        v2 = model.run(input_val)
+        value2 = tmp.run(input_val)
         value2 = float(value2)
-    except:
-        passed = False
+    except ZeroDivisionError:
+        value2 = None
     
     # If we made it this far, we have a float
     passed = True 
@@ -663,9 +694,8 @@ def mulStimulus(model):
     else:
         report.log = "Mul: bad output from composite model\n"
         
-    report.trace = "Mul %s (%g * %g = %g) %i\n" % \
-      (model.name, model.run(1), \
-       mul_model.run(1), value2, passed)                
+    report.trace = "Mul %s (%s * %s = %s) %i\n" % \
+      (model.name, str(v1), str(v2), str(value2), passed)                
     return tmp, report
 
 def divStimulus(model):
@@ -677,21 +707,40 @@ def divStimulus(model):
     #factory = ModelFactory()
     #div_model = factory.getModel("SphereModel")
     #div_model = factory.getModel(randomModel())
-    div_model = getRandomModelObject()
+
+    from random import random
+    input_val = 1.5 * random()
     
+    # Find a model that will not evaluate to zero
+    # at the input value
+    try_again = True
+    while try_again:
+        div_model = getRandomModelObject()
+        try:
+            v2 = div_model.run(input_val)
+            try_again = False
+        except:
+            pass
+        
     tmp = model / div_model
     
     # Oracle bit
     passed = False
     
+    v1 = None
+    v2 = None
     try:
-        from random import random
-        input_val = 1.5 * random()
-        if div_model.run(input_val)==0:
-            print "Skipped (DIV) because denominator evaluated to zero"
-        else:
+        
+        # Check individual models against bad combinations,
+        # which happen from time to time given that all 
+        # parameters are random
+        try:
+            v2 = div_model.run(input_val)
+            v1 = model.run(input_val)
             value2 = tmp.run(input_val)
             value2 = float(value2)
+        except ZeroDivisionError:
+            value2 = None
     except:
         passed = False
     
@@ -705,16 +754,15 @@ def divStimulus(model):
     else:
         report.log = "Div: bad output from composite model\n"
         
-    report.trace = "Div %s (%g / %g = %g) %i\n" % \
-        (model.name, model.run(1), \
-         div_model.run(1), value2, passed)                
+    report.trace = "Div %s/%s (%g) = %s / %s = %s %i\n" % \
+      (model.name, div_model.name, input_val, str(v1), str(v2), str(value2), passed)                
     return tmp, report
 
 if __name__ == '__main__':
 
     #print randomModel()
     g = TestCaseGenerator()
-    g.generateAndRun(2000)
+    g.generateAndRun(20000)
     
     #t = TestCase(filename = "error_1.17721e+009.xml")
     #print t.run()

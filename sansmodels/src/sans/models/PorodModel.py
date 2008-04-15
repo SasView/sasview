@@ -25,16 +25,18 @@ class PorodModel(BaseComponent):
 
         ## Define parameters
         self.params = {}
-        self.params['scale'] = 0.0
+        self.params['scale'] = 1.0
+        self.params['background'] = 0.0
         
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['scale'] = ['', None, None]
+        self.details['scale']      = ['', None, None]
+        self.details['background'] = ['', None, None]
       
                
     def _porod(self, x):
-        return self.params['scale']/x**4.0
+        return self.params['scale']/x**4.0 + self.params['background']
    
     def run(self, x = 0.0):
         """ Evaluate the model
