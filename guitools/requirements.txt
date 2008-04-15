@@ -81,21 +81,21 @@
   
   2- [DONE]Specify in the fitDialog if natural log or log base 10
   
-  3- When fitting sphere.txt , logx --logy ,fitting is not correct
+  3- [FIXED]When fitting sphere.txt , logx --logy ,fitting is not correct
   
-  4- the line to fit always is displayed from x min to max all the time even if xmin is changed
+  4- [FIXED]the line to fit always is displayed from x min to max all the time even if xmin is changed
      or xmax is changed
      
-  5- The fitting errors are too small (order of 10^(-7))for that case too,certainly wrong
+  5- [FIXED]The fitting errors are too small (order of 10^(-7))for that case too,certainly wrong
   
   6- When to see errors bars appear when loading sphere.txt file. 
   
   7- Add zoom in option when xmax and xmin(user) are entered.
   
-  8-[DONE] Always want to know the initial value of xmin and xmax when opening the fitDialog.These values
+  8-[FIXED] Always want to know the initial value of xmin and xmax when opening the fitDialog.These values
      should always be independant of the transformation
      
-  9- the user should be able to add point to fit without knowing the exact range or guessing
+  9-[FIXED] the user should be able to add point to fit without knowing the exact range or guessing
   		a range to fit.
 
 	TO Dr. MATHIEU 

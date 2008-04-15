@@ -6,7 +6,7 @@ import wx
 
 class Properties(wx.Dialog):
     def __init__(self, parent, id, title):
-        wx.Dialog.__init__(self, parent, id, title, size=(300, 200))
+        wx.Dialog.__init__(self, parent, id, title, size=(350, 200))
         """
             for the properties window
         """
@@ -31,8 +31,8 @@ class Properties(wx.Dialog):
         self.yvalue = wx.ComboBox(panel, -1)
         sizer.Add( self.yvalue,(iy, ix))
         ix +=2
-        view =wx.ComboBox(panel, -1, size=(60, -1))
-        sizer.Add(view,(iy,ix))
+        self.view =wx.ComboBox(panel, -1)
+        sizer.Add(self.view,(iy,ix))
         ix =3
         iy +=3
         btCancel=wx.Button(panel, wx.ID_CANCEL,'Cancel' )
@@ -60,6 +60,9 @@ class Properties(wx.Dialog):
         self.yvalue.Insert("ln(y*x^(2))",7)
         self.yvalue.Insert("ln(y*x^(4))",8)
         
+        # type of view or model used 
+        self.view.SetValue("Guinier lny vs x^(2)")
+        self.view.Insert("Guinier lny vs x^(2)",0)
         panel.SetSizer(sizer)
         self.SetSizer(vbox)
         self.Centre()
