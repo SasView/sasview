@@ -6,6 +6,9 @@ import wx
 from PlotPanel import PlotPanel
 from plottables import Theory1D
 import math,pylab,fittings
+import transform
+
+
 class LinearFit(wx.Dialog):
     #def __init__(self, parent, id, title):
     def __init__(self, parent, plottable, push_data,transform, id, title):
@@ -32,8 +35,10 @@ class LinearFit(wx.Dialog):
         self.tcB = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.tcErrB = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.tcChi = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
-        self.tcXmin = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
-        self.tcXmax = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.FXmin = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.FXmax = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.PXmin = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.PXmax = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.btFit =wx.Button(panel,-1,'Fit',size=(120, 30))
         self.btClose =wx.Button(panel, wx.ID_CANCEL,'Close',size=(90, 30) )
         self.static_line_1 = wx.StaticLine(panel, -1)
@@ -76,11 +81,23 @@ class LinearFit(wx.Dialog):
         ix += 2
         sizer.Add(wx.StaticText(panel, -1, 'Xmax'),(iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
-        ix = 1
-        sizer.Add(self.tcXmin, (iy, ix),(1,1),\
+        ix = 0
+        sizer.Add(wx.StaticText(panel, -1, 'Plotted Range'),(iy, ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix +=1
+        sizer.Add(self.PXmin, (iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 2
-        sizer.Add(self.tcXmax, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer.Add(self.PXmax, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        iy += 1
+        ix = 0
+        sizer.Add(wx.StaticText(panel, -1, 'Fit Range'),(iy, ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        sizer.Add(self.FXmin, (iy, ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 2
+        sizer.Add(self.FXmax, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 1
         
@@ -111,7 +128,16 @@ class LinearFit(wx.Dialog):
         self.tcErrA.SetLabel(str(0.0))
         self.tcErrB.SetLabel(str(0.0))
         self.tcChi.SetLabel(str(0.0))
-        
+        if self.plottable.x !=[]:
+            self.mini =min(self.plottable.x)
+            self.maxi =max(self.plottable.x)
+            self.FXmin.SetLabel(str(self.mini))
+            self.FXmax.SetLabel(str(self.maxi))
+            
+            self.PXmin.SetValue(str(self.mini))
+            self.PXmax.SetValue(str(self.maxi))
+            self.PXmin.Disable()
+            self.PXmax.Disable()
        
         
         # new data for the fit 
@@ -130,9 +156,8 @@ class LinearFit(wx.Dialog):
         tempdy = []
         
         #Check if the field of Fit Dialog contain values and use the x max and min of the user
-        xmin = self._checkVal(self.tcXmin.GetValue())
-        xmax = self._checkVal(self.tcXmax.GetValue())
-        
+        xmin,xmax = self._checkVal(self.FXmin.GetValue(),self.FXmax.GetValue())
+       
         #store the values of View in x,y, dx,dy
         x,y,dx,dy=self.plottable.returnValuesOfView()
         # Receive transformations of x and y
@@ -140,40 +165,34 @@ class LinearFit(wx.Dialog):
         
         # Check if View contains a x array .we online fit when x exits
         # makes transformation for y as a line to fit
-        if x != []:                
-            if (xmin ==None)and (xmax == None):
-                #Display the min and the max of x on fit dialog fields
-                self.tcXmin.SetValue(str(min(x)))
-                self.tcXmax.SetValue(str(max(x)))
-          
+        if x != []: 
             
+            xminView=self.floatTransform(xmin)
+            xmaxView=self.floatTransform(xmax)
+        
             # Store the transformed values of view x, y,dy in variables  before the fit
-            if  self.ytrans == "Log(y)":
+            if  self.ytrans.lower() == "log10(y)":
                 for y_i in y:
-                    tempy.append(math.log(y_i)) 
+                    tempy.append(math.log10(y_i)) 
             else:
                 tempy = y
-                
+            if  self.xtrans.lower() == "log10(x)":
+                for x_i in x:
+                    tempx.append(math.log10(x_i)) 
+            else:
+                tempx = x
+                   
             for y_i in y:
                 dy = 1/y_i
                 if dy >= y_i:
                     dy = 0.9*y_i
                 tempdy.append(dy)
                    
-            
-            if  self.xtrans == "Log(x)":
-                for x_i in x:
-                    tempx.append(math.log(x_i)) 
-            else:
-                tempx = x
-                
             #Find the fitting parameters
-            if (xmin !=None and xmin >= min(tempx) ) and (xmax !=None and xmax <= max(tempx)):   
-                chisqr, out, cov = fittings.sansfit(self.model, 
-                            [self.cstA, self.cstB],tempx, tempy,tempdy,xmin,xmax)
-            else:
-                chisqr, out, cov = fittings.sansfit(self.model, 
-                            [self.cstA, self.cstB],tempx, tempy,tempdy,min(tempx),max(tempx))
+            print "X", tempx
+            print "Y", tempy
+            chisqr, out, cov = fittings.sansfit(self.model, 
+                            [self.cstA, self.cstB],tempx, tempy,tempdy,xminView,xmaxView)
             
             #Check that cov and out are iterable before displaying them
             if cov ==None:
@@ -191,28 +210,54 @@ class LinearFit(wx.Dialog):
             # Reset model with the right values of A and B 
             self.model.setParam('A', float(cstA))
             self.model.setParam('B', float(cstB))
+            print "this is constant A:",float(cstA)
+            tempx = []
             tempy = []
             y_model = 0.0
+            # load tempy with the minimum transformation
+           
+            if self.xtrans == "log10(x)":
+                y_model = self.model.run(math.log10(xmin))
+
+            else:
+                y_model = self.model.run(xminView)
+            tempx.append(xmin)
             
-            for j in range(len(x)): 
-                    if (xmin !=None)and (xmax != None):
-                        if (x[j] > xmin and x[j] < xmax):
-                            y_model = self.model.run(x[j])
-                    else:
-                        # x has a default value in case the user doesn't load data
-                        if self.xtrans == "Log(x)":
-                            y_model = self.model.run(math.log(x[j]))
-                        else:
-                            y_model = self.model.run(x[j])
-                    
-                    if self.ytrans == "Log(y)":
-                        tempy.append(math.exp(y_model))
-                    else:
-                        tempy.append(y_model)
+            if self.ytrans == "log10(y)":
+                tempy.append(math.pow(10,y_model))
+            else:
+                tempy.append(y_model)
+            #Load tempy with the value between xView min and xView max
+            #for j in range(len(x)): 
+            #    if (x[j] > xminView and x[j] < xmaxView):
+            #        if self.xtrans == "log10(x)":
+            #            y_model = self.model.run(math.log10(x[j]))
+            #        else:
+            #            y_model = self.model.run(x[j])
                         
+                        
+            #        if self.ytrans == "log10(y)":
+            #            tempy.append(math.pow(10,y_model))
+            #        else:
+            #            tempy.append(y_model)
+            #        tempx.append(x[j])
+                    
+            # load tempy with the maximum transformation
+            if self.xtrans == "log10(x)":
+                y_model = self.model.run(math.log10(xmax))
+               
+            else:
+                y_model = self.model.run(xmaxView)
+            tempx.append(xmax)
+                
+            if self.ytrans == "log10(y)":
+                tempy.append(math.pow(10,y_model))
+            else: 
+                tempy.append(y_model)
             # Create new data plottable with result
-            self.file_data1.x =x 
-            self.file_data1.y =[]  
+            self.file_data1.x =[] 
+            self.file_data1.y =[] 
+            self.file_data1.x =tempx  
             self.file_data1.y =tempy     
             self.file_data1.dx=None
             self.file_data1.dy=None
@@ -239,16 +284,44 @@ class LinearFit(wx.Dialog):
     def _returnPlottable(self):
         return self.file_data1
     
-    def _checkVal(self,value):
+    def _checkVal(self,usermin, usermax):
         """
-                Ensure that fields parameter contains a value 
-                before sending to fit in Plotter1D
+                Ensure that fields parameter contains a min and a max value 
+                within x min and x max range
         """
-        try:
-            param = float(value)
-        except:
-            param = None
-        return param
+        if float(usermin) < float(usermax):
+            if float(usermin) >= float(self.mini) and float(usermin) < float(self.maxi):
+                self.FXmin.SetValue(str(usermin))
+            else:
+                self.FXmin.SetValue(str(self.mini))
+                
+            if float(usermax) > float(self.mini) and float(usermax) <= float(self.maxi):
+                self.FXmax.SetLabel(str(usermax))
+            else:
+                self.FXmax.SetLabel(str(self.maxi))
+                
+            mini =float(self.FXmin.GetValue())
+            maxi =float(self.FXmax.GetValue())
+            
+            return mini, maxi
+    def floatTransform(self,x):
+        """
+             transform a float.It is use to determine the x.View min and x.View max for values
+             not in x
+        """
+        if ( self.xtrans=="x" ):
+            return transform.toX(x)
+        
+        if ( self.xtrans=="x^(2)" ):
+            return transform.toX2(x)
+        
+        if (self.xtrans=="log10(x)" ):
+            if x >0:
+                return math.log10(x)
+            else:
+                raise ValueError,"cannot compute log of a negative number"
+       
+                
    
 if __name__ == "__main__": 
     app = wx.App()

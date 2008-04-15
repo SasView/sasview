@@ -29,8 +29,8 @@ class LineModel(BaseComponent):
 
         ## Define parameters
         self.params = {}
-        self.params['A'] = 10.0
-        self.params['B'] = 10.0
+        self.params['A'] = 1.0
+        self.params['B'] = 1.0
 
         ## Parameter details [units, min, max]
         self.details = {}

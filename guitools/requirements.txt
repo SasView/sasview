@@ -77,20 +77,29 @@
   
  This is a list the changes Steeve wants :
  
-  1- Add curves : ln(y) in linear scale, ln(x^(4)*I)
-  2- Specify in the fitDialog if natural log or log base 10
+  1- [DONE] Add curves : ln(y) in linear scale, ln(x^(4)*I)
+  
+  2- [DONE]Specify in the fitDialog if natural log or log base 10
+  
   3- When fitting sphere.txt , logx --logy ,fitting is not correct
+  
   4- the line to fit always is displayed from x min to max all the time even if xmin is changed
      or xmax is changed
+     
   5- The fitting errors are too small (order of 10^(-7))for that case too,certainly wrong
+  
   6- When to see errors bars appear when loading sphere.txt file. 
+  
   7- Add zoom in option when xmax and xmin(user) are entered.
-  8- Always want to know the initial value of xmin and xmax when opening the fitDialog.These values
+  
+  8-[DONE] Always want to know the initial value of xmin and xmax when opening the fitDialog.These values
      should always be independant of the transformation
+     
   9- the user should be able to add point to fit without knowing the exact range or guessing
   		a range to fit.
 
 	TO Dr. MATHIEU 
   1- I probably have to change the interface of the fitdialog, I would like to discuss 
      it before proceeding
-  
+	ALINA
+ 1- Would like to change the y axis label display

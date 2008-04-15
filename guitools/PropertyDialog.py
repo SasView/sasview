@@ -44,18 +44,21 @@ class Properties(wx.Dialog):
         # scale value for x
         self.xvalue.SetValue("x")
         self.xvalue.Insert("x",0)
-        self.xvalue.Insert("Log(x)",1)
-        self.xvalue.Insert("x^(2)",2)
+        self.xvalue.Insert("x^(2)",1)
+        self.xvalue.Insert("log10(x)",2)
+        
         
         # scale value for y
-        self.yvalue.SetValue("Log(y)")
+        self.yvalue.SetValue("log10(y)")
         self.yvalue.Insert("y",0)
-        self.yvalue.Insert("Log(y)",1)
-        self.yvalue.Insert("y^(2)",2)
-        self.yvalue.Insert("1/y",3)
+        self.yvalue.Insert("1/y",1)
+        self.yvalue.Insert("ln(y)",2)
+        self.yvalue.Insert("y^(2)",3)
         self.yvalue.Insert("1/sqrt(y)",4)
-        self.yvalue.Insert("Log(y*x)",5)
-        self.yvalue.Insert("Log(y*x^(2))",6)
+        self.yvalue.Insert("log10(y)",5)
+        self.yvalue.Insert("ln(y*x)",6)
+        self.yvalue.Insert("ln(y*x^(2))",7)
+        self.yvalue.Insert("ln(y*x^(4))",8)
         
         panel.SetSizer(sizer)
         self.SetSizer(vbox)

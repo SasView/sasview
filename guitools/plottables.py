@@ -408,8 +408,7 @@ class Plottable:
     def returnValuesOfView(self):
         
         return self.view.returnXview()
-        
-        
+   
     class View:
         """
             Representation of the data that might include a transformation
@@ -523,8 +522,13 @@ class Plottable:
      
         def returnXview(self):
             return self.x,self.y,self.dx,self.dy
-           
-     
+        
+        def returnValueOfView(self,i): 
+            print"this is i:",i
+            if i in range(len(self.x)):
+                print self.x[i]
+                return self.x[i]
+
 class Data1D(Plottable):
     """Data plottable: scatter plot of x,y with errors in x and y.
     """

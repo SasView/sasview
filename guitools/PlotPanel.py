@@ -7,6 +7,7 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
 import os
 import fittings
+import transform
 from canvas import FigureCanvas
 #TODO: make the plottables interactive
 
@@ -58,7 +59,7 @@ class PlotPanel(wx.Panel):
         self.symbollist = ['o','x','^','v','<','>','+','s','d','D','h','H','p']
         #User scale
         self.xscales ="x"
-        self.yscales ="Log(y)"
+        self.yscales ="log10(y)"
         # keep track if the previous transformation of x and y in Property dialog
         self.prevXtrans =" "
         self.prevYtrans =" "
@@ -100,95 +101,7 @@ class PlotPanel(wx.Panel):
             self.xscales, self.yscales = dial.getValues()
             self._onEVT_FUNC_PROPERTY()
         dial.Destroy()
-            
-    def toX(self,x,y=None):
-        """
-            This function is used to load value on Plottable.View
-            @param x: Float value
-            @return x,
-        """
-        return x
-    
-    def toX2(self,x,y=None):
-        """
-            This function is used to load value on Plottable.View
-            Calculate x^(2)
-            @param x: float value
-        """
-        return x*x
-    
-    def fromX2(self,x,y=None):
-         """
-             This function is used to load value on Plottable.View
-            Calculate square root of x
-            @param x: float value
-         """
-         if not x >=0 :
-             raise ValueError, "square root of a negative value "
-         else:
-             return math.sqrt(x)
-    def toLogX(self,x,y=None):
-        """
-            This function is used to load value on Plottable.View
-            calculate log x
-            @param x: float value
-        """
-        if not x > 0:
-            raise ValueError, "Log(X)of a negative value "
-        else:
-            return math.log(x)
-        
-    def toOneOverX(self,x,y=None):
-        if x !=0:
-            return 1/x
-        else:
-            raise ValueError,"cannot divide by zero"
-    def toOneOverSqrtX(self,x=None,y=None):
-        if y!=None:
-            if y > 0:
-                return 1/math.sqrt(y)
-            else:
-                raise ValueError,"cannot be computed"
-        if x!= None:
-            if x > 0:
-                return 1/math.sqrt(x)
-            else:
-                raise ValueError,"cannot be computed"
-        
-    def toLogYX2(self,x,y):
-        if y*(x**2) >0:
-            return math.log(y*(x**2))
-        else:
-             raise ValueError,"cannot be computed"
-         
-         
-    def toYX2(self,x,y):
-        return (x**2)*y
-    
-    
-    def toXY(self,x,y):
-        return x*y
-    
-    
-    def toLogXY(self,x,y):
-        """
-            This function is used to load value on Plottable.View
-            calculate log x
-            @param x: float value
-        """
-        if not x*y > 0:
-            raise ValueError, "Log(X*Y)of a negative value "
-        else:
-            return math.log(x*y)
-        
-    def fromLogXY(self,x):
-        """
-            This function is used to load value on Plottable.View
-            Calculate e^(x)
-            @param x: float value
-        """
-        return math.exp(x*y)
-    
+  
     def set_yscale(self, scale='linear'):
         """
             Set the scale on Y-axis
@@ -411,205 +324,83 @@ class PlotPanel(wx.Panel):
         list = self.graph.returnPlottable()
         for item in list:
             if ( self.xscales=="x" ):
-                item.transform_x(  self.toX, self.errToX )
+                item.transform_x( transform.toX,transform.errToX )
                 self.set_xscale("linear")
                 name, units = item.get_xaxis()
                 self.graph.xaxis("%s" % name,  "%s^{-1}" % units)
                 
             if ( self.xscales=="x^(2)" ):
-                item.transform_x(  self.toX2, self.errToX2 )
+                item.transform_x( transform.toX2,transform.errToX2 )
                 self.set_xscale('linear')
                 name, units = item.get_xaxis()
                 self.graph.xaxis("%s^{2}" % name,  "%s^{-2}" % units)
                 
-            if (self.xscales=="Log(x)" ):
-                item.transform_x(  self.toX, self.errToLogX )
+            if (self.xscales=="log10(x)" ):
+                item.transform_x( transform.toX, transform.errToLogX )
                 self.set_xscale("log")
                 name, units = item.get_xaxis()
                 self.graph.xaxis("%s" % name,  "%s^{-1}" % units)
                 
-            if ( self.yscales=="y" ):
-                item.transform_y(  self.toX, self.errToX )
+            if ( self.yscales=="ln(y)" ):
+                item.transform_y( transform.toLogX, transform.errToLogX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s" % name,  "%s^{-1}" % units)
                 
-            if ( self.yscales=="Log(y)" ): 
-                item.transform_y(  self.toX, self.errToLogX)
+            if ( self.yscales=="y" ):
+                item.transform_y( transform.toX, transform.errToX )
+                self.set_yscale("linear")
+                name, units = item.get_yaxis()
+                self.graph.yaxis("%s" % name,  "%s^{-1}" % units)
+                
+            if ( self.yscales=="log10(y)" ): 
+                item.transform_y( transform.toX, transform.errToLogX)
                 self.set_yscale("log")  
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="y^(2)" ):
-                item.transform_y(  self.toX2, self.errToX2 )    
+                item.transform_y( transform.toX2, transform.errToX2 )    
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s^2" % name,  "%s^{-2}" % units)
             if ( self.yscales =="1/y"):
-                item.transform_y( self.toOneOverX ,self.errOneOverX )
+                item.transform_y( transform.toOneOverX , transform.errOneOverX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s" % name,  "%s" % units)
             if ( self.yscales =="1/sqrt(y)" ):
-                item.transform_y( self.toOneOverSqrtX ,self.errOneOverSqrtX )
+                item.transform_y( transform.toOneOverSqrtX ,transform.errOneOverSqrtX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s" %name,  "%s" % units)
                 
-            if ( self.yscales =="Log(y*x)"):
-                item.transform_y( self.toLogXY ,self.errToLogXY )
+            if ( self.yscales =="ln(y*x)"):
+                item.transform_y( transform.toLogXY ,transform.errToLogXY )
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
                 self.graph.yaxis("%s%s" % (yname,xname),  "%s^{-1}%s^{-1}" % (yunits,xunits))
-            if ( self.yscales =="Log(y*x^(2)"):
-                item.transform_y( self.toYX2 ,self.errToYX2 )
+                
+            if ( self.yscales =="ln(y*x^(2)"):
+                item.transform_y( transform.toYX2 ,transform.ToYX2 )
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
                 self.graph.yaxis("%s%s^{2}" % (yname,xname),  "%s^{-1}%s^{-2}" % (yunits,xunits))
+            
+            if ( self.yscales =="ln(y*x^(4))"):
+                item.transform_y( transform.toLogYX4 ,transform.errToLogYX4 )
+                self.set_yscale("linear")
+                yname, yunits = item.get_yaxis()
+                xname, xunits = item.get_xaxis()
+                self.graph.yaxis("%s%s^{4}" % (yname,xname),  "%s^{-1}%s^{-4}" % (yunits,xunits))
    
         self.prevXtrans = self.xscales 
         self.prevYtrans = self.yscales  
         
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
-        
-    def errToX(self,x,y=None,dx=None,dy=None):
-        """
-            calculate error of x**2
-            @param x: float value
-            @param dx: float value
-        """
-        return dx
-    
-    
-    def errToX2(self,x,y=None,dx=None,dy=None):
-        """
-            calculate error of x**2
-            @param x: float value
-            @param dx: float value
-        """
-        if  dx != None:
-            err = 2*x*dx
-            if math.fabs(err) >= math.fabs(x):
-                err = 0.9*x
-            return math.fabs(err)
-        else:
-            return 0.0
-    def errFromX2(self,x,y=None,dx=None,dy=None):
-        """
-            calculate error of sqrt(x)
-            @param x: float value
-            @param dx: float value
-        """
-        if (x > 0):
-            if(dx != None):
-                err = dx/(2*math.sqrt(x))
-            else:
-                err = 0
-            if math.fabs(err) >= math.fabs(x):
-                err = 0.9*x    
-        else:
-            err = 0.9*x
-           
-            return math.fabs(err)
-        
-    def errToLogX(self,x,y=None,dx=None,dy=None):
-        """
-            calculate error of Log(x)
-            @param x: float value
-            @param dx: float value
-        """
-        if math.fabs(dx) >= math.fabs(x):
-            return 0.9*x
-        return dx
-    
-    def errToXY(self, x, y, dx=None, dy=None):
-        if dx==None:
-            dx=0
-        if dy==None:
-            dy=0
-        err =math.sqrt((y*dx)**2 +(x*dy)**2)
-        if err >= math.fabs(x):
-            err =0.9*x
-        return err 
-    
-    def errToYX2(self, x, y, dx=None, dy=None):
-        if dx==None:
-            dx=0
-        if dy==None:
-            dy=0
-        err =math.sqrt((2*x*y*dx)**2 +((x**2)*dy)**2)
-        if err >= math.fabs(x):
-            err =0.9*x
-        return err 
-        
-    def errToLogXY(self,x,y,dx=None, dy=None):
-        """
-            calculate error of Log(xy)
-        """
-        if (x!=0) and (y!=0):
-            if dx == None:
-                dx = 0
-            if dy == None:
-                dy = 0
-            err = (dx/x)**2 + (dy/y)**2
-            if  math.sqrt(math.fabs(err)) >= math.fabs(x):
-                err= 0.9*x
-        else:
-            raise ValueError, "cannot compute this error"
-       
-        return math.sqrt(math.fabs(err))
-        
-    def errToLogYX2(self,x,y,dx=None, dy=None):
-        """
-            calculate error of Log(yx**2)
-        """
-        if (x > 0) and (y > 0):
-            if (dx == None):
-                dx = 0
-            if (dy == None):
-                dy = 0
-            err = 4*(dx**2)/(x**2) + (dy**2)/(y**2)
-            if math.fabs(err) >= math.fabs(x):
-                err =0.9*x
-        else:
-             raise ValueError, "cannot compute this error"
-         
-        return math.sqrt(math.fabs(err)) 
-            
-    def errOneOverX(self,x,y=None,dx=None, dy=None):
-        """
-             calculate error on 1/x
-        """
-        if (x != 0):
-            if dx ==None:
-                dx= 0
-            err = -(dx)**2/x**2
-        else:
-            raise ValueError,"Cannot compute this error"
-        
-        if math.fabs(err)>= math.fabs(x):
-            err= 0.9*x
-        return math.fabs(err)
-    
-    def errOneOverSqrtX(self,x,y=None, dx=None,dy=None):
-        """
-            Calculate error on 1/sqrt(x)
-        """
-        if (x >0):
-            if dx==None:
-                dx =0
-            err= -1/2*math.pow(x, -3/2)* dx
-            if math.fabs(err)>= math.fabs(x):
-                err=0.9*x
-        else:
-            raise ValueError, "Cannot compute this error"
-        
-        return math.fabs(err)
-    
-                      
     def onFitDisplay(self, plottable):
         """
             Add a new plottable into the graph .In this case this plottable will be used 
@@ -623,9 +414,7 @@ class PlotPanel(wx.Panel):
         self.subplot.figure.canvas.draw_idle()
         self.graph.delete(plottable)
       
-        
-     
-        
+    
     
 class NoRepaintCanvas(FigureCanvasWxAgg):
     """We subclass FigureCanvasWxAgg, overriding the _onPaint method, so that
