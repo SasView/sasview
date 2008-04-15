@@ -1,12 +1,15 @@
 Release Notes
 =============
 
-SANS Models version 0.3.2
+SANS Models version 0.4.0
 
 Package name: sans.models 
 
-1- What's New in Version 0.3.2
-
+1- What's New in Version 0.4.0
+	- Release date: 4/15/2008
+	- Added shape-independent models.
+	
+	Version 0.3.2:
 	- Release date: 2/14/2008
 	- Added models to be used in magnetic analysis.
 	   
@@ -18,7 +21,7 @@ Package name: sans.models
 		- Python version >= 2.4 should be running on the system
 
 	2.2- Installing:
-		- Get the code from svn://danse.us/sans/releases/sansmodels-0.3.2
+		- Get the code from svn://danse.us/sans/releases/sansmodels-0.4.0
 		- Execute the following: 
 			python setup.py install
 
@@ -55,6 +58,7 @@ Package name: sans.models
 	- See: http://danse.us/trac/sans/wiki/8_2_2_1DModelFitting
 	- See: http://danse.us/trac/sans/wiki/8_2_3_2DModeling
 	- See: http://danse.us/trac/sans/wiki/8_2_6_model_extensions
+	- See: http://danse.us/trac/sans/wiki/8_2_1Nonshape_models
 
 	
 
