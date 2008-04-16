@@ -39,6 +39,9 @@ distinctiveness rather than a simple colour number.
 # all plots on the graph.
 
 # Support for ancient python versions
+import copy
+import numpy
+
 if 'any' not in dir(__builtins__):
     def any(L):
         for cond in L:
@@ -433,8 +436,7 @@ class Plottable:
                 @param dx: array of error values
                 @param errfunc: function to apply to errors
             """
-            import copy
-            import numpy
+            
             
             # Sanity check
             has_y = False
@@ -482,8 +484,6 @@ class Plottable:
                 @param dy: array of error values
                 @param errfunc: function to apply to errors dy
             """
-            import copy
-            import numpy
             # Sanity check
             has_x = False
             if dy and not len(y)==len(dy):
@@ -588,6 +588,7 @@ class Theory1D(Plottable):
 
     def changed(self):
         return False
+    
     @classmethod
     def labels(cls, collection):
         """Build a label mostly unique within a collection"""
@@ -597,8 +598,7 @@ class Theory1D(Plottable):
             map[item] = r"$\rm{%s}$" % item.name
         return map
    
-
-
+   
 class Fit1D(Plottable):
     """Fit plottable: composed of a data line plus a theory line.  This
     is treated like a single object from the perspective of the graph,

@@ -82,19 +82,7 @@ def toLogXY(x,y):
         raise ValueError, "Log(X*Y)of a negative value "
     else:
         return math.log(x*y)
-def errToLogYX4(x,y=None,dx=None,dy=None):
-    """
-        error for ln(y*x^(4))
-        @param x: float value
-    """
-    if dx==None:
-        dx=0
-    if dy==None:
-        dy=0
-    err =math.sqrt((4*dx/x)**2 +(dy/y)**2)
-    if err >= math.fabs(x):
-        err =0.9*x
-    return err 
+
 def fromLogXY(self,x):
     """
         This function is used to load value on Plottable.View
@@ -203,7 +191,7 @@ def errToLogYX2(x,y,dx=None, dy=None):
             dx = 0
         if (dy == None):
             dy = 0
-        err = 4*(dx**2)/(x**2) + (dy**2)/(y**2)
+        err = (2*dx/x)**2 + (dy/y)**2
         if math.fabs(err) >= math.fabs(x):
             err =0.9*x
     else:
@@ -240,5 +228,18 @@ def errOneOverSqrtX(x,y=None, dx=None,dy=None):
         raise ValueError, "Cannot compute this error"
     
     return math.fabs(err)
+def errToLogYX4(x,y=None,dx=None,dy=None):
+    """
+        error for ln(y*x^(4))
+        @param x: float value
+    """
+    if dx==None:
+        dx=0
+    if dy==None:
+        dy=0
+    err =math.sqrt((4*dx/x)**2 +(dy/y)**2)
+    if err >= math.fabs(x):
+        err =0.9*x
+    return err 
 
            

@@ -388,8 +388,8 @@ class PlotPanel(wx.Panel):
                 xname, xunits = item.get_xaxis()
                 self.graph.yaxis("%s%s" % (yname,xname),  "%s^{-1}%s^{-1}" % (yunits,xunits))
                 
-            if ( self.yscales =="ln(y*x^(2)"):
-                item.transform_y( transform.toYX2 ,transform.ToYX2 )
+            if ( self.yscales =="ln(y*x^(2))"):
+                item.transform_y( transform.toYX2 ,transform.errToLogYX2 )
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()

@@ -42,12 +42,11 @@ class LinearFit(wx.Dialog):
         self.btFit =wx.Button(panel,-1,'Fit',size=(120, 30))
         self.btClose =wx.Button(panel, wx.ID_CANCEL,'Close',size=(90, 30) )
         self.static_line_1 = wx.StaticLine(panel, -1)
+        
         ix = 0
         iy = 1
-        
         sizer.Add(wx.StaticText(panel, -1, 'y = Ax +B'),(iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        
         iy+=1
         sizer.Add(wx.StaticText(panel, -1, 'Param A'),(iy, ix),\
                  (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -57,7 +56,6 @@ class LinearFit(wx.Dialog):
         sizer.Add(wx.StaticText(panel, -1, '+/-'),(iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 1
         sizer.Add(self.tcErrA, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-       
         iy += 1
         ix = 0
         sizer.Add(wx.StaticText(panel, -1, 'Param B'),(iy, ix),(1,1),\
@@ -107,14 +105,13 @@ class LinearFit(wx.Dialog):
         sizer.Add(self.btClose, (iy, ix),(1,1),\
                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
-       
         panel.SetSizer(sizer)
         self.SetSizer(vbox)
         self.Centre()
+        
         # Receives the type of model for the fitting
         from LineModel import LineModel
         self.model  = LineModel()
-          
           
         #Display the fittings values
         self.default_A = self.model.getParam('A') 
@@ -138,8 +135,7 @@ class LinearFit(wx.Dialog):
             self.PXmax.SetValue(str(self.maxi))
             self.PXmin.Disable()
             self.PXmax.Disable()
-       
-        
+    
         # new data for the fit 
         self.file_data1 = Theory1D(x=[], y=[], dy=None)
         self.file_data1.name = "Fit"
@@ -157,7 +153,6 @@ class LinearFit(wx.Dialog):
         
         #Check if the field of Fit Dialog contain values and use the x max and min of the user
         xmin,xmax = self._checkVal(self.FXmin.GetValue(),self.FXmax.GetValue())
-       
         #store the values of View in x,y, dx,dy
         x,y,dx,dy=self.plottable.returnValuesOfView()
         # Receive transformations of x and y
@@ -166,7 +161,6 @@ class LinearFit(wx.Dialog):
         # Check if View contains a x array .we online fit when x exits
         # makes transformation for y as a line to fit
         if x != []: 
-            
             xminView=self.floatTransform(xmin)
             xmaxView=self.floatTransform(xmax)
         
@@ -189,8 +183,6 @@ class LinearFit(wx.Dialog):
                 tempdy.append(dy)
                    
             #Find the fitting parameters
-            print "X", tempx
-            print "Y", tempy
             chisqr, out, cov = fittings.sansfit(self.model, 
                             [self.cstA, self.cstB],tempx, tempy,tempdy,xminView,xmaxView)
             
@@ -210,7 +202,7 @@ class LinearFit(wx.Dialog):
             # Reset model with the right values of A and B 
             self.model.setParam('A', float(cstA))
             self.model.setParam('B', float(cstB))
-            print "this is constant A:",float(cstA)
+            
             tempx = []
             tempy = []
             y_model = 0.0
@@ -240,10 +232,7 @@ class LinearFit(wx.Dialog):
                 tempy.append(math.pow(10,y_model))
             else: 
                 tempy.append(y_model)
-                
-            
-            print "this max",xmax
-            print "this view xmax", xmaxView
+          
             # Create new data plottable with result
             self.file_data1.x =[] 
             self.file_data1.y =[] 
@@ -251,8 +240,6 @@ class LinearFit(wx.Dialog):
             self.file_data1.y =tempy     
             self.file_data1.dx=None
             self.file_data1.dy=None
-            print "this is the min of data1",min(self.file_data1.x )
-            print "this is the max of data1",max(self.file_data1.x )
             #Load the view with the new values
             self.file_data1.reset_view()
             
