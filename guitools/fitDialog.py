@@ -218,42 +218,32 @@ class LinearFit(wx.Dialog):
            
             if self.xtrans == "log10(x)":
                 y_model = self.model.run(math.log10(xmin))
-
+                tempx.append(xmin)
             else:
                 y_model = self.model.run(xminView)
-            tempx.append(xmin)
-            
+                tempx.append(xminView)
+                
             if self.ytrans == "log10(y)":
                 tempy.append(math.pow(10,y_model))
             else:
                 tempy.append(y_model)
-            #Load tempy with the value between xView min and xView max
-            #for j in range(len(x)): 
-            #    if (x[j] > xminView and x[j] < xmaxView):
-            #        if self.xtrans == "log10(x)":
-            #            y_model = self.model.run(math.log10(x[j]))
-            #        else:
-            #            y_model = self.model.run(x[j])
-                        
-                        
-            #        if self.ytrans == "log10(y)":
-            #            tempy.append(math.pow(10,y_model))
-            #        else:
-            #            tempy.append(y_model)
-            #        tempx.append(x[j])
-                    
+                
             # load tempy with the maximum transformation
             if self.xtrans == "log10(x)":
                 y_model = self.model.run(math.log10(xmax))
-               
+                tempx.append(xmax)
             else:
                 y_model = self.model.run(xmaxView)
-            tempx.append(xmax)
+                tempx.append(xmaxView)
                 
             if self.ytrans == "log10(y)":
                 tempy.append(math.pow(10,y_model))
             else: 
                 tempy.append(y_model)
+                
+            
+            print "this max",xmax
+            print "this view xmax", xmaxView
             # Create new data plottable with result
             self.file_data1.x =[] 
             self.file_data1.y =[] 
@@ -261,7 +251,8 @@ class LinearFit(wx.Dialog):
             self.file_data1.y =tempy     
             self.file_data1.dx=None
             self.file_data1.dy=None
-            
+            print "this is the min of data1",min(self.file_data1.x )
+            print "this is the max of data1",max(self.file_data1.x )
             #Load the view with the new values
             self.file_data1.reset_view()
             
