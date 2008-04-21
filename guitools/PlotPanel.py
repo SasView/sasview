@@ -345,13 +345,13 @@ class PlotPanel(wx.Panel):
                 item.transform_x( transform.toX, transform.errToLogX )
                 self.set_xscale("log")
                 name, units = item.get_xaxis()
-                self.graph.xaxis("%s" % name,  "%s^{-1}" % units)
+                self.graph.xaxis("Log10 %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="ln(y)" ):
                 item.transform_y( transform.toLogX, transform.errToLogX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("%s" % name,  "%s^{-1}" % units)
+                self.graph.yaxis("log %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="y" ):
                 item.transform_y( transform.toX, transform.errToX )
@@ -363,18 +363,20 @@ class PlotPanel(wx.Panel):
                 item.transform_y( transform.toX, transform.errToLogX)
                 self.set_yscale("log")  
                 name, units = item.get_yaxis()
-                self.graph.yaxis("%s" % name,  "%s^{-1}" % units)
+                self.graph.yaxis("Log10 %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="y^(2)" ):
                 item.transform_y( transform.toX2, transform.errToX2 )    
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s^2" % name,  "%s^{-2}" % units)
+                
             if ( self.yscales =="1/y"):
                 item.transform_y( transform.toOneOverX , transform.errOneOverX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s" % name,  "%s" % units)
+                
             if ( self.yscales =="1/sqrt(y)" ):
                 item.transform_y( transform.toOneOverSqrtX ,transform.errOneOverSqrtX )
                 self.set_yscale("linear")
@@ -386,21 +388,21 @@ class PlotPanel(wx.Panel):
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
-                self.graph.yaxis("%s%s" % (yname,xname),  "%s^{-1}%s^{-1}" % (yunits,xunits))
+                self.graph.yaxis("Log %s%s" % (yname,xname),  "%s^{-1}%s^{-1}" % (yunits,xunits))
                 
             if ( self.yscales =="ln(y*x^(2))"):
                 item.transform_y( transform.toYX2 ,transform.errToLogYX2 )
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
-                self.graph.yaxis("%s%s^{2}" % (yname,xname),  "%s^{-1}%s^{-2}" % (yunits,xunits))
+                self.graph.yaxis("Log %s%s^{2}" % (yname,xname),  "%s^{-1}%s^{-2}" % (yunits,xunits))
             
             if ( self.yscales =="ln(y*x^(4))"):
                 item.transform_y( transform.toLogYX4 ,transform.errToLogYX4 )
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
-                self.graph.yaxis("%s%s^{4}" % (yname,xname),  "%s^{-1}%s^{-4}" % (yunits,xunits))
+                self.graph.yaxis("Log %s%s^{4}" % (yname,xname),  "%s^{-1}%s^{-4}" % (yunits,xunits))
             
             if ( self.viewModel == "Guinier lny vs x^(2)"):
                 
@@ -412,8 +414,8 @@ class PlotPanel(wx.Panel):
                 item.transform_y( transform.toLogX, transform.errToLogX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("%s" % name,  "%s^{-1}" % units)
-                 
+                self.graph.yaxis("Log %s" % name,  "%s^{-1}" % units)
+        #item.name = self.yscales+" vs " +self.xscales      
         self.prevXtrans = self.xscales 
         self.prevYtrans = self.yscales  
         
