@@ -445,6 +445,7 @@ class PlotPanel(wx.Panel):
                     if((min(x) < xmin )and( max(x) > xmax ))\
                         or ((min(x) <= xmin )and( max(x) > xmax ))\
                         or((min(x) < xmin )and( max(x) >= xmax )):
+                        print"went here"
                         item.reducedXrange(xmin,xmax)
                     else:
                          item.originalXrange()
