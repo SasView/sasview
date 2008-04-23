@@ -346,7 +346,7 @@ class PlotPanel(wx.Panel):
                 item.transform_x( transform.toX, transform.errToX )
                 self.set_xscale("log")
                 name, units = item.get_xaxis()
-                item.check_data_Plottable() 
+                item.check_data_PlottableX() 
                 self.graph.xaxis("Log10 %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="ln(y)" ):
@@ -365,7 +365,7 @@ class PlotPanel(wx.Panel):
                 item.transform_y( transform.toX, transform.errToLogX)
                 self.set_yscale("log")  
                 name, units = item.get_yaxis()
-                #item.check_data_Plottable() 
+                item.check_data_PlottableY() 
                 self.graph.yaxis("Log10 %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="y^(2)" ):
