@@ -63,6 +63,7 @@ class PlotPanel(wx.Panel):
         self.viewModel ="--"
         # keep track if the previous transformation of x and y in Property dialog
         self.prevXtrans =" "
+        
         self.prevYtrans =" "
         
     def returnTrans(self):
@@ -342,9 +343,10 @@ class PlotPanel(wx.Panel):
                 self.graph.xaxis("%s^{2}" % name,  "%s^{-2}" % units)
                 
             if (self.xscales=="log10(x)" ):
-                item.transform_x( transform.toX, transform.errToLogX )
+                item.transform_x( transform.toX, transform.errToX )
                 self.set_xscale("log")
                 name, units = item.get_xaxis()
+                item.check_data_Plottable() 
                 self.graph.xaxis("Log10 %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="ln(y)" ):
@@ -363,6 +365,7 @@ class PlotPanel(wx.Panel):
                 item.transform_y( transform.toX, transform.errToLogX)
                 self.set_yscale("log")  
                 name, units = item.get_yaxis()
+                #item.check_data_Plottable() 
                 self.graph.yaxis("Log10 %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="y^(2)" ):
@@ -391,7 +394,7 @@ class PlotPanel(wx.Panel):
                 self.graph.yaxis("Log %s%s" % (yname,xname),  "%s^{-1}%s^{-1}" % (yunits,xunits))
                 
             if ( self.yscales =="ln(y*x^(2))"):
-                item.transform_y( transform.toYX2 ,transform.errToLogYX2 )
+                item.transform_y( transform.toLogYX2 ,transform.errToLogYX2 )
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
@@ -414,25 +417,47 @@ class PlotPanel(wx.Panel):
                 item.transform_y( transform.toLogX, transform.errToLogX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("Log %s" % name,  "%s^{-1}" % units)
+                self.graph.yaxis("$Log %s$" % name,  "%s^{-1}" % units)
         #item.name = self.yscales+" vs " +self.xscales      
         self.prevXtrans = self.xscales 
         self.prevYtrans = self.yscales  
         
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
-    def onFitDisplay(self, plottable):
+        
+    def onFitDisplay(self, plottable,xmin,xmax):
         """
             Add a new plottable into the graph .In this case this plottable will be used 
             to fit some data
             @param plottable: the plottable to plot
         """
+        list =[]
+        tempx=[]
+        tempy=[]
+        tempdx=[]
+        tempdy=[]
+        #Stored plotted plottable in a new plottable 
+        list = self.graph.returnPlottable()
+        if len(list.keys())>0:
+            for item in list:
+                if self.graph.isPlotted(item)== True:
+                    x,y,dx,dy = item.returnValuesOfView()
+                    if((min(x) < xmin )and( max(x) > xmax ))\
+                        or ((min(x) <= xmin )and( max(x) > xmax ))\
+                        or((min(x) < xmin )and( max(x) >= xmax )):
+                        item.reducedXrange(xmin,xmax)
+                    else:
+                         item.originalXrange()
+            
+        
+        #Add the data to fit 
         plottable.reset_view()
         self.graph.add(plottable)
         self.graph.render(self)
         
         self.subplot.figure.canvas.draw_idle()
         self.graph.delete(plottable)
+    
       
     
     

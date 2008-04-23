@@ -244,7 +244,7 @@ class LinearFit(wx.Dialog):
             self.file_data1.reset_view()
             
             #Send the data to display to the PlotPanel
-            self.push_data(self.file_data1)
+            self.push_data(self.file_data1,xminView, xmaxView)
             
             # Display the fitting value on the Fit Dialog
             self._onsetValues(cstA, cstB, errA,errB,chisqr)

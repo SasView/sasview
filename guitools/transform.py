@@ -60,13 +60,6 @@ def toLogYX2(x,y):
     else:
          raise ValueError,"cannot be computed"
      
-     
-def toYX2(x,y):
-    return (x**2)*y
-
-
-def toXY(x,y):
-    return x*y
 
 def toLogYX4(x, y):
     if math.pow(x,4)*y > 0:
@@ -83,16 +76,8 @@ def toLogXY(x,y):
     else:
         return math.log(x*y)
 
-def fromLogXY(self,x):
-    """
-        This function is used to load value on Plottable.View
-        Calculate e^(x)
-        @param x: float value
-    """
-    return math.exp(x*y)
 
-         
-        
+
 def errToX(x,y=None,dx=None,dy=None):
     """
         calculate error of x**2
@@ -141,8 +126,14 @@ def errToLogX(x,y=None,dx=None,dy=None):
     """
     if dx==None:
         dx = 0
+    if x!=0:
+        dx = dx/x
+    else:
+        raise ValueError, "errToLogX: divide by zero"
+    
     if math.fabs(dx) >= math.fabs(x):
-        return 0.9*x
+        dx = 0.9*x
+    
     return dx
 
 def errToXY(x, y, dx=None, dy=None):

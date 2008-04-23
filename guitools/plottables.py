@@ -217,6 +217,9 @@ class Graph:
         for p in self.plottables:
             p.render(plot,color=self.plottables[p],symbol=0,label=labels[p])
         plot.render()
+   
+    def clear(self,plot): 
+        plot.clear()
 
     def __init__(self,**kw):
         self.reset()
@@ -374,7 +377,11 @@ class Plottable:
     def reset_view(self):
         """ Reload view with new value to plot"""
         self.view = self.View(self.x, self.y, self.dx, self.dy)
-       
+        #save the initial value
+        self.view.Xreel = self.view.x
+        self.view.Yreel = self.view.y
+        self.view.DXreel = self.view.dx
+        self.view.DYreel = self.view.dy
        
     
     def render(self,plot):
@@ -411,7 +418,14 @@ class Plottable:
     def returnValuesOfView(self):
         
         return self.view.returnXview()
-   
+    def check_data_PlottableX(self): 
+        self.view.check_data_logX()
+    def check_data_PlottableY(self): 
+        self.view.check_data_logY() 
+    def originalXrange(self):
+        self.view.reelXrange()
+    def reducedXrange(self,min,max):
+        self.view.reduceXrange(min, max)
     class View:
         """
             Representation of the data that might include a transformation
@@ -421,12 +435,18 @@ class Plottable:
         dx = None
         dy = None
         
+        
         def __init__(self, x=None, y=None, dx=None, dy=None):
             self.x = x
             self.y = y
             self.dx = dx
             self.dy = dy
-            
+            #to change x range to the reel range
+            self.Xreel = self.x
+            self.Yreel = self.y
+            self.DXreel = self.dx
+            self.DYreel = self.dy
+           
         def transform_x(self, func, errfunc, x,y=None,dx=None, dy=None):
             """
                 Transforms the x and dx vectors and stores the output.
@@ -451,26 +471,53 @@ class Plottable:
                 if dy and not len(y)==len(dy):
                     raise ValueError, "Plottable.View: Given y and dy are not of the same length"
             
-            self.x = numpy.zeros(len(x))
-            self.dx = numpy.zeros(len(x))
+            self.x = []
+            self.dx = []
             
             for i in range(len(x)):
                 if has_y:
-                     self.x[i] = func(x[i],y[i])
-                     if (dx!=None) and (dy !=None):
-                         self.dx[i] = errfunc(x[i], y[i], dx[i], dy[i])
-                     elif (dx != None):
-                         self.dx[i] = errfunc(x[i], y[i], dx[i],0)
-                     elif (dy != None):
-                         self.dx[i] = errfunc(x[i], y[i],0,dy[i])
-                     else:
-                         self.dx[i] = errfunc(x[i],y[i],0, 0)
+                     try:
+                         xtemp = func(x[i],y[i])
+                         
+                         
+                         if (dx!=None) and (dy !=None):
+                             dxtemp = errfunc(x[i], y[i], dx[i], dy[i])
+                         elif (dx != None):
+                             dxtemp = errfunc(x[i], y[i], dx[i],0)
+                         elif (dy != None):
+                             dxtemp = errfunc(x[i], y[i],0,dy[i])
+                         else:
+                             dxtemp = errfunc(x[i],y[i],0, 0)
+                         
+                         self.x.append(xtemp)
+                         self.dx.append(dxtemp)
+                         self.Xreel = []
+                         self.DXreel=[]
+                         self.Xreel = self.x
+                         self.DXreel = self.dx
+                         
+                     except:
+                         print "View.transform_x: skipping point %g" % x[i]
+                         print sys.exc_value
+                         
+                         
                 else:
-                    self.x[i] = func(x[i])
-                    if (dx != None):
-                        self.dx[i] = errfunc(x[i], dx[i])
-                    else:
-                        self.dx[i] = errfunc(x[i],None)
+                    try:
+                        xtemp = func(x[i])
+                        if (dx != None):
+                            dxtemp = errfunc(x[i], dx[i])
+                        else:
+                            dxtemp = errfunc(x[i],None)  
+                        self.x.append(xtemp)
+                        self.dx.append(dxtemp)
+                        self.Xreel = []
+                        self.DXreel=[]
+                        self.Xreel = self.x
+                        self.DXreel = self.dx
+                         
+                    except:
+                         print "View.transform_x: skipping point %g" % x[i]
+                         print sys.exc_value
                     
                          
         def transform_y(self, func, errfunc, y, x=None,dx=None,dy=None):
@@ -497,37 +544,172 @@ class Plottable:
                 if dx and not len(x)==len(dx):
                     raise ValueError, "Plottable.View: Given x and dx are not of the same length"
             
-            self.y = numpy.zeros(len(y))
-            self.dy = numpy.zeros(len(y))
+            self.y = []
+            self.dy = []
            
             for i in range(len(y)):
                 
                  if has_x:
-                     self.y[i] = func(y[i],x[i])
-                     if (dx!=None) and (dy !=None):
-                         self.dy[i] = errfunc(y[i], x[i], dy[i], dx[i])
-                     elif (dx != None):
-                         self.dy[i] = errfunc(y[i], x[i], 0, dx[i])
-                     elif (dy != None):
-                         self.dy[i] = errfunc(y[i], x[i], dy[i], 0)
-                     else:
-                         self.dy[i] = errfunc(y[i], None)
+                     try:
+                         tempy = func(y[i],x[i])
+                         if (dx!=None) and (dy !=None):
+                             tempdy = errfunc(y[i], x[i], dy[i], dx[i])
+                         elif (dx != None):
+                             tempdy = errfunc(y[i], x[i], 0, dx[i])
+                         elif (dy != None):
+                             tempdy = errfunc(y[i], x[i], dy[i], 0)
+                         else:
+                             tempdy = errfunc(y[i], None)
+                         self.y.append(tempy)
+                         self.dy.append(tempdy)
+                         self.Yreel = []
+                         self.DYreel=[]
+                         self.Yreel = self.y
+                         self.DYreel = self.dy
+                     except:
+                         print "View.transform_y: skipping point %g" % y[i]
+                         print sys.exc_value
+                            
                  else:
-                     self.y[i] = func(y[i])
-                     if (dy != None):
-                         self.dy[i] = errfunc( y[i],dy[i])
-                     else:
-                         self.dy[i] = errfunc( y[i],None)
-                
-     
+                     try:
+                         tempy = func(y[i])
+                         if (dy != None):
+                             tempdy = errfunc( y[i],dy[i])
+                         else:
+                             tempdy = errfunc( y[i],None)
+                         self.y.append(tempy)
+                         self.dy.append(tempdy)
+                         self.Yreel = []
+                         self.DYreel=[]
+                         self.Yreel = self.y
+                         self.DYreel = self.dy
+                     except:
+                          print "View.transform_y: skipping point %g" % y[i]
+                          print sys.exc_value
+                          
+
+            
         def returnXview(self):
             return self.x,self.y,self.dx,self.dy
         
-        def returnValueOfView(self,i): 
-            print"this is i:",i
-            if i in range(len(self.x)):
-                print self.x[i]
-                return self.x[i]
+        def checkMin(self,x,min,pos=None):
+            if pos==None:
+                pos=0
+                for i in range(len(self.x)):
+                    if not min in x:# The user enters a value not in x
+                        if x[i] > min:
+                            index= i-1
+                            print "this is index",index
+                            return index1
+                    else:
+                         index=i
+                         print"the user enter a value inside x",index
+                         return index
+            else:
+                index= pos
+                return index
+            
+        def checkMax(self,x,max,pos=None):
+            if pos==None:
+                pos=0
+                for i in range(len(self.x)):
+                    if not max in x:# The user enters a value not in x
+                        if x[i] >max:
+                           
+                            index= i-1
+                            return index
+                    else:
+                         index=i
+                         return index
+            else:
+                index= pos
+                return index
+              
+        def reduceXrange(self,min,max):
+            
+            # to change the x range to the user range
+            self.Xscale = []
+            self.Yscale = []
+            self.DXscale = []
+            self.DYscale = []
+            indexmin =self.checkMin(self.x,min,None)
+            indexmax =self.checkMin(self.x,max,None)
+            for i in range(len(self.x)):
+                if( self.x[i] >=self.x[indexmin])and( self.x[i] <= max):
+                    self.Xscale.append(self.x[i])
+                    self.Yscale.append(self.y[i])
+                    self.DXscale.append(self.dx[i])
+                    self.DYscale.append(self.dy[i])
+            print self.Xscale
+            self.x= self.Xscale  
+            self.y= self.Yscale
+            self.dx= self.DXscale
+            self.dy= self.DYscale
+        
+            
+        def reelXrange(self):
+            self.x= self.Xreel
+            self.y= self.Yreel
+            self.dx= self.DXreel
+            self.dy= self.DYreel
+           
+        
+        def check_data_logX(self): 
+            tempx=[]
+            tempdx=[]
+            tempy=[]
+            tempdy=[]
+        
+            for i in range(len(self.x)):
+                try:
+                    if (self.x[i]> 0):
+                       
+                        tempx.append(self.x[i])
+                        tempdx.append(self.dx[i])
+                        tempy.append(self.y[i])
+                        tempdy.append(self.dy[i])
+                except:
+                    #print "View.transform_x: skipping point %g" %self.x[i]
+                    print sys.exc_value  
+                    pass     
+                
+            self.x=[]
+            self.dx=[]
+            self.y=[]
+            self.dy=[]
+            self.x=tempx
+            self.y=tempy
+            self.dx=tempdx
+            self.dy=tempdy
+        def check_data_logY(self): 
+            tempx=[]
+            tempdx=[]
+            tempy=[]
+            tempdy=[]
+        
+            for i in range(len(self.x)):
+                try:
+                    if (self.y[i]> 0):
+                       
+                        tempx.append(self.x[i])
+                        tempdx.append(self.dx[i])
+                        tempy.append(self.y[i])
+                        tempdy.append(self.dy[i])
+                except:
+                    #print "View.transform_x: skipping point %g" %self.x[i]
+                    print sys.exc_value  
+                    pass     
+                
+            self.x=[]
+            self.dx=[]
+            self.y=[]
+            self.dy=[]
+            self.x=tempx
+            self.y=tempy
+            self.dx=tempdx
+            self.dy=tempdy
+                
+            
 
 class Data1D(Plottable):
     """Data plottable: scatter plot of x,y with errors in x and y.
