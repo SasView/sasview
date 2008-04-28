@@ -139,7 +139,8 @@ class LinearFit(wx.Dialog):
         # new data for the fit 
         self.file_data1 = Theory1D(x=[], y=[], dy=None)
         self.file_data1.name = "Fit"
-        
+        # Receive transformations of x and y
+        self.xtrans,self.ytrans= self.transform()
     def _onFit(self ,event):
         """
             Performs the fit. Receive an event when clicking on the button Fit.Computes chisqr ,
@@ -151,8 +152,6 @@ class LinearFit(wx.Dialog):
         tempy=[]
         tempdy = []
         
-        #Check if the field of Fit Dialog contain values and use the x max and min of the user
-        xmin,xmax = self._checkVal(self.FXmin.GetValue(),self.FXmax.GetValue())
         #store the values of View in x,y, dx,dy
         x,y,dx,dy=self.plottable.returnValuesOfView()
         # Receive transformations of x and y
@@ -161,94 +160,109 @@ class LinearFit(wx.Dialog):
         # Check if View contains a x array .we online fit when x exits
         # makes transformation for y as a line to fit
         if x != []: 
-            xminView=self.floatTransform(xmin)
-            xmaxView=self.floatTransform(xmax)
-        
-            # Store the transformed values of view x, y,dy in variables  before the fit
-            if  self.ytrans.lower() == "log10(y)":
-                for y_i in y:
-                    tempy.append(math.log10(y_i)) 
-            else:
-                tempy = y
-            if  self.xtrans.lower() == "log10(x)":
-                for x_i in x:
-                    tempx.append(math.log10(x_i)) 
-            else:
-                tempx = x
-                   
-            for y_i in y:
-                dy = 1/y_i
-                if dy >= y_i:
-                    dy = 0.9*y_i
-                tempdy.append(dy)
-                   
-            #Find the fitting parameters
-            chisqr, out, cov = fittings.sansfit(self.model, 
-                            [self.cstA, self.cstB],tempx, tempy,tempdy,xminView,xmaxView)
-            
-            #Check that cov and out are iterable before displaying them
-            if cov ==None:
-                errA =0.0
-                errB =0.0
-            else:
-                errA= math.sqrt(cov[0][0])
-                errB= math.sqrt(cov[1][1])
-            if out==None:
-                cstA=0.0
-                cstB=0.0
-            else:
-                cstA=out[0]
-                cstB=out[1]
-            # Reset model with the right values of A and B 
-            self.model.setParam('A', float(cstA))
-            self.model.setParam('B', float(cstB))
-            
-            tempx = []
-            tempy = []
-            y_model = 0.0
-            # load tempy with the minimum transformation
-           
-            if self.xtrans == "log10(x)":
-                y_model = self.model.run(math.log10(xmin))
-                tempx.append(xmin)
-            else:
-                y_model = self.model.run(xminView)
-                tempx.append(xminView)
+            if(self.checkFitValues(self.FXmin) == True):
+                #Check if the field of Fit Dialog contain values and use the x max and min of the user
+                xmin,xmax = self._checkVal(self.FXmin.GetValue(),self.FXmax.GetValue())
+                xminView=self.floatTransform(xmin)
+                xmaxView=self.floatTransform(xmax)
                 
-            if self.ytrans == "log10(y)":
-                tempy.append(math.pow(10,y_model))
-            else:
-                tempy.append(y_model)
+                # Store the transformed values of view x, y,dy in variables  before the fit
+                if  self.ytrans.lower() == "log10(y)":
+                    if (self.xtrans.lower() == "log10(x)"):
+                        for i in range(len(x)):
+                            if x[i]>=xmin:
+                                tempy.append(math.log10(y[i])) 
+                                tempdy.append(transform.errToLogX(y[i],0,dy[i],0))
+                    else:
+                        for y_i in y:
+                            tempy.append(math.log10(y_i)) 
+                            tempdy.append(transform.errToLogX(y[i],0,dy[i],0))
+                else:
+                    tempy = y
+                    tempdy = dy
+               
+                if (self.xtrans.lower() == "log10(x)"):
+                    for x_i in x:
+                        if x_i >= xmin:
+                            tempx.append(math.log10(x_i)) 
+                else:
+                    tempx = x
+                       
+                #for y_i in y:
+                #    dy = math.sqrt(math.fabs(y_i))
+                #    if dy >= y_i:
+                #        dy = 0.9*y_i
+                #    tempdy.append(dy)
+                       
+                #Find the fitting parameters
+
+                chisqr, out, cov = fittings.sansfit(self.model, 
+                                [self.cstA, self.cstB],tempx, tempy,tempdy,xminView,xmaxView)
+                print "this out",out
+                #Check that cov and out are iterable before displaying them
+                if cov ==None:
+                    errA =0.0
+                    errB =0.0
+                else:
+                    errA= math.sqrt(cov[0][0])
+                    errB= math.sqrt(cov[1][1])
+                if out==None:
+                    cstA=0.0
+                    cstB=0.0
+                else:
+                    cstA=out[0]
+                    cstB=out[1]
+                # Reset model with the right values of A and B 
+                self.model.setParam('A', float(cstA))
+                self.model.setParam('B', float(cstB))
                 
-            # load tempy with the maximum transformation
-            if self.xtrans == "log10(x)":
-                y_model = self.model.run(math.log10(xmax))
-                tempx.append(xmax)
-            else:
-                y_model = self.model.run(xmaxView)
-                tempx.append(xmaxView)
+                tempx = []
+                tempy = []
+                y_model = 0.0
+                # load tempy with the minimum transformation
+               
+                if self.xtrans == "log10(x)":
+                    y_model = self.model.run(math.log10(xmin))
+                    tempx.append(xmin)
+                else:
+                    y_model = self.model.run(xminView)
+                    tempx.append(xminView)
+                    
+                if self.ytrans == "log10(y)":
+                    tempy.append(math.pow(10,y_model))
+                    print "tempy",tempy
+                else:
+                    tempy.append(y_model)
+                    
+                # load tempy with the maximum transformation
+                if self.xtrans == "log10(x)":
+                    y_model = self.model.run(math.log10(xmax))
+                    tempx.append(xmax)
+                else:
+                    y_model = self.model.run(xmaxView)
+                    tempx.append(xmaxView)
+                    
+                if self.ytrans == "log10(y)":
+                    tempy.append(math.pow(10,y_model))
+                else: 
+                    tempy.append(y_model)
+              
+                # Create new data plottable with result
+                self.file_data1.x =[] 
+                self.file_data1.y =[] 
+                self.file_data1.x =tempx  
+                self.file_data1.y =tempy     
+                self.file_data1.dx=None
+                self.file_data1.dy=None
+                #Load the view with the new values
+                self.file_data1.reset_view()
                 
-            if self.ytrans == "log10(y)":
-                tempy.append(math.pow(10,y_model))
-            else: 
-                tempy.append(y_model)
-          
-            # Create new data plottable with result
-            self.file_data1.x =[] 
-            self.file_data1.y =[] 
-            self.file_data1.x =tempx  
-            self.file_data1.y =tempy     
-            self.file_data1.dx=None
-            self.file_data1.dy=None
-            #Load the view with the new values
-            self.file_data1.reset_view()
+                #Send the data to display to the PlotPanel
+                self.push_data(self.file_data1)
+                
+                # Display the fitting value on the Fit Dialog
+                self._onsetValues(cstA, cstB, errA,errB,chisqr)
             
-            #Send the data to display to the PlotPanel
-            self.push_data(self.file_data1,xminView, xmaxView)
-            
-            # Display the fitting value on the Fit Dialog
-            self._onsetValues(cstA, cstB, errA,errB,chisqr)
-   
     def _onsetValues(self,cstA,cstB,errA,errB,Chi):
          """
               Display  the value on fit Dialog 
@@ -290,7 +304,7 @@ class LinearFit(wx.Dialog):
         if ( self.xtrans=="x" ):
             return transform.toX(x)
         
-        if ( self.xtrans=="x^(2)" ):
+        if ( self.xtrans=="x^(2)" ): 
             return transform.toX2(x)
         
         if (self.xtrans=="log10(x)" ):
@@ -298,6 +312,24 @@ class LinearFit(wx.Dialog):
                 return math.log10(x)
             else:
                 raise ValueError,"cannot compute log of a negative number"
+            
+    def checkFitValues(self,item):
+        """
+            Check the validity of input values
+        """
+        flag = True
+        value = item.GetValue()
+        # Check for possible values entered
+        if (self.xtrans=="log10(x)"):
+            if (float(value) > 0):
+                item.SetBackgroundColour(wx.WHITE)
+                item.Refresh()
+            else:
+                flag = False
+                item.SetBackgroundColour("pink")
+                item.Refresh()
+      
+        return flag
        
                 
    

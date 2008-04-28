@@ -42,30 +42,26 @@ def toOneOverX(x,y=None):
         return 1/x
     else:
         raise ValueError,"cannot divide by zero"
-def toOneOverSqrtX(x=None,y=None):
+def toOneOverSqrtX(y , x=None):
     if y!=None:
         if y > 0:
             return 1/math.sqrt(y)
         else:
             raise ValueError,"cannot be computed"
-    if x!= None:
-        if x > 0:
-            return 1/math.sqrt(x)
-        else:
-            raise ValueError,"cannot be computed"
     
-def toLogYX2(x,y):
+    
+def toLogYX2(y,x):
     if y*(x**2) >0:
         return math.log(y*(x**2))
     else:
          raise ValueError,"cannot be computed"
      
 
-def toLogYX4(x, y):
+def toLogYX4(y, x):
     if math.pow(x,4)*y > 0:
         return math.log(math.pow(x,4)*y)
 
-def toLogXY(x,y):
+def toLogXY(y,x):
     """
         This function is used to load value on Plottable.View
         calculate log x
@@ -84,6 +80,8 @@ def errToX(x,y=None,dx=None,dy=None):
         @param x: float value
         @param dx: float value
     """
+    if dx==None:
+        dx=0
     return dx
 
 

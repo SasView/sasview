@@ -9,6 +9,9 @@ import os
 import fittings
 import transform
 from canvas import FigureCanvas
+from matplotlib.widgets import RectangleSelector
+from pylab import  gca, gcf
+
 #TODO: make the plottables interactive
 
 from plottables import Graph
@@ -48,7 +51,7 @@ class PlotPanel(wx.Panel):
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.canvas,1,wx.EXPAND)
         self.SetSizer(sizer)
-
+        
         # Graph object to manage the plottables
         self.graph = Graph()
         #self.Bind(EVT_FUNC_FIT, self.onFitRange)
@@ -87,7 +90,6 @@ class PlotPanel(wx.Panel):
         
         if len(list.keys())>0:
             first_item = list.keys()[0]
-            #print first_item, list[first_item].__class__.__name__
             dlg = LinearFit( None, first_item, self.onFitDisplay,self.returnTrans, -1, 'Fitting')
             dlg.ShowModal() 
 
@@ -171,7 +173,29 @@ class PlotPanel(wx.Panel):
         self.figure.canvas.draw_idle()
         
 
+  
+         
+    def onselect(self,event1, event2):
+        print"went here"
+        from matplotlib.widgets import RectangleSelector
+        from pylab import  show, gca, gcf
 
+        'event1 and event2 are the press and release events'
+        x1, y1 = event1.xdata, event1.ydata
+        x2, y2 = event2.xdata, event2.ydata
+        print "(%3.2f, %3.2f) --> (%3.2f, %3.2f)"%(x1,y1,x2,y2)
+        print " The button you used were: ",event1.button, event2.button
+        gca().set_xlim([x1,x2])
+        gca().set_ylim([y1,y2])
+        gcf().canvas.draw_idle()
+       
+        # drawtype is 'box' or 'line' or 'none'
+        LS = RectangleSelector(self.subplot, onselect,drawtype='box',useblit=True)
+        show()
+
+
+
+        
     def onSaveImage(self, evt):
         #figure.savefig
         #print "Save image not implemented"
@@ -240,8 +264,7 @@ class PlotPanel(wx.Panel):
         # TODO: rather than redrawing on the fly.
         self.subplot.clear()
         self.subplot.hold(True)
-
-
+	
     def render(self):
         """Commit the plot after all objects are drawn"""
         # TODO: this is when the backing store should be swapped in.
@@ -329,139 +352,122 @@ class PlotPanel(wx.Panel):
         """ 
         list =[]
         list = self.graph.returnPlottable()
+        
         for item in list:
+            item.getTransform(self.xscales,self.yscales)
             if ( self.xscales=="x" ):
-                item.transform_x( transform.toX,transform.errToX )
+                item.returnTransformationx(transform.toX,transform.errToX)
+                
                 self.set_xscale("linear")
                 name, units = item.get_xaxis()
                 self.graph.xaxis("%s" % name,  "%s^{-1}" % units)
                 
             if ( self.xscales=="x^(2)" ):
-                item.transform_x( transform.toX2,transform.errToX2 )
+                item.returnTransformationx(transform.toX2,transform.errToX2)
                 self.set_xscale('linear')
                 name, units = item.get_xaxis()
                 self.graph.xaxis("%s^{2}" % name,  "%s^{-2}" % units)
                 
             if (self.xscales=="log10(x)" ):
-                item.transform_x( transform.toX, transform.errToX )
+                item.returnTransformationx(transform.toX,transform.errToX)
                 self.set_xscale("log")
-                name, units = item.get_xaxis()
-                item.check_data_PlottableX() 
+                name, units = item.get_xaxis() 
                 self.graph.xaxis("Log10 %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="ln(y)" ):
-                item.transform_y( transform.toLogX, transform.errToLogX )
+                item.returnTransformationy(transform.toLogX,transform.errToLogX)
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
+                item.check_data_PlottableY() 
                 self.graph.yaxis("log %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="y" ):
-                item.transform_y( transform.toX, transform.errToX )
+                item.returnTransformationy(transform.toX,transform.errToX)
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="log10(y)" ): 
-                item.transform_y( transform.toX, transform.errToLogX)
+                item.returnTransformationy(transform.toX,transform.errToX)
+                item.check_data_PlottableY() 
                 self.set_yscale("log")  
                 name, units = item.get_yaxis()
-                item.check_data_PlottableY() 
                 self.graph.yaxis("Log10 %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="y^(2)" ):
-                item.transform_y( transform.toX2, transform.errToX2 )    
+                item.returnTransformationy( transform.toX2,transform.errToX2 )    
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s^2" % name,  "%s^{-2}" % units)
                 
             if ( self.yscales =="1/y"):
-                item.transform_y( transform.toOneOverX , transform.errOneOverX )
+                item.returnTransformationy(transform.toOneOverX,transform.errOneOverX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s" % name,  "%s" % units)
                 
             if ( self.yscales =="1/sqrt(y)" ):
-                item.transform_y( transform.toOneOverSqrtX ,transform.errOneOverSqrtX )
+                item.returnTransformationy(transform.toOneOverSqrtX,transform.errOneOverSqrtX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
+                item.check_data_PlottableY() 
                 self.graph.yaxis("%s" %name,  "%s" % units)
                 
             if ( self.yscales =="ln(y*x)"):
-                item.transform_y( transform.toLogXY ,transform.errToLogXY )
+                item.returnTransformationy( transform.toLogXY,transform.errToLogXY)
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
                 self.graph.yaxis("Log %s%s" % (yname,xname),  "%s^{-1}%s^{-1}" % (yunits,xunits))
                 
             if ( self.yscales =="ln(y*x^(2))"):
-                item.transform_y( transform.toLogYX2 ,transform.errToLogYX2 )
+                item.returnTransformationy( transform.toLogYX2,transform.errToLogYX2)
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
+                item.check_data_PlottableY() 
                 self.graph.yaxis("Log %s%s^{2}" % (yname,xname),  "%s^{-1}%s^{-2}" % (yunits,xunits))
             
             if ( self.yscales =="ln(y*x^(4))"):
-                item.transform_y( transform.toLogYX4 ,transform.errToLogYX4 )
+                item.returnTransformationy(transform.toLogYX4,transform.errToLogYX4)
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
                 self.graph.yaxis("Log %s%s^{4}" % (yname,xname),  "%s^{-1}%s^{-4}" % (yunits,xunits))
             
             if ( self.viewModel == "Guinier lny vs x^(2)"):
-                
-                item.transform_x( transform.toX2,transform.errToX2 )
+                item.returnTransformationx(transform.toX2,transform.errToX2)
                 self.set_xscale('linear')
                 name, units = item.get_xaxis()
                 self.graph.xaxis("%s^{2}" % name,  "%s^{-2}" % units)
-                
-                item.transform_y( transform.toLogX, transform.errToLogX )
+                item.returnTransformationy(transform.toLogX,transform.errToLogX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("$Log %s$" % name,  "%s^{-1}" % units)
+                
         #item.name = self.yscales+" vs " +self.xscales      
         self.prevXtrans = self.xscales 
         self.prevYtrans = self.yscales  
-        
+        item.transformView()
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
         
-    def onFitDisplay(self, plottable,xmin,xmax):
+    def onFitDisplay(self, plottable):
         """
             Add a new plottable into the graph .In this case this plottable will be used 
             to fit some data
             @param plottable: the plottable to plot
         """
-        list =[]
-        tempx=[]
-        tempy=[]
-        tempdx=[]
-        tempdy=[]
-        #Stored plotted plottable in a new plottable 
-        list = self.graph.returnPlottable()
-        if len(list.keys())>0:
-            for item in list:
-                if self.graph.isPlotted(item)== True:
-                    x,y,dx,dy = item.returnValuesOfView()
-                    if((min(x) < xmin )and( max(x) > xmax ))\
-                        or ((min(x) <= xmin )and( max(x) > xmax ))\
-                        or((min(x) < xmin )and( max(x) >= xmax )):
-                        print"went here"
-                        item.reducedXrange(xmin,xmax)
-                    else:
-                         item.originalXrange()
-            
-        
         #Add the data to fit 
-        plottable.reset_view()
+       
         self.graph.add(plottable)
         self.graph.render(self)
         
         self.subplot.figure.canvas.draw_idle()
         self.graph.delete(plottable)
-    
-      
-    
-    
+   
+
+        
 class NoRepaintCanvas(FigureCanvasWxAgg):
     """We subclass FigureCanvasWxAgg, overriding the _onPaint method, so that
     the draw method is only called for the first two paint events. After that,

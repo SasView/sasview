@@ -1,6 +1,7 @@
 import wx
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg, _convert_agg_to_wx_bitmap
 from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib.backend_bases import MouseEvent
 
 class FigureCanvas(FigureCanvasWxAgg):
     """
@@ -18,6 +19,9 @@ class FigureCanvas(FigureCanvasWxAgg):
         # alternative approach, binding to wx.EVT_IDLE,
         # doesn't behave as nicely.
         self.idletimer = wx.CallLater(1,self._onDrawIdle)
+        # Support for mouse wheel
+        self.Bind(wx.EVT_MOUSEWHEEL, self._onMouseWheel)
+
 
     def draw_idle(self, *args, **kwargs):
         """
@@ -45,6 +49,36 @@ class FigureCanvas(FigureCanvasWxAgg):
             self.gui_repaint(drawDC=drawDC)
         else:
             self._isRendered = False
+    def _onMouseWheel(self, evt):
+        """Translate mouse wheel events into matplotlib events"""
+        # Determine mouse location
+        x = evt.GetX()
+        y = self.figure.bbox.height - evt.GetY()
+
+        # Convert delta/rotation/rate into a floating point step size
+        delta = evt.GetWheelDelta()
+        rotation = evt.GetWheelRotation()
+        rate = evt.GetLinesPerAction()
+        #print "delta,rotation,rate",delta,rotation,rate
+        step = rate*float(rotation)/delta
+
+        # Convert to mpl event
+        evt.Skip()
+        self.scroll_event(x, y, step, guiEvent=evt)
+
+    def scroll_event(self, x, y, step=1, guiEvent=None):
+        """
+        Backend derived classes should call this function on any
+        scroll wheel event.  x,y are the canvas coords: 0,0 is lower,
+        left.  button and key are as defined in MouseEvent
+        """
+        button = 'up' if step >= 0 else 'down'
+        self._button = button
+        s = 'scroll_event'
+        event = MouseEvent(s, self, x, y, button, self._key, guiEvent=guiEvent)
+        setattr(event,'step',step)
+        self.callbacks.process(s, event)
+
 
     def _onPaint(self, evt):
         """
@@ -63,4 +97,4 @@ class FigureCanvas(FigureCanvasWxAgg):
             self.draw(drawDC=wx.PaintDC(self))
 
         evt.Skip()
-
+   
