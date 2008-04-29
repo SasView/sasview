@@ -405,20 +405,9 @@ class Plottable:
         """Return the number of colors need to render the object"""
         return 1
     
-    def transform_x(self, func, errfunc):
-        """
-            @param func: reference to x transformation function
-            
-        """
-        self.view.transform_x(func, errfunc, x=self.x, y=self.y, dx=self.dx, dy=self.dy)
-    
-    def transform_y(self, func, errfunc):
-        """
-            @param func: reference to y transformation function
-            
-        """
-        self.view.transform_y(func, errfunc, self.y, self.x, self.dx,  self.dy)
-        
+    def transformView(self):
+       
+        self.view.transform( self.x, self.y, self.dx,self.dy)
         
     def returnValuesOfView(self):
         return self.view.returnXview()
@@ -459,8 +448,7 @@ class Plottable:
             self.funcy= None
             self.funcdx= None
             self.funcdy= None
-    
-        def transform_x(self, func, errfunc, x,y=None,dx=None, dy=None):
+        def transform(self, x=None,y=None,dx=None, dy=None):
             """
                 Transforms the x and dx vectors and stores the output.
                 
@@ -472,67 +460,48 @@ class Plottable:
             
             
             # Sanity check
-            has_y = False
-            if dx and not len(x)==len(dx):
-                    raise ValueError, "Plottable.View: Given x and dx are not of the same length" 
-            # Check length of y array
-            if not y==None:
+            if (x!=None) and (y!=None):
+                if dx and not len(x)==len(dx):
+                        raise ValueError, "Plottable.View: Given x and dx are not of the same length" 
+                # Check length of y array
                 if not len(y)==len(x):
                     raise ValueError, "Plottable.View: Given y and x are not of the same length"
-                else:
-                    has_y = True
+            
                 if dy and not len(y)==len(dy):
                     raise ValueError, "Plottable.View: Given y and dy are not of the same length"
-            
-            self.x = []
-            self.dx = []
-            tempy=[]
-            tempdy=[]
-            print "this is initial value of y transformed",self.y
-            print "this is initial value of dy transformed",self.dy
-            for i in range(len(x)):
-                if has_y:
-                     try:
-                         xtemp = func(x[i],y[i])
-                         tempy.append(self.funcy.y[i])
-                         tempdy.append(self.funcdy.dy[i])
-                         if (dx!=None) and (dy !=None):
-                             dxtemp = errfunc(x[i], y[i], dx[i], dy[i])
-                         elif (dx != None):
-                             dxtemp = errfunc(x[i], y[i], dx[i],0)
-                         elif (dy != None):
-                             dxtemp = errfunc(x[i], y[i],0,dy[i])
-                         else:
-                             dxtemp = errfunc(x[i],y[i],0, 0)
-                         self.x.append(xtemp)
-                         self.dx.append(dxtemp)  
-                     except:
-                         if len(tempy)>0:
-                             del tempy[len(tempy)-1]
-                             del tempdy[len(tempdy)-1]
+                self.x = []
+                self.y = []
+                self.dx = []
+                self.dy = []
+                tempx=[]
+                tempdx=[]
+                tempy=[]
+                tempdy=[]
+                if dx==None:
+                    dx=numpy.zeros(len(x))
+                if dy==None:
+                    dy=numpy.zeros(len(y))
+               
+                for i in range(len(x)):
+                    try:
+                         tempx =self.funcx(x[i],y[i])
+                         tempy =self.funcy(y[i],x[i])
+                         tempdx = self.funcdx(x[i], y[i], dx[i], dy[i])
+                         tempdy = self.funcdy(y[i], x[i], dy[i], dx[i])
+                        
+                         self.x.append(tempx)
+                         self.y.append(tempy)
+                         self.dx.append(tempdx)
+                         self.dy.append(tempdy)
+                    except:
+                         
                          print "View.transform_x: skipping point %g" % x[i]
                          print sys.exc_value   
-                else:
-                    try:
-                        xtemp = func(x[i])
-                        tempy.append(self.funcy.y[i])
-                        tempdy.append(self.funcdy.dy[i])
-                        if (dx != None):
-                            dxtemp = errfunc(x[i], dx[i])
-                        else:
-                            dxtemp = errfunc(x[i],None)  
-                        self.x.append(xtemp)
-                        self.dx.append(dxtemp) 
-                    except:
-                         if len(tempy)>0:
-                             del tempy[len(tempy)-1]
-                             del tempdy[len(tempdy)-1]
-                         print "View.transform_x: skipping point %g" % x[i]
-                         print sys.exc_value
-            self.y=tempy
-            self.dy=tempdy
-            self.Xreel = []
-            self.DXreel=[]
+                # Sanity check
+                if not (len(self.x)==len(self.dx))and(len(self.x)==len(self.dy))\
+                and(len(self.x)==len(self.y))and(len(self.y)==len(self.dy)) :
+                        raise ValueError, "Plottable.View: Given x,y,dy and dx are not of the same length" 
+            
         def returntransformx(self,funcx,funcdx):    
             self.funcx= funcx
             self.funcdx= funcdx
@@ -540,88 +509,7 @@ class Plottable:
         def returntransformy(self,funcy,funcdy):    
             self.funcy= funcy
             self.funcdy= funcdy
-        def transform_y(self, func, errfunc, y, x=None,dx=None,dy=None):
-            """
-                Transforms the y and dy vectors and stores the output.
-                
-                @param func: function to apply to the data y
-                @param x: array of x values
-                @param dx: array of error values
-                @param y: array of y values
-                @param dy: array of error values
-                @param errfunc: function to apply to errors dy
-            """
-            # Sanity check
-            has_x = False
-            if dy and not len(y)==len(dy):
-                raise ValueError, "Plottable.View: Given y and dy are not of the same length"
-            # Check length of x array
-            if not x==None:
-                if not len(y)==len(x):
-                    raise ValueError, "Plottable.View: Given y and x are not of the same length"
-                else:
-                    has_x = True
-                if dx and not len(x)==len(dx):
-                    raise ValueError, "Plottable.View: Given x and dx are not of the same length"
-            
-            self.y = []
-            self.dy = []
-            tempx=[]
-            tempdx=[]
-            print "this is initial value of x transformed",self.x
-            print "this is initial value of dx transformed",self.dx
-            for i in range(len(y)):
-                
-                 if has_x:
-                     try:
-                         tempy = func(y[i],x[i])
-                         tempx.append(self.funcx.x[i])
-                         tempdx.append(self.funcdx.x[i])
-                         if (dx!=None) and (dy !=None):
-                             tempdy = errfunc(y[i], x[i], dy[i], dx[i])
-                         elif (dx != None):
-                             tempdy = errfunc(y[i], x[i], 0, dx[i])
-                         elif (dy != None):
-                             tempdy = errfunc(y[i], x[i], dy[i], 0)
-                         else:
-                             tempdy = errfunc(y[i], None)
-                         self.y.append(tempy)
-                         self.dy.append(tempdy)
-                     except:
-                         if len(tempx)>0:
-                             del tempx[len(tempx)-1]
-                             del tempdx[len(tempdx)-1]
-                         print "View.transform_y: skipping point %g" % y[i]
-                         print sys.exc_value
-                            
-                 else:
-                     try:
-                         tempy = func(y[i])
-                         tempx.append(self.funcx.x[i])
-                         tempdx.append(self.funcdx.dx[i])
-                         if (dy != None):
-                             tempdy = errfunc( y[i],dy[i])
-                         else:
-                             tempdy = errfunc( y[i],None)
-                         self.y.append(tempy)
-                         self.dy.append(tempdy)   
-                     except:
-                          if len(tempx)>0:
-                              del tempx[len(tempx)-1]
-                              del tempdx[len(tempdx)-1]
-                          print "View.transform_y: skipping point %g" % y[i]
-                          print sys.exc_value
-                    
-            self.x = tempx
-            self.dx = tempdx
-            self.Yreel = []
-            self.DYreel=[]
-            self.Yreel = self.y
-            self.DYreel = self.dy
-            print "this is x length",self.x
-            print "this is y length",self.y
-            print "this is dx length",self.dx
-            print "this is dy length",self.dy
+       
         def returnXview(self):
             return self.x,self.y,self.dx,self.dy
         
@@ -637,6 +525,10 @@ class Plottable:
             tempdx=[]
             tempy=[]
             tempdy=[]
+            if self.dx==None:
+                self.dx=numpy.zeros(len(self.x))
+            if self.dy==None:
+                self.dy=numpy.zeros(len(self.y))
             if self.transx=="log10(x)" :
                 for i in range(len(self.x)):
                     try:
@@ -650,31 +542,7 @@ class Plottable:
                         #print "View.transform_x: skipping point %g" %self.x[i]
                         print sys.exc_value  
                         pass 
-            if (self.transx == "x"):   
-                if (self.transy == "ln(y*x)"):
-                        try:
-                            if (self.y[i]*self.x[i]> 0):
-                                tempx.append(self.x[i])
-                                tempdx.append(self.dx[i])
-                                tempy.append(self.y[i])
-                                tempdy.append(self.dy[i])
-                        except:
-                            #print "View.transform_x: skipping point %g" %self.x[i]
-                            print sys.exc_value  
-                            pass
-            if(self.transy =="ln(y*x^(2))")or(self.transy =="ln(y*x^(4))"):
-                print "this is y transform",self.y
-                print "this is x transform",self.x
-                try:
-                    if (self.y[i]> 0 )and (self.x[i]!=0):
-                        tempx.append(self.x[i])
-                        tempdx.append(self.dx[i])
-                        tempy.append(self.y[i])
-                        tempdy.append(self.dy[i])
-                except:
-                    #print "View.transform_x: skipping point %g" %self.x[i]
-                    print sys.exc_value  
-                    pass
+           
             self.x=[]
             self.dx=[]
             self.y=[]
@@ -689,9 +557,12 @@ class Plottable:
             tempdx=[]
             tempy=[]
             tempdy=[]
-            for i in range(len(self.x)):
-                if (self.transy == "ln(y)") or (self.transy == "log10(y)" )or\
-                     (self.transy =="1/sqrt(y)") :
+            if self.dx==None:
+                self.dx=numpy.zeros(len(self.x))
+            if self.dy==None:
+                self.dy=numpy.zeros(len(self.y))
+            if (self.transy == "log10(y)" ):
+                for i in range(len(self.x)):
                      try:
                         if (self.y[i]> 0):
                             tempx.append(self.x[i])
@@ -702,42 +573,6 @@ class Plottable:
                         #print "View.transform_x: skipping point %g" %self.x[i]
                         print sys.exc_value  
                         pass
-                if(self.transy == "1/y"):
-                    try:
-                        if (self.y[i]!=0):
-                            tempx.append(self.x[i])
-                            tempdx.append(self.dx[i])
-                            tempy.append(self.y[i])
-                            tempdy.append(self.dy[i])
-                    except:
-                        #print "View.transform_x: skipping point %g" %self.x[i]
-                        print sys.exc_value  
-                        pass  
-            if (self.transx == "x"):   
-                if (self.transy == "ln(y*x)"):
-                        try:
-                            if (self.y[i]*self.x[i]> 0):
-                                tempx.append(self.x[i])
-                                tempdx.append(self.dx[i])
-                                tempy.append(self.y[i])
-                                tempdy.append(self.dy[i])
-                        except:
-                            #print "View.transform_x: skipping point %g" %self.x[i]
-                            print sys.exc_value  
-                            pass
-            if(self.transy =="ln(y*x^(2))")or(self.transy =="ln(y*x^(4))"):
-                print "this is y transform",self.y
-                print "this is x transform",self.x
-                try:
-                    if (self.y[i]> 0 )and (self.x[i]!= 0):
-                        tempx.append(self.x[i])
-                        tempdx.append(self.dx[i])
-                        tempy.append(self.y[i])
-                        tempdy.append(self.dy[i])
-                except:
-                    #print "View.transform_x: skipping point %g" %self.x[i]
-                    print sys.exc_value  
-                    pass
                 
             self.x=[]
             self.dx=[]

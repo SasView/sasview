@@ -66,9 +66,83 @@ class PlotPanel(wx.Panel):
         self.viewModel ="--"
         # keep track if the previous transformation of x and y in Property dialog
         self.prevXtrans =" "
-        
         self.prevYtrans =" "
-        
+        self.canvas.mpl_connect('scroll_event',self.onWheel)
+    def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
+        """
+        Rescale (lo,hi) by step, returning the new (lo,hi)
+        The scaling is centered on pt, with positive values of step
+        driving lo/hi away from pt and negative values pulling them in.
+        If bal is given instead of point, it is already in [0,1] coordinates.
+    
+        This is a helper function for step-based zooming.
+        """
+        # Convert values into the correct scale for a linear transformation
+        # TODO: use proper scale transformers
+        if scale=='log':
+            lo,hi = log10(lo),log10(hi)
+            if pt is not None: pt = log10(pt)
+    
+        # Compute delta from axis range * %, or 1-% if persent is negative
+        if step > 0:
+            delta = float(hi-lo)*step/100
+        else:
+            delta = float(hi-lo)*step/(100-step)
+    
+        # Add scale factor proportionally to the lo and hi values, preserving the
+        # point under the mouse
+        if bal is None:
+            bal = float(pt-lo)/(hi-lo)
+        lo = lo - bal*delta
+        hi = hi + (1-bal)*delta
+    
+        # Convert transformed values back to the original scale
+        if scale=='log':
+            lo,hi = pow(10.,lo),pow(10.,hi)
+    
+        return (lo,hi)
+
+    def onWheel(self, event):
+        """
+        Process mouse wheel as zoom events
+        """
+        ax = event.inaxes
+        step = event.step
+
+        if ax != None:
+            # Event occurred inside a plotting area
+            lo,hi = ax.get_xlim()
+            lo,hi = _rescale(lo,hi,step,pt=event.xdata)
+            ax.set_xlim((lo,hi))
+
+            lo,hi = ax.get_ylim()
+            lo,hi = _rescale(lo,hi,step,pt=event.ydata)
+            ax.set_ylim((lo,hi))
+        else:
+            # Check if zoom happens in the axes
+            xdata,ydata = None,None
+            x,y = event.x,event.y
+            for ax in self.axes:
+                insidex,_ = ax.xaxis.contains(event)
+                if insidex:
+                    xdata,_ = ax.transAxes.inverse_xy_tup((x,y))
+                    #print "xaxis",x,"->",xdata
+                insidey,_ = ax.yaxis.contains(event)
+                if insidey:
+                    _,ydata = ax.transAxes.inverse_xy_tup((x,y))
+                    #print "yaxis",y,"->",ydata
+            if xdata is not None:
+                lo,hi = ax.get_xlim()
+                lo,hi = _rescale(lo,hi,step,bal=xdata)
+                ax.set_xlim((lo,hi))
+            if ydata is not None:
+                lo,hi = ax.get_ylim()
+                lo,hi = _rescale(lo,hi,step,bal=ydata)
+                ax.set_ylim((lo,hi))
+
+        self.canvas.draw_idle()
+
+
     def returnTrans(self):
         return self.xscales,self.yscales
     
@@ -264,7 +338,7 @@ class PlotPanel(wx.Panel):
         # TODO: rather than redrawing on the fly.
         self.subplot.clear()
         self.subplot.hold(True)
-	
+    
     def render(self):
         """Commit the plot after all objects are drawn"""
         # TODO: this is when the backing store should be swapped in.
