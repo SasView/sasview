@@ -382,13 +382,7 @@ class Plottable:
     def reset_view(self):
         """ Reload view with new value to plot"""
         self.view = self.View(self.x, self.y, self.dx, self.dy)
-        #save the initial value
-        self.view.Xreel = self.view.x
-        self.view.Yreel = self.view.y
-        self.view.DXreel = self.view.dx
-        self.view.DYreel = self.view.dy
-       
-    
+        
     def render(self,plot):
         """The base class makes sure the correct units are being used for
         subsequent plottable.  
@@ -437,11 +431,7 @@ class Plottable:
             self.y = y
             self.dx = dx
             self.dy = dy
-            #to change x range to the reel range
-            self.Xreel = self.x
-            self.Yreel = self.y
-            self.DXreel = self.dx
-            self.DYreel = self.dy
+           
             self.transx =""
             self.transy =""
             self.funcx= None
@@ -458,7 +448,6 @@ class Plottable:
                 @param errfunc: function to apply to errors
             """
             
-            
             # Sanity check
             if (x!=None) and (y!=None):
                 if dx and not len(x)==len(dx):
@@ -473,15 +462,12 @@ class Plottable:
                 self.y = []
                 self.dx = []
                 self.dy = []
-                tempx=[]
-                tempdx=[]
-                tempy=[]
-                tempdy=[]
+               
                 if dx==None:
                     dx=numpy.zeros(len(x))
                 if dy==None:
                     dy=numpy.zeros(len(y))
-               
+              
                 for i in range(len(x)):
                     try:
                          tempx =self.funcx(x[i],y[i])
@@ -494,14 +480,24 @@ class Plottable:
                          self.dx.append(tempdx)
                          self.dy.append(tempdy)
                     except:
-                         
-                         print "View.transform_x: skipping point %g" % x[i]
-                         print sys.exc_value   
+                         print "View.transform: skipping point x %g" % x[i]
+                         print "View.transform: skipping point y %g" % y[i]
+                         print "View.transform: skipping point dy %g" % dy[i]
+                         print sys.exc_value  
+                print len(self.x)
+                print len(self.dx)
+                print len(self.y)
+                print len(self.dy)
                 # Sanity check
                 if not (len(self.x)==len(self.dx))and(len(self.x)==len(self.dy))\
                 and(len(self.x)==len(self.y))and(len(self.y)==len(self.dy)) :
                         raise ValueError, "Plottable.View: Given x,y,dy and dx are not of the same length" 
-            
+                self.check_data_logX()
+                self.check_data_logY()
+                print len(self.x)
+                print len(self.dx)
+                print len(self.y)
+                print len(self.dy)
         def returntransformx(self,funcx,funcdx):    
             self.funcx= funcx
             self.funcdx= funcdx
@@ -514,12 +510,6 @@ class Plottable:
             return self.x,self.y,self.dx,self.dy
         
      
-        def reelXrange(self):
-            self.x= self.Xreel
-            self.y= self.Yreel
-            self.dx= self.DXreel
-            self.dy= self.DYreel
-        
         def check_data_logX(self): 
             tempx=[]
             tempdx=[]
@@ -539,18 +529,18 @@ class Plottable:
                             tempy.append(self.y[i])
                             tempdy.append(self.dy[i])
                     except:
-                        #print "View.transform_x: skipping point %g" %self.x[i]
+                        print "check_data_logX: skipping point x %g" %self.x[i]
                         print sys.exc_value  
                         pass 
            
-            self.x=[]
-            self.dx=[]
-            self.y=[]
-            self.dy=[]
-            self.x=tempx
-            self.y=tempy
-            self.dx=tempdx
-            self.dy=tempdy
+                self.x=[]
+                self.dx=[]
+                self.y=[]
+                self.dy=[]
+                self.x=tempx
+                self.y=tempy
+                self.dx=tempdx
+                self.dy=tempdy
             
         def check_data_logY(self): 
             tempx=[]
@@ -570,18 +560,18 @@ class Plottable:
                             tempy.append(self.y[i])
                             tempdy.append(self.dy[i])
                      except:
-                        #print "View.transform_x: skipping point %g" %self.x[i]
+                        print "check_data_logY: skipping point %g" %self.y[i]
                         print sys.exc_value  
                         pass
                 
-            self.x=[]
-            self.dx=[]
-            self.y=[]
-            self.dy=[]
-            self.x=tempx
-            self.y=tempy
-            self.dx=tempdx
-            self.dy=tempdy
+                self.x=[]
+                self.dx=[]
+                self.y=[]
+                self.dy=[]
+                self.x=tempx
+                self.y=tempy
+                self.dx=tempdx
+                self.dy=tempdy
                 
             
 

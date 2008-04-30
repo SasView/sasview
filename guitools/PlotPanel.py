@@ -22,7 +22,39 @@ def show_tree(obj,d=0):
     print "%s%s" % ("-"*d,obj.__class__.__name__)
     if 'get_children' in dir(obj):
         for a in obj.get_children(): show_tree(a,d+1)
-
+def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
+        """
+        Rescale (lo,hi) by step, returning the new (lo,hi)
+        The scaling is centered on pt, with positive values of step
+        driving lo/hi away from pt and negative values pulling them in.
+        If bal is given instead of point, it is already in [0,1] coordinates.
+    
+        This is a helper function for step-based zooming.
+        """
+        # Convert values into the correct scale for a linear transformation
+        # TODO: use proper scale transformers
+        if scale=='log':
+            lo,hi = log10(lo),log10(hi)
+            if pt is not None: pt = log10(pt)
+    
+        # Compute delta from axis range * %, or 1-% if persent is negative
+        if step > 0:
+            delta = float(hi-lo)*step/100
+        else:
+            delta = float(hi-lo)*step/(100-step)
+    
+        # Add scale factor proportionally to the lo and hi values, preserving the
+        # point under the mouse
+        if bal is None:
+            bal = float(pt-lo)/(hi-lo)
+        lo = lo - bal*delta
+        hi = hi + (1-bal)*delta
+    
+        # Convert transformed values back to the original scale
+        if scale=='log':
+            lo,hi = pow(10.,lo),pow(10.,hi)
+    
+        return (lo,hi)
 
 
 class PlotPanel(wx.Panel):
@@ -68,39 +100,7 @@ class PlotPanel(wx.Panel):
         self.prevXtrans =" "
         self.prevYtrans =" "
         self.canvas.mpl_connect('scroll_event',self.onWheel)
-    def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
-        """
-        Rescale (lo,hi) by step, returning the new (lo,hi)
-        The scaling is centered on pt, with positive values of step
-        driving lo/hi away from pt and negative values pulling them in.
-        If bal is given instead of point, it is already in [0,1] coordinates.
-    
-        This is a helper function for step-based zooming.
-        """
-        # Convert values into the correct scale for a linear transformation
-        # TODO: use proper scale transformers
-        if scale=='log':
-            lo,hi = log10(lo),log10(hi)
-            if pt is not None: pt = log10(pt)
-    
-        # Compute delta from axis range * %, or 1-% if persent is negative
-        if step > 0:
-            delta = float(hi-lo)*step/100
-        else:
-            delta = float(hi-lo)*step/(100-step)
-    
-        # Add scale factor proportionally to the lo and hi values, preserving the
-        # point under the mouse
-        if bal is None:
-            bal = float(pt-lo)/(hi-lo)
-        lo = lo - bal*delta
-        hi = hi + (1-bal)*delta
-    
-        # Convert transformed values back to the original scale
-        if scale=='log':
-            lo,hi = pow(10.,lo),pow(10.,hi)
-    
-        return (lo,hi)
+        self.axes = [self.subplot]
 
     def onWheel(self, event):
         """
@@ -119,7 +119,7 @@ class PlotPanel(wx.Panel):
             lo,hi = _rescale(lo,hi,step,pt=event.ydata)
             ax.set_ylim((lo,hi))
         else:
-            # Check if zoom happens in the axes
+             # Check if zoom happens in the axes
             xdata,ydata = None,None
             x,y = event.x,event.y
             for ax in self.axes:
@@ -248,27 +248,7 @@ class PlotPanel(wx.Panel):
         
 
   
-         
-    def onselect(self,event1, event2):
-        print"went here"
-        from matplotlib.widgets import RectangleSelector
-        from pylab import  show, gca, gcf
-
-        'event1 and event2 are the press and release events'
-        x1, y1 = event1.xdata, event1.ydata
-        x2, y2 = event2.xdata, event2.ydata
-        print "(%3.2f, %3.2f) --> (%3.2f, %3.2f)"%(x1,y1,x2,y2)
-        print " The button you used were: ",event1.button, event2.button
-        gca().set_xlim([x1,x2])
-        gca().set_ylim([y1,y2])
-        gcf().canvas.draw_idle()
-       
-        # drawtype is 'box' or 'line' or 'none'
-        LS = RectangleSelector(self.subplot, onselect,drawtype='box',useblit=True)
-        show()
-
-
-
+  
         
     def onSaveImage(self, evt):
         #figure.savefig
@@ -431,7 +411,6 @@ class PlotPanel(wx.Panel):
             item.getTransform(self.xscales,self.yscales)
             if ( self.xscales=="x" ):
                 item.returnTransformationx(transform.toX,transform.errToX)
-                
                 self.set_xscale("linear")
                 name, units = item.get_xaxis()
                 self.graph.xaxis("%s" % name,  "%s^{-1}" % units)
@@ -452,7 +431,6 @@ class PlotPanel(wx.Panel):
                 item.returnTransformationy(transform.toLogX,transform.errToLogX)
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                item.check_data_PlottableY() 
                 self.graph.yaxis("log %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="y" ):
@@ -463,7 +441,6 @@ class PlotPanel(wx.Panel):
                 
             if ( self.yscales=="log10(y)" ): 
                 item.returnTransformationy(transform.toX,transform.errToX)
-                item.check_data_PlottableY() 
                 self.set_yscale("log")  
                 name, units = item.get_yaxis()
                 self.graph.yaxis("Log10 %s" % name,  "%s^{-1}" % units)
@@ -484,7 +461,6 @@ class PlotPanel(wx.Panel):
                 item.returnTransformationy(transform.toOneOverSqrtX,transform.errOneOverSqrtX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                item.check_data_PlottableY() 
                 self.graph.yaxis("%s" %name,  "%s" % units)
                 
             if ( self.yscales =="ln(y*x)"):
@@ -498,8 +474,7 @@ class PlotPanel(wx.Panel):
                 item.returnTransformationy( transform.toLogYX2,transform.errToLogYX2)
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
-                xname, xunits = item.get_xaxis()
-                item.check_data_PlottableY() 
+                xname, xunits = item.get_xaxis() 
                 self.graph.yaxis("Log %s%s^{2}" % (yname,xname),  "%s^{-1}%s^{-2}" % (yunits,xunits))
             
             if ( self.yscales =="ln(y*x^(4))"):
