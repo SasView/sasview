@@ -7,7 +7,7 @@
 # pylint: disable-msg=R0904 
 
 
-import unittest, math, numpy
+import unittest, math, numpy, pylab
 from sans.pr.invertor import Invertor
         
 class TestBasicComponent(unittest.TestCase):
@@ -20,7 +20,7 @@ class TestBasicComponent(unittest.TestCase):
         self.ntest = 5
         self.x_in = numpy.ones(self.ntest)
         for i in range(self.ntest):
-            self.x_in[i] = 1.0*i
+            self.x_in[i] = 1.0*(i+1)
 
 
     def testset_dmax(self):
@@ -30,6 +30,14 @@ class TestBasicComponent(unittest.TestCase):
         value = 15.0
         self.invertor.d_max = value
         self.assertEqual(self.invertor.d_max, value)
+        
+    def testset_alpha(self):
+        """
+            Set and read alpha
+        """
+        value = 15.0
+        self.invertor.alpha = value
+        self.assertEqual(self.invertor.alpha, value)
         
     def testset_x_1(self):
         """
@@ -112,5 +120,161 @@ class TestBasicComponent(unittest.TestCase):
         
         self.assertEqual(self.invertor.test_no_data, None)
         
+    def test_inversion(self):
+        """
+            Test an inversion for which we know the answer
+        """
+        x, y, err = load("sphere_80.txt")
+
+        # Choose the right d_max...
+        self.invertor.d_max = 160.0
+        # Set a small alpha
+        self.invertor.alpha = 1e-7
+        # Set data
+        self.invertor.x   = x
+        self.invertor.y   = y
+        self.invertor.err = err
+        # Perform inversion
+        out, cov = self.invertor.invert(10)
+        # This is a very specific case
+        # We should make sure it always passes
+        self.assertTrue(self.invertor.chi2/len(x)<200.00)
+        
+        # Check the computed P(r) with the theory
+        # for shpere of radius 80
+        x = pylab.arange(0.01, self.invertor.d_max, self.invertor.d_max/51.0)
+        y = numpy.zeros(len(x))
+        dy = numpy.zeros(len(x))
+        y_true = numpy.zeros(len(x))
+
+        sum = 0.0
+        sum_true = 0.0
+        for i in range(len(x)):
+            #y[i] = self.invertor.pr(out, x[i])
+            (y[i], dy[i]) = self.invertor.pr_err(out, cov, x[i])
+            sum += y[i]
+            if x[i]<80.0:
+                y_true[i] = pr_theory(x[i], 80.0)
+            else:
+                y_true[i] = 0
+            sum_true += y_true[i]
+            
+        y = y/sum*self.invertor.d_max/len(x)
+        dy = dy/sum*self.invertor.d_max/len(x)
+        y_true = y_true/sum_true*self.invertor.d_max/len(x)
+        
+        chi2 = 0.0
+        for i in range(len(x)):
+            res = (y[i]-y_true[i])/dy[i]
+            chi2 += res*res
+            
+        try:
+            self.assertTrue(chi2/51.0<10.0)
+        except:
+            print "chi2 =", chi2/51.0
+            raise
+            
+    def test_q_zero(self):
+        """
+            Test error condition where a point has q=0
+        """
+        x, y, err = load("sphere_80.txt")
+        x[0] = 0.0
+        
+        # Choose the right d_max...
+        self.invertor.d_max = 160.0
+        # Set a small alpha
+        self.invertor.alpha = 1e-7
+        # Set data
+        def doit():
+            self.invertor.x   = x
+        self.assertRaises(ValueError, doit)
+        
+                            
+    def test_q_neg(self):
+        """
+            Test error condition where a point has q<0
+        """
+        x, y, err = load("sphere_80.txt")
+        x[0] = -0.2
+        
+        # Choose the right d_max...
+        self.invertor.d_max = 160.0
+        # Set a small alpha
+        self.invertor.alpha = 1e-7
+        # Set data
+        self.invertor.x   = x
+        self.invertor.y   = y
+        self.invertor.err = err
+        # Perform inversion
+        out, cov = self.invertor.invert(4)
+        
+        try:
+            self.assertTrue(self.invertor.chi2>0)
+        except:
+            print "Chi2 =", self.invertor.chi2
+            raise
+                            
+    def test_Iq_zero(self):
+        """
+            Test error condition where a point has q<0
+        """
+        x, y, err = load("sphere_80.txt")
+        y[0] = 0.0
+        
+        # Choose the right d_max...
+        self.invertor.d_max = 160.0
+        # Set a small alpha
+        self.invertor.alpha = 1e-7
+        # Set data
+        self.invertor.x   = x
+        self.invertor.y   = y
+        self.invertor.err = err
+        # Perform inversion
+        out, cov = self.invertor.invert(4)
+        
+        try:
+            self.assertTrue(self.invertor.chi2>0)
+        except:
+            print "Chi2 =", self.invertor.chi2
+            raise
+                            
+        
+
+def pr_theory(r, R):
+    """
+       P(r) for a sphere
+    """
+    if r<=2*R:
+        return 12.0* ((0.5*r/R)**2) * ((1.0-0.5*r/R)**2) * ( 2.0 + 0.5*r/R )
+    else:
+        return 0.0
+    
+def load(path = "sphere_60_q0_2.txt"):
+    import numpy, math, sys
+    # Read the data from the data file
+    data_x   = numpy.zeros(0)
+    data_y   = numpy.zeros(0)
+    data_err = numpy.zeros(0)
+    if not path == None:
+        input_f = open(path,'r')
+        buff    = input_f.read()
+        lines   = buff.split('\n')
+        for line in lines:
+            try:
+                toks = line.split()
+                x = float(toks[0])
+                y = float(toks[1])
+                data_x = numpy.append(data_x, x)
+                data_y = numpy.append(data_y, y)
+                # Set the error of the first point to 5%
+                # to make theory look like data
+                scale = 0.1/math.sqrt(data_x[0])
+                data_err = numpy.append(data_err, scale*math.sqrt(y))
+            except:
+                pass
+               
+    return data_x, data_y, data_err 
+       
 if __name__ == '__main__':
     unittest.main()

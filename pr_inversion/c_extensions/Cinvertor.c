@@ -221,6 +221,21 @@ static PyObject * get_dmax(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("d", self->params.d_max);	
 }
 
+static PyObject * set_alpha(Cinvertor *self, PyObject *args) {
+	double alpha;
+  
+	if (!PyArg_ParseTuple(args, "d", &alpha)) return NULL;
+	self->params.alpha = alpha;
+	return Py_BuildValue("d", self->params.alpha);	
+}
+
+/**
+ * Gets the maximum distance
+ */
+static PyObject * get_alpha(Cinvertor *self, PyObject *args) {
+	return Py_BuildValue("d", self->params.alpha);	
+}
+
 /**
  * Gets the number of x points
  */
@@ -245,8 +260,8 @@ static PyObject * get_nerr(Cinvertor *self, PyObject *args) {
 
 /**
  * Function to call to evaluate the residuals
- * @param args: input q or [q,phi]
- * @return: function value
+ * @param args: input parameters
+ * @return: list of residuals
  */
 static PyObject * residuals(Cinvertor *self, PyObject *args) {
 	double *pars;
@@ -256,7 +271,8 @@ static PyObject * residuals(Cinvertor *self, PyObject *args) {
 	int i;
 	double residual, diff;
 	// Regularization factor
-	double lmult = 0.0;
+	double regterm = 0.0;
+	double tmp = 0.0;
 	
 	PyObject *data_obj;
 	Py_ssize_t npars;
@@ -265,16 +281,68 @@ static PyObject * residuals(Cinvertor *self, PyObject *args) {
 	
 	OUTVECTOR(data_obj,pars,npars);
 		
-	//printf("npars: %i", npars);
     // PyList of residuals
 	// Should create this list only once and refill it
     residuals = PyList_New(self->params.npoints);
+
+    regterm = reg_term(pars, self->params.d_max, npars);
     
     for(i=0; i<self->params.npoints; i++) {
-    	//printf("\n%i: ", i);
     	diff = self->params.y[i] - iq(pars, self->params.d_max, npars, self->params.x[i]);
     	residual = diff*diff / (self->params.err[i]*self->params.err[i]);
-    	//printf("%i %g\n", i, residual);
+    	tmp = residual;
+    	
+    	// regularization term
+    	residual += self->params.alpha * regterm;
+    	
+    	if (PyList_SetItem(residuals, i, Py_BuildValue("d",residual) ) < 0){
+    	    PyErr_SetString(CinvertorError, 
+    	    	"Cinvertor.residuals: error setting residual.");
+    		return NULL;
+    	};
+    		
+    }
+    
+	return residuals;
+}
+/**
+ * Function to call to evaluate the residuals
+ * for P(r) minimization (for testing purposes)
+ * @param args: input parameters
+ * @return: list of residuals
+ */
+static PyObject * pr_residuals(Cinvertor *self, PyObject *args) {
+	double *pars;
+	PyObject* residuals;
+	PyObject* temp;
+	double *res;
+	int i;
+	double residual, diff;
+	// Regularization factor
+	double regterm = 0.0;
+	double tmp = 0.0;
+	
+	PyObject *data_obj;
+	Py_ssize_t npars;
+	  
+	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
+	
+	OUTVECTOR(data_obj,pars,npars);
+		
+	// Should create this list only once and refill it
+    residuals = PyList_New(self->params.npoints);
+
+    regterm = reg_term(pars, self->params.d_max, npars);
+
+    
+    for(i=0; i<self->params.npoints; i++) {
+    	diff = self->params.y[i] - pr(pars, self->params.d_max, npars, self->params.x[i]);
+    	residual = diff*diff / (self->params.err[i]*self->params.err[i]);
+    	tmp = residual;
+    	
+    	// regularization term
+    	residual += self->params.alpha * regterm;
+    	
     	if (PyList_SetItem(residuals, i, Py_BuildValue("d",residual) ) < 0){
     	    PyErr_SetString(CinvertorError, 
     	    	"Cinvertor.residuals: error setting residual.");
@@ -322,9 +390,33 @@ static PyObject * get_pr(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("f", pr_value);	
 }
 
+/**
+ * Function to call to evaluate P(r) with errors
+ * @param args: c-parameters and r
+ * @return: P(r)
+ */
+static PyObject * get_pr_err(Cinvertor *self, PyObject *args) {
+	double *pars;
+	double *pars_err;
+	double pr_err_value;
+	double r, pr_value;
+	PyObject *data_obj;
+	Py_ssize_t npars;
+	PyObject *err_obj;
+	Py_ssize_t npars2;
+	  
+	if (!PyArg_ParseTuple(args, "OOd", &data_obj, &err_obj, &r)) return NULL;
+	OUTVECTOR(data_obj,pars,npars);
+	OUTVECTOR(err_obj,pars_err,npars2);
+		
+	pr_err(pars, pars_err, self->params.d_max, npars, r, &pr_value, &pr_err_value);
+	return Py_BuildValue("ff", pr_value, pr_err_value);	
+}
+
 
 static PyMethodDef Cinvertor_methods[] = {
 		   {"residuals", (PyCFunction)residuals, METH_VARARGS, "Get the list of residuals"},
+		   {"pr_residuals", (PyCFunction)pr_residuals, METH_VARARGS, "Get the list of residuals"},
 		   {"set_x", (PyCFunction)set_x, METH_VARARGS, ""},
 		   {"get_x", (PyCFunction)get_x, METH_VARARGS, ""},
 		   {"set_y", (PyCFunction)set_y, METH_VARARGS, ""},
@@ -333,11 +425,14 @@ static PyMethodDef Cinvertor_methods[] = {
 		   {"get_err", (PyCFunction)get_err, METH_VARARGS, ""},
 		   {"set_dmax", (PyCFunction)set_dmax, METH_VARARGS, ""},
 		   {"get_dmax", (PyCFunction)get_dmax, METH_VARARGS, ""},
+		   {"set_alpha", (PyCFunction)set_alpha, METH_VARARGS, ""},
+		   {"get_alpha", (PyCFunction)get_alpha, METH_VARARGS, ""},
 		   {"get_nx", (PyCFunction)get_nx, METH_VARARGS, ""},
 		   {"get_ny", (PyCFunction)get_ny, METH_VARARGS, ""},
 		   {"get_nerr", (PyCFunction)get_nerr, METH_VARARGS, ""},
 		   {"iq", (PyCFunction)get_iq, METH_VARARGS, ""},
 		   {"pr", (PyCFunction)get_pr, METH_VARARGS, ""},
+		   {"get_pr_err", (PyCFunction)get_pr_err, METH_VARARGS, ""},
 		   {"is_valid", (PyCFunction)is_valid, METH_VARARGS, ""},
    
    {NULL}

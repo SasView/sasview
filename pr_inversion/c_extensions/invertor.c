@@ -39,7 +39,6 @@ double pr_sphere(double R, double r) {
  */
 double ortho(double d_max, int n, double r) {
 	return 2.0*r*sin(pi*n*r/d_max);
-	
 }
 
 /**
@@ -75,12 +74,62 @@ double iq(double *pars, double d_max, int n_c, double q) {
  * P(r) calculated from the expansion.
  */
 double pr(double *pars, double d_max, int n_c, double r) {
-    double sum = 0.0; 
+    double sum = 0.0;  
 	int i;
     for (i=0; i<n_c; i++) {
         sum += pars[i] * ortho(d_max, i+1, r);
     }
     return sum;
+}
+
+/**
+ * P(r) calculated from the expansion, with errors
+ */
+void pr_err(double *pars, double *err, double d_max, int n_c, 
+		double r, double *pr_value, double *pr_value_err) {
+    double sum = 0.0; 
+    double sum_err = 0.0;
+    double func_value;
+	int i;
+    for (i=0; i<n_c; i++) {
+    	func_value = ortho(d_max, i+1, r);
+        sum += pars[i] * func_value;
+        sum_err += err[i]*err[i]*func_value*func_value;
+    }
+    *pr_value = sum;
+    if (sum_err>0) {
+    	*pr_value_err = sqrt(sum_err);
+    } else {
+    	*pr_value_err = sum;
+    }
+} 
+
+/**
+ * dP(r)/dr calculated from the expansion.
+ */
+double dprdr(double *pars, double d_max, int n_c, double r) {
+    double sum = 0.0; 
+	int i;
+    for (i=0; i<n_c; i++) {
+        sum += pars[i] * 2.0*(sin(pi*(i+1)*r/d_max) + pi*(i+1)*r/d_max * cos(pi*(i+1)*r/d_max));
+    }
+    return sum;
+}
+
+/**
+ * regularization term calculated from the expansion.
+ */
+double reg_term(double *pars, double d_max, int n_c) {
+    double sum = 0.0; 
+    double r;
+    double deriv;
+	int i;
+    for (i=0; i<25; i++) {
+    	r = d_max/25.0*i;
+    	deriv = dprdr(pars, d_max, n_c, r);
+        sum += deriv*deriv;
+    }
+    return sum/25.0*d_max;
 }
 
 
