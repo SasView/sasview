@@ -52,7 +52,19 @@ if 'any' not in dir(__builtins__):
         for cond in L:
             if not cond: return False
         return True
-
+def error_msg(msg, parent=None):
+    """
+    Signal an error condition -- in a GUI, popup a error dialog
+    """
+    # Code brought with minor podifications from mpl.backends.backend_wx
+    # Copyright (C) Jeremy O'Donoghue & John Hunter, 2003-4
+    dialog =wx.MessageDialog(parent  = parent,
+                             message = msg,
+                             caption = 'Polplot error',
+                             style=wx.OK | wx.CENTRE)
+    dialog.ShowModal()
+    dialog.Destroy()
+    return None
 # Graph structure for holding multiple plottables
 class Graph:
     """
@@ -382,7 +394,10 @@ class Plottable:
     def reset_view(self):
         """ Reload view with new value to plot"""
         self.view = self.View(self.x, self.y, self.dx, self.dy)
-        
+        self.view.Xreel = self.view.x
+        self.view.Yreel = self.view.y
+        self.view.DXreel = self.view.dx
+        self.view.DYreel = self.view.dy
     def render(self,plot):
         """The base class makes sure the correct units are being used for
         subsequent plottable.  
@@ -411,11 +426,16 @@ class Plottable:
         
     def check_data_PlottableY(self): 
         self.view.check_data_logY() 
+        
     def returnTransformationx(self,transx,transdx):
         self.view.returntransformx(transx,transdx)
+        
     def returnTransformationy(self,transy,transdy):
         self.view.returntransformy(transy,transdy)
-   
+    def onReset(self):
+        self.view.onResetView()
+    def onFitRange(self,xmin,xmax):
+        self.view.onFitRangeView(xmin,xmax)
     class View:
         """
             Representation of the data that might include a transformation
@@ -431,9 +451,15 @@ class Plottable:
             self.y = y
             self.dx = dx
             self.dy = dy
-           
+            #to change x range to the reel range
+            self.Xreel = self.x
+            self.Yreel = self.y
+            self.DXreel = self.dx
+            self.DYreel = self.dy
+            
             self.transx =""
             self.transy =""
+            # function to transform x and y
             self.funcx= None
             self.funcy= None
             self.funcdx= None
@@ -462,7 +488,8 @@ class Plottable:
                 self.y = []
                 self.dx = []
                 self.dy = []
-               
+                tempx=[]
+                tempy=[]
                 if dx==None:
                     dx=numpy.zeros(len(x))
                 if dy==None:
@@ -480,24 +507,29 @@ class Plottable:
                          self.dx.append(tempdx)
                          self.dy.append(tempdy)
                     except:
+                         tempx=x[i]
+                         tempy=y[i]
                          print "View.transform: skipping point x %g" % x[i]
                          print "View.transform: skipping point y %g" % y[i]
                          print "View.transform: skipping point dy %g" % dy[i]
+                         
                          print sys.exc_value  
-                print len(self.x)
-                print len(self.dx)
-                print len(self.y)
-                print len(self.dy)
+               
                 # Sanity check
                 if not (len(self.x)==len(self.dx))and(len(self.x)==len(self.dy))\
                 and(len(self.x)==len(self.y))and(len(self.y)==len(self.dy)) :
                         raise ValueError, "Plottable.View: Given x,y,dy and dx are not of the same length" 
                 self.check_data_logX()
                 self.check_data_logY()
-                print len(self.x)
-                print len(self.dx)
-                print len(self.y)
-                print len(self.dy)
+                self.Xreel = self.x
+                self.Yreel = self.y
+                self.DXreel = self.dx
+                self.DYreel = self.dy
+        def onResetView(self):
+            self.x=self.Xreel
+            self.y=self.Yreel
+            self.dx=self.DXreel
+            self.dy=self.DYreel
         def returntransformx(self,funcx,funcdx):    
             self.funcx= funcx
             self.funcdx= funcdx
@@ -573,7 +605,21 @@ class Plottable:
                 self.dx=tempdx
                 self.dy=tempdy
                 
-            
+        def onFitRangeView(self,xmin,xmax):
+            tempx=[]
+            tempdx=[]
+            tempy=[]
+            tempdy=[]
+            for i in range(len(self.x)):
+                if ( self.x[i] >= xmin ) and ( self.x[i] <= xmax ):
+                    tempx.append(self.x[i])
+                    tempdx.append(self.dx[i])
+                    tempy.append(self.y[i])
+                    tempdy.append(self.dy[i])
+            self.x=tempx
+            self.y=tempy
+            self.dx=tempdx
+            self.dy=tempdy        
 
 class Data1D(Plottable):
     """Data plottable: scatter plot of x,y with errors in x and y.

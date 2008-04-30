@@ -170,12 +170,12 @@ class LinearFit(wx.Dialog):
                 if  self.ytrans.lower() == "log10(y)":
                     if (self.xtrans.lower() == "log10(x)"):
                         for i in range(len(x)):
-                            if x[i]>=xmin:
+                            if x[i]>= math.log10(xmin):
                                 tempy.append(math.log10(y[i])) 
                                 tempdy.append(transform.errToLogX(y[i],0,dy[i],0))
                     else:
-                        for y_i in y:
-                            tempy.append(math.log10(y_i)) 
+                        for i in range(len(y)):
+                            tempy.append(math.log10(y[i])) 
                             tempdy.append(transform.errToLogX(y[i],0,dy[i],0))
                 else:
                     tempy = y
@@ -183,7 +183,7 @@ class LinearFit(wx.Dialog):
                
                 if (self.xtrans.lower() == "log10(x)"):
                     for x_i in x:
-                        if x_i >= xmin:
+                        if x_i >= math.log10(xmin):
                             tempx.append(math.log10(x_i)) 
                 else:
                     tempx = x
@@ -195,8 +195,11 @@ class LinearFit(wx.Dialog):
                 #    tempdy.append(dy)
                        
                 #Find the fitting parameters
-
-                chisqr, out, cov = fittings.sansfit(self.model, 
+                if (self.xtrans.lower() == "log10(x)"):
+                    chisqr, out, cov = fittings.sansfit(self.model, [self.cstA, self.cstB],
+                    tempx, tempy,tempdy,math.log10(xmin),math.log10(xmax))
+                else:
+                    chisqr, out, cov = fittings.sansfit(self.model, 
                                 [self.cstA, self.cstB],tempx, tempy,tempdy,xminView,xmaxView)
                 print "this out",out
                 #Check that cov and out are iterable before displaying them
@@ -258,7 +261,7 @@ class LinearFit(wx.Dialog):
                 self.file_data1.reset_view()
                 
                 #Send the data to display to the PlotPanel
-                self.push_data(self.file_data1)
+                self.push_data(self.file_data1,xminView,xmaxView)
                 
                 # Display the fitting value on the Fit Dialog
                 self._onsetValues(cstA, cstB, errA,errB,chisqr)
@@ -309,7 +312,7 @@ class LinearFit(wx.Dialog):
         
         if (self.xtrans=="log10(x)" ):
             if x >0:
-                return math.log10(x)
+                return x
             else:
                 raise ValueError,"cannot compute log of a negative number"
             

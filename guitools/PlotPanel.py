@@ -34,8 +34,8 @@ def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
         # Convert values into the correct scale for a linear transformation
         # TODO: use proper scale transformers
         if scale=='log':
-            lo,hi = log10(lo),log10(hi)
-            if pt is not None: pt = log10(pt)
+            lo,hi = math.log10(lo),math.log10(hi)
+            if pt is not None: pt = math.log10(pt)
     
         # Compute delta from axis range * %, or 1-% if persent is negative
         if step > 0:
@@ -52,7 +52,8 @@ def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
     
         # Convert transformed values back to the original scale
         if scale=='log':
-            lo,hi = pow(10.,lo),pow(10.,hi)
+            lo,hi = math.pow(10.,lo),math.pow(10.,hi)
+            print "check y axis rescale"
     
         return (lo,hi)
 
@@ -107,6 +108,7 @@ class PlotPanel(wx.Panel):
         Process mouse wheel as zoom events
         """
         ax = event.inaxes
+        
         step = event.step
 
         if ax != None:
@@ -122,22 +124,23 @@ class PlotPanel(wx.Panel):
              # Check if zoom happens in the axes
             xdata,ydata = None,None
             x,y = event.x,event.y
+           
             for ax in self.axes:
                 insidex,_ = ax.xaxis.contains(event)
                 if insidex:
                     xdata,_ = ax.transAxes.inverse_xy_tup((x,y))
-                    #print "xaxis",x,"->",xdata
+                    print "xaxis",x,"->",xdata
                 insidey,_ = ax.yaxis.contains(event)
                 if insidey:
                     _,ydata = ax.transAxes.inverse_xy_tup((x,y))
-                    #print "yaxis",y,"->",ydata
+                    print "yaxis",y,"->",ydata
             if xdata is not None:
                 lo,hi = ax.get_xlim()
-                lo,hi = _rescale(lo,hi,step,bal=xdata)
+                lo,hi = _rescale(lo,hi,step,bal=xdata,scale=ax.get_xscale())
                 ax.set_xlim((lo,hi))
             if ydata is not None:
                 lo,hi = ax.get_ylim()
-                lo,hi = _rescale(lo,hi,step,bal=ydata)
+                lo,hi = _rescale(lo,hi,step,bal=ydata,scale=ax.get_yscale())
                 ax.set_ylim((lo,hi))
 
         self.canvas.draw_idle()
@@ -172,18 +175,24 @@ class PlotPanel(wx.Panel):
             when clicking on Properties on context menu ,The Property dialog is displayed
             The user selects a transformation for x or y value and a new plot is displayed
         """
-        from PropertyDialog import Properties
-        dial = Properties(self, -1, 'Properties')
-        dial.setValues( self.prevXtrans, self.prevYtrans,self.viewModel )
-        if dial.ShowModal() == wx.ID_OK:
-            self.xscales, self.yscales,self.viewModel = dial.getValues()
-            if self.viewModel =="Guinier lny vs x^(2)":
-                self.xscales="x^(2)"
-                self.yscales="ln(y)"
-                self.viewModel = "--"
-                dial.setValues( self.xscales, self.yscales,self.viewModel )
-            self._onEVT_FUNC_PROPERTY()
-        dial.Destroy()
+        list =[]
+        list = self.graph.returnPlottable()
+        if len(list.keys())>0:
+            first_item = list.keys()[0]
+            if first_item.x !=[]:
+                from PropertyDialog import Properties
+                dial = Properties(self, -1, 'Properties')
+                dial.setValues( self.prevXtrans, self.prevYtrans,self.viewModel )
+                if dial.ShowModal() == wx.ID_OK:
+                    self.xscales, self.yscales,self.viewModel = dial.getValues()
+                    if self.viewModel =="Guinier lny vs x^(2)":
+                        self.xscales="x^(2)"
+                        self.yscales="ln(y)"
+                        self.viewModel = "--"
+                        dial.setValues( self.xscales, self.yscales,self.viewModel )
+                    self._onEVT_FUNC_PROPERTY()
+                dial.Destroy()
+           
   
     def set_yscale(self, scale='linear'):
         """
@@ -283,6 +292,10 @@ class PlotPanel(wx.Panel):
         slicerpop.AppendSeparator()
         slicerpop.Append(317, '&Linear Fit')
         wx.EVT_MENU(self, 317, self.onFitting)
+        
+        slicerpop.AppendSeparator()
+        slicerpop.Append(318, '&Reset Graph')
+        wx.EVT_MENU(self, 318, self.onResetGraph)
        
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
@@ -425,13 +438,13 @@ class PlotPanel(wx.Panel):
                 item.returnTransformationx(transform.toX,transform.errToX)
                 self.set_xscale("log")
                 name, units = item.get_xaxis() 
-                self.graph.xaxis("Log10 %s" % name,  "%s^{-1}" % units)
+                self.graph.xaxis("\log_{10}\ \  %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="ln(y)" ):
                 item.returnTransformationy(transform.toLogX,transform.errToLogX)
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("log %s" % name,  "%s^{-1}" % units)
+                self.graph.yaxis("log\ \ %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="y" ):
                 item.returnTransformationy(transform.toX,transform.errToX)
@@ -443,32 +456,32 @@ class PlotPanel(wx.Panel):
                 item.returnTransformationy(transform.toX,transform.errToX)
                 self.set_yscale("log")  
                 name, units = item.get_yaxis()
-                self.graph.yaxis("Log10 %s" % name,  "%s^{-1}" % units)
+                self.graph.yaxis("\log_{10}\ \ %s" % name,  "%s^{-1}" % units)
                 
             if ( self.yscales=="y^(2)" ):
                 item.returnTransformationy( transform.toX2,transform.errToX2 )    
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("%s^2" % name,  "%s^{-2}" % units)
+                self.graph.yaxis("%s^{2}" % name,  "%s^{-2}" % units)
                 
             if ( self.yscales =="1/y"):
                 item.returnTransformationy(transform.toOneOverX,transform.errOneOverX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("%s" % name,  "%s" % units)
+                self.graph.yaxis("%s" % name,  "\ \%s" % units)
                 
             if ( self.yscales =="1/sqrt(y)" ):
                 item.returnTransformationy(transform.toOneOverSqrtX,transform.errOneOverSqrtX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("%s" %name,  "%s" % units)
+                self.graph.yaxis("\sqrt{%s}" %name,  "%s" % units)
                 
             if ( self.yscales =="ln(y*x)"):
                 item.returnTransformationy( transform.toLogXY,transform.errToLogXY)
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
-                self.graph.yaxis("Log %s%s" % (yname,xname),  "%s^{-1}%s^{-1}" % (yunits,xunits))
+                self.graph.yaxis("log\ %s %s" % (yname,xname),  "%s^{-1}%s^{-1}" % (yunits,xunits))
                 
             if ( self.yscales =="ln(y*x^(2))"):
                 item.returnTransformationy( transform.toLogYX2,transform.errToLogYX2)
@@ -501,21 +514,30 @@ class PlotPanel(wx.Panel):
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
         
-    def onFitDisplay(self, plottable):
+    def onFitDisplay(self, plottable,xmin,xmax):
         """
             Add a new plottable into the graph .In this case this plottable will be used 
             to fit some data
             @param plottable: the plottable to plot
         """
+        list =[]
+        list = self.graph.returnPlottable()
+        for item in list:
+            item.onFitRange(xmin,xmax)
         #Add the data to fit 
-       
         self.graph.add(plottable)
         self.graph.render(self)
         
         self.subplot.figure.canvas.draw_idle()
         self.graph.delete(plottable)
    
-
+    def onResetGraph(self,event):
+        list =[]
+        list = self.graph.returnPlottable()
+        for item in list:
+            item.onReset()
+        self.graph.render(self)
+        self.subplot.figure.canvas.draw_idle()
         
 class NoRepaintCanvas(FigureCanvasWxAgg):
     """We subclass FigureCanvasWxAgg, overriding the _onPaint method, so that
