@@ -107,14 +107,15 @@ class PlotPanel(wx.Panel):
         self.fit_result = Theory1D(x=[], y=[], dy=None)
         #self.fit_result = Data1D(x=[], y=[],dx=None, dy=None)
         self.fit_result.name = "Fit"
-        self.fit_result.ID = "isFit"
-
+        self.xmin=0.0
+        self.xmax=0.0
+        self.xminView=0.0
+        self.xmaxView=0.0
     def onWheel(self, event):
         """
         Process mouse wheel as zoom events
         """
         ax = event.inaxes
-        
         step = event.step
 
         if ax != None:
@@ -174,6 +175,9 @@ class PlotPanel(wx.Panel):
         if len(list.keys())>0:
             first_item = list.keys()[0]
             dlg = LinearFit( None, first_item, self.onFitDisplay,self.returnTrans, -1, 'Fitting')
+            if (self.xmin !=0.0 )and ( self.xmax !=0.0)\
+                and(self.xminView !=0.0 )and ( self.xmaxView !=0.0):
+                dlg.setFitRange(self.xminView,self.xmaxView,self.xmin,self.xmax)
             dlg.ShowModal() 
 
     def _onProperties(self, event):
@@ -523,7 +527,7 @@ class PlotPanel(wx.Panel):
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
         
-    def onFitDisplay(self, tempx,tempy,xmin,xmax):
+    def onFitDisplay(self, tempx,tempy,xminView,xmaxView,xmin,xmax):
         """
             Add a new plottable into the graph .In this case this plottable will be used 
             to fit some data
@@ -534,7 +538,11 @@ class PlotPanel(wx.Panel):
         list =[]
         list = self.graph.returnPlottable()
         for item in list:
-            item.onFitRange(xmin,xmax)
+            item.onFitRange(xminView,xmaxView)
+        self.xminView=xminView
+        self.xmaxView=xmaxView
+        self.xmin= xmin
+        self.xmax= xmax
         # Create new data plottable with result
         self.fit_result.x =[] 
         self.fit_result.y =[]

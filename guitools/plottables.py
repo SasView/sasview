@@ -446,7 +446,7 @@ class Plottable:
         y = None
         dx = None
         dy = None
-        ID = ""
+
         
         def __init__(self, x=None, y=None, dx=None, dy=None):
             self.x = x
@@ -640,7 +640,6 @@ class Data1D(Plottable):
         The label, if it is different, appears on the status bar.
         """
         self.name = "data"
-        self.ID= ""
         self.x = x
         self.y = y
         self.dx = dx
@@ -679,7 +678,6 @@ class Theory1D(Plottable):
         self.x = x
         self.y = y
         self.dy = dy
-        self.ID= ""
         self.xaxis( 'q', 'A')
         self.yaxis( 'intensity', 'cm')
         self.view = self.View(self.x, self.y, None, self.dy)

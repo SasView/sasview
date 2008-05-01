@@ -12,7 +12,7 @@ import transform
 class LinearFit(wx.Dialog):
     #def __init__(self, parent, id, title):
     def __init__(self, parent, plottable, push_data,transform, id, title):
-        wx.Dialog.__init__(self, parent, id, title, size=(450, 300))
+        wx.Dialog.__init__(self, parent, id, title, size=(450, 500))
         """
             for the fit window
         """
@@ -22,7 +22,8 @@ class LinearFit(wx.Dialog):
         self.push_data = push_data
         #dialog self plottable
         self.plottable = plottable
-        
+        # Receive transformations of x and y
+        self.xtrans,self.ytrans= self.transform()
         #Dialog interface
         panel = wx.Panel(self, -1, style=wx.SIMPLE_BORDER)   
         vbox  = wx.BoxSizer(wx.VERTICAL)
@@ -37,6 +38,8 @@ class LinearFit(wx.Dialog):
         self.tcChi = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.FXmin = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.FXmax = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.FXminX = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.FXmaxX = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.PXmin = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.PXmax = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.btFit =wx.Button(panel,-1,'Fit',size=(120, 30))
@@ -88,6 +91,10 @@ class LinearFit(wx.Dialog):
         ix += 2
         sizer.Add(self.PXmax, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
+        ix = 1
+        sizer.Add(wx.StaticText(panel, -1,"x transofrmation is: "+self.xtrans ),(iy, ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        iy += 1
         ix = 0
         sizer.Add(wx.StaticText(panel, -1, 'Fit Range'),(iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -96,6 +103,20 @@ class LinearFit(wx.Dialog):
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 2
         sizer.Add(self.FXmax, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
+        #iy += 1
+        #ix = 1
+        #sizer.Add(wx.StaticText(panel, -1,"x is: "),(iy, ix),(1,1),\
+        #           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        iy += 1
+        ix = 0
+        sizer.Add(wx.StaticText(panel, -1, 'Fit Range of x'),(iy, ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        sizer.Add(self.FXminX, (iy, ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 2
+        sizer.Add(self.FXmaxX, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 1
         
@@ -130,12 +151,15 @@ class LinearFit(wx.Dialog):
             self.maxi =max(self.plottable.x)
             self.FXmin.SetLabel(str(self.mini))
             self.FXmax.SetLabel(str(self.maxi))
-            
+            self.FXminX.SetLabel(str(self.mini))
+            self.FXmaxX.SetLabel(str(self.maxi))
+            self.FXmin.Disable()
+            self.FXmax.Disable()
             self.PXmin.SetValue(str(self.mini))
             self.PXmax.SetValue(str(self.maxi))
             self.PXmin.Disable()
             self.PXmax.Disable()
-    
+        
         # new data for the fit 
         #self.file_data1 = Theory1D(x=[], y=[], dy=None)
         #self.file_data1.name = "Fit"
@@ -152,7 +176,7 @@ class LinearFit(wx.Dialog):
         tempx=[]
         tempy=[]
         tempdy = []
-        
+       
         #store the values of View in x,y, dx,dy
         x,y,dx,dy=self.plottable.returnValuesOfView()
         # Receive transformations of x and y
@@ -161,12 +185,18 @@ class LinearFit(wx.Dialog):
         # Check if View contains a x array .we online fit when x exits
         # makes transformation for y as a line to fit
         if x != []: 
+            
+                
             if(self.checkFitValues(self.FXmin) == True):
                 #Check if the field of Fit Dialog contain values and use the x max and min of the user
-                xmin,xmax = self._checkVal(self.FXmin.GetValue(),self.FXmax.GetValue())
+                xmin,xmax = self._checkVal(self.FXminX.GetValue(),self.FXmaxX.GetValue())
+                
                 xminView=self.floatTransform(xmin)
                 xmaxView=self.floatTransform(xmax)
-                
+                self.FXmin.SetValue(str(xminView))
+                self.FXmax.SetValue(str(xmaxView))
+                self.FXmin.Disable()
+                self.FXmax.Disable()
                 # Store the transformed values of view x, y,dy in variables  before the fit
                 if  self.ytrans.lower() == "log10(y)":
                     if (self.xtrans.lower() == "log10(x)"):
@@ -196,6 +226,7 @@ class LinearFit(wx.Dialog):
                 #    tempdy.append(dy)
                        
                 #Find the fitting parameters
+                
                 if (self.xtrans.lower() == "log10(x)"):
                     chisqr, out, cov = fittings.sansfit(self.model, [self.cstA, self.cstB],
                     tempx, tempy,tempdy,math.log10(xmin),math.log10(xmax))
@@ -250,20 +281,8 @@ class LinearFit(wx.Dialog):
                     tempy.append(math.pow(10,y_model))
                 else: 
                     tempy.append(y_model)
-              
-                # Create new data plottable with result
-                #self.file_data1.x =[] 
-                #self.file_data1.y =[] 
-                #self.file_data1.x =tempx  
-                #self.file_data1.y =tempy     
-                #self.file_data1.dx=None
-                #self.file_data1.dy=None
-                #Load the view with the new values
-                #self.file_data1.reset_view()
-                
-                #Send the data to display to the PlotPanel
-                #self.push_data(self.file_data1,xminView,xmaxView)
-                self.push_data(tempx,tempy,xminView,xmaxView)
+               
+                self.push_data(tempx,tempy,xminView,xmaxView,xmin,xmax)
                 
                 # Display the fitting value on the Fit Dialog
                 self._onsetValues(cstA, cstB, errA,errB,chisqr)
@@ -288,17 +307,17 @@ class LinearFit(wx.Dialog):
         """
         if float(usermin) < float(usermax):
             if float(usermin) >= float(self.mini) and float(usermin) < float(self.maxi):
-                self.FXmin.SetValue(str(usermin))
+                self.FXminX.SetValue(str(usermin))
             else:
-                self.FXmin.SetValue(str(self.mini))
+                self.FXminX.SetValue(str(self.mini))
                 
             if float(usermax) > float(self.mini) and float(usermax) <= float(self.maxi):
-                self.FXmax.SetLabel(str(usermax))
+                self.FXmaxX.SetLabel(str(usermax))
             else:
-                self.FXmax.SetLabel(str(self.maxi))
+                self.FXmaxX.SetLabel(str(self.maxi))
                 
-            mini =float(self.FXmin.GetValue())
-            maxi =float(self.FXmax.GetValue())
+            mini =float(self.FXminX.GetValue())
+            maxi =float(self.FXmaxX.GetValue())
             
             return mini, maxi
     def floatTransform(self,x):
@@ -336,7 +355,16 @@ class LinearFit(wx.Dialog):
       
         return flag
        
-                
+    def setFitRange(self,xmin,xmax,Reelxmin,Reelxmax):
+       
+        self.FXmin.SetValue(str(math.log10(xmin)))
+        self.FXmax.SetValue(str(math.log10(xmax)))
+        
+        self.FXmin.SetValue(str(xmin))
+        self.FXmax.SetValue(str(xmax))
+        self.FXminX.SetValue(str(Reelxmin))
+        self.FXmaxX.SetValue(str(Reelxmax))
+        
    
 if __name__ == "__main__": 
     app = wx.App()
