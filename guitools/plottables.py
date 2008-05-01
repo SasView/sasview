@@ -203,7 +203,8 @@ class Graph:
                      "ylabel":"","yunit":None,
                      "title":""}
         self.plottables = {}
-
+    def setGraph(self,listofplottable):
+        self.plottables = listofplottable
     def _make_labels(self):
         # Find groups of related plottables
         sets = {}
@@ -385,6 +386,7 @@ class Plottable:
         self._yaxis = ""
         self._yunit = "" 
         
+        
     def set_View(self,x,y):
         """ Load View  """
         self.x= x
@@ -444,7 +446,7 @@ class Plottable:
         y = None
         dx = None
         dy = None
-        
+        ID = ""
         
         def __init__(self, x=None, y=None, dx=None, dy=None):
             self.x = x
@@ -610,6 +612,10 @@ class Plottable:
             tempdx=[]
             tempy=[]
             tempdy=[]
+            if self.dx==None:
+                self.dx=numpy.zeros(len(self.x))
+            if self.dy==None:
+                self.dy=numpy.zeros(len(self.y))
             for i in range(len(self.x)):
                 if ( self.x[i] >= xmin ) and ( self.x[i] <= xmax ):
                     tempx.append(self.x[i])
@@ -634,6 +640,7 @@ class Data1D(Plottable):
         The label, if it is different, appears on the status bar.
         """
         self.name = "data"
+        self.ID= ""
         self.x = x
         self.y = y
         self.dx = dx
@@ -672,7 +679,9 @@ class Theory1D(Plottable):
         self.x = x
         self.y = y
         self.dy = dy
-       
+        self.ID= ""
+        self.xaxis( 'q', 'A')
+        self.yaxis( 'intensity', 'cm')
         self.view = self.View(self.x, self.y, None, self.dy)
     def render(self,plot,**kw):
         #plot.curve(self.x,self.y,dy=self.dy,**kw)

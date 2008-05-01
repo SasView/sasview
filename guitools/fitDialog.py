@@ -137,8 +137,9 @@ class LinearFit(wx.Dialog):
             self.PXmax.Disable()
     
         # new data for the fit 
-        self.file_data1 = Theory1D(x=[], y=[], dy=None)
-        self.file_data1.name = "Fit"
+        #self.file_data1 = Theory1D(x=[], y=[], dy=None)
+        #self.file_data1.name = "Fit"
+        #self.file_data1.ID = "isFit"
         # Receive transformations of x and y
         self.xtrans,self.ytrans= self.transform()
     def _onFit(self ,event):
@@ -251,17 +252,18 @@ class LinearFit(wx.Dialog):
                     tempy.append(y_model)
               
                 # Create new data plottable with result
-                self.file_data1.x =[] 
-                self.file_data1.y =[] 
-                self.file_data1.x =tempx  
-                self.file_data1.y =tempy     
-                self.file_data1.dx=None
-                self.file_data1.dy=None
+                #self.file_data1.x =[] 
+                #self.file_data1.y =[] 
+                #self.file_data1.x =tempx  
+                #self.file_data1.y =tempy     
+                #self.file_data1.dx=None
+                #self.file_data1.dy=None
                 #Load the view with the new values
-                self.file_data1.reset_view()
+                #self.file_data1.reset_view()
                 
                 #Send the data to display to the PlotPanel
-                self.push_data(self.file_data1,xminView,xmaxView)
+                #self.push_data(self.file_data1,xminView,xmaxView)
+                self.push_data(tempx,tempy,xminView,xmaxView)
                 
                 # Display the fitting value on the Fit Dialog
                 self._onsetValues(cstA, cstB, errA,errB,chisqr)

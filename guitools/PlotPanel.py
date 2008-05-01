@@ -11,7 +11,8 @@ import transform
 from canvas import FigureCanvas
 from matplotlib.widgets import RectangleSelector
 from pylab import  gca, gcf
-
+from plottables import Theory1D
+#from plottables import Data1D
 #TODO: make the plottables interactive
 
 from plottables import Graph
@@ -102,6 +103,11 @@ class PlotPanel(wx.Panel):
         self.prevYtrans =" "
         self.canvas.mpl_connect('scroll_event',self.onWheel)
         self.axes = [self.subplot]
+         # new data for the fit 
+        self.fit_result = Theory1D(x=[], y=[], dy=None)
+        #self.fit_result = Data1D(x=[], y=[],dx=None, dy=None)
+        self.fit_result.name = "Fit"
+        self.fit_result.ID = "isFit"
 
     def onWheel(self, event):
         """
@@ -129,11 +135,11 @@ class PlotPanel(wx.Panel):
                 insidex,_ = ax.xaxis.contains(event)
                 if insidex:
                     xdata,_ = ax.transAxes.inverse_xy_tup((x,y))
-                    print "xaxis",x,"->",xdata
+                    #print "xaxis",x,"->",xdata
                 insidey,_ = ax.yaxis.contains(event)
                 if insidey:
                     _,ydata = ax.transAxes.inverse_xy_tup((x,y))
-                    print "yaxis",y,"->",ydata
+                    #print "yaxis",y,"->",ydata
             if xdata is not None:
                 lo,hi = ax.get_xlim()
                 lo,hi = _rescale(lo,hi,step,bal=xdata,scale=ax.get_xscale())
@@ -419,6 +425,10 @@ class PlotPanel(wx.Panel):
         """ 
         list =[]
         list = self.graph.returnPlottable()
+        self.fit_result.x =[]  
+        self.fit_result.y =[] 
+        self.fit_result.dx=None
+        self.fit_result.dy=None
         
         for item in list:
             item.getTransform(self.xscales,self.yscales)
@@ -506,30 +516,39 @@ class PlotPanel(wx.Panel):
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("$Log %s$" % name,  "%s^{-1}" % units)
-                
+            item.transformView()
         #item.name = self.yscales+" vs " +self.xscales      
         self.prevXtrans = self.xscales 
         self.prevYtrans = self.yscales  
-        item.transformView()
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
         
-    def onFitDisplay(self, plottable,xmin,xmax):
+    def onFitDisplay(self, tempx,tempy,xmin,xmax):
         """
             Add a new plottable into the graph .In this case this plottable will be used 
             to fit some data
             @param plottable: the plottable to plot
         """
+        
+        
         list =[]
         list = self.graph.returnPlottable()
         for item in list:
             item.onFitRange(xmin,xmax)
-        #Add the data to fit 
-        self.graph.add(plottable)
-        self.graph.render(self)
+        # Create new data plottable with result
+        self.fit_result.x =[] 
+        self.fit_result.y =[]
+        self.fit_result.x =tempx  
+        self.fit_result.y =tempy     
+        self.fit_result.dx=None
+        self.fit_result.dy=None
+        #Load the view with the new values
+        self.fit_result.reset_view() 
+        self.graph.add(self.fit_result) 
         
+        self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
-        self.graph.delete(plottable)
+        #self.graph.delete(plottable)
    
     def onResetGraph(self,event):
         list =[]
