@@ -34,10 +34,17 @@ def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
         """
         # Convert values into the correct scale for a linear transformation
         # TODO: use proper scale transformers
+        loprev = lo
+        hiprev = hi
+        ptprev = pt
         if scale=='log':
-            lo,hi = math.log10(lo),math.log10(hi)
+            #assert lo >0
+            if lo > 0 :
+                lo = math.log10(lo)
+            if hi > 0 :
+                hi = math.log10(hi)
             if pt is not None: pt = math.log10(pt)
-    
+        
         # Compute delta from axis range * %, or 1-% if persent is negative
         if step > 0:
             delta = float(hi-lo)*step/100
@@ -53,9 +60,22 @@ def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
     
         # Convert transformed values back to the original scale
         if scale=='log':
-            lo,hi = math.pow(10.,lo),math.pow(10.,hi)
-            print "check y axis rescale"
-    
+            #if (lo <= -300) and (hi >= 300):
+            if (lo > 0) and (math.log(lo) <= -300):
+                lo=loprev
+                hi=hiprev
+                print "Not possible to scale"
+            if (lo == 0) or (lo <= -300):
+                lo=loprev
+                hi=hiprev
+                print "Not possible to scale"
+            else:
+                lo,hi = math.pow(10.,lo),math.pow(10.,hi)
+                #assert lo >0,"lo = %g"%lo
+                print "possible to scale"
+           
+        print "these are low and high",lo,hi
+
         return (lo,hi)
 
 
@@ -136,11 +156,11 @@ class PlotPanel(wx.Panel):
                 insidex,_ = ax.xaxis.contains(event)
                 if insidex:
                     xdata,_ = ax.transAxes.inverse_xy_tup((x,y))
-                    #print "xaxis",x,"->",xdata
+                    print "xaxis",x,"->",xdata
                 insidey,_ = ax.yaxis.contains(event)
                 if insidey:
                     _,ydata = ax.transAxes.inverse_xy_tup((x,y))
-                    #print "yaxis",y,"->",ydata
+                    print "yaxis",y,"->",ydata
             if xdata is not None:
                 lo,hi = ax.get_xlim()
                 lo,hi = _rescale(lo,hi,step,bal=xdata,scale=ax.get_xscale())
@@ -149,7 +169,7 @@ class PlotPanel(wx.Panel):
                 lo,hi = ax.get_ylim()
                 lo,hi = _rescale(lo,hi,step,bal=ydata,scale=ax.get_yscale())
                 ax.set_ylim((lo,hi))
-
+               
         self.canvas.draw_idle()
 
 
@@ -521,7 +541,11 @@ class PlotPanel(wx.Panel):
                 name, units = item.get_yaxis()
                 self.graph.yaxis("$Log %s$" % name,  "%s^{-1}" % units)
             item.transformView()
-        #item.name = self.yscales+" vs " +self.xscales      
+        #item.name = self.yscales+" vs " +self.xscales  
+        self.xmin=0.0
+        self.xmax=0.0
+        self.xminView=0.0
+        self.xmaxView=0.0    
         self.prevXtrans = self.xscales 
         self.prevYtrans = self.yscales  
         self.graph.render(self)
@@ -538,7 +562,8 @@ class PlotPanel(wx.Panel):
         list =[]
         list = self.graph.returnPlottable()
         for item in list:
-            item.onFitRange(xminView,xmaxView)
+            #item.onFitRange(xminView,xmaxView)
+            item.onFitRange(None,None)
         self.xminView=xminView
         self.xmaxView=xmaxView
         self.xmin= xmin

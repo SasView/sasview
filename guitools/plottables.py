@@ -436,7 +436,7 @@ class Plottable:
         self.view.returntransformy(transy,transdy)
     def onReset(self):
         self.view.onResetView()
-    def onFitRange(self,xmin,xmax):
+    def onFitRange(self,xmin=None,xmax=None):
         self.view.onFitRangeView(xmin,xmax)
     class View:
         """
@@ -607,7 +607,7 @@ class Plottable:
                 self.dx=tempdx
                 self.dy=tempdy
                 
-        def onFitRangeView(self,xmin,xmax):
+        def onFitRangeView(self,xmin=None,xmax=None):
             tempx=[]
             tempdx=[]
             tempy=[]
@@ -616,16 +616,17 @@ class Plottable:
                 self.dx=numpy.zeros(len(self.x))
             if self.dy==None:
                 self.dy=numpy.zeros(len(self.y))
-            for i in range(len(self.x)):
-                if ( self.x[i] >= xmin ) and ( self.x[i] <= xmax ):
-                    tempx.append(self.x[i])
-                    tempdx.append(self.dx[i])
-                    tempy.append(self.y[i])
-                    tempdy.append(self.dy[i])
-            self.x=tempx
-            self.y=tempy
-            self.dx=tempdx
-            self.dy=tempdy        
+            if ( xmin != None ) and ( xmax != None ):
+                for i in range(len(self.x)):
+                    if ( self.x[i] >= xmin ) and ( self.x[i] <= xmax ):
+                        tempx.append(self.x[i])
+                        tempdx.append(self.dx[i])
+                        tempy.append(self.y[i])
+                        tempdy.append(self.dy[i])
+                self.x=tempx
+                self.y=tempy
+                self.dx=tempdx
+                self.dy=tempdy        
 
 class Data1D(Plottable):
     """Data plottable: scatter plot of x,y with errors in x and y.
