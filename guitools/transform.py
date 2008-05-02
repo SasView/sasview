@@ -134,15 +134,7 @@ def errToLogX(x,y=None,dx=None,dy=None):
     
     return dx
 
-def errToXY(x, y, dx=None, dy=None):
-    if dx==None:
-        dx=0
-    if dy==None:
-        dy=0
-    err =math.sqrt((y*dx)**2 +(x*dy)**2)
-    if err >= math.fabs(x):
-        err =0.9*x
-    return err 
+
 
 def errToYX2(x, y, dx=None, dy=None):
     if dx==None:
@@ -150,8 +142,8 @@ def errToYX2(x, y, dx=None, dy=None):
     if dy==None:
         dy=0
     err =math.sqrt((2*x*y*dx)**2 +((x**2)*dy)**2)
-    if err >= math.fabs(x):
-        err =0.9*x
+    #if err >= math.fabs(x):
+    #    err =0.9*x
     return err 
     
 def errToLogXY(x,y,dx=None, dy=None):
@@ -164,8 +156,8 @@ def errToLogXY(x,y,dx=None, dy=None):
         if dy == None:
             dy = 0
         err = (dx/x)**2 + (dy/y)**2
-        if  math.sqrt(math.fabs(err)) >= math.fabs(x):
-            err= 0.9*x
+        #if  math.sqrt(math.fabs(err)) >= math.fabs(x):
+        #    err= 0.9*x
     else:
         raise ValueError, "cannot compute this error"
    
@@ -181,8 +173,8 @@ def errToLogYX2(x,y,dx=None, dy=None):
         if (dy == None):
             dy = 0
         err = (2*dx/x)**2 + (dy/y)**2
-        if math.fabs(err) >= math.fabs(x):
-            err =0.9*x
+        #if math.fabs(err) >= math.fabs(x):
+        #   err =0.9*x
     else:
          raise ValueError, "cannot compute this error"
      
@@ -211,8 +203,8 @@ def errOneOverSqrtX(x,y=None, dx=None,dy=None):
         if dx==None:
             dx =0
         err= -1/2*math.pow(x, -3/2)* dx
-        if math.fabs(err)>= math.fabs(x):
-            err=0.9*x
+        #if math.fabs(err)>= math.fabs(x):
+        #    err=0.9*x
     else:
         raise ValueError, "Cannot compute this error"
     
@@ -227,8 +219,8 @@ def errToLogYX4(x,y=None,dx=None,dy=None):
     if dy==None:
         dy=0
     err =math.sqrt((4*dx/x)**2 +(dy/y)**2)
-    if err >= math.fabs(x):
-        err =0.9*x
+    #if err >= math.fabs(x):
+    #err =0.9*x
     return err 
 
            
