@@ -185,8 +185,12 @@ class LinearFit(wx.Dialog):
                 
                 xminView=self.floatTransform(xmin)
                 xmaxView=self.floatTransform(xmax)
-                self.FXmin.SetValue(str(xminView))
-                self.FXmax.SetValue(str(xmaxView))
+                if (self.xtrans=="log10(x)"):
+                    self.FXmin.SetValue(str(math.log10(xminView)))
+                    self.FXmax.SetValue(str(math.log10(xmaxView)))
+                else:
+                    self.FXmin.SetValue(str(xminView))
+                    self.FXmax.SetValue(str(xmaxView))
                 self.FXmin.Disable()
                 self.FXmax.Disable()
                 # Store the transformed values of view x, y,dy in variables  before the fit
