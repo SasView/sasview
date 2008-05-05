@@ -38,12 +38,12 @@ class LinearFit(wx.Dialog):
         self.tcB = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.tcErrB = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.tcChi = wx.TextCtrl(panel, -1,size=(120,20),style=wx.SIMPLE_BORDER)
-        self.FXmin = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
-        self.FXmax = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
-        self.FXminX = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
-        self.FXmaxX = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
-        self.PXmin = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
-        self.PXmax = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.xminFit = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.xmaxFit = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.xminTransFit = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.xmaxTransFit = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.initXmin = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
+        self.initXmax = wx.TextCtrl(panel,-1,size=(120,20),style=wx.SIMPLE_BORDER)
         self.btFit =wx.Button(panel,-1,'Fit',size=(120, 30))
         self.btClose =wx.Button(panel, wx.ID_CANCEL,'Close',size=(90, 30) )
         self.static_line_1 = wx.StaticLine(panel, -1)
@@ -88,30 +88,30 @@ class LinearFit(wx.Dialog):
         sizer.Add(wx.StaticText(panel, -1, 'Plotted Range'),(iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix +=1
-        sizer.Add(self.PXmin, (iy, ix),(1,1),\
+        sizer.Add(self.initXmin, (iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 2
-        sizer.Add(self.PXmax, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer.Add(self.initXmax, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
        
         iy += 1
         ix = 0
         sizer.Add(wx.StaticText(panel, -1, 'Fit Range of '+self.xLabel),(iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer.Add(self.FXmin, (iy, ix),(1,1),\
+        sizer.Add(self.xminTransFit, (iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 2
-        sizer.Add(self.FXmax, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer.Add(self.xmaxTransFit, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
       
         iy += 1
         ix = 0
         sizer.Add(wx.StaticText(panel, -1, 'Fit Range of x'),(iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer.Add(self.FXminX, (iy, ix),(1,1),\
+        sizer.Add(self.xminFit, (iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 2
-        sizer.Add(self.FXmaxX, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer.Add(self.xmaxFit, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 1
         
@@ -160,20 +160,21 @@ class LinearFit(wx.Dialog):
         if self.plottable.x !=[]:
             self.mini =min(self.plottable.x)
             self.maxi =max(self.plottable.x)
-            xView,yView,dxView,dyView= self.plottable.returnValuesOfView()
+            #store the values of View in self.x,self.y,self.dx,self.dy
+            self.x,self.y,self.dx,self.dy= self.plottable.returnValuesOfView()
             
-            self.FXmin.SetLabel(str(min(xView)))
-            self.FXmax.SetLabel(str(max(xView)))
-            self.FXmin.Disable()
-            self.FXmax.Disable()
+            self.xminTransFit.SetLabel(str(min(self.x)))
+            self.xmaxTransFit.SetLabel(str(max(self.x)))
+            self.xminTransFit.Disable()
+            self.xmaxTransFit.Disable()
             
-            self.PXmin.SetValue(str(self.mini))
-            self.PXmax.SetValue(str(self.maxi))
-            self.PXmin.Disable()
-            self.PXmax.Disable()
+            self.initXmin.SetValue(str(self.mini))
+            self.initXmax.SetValue(str(self.maxi))
+            self.initXmin.Disable()
+            self.initXmax.Disable()
             
-            self.FXminX.SetLabel(str(self.mini))
-            self.FXmaxX.SetLabel(str(self.maxi))
+            self.xminFit.SetLabel(str(self.mini))
+            self.xmaxFit.SetLabel(str(self.maxi))
             
       
     def _onFit(self ,event):
@@ -186,49 +187,49 @@ class LinearFit(wx.Dialog):
         tempy=[]
         tempdy = []
        
-        #store the values of View in x,y, dx,dy
-        x,y,dx,dy=self.plottable.returnValuesOfView()
+       
+        
         
         # Check if View contains a x array .we online fit when x exits
         # makes transformation for y as a line to fit
-        if x != []: 
+        if self.x != []: 
             
                 
-            if(self.checkFitValues(self.FXminX) == True):
+            if(self.checkFitValues(self.xminFit) == True):
                 #Check if the field of Fit Dialog contain values and use the x max and min of the user
-                xmin,xmax = self._checkVal(self.FXminX.GetValue(),self.FXmaxX.GetValue())
+                xmin,xmax = self._checkVal(self.xminFit.GetValue(),self.xmaxFit.GetValue())
                 
                 xminView=self.floatTransform(xmin)
                 xmaxView=self.floatTransform(xmax)
                 if (self.xLabel=="log10(x)"):
-                    self.FXmin.SetValue(str(math.log10(xminView)))
-                    self.FXmax.SetValue(str(math.log10(xmaxView)))
+                    self.xminTransFit.SetValue(str(math.log10(xminView)))
+                    self.xmaxTransFit.SetValue(str(math.log10(xmaxView)))
                 else:
-                    self.FXmin.SetValue(str(xminView))
-                    self.FXmax.SetValue(str(xmaxView))
-                self.FXmin.Disable()
-                self.FXmax.Disable()
+                    self.xminTransFit.SetValue(str(xminView))
+                    self.xmaxTransFit.SetValue(str(xmaxView))
+                self.xminTransFit.Disable()
+                self.xmaxTransFit.Disable()
                 # Store the transformed values of view x, y,dy in variables  before the fit
                 if  self.yLabel.lower() == "log10(y)":
                     if (self.xLabel.lower() == "log10(x)"):
-                        for i in range(len(x)):
-                            if x[i]>= math.log10(xmin):
-                                tempy.append(math.log10(y[i])) 
-                                tempdy.append(transform.errToLogX(y[i],0,dy[i],0))
+                        for i in range(len(self.x)):
+                            if self.x[i]>= math.log10(xmin):
+                                tempy.append(math.log10(self.y[i])) 
+                                tempdy.append(transform.errToLogX(self.y[i],0,self.dy[i],0))
                     else:
-                        for i in range(len(y)):
-                            tempy.append(math.log10(y[i])) 
-                            tempdy.append(transform.errToLogX(y[i],0,dy[i],0))
+                        for i in range(len(self.y)):
+                            tempy.append(math.log10(self.y[i])) 
+                            tempdy.append(transform.errToLogX(self.y[i],0,self.dy[i],0))
                 else:
-                    tempy = y
-                    tempdy = dy
+                    tempy = self.y
+                    tempdy = self.dy
                
                 if (self.xLabel.lower() == "log10(x)"):
-                    for x_i in x:
+                    for x_i in self.x:
                         if x_i >= math.log10(xmin):
                             tempx.append(math.log10(x_i)) 
                 else:
-                    tempx = x
+                    tempx = self.x
               
                 #Find the fitting parameters
                 
@@ -286,6 +287,7 @@ class LinearFit(wx.Dialog):
                     tempy.append(math.pow(10,y_model))
                 else: 
                     tempy.append(y_model)
+                #Set the fit parameter display when  FitDialog is opened again
                 self.Avalue=cstA
                 self.Bvalue=cstB
                 self.ErrAvalue=errA
@@ -314,8 +316,6 @@ class LinearFit(wx.Dialog):
          """
          return self.Avalue, self.Bvalue,self.ErrAvalue,self.ErrBvalue,self.Chivalue
          
-    def _returnPlottable(self):
-        return self.file_data1
     
     def _checkVal(self,usermin, usermax):
         """
@@ -324,17 +324,17 @@ class LinearFit(wx.Dialog):
         """
         if float(usermin) < float(usermax):
             if float(usermin) >= float(self.mini) and float(usermin) < float(self.maxi):
-                self.FXminX.SetValue(str(usermin))
+                self.xminFit.SetValue(str(usermin))
             else:
-                self.FXminX.SetValue(str(self.mini))
+                self.xminFit.SetValue(str(self.mini))
                 
             if float(usermax) > float(self.mini) and float(usermax) <= float(self.maxi):
-                self.FXmaxX.SetLabel(str(usermax))
+                self.xmaxFit.SetLabel(str(usermax))
             else:
-                self.FXmaxX.SetLabel(str(self.maxi))
+                self.xmaxFit.SetLabel(str(self.maxi))
                 
-            mini =float(self.FXminX.GetValue())
-            maxi =float(self.FXmaxX.GetValue())
+            mini =float(self.xminFit.GetValue())
+            maxi =float(self.xmaxFit.GetValue())
             
             return mini, maxi
     def floatTransform(self,x):
@@ -372,15 +372,14 @@ class LinearFit(wx.Dialog):
       
         return flag
        
-    def setFitRange(self,xmin,xmax,Reelxmin,Reelxmax):
-        if (self.xLabel=="log10(x)"):
-            self.FXmin.SetValue(str(math.log10(xmin)))
-            self.FXmax.SetValue(str(math.log10(xmax)))
-        else:
-            self.FXmin.SetValue(str(xmin))
-            self.FXmax.SetValue(str(xmax))
-        self.FXminX.SetValue(str(Reelxmin))
-        self.FXmaxX.SetValue(str(Reelxmax))
+    def setFitRange(self,xmin,xmax,xminTrans,xmaxTrans):
+        """
+            Set fit parameters
+        """
+        self.xminFit.SetValue(str(xmin))
+        self.xmaxFit.SetValue(str(xmax))
+        self.xminTransFit.SetValue(str(xminTrans))
+        self.xmaxTransFit.SetValue(str(xmaxTrans))
         
    
 if __name__ == "__main__": 
