@@ -79,10 +79,25 @@ static PyObject * set_x(Cinvertor *self, PyObject *args) {
 	PyObject *data_obj;
 	Py_ssize_t ndata;
 	double *data;
+	int i;
   
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
 	OUTVECTOR(data_obj,data,ndata);
-	self->params.x = data;
+	
+	free(self->params.x);
+	self->params.x = (double*) malloc(ndata*sizeof(double));
+	
+	if(self->params.x==NULL) {
+	    PyErr_SetString(CinvertorError, 
+	    	"Cinvertor.set_x: problem allocating memory.");
+		return NULL;		
+	}
+	
+	for (i=0; i<ndata; i++) {
+		self->params.x[i] = data[i];
+	}
+	
+	//self->params.x = data;
 	self->params.npoints = ndata;
 	return Py_BuildValue("i", self->params.npoints);	
 }
@@ -94,7 +109,7 @@ static PyObject * get_x(Cinvertor *self, PyObject *args) {
     int i;
     
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	INVECTOR(data_obj, data, ndata);
+	OUTVECTOR(data_obj, data, ndata);
 	
 	// Check that the input array is large enough
 	if (ndata < self->params.npoints) {
@@ -119,10 +134,25 @@ static PyObject * set_y(Cinvertor *self, PyObject *args) {
 	PyObject *data_obj;
 	Py_ssize_t ndata;
 	double *data;
+	int i;
   
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
 	OUTVECTOR(data_obj,data,ndata);
-	self->params.y = data;
+	
+	free(self->params.y);
+	self->params.y = (double*) malloc(ndata*sizeof(double));
+	
+	if(self->params.y==NULL) {
+	    PyErr_SetString(CinvertorError, 
+	    	"Cinvertor.set_y: problem allocating memory.");
+		return NULL;		
+	}
+	
+	for (i=0; i<ndata; i++) {
+		self->params.y[i] = data[i];
+	}	
+	
+	//self->params.y = data;
 	self->params.ny = ndata;
 	return Py_BuildValue("i", self->params.ny);	
 }
@@ -134,7 +164,7 @@ static PyObject * get_y(Cinvertor *self, PyObject *args) {
     int i;
     
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	INVECTOR(data_obj, data, ndata);
+	OUTVECTOR(data_obj, data, ndata);
 	
 	// Check that the input array is large enough
 	if (ndata < self->params.ny) {
@@ -159,10 +189,25 @@ static PyObject * set_err(Cinvertor *self, PyObject *args) {
 	PyObject *data_obj;
 	Py_ssize_t ndata;
 	double *data;
+	int i;
   
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
 	OUTVECTOR(data_obj,data,ndata);
-	self->params.err = data;
+	
+	free(self->params.err);
+	self->params.err = (double*) malloc(ndata*sizeof(double));
+	
+	if(self->params.err==NULL) {
+	    PyErr_SetString(CinvertorError, 
+	    	"Cinvertor.set_err: problem allocating memory.");
+		return NULL;		
+	}
+	
+	for (i=0; i<ndata; i++) {
+		self->params.err[i] = data[i];
+	}
+	
+	//self->params.err = data;
 	self->params.nerr = ndata;
 	return Py_BuildValue("i", self->params.nerr);	
 }
@@ -174,7 +219,7 @@ static PyObject * get_err(Cinvertor *self, PyObject *args) {
     int i;
     
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
-	INVECTOR(data_obj, data, ndata);
+	OUTVECTOR(data_obj, data, ndata);
 	
 	// Check that the input array is large enough
 	if (ndata < self->params.nerr) {
@@ -413,6 +458,14 @@ static PyObject * get_pr_err(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("ff", pr_value, pr_err_value);	
 }
 
+static PyObject * basefunc_ft(Cinvertor *self, PyObject *args) {
+	double d_max, q;
+	int n;
+	
+	if (!PyArg_ParseTuple(args, "did", &d_max, &n, &q)) return NULL;
+	return Py_BuildValue("f", ortho_transformed(d_max, n, q));	
+	
+}
 
 static PyMethodDef Cinvertor_methods[] = {
 		   {"residuals", (PyCFunction)residuals, METH_VARARGS, "Get the list of residuals"},
@@ -434,6 +487,7 @@ static PyMethodDef Cinvertor_methods[] = {
 		   {"pr", (PyCFunction)get_pr, METH_VARARGS, ""},
 		   {"get_pr_err", (PyCFunction)get_pr_err, METH_VARARGS, ""},
 		   {"is_valid", (PyCFunction)is_valid, METH_VARARGS, ""},
+		   {"basefunc_ft", (PyCFunction)basefunc_ft, METH_VARARGS, ""},
    
    {NULL}
 };

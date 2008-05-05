@@ -7,9 +7,9 @@ double pi = 3.1416;
  * Deallocate memory
  */
 void invertor_dealloc(Invertor_params *pars) {
-	//free(pars->x);
-	//free(pars->y);
-	//free(pars->err);
+	free(pars->x);
+	free(pars->y);
+	free(pars->err);
 }
 
 void invertor_init(Invertor_params *pars) {
@@ -131,5 +131,4 @@ double reg_term(double *pars, double d_max, int n_c) {
     }
     return sum/25.0*d_max;
 }
-
 

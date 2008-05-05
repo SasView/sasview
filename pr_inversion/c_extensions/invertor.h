@@ -28,5 +28,4 @@ double dprdr(double *pars, double d_max, int n_c, double r);
 double reg_term(double *pars, double d_max, int n_c);
 void pr_err(double *pars, double *err, double d_max, int n_c, 
 		double r, double *pr_value, double *pr_value_err);
-
 #endif

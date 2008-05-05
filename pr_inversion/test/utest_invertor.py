@@ -173,6 +173,68 @@ class TestBasicComponent(unittest.TestCase):
         except:
             print "chi2 =", chi2/51.0
             raise
+        
+    def test_lstsq(self):
+        """
+            Test an inversion for which we know the answer
+        """
+        x, y, err = load("sphere_80.txt")
+
+        # Choose the right d_max...
+        self.invertor.d_max = 160.0
+        # Set a small alpha
+        self.invertor.alpha = .0007
+        # Set data
+        self.invertor.x   = x
+        self.invertor.y   = y
+        self.invertor.err = err
+        # Perform inversion
+        #out, cov = self.invertor.invert(10)
+        
+        out, cov = self.invertor.lstsq(10)
+         
+        
+        # This is a very specific case
+        # We should make sure it always passes
+        try:
+            self.assertTrue(self.invertor.chi2/len(x)<200.00)
+        except:
+            print "Chi2(I(q)) =", self.invertor.chi2/len(x)
+            raise
+        
+        # Check the computed P(r) with the theory
+        # for shpere of radius 80
+        x = pylab.arange(0.01, self.invertor.d_max, self.invertor.d_max/51.0)
+        y = numpy.zeros(len(x))
+        dy = numpy.zeros(len(x))
+        y_true = numpy.zeros(len(x))
+
+        sum = 0.0
+        sum_true = 0.0
+        for i in range(len(x)):
+            #y[i] = self.invertor.pr(out, x[i])
+            (y[i], dy[i]) = self.invertor.pr_err(out, cov, x[i])
+            sum += y[i]
+            if x[i]<80.0:
+                y_true[i] = pr_theory(x[i], 80.0)
+            else:
+                y_true[i] = 0
+            sum_true += y_true[i]
+            
+        y = y/sum*self.invertor.d_max/len(x)
+        dy = dy/sum*self.invertor.d_max/len(x)
+        y_true = y_true/sum_true*self.invertor.d_max/len(x)
+        
+        chi2 = 0.0
+        for i in range(len(x)):
+            res = (y[i]-y_true[i])/dy[i]
+            chi2 += res*res
+            
+        try:
+            self.assertTrue(chi2/51.0<50.0)
+        except:
+            print "chi2(P(r)) =", chi2/51.0
+            raise
             
     def test_q_zero(self):
         """
@@ -238,9 +300,39 @@ class TestBasicComponent(unittest.TestCase):
         except:
             print "Chi2 =", self.invertor.chi2
             raise
-                            
         
+    def no_test_time(self):
+        x, y, err = load("sphere_80.txt")
 
+        # Choose the right d_max...
+        self.invertor.d_max = 160.0
+        # Set a small alpha
+        self.invertor.alpha = 1e-7
+        # Set data
+        self.invertor.x   = x
+        self.invertor.y   = y
+        self.invertor.err = err
+    
+        # time scales like nfunc**2
+        # on a Lenovo Intel Core 2 CPU T7400 @ 2.16GHz, 
+        # I get time/(nfunc)**2 = 0.022 sec
+                            
+        out, cov = self.invertor.invert(15)
+        t16 = self.invertor.elapsed
+        
+        out, cov = self.invertor.invert(30)
+        t30 = self.invertor.elapsed
+        
+        t30s = t30/30.0**2
+        self.assertTrue( (t30s-t16/16.0**2)/t30s <1.2 )
+        
+    def test_clone(self):
+        self.invertor.x = self.x_in
+        clone = self.invertor.clone()
+        
+        for i in range(len(self.x_in)):
+            self.assertEqual(self.x_in[i], clone.x[i])
+        
 def pr_theory(r, R):
     """
        P(r) for a sphere
