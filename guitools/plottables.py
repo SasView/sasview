@@ -52,19 +52,7 @@ if 'any' not in dir(__builtins__):
         for cond in L:
             if not cond: return False
         return True
-def error_msg(msg, parent=None):
-    """
-    Signal an error condition -- in a GUI, popup a error dialog
-    """
-    # Code brought with minor podifications from mpl.backends.backend_wx
-    # Copyright (C) Jeremy O'Donoghue & John Hunter, 2003-4
-    dialog =wx.MessageDialog(parent  = parent,
-                             message = msg,
-                             caption = 'Polplot error',
-                             style=wx.OK | wx.CENTRE)
-    dialog.ShowModal()
-    dialog.Destroy()
-    return None
+
 # Graph structure for holding multiple plottables
 class Graph:
     """
@@ -203,8 +191,8 @@ class Graph:
                      "ylabel":"","yunit":None,
                      "title":""}
         self.plottables = {}
-    def setGraph(self,listofplottable):
-        self.plottables = listofplottable
+        
+        
     def _make_labels(self):
         # Find groups of related plottables
         sets = {}
@@ -222,6 +210,11 @@ class Graph:
         return labels
     
     def returnPlottable(self):
+        """
+            This method returns a dictionary of plottables contained in graph
+            It is just by Plotpanel to interact with the complete list of plottables 
+            inside the graph.
+        """
         return self.plottables
 
     def render(self,plot):
@@ -233,8 +226,7 @@ class Graph:
             p.render(plot,color=self.plottables[p],symbol=0,label=labels[p])
         plot.render()
    
-    def clear(self,plot): 
-        plot.clear()
+   
 
     def __init__(self,**kw):
         self.reset()
@@ -375,9 +367,14 @@ class Plottable:
         return map
     ##Use the following if @classmethod doesn't work
     # labels = classmethod(labels)
-    def getTransform(self,transx,transy):
-        self.view.transx = transx
-        self.view.transy = transy
+    def setLabel(self,labelx,labely):
+        """
+            It takes a label of the x and y transformation and set View parameters
+            @param transx: The label of x transformation is sent by Properties Dialog
+            @param transy: The label of y transformation is sent Properties Dialog
+        """
+        self.view.xLabel= labelx
+        self.view.yLabel = labely
         
     def __init__(self):
         self.view = View()
@@ -417,27 +414,63 @@ class Plottable:
         return 1
     
     def transformView(self):
-       
+        """
+            It transforms x, y before displaying
+        """
         self.view.transform( self.x, self.y, self.dx,self.dy)
         
     def returnValuesOfView(self):
+        """
+            Return View parameters and it is used by Fit Dialog
+        """
         return self.view.returnXview()
     
     def check_data_PlottableX(self): 
+        """
+            Since no transformation is made for log10(x), check that 
+            no negative values is plot in log scale
+        """
         self.view.check_data_logX()
         
     def check_data_PlottableY(self): 
+        """
+            Since no transformation is made for log10(y), check that 
+            no negative values is plot in log scale
+        """
         self.view.check_data_logY() 
         
-    def returnTransformationx(self,transx,transdx):
-        self.view.returntransformx(transx,transdx)
+    def transformX(self,transx,transdx):
+        """
+            Receive pointers to function that transform x and dx 
+            and set corresponding View pointers
+            @param transx: pointer to function that transforms x
+            @param transdx: pointer to function that transforms dx
+        """
+        self.view.setTransformX(transx,transdx)
         
-    def returnTransformationy(self,transy,transdy):
-        self.view.returntransformy(transy,transdy)
+    def transformY(self,transy,transdy):
+        """
+            Receive pointers to function that transform y and dy 
+            and set corresponding View pointers
+            @param transy: pointer to function that transforms y
+            @param transdy: pointer to function that transforms dy
+        """
+        self.view.setTransformY(transy,transdy)
+        
     def onReset(self):
+        """
+            Reset x, y, dx, dy view with its parameters
+        """
         self.view.onResetView()
+        
     def onFitRange(self,xmin=None,xmax=None):
+        """
+            It limits View data range to plot from min to max
+            @param xmin: the minimum value of x to plot.
+            @param xmax: the maximum value of x to plot
+        """
         self.view.onFitRangeView(xmin,xmax)
+        
     class View:
         """
             Representation of the data that might include a transformation
@@ -453,31 +486,32 @@ class Plottable:
             self.y = y
             self.dx = dx
             self.dy = dy
-            #to change x range to the reel range
+            # To change x range to the reel range
             self.Xreel = self.x
             self.Yreel = self.y
             self.DXreel = self.dx
             self.DYreel = self.dy
-            
-            self.transx =""
-            self.transy =""
-            # function to transform x and y
+            # Labels of x and y received from Properties Dialog
+            self.xLabel =""
+            self.yLabel =""
+            # Function to transform x, y, dx and dy
             self.funcx= None
             self.funcy= None
             self.funcdx= None
             self.funcdy= None
         def transform(self, x=None,y=None,dx=None, dy=None):
             """
-                Transforms the x and dx vectors and stores the output.
-                
-                @param func: function to apply to the data
+                Transforms the x,y,dx and dy vectors and stores the output in View parameters
+        
                 @param x: array of x values
-                @param dx: array of error values
-                @param errfunc: function to apply to errors
+                @param y: array of y values
+                @param dx: array of  errors values on x 
+                @param dy: array of error values on y
             """
             
             # Sanity check
-            if (x!=None) and (y!=None):
+            # Do the transofrmation only when x and y are empty
+            if (x!=None) and (y!=None): 
                 if dx and not len(x)==len(dx):
                         raise ValueError, "Plottable.View: Given x and dx are not of the same length" 
                 # Check length of y array
@@ -521,30 +555,59 @@ class Plottable:
                 if not (len(self.x)==len(self.dx))and(len(self.x)==len(self.dy))\
                 and(len(self.x)==len(self.y))and(len(self.y)==len(self.dy)) :
                         raise ValueError, "Plottable.View: Given x,y,dy and dx are not of the same length" 
+                # Check that negative values are not plot on x and y axis for log10 transformation
                 self.check_data_logX()
                 self.check_data_logY()
+                # Store x ,y dx,and dy in their full range for reset
                 self.Xreel = self.x
                 self.Yreel = self.y
                 self.DXreel = self.dx
                 self.DYreel = self.dy
+                
+                
+                
         def onResetView(self):
-            self.x=self.Xreel
-            self.y=self.Yreel
-            self.dx=self.DXreel
-            self.dy=self.DYreel
-        def returntransformx(self,funcx,funcdx):    
+            """
+                Reset x,y,dx and y in their full range  and in the initial scale
+                in case their previous range has changed  
+            """
+            self.x = self.Xreel
+            self.y = self.Yreel
+            self.dx = self.DXreel
+            self.dy = self.DYreel
+            
+        def setTransformX(self,funcx,funcdx):  
+            """
+                Receive pointers to function that transform x and dx 
+                and set corresponding View pointers
+                @param transx: pointer to function that transforms x
+                @param transdx: pointer to function that transforms dx
+            """
             self.funcx= funcx
             self.funcdx= funcdx
             
-        def returntransformy(self,funcy,funcdy):    
+        def setTransformY(self,funcy,funcdy):
+            """
+                Receive pointers to function that transform y and dy 
+                and set corresponding View pointers
+                @param transx: pointer to function that transforms y
+                @param transdx: pointer to function that transforms dy
+            """    
             self.funcy= funcy
             self.funcdy= funcdy
        
         def returnXview(self):
+            """
+                Return View  x,y,dx,dy
+            """
             return self.x,self.y,self.dx,self.dy
         
      
         def check_data_logX(self): 
+            """
+                 Remove negative value in x vector 
+                 to avoid plotting negative value of Log10
+            """
             tempx=[]
             tempdx=[]
             tempy=[]
@@ -553,7 +616,7 @@ class Plottable:
                 self.dx=numpy.zeros(len(self.x))
             if self.dy==None:
                 self.dy=numpy.zeros(len(self.y))
-            if self.transx=="log10(x)" :
+            if self.xLabel=="log10(x)" :
                 for i in range(len(self.x)):
                     try:
                         if (self.x[i]> 0):
@@ -567,16 +630,16 @@ class Plottable:
                         print sys.exc_value  
                         pass 
            
-                self.x=[]
-                self.dx=[]
-                self.y=[]
-                self.dy=[]
-                self.x=tempx
-                self.y=tempy
-                self.dx=tempdx
-                self.dy=tempdy
+                self.x = tempx
+                self.y = tempy
+                self.dx = tempdx
+                self.dy = tempdy
             
         def check_data_logY(self): 
+            """
+                 Remove negative value in y vector 
+                 to avoid plotting negative value of Log10
+            """
             tempx=[]
             tempdx=[]
             tempy=[]
@@ -585,7 +648,7 @@ class Plottable:
                 self.dx=numpy.zeros(len(self.x))
             if self.dy==None:
                 self.dy=numpy.zeros(len(self.y))
-            if (self.transy == "log10(y)" ):
+            if (self.yLabel == "log10(y)" ):
                 for i in range(len(self.x)):
                      try:
                         if (self.y[i]> 0):
@@ -597,17 +660,18 @@ class Plottable:
                         print "check_data_logY: skipping point %g" %self.y[i]
                         print sys.exc_value  
                         pass
-                
-                self.x=[]
-                self.dx=[]
-                self.y=[]
-                self.dy=[]
-                self.x=tempx
-                self.y=tempy
-                self.dx=tempdx
-                self.dy=tempdy
+              
+                self.x = tempx
+                self.y = tempy
+                self.dx = tempdx
+                self.dy = tempdy
                 
         def onFitRangeView(self,xmin=None,xmax=None):
+            """
+                It limits View data range to plot from min to max
+                @param xmin: the minimum value of x to plot.
+                @param xmax: the maximum value of x to plot
+            """
             tempx=[]
             tempdx=[]
             tempy=[]
@@ -675,13 +739,14 @@ class Theory1D(Plottable):
         
         The title is the name that will show up on the legend.
         """
-        self.name= "theo"
+        self.name= "theory"
         self.x = x
         self.y = y
         self.dy = dy
         self.xaxis( 'q', 'A')
         self.yaxis( 'intensity', 'cm')
         self.view = self.View(self.x, self.y, None, self.dy)
+        
     def render(self,plot,**kw):
         #plot.curve(self.x,self.y,dy=self.dy,**kw)
         plot.curve(self.view.x,self.view.y,dy=self.view.dy,**kw)

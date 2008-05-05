@@ -115,8 +115,8 @@ class PlotPanel(wx.Panel):
         self.colorlist = ['b','g','r','c','m','y']
         self.symbollist = ['o','x','^','v','<','>','+','s','d','D','h','H','p']
         #User scale
-        self.xscales ="x"
-        self.yscales ="log10(y)"
+        self.xLabel ="x"
+        self.yLabel ="log10(y)"
         self.viewModel ="--"
         # keep track if the previous transformation of x and y in Property dialog
         self.prevXtrans =" "
@@ -127,10 +127,27 @@ class PlotPanel(wx.Panel):
         self.fit_result = Theory1D(x=[], y=[], dy=None)
         #self.fit_result = Data1D(x=[], y=[],dx=None, dy=None)
         self.fit_result.name = "Fit"
+        # For fit Dialog initial display
         self.xmin=0.0
         self.xmax=0.0
         self.xminView=0.0
         self.xmaxView=0.0
+        self.Avalue=None
+        self.Bvalue=None
+        self.ErrAvalue=None
+        self.ErrBvalue=None
+        self.Chivalue=None
+    def resetFitView(self):
+        # For fit Dialog initial display
+        self.xmin=0.0
+        self.xmax=0.0
+        self.xminView=0.0
+        self.xmaxView=0.0
+        self.Avalue=None
+        self.Bvalue=None
+        self.ErrAvalue=None
+        self.ErrBvalue=None
+        self.Chivalue=None
     def onWheel(self, event):
         """
         Process mouse wheel as zoom events
@@ -174,7 +191,8 @@ class PlotPanel(wx.Panel):
 
 
     def returnTrans(self):
-        return self.xscales,self.yscales
+        return self.xLabel,self.yLabel, self.Avalue, self.Bvalue,\
+        self.ErrAvalue,self.ErrBvalue,self.Chivalue
     
     def setTrans(self,xtrans,ytrans): 
         """
@@ -195,6 +213,7 @@ class PlotPanel(wx.Panel):
         if len(list.keys())>0:
             first_item = list.keys()[0]
             dlg = LinearFit( None, first_item, self.onFitDisplay,self.returnTrans, -1, 'Fitting')
+           
             if (self.xmin !=0.0 )and ( self.xmax !=0.0)\
                 and(self.xminView !=0.0 )and ( self.xmaxView !=0.0):
                 dlg.setFitRange(self.xminView,self.xmaxView,self.xmin,self.xmax)
@@ -214,12 +233,12 @@ class PlotPanel(wx.Panel):
                 dial = Properties(self, -1, 'Properties')
                 dial.setValues( self.prevXtrans, self.prevYtrans,self.viewModel )
                 if dial.ShowModal() == wx.ID_OK:
-                    self.xscales, self.yscales,self.viewModel = dial.getValues()
+                    self.xLabel, self.yLabel,self.viewModel = dial.getValues()
                     if self.viewModel =="Guinier lny vs x^(2)":
-                        self.xscales="x^(2)"
-                        self.yscales="ln(y)"
+                        self.xLabel="x^(2)"
+                        self.yLabel="ln(y)"
                         self.viewModel = "--"
-                        dial.setValues( self.xscales, self.yscales,self.viewModel )
+                        dial.setValues( self.xLabel, self.yLabel,self.viewModel )
                     self._onEVT_FUNC_PROPERTY()
                 dial.Destroy()
            
@@ -455,109 +474,113 @@ class PlotPanel(wx.Panel):
         self.fit_result.dy=None
         
         for item in list:
-            item.getTransform(self.xscales,self.yscales)
-            if ( self.xscales=="x" ):
-                item.returnTransformationx(transform.toX,transform.errToX)
+            item.setLabel(self.xLabel,self.yLabel)
+            if ( self.xLabel=="x" ):
+                item.transformX(transform.toX,transform.errToX)
                 self.set_xscale("linear")
                 name, units = item.get_xaxis()
                 self.graph.xaxis("%s" % name,  "%s^{-1}" % units)
                 
-            if ( self.xscales=="x^(2)" ):
-                item.returnTransformationx(transform.toX2,transform.errToX2)
+            if ( self.xLabel=="x^(2)" ):
+                item.transformX(transform.toX2,transform.errToX2)
                 self.set_xscale('linear')
                 name, units = item.get_xaxis()
                 self.graph.xaxis("%s^{2}" % name,  "%s^{-2}" % units)
                 
-            if (self.xscales=="log10(x)" ):
-                item.returnTransformationx(transform.toX,transform.errToX)
+            if (self.xLabel=="log10(x)" ):
+                item.transformX(transform.toX,transform.errToX)
                 self.set_xscale("log")
                 name, units = item.get_xaxis() 
                 self.graph.xaxis("\log_{10}\ \  %s" % name,  "%s^{-1}" % units)
                 
-            if ( self.yscales=="ln(y)" ):
-                item.returnTransformationy(transform.toLogX,transform.errToLogX)
+            if ( self.yLabel=="ln(y)" ):
+                item.transformY(transform.toLogX,transform.errToLogX)
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("log\ \ %s" % name,  "%s^{-1}" % units)
                 
-            if ( self.yscales=="y" ):
-                item.returnTransformationy(transform.toX,transform.errToX)
+            if ( self.yLabel=="y" ):
+                item.transformY(transform.toX,transform.errToX)
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s" % name,  "%s^{-1}" % units)
                 
-            if ( self.yscales=="log10(y)" ): 
-                item.returnTransformationy(transform.toX,transform.errToX)
+            if ( self.yLabel=="log10(y)" ): 
+                item.transformY(transform.toX,transform.errToX)
                 self.set_yscale("log")  
                 name, units = item.get_yaxis()
                 self.graph.yaxis("\log_{10}\ \ %s" % name,  "%s^{-1}" % units)
                 
-            if ( self.yscales=="y^(2)" ):
-                item.returnTransformationy( transform.toX2,transform.errToX2 )    
+            if ( self.yLabel=="y^(2)" ):
+                item.transformY( transform.toX2,transform.errToX2 )    
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s^{2}" % name,  "%s^{-2}" % units)
                 
-            if ( self.yscales =="1/y"):
-                item.returnTransformationy(transform.toOneOverX,transform.errOneOverX )
+            if ( self.yLabel =="1/y"):
+                item.transformY(transform.toOneOverX,transform.errOneOverX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s" % name,  "\ \%s" % units)
                 
-            if ( self.yscales =="1/sqrt(y)" ):
-                item.returnTransformationy(transform.toOneOverSqrtX,transform.errOneOverSqrtX )
+            if ( self.yLabel =="1/sqrt(y)" ):
+                item.transformY(transform.toOneOverSqrtX,transform.errOneOverSqrtX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("\sqrt{%s}" %name,  "%s" % units)
                 
-            if ( self.yscales =="ln(y*x)"):
-                item.returnTransformationy( transform.toLogXY,transform.errToLogXY)
+            if ( self.yLabel =="ln(y*x)"):
+                item.transformY( transform.toLogXY,transform.errToLogXY)
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
                 self.graph.yaxis("log\ %s %s" % (yname,xname),  "%s^{-1}%s^{-1}" % (yunits,xunits))
                 
-            if ( self.yscales =="ln(y*x^(2))"):
-                item.returnTransformationy( transform.toLogYX2,transform.errToLogYX2)
+            if ( self.yLabel =="ln(y*x^(2))"):
+                item.transformY( transform.toLogYX2,transform.errToLogYX2)
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis() 
                 self.graph.yaxis("Log %s%s^{2}" % (yname,xname),  "%s^{-1}%s^{-2}" % (yunits,xunits))
             
-            if ( self.yscales =="ln(y*x^(4))"):
-                item.returnTransformationy(transform.toLogYX4,transform.errToLogYX4)
+            if ( self.yLabel =="ln(y*x^(4))"):
+                item.transformY(transform.toLogYX4,transform.errToLogYX4)
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
                 self.graph.yaxis("Log %s%s^{4}" % (yname,xname),  "%s^{-1}%s^{-4}" % (yunits,xunits))
             
             if ( self.viewModel == "Guinier lny vs x^(2)"):
-                item.returnTransformationx(transform.toX2,transform.errToX2)
+                
+                item.transformX(transform.toX2,transform.errToX2)
                 self.set_xscale('linear')
                 name, units = item.get_xaxis()
                 self.graph.xaxis("%s^{2}" % name,  "%s^{-2}" % units)
-                item.returnTransformationy(transform.toLogX,transform.errToLogX )
+                
+                item.transformY(transform.toLogX,transform.errToLogX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("$Log %s$" % name,  "%s^{-1}" % units)
+                
             item.transformView()
-        #item.name = self.yscales+" vs " +self.xscales  
+            
+        #item.name = self.yLabel+" vs " +self.xLabel  
         self.xmin=0.0
         self.xmax=0.0
         self.xminView=0.0
         self.xmaxView=0.0    
-        self.prevXtrans = self.xscales 
-        self.prevYtrans = self.yscales  
+        self.prevXtrans = self.xLabel 
+        self.prevYtrans = self.yLabel  
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
         
-    def onFitDisplay(self, tempx,tempy,xminView,xmaxView,xmin,xmax):
+    def onFitDisplay(self, tempx,tempy,xminView,xmaxView,xmin,xmax,func):
         """
             Add a new plottable into the graph .In this case this plottable will be used 
             to fit some data
             @param plottable: the plottable to plot
         """
-        
+        self.Avalue,self.Bvalue,self.ErrAvalue,self.ErrBvalue,self.Chivalue=func
         
         list =[]
         list = self.graph.returnPlottable()
