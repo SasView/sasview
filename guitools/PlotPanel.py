@@ -138,7 +138,9 @@ class PlotPanel(wx.Panel):
         self.ErrBvalue=None
         self.Chivalue=None
     def resetFitView(self):
-        # For fit Dialog initial display
+        """
+             For fit Dialog initial display
+        """
         self.xmin=0.0
         self.xmax=0.0
         self.xminView=0.0
@@ -191,8 +193,11 @@ class PlotPanel(wx.Panel):
 
 
     def returnTrans(self):
+        """
+            Return values and labels used by Fit Dialog
+        """
         return self.xLabel,self.yLabel, self.Avalue, self.Bvalue,\
-        self.ErrAvalue,self.ErrBvalue,self.Chivalue
+                self.ErrAvalue,self.ErrBvalue,self.Chivalue
     
     def setTrans(self,xtrans,ytrans): 
         """
@@ -578,19 +583,26 @@ class PlotPanel(wx.Panel):
         """
             Add a new plottable into the graph .In this case this plottable will be used 
             to fit some data
-            @param plottable: the plottable to plot
+            @param tempx: The x data of fit line
+            @param tempy: The y data of fit line
+            @param xminView: the lower bound of fitting range
+            @param xminView: the upper bound of  fitting range
+            @param xmin: the lowest value of data to fit to the line
+            @param xmax: the highest value of data to fit to the line
         """
+        # Saving value to redisplay in Fit Dialog when it is opened again
         self.Avalue,self.Bvalue,self.ErrAvalue,self.ErrBvalue,self.Chivalue=func
-        
+        self.xminView=xminView
+        self.xmaxView=xmaxView
+        self.xmin= xmin
+        self.xmax= xmax
+        #In case need to change the range of data plotted
         list =[]
         list = self.graph.returnPlottable()
         for item in list:
             #item.onFitRange(xminView,xmaxView)
             item.onFitRange(None,None)
-        self.xminView=xminView
-        self.xmaxView=xmaxView
-        self.xmin= xmin
-        self.xmax= xmax
+        
         # Create new data plottable with result
         self.fit_result.x =[] 
         self.fit_result.y =[]
@@ -599,14 +611,17 @@ class PlotPanel(wx.Panel):
         self.fit_result.dx=None
         self.fit_result.dy=None
         #Load the view with the new values
-        self.fit_result.reset_view() 
+        self.fit_result.reset_view()
+        # Add the new plottable to the graph 
         self.graph.add(self.fit_result) 
-        
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
-        #self.graph.delete(plottable)
+        
    
     def onResetGraph(self,event):
+        """
+            Reset the graph by plotting the full range of data 
+        """
         list =[]
         list = self.graph.returnPlottable()
         for item in list:
