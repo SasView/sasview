@@ -570,10 +570,7 @@ class PlotPanel(wx.Panel):
             item.transformView()
             
         #item.name = self.yLabel+" vs " +self.xLabel  
-        self.xmin=0.0
-        self.xmax=0.0
-        self.xminView=0.0
-        self.xmaxView=0.0    
+        self.resetFitView()   
         self.prevXtrans = self.xLabel 
         self.prevYtrans = self.yLabel  
         self.graph.render(self)
