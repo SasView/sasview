@@ -175,7 +175,7 @@ class LinearFit(wx.Dialog):
             
             self.xminFit.SetLabel(str(self.mini))
             self.xmaxFit.SetLabel(str(self.maxi))
-            
+        
       
     def _onFit(self ,event):
         """
