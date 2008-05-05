@@ -160,9 +160,10 @@ class LinearFit(wx.Dialog):
         if self.plottable.x !=[]:
             self.mini =min(self.plottable.x)
             self.maxi =max(self.plottable.x)
+            xView,yView,dxView,dyView= self.plottable.returnValuesOfView()
             
-            self.FXmin.SetLabel(str(self.mini))
-            self.FXmax.SetLabel(str(self.maxi))
+            self.FXmin.SetLabel(str(min(xView)))
+            self.FXmax.SetLabel(str(max(xView)))
             self.FXmin.Disable()
             self.FXmax.Disable()
             
