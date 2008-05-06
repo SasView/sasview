@@ -1,0 +1,18 @@
+First cut at a GUI framework for SANS applications. 
+
+Modules should be put in the "perspectives" directory
+of their main application when using this framework.
+
+Documentation to come...
+
+Dependencies:
+	- Needs sans.guitools version 0.1.1
+	- Needs sans.guicomm
+	
+To-do list:
+	- Clean up about box
+	- Clean up the _find_plugins() function to allow user-defined directory
+	- Modify the get_context_menu() function to allow a plug-in to recognize
+		its own plots.
+	- Provide a hook for a general file loader for the various data formats
+	
