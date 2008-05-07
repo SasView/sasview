@@ -34,6 +34,8 @@ class View1DPanel(PlotPanel):
     ## Flag to tell the GUI manager that this panel is not
     #  tied to any perspective
     ALWAYS_ON = True
+    ## Group ID
+    group_id = None
     
     def __init__(self, parent, id = -1, color = None,\
         dpi = None, style = wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
@@ -215,16 +217,34 @@ class Plugin:
         for panel in self.plot_panels:
             if event.plot._xunit == panel.graph.prop["xunit"] \
             and event.plot._yunit == panel.graph.prop["yunit"]:
-                is_available = True
-                panel._onEVT_1DREPLOT(event)
-                self.parent.show_panel(panel.uid)
+                if hasattr(event.plot, "group_id"):
+                    if not event.plot.group_id==None \
+                        and event.plot.group_id==panel.group_id:
+                        is_available = True
+                        panel._onEVT_1DREPLOT(event)
+                        self.parent.show_panel(panel.uid)
+                else:
+                    # Check that the plot panel has no group ID
+                    if panel.group_id==None:
+                        is_available = True
+                        panel._onEVT_1DREPLOT(event)
+                        self.parent.show_panel(panel.uid)
         
         # Create a new plot panel if none was available        
         if not is_available:
             new_panel = View1DPanel(self.parent, -1, style=wx.RAISED_BORDER)
+            # Set group ID if available
+            group_id_str = ''
+            if hasattr(event.plot, "group_id"):
+                if not event.plot.group_id==None:
+                    new_panel.group_id = event.plot.group_id
+                    group_id_str = ' [%s]' % event.plot.group_id
+            
             if hasattr(event, "title"):
                 new_panel.window_caption = event.title
                 new_panel.window_name = event.title
+                #new_panel.window_caption = event.title+group_id_str
+                #new_panel.window_name = event.title+group_id_str
             
             event_id = self.parent.popup_panel(new_panel)
             self.menu.Append(event_id, new_panel.window_caption, 

@@ -15,4 +15,6 @@ To-do list:
 	- Modify the get_context_menu() function to allow a plug-in to recognize
 		its own plots.
 	- Provide a hook for a general file loader for the various data formats
+	- Add group flag to allow groups of plots (and exclude other plots with
+		same units to be plotted in the same Graph.
 	

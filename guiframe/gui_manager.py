@@ -216,7 +216,7 @@ class ViewerFrame(wx.Frame):
         
         count = 0
         for item in self.panels:
-            if self.panels[item].window_name == p.window_name:
+            if self.panels[item].window_name.startswith(p.window_name): 
                 count += 1
                 
         windowname = p.window_name
@@ -348,6 +348,10 @@ class ViewerFrame(wx.Frame):
         if ID in self.panels.keys():
             if not self._mgr.GetPane(self.panels[ID].window_name).IsShown():
                 self._mgr.GetPane(self.panels[ID].window_name).Show()
+                # Hide default panel
+                self._mgr.GetPane(self.panels["default"].window_name).Hide()
+                
+                
             self._mgr.Update()
         
 
