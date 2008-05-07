@@ -288,15 +288,15 @@ class LinearFit(wx.Dialog):
                 else: 
                     tempy.append(y_model)
                 #Set the fit parameter display when  FitDialog is opened again
-                self.Avalue=cstA
-                self.Bvalue=cstB
+                self.Avalue=cstB
+                self.Bvalue=cstA
                 self.ErrAvalue=errA
                 self.ErrBvalue=errB
                 self.Chivalue=chisqr
                 self.push_data(tempx,tempy,xminView,xmaxView,xmin,xmax,self._ongetValues())
                 
                 # Display the fitting value on the Fit Dialog
-                self._onsetValues(cstA, cstB, errA,errB,chisqr)
+                self._onsetValues(cstB, cstA, errA,errB,chisqr)
                
                
             

@@ -115,6 +115,23 @@ def errFromX2(x,y=None,dx=None,dy=None):
         err = 0.9*x
        
         return math.fabs(err)
+def errToLog10X(x,y=None,dx=None,dy=None):
+    """
+        calculate error of Log(x)
+        @param x: float value
+        @param dx: float value
+    """
+    if dx==None:
+        dx = 0
+    if x!=0:
+        dx = dx/(x*math.log(10))
+    else:
+        raise ValueError, "errToLogX: divide by zero"
+    
+    if math.fabs(dx) >= math.fabs(x):
+        dx = 0.9*x
+    
+    return dx
     
 def errToLogX(x,y=None,dx=None,dy=None):
     """
