@@ -486,6 +486,21 @@ static PyObject * oscillations(Cinvertor *self, PyObject *args) {
 	
 }
 
+static PyObject * get_peaks(Cinvertor *self, PyObject *args) {
+	double *pars;
+	PyObject *data_obj;
+	Py_ssize_t npars;
+	int count;
+	
+	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
+	OUTVECTOR(data_obj,pars,npars);
+	
+	count = npeaks(pars, self->params.d_max, npars, 100);
+
+	return Py_BuildValue("i", count );	
+	
+}
+
 static PyMethodDef Cinvertor_methods[] = {
 		   {"residuals", (PyCFunction)residuals, METH_VARARGS, "Get the list of residuals"},
 		   {"pr_residuals", (PyCFunction)pr_residuals, METH_VARARGS, "Get the list of residuals"},
@@ -508,6 +523,7 @@ static PyMethodDef Cinvertor_methods[] = {
 		   {"is_valid", (PyCFunction)is_valid, METH_VARARGS, ""},
 		   {"basefunc_ft", (PyCFunction)basefunc_ft, METH_VARARGS, ""},
 		   {"oscillations", (PyCFunction)oscillations, METH_VARARGS, ""},
+		   {"get_peaks", (PyCFunction)get_peaks, METH_VARARGS, ""},
    
    {NULL}
 };

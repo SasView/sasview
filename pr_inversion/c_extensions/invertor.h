@@ -29,4 +29,6 @@ double reg_term(double *pars, double d_max, int n_c, int nslice);
 double int_p2(double *pars, double d_max, int n_c, int nslice);
 void pr_err(double *pars, double *err, double d_max, int n_c, 
 		double r, double *pr_value, double *pr_value_err);
+int npeaks(double *pars, double d_max, int n_c, int nslice);
+
 #endif

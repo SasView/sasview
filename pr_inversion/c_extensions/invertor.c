@@ -151,3 +151,29 @@ double int_p2(double *pars, double d_max, int n_c, int nslice) {
     return sum/(1.0*nslice)*d_max;
 }
 
+/**
+ * Get the number of P(r) peaks.
+ */
+int npeaks(double *pars, double d_max, int n_c, int nslice) {
+    double r; 
+    double value;
+	int i;
+	double previous = 0.0;
+	double slope    = 0.0;
+	int count = 0;
+    for (i=0; i<nslice; i++) {
+    	r = d_max/(1.0*nslice)*i;
+    	value = pr(pars, d_max, n_c, r);
+    	if (previous<=value){
+    		//if (slope<0) count += 1;
+    		slope = 1;
+    	} else {
+    		//printf("slope -1");
+    		if (slope>0) count += 1;
+    		slope = -1;
+    	}
+    	previous = value;
+    }
+    return count;
+}
+
