@@ -149,7 +149,7 @@ class InversionControl(wx.Panel):
         elif name=='oscillation':
             self.osc_ctl.SetValue("%-5.2g" % value)
         elif name=='alpha_estimate':
-            self.alpha_estimate_ctl.SetValue("%-5.2g" % value)
+            self.alpha_estimate_ctl.SetValue("%-3.1g" % value)
         elif name=='plotname':
             self.plot_data.SetValue(str(value))
             self.plot_radio.SetValue(True)
@@ -225,6 +225,16 @@ class InversionControl(wx.Panel):
         boxsizer2 = wx.StaticBoxSizer(parsbox, wx.VERTICAL)
         boxsizer2.SetMinSize((320,50))
         
+        explanation  = "P(r) is found by fitting a set of base functions to I(Q). "
+        explanation += "The minimization involves a regularization term to ensure "
+        explanation += "a smooth P(r). The alpha parameter gives the size of that "  
+        explanation += "term. The suggested value is the value above which the"
+        explanation += "output P(r) will have only one peak."
+        label_explain = wx.StaticText(self, -1, explanation, size=(280,80))
+        boxsizer2.Add(label_explain,  wx.LEFT|wx.BOTTOM, 5)
+        
+        
+        
         label_nfunc = wx.StaticText(self, -1, "Number of terms")
         label_nfunc.SetMinSize((120,20))
         label_alpha = wx.StaticText(self, -1, "Regularization constant")
@@ -232,10 +242,14 @@ class InversionControl(wx.Panel):
         label_sugg  = wx.StaticText(self, -1, "Suggested value")
         
         self.nfunc_ctl = wx.TextCtrl(self, -1, size=(60,20))
+        self.nfunc_ctl.SetToolTipString("Number of terms in the expansion.")
         self.alpha_ctl = wx.TextCtrl(self, -1, size=(60,20))
+        self.alpha_ctl.SetToolTipString("Control parameter for the size of the regularization term.")
         self.dmax_ctl  = wx.TextCtrl(self, -1, size=(60,20))
+        self.dmax_ctl.SetToolTipString("Maximum distance between any two points in the system.")
         self.alpha_estimate_ctl  = wx.TextCtrl(self, -1, size=(60,20))
         self.alpha_estimate_ctl.Enable(False)
+        self.alpha_estimate_ctl.SetToolTipString("Value of alpha below which P(r) may have multiple peaks.")
         
         # EVT_TEXT would trigger an event for each character entered
         self.nfunc_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
@@ -246,17 +260,17 @@ class InversionControl(wx.Panel):
         sizer_params = wx.GridBagSizer(5,5)
 
         iy = 0
-        sizer_params.Add(label_sugg, (iy,2), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        sizer_params.Add(label_sugg,       (iy,2), (1,1), wx.LEFT, 15)
         iy += 1
-        sizer_params.Add(label_nfunc, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        sizer_params.Add(self.nfunc_ctl,   (iy,1), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        sizer_params.Add(label_nfunc,      (iy,0), (1,1), wx.LEFT, 15)
+        sizer_params.Add(self.nfunc_ctl,   (iy,1), (1,1), wx.RIGHT, 0)
         iy += 1
-        sizer_params.Add(label_alpha, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        sizer_params.Add(self.alpha_ctl,   (iy,1), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        sizer_params.Add(self.alpha_estimate_ctl,   (iy,2), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        sizer_params.Add(label_alpha,      (iy,0), (1,1), wx.LEFT, 15)
+        sizer_params.Add(self.alpha_ctl,   (iy,1), (1,1), wx.RIGHT, 0)
+        sizer_params.Add(self.alpha_estimate_ctl, (iy,2), (1,1), wx.LEFT, 15)
         iy += 1
-        sizer_params.Add(label_dmax, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        sizer_params.Add(self.dmax_ctl,   (iy,1), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        sizer_params.Add(label_dmax, (iy,0), (1,1), wx.LEFT, 15)
+        sizer_params.Add(self.dmax_ctl,   (iy,1), (1,1), wx.RIGHT, 0)
 
         boxsizer2.Add(sizer_params, 0)
         vbox.Add(boxsizer2)
@@ -274,10 +288,15 @@ class InversionControl(wx.Panel):
         
         self.time_ctl = wx.TextCtrl(self, -1, size=(60,20))
         self.time_ctl.SetEditable(False)
+        self.time_ctl.SetToolTipString("Computation time for the last inversion, in seconds.")
+        
         self.chi2_ctl = wx.TextCtrl(self, -1, size=(60,20))
         self.chi2_ctl.SetEditable(False)
+        self.chi2_ctl.SetToolTipString("Chi^2 over degrees of freedom.")
+        
         self.osc_ctl = wx.TextCtrl(self, -1, size=(60,20))
         self.osc_ctl.SetEditable(False)
+        self.osc_ctl.SetToolTipString("Oscillation parameter. P(r) for a sphere has an oscillation parameter of 1.1.")
         
         sizer_res = wx.GridBagSizer(5,5)
 
@@ -301,6 +320,7 @@ class InversionControl(wx.Panel):
         
         id = wx.NewId()
         button_OK = wx.Button(self, id, "Compute")
+        button_OK.SetToolTipString("Perform P(r) inversion.")
         self.Bind(wx.EVT_BUTTON, self._on_invert, id = id)   
         #button_Cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
         

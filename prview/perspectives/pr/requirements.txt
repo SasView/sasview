@@ -17,3 +17,4 @@
 13. Errors on output constants
 14. Clean up the InversionDialog
 15. Add online help for inputs and outputs (especially figures of merit)
+16. Add help text to the interface (description of what we are minimizing, to explain alpha and nfunc).

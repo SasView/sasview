@@ -290,7 +290,7 @@ class Plugin:
     def _thread_error(self, error):
         wx.PostEvent(self.parent, StatusEvent(status=error))
     
-    def _estimate_completed(self, alpha, elapsed):
+    def _estimate_completed(self, alpha, message, elapsed):
         """
             Parameter estimation completed, 
             display the results to the user
@@ -300,6 +300,8 @@ class Plugin:
         # Save useful info
         self.elapsed = elapsed
         self.control_panel.alpha_estimate = alpha
+        if not message==None:
+            wx.PostEvent(self.parent, StatusEvent(status=str(message)))
     
     def _completed(self, out, cov, pr, elapsed):
         """
@@ -321,6 +323,7 @@ class Plugin:
         self.control_panel.elapsed = elapsed
         self.control_panel.oscillation = pr.oscillations(out)
         #print "OSCILL", pr.oscillations(out)
+        print "PEAKS:", pr.get_peaks(out)
         
         for i in range(len(out)):
             try:
@@ -427,10 +430,10 @@ class Plugin:
         return False
         
     def perform_estimate(self):
-        print "ESTIMATE"
         from pr_thread import EstimatePr
         from copy import deepcopy
         
+        wx.PostEvent(self.parent, StatusEvent(status=''))
         # If a thread is already started, stop it
         if self.estimation_thread != None and self.estimation_thread.isrunning():
             self.estimation_thread.stop()
@@ -547,5 +550,5 @@ class Plugin:
             Post initialization call back to close the loose ends
             [Somehow openGL needs this call]
         """
-        pass
+        self.parent.set_perspective(self.perspective)
     
