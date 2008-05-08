@@ -191,7 +191,10 @@ class Invertor(Cinvertor):
             for i in range(nq):
                 sum_reg += (a[i_q+npts][j])**2
                     
-        new_alpha = sum_sig/(sum_reg/self.alpha)
+        if math.fabs(self.alpha)>0:
+            new_alpha = sum_sig/(sum_reg/self.alpha)
+        else:
+            new_alpha = 0.0
         self.suggested_alpha = new_alpha
         
         try:
