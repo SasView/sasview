@@ -1,0 +1,19 @@
+1. Thread
+2. Find good defaults. Automate the inversion.
+   -How do we estimate d_max?
+   -How do we estimate alpha?
+   Compute the residuals once and choose a value that brings the reg term up to 
+   a fraction of the residuals.
+3. When fitting a plottable on a Graph with multiple plottables, remember the one the user chose [done]
+4. What q-range do we need to make it work? What are the constraints?
+5. Create handshake so that a plug-in can set context menu items to its own panels...
+6. Return figure of merit values and suggest the values for d_max and alpha.
+7. Show time estimate
+8. Plot the reg term alone to see what it looks like
+9. Use data loader perspective/plug-in to load data/choose file
+10. Common module for file reading and file choosing
+11. Define limits of applicability
+12. Return figures of merit
+13. Errors on output constants
+14. Clean up the InversionDialog
+15. Add online help for inputs and outputs (especially figures of merit)
