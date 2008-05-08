@@ -38,7 +38,7 @@ def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
         hiprev = hi
         ptprev = pt
         if scale=='log':
-            #assert lo >0
+            assert lo >0
             if lo > 0 :
                 lo = math.log10(lo)
             if hi > 0 :
@@ -60,21 +60,17 @@ def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
     
         # Convert transformed values back to the original scale
         if scale=='log':
-            #if (lo <= -300) and (hi >= 300):
-            if (lo > 0) and (math.log(lo) <= -300):
+            if (lo <= -250) or (hi >= 250):
                 lo=loprev
                 hi=hiprev
                 print "Not possible to scale"
-            if (lo == 0) or (lo <= -300):
-                lo=loprev
-                hi=hiprev
-                print "Not possible to scale"
+           
             else:
                 lo,hi = math.pow(10.,lo),math.pow(10.,hi)
                 #assert lo >0,"lo = %g"%lo
                 print "possible to scale"
            
-        print "these are low and high",lo,hi
+            print "these are low and high",lo,hi
 
         return (lo,hi)
 
