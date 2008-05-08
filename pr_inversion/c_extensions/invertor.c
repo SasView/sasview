@@ -1,5 +1,8 @@
 #include <math.h>
 #include "invertor.h"
+#include <memory.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 double pi = 3.1416;
 
@@ -119,16 +122,32 @@ double dprdr(double *pars, double d_max, int n_c, double r) {
 /**
  * regularization term calculated from the expansion.
  */
-double reg_term(double *pars, double d_max, int n_c) {
+double reg_term(double *pars, double d_max, int n_c, int nslice) {
     double sum = 0.0; 
     double r;
     double deriv;
 	int i;
-    for (i=0; i<25; i++) {
-    	r = d_max/25.0*i;
+    for (i=0; i<nslice; i++) {
+    	r = d_max/(1.0*nslice)*i;
     	deriv = dprdr(pars, d_max, n_c, r);
         sum += deriv*deriv;
     }
-    return sum/25.0*d_max;
+    return sum/(1.0*nslice)*d_max;
+}
+
+/**
+ * regularization term calculated from the expansion.
+ */
+double int_p2(double *pars, double d_max, int n_c, int nslice) {
+    double sum = 0.0; 
+    double r; 
+    double value;
+	int i;
+    for (i=0; i<nslice; i++) {
+    	r = d_max/(1.0*nslice)*i;
+    	value = pr(pars, d_max, n_c, r);
+        sum += value*value;
+    }
+    return sum/(1.0*nslice)*d_max;
 }
 

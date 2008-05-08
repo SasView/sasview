@@ -318,6 +318,8 @@ static PyObject * residuals(Cinvertor *self, PyObject *args) {
 	// Regularization factor
 	double regterm = 0.0;
 	double tmp = 0.0;
+	// Number of slices in regularization term estimate
+	int nslice = 25;
 	
 	PyObject *data_obj;
 	Py_ssize_t npars;
@@ -330,7 +332,7 @@ static PyObject * residuals(Cinvertor *self, PyObject *args) {
 	// Should create this list only once and refill it
     residuals = PyList_New(self->params.npoints);
 
-    regterm = reg_term(pars, self->params.d_max, npars);
+    regterm = reg_term(pars, self->params.d_max, npars, nslice);
     
     for(i=0; i<self->params.npoints; i++) {
     	diff = self->params.y[i] - iq(pars, self->params.d_max, npars, self->params.x[i]);
@@ -366,6 +368,8 @@ static PyObject * pr_residuals(Cinvertor *self, PyObject *args) {
 	// Regularization factor
 	double regterm = 0.0;
 	double tmp = 0.0;
+	// Number of slices in regularization term estimate
+	int nslice = 25;
 	
 	PyObject *data_obj;
 	Py_ssize_t npars;
@@ -377,7 +381,7 @@ static PyObject * pr_residuals(Cinvertor *self, PyObject *args) {
 	// Should create this list only once and refill it
     residuals = PyList_New(self->params.npoints);
 
-    regterm = reg_term(pars, self->params.d_max, npars);
+    regterm = reg_term(pars, self->params.d_max, npars, nslice);
 
     
     for(i=0; i<self->params.npoints; i++) {
@@ -467,6 +471,21 @@ static PyObject * basefunc_ft(Cinvertor *self, PyObject *args) {
 	
 }
 
+static PyObject * oscillations(Cinvertor *self, PyObject *args) {
+	double *pars;
+	PyObject *data_obj;
+	Py_ssize_t npars;
+	double oscill, norm;
+	
+	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
+	OUTVECTOR(data_obj,pars,npars);
+	
+	oscill = reg_term(pars, self->params.d_max, npars, 100);
+	norm   = int_p2(pars, self->params.d_max, npars, 100);
+	return Py_BuildValue("f", sqrt(oscill/norm)/acos(-1.0)*self->params.d_max );	
+	
+}
+
 static PyMethodDef Cinvertor_methods[] = {
 		   {"residuals", (PyCFunction)residuals, METH_VARARGS, "Get the list of residuals"},
 		   {"pr_residuals", (PyCFunction)pr_residuals, METH_VARARGS, "Get the list of residuals"},
@@ -488,6 +507,7 @@ static PyMethodDef Cinvertor_methods[] = {
 		   {"get_pr_err", (PyCFunction)get_pr_err, METH_VARARGS, ""},
 		   {"is_valid", (PyCFunction)is_valid, METH_VARARGS, ""},
 		   {"basefunc_ft", (PyCFunction)basefunc_ft, METH_VARARGS, ""},
+		   {"oscillations", (PyCFunction)oscillations, METH_VARARGS, ""},
    
    {NULL}
 };

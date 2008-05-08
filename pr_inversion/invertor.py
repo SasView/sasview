@@ -7,6 +7,8 @@ class Invertor(Cinvertor):
     chi2  = 0
     ## Time elapsed for last computation
     elapsed = 0
+    ## Alpha to get the reg term the same size as the signal
+    suggested_alpha = 0
     
     def __init__(self):
         Cinvertor.__init__(self)
@@ -190,7 +192,7 @@ class Invertor(Cinvertor):
                 sum_reg += (a[i_q+npts][j])**2
                     
         new_alpha = sum_sig/(sum_reg/self.alpha)
-        print "Suggested alpha =", 0.1*new_alpha
+        self.suggested_alpha = new_alpha
         
         try:
             err = math.fabs(chi2/(npts-nfunc))* inv_cov

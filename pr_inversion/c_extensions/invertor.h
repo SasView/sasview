@@ -25,7 +25,8 @@ double ortho_derived(double d_max, int n, double r);
 double iq(double *c, double d_max, int n_c, double q);
 double pr(double *c, double d_max, int n_c, double r);
 double dprdr(double *pars, double d_max, int n_c, double r);
-double reg_term(double *pars, double d_max, int n_c);
+double reg_term(double *pars, double d_max, int n_c, int nslice);
+double int_p2(double *pars, double d_max, int n_c, int nslice);
 void pr_err(double *pars, double *err, double d_max, int n_c, 
 		double r, double *pr_value, double *pr_value_err);
 #endif
