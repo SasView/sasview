@@ -123,6 +123,9 @@ class InversionControl(wx.Panel):
         self.osc_ctl  = None
         self.file_radio = None
         self.plot_radio = None
+        self.label_sugg = None
+        self.qmin_ctl = None
+        self.qmax_ctl = None
         
         ## Estimates
         self.alpha_estimate_ctl = None
@@ -144,12 +147,20 @@ class InversionControl(wx.Panel):
             self.alpha_ctl.SetValue(str(value))
         elif name=='chi2':
             self.chi2_ctl.SetValue("%-5.3g" % value)
+        elif name=='q_min':
+            self.qmin_ctl.SetValue("%-5.3g" % value)
+        elif name=='q_max':
+            self.qmax_ctl.SetValue("%-5.3g" % value)
         elif name=='elapsed':
             self.time_ctl.SetValue("%-5.2g" % value)
         elif name=='oscillation':
             self.osc_ctl.SetValue("%-5.2g" % value)
         elif name=='alpha_estimate':
-            self.alpha_estimate_ctl.SetValue("%-3.1g" % value)
+            self.alpha_estimate_ctl.SetToolTipString("Click to accept value.")
+            self.alpha_estimate_ctl.Enable(True)
+            self.alpha_estimate_ctl.SetLabel("%-3.1g" % value)
+            #self.alpha_estimate_ctl.Show()
+            #self.label_sugg.Show()
         elif name=='plotname':
             self.plot_data.SetValue(str(value))
             self.plot_radio.SetValue(True)
@@ -169,6 +180,10 @@ class InversionControl(wx.Panel):
             self.alpha_ctl.GetValue()
         elif name=='chi2':
             self.chi2_ctl.GetValue()
+        elif name=='q_min':
+            self.qmin_ctl.GetValue()
+        elif name=='q_max':
+            self.qmax_ctl.GetValue()
         elif name=='elapsed':
             self.time_ctl.GetValue()
         elif name=='oscillation':
@@ -239,7 +254,8 @@ class InversionControl(wx.Panel):
         label_nfunc.SetMinSize((120,20))
         label_alpha = wx.StaticText(self, -1, "Regularization constant")
         label_dmax  = wx.StaticText(self, -1, "Max distance [A]")
-        label_sugg  = wx.StaticText(self, -1, "Suggested value")
+        self.label_sugg  = wx.StaticText(self, -1, "Suggested value")
+        #self.label_sugg.Hide()
         
         self.nfunc_ctl = wx.TextCtrl(self, -1, size=(60,20))
         self.nfunc_ctl.SetToolTipString("Number of terms in the expansion.")
@@ -247,20 +263,25 @@ class InversionControl(wx.Panel):
         self.alpha_ctl.SetToolTipString("Control parameter for the size of the regularization term.")
         self.dmax_ctl  = wx.TextCtrl(self, -1, size=(60,20))
         self.dmax_ctl.SetToolTipString("Maximum distance between any two points in the system.")
-        self.alpha_estimate_ctl  = wx.TextCtrl(self, -1, size=(60,20))
+        id = wx.NewId()
+        self.alpha_estimate_ctl  = wx.Button(self, id, "")
+        #self.alpha_estimate_ctl.Hide()
+        self.Bind(wx.EVT_BUTTON, self._on_accept_alpha, id = id)   
         self.alpha_estimate_ctl.Enable(False)
-        self.alpha_estimate_ctl.SetToolTipString("Value of alpha below which P(r) may have multiple peaks.")
+        #self.alpha_estimate_ctl.SetBackgroundColour('#ffdf85')
+        #self.alpha_estimate_ctl.SetBackgroundColour(self.GetBackgroundColour())
+        self.alpha_estimate_ctl.SetToolTipString("Waiting for estimate...")
         
         # EVT_TEXT would trigger an event for each character entered
         self.nfunc_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
-        #self.alpha_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
+        self.alpha_ctl.Bind(wx.EVT_KILL_FOCUS, self._read_pars)
         self.dmax_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
         self.Bind(wx.EVT_TEXT_ENTER, self._on_pars_changed)
         
         sizer_params = wx.GridBagSizer(5,5)
 
         iy = 0
-        sizer_params.Add(label_sugg,       (iy,2), (1,1), wx.LEFT, 15)
+        sizer_params.Add(self.label_sugg,       (iy,2), (1,1), wx.LEFT, 15)
         iy += 1
         sizer_params.Add(label_nfunc,      (iy,0), (1,1), wx.LEFT, 15)
         sizer_params.Add(self.nfunc_ctl,   (iy,1), (1,1), wx.RIGHT, 0)
@@ -273,7 +294,30 @@ class InversionControl(wx.Panel):
         sizer_params.Add(self.dmax_ctl,   (iy,1), (1,1), wx.RIGHT, 0)
 
         boxsizer2.Add(sizer_params, 0)
+        
         vbox.Add(boxsizer2)
+
+        # ----- Q range -----
+        qbox = wx.StaticBox(self, -1, "Q range")
+        qboxsizer = wx.StaticBoxSizer(qbox, wx.VERTICAL)
+        qboxsizer.SetMinSize((320,20))
+        
+        sizer_q = wx.GridBagSizer(5,5)
+
+        label_qmin = wx.StaticText(self, -1, "Q min")
+        label_qmax = wx.StaticText(self, -1, "Q max")
+        self.qmin_ctl = wx.TextCtrl(self, -1, size=(60,20))
+        self.qmax_ctl = wx.TextCtrl(self, -1, size=(60,20))
+        
+        iy = 0
+        sizer_q.Add(label_qmin, (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
+        sizer_q.Add(self.qmin_ctl, (iy,1), (1,1), wx.LEFT|wx.EXPAND, 10)
+        sizer_q.Add(label_qmax, (iy,2), (1,1), wx.LEFT|wx.EXPAND, 15)
+        sizer_q.Add(self.qmax_ctl, (iy,3), (1,1), wx.LEFT|wx.EXPAND, 10)
+        qboxsizer.Add(sizer_q, wx.TOP, 15)
+        vbox.Add(qboxsizer)
+        
+        
 
         # ----- Results -----
         resbox = wx.StaticBox(self, -1, "Outputs")
@@ -333,27 +377,47 @@ class InversionControl(wx.Panel):
 
         self.SetSizer(vbox)
         
+
+        
+    def _on_accept_alpha(self, evt):
+        """
+            User has accepted the estimated alpha, 
+            set it as part of the input parameters
+        """
+        try:
+            alpha = self.alpha_estimate_ctl.GetLabel()
+            tmp = float(alpha)
+            self.alpha_ctl.SetValue(alpha)
+        except:
+            # No estimate or bad estimate, either do nothing
+            import sys
+            print "InversionControl._on_accept_alpha: %s" % sys.exc_value
+            pass
+        
+        
     def _on_pars_changed(self, evt):
         """
             Called when an input parameter has changed
             We will estimate the alpha parameter behind the
             scenes. 
         """
-        flag, alpha, dmax, nfunc = self._read_pars()
+        flag, alpha, dmax, nfunc, qmin, qmax = self._read_pars()
         
         # If the pars are valid, estimate alpha
         if flag:
             if self.plot_radio.GetValue():
                 dataset = self.plot_data.GetValue()
                 self.manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc, 
-                                                     d_max=dmax)
+                                                     d_max=dmax,
+                                                     q_min=qmin, q_max=qmax)
             else:
                 path = self.data_file.GetValue()
                 self.manager.estimate_file_inversion(alpha=alpha, nfunc=nfunc, 
-                                                     d_max=dmax, path=path)
+                                                     d_max=dmax, path=path,
+                                                     q_min=qmin, q_max=qmax)
         
         
-    def _read_pars(self):    
+    def _read_pars(self, evt=None):    
         alpha = 0
         nfunc = 5
         dmax  = 120
@@ -390,7 +454,35 @@ class InversionControl(wx.Panel):
             self.nfunc_ctl.SetBackgroundColour("pink")
             self.nfunc_ctl.Refresh()
         
-        return flag, alpha, dmax, nfunc
+        # Read qmin
+        try:
+            qmin_str = self.qmin_ctl.GetValue()
+            if len(qmin_str.lstrip().rstrip())==0:
+                qmin = None
+            else:
+                qmin = float(qmin_str)
+                self.qmin_ctl.SetBackgroundColour(wx.WHITE)
+                self.qmin_ctl.Refresh()
+        except:
+            flag = False
+            self.qmin_ctl.SetBackgroundColour("pink")
+            self.qmin_ctl.Refresh()
+        
+        # Read qmax
+        try:
+            qmax_str = self.qmax_ctl.GetValue()
+            if len(qmax_str.lstrip().rstrip())==0:
+                qmax = None
+            else:
+                qmax = float(qmax_str)
+                self.qmax_ctl.SetBackgroundColour(wx.WHITE)
+                self.qmax_ctl.Refresh()
+        except:
+            flag = False
+            self.qmax_ctl.SetBackgroundColour("pink")
+            self.qmax_ctl.Refresh()
+        
+        return flag, alpha, dmax, nfunc, qmin, qmax
     
     def _on_invert(self, evt):
         """
@@ -400,17 +492,20 @@ class InversionControl(wx.Panel):
         # Get the data from the form
         # Push it to the manager
         
-        flag, alpha, dmax, nfunc = self._read_pars()
+        flag, alpha, dmax, nfunc, qmin, qmax = self._read_pars()
         
         if flag:
             if self.plot_radio.GetValue():
                 dataset = self.plot_data.GetValue()
                 self.manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc, 
-                                                  d_max=dmax)
+                                                  d_max=dmax,
+                                                  q_min=qmin, q_max=qmax)
             else:
                 path = self.data_file.GetValue()
                 self.manager.setup_file_inversion(alpha=alpha, nfunc=nfunc, 
-                                                  d_max=dmax, path=path)
+                                                  d_max=dmax, path=path,
+                                                  q_min=qmin, q_max=qmax
+                                                  )
                 
         else:
             message = "The P(r) form contains invalid values: please submit it again."

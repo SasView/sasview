@@ -28,6 +28,8 @@ class Plugin:
         self.alpha      = 0.0001
         self.nfunc      = 10
         self.max_length = 140.0
+        self.q_min      = None
+        self.q_max      = None
         ## Remember last plottable processed
         self.last_data  = "sphere_60_q0_2.txt"
         ## Time elapsed for last computation [sec]
@@ -157,7 +159,15 @@ class Plugin:
             if q_i>maxq:
                 maxq=q_i
                 
-        x = pylab.arange(0.001, maxq, maxq/301.0)
+        minq = 0.001
+        
+        # Check for user min/max
+        if not pr.q_min==None:
+            minq = pr.q_min
+        if not pr.q_max==None:
+            maxq = pr.q_max
+                
+        x = pylab.arange(minq, maxq, maxq/301.0)
         y = numpy.zeros(len(x))
         err = numpy.zeros(len(x))
         for i in range(len(x)):
@@ -348,18 +358,22 @@ class Plugin:
         # Popup result panel
         #result_panel = InversionResults(self.parent, -1, style=wx.RAISED_BORDER)
         
-    def setup_plot_inversion(self, alpha, nfunc, d_max):
+    def setup_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None):
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
+        self.q_min = q_min
+        self.q_max = q_max
         
         self._create_plot_pr()
         self.perform_inversion()
 
-    def estimate_plot_inversion(self, alpha, nfunc, d_max):
+    def estimate_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None):
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
+        self.q_min = q_min
+        self.q_max = q_max
         
         self._create_plot_pr()
         self.perform_estimate()
@@ -374,6 +388,8 @@ class Plugin:
         pr = Invertor()
         pr.d_max = self.max_length
         pr.alpha = self.alpha
+        pr.q_min = self.q_min
+        pr.q_max = self.q_max
         pr.x = self.current_plottable.x
         pr.y = self.current_plottable.y
         
@@ -390,19 +406,23 @@ class Plugin:
         self.pr = pr
 
           
-    def setup_file_inversion(self, alpha, nfunc, d_max, path):
+    def setup_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None):
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
+        self.q_min = q_min
+        self.q_max = q_max
         
         self._create_file_pr(path)
         
         self.perform_inversion()
           
-    def estimate_file_inversion(self, alpha, nfunc, d_max, path):
+    def estimate_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None):
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
+        self.q_min = q_min
+        self.q_max = q_max
         
         if self._create_file_pr(path):
             self.perform_estimate()
@@ -421,6 +441,8 @@ class Plugin:
             pr = Invertor()
             pr.d_max = self.max_length
             pr.alpha = self.alpha
+            pr.q_min = self.q_min
+            pr.q_max = self.q_max
             pr.x = x
             pr.y = y
             pr.err = err

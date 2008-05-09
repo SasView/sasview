@@ -77,70 +77,12 @@ class EstimatePr(CalcThread):
             raise KeyboardInterrupt    
         
     def compute(self):
-        import time
+        """
+            Calculates the estimate
+        """
         try:            
-            self.starttime = time.time()
-            # If the current alpha is zero, try
-            # another value
-            if self.pr.alpha<=0:
-                self.pr.alpha = 0.0001
-                 
-            # Perform inversion to find the largest alpha
-            out, cov = self.pr.lstsq(self.nfunc)
-            elapsed = time.time()-self.starttime
-            initial_alpha = self.pr.alpha
-            initial_peaks = self.pr.get_peaks(out)
-
-            # Try the inversion with the estimated alpha
-            self.pr.alpha = self.pr.suggested_alpha
-            out, cov = self.pr.lstsq(self.nfunc)
-
-            npeaks = self.pr.get_peaks(out)
-            # if more than one peak to start with
-            # just return the estimate
-            if npeaks>1:
-                message = "Your P(r) is not smooth, please check your inversion parameters"
-                self.complete(alpha=self.pr.suggested_alpha, message=message, elapsed=elapsed)
-            else:
-                
-                # Look at smaller values
-                # We assume that for the suggested alpha, we have 1 peak
-                # if not, send a message to change parameters
-                alpha = self.pr.suggested_alpha
-                best_alpha = self.pr.suggested_alpha
-                found = False
-                for i in range(10):
-                    self.pr.alpha = (0.33)**(i+1)*alpha
-                    out, cov = self.pr.lstsq(self.nfunc)
-                    #osc = self.pr.oscillations(out) 
-                    #print self.pr.alpha, osc
-                    
-                    peaks = self.pr.get_peaks(out)
-                    print self.pr.alpha, peaks
-                    if peaks>1:
-                        found = True
-                        break
-                    best_alpha = self.pr.alpha
-                    
-                # If we didn't find a turning point for alpha and
-                # the initial alpha already had only one peak,
-                # just return that
-                if not found and initial_peaks==1 and initial_alpha<best_alpha:
-                    best_alpha = initial_alpha
-                    
-                # Check whether the size makes sense
-                message=None
-                
-                if not found:
-                    message = "None"
-                elif best_alpha>=0.5*self.pr.suggested_alpha:
-                    # best alpha is too big, return a 
-                    # reasonable value
-                    message  = "The estimated alpha for your system is too large. "
-                    message += "Try increasing your maximum distance."
-                
-                self.complete(alpha=best_alpha, message=None, elapsed=elapsed)
-
+            alpha, message, elapsed = self.pr.estimate_alpha(self.nfunc)
+            self.complete(alpha=alpha, message=message, elapsed=elapsed)
         except:
             if not self.error_func==None:
                 printEVT("EstimatePr.compute: %s" % sys.exc_value)
