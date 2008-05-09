@@ -17,6 +17,8 @@ void invertor_dealloc(Invertor_params *pars) {
 
 void invertor_init(Invertor_params *pars) {
 	pars->d_max = 180;
+	pars->q_min = -1.0;
+	pars->q_max = -1.0;
 }
 
 

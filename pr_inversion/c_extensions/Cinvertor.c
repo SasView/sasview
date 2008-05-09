@@ -266,6 +266,44 @@ static PyObject * get_dmax(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("d", self->params.d_max);	
 }
 
+/**
+ * Sets the minimum q
+ */
+static PyObject * set_qmin(Cinvertor *self, PyObject *args) {
+	double q_min;
+  
+	if (!PyArg_ParseTuple(args, "d", &q_min)) return NULL;
+	self->params.q_min = q_min;
+	return Py_BuildValue("d", self->params.q_min);	
+}
+
+/**
+ * Gets the minimum q
+ */
+static PyObject * get_qmin(Cinvertor *self, PyObject *args) {
+	return Py_BuildValue("d", self->params.q_min);	
+}
+
+
+/**
+ * Sets the maximum q
+ */
+static PyObject * set_qmax(Cinvertor *self, PyObject *args) {
+	double q_max;
+  
+	if (!PyArg_ParseTuple(args, "d", &q_max)) return NULL;
+	self->params.q_max = q_max;
+	return Py_BuildValue("d", self->params.q_max);	
+}
+
+/**
+ * Gets the maximum q
+ */
+static PyObject * get_qmax(Cinvertor *self, PyObject *args) {
+	return Py_BuildValue("d", self->params.q_max);	
+}
+
+
 static PyObject * set_alpha(Cinvertor *self, PyObject *args) {
 	double alpha;
   
@@ -512,6 +550,10 @@ static PyMethodDef Cinvertor_methods[] = {
 		   {"get_err", (PyCFunction)get_err, METH_VARARGS, ""},
 		   {"set_dmax", (PyCFunction)set_dmax, METH_VARARGS, ""},
 		   {"get_dmax", (PyCFunction)get_dmax, METH_VARARGS, ""},
+		   {"set_qmin", (PyCFunction)set_qmin, METH_VARARGS, ""},
+		   {"get_qmin", (PyCFunction)get_qmin, METH_VARARGS, ""},
+		   {"set_qmax", (PyCFunction)set_qmax, METH_VARARGS, ""},
+		   {"get_qmax", (PyCFunction)get_qmax, METH_VARARGS, ""},
 		   {"set_alpha", (PyCFunction)set_alpha, METH_VARARGS, ""},
 		   {"get_alpha", (PyCFunction)get_alpha, METH_VARARGS, ""},
 		   {"get_nx", (PyCFunction)get_nx, METH_VARARGS, ""},

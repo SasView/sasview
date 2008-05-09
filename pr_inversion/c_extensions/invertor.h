@@ -11,6 +11,8 @@ typedef struct {
     int ny;    
     int nerr;  
     double alpha;
+    double q_min;
+    double q_max;
 } Invertor_params; 
 
 void invertor_dealloc(Invertor_params *pars);

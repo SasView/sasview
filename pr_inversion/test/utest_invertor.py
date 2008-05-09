@@ -333,6 +333,48 @@ class TestBasicComponent(unittest.TestCase):
         for i in range(len(self.x_in)):
             self.assertEqual(self.x_in[i], clone.x[i])
         
+    def test_save(self):
+        x, y, err = load("sphere_80.txt")
+
+        # Choose the right d_max...
+        self.invertor.d_max = 160.0
+        # Set a small alpha
+        self.invertor.alpha = .0007
+        # Set data
+        self.invertor.x   = x
+        self.invertor.y   = y
+        self.invertor.err = err
+        # Perform inversion
+        
+        out, cov = self.invertor.lstsq(10)
+        
+        # Save
+        self.invertor.to_file("test_output.txt")
+    
+    def test_load(self):
+        self.invertor.from_file("test_output.txt")
+        self.assertEqual(self.invertor.d_max, 160.0)
+        self.assertEqual(self.invertor.alpha, 0.0007)
+        self.assertEqual(self.invertor.chi2, 16654.1)
+        self.assertAlmostEqual(self.invertor.pr(self.invertor.out, 10.0), 8948.22689927, 4)
+        
+    def test_qmin(self):
+        self.invertor.q_min = 1.0
+        print self.invertor.q_min
+        self.assertEqual(self.invertor.q_min, 1.0)
+        
+        self.invertor.q_min = None
+        self.assertEqual(self.invertor.q_min, None)
+        
+                         
+    def test_qmax(self):
+        self.invertor.q_max = 1.0
+        self.assertEqual(self.invertor.q_max, 1.0)
+       
+        self.invertor.q_max = None
+        self.assertEqual(self.invertor.q_max, None)
+
+        
 def pr_theory(r, R):
     """
        P(r) for a sphere
