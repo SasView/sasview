@@ -15,3 +15,6 @@ Functional Requirements:
  Risks:
  - Can we run Park standalone without a server?
  - Can we define an interface to Park that is as simple as scipy.optimizer?
+ 
+ [ALINA] Am I on the right track?
+ please take a look at the uml diagram...
