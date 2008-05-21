@@ -294,6 +294,14 @@ class ViewerFrame(wx.Frame):
  
         # Help menu
         helpmenu = wx.Menu()
+
+        # Look for help item in plug-ins 
+        for item in self.plugins:
+            if hasattr(item, "help"):
+                id = wx.NewId()
+                helpmenu.Append(id,'&%s help' % item.sub_menu, '')
+                wx.EVT_MENU(self, id, item.help)
+        
         if config._do_aboutbox:
             id = wx.NewId()
             helpmenu.Append(id,'&About', 'Software information')

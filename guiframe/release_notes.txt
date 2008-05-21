@@ -16,5 +16,10 @@ To-do list:
 		its own plots.
 	- Provide a hook for a general file loader for the various data formats
 	- Add group flag to allow groups of plots (and exclude other plots with
-		same units to be plotted in the same Graph.
+		same units to be plotted in the same Graph. [DONE]
+	- If there is only one perspective, drop the perspective menu.
+	- If there is only one panel in the Panel menu, drop the menu.
+	- Make legend transparent
+	- Make sure that when a plottable is sent a second time for update, that we replace the lables too!
+	- Add help menu entry for each module	
 	
