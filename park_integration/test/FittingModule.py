@@ -50,15 +50,17 @@ class Fitting:
         self.fitArrangeList={}
         #the list of all data to fit 
         self.data = data
-        #dictionary of models parameters
-        self.parameters={}
+        #list of models parameters
+        self.parameters=[]
         self.contraint =None
         self.residuals=[]
+        self.fitType =None
         
-    def fit_engine(self):
+    def fit_engine(self,word):
         """
             Check the contraint value and specify what kind of fit to use
         """
+        self.fitType = word
         return True
     
     def fit(self,pars, qmin=None, qmax=None):
@@ -76,7 +78,8 @@ class Fitting:
         listdata=[]
         model =fitproblem.get_model()
         listdata= fitproblem.get_data()
-        
+        self.set_param(model, pars)
+        print "this is self.parameters",self.parameters
         for data in listdata:
             for i in range(len(data.x)):
                 if not data.x[i] in xtemp:
@@ -91,7 +94,7 @@ class Fitting:
             qmin= min(xtemp)
         if qmax==None:
             qmax= max(xtemp)  
-        chisqr, out, cov = fitHelper(model, pars, xtemp,ytemp, dytemp ,qmin,qmax)
+        chisqr, out, cov = fitHelper(model,self.parameters, xtemp,ytemp, dytemp ,qmin,qmax)
         return chisqr, out, cov
     
     def set_model(self,model,Uid):
@@ -115,6 +118,16 @@ class Fitting:
         """ return list of data"""
         return self.data
     
+    def set_param(self,model, pars):
+        """ Recieve a dictionary of parameter and save it """
+        self.parameters=[]
+        #for key ,value in pars:
+        for key, value in pars.iteritems():
+            print "this is the key",key
+            print "this is the value",value
+            param = Parameter(model, key, value)
+            self.parameters.append(param)
+        
     def add_contraint(self, contraint):
         """ User specify contraint to fit """
         self.contraint = str(contraint)
@@ -214,12 +227,13 @@ if __name__ == "__main__":
     model  = LineModel()
     Fit.set_model(model,1 )
     Fit.set_data(data1,1)
-    default_A = model.getParam('A') 
-    default_B = model.getParam('B') 
-    cstA = Parameter(model, 'A', default_A)
-    cstB  = Parameter(model, 'B', default_B)
+    #default_A = model.getParam('A') 
+    #default_B = model.getParam('B') 
+    #cstA = Parameter(model, 'A', default_A)
+    #cstB  = Parameter(model, 'B', default_B)
     
-    chisqr, out, cov=Fit.fit([cstA,cstB],None,None)
+    #chisqr, out, cov=Fit.fit([cstA,cstB],None,None)
+    chisqr, out, cov=Fit.fit({'A':2,'B':1},None,None)
     print"fit only one data",chisqr, out, cov 
     
     # test fit with 2 data and one model
@@ -239,6 +253,6 @@ if __name__ == "__main__":
     data3.name = "data2"
     load.load_data(data3)
     Fit.set_data(data3,2)
-    chisqr, out, cov=Fit.fit([cstA,cstB],None,None)
+    chisqr, out, cov=Fit.fit({'A':2,'B':1},None,None)
     print"fit two data",chisqr, out, cov 
     
