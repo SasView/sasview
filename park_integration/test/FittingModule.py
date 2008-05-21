@@ -2,13 +2,52 @@
 from sans.guitools.plottables import Data1D
 from Loader import Load
 from scipy import optimize
+
+
+class FitArrange:
+    def __init__(self):
+        """
+            @param model: the model selected by the user
+            @param Ldata: a list of data what the user want to fit
+        """
+        self.model = None
+        self.dList =[]
+        
+    def set_model(self,model):
+        """ set the model """
+        self.model = model
+        
+    def add_data(self,data):
+        """ 
+            @param data: Data to add in the list
+            fill a self.dataList with data to fit
+        """
+        if not data in self.dList:
+            self.dList.append(data)
+            
+    def get_model(self):
+        return self.model   
+     
+    def get_data(self):
+        """ Return list of data"""
+        return self.dList 
+      
+    def delete_data(self,data):
+        """
+            Remove one element from the list
+            @param data: Data to remove from the the lsit of data
+        """
+        if data in self.dList:
+            self.dList.remove(data)
+            
 class Fitting:
     """ 
         Performs the Fit.he user determine what kind of data 
     """
     def __init__(self,data=[]):
         #self.model is a list of all models to fit
-        self.model=[]
+        self.model={}
+        self.fitArrangeList={}
         #the list of all data to fit 
         self.data = data
         #dictionary of models parameters
@@ -21,55 +60,57 @@ class Fitting:
             Check the contraint value and specify what kind of fit to use
         """
         return True
+    
     def fit(self,pars, qmin=None, qmax=None):
         """
              Do the fit 
         """
+        # Do the fit with more than one data set and one model 
+        xtemp=[]
+        ytemp=[]
+        dytemp=[]
         
-        # Do the fit with 2 data set and one model 
-        numberData= len(self.data)
-        numberModel= len(self.model)
-        if numberData==1 and numberModel==1:
-            if qmin==None:
-                xmin= min(self.data[0].x)
-            if qmax==None:
-                xmax= max(self.data[0].x)
-           
-            #chisqr, out, cov = fitHelper(self.model[0],self.data[0],pars,xmin,xmax)
-            chisqr, out, cov =fitHelper(self.model[0], pars, self.data[0].x,
-                                 self.data[0].y, self.data[0].dy ,xmin,xmax)
-        else:# More than one data to fit with one model
-            xtemp=[]
-            ytemp=[]
-            dytemp=[]
-            for data in self.data:
-                for i in range(len(data.x)):
-                    if not data.x[i] in xtemp:
-                        xtemp.append(data.x[i])
-                       
-                    if not data.y[i] in ytemp:
-                        ytemp.append(data.y[i])
-                        
-                    if not data.dy[i] in dytemp:
-                        dytemp.append(data.dy[i])
-            if qmin==None:
-                xmin= min(xtemp)
-            if qmax==None:
-                xmax= max(xtemp)      
-            #chisqr, out, cov = fitHelper(self.model[0], 
-            #temp,pars,min(temp.x),max(temp.x))
-            chisqr, out, cov =fitHelper(self.model[0], pars, xtemp,
-                                 ytemp, dytemp ,xmin,xmax)
+        #for item in self.self.fitArrangeList.:
+        
+        fitproblem=self.fitArrangeList.values()[0]
+        listdata=[]
+        model =fitproblem.get_model()
+        listdata= fitproblem.get_data()
+        
+        for data in listdata:
+            for i in range(len(data.x)):
+                if not data.x[i] in xtemp:
+                    xtemp.append(data.x[i])
+                   
+                if not data.y[i] in ytemp:
+                    ytemp.append(data.y[i])
+                    
+                if not data.dy[i] in dytemp:
+                    dytemp.append(data.dy[i])
+        if qmin==None:
+            qmin= min(xtemp)
+        if qmax==None:
+            qmax= max(xtemp)  
+        chisqr, out, cov = fitHelper(model, pars, xtemp,ytemp, dytemp ,qmin,qmax)
         return chisqr, out, cov
     
-    def set_model(self,model):
+    def set_model(self,model,Uid):
         """ Set model """
-        self.model.append(model)
+        #self.model[Uid] = model
+        fitproblem= FitArrange()
+        fitproblem.set_model(model)
+        self.fitArrangeList[Uid]=fitproblem
         
-    def set_data(self,data):
+    def set_data(self,data,Uid):
         """ Receive plottable and create a list of data to fit"""
-        self.data.append(data)
-        
+        #self.data.append(data)
+        if self.fitArrangeList.has_key(Uid):
+            self.fitArrangeList[Uid].add_data(data)
+        else:
+            fitproblem= FitArrange()
+            fitproblem.add_data(data)
+            self.fitArrangeList[Uid]=fitproblem
+            
     def get_data(self):
         """ return list of data"""
         return self.data
@@ -81,52 +122,8 @@ class Fitting:
     def get_contraint(self):
         """ return the contraint value """
         return self.contraint
-    
-def get_residuals(model,data,qmin=None,qmax=None):
-    """
-        Calculates the vector of residuals for each point 
-        in y for a given set of input parameters.
-        @param params: list of parameter values
-        @return: vector of residuals
-    """
-    residuals = []
-   
-    for j in range(len(data.x)):
-        if data.x[j]> qmin and data.x[j]< qmax:
-            residuals.append( ( data.y[j] - model.runXY(data.x[j]) ) / data.dy[j])
-    
-    return residuals
 
-   
-def chi2(params): 
-    """
-        Calculates chi^2
-        @param params: list of parameter values
-        @return: chi^2
-    """
-    sum = 0
-    res = get_residuals(params)
-    for item in res:
-        sum += item*item
-    return sum 
-    
-    
-    def residual(self):
-        return self.residuals
-    
-def fitHelper(model,data,pars,qmin=None,qmax=None):
-    """ Do the actual fitting"""
-    
-    p = [param() for param in pars]
-    out, cov_x, info, mesg, success = optimize.leastsq(get_residuals, p, full_output=1, warning=True)
-    print info, mesg, success
-    # Calculate chi squared
-    if len(pars)>1:
-        chisqr = self.chi2(out)
-    elif len(pars)==1:
-        chisqr = self.chi2([out])
-        
-    return chisqr, out, cov_x
+
 
 class Parameter:
     """
@@ -212,11 +209,11 @@ if __name__ == "__main__":
     data1.name = "data1"
     load.load_data(data1)
     Fit =Fitting()
-    Fit.set_data(data1)
+    
     from sans.guitools.LineModel import LineModel
     model  = LineModel()
-    Fit.set_model(model)
-    
+    Fit.set_model(model,1 )
+    Fit.set_data(data1,1)
     default_A = model.getParam('A') 
     default_B = model.getParam('B') 
     cstA = Parameter(model, 'A', default_A)
@@ -226,19 +223,22 @@ if __name__ == "__main__":
     print"fit only one data",chisqr, out, cov 
     
     # test fit with 2 data and one model
+    Fit =Fitting()
+    Fit.set_model(model,2 )
     load.set_filename("testdata1.txt")
     load.set_values()
     data2 = Data1D(x=[], y=[], dx=None,dy=None)
     data2.name = "data2"
     
     load.load_data(data2)
-    Fit.set_data(data2)
+    Fit.set_data(data2,2)
     
     load.set_filename("testdata2.txt")
     load.set_values()
     data3 = Data1D(x=[], y=[], dx=None,dy=None)
     data3.name = "data2"
     load.load_data(data3)
-    Fit.set_data(data3)
+    Fit.set_data(data3,2)
     chisqr, out, cov=Fit.fit([cstA,cstB],None,None)
     print"fit two data",chisqr, out, cov 
+    
