@@ -243,7 +243,7 @@ class InversionControl(wx.Panel):
         explanation  = "P(r) is found by fitting a set of base functions to I(Q). "
         explanation += "The minimization involves a regularization term to ensure "
         explanation += "a smooth P(r). The alpha parameter gives the size of that "  
-        explanation += "term. The suggested value is the value above which the"
+        explanation += "term. The suggested value is the value above which the "
         explanation += "output P(r) will have only one peak."
         label_explain = wx.StaticText(self, -1, explanation, size=(280,80))
         boxsizer2.Add(label_explain,  wx.LEFT|wx.BOTTOM, 5)
@@ -525,6 +525,43 @@ class InversionControl(wx.Panel):
                 self._on_pars_changed(None)
         
 
+
+
+class HelpDialog(wx.Dialog):
+    def __init__(self, parent, id):
+        from sans.pr.invertor import help
+        wx.Dialog.__init__(self, parent, id, size=(400, 400))
+        self.SetTitle("P(r) help") 
+        
+
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        explanation = help()
+           
+        label_explain = wx.StaticText(self, -1, explanation, size=(350,300))
+            
+        vbox.Add(label_explain, 0, wx.ALL|wx.EXPAND, 15)
+
+
+        static_line = wx.StaticLine(self, -1)
+        vbox.Add(static_line, 0, wx.EXPAND, 0)
+        
+        button_OK = wx.Button(self, wx.ID_OK, "OK")
+        #button_Cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
+        
+        sizer_button = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer_button.Add(button_OK, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+        #sizer_button.Add(button_Cancel, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)        
+        vbox.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
+
+        self.SetSizer(vbox)
+        self.SetAutoLayout(True)
+        
+        self.Layout()
+        self.Centre()
+
+
 class ParsDialog(wx.Panel):
     """
         Dialog box to let the user edit detector settings
@@ -665,16 +702,9 @@ class TestPlot:
 class MyApp(wx.App):
     def OnInit(self):
         wx.InitAllImageHandlers()
-        plots = {}
-        plots['a'] = TestPlot("data 1")
-        plots['b'] = TestPlot("data 2")
-        #plots['c'] = TestPlot("data 3")
-        #plots['d'] = TestPlot("data 1")
-        #plots['e'] = TestPlot("data 2")
-        #plots['f'] = TestPlot("data 3")
-        dialog = InversionDlg(None, -1, "P(r) parameters", plots)
+        dialog = HelpDialog(None, -1)
         if dialog.ShowModal() == wx.ID_OK:
-            print dialog.get_content()
+            pass
         dialog.Destroy()
         
         return 1

@@ -18,3 +18,6 @@
 14. Clean up the InversionDialog
 15. Add online help for inputs and outputs (especially figures of merit)
 16. Add help text to the interface (description of what we are minimizing, to explain alpha and nfunc).
+17. Get rid of all output prints.
+18. Clean up
+19. Replace help dialog text with a nice image. Mention how to choose alpha and what the suggested alpha means.

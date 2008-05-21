@@ -57,7 +57,20 @@ class Plugin:
         id = wx.NewId()
         shapes.Append(id, '&Sphere test')
         wx.EVT_MENU(owner, id, self._fit_pr)
+        
         return [(id, shapes, "P(r)")]
+    
+    def help(self, evt):
+        """
+            Show a general help dialog. 
+            TODO: replace the text with a nice image
+        """
+        from inversion_panel import HelpDialog
+        dialog = HelpDialog(None, -1)
+        if dialog.ShowModal() == wx.ID_OK:
+            dialog.Destroy()
+        else:
+            dialog.Destroy()
     
     def _fit_pr(self, evt):
         from sans.pr.invertor import Invertor
