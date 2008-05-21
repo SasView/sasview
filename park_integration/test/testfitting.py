@@ -1,9 +1,11 @@
 """
     Unit tests for fitting module 
 """
-import unittest,fittings
+import unittest
 from sans.guitools.plottables import Theory1D
 from sans.guitools.plottables import Data1D
+from FittingModule import Parameter
+import math
 class testFitModule(unittest.TestCase):
     """ test fitting """
     def testLoader(self):
@@ -54,24 +56,34 @@ class testFitModule(unittest.TestCase):
         from Loader import Load
         load= Load()
         load.set_filename("testdata_line.txt")
-        self.assertEqual(load.get_filename(),"testdata_line.txt")
         load.set_values()
         x,y,dx,dy = load.get_values()
-        
         data1 = Data1D(x=[], y=[],dx=None, dy=None)
         load.load_data(data1)
+        
         # Receives the type of model for the fitting
         from sans.guitools.LineModel import LineModel
-        self.model  = LineModel()
-          
+        model  = LineModel()
+        
         from FittingModule import Fitting
-        fitting= Fitting(data1,None)
-        fitting.set_model(self.model)
-        self.assertEqual(fitting.fit_engine(),True)
-        fitting.set_data(x,y,dx,dy)
-        chisqr, out, cov= fitting.fit()
-        self.assertAlmostEqual(out[1],2.5)
-        self.assertAlmostEquals(out[0],4.0)
-        self.assertAlmostEquals(out[1]+cov[1][1],2.5)
-        self.assertAlmostEquals(out[0]+cov[0][0],4.0)
+        Fit= Fitting()
+        Fit.set_data(data1)
+        Fit.set_model(model)
+        
+        default_A = model.getParam('A') 
+        default_B = model.getParam('B') 
+        cstA = Parameter(model, 'A', default_A)
+        cstB  = Parameter(model, 'B', default_B)
+        chisqr, out, cov=Fit.fit([cstA,cstB],None,None)
+        print"fit only one data",chisqr, out, cov   
+       
+        self.assertEqual(Fit.fit_engine(),True)
+        
+        self.assert_(math.fabs(out[1]-2.5)/math.sqrt(cov[1][1]) < 2)
+        print "chisqr",chisqr/len(data1.x)
+        self.assert_(chisqr/len(data1.x) < 2)
+#        self.assertAlmostEqual(out[1],2.5)
+        #self.assertAlmostEquals(out[0],4.0)
+        #self.assertAlmostEquals(out[1]+cov[1][1],2.5)
+        #self.assertAlmostEquals(out[0]+cov[0][0],4.0)
         
