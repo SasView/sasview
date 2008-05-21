@@ -2,8 +2,35 @@ from sans.pr.core.pr_inversion import Cinvertor
 import numpy
 import sys
 
-class Invertor(Cinvertor):
+def help():
+    """
+        Provide general online help text
+    """
+    info_txt  = "The inversion approach is based on Moore, J. Appl. Cryst. (1980) 13, 168-175.\n\n"
+    info_txt += "P(r) is set to be equal to an expansion of base functions of the type "
+    info_txt += "phi_n(r) = 2*r*sin(pi*n*r/D_max). The coefficient of each base functions "
+    info_txt += "in the expansion is found by performing a least square fit with the "
+    info_txt += "following fit function:\n\n"
+    info_txt += "chi**2 = sum_i[ I_meas(q_i) - I_th(q_i) ]**2/error**2 + Reg_term\n\n"
+    info_txt += "where I_meas(q) is the measured scattering intensity and I_th(q) is "
+    info_txt += "the prediction from the Fourier transform of the P(r) expansion. "
+    info_txt += "The Reg_term term is a regularization term set to the second derivative "
+    info_txt += "d**2P(r)/dr**2 integrated over r. It is used to produce a smooth P(r) output.\n\n"
+    info_txt += "The following are user inputs:\n\n"
+    info_txt += "   - Number of terms: the number of base functions in the P(r) expansion.\n\n"
+    info_txt += "   - Regularization constant: a multiplicative constant to set the size of "
+    info_txt += "the regularization term.\n\n"
+    info_txt += "   - Maximum distance: the maximum distance between any two points in the system.\n"
+     
+    return info_txt
     
+
+class Invertor(Cinvertor):
+    """
+        Invertor class to perform P(r) inversion
+        
+        TODO: explain the maths
+    """
     ## Chisqr of the last computation
     chi2  = 0
     ## Time elapsed for last computation
@@ -190,7 +217,9 @@ class Invertor(Cinvertor):
         # To make sure an array is contiguous:
         # blah = numpy.ascontiguousarray(blah_original)
         # ... before passing it to C
-        
+        """
+            TODO: Document this
+        """
         import math
         from scipy.linalg.basic import lstsq
         
@@ -409,6 +438,7 @@ class Invertor(Cinvertor):
             file.write("%g  %g  %g\n" % (r_i, value, err))
     
         file.close()
+     
         
     def from_file(self, path):
         """
