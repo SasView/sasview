@@ -46,7 +46,7 @@ class Fitting:
     """
     def __init__(self,data=[]):
         #self.model is a list of all models to fit
-        self.model={}
+        #self.model={}
         self.fitArrangeList={}
         #the list of all data to fit 
         self.data = data
@@ -67,35 +67,38 @@ class Fitting:
         """
              Do the fit 
         """
-        # Do the fit with more than one data set and one model 
-        xtemp=[]
-        ytemp=[]
-        dytemp=[]
-        
-        #for item in self.self.fitArrangeList.:
+        #for item in self.fitArrangeList.:
         
         fitproblem=self.fitArrangeList.values()[0]
         listdata=[]
         model =fitproblem.get_model()
         listdata= fitproblem.get_data()
         self.set_param(model, pars)
-        print "this is self.parameters",self.parameters
-        for data in listdata:
-            for i in range(len(data.x)):
-                if not data.x[i] in xtemp:
-                    xtemp.append(data.x[i])
-                   
-                if not data.y[i] in ytemp:
-                    ytemp.append(data.y[i])
-                    
-                if not data.dy[i] in dytemp:
-                    dytemp.append(data.dy[i])
-        if qmin==None:
-            qmin= min(xtemp)
-        if qmax==None:
-            qmax= max(xtemp)  
-        chisqr, out, cov = fitHelper(model,self.parameters, xtemp,ytemp, dytemp ,qmin,qmax)
-        return chisqr, out, cov
+        if listdata==[]:
+            raise ValueError, " data list missing"
+        else:
+            # Do the fit with more than one data set and one model 
+            xtemp=[]
+            ytemp=[]
+            dytemp=[]
+            
+            
+            for data in listdata:
+                for i in range(len(data.x)):
+                    if not data.x[i] in xtemp:
+                        xtemp.append(data.x[i])
+                       
+                    if not data.y[i] in ytemp:
+                        ytemp.append(data.y[i])
+                        
+                    if not data.dy[i] in dytemp:
+                        dytemp.append(data.dy[i])
+            if qmin==None:
+                qmin= min(xtemp)
+            if qmax==None:
+                qmax= max(xtemp)  
+            chisqr, out, cov = fitHelper(model,self.parameters, xtemp,ytemp, dytemp ,qmin,qmax)
+            return chisqr, out, cov
     
     def set_model(self,model,Uid):
         """ Set model """
@@ -121,13 +124,16 @@ class Fitting:
     def set_param(self,model, pars):
         """ Recieve a dictionary of parameter and save it """
         self.parameters=[]
-        #for key ,value in pars:
-        for key, value in pars.iteritems():
-            print "this is the key",key
-            print "this is the value",value
-            param = Parameter(model, key, value)
-            self.parameters.append(param)
-        
+        if model==None:
+            raise ValueError, "Cannot set parameters for empty model"
+        else:
+            #for key ,value in pars:
+            for key, value in pars.iteritems():
+                print "this is the key",key
+                print "this is the value",value
+                param = Parameter(model, key, value)
+                self.parameters.append(param)
+            
     def add_contraint(self, contraint):
         """ User specify contraint to fit """
         self.contraint = str(contraint)
@@ -225,7 +231,7 @@ if __name__ == "__main__":
     
     from sans.guitools.LineModel import LineModel
     model  = LineModel()
-    Fit.set_model(model,1 )
+    Fit.set_model(model,1)
     Fit.set_data(data1,1)
     #default_A = model.getParam('A') 
     #default_B = model.getParam('B') 
