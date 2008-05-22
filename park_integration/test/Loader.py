@@ -12,7 +12,7 @@ class Load:
         self.y = y
         self.dx = dx
         self.dy = dy
-        self.filename=None
+        self.filename = None
         
     def set_filename(self,path=None):
         """
@@ -20,17 +20,13 @@ class Load:
             window appears to select the file.
             @param path: the path given by the user
         """
-        if path == None:
-            dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", "*.txt", wx.OPEN)
-            if dlg.ShowModal() == wx.ID_OK:
-                path = dlg.GetPath()
-            dlg.Destroy()
         self.filename = path
-            
-        
+       
+
     def get_filename(self):
         """ return the file's path"""
         return self.filename
+    
     def set_values(self):
         """ Store the values loaded from file in local variables """
         if not self.filename == None:
@@ -62,7 +58,6 @@ class Load:
             if not len(self.y) == len(self.dy):
                 raise ValueError, "y and dy have different length"
             
-      
             
     def get_values(self):
         """ Return x, y, dx, dy """

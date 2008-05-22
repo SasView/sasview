@@ -26,13 +26,14 @@ class FitArrange:
             self.dList.append(data)
             
     def get_model(self):
+        """ Return the model"""
         return self.model   
      
     def get_data(self):
         """ Return list of data"""
         return self.dList 
       
-    def delete_data(self,data):
+    def remove_data(self,data):
         """
             Remove one element from the list
             @param data: Data to remove from the the lsit of data
@@ -52,8 +53,8 @@ class Fitting:
         self.data = data
         #list of models parameters
         self.parameters=[]
-        self.contraint =None
-        self.residuals=[]
+        
+        self.constraint =None
         self.fitType =None
         
     def fit_engine(self,word):
