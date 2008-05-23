@@ -41,12 +41,12 @@ class Invertor(Cinvertor):
         
         In the following i refers to the ith base function coefficient.
         The matrix has its entries j in its first Npts rows set to
-            A[i][j] = (Fourier transformed base function for point j) 
+            A[j][i] = (Fourier transformed base function for point j) 
             
         We them choose a number of r-points, n_r, to evaluate the second
         derivative of P(r) at. This is used as our regularization term.
         For a vector r of length n_r, the following n_r rows are set to
-            A[i+Npts][j] = (2nd derivative of P(r), d**2(P(r))/d(r)**2, evaluated at r[j])
+            A[j+Npts][i] = (2nd derivative of P(r), d**2(P(r))/d(r)**2, evaluated at r[j])
             
         The vector b has its first Npts entries set to
             b[j] = (I(q) observed for point j)
