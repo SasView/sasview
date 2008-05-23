@@ -356,7 +356,7 @@ class Invertor(Cinvertor):
         for i in range(nfunc):
             for j in range(nfunc):
                 inv_cov[i][j] = 0.0
-                for k in range(npts):
+                for k in range(npts+nr):
                     if self._accept_q(self.x[i]):
                         inv_cov[i][j] = at[i][k]*a[k][j]
                     
