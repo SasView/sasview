@@ -23,6 +23,10 @@
 #
 # [5] S. Hansen and J. Skov Pedersen, J.Appl. Cryst (1991) 24, 541-548.
 #
+## \subsection class Class Diagram:
+# The following shows a partial class diagram with the main attributes and methods of the invertor.
+#
+# \image html architecture.png
 #
 # \section install_sec Installation
 #
@@ -75,6 +79,23 @@
 # \endverbatim
 # The c_out and c_cov are the set of coefficients and the covariance 
 # matrix for those coefficients, respectively.
+#
+# To get P(r):
+# \verbatim
+#    r = 10.0
+#    pr = invertor.pr(c_out, r)
+# \endverbatim
+# Alternatively, one can get P(r) with the error on P(r):
+# \verbatim
+#    r = 10.0
+#    pr, dpr = invertor.pr_err(c_out, c_cov, r)
+# \endverbatim
+#
+# To get the output I(q) from the set of coefficients found:
+# \verbatim
+#    q = 0.001
+#    iq = invertor.iq(c_out, q)
+# \endverbatim
 #
 # Examples are available as unit tests under sans.pr_inversion.test.
 #

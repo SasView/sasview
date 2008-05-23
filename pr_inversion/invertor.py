@@ -34,8 +34,27 @@ class Invertor(Cinvertor):
     """
         Invertor class to perform P(r) inversion
         
-        TODO: explain the maths
+        The problem is solved by posing the problem as  Ax = b,
+        where x is the set of coefficients we are looking for.
         
+        Npts is the number of points.
+        
+        In the following i refers to the ith base function coefficient.
+        The matrix has its entries j in its first Npts rows set to
+            A[i][j] = (Fourier transformed base function for point j) 
+            
+        We them choose a number of r-points, n_r, to evaluate the second
+        derivative of P(r) at. This is used as our regularization term.
+        For a vector r of length n_r, the following n_r rows are set to
+            A[i+Npts][j] = (2nd derivative of P(r), d**2(P(r))/d(r)**2, evaluated at r[j])
+            
+        The vector b has its first Npts entries set to
+            b[j] = (I(q) observed for point j)
+            
+        The following n_r entries are set to zero.
+        
+        The result is found by using scipy.linalg.basic.lstsq to invert
+        the matrix and find the coefficients x.
         
         Methods inherited from Cinvertor:
         - get_peaks(pars): returns the number of P(r) peaks
@@ -143,10 +162,53 @@ class Invertor(Cinvertor):
         
         return invertor
     
-    def invert(self, nfunc=5):
+    def invert(self, nfunc=10, nr=20):
         """
             Perform inversion to P(r)
+            
+            The problem is solved by posing the problem as  Ax = b,
+            where x is the set of coefficients we are looking for.
+            
+            Npts is the number of points.
+            
+            In the following i refers to the ith base function coefficient.
+            The matrix has its entries j in its first Npts rows set to
+                A[i][j] = (Fourier transformed base function for point j) 
+                
+            We them choose a number of r-points, n_r, to evaluate the second
+            derivative of P(r) at. This is used as our regularization term.
+            For a vector r of length n_r, the following n_r rows are set to
+                A[i+Npts][j] = (2nd derivative of P(r), d**2(P(r))/d(r)**2, evaluated at r[j])
+                
+            The vector b has its first Npts entries set to
+                b[j] = (I(q) observed for point j)
+                
+            The following n_r entries are set to zero.
+            
+            The result is found by using scipy.linalg.basic.lstsq to invert
+            the matrix and find the coefficients x.
+            
+            @param nfunc: number of base functions to use.
+            @param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
+            @return: c_out, c_cov - the coefficients with covariance matrix 
         """
+        #TODO: call the pyhton implementation for now. In the future, translate this to C.
+        return self.lstsq(nfunc, nr=nr)
+    
+    def invert_optimize(self, nfunc=10, nr=20):
+        """
+            Slower version of the P(r) inversion that uses scipy.optimize.leastsq.
+            
+            This probably produce more reliable results, but is much slower.
+            The minimization function is set to sum_i[ (I_obs(q_i) - I_theo(q_i))/err**2 ] + alpha * reg_term,
+            where the reg_term is given by Svergun: it is the integral of the square of the first derivative
+            of P(r), d(P(r))/dr, integrated over the full range of r.
+            
+            @param nfunc: number of base functions to use.
+            @param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
+            @return: c_out, c_cov - the coefficients with covariance matrix 
+        """
+        
         from scipy import optimize
         import time
         
@@ -174,7 +236,11 @@ class Invertor(Cinvertor):
     
     def pr_fit(self, nfunc=5):
         """
-            Perform inversion to P(r)
+            This is a direct fit to a given P(r). It assumes that the y data
+            is set to some P(r) distribution that we are trying to reproduce
+            with a set of base functions.
+            
+            This method is provided as a test. 
         """
         from scipy import optimize
         
@@ -208,7 +274,6 @@ class Invertor(Cinvertor):
             @param c_cov: covariance matrice of the base function coefficients
             @param r: r-value to evaluate P(r) at
             @return: P(r)
-            
         """
         return self.get_pr_err(c, c_cov, r)
        
@@ -222,14 +287,37 @@ class Invertor(Cinvertor):
             return False
         return True
        
-    def lstsq(self, nfunc=5):
+    def lstsq(self, nfunc=5, nr=20):
         #TODO: do this on the C side
         #
         # To make sure an array is contiguous:
         # blah = numpy.ascontiguousarray(blah_original)
         # ... before passing it to C
         """
-            TODO: Document this
+            The problem is solved by posing the problem as  Ax = b,
+            where x is the set of coefficients we are looking for.
+            
+            Npts is the number of points.
+            
+            In the following i refers to the ith base function coefficient.
+            The matrix has its entries j in its first Npts rows set to
+                A[i][j] = (Fourier transformed base function for point j) 
+                
+            We them choose a number of r-points, n_r, to evaluate the second
+            derivative of P(r) at. This is used as our regularization term.
+            For a vector r of length n_r, the following n_r rows are set to
+                A[i+Npts][j] = (2nd derivative of P(r), d**2(P(r))/d(r)**2, evaluated at r[j])
+                
+            The vector b has its first Npts entries set to
+                b[j] = (I(q) observed for point j)
+                
+            The following n_r entries are set to zero.
+            
+            The result is found by using scipy.linalg.basic.lstsq to invert
+            the matrix and find the coefficients x.
+            
+            @param nfunc: number of base functions to use.
+            @param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
         """
         import math
         from scipy.linalg.basic import lstsq
@@ -238,7 +326,7 @@ class Invertor(Cinvertor):
         # a -- An M x N matrix.
         # b -- An M x nrhs matrix or M vector.
         npts = len(self.x)
-        nq   = 20
+        nq   = nr
         sqrt_alpha = math.sqrt(self.alpha)
         
         a = numpy.zeros([npts+nq, nfunc])
@@ -249,6 +337,8 @@ class Invertor(Cinvertor):
             for i in range(npts):
                 if self._accept_q(self.x[i]):
                     a[i][j] = self.basefunc_ft(self.d_max, j+1, self.x[i])/self.err[i]
+                    
+            #TODO: refactor this: i_q should really be i_r
             for i_q in range(nq):
                 r = self.d_max/nq*i_q
                 #a[i_q+npts][j] = sqrt_alpha * 1.0/nq*self.d_max*2.0*math.fabs(math.sin(math.pi*(j+1)*r/self.d_max) + math.pi*(j+1)*r/self.d_max * math.cos(math.pi*(j+1)*r/self.d_max))     
@@ -295,48 +385,6 @@ class Invertor(Cinvertor):
         self.out = c
         self.cov = err
         
-        return c, err
-        
-    def svd(self, nfunc=5):
-        import math, time
-        # Ac - b = 0
-        
-        A = numpy.zeros([nfunc, nfunc])
-        y = numpy.zeros(nfunc)
-        
-        t_0 = time.time()
-        for i in range(nfunc):
-            # A
-            for j in range(nfunc):
-                A[i][j] = 0.0
-                for k in range(len(self.x)):
-                    err = self.err[k]
-                    A[i][j] += 1.0/err/err*self.basefunc_ft(self.d_max, j+1, self.x[k]) \
-                            *self.basefunc_ft(self.d_max, i+1, self.x[k]);
-                #print A[i][j]
-                #A[i][j] -= self.alpha*(math.cos(math.pi*(i+j)) - math.cos(math.pi*(i-j)));
-                if i==j:
-                    A[i][j] += -1.0*self.alpha
-                elif i-j==1 or i-j==-1:
-                    A[i][j] += 1.0*self.alpha
-                #print "   ",A[i][j]
-            # y
-            y[i] = 0.0
-            for k in range(len(self.x)):
-                y[i] = self.y[k]/self.err[k]/self.err[k]*self.basefunc_ft(self.d_max, i+1, self.x[k])
-            
-        print time.time()-t_0, 'secs'
-        
-        # use numpy.pinv(A)
-        #inv_A = numpy.linalg.inv(A)
-        #c = y*inv_A
-        print y
-        c = numpy.linalg.solve(A, y)
-        
-        
-        print c
-        
-        err = numpy.zeros(len(c))
         return c, err
         
     def estimate_alpha(self, nfunc):
@@ -391,7 +439,6 @@ class Invertor(Cinvertor):
                     out, cov = pr.lstsq(nfunc)
                     
                     peaks = pr.get_peaks(out)
-                    print pr.alpha, peaks
                     if peaks>1:
                         found = True
                         break

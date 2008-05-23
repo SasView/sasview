@@ -175,7 +175,7 @@ class TestBasicComponent(unittest.TestCase):
         self.invertor.y   = y
         self.invertor.err = err
         # Perform inversion
-        out, cov = self.invertor.invert(10)
+        out, cov = self.invertor.invert_optimize(10)
         # This is a very specific case
         # We should make sure it always passes
         self.assertTrue(self.invertor.chi2/len(x)<200.00)
@@ -403,7 +403,6 @@ class TestBasicComponent(unittest.TestCase):
         
     def test_qmin(self):
         self.invertor.q_min = 1.0
-        print self.invertor.q_min
         self.assertEqual(self.invertor.q_min, 1.0)
         
         self.invertor.q_min = None
