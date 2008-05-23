@@ -1,6 +1,7 @@
 Dependencies:
 	- Needs sans.guitools version 0.1.1
 	- Needs sans.guicomm
+	- Needs sans.guiframe
 	- sans.pr_inversion
 	
 

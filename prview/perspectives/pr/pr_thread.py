@@ -38,8 +38,9 @@ class CalcPr(CalcThread):
         import time
         try:
             self.starttime = time.time()
-            #out, cov = self.pr.invert(self.nfunc)
-            out, cov = self.pr.lstsq(self.nfunc)
+            out, cov = self.pr.invert(self.nfunc)
+            #out, cov = self.pr.lstsq(self.nfunc)
+            #out, cov = self.pr.invert_optimize(self.nfunc)
             elapsed = time.time()-self.starttime
             self.complete(out=out, cov=cov, pr=self.pr, elapsed=elapsed)
         except:

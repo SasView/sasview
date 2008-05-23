@@ -22,3 +22,4 @@
 18. Clean up
 19. Replace help dialog text with a nice image. Mention how to choose alpha and what the suggested alpha means.
 20. If a figure of merit is clearly bad, put its background red
+21. Option to save data.

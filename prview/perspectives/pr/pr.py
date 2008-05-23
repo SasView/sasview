@@ -51,6 +51,7 @@ class Plugin:
         """
             Create a menu for the plug-in
         """
+        return []
         import wx
         shapes = wx.Menu()
 
