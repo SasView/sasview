@@ -1,17 +1,29 @@
 #if !defined(invertor_h)
 #define invertor_h
 
-
+/**
+ * Internal data structure for P(r) inversion
+ */
 typedef struct {
+	/// Maximum distance between any two points in the system
     double d_max;
+    /// q data
     double *x;
+    /// I(q) data
     double *y;
+    /// dI(q) data
     double *err;
+    /// Number of q points
     int npoints;    
+    /// Number of I(q) points
     int ny;    
+    /// Number of dI(q) points
     int nerr;  
+    /// Alpha value
     double alpha;
+    /// Minimum q to include in inversion
     double q_min;
+    /// Maximum q to include in inversion
     double q_max;
 } Invertor_params; 
 

@@ -1,4 +1,9 @@
-
+/**
+ * C implementation of the P(r) inversion
+ * Cinvertor is the base class for the Invertor class
+ * and provides the underlying computations.
+ * 
+ */
 #include <Python.h>
 #include "structmember.h"
 #include <stdio.h>
@@ -28,8 +33,15 @@ static PyObject * CinvertorError = NULL;
 
 
 // Class definition
+/**
+ * C implementation of the P(r) inversion
+ * Cinvertor is the base class for the Invertor class
+ * and provides the underlying computations.
+ * 
+ */
 typedef struct {
     PyObject_HEAD    
+    /// Internal data structure
     Invertor_params params; 
 } Cinvertor;
 
@@ -69,6 +81,10 @@ static PyMemberDef Cinvertor_members[] = {
     {NULL}  /* Sentinel */
 };
 
+const char set_x_doc[] = 
+	"Function to set the x data\n"
+	"Takes an array of doubles as input.\n"
+	" @return: number of entries found";
 
 /**
  * Function to set the x data
@@ -102,6 +118,11 @@ static PyObject * set_x(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("i", self->params.npoints);	
 }
 
+const char get_x_doc[] = 
+	"Function to get the x data\n"
+	"Takes an array of doubles as input.\n"
+	" @return: number of entries found";
+
 static PyObject * get_x(Cinvertor *self, PyObject *args) {
 	PyObject *data_obj;
 	Py_ssize_t ndata;
@@ -124,6 +145,11 @@ static PyObject * get_x(Cinvertor *self, PyObject *args) {
 	
 	return Py_BuildValue("i", self->params.npoints);	
 }
+
+const char set_y_doc[] = 
+	"Function to set the y data\n"
+	"Takes an array of doubles as input.\n"
+	" @return: number of entries found";
 
 /**
  * Function to set the y data
@@ -157,6 +183,11 @@ static PyObject * set_y(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("i", self->params.ny);	
 }
 
+const char get_y_doc[] = 
+	"Function to get the y data\n"
+	"Takes an array of doubles as input.\n"
+	" @return: number of entries found";
+
 static PyObject * get_y(Cinvertor *self, PyObject *args) {
 	PyObject *data_obj;
 	Py_ssize_t ndata;
@@ -179,6 +210,11 @@ static PyObject * get_y(Cinvertor *self, PyObject *args) {
 	
 	return Py_BuildValue("i", self->params.npoints);	
 }
+
+const char set_err_doc[] = 
+	"Function to set the err data\n"
+	"Takes an array of doubles as input.\n"
+	" @return: number of entries found";
 
 /**
  * Function to set the x data
@@ -212,6 +248,11 @@ static PyObject * set_err(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("i", self->params.nerr);	
 }
 
+const char get_err_doc[] = 
+	"Function to get the err data\n"
+	"Takes an array of doubles as input.\n"
+	" @return: number of entries found";
+
 static PyObject * get_err(Cinvertor *self, PyObject *args) {
 	PyObject *data_obj;
 	Py_ssize_t ndata;
@@ -235,6 +276,10 @@ static PyObject * get_err(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("i", self->params.npoints);	
 }
 
+const char is_valid_doc[] = 
+	"Check the validity of the stored data\n"
+	" @return: Returns the number of points if it's all good, -1 otherwise";
+
 /**
  * Check the validity of the stored data
  * Returns the number of points if it's all good, -1 otherwise
@@ -248,6 +293,9 @@ static PyObject * is_valid(Cinvertor *self, PyObject *args) {
 	}	
 }
 
+const char set_dmax_doc[] = 
+	"Sets the maximum distance\n";
+
 /**
  * Sets the maximum distance
  */
@@ -259,12 +307,18 @@ static PyObject * set_dmax(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("d", self->params.d_max);	
 }
 
+const char get_dmax_doc[] = 
+	"Gets the maximum distance\n";
+
 /**
  * Gets the maximum distance
  */
 static PyObject * get_dmax(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("d", self->params.d_max);	
 }
+
+const char set_qmin_doc[] = 
+	"Sets the minimum q\n";
 
 /**
  * Sets the minimum q
@@ -277,6 +331,9 @@ static PyObject * set_qmin(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("d", self->params.q_min);	
 }
 
+const char get_qmin_doc[] = 
+	"Gets the minimum q\n";
+
 /**
  * Gets the minimum q
  */
@@ -284,6 +341,8 @@ static PyObject * get_qmin(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("d", self->params.q_min);	
 }
 
+const char set_qmax_doc[] = 
+	"Sets the maximum q\n";
 
 /**
  * Sets the maximum q
@@ -296,6 +355,9 @@ static PyObject * set_qmax(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("d", self->params.q_max);	
 }
 
+const char get_qmax_doc[] = 
+	"Gets the maximum q\n";
+
 /**
  * Gets the maximum q
  */
@@ -303,6 +365,8 @@ static PyObject * get_qmax(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("d", self->params.q_max);	
 }
 
+const char set_alpha_doc[] = 
+	"Sets the alpha parameter\n";
 
 static PyObject * set_alpha(Cinvertor *self, PyObject *args) {
 	double alpha;
@@ -312,12 +376,18 @@ static PyObject * set_alpha(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("d", self->params.alpha);	
 }
 
+const char get_alpha_doc[] = 
+	"Gets the alpha parameter\n";
+
 /**
  * Gets the maximum distance
  */
 static PyObject * get_alpha(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("d", self->params.alpha);	
 }
+
+const char get_nx_doc[] = 
+	"Gets the number of x points\n";
 
 /**
  * Gets the number of x points
@@ -326,12 +396,18 @@ static PyObject * get_nx(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("i", self->params.npoints);	
 }
 
+const char get_ny_doc[] = 
+	"Gets the number of y points\n";
+
 /**
  * Gets the number of y points
  */
 static PyObject * get_ny(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("i", self->params.ny);	
 }
+
+const char get_nerr_doc[] = 
+	"Gets the number of err points\n";
 
 /**
  * Gets the number of error points
@@ -340,6 +416,12 @@ static PyObject * get_nerr(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("i", self->params.nerr);	
 }
 
+
+const char residuals_doc[] = 
+	"Function to call to evaluate the residuals\n"
+	"for P(r) inversion\n"
+	" @param args: input parameters\n"
+	" @return: list of residuals";
 
 /**
  * Function to call to evaluate the residuals
@@ -390,6 +472,13 @@ static PyObject * residuals(Cinvertor *self, PyObject *args) {
     
 	return residuals;
 }
+
+const char pr_residuals_doc[] = 
+	"Function to call to evaluate the residuals\n"
+	"for P(r) minimization (for testing purposes)\n"
+	" @param args: input parameters\n"
+	" @return: list of residuals";
+
 /**
  * Function to call to evaluate the residuals
  * for P(r) minimization (for testing purposes)
@@ -441,6 +530,11 @@ static PyObject * pr_residuals(Cinvertor *self, PyObject *args) {
 	return residuals;
 }
 
+const char get_iq_doc[] = 
+	"Function to call to evaluate the scattering intensity\n"
+	" @param args: c-parameters, and q\n"
+	" @return: I(q)";
+
 /**
  * Function to call to evaluate the scattering intensity
  * @param args: c-parameters, and q
@@ -459,6 +553,11 @@ static PyObject * get_iq(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("f", iq_value);	
 }
 
+const char get_pr_doc[] = 
+	"Function to call to evaluate P(r)\n"
+	" @param args: c-parameters and r\n"
+	" @return: P(r)";
+
 /**
  * Function to call to evaluate P(r)
  * @param args: c-parameters and r
@@ -476,6 +575,11 @@ static PyObject * get_pr(Cinvertor *self, PyObject *args) {
 	pr_value = pr(pars, self->params.d_max, npars, r);
 	return Py_BuildValue("f", pr_value);	
 }
+
+const char get_pr_err_doc[] = 
+	"Function to call to evaluate P(r) with errors\n"
+	" @param args: c-parameters and r\n"
+	" @return: (P(r),dP(r))";
 
 /**
  * Function to call to evaluate P(r) with errors
@@ -501,6 +605,11 @@ static PyObject * get_pr_err(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("ff", pr_value, pr_err_value);	
 }
 
+const char basefunc_ft_doc[] = 
+	"Returns the value of the nth Fourier transofrmed base function\n"
+	" @param args: c-parameters, n and q\n"
+	" @return: nth Fourier transformed base function, evaluated at q";
+
 static PyObject * basefunc_ft(Cinvertor *self, PyObject *args) {
 	double d_max, q;
 	int n;
@@ -509,6 +618,13 @@ static PyObject * basefunc_ft(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("f", ortho_transformed(d_max, n, q));	
 	
 }
+
+const char oscillations_doc[] = 
+	"Returns the value of the oscillation figure of merit for\n"
+	"the given set of coefficients. For a sphere, the oscillation\n"
+	"figure of merit is 1.1.\n"
+	" @param args: c-parameters\n"
+	" @return: oscillation figure of merit";
 
 static PyObject * oscillations(Cinvertor *self, PyObject *args) {
 	double *pars;
@@ -525,6 +641,12 @@ static PyObject * oscillations(Cinvertor *self, PyObject *args) {
 	
 }
 
+const char get_peaks_doc[] = 
+	"Returns the number of peaks in the output P(r) distrubution\n"
+	"for the given set of coefficients.\n"
+	" @param args: c-parameters\n"
+	" @return: number of P(r) peaks";
+
 static PyObject * get_peaks(Cinvertor *self, PyObject *args) {
 	double *pars;
 	PyObject *data_obj;
@@ -540,6 +662,12 @@ static PyObject * get_peaks(Cinvertor *self, PyObject *args) {
 	
 }
 
+const char get_positive_doc[] = 
+	"Returns the fraction of P(r) that is positive over\n"
+	"the full range of r for the given set of coefficients.\n"
+	" @param args: c-parameters\n"
+	" @return: fraction of P(r) that is positive";
+
 static PyObject * get_positive(Cinvertor *self, PyObject *args) {
 	double *pars;
 	PyObject *data_obj;
@@ -554,6 +682,12 @@ static PyObject * get_positive(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("f", fraction );	
 	
 }
+
+const char get_pos_err_doc[] = 
+	"Returns the fraction of P(r) that is 1 standard deviation\n"
+	"above zero over the full range of r for the given set of coefficients.\n"
+	" @param args: c-parameters\n"
+	" @return: fraction of P(r) that is positive";
 
 static PyObject * get_pos_err(Cinvertor *self, PyObject *args) {
 	double *pars;
@@ -574,35 +708,45 @@ static PyObject * get_pos_err(Cinvertor *self, PyObject *args) {
 	
 }
 
+
+const char eeeget_qmin_doc[] = "\
+This is a multiline doc string.\n\
+\n\
+This is the second line.";
+const char eeeset_qmin_doc[] = 
+	"This is a multiline doc string.\n"
+	"\n"
+	"This is the second line.";
+
 static PyMethodDef Cinvertor_methods[] = {
-		   {"residuals", (PyCFunction)residuals, METH_VARARGS, "Get the list of residuals"},
-		   {"pr_residuals", (PyCFunction)pr_residuals, METH_VARARGS, "Get the list of residuals"},
-		   {"set_x", (PyCFunction)set_x, METH_VARARGS, ""},
-		   {"get_x", (PyCFunction)get_x, METH_VARARGS, ""},
-		   {"set_y", (PyCFunction)set_y, METH_VARARGS, ""},
-		   {"get_y", (PyCFunction)get_y, METH_VARARGS, ""},
-		   {"set_err", (PyCFunction)set_err, METH_VARARGS, ""},
-		   {"get_err", (PyCFunction)get_err, METH_VARARGS, ""},
-		   {"set_dmax", (PyCFunction)set_dmax, METH_VARARGS, ""},
-		   {"get_dmax", (PyCFunction)get_dmax, METH_VARARGS, ""},
-		   {"set_qmin", (PyCFunction)set_qmin, METH_VARARGS, ""},
-		   {"get_qmin", (PyCFunction)get_qmin, METH_VARARGS, ""},
-		   {"set_qmax", (PyCFunction)set_qmax, METH_VARARGS, ""},
-		   {"get_qmax", (PyCFunction)get_qmax, METH_VARARGS, ""},
-		   {"set_alpha", (PyCFunction)set_alpha, METH_VARARGS, ""},
-		   {"get_alpha", (PyCFunction)get_alpha, METH_VARARGS, ""},
-		   {"get_nx", (PyCFunction)get_nx, METH_VARARGS, ""},
-		   {"get_ny", (PyCFunction)get_ny, METH_VARARGS, ""},
-		   {"get_nerr", (PyCFunction)get_nerr, METH_VARARGS, ""},
-		   {"iq", (PyCFunction)get_iq, METH_VARARGS, ""},
-		   {"pr", (PyCFunction)get_pr, METH_VARARGS, ""},
-		   {"get_pr_err", (PyCFunction)get_pr_err, METH_VARARGS, ""},
-		   {"is_valid", (PyCFunction)is_valid, METH_VARARGS, ""},
-		   {"basefunc_ft", (PyCFunction)basefunc_ft, METH_VARARGS, ""},
-		   {"oscillations", (PyCFunction)oscillations, METH_VARARGS, ""},
-		   {"get_peaks", (PyCFunction)get_peaks, METH_VARARGS, ""},
-		   {"get_positive", (PyCFunction)get_positive, METH_VARARGS, ""},
-		   {"get_pos_err", (PyCFunction)get_pos_err, METH_VARARGS, ""},
+		   {"residuals", (PyCFunction)residuals, METH_VARARGS, residuals_doc},
+		   {"pr_residuals", (PyCFunction)pr_residuals, METH_VARARGS, pr_residuals_doc},
+		   {"set_x", (PyCFunction)set_x, METH_VARARGS, set_x_doc},
+		   {"get_x", (PyCFunction)get_x, METH_VARARGS, get_x_doc},
+		   {"set_y", (PyCFunction)set_y, METH_VARARGS, set_y_doc},
+		   {"get_y", (PyCFunction)get_y, METH_VARARGS, get_y_doc},
+		   {"set_err", (PyCFunction)set_err, METH_VARARGS, set_err_doc},
+		   {"get_err", (PyCFunction)get_err, METH_VARARGS, get_err_doc},
+		   {"set_dmax", (PyCFunction)set_dmax, METH_VARARGS, set_dmax_doc},
+		   {"get_dmax", (PyCFunction)get_dmax, METH_VARARGS, get_dmax_doc},
+		   {"set_qmin", (PyCFunction)set_qmin, METH_VARARGS, set_qmin_doc},
+		   {"get_qmin", (PyCFunction)get_qmin, METH_VARARGS, get_qmin_doc},
+		   {"set_qmax", (PyCFunction)set_qmax, METH_VARARGS, set_qmax_doc},
+		   {"get_qmax", (PyCFunction)get_qmax, METH_VARARGS, get_qmax_doc},
+		   {"set_alpha", (PyCFunction)set_alpha, METH_VARARGS, set_alpha_doc},
+		   {"get_alpha", (PyCFunction)get_alpha, METH_VARARGS, get_alpha_doc},
+		   {"get_nx", (PyCFunction)get_nx, METH_VARARGS, get_nx_doc},
+		   {"get_ny", (PyCFunction)get_ny, METH_VARARGS, get_ny_doc},
+		   {"get_nerr", (PyCFunction)get_nerr, METH_VARARGS, get_nerr_doc},
+		   {"iq", (PyCFunction)get_iq, METH_VARARGS, get_iq_doc},
+		   {"pr", (PyCFunction)get_pr, METH_VARARGS, get_pr_doc},
+		   {"get_pr_err", (PyCFunction)get_pr_err, METH_VARARGS, get_pr_err_doc},
+		   {"is_valid", (PyCFunction)is_valid, METH_VARARGS, is_valid_doc},
+		   {"basefunc_ft", (PyCFunction)basefunc_ft, METH_VARARGS, basefunc_ft_doc},
+		   {"oscillations", (PyCFunction)oscillations, METH_VARARGS, oscillations_doc},
+		   {"get_peaks", (PyCFunction)get_peaks, METH_VARARGS, get_peaks_doc},
+		   {"get_positive", (PyCFunction)get_positive, METH_VARARGS, get_positive_doc},
+		   {"get_pos_err", (PyCFunction)get_pos_err, METH_VARARGS, get_pos_err_doc},
    
    {NULL}
 };

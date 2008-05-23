@@ -1,3 +1,6 @@
+"""
+    Setup script for the P(r) inversion module
+"""
 import sys, os
 
 # Then build and install the modules

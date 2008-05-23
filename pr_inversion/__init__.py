@@ -14,9 +14,13 @@
 # Procedure: We will follow the procedure of Moore [1].
 # 
 # [1] P.B. Moore, J.Appl. Cryst (1980) 13, 168-175.
+#
 # [2] O. Glatter, J.Appl. Cryst (1977) 10, 415-421.
+#
 # [3] D.I. Svergun, J.Appl. Cryst (1991) 24, 485-492.
+#
 # [4] D.I. Svergun, J.Appl. Cryst (1992) 25, 495-503.
+#
 # [5] S. Hansen and J. Skov Pedersen, J.Appl. Cryst (1991) 24, 541-548.
 #
 #
@@ -39,6 +43,38 @@
 #$ python setup.py install
 # \endverbatim
 #
+#
+# \subsection Tutorial
+# To create an inversion object:
+# \verbatim
+#from sans.pr.invertor import Invertor
+#    invertor = Invertor()
+# \endverbatim
+#
+# To set the maximum distance between any two points:
+# \verbatim
+#    invertor.d_max = 160.0
+# \endverbatim
+#
+# To set the regularization constant:
+# \verbatim
+#    invertor.alpha = 0.0007
+# \endverbatim
+#
+# To set the q, I(q) and error on I(q):
+# \verbatim
+#    invertor.x = q_vector
+#    invertor.y = Iq_vector
+#    invertor.err = dIq_vector
+# \endverbatim
+#
+# To perform the inversion. In this example, we choose
+# a P(r) expension wit 10 base functions.
+# \verbatim
+#    c_out, c_cov = invertor.invert(10)
+# \endverbatim
+# The c_out and c_cov are the set of coefficients and the covariance 
+# matrix for those coefficients, respectively.
 #
 # Examples are available as unit tests under sans.pr_inversion.test.
 #
