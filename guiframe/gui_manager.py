@@ -22,6 +22,10 @@ except:
     import config
 from sans.guicomm.events import EVT_STATUS
 
+import warnings
+warnings.simplefilter("ignore")
+
+
 class ViewerFrame(wx.Frame):
     """
         Main application frame
@@ -261,36 +265,56 @@ class ViewerFrame(wx.Frame):
         filemenu = wx.Menu()
         filemenu.Append(101,'&Quit', 'Exit') 
         
+        # Add sub menus
+        menubar.Append(filemenu,  '&File')
+        
         # Plot menu
         # Attach a menu item for each panel in our
         # panel list that also appears in a plug-in.
         # TODO: clean this up. We should just identify
         # plug-in panels and add them all.
-        viewmenu = wx.Menu()
         
+        # Only add the panel menu if there is more than one panel
+        n_panels = 0
         for plug in self.plugins:
-            plugmenu = wx.Menu()
             pers = plug.get_perspective()
             if len(pers)>0:
-                for item in self.panels:
-                    if item == 'default':
-                        continue
-                    panel = self.panels[item]
-                    if panel.window_name in pers:
-                        plugmenu.Append(int(item), panel.window_caption, "Show %s window" % panel.window_caption)
-                        wx.EVT_MENU(self, int(item), self._on_view)
+                n_panels += 1
+        
+        if n_panels>1:
+            viewmenu = wx.Menu()
+            for plug in self.plugins:
+                plugmenu = wx.Menu()
+                pers = plug.get_perspective()
+                if len(pers)>0:
+                    for item in self.panels:
+                        if item == 'default':
+                            continue
+                        panel = self.panels[item]
+                        if panel.window_name in pers:
+                            plugmenu.Append(int(item), panel.window_caption, "Show %s window" % panel.window_caption)
+                            wx.EVT_MENU(self, int(item), self._on_view)
+                    
+                    viewmenu.AppendMenu(wx.NewId(), plug.sub_menu, plugmenu, plug.sub_menu)
                 
-                viewmenu.AppendMenu(wx.NewId(), plug.sub_menu, plugmenu, plug.sub_menu)
-            
+            menubar.Append(viewmenu, '&Panel')
+
         # Perspective
         # Attach a menu item for each defined perspective.
-        p_menu = wx.Menu()
-        
+        # Only add the perspective menu if there are more than one perspectves
+        n_perspectives = 0
         for plug in self.plugins:
             if len(plug.get_perspective()) > 0:
-                id = wx.NewId()
-                p_menu.Append(id, plug.sub_menu, "Switch to %s perspective" % plug.sub_menu)
-                wx.EVT_MENU(self, id, plug.on_perspective)
+                n_perspectives += 1
+        
+        if n_perspectives>1:
+            p_menu = wx.Menu()
+            for plug in self.plugins:
+                if len(plug.get_perspective()) > 0:
+                    id = wx.NewId()
+                    p_menu.Append(id, plug.sub_menu, "Switch to %s perspective" % plug.sub_menu)
+                    wx.EVT_MENU(self, id, plug.on_perspective)
+            menubar.Append(p_menu,   '&Perspective')
  
         # Help menu
         helpmenu = wx.Menu()
@@ -311,8 +335,7 @@ class ViewerFrame(wx.Frame):
         wx.EVT_MENU(self, id, self._check_update)
         
         
-        # Add sub menus
-        menubar.Append(filemenu,  '&File')
+        
         
         # Look for plug-in menus
         # Add available plug-in sub-menus. 
@@ -322,8 +345,6 @@ class ViewerFrame(wx.Frame):
                     menubar.Append(menu, name)
         
 
-        menubar.Append(viewmenu, '&Panel')
-        menubar.Append(p_menu,   '&Perspective')
         menubar.Append(helpmenu, '&Help')
          
         self.SetMenuBar(menubar)
