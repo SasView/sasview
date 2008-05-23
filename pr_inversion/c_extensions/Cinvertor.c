@@ -491,11 +491,12 @@ static PyObject * get_pr_err(Cinvertor *self, PyObject *args) {
 	Py_ssize_t npars;
 	PyObject *err_obj;
 	Py_ssize_t npars2;
-	  
+	int i; 
+	
 	if (!PyArg_ParseTuple(args, "OOd", &data_obj, &err_obj, &r)) return NULL;
-	OUTVECTOR(data_obj,pars,npars);
+	OUTVECTOR(data_obj,pars,npars); 
 	OUTVECTOR(err_obj,pars_err,npars2);
-		
+
 	pr_err(pars, pars_err, self->params.d_max, npars, r, &pr_value, &pr_err_value);
 	return Py_BuildValue("ff", pr_value, pr_err_value);	
 }
@@ -539,6 +540,40 @@ static PyObject * get_peaks(Cinvertor *self, PyObject *args) {
 	
 }
 
+static PyObject * get_positive(Cinvertor *self, PyObject *args) {
+	double *pars;
+	PyObject *data_obj;
+	Py_ssize_t npars;
+	double fraction;
+	 
+	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
+	OUTVECTOR(data_obj,pars,npars);
+	
+	fraction = positive_integral(pars, self->params.d_max, npars, 100);
+
+	return Py_BuildValue("f", fraction );	
+	
+}
+
+static PyObject * get_pos_err(Cinvertor *self, PyObject *args) {
+	double *pars;
+	double *pars_err;
+	PyObject *data_obj;
+	PyObject *err_obj;
+	Py_ssize_t npars;
+	Py_ssize_t npars2;
+	double fraction;
+	
+	if (!PyArg_ParseTuple(args, "OO", &data_obj, &err_obj)) return NULL;
+	OUTVECTOR(data_obj,pars,npars); 
+	OUTVECTOR(err_obj,pars_err,npars2);
+	
+	fraction = positive_errors(pars, pars_err, self->params.d_max, npars, 51);
+
+	return Py_BuildValue("f", fraction );	
+	
+}
+
 static PyMethodDef Cinvertor_methods[] = {
 		   {"residuals", (PyCFunction)residuals, METH_VARARGS, "Get the list of residuals"},
 		   {"pr_residuals", (PyCFunction)pr_residuals, METH_VARARGS, "Get the list of residuals"},
@@ -566,6 +601,8 @@ static PyMethodDef Cinvertor_methods[] = {
 		   {"basefunc_ft", (PyCFunction)basefunc_ft, METH_VARARGS, ""},
 		   {"oscillations", (PyCFunction)oscillations, METH_VARARGS, ""},
 		   {"get_peaks", (PyCFunction)get_peaks, METH_VARARGS, ""},
+		   {"get_positive", (PyCFunction)get_positive, METH_VARARGS, ""},
+		   {"get_pos_err", (PyCFunction)get_pos_err, METH_VARARGS, ""},
    
    {NULL}
 };

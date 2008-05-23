@@ -5,6 +5,7 @@ import sys
 def help():
     """
         Provide general online help text
+        Future work: extend this function to allow topic selection
     """
     info_txt  = "The inversion approach is based on Moore, J. Appl. Cryst. (1980) 13, 168-175.\n\n"
     info_txt += "P(r) is set to be equal to an expansion of base functions of the type "
@@ -30,6 +31,10 @@ class Invertor(Cinvertor):
         Invertor class to perform P(r) inversion
         
         TODO: explain the maths
+        
+        
+        Methods inherited from Cinvertor:
+        - get_peaks: returns the number of P(r) peaks
     """
     ## Chisqr of the last computation
     chi2  = 0
@@ -188,18 +193,18 @@ class Invertor(Cinvertor):
         return out, cov_x
     
     def pr_err(self, c, c_cov, r):
-        import math
-        c_err = numpy.zeros(len(c))
-        for i in range(len(c)):
-            try:
-                c_err[i] = math.sqrt(math.fabs(c_cov[i][i]))
-            except:
-                import sys
-                print sys.exc_value
-                print "oups", c_cov[i][i]
-                c_err[i] = c[i]
+        #import math
+        #c_err = numpy.zeros(len(c))
+        #for i in range(len(c)):
+        #    try:
+        #        c_err[i] = math.sqrt(math.fabs(c_cov[i][i]))
+        #    except:
+        #        import sys
+        #        print sys.exc_value
+        #        print "oups", c_cov[i][i]
+        #        c_err[i] = c[i]
 
-        return self.get_pr_err(c, c_err, r)
+        return self.get_pr_err(c, c_cov, r)
        
     def _accept_q(self, q):
         """

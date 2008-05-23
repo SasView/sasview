@@ -10,6 +10,46 @@
 import unittest, math, numpy, pylab
 from sans.pr.invertor import Invertor
         
+class TestFiguresOfMerit(unittest.TestCase):
+            
+    def setUp(self):
+        self.invertor = Invertor()
+        self.invertor.d_max = 100.0
+        
+        # Test array
+        self.ntest = 5
+        self.x_in = numpy.ones(self.ntest)
+        for i in range(self.ntest):
+            self.x_in[i] = 1.0*(i+1)
+       
+        x, y, err = load("sphere_80.txt")
+
+        # Choose the right d_max...
+        self.invertor.d_max = 160.0
+        # Set a small alpha
+        self.invertor.alpha = .0007
+        # Set data
+        self.invertor.x   = x
+        self.invertor.y   = y
+        self.invertor.err = err
+        # Perform inversion
+        #out, cov = self.invertor.invert(10)
+        
+        self.out, self.cov = self.invertor.lstsq(10)
+
+    def test_positive(self):
+        """
+            Test whether P(r) is positive
+        """
+        self.assertEqual(self.invertor.get_positive(self.out), 1)
+        
+    def test_positive_err(self):
+        """
+            Test whether P(r) is at least 1 sigma greater than zero
+            for all r-values
+        """
+        self.assertTrue(self.invertor.get_pos_err(self.out, self.cov)>0.9)
+       
 class TestBasicComponent(unittest.TestCase):
     
     def setUp(self):
@@ -235,6 +275,9 @@ class TestBasicComponent(unittest.TestCase):
         except:
             print "chi2(P(r)) =", chi2/51.0
             raise
+        
+        # Test the number of peaks
+        self.assertEqual(self.invertor.get_peaks(out), 1)
             
     def test_q_zero(self):
         """

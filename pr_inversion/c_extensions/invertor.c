@@ -99,7 +99,8 @@ void pr_err(double *pars, double *err, double d_max, int n_c,
     for (i=0; i<n_c; i++) {
     	func_value = ortho(d_max, i+1, r);
         sum += pars[i] * func_value;
-        sum_err += err[i]*err[i]*func_value*func_value;
+        //sum_err += err[i]*err[i]*func_value*func_value;
+        sum_err += err[i*n_c+i]*func_value*func_value;
     }
     *pr_value = sum;
     if (sum_err>0) {
@@ -114,7 +115,7 @@ void pr_err(double *pars, double *err, double d_max, int n_c,
  */
 double dprdr(double *pars, double d_max, int n_c, double r) {
     double sum = 0.0; 
-	int i;
+	int i; 
     for (i=0; i<n_c; i++) {
         sum += pars[i] * 2.0*(sin(pi*(i+1)*r/d_max) + pi*(i+1)*r/d_max * cos(pi*(i+1)*r/d_max));
     }
@@ -179,3 +180,47 @@ int npeaks(double *pars, double d_max, int n_c, int nslice) {
     return count;
 }
 
+/**
+ * Get the fraction of the integral of P(r) over the whole range
+ * of r that is above zero.
+ * A valid P(r) is define as being positive for all r.
+ */
+double positive_integral(double *pars, double d_max, int n_c, int nslice) {
+    double r; 
+    double value;
+	int i;
+	double sum_pos = 0.0;
+	double sum = 0.0;
+	
+    for (i=0; i<nslice; i++) {
+    	r = d_max/(1.0*nslice)*i;
+    	value = pr(pars, d_max, n_c, r);
+    	if (value>0.0) sum_pos += value;
+    	sum += value;
+    }
+    return sum_pos/sum;
+}
+
+/**
+ * Get the fraction of the integral of P(r) over the whole range
+ * of r that is at least one sigma above zero.
+ */
+double positive_errors(double *pars, double *err, double d_max, int n_c, int nslice) {
+    double r; 
+    double value;
+	int i; 
+	double sum_pos = 0.0;
+	double sum = 0.0;
+	double pr_val;
+	double pr_val_err;
+	
+    for (i=0; i<nslice; i++) {
+    	r = d_max/(1.0*nslice)*i;
+    	pr_err(pars, err, d_max, n_c, r, &pr_val, &pr_val_err);
+    	if (pr_val>pr_val_err) sum_pos += pr_val;
+    	sum += pr_val;
+    	
+
+    }
+    return sum_pos/sum;
+}
