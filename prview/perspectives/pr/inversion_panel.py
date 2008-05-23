@@ -104,7 +104,15 @@ class InversionControl(wx.Panel):
     CENTER_PANE = True
     
     # Figure of merit parameters [default]
+    
+    ## Oscillation parameters (sin function = 1.1)
     oscillation_max = 1.5
+    
+    ## Fraction of P(r) that is positive 
+    positive = 1.0
+    
+    ## Fraction of P(r) that is greater than zero by more than 1 sigma
+    pos_err  = 1.0
     
     def __init__(self, parent, id = -1, plots = None, **kwargs):
         wx.Panel.__init__(self, parent, id = id, **kwargs)
@@ -126,6 +134,12 @@ class InversionControl(wx.Panel):
         self.label_sugg = None
         self.qmin_ctl = None
         self.qmax_ctl = None
+        
+        # TextCtrl for fraction of positive P(r)
+        self.pos_ctl = None
+        
+        # TextCtrl for fraction of 1 sigma positive P(r)
+        self.pos_err_ctl = None 
         
         ## Estimates
         self.alpha_estimate_ctl = None
@@ -155,6 +169,10 @@ class InversionControl(wx.Panel):
             self.time_ctl.SetValue("%-5.2g" % value)
         elif name=='oscillation':
             self.osc_ctl.SetValue("%-5.2g" % value)
+        elif name=='positive':
+            self.pos_ctl.SetValue("%-5.2g" % value)
+        elif name=='pos_err':
+            self.pos_err_ctl.SetValue("%-5.2g" % value)
         elif name=='alpha_estimate':
             self.alpha_estimate_ctl.SetToolTipString("Click to accept value.")
             self.alpha_estimate_ctl.Enable(True)
@@ -188,6 +206,10 @@ class InversionControl(wx.Panel):
             self.time_ctl.GetValue()
         elif name=='oscillation':
             self.osc_ctl.GetValue()
+        elif name=='pos':
+            self.pos_ctl.GetValue()
+        elif name=='pos_err':
+            self.pos_err_ctl.GetValue()
         elif name=='alpha_estimate':
             self.alpha_estimate_ctl.GetValue()
         elif name=='plotname':
@@ -329,6 +351,8 @@ class InversionControl(wx.Panel):
         label_time.SetMinSize((120,20))
         label_chi2 = wx.StaticText(self, -1, "Chi2/dof")
         label_osc = wx.StaticText(self, -1, "Oscillations")
+        label_pos = wx.StaticText(self, -1, "Positive fraction")
+        label_pos_err = wx.StaticText(self, -1, "1-sigma positive fraction")
         
         self.time_ctl = wx.TextCtrl(self, -1, size=(60,20))
         self.time_ctl.SetEditable(False)
@@ -338,9 +362,24 @@ class InversionControl(wx.Panel):
         self.chi2_ctl.SetEditable(False)
         self.chi2_ctl.SetToolTipString("Chi^2 over degrees of freedom.")
         
+        # Oscillation parameter
         self.osc_ctl = wx.TextCtrl(self, -1, size=(60,20))
         self.osc_ctl.SetEditable(False)
         self.osc_ctl.SetToolTipString("Oscillation parameter. P(r) for a sphere has an oscillation parameter of 1.1.")
+        
+        # Positive fraction figure of merit
+        self.pos_ctl = wx.TextCtrl(self, -1, size=(60,20))
+        self.pos_ctl.SetEditable(False)
+        self.pos_ctl.SetToolTipString("Fraction of P(r) that is positive. Theoretically, P(r) is defined positive.")
+        
+        # 1-simga positive fraction figure of merit
+        self.pos_err_ctl = wx.TextCtrl(self, -1, size=(60,20))
+        self.pos_err_ctl.SetEditable(False)
+        message  = "Fraction of P(r) that is at least 1 standard deviation greater than zero.\n"
+        message += "This figure of merit tells you about the size of the P(r) errors.\n"
+        message += "If it is close to 1 and the other figures of merit are bad, consider changing "
+        message += "the maximum distance."
+        self.pos_err_ctl.SetToolTipString(message)
         
         sizer_res = wx.GridBagSizer(5,5)
 
@@ -354,6 +393,14 @@ class InversionControl(wx.Panel):
         iy += 1
         sizer_res.Add(label_osc, (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
         sizer_res.Add(self.osc_ctl,   (iy,1), (1,1), wx.RIGHT|wx.EXPAND, 15)
+
+        iy += 1
+        sizer_res.Add(label_pos, (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
+        sizer_res.Add(self.pos_ctl,   (iy,1), (1,1), wx.RIGHT|wx.EXPAND, 15)
+
+        iy += 1
+        sizer_res.Add(label_pos_err, (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
+        sizer_res.Add(self.pos_err_ctl,   (iy,1), (1,1), wx.RIGHT|wx.EXPAND, 15)
 
         ressizer.Add(sizer_res, 0)
         vbox.Add(ressizer)

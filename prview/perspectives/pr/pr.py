@@ -217,18 +217,20 @@ class Plugin:
         y_true = numpy.zeros(len(x))
 
         sum = 0.0
+        cov2 = numpy.ascontiguousarray(cov)
+        
         for i in range(len(x)):
-            if cov==None:
+            if cov2==None:
                 value = pr.pr(out, x[i])
             else:
-                (value, dy[i]) = pr.pr_err(out, cov, x[i])
+                (value, dy[i]) = pr.pr_err(out, cov2, x[i])
             sum += value
             y[i] = value
             
         y = y/sum*pr.d_max/len(x)
         dy = dy/sum*pr.d_max/len(x)
         
-        if cov==None:
+        if cov2==None:
             new_plot = Theory1D(x, y)
         else:
             new_plot = Data1D(x, y, dy=dy)
@@ -336,17 +338,22 @@ class Plugin:
             @param pr: Invertor instance
             @param elapsed: time spent computing
         """
+        from copy import deepcopy
         # Save useful info
         self.elapsed = elapsed
         message = "Computation completed in %g seconds [chi2=%g]" % (elapsed, pr.chi2)
         wx.PostEvent(self.parent, StatusEvent(status=message))
+
+        cov = numpy.ascontiguousarray(cov)
 
         # Show result on control panel
         self.control_panel.chi2 = pr.chi2
         self.control_panel.elapsed = elapsed
         self.control_panel.oscillation = pr.oscillations(out)
         #print "OSCILL", pr.oscillations(out)
-        print "PEAKS:", pr.get_peaks(out)
+        print "PEAKS:", pr.get_peaks(out) 
+        self.control_panel.positive = pr.get_positive(out)
+        self.control_panel.pos_err  = pr.get_pos_err(out, cov)
         
         for i in range(len(out)):
             try:
@@ -366,7 +373,7 @@ class Plugin:
         self.show_iq(out, self.pr)
         
         # Show P(r) fit
-        x_values, x_range = self.show_pr(out, self.pr)  
+        x_values, x_range = self.show_pr(out, self.pr, cov)  
         
         # Popup result panel
         #result_panel = InversionResults(self.parent, -1, style=wx.RAISED_BORDER)
