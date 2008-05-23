@@ -51,39 +51,74 @@ class testFitModule(unittest.TestCase):
             self.assertEqual(data2.y[i],data2.y[i])
             
            
-    def testfit(self):
-        """ test fitting"""
+    def testfit_1Data_1Model(self):
+        """ test fitting for one data and one model"""
+        #load data
         from Loader import Load
         load= Load()
         load.set_filename("testdata_line.txt")
         load.set_values()
-        x,y,dx,dy = load.get_values()
         data1 = Data1D(x=[], y=[],dx=None, dy=None)
         load.load_data(data1)
         
+        #Importing the Fit module
+        from FittingModule import Fitting
+        Fit= Fitting()
         # Receives the type of model for the fitting
         from sans.guitools.LineModel import LineModel
         model  = LineModel()
         
+        #Do the fit
+        Fit.set_data(data1,1)
+        Fit.set_model(model,1)
+        chisqr, out, cov=Fit.fit({'A':2,'B':1},None,None)
+        #print"fit only one data",chisqr, out, cov   
+        #Testing results
+        self.assertEqual(Fit.fit_engine("scipy"),True)
+        self.assert_(math.fabs(out[1]-2.5)/math.sqrt(cov[1][1]) < 2)
+        self.assert_(math.fabs(out[0]-4.0)/math.sqrt(cov[0][0]) < 2)
+        self.assert_(chisqr/len(data1.x) < 2)
+        
+        #print "chisqr",chisqr/len(data1.x)
+        #print "Error on A",math.fabs(out[1]-2.5)/math.sqrt(cov[1][1])
+        #print "Error on B",math.fabs(out[0]-4.0)/math.sqrt(cov[0][0])
+        
+    def testfit_2Data_1Model(self):
+        """ test fitting for two set of data data and one model"""
+        from Loader import Load
+        load= Load()
+        #Load the first set of data
+        load.set_filename("testdata1.txt")
+        load.set_values()
+        data1 = Data1D(x=[], y=[],dx=None, dy=None)
+        load.load_data(data1)
+        
+        #Load the second set of data
+        load.set_filename("testdata2.txt")
+        load.set_values()
+        data2 = Data1D(x=[], y=[],dx=None, dy=None)
+        load.load_data(data2)
+       
+        #Importing the Fit module
         from FittingModule import Fitting
         Fit= Fitting()
-        Fit.set_data(data1)
-        Fit.set_model(model)
+        # Receives the type of model for the fitting
+        from sans.guitools.LineModel import LineModel
+        model  = LineModel()
         
-        default_A = model.getParam('A') 
-        default_B = model.getParam('B') 
-        cstA = Parameter(model, 'A', default_A)
-        cstB  = Parameter(model, 'B', default_B)
-        chisqr, out, cov=Fit.fit([cstA,cstB],None,None)
-        print"fit only one data",chisqr, out, cov   
-       
-        self.assertEqual(Fit.fit_engine(),True)
+        #Do the fit
+        Fit.set_data(data1,1)
+        Fit.set_model(model,1)
         
+        Fit.set_data(data2,2)
+        Fit.set_model(model,2)
+        
+        chisqr, out, cov=Fit.fit({'A':2,'B':1},None,None)
+        #print"fit only one data",chisqr, out, cov
+        
+        #Testing results
+        self.assertEqual(Fit.fit_engine("scipy"),True)
         self.assert_(math.fabs(out[1]-2.5)/math.sqrt(cov[1][1]) < 2)
-        print "chisqr",chisqr/len(data1.x)
+        self.assert_(math.fabs(out[0]-4.0)/math.sqrt(cov[0][0]) < 2)
         self.assert_(chisqr/len(data1.x) < 2)
-#        self.assertAlmostEqual(out[1],2.5)
-        #self.assertAlmostEquals(out[0],4.0)
-        #self.assertAlmostEquals(out[1]+cov[1][1],2.5)
-        #self.assertAlmostEquals(out[0]+cov[0][0],4.0)
         

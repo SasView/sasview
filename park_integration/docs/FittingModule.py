@@ -7,6 +7,7 @@ from scipy import optimize
 class FitArrange:
     def __init__(self):
         """
+            Store a set of data for a given model to perform the Fit
             @param model: the model selected by the user
             @param Ldata: a list of data what the user want to fit
         """
@@ -46,15 +47,11 @@ class Fitting:
         Performs the Fit.he user determine what kind of data 
     """
     def __init__(self,data=[]):
-        #self.model is a list of all models to fit
-        #self.model={}
+        #this is a dictionary of FitArrange elements
         self.fitArrangeList={}
-        #the list of all data to fit 
-        self.data = data
-        #list of models parameters
-        self.parameters=[]
-        
+        #the constraint of the Fit
         self.constraint =None
+        #Specify the use of scipy or park fit
         self.fitType =None
         
     def fit_engine(self,word):
@@ -72,9 +69,10 @@ class Fitting:
         
         fitproblem=self.fitArrangeList.values()[0]
         listdata=[]
-        model =fitproblem.get_model()
-        listdata= fitproblem.get_data()
-        self.set_param(model, pars)
+        model = fitproblem.get_model()
+        listdata = fitproblem.get_data()
+        
+        parameters = self.set_param(model,pars)
         if listdata==[]:
             raise ValueError, " data list missing"
         else:
@@ -82,8 +80,7 @@ class Fitting:
             xtemp=[]
             ytemp=[]
             dytemp=[]
-            
-            
+           
             for data in listdata:
                 for i in range(len(data.x)):
                     if not data.x[i] in xtemp:
@@ -98,19 +95,21 @@ class Fitting:
                 qmin= min(xtemp)
             if qmax==None:
                 qmax= max(xtemp)  
-            chisqr, out, cov = fitHelper(model,self.parameters, xtemp,ytemp, dytemp ,qmin,qmax)
+            chisqr, out, cov = fitHelper(model,parameters, xtemp,ytemp, dytemp ,qmin,qmax)
             return chisqr, out, cov
     
     def set_model(self,model,Uid):
         """ Set model """
-        #self.model[Uid] = model
-        fitproblem= FitArrange()
-        fitproblem.set_model(model)
-        self.fitArrangeList[Uid]=fitproblem
+        if self.fitArrangeList.has_key(Uid):
+            self.fitArrangeList[Uid].set_model(model)
+        else:
+            fitproblem= FitArrange()
+            fitproblem.set_model(model)
+            self.fitArrangeList[Uid]=fitproblem
         
     def set_data(self,data,Uid):
         """ Receive plottable and create a list of data to fit"""
-        #self.data.append(data)
+        
         if self.fitArrangeList.has_key(Uid):
             self.fitArrangeList[Uid].add_data(data)
         else:
@@ -118,32 +117,40 @@ class Fitting:
             fitproblem.add_data(data)
             self.fitArrangeList[Uid]=fitproblem
             
-    def get_data(self):
+    def get_model(self,Uid):
         """ return list of data"""
-        return self.data
+        return self.fitArrangeList[Uid]
     
     def set_param(self,model, pars):
         """ Recieve a dictionary of parameter and save it """
-        self.parameters=[]
+        parameters=[]
         if model==None:
             raise ValueError, "Cannot set parameters for empty model"
         else:
             #for key ,value in pars:
             for key, value in pars.iteritems():
-                print "this is the key",key
-                print "this is the value",value
                 param = Parameter(model, key, value)
-                self.parameters.append(param)
-            
-    def add_contraint(self, contraint):
+                parameters.append(param)
+        return parameters
+    
+    def add_constraint(self, constraint):
         """ User specify contraint to fit """
-        self.contraint = str(contraint)
+        self.constraint = str(constraint)
         
-    def get_contraint(self):
+    def get_constraint(self):
         """ return the contraint value """
-        return self.contraint
-
-
+        return self.constraint
+   
+    def set_constraint(self,constraint):
+        """ 
+            receive a string as a constraint
+            @param constraint: a string used to constraint some parameters to get a 
+                specific value
+        """
+        self.constraint= constraint
+    
+   
+                
 
 class Parameter:
     """
@@ -234,12 +241,7 @@ if __name__ == "__main__":
     model  = LineModel()
     Fit.set_model(model,1)
     Fit.set_data(data1,1)
-    #default_A = model.getParam('A') 
-    #default_B = model.getParam('B') 
-    #cstA = Parameter(model, 'A', default_A)
-    #cstB  = Parameter(model, 'B', default_B)
     
-    #chisqr, out, cov=Fit.fit([cstA,cstB],None,None)
     chisqr, out, cov=Fit.fit({'A':2,'B':1},None,None)
     print"fit only one data",chisqr, out, cov 
     
