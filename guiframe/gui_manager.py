@@ -101,7 +101,7 @@ class ViewerFrame(wx.Frame):
         """
         is_loaded = False
         for item in self.plugins:
-             if plugin.__class__==item.PLUGIN_ID.__class__:
+             if plugin.__class__==item.__class__:
                  print "Plugin %s already loaded" % plugin.__class__.__name__
                  is_loaded = True
                  
