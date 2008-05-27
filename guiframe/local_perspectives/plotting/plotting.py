@@ -52,6 +52,9 @@ class View1DPanel(PlotPanel):
         ## Unique ID (from gui_manager)
         self.uid = None
         
+        ## Action IDs for internal call-backs
+        self.action_ids = {}
+        
         ## Graph        
         self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
@@ -82,11 +85,11 @@ class View1DPanel(PlotPanel):
         
         # Check axis labels
         #TODO: Should re-factor this
-        if event.plot._xunit != self.graph.prop["xunit"]:
-            self.graph.xaxis(event.plot._xaxis, event.plot._xunit)
+        #if event.plot._xunit != self.graph.prop["xunit"]:
+        self.graph.xaxis(event.plot._xaxis, event.plot._xunit)
             
-        if event.plot._yunit != self.graph.prop["yunit"]:
-            self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
+        #if event.plot._yunit != self.graph.prop["yunit"]:
+        self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
       
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
@@ -99,6 +102,14 @@ class View1DPanel(PlotPanel):
         #slicerpop = wx.Menu()
         slicerpop = PanelMenu()
         slicerpop.set_plots(self.plots)
+                
+        # Option to save the data displayed
+        id = wx.NewId()
+        for plot in self.graph.plottables:
+            name = plot.name
+            slicerpop.Append(id, "&Save %s points" % name)
+            self.action_ids[str(id)] = plot
+            wx.EVT_MENU(self, id, self._onSave)
                 
         # Various plot options
         id = wx.NewId()
@@ -126,6 +137,55 @@ class View1DPanel(PlotPanel):
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
+    
+    def _onSave(self, evt):
+        """
+            Save a data set to a text file
+            @param evt: Menu event
+        """
+        import os
+        id = str(evt.GetId())
+        if id in self.action_ids:         
+            
+            path = None
+            dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", "*.txt", wx.SAVE)
+            if dlg.ShowModal() == wx.ID_OK:
+                path = dlg.GetPath()
+                mypath = os.path.basename(path)
+                print path
+            dlg.Destroy()
+            
+            if not path == None:
+                out = open(path, 'w')
+                has_errors = True
+                if self.action_ids[id].dy==None or self.action_ids[id].dy==[]:
+                    has_errors = False
+                    
+                # Sanity check
+                if has_errors:
+                    try:
+                        if len(self.action_ids[id].y) != len(self.action_ids[id].dy):
+                            print "Y and dY have different lengths"
+                            has_errors = False
+                    except:
+                        has_errors = False
+                
+                if has_errors:
+                    out.write("<X>   <Y>   <dY>\n")
+                else:
+                    out.write("<X>   <Y>\n")
+                    
+                for i in range(len(self.action_ids[id].x)):
+                    if has_errors:
+                        out.write("%g  %g  %g\n" % (self.action_ids[id].x[i], 
+                                                    self.action_ids[id].y[i],
+                                                    self.action_ids[id].dy[i]))
+                    else:
+                        out.write("%g  %g\n" % (self.action_ids[id].x[i], 
+                                                self.action_ids[id].y[i]))
+                        
+                out.close()
+    
     
     def _onToggleScale(self, event):
         if self.get_yscale() == 'log':

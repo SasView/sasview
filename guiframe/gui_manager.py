@@ -14,9 +14,12 @@ try:
     # Try to find a local config
     import imp
     path = os.getcwd()
-    if(os.path.isfile("%s/%s.py" % (path, 'config'))):
+    if(os.path.isfile("%s/%s.py" % (path, 'config'))) or \
+      (os.path.isfile("%s/%s.pyc" % (path, 'config'))):
             fObj, path, descr = imp.find_module('config', [path])
-            config = imp.load_module('config', fObj, path, descr)     
+            config = imp.load_module('config', fObj, path, descr)  
+    else:
+        raise RuntimeError, "Look for default config"   
 except:
     # Didn't find local config, load the default 
     import config
@@ -38,7 +41,9 @@ class ViewerFrame(wx.Frame):
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(1000, 1000))
         
         path = os.path.dirname(__file__)
-        self.SetIcon(wx.Icon(os.path.join(path,'images/ball.ico'), wx.BITMAP_TYPE_ICO))
+        ico_file = os.path.join(path,'images/ball.ico')
+        if os.path.isfile(ico_file):
+            self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         
         ## Application manager
         self.app_manager = None
@@ -57,6 +62,14 @@ class ViewerFrame(wx.Frame):
         ## Default welcome panel
         self.defaultPanel    = DefaultPanel(self, -1, style=wx.RAISED_BORDER)
 
+        # self.build_gui()
+       
+        # Register the close event so it calls our own method
+        wx.EVT_CLOSE(self, self._onClose)
+        # Register to status events
+        self.Bind(EVT_STATUS, self._on_status_event)
+             
+    def build_gui(self):
         # Set up the layout
         self._setup_layout()
         
@@ -64,11 +77,6 @@ class ViewerFrame(wx.Frame):
         self._setup_menus()
         
         self.Fit()
-       
-        # Register the close event so it calls our own method
-        wx.EVT_CLOSE(self, self._onClose)
-        # Register to status events
-        self.Bind(EVT_STATUS, self._on_status_event)
              
     def _setup_layout(self):
         """
@@ -85,6 +93,20 @@ class ViewerFrame(wx.Frame):
         self._load_panels()
         
         self._mgr.Update()
+
+    def add_perspective(self, plugin):
+        """
+            Add a perspective if it doesn't already
+            exist.
+        """
+        is_loaded = False
+        for item in self.plugins:
+             if plugin.__class__==item.PLUGIN_ID.__class__:
+                 print "Plugin %s already loaded" % plugin.__class__.__name__
+                 is_loaded = True
+                 
+        if not is_loaded:
+            self.plugins.append(plugin)
       
     def _find_plugins(self, dir="perspectives"):
         """
@@ -95,6 +117,14 @@ class ViewerFrame(wx.Frame):
         import imp
         print "Looking for plug-ins in %s" % dir
         # List of plug-in objects
+        
+        #path_exe = os.getcwd()
+        #path_plugs = os.path.join(path_exe, dir)
+        f = open("load.log",'w') 
+        f.write(os.getcwd()+'\n\n')
+        #f.write(str(os.listdir(dir))+'\n')
+        
+        
         plugins = []
         # Go through files in panels directory
         try:
@@ -112,8 +142,11 @@ class ViewerFrame(wx.Frame):
                     file = None
                     try:
                         if toks[1]=='':
+                            f.write("trying to import \n")
                             mod_path = '.'.join([dir, name])
+                            f.write("mod_path= %s\n" % mod_path)
                             module = __import__(mod_path, globals(), locals(), [name])
+                            f.write(str(module)+'\n')
                         else:
                             (file, path, info) = imp.find_module(name, path)
                             print path
@@ -127,12 +160,15 @@ class ViewerFrame(wx.Frame):
                         
                     except:
                         print sys.exc_value
+                        f.write(str(sys.exc_value)+'\n')
                     finally:
                         if not file==None:
                             file.close()
         except:
             # Should raise and catch at a higher level and display error on status bar
             pass   
+        f.write(str(plugins)+'\n')
+        f.close()
         return plugins
     
         
@@ -515,7 +551,6 @@ class ViewApp(wx.App):
         if hasattr(self.frame, 'special'):
             print "Special?", self.frame.special.__class__.__name__
             self.frame.special.SetCurrent()
-        self.frame.post_init()
         self.SetTopWindow(self.frame)
         return True
     
@@ -525,6 +560,19 @@ class ViewApp(wx.App):
             of the GUI manager (Frame) 
         """
         self.frame.set_manager(manager)
+        
+    def build_gui(self):
+        """
+            Build the GUI
+        """
+        self.frame.build_gui()
+        self.frame.post_init()
+        
+    def add_perspective(self, perspective):
+        """
+            Manually add a perspective to the application GUI
+        """
+        self.frame.add_perspective(perspective)
         
 
 if __name__ == "__main__": 

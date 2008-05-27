@@ -22,4 +22,8 @@ To-do list:
 	- Make legend transparent
 	- Make sure that when a plottable is sent a second time for update, that we replace the lables too!
 	- Add help menu entry for each module	
+	- Put debug info in log file, because we can't access it from a py2exe executable
+	- Allow the application to load perspectives by hand. Then the automatic loading is only
+	  for additionally installed plug-ins.
+	- Fix the damned images directory folder...
 	
