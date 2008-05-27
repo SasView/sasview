@@ -71,10 +71,11 @@ class testFitModule(unittest.TestCase):
         #Do the fit
         Fit.set_data(data1,1)
         Fit.set_model(model,1)
+        self.assertEqual(Fit.fit_engine("scipy"),True)
         chisqr, out, cov=Fit.fit({'A':2,'B':1},None,None)
         #print"fit only one data",chisqr, out, cov   
         #Testing results
-        self.assertEqual(Fit.fit_engine("scipy"),True)
+        
         self.assert_(math.fabs(out[1]-2.5)/math.sqrt(cov[1][1]) < 2)
         self.assert_(math.fabs(out[0]-4.0)/math.sqrt(cov[0][0]) < 2)
         self.assert_(chisqr/len(data1.x) < 2)
@@ -112,13 +113,15 @@ class testFitModule(unittest.TestCase):
         
         Fit.set_data(data2,2)
         Fit.set_model(model,2)
-        
+        self.assertEqual(Fit.fit_engine("scipy"),True)
+        self.assertEqual(Fit.fit_engine("scipys"),False)
         chisqr, out, cov=Fit.fit({'A':2,'B':1},None,None)
         #print"fit only one data",chisqr, out, cov
         
         #Testing results
-        self.assertEqual(Fit.fit_engine("scipy"),True)
+        
         self.assert_(math.fabs(out[1]-2.5)/math.sqrt(cov[1][1]) < 2)
         self.assert_(math.fabs(out[0]-4.0)/math.sqrt(cov[0][0]) < 2)
         self.assert_(chisqr/len(data1.x) < 2)
+        
         
