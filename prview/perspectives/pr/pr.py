@@ -3,6 +3,7 @@
 # Use the I(q) curve as input and compare the output to P(r)
 
 import os
+import sys
 import wx
 from sans.guitools.plottables import Data1D, Theory1D
 from sans.guicomm.events import NewPlotEvent, StatusEvent    
@@ -266,14 +267,14 @@ class Plugin:
                     toks = line.split()
                     x = float(toks[0])
                     y = float(toks[1])
-                    data_x = numpy.append(data_x, x)
-                    data_y = numpy.append(data_y, y)
                     try:
                         scale = 0.05/math.sqrt(data_x[0])
                     except:
                         scale = 1.0
                     #data_err = numpy.append(data_err, 10.0*math.sqrt(y)+1000.0)
-                    data_err = numpy.append(data_err, scale*math.sqrt(y))
+                    data_x = numpy.append(data_x, x)
+                    data_y = numpy.append(data_y, y)
+                    data_err = numpy.append(data_err, scale*math.sqrt(math.fabs(y)))
                 except:
                     print "Error reading line: ", line
                     print sys.exc_value
@@ -386,8 +387,11 @@ class Plugin:
         self.q_min = q_min
         self.q_max = q_max
         
-        self._create_plot_pr()
-        self.perform_inversion()
+        try:
+            self._create_plot_pr()
+            self.perform_inversion()
+        except:
+            wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
 
     def estimate_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None):
         self.alpha = alpha
@@ -396,8 +400,11 @@ class Plugin:
         self.q_min = q_min
         self.q_max = q_max
         
-        self._create_plot_pr()
-        self.perform_estimate()
+        try:
+            self._create_plot_pr()
+            self.perform_estimate()
+        except:
+            wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))            
 
     def _create_plot_pr(self):
         """
@@ -434,9 +441,11 @@ class Plugin:
         self.q_min = q_min
         self.q_max = q_max
         
-        self._create_file_pr(path)
-        
-        self.perform_inversion()
+        try:
+            if self._create_file_pr(path):
+                self.perform_inversion()
+        except:
+            wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
           
     def estimate_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None):
         self.alpha = alpha
@@ -445,8 +454,12 @@ class Plugin:
         self.q_min = q_min
         self.q_max = q_max
         
-        if self._create_file_pr(path):
-            self.perform_estimate()
+        try:
+            if self._create_file_pr(path):
+                self.perform_estimate()
+        except:
+            wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
+                
           
     def _create_file_pr(self, path):
         """

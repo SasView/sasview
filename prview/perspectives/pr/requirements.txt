@@ -23,3 +23,6 @@
 19. Replace help dialog text with a nice image. Mention how to choose alpha and what the suggested alpha means.
 20. If a figure of merit is clearly bad, put its background red
 21. Option to save data.
+22. If you click compute before loading data, an error occurs.
+23. Plot I(q) immediately when you choose a new file.
+24. *** probably need to ship the perspectives separately...
