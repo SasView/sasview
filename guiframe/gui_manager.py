@@ -14,15 +14,17 @@ try:
     # Try to find a local config
     import imp
     path = os.getcwd()
-    if(os.path.isfile("%s/%s.py" % (path, 'config'))) or \
-      (os.path.isfile("%s/%s.pyc" % (path, 'config'))):
-            fObj, path, descr = imp.find_module('config', [path])
-            config = imp.load_module('config', fObj, path, descr)  
+    if(os.path.isfile("%s/%s.py" % (path, 'local_config'))) or \
+      (os.path.isfile("%s/%s.pyc" % (path, 'local_config'))):
+            fObj, path, descr = imp.find_module('local_config', [path])
+            config = imp.load_module('local_config', fObj, path, descr)  
     else:
-        raise RuntimeError, "Look for default config"   
+        # Try simply importing local_config
+        import local_config as config
 except:
     # Didn't find local config, load the default 
     import config
+    
 from sans.guicomm.events import EVT_STATUS
 
 import warnings
@@ -44,6 +46,10 @@ class ViewerFrame(wx.Frame):
         ico_file = os.path.join(path,'images/ball.ico')
         if os.path.isfile(ico_file):
             self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
+        else:
+            ico_file = os.path.join(os.getcwd(),'images/ball.ico')
+            if os.path.isfile(ico_file):
+                self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         
         ## Application manager
         self.app_manager = None
