@@ -404,6 +404,7 @@ class Invertor(Cinvertor):
             
             # T_0 for computation time
             starttime = time.time()
+            elapsed = 0
             
             # If the current alpha is zero, try
             # another value
