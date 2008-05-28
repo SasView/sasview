@@ -1,7 +1,58 @@
-Dependencies:
-	- Needs sans.guitools version 0.1.1
-	- Needs sans.guicomm
-	- Needs sans.guiframe
-	- sans.pr_inversion
+Release Notes
+=============
+
+PrView 0.1
+
+Package name: None
+
+1- Version 0.1.0
+
+	- Release date: 5/28/2008
+	- First version put together built on guiframe.
+
+2- Downloading and Installing
+
+	2.1- System Requirements:
+		- Python version >= 2.4 should be running on the system
+
+	2.2- Installing:
+		- Get the code from svn://danse.us/sans/releases/prview-0.1.0
+		- This application is also dependent on the following DANSE code:
+			svn://danse.us/sans/releases/guitools-0.1.1
+			svn://danse.us/sans/treleases/guicomm-0.1.0
+			svn://danse.us/sans/releases/guiframe-0.1.0
+			svn://danse.us/sans/releases/pr_inversion-0.1.0
+		- The following modules are required:
+			* matplotlib
+			* numpy
+			* scipy
+			* wxpython
+
+3- Known Issues
+
+	3.1- All systems:
+		- None
+
+	3.2- Windows:
+		- None
+
+	3.3- Linux:
+		- None
+
+4- Troubleshooting
+
+	- None
+
+5- Frequently Asked Questions
+
+	- None
+
+6- Other Resources
+
+	- See: http://danse.chem.utk.edu/prview.html
+
 	
+
+	
+
 
