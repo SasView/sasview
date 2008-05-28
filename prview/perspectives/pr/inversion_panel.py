@@ -577,7 +577,7 @@ class InversionControl(wx.Panel):
 class HelpDialog(wx.Dialog):
     def __init__(self, parent, id):
         from sans.pr.invertor import help
-        wx.Dialog.__init__(self, parent, id, size=(400, 400))
+        wx.Dialog.__init__(self, parent, id, size=(400, 420))
         self.SetTitle("P(r) help") 
         
 
@@ -585,7 +585,7 @@ class HelpDialog(wx.Dialog):
 
         explanation = help()
            
-        label_explain = wx.StaticText(self, -1, explanation, size=(350,300))
+        label_explain = wx.StaticText(self, -1, explanation, size=(350,320))
             
         vbox.Add(label_explain, 0, wx.ALL|wx.EXPAND, 15)
 
