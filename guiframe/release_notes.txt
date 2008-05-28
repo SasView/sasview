@@ -5,6 +5,10 @@ of their main application when using this framework.
 
 Documentation to come...
 
+1- Version 0.1.0
+
+	- Release date: 5/28/2008
+
 Dependencies:
 	- Needs sans.guitools version 0.1.1
 	- Needs sans.guicomm
