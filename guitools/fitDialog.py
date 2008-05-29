@@ -55,13 +55,17 @@ class LinearFit(wx.Dialog):
         self.tcChi    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.tcChi.SetToolTipString("Chi^2 over degrees of freedom.")
         self.xminFit  = wx.TextCtrl(self,-1,size=(_BOX_WIDTH,20))
-        self.xminFit.SetToolTipString("Enter the minimum value on the axis to be included in the fit.")
+        self.xminFit.SetToolTipString("Enter the minimum value on the x-axis to be included in the fit.")
         self.xmaxFit  = wx.TextCtrl(self,-1,size=(_BOX_WIDTH,20))
-        self.xmaxFit.SetToolTipString("Enter the maximum value on the axis to be included in the fit.")
+        self.xmaxFit.SetToolTipString("Enter the maximum value on the x-axis to be included in the fit.")
         self.xminTransFit = wx.TextCtrl(self,-1,size=(_BOX_WIDTH,20))
+        self.xminTransFit.SetToolTipString("Minimum value on the x-axis for the plotted data.")
         self.xmaxTransFit = wx.TextCtrl(self,-1,size=(_BOX_WIDTH,20))
+        self.xmaxTransFit.SetToolTipString("Maximum value on the x-axis for the plotted data.")
         self.initXmin = wx.TextCtrl(self,-1,size=(_BOX_WIDTH,20))
+        self.initXmin.SetToolTipString("Minimum value available on the x-axis for the plotted data.")
         self.initXmax = wx.TextCtrl(self,-1,size=(_BOX_WIDTH,20))
+        self.initXmax.SetToolTipString("Maximum value available on the x-axis for the plotted data.")
 
         # Make the info box not editable
         #_BACKGROUND_COLOR = '#ffdf85'
@@ -125,7 +129,7 @@ class LinearFit(wx.Dialog):
         sizer.Add(wx.StaticText(self, -1, 'Max'),(iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
-        sizer.Add(wx.StaticText(self, -1, 'Plotted Range'),(iy, ix),(1,1),\
+        sizer.Add(wx.StaticText(self, -1, 'Plotted range'),(iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix +=1
         sizer.Add(self.initXmin, (iy, ix),(1,1),\
@@ -135,7 +139,7 @@ class LinearFit(wx.Dialog):
        
         iy += 1
         ix = 0
-        sizer.Add(wx.StaticText(self, -1, 'Fit Range of '+self.xLabel),(iy, ix),(1,1),\
+        sizer.Add(wx.StaticText(self, -1, 'Fit range of '+self.xLabel),(iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         sizer.Add(self.xminTransFit, (iy, ix),(1,1),\
@@ -145,7 +149,7 @@ class LinearFit(wx.Dialog):
       
         iy += 1
         ix = 0
-        sizer.Add(wx.StaticText(self, -1, 'Fit Range of x'),(iy, ix),(1,1),\
+        sizer.Add(wx.StaticText(self, -1, 'Fit range of x'),(iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         sizer.Add(self.xminFit, (iy, ix),(1,1),\

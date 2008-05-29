@@ -6,7 +6,7 @@ import wx
 
 class Properties(wx.Dialog):
     def __init__(self, parent, id, title):
-        wx.Dialog.__init__(self, parent, id, title, size=(350, 200))
+        wx.Dialog.__init__(self, parent, id, "Select the scale of the graph", size=(350, 190))
         """
             for the properties window
         """
@@ -15,7 +15,7 @@ class Properties(wx.Dialog):
         vbox  = wx.BoxSizer(wx.VERTICAL)
         sizer = wx.GridBagSizer(5,0)
         vbox.Add(panel, 1, wx.EXPAND | wx.ALL)
-     
+
         ix = 1
         iy = 1
         sizer.Add(wx.StaticText(panel, -1, 'X'),(iy, ix))
@@ -33,13 +33,17 @@ class Properties(wx.Dialog):
         ix +=2
         self.view =wx.ComboBox(panel, -1)
         sizer.Add(self.view,(iy,ix))
-        ix =3
-        iy +=3
-        btCancel=wx.Button(panel, wx.ID_CANCEL,'Cancel' )
-        sizer.Add(btCancel,(iy,ix))
-        ix +=2
-        btOk = wx.Button(panel, wx.ID_OK, "Ok")
-        sizer.Add(btOk,(iy, ix))
+        
+       
+        btCancel=wx.Button(self, wx.ID_CANCEL,'Cancel' )
+        btOk = wx.Button(self, wx.ID_OK, "OK")
+
+        sizer_button = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer_button.Add(btOk, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+        sizer_button.Add(btCancel, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)        
+        vbox.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
+ 
         
         # scale value for x
         self.xvalue.SetValue("x")
