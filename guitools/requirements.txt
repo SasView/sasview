@@ -103,3 +103,16 @@
      it before proceeding
 	ALINA
  1- Would like to change the y axis label display
+ 
+ 
+Cleaning up for deployment:
+
+ - When zooming, check that the new lower bound is positive if on a log scale [DONE] 
+ - Fixed bug with the zooming dependency on scale [DONE]
+ - Improved look of Fit dialog [DONE]
+ 
+ - Improve labels
+ 
+ - Problem scales:
+     - x vs 1/y
+     

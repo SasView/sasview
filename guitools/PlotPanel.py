@@ -15,6 +15,8 @@ from plottables import Theory1D
 #from plottables import Data1D
 #TODO: make the plottables interactive
 
+DEBUG = False
+
 from plottables import Graph
 #(FuncFitEvent, EVT_FUNC_FIT) = wx.lib.newevent.NewEvent()
 import math,pylab
@@ -146,9 +148,11 @@ class PlotPanel(wx.Panel):
         self.ErrAvalue=None
         self.ErrBvalue=None
         self.Chivalue=None
+        
     def onWheel(self, event):
         """
-        Process mouse wheel as zoom events
+            Process mouse wheel as zoom events
+            @param event: Wheel event
         """
         ax = event.inaxes
         step = event.step
@@ -156,12 +160,14 @@ class PlotPanel(wx.Panel):
         if ax != None:
             # Event occurred inside a plotting area
             lo,hi = ax.get_xlim()
-            lo,hi = _rescale(lo,hi,step,pt=event.xdata)
-            ax.set_xlim((lo,hi))
+            lo,hi = _rescale(lo,hi,step,pt=event.xdata,scale=ax.get_xscale())
+            if not self.xscale=='log' or lo>0:
+                ax.set_xlim((lo,hi))
 
             lo,hi = ax.get_ylim()
-            lo,hi = _rescale(lo,hi,step,pt=event.ydata)
-            ax.set_ylim((lo,hi))
+            lo,hi = _rescale(lo,hi,step,pt=event.ydata,scale=ax.get_yscale())
+            if not self.yscale=='log' or lo>0:
+                ax.set_ylim((lo,hi))
         else:
              # Check if zoom happens in the axes
             xdata,ydata = None,None
@@ -171,19 +177,19 @@ class PlotPanel(wx.Panel):
                 insidex,_ = ax.xaxis.contains(event)
                 if insidex:
                     xdata,_ = ax.transAxes.inverse_xy_tup((x,y))
-                    print "xaxis",x,"->",xdata
                 insidey,_ = ax.yaxis.contains(event)
                 if insidey:
                     _,ydata = ax.transAxes.inverse_xy_tup((x,y))
-                    print "yaxis",y,"->",ydata
             if xdata is not None:
                 lo,hi = ax.get_xlim()
                 lo,hi = _rescale(lo,hi,step,bal=xdata,scale=ax.get_xscale())
-                ax.set_xlim((lo,hi))
+                if not self.xscale=='log' or lo>0:
+                    ax.set_xlim((lo,hi))
             if ydata is not None:
                 lo,hi = ax.get_ylim()
                 lo,hi = _rescale(lo,hi,step,bal=ydata,scale=ax.get_yscale())
-                ax.set_ylim((lo,hi))
+                if not self.yscale=='log' or lo>0:
+                    ax.set_ylim((lo,hi))
                
         self.canvas.draw_idle()
 
@@ -213,7 +219,7 @@ class PlotPanel(wx.Panel):
         
         if len(list.keys())>0:
             first_item = list.keys()[0]
-            dlg = LinearFit( None, first_item, self.onFitDisplay,self.returnTrans, -1, 'Fitting')
+            dlg = LinearFit( None, first_item, self.onFitDisplay,self.returnTrans, -1, 'Linear Fit')
            
             if (self.xmin !=0.0 )and ( self.xmax !=0.0)\
                 and(self.xminView !=0.0 )and ( self.xmaxView !=0.0):
@@ -492,7 +498,7 @@ class PlotPanel(wx.Panel):
                 item.transformX(transform.toX,transform.errToX)
                 self.set_xscale("log")
                 name, units = item.get_xaxis() 
-                self.graph.xaxis("\log_{10}\ \  %s" % name,  "%s^{-1}" % units)
+                self.graph.xaxis("\log_{10}\ \  (%s)" % name,  "%s^{-1}" % units)
                 
             if ( self.yLabel=="ln(y)" ):
                 item.transformY(transform.toLogX,transform.errToLogX)
@@ -510,7 +516,7 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toX,transform.errToX)
                 self.set_yscale("log")  
                 name, units = item.get_yaxis()
-                self.graph.yaxis("\log_{10}\ \ %s" % name,  "%s^{-1}" % units)
+                self.graph.yaxis("\log_{10}\ \ (%s)" % name,  "%s^{-1}" % units)
                 
             if ( self.yLabel=="y^(2)" ):
                 item.transformY( transform.toX2,transform.errToX2 )    
@@ -522,34 +528,34 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toOneOverX,transform.errOneOverX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("%s" % name,  "\ \%s" % units)
+                self.graph.yaxis("1/%s" % name,  "\ \%s" % units)
                 
             if ( self.yLabel =="1/sqrt(y)" ):
                 item.transformY(transform.toOneOverSqrtX,transform.errOneOverSqrtX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("\sqrt{%s}" %name,  "%s" % units)
+                self.graph.yaxis("1/\sqrt{%s}" %name,  "%s" % units)
                 
             if ( self.yLabel =="ln(y*x)"):
                 item.transformY( transform.toLogXY,transform.errToLogXY)
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
-                self.graph.yaxis("log\ %s %s" % (yname,xname),  "%s^{-1}%s^{-1}" % (yunits,xunits))
+                self.graph.yaxis("log\ (%s \ \ %s)" % (yname,xname),  "%s^{-1}%s^{-1}" % (yunits,xunits))
                 
             if ( self.yLabel =="ln(y*x^(2))"):
                 item.transformY( transform.toLogYX2,transform.errToLogYX2)
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis() 
-                self.graph.yaxis("Log %s%s^{2}" % (yname,xname),  "%s^{-1}%s^{-2}" % (yunits,xunits))
+                self.graph.yaxis("Log (%s \ \ %s^{2})" % (yname,xname),  "%s^{-1}%s^{-2}" % (yunits,xunits))
             
             if ( self.yLabel =="ln(y*x^(4))"):
                 item.transformY(transform.toLogYX4,transform.errToLogYX4)
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
-                self.graph.yaxis("Log %s%s^{4}" % (yname,xname),  "%s^{-1}%s^{-4}" % (yunits,xunits))
+                self.graph.yaxis("Log (%s \ \ %s^{4})" % (yname,xname),  "%s^{-1}%s^{-4}" % (yunits,xunits))
             
             if ( self.viewModel == "Guinier lny vs x^(2)"):
                 

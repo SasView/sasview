@@ -709,8 +709,8 @@ class Data1D(Plottable):
         self.y = y
         self.dx = dx
         self.dy = dy
-        self.xaxis( 'q', 'A')
-        self.yaxis( 'intensity', 'cm')
+        self.xaxis( '', '')
+        self.yaxis( '', '')
         self.view = self.View(self.x, self.y, self.dx, self.dy)
         
     def render(self,plot,**kw):
@@ -743,8 +743,8 @@ class Theory1D(Plottable):
         self.x = x
         self.y = y
         self.dy = dy
-        self.xaxis( 'q', 'A')
-        self.yaxis( 'intensity', 'cm')
+        self.xaxis( '', '')
+        self.yaxis( '', '')
         self.view = self.View(self.x, self.y, None, self.dy)
         
     def render(self,plot,**kw):
