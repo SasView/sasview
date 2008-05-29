@@ -19,12 +19,33 @@ DEBUG = False
 
 from plottables import Graph
 #(FuncFitEvent, EVT_FUNC_FIT) = wx.lib.newevent.NewEvent()
-import math,pylab
+import math,pylab,re
+
 def show_tree(obj,d=0):
     """Handy function for displaying a tree of graph objects"""
     print "%s%s" % ("-"*d,obj.__class__.__name__)
     if 'get_children' in dir(obj):
         for a in obj.get_children(): show_tree(a,d+1)
+        
+def convertUnit(pow,unit):
+    """ 
+        Displays the unit with the proper convertion
+        @param pow: the user set the power of the unit
+        @param unit: the unit of the data
+    """ 
+    toks=re.match("^", unit)
+    if not toks==None:
+        unitValue= re.split("{",unit)
+        unitPower= re.split("}",unitValue[1])
+        power= int(unitPower[0])*pow
+        word= unitValue[0]+"{"+str(power)+"}"
+        if power==1:
+            tempUnit=re.split("\^",unitValue[0])
+            unit=tempUnit[0]
+        else:
+            unit = word
+    #print"this is unit",unit
+    return unit
 def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
         """
         Rescale (lo,hi) by step, returning the new (lo,hi)
@@ -486,54 +507,65 @@ class PlotPanel(wx.Panel):
                 item.transformX(transform.toX,transform.errToX)
                 self.set_xscale("linear")
                 name, units = item.get_xaxis()
-                self.graph.xaxis("%s" % name,  "%s^{-1}" % units)
+                self.graph.xaxis("%s" % name,  "%s" % units)
+                
                 
             if ( self.xLabel=="x^(2)" ):
                 item.transformX(transform.toX2,transform.errToX2)
                 self.set_xscale('linear')
                 name, units = item.get_xaxis()
-                self.graph.xaxis("%s^{2}" % name,  "%s^{-2}" % units)
+                units=convertUnit(2,units) 
+                self.graph.xaxis("%s^{2}" % name,  "%s" % units)
+                
                 
             if (self.xLabel=="log10(x)" ):
                 item.transformX(transform.toX,transform.errToX)
                 self.set_xscale("log")
                 name, units = item.get_xaxis() 
-                self.graph.xaxis("\log_{10}\ \  (%s)" % name,  "%s^{-1}" % units)
+                self.graph.xaxis("\log_{10}\ \  (%s)" % name,  "%s" % units)
+                
                 
             if ( self.yLabel=="ln(y)" ):
                 item.transformY(transform.toLogX,transform.errToLogX)
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("log\ \ %s" % name,  "%s^{-1}" % units)
+                self.graph.yaxis("log\ \ %s" % name,  "%s" % units)
+                
                 
             if ( self.yLabel=="y" ):
                 item.transformY(transform.toX,transform.errToX)
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("%s" % name,  "%s^{-1}" % units)
+                self.graph.yaxis("%s" % name,  "%s" % units)
+               
                 
             if ( self.yLabel=="log10(y)" ): 
                 item.transformY(transform.toX,transform.errToX)
                 self.set_yscale("log")  
                 name, units = item.get_yaxis()
-                self.graph.yaxis("\log_{10}\ \ (%s)" % name,  "%s^{-1}" % units)
+                self.graph.yaxis("\log_{10}\ \ (%s)" % name,  "%s" % units)
+                
                 
             if ( self.yLabel=="y^(2)" ):
                 item.transformY( transform.toX2,transform.errToX2 )    
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("%s^{2}" % name,  "%s^{-2}" % units)
+                units=convertUnit(2,units) 
+                self.graph.yaxis("%s^{2}" % name,  "%s" % units)
+                
                 
             if ( self.yLabel =="1/y"):
                 item.transformY(transform.toOneOverX,transform.errOneOverX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("1/%s" % name,  "\ \%s" % units)
+                units=convertUnit(-1,units)
+                self.graph.yaxis("1/%s" % name,  "%s" % units)
                 
             if ( self.yLabel =="1/sqrt(y)" ):
                 item.transformY(transform.toOneOverSqrtX,transform.errOneOverSqrtX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
+                units=convertUnit(-1,units)
                 self.graph.yaxis("1/\sqrt{%s}" %name,  "%s" % units)
                 
             if ( self.yLabel =="ln(y*x)"):
@@ -541,43 +573,52 @@ class PlotPanel(wx.Panel):
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
-                self.graph.yaxis("log\ (%s \ \ %s)" % (yname,xname),  "%s^{-1}%s^{-1}" % (yunits,xunits))
+                self.graph.yaxis("log\ (%s \ \ %s)" % (yname,xname),  "%s%s" % (yunits,xunits))
+               
                 
             if ( self.yLabel =="ln(y*x^(2))"):
                 item.transformY( transform.toLogYX2,transform.errToLogYX2)
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis() 
-                self.graph.yaxis("Log (%s \ \ %s^{2})" % (yname,xname),  "%s^{-1}%s^{-2}" % (yunits,xunits))
+                xunits = convertUnit(2,xunits) 
+                self.graph.yaxis("Log (%s \ \ %s)" % (yname,xname),  "%s%s" % (yunits,xunits))
+                
             
             if ( self.yLabel =="ln(y*x^(4))"):
                 item.transformY(transform.toLogYX4,transform.errToLogYX4)
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
-                self.graph.yaxis("Log (%s \ \ %s^{4})" % (yname,xname),  "%s^{-1}%s^{-4}" % (yunits,xunits))
-            
+                xunits = convertUnit(4,xunits) 
+                self.graph.yaxis("Log (%s \ \ %s)" % (yname,xname),  "%s%s" % (yunits,xunits))
+                
             if ( self.viewModel == "Guinier lny vs x^(2)"):
                 
                 item.transformX(transform.toX2,transform.errToX2)
                 self.set_xscale('linear')
                 name, units = item.get_xaxis()
-                self.graph.xaxis("%s^{2}" % name,  "%s^{-2}" % units)
+                units = convertUnit(2,units) 
+                self.graph.xaxis("%s^{2}" % name,  "%s" % units)
+                
                 
                 item.transformY(transform.toLogX,transform.errToLogX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("$Log %s$" % name,  "%s^{-1}" % units)
+                self.graph.yaxis("$Log %s$" % name,  "%s" % units)
+               
                 
             item.transformView()
             
-        #item.name = self.yLabel+" vs " +self.xLabel  
+         
         self.resetFitView()   
         self.prevXtrans = self.xLabel 
         self.prevYtrans = self.yLabel  
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
         
+        
+    
     def onFitDisplay(self, tempx,tempy,xminView,xmaxView,xmin,xmax,func):
         """
             Add a new plottable into the graph .In this case this plottable will be used 
