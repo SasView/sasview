@@ -12,6 +12,12 @@ def format_number(value, high=False):
     """
         Return a float in a standardized, human-readable formatted string 
     """
+    try: 
+        value = float(value)
+    except:
+        print "returning 0"
+        return "0"
+    
     if high:
         return "%-6.4g" % value
     else:
@@ -129,7 +135,7 @@ class LinearFit(wx.Dialog):
         sizer.Add(wx.StaticText(self, -1, 'Max'),(iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
-        sizer.Add(wx.StaticText(self, -1, 'Plotted range'),(iy, ix),(1,1),\
+        sizer.Add(wx.StaticText(self, -1, 'Maximum range'),(iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix +=1
         sizer.Add(self.initXmin, (iy, ix),(1,1),\
@@ -189,25 +195,25 @@ class LinearFit(wx.Dialog):
         # Set default value of parameter in fit dialog
         
         if self.Avalue==None:
-            self.tcA.SetLabel(str(self.default_A))
+            self.tcA.SetLabel(format_number(self.default_A))
         else :
-            self.tcA.SetLabel(str(self.Avalue))
+            self.tcA.SetLabel(format_number(self.Avalue))
         if self.Bvalue==None:
-            self.tcB.SetLabel(str(self.default_B))
+            self.tcB.SetLabel(format_number(self.default_B))
         else:
-            self.tcB.SetLabel(str(self.Bvalue))
+            self.tcB.SetLabel(format_number(self.Bvalue))
         if self.ErrAvalue==None:
-            self.tcErrA.SetLabel(str(0.0))
+            self.tcErrA.SetLabel(format_number(0.0))
         else:
-            self.tcErrA.SetLabel(str(self.ErrAvalue))
+            self.tcErrA.SetLabel(format_number(self.ErrAvalue))
         if self.ErrBvalue==None:
-            self.tcErrB.SetLabel(str(0.0))
+            self.tcErrB.SetLabel(format_number(0.0))
         else:
-            self.tcErrB.SetLabel(str(self.ErrBvalue))
+            self.tcErrB.SetLabel(format_number(self.ErrBvalue))
         if self.Chivalue==None:
-            self.tcChi.SetLabel(str(0.0))
+            self.tcChi.SetLabel(format_number(0.0))
         else:
-            self.tcChi.SetLabel(str(self.Chivalue))
+            self.tcChi.SetLabel(format_number(self.Chivalue))
         if self.plottable.x !=[]:
             self.mini =min(self.plottable.x)
             self.maxi =max(self.plottable.x)

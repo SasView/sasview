@@ -172,6 +172,26 @@ class Graph:
     def changed(self):
         """Detect if any graphed plottables have changed"""
         return any([p.changed() for p in self.plottables])
+    
+    def get_range(self):
+        """
+            Return the range of all displayed plottables
+        """
+        min = None
+        max = None
+        
+        for p in self.plottables:
+            if p.hidden==True:
+                continue
+            
+            if not p.x==None:
+                for x_i in p.x:
+                    if min==None or x_i<min:
+                        min = x_i
+                    if max==None or x_i>max:
+                        max = x_i
+                        
+        return min, max
 
     def delete(self,plottable):
         """Remove an existing plottable from the graph"""
@@ -182,6 +202,12 @@ class Graph:
         else:
             self.color =0 
             
+    def reset_scale(self):
+        """
+            Resets the scale transformation data to the underlying data
+        """
+        for p in self.plottables:
+            p.reset_view()
 
     def reset(self):
         """Reset the graph."""
@@ -320,7 +346,38 @@ class Transform:
     #    to the sliced data as well?
 
 
-class Plottable:
+class Plottable(object):
+    
+    # Short ascii name to refer to the plottable in a menu 
+    short_name = None
+    
+    # Data
+    x  = None
+    y  = None
+    dx = None
+    dy = None
+    
+    # Parameter to allow a plot to be part of the list without being displayed
+    hidden = False
+
+    def __setattr__(self, name, value):
+        """
+            Take care of changes in View when data is changed.
+            This method is provided for backward compatibility.
+        """
+        object.__setattr__(self, name, value)
+        
+        if name in ['x', 'y', 'dx', 'dy']:
+            self.reset_view()
+            #print "self.%s has been called" % name
+
+    def set_data(self, x, y, dx=None, dy=None):
+        self.x = x
+        self.y = y
+        self.dy = dy
+        self.dx = dx
+        self.transformView()
+    
     def xaxis(self, name, units):
         """
             Set the name and unit of x_axis
@@ -408,6 +465,16 @@ class Plottable:
        
         plot.xaxis(self._xaxis, self._xunit)
         plot.yaxis(self._yaxis, self._yunit)
+        
+    def is_empty(self):
+        """
+            Returns True if there is no data stored in the plottable
+        """
+        if not self.x==None and len(self.x)==0 \
+            and not self.y==None and len(self.y)==0:
+            return True
+        return False
+        
         
     def colors(self):
         """Return the number of colors need to render the object"""
@@ -499,6 +566,7 @@ class Plottable:
             self.funcy= None
             self.funcdx= None
             self.funcdy= None
+
         def transform(self, x=None,y=None,dx=None, dy=None):
             """
                 Transforms the x,y,dx and dy vectors and stores the output in View parameters
@@ -511,50 +579,69 @@ class Plottable:
             
             # Sanity check
             # Do the transofrmation only when x and y are empty
+            has_err_x = not (dx==None or len(dx)==0)
+            has_err_y = not (dy==None or len(dy)==0)
+            
             if (x!=None) and (y!=None): 
-                if dx and not len(x)==len(dx):
+                if not dx==None and not len(dx)==0 and not len(x)==len(dx):
                         raise ValueError, "Plottable.View: Given x and dx are not of the same length" 
                 # Check length of y array
                 if not len(y)==len(x):
                     raise ValueError, "Plottable.View: Given y and x are not of the same length"
             
-                if dy and not len(y)==len(dy):
-                    raise ValueError, "Plottable.View: Given y and dy are not of the same length"
+                if not dy==None and not len(dy)==0 and not len(y)==len(dy):
+                    message = "Plottable.View: Given y and dy are not of the same length: len(y)=%s, len(dy)=%s" %(len(y), len(dy))
+                    raise ValueError, message
+                
+                
                 self.x = []
                 self.y = []
-                self.dx = []
-                self.dy = []
+                if has_err_x:
+                    self.dx = []
+                else:
+                    self.dx = None
+                if has_err_y:
+                    self.dy = []
+                else:
+                    self.dy = None
                 tempx=[]
                 tempy=[]
-                if dx==None:
+                
+                if not has_err_x:
                     dx=numpy.zeros(len(x))
-                if dy==None:
+                if not has_err_y:
                     dy=numpy.zeros(len(y))
               
                 for i in range(len(x)):
                     try:
                          tempx =self.funcx(x[i],y[i])
                          tempy =self.funcy(y[i],x[i])
-                         tempdx = self.funcdx(x[i], y[i], dx[i], dy[i])
-                         tempdy = self.funcdy(y[i], x[i], dy[i], dx[i])
+                         if has_err_x:
+                             tempdx = self.funcdx(x[i], y[i], dx[i], dy[i])
+                         if has_err_y:
+                             tempdy = self.funcdy(y[i], x[i], dy[i], dx[i])
                         
                          self.x.append(tempx)
                          self.y.append(tempy)
-                         self.dx.append(tempdx)
-                         self.dy.append(tempdy)
+                         if has_err_x:
+                             self.dx.append(tempdx)
+                         if has_err_y:
+                             self.dy.append(tempdy)
                     except:
                          tempx=x[i]
                          tempy=y[i]
-                         print "View.transform: skipping point x %g" % x[i]
-                         print "View.transform: skipping point y %g" % y[i]
-                         print "View.transform: skipping point dy %g" % dy[i]
+                         print "View.transform: skipping point x=%g y=%g" % (x[i], y[i])
                          
                          print sys.exc_value  
                
                 # Sanity check
-                if not (len(self.x)==len(self.dx))and(len(self.x)==len(self.dy))\
-                and(len(self.x)==len(self.y))and(len(self.y)==len(self.dy)) :
-                        raise ValueError, "Plottable.View: Given x,y,dy and dx are not of the same length" 
+                if not len(self.x)==len(self.y):
+                    raise ValueError, "Plottable.View: transformed x and y are not of the same length" 
+                if has_err_x and not (len(self.x) and len(self.dx)):
+                    raise ValueError, "Plottable.View: transformed x and dx are not of the same length" 
+                if has_err_y and not (len(self.y) and len(self.dy)):
+                    raise ValueError, "Plottable.View: transformed y and dy are not of the same length" 
+                
                 # Check that negative values are not plot on x and y axis for log10 transformation
                 self.check_data_logX()
                 self.check_data_logY()
@@ -563,7 +650,6 @@ class Plottable:
                 self.Yreel = self.y
                 self.DXreel = self.dx
                 self.DYreel = self.dy
-                
                 
                 
         def onResetView(self):
@@ -748,7 +834,6 @@ class Theory1D(Plottable):
         self.view = self.View(self.x, self.y, None, self.dy)
         
     def render(self,plot,**kw):
-        #plot.curve(self.x,self.y,dy=self.dy,**kw)
         plot.curve(self.view.x,self.view.y,dy=self.view.dy,**kw)
 
     def changed(self):

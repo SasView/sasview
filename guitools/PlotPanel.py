@@ -33,6 +33,7 @@ def convertUnit(pow,unit):
         @param pow: the user set the power of the unit
         @param unit: the unit of the data
     """ 
+    return unit
     toks=re.match("^", unit)
     if not toks==None:
         unitValue= re.split("{",unit)
@@ -135,11 +136,11 @@ class PlotPanel(wx.Panel):
         self.symbollist = ['o','x','^','v','<','>','+','s','d','D','h','H','p']
         #User scale
         self.xLabel ="x"
-        self.yLabel ="log10(y)"
+        self.yLabel ="y"
         self.viewModel ="--"
         # keep track if the previous transformation of x and y in Property dialog
-        self.prevXtrans =" "
-        self.prevYtrans =" "
+        self.prevXtrans ="x"
+        self.prevYtrans ="y"
         self.canvas.mpl_connect('scroll_event',self.onWheel)
         self.axes = [self.subplot]
          # new data for the fit 
@@ -156,6 +157,7 @@ class PlotPanel(wx.Panel):
         self.ErrAvalue=None
         self.ErrBvalue=None
         self.Chivalue=None
+        
     def resetFitView(self):
         """
              For fit Dialog initial display
@@ -246,6 +248,19 @@ class PlotPanel(wx.Panel):
                 and(self.xminView !=0.0 )and ( self.xmaxView !=0.0):
                 dlg.setFitRange(self.xminView,self.xmaxView,self.xmin,self.xmax)
             dlg.ShowModal() 
+
+    def linear_plottable_fit(self, plot): 
+        """
+            when clicking on linear Fit on context menu , display Fitting Dialog
+        """
+        from fitDialog import LinearFit
+        
+        dlg = LinearFit( None, plot, self.onFitDisplay,self.returnTrans, -1, 'Linear Fit')
+       
+        if (self.xmin !=0.0 )and ( self.xmax !=0.0)\
+            and(self.xminView !=0.0 )and ( self.xmaxView !=0.0):
+            dlg.setFitRange(self.xminView,self.xmaxView,self.xmin,self.xmax)
+        dlg.ShowModal() 
 
     def _onProperties(self, event):
         """
@@ -355,24 +370,29 @@ class PlotPanel(wx.Panel):
             Default context menu for a plot panel
         """
         # Slicer plot popup menu
+        id = wx.NewId()
         slicerpop = wx.Menu()
-        slicerpop.Append(313,'&Save image', 'Save image as PNG')
-        wx.EVT_MENU(self, 313, self.onSaveImage)
+        slicerpop.Append(id,'&Save image', 'Save image as PNG')
+        wx.EVT_MENU(self, id, self.onSaveImage)
         
-        slicerpop.Append(316, '&Load 1D data file')
-        wx.EVT_MENU(self, 316, self._onLoad1DData)
+        id = wx.NewId()
+        slicerpop.Append(id, '&Load 1D data file')
+        wx.EVT_MENU(self, id, self._onLoad1DData)
        
+        id = wx.NewId()
         slicerpop.AppendSeparator()
-        slicerpop.Append(315, '&Properties')
-        wx.EVT_MENU(self, 315, self._onProperties)
+        slicerpop.Append(id, '&Properties')
+        wx.EVT_MENU(self, id, self._onProperties)
         
+        id = wx.NewId()
         slicerpop.AppendSeparator()
-        slicerpop.Append(317, '&Linear Fit')
-        wx.EVT_MENU(self, 317, self.onFitting)
+        slicerpop.Append(id, '&Linear Fit')
+        wx.EVT_MENU(self, id, self.onFitting)
         
+        id = wx.NewId()
         slicerpop.AppendSeparator()
-        slicerpop.Append(318, '&Reset Graph')
-        wx.EVT_MENU(self, 318, self.onResetGraph)
+        slicerpop.Append(id, '&Reset Graph')
+        wx.EVT_MENU(self, id, self.onResetGraph)
        
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
@@ -451,6 +471,7 @@ class PlotPanel(wx.Panel):
         """Draw markers with error bars"""
         self.subplot.set_yscale('linear')
         self.subplot.set_xscale('linear')
+        
         # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
         if dx != None and type(dx) == type(()):
             dx = nx.vstack((x-dx[0],dx[1]-x)).transpose()
@@ -461,8 +482,10 @@ class PlotPanel(wx.Panel):
             h = self.subplot.plot(x,y,color=self._color(color),
                                    marker=self._symbol(symbol),linestyle='',label=label)
         else:
+            col = self._color(color)
             self.subplot.errorbar(x, y, yerr=dy, xerr=None,
-             ecolor=self._color(color), capsize=2,linestyle='', barsabove=False,
+             ecolor=col, capsize=2,linestyle='', barsabove=False,
+             mec=col, mfc=col,
              marker=self._symbol(symbol),
              lolims=False, uplims=False,
              xlolims=False, xuplims=False,label=label)
@@ -489,17 +512,34 @@ class PlotPanel(wx.Panel):
         """Return a particular symbol"""
         return self.symbollist[s%len(self.symbollist)]
    
-    def _onEVT_FUNC_PROPERTY(self):
+    def _replot(self):
+        """
+            Rescale the plottables according to the latest
+            user selection and update the plot
+        """
+        self.graph.reset_scale()
+        self._onEVT_FUNC_PROPERTY(remove_fit=False)
+        
+        #TODO: Why do we have to have the following line?
+        self.fit_result.reset_view()
+        
+        self.graph.render(self)
+        self.subplot.figure.canvas.draw_idle()
+   
+    def _onEVT_FUNC_PROPERTY(self, remove_fit=True):
         """
              Receive the x and y transformation from myDialog,Transforms x and y in View
               and set the scale    
         """ 
         list =[]
         list = self.graph.returnPlottable()
-        self.fit_result.x =[]  
-        self.fit_result.y =[] 
-        self.fit_result.dx=None
-        self.fit_result.dy=None
+        
+        if remove_fit:
+            self.fit_result.x =[]  
+            self.fit_result.y =[] 
+            self.fit_result.dx=None
+            self.fit_result.dy=None
+            self.graph.delete(self.fit_result)
         
         for item in list:
             item.setLabel(self.xLabel,self.yLabel)
