@@ -26,8 +26,9 @@ def show_tree(obj,d=0):
     print "%s%s" % ("-"*d,obj.__class__.__name__)
     if 'get_children' in dir(obj):
         for a in obj.get_children(): show_tree(a,d+1)
-        
-def convertUnit(pow,unit):
+     
+from unitConverter import UnitConvertion as convertUnit   
+def _convertUnit(pow,unit):
     """ 
         Displays the unit with the proper convertion
         @param pow: the user set the power of the unit
@@ -47,6 +48,7 @@ def convertUnit(pow,unit):
             unit = word
     #print"this is unit",unit
     return unit
+
 def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
         """
         Rescale (lo,hi) by step, returning the new (lo,hi)
@@ -605,7 +607,7 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toOneOverSqrtX,transform.errOneOverSqrtX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                units=convertUnit(-1,units)
+                units=convertUnit(-0.5,units)
                 self.graph.yaxis("1/\sqrt{%s}" %name,  "%s" % units)
                 
             if ( self.yLabel =="ln(y*x)"):
@@ -622,7 +624,7 @@ class PlotPanel(wx.Panel):
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis() 
                 xunits = convertUnit(2,xunits) 
-                self.graph.yaxis("Log (%s \ \ %s)" % (yname,xname),  "%s%s" % (yunits,xunits))
+                self.graph.yaxis("Log (%s \ \ %s^{2})" % (yname,xname),  "%s%s" % (yunits,xunits))
                 
             
             if ( self.yLabel =="ln(y*x^(4))"):
@@ -631,7 +633,7 @@ class PlotPanel(wx.Panel):
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
                 xunits = convertUnit(4,xunits) 
-                self.graph.yaxis("Log (%s \ \ %s)" % (yname,xname),  "%s%s" % (yunits,xunits))
+                self.graph.yaxis("Log (%s \ \ %s^{4})" % (yname,xname),  "%s%s" % (yunits,xunits))
                 
             if ( self.viewModel == "Guinier lny vs x^(2)"):
                 

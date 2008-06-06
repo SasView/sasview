@@ -40,6 +40,10 @@ def UnitConvertion(pow,unit):
                        
                         if power==1.0:
                            unit = unitSplitted[0]
+                        elif power==0.5:
+                            unit = unitSplitted[0]+"^{1/2}"  
+                        elif power==-0.5:
+                            unit = unitSplitted[0]+"^{-1/2}"  
                         else:
                             unit= unitSplitted[0]+"^{"+str(power)+"}"  
                 else:
