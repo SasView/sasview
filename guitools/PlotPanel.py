@@ -377,9 +377,9 @@ class PlotPanel(wx.Panel):
         slicerpop.Append(id,'&Save image', 'Save image as PNG')
         wx.EVT_MENU(self, id, self.onSaveImage)
         
-        id = wx.NewId()
-        slicerpop.Append(id, '&Load 1D data file')
-        wx.EVT_MENU(self, id, self._onLoad1DData)
+        #id = wx.NewId()
+        #slicerpop.Append(id, '&Load 1D data file')
+        #wx.EVT_MENU(self, id, self._onLoad1DData)
        
         id = wx.NewId()
         slicerpop.AppendSeparator()
