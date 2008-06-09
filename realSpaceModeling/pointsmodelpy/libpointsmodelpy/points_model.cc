@@ -209,8 +209,18 @@ void PointsModel::OutputPR(const string &fpr){
 	 << outfile << endl;
     exit(1);
   }
+  
+  double sum = 0.0;
+  double r_stepsize = 1.0;
+  if (pr_.dim1()>2) r_stepsize = pr_[1][0] - pr_[0][0];
+  
   for (int i = 0;  i < pr_.dim1(); ++i){
-    outfile << pr_[i][0] << "       " << pr_[i][1] << endl;
+	  sum += pr_[i][1]*r_stepsize;
+  }
+  
+  for (int i = 0;  i < pr_.dim1(); ++i){
+	  if (pr_[i][1]==0) continue;
+	  outfile << pr_[i][0] << "       " << (pr_[i][1]/sum) << endl;
   }
 }
 
