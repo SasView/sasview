@@ -196,7 +196,7 @@ double positive_integral(double *pars, double d_max, int n_c, int nslice) {
     	r = d_max/(1.0*nslice)*i;
     	value = pr(pars, d_max, n_c, r);
     	if (value>0.0) sum_pos += value;
-    	sum += value;
+    	sum += fabs(value);
     }
     return sum_pos/sum;
 }
@@ -218,7 +218,7 @@ double positive_errors(double *pars, double *err, double d_max, int n_c, int nsl
     	r = d_max/(1.0*nslice)*i;
     	pr_err(pars, err, d_max, n_c, r, &pr_val, &pr_val_err);
     	if (pr_val>pr_val_err) sum_pos += pr_val;
-    	sum += pr_val;
+    	sum += fabs(pr_val);
     	
 
     }
