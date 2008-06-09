@@ -12,10 +12,13 @@ from canvas import FigureCanvas
 from matplotlib.widgets import RectangleSelector
 from pylab import  gca, gcf
 from plottables import Theory1D
+
+#from matplotlib.backend_bases import MouseEvent
 #from plottables import Data1D
 #TODO: make the plottables interactive
 
 DEBUG = False
+print "hello"
 
 from plottables import Graph
 #(FuncFitEvent, EVT_FUNC_FIT) = wx.lib.newevent.NewEvent()
@@ -48,7 +51,6 @@ def _convertUnit(pow,unit):
             unit = word
     #print"this is unit",unit
     return unit
-
 def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
         """
         Rescale (lo,hi) by step, returning the new (lo,hi)
@@ -132,6 +134,7 @@ class PlotPanel(wx.Panel):
         self.graph = Graph()
         #self.Bind(EVT_FUNC_FIT, self.onFitRange)
         self.Bind(wx.EVT_CONTEXT_MENU, self.onContextMenu)
+        
         #self.Bind(EVT_PROPERTY, self._onEVT_FUNC_PROPERTY)
         # Define some constants
         self.colorlist = ['b','g','r','c','m','y']
@@ -144,6 +147,17 @@ class PlotPanel(wx.Panel):
         self.prevXtrans ="x"
         self.prevYtrans ="y"
         self.canvas.mpl_connect('scroll_event',self.onWheel)
+        #taking care of dragging
+        self.canvas.mpl_connect('motion_notify_event',self.onMouseMotion)
+        self.canvas.mpl_connect('button_press_event',self.onLeftDown)
+        self.canvas.mpl_connect('button_release_event',self.onLeftUp)
+        #self.canvas.mpl_connect('key_press_event',self.onKeyPress)
+       
+        self.leftdown=False
+        self.leftup=False
+        self.mousemotion=False
+        
+        #self.canvas.Bind(wx.EVT_MOUSE_EVENTS,self.onTest)
         self.axes = [self.subplot]
          # new data for the fit 
         self.fit_result = Theory1D(x=[], y=[], dy=None)
@@ -159,7 +173,79 @@ class PlotPanel(wx.Panel):
         self.ErrAvalue=None
         self.ErrBvalue=None
         self.Chivalue=None
+        self.begDrag=False
+        #self.begDragI=False
+        self.xInit=None
+        self.yInit=None
+        self.xFinal=None
+        self.yFinal=None
+   
+    def onLeftDown(self,event): 
+        """ left button down and ready to drag"""
+        self.leftdown=True
+        ax = event.inaxes
+        if ax !=None:
+            x,y = event.x,event.y
+            self.xInit,self.yInit=ax.transAxes.inverse_xy_tup((x,y))
         
+    def onLeftUp(self,event): 
+        """ Dragging is done """
+        
+        self.leftup=True
+        
+        if self.mousemotion==True:
+            ax = event.inaxes
+            if ax !=None:
+                x,y = event.x,event.y
+                self.xFinal,self.yFinal=ax.transAxes.inverse_xy_tup((x,y))
+                
+                #print "this is xFinal %f this is yFinal %f"%(self.xFinal, self.yFinal)
+                #print "this is xInit %f this is yInit %f"%(self.xInit, self.yInit)
+                #print "this is xdelta %f and ydelta %f"%(xdelta,ydelta)
+                xdelta = self.xFinal -self.xInit
+                ydelta = self.yFinal -self.yInit
+                
+                self.dragHelper(xdelta,ydelta)
+            
+    def onMouseMotion(self,event): 
+        if self.leftdown==True:
+            self.mousemotion=True 
+            
+    def dragHelper(self,xdelta,ydelta):
+        """ dragging occurs here"""
+       
+        # Event occurred inside a plotting area
+        for ax in self.axes:
+            lo,hi= ax.get_xlim()
+            #print "x lo %f and x hi %f"%(lo,hi)
+            newlo,newhi= lo- xdelta, hi- xdelta
+            if self.xscale=='log':
+                if newlo > 0:
+                    newlo= math.log10(newlo)
+                if newhi > 0:
+                    newhi= math.log10(newhi)
+            if self.xscale=='log':
+                ax.set_xlim(math.pow(10,newlo),math.pow(10,newhi))
+            else:
+                ax.set_xlim(newlo,newhi)
+            print "new lo %f and new hi %f"%(newlo,newhi)
+            
+            lo,hi= ax.get_ylim()
+            print "y lo %f and y hi %f"%(lo,hi)
+            newlo,newhi= lo- ydelta, hi- ydelta
+            if self.yscale=='log':
+                if newlo > 0:
+                    newlo= math.log10(newlo)
+                if newhi > 0:
+                    newhi= math.log10(newhi)
+            if  self.yscale=='log':
+                ax.set_ylim(math.pow(10,newlo),math.pow(10,newhi))
+            else:
+                ax.set_ylim(newlo,newhi)
+        self.canvas.draw_idle()
+        
+        
+   
     def resetFitView(self):
         """
              For fit Dialog initial display
@@ -173,7 +259,7 @@ class PlotPanel(wx.Panel):
         self.ErrAvalue=None
         self.ErrBvalue=None
         self.Chivalue=None
-        
+    
     def onWheel(self, event):
         """
             Process mouse wheel as zoom events
@@ -349,9 +435,6 @@ class PlotPanel(wx.Panel):
         """Where the actual drawing happens"""
         self.figure.canvas.draw_idle()
         
-
-  
-  
         
     def onSaveImage(self, evt):
         #figure.savefig
