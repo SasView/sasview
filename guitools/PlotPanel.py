@@ -151,7 +151,7 @@ class PlotPanel(wx.Panel):
         self.canvas.mpl_connect('motion_notify_event',self.onMouseMotion)
         self.canvas.mpl_connect('button_press_event',self.onLeftDown)
         self.canvas.mpl_connect('button_release_event',self.onLeftUp)
-        #self.canvas.mpl_connect('key_press_event',self.onKeyPress)
+        
        
         self.leftdown=False
         self.leftup=False
@@ -179,43 +179,66 @@ class PlotPanel(wx.Panel):
         self.yInit=None
         self.xFinal=None
         self.yFinal=None
-   
+  
     def onLeftDown(self,event): 
         """ left button down and ready to drag"""
         self.leftdown=True
+        #self.mousemotion=False
         ax = event.inaxes
         if ax !=None:
             x,y = event.x,event.y
+            #print "these are x %f and y %f"%(x,y)
             self.xInit,self.yInit=ax.transAxes.inverse_xy_tup((x,y))
-        
+            #print "this is xInit %f this is yInit %f"%(self.xInit, self.yInit)
     def onLeftUp(self,event): 
         """ Dragging is done """
-        
+        self.leftdown=False
+        self.mousemotion=False 
         self.leftup=True
-        
+        """
         if self.mousemotion==True:
             ax = event.inaxes
             if ax !=None:
                 x,y = event.x,event.y
                 self.xFinal,self.yFinal=ax.transAxes.inverse_xy_tup((x,y))
                 
-                #print "this is xFinal %f this is yFinal %f"%(self.xFinal, self.yFinal)
-                #print "this is xInit %f this is yInit %f"%(self.xInit, self.yInit)
-                #print "this is xdelta %f and ydelta %f"%(xdelta,ydelta)
                 xdelta = self.xFinal -self.xInit
                 ydelta = self.yFinal -self.yInit
+                
                 if self.xscale=='log':
-                    #xdelta = math.log10(self.xFinal - self.xInit)
                     xdelta = math.log10(self.xFinal) -math.log10(self.xInit)
                 if self.yscale=='log':
                     ydelta = math.log10(self.yFinal) -math.log10(self.yInit)
                 self.dragHelper(xdelta,ydelta)
+                print "this is xInit %f this is xFinal %f \n"%(self.xInit, self.xFinal)
+                print "this is yInit %f this is yFinal %f \n"%(self.yInit, self.yFinal)
+                print "this is xdelta %f and ydelta %f \n"%(xdelta,ydelta)
             else:
                 self.dragHelper(0,0)
+                
+               """
     def onMouseMotion(self,event): 
-        if self.leftdown==True:
-            self.mousemotion=True 
+        self.mousemotion=True 
+        if self.leftdown==True and self.mousemotion==True:
             
+            ax = event.inaxes
+            if ax !=None:
+                x,y = event.x,event.y
+                self.xFinal,self.yFinal=ax.transAxes.inverse_xy_tup((x,y))
+                
+                xdelta = self.xFinal -self.xInit
+                ydelta = self.yFinal -self.yInit
+                
+                if self.xscale=='log':
+                    xdelta = math.log10(self.xFinal) -math.log10(self.xInit)
+                if self.yscale=='log':
+                    ydelta = math.log10(self.yFinal) -math.log10(self.yInit)
+                self.dragHelper(xdelta,ydelta)
+                print "this is xInit %f this is xFinal %f \n"%(self.xInit, self.xFinal)
+                print "this is yInit %f this is yFinal %f \n"%(self.yInit, self.yFinal)
+                print "this is xdelta %f and ydelta %f \n"%(xdelta,ydelta)
+            else:
+                self.dragHelper(0,0)
     def dragHelper(self,xdelta,ydelta):
         """ dragging occurs here"""
        
@@ -233,17 +256,17 @@ class PlotPanel(wx.Panel):
                 ax.set_xlim(math.pow(10,newlo),math.pow(10,newhi))
             else:
                 ax.set_xlim(newlo,newhi)
-            print "new lo %f and new hi %f"%(newlo,newhi)
+            #print "new lo %f and new hi %f"%(newlo,newhi)
             
             lo,hi= ax.get_ylim()
-            print "y lo %f and y hi %f"%(lo,hi)
+            #print "y lo %f and y hi %f"%(lo,hi)
             newlo,newhi= lo- ydelta, hi- ydelta
             if self.yscale=='log':
                 if lo > 0:
                     newlo= math.log10(lo)-ydelta
                 if hi > 0:
                     newhi= math.log10(hi)-ydelta
-                print "new lo %f and new hi %f"%(newlo,newhi)
+                #print "new lo %f and new hi %f"%(newlo,newhi)
             if  self.yscale=='log':
                 ax.set_ylim(math.pow(10,newlo),math.pow(10,newhi))
             else:
