@@ -41,8 +41,10 @@ class TestGuinier(unittest.TestCase):
         self.model.setParam('scale', 2.0)
         self.model.setParam('rg', 1.0)
         
-        value = self._func(2.0, 1.0, 1.0)*self._func(2.0, 1.0, 2.0)
-        self.assertEqual(self.model.runXY([0.0,0.0]), 2.0*2.0)
+        #value = self._func(2.0, 1.0, 1.0)*self._func(2.0, 1.0, 2.0)
+        value = self._func(2.0, 1.0, math.sqrt(5.0))
+        #self.assertEqual(self.model.runXY([0.0,0.0]), 2.0*2.0)
+        self.assertEqual(self.model.runXY([0.0,0.0]), 2.0)
         self.assertEqual(self.model.runXY([1.0,2.0]), value)
         
     def test2Dphi(self):
@@ -54,7 +56,8 @@ class TestGuinier(unittest.TestCase):
         r = math.sqrt(x**2 + y**2)
         phi = math.atan2(y, x)
         
-        value = self._func(2.0, 1.0, x)*self._func(2.0, 1.0, y)
+        #value = self._func(2.0, 1.0, x)*self._func(2.0, 1.0, y)
+        value = self._func(2.0, 1.0, r)
         
         #self.assertEqual(self.model.run([r, phi]), value)
         self.assertAlmostEquals(self.model.run([r, phi]), value,1)
@@ -82,7 +85,8 @@ class TestPorod(unittest.TestCase):
         self.assertEqual(self.model.runXY(3.0), value)
         
     def test2D(self):
-        value = self._func(2.0, 1.0)*self._func(2.0, 2.0)
+        #value = self._func(2.0, 1.0)*self._func(2.0, 2.0)
+        value = self._func(2.0, math.sqrt(5.0))
         self.assertEqual(self.model.runXY([1.0,2.0]), value)
         
     def test2Dphi(self):
@@ -91,7 +95,8 @@ class TestPorod(unittest.TestCase):
         r = math.sqrt(x**2 + y**2)
         phi = math.atan2(y, x)
         
-        value = self._func(2.0, 1.0)*self._func(2.0, 2.0)
+        #value = self._func(2.0, 1.0)*self._func(2.0, 2.0)
+        value = self._func(2.0, r)
         self.assertAlmostEquals(self.model.run([r, phi]), value,1)
         
 class TestDebye(unittest.TestCase):
@@ -126,7 +131,8 @@ class TestDebye(unittest.TestCase):
         self.assertRaises(ZeroDivisionError, self.model.run, 0.0)
         
     def test2D(self):
-        value = self._func(50.0, 1.0, 0.001, 1.0)*self._func(50.0, 1.0, 0.001, 2.0)
+        #value = self._func(50.0, 1.0, 0.001, 1.0)*self._func(50.0, 1.0, 0.001, 2.0)
+        value = self._func(50.0, 1.0, 0.001, math.sqrt(5.0))
         self.assertEqual(self.model.runXY([1.0,2.0]), value)
         
     def test2Dphi(self):
@@ -171,7 +177,8 @@ class TestLorentz(unittest.TestCase):
         self.model.setParam('Length', 50.0)
         self.model.setParam('background', 1.0)
         
-        value = self._func(100.0, 50.0, 1.0, 1.0)*self._func(100.0, 50.0, 1.0, 2.0)    
+        #value = self._func(100.0, 50.0, 1.0, 1.0)*self._func(100.0, 50.0, 1.0, 2.0)    
+        value = self._func(100.0, 50.0, 1.0, math.sqrt(5.0))  
         self.assertEqual(self.model.runXY([1.0,2.0]), value)
         
     def test2Dphi(self):
@@ -219,7 +226,8 @@ class TestDAB(unittest.TestCase):
         self.assertEqual(self.model.runXY(2.0), self._func(self.scale, self.length, self.back, 2.0))
         
     def test2D(self):
-        value = self._func(self.scale, self.length, self.back, 1.0)*self._func(self.scale, self.length, self.back, 2.0)    
+        #value = self._func(self.scale, self.length, self.back, 1.0)*self._func(self.scale, self.length, self.back, 2.0)    
+        value = self._func(self.scale, self.length, self.back, math.sqrt(5.0))
         self.assertEqual(self.model.runXY([1.0,2.0]), value)
         
     def test2Dphi(self):
@@ -271,8 +279,9 @@ class TestPowerLaw(unittest.TestCase):
         self.model.setParam('m', 4.0)
         self.model.setParam('background', 1.0)
         
-        value = self._func(math.exp(-6), 4.0, 1.0, 1.0)\
-        *self._func(math.exp(-6), 4.0, 1.0, 2.0)    
+        #value = self._func(math.exp(-6), 4.0, 1.0, 1.0)\
+        #*self._func(math.exp(-6), 4.0, 1.0, 2.0)    
+        value = self._func(math.exp(-6), 4.0, 1.0, math.sqrt(5.0))
         
         self.assertEqual(self.model.runXY([1.0,2.0]), value)
         
@@ -331,8 +340,9 @@ class TestTeubnerStrey(unittest.TestCase):
         self.model.setParam('c2', 5000.0) 
         self.model.setParam('scale', 0.1)
         self.model.setParam('background', 0.1)
-        value = self._func(0.1,-30.0,5000.0,0.1, 1.0)\
-        *self._func(0.1,-30.0,5000.0,0.1, 2.0)    
+        #value = self._func(0.1,-30.0,5000.0,0.1, 1.0)\
+        #*self._func(0.1,-30.0,5000.0,0.1, 2.0)    
+        value = self._func(0.1,-30.0,5000.0,0.1, math.sqrt(5.0))
         
         self.assertEqual(self.model.runXY([1.0,2.0]), value)
         
@@ -347,8 +357,9 @@ class TestTeubnerStrey(unittest.TestCase):
         r = math.sqrt(x**2 + y**2)
         phi = math.atan2(y, x)
         
-        value = self._func(0.1,-30.0,5000.0,0.1, x)\
-        *self._func(0.1,-30.0,5000.0,0.1, y)
+        #value = self._func(0.1,-30.0,5000.0,0.1, x)\
+        #*self._func(0.1,-30.0,5000.0,0.1, y)
+        value = self._func(0.1,-30.0,5000.0,0.1, r)
         self.assertAlmostEquals(self.model.run([r, phi]), value,1)
         
 class TestBEPolyelectrolyte(unittest.TestCase):
@@ -414,7 +425,8 @@ class TestBEPolyelectrolyte(unittest.TestCase):
         self.assertEqual(self.model.runXY(q), self._func(q))
          
     def test2D(self):
-        self.assertAlmostEquals(self.model.runXY([1.0,2.0]), self._func(1.0)*self._func(2.0), 8)
+        #self.assertAlmostEquals(self.model.runXY([1.0,2.0]), self._func(1.0)*self._func(2.0), 8)
+        self.assertAlmostEquals(self.model.runXY([1.0,2.0]), self._func(math.sqrt(1.0+2.0**2)), 8)
         
     def test2Dphi(self):
 
@@ -423,7 +435,7 @@ class TestBEPolyelectrolyte(unittest.TestCase):
         r = math.sqrt(x**2 + y**2)
         phi = math.atan2(y, x)
         
-        self.assertAlmostEquals(self.model.run([r, phi]), self._func(x)*self._func(y), 8)
+        self.assertAlmostEquals(self.model.run([r, phi]), self._func(r), 8)
         
 class TestFractalModel(unittest.TestCase):
     """
@@ -492,8 +504,10 @@ class TestFractalModel(unittest.TestCase):
         iq_x = self._func(x)
         iq_y = self._func(y)
         
-        self.assertEqual(self.model.run([r, phi]), iq_x*iq_y)
-        self.assertEqual(self.model.runXY([x,y]), iq_x*iq_y)
+        #self.assertEqual(self.model.run([r, phi]), iq_x*iq_y)
+        self.assertEqual(self.model.run([r, phi]), self.model.run(r))
+        #self.assertEqual(self.model.runXY([x,y]), iq_x*iq_y)
+        self.assertEqual(self.model.runXY([x,y]), self.model.run(r))
         
 if __name__ == '__main__':
     unittest.main()

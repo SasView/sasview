@@ -44,7 +44,7 @@ class PorodModel(BaseComponent):
             @return: (porod value)
         """
         if x.__class__.__name__ == 'list':
-            return self._porod(x[0]*math.cos(x[1]))*self._porod(x[0]*math.sin(x[1]))
+            return self._porod(x[0])
         elif x.__class__.__name__ == 'tuple':
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"
         else:
@@ -56,7 +56,8 @@ class PorodModel(BaseComponent):
             @return: porod value
         """
         if x.__class__.__name__ == 'list':
-            return self._porod(x[0])*self._porod(x[1])
+            q = math.sqrt(x[0]**2 + x[1]**2)
+            return self._porod(q)
         elif x.__class__.__name__ == 'tuple':
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"
         else:

@@ -1,18 +1,21 @@
 Release Notes
 =============
 
-SANS Models version 0.4.0
+SANS Models version 0.4.1
 
 Package name: sans.models 
 
-1- What's New in Version 0.4.0
+1- What's New in Version 0.4.1
+    - Release date: 6/9/2008
+    - Modified non-shape models so that the 2D output is the 1D output for the length of Q
+
+    Version 0.4.0
 	- Release date: 4/15/2008
 	- Added shape-independent models.
 	
 	Version 0.3.2:
 	- Release date: 2/14/2008
 	- Added models to be used in magnetic analysis.
-	   
 
 
 2- Downloading and Installing

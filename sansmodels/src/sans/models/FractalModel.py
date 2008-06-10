@@ -98,10 +98,10 @@ class FractalModel(BaseComponent):
         if x.__class__.__name__ == 'list':
             # Take absolute value of Q, since this model is really meant to
             # be defined in 1D for a given length of Q
-            qx = math.fabs(x[0]*math.cos(x[1]))
-            qy = math.fabs(x[0]*math.sin(x[1]))
+            #qx = math.fabs(x[0]*math.cos(x[1]))
+            #qy = math.fabs(x[0]*math.sin(x[1]))
             
-            return self._Fractal(qx)*self._Fractal(qy)
+            return self._Fractal(math.fabs(x[0]))
         elif x.__class__.__name__ == 'tuple':
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"
         else:
@@ -113,7 +113,8 @@ class FractalModel(BaseComponent):
             @return: Fractal value
         """
         if x.__class__.__name__ == 'list':
-            return self._Fractal(x[0])*self._Fractal(x[1])
+            q = math.sqrt(x[0]**2 + x[1]**2)
+            return self._Fractal(q)
         elif x.__class__.__name__ == 'tuple':
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"
         else:

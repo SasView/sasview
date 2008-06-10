@@ -60,9 +60,9 @@ class PowerLawModel(BaseComponent):
         if x.__class__.__name__ == 'list':
             # Take absolute value of Q, since this model is really meant to
             # be defined in 1D for a given length of Q
-            qx = math.fabs(x[0]*math.cos(x[1]))
-            qy = math.fabs(x[0]*math.sin(x[1]))
-            return self._PowerLaw(qx)*self._PowerLaw(qy)
+            #qx = math.fabs(x[0]*math.cos(x[1]))
+            #qy = math.fabs(x[0]*math.sin(x[1]))
+            return self._PowerLaw(math.fabs(x[0]))
         elif x.__class__.__name__ == 'tuple':
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"
         else:
@@ -74,7 +74,8 @@ class PowerLawModel(BaseComponent):
             @return: PowerLaw value
         """
         if x.__class__.__name__ == 'list':
-            return self._PowerLaw(x[0])*self._PowerLaw(x[1])
+            q = math.sqrt(x[0]**2 + x[1]**2)
+            return self._PowerLaw(q)
         elif x.__class__.__name__ == 'tuple':
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"
         else:
