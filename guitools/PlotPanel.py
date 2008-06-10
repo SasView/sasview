@@ -204,9 +204,14 @@ class PlotPanel(wx.Panel):
                 #print "this is xdelta %f and ydelta %f"%(xdelta,ydelta)
                 xdelta = self.xFinal -self.xInit
                 ydelta = self.yFinal -self.yInit
-                
+                if self.xscale=='log':
+                    #xdelta = math.log10(self.xFinal - self.xInit)
+                    xdelta = math.log10(self.xFinal) -math.log10(self.xInit)
+                if self.yscale=='log':
+                    ydelta = math.log10(self.yFinal) -math.log10(self.yInit)
                 self.dragHelper(xdelta,ydelta)
-            
+            else:
+                self.dragHelper(0,0)
     def onMouseMotion(self,event): 
         if self.leftdown==True:
             self.mousemotion=True 
@@ -220,10 +225,10 @@ class PlotPanel(wx.Panel):
             #print "x lo %f and x hi %f"%(lo,hi)
             newlo,newhi= lo- xdelta, hi- xdelta
             if self.xscale=='log':
-                if newlo > 0:
-                    newlo= math.log10(newlo)
-                if newhi > 0:
-                    newhi= math.log10(newhi)
+                if lo > 0:
+                    newlo= math.log10(lo)-xdelta
+                if hi > 0:
+                    newhi= math.log10(hi)-xdelta
             if self.xscale=='log':
                 ax.set_xlim(math.pow(10,newlo),math.pow(10,newhi))
             else:
@@ -234,10 +239,11 @@ class PlotPanel(wx.Panel):
             print "y lo %f and y hi %f"%(lo,hi)
             newlo,newhi= lo- ydelta, hi- ydelta
             if self.yscale=='log':
-                if newlo > 0:
-                    newlo= math.log10(newlo)
-                if newhi > 0:
-                    newhi= math.log10(newhi)
+                if lo > 0:
+                    newlo= math.log10(lo)-ydelta
+                if hi > 0:
+                    newhi= math.log10(hi)-ydelta
+                print "new lo %f and new hi %f"%(newlo,newhi)
             if  self.yscale=='log':
                 ax.set_ylim(math.pow(10,newlo),math.pow(10,newhi))
             else:
