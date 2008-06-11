@@ -226,11 +226,11 @@ class Plugin:
                 value = pr.pr(out, x[i])
             else:
                 (value, dy[i]) = pr.pr_err(out, cov2, x[i])
-            sum += value
+            sum += value*pr.d_max/len(x)
             y[i] = value
             
-        y = y/sum*pr.d_max/len(x)
-        dy = dy/sum*pr.d_max/len(x)
+        y = y/sum
+        dy = dy/sum
         
         if cov2==None:
             new_plot = Theory1D(x, y)
@@ -291,15 +291,40 @@ class Plugin:
         else:
             return 0.0
 
-    def get_context_menu(self, plot_id=None):
+    def get_context_menu(self, graph=None):
         """
             Get the context menu items available for P(r)
-            @param plot_id: Unique ID of a plot, so that we can recognize those
-                            that we created
+            @param graph: the Graph object to which we attach the context menu
             @return: a list of menu items with call-back function
         """
+        # Look whether this Graph contains P(r) data
+        for item in graph.plottables:
+            if item.name=="P_{fit}(r)":
+                
+                return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion],
+                       ["Add P(r) data", "Load a data file and display it on this plot", self._on_add_data]]
+                
         return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion]]
-    
+
+    def _on_add_data(self, evt):
+        """
+            Add a data curve to the plot
+            WARNING: this will be removed once guiframe.plotting has its full functionality
+        """
+        path = self.choose_file()
+        if path==None:
+            return
+        
+        x, y, err = self.parent.load_ascii_1D(path)
+        
+        new_plot = Data1D(x, y, dy=err)
+        new_plot.name = "P_{loaded}(r)"
+        new_plot.xaxis("\\rm{r}", 'A')
+        new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
+            
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="P(r) fit"))
+        
+        
 
     def start_thread(self):
         from pr_thread import CalcPr
@@ -379,6 +404,19 @@ class Plugin:
         
         # Popup result panel
         #result_panel = InversionResults(self.parent, -1, style=wx.RAISED_BORDER)
+        
+    def show_data(self, path=None):
+        if not path==None:
+            self._create_file_pr(path)  
+              
+        # Make a plot of I(q) data
+        new_plot = Data1D(self.pr.x, self.pr.y, self.pr.err)
+        new_plot.name = "I_{obs}(q)"
+        new_plot.xaxis("\\rm{Q}", 'A^{-1}')
+        new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+        #new_plot.group_id = "test group"
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
+        
         
     def setup_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None):
         self.alpha = alpha
@@ -539,7 +577,6 @@ class Plugin:
         x_values, x_range = self.show_pr(out, self.pr, cov=cov)
         
         
-          
           
     def _on_context_inversion(self, event):
         panel = event.GetEventObject()

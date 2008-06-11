@@ -570,6 +570,7 @@ class InversionControl(wx.Panel):
                 self.data_file.SetValue(str(path))
                 self.file_radio.SetValue(True)
                 self._on_pars_changed(None)
+                self.manager.show_data(path)
         
 
 

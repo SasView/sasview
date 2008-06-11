@@ -26,3 +26,4 @@
 22. If you click compute before loading data, an error occurs.
 23. Plot I(q) immediately when you choose a new file.
 24. *** probably need to ship the perspectives separately...
+25. If no data is available, disable the Fit button.
