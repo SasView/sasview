@@ -5,9 +5,12 @@ of their main application when using this framework.
 
 Documentation to come...
 
-1- Version 0.1.0
+1- Version 0.1.1
 
 	- Release date: 5/28/2008
+
+	- Changes:
+		* the Plugin.get_context_menu(graph) now takes a Graph object
 
 Dependencies:
 	- Needs sans.guitools version 0.1.1
@@ -30,4 +33,7 @@ To-do list:
 	- Allow the application to load perspectives by hand. Then the automatic loading is only
 	  for additionally installed plug-ins.
 	- Fix the damned images directory folder...
+	- Allow user to remove a plottable from a graph (from code!)
+	- Allow perspectives to recognize their own plots and add context menu items.
+	- Catch error when trying to show log of negative or zero plots... update status bar.
 	

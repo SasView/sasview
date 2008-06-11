@@ -117,7 +117,7 @@ class View1DPanel(PlotPanel):
         wx.EVT_MENU(self, id, self.onSaveImage)
         
         slicerpop.AppendSeparator()
-        item_list = self.parent.get_context_menu()
+        item_list = self.parent.get_context_menu(self.graph)
         if not item_list==None:
             for item in item_list:
                 try:
@@ -130,9 +130,13 @@ class View1DPanel(PlotPanel):
         
         slicerpop.AppendSeparator()
         
+        #id = wx.NewId()
+        #slicerpop.Append(id, '&Toggle Linear/Log scale')
+        #wx.EVT_MENU(self, id, self._onToggleScale)
+
         id = wx.NewId()
-        slicerpop.Append(id, '&Toggle Linear/Log scale')
-        wx.EVT_MENU(self, id, self._onToggleScale)
+        slicerpop.Append(id, '&Change scale')
+        wx.EVT_MENU(self, id, self._onProperties)
 
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)

@@ -63,7 +63,11 @@ class ViewerFrame(wx.Frame):
         self.panels = {}
 
         ## Next available ID for wx gui events 
+        #TODO:  No longer used - remove all calls to this 
         self.next_id = 20000
+
+        # Default locations
+        self._default_save_location = os.getcwd()        
 
         ## Default welcome panel
         self.defaultPanel    = DefaultPanel(self, -1, style=wx.RAISED_BORDER)
@@ -198,7 +202,7 @@ class ViewerFrame(wx.Frame):
                               Name("default").
                               CenterPane().
                               BestSize(wx.Size(900,800)).
-                              MinSize(wx.Size(900,800)).
+                              MinSize(wx.Size(800,700)).
                               Show())
 
         # Add the panels to the AUI manager
@@ -215,7 +219,7 @@ class ViewerFrame(wx.Frame):
                                           Name(p.window_name).Caption(p.window_caption).
                                           CenterPane().
                                           BestSize(wx.Size(600,600)).
-                                          MinSize(wx.Size(600,600)).
+                                          MinSize(wx.Size(200,200)).
                                           Hide())
                 
             else:
@@ -234,10 +238,10 @@ class ViewerFrame(wx.Frame):
                                   Hide().
                                   #Show().
                                   BestSize(wx.Size(400,400)).
-                                  MinSize(wx.Size(100,100)))
+                                  MinSize(wx.Size(300,200)))
                 
         
-    def get_context_menu(self):
+    def get_context_menu(self, graph=None):
         """
             Get the context menu items made available 
             by the different plug-ins. 
@@ -246,7 +250,7 @@ class ViewerFrame(wx.Frame):
         menu_list = []
         for item in self.plugins:
             if hasattr(item, "get_context_menu"):
-                menu_list.extend(item.get_context_menu())
+                menu_list.extend(item.get_context_menu(graph))
             
         return menu_list
         
@@ -532,7 +536,17 @@ class ViewerFrame(wx.Frame):
         """
         #TODO: clean this up
         from data_loader import choose_data_file
-        return choose_data_file(self)
+        path = choose_data_file(self, self._default_save_location)
+        if not path==None:
+            try:
+                self._default_save_location = os.path.dirname(path)
+            except:
+                pass
+        return path
+    
+    def load_ascii_1D(self, path):
+        from data_loader import load_ascii_1D
+        return load_ascii_1D(path)
                   
 class DefaultPanel(wx.Panel):
     """
