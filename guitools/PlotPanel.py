@@ -91,14 +91,14 @@ def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
             if (lo <= -250) or (hi >= 250):
                 lo=loprev
                 hi=hiprev
-                print "Not possible to scale"
+                #print "Not possible to scale"
            
             else:
                 lo,hi = math.pow(10.,lo),math.pow(10.,hi)
                 #assert lo >0,"lo = %g"%lo
-                print "possible to scale"
+                #print "possible to scale"
            
-            print "these are low and high",lo,hi
+            #print "these are low and high",lo,hi
 
         return (lo,hi)
 
@@ -183,46 +183,28 @@ class PlotPanel(wx.Panel):
     def onLeftDown(self,event): 
         """ left button down and ready to drag"""
         self.leftdown=True
-        #self.mousemotion=False
         ax = event.inaxes
         if ax !=None:
-            
-            #print "these are x %f and y %f"%(x,y)
             self.xInit,self.yInit=event.xdata,event.ydata
-            print "this is xInit %f this is yInit %f"%(self.xInit, self.yInit)
+            
+            
     def onLeftUp(self,event): 
         """ Dragging is done """
         self.leftdown=False
         self.mousemotion=False 
         self.leftup=True
-        """
-        if self.mousemotion==True:
-            ax = event.inaxes
-            if ax !=None:
-                x,y = event.x,event.y
-                self.xFinal,self.yFinal=ax.transAxes.inverse_xy_tup((x,y))
-                
-                xdelta = self.xFinal -self.xInit
-                ydelta = self.yFinal -self.yInit
-                
-                if self.xscale=='log':
-                    xdelta = math.log10(self.xFinal) -math.log10(self.xInit)
-                if self.yscale=='log':
-                    ydelta = math.log10(self.yFinal) -math.log10(self.yInit)
-                self.dragHelper(xdelta,ydelta)
-                print "this is xInit %f this is xFinal %f \n"%(self.xInit, self.xFinal)
-                print "this is yInit %f this is yFinal %f \n"%(self.yInit, self.yFinal)
-                print "this is xdelta %f and ydelta %f \n"%(xdelta,ydelta)
-            else:
-                self.dragHelper(0,0)
-                
-               """
+      
     def onMouseMotion(self,event): 
+        """
+            check if the left button is press and the mouse in moving.
+            computer delta for x and y coordinates and then calls draghelper 
+            to perform the drag
+        """
         self.mousemotion=True 
         if self.leftdown==True and self.mousemotion==True:
             
             ax = event.inaxes
-            if ax !=None:
+            if ax !=None:#the dragging is perform inside the figure
                 self.xFinal,self.yFinal=event.xdata,event.ydata
                 
                 xdelta = self.xFinal -self.xInit
@@ -233,11 +215,10 @@ class PlotPanel(wx.Panel):
                 if self.yscale=='log':
                     ydelta = math.log10(self.yFinal) -math.log10(self.yInit)
                 self.dragHelper(xdelta,ydelta)
-                print "this is xInit %f this is xFinal %f \n"%(self.xInit, self.xFinal)
-                print "this is yInit %f this is yFinal %f \n"%(self.yInit, self.yFinal)
-                print "this is xdelta %f and ydelta %f \n"%(xdelta,ydelta)
-            else:
+              
+            else:# no dragging is perform elsewhere
                 self.dragHelper(0,0)
+                
     def dragHelper(self,xdelta,ydelta):
         """ dragging occurs here"""
        
