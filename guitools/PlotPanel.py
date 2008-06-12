@@ -186,10 +186,10 @@ class PlotPanel(wx.Panel):
         #self.mousemotion=False
         ax = event.inaxes
         if ax !=None:
-            x,y = event.x,event.y
+            
             #print "these are x %f and y %f"%(x,y)
-            self.xInit,self.yInit=ax.transAxes.inverse_xy_tup((x,y))
-            #print "this is xInit %f this is yInit %f"%(self.xInit, self.yInit)
+            self.xInit,self.yInit=event.xdata,event.ydata
+            print "this is xInit %f this is yInit %f"%(self.xInit, self.yInit)
     def onLeftUp(self,event): 
         """ Dragging is done """
         self.leftdown=False
@@ -223,8 +223,7 @@ class PlotPanel(wx.Panel):
             
             ax = event.inaxes
             if ax !=None:
-                x,y = event.x,event.y
-                self.xFinal,self.yFinal=ax.transAxes.inverse_xy_tup((x,y))
+                self.xFinal,self.yFinal=event.xdata,event.ydata
                 
                 xdelta = self.xFinal -self.xInit
                 ydelta = self.yFinal -self.yInit
