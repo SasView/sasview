@@ -8,6 +8,17 @@ def toX(x,y=None):
     """
     return x
 
+def toX_pos(x,y=None):
+    """
+    This function is used to load value on Plottable.View
+    @param x: Float value
+    @return x,
+    """
+    if not x>0:
+        raise ValueError, "Transformation only accepts positive values."
+    else:
+        return x
+
 def toX2(x,y=None):
     """
         This function is used to load value on Plottable.View
@@ -34,7 +45,7 @@ def toLogX(x,y=None):
         @param x: float value
     """
     if not x > 0:
-        raise ValueError, "Log(X)of a negative value "
+        raise ValueError, "Log(x)of a negative value "
     else:
         return math.log(x)
     
@@ -87,6 +98,22 @@ def errToX(x,y=None,dx=None,dy=None):
         dx=0
     return dx
 
+def errToX_pos(x,y=None,dx=None,dy=None):
+    """
+        calculate error of x**2
+        @param x: float value
+        @param dx: float value
+    """
+    if dx==None:
+        dx=0
+        
+    # Check that the point on the graph is positive
+    # within errors
+    if not x-dx > 0:
+        raise ValueError, "Transformation does not accept point that are consistent with zero."
+    
+    return dx
+
 
 def errToX2(x,y=None,dx=None,dy=None):
     """
@@ -123,6 +150,12 @@ def errToLog10X(x,y=None,dx=None,dy=None):
     """
     if dx==None:
         dx = 0
+        
+    # Check that the point on the graph is positive
+    # within errors
+    if not x-dx > 0:
+        raise ValueError, "Transformation does not accept point that are consistent with zero."
+        
     if x!=0:
         dx = dx/(x*math.log(10))
     else:
@@ -138,6 +171,12 @@ def errToLogX(x,y=None,dx=None,dy=None):
     """
     if dx==None:
         dx = 0
+            
+    # Check that the point on the graph is positive
+    # within errors
+    if not x-dx > 0:
+        raise ValueError, "Transformation does not accept point that are consistent with zero."
+
     if x!=0:
         dx = dx/x
     else:
@@ -159,6 +198,11 @@ def errToLogXY(x,y,dx=None, dy=None):
     """
         calculate error of Log(xy)
     """
+    # Check that the point on the graph is positive
+    # within errors
+    if (not x-dx > 0) or (not y-dy > 0):
+        raise ValueError, "Transformation does not accept point that are consistent with zero."
+    
     if (x!=0) and (y!=0):
         if dx == None:
             dx = 0
@@ -174,6 +218,11 @@ def errToLogYX2(x,y,dx=None, dy=None):
     """
         calculate error of Log(yx**2)
     """
+    # Check that the point on the graph is positive
+    # within errors
+    if (not x-dx > 0) or (not y-dy > 0):
+        raise ValueError, "Transformation does not accept point that are consistent with zero."
+    
     if (x > 0) and (y > 0):
         if (dx == None):
             dx = 0
@@ -216,6 +265,11 @@ def errToLogYX4(x,y=None,dx=None,dy=None):
         error for ln(y*x^(4))
         @param x: float value
     """
+    # Check that the point on the graph is positive
+    # within errors
+    if (not x-dx > 0) or (not y-dy > 0):
+        raise ValueError, "Transformation does not accept point that are consistent with zero."
+    
     if dx==None:
         dx=0
     if dy==None:

@@ -12,9 +12,6 @@ from canvas import FigureCanvas
 from matplotlib.widgets import RectangleSelector
 from pylab import  gca, gcf
 from plottables import Theory1D
-
-#from matplotlib.backend_bases import MouseEvent
-#from plottables import Data1D
 #TODO: make the plottables interactive
 
 DEBUG = False
@@ -91,15 +88,8 @@ def _rescale(lo,hi,step,pt=None,bal=None,scale='linear'):
             if (lo <= -250) or (hi >= 250):
                 lo=loprev
                 hi=hiprev
-                #print "Not possible to scale"
-           
             else:
                 lo,hi = math.pow(10.,lo),math.pow(10.,hi)
-                #assert lo >0,"lo = %g"%lo
-                #print "possible to scale"
-           
-            #print "these are low and high",lo,hi
-
         return (lo,hi)
 
 
@@ -157,9 +147,8 @@ class PlotPanel(wx.Panel):
         self.leftup=False
         self.mousemotion=False
         
-        #self.canvas.Bind(wx.EVT_MOUSE_EVENTS,self.onTest)
         self.axes = [self.subplot]
-         # new data for the fit 
+        # new data for the fit 
         self.fit_result = Theory1D(x=[], y=[], dy=None)
         #self.fit_result = Data1D(x=[], y=[],dx=None, dy=None)
         self.fit_result.name = "Fit"
@@ -173,18 +162,23 @@ class PlotPanel(wx.Panel):
         self.ErrAvalue=None
         self.ErrBvalue=None
         self.Chivalue=None
+        
+        # Dragging info
         self.begDrag=False
-        #self.begDragI=False
         self.xInit=None
         self.yInit=None
         self.xFinal=None
         self.yFinal=None
-  
+        
+        # Default locations
+        self._default_save_location = os.getcwd()        
+        
+        
     def onLeftDown(self,event): 
         """ left button down and ready to drag"""
         self.leftdown=True
         ax = event.inaxes
-        if ax !=None:
+        if ax != None:
             self.xInit,self.yInit=event.xdata,event.ydata
             
             
@@ -207,6 +201,11 @@ class PlotPanel(wx.Panel):
             if ax !=None:#the dragging is perform inside the figure
                 self.xFinal,self.yFinal=event.xdata,event.ydata
                 
+                # Check whether this is the first point
+                if self.xInit==None:
+                    self.xInit = self.xFinal
+                    self.yInit = self.yFinal
+                    
                 xdelta = self.xFinal -self.xInit
                 ydelta = self.yFinal -self.yInit
                 
@@ -449,11 +448,10 @@ class PlotPanel(wx.Panel):
         #figure.savefig
         #print "Save image not implemented"
         path = None
-        dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", "*.png", wx.SAVE)
+        dlg = wx.FileDialog(self, "Choose a file", self._default_save_location, "", "*.png", wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
-            mypath = os.path.basename(path)
-            print path
+            self._default_save_location = os.path.dirname(path)
         dlg.Destroy()
         if not path == None:
             self.subplot.figure.savefig(path,dpi=300, facecolor='w', edgecolor='w',
@@ -653,7 +651,7 @@ class PlotPanel(wx.Panel):
                 
                 
             if (self.xLabel=="log10(x)" ):
-                item.transformX(transform.toX,transform.errToX)
+                item.transformX(transform.toX_pos,transform.errToX_pos)
                 self.set_xscale("log")
                 name, units = item.get_xaxis() 
                 self.graph.xaxis("\log_{10}\ \  (%s)" % name,  "%s" % units)
@@ -663,7 +661,7 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toLogX,transform.errToLogX)
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("log\ \ %s" % name,  "%s" % units)
+                self.graph.yaxis("\log\ \ %s" % name,  "%s" % units)
                 
                 
             if ( self.yLabel=="y" ):
@@ -674,7 +672,7 @@ class PlotPanel(wx.Panel):
                
                 
             if ( self.yLabel=="log10(y)" ): 
-                item.transformY(transform.toX,transform.errToX)
+                item.transformY(transform.toX_pos,transform.errToX_pos)
                 self.set_yscale("log")  
                 name, units = item.get_yaxis()
                 self.graph.yaxis("\log_{10}\ \ (%s)" % name,  "%s" % units)
@@ -707,7 +705,7 @@ class PlotPanel(wx.Panel):
                 self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
-                self.graph.yaxis("log\ (%s \ \ %s)" % (yname,xname),  "%s%s" % (yunits,xunits))
+                self.graph.yaxis("\log\ (%s \ \ %s)" % (yname,xname),  "%s%s" % (yunits,xunits))
                
                 
             if ( self.yLabel =="ln(y*x^(2))"):
@@ -716,7 +714,7 @@ class PlotPanel(wx.Panel):
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis() 
                 xunits = convertUnit(2,xunits) 
-                self.graph.yaxis("Log (%s \ \ %s^{2})" % (yname,xname),  "%s%s" % (yunits,xunits))
+                self.graph.yaxis("\log (%s \ \ %s^{2})" % (yname,xname),  "%s%s" % (yunits,xunits))
                 
             
             if ( self.yLabel =="ln(y*x^(4))"):
@@ -725,7 +723,7 @@ class PlotPanel(wx.Panel):
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
                 xunits = convertUnit(4,xunits) 
-                self.graph.yaxis("Log (%s \ \ %s^{4})" % (yname,xname),  "%s%s" % (yunits,xunits))
+                self.graph.yaxis("\log (%s \ \ %s^{4})" % (yname,xname),  "%s%s" % (yunits,xunits))
                 
             if ( self.viewModel == "Guinier lny vs x^(2)"):
                 
@@ -739,7 +737,7 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toLogX,transform.errToLogX )
                 self.set_yscale("linear")
                 name, units = item.get_yaxis()
-                self.graph.yaxis("$Log %s$" % name,  "%s" % units)
+                self.graph.yaxis("\log\ \ %s" % name,  "%s" % units)
                
                 
             item.transformView()

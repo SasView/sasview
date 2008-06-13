@@ -284,6 +284,9 @@ class LinearFit(wx.Dialog):
                     tempx = self.x
               
                 #Find the fitting parameters
+                # Always use the same defaults, so that fit history doesn't play a role! 
+                self.cstA = fittings.Parameter(self.model, 'A', self.default_A)
+                self.cstB  = fittings.Parameter(self.model, 'B', self.default_B)
                 
                 if (self.xLabel.lower() == "log10(x)"):
                     chisqr, out, cov = fittings.sansfit(self.model, [self.cstA, self.cstB],
