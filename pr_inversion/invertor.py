@@ -91,7 +91,8 @@ class Invertor(Cinvertor):
         elif name=='y':
             return self.set_y(value)
         elif name=='err':
-            return self.set_err(value)
+            value2 = abs(value)
+            return self.set_err(value2)
         elif name=='d_max':
             return self.set_dmax(value)
         elif name=='q_min':
@@ -318,20 +319,29 @@ class Invertor(Cinvertor):
             
             @param nfunc: number of base functions to use.
             @param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
+
+            If the result does not allow us to compute the covariance matrix,
+            a matrix filled with zeros will be returned.
+
         """
         import math
         from scipy.linalg.basic import lstsq
+        
+        if self.is_valid()<0:
+            raise RuntimeError, "Invertor: invalid data; incompatible data lengths."
         
         self.nfunc = nfunc
         # a -- An M x N matrix.
         # b -- An M x nrhs matrix or M vector.
         npts = len(self.x)
         nq   = nr
-        sqrt_alpha = math.sqrt(self.alpha)
+        sqrt_alpha = math.sqrt(math.fabs(self.alpha))
+        if sqrt_alpha<0.0:
+            nq = 0
         
         a = numpy.zeros([npts+nq, nfunc])
         b = numpy.zeros(npts+nq)
-        err = numpy.zeros(nfunc)
+        err = numpy.zeros([nfunc, nfunc])
         
         for j in range(nfunc):
             for i in range(npts):
@@ -349,6 +359,11 @@ class Invertor(Cinvertor):
                 b[i] = self.y[i]/self.err[i]
             
         c, chi2, rank, n = lstsq(a, b)
+        # Sanity check
+        try:
+            float(chi2)
+        except:
+            chi2 = -1.0
         self.chi2 = chi2
                 
         at = numpy.transpose(a)
@@ -357,8 +372,8 @@ class Invertor(Cinvertor):
             for j in range(nfunc):
                 inv_cov[i][j] = 0.0
                 for k in range(npts+nr):
-                    if self._accept_q(self.x[i]):
-                        inv_cov[i][j] = at[i][k]*a[k][j]
+                    #if self._accept_q(self.x[i]):
+                    inv_cov[i][j] += at[i][k]*a[k][j]
                     
         # Compute the reg term size for the output
         sum_sig = 0.0
@@ -377,9 +392,14 @@ class Invertor(Cinvertor):
         self.suggested_alpha = new_alpha
         
         try:
-            err = math.fabs(chi2/(npts-nfunc))* inv_cov
+            cov = numpy.linalg.pinv(inv_cov)
+            err = math.fabs(chi2/float(npts-nfunc)) * cov
         except:
-            print "Error estimating uncertainties"
+            # We were not able to estimate the errors,
+            # returns an empty covariance matrix
+            print "lstsq:", sys.exc_value
+            print chi2
+            pass
             
         # Keep a copy of the last output
         self.out = c

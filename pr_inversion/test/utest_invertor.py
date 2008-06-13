@@ -223,7 +223,7 @@ class TestBasicComponent(unittest.TestCase):
         # Choose the right d_max...
         self.invertor.d_max = 160.0
         # Set a small alpha
-        self.invertor.alpha = .0007
+        self.invertor.alpha = .005
         # Set data
         self.invertor.x   = x
         self.invertor.y   = y
@@ -398,8 +398,8 @@ class TestBasicComponent(unittest.TestCase):
         self.invertor.from_file("test_output.txt")
         self.assertEqual(self.invertor.d_max, 160.0)
         self.assertEqual(self.invertor.alpha, 0.0007)
-        self.assertEqual(self.invertor.chi2, 16654.1)
-        self.assertAlmostEqual(self.invertor.pr(self.invertor.out, 10.0), 8948.22689927, 4)
+        self.assertEqual(self.invertor.chi2, 836.797)
+        self.assertAlmostEqual(self.invertor.pr(self.invertor.out, 10.0), 903.31577041, 4)
         
     def test_qmin(self):
         self.invertor.q_min = 1.0
@@ -415,6 +415,124 @@ class TestBasicComponent(unittest.TestCase):
        
         self.invertor.q_max = None
         self.assertEqual(self.invertor.q_max, None)
+
+class TestErrorConditions(unittest.TestCase):
+    
+    def setUp(self):
+        self.invertor = Invertor()
+        self.invertor.d_max = 100.0
+        
+        # Test array
+        self.ntest = 5
+        self.x_in = numpy.ones(self.ntest)
+        for i in range(self.ntest):
+            self.x_in[i] = 1.0*(i+1)
+
+    def test_negative_errs(self):
+        """
+            Test an inversion for which we know the answer
+        """
+        x, y, err = load("data_error_1.txt")
+
+        # Choose the right d_max...
+        self.invertor.d_max = 160.0
+        # Set a small alpha
+        self.invertor.alpha = .0007
+        # Set data
+        self.invertor.x   = x
+        self.invertor.y   = y
+        self.invertor.err = err
+        # Perform inversion
+        
+        out, cov = self.invertor.lstsq(10)
+         
+    def test_zero_errs(self):
+        """
+            Have zero as an error should raise an exception
+        """
+        x, y, err = load("data_error_2.txt")
+
+        # Set data
+        self.invertor.x   = x
+        self.invertor.y   = y
+        self.invertor.err = err
+        # Perform inversion
+        self.assertRaises(ValueError, self.invertor.invert, 10)
+         
+        
+    def test_invalid(self):
+        """
+            Test an inversion for which we know the answer
+        """
+        x, y, err = load("data_error_1.txt")
+
+        # Set data
+        self.invertor.x   = x
+        self.invertor.y   = y
+        err = numpy.zeros(len(x)-1)
+        self.invertor.err = err
+        # Perform inversion
+        self.assertRaises(RuntimeError, self.invertor.invert, 10)
+         
+        
+    def test_zero_q(self):
+        """
+            One of the q-values is zero.
+            An exception should be raised.
+        """
+        x, y, err = load("data_error_3.txt")
+
+        # Set data
+        self.assertRaises(ValueError, self.invertor.__setattr__, 'x', x)
+        
+    def test_zero_Iq(self):
+        """
+            One of the I(q) points has a value of zero
+            Should not complain or crash.
+        """
+        x, y, err = load("data_error_4.txt")
+
+        # Set data
+        self.invertor.x   = x
+        self.invertor.y   = y
+        self.invertor.err = err
+        # Perform inversion
+        out, cov = self.invertor.lstsq(10)
+    
+    def test_negative_q(self):
+        """
+            One q value is negative.
+            Makes not sense, but should not complain or crash.
+        """
+        x, y, err = load("data_error_5.txt")
+
+        # Set data
+        self.invertor.x   = x
+        self.invertor.y   = y
+        self.invertor.err = err
+        # Perform inversion
+        out, cov = self.invertor.lstsq(10)
+    
+    def test_negative_Iq(self):
+        """
+            One I(q) value is negative.
+            Makes not sense, but should not complain or crash.
+        """
+        x, y, err = load("data_error_6.txt")
+
+        # Set data
+        self.invertor.x   = x
+        self.invertor.y   = y
+        self.invertor.err = err
+        # Perform inversion
+        out, cov = self.invertor.lstsq(10)
+        
+    def test_nodata(self):
+        """
+             No data was loaded. Should not complain.
+        """
+        out, cov = self.invertor.lstsq(10)
+    
 
         
 def pr_theory(r, R):
@@ -432,6 +550,7 @@ def load(path = "sphere_60_q0_2.txt"):
     data_x   = numpy.zeros(0)
     data_y   = numpy.zeros(0)
     data_err = numpy.zeros(0)
+    scale    = None
     if not path == None:
         input_f = open(path,'r')
         buff    = input_f.read()
@@ -441,12 +560,15 @@ def load(path = "sphere_60_q0_2.txt"):
                 toks = line.split()
                 x = float(toks[0])
                 y = float(toks[1])
+                if len(toks)>2:
+                    err = float(toks[2])
+                else:
+                    if scale==None:
+                        scale = 0.15*math.sqrt(y)
+                    err = scale*math.sqrt(y)
                 data_x = numpy.append(data_x, x)
                 data_y = numpy.append(data_y, y)
-                # Set the error of the first point to 5%
-                # to make theory look like data
-                scale = 0.1/math.sqrt(data_x[0])
-                data_err = numpy.append(data_err, scale*math.sqrt(y))
+                data_err = numpy.append(data_err, err)
             except:
                 pass
                
