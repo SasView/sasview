@@ -104,8 +104,8 @@ class View1DPanel(PlotPanel):
         slicerpop.set_plots(self.plots)
                 
         # Option to save the data displayed
-        id = wx.NewId()
         for plot in self.graph.plottables:
+            id = wx.NewId()
             name = plot.name
             slicerpop.Append(id, "&Save %s points" % name)
             self.action_ids[str(id)] = plot
@@ -137,6 +137,11 @@ class View1DPanel(PlotPanel):
         id = wx.NewId()
         slicerpop.Append(id, '&Change scale')
         wx.EVT_MENU(self, id, self._onProperties)
+        
+        id = wx.NewId()
+        slicerpop.AppendSeparator()
+        slicerpop.Append(id, '&Reset Graph')
+        wx.EVT_MENU(self, id, self.onResetGraph)        
 
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
