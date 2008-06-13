@@ -12,6 +12,10 @@ from sans.pr.invertor import Invertor
 
 class Plugin:
     
+    DEFAULT_ALPHA = 0.0001
+    DEFAULT_NFUNC = 10
+    DEFAULT_DMAX  = 140.0
+    
     def __init__(self):
         ## Plug-in name
         self.sub_menu = "Pr inversion"
@@ -26,9 +30,9 @@ class Plugin:
         self.perspective = []
         
         ## State data
-        self.alpha      = 0.0001
-        self.nfunc      = 10
-        self.max_length = 140.0
+        self.alpha      = self.DEFAULT_ALPHA
+        self.nfunc      = self.DEFAULT_NFUNC
+        self.max_length = self.DEFAULT_DMAX
         self.q_min      = None
         self.q_max      = None
         ## Remember last plottable processed
@@ -47,6 +51,8 @@ class Plugin:
         self.control_panel = None
         ## Currently views plottable
         self.current_plottable = None
+        ## Number of P(r) points to display on the output plot
+        self._pr_npts = 51
 
     def populate_menu(self, id, owner):
         """
@@ -117,7 +123,7 @@ class Plugin:
 
 
         # Show input P(r)
-        new_plot = Data1D(pr.x, pr.y, pr.err)
+        new_plot = Data1D(pr.x, pr.y, dy=pr.err)
         new_plot.name = "P_{obs}(r)"
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
@@ -156,6 +162,15 @@ class Plugin:
         
         #Put this call in plottables/guitools    
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Sphere P(r)"))
+        
+    def get_npts(self):
+        """
+            Returns the number of points in the I(q) data
+        """
+        try:
+            return len(self.pr.x)
+        except:
+            return 0
         
     def show_iq(self, out, pr, q=None):
         import numpy
@@ -202,6 +217,19 @@ class Plugin:
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
         
         
+    def _on_pr_npts(self, evt):
+        """
+            Redisplay P(r) with a different number of points
+        """   
+        from inversion_panel import PrDistDialog
+        dialog = PrDistDialog(None, -1)
+        dialog.set_content(self._pr_npts)
+        if dialog.ShowModal() == wx.ID_OK:
+            self._pr_npts= dialog.get_content()
+            dialog.Destroy()
+            self.show_pr(self.pr.out, self.pr, self.pr.cov)
+        else:
+            dialog.Destroy()
         
         
     def show_pr(self, out, pr, cov=None):
@@ -212,7 +240,7 @@ class Plugin:
         from sans.guitools.plottables import Data1D, Theory1D
         
         # Show P(r)
-        x = pylab.arange(0.0, pr.d_max, pr.d_max/51.0)
+        x = pylab.arange(0.0, pr.d_max, pr.d_max/self._pr_npts)
     
         y = numpy.zeros(len(x))
         dy = numpy.zeros(len(x))
@@ -252,12 +280,14 @@ class Plugin:
         #TODO: this should be in a common module
         return self.parent.choose_file()
                 
-    def load(self, path = "sphere_test_data.txt"):
+    def load(self, path = "sphere_60_q0_2.txt"):
         import numpy, math, sys
         # Read the data from the data file
         data_x   = numpy.zeros(0)
         data_y   = numpy.zeros(0)
         data_err = numpy.zeros(0)
+        scale    = None
+        min_err  = 0.0
         if not path == None:
             input_f = open(path,'r')
             buff    = input_f.read()
@@ -267,20 +297,23 @@ class Plugin:
                     toks = line.split()
                     x = float(toks[0])
                     y = float(toks[1])
-                    try:
-                        scale = 0.05/math.sqrt(data_x[0])
-                    except:
-                        scale = 1.0
-                    #data_err = numpy.append(data_err, 10.0*math.sqrt(y)+1000.0)
+                    if len(toks)>2:
+                        err = float(toks[2])
+                    else:
+                        if scale==None:
+                            scale = 0.05*math.sqrt(y)
+                            #scale = 0.05/math.sqrt(y)
+                            min_err = 0.01*y
+                        err = scale*math.sqrt(y)+min_err
+                        #err = 0
+                        
                     data_x = numpy.append(data_x, x)
                     data_y = numpy.append(data_y, y)
-                    data_err = numpy.append(data_err, scale*math.sqrt(math.fabs(y)))
+                    data_err = numpy.append(data_err, err)
                 except:
-                    print "Error reading line: ", line
-                    print sys.exc_value
+                    pass
                    
-        print "Lines read:", len(data_x)
-        return data_x, data_y, data_err
+        return data_x, data_y, data_err     
         
     def pr_theory(self, r, R):
         """
@@ -302,7 +335,8 @@ class Plugin:
             if item.name=="P_{fit}(r)":
                 
                 return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion],
-                       ["Add P(r) data", "Load a data file and display it on this plot", self._on_add_data]]
+                       ["Add P(r) data", "Load a data file and display it on this plot", self._on_add_data],
+                       ["Change number of P(r) points", "Change the number of points on the P(r) output", self._on_pr_npts]]
                 
         return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion]]
 
@@ -317,7 +351,8 @@ class Plugin:
         
         x, y, err = self.parent.load_ascii_1D(path)
         
-        new_plot = Data1D(x, y, dy=err)
+        #new_plot = Data1D(x, y, dy=err)
+        new_plot = Theory1D(x, y)
         new_plot.name = "P_{loaded}(r)"
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
@@ -368,6 +403,9 @@ class Plugin:
         from copy import deepcopy
         # Save useful info
         self.elapsed = elapsed
+        # Save Pr invertor
+        self.pr = pr
+        
         message = "Computation completed in %g seconds [chi2=%g]" % (elapsed, pr.chi2)
         wx.PostEvent(self.parent, StatusEvent(status=message))
 
@@ -386,10 +424,11 @@ class Plugin:
             try:
                 print "%d: %g +- %g" % (i, out[i], math.sqrt(math.fabs(cov[i][i])))
             except: 
+                print sys.exc_value
                 print "%d: %g +- ?" % (i, out[i])        
         
         # Make a plot of I(q) data
-        new_plot = Data1D(self.pr.x, self.pr.y, self.pr.err)
+        new_plot = Data1D(self.pr.x, self.pr.y, dy=self.pr.err)
         new_plot.name = "I_{obs}(q)"
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
@@ -410,7 +449,7 @@ class Plugin:
             self._create_file_pr(path)  
               
         # Make a plot of I(q) data
-        new_plot = Data1D(self.pr.x, self.pr.y, self.pr.err)
+        new_plot = Data1D(self.pr.x, self.pr.y, dy=self.pr.err)
         new_plot.name = "I_{obs}(q)"
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")

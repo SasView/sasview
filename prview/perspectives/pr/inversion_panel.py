@@ -413,10 +413,16 @@ class InversionControl(wx.Panel):
         button_OK = wx.Button(self, id, "Compute")
         button_OK.SetToolTipString("Perform P(r) inversion.")
         self.Bind(wx.EVT_BUTTON, self._on_invert, id = id)   
+        
+        id = wx.NewId()
+        button_Reset = wx.Button(self, id, "Reset")
+        button_Reset.SetToolTipString("Reset inversion parameters to default.")
+        self.Bind(wx.EVT_BUTTON, self._on_reset, id = id)   
         #button_Cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
         
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer_button.Add(button_Reset, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
         sizer_button.Add(button_OK, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
         #sizer_button.Add(button_Cancel, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)        
         vbox.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
@@ -441,8 +447,25 @@ class InversionControl(wx.Panel):
             print "InversionControl._on_accept_alpha: %s" % sys.exc_value
             pass
         
+    def _on_reset(self, evt):
+        """
+            Resets inversion parameters
+        """
+        self.nfunc = self.manager.DEFAULT_NFUNC
+        self.d_max = self.manager.DEFAULT_DMAX
+        self.alpha = self.manager.DEFAULT_ALPHA
+        self.qmin_ctl.SetValue("")
+        self.qmax_ctl.SetValue("")
+        self.time_ctl.SetValue("")
+        self.chi2_ctl.SetValue("")
+        self.osc_ctl.SetValue("")
+        self.pos_ctl.SetValue("")
+        self.pos_err_ctl.SetValue("")
+        self.alpha_estimate_ctl.Enable(False)
+        self.alpha_estimate_ctl.SetLabel("")
+        self._on_pars_changed()
         
-    def _on_pars_changed(self, evt):
+    def _on_pars_changed(self, evt=None):
         """
             Called when an input parameter has changed
             We will estimate the alpha parameter behind the
@@ -494,6 +517,11 @@ class InversionControl(wx.Panel):
         # Read nfunc
         try:
             nfunc = int(self.nfunc_ctl.GetValue())
+            npts = self.manager.get_npts()
+            if npts>0 and nfunc>npts:
+                message = "Number of function terms should be smaller than the number of points"
+                wx.PostEvent(self.manager.parent, StatusEvent(status=message))
+                raise ValueError, message
             self.nfunc_ctl.SetBackgroundColour(wx.WHITE)
             self.nfunc_ctl.Refresh()
         except:
@@ -608,6 +636,80 @@ class HelpDialog(wx.Dialog):
         
         self.Layout()
         self.Centre()
+
+class PrDistDialog(wx.Dialog):
+    """
+        Property dialog to let the user change the number
+        of points on the P(r) plot.
+    """
+    def __init__(self, parent, id):
+        from sans.pr.invertor import help
+        wx.Dialog.__init__(self, parent, id, size=(250, 120))
+        self.SetTitle("P(r) distribution") 
+        
+
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        
+        label_npts = wx.StaticText(self, -1, "Number of points")
+        self.npts_ctl = wx.TextCtrl(self, -1, size=(100,20))
+                 
+        pars_sizer = wx.GridBagSizer(5,5)
+        iy = 0
+        pars_sizer.Add(label_npts,      (iy,0), (1,1), wx.LEFT, 15)
+        pars_sizer.Add(self.npts_ctl,   (iy,1), (1,1), wx.RIGHT, 0)
+        
+        vbox.Add(pars_sizer, 0, wx.ALL|wx.EXPAND, 15)
+
+
+        static_line = wx.StaticLine(self, -1)
+        vbox.Add(static_line, 0, wx.EXPAND, 0)
+        
+        button_OK = wx.Button(self, wx.ID_OK, "OK")
+        self.Bind(wx.EVT_BUTTON, self._checkValues, button_OK)
+        button_Cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
+        
+        sizer_button = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer_button.Add(button_OK, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+        sizer_button.Add(button_Cancel, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)        
+        vbox.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
+
+        self.SetSizer(vbox)
+        self.SetAutoLayout(True)
+        
+        self.Layout()
+        self.Centre()
+
+    def _checkValues(self, event):
+        """
+            Check the dialog content.
+        """
+        flag = True
+        try:
+            int(self.npts_ctl.GetValue())
+            self.npts_ctl.SetBackgroundColour(wx.WHITE)
+            self.npts_ctl.Refresh()
+        except:
+            flag = False
+            self.npts_ctl.SetBackgroundColour("pink")
+            self.npts_ctl.Refresh()
+        if flag:
+            event.Skip(True)
+
+    def get_content(self):
+        """
+            Return the content of the dialog.
+            At this point the values have already been
+            checked.
+        """
+        value = int(self.npts_ctl.GetValue())
+        return value
+    
+    def set_content(self, npts):
+        """
+            Initialize the content of the dialog.
+        """
+        self.npts_ctl.SetValue("%i" % npts)
 
 
 class ParsDialog(wx.Panel):
@@ -750,7 +852,7 @@ class TestPlot:
 class MyApp(wx.App):
     def OnInit(self):
         wx.InitAllImageHandlers()
-        dialog = HelpDialog(None, -1)
+        dialog = PrDistDialog(None, -1)
         if dialog.ShowModal() == wx.ID_OK:
             pass
         dialog.Destroy()
