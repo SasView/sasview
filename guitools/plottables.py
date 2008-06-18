@@ -235,6 +235,16 @@ class Graph:
         
         return labels
     
+    def get_plottable(self, name):
+        """
+            Return the plottable with the given
+            name if it exists. Otherwise return None
+        """
+        for item in self.plottables:
+            if item.name==name:
+                return item
+        return None
+    
     def returnPlottable(self):
         """
             This method returns a dictionary of plottables contained in graph
@@ -245,6 +255,8 @@ class Graph:
 
     def render(self,plot):
         """Redraw the graph"""
+        plot.connect.clearall()
+        
         plot.clear()
         plot.properties(self.prop)
         labels = self._make_labels()
@@ -257,6 +269,9 @@ class Graph:
     def __init__(self,**kw):
         self.reset()
         self.set(**kw)
+        
+        # Name of selected plottable, if any
+        self.selected_plottable = None
 
 
 # Transform interface definition
@@ -351,6 +366,9 @@ class Plottable(object):
     # Short ascii name to refer to the plottable in a menu 
     short_name = None
     
+    # Fancy name
+    name = None
+    
     # Data
     x  = None
     y  = None
@@ -359,6 +377,9 @@ class Plottable(object):
     
     # Parameter to allow a plot to be part of the list without being displayed
     hidden = False
+    
+    # Flag to set whether a plottable has an interactor or not
+    interactive = True
 
     def __setattr__(self, name, value):
         """
@@ -800,8 +821,15 @@ class Data1D(Plottable):
         self.view = self.View(self.x, self.y, self.dx, self.dy)
         
     def render(self,plot,**kw):
-        plot.points(self.view.x,self.view.y,dx=self.view.dx,dy=self.view.dy,**kw)
-     
+        """
+            Renders the plottable on the graph
+        """
+        if self.interactive==True:
+            plot.interactive_points(self.view.x,self.view.y,
+                                    dx=self.view.dx,dy=self.view.dy,
+                                    name=self.name, **kw)            
+        else:
+            plot.points(self.view.x,self.view.y,dx=self.view.dx,dy=self.view.dy,**kw)
    
     def changed(self):
         return False
@@ -834,7 +862,13 @@ class Theory1D(Plottable):
         self.view = self.View(self.x, self.y, None, self.dy)
         
     def render(self,plot,**kw):
-        plot.curve(self.view.x,self.view.y,dy=self.view.dy,**kw)
+        if self.interactive==True:
+            plot.interactive_curve(self.view.x,self.view.y,
+                                   dy=self.view.dy,
+                                   name=self.name,**kw)
+        else:
+            plot.curve(self.view.x,self.view.y,dy=self.view.dy,**kw)
+            
 
     def changed(self):
         return False

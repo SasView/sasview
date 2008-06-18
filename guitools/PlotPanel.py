@@ -13,9 +13,9 @@ from matplotlib.widgets import RectangleSelector
 from pylab import  gca, gcf
 from plottables import Theory1D
 #TODO: make the plottables interactive
+from binder import BindArtist
 
 DEBUG = False
-print "hello"
 
 from plottables import Graph
 #(FuncFitEvent, EVT_FUNC_FIT) = wx.lib.newevent.NewEvent()
@@ -148,6 +148,11 @@ class PlotPanel(wx.Panel):
         self.mousemotion=False
         
         self.axes = [self.subplot]
+        
+        # Interactor
+        self.connect = BindArtist(self.subplot.figure)
+        #self.selected_plottable = None
+
         # new data for the fit 
         self.fit_result = Theory1D(x=[], y=[], dy=None)
         #self.fit_result = Data1D(x=[], y=[],dx=None, dy=None)
@@ -558,6 +563,37 @@ class PlotPanel(wx.Panel):
     #def connect(self,trigger,callback):
     #    print "PlotPanel.connect???"
     #    if trigger == 'xlim': self._connect_to_xlim(callback)
+
+    def interactive_points(self,x,y,dx=None,dy=None,name='', color=0,symbol=0,label=None):
+        """Draw markers with error bars"""
+        self.subplot.set_yscale('linear')
+        self.subplot.set_xscale('linear')
+        
+        from plottable_interactor import PointInteractor
+        p = PointInteractor(self, self.subplot, zorder=3, id=name)
+        p.points(x, y, dx, dy, color, symbol, label)
+        
+        self.subplot.set_yscale(self.yscale)
+        self.subplot.set_xscale(self.xscale)
+
+    def interactive_curve(self,x,y,dy=None,name='',color=0,symbol=0,label=None):
+        """Draw markers with error bars"""
+        self.subplot.set_yscale('linear')
+        self.subplot.set_xscale('linear')
+        
+        from plottable_interactor import PointInteractor
+        p = PointInteractor(self, self.subplot, zorder=4, id=name)
+        p.curve(x, y, dy, color, symbol, label)
+        
+        self.subplot.set_yscale(self.yscale)
+        self.subplot.set_xscale(self.xscale)
+
+    def plottable_selected(self, id):
+        """
+            Called to register a plottable as selected
+        """
+        #TODO: check that it really is in the list of plottables
+        self.graph.selected_plottable = id
 
     def points(self,x,y,dx=None,dy=None,color=0,symbol=0,label=None):
         """Draw markers with error bars"""
