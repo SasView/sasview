@@ -5,10 +5,19 @@
 import os
 import sys
 import wx
+import logging
 from sans.guitools.plottables import Data1D, Theory1D
 from sans.guicomm.events import NewPlotEvent, StatusEvent    
 import math, numpy
 from sans.pr.invertor import Invertor
+
+PR_FIT_LABEL    = "P_{fit}(r)"
+PR_LOADED_LABEL = "P_{loaded}(r)"
+IQ_DATA_LABEL   = "I_{obs}(q)"
+
+import wx.lib
+(NewPrFileEvent, EVT_PR_FILE) = wx.lib.newevent.NewEvent()
+
 
 class Plugin:
     
@@ -40,6 +49,7 @@ class Plugin:
         ## Time elapsed for last computation [sec]
         # Start with a good default
         self.elapsed = 0.022
+        self.iq_data_shown = False
         
         ## Current invertor
         self.invertor    = None
@@ -53,6 +63,13 @@ class Plugin:
         self.current_plottable = None
         ## Number of P(r) points to display on the output plot
         self._pr_npts = 51
+        ## Flag to let the plug-in know that it is running standalone
+        self.standalone = True
+        
+        # Log startup
+        logging.info("Pr(r) plug-in started")
+        
+        
 
     def populate_menu(self, id, owner):
         """
@@ -331,14 +348,16 @@ class Plugin:
             @return: a list of menu items with call-back function
         """
         # Look whether this Graph contains P(r) data
+        #if graph.selected_plottable==IQ_DATA_LABEL:
         for item in graph.plottables:
-            if item.name=="P_{fit}(r)":
-                
-                return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion],
-                       ["Add P(r) data", "Load a data file and display it on this plot", self._on_add_data],
+            if item.name==PR_FIT_LABEL:
+                return [["Add P(r) data", "Load a data file and display it on this plot", self._on_add_data],
                        ["Change number of P(r) points", "Change the number of points on the P(r) output", self._on_pr_npts]]
+
+            elif item.name==graph.selected_plottable:
+                return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion]]      
                 
-        return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion]]
+        return []
 
     def _on_add_data(self, evt):
         """
@@ -428,12 +447,13 @@ class Plugin:
                 print "%d: %g +- ?" % (i, out[i])        
         
         # Make a plot of I(q) data
-        new_plot = Data1D(self.pr.x, self.pr.y, dy=self.pr.err)
-        new_plot.name = "I_{obs}(q)"
-        new_plot.xaxis("\\rm{Q}", 'A^{-1}')
-        new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-        #new_plot.group_id = "test group"
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
+        if False:
+            new_plot = Data1D(self.pr.x, self.pr.y, dy=self.pr.err)
+            new_plot.name = "I_{obs}(q)"
+            new_plot.xaxis("\\rm{Q}", 'A^{-1}')
+            new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+            #new_plot.group_id = "test group"
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
                 
         # Show I(q) fit
         self.show_iq(out, self.pr)
@@ -453,9 +473,15 @@ class Plugin:
         new_plot.name = "I_{obs}(q)"
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+        new_plot.interactive = True
         #new_plot.group_id = "test group"
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
         
+        # Get Q range
+        self.control_panel.q_min = self.pr.x.min()
+        self.control_panel.q_max = self.pr.x.max()
+            
+
         
     def setup_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None):
         self.alpha = alpha
@@ -509,6 +535,7 @@ class Plugin:
             pr.err = self.current_plottable.dy
             
         self.pr = pr
+        self.iq_data_shown = True
 
           
     def setup_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None):
@@ -623,15 +650,17 @@ class Plugin:
         from inversion_panel import InversionDlg
         
         # If we have more than one displayed plot, make the user choose
-        if len(panel.plots)>1:
-            dialog = InversionDlg(None, -1, "P(r) Inversion", panel.plots, pars=False)
-            dialog.set_content(self.last_data, self.nfunc, self.alpha, self.max_length)
-            if dialog.ShowModal() == wx.ID_OK:
-                dataset = dialog.get_content()
-                dialog.Destroy()
-            else:
-                dialog.Destroy()
-                return
+        if len(panel.plots)>1 and panel.graph.selected_plottable in panel.plots:
+            dataset = panel.graph.selected_plottable
+            if False:
+                dialog = InversionDlg(None, -1, "P(r) Inversion", panel.plots, pars=False)
+                dialog.set_content(self.last_data, self.nfunc, self.alpha, self.max_length)
+                if dialog.ShowModal() == wx.ID_OK:
+                    dataset = dialog.get_content()
+                    dialog.Destroy()
+                else:
+                    dialog.Destroy()
+                    return
         elif len(panel.plots)==1:
             dataset = panel.plots.keys()[0]
         else:
@@ -645,6 +674,7 @@ class Plugin:
         self.control_panel.d_max = self.max_length
         self.control_panel.alpha = self.alpha
         self.parent.set_perspective(self.perspective)
+        self.control_panel._on_invert(None)
             
     def get_panels(self, parent):
         """
@@ -653,7 +683,9 @@ class Plugin:
         from inversion_panel import InversionControl
         
         self.parent = parent
-        self.control_panel = InversionControl(self.parent, -1, style=wx.RAISED_BORDER)
+        self.control_panel = InversionControl(self.parent, -1, 
+                                              style=wx.RAISED_BORDER,
+                                              standalone=self.standalone)
         self.control_panel.set_manager(self)
         self.control_panel.nfunc = self.nfunc
         self.control_panel.d_max = self.max_length
@@ -661,7 +693,18 @@ class Plugin:
         
         self.perspective = []
         self.perspective.append(self.control_panel.window_name)
+        
+        self.parent.Bind(EVT_PR_FILE, self._on_new_file)
+        
         return [self.control_panel]
+    
+    def _on_new_file(self, evt):
+        """
+            Called when the application manager posted an
+            EVT_PR_FILE event. Just prompt the control
+            panel to load a new data file.
+        """
+        self.control_panel._change_file(None)
     
     def get_perspective(self):
         """

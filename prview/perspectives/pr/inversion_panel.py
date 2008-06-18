@@ -114,7 +114,7 @@ class InversionControl(wx.Panel):
     ## Fraction of P(r) that is greater than zero by more than 1 sigma
     pos_err  = 1.0
     
-    def __init__(self, parent, id = -1, plots = None, **kwargs):
+    def __init__(self, parent, id = -1, plots = None, standalone=False, **kwargs):
         wx.Panel.__init__(self, parent, id = id, **kwargs)
         
         self.plots = plots
@@ -146,6 +146,9 @@ class InversionControl(wx.Panel):
         
         ## Data manager
         self.manager   = None
+        
+        ## Standalone flage
+        self.standalone = standalone
         
         self._do_layout()
         
@@ -180,8 +183,13 @@ class InversionControl(wx.Panel):
             #self.alpha_estimate_ctl.Show()
             #self.label_sugg.Show()
         elif name=='plotname':
-            self.plot_data.SetValue(str(value))
-            self.plot_radio.SetValue(True)
+            if self.standalone==False:
+                self.plot_data.SetValue(str(value))
+                self.plot_radio.SetValue(True)
+                self._on_pars_changed(None)
+        elif name=='datafile':
+            self.data_file.SetValue(str(value))
+            self.file_radio.SetValue(True)
             self._on_pars_changed(None)
         else:
             wx.Panel.__setattr__(self, name, value)
@@ -213,7 +221,10 @@ class InversionControl(wx.Panel):
         elif name=='alpha_estimate':
             self.alpha_estimate_ctl.GetValue()
         elif name=='plotname':
-            self.plot_data.GetValue()
+            if self.standalone==False:
+                self.plot_data.GetValue()
+        elif name=='datafile':
+            self.data_file.GetValue()
         else:
             wx.Panel.__getattr__(self, name)
         
@@ -229,7 +240,7 @@ class InversionControl(wx.Panel):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         # ----- I(q) data -----
-        databox = wx.StaticBox(self, -1, "I(q) data")
+        databox = wx.StaticBox(self, -1, "I(q) data source")
         
         boxsizer1 = wx.StaticBoxSizer(databox, wx.VERTICAL)
         boxsizer1.SetMinSize((320,50))
@@ -247,12 +258,13 @@ class InversionControl(wx.Panel):
         pars_sizer.Add(self.data_file, (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         pars_sizer.Add(choose_button, (iy,3), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
-        iy += 1
-        self.plot_radio = wx.RadioButton(self, -1, "Plot data:")
-        self.plot_data = wx.TextCtrl(self, -1, size=(100,20))
-        self.plot_data.SetEditable(False)
-        pars_sizer.Add(self.plot_radio, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        pars_sizer.Add(self.plot_data, (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        if self.standalone==False:
+            iy += 1
+            self.plot_radio = wx.RadioButton(self, -1, "Plot data:")
+            self.plot_data = wx.TextCtrl(self, -1, size=(100,20))
+            self.plot_data.SetEditable(False)
+            pars_sizer.Add(self.plot_radio, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+            pars_sizer.Add(self.plot_data, (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
         boxsizer1.Add(pars_sizer, 0, wx.EXPAND)
         vbox.Add(boxsizer1)
@@ -475,7 +487,7 @@ class InversionControl(wx.Panel):
         
         # If the pars are valid, estimate alpha
         if flag:
-            if self.plot_radio.GetValue():
+            if self.standalone==False and self.plot_radio.GetValue():
                 dataset = self.plot_data.GetValue()
                 self.manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc, 
                                                      d_max=dmax,
@@ -570,17 +582,25 @@ class InversionControl(wx.Panel):
         flag, alpha, dmax, nfunc, qmin, qmax = self._read_pars()
         
         if flag:
-            if self.plot_radio.GetValue():
+            if self.standalone==False and self.plot_radio.GetValue():
                 dataset = self.plot_data.GetValue()
-                self.manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc, 
-                                                  d_max=dmax,
-                                                  q_min=qmin, q_max=qmax)
+                if len(dataset.strip())==0:
+                    message = "No data to invert. Select a data set before proceeding with P(r) inversion."
+                    wx.PostEvent(self.manager.parent, StatusEvent(status=message))
+                else:
+                    self.manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc, 
+                                                      d_max=dmax,
+                                                      q_min=qmin, q_max=qmax)
             else:
                 path = self.data_file.GetValue()
-                self.manager.setup_file_inversion(alpha=alpha, nfunc=nfunc, 
-                                                  d_max=dmax, path=path,
-                                                  q_min=qmin, q_max=qmax
-                                                  )
+                if len(path.strip())==0:
+                    message = "No data to invert. Select a data set before proceeding with P(r) inversion."
+                    wx.PostEvent(self.manager.parent, StatusEvent(status=message))
+                else:
+                    self.manager.setup_file_inversion(alpha=alpha, nfunc=nfunc, 
+                                                      d_max=dmax, path=path,
+                                                      q_min=qmin, q_max=qmax
+                                                      )
                 
         else:
             message = "The P(r) form contains invalid values: please submit it again."
