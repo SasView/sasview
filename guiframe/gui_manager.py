@@ -30,6 +30,7 @@ from sans.guicomm.events import EVT_STATUS
 import warnings
 warnings.simplefilter("ignore")
 
+import logging
 
 class ViewerFrame(wx.Frame):
     """
@@ -41,6 +42,12 @@ class ViewerFrame(wx.Frame):
         """
         from local_perspectives.plotting import plotting
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(1000, 1000))
+        
+        # Logging info
+        logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    filename='sans_app.log',
+                    filemode='w')        
         
         path = os.path.dirname(__file__)
         ico_file = os.path.join(path,'images/ball.ico')
@@ -309,7 +316,14 @@ class ViewerFrame(wx.Frame):
         
         # File menu
         filemenu = wx.Menu()
-        filemenu.Append(101,'&Quit', 'Exit') 
+        
+        id = wx.NewId()
+        filemenu.Append(id, '&Open', 'Open a file')
+        wx.EVT_MENU(self, id, self._on_open)
+        
+        id = wx.NewId()
+        filemenu.Append(id,'&Quit', 'Exit') 
+        wx.EVT_MENU(self, id, self.Close)
         
         # Add sub menus
         menubar.Append(filemenu,  '&File')
@@ -395,8 +409,7 @@ class ViewerFrame(wx.Frame):
          
         self.SetMenuBar(menubar)
         
-        # Bind handlers       
-        wx.EVT_MENU(self, 101, self.Close)
+        
         
     def _on_status_event(self, evt):
         """
@@ -429,7 +442,15 @@ class ViewerFrame(wx.Frame):
                 
             self._mgr.Update()
         
-
+    def _on_open(self, event):
+        from data_loader import plot_data
+        path = self.choose_file()
+            
+        if path and os.path.isfile(path):
+            plot_data(self, path)
+                
+        
+        
     def _onClose(self, event):
         import sys
         wx.Exit()
