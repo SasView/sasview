@@ -14,6 +14,8 @@ class PointInteractor(_BaseInteractor):
         self._button_down = False
         self._context_menu = False
         self._dragged = False
+        self.connect_markers([self.axes])
+        
         
     def _color(self,c):
         """Return a particular colour"""
@@ -84,34 +86,55 @@ class PointInteractor(_BaseInteractor):
         print "plottable_interactor.clear()"
         
     def _on_click(self, evt):
-        self._context_menu = False
+        """
+            Called when a mouse button is clicked
+            from within the boundaries of an artist.
+        """
+        if self._context_menu==True:
+            self._context_menu = False
+            evt.artist = self.marker
+            self._on_leave(evt)
+        
         
     def _on_release(self, evt): 
+        """
+            Called when a mouse button is released
+            within the boundaries of an artist
+        """
         # Check to see whether we are about to pop 
         # the context menu up
         if evt.button==3:
             self._context_menu = True
         
     def _on_enter(self, evt):
-        self.base.plottable_selected(self.id)
-        evt.artist.set_color('y')
-        if hasattr(evt.artist, "set_facecolor"):
-            evt.artist.set_facecolor('y')
-        if hasattr(evt.artist, "set_edgecolor"):
-            evt.artist.set_edgecolor('y')
-        self.axes.figure.canvas.draw_idle()
+        """
+            Called when we are entering the boundaries
+            of an artist.
+        """
+        if not evt.artist.__class__.__name__=="Subplot":
+        
+            self.base.plottable_selected(self.id)
+            evt.artist.set_color('y')
+            if hasattr(evt.artist, "set_facecolor"):
+                evt.artist.set_facecolor('y')
+            if hasattr(evt.artist, "set_edgecolor"):
+                evt.artist.set_edgecolor('y')
+            self.axes.figure.canvas.draw_idle()
         
     def _on_leave(self, evt):
-        if self._context_menu==False:
-            self.base.plottable_selected(None)
-            evt.artist.set_color(self.color)
-            if hasattr(evt.artist, "set_facecolor"):
-                evt.artist.set_facecolor(self.color)
-            if hasattr(evt.artist, "set_edgecolor"):            
-                evt.artist.set_edgecolor(self.color)
-            self.axes.figure.canvas.draw_idle()
-            
-        self._context_menu = False
+        """
+            Called when we are leaving the boundaries
+            of an artist.
+        """
+        if not evt.artist.__class__.__name__=="Subplot":
+            if self._context_menu==False:
+                self.base.plottable_selected(None)
+                evt.artist.set_color(self.color)
+                if hasattr(evt.artist, "set_facecolor"):
+                    evt.artist.set_facecolor(self.color)
+                if hasattr(evt.artist, "set_edgecolor"):            
+                    evt.artist.set_edgecolor(self.color)
+                self.axes.figure.canvas.draw_idle()
     
     def update(self):
         """
