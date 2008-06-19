@@ -232,7 +232,7 @@ class Plugin:
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         #new_plot.group_id = "test group"
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="I(q)"))
         
         
     def _on_pr_npts(self, evt):
@@ -476,7 +476,7 @@ class Plugin:
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.interactive = True
         #new_plot.group_id = "test group"
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="I(q)"))
         
         # Get Q range
         self.control_panel.q_min = self.pr.x.min()
