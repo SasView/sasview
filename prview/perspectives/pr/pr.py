@@ -53,6 +53,7 @@ class Plugin:
         
         ## Current invertor
         self.invertor    = None
+        self.pr          = None
         ## Calculation thread
         self.calc_thread = None
         ## Estimation thread
@@ -668,11 +669,19 @@ class Plugin:
             return
         
         # Store a reference to the current plottable
+        # If we have a suggested value, use it.
+        try:
+            estimate = float(self.control_panel.alpha_estimate)
+            self.control_panel.alpha = estimate
+        except:
+            self.control_panel.alpha = self.alpha
+            print "No estimate yet"
+            pass
+        
         self.current_plottable = panel.plots[dataset]
         self.control_panel.plotname = dataset
         self.control_panel.nfunc = self.nfunc
         self.control_panel.d_max = self.max_length
-        self.control_panel.alpha = self.alpha
         self.parent.set_perspective(self.perspective)
         self.control_panel._on_invert(None)
             

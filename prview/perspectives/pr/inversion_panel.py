@@ -199,32 +199,59 @@ class InversionControl(wx.Panel):
             Allow direct hooks to text boxes
         """
         if name=='nfunc':
-            int(self.nfunc_ctl.GetValue())
+            try:
+                return int(self.nfunc_ctl.GetValue())
+            except:
+                return -1
         elif name=='d_max':
-            self.dmax_ctl.GetValue()
+            try:
+                return self.dmax_ctl.GetValue()
+            except:
+                return -1.0
         elif name=='alpha':
-            self.alpha_ctl.GetValue()
+            try:
+                return self.alpha_ctl.GetValue()
+            except:
+                return -1.0
         elif name=='chi2':
-            self.chi2_ctl.GetValue()
+            try:
+                return float(self.chi2_ctl.GetValue())
+            except:
+                return -1.0
         elif name=='q_min':
-            self.qmin_ctl.GetValue()
+            try:
+                return float(self.qmin_ctl.GetValue())
+            except:
+                return 0.0
         elif name=='q_max':
-            self.qmax_ctl.GetValue()
+            try:
+                return float(self.qmax_ctl.GetValue())
+            except:
+                return 0.0
         elif name=='elapsed':
-            self.time_ctl.GetValue()
+            try:
+                return float(self.time_ctl.GetValue())
+            except:
+                return -1.0
         elif name=='oscillation':
-            self.osc_ctl.GetValue()
+            try:
+                return float(self.osc_ctl.GetValue())
+            except:
+                return -1.0
         elif name=='pos':
-            self.pos_ctl.GetValue()
+            try:
+                return float(self.pos_ctl.GetValue())
+            except:
+                return -1.0
         elif name=='pos_err':
-            self.pos_err_ctl.GetValue()
+            return self.pos_err_ctl.GetValue()
         elif name=='alpha_estimate':
-            self.alpha_estimate_ctl.GetValue()
+            return self.alpha_estimate_ctl.GetLabel()
         elif name=='plotname':
             if self.standalone==False:
-                self.plot_data.GetValue()
+                return self.plot_data.GetValue()
         elif name=='datafile':
-            self.data_file.GetValue()
+            return self.data_file.GetValue()
         else:
             wx.Panel.__getattr__(self, name)
         
@@ -310,7 +337,8 @@ class InversionControl(wx.Panel):
         self.nfunc_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
         self.alpha_ctl.Bind(wx.EVT_KILL_FOCUS, self._read_pars)
         self.dmax_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
-        self.Bind(wx.EVT_TEXT_ENTER, self._on_pars_changed)
+        #self.dmax_ctl.Bind(wx.EVT_TEXT_ENTER, self._on_pars_changed)
+        #self.Bind(wx.EVT_TEXT_ENTER, self._on_pars_changed)
         
         sizer_params = wx.GridBagSizer(5,5)
 
@@ -342,6 +370,8 @@ class InversionControl(wx.Panel):
         label_qmax = wx.StaticText(self, -1, "Q max")
         self.qmin_ctl = wx.TextCtrl(self, -1, size=(60,20))
         self.qmax_ctl = wx.TextCtrl(self, -1, size=(60,20))
+        self.qmin_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
+        self.qmax_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
         
         iy = 0
         sizer_q.Add(label_qmin, (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
@@ -503,6 +533,8 @@ class InversionControl(wx.Panel):
         alpha = 0
         nfunc = 5
         dmax  = 120
+        qmin  = 0
+        qmax  = 0
         
         flag = True
         
