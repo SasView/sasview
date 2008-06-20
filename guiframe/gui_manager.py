@@ -6,6 +6,15 @@ project funded by the US National Science Foundation.
 See the license text in license.txt
 
 copyright 2008, University of Tennessee
+
+How-to build an application using guiframe:
+
+ 1- Write a main application script along the lines of dummyapp.py
+ 2- Write a config script along the lines of config.py, and name it local_config.py
+ 3- Write your plug-ins and place them in a directory called "perspectives".
+     - Look at local_perspectives/plotting for an example of a plug-in.
+     - A plug-in should define a class called Plugin. See abstract class below.
+
 """
 import wx
 import wx.aui
@@ -31,6 +40,134 @@ import warnings
 warnings.simplefilter("ignore")
 
 import logging
+
+class Plugin:
+    """
+        This class defines the interface for a Plugin class
+        that can be used by the gui_manager.
+        
+        Plug-ins should be placed in a sub-directory called "perspectives".
+        For example, a plug-in called Foo should be place in "perspectives/Foo".
+        That directory contains at least two files:
+            perspectives/Foo/__init.py contains two lines:
+            
+                PLUGIN_ID = "Foo plug-in 1.0"
+                from Foo import *
+                
+            perspectives/Foo/Foo.py contains the definition of the Plugin
+            class for the Foo plug-in. The interface of that Plugin class
+            should follow the interface of the class you are looking at.
+    """
+    
+    def __init__(self):
+        """
+            Abstract class for gui_manager Plugins.
+        """
+        ## Plug-in name. It will appear on the application menu.
+        self.sub_menu = "Plugin"        
+        
+        ## Reference to the parent window. Filled by get_panels() below.
+        self.parent = None
+        
+        ## List of panels that you would like to open in AUI windows
+        #  for your plug-in. This defines your plug-in "perspective"
+        self.perspective = []
+        
+        raise RuntimeError, "gui_manager.Plugin is an abstract class"
+        
+    def populate_menu(self, id, parent):
+        """
+            Create and return the list of application menu
+            items for the plug-in. 
+            
+            @param id: deprecated. Un-used.
+            @param parent: parent window
+            @return: plug-in menu
+        """
+        import wx
+        # Create a menu
+        plug_menu = wx.Menu()
+
+        # Always get event IDs from wx
+        id = wx.NewId()
+        
+        # Fill your menu
+        plug_menu.Append(id, '&Do something')
+        wx.EVT_MENU(owner, id, self._on_do_something)
+    
+        # Returns the menu and a name for it.
+        return [(id, plug_menu, "name of the application menu")]
+    
+    
+    def get_panels(self, parent):
+        """
+            Create and return the list of wx.Panels for your plug-in.
+            Define the plug-in perspective.
+            
+            Panels should inherit from DefaultPanel defined below,
+            or should present the same interface. They must define
+            "window_caption" and "window_name".
+            
+            @param parent: parent window
+            @return: list of panels
+        """
+        ## Save a reference to the parent
+        self.parent = parent
+        
+        # Define a panel
+        mypanel = DefaultPanel(self.parent, -1)
+        
+        # If needed, add its name to the perspective list
+        self.perspective.append(self.control_panel.window_name)
+
+        # Return the list of panels
+        return [mypanel]
+    
+    def get_context_menu(self, graph=None):
+        """
+            This method is optional.
+        
+            When the context menu of a plot is rendered, the 
+            get_context_menu method will be called to give you a 
+            chance to add a menu item to the context menu.
+            
+            A ref to a Graph object is passed so that you can
+            investigate the plot content and decide whether you
+            need to add items to the context menu.  
+            
+            This method returns a list of menu items.
+            Each item is itself a list defining the text to 
+            appear in the menu, a tool-tip help text, and a
+            call-back method.
+            
+            @param graph: the Graph object to which we attach the context menu
+            @return: a list of menu items with call-back function
+        """
+        return [["Menu text", 
+                 "Tool-tip help text", 
+                 self._on_context_do_something]]      
+    
+    def get_perspective(self):
+        """
+            Get the list of panel names for this perspective
+        """
+        return self.perspective
+    
+    def on_perspective(self, event):
+        """
+            Call back function for the perspective menu item.
+            We notify the parent window that the perspective
+            has changed.
+            @param event: menu event
+        """
+        self.parent.set_perspective(self.perspective)
+    
+    def post_init(self):
+        """
+            Post initialization call back to close the loose ends
+        """
+        pass
+
 
 class ViewerFrame(wx.Frame):
     """
@@ -147,7 +284,6 @@ class ViewerFrame(wx.Frame):
         try:
             list = os.listdir(dir)
             for item in list:
-                print item
                 toks = os.path.splitext(os.path.basename(item))
                 name = None
                 if not toks[0] == '__init__':
@@ -166,7 +302,6 @@ class ViewerFrame(wx.Frame):
                             f.write(str(module)+'\n')
                         else:
                             (file, path, info) = imp.find_module(name, path)
-                            print path
                             module = imp.load_module( name, file, item, info )
                         if hasattr(module, "PLUGIN_ID"):
                             try:
