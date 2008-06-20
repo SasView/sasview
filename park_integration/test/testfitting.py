@@ -4,7 +4,7 @@
 import unittest
 from sans.guitools.plottables import Theory1D
 from sans.guitools.plottables import Data1D
-from FittingModule import Parameter
+from sans.fit.ScipyFitting import Parameter
 import math
 class testFitModule(unittest.TestCase):
     """ test fitting """
@@ -12,7 +12,7 @@ class testFitModule(unittest.TestCase):
         """ 
             test module Load
         """
-        from Loader import Load
+        from sans.fit.Loader import Load
         load= Load()
         
         load.set_filename("testdata_line.txt")
@@ -54,7 +54,7 @@ class testFitModule(unittest.TestCase):
     def testfit_1Data_1Model(self):
         """ test fitting for one data and one model"""
         #load data
-        from Loader import Load
+        from sans.fit.Loader import Load
         load= Load()
         load.set_filename("testdata_line.txt")
         load.set_values()
@@ -62,7 +62,7 @@ class testFitModule(unittest.TestCase):
         load.load_data(data1)
         
         #Importing the Fit module
-        from Fitting import Fit
+        from sans.fit.Fitting import Fit
         fitter= Fit()
         fitter.fit_engine('scipy')
         engine = fitter.returnEngine()
@@ -103,7 +103,7 @@ class testFitModule(unittest.TestCase):
         """
     def testfit_2Data_1Model(self):
         """ test fitting for two set of data  and one model"""
-        from Loader import Load
+        from sans.fit.Loader import Load
         load= Load()
         #Load the first set of data
         load.set_filename("testdata1.txt")
@@ -118,7 +118,7 @@ class testFitModule(unittest.TestCase):
         load.load_data(data2)
        
         #Importing the Fit module
-        from Fitting import Fit
+        from sans.fit.Fitting import Fit
         fitter= Fit()
         # Receives the type of model for the fitting
         from sans.guitools.LineModel import LineModel
