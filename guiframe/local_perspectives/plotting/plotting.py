@@ -98,6 +98,9 @@ class View1DPanel(PlotPanel):
         #if event.plot._yunit != self.graph.prop["yunit"]:
         self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
       
+        # Set the view scale for all plots
+        self._onEVT_FUNC_PROPERTY()
+      
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
 

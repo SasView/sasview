@@ -13,6 +13,9 @@ class SansView():
         from gui_manager import ViewApp
         self.gui = ViewApp(0)
         
+        # Build the GUI
+        self.gui.build_gui()
+        
         # Set the application manager for the GUI
         self.gui.set_manager(self)
         
