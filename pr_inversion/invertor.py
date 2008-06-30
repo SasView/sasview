@@ -520,7 +520,19 @@ class Invertor(Cinvertor):
         self.cov = err_0
         
         return c_0, err_0
+
+    def estimate_numterms(self, isquit_func=None):
+        """
+            Returns a reasonable guess for the
+            number of terms
+            
+            @return: number of terms, alpha, message
+        """
+        from num_term import Num_terms
+        estimator = Num_terms(self.clone())
         
+        return estimator.num_terms(isquit_func)
+                    
     def estimate_alpha(self, nfunc):
         """
             Returns a reasonable guess for the
