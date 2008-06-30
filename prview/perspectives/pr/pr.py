@@ -439,8 +439,8 @@ class Plugin:
         # Save Pr invertor
         self.pr = pr
         
-        message = "Computation completed in %g seconds [chi2=%g]" % (elapsed, pr.chi2)
-        wx.PostEvent(self.parent, StatusEvent(status=message))
+        #message = "Computation completed in %g seconds [chi2=%g]" % (elapsed, pr.chi2)
+        #wx.PostEvent(self.parent, StatusEvent(status=message))
 
         cov = numpy.ascontiguousarray(cov)
 
@@ -449,7 +449,7 @@ class Plugin:
         self.control_panel.elapsed = elapsed
         self.control_panel.oscillation = pr.oscillations(out)
         #print "OSCILL", pr.oscillations(out)
-        print "PEAKS:", pr.get_peaks(out) 
+        #print "PEAKS:", pr.get_peaks(out) 
         self.control_panel.positive = pr.get_positive(out)
         self.control_panel.pos_err  = pr.get_pos_err(out, cov)
         self.control_panel.rg = pr.rg(out)
@@ -472,14 +472,6 @@ class Plugin:
             #new_plot.group_id = "test group"
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
                 
-        # Compute the fit I(Q=0)
-        try:
-            print "I(0) = ", self.pr.iq0(out)
-        except:
-            pass
-        
-        # Get R_g
-        print "Rg = ", self.pr.rg(out)
         # Show I(q) fit
         self.show_iq(out, self.pr)
         
@@ -723,10 +715,17 @@ class Plugin:
             self.control_panel.alpha = self.alpha
             print "No estimate yet"
             pass
+        try:
+            estimate = int(self.control_panel.nterms_estimate)
+            self.control_panel.nfunc = estimate
+        except:
+            self.control_panel.nfunc = self.nfunc
+            print "No estimate yet"
+            pass
         
         self.current_plottable = panel.plots[dataset]
         self.control_panel.plotname = dataset
-        self.control_panel.nfunc = self.nfunc
+        #self.control_panel.nfunc = self.nfunc
         self.control_panel.d_max = self.max_length
         self.parent.set_perspective(self.perspective)
         self.control_panel._on_invert(None)

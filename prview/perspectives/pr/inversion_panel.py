@@ -415,14 +415,7 @@ class InversionControl(wx.Panel):
         #self.nterms_estimate_ctl.SetBackgroundColour(self.GetBackgroundColour())
         self.nterms_estimate_ctl.SetToolTipString("Waiting for estimate...")
         
-        # EVT_TEXT would trigger an event for each character entered
-        #self.nfunc_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
-        #self.alpha_ctl.Bind(wx.EVT_KILL_FOCUS, self._read_pars)
-        #self.dmax_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
-        #self.dmax_ctl.Bind(wx.EVT_TEXT_ENTER, self._on_pars_changed)
-        #self.Bind(wx.EVT_TEXT_ENTER, self._on_pars_changed)
-        
-        self.nfunc_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
+        self.nfunc_ctl.Bind(wx.EVT_TEXT, self._read_pars)
         self.alpha_ctl.Bind(wx.EVT_TEXT, self._read_pars)
         self.dmax_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
         
