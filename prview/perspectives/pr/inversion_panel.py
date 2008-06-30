@@ -121,19 +121,24 @@ class InversionControl(wx.Panel):
         self.radio_buttons = {}
         
         ## Data file TextCtrl
-        self.data_file = None
-        self.plot_data = None
-        self.nfunc_ctl = None
-        self.alpha_ctl = None
-        self.dmax_ctl  = None
-        self.time_ctl  = None
-        self.chi2_ctl  = None
-        self.osc_ctl  = None
+        self.data_file  = None
+        self.plot_data  = None
+        self.nfunc_ctl  = None
+        self.alpha_ctl  = None
+        self.dmax_ctl   = None
+        self.time_ctl   = None
+        self.chi2_ctl   = None
+        self.osc_ctl    = None
         self.file_radio = None
         self.plot_radio = None
         self.label_sugg = None
-        self.qmin_ctl = None
-        self.qmax_ctl = None
+        self.qmin_ctl   = None
+        self.qmax_ctl   = None
+        
+        self.rg_ctl     = None
+        self.iq0_ctl    = None
+        self.bck_chk    = None
+        self.bck_ctl    = None
         
         # TextCtrl for fraction of positive P(r)
         self.pos_ctl = None
@@ -163,13 +168,19 @@ class InversionControl(wx.Panel):
         elif name=='alpha':
             self.alpha_ctl.SetValue(str(value))
         elif name=='chi2':
-            self.chi2_ctl.SetValue("%-5.3g" % value)
+            self.chi2_ctl.SetValue("%-5.2g" % value)
+        elif name=='bck':
+            self.bck_ctl.SetValue("%-5.2g" % value)
         elif name=='q_min':
-            self.qmin_ctl.SetValue("%-5.3g" % value)
+            self.qmin_ctl.SetValue("%-5.2g" % value)
         elif name=='q_max':
-            self.qmax_ctl.SetValue("%-5.3g" % value)
+            self.qmax_ctl.SetValue("%-5.2g" % value)
         elif name=='elapsed':
             self.time_ctl.SetValue("%-5.2g" % value)
+        elif name=='rg':
+            self.rg_ctl.SetValue("%-5.2g" % value)
+        elif name=='iq0':
+            self.iq0_ctl.SetValue("%-5.2g" % value)
         elif name=='oscillation':
             self.osc_ctl.SetValue("%-5.2g" % value)
         elif name=='positive':
@@ -218,6 +229,11 @@ class InversionControl(wx.Panel):
                 return float(self.chi2_ctl.GetValue())
             except:
                 return -1.0
+        elif name=='bck':
+            try:
+                return float(self.bck_ctl.GetValue())
+            except:
+                return -1.0
         elif name=='q_min':
             try:
                 return float(self.qmin_ctl.GetValue())
@@ -231,6 +247,16 @@ class InversionControl(wx.Panel):
         elif name=='elapsed':
             try:
                 return float(self.time_ctl.GetValue())
+            except:
+                return -1.0
+        elif name=='rg':
+            try:
+                return float(self.rg_ctl.GetValue())
+            except:
+                return -1.0
+        elif name=='iq0':
+            try:
+                return float(self.iq0_ctl.GetValue())
             except:
                 return -1.0
         elif name=='oscillation':
@@ -274,7 +300,10 @@ class InversionControl(wx.Panel):
         pars_sizer = wx.GridBagSizer(5,5)
 
         iy = 0
-        self.file_radio = wx.RadioButton(self, -1, "File data:")
+        if self.standalone==False:
+            self.file_radio = wx.RadioButton(self, -1, "File data:")
+        else:
+            self.file_radio = wx.StaticText(self, -1, "Data file:")
         self.data_file = wx.TextCtrl(self, -1, size=(100,20))
         self.data_file.SetEditable(False)
         self.data_file.SetValue("")
@@ -282,7 +311,8 @@ class InversionControl(wx.Panel):
         choose_button = wx.Button(self, id, "Choose file")
         self.Bind(wx.EVT_BUTTON, self._change_file, id = id)   
         pars_sizer.Add(self.file_radio, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        pars_sizer.Add(self.data_file, (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        #pars_sizer.Add(self.data_file, (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        pars_sizer.Add(self.data_file, (iy,1), (1,1), wx.ADJUST_MINSIZE, 15)
         pars_sizer.Add(choose_button, (iy,3), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
         if self.standalone==False:
@@ -293,8 +323,44 @@ class InversionControl(wx.Panel):
             pars_sizer.Add(self.plot_radio, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
             pars_sizer.Add(self.plot_data, (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
-        boxsizer1.Add(pars_sizer, 0, wx.EXPAND)
+        self.bck_chk = wx.CheckBox(self, -1, "Estimate background level")
+        self.bck_chk.SetToolTipString("Check box to let the fit estimate the constant background level.")
+        self.bck_chk.Bind(wx.EVT_CHECKBOX, self._on_pars_changed)
+        iy += 1
+        pars_sizer.Add(self.bck_chk, (iy,0), (1,2), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        boxsizer1.Add(pars_sizer, 0, wx.EXPAND)  
         vbox.Add(boxsizer1)
+        
+        # ----- Add slit parameters -----
+        if False:
+            sbox = wx.StaticBox(self, -1, "Slit parameters")
+            sboxsizer = wx.StaticBoxSizer(sbox, wx.VERTICAL)
+            sboxsizer.SetMinSize((320,20))
+            
+            sizer_slit = wx.GridBagSizer(5,5)
+    
+            label_sheight = wx.StaticText(self, -1, "Height")
+            label_swidth = wx.StaticText(self, -1, "Width")
+            #label_sunits1 = wx.StaticText(self, -1, "[A^(-1)]")
+            label_sunits2 = wx.StaticText(self, -1, "[A^(-1)]")
+            self.sheight_ctl = wx.TextCtrl(self, -1, size=(60,20))
+            self.swidth_ctl = wx.TextCtrl(self, -1, size=(60,20))
+            self.sheight_ctl.SetToolTipString("Enter slit height in units of Q or leave blank.")
+            self.swidth_ctl.SetToolTipString("Enter slit width in units of Q or leave blank.")
+            self.sheight_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
+            self.swidth_ctl.Bind(wx.EVT_TEXT,  self._on_pars_changed)
+            
+            iy = 0
+            sizer_slit.Add(label_sheight,    (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
+            sizer_slit.Add(self.sheight_ctl, (iy,1), (1,1), wx.LEFT|wx.EXPAND, 10)
+            #sizer_slit.Add(label_sunits1,    (iy,2), (1,1), wx.LEFT|wx.EXPAND, 10)
+            sizer_slit.Add(label_swidth,     (iy,2), (1,1), wx.LEFT|wx.EXPAND, 15)
+            sizer_slit.Add(self.swidth_ctl,  (iy,3), (1,1), wx.LEFT|wx.EXPAND, 10)
+            sizer_slit.Add(label_sunits2,    (iy,4), (1,1), wx.LEFT|wx.EXPAND, 10)
+            
+            sboxsizer.Add(sizer_slit, wx.TOP, 15)
+            vbox.Add(sboxsizer)
+        
 
         # ----- Parameters -----
         parsbox = wx.StaticBox(self, -1, "Parameters")
@@ -334,11 +400,17 @@ class InversionControl(wx.Panel):
         self.alpha_estimate_ctl.SetToolTipString("Waiting for estimate...")
         
         # EVT_TEXT would trigger an event for each character entered
-        self.nfunc_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
-        self.alpha_ctl.Bind(wx.EVT_KILL_FOCUS, self._read_pars)
-        self.dmax_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
+        #self.nfunc_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
+        #self.alpha_ctl.Bind(wx.EVT_KILL_FOCUS, self._read_pars)
+        #self.dmax_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
         #self.dmax_ctl.Bind(wx.EVT_TEXT_ENTER, self._on_pars_changed)
         #self.Bind(wx.EVT_TEXT_ENTER, self._on_pars_changed)
+        
+        self.nfunc_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
+        self.alpha_ctl.Bind(wx.EVT_TEXT, self._read_pars)
+        self.dmax_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
+        
+        
         
         sizer_params = wx.GridBagSizer(5,5)
 
@@ -368,16 +440,22 @@ class InversionControl(wx.Panel):
 
         label_qmin = wx.StaticText(self, -1, "Q min")
         label_qmax = wx.StaticText(self, -1, "Q max")
+        #label_qunits1 = wx.StaticText(self, -1, "[A^(-1)]")
+        label_qunits2 = wx.StaticText(self, -1, "[A^(-1)]")
         self.qmin_ctl = wx.TextCtrl(self, -1, size=(60,20))
         self.qmax_ctl = wx.TextCtrl(self, -1, size=(60,20))
-        self.qmin_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
-        self.qmax_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
+        self.qmin_ctl.SetToolTipString("Select a lower bound for Q or leave blank.")
+        self.qmax_ctl.SetToolTipString("Select an upper bound for Q or leave blank.")
+        self.qmin_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
+        self.qmax_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
         
         iy = 0
-        sizer_q.Add(label_qmin, (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
+        sizer_q.Add(label_qmin,    (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
         sizer_q.Add(self.qmin_ctl, (iy,1), (1,1), wx.LEFT|wx.EXPAND, 10)
-        sizer_q.Add(label_qmax, (iy,2), (1,1), wx.LEFT|wx.EXPAND, 15)
+        #sizer_q.Add(label_qunits1, (iy,2), (1,1), wx.LEFT|wx.EXPAND, 15)
+        sizer_q.Add(label_qmax,    (iy,2), (1,1), wx.LEFT|wx.EXPAND, 15)
         sizer_q.Add(self.qmax_ctl, (iy,3), (1,1), wx.LEFT|wx.EXPAND, 10)
+        sizer_q.Add(label_qunits2, (iy,4), (1,1), wx.LEFT|wx.EXPAND, 15)
         qboxsizer.Add(sizer_q, wx.TOP, 15)
         vbox.Add(qboxsizer)
         
@@ -387,6 +465,22 @@ class InversionControl(wx.Panel):
         resbox = wx.StaticBox(self, -1, "Outputs")
         ressizer = wx.StaticBoxSizer(resbox, wx.VERTICAL)
         ressizer.SetMinSize((320,50))
+        
+        label_rg       = wx.StaticText(self, -1, "Rg")
+        label_rg_unit  = wx.StaticText(self, -1, "[A]")
+        label_iq0      = wx.StaticText(self, -1, "I(Q=0)")
+        label_iq0_unit = wx.StaticText(self, -1, "[A^(-1)]")
+        label_bck      = wx.StaticText(self, -1, "Background")
+        label_bck_unit = wx.StaticText(self, -1, "[A^(-1)]")
+        self.rg_ctl    = wx.TextCtrl(self, -1, size=(60,20))
+        self.rg_ctl.SetEditable(False)
+        self.rg_ctl.SetToolTipString("Radius of gyration for the computed P(r).")
+        self.iq0_ctl   = wx.TextCtrl(self, -1, size=(60,20))
+        self.iq0_ctl.SetEditable(False)
+        self.iq0_ctl.SetToolTipString("Scattering intensity at Q=0 for the computed P(r).")
+        self.bck_ctl   = wx.TextCtrl(self, -1, size=(60,20))
+        self.bck_ctl.SetEditable(False)
+        self.bck_ctl.SetToolTipString("Value of estimated constant background.")
         
         label_time = wx.StaticText(self, -1, "Computation time")
         label_time_unit = wx.StaticText(self, -1, "secs")
@@ -426,6 +520,18 @@ class InversionControl(wx.Panel):
         sizer_res = wx.GridBagSizer(5,5)
 
         iy = 0
+        sizer_res.Add(label_rg, (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
+        sizer_res.Add(self.rg_ctl,   (iy,1), (1,1), wx.RIGHT|wx.EXPAND, 15)
+        sizer_res.Add(label_rg_unit,   (iy,2), (1,1), wx.RIGHT|wx.EXPAND, 15)
+        iy += 1
+        sizer_res.Add(label_iq0, (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
+        sizer_res.Add(self.iq0_ctl,   (iy,1), (1,1), wx.RIGHT|wx.EXPAND, 15)
+        sizer_res.Add(label_iq0_unit,   (iy,2), (1,1), wx.RIGHT|wx.EXPAND, 15)
+        iy += 1
+        sizer_res.Add(label_bck, (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
+        sizer_res.Add(self.bck_ctl,   (iy,1), (1,1), wx.RIGHT|wx.EXPAND, 15)
+        sizer_res.Add(label_bck_unit,   (iy,2), (1,1), wx.RIGHT|wx.EXPAND, 15)
+        iy += 1
         sizer_res.Add(label_time, (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
         sizer_res.Add(self.time_ctl,   (iy,1), (1,1), wx.RIGHT|wx.EXPAND, 15)
         sizer_res.Add(label_time_unit,   (iy,2), (1,1), wx.RIGHT|wx.EXPAND, 15)
@@ -472,8 +578,6 @@ class InversionControl(wx.Panel):
 
         self.SetSizer(vbox)
         
-
-        
     def _on_accept_alpha(self, evt):
         """
             User has accepted the estimated alpha, 
@@ -499,6 +603,9 @@ class InversionControl(wx.Panel):
         self.qmin_ctl.SetValue("")
         self.qmax_ctl.SetValue("")
         self.time_ctl.SetValue("")
+        self.rg_ctl.SetValue("")
+        self.iq0_ctl.SetValue("")
+        self.bck_ctl.SetValue("")
         self.chi2_ctl.SetValue("")
         self.osc_ctl.SetValue("")
         self.pos_ctl.SetValue("")
@@ -514,6 +621,7 @@ class InversionControl(wx.Panel):
             scenes. 
         """
         flag, alpha, dmax, nfunc, qmin, qmax = self._read_pars()
+        has_bck = self.bck_chk.IsChecked()
         
         # If the pars are valid, estimate alpha
         if flag:
@@ -521,12 +629,14 @@ class InversionControl(wx.Panel):
                 dataset = self.plot_data.GetValue()
                 self.manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc, 
                                                      d_max=dmax,
-                                                     q_min=qmin, q_max=qmax)
+                                                     q_min=qmin, q_max=qmax,
+                                                     bck=has_bck)
             else:
                 path = self.data_file.GetValue()
                 self.manager.estimate_file_inversion(alpha=alpha, nfunc=nfunc, 
                                                      d_max=dmax, path=path,
-                                                     q_min=qmin, q_max=qmax)
+                                                     q_min=qmin, q_max=qmax,
+                                                     bck=has_bck)
         
         
     def _read_pars(self, evt=None):    
@@ -612,6 +722,7 @@ class InversionControl(wx.Panel):
         # Push it to the manager
         
         flag, alpha, dmax, nfunc, qmin, qmax = self._read_pars()
+        has_bck = self.bck_chk.IsChecked()
         
         if flag:
             if self.standalone==False and self.plot_radio.GetValue():
@@ -622,7 +733,8 @@ class InversionControl(wx.Panel):
                 else:
                     self.manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc, 
                                                       d_max=dmax,
-                                                      q_min=qmin, q_max=qmax)
+                                                      q_min=qmin, q_max=qmax,
+                                                      bck=has_bck)
             else:
                 path = self.data_file.GetValue()
                 if len(path.strip())==0:
@@ -631,8 +743,8 @@ class InversionControl(wx.Panel):
                 else:
                     self.manager.setup_file_inversion(alpha=alpha, nfunc=nfunc, 
                                                       d_max=dmax, path=path,
-                                                      q_min=qmin, q_max=qmax
-                                                      )
+                                                      q_min=qmin, q_max=qmax,
+                                                      bck=has_bck)
                 
         else:
             message = "The P(r) form contains invalid values: please submit it again."
@@ -648,7 +760,8 @@ class InversionControl(wx.Panel):
             
             if path and os.path.isfile(path):
                 self.data_file.SetValue(str(path))
-                self.file_radio.SetValue(True)
+                if self.standalone==False:
+                    self.file_radio.SetValue(True)
                 self._on_pars_changed(None)
                 self.manager.show_data(path)
         

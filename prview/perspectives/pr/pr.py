@@ -44,6 +44,7 @@ class Plugin:
         self.max_length = self.DEFAULT_DMAX
         self.q_min      = None
         self.q_max      = None
+        self.has_bck    = False
         ## Remember last plottable processed
         self.last_data  = "sphere_60_q0_2.txt"
         ## Time elapsed for last computation [sec]
@@ -77,14 +78,6 @@ class Plugin:
             Create a menu for the plug-in
         """
         return []
-        import wx
-        shapes = wx.Menu()
-
-        id = wx.NewId()
-        shapes.Append(id, '&Sphere test')
-        wx.EVT_MENU(owner, id, self._fit_pr)
-        
-        return [(id, shapes, "P(r)")]
     
     def help(self, evt):
         """
@@ -439,6 +432,9 @@ class Plugin:
         print "PEAKS:", pr.get_peaks(out) 
         self.control_panel.positive = pr.get_positive(out)
         self.control_panel.pos_err  = pr.get_pos_err(out, cov)
+        self.control_panel.rg = pr.rg(out)
+        self.control_panel.iq0 = pr.iq0(out)
+        self.control_panel.bck = pr.background
         
         for i in range(len(out)):
             try:
@@ -456,6 +452,14 @@ class Plugin:
             #new_plot.group_id = "test group"
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
                 
+        # Compute the fit I(Q=0)
+        try:
+            print "I(0) = ", self.pr.iq0(out)
+        except:
+            pass
+        
+        # Get R_g
+        print "Rg = ", self.pr.rg(out)
         # Show I(q) fit
         self.show_iq(out, self.pr)
         
@@ -484,12 +488,13 @@ class Plugin:
             
 
         
-    def setup_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None):
+    def setup_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None, bck=False):
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
         self.q_min = q_min
         self.q_max = q_max
+        self.has_bck = bck
         
         try:
             self._create_plot_pr()
@@ -497,12 +502,13 @@ class Plugin:
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
 
-    def estimate_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None):
+    def estimate_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None, bck=False):
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
         self.q_min = q_min
         self.q_max = q_max
+        self.has_bck = bck
         
         try:
             self._create_plot_pr()
@@ -524,6 +530,7 @@ class Plugin:
         pr.q_max = self.q_max
         pr.x = self.current_plottable.x
         pr.y = self.current_plottable.y
+        pr.has_bck = self.has_bck
         
         # Fill in errors if none were provided
         if self.current_plottable.dy == None:
@@ -539,12 +546,13 @@ class Plugin:
         self.iq_data_shown = True
 
           
-    def setup_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None):
+    def setup_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None, bck=False):
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
         self.q_min = q_min
         self.q_max = q_max
+        self.has_bck = bck
         
         try:
             if self._create_file_pr(path):
@@ -552,12 +560,13 @@ class Plugin:
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
           
-    def estimate_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None):
+    def estimate_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None, bck=False):
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
         self.q_min = q_min
         self.q_max = q_max
+        self.has_bck = bck
         
         try:
             if self._create_file_pr(path):
@@ -585,6 +594,7 @@ class Plugin:
             pr.x = x
             pr.y = y
             pr.err = err
+            pr.has_bck = self.has_bck
             
             self.pr = pr
             return True

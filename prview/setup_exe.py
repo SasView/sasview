@@ -14,6 +14,32 @@ import matplotlib
 
 import py2exe
 
+manifest = """
+   <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+   <assembly xmlns="urn:schemas-microsoft-com:asm.v1"
+   manifestVersion="1.0">
+   <assemblyIdentity
+       version="0.64.1.0"
+       processorArchitecture="x86"
+       name="Controls"
+       type="win32"
+   />
+   <description>PrView</description>
+   <dependency>
+       <dependentAssembly>
+           <assemblyIdentity
+               type="win32"
+               name="Microsoft.Windows.Common-Controls"
+               version="6.0.0.0"
+               processorArchitecture="X86"
+               publicKeyToken="6595b64144ccf1df"
+               language="*"
+           />
+       </dependentAssembly>
+   </dependency>
+   </assembly>
+  """
+
     
 class Target:
     def __init__(self, **kw):
@@ -58,6 +84,7 @@ target_wx_client = Target(
     script = 'sansview.py',
     #other_resources = [(RT_MANIFEST, 1, manifest_template % dict(prog="AppJob"))],
     icon_resources = [(1, "images/ball.ico")],
+    other_resources = [(24,1,manifest)],
     dest_base = "prView"
     )
 

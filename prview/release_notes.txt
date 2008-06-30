@@ -5,7 +5,12 @@ PrView 0.1
 
 Package name: None
 
-1- Version 0.1.0
+1- Version 0.1.1
+
+	- Release date: 6/XX/2008
+	- First version put together built on guiframe.
+
+   Version 0.1.0
 
 	- Release date: 5/28/2008
 	- First version put together built on guiframe.

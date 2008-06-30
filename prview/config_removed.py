@@ -5,7 +5,7 @@ import time
 
 # Version of the application
 __appname__ = "PrView"
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __download_page__ = 'http://danse.chem.utk.edu'
 
 
