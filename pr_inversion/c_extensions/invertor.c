@@ -19,12 +19,13 @@ void invertor_init(Invertor_params *pars) {
 	pars->d_max = 180;
 	pars->q_min = -1.0;
 	pars->q_max = -1.0;
+	pars->has_bck = 0;
 }
 
 
 /**
  * P(r) of a sphere, for test purposes
- * 
+ *
  * @param R: radius of the sphere
  * @param r: distance, in the same units as the radius
  * @return: P(r)
@@ -40,7 +41,7 @@ double pr_sphere(double R, double r) {
 /**
  * Orthogonal functions:
  * B(r) = 2r sin(pi*nr/d)
- * 
+ *
  */
 double ortho(double d_max, int n, double r) {
 	return 2.0*r*sin(pi*n*r/d_max);
@@ -48,7 +49,7 @@ double ortho(double d_max, int n, double r) {
 
 /**
  * Fourier transform of the nth orthogonal function
- * 
+ *
  */
 double ortho_transformed(double d_max, int n, double q) {
 	return 8.0*pow(pi, 2.0)/q * d_max * n * pow(-1.0, n+1)
@@ -56,8 +57,30 @@ double ortho_transformed(double d_max, int n, double q) {
 }
 
 /**
+ * Slit-smeared Fourier transform of the nth orthogonal function.
+ * Smearing follows Lake, Acta Cryst. (1967) 23, 191.
+ */
+double ortho_transformed_smeared(double d_max, int n, double height, double width, double q, int npts) {
+	double sum, value, y, z;
+	int i, j;
+	double fnpts;
+	sum = 0.0;
+	fnpts = (float)npts-1.0;
+
+	for(i=0; i<npts; i++) {
+		y = -width/2.0+width/fnpts*(float)i;
+		for(j=0; j<npts; j++) {
+			z = height/fnpts*(float)j;
+			sum += ortho_transformed(d_max, n, sqrt((q-y)*(q-y)+z*z));
+		}
+	}
+
+	return sum/npts/npts/height/width;
+}
+
+/**
  * First derivative in of the orthogonal function dB(r)/dr
- * 
+ *
  */
 double ortho_derived(double d_max, int n, double r) {
     return 2.0*sin(pi*n*r/d_max) + 2.0*r*cos(pi*n*r/d_max);
@@ -79,7 +102,7 @@ double iq(double *pars, double d_max, int n_c, double q) {
  * P(r) calculated from the expansion.
  */
 double pr(double *pars, double d_max, int n_c, double r) {
-    double sum = 0.0;  
+    double sum = 0.0;
 	int i;
     for (i=0; i<n_c; i++) {
         sum += pars[i] * ortho(d_max, i+1, r);
@@ -90,9 +113,9 @@ double pr(double *pars, double d_max, int n_c, double r) {
 /**
  * P(r) calculated from the expansion, with errors
  */
-void pr_err(double *pars, double *err, double d_max, int n_c, 
+void pr_err(double *pars, double *err, double d_max, int n_c,
 		double r, double *pr_value, double *pr_value_err) {
-    double sum = 0.0; 
+    double sum = 0.0;
     double sum_err = 0.0;
     double func_value;
 	int i;
@@ -108,14 +131,14 @@ void pr_err(double *pars, double *err, double d_max, int n_c,
     } else {
     	*pr_value_err = sum;
     }
-} 
+}
 
 /**
  * dP(r)/dr calculated from the expansion.
  */
 double dprdr(double *pars, double d_max, int n_c, double r) {
-    double sum = 0.0; 
-	int i; 
+    double sum = 0.0;
+	int i;
     for (i=0; i<n_c; i++) {
         sum += pars[i] * 2.0*(sin(pi*(i+1)*r/d_max) + pi*(i+1)*r/d_max * cos(pi*(i+1)*r/d_max));
     }
@@ -126,7 +149,7 @@ double dprdr(double *pars, double d_max, int n_c, double r) {
  * regularization term calculated from the expansion.
  */
 double reg_term(double *pars, double d_max, int n_c, int nslice) {
-    double sum = 0.0; 
+    double sum = 0.0;
     double r;
     double deriv;
 	int i;
@@ -142,8 +165,8 @@ double reg_term(double *pars, double d_max, int n_c, int nslice) {
  * regularization term calculated from the expansion.
  */
 double int_p2(double *pars, double d_max, int n_c, int nslice) {
-    double sum = 0.0; 
-    double r; 
+    double sum = 0.0;
+    double r;
     double value;
 	int i;
     for (i=0; i<nslice; i++) {
@@ -155,10 +178,26 @@ double int_p2(double *pars, double d_max, int n_c, int nslice) {
 }
 
 /**
+ * Integral of P(r)
+ */
+double int_pr(double *pars, double d_max, int n_c, int nslice) {
+    double sum = 0.0;
+    double r;
+    double value;
+	int i;
+    for (i=0; i<nslice; i++) {
+    	r = d_max/(1.0*nslice)*i;
+    	value = pr(pars, d_max, n_c, r);
+        sum += value;
+    }
+    return sum/(1.0*nslice)*d_max;
+}
+
+/**
  * Get the number of P(r) peaks.
  */
 int npeaks(double *pars, double d_max, int n_c, int nslice) {
-    double r; 
+    double r;
     double value;
 	int i;
 	double previous = 0.0;
@@ -186,12 +225,12 @@ int npeaks(double *pars, double d_max, int n_c, int nslice) {
  * A valid P(r) is define as being positive for all r.
  */
 double positive_integral(double *pars, double d_max, int n_c, int nslice) {
-    double r; 
+    double r;
     double value;
 	int i;
 	double sum_pos = 0.0;
 	double sum = 0.0;
-	
+
     for (i=0; i<nslice; i++) {
     	r = d_max/(1.0*nslice)*i;
     	value = pr(pars, d_max, n_c, r);
@@ -206,21 +245,42 @@ double positive_integral(double *pars, double d_max, int n_c, int nslice) {
  * of r that is at least one sigma above zero.
  */
 double positive_errors(double *pars, double *err, double d_max, int n_c, int nslice) {
-    double r; 
+    double r;
     double value;
-	int i; 
+	int i;
 	double sum_pos = 0.0;
 	double sum = 0.0;
 	double pr_val;
 	double pr_val_err;
-	
+
     for (i=0; i<nslice; i++) {
     	r = d_max/(1.0*nslice)*i;
     	pr_err(pars, err, d_max, n_c, r, &pr_val, &pr_val_err);
     	if (pr_val>pr_val_err) sum_pos += pr_val;
     	sum += fabs(pr_val);
-    	
+
 
     }
     return sum_pos/sum;
 }
+
+/**
+ * R_g radius of gyration calculation
+ *
+ * R_g**2 = integral[r**2 * p(r) dr] /  (2.0 * integral[p(r) dr])
+ */
+double rg(double *pars, double d_max, int n_c, int nslice) {
+    double sum_r2 = 0.0;
+    double sum    = 0.0;
+    double r;
+    double value;
+	int i;
+    for (i=0; i<nslice; i++) {
+    	r = d_max/(1.0*nslice)*i;
+    	value = pr(pars, d_max, n_c, r);
+        sum += value;
+        sum_r2 += r*r*value;
+    }
+    return sqrt(sum_r2/(2.0*sum));
+}
+

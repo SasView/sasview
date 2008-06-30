@@ -62,6 +62,9 @@ class Invertor(Cinvertor):
         - get_positive(pars): returns the fraction of P(r) that is above zero
         - get_pos_err(pars): returns the fraction of P(r) that is 1-sigma above zero
     """
+    #TODO: Allow for slit smearing. Smear each base function once before filling
+    # the A matrix.
+    
     ## Chisqr of the last computation
     chi2  = 0
     ## Time elapsed for last computation
@@ -74,6 +77,11 @@ class Invertor(Cinvertor):
     out = None
     ## Last errors on output values
     cov = None
+    ## Flag to allow I(q) data with constant background
+    #has_bck = False
+    ## Background value
+    background = 0
+    
     
     def __init__(self):
         Cinvertor.__init__(self)
@@ -105,6 +113,17 @@ class Invertor(Cinvertor):
             return self.set_qmax(value)
         elif name=='alpha':
             return self.set_alpha(value)
+        elif name=='slit_height':
+            return self.set_slit_height(value)
+        elif name=='slit_width':
+            return self.set_slit_width(value)
+        elif name=='has_bck':
+            if value==True:
+                return self.set_has_bck(1)
+            elif value==False:
+                return self.set_has_bck(0)
+            else:
+                raise ValueError, "Invertor: has_bck can only be True or False"
             
         return Cinvertor.__setattr__(self, name, value)
     
@@ -141,6 +160,16 @@ class Invertor(Cinvertor):
             return qmax
         elif name=='alpha':
             return self.get_alpha()
+        elif name=='slit_height':
+            return self.get_slit_height()
+        elif name=='slit_width':
+            return self.get_slit_width()
+        elif name=='has_bck':
+            value = self.get_has_bck()
+            if value==1:
+                return True
+            else:
+                return False
         elif name in self.__dict__:
             return self.__dict__[name]
         return None
@@ -160,6 +189,7 @@ class Invertor(Cinvertor):
         invertor.x = self.x
         invertor.y = self.y
         invertor.err = self.err
+        invertor.has_bck = self.has_bck
         
         return invertor
     
@@ -193,8 +223,17 @@ class Invertor(Cinvertor):
             @param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
             @return: c_out, c_cov - the coefficients with covariance matrix 
         """
-        #TODO: call the pyhton implementation for now. In the future, translate this to C.
+        # Reset the background value before proceeding
+        self.background = 0.0
         return self.lstsq(nfunc, nr=nr)
+    
+    def iq(self, out, q):
+        """
+            Function to call to evaluate the scattering intensity
+            @param args: c-parameters, and q
+            @return: I(q)
+        """
+        return Cinvertor.iq(self, out, q)+self.background
     
     def invert_optimize(self, nfunc=10, nr=20):
         """
@@ -324,7 +363,9 @@ class Invertor(Cinvertor):
             a matrix filled with zeros will be returned.
 
         """
-        import math
+        #TODO: Allow for background by starting at n=0 (since the base function
+        # is zero for n=0).
+        import math, time
         from scipy.linalg.basic import lstsq
         
         if self.is_valid()<0:
@@ -338,26 +379,20 @@ class Invertor(Cinvertor):
         sqrt_alpha = math.sqrt(math.fabs(self.alpha))
         if sqrt_alpha<0.0:
             nq = 0
-        
+
+        # If we need to fit the background, add a term
+        if self.has_bck==True:
+            nfunc_0 = nfunc
+            nfunc += 1
+
         a = numpy.zeros([npts+nq, nfunc])
         b = numpy.zeros(npts+nq)
         err = numpy.zeros([nfunc, nfunc])
         
-        for j in range(nfunc):
-            for i in range(npts):
-                if self._accept_q(self.x[i]):
-                    a[i][j] = self.basefunc_ft(self.d_max, j+1, self.x[i])/self.err[i]
-                    
-            #TODO: refactor this: i_q should really be i_r
-            for i_q in range(nq):
-                r = self.d_max/nq*i_q
-                #a[i_q+npts][j] = sqrt_alpha * 1.0/nq*self.d_max*2.0*math.fabs(math.sin(math.pi*(j+1)*r/self.d_max) + math.pi*(j+1)*r/self.d_max * math.cos(math.pi*(j+1)*r/self.d_max))     
-                a[i_q+npts][j] = sqrt_alpha * 1.0/nq*self.d_max*2.0*(2.0*math.pi*(j+1)/self.d_max*math.cos(math.pi*(j+1)*r/self.d_max) + math.pi**2*(j+1)**2*r/self.d_max**2 * math.sin(math.pi*(j+1)*r/self.d_max))     
-        
-        for i in range(npts):
-            if self._accept_q(self.x[i]):
-                b[i] = self.y[i]/self.err[i]
-            
+        # Construct the a matrix and b vector that represent the problem
+        self._get_matrix(nfunc, nq, a, b)
+             
+        # Perform the inversion (least square fit)
         c, chi2, rank, n = lstsq(a, b)
         # Sanity check
         try:
@@ -366,24 +401,12 @@ class Invertor(Cinvertor):
             chi2 = -1.0
         self.chi2 = chi2
                 
-        at = numpy.transpose(a)
         inv_cov = numpy.zeros([nfunc,nfunc])
-        for i in range(nfunc):
-            for j in range(nfunc):
-                inv_cov[i][j] = 0.0
-                for k in range(npts+nr):
-                    #if self._accept_q(self.x[i]):
-                    inv_cov[i][j] += at[i][k]*a[k][j]
+        # Get the covariance matrix, defined as inv_cov = a_transposed * a
+        self._get_invcov_matrix(nfunc, nr, a, inv_cov)
                     
         # Compute the reg term size for the output
-        sum_sig = 0.0
-        sum_reg = 0.0
-        for j in range(nfunc):
-            for i in range(npts):
-                if self._accept_q(self.x[i]):
-                    sum_sig += (a[i][j])**2
-            for i in range(nq):
-                sum_reg += (a[i+npts][j])**2
+        sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
                     
         if math.fabs(self.alpha)>0:
             new_alpha = sum_sig/(sum_reg/self.alpha)
@@ -402,10 +425,101 @@ class Invertor(Cinvertor):
             pass
             
         # Keep a copy of the last output
-        self.out = c
-        self.cov = err
+        if self.has_bck==False:
+            self.background = 0
+            self.out = c
+            self.cov = err
+        else:
+            self.background = c[0]
+            
+            err_0 = numpy.zeros([nfunc, nfunc])
+            c_0 = numpy.zeros(nfunc)
+            
+            for i in range(nfunc_0):
+                c_0[i] = c[i+1]
+                for j in range(nfunc_0):
+                    err_0[i][j] = err[i+1][j+1]
+                    
+            self.out = c_0
+            self.cov = err_0
+            
+        return self.out, self.cov
         
-        return c, err
+    def lstsq_bck(self, nfunc=5, nr=20):
+        #TODO: Allow for background by starting at n=0 (since the base function
+        # is zero for n=0).
+        import math
+        from scipy.linalg.basic import lstsq
+        
+        if self.is_valid()<0:
+            raise RuntimeError, "Invertor: invalid data; incompatible data lengths."
+        
+        self.nfunc = nfunc
+        # a -- An M x N matrix.
+        # b -- An M x nrhs matrix or M vector.
+        npts = len(self.x)
+        nq   = nr
+        sqrt_alpha = math.sqrt(math.fabs(self.alpha))
+        if sqrt_alpha<0.0:
+            nq = 0
+        
+        err_0 = numpy.zeros([nfunc, nfunc])
+        c_0 = numpy.zeros(nfunc)
+        nfunc_0 = nfunc
+        nfunc += 1
+        
+        a = numpy.zeros([npts+nq, nfunc])
+        b = numpy.zeros(npts+nq)
+        err = numpy.zeros([nfunc, nfunc])
+        
+        # Construct the a matrix and b vector that represent the problem
+        self._get_matrix(nfunc, nq, a, b)
+            
+        c, chi2, rank, n = lstsq(a, b)
+        # Sanity check
+        try:
+            float(chi2)
+        except:
+            chi2 = -1.0
+        self.chi2 = chi2
+
+        inv_cov = numpy.zeros([nfunc,nfunc])
+        # Get the covariance matrix, defined as inv_cov = a_transposed * a
+        self._get_invcov_matrix(nfunc, nr, a, inv_cov)
+                    
+        # Compute the reg term size for the output
+        sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
+        
+        if math.fabs(self.alpha)>0:
+            new_alpha = sum_sig/(sum_reg/self.alpha)
+        else:
+            new_alpha = 0.0
+        self.suggested_alpha = new_alpha
+        
+        try:
+            cov = numpy.linalg.pinv(inv_cov)
+            err = math.fabs(chi2/float(npts-nfunc)) * cov
+        except:
+            # We were not able to estimate the errors,
+            # returns an empty covariance matrix
+            print "lstsq:", sys.exc_value
+            print chi2
+            pass
+            
+        # Keep a copy of the last output
+        
+        print "BACKGROUND =", c[0]
+        self.background = c[0]
+        
+        for i in range(nfunc_0):
+            c_0[i] = c[i+1]
+            for j in range(nfunc_0):
+                err_0[i][j] = err[i+1][j+1]
+                
+        self.out = c_0
+        self.cov = err_0
+        
+        return c_0, err_0
         
     def estimate_alpha(self, nfunc):
         """
@@ -432,14 +546,14 @@ class Invertor(Cinvertor):
                 pr.alpha = 0.0001
                  
             # Perform inversion to find the largest alpha
-            out, cov = pr.lstsq(nfunc)
+            out, cov = pr.invert(nfunc)
             elapsed = time.time()-starttime
             initial_alpha = pr.alpha
             initial_peaks = pr.get_peaks(out)
     
             # Try the inversion with the estimated alpha
             pr.alpha = pr.suggested_alpha
-            out, cov = pr.lstsq(nfunc)
+            out, cov = pr.invert(nfunc)
     
             npeaks = pr.get_peaks(out)
             # if more than one peak to start with
@@ -457,7 +571,7 @@ class Invertor(Cinvertor):
                 found = False
                 for i in range(10):
                     pr.alpha = (0.33)**(i+1)*alpha
-                    out, cov = pr.lstsq(nfunc)
+                    out, cov = pr.invert(nfunc)
                     
                     peaks = pr.get_peaks(out)
                     if peaks>1:

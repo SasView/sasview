@@ -62,6 +62,21 @@ class TestBasicComponent(unittest.TestCase):
         for i in range(self.ntest):
             self.x_in[i] = 1.0*(i+1)
 
+    def test_has_bck_flag(self):
+        """
+            Tests the has_bck flag operations
+        """
+        self.assertEqual(self.invertor.has_bck, False)
+        self.invertor.has_bck=True
+        self.assertEqual(self.invertor.has_bck, True)
+        def doit_float():
+            self.invertor.has_bck  = 2.0
+        def doit_str():
+            self.invertor.has_bck  = 'a'
+
+        self.assertRaises(ValueError, doit_float)
+        self.assertRaises(ValueError, doit_str)
+        
 
     def testset_dmax(self):
         """
@@ -176,6 +191,7 @@ class TestBasicComponent(unittest.TestCase):
         self.invertor.err = err
         # Perform inversion
         out, cov = self.invertor.invert_optimize(10)
+        #out, cov = self.invertor.invert(10)
         # This is a very specific case
         # We should make sure it always passes
         self.assertTrue(self.invertor.chi2/len(x)<200.00)
