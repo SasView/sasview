@@ -23,7 +23,7 @@ static PyObject * CinvertorError = NULL;
         if (err < 0) return NULL; \
         len /= sizeof(*buf); \
     } while (0)
-    
+
 #define OUTVECTOR(obj,buf,len) \
     do { \
         int err = PyObject_AsWriteBuffer(obj, (void **)(&buf), &len); \
@@ -862,7 +862,7 @@ static PyObject * get_matrix(Cinvertor *self, PyObject *args) {
 	OUTVECTOR(b_obj,b,n_b);
 
 	assert(n_b>=nfunc);
-	assert(n_a>=nfunc*(nr*self->params.npoints));
+	assert(n_a>=nfunc*(nr+self->params.npoints));
 
 	sqrt_alpha = sqrt(self->params.alpha);
 	pi = acos(-1.0);

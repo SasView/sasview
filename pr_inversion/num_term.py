@@ -48,7 +48,6 @@ class Num_terms():
         self.err_list = []
         self.alpha_list = []
         for k in range(self.nterm_min, self.nterm_max):
-            print "get_out ", k
             if self.isquit_func != None:
                 self.isquit_func()
             best_alpha, message, elapsed = inver.estimate_alpha(k)
@@ -116,7 +115,7 @@ class Num_terms():
             #er = self.err_list[n]
             #nt = self.osc_list.index(r) + 10
             nt_ls.append(n)
-        print "nt list", nt_ls
+        #print "nt list", nt_ls
         return nt_ls
 
      def num_terms(self, isquit_func=None):
