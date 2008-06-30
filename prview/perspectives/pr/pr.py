@@ -402,6 +402,26 @@ class Plugin:
         self.control_panel.alpha_estimate = alpha
         if not message==None:
             wx.PostEvent(self.parent, StatusEvent(status=str(message)))
+            
+        self.perform_estimateNT()
+    
+
+    
+    def _estimateNT_completed(self, nterms, alpha, message, elapsed):
+        """
+            Parameter estimation completed, 
+            display the results to the user
+            @param alpha: estimated best alpha
+            @param nterms: estimated number of terms
+            @param elapsed: computation time
+        """
+        # Save useful info
+        print "Number of terms =", nterms
+        self.elapsed = elapsed
+        self.control_panel.nterms_estimate = nterms
+        self.control_panel.alpha_estimate = alpha
+        if not message==None:
+            wx.PostEvent(self.parent, StatusEvent(status=str(message)))
     
     def _completed(self, out, cov, pr, elapsed):
         """
@@ -615,6 +635,22 @@ class Plugin:
                                             updatefn   = None)
         self.estimation_thread.queue()
         self.estimation_thread.ready(2.5)
+    
+    def perform_estimateNT(self):
+        from pr_thread import EstimateNT
+        from copy import deepcopy
+        
+        wx.PostEvent(self.parent, StatusEvent(status=''))
+        # If a thread is already started, stop it
+        if self.estimation_thread != None and self.estimation_thread.isrunning():
+            self.estimation_thread.stop()
+                
+        pr = self.pr.clone()
+        self.estimation_thread = EstimateNT(pr, self.nfunc, error_func=self._thread_error, 
+                                            completefn = self._estimateNT_completed, 
+                                            updatefn   = None)
+        self.estimation_thread.queue()
+        self.estimation_thread.ready(2.5)
         
     def perform_inversion(self):
         
@@ -745,4 +781,11 @@ class Plugin:
             [Somehow openGL needs this call]
         """
         self.parent.set_perspective(self.perspective)
+  
+if __name__ == "__main__":
+    i = Plugin()
+    print i.perform_estimateNT()
+    
+    
+    
     

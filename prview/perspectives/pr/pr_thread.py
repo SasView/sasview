@@ -74,7 +74,7 @@ class EstimatePr(CalcThread):
         try:
             CalcThread.isquit(self)
         except KeyboardInterrupt:
-            printEVT("P(r) calc interrupted")
+            printEVT("Alpha estimator thread interrupted")
             raise KeyboardInterrupt    
         
     def compute(self):
@@ -83,9 +83,49 @@ class EstimatePr(CalcThread):
         """
         try:            
             alpha, message, elapsed = self.pr.estimate_alpha(self.nfunc)
+            self.isquit()
             self.complete(alpha=alpha, message=message, elapsed=elapsed)
         except:
             if not self.error_func==None:
                 printEVT("EstimatePr.compute: %s" % sys.exc_value)
+
+class EstimateNT(CalcThread):
+    
+    def __init__(self, pr, nfunc=5, error_func=None,
+                 completefn = None,
+                 updatefn   = None,
+                 yieldtime  = 0.01,
+                 worktime   = 0.01
+                 ):
+        CalcThread.__init__(self,completefn,
+                 updatefn,
+                 yieldtime,
+                 worktime)
+        self.pr = pr
+        self.nfunc = nfunc
+        self.error_func = error_func
+        self.starttime = 0
+        
+    def isquit(self):
+        try:
+            CalcThread.isquit(self)
+        except KeyboardInterrupt:
+            printEVT("Number of terms thread interrupted")
+            raise KeyboardInterrupt    
+        
+    def compute(self):
+        """
+            Calculates the estimate
+        """
+        import time
+        try:            
+            t_0 = time.time()
+            nterms, alpha, message = self.pr.estimate_numterms(self.isquit)
+            t_1 = time.time()-t_0
+            self.isquit()
+            self.complete(nterms=nterms, alpha=alpha, message=message, elapsed=t_1)
+        except:
+            if not self.error_func==None:
+                printEVT("EstimatePr2.compute: %s" % sys.exc_value)
 
     

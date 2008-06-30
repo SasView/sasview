@@ -148,6 +148,7 @@ class InversionControl(wx.Panel):
         
         ## Estimates
         self.alpha_estimate_ctl = None
+        self.nterms_estimate_ctl = None
         
         ## Data manager
         self.manager   = None
@@ -193,6 +194,10 @@ class InversionControl(wx.Panel):
             self.alpha_estimate_ctl.SetLabel("%-3.1g" % value)
             #self.alpha_estimate_ctl.Show()
             #self.label_sugg.Show()
+        elif name=='nterms_estimate':
+            self.nterms_estimate_ctl.SetToolTipString("Click to accept value.")
+            self.nterms_estimate_ctl.Enable(True)
+            self.nterms_estimate_ctl.SetLabel("%-g" % value)
         elif name=='plotname':
             if self.standalone==False:
                 self.plot_data.SetValue(str(value))
@@ -273,6 +278,8 @@ class InversionControl(wx.Panel):
             return self.pos_err_ctl.GetValue()
         elif name=='alpha_estimate':
             return self.alpha_estimate_ctl.GetLabel()
+        elif name=='nterms_estimate':
+            return self.nterms_estimate_ctl.GetLabel()
         elif name=='plotname':
             if self.standalone==False:
                 return self.plot_data.GetValue()
@@ -399,6 +406,15 @@ class InversionControl(wx.Panel):
         #self.alpha_estimate_ctl.SetBackgroundColour(self.GetBackgroundColour())
         self.alpha_estimate_ctl.SetToolTipString("Waiting for estimate...")
         
+        id = wx.NewId()
+        self.nterms_estimate_ctl  = wx.Button(self, id, "")
+        #self.nterms_estimate_ctl.Hide()
+        self.Bind(wx.EVT_BUTTON, self._on_accept_nterms, id = id)   
+        self.nterms_estimate_ctl.Enable(False)
+        #self.nterms_estimate_ctl.SetBackgroundColour('#ffdf85')
+        #self.nterms_estimate_ctl.SetBackgroundColour(self.GetBackgroundColour())
+        self.nterms_estimate_ctl.SetToolTipString("Waiting for estimate...")
+        
         # EVT_TEXT would trigger an event for each character entered
         #self.nfunc_ctl.Bind(wx.EVT_KILL_FOCUS, self._on_pars_changed)
         #self.alpha_ctl.Bind(wx.EVT_KILL_FOCUS, self._read_pars)
@@ -419,6 +435,7 @@ class InversionControl(wx.Panel):
         iy += 1
         sizer_params.Add(label_nfunc,      (iy,0), (1,1), wx.LEFT, 15)
         sizer_params.Add(self.nfunc_ctl,   (iy,1), (1,1), wx.RIGHT, 0)
+        sizer_params.Add(self.nterms_estimate_ctl, (iy,2), (1,1), wx.LEFT, 15)
         iy += 1
         sizer_params.Add(label_alpha,      (iy,0), (1,1), wx.LEFT, 15)
         sizer_params.Add(self.alpha_ctl,   (iy,1), (1,1), wx.RIGHT, 0)
@@ -592,6 +609,21 @@ class InversionControl(wx.Panel):
             import sys
             print "InversionControl._on_accept_alpha: %s" % sys.exc_value
             pass
+    
+    def _on_accept_nterms(self, evt):
+        """
+            User has accepted the estimated number of terms, 
+            set it as part of the input parameters
+        """
+        try:
+            nterms = self.nterms_estimate_ctl.GetLabel()
+            tmp = float(nterms)
+            self.nfunc_ctl.SetValue(nterms)
+        except:
+            # No estimate or bad estimate, either do nothing
+            import sys
+            print "InversionControl._on_accept_nterms: %s" % sys.exc_value
+            pass
         
     def _on_reset(self, evt):
         """
@@ -612,6 +644,8 @@ class InversionControl(wx.Panel):
         self.pos_err_ctl.SetValue("")
         self.alpha_estimate_ctl.Enable(False)
         self.alpha_estimate_ctl.SetLabel("")
+        self.nterms_estimate_ctl.Enable(False)
+        self.nterms_estimate_ctl.SetLabel("")
         self._on_pars_changed()
         
     def _on_pars_changed(self, evt=None):
