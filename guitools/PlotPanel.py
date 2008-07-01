@@ -571,7 +571,7 @@ class PlotPanel(wx.Panel):
         
         from plottable_interactor import PointInteractor
         p = PointInteractor(self, self.subplot, zorder=3, id=name)
-        p.points(x, y, dx, dy, color, symbol, label)
+        p.points(x, y, dx=dx, dy=dy, color=color, symbol=symbol, label=label)
         
         self.subplot.set_yscale(self.yscale)
         self.subplot.set_xscale(self.xscale)
@@ -583,7 +583,7 @@ class PlotPanel(wx.Panel):
         
         from plottable_interactor import PointInteractor
         p = PointInteractor(self, self.subplot, zorder=4, id=name)
-        p.curve(x, y, dy, color, symbol, label)
+        p.curve(x, y, dy=dy, color=color, symbol=symbol, label=label)
         
         self.subplot.set_yscale(self.yscale)
         self.subplot.set_xscale(self.xscale)

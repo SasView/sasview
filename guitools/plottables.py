@@ -42,6 +42,7 @@ distinctiveness rather than a simple colour number.
 import copy
 import numpy
 import math
+import sys
 
 if 'any' not in dir(__builtins__):
     def any(L):
@@ -197,10 +198,10 @@ class Graph:
         """Remove an existing plottable from the graph"""
         if plottable in self.plottables:
             del self.plottables[plottable]
-        if self.color > 0:
-            self.color =  self.color -1
-        else:
-            self.color =0 
+            if self.color > 0:
+                self.color =  self.color -1
+            else:
+                self.color =0 
             
     def reset_scale(self):
         """

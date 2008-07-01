@@ -7,6 +7,7 @@ class PointInteractor(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.zorder = zorder
         self.id = id
+        self.color=color
         self.colorlist = ['b','g','r','c','m','y']
         self.symbollist = ['o','x','^','v','<','>','+','s','d','D','h','H','p']
         self.marker = None
@@ -140,6 +141,6 @@ class PointInteractor(_BaseInteractor):
         """
             Update
         """
-        print "update"
+        pass
      
      
