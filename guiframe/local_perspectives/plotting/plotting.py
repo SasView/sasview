@@ -64,12 +64,23 @@ class View1DPanel(PlotPanel):
         self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
         self.graph.render(self)
         
+    def _reset(self):
+        """
+            Resets internal data and graph
+        """    
+        self.graph.reset()
+        self.plots      = {}
+        self.action_ids = {}
+    
     def _onEVT_1DREPLOT(self, event):
         """
             Data is ready to be displayed
             @param event: data event
         """
         #TODO: Check for existence of plot attribute
+        
+        if hasattr(event, "reset"):
+            self._reset()
         
         is_new = True
         if event.plot.name in self.plots.keys():

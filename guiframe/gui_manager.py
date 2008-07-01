@@ -173,12 +173,16 @@ class ViewerFrame(wx.Frame):
     """
         Main application frame
     """
-    def __init__(self, parent, id, title):
+    def __init__(self, parent, id, title, window_height=800, window_width=800):
         """
             Initialize the Frame object
         """
         from local_perspectives.plotting import plotting
-        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(1000, 1000))
+        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(800, 700))
+        
+        # Preferred window size
+        self._window_height = window_height
+        self._window_width  = window_width
         
         # Logging info
         logging.basicConfig(level=logging.DEBUG,
@@ -343,8 +347,9 @@ class ViewerFrame(wx.Frame):
         self._mgr.AddPane(self.defaultPanel, wx.aui.AuiPaneInfo().
                               Name("default").
                               CenterPane().
-                              BestSize(wx.Size(900,800)).
-                              MinSize(wx.Size(800,700)).
+                              # This is where we set the size of the application window
+                              BestSize(wx.Size(self._window_width, self._window_height)).
+                              MinSize(wx.Size(self._window_width, self._window_height)).
                               Show())
 
         # Add the panels to the AUI manager
@@ -360,7 +365,7 @@ class ViewerFrame(wx.Frame):
                     self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                                           Name(p.window_name).Caption(p.window_caption).
                                           CenterPane().
-                                          BestSize(wx.Size(600,600)).
+                                          BestSize(wx.Size(500,500)).
                                           MinSize(wx.Size(200,200)).
                                           Hide())
                 
@@ -380,7 +385,8 @@ class ViewerFrame(wx.Frame):
                                   Hide().
                                   #Show().
                                   BestSize(wx.Size(400,400)).
-                                  MinSize(wx.Size(300,200)))
+                                  MinSize(wx.Size(300,300)))
+
                 
         
     def get_context_menu(self, graph=None):
@@ -434,7 +440,11 @@ class ViewerFrame(wx.Frame):
                           #Hide().
                           #Show().
                           BestSize(wx.Size(400,400)).
-                          MinSize(wx.Size(200,200)))
+                          MinSize(wx.Size(350,350)))
+        pane = self._mgr.GetPane(windowname)
+        self._mgr.MaximizePane(pane)
+        self._mgr.RestoreMaximizedPane()
+        
         
         # Register for showing/hiding the panel
         wx.EVT_MENU(self, ID, self._on_view)
