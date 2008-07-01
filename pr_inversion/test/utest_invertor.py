@@ -175,6 +175,13 @@ class TestBasicComponent(unittest.TestCase):
         
         self.assertEqual(self.invertor.test_no_data, None)
         
+    def test_slitsettings(self):
+        self.invertor.slit_width = 1.0
+        self.assertEqual(self.invertor.slit_width, 1.0)
+        self.invertor.slit_height = 2.0
+        self.assertEqual(self.invertor.slit_height, 2.0)
+        
+        
     def test_inversion(self):
         """
             Test an inversion for which we know the answer

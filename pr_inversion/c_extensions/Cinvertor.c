@@ -626,6 +626,33 @@ static PyObject * get_iq(Cinvertor *self, PyObject *args) {
 	return Py_BuildValue("f", iq_value);
 }
 
+const char get_iq_smeared_doc[] =
+	"Function to call to evaluate the scattering intensity.\n"
+	"The scattering intensity is slit-smeared."
+	" @param args: c-parameters, and q\n"
+	" @return: I(q)";
+
+/**
+ * Function to call to evaluate the scattering intensity
+ * The scattering intensity is slit-smeared.
+ * @param args: c-parameters, and q
+ * @return: I(q)
+ */
+static PyObject * get_iq_smeared(Cinvertor *self, PyObject *args) {
+	double *pars;
+	double q, iq_value;
+	PyObject *data_obj;
+	Py_ssize_t npars;
+
+	if (!PyArg_ParseTuple(args, "Od", &data_obj, &q)) return NULL;
+	OUTVECTOR(data_obj,pars,npars);
+
+	iq_value = iq_smeared(pars, self->params.d_max, npars,
+							self->params.slit_height, self->params.slit_width,
+							q, 21);
+	return Py_BuildValue("f", iq_value);
+}
+
 const char get_pr_doc[] =
 	"Function to call to evaluate P(r)\n"
 	" @param args: c-parameters and r\n"
@@ -874,7 +901,13 @@ static PyObject * get_matrix(Cinvertor *self, PyObject *args) {
                 if (self->params.has_bck==1 && j==0) {
                     a[i*nfunc+j] = 1.0/self->params.err[i];
                 } else {
-                	a[i*nfunc+j] = ortho_transformed(self->params.d_max, j+offset, self->params.x[i])/self->params.err[i];
+                	if (self->params.slit_width>0 || self->params.slit_height>0) {
+                		a[i*nfunc+j] = ortho_transformed_smeared(self->params.d_max,
+                				j+offset, self->params.slit_height, self->params.slit_width,
+                				self->params.x[i], 21)/self->params.err[i];
+                	} else {
+                		a[i*nfunc+j] = ortho_transformed(self->params.d_max, j+offset, self->params.x[i])/self->params.err[i];
+                	}
             	}
             }
         }
@@ -1008,6 +1041,7 @@ static PyMethodDef Cinvertor_methods[] = {
 		   {"get_ny", (PyCFunction)get_ny, METH_VARARGS, get_ny_doc},
 		   {"get_nerr", (PyCFunction)get_nerr, METH_VARARGS, get_nerr_doc},
 		   {"iq", (PyCFunction)get_iq, METH_VARARGS, get_iq_doc},
+		   {"iq_smeared", (PyCFunction)get_iq_smeared, METH_VARARGS, get_iq_smeared_doc},
 		   {"pr", (PyCFunction)get_pr, METH_VARARGS, get_pr_doc},
 		   {"get_pr_err", (PyCFunction)get_pr_err, METH_VARARGS, get_pr_err_doc},
 		   {"is_valid", (PyCFunction)is_valid, METH_VARARGS, is_valid_doc},

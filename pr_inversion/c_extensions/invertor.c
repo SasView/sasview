@@ -62,20 +62,37 @@ double ortho_transformed(double d_max, int n, double q) {
  */
 double ortho_transformed_smeared(double d_max, int n, double height, double width, double q, int npts) {
 	double sum, value, y, z;
-	int i, j;
+	int i, j, n_height, n_width;
+	double count_w;
 	double fnpts;
 	sum = 0.0;
 	fnpts = (float)npts-1.0;
 
-	for(i=0; i<npts; i++) {
-		y = -width/2.0+width/fnpts*(float)i;
-		for(j=0; j<npts; j++) {
+	// Check for zero slit size
+	n_height = (height>0) ? npts : 1;
+	n_width  = (width>0)  ? npts : 1;
+
+	count_w = 0.0;
+
+	for(j=0; j<n_height; j++) {
+		if(height>0){
 			z = height/fnpts*(float)j;
+		} else {
+			z = 0.0;
+		}
+
+		for(i=0; i<n_width; i++) {
+			if(width>0){
+				y = -width/2.0+width/fnpts*(float)i;
+			} else {
+				y = 0.0;
+			}
+			if (((q-y)*(q-y)+z*z)<=0.0) continue;
+			count_w += 1.0;
 			sum += ortho_transformed(d_max, n, sqrt((q-y)*(q-y)+z*z));
 		}
 	}
-
-	return sum/npts/npts/height/width;
+	return sum/count_w;
 }
 
 /**
@@ -94,6 +111,19 @@ double iq(double *pars, double d_max, int n_c, double q) {
 	int i;
     for (i=0; i<n_c; i++) {
         sum += pars[i] * ortho_transformed(d_max, i+1, q);
+    }
+    return sum;
+}
+
+/**
+ * Scattering intensity calculated from the expansion,
+ * slit-smeared.
+ */
+double iq_smeared(double *pars, double d_max, int n_c, double height, double width, double q, int npts) {
+    double sum = 0.0;
+	int i;
+    for (i=0; i<n_c; i++) {
+        sum += pars[i] * ortho_transformed_smeared(d_max, i+1, height, width, q, npts);
     }
     return sum;
 }

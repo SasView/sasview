@@ -54,5 +54,6 @@ double positive_errors(double *pars, double *err, double d_max, int n_c, int nsl
 double rg(double *pars, double d_max, int n_c, int nslice);
 double int_pr(double *pars, double d_max, int n_c, int nslice);
 double ortho_transformed_smeared(double d_max, int n, double heigth, double width, double q, int npts);
+double iq_smeared(double *pars, double d_max, int n_c, double height, double width, double q, int npts);
 
 #endif

@@ -72,7 +72,7 @@ class Invertor(Cinvertor):
     ## Alpha to get the reg term the same size as the signal
     suggested_alpha = 0
     ## Last number of base functions used
-    nfunc = 0
+    nfunc = 10
     ## Last output values
     out = None
     ## Last errors on output values
@@ -190,6 +190,8 @@ class Invertor(Cinvertor):
         invertor.y = self.y
         invertor.err = self.err
         invertor.has_bck = self.has_bck
+        invertor.slit_height = self.slit_height
+        invertor.slit_width  = self.slit_width
         
         return invertor
     
@@ -390,7 +392,9 @@ class Invertor(Cinvertor):
         err = numpy.zeros([nfunc, nfunc])
         
         # Construct the a matrix and b vector that represent the problem
+        t_0 = time.time()
         self._get_matrix(nfunc, nq, a, b)
+        #print "elasped: ", time.time()-t_0
              
         # Perform the inversion (least square fit)
         c, chi2, rank, n = lstsq(a, b)
@@ -530,8 +534,13 @@ class Invertor(Cinvertor):
         """
         from num_term import Num_terms
         estimator = Num_terms(self.clone())
-        
-        return estimator.num_terms(isquit_func)
+        try:
+            return estimator.num_terms(isquit_func)
+        except:
+            # If we fail, estimate alpha and return the default
+            # number of terms 
+            best_alpha, message, elapsed =self.estimate_alpha(self.nfunc)
+            return self.nfunc, best_alpha, "Could not estimate number of terms"
                     
     def estimate_alpha(self, nfunc):
         """
@@ -571,7 +580,8 @@ class Invertor(Cinvertor):
             # if more than one peak to start with
             # just return the estimate
             if npeaks>1:
-                message = "Your P(r) is not smooth, please check your inversion parameters"
+                #message = "Your P(r) is not smooth, please check your inversion parameters"
+                message = None
                 return pr.suggested_alpha, message, elapsed
             else:
                 
