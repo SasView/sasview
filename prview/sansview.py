@@ -13,7 +13,8 @@ class PrFrame(gui_manager.ViewerFrame):
 class PrApp(gui_manager.ViewApp):
     def OnInit(self):
         #from gui_manager import ViewerFrame
-        self.frame = PrFrame(None, -1, local_config.__appname__)    
+        self.frame = PrFrame(None, -1, local_config.__appname__, 
+                             window_height=650, window_width=750)    
         self.frame.Show(True)
 
         if hasattr(self.frame, 'special'):

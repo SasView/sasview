@@ -43,6 +43,9 @@ class CalcPr(CalcThread):
             #out, cov = self.pr.invert_optimize(self.nfunc)
             elapsed = time.time()-self.starttime
             self.complete(out=out, cov=cov, pr=self.pr, elapsed=elapsed)
+        except KeyboardInterrupt:
+            # Thread was interrupted, just proceed
+            printEVT("P(r) calc interrupted")
         except:
             if not self.error_func==None:
                 self.error_func("CalcPr.compute: %s" % sys.exc_value)
@@ -70,13 +73,6 @@ class EstimatePr(CalcThread):
         self.error_func = error_func
         self.starttime = 0
         
-    def isquit(self):
-        try:
-            CalcThread.isquit(self)
-        except KeyboardInterrupt:
-            printEVT("Alpha estimator thread interrupted")
-            raise KeyboardInterrupt    
-        
     def compute(self):
         """
             Calculates the estimate
@@ -85,9 +81,12 @@ class EstimatePr(CalcThread):
             alpha, message, elapsed = self.pr.estimate_alpha(self.nfunc)
             self.isquit()
             self.complete(alpha=alpha, message=message, elapsed=elapsed)
+        except KeyboardInterrupt:
+            # Thread was interrupted, just proceed
+            printEVT("Alpha estimator thread interrupted")
         except:
             if not self.error_func==None:
-                printEVT("EstimatePr.compute: %s" % sys.exc_value)
+                self.error_func("EstimatePr.compute: %s" % sys.exc_value)
 
 class EstimateNT(CalcThread):
     
@@ -106,13 +105,6 @@ class EstimateNT(CalcThread):
         self.error_func = error_func
         self.starttime = 0
         
-    def isquit(self):
-        try:
-            CalcThread.isquit(self)
-        except KeyboardInterrupt:
-            printEVT("Number of terms thread interrupted")
-            raise KeyboardInterrupt    
-        
     def compute(self):
         """
             Calculates the estimate
@@ -124,8 +116,11 @@ class EstimateNT(CalcThread):
             t_1 = time.time()-t_0
             self.isquit()
             self.complete(nterms=nterms, alpha=alpha, message=message, elapsed=t_1)
+        except KeyboardInterrupt:
+            # Thread was interrupted, just proceed
+            printEVT("Number of terms thread interrupted")
         except:
             if not self.error_func==None:
-                printEVT("EstimatePr2.compute: %s" % sys.exc_value)
+                self.error_func("EstimatePr2.compute: %s" % sys.exc_value)
 
     

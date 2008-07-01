@@ -11,9 +11,11 @@ from sans.guicomm.events import NewPlotEvent, StatusEvent
 import math, numpy
 from sans.pr.invertor import Invertor
 
-PR_FIT_LABEL    = "P_{fit}(r)"
-PR_LOADED_LABEL = "P_{loaded}(r)"
-IQ_DATA_LABEL   = "I_{obs}(q)"
+PR_FIT_LABEL       = "P_{fit}(r)"
+PR_LOADED_LABEL    = "P_{loaded}(r)"
+IQ_DATA_LABEL      = "I_{obs}(q)"
+IQ_FIT_LABEL       = "I_{fit}(q)"
+IQ_SMEARED_LABEL   = "I_{smeared}(q)"
 
 import wx.lib
 (NewPrFileEvent, EVT_PR_FILE) = wx.lib.newevent.NewEvent()
@@ -45,6 +47,8 @@ class Plugin:
         self.q_min      = None
         self.q_max      = None
         self.has_bck    = False
+        self.slit_height = 0
+        self.slit_width  = 0
         ## Remember last plottable processed
         self.last_data  = "sphere_60_q0_2.txt"
         ## Time elapsed for last computation [sec]
@@ -55,6 +59,7 @@ class Plugin:
         ## Current invertor
         self.invertor    = None
         self.pr          = None
+        self.pr_estimate = None
         ## Calculation thread
         self.calc_thread = None
         ## Estimation thread
@@ -221,11 +226,32 @@ class Plugin:
                 print "Error getting error", value, x[i]
                 
         new_plot = Theory1D(x, y)
-        new_plot.name = "I_{fit}(q)"
+        new_plot.name = IQ_FIT_LABEL
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         #new_plot.group_id = "test group"
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="I(q)"))
+        
+        # If we have used slit smearing, plot the smeared I(q) too
+        if pr.slit_width>0 or pr.slit_height>0:
+            x = pylab.arange(minq, maxq, maxq/301.0)
+            y = numpy.zeros(len(x))
+            err = numpy.zeros(len(x))
+            for i in range(len(x)):
+                value = pr.iq_smeared(out, x[i])
+                y[i] = value
+                try:
+                    err[i] = math.sqrt(math.fabs(value))
+                except:
+                    err[i] = 1.0
+                    print "Error getting error", value, x[i]
+                    
+            new_plot = Theory1D(x, y)
+            new_plot.name = IQ_SMEARED_LABEL
+            new_plot.xaxis("\\rm{Q}", 'A^{-1}')
+            new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+            #new_plot.group_id = "test group"
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="I(q)"))
         
         
     def _on_pr_npts(self, evt):
@@ -416,7 +442,6 @@ class Plugin:
             @param elapsed: computation time
         """
         # Save useful info
-        print "Number of terms =", nterms
         self.elapsed = elapsed
         self.control_panel.nterms_estimate = nterms
         self.control_panel.alpha_estimate = alpha
@@ -481,7 +506,14 @@ class Plugin:
         # Popup result panel
         #result_panel = InversionResults(self.parent, -1, style=wx.RAISED_BORDER)
         
-    def show_data(self, path=None):
+    def show_data(self, path=None, reset=False):
+        """
+            Show data read from a file
+            @param path: file path
+            @param reset: if True all other plottables will be cleared
+        """
+        
+        
         if not path==None:
             self._create_file_pr(path)  
               
@@ -492,7 +524,7 @@ class Plugin:
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.interactive = True
         #new_plot.group_id = "test group"
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="I(q)"))
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="I(q)", reset=reset))
         
         # Get Q range
         self.control_panel.q_min = self.pr.x.min()
@@ -500,35 +532,45 @@ class Plugin:
             
 
         
-    def setup_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None, bck=False):
+    def setup_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None, 
+                             bck=False, height=0, width=0):
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
         self.q_min = q_min
         self.q_max = q_max
         self.has_bck = bck
+        self.slit_height = height
+        self.slit_width  = width
         
         try:
-            self._create_plot_pr()
-            self.perform_inversion()
+            pr = self._create_plot_pr()
+            if not pr==None:
+                self.pr = pr
+                self.perform_inversion()
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
 
-    def estimate_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None, bck=False):
+    def estimate_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None, 
+                                bck=False, height=0, width=0):
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
         self.q_min = q_min
         self.q_max = q_max
         self.has_bck = bck
+        self.slit_height = height
+        self.slit_width  = width
         
         try:
-            self._create_plot_pr()
-            self.perform_estimate()
+            pr = self._create_plot_pr()
+            if not pr==None:
+                self.pr = pr
+                self.perform_estimate()
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))            
 
-    def _create_plot_pr(self):
+    def _create_plot_pr(self, estimate=False):
         """
             Create and prepare invertor instance from
             a plottable data set.
@@ -543,6 +585,8 @@ class Plugin:
         pr.x = self.current_plottable.x
         pr.y = self.current_plottable.y
         pr.has_bck = self.has_bck
+        pr.slit_height = self.slit_height
+        pr.slit_width = self.slit_width
         
         # Fill in errors if none were provided
         if self.current_plottable.dy == None:
@@ -553,35 +597,45 @@ class Plugin:
             pr.err = y
         else:
             pr.err = self.current_plottable.dy
-            
-        self.pr = pr
-        self.iq_data_shown = True
+        
+        #self.pr = pr
+        return pr
 
           
-    def setup_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None, bck=False):
+    def setup_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None, 
+                             bck=False, height=0, width=0):
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
         self.q_min = q_min
         self.q_max = q_max
         self.has_bck = bck
+        self.slit_height = height
+        self.slit_width  = width
         
         try:
-            if self._create_file_pr(path):
+            pr = self._create_file_pr(path)
+            if not pr==None:
+                self.pr = pr
                 self.perform_inversion()
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
           
-    def estimate_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None, bck=False):
+    def estimate_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None, 
+                                bck=False, height=0, width=0):
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
         self.q_min = q_min
         self.q_max = q_max
         self.has_bck = bck
+        self.slit_height = height
+        self.slit_width  = width
         
         try:
-            if self._create_file_pr(path):
+            pr = self._create_file_pr(path)
+            if not pr==None:
+                self.pr = pr
                 self.perform_estimate()
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
@@ -607,10 +661,13 @@ class Plugin:
             pr.y = y
             pr.err = err
             pr.has_bck = self.has_bck
-            
-            self.pr = pr
-            return True
-        return False
+            pr.slit_height = self.slit_height
+            pr.slit_width = self.slit_width
+            return pr
+            #self.pr = pr
+            #return True
+        #return False
+        return None
         
     def perform_estimate(self):
         from pr_thread import EstimatePr
@@ -638,6 +695,10 @@ class Plugin:
             self.estimation_thread.stop()
                 
         pr = self.pr.clone()
+        # Skip the slit settings for the estimation
+        # It slows down the application and it doesn't change the estimates
+        pr.slit_height = 0.0
+        pr.slit_width  = 0.0
         self.estimation_thread = EstimateNT(pr, self.nfunc, error_func=self._thread_error, 
                                             completefn = self._estimateNT_completed, 
                                             updatefn   = None)
@@ -648,8 +709,8 @@ class Plugin:
         
         # Time estimate
         #estimated = self.elapsed*self.nfunc**2
-        message = "Computation time may take up to %g seconds" % self.elapsed
-        wx.PostEvent(self.parent, StatusEvent(status=message))
+        #message = "Computation time may take up to %g seconds" % self.elapsed
+        #wx.PostEvent(self.parent, StatusEvent(status=message))
         
         # Start inversion thread
         self.start_thread()

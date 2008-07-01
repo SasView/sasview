@@ -298,6 +298,7 @@ class InversionControl(wx.Panel):
     def _do_layout(self):
         #panel = wx.Panel(self, -1)
         vbox = wx.BoxSizer(wx.VERTICAL)
+        #vbox.SetMinSize((1000,50))
 
         # ----- I(q) data -----
         databox = wx.StaticBox(self, -1, "I(q) data source")
@@ -339,7 +340,7 @@ class InversionControl(wx.Panel):
         vbox.Add(boxsizer1)
         
         # ----- Add slit parameters -----
-        if False:
+        if True:
             sbox = wx.StaticBox(self, -1, "Slit parameters")
             sboxsizer = wx.StaticBoxSizer(sbox, wx.VERTICAL)
             sboxsizer.SetMinSize((320,20))
@@ -354,8 +355,8 @@ class InversionControl(wx.Panel):
             self.swidth_ctl = wx.TextCtrl(self, -1, size=(60,20))
             self.sheight_ctl.SetToolTipString("Enter slit height in units of Q or leave blank.")
             self.swidth_ctl.SetToolTipString("Enter slit width in units of Q or leave blank.")
-            self.sheight_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
-            self.swidth_ctl.Bind(wx.EVT_TEXT,  self._on_pars_changed)
+            #self.sheight_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
+            #self.swidth_ctl.Bind(wx.EVT_TEXT,  self._on_pars_changed)
             
             iy = 0
             sizer_slit.Add(label_sheight,    (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
@@ -647,23 +648,30 @@ class InversionControl(wx.Panel):
             We will estimate the alpha parameter behind the
             scenes. 
         """
-        flag, alpha, dmax, nfunc, qmin, qmax = self._read_pars()
+        flag, alpha, dmax, nfunc, qmin, qmax, height, width = self._read_pars()
         has_bck = self.bck_chk.IsChecked()
         
         # If the pars are valid, estimate alpha
         if flag:
+            self.nterms_estimate_ctl.Enable(False)
+            self.alpha_estimate_ctl.Enable(False)
+            
             if self.standalone==False and self.plot_radio.GetValue():
                 dataset = self.plot_data.GetValue()
                 self.manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc, 
                                                      d_max=dmax,
                                                      q_min=qmin, q_max=qmax,
-                                                     bck=has_bck)
+                                                     bck=has_bck, 
+                                                     height=height,
+                                                     width=width)
             else:
                 path = self.data_file.GetValue()
                 self.manager.estimate_file_inversion(alpha=alpha, nfunc=nfunc, 
                                                      d_max=dmax, path=path,
                                                      q_min=qmin, q_max=qmax,
-                                                     bck=has_bck)
+                                                     bck=has_bck,
+                                                     height=height,
+                                                     width=width)
         
         
     def _read_pars(self, evt=None):    
@@ -672,8 +680,39 @@ class InversionControl(wx.Panel):
         dmax  = 120
         qmin  = 0
         qmax  = 0
+        height = 0
+        width  = 0
         
         flag = True
+        
+        
+        # Read slit height
+        try:
+            height_str = self.sheight_ctl.GetValue()
+            if len(height_str.lstrip().rstrip())==0:
+                height = 0
+            else:
+                height = float(height_str)
+                self.sheight_ctl.SetBackgroundColour(wx.WHITE)
+                self.sheight_ctl.Refresh()
+        except:
+            flag = False
+            self.sheight_ctl.SetBackgroundColour("pink")
+            self.sheight_ctl.Refresh()
+            
+        # Read slit width
+        try:
+            width_str = self.swidth_ctl.GetValue()
+            if len(width_str.lstrip().rstrip())==0:
+                width = 0
+            else:
+                width = float(width_str)
+                self.swidth_ctl.SetBackgroundColour(wx.WHITE)
+                self.swidth_ctl.Refresh()
+        except:
+            flag = False
+            self.swidth_ctl.SetBackgroundColour("pink")
+            self.swidth_ctl.Refresh()
         
         # Read alpha
         try:
@@ -738,7 +777,7 @@ class InversionControl(wx.Panel):
             self.qmax_ctl.SetBackgroundColour("pink")
             self.qmax_ctl.Refresh()
         
-        return flag, alpha, dmax, nfunc, qmin, qmax
+        return flag, alpha, dmax, nfunc, qmin, qmax, height, width
     
     def _on_invert(self, evt):
         """
@@ -748,7 +787,7 @@ class InversionControl(wx.Panel):
         # Get the data from the form
         # Push it to the manager
         
-        flag, alpha, dmax, nfunc, qmin, qmax = self._read_pars()
+        flag, alpha, dmax, nfunc, qmin, qmax, height, width = self._read_pars()
         has_bck = self.bck_chk.IsChecked()
         
         if flag:
@@ -761,7 +800,9 @@ class InversionControl(wx.Panel):
                     self.manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc, 
                                                       d_max=dmax,
                                                       q_min=qmin, q_max=qmax,
-                                                      bck=has_bck)
+                                                      bck=has_bck,
+                                                      height=height,
+                                                      width=width)
             else:
                 path = self.data_file.GetValue()
                 if len(path.strip())==0:
@@ -771,7 +812,9 @@ class InversionControl(wx.Panel):
                     self.manager.setup_file_inversion(alpha=alpha, nfunc=nfunc, 
                                                       d_max=dmax, path=path,
                                                       q_min=qmin, q_max=qmax,
-                                                      bck=has_bck)
+                                                      bck=has_bck,
+                                                      height=height,
+                                                      width=width)
                 
         else:
             message = "The P(r) form contains invalid values: please submit it again."
@@ -790,7 +833,7 @@ class InversionControl(wx.Panel):
                 if self.standalone==False:
                     self.file_radio.SetValue(True)
                 self._on_pars_changed(None)
-                self.manager.show_data(path)
+                self.manager.show_data(path, reset=True)
         
 
 
