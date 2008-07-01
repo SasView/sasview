@@ -35,7 +35,7 @@ class ReaderInfo:
     ## Error on each pixel
     error = None
     
-class DataReader:
+class Reader:
     """
         Example data manipulation
     """

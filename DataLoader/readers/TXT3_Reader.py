@@ -14,47 +14,58 @@ class Reader:
         self.dy = dy
         self.filename = filename
         
+        
     def read(self,path, format=None):
         """ Store the values loaded from file in local variables 
             can read 3 columns of data
         """
-        if not path == None:
-            input_f =  open(path,'r')
-            buff = input_f.read()
-            lines = buff.split('\n')
-            self.x=[]
-            self.y=[]
-            self.dx = [] 
-            self.dy=[]
-            value="can't read" 
-            for line in lines:
-                toks = line.split()
-                try:  
-                    x = float(toks[0])
-                    y = float(toks[1]) 
-                    dy = float(toks[2])
-                   
-                    self.x.append(x)
-                    self.y.append(y)
-                    self.dy.append(dy)
-               
-                except:
-                    print "READ ERROR", line
         
-                self.dx = numpy.zeros(len(self.x))
-                # Sanity check
-                if not len(self.x) == len(self.dx):
-                    raise ValueError, "x and dx have different length"
-                if not len(self.y) == len(self.dy):
-                    raise ValueError, "y and dy have different length"
-           
-            if (self.x==[] or self.y==[])and (self.dy==[]):
+        if not path == None:
+            read_it = False
+            ext=['.txt','.dat']  
+            for item in ext:
+                if path.lower().find(item)>=0:
+                    read_it = True
+            print "this is the flag",read_it, path.lower()
+            if read_it==False:
                 raise ValueError, "txtReader can't read"
             else:
-                #msg="txtReader  Reading:\n"+"this x :"+ str(self.x) +"\n"+"this y:"+str(self.y)+"\n"+"this dy :"+str(self.dy)+"\n"
-                #return msg
-                print "TXT3_Reader reading: \n"
-                return self.x,self.y,self.dy
+                input_f =  open(path,'r')
+                buff = input_f.read()
+                lines = buff.split('\n')
+                self.x=[]
+                self.y=[]
+                self.dx = [] 
+                self.dy=[]
+                value="can't read" 
+                for line in lines:
+                    toks = line.split()
+                    try:  
+                        x = float(toks[0])
+                        y = float(toks[1]) 
+                        dy = float(toks[2])
+                       
+                        self.x.append(x)
+                        self.y.append(y)
+                        self.dy.append(dy)
+                   
+                    except:
+                        print "READ ERROR", line
+            
+                    self.dx = numpy.zeros(len(self.x))
+                    # Sanity check
+                    if not len(self.x) == len(self.dx):
+                        raise ValueError, "x and dx have different length"
+                    if not len(self.y) == len(self.dy):
+                        raise ValueError, "y and dy have different length"
+               
+                if (self.x==[] or self.y==[])and (self.dy==[]):
+                    raise ValueError, "txtReader can't read"
+                else:
+                    #msg="txtReader  Reading:\n"+"this x :"+ str(self.x) +"\n"+"this y:"+str(self.y)+"\n"+"this dy :"+str(self.dy)+"\n"
+                    #return msg
+                    print "TXT3_Reader reading: \n"
+                    return self.x,self.y,self.dy
                 
   
 if __name__ == "__main__": 

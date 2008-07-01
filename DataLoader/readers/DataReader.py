@@ -2,7 +2,7 @@ import os, sys
 import pylab
 from copy import deepcopy
 import math
-class DataReader:
+class Reader:
     """ Simple data reader for Igor data files """
     
     def __init__(self, filename=None):

@@ -52,6 +52,7 @@ class ExtensionRegistry(object):
     """
     def __init__(self):
         self.loaders = {}
+        self.reader=None
     def __setitem__(self, ext, loader):
         if ext not in self.loaders:
             self.loaders[ext] = []
@@ -103,11 +104,13 @@ class ExtensionRegistry(object):
             print fn
             try:
                 value=fn.read(path)
+                self.reader= fn
                 return value 
             except ValueError,msg:
                 #pass
                 print str(msg)
-
+    def getAcTReader(self,path):
+        return self.reader
     def load(self, path, format=None):
         """
         Call the loader for the file type of path.
@@ -122,7 +125,9 @@ class ExtensionRegistry(object):
         if loaders!=None:
             for fn in loaders:
                 try:
-                    return fn.read(path)
+                    value=fn.read(path)
+                    self.reader= fn.__class__
+                    return value
                     #value=fn.read(path)
                     #return value 
                 except ValueError,msg:
