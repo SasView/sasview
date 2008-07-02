@@ -10,7 +10,7 @@ from park import assembly
 from sans.guitools.plottables import Data1D
 #from sans.guitools import plottables
 from Loader import Load
-
+from park import expression
 class SansParameter(park.Parameter):
     """
     SANS model parameters for use in the PARK fitting service.
@@ -19,8 +19,12 @@ class SansParameter(park.Parameter):
     """
     def __init__(self, name, model):
          self._model, self._name = model,name
+         self.set(model.getParam(name))
     def _getvalue(self): return self._model.getParam(self.name)
-    def _setvalue(self,value): self._model.setParam(self.name, value)
+    def _setvalue(self,value): 
+        if numpy.isnan(value):
+            print "setting %s.%s to"%(self._model.name,self.name),value
+        self._model.setParam(self.name, value)
     value = property(_getvalue,_setvalue)
     def _getrange(self):
         lo,hi = self._model.details[self.name][1:]
@@ -129,44 +133,53 @@ class ParkFit:
             return (M1,D1)
         """
         mylist=[]
+        listmodel=[]
         for k,value in self.fitArrangeList.iteritems():
-            couple=()
-            model=value.get_model()
-            parameters= self.set_param(model, pars)
-            model = Model(model)
+            #couple=()
+            sansmodel=value.get_model()
+           
+            #parameters= self.set_param(model,model.name, pars)
+            parkmodel = Model(sansmodel)
             #print "model created",model.parameterset[0].value,model.parameterset[1].value
             # Make all parameters fitting parameters
-            for p in model.parameterset:
-                p.set([-numpy.inf,numpy.inf])
-                #p.set([-10,10])
+            
+            
+            for p in parkmodel.parameterset:
+                #p.range([-numpy.inf,numpy.inf])
+                # Convert parameters with initial values into fitted parameters
+                # spanning all possible values.  Parameters which are expressions
+                # will remain as expressions.
+                if p.isfixed():
+                    p.set([-numpy.inf,numpy.inf])
+                
             Ldata=value.get_data()
             data=self._concatenateData(Ldata)
-            #print "this data",data
-            #print "data.residuals in createProblem",Ldata[0].residuals
-            #print "data.residuals in createProblem",data.residuals
-            #couple1=(model,Ldata[0])
-            #mylist.append(couple1)
-            couple=(model,data)
+            data1=Data(data)
+           
+            couple=(parkmodel,data1)
             mylist.append(couple)
         #print mylist
         return mylist
         #return model,data
     
-    def fit(self,pars, qmin=None, qmax=None):
+    def fit(self,pars=None, qmin=None, qmax=None):
         """
              Do the fit 
         """
-        
-        modelList=self.createProblem(pars)
-        #model,data=self.createProblem()
-        #fitness=assembly.Fitness(model,data)
-        
+    
+        print "starting ParkFit.fit()"
+        modelList=self.createProblem()
         problem =  park.Assembly(modelList)
-        print "problem :",problem[0].parameterset,problem[0].parameterset.fitted
+        pars=problem.fit_parameters()
+        print "About to call eval",pars
+        print "initial",[p.value for p in pars]
+        problem.eval()
+        #print "M2.B",problem.parameterset['M2.B'].expression,problem.parameterset['M2.B'].value
+        #print "problem :",problem[0].parameterset,problem[0].parameterset.fitted
+        
         #problem[0].parameterset['A'].set([0,1000])
         #print "problem :",problem[0].parameterset,problem[0].parameterset.fitted
         fit.fit(problem, handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
-        #fit.fit(problem, handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
        
     
     def set_model(self,model,Uid):
@@ -181,7 +194,7 @@ class ParkFit:
         
     def set_data(self,data,Uid):
         """ Receive plottable and create a list of data to fit"""
-        data=Data(data)
+        
         if self.fitArrangeList.has_key(Uid):
             self.fitArrangeList[Uid].add_data(data)
         else:
@@ -193,13 +206,13 @@ class ParkFit:
         """ return list of data"""
         return self.fitArrangeList[Uid]
     
-    def set_param(self,model, pars):
+    def set_param(self,model,name, pars):
         """ Recieve a dictionary of parameter and save it """
         parameters=[]
         if model==None:
             raise ValueError, "Cannot set parameters for empty model"
         else:
-            #for key ,value in pars:
+            model.name=name
             for key, value in pars.iteritems():
                 param = Parameter(model, key, value)
                 parameters.append(param)

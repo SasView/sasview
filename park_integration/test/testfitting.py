@@ -164,3 +164,55 @@ class testFitModule(unittest.TestCase):
             self.assertEqual(cov1[0][0],cov2[0][0])
             self.assertEqual(cov1[1][1],cov2[1][1])
         """
+    def test2models2dataonconstraint(self):
+        """ test for 2 Models two data one constraint"""
+        from sans.fit.Loader import Load
+        load= Load()
+        #Load the first set of data
+        load.set_filename("testdata1.txt")
+        load.set_values()
+        data1 = Data1D(x=[], y=[],dx=None, dy=None)
+        load.load_data(data1)
+        
+        #Load the second set of data
+        load.set_filename("testdata2.txt")
+        load.set_values()
+        data2 = Data1D(x=[], y=[],dx=None, dy=None)
+        load.load_data(data2)
+       
+        #Importing the Fit module
+        from sans.fit.Fitting import Fit
+        fitter= Fit()
+        # Receives the type of model for the fitting
+        from sans.guitools.LineModel import LineModel
+        model1  = LineModel()
+        model1.name='M1'
+        model2  = LineModel()
+        model2.name='M2'
+        #set engine for scipy 
+        fitter.fit_engine('scipy')
+        engine = fitter.returnEngine()
+        #Do the fit
+        engine.set_model(model1,1)
+        engine.set_data(data1,1)
+        engine.set_model(model2,2)
+        engine.set_data(data2,2)
+    
+        try: engine.fit({'A':2,'B':1},None,None)
+        except ValueError,msg:
+            assert str(msg)=="cannot fit more than one model",'Message: <%s>'%(msg)
+        
+        #set engine for park 
+        fitter= Fit()
+        fitter.fit_engine('park')
+        engine = fitter.returnEngine()
+        #Do the fit
+        engine.set_data(data1,1)
+        engine.set_param(model1,{'A':2,'B':1})
+        engine.set_model(model1,1)
+        
+        engine.set_param(model2,{'A':3,'B':'5*M1.B'})
+        engine.set_model(model2,2)
+        engine.set_data(data2,2)
+        engine.fit({'A':2,'B':1},None,None)
+        
