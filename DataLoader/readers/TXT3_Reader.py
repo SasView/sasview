@@ -26,9 +26,9 @@ class Reader:
             for item in ext:
                 if path.lower().find(item)>=0:
                     read_it = True
-            print "this is the flag",read_it, path.lower()
+            #print "this is the flag",read_it, path.lower()
             if read_it==False:
-                raise ValueError, "txtReader can't read"
+                return None
             else:
                 input_f =  open(path,'r')
                 buff = input_f.read()
@@ -37,7 +37,6 @@ class Reader:
                 self.y=[]
                 self.dx = [] 
                 self.dy=[]
-                value="can't read" 
                 for line in lines:
                     toks = line.split()
                     try:  
@@ -50,7 +49,8 @@ class Reader:
                         self.dy.append(dy)
                    
                     except:
-                        print "READ ERROR", line
+                        pass
+                        #print "READ ERROR", line
             
                     self.dx = numpy.zeros(len(self.x))
                     # Sanity check
@@ -60,14 +60,14 @@ class Reader:
                         raise ValueError, "y and dy have different length"
                
                 if (self.x==[] or self.y==[])and (self.dy==[]):
-                    raise ValueError, "txtReader can't read"
+                    raise ValueError, "TXT3_Reader can't read"
                 else:
                     #msg="txtReader  Reading:\n"+"this x :"+ str(self.x) +"\n"+"this y:"+str(self.y)+"\n"+"this dy :"+str(self.dy)+"\n"
                     #return msg
                     print "TXT3_Reader reading: \n"
                     return self.x,self.y,self.dy
                 
-  
+        return None
 if __name__ == "__main__": 
     read= Reader()
     #read= Reader(filename="testdata_line.txt")
