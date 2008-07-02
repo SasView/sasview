@@ -71,12 +71,12 @@ class Reader:
                 try:
                     wavelength = float(line_toks[1])
                 except:
-                    raise ValueError,"DataReader: can't read this file, missing wavelength"
+                    raise ValueError,"IgorReader: can't read this file, missing wavelength"
                 # Distance in meters
                 try:
                     distance = float(line_toks[3])
                 except:
-                    raise ValueError,"DataReader: can't read this file, missing distance"
+                    raise ValueError,"IgorReader: can't read this file, missing distance"
                 
             if line.count("LAMBDA")>0:
                 isInfo = True
@@ -102,7 +102,7 @@ class Reader:
                     or distance == None \
                     or center_x == None \
                     or center_y == None:
-                    raise ValueError, "Missing information in data file"
+                    raise ValueError, "IgorReader:Missing information in data file"
                 
             if dataStarted == True:
                 try:
@@ -164,6 +164,6 @@ class Reader:
         self.distance   = distance*1000.0
         self.center_x = center_x
         self.center_y = center_y
-        
+        print "IgorReader reading %s"%self.file
         return Z, xmin-xstep/2.0, xmax+xstep/2.0, ymin-ystep/2.0, ymax+ystep/2.0
      

@@ -58,11 +58,11 @@ class Reader:
                 if(( self.x==[])or (self.y==[])) or (self.dy !=[]):
                     #print "went here"
                     #return value
-                    raise ValueError, "TXT2_Reader can't read"
+                    raise ValueError, "TXT2_Reader can't read %s"%path
                 else:
                     #msg="R1 reading: \n"+"this x :"+ str(self.x) +"\n"+"this y:"+str(self.y)+"\n"+"this dy :"+str(self.dy)+"\n"
                     #return msg
-                    print "TXT2_Reader reading \n"
+                    print "TXT2_Reader reading  %s\n" %path
                     return self.x,self.y,self.dy
         return None
    

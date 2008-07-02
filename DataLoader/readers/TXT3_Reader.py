@@ -60,11 +60,11 @@ class Reader:
                         raise ValueError, "y and dy have different length"
                
                 if (self.x==[] or self.y==[])and (self.dy==[]):
-                    raise ValueError, "TXT3_Reader can't read"
+                    raise ValueError, "TXT3_Reader can't read %s"%path
                 else:
                     #msg="txtReader  Reading:\n"+"this x :"+ str(self.x) +"\n"+"this y:"+str(self.y)+"\n"+"this dy :"+str(self.dy)+"\n"
                     #return msg
-                    print "TXT3_Reader reading: \n"
+                    print "TXT3_Reader reading %s \n" %path
                     return self.x,self.y,self.dy
                 
         return None

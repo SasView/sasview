@@ -206,9 +206,9 @@ class Reader:
             output.image      = Z
             if not fversion==1.1:
                 #output.error  = E
-                raise ValueError,"Danse_reader can't read this file"
+                raise ValueError,"Danse_reader can't read this file %s"%filename
             else:
-                print "Danse_reader Reading : \n"
+                print "Danse_reader Reading %s \n"%filename
                 return output
         
         return None
