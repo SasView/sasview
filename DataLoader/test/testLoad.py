@@ -8,7 +8,7 @@ import DataLoader
 from DataLoader.loader import  Loader
 from DataLoader.readers import TXT3_Reader,TXT2_Reader
 from DataLoader.readers import IgorReader,danse_reader,tiff_reader
-
+import os.path
 class testLoader(unittest.TestCase):
     """ test fitting """
     #Creating a loader
@@ -97,5 +97,12 @@ class testLoader(unittest.TestCase):
         data=self.L.load('angles_flat.png')
         self.assertEqual(data.__class__,tiff_reader.ReaderInfo)
         self.assertEqual(self.L.getAcTReader('angles_flat.png'),self.read5.__class__)
-        
+    def testplugin(self):
+        """ test loading with plugging"""
+        l=Loader()
+        l.__setitem__()
+        self.assertEqual(l.__contains__('.tiff'),True)
+        self.assertEqual(l.__contains__('.png'),True)
+        self.assertEqual(self.L.getAcTReader('angles_flat.png'),tiff_reader.Reader)
+        self.assertEqual(self.L.load('angles_flat.png').__class__,tiff_reader.ReaderInfo)
         
