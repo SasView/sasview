@@ -24,25 +24,14 @@ def _findReaders(dir):
                 file = None
         
                 try:
-                    print"name",name 
-                    print "path",path
-                    print imp.find_module(name, path)
                     (file, path, info) = imp.find_module(name, path)
-                    print"file",file
-                    print "path", path
-                    print "info",info
-                    print"hasattr",imp.load_module( name, file, item, info )
                     module = imp.load_module( name, file, item, info )
-                    print"module", module
-    
                     if hasattr(module, "Reader"):
-                        print "went here"
                         try:
                             plugins.append(module.Reader())
                         except:
                             log("Error accessing Reader in %s\n  %s" % (name, sys.exc_value))
                 except :
-                    print"Error importing %s\n  %s" % (name,sys.exc_value)
                     log("Error importing %s\n  %s" % (name, sys.exc_value))
                 finally:
                     if not file==None:
@@ -100,17 +89,12 @@ class Loader(object):
         
     def __setitem__(self, ext=None, reader=None):
         if reader==None:
-            print os.getcwd()
-            print  os.path.isdir('plugins')
-            print "absolute path : ",os.path.abspath('plugins')
             plugReader=None
             if os.path.isdir('plugins'):
-                print "went here"
                 plugReader=_findReaders('plugins')# import all module in plugins
             elif os.path.isdir('../plugins'):
                 plugReader=_findReaders('../plugins')
             if plugReader !=None:
-                print "this is plugreader",plugReader
                 for preader in plugReader:# for each modules takes list of extensions
                     #print preader.ext
                     for item in preader.ext:
@@ -118,8 +102,6 @@ class Loader(object):
                         if ext not in self.readers:#assign extension with its reader
                             self.readers[ext] = []
                         self.readers[ext].insert(0,preader)
-                        print "extension",ext
-                        print "readers",self.readers
         else:
             if ext not in self.readers:
                 self.readers[ext] = []
