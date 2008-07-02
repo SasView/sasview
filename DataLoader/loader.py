@@ -5,9 +5,52 @@ File extension registry.
 This provides routines for opening files based on extension,
 and registers the built-in file extensions.
 """
+import imp,os,sys
 import logging
 import os.path
-
+def _findReaders(dir):
+    # List of plugin objects
+    plugins = []
+    # Go through files in plug-in directory
+    try:
+        
+        list = os.listdir(dir)
+        for item in list:
+            
+            toks = os.path.splitext(os.path.basename(item))
+            if toks[1]=='.py' and not toks[0]=='__init__':
+                name = toks[0]
+                path = [os.path.abspath(dir)]
+                file = None
+        
+                try:
+                    print"name",name 
+                    print "path",path
+                    print imp.find_module(name, path)
+                    (file, path, info) = imp.find_module(name, path)
+                    print"file",file
+                    print "path", path
+                    print "info",info
+                    print"hasattr",imp.load_module( name, file, item, info )
+                    module = imp.load_module( name, file, item, info )
+                    print"module", module
+    
+                    if hasattr(module, "Reader"):
+                        print "went here"
+                        try:
+                            plugins.append(module.Reader())
+                        except:
+                            log("Error accessing Reader in %s\n  %s" % (name, sys.exc_value))
+                except :
+                    print"Error importing %s\n  %s" % (name,sys.exc_value)
+                    log("Error importing %s\n  %s" % (name, sys.exc_value))
+                finally:
+                    if not file==None:
+                        file.close()
+    except:
+        # Should raise and catch at a higher level and display error on status bar
+        pass   
+    return plugins
 class Loader(object):
     """
     Associate a file loader with an extension.
@@ -55,14 +98,37 @@ class Loader(object):
         self.reading=None
         
         
-    def __setitem__(self, ext, reader):
-        if ext not in self.readers:
-            self.readers[ext] = []
-        self.readers[ext].insert(0,reader)
+    def __setitem__(self, ext=None, reader=None):
+        if reader==None:
+            print os.getcwd()
+            print  os.path.isdir('plugins')
+            print "absolute path : ",os.path.abspath('plugins')
+            plugReader=None
+            if os.path.isdir('plugins'):
+                print "went here"
+                plugReader=_findReaders('plugins')# import all module in plugins
+            elif os.path.isdir('../plugins'):
+                plugReader=_findReaders('../plugins')
+            if plugReader !=None:
+                print "this is plugreader",plugReader
+                for preader in plugReader:# for each modules takes list of extensions
+                    #print preader.ext
+                    for item in preader.ext:
+                        ext=item
+                        if ext not in self.readers:#assign extension with its reader
+                            self.readers[ext] = []
+                        self.readers[ext].insert(0,preader)
+                        print "extension",ext
+                        print "readers",self.readers
+        else:
+            if ext not in self.readers:
+                self.readers[ext] = []
+            self.readers[ext].insert(0,reader)
         
         
     def __getitem__(self, ext):
         return self.readers[ext]
+        
     
     
     def __contains__(self, ext):
@@ -120,3 +186,10 @@ class Loader(object):
                     return value
                 except ValueError,msg:
                     print str(msg)
+if __name__=="__main__":
+    l=Loader()
+    l.__setitem__()
+    print "look up",l.lookup('angles_flat.png')
+    print l.__getitem__('.tiff')
+    print l.__contains__('.tiff')
+    
