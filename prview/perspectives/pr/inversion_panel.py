@@ -347,10 +347,10 @@ class InversionControl(wx.Panel):
             
             sizer_slit = wx.GridBagSizer(5,5)
     
-            label_sheight = wx.StaticText(self, -1, "Height")
-            label_swidth = wx.StaticText(self, -1, "Width")
+            label_sheight = wx.StaticText(self, -1, "Height", size=(35,20))
+            label_swidth = wx.StaticText(self, -1, "Width", size=(35,20))
             #label_sunits1 = wx.StaticText(self, -1, "[A^(-1)]")
-            label_sunits2 = wx.StaticText(self, -1, "[A^(-1)]")
+            label_sunits2 = wx.StaticText(self, -1, "[A^(-1)]", size=(40,20))
             self.sheight_ctl = wx.TextCtrl(self, -1, size=(60,20))
             self.swidth_ctl = wx.TextCtrl(self, -1, size=(60,20))
             self.sheight_ctl.SetToolTipString("Enter slit height in units of Q or leave blank.")
@@ -359,15 +359,46 @@ class InversionControl(wx.Panel):
             #self.swidth_ctl.Bind(wx.EVT_TEXT,  self._on_pars_changed)
             
             iy = 0
-            sizer_slit.Add(label_sheight,    (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
-            sizer_slit.Add(self.sheight_ctl, (iy,1), (1,1), wx.LEFT|wx.EXPAND, 10)
+            sizer_slit.Add(label_sheight,    (iy,0), (1,1), wx.LEFT|wx.EXPAND, 5)
+            sizer_slit.Add(self.sheight_ctl, (iy,1), (1,1), wx.LEFT|wx.EXPAND, 5)
             #sizer_slit.Add(label_sunits1,    (iy,2), (1,1), wx.LEFT|wx.EXPAND, 10)
-            sizer_slit.Add(label_swidth,     (iy,2), (1,1), wx.LEFT|wx.EXPAND, 15)
-            sizer_slit.Add(self.swidth_ctl,  (iy,3), (1,1), wx.LEFT|wx.EXPAND, 10)
-            sizer_slit.Add(label_sunits2,    (iy,4), (1,1), wx.LEFT|wx.EXPAND, 10)
+            sizer_slit.Add(label_swidth,     (iy,2), (1,1), wx.LEFT|wx.EXPAND, 5)
+            sizer_slit.Add(self.swidth_ctl,  (iy,3), (1,1), wx.LEFT|wx.EXPAND, 5)
+            sizer_slit.Add(label_sunits2,    (iy,4), (1,1), wx.LEFT|wx.EXPAND, 5)
             
             sboxsizer.Add(sizer_slit, wx.TOP, 15)
             vbox.Add(sboxsizer)
+        
+        
+        # ----- Q range -----
+        qbox = wx.StaticBox(self, -1, "Q range")
+        qboxsizer = wx.StaticBoxSizer(qbox, wx.VERTICAL)
+        qboxsizer.SetMinSize((320,20))
+        
+        sizer_q = wx.GridBagSizer(5,5)
+
+        label_qmin = wx.StaticText(self, -1, "Q min", size=(35,20))
+        label_qmax = wx.StaticText(self, -1, "Q max", size=(35,20))
+        #label_qunits1 = wx.StaticText(self, -1, "[A^(-1)]")
+        label_qunits2 = wx.StaticText(self, -1, "[A^(-1)]", size=(40,20))
+        self.qmin_ctl = wx.TextCtrl(self, -1, size=(60,20))
+        self.qmax_ctl = wx.TextCtrl(self, -1, size=(60,20))
+        self.qmin_ctl.SetToolTipString("Select a lower bound for Q or leave blank.")
+        self.qmax_ctl.SetToolTipString("Select an upper bound for Q or leave blank.")
+        self.qmin_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
+        self.qmax_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
+        
+        iy = 0
+        sizer_q.Add(label_qmin,    (iy,0), (1,1), wx.LEFT|wx.EXPAND, 5)
+        sizer_q.Add(self.qmin_ctl, (iy,1), (1,1), wx.LEFT|wx.EXPAND, 5)
+        #sizer_q.Add(label_qunits1, (iy,2), (1,1), wx.LEFT|wx.EXPAND, 15)
+        sizer_q.Add(label_qmax,    (iy,2), (1,1), wx.LEFT|wx.EXPAND, 5)
+        sizer_q.Add(self.qmax_ctl, (iy,3), (1,1), wx.LEFT|wx.EXPAND, 5)
+        sizer_q.Add(label_qunits2, (iy,4), (1,1), wx.LEFT|wx.EXPAND, 5)
+        qboxsizer.Add(sizer_q, wx.TOP, 15)
+        vbox.Add(qboxsizer)
+        
+        
         
 
         # ----- Parameters -----
@@ -442,35 +473,6 @@ class InversionControl(wx.Panel):
         
         vbox.Add(boxsizer2)
 
-        # ----- Q range -----
-        qbox = wx.StaticBox(self, -1, "Q range")
-        qboxsizer = wx.StaticBoxSizer(qbox, wx.VERTICAL)
-        qboxsizer.SetMinSize((320,20))
-        
-        sizer_q = wx.GridBagSizer(5,5)
-
-        label_qmin = wx.StaticText(self, -1, "Q min")
-        label_qmax = wx.StaticText(self, -1, "Q max")
-        #label_qunits1 = wx.StaticText(self, -1, "[A^(-1)]")
-        label_qunits2 = wx.StaticText(self, -1, "[A^(-1)]")
-        self.qmin_ctl = wx.TextCtrl(self, -1, size=(60,20))
-        self.qmax_ctl = wx.TextCtrl(self, -1, size=(60,20))
-        self.qmin_ctl.SetToolTipString("Select a lower bound for Q or leave blank.")
-        self.qmax_ctl.SetToolTipString("Select an upper bound for Q or leave blank.")
-        self.qmin_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
-        self.qmax_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
-        
-        iy = 0
-        sizer_q.Add(label_qmin,    (iy,0), (1,1), wx.LEFT|wx.EXPAND, 15)
-        sizer_q.Add(self.qmin_ctl, (iy,1), (1,1), wx.LEFT|wx.EXPAND, 10)
-        #sizer_q.Add(label_qunits1, (iy,2), (1,1), wx.LEFT|wx.EXPAND, 15)
-        sizer_q.Add(label_qmax,    (iy,2), (1,1), wx.LEFT|wx.EXPAND, 15)
-        sizer_q.Add(self.qmax_ctl, (iy,3), (1,1), wx.LEFT|wx.EXPAND, 10)
-        sizer_q.Add(label_qunits2, (iy,4), (1,1), wx.LEFT|wx.EXPAND, 15)
-        qboxsizer.Add(sizer_q, wx.TOP, 15)
-        vbox.Add(qboxsizer)
-        
-        
 
         # ----- Results -----
         resbox = wx.StaticBox(self, -1, "Outputs")

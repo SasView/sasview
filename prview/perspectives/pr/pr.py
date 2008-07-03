@@ -350,6 +350,12 @@ class Plugin:
                 except:
                     pass
                    
+        if not scale==None:
+            message = "The loaded file had no error bars, statistical errors are assumed."
+            wx.PostEvent(self.parent, StatusEvent(status=message))
+        else:
+            wx.PostEvent(self.parent, StatusEvent(status=''))
+                        
         return data_x, data_y, data_err     
         
     def pr_theory(self, r, R):
@@ -518,7 +524,10 @@ class Plugin:
             self._create_file_pr(path)  
               
         # Make a plot of I(q) data
-        new_plot = Data1D(self.pr.x, self.pr.y, dy=self.pr.err)
+        if self.pr.err==None:
+            new_plot = Theory1D(self.pr.x, self.pr.y)
+        else:
+            new_plot = Data1D(self.pr.x, self.pr.y, dy=self.pr.err)
         new_plot.name = "I_{obs}(q)"
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
@@ -647,9 +656,23 @@ class Plugin:
             a file data set.
             @param path: path of the file to read in 
         """
+        from sans.guiframe.data_loader import load_ascii_1D
+        import numpy
         # Load data
         if os.path.isfile(path):
+            
             x, y, err = self.load(path)
+            #x, y, err = load_ascii_1D(path)
+            
+            # If we have not errors, add statistical errors
+            if err==None:
+                err = numpy.zeros(len(y))
+                for i in range(len(y)):
+                    err[i] = math.sqrt( math.fabs(y[i]) )
+                message = "The loaded file had no error bars, statistical errors are assumed."
+                wx.PostEvent(self.parent, StatusEvent(status=message))
+            else:
+                wx.PostEvent(self.parent, StatusEvent(status=''))
             
             # Get the data from the chosen data set and perform inversion
             pr = Invertor()
@@ -673,7 +696,6 @@ class Plugin:
         from pr_thread import EstimatePr
         from copy import deepcopy
         
-        wx.PostEvent(self.parent, StatusEvent(status=''))
         # If a thread is already started, stop it
         if self.estimation_thread != None and self.estimation_thread.isrunning():
             self.estimation_thread.stop()
@@ -689,7 +711,6 @@ class Plugin:
         from pr_thread import EstimateNT
         from copy import deepcopy
         
-        wx.PostEvent(self.parent, StatusEvent(status=''))
         # If a thread is already started, stop it
         if self.estimation_thread != None and self.estimation_thread.isrunning():
             self.estimation_thread.stop()

@@ -5,12 +5,12 @@ import time
 
 # Version of the application
 __appname__ = "PrView"
-__version__ = '0.1.1'
+__version__ = '0.2.1'
 __download_page__ = 'http://danse.chem.utk.edu'
 
 
 # Debug message flag
-__EVT_DEBUG__ = True
+__EVT_DEBUG__ = False
 
 # Flag for automated testing
 __TEST__ = False
@@ -39,7 +39,7 @@ _inst_logo = "images/utlogo.gif"
 _nsf_url = "http://www.nsf.gov"
 _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
-_corner_image = "images/angles_flat.png"
+_corner_image = "images/prview.jpg"
 _copyright = "(c) 2008, University of Tennessee"
 
 import wx.lib.newevent

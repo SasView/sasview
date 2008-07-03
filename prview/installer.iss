@@ -2,20 +2,21 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 [Setup]
-AppName=PrView-0.1
-AppVerName=PrView 0.1
+AppName=PrView-0.2
+AppVerName=PrView 0.2
 AppPublisher=University of Tennessee
 AppPublisherURL=http://danse.chem.utk.edu/
 AppSupportURL=http://danse.chem.utk.edu/
 AppUpdatesURL=http://danse.chem.utk.edu/
-DefaultDirName={userappdata}\PrView-0.1
-DefaultGroupName=DANSE\PrView-0.1
+DefaultDirName={userappdata}\PrView-0.2
+DefaultGroupName=DANSE\PrView-0.2
 DisableProgramGroupPage=yes
 LicenseFile=license.txt
 OutputBaseFilename=setupPrView
 SetupIconFile=images\ball.ico
 Compression=lzma
 SolidCompression=yes
+PrivilegesRequired=none
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -34,7 +35,7 @@ Source: "images\*"; DestDir: "{app}\images"; Flags: ignoreversion recursesubdirs
 [Icons]
 Name: "{group}\PrView"; Filename: "{app}\prView.exe"; WorkingDir: "{app}"
 Name: "{group}\{cm:UninstallProgram,PrView}"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\PrView 0.1"; Filename: "{app}\prView.exe"; Tasks: desktopicon; WorkingDir: "{app}"
+Name: "{commondesktop}\PrView 0.2"; Filename: "{app}\prView.exe"; Tasks: desktopicon; WorkingDir: "{app}"
 
 [Run]
 Filename: "{app}\prView.exe"; Description: "{cm:LaunchProgram,PrView}"; Flags: nowait postinstall skipifsilent

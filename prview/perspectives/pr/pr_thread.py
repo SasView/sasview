@@ -104,7 +104,16 @@ class EstimateNT(CalcThread):
         self.nfunc = nfunc
         self.error_func = error_func
         self.starttime = 0
-        
+        self._time_for_sleep = 0
+        self._sleep_delay = 1.0
+
+
+    def isquit(self):
+        CalcThread.isquit(self)
+        if time.time()>self._time_for_sleep+self._sleep_delay:
+            time.sleep(.2)
+            self._time_for_sleep = time.time()
+
     def compute(self):
         """
             Calculates the estimate
@@ -112,6 +121,7 @@ class EstimateNT(CalcThread):
         import time
         try:            
             t_0 = time.time()
+            self._time_for_sleep = t_0
             nterms, alpha, message = self.pr.estimate_numterms(self.isquit)
             t_1 = time.time()-t_0
             self.isquit()
