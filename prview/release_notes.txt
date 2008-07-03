@@ -1,14 +1,20 @@
 Release Notes
 =============
 
-PrView 0.1
+PrView 0.2
 
 Package name: None
 
-1- Version 0.1.1
+1- Version 0.2.1
 
-	- Release date: 6/XX/2008
-	- First version put together built on guiframe.
+	- Release date: 7/04/2008
+	- Improved user interface.
+	- Automated estimate of the number of terms.
+	- I(q=0) and Rg are now outputs of the inversion.
+	- Slit smearing has been added.
+	- Constant background estimation.
+	- Functionality to compare p(r) output with data from a file.
+	- Functionality to change the number of p(r) points of the output dsitribution.
 
    Version 0.1.0
 
@@ -23,10 +29,10 @@ Package name: None
 	2.2- Installing:
 		- Get the code from svn://danse.us/sans/releases/prview-0.1.0
 		- This application is also dependent on the following DANSE code:
-			svn://danse.us/sans/releases/guitools-0.1.1
+			svn://danse.us/sans/releases/guitools-0.2.2
 			svn://danse.us/sans/treleases/guicomm-0.1.0
-			svn://danse.us/sans/releases/guiframe-0.1.0
-			svn://danse.us/sans/releases/pr_inversion-0.1.0
+			svn://danse.us/sans/releases/guiframe-0.1.1
+			svn://danse.us/sans/releases/pr_inversion-0.2.0
 		- The following modules are required:
 			* matplotlib
 			* numpy
