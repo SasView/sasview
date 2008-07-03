@@ -28,7 +28,7 @@ project funded by the US National Science Foundation.
 
 '''
 _homepage = "http://danse.chem.utk.edu"
-_download = "http://danse.chem.utk.edu/sansview.html"
+_download = "http://danse.chem.utk.edu/prview.html"
 _authors = []
 _paper = "http://danse.us/trac/sans/newticket"
 _license = "mailto:sansdanse@gmail.com"
