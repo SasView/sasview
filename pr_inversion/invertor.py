@@ -5,6 +5,8 @@
 from sans.pr.core.pr_inversion import Cinvertor
 import numpy
 import sys
+import math, time
+from scipy.linalg.basic import lstsq
 
 def help():
     """
@@ -330,11 +332,6 @@ class Invertor(Cinvertor):
         return True
        
     def lstsq(self, nfunc=5, nr=20):
-        #TODO: do this on the C side
-        #
-        # To make sure an array is contiguous:
-        # blah = numpy.ascontiguousarray(blah_original)
-        # ... before passing it to C
         """
             The problem is solved by posing the problem as  Ax = b,
             where x is the set of coefficients we are looking for.
@@ -365,10 +362,9 @@ class Invertor(Cinvertor):
             a matrix filled with zeros will be returned.
 
         """
-        #TODO: Allow for background by starting at n=0 (since the base function
-        # is zero for n=0).
-        import math, time
-        from scipy.linalg.basic import lstsq
+        # Note: To make sure an array is contiguous:
+        # blah = numpy.ascontiguousarray(blah_original)
+        # ... before passing it to C
         
         if self.is_valid()<0:
             raise RuntimeError, "Invertor: invalid data; incompatible data lengths."
@@ -394,7 +390,6 @@ class Invertor(Cinvertor):
         # Construct the a matrix and b vector that represent the problem
         t_0 = time.time()
         self._get_matrix(nfunc, nq, a, b)
-        #print "elasped: ", time.time()-t_0
              
         # Perform the inversion (least square fit)
         c, chi2, rank, n = lstsq(a, b)
@@ -422,10 +417,8 @@ class Invertor(Cinvertor):
             cov = numpy.linalg.pinv(inv_cov)
             err = math.fabs(chi2/float(npts-nfunc)) * cov
         except:
-            # We were not able to estimate the errors,
-            # returns an empty covariance matrix
-            print "lstsq:", sys.exc_value
-            print chi2
+            # We were not able to estimate the errors
+            # Return an empty error matrix
             pass
             
         # Keep a copy of the last output
@@ -449,86 +442,13 @@ class Invertor(Cinvertor):
             
         return self.out, self.cov
         
-    def lstsq_bck(self, nfunc=5, nr=20):
-        #TODO: Allow for background by starting at n=0 (since the base function
-        # is zero for n=0).
-        import math
-        from scipy.linalg.basic import lstsq
-        
-        if self.is_valid()<0:
-            raise RuntimeError, "Invertor: invalid data; incompatible data lengths."
-        
-        self.nfunc = nfunc
-        # a -- An M x N matrix.
-        # b -- An M x nrhs matrix or M vector.
-        npts = len(self.x)
-        nq   = nr
-        sqrt_alpha = math.sqrt(math.fabs(self.alpha))
-        if sqrt_alpha<0.0:
-            nq = 0
-        
-        err_0 = numpy.zeros([nfunc, nfunc])
-        c_0 = numpy.zeros(nfunc)
-        nfunc_0 = nfunc
-        nfunc += 1
-        
-        a = numpy.zeros([npts+nq, nfunc])
-        b = numpy.zeros(npts+nq)
-        err = numpy.zeros([nfunc, nfunc])
-        
-        # Construct the a matrix and b vector that represent the problem
-        self._get_matrix(nfunc, nq, a, b)
-            
-        c, chi2, rank, n = lstsq(a, b)
-        # Sanity check
-        try:
-            float(chi2)
-        except:
-            chi2 = -1.0
-        self.chi2 = chi2
-
-        inv_cov = numpy.zeros([nfunc,nfunc])
-        # Get the covariance matrix, defined as inv_cov = a_transposed * a
-        self._get_invcov_matrix(nfunc, nr, a, inv_cov)
-                    
-        # Compute the reg term size for the output
-        sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
-        
-        if math.fabs(self.alpha)>0:
-            new_alpha = sum_sig/(sum_reg/self.alpha)
-        else:
-            new_alpha = 0.0
-        self.suggested_alpha = new_alpha
-        
-        try:
-            cov = numpy.linalg.pinv(inv_cov)
-            err = math.fabs(chi2/float(npts-nfunc)) * cov
-        except:
-            # We were not able to estimate the errors,
-            # returns an empty covariance matrix
-            print "lstsq:", sys.exc_value
-            print chi2
-            pass
-            
-        # Keep a copy of the last output
-        
-        print "BACKGROUND =", c[0]
-        self.background = c[0]
-        
-        for i in range(nfunc_0):
-            c_0[i] = c[i+1]
-            for j in range(nfunc_0):
-                err_0[i][j] = err[i+1][j+1]
-                
-        self.out = c_0
-        self.cov = err_0
-        
-        return c_0, err_0
-
     def estimate_numterms(self, isquit_func=None):
         """
             Returns a reasonable guess for the
             number of terms
+            @param isquit_func: reference to thread function to call to 
+                                check whether the computation needs to
+                                be stopped.
             
             @return: number of terms, alpha, message
         """
@@ -547,6 +467,7 @@ class Invertor(Cinvertor):
             Returns a reasonable guess for the
             regularization constant alpha
             
+            @param nfunc: number of terms to use in the expansion.
             @return: alpha, message, elapsed
             
             where alpha is the estimate for alpha,
@@ -640,6 +561,15 @@ class Invertor(Cinvertor):
         file.write("#alpha=%g\n" % self.alpha)
         file.write("#chi2=%g\n" % self.chi2)
         file.write("#elapsed=%g\n" % self.elapsed)
+        file.write("#qmin=%s\n" % str(self.q_min))
+        file.write("#qmax=%s\n" % str(self.q_max))
+        file.write("#slit_height=%g\n" % self.slit_height)
+        file.write("#slit_width=%g\n" % self.slit_width)
+        file.write("#background=%g\n" % self.background)
+        if self.has_bck==True:
+            file.write("#has_bck=1\n")
+        else:
+            file.write("#has_bck=0\n")
         file.write("#alpha_estimate=%g\n" % self.suggested_alpha)
         if not self.out==None:
             if len(self.out)==len(self.cov):
@@ -691,6 +621,33 @@ class Invertor(Cinvertor):
                     elif line.startswith('#alpha_estimate='):
                         toks = line.split('=')
                         self.suggested_alpha = float(toks[1])
+                    elif line.startswith('#qmin='):
+                        toks = line.split('=')
+                        try:
+                            self.q_min = float(toks[1])
+                        except:
+                            self.q_min = None
+                    elif line.startswith('#qmax='):
+                        toks = line.split('=')
+                        try:
+                            self.q_max = float(toks[1])
+                        except:
+                            self.q_max = None
+                    elif line.startswith('#slit_height='):
+                        toks = line.split('=')
+                        self.slit_height = float(toks[1])
+                    elif line.startswith('#slit_width='):
+                        toks = line.split('=')
+                        self.slit_width = float(toks[1])
+                    elif line.startswith('#background='):
+                        toks = line.split('=')
+                        self.background = float(toks[1])
+                    elif line.startswith('#has_bck='):
+                        toks = line.split('=')
+                        if int(toks[1])==1:
+                            self.has_bck=True
+                        else:
+                            self.has_bck=False
             
                     # Now read in the parameters
                     elif line.startswith('#C_'):

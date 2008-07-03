@@ -7,6 +7,8 @@ class Num_terms():
          self.invertor = invertor
          self.nterm_min = 10
          self.nterm_max = len(self.invertor.x)
+         if self.nterm_max>50:
+             self.nterm_max=50
          self.isquit_func = None
          
          self.osc_list = []
@@ -47,7 +49,7 @@ class Num_terms():
         self.osc_list = []
         self.err_list = []
         self.alpha_list = []
-        for k in range(self.nterm_min, self.nterm_max):
+        for k in range(self.nterm_min, self.nterm_max, 1):
             if self.isquit_func != None:
                 self.isquit_func()
             best_alpha, message, elapsed = inver.estimate_alpha(k)
@@ -55,7 +57,8 @@ class Num_terms():
             inver.out, inver.cov = inver.lstsq(k)
             osc = inver.oscillations(inver.out)
             err = inver.get_pos_err(inver.out, inver.cov)
-            
+            if osc>10.0:
+                break
             self.osc_list.append(osc)
             self.err_list.append(err)
             self.alpha_list.append(inver.alpha)
