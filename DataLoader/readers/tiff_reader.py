@@ -42,7 +42,7 @@ class Reader:
     ## File type
     type = []
     ## Extension
-    ext  = ['tif', 'jpg', 'png', 'jpeg', 'tiff', 'gif', 'bmp']    
+    ext  = ['tif', 'jpg', '.png', 'jpeg', '.tiff', 'gif', 'bmp']    
         
     def read(self, filename=None):
         """

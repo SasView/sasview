@@ -100,7 +100,6 @@ class testLoader(unittest.TestCase):
     def testplugin(self):
         """ test loading with plugging"""
         l=Loader()
-        l.__setitem__()
         self.assertEqual(l.__contains__('.tiff'),True)
         self.assertEqual(l.__contains__('.png'),True)
         self.assertEqual(self.L.getAcTReader('angles_flat.png'),tiff_reader.Reader)

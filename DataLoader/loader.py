@@ -8,6 +8,8 @@ and registers the built-in file extensions.
 import imp,os,sys
 import logging
 import os.path
+
+
 def _findReaders(dir):
     # List of plugin objects
     plugins = []
@@ -85,15 +87,21 @@ class Loader(object):
     def __init__(self):
         self.readers = {}
         self.reading=None
+        self.dir='plugins'
+        self.__setitem__()
         
-        
+    def set_pluginDir (self,path):
+        """ specify the name of folder containing pluging"""
+        if not os.path.isdir(path):
+            os.mkdir(path)
+        self.dir=path
     def __setitem__(self, ext=None, reader=None):
         if reader==None:
             plugReader=None
-            if os.path.isdir('plugins'):
-                plugReader=_findReaders('plugins')# import all module in plugins
-            elif os.path.isdir('../plugins'):
-                plugReader=_findReaders('../plugins')
+            if os.path.isdir(self.dir):
+                plugReader=_findReaders(self.dir)# import all module in plugins
+            elif os.path.isdir('../'+self.dir):
+                plugReader=_findReaders('../'+self.dir)
             if plugReader !=None:
                 for preader in plugReader:# for each modules takes list of extensions
                     #print preader.ext
@@ -134,7 +142,7 @@ class Loader(object):
         
     def lookup(self, path):
         """
-        Return the loader associated with the file type of path.
+        Return the reader associated with the file type of path.
         """        
         file = os.path.basename(path)
         idx = file.find('.')
@@ -147,6 +155,7 @@ class Loader(object):
  
                 
     def getAcTReader(self,path):
+        """ return  Reader  actually reading"""
         return self.reading
     
     def load(self, path, format=None):
@@ -170,8 +179,8 @@ class Loader(object):
                     print str(msg)
 if __name__=="__main__":
     l=Loader()
-    l.__setitem__()
     print "look up",l.lookup('angles_flat.png')
     print l.__getitem__('.tiff')
+    print l.__getitem__('jpeg')
     print l.__contains__('.tiff')
     
