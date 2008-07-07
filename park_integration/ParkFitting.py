@@ -6,6 +6,7 @@ import park
 from scipy import optimize
 from park import fit,fitresult
 from park import assembly
+from park.fitmc import FitSimplex, FitMC
 
 from sans.guitools.plottables import Data1D
 #from sans.guitools import plottables
@@ -66,9 +67,11 @@ class Data(object):
         
         x,y,dy = [numpy.asarray(v) for v in (self.x,self.y,self.dy)]
         if self.qmin==None and self.qmax==None: 
+            self.fx = fn(x)
             return (y - fn(x))/dy
         
         else:
+            self.fx = fn(x[idx])
             idx = x>=self.qmin & x <= self.qmax
             return (y[idx] - fn(x[idx]))/dy[idx]
             
@@ -114,6 +117,11 @@ class FitArrange:
         """
         if data in self.dList:
             self.dList.remove(data)
+    def remove_model(self):
+        """ Remove model """
+        model=None
+    def remove_datalist(self):
+        self.dList=[]
             
 class ParkFit:
     """ 
@@ -159,28 +167,39 @@ class ParkFit:
             couple=(parkmodel,data1)
             mylist.append(couple)
         #print mylist
-        return mylist
+        self.problem =  park.Assembly(mylist)
         #return model,data
     
     def fit(self,pars=None, qmin=None, qmax=None):
         """
              Do the fit 
         """
-    
+
+        self.createProblem(pars)
         print "starting ParkFit.fit()"
-        modelList=self.createProblem()
-        problem =  park.Assembly(modelList)
-        pars=problem.fit_parameters()
+        #problem[0].model.parameterset['A'].set([1,5])
+        #problem[0].model.parameterset['B'].set([1,5])
+        pars=self.problem.fit_parameters()
         print "About to call eval",pars
         print "initial",[p.value for p in pars]
-        problem.eval()
+        self.problem.eval()
         #print "M2.B",problem.parameterset['M2.B'].expression,problem.parameterset['M2.B'].value
         #print "problem :",problem[0].parameterset,problem[0].parameterset.fitted
         
         #problem[0].parameterset['A'].set([0,1000])
         #print "problem :",problem[0].parameterset,problem[0].parameterset.fitted
-        fit.fit(problem, handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
-       
+
+        localfit = FitSimplex()
+        localfit.ftol = 1e-8
+        fitter = FitMC(localfit=localfit)
+
+        result = fit.fit(self.problem,
+                         fitter=fitter,
+                         handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
+        pvec = result.pvec
+        cov = self.problem.cov(pvec)
+        return result.fitness,pvec,numpy.sqrt(numpy.diag(cov))
+
     
     def set_model(self,model,Uid):
         """ Set model """
@@ -218,21 +237,21 @@ class ParkFit:
                 parameters.append(param)
         return parameters
     
-    def add_constraint(self, constraint):
-        """ User specify contraint to fit """
-        self.constraint = str(constraint)
-        
-    def get_constraint(self):
-        """ return the contraint value """
-        return self.constraint
-   
-    def set_constraint(self,constraint):
-        """ 
-            receive a string as a constraint
-            @param constraint: a string used to constraint some parameters to get a 
-                specific value
-        """
-        self.constraint= constraint
+    def remove_data(self,Uid,data=None):
+        """ remove one or all data"""
+        if data==None:# remove all element in data list
+            if self.fitArrangeList.has_key(Uid):
+                self.fitArrangeList[Uid].remove_datalist()
+        else:
+            if self.fitArrangeList.has_key(Uid):
+                self.fitArrangeList[Uid].remove_data(data)
+                
+    def remove_model(self,Uid):
+        """ remove model """
+        if self.fitArrangeList.has_key(Uid):
+            self.fitArrangeList[Uid].remove_model()
+                
+                
     def _concatenateData(self, listdata=[]):
         """ concatenate each fields of all Data contains ins listdata
          return data
@@ -286,25 +305,7 @@ class Parameter:
         return self.model.getParam(self.name)
     
 
-      
-if __name__ == "__main__": 
-    load= Load()
-    
-    # test fit one data set one model
-    load.set_filename("testdata_line.txt")
-    load.set_values()
-    data1 = Data1D(x=[], y=[], dx=None,dy=None)
-    data1.name = "data1"
-    load.load_data(data1)
-    fitter =ParkFit()
-    
-    from sans.guitools.LineModel import LineModel
-    model  = LineModel()
-    fitter.set_model(model,1)
-    fitter.set_data(data1,1)
-    
-    print"PARK fit result",fitter.fit({'A':2,'B':1},None,None)
-   
+
     
    
     

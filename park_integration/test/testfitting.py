@@ -72,6 +72,7 @@ class testFitModule(unittest.TestCase):
         
         #Do the fit SCIPY
         engine.set_data(data1,1)
+        engine.set_param( model,"M1", {'A':2,'B':4})
         engine.set_model(model,1)
         
         chisqr1, out1, cov1=engine.fit({'A':2,'B':1},None,None)
@@ -86,21 +87,21 @@ class testFitModule(unittest.TestCase):
         
         #Do the fit
         engine.set_data(data1,1)
+        engine.set_param( model1,"M1", {'A':2,'B':4})
         engine.set_model(model,1)
        
         engine.fit({'A':2,'B':1},None,None)
-        """
-            
-            self.assert_(math.fabs(out2[1]-2.5)/math.sqrt(cov2[1][1]) < 2)
-            self.assert_(math.fabs(out2[0]-4.0)/math.sqrt(cov2[0][0]) < 2)
-            self.assert_(chisqr2/len(data1.x) < 2)
-            
-            self.assertEqual(out1[1], out2[1])
-            self.assertEquals(out1[0], out2[0])
-            self.assertEquals(cov1[0][0], cov2[0][0])
-            self.assertEquals(cov1[1][1], cov2[1][1])
-            self.assertEquals(chisqr1, chisqr2)
-        """
+        
+        self.assert_(math.fabs(out2[1]-2.5)/math.sqrt(cov2[1][1]) < 2)
+        self.assert_(math.fabs(out2[0]-4.0)/math.sqrt(cov2[0][0]) < 2)
+        self.assert_(chisqr2/len(data1.x) < 2)
+        
+        self.assertEqual(out1[1], out2[1])
+        self.assertEquals(out1[0], out2[0])
+        self.assertEquals(cov1[0][0], cov2[0][0])
+        self.assertEquals(cov1[1][1], cov2[1][1])
+        self.assertEquals(chisqr1, chisqr2)
+       
     def testfit_2Data_1Model(self):
         """ test fitting for two set of data  and one model"""
         from sans.fit.Loader import Load
@@ -127,7 +128,9 @@ class testFitModule(unittest.TestCase):
         fitter.fit_engine('scipy')
         engine = fitter.returnEngine()
         #Do the fit
+        engine.set_param( model,"M1", {'A':2,'B':4})
         engine.set_model(model,1)
+    
         engine.set_data(data1,1)
         engine.set_data(data2,1)
     
@@ -149,21 +152,20 @@ class testFitModule(unittest.TestCase):
         engine.set_model(model,1)
         engine.set_data(data2,1)
         engine.fit({'A':2,'B':1},None,None)
-        """
-            chisqr2, out2, cov2= engine.fit({'A':2,'B':1},None,None)
-            
-            
-            self.assert_(math.fabs(out2[1]-2.5)/math.sqrt(cov2[1][1]) < 2)
-            self.assert_(math.fabs(out2[0]-4.0)/math.sqrt(cov2[0][0]) < 2)
-            self.assert_(chisqr2/len(data1.x) < 2)
-            self.assert_(chisqr2/len(data2.x) < 2)
-            
-            self.assertEqual(out1[0],out2[0])
-            self.assertEqual(out1[1],out2[1])
-            self.assertEqual(chisqr1,chisqr2)
-            self.assertEqual(cov1[0][0],cov2[0][0])
-            self.assertEqual(cov1[1][1],cov2[1][1])
-        """
+        
+        chisqr2, out2, cov2= engine.fit({'A':2,'B':1},None,None)
+        #print "park",chisqr2, out2, cov2
+        self.assert_(math.fabs(out2[1]-2.5)/math.sqrt(cov2[1][1]) < 2)
+        self.assert_(math.fabs(out2[0]-4.0)/math.sqrt(cov2[0][0]) < 2)
+        self.assert_(chisqr2/len(data1.x) < 2)
+        self.assert_(chisqr2/len(data2.x) < 2)
+        
+        self.assertEqual(out1[0],out2[0])
+        self.assertEqual(out1[1],out2[1])
+        self.assertEqual(chisqr1,chisqr2)
+        self.assertEqual(cov1[0][0],cov2[0][0])
+        self.assertEqual(cov1[1][1],cov2[1][1])
+       
     def test2models2dataonconstraint(self):
         """ test for 2 Models two data one constraint"""
         from sans.fit.Loader import Load
@@ -186,33 +188,41 @@ class testFitModule(unittest.TestCase):
         # Receives the type of model for the fitting
         from sans.guitools.LineModel import LineModel
         model1  = LineModel()
-        model1.name='M1'
         model2  = LineModel()
-        model2.name='M2'
+       
         #set engine for scipy 
-        fitter.fit_engine('scipy')
-        engine = fitter.returnEngine()
-        #Do the fit
-        engine.set_model(model1,1)
-        engine.set_data(data1,1)
-        engine.set_model(model2,2)
-        engine.set_data(data2,2)
-    
-        try: engine.fit({'A':2,'B':1},None,None)
-        except ValueError,msg:
-            assert str(msg)=="cannot fit more than one model",'Message: <%s>'%(msg)
+        """
+            fitter.fit_engine('scipy')
+            engine = fitter.returnEngine()
+            #Do the fit
+            engine.set_param( model1,"M1", {'A':2,'B':4})
+            engine.set_model(model1,1)
+            engine.set_data(data1,1)
+            engine.set_param( model1,"M2", {'A':2.1,'B':3})
+            engine.set_model(model2,2)
+            engine.set_data(data2,2)
         
+            try: engine.fit({'A':2,'B':1},None,None)
+            except ValueError,msg:
+                assert str(msg)=="cannot fit more than one model",'Message: <%s>'%(msg)
+        """
         #set engine for park 
         fitter= Fit()
         fitter.fit_engine('park')
         engine = fitter.returnEngine()
         #Do the fit
         engine.set_data(data1,1)
-        engine.set_param(model1,{'A':2,'B':1})
+        engine.set_param(model1,"M1",{'A':2,'B':1})
         engine.set_model(model1,1)
         
-        engine.set_param(model2,{'A':3,'B':'5*M1.B'})
+        engine.set_param(model2,"M2",{'A':3,'B':'M1.B'})
         engine.set_model(model2,2)
         engine.set_data(data2,2)
-        engine.fit({'A':2,'B':1},None,None)
+        chisqr2, out2, cov2= engine.fit({'A':2,'B':1},None,None)
+        
+        
+        self.assert_(math.fabs(out2[1]-2.5)/math.sqrt(cov2[1][1]) < 2)
+        self.assert_(math.fabs(out2[0]-4.0)/math.sqrt(cov2[0][0]) < 2)
+        self.assert_(chisqr2/len(data1.x) < 2)
+        self.assert_(chisqr2/len(data2.x) < 2)
         

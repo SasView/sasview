@@ -67,10 +67,11 @@ class ScipyFit:
         model = fitproblem.get_model()
         listdata = fitproblem.get_data()
         
-        parameters = self.set_param(model,pars)
+        parameters = self.set_param(model,model.name,pars)
        
         # Do the fit with  data set (contains one or more data) and one model 
         xtemp,ytemp,dytemp=self._concatenateData( listdata)
+        print "dytemp",dytemp
         if qmin==None:
             qmin= min(xtemp)
         if qmax==None:
@@ -122,13 +123,13 @@ class ScipyFit:
         """ return list of data"""
         return self.fitArrangeList[Uid]
     
-    def set_param(self,model, pars):
+    def set_param(self,model,name, pars):
         """ Recieve a dictionary of parameter and save it """
         parameters=[]
         if model==None:
             raise ValueError, "Cannot set parameters for empty model"
         else:
-            #for key ,value in pars:
+            model.name=name
             for key, value in pars.iteritems():
                 param = Parameter(model, key, value)
                 parameters.append(param)
@@ -163,7 +164,19 @@ class ScipyFit:
             mylist.append(couple)
         #print mylist
         return mylist
-    
+    def remove_data(self,Uid,data=None):
+        """ remove one or all data"""
+        if data==None:# remove all element in data list
+            if self.fitArrangeList.has_key(Uid):
+                self.fitArrangeList[Uid].remove_datalist()
+        else:
+            if self.fitArrangeList.has_key(Uid):
+                self.fitArrangeList[Uid].remove_data(data)
+                
+    def remove_model(self,Uid):
+        """ remove model """
+        if self.fitArrangeList.has_key(Uid):
+            self.fitArrangeList[Uid].remove_model()
                 
 
 class Parameter:
@@ -213,7 +226,7 @@ def fitHelper(model, pars, x, y, err_y ,qmin=None, qmax=None):
         for j in range(len(x)):
             if x[j]>qmin and x[j]<qmax:
                 residuals.append( ( y[j] - model.runXY(x[j]) ) / err_y[j] )
-       
+            
         return residuals
         
     def chi2(params):
@@ -239,44 +252,3 @@ def fitHelper(model, pars, x, y, err_y ,qmin=None, qmax=None):
         
     return chisqr, out, cov_x    
 
-      
-if __name__ == "__main__": 
-    load= Load()
-    
-    # test fit one data set one model
-    load.set_filename("testdata_line.txt")
-    load.set_values()
-    data1 = Data1D(x=[], y=[], dx=None,dy=None)
-    data1.name = "data1"
-    load.load_data(data1)
-    fitter =ScipyFit()
-    from sans.guitools.LineModel import LineModel
-    model  = LineModel()
-    fitter.set_model(model,1)
-    fitter.set_data(data1,1)
-    
-    chisqr, out, cov=fitter.fit({'A':2,'B':1},None,None)
-    print "my list of param",fitter.createProblem()
-    print"fit only one data",chisqr, out, cov 
-    print "this model list of param",model.getParamList()
-    # test fit with 2 data and one model
-    fitter =ScipyFit()
-   
-    fitter.set_model(model,2 )
-    load.set_filename("testdata1.txt")
-    load.set_values()
-    data2 = Data1D(x=[], y=[], dx=None,dy=None)
-    data2.name = "data2"
-    
-    load.load_data(data2)
-    fitter.set_data(data2,2)
-    
-    load.set_filename("testdata2.txt")
-    load.set_values()
-    data3 = Data1D(x=[], y=[], dx=None,dy=None)
-    data3.name = "data2"
-    load.load_data(data3)
-    fitter.set_data(data3,2)
-    chisqr, out, cov=fitter.fit({'A':2,'B':1},None,None)
-    print"fit two data",chisqr, out, cov 
-    
