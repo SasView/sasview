@@ -12,7 +12,7 @@
 
 - Document all classes and methods, and all inputs and outputs.
 - Where are the comments for log() going? That should be documented in the code.  
-- Why is the description of the DataLoader module in setup.py "Python module for fitting"?
+[changed]- Why is the description of the DataLoader module in setup.py "Python module for fitting"?
 - The return object of a load seems to be inconsistent and depend only on the particular reader. This will cause problems since
   the calling modules will be unable to know what to expect. An interface should be defined.
  
