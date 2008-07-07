@@ -1,0 +1,18 @@
+- Change SingleLoader class name to Loader. There's no reason to add confusion by making the name more complicated.
+- Remove all print statements such as: print "Hello", or print "in loader". If you need to log something, use python's logging module.
+- The following error condition is not dealt with properly:
+   If the used calls Loader.load(path) for a file that has an unknown extension, an exception should be raise.
+   As it is load() will call lookup(), which will simply print "Unknown file type '%s'"%ext. 
+   Modules using that function will then fail to recognize the error condition.
+ 
+- Look at all the try-except blocks and deal with error conditions.
+- Golden rule of error handling: if you catch an exception and all you do is calling pass or print, you have not dealt with the error properly.
+ If you think you did, then you should definitely explain why in a comment so that developers looking at the code don't
+ think that it's a bug.
+
+- Document all classes and methods, and all inputs and outputs.
+- Where are the comments for log() going? That should be documented in the code.  
+- Why is the description of the DataLoader module in setup.py "Python module for fitting"?
+- The return object of a load seems to be inconsistent and depend only on the particular reader. This will cause problems since
+  the calling modules will be unable to know what to expect. An interface should be defined.
+ 
