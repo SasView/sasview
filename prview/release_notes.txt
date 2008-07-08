@@ -32,12 +32,12 @@ Package name: None
 		- Python version >= 2.4 should be running on the system
 
 	2.2- Installing:
-		- Get the code from svn://danse.us/sans/releases/prview-0.1.0
+		- Get the code from svn://danse.us/sans/releases/prview-0.2.2
 		- This application is also dependent on the following DANSE code:
-			svn://danse.us/sans/releases/guitools-0.2.2
+			svn://danse.us/sans/releases/guitools-0.2.3
 			svn://danse.us/sans/treleases/guicomm-0.1.0
-			svn://danse.us/sans/releases/guiframe-0.1.1
-			svn://danse.us/sans/releases/pr_inversion-0.2.0
+			svn://danse.us/sans/releases/guiframe-0.1.2
+			svn://danse.us/sans/releases/pr_inversion-0.2.1
 		- The following modules are required:
 			* matplotlib
 			* numpy
