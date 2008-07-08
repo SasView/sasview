@@ -115,6 +115,16 @@ class View1DPanel(PlotPanel):
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
 
+    def onLeftDown(self,event): 
+        """ left button down and ready to drag"""
+        from sans.guicomm.events import StatusEvent    
+        PlotPanel.onLeftDown(self, event)
+        ax = event.inaxes
+        if ax != None:
+            position = "x: %8.3g    y: %8.3g" % (event.xdata, event.ydata)
+            wx.PostEvent(self.parent, StatusEvent(status=position))
+
+
     def onContextMenu(self, event):
         """
             1D plot context menu
