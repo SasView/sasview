@@ -395,9 +395,10 @@ class Plugin:
                 m_list = [["Add P(r) data", "Load a data file and display it on this plot", self._on_add_data],
                        ["Change number of P(r) points", "Change the number of points on the P(r) output", self._on_pr_npts]]
 
-                m_list.append(["Disable P(r) scaling", 
-                               "Let the output P(r) keep the scale of the data", 
-                               self._on_disable_scaling])
+                if self._scale_output_unity==True or self._normalize_output==True:
+                    m_list.append(["Disable P(r) scaling", 
+                                   "Let the output P(r) keep the scale of the data", 
+                                   self._on_disable_scaling])
                 
                 if self._scale_output_unity==False:
                     m_list.append(["Scale P_max(r) to unity", 
