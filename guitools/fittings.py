@@ -67,7 +67,6 @@ def sansfit(model, pars, x, y, err_y ,qmin=None, qmax=None):
         
     p = [param() for param in pars]
     out, cov_x, info, mesg, success = optimize.leastsq(f, p, full_output=1, warning=True)
-    print info, mesg, success
     # Calculate chi squared
     if len(pars)>1:
         chisqr = chi2(out)

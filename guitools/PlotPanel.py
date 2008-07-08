@@ -149,6 +149,9 @@ class PlotPanel(wx.Panel):
         
         self.axes = [self.subplot]
         
+        ## Fit dialog
+        self._fit_dialog = None
+        
         # Interactor
         self.connect = BindArtist(self.subplot.figure)
         #self.selected_plottable = None
@@ -162,6 +165,10 @@ class PlotPanel(wx.Panel):
         self.xmax=0.0
         self.xminView=0.0
         self.xmaxView=0.0
+        self._scale_xlo = None
+        self._scale_xhi = None
+        self._scale_ylo = None
+        self._scale_yhi = None
         self.Avalue=None
         self.Bvalue=None
         self.ErrAvalue=None
@@ -223,6 +230,19 @@ class PlotPanel(wx.Panel):
             else:# no dragging is perform elsewhere
                 self.dragHelper(0,0)
                 
+    def _offset_graph(self):
+        """
+             Zoom and offset the graph to the last known 
+             settings 
+        """
+
+        for ax in self.axes:
+            if self._scale_xhi is not None and self._scale_xlo is not None:
+                ax.set_xlim(self._scale_xlo, self._scale_xhi)
+            if self._scale_yhi is not None and self._scale_ylo is not None:
+                ax.set_ylim(self._scale_ylo, self._scale_yhi)
+            
+            
     def dragHelper(self,xdelta,ydelta):
         """ dragging occurs here"""
        
@@ -237,8 +257,12 @@ class PlotPanel(wx.Panel):
                 if hi > 0:
                     newhi= math.log10(hi)-xdelta
             if self.xscale=='log':
+                self._scale_xlo = math.pow(10,newlo)
+                self._scale_xhi = math.pow(10,newhi)
                 ax.set_xlim(math.pow(10,newlo),math.pow(10,newhi))
             else:
+                self._scale_xlo = newlo
+                self._scale_xhi = newhi
                 ax.set_xlim(newlo,newhi)
             #print "new lo %f and new hi %f"%(newlo,newhi)
             
@@ -252,8 +276,12 @@ class PlotPanel(wx.Panel):
                     newhi= math.log10(hi)-ydelta
                 #print "new lo %f and new hi %f"%(newlo,newhi)
             if  self.yscale=='log':
+                self._scale_ylo = math.pow(10,newlo)
+                self._scale_yhi = math.pow(10,newhi)
                 ax.set_ylim(math.pow(10,newlo),math.pow(10,newhi))
             else:
+                self._scale_ylo = newlo
+                self._scale_yhi = newhi
                 ax.set_ylim(newlo,newhi)
         self.canvas.draw_idle()
         
@@ -267,6 +295,10 @@ class PlotPanel(wx.Panel):
         self.xmax=0.0
         self.xminView=0.0
         self.xmaxView=0.0
+        self._scale_xlo = None
+        self._scale_xhi = None
+        self._scale_ylo = None
+        self._scale_yhi = None
         self.Avalue=None
         self.Bvalue=None
         self.ErrAvalue=None
@@ -286,11 +318,15 @@ class PlotPanel(wx.Panel):
             lo,hi = ax.get_xlim()
             lo,hi = _rescale(lo,hi,step,pt=event.xdata,scale=ax.get_xscale())
             if not self.xscale=='log' or lo>0:
+                self._scale_xlo = lo
+                self._scale_xhi = hi
                 ax.set_xlim((lo,hi))
 
             lo,hi = ax.get_ylim()
             lo,hi = _rescale(lo,hi,step,pt=event.ydata,scale=ax.get_yscale())
             if not self.yscale=='log' or lo>0:
+                self._scale_ylo = lo
+                self._scale_yhi = hi
                 ax.set_ylim((lo,hi))
         else:
              # Check if zoom happens in the axes
@@ -308,11 +344,15 @@ class PlotPanel(wx.Panel):
                 lo,hi = ax.get_xlim()
                 lo,hi = _rescale(lo,hi,step,bal=xdata,scale=ax.get_xscale())
                 if not self.xscale=='log' or lo>0:
+                    self._scale_xlo = lo
+                    self._scale_xhi = hi
                     ax.set_xlim((lo,hi))
             if ydata is not None:
                 lo,hi = ax.get_ylim()
                 lo,hi = _rescale(lo,hi,step,bal=ydata,scale=ax.get_yscale())
                 if not self.yscale=='log' or lo>0:
+                    self._scale_ylo = lo
+                    self._scale_yhi = hi
                     ax.set_ylim((lo,hi))
                
         self.canvas.draw_idle()
@@ -353,21 +393,41 @@ class PlotPanel(wx.Panel):
     def linear_plottable_fit(self, plot): 
         """
             when clicking on linear Fit on context menu , display Fitting Dialog
+            @param plot: PlotPanel owning the graph
         """
         from fitDialog import LinearFit
         
-        dlg = LinearFit( None, plot, self.onFitDisplay,self.returnTrans, -1, 'Linear Fit')
-       
-        if (self.xmin !=0.0 )and ( self.xmax !=0.0)\
-            and(self.xminView !=0.0 )and ( self.xmaxView !=0.0):
-            dlg.setFitRange(self.xminView,self.xmaxView,self.xmin,self.xmax)
-        dlg.ShowModal() 
+        if self._fit_dialog is not None:
+            return
+        
+        self._fit_dialog = LinearFit( None, plot, self.onFitDisplay,self.returnTrans, -1, 'Linear Fit')
+        
+        # Set the zoom area 
+        if self._scale_xhi is not None and self._scale_xlo is not None:
+            self._fit_dialog.set_fit_region(self._scale_xlo, self._scale_xhi)
+        
+        # Register the close event
+        self._fit_dialog.register_close(self._linear_fit_close)
+        
+        # Show a non-model dialog
+        self._fit_dialog.Show() 
+
+    def _linear_fit_close(self):
+        """
+            A fit dialog was closed
+        """
+        self._fit_dialog = None
+        
 
     def _onProperties(self, event):
         """
             when clicking on Properties on context menu ,The Property dialog is displayed
             The user selects a transformation for x or y value and a new plot is displayed
         """
+        if self._fit_dialog is not None:
+            self._fit_dialog.Destroy()
+            self._fit_dialog = None
+            
         list =[]
         list = self.graph.returnPlottable()
         if len(list.keys())>0:
@@ -640,13 +700,15 @@ class PlotPanel(wx.Panel):
         """Return a particular symbol"""
         return self.symbollist[s%len(self.symbollist)]
    
-    def _replot(self):
+    def _replot(self, remove_fit=False):
         """
             Rescale the plottables according to the latest
             user selection and update the plot
+            
+            @param remove_fit: Fit line will be removed if True
         """
         self.graph.reset_scale()
-        self._onEVT_FUNC_PROPERTY(remove_fit=False)
+        self._onEVT_FUNC_PROPERTY(remove_fit=remove_fit)
         
         #TODO: Why do we have to have the following line?
         self.fit_result.reset_view()
@@ -659,28 +721,36 @@ class PlotPanel(wx.Panel):
              Receive the x and y transformation from myDialog,Transforms x and y in View
               and set the scale    
         """ 
+        # The logic should be in the right order
+        # Delete first, and then get the whole list...
+        if remove_fit:
+            self.graph.delete(self.fit_result)
+            
         list =[]
         list = self.graph.returnPlottable()
         
-        if remove_fit:
-            self.fit_result.x =[]  
-            self.fit_result.y =[] 
-            self.fit_result.dx=None
-            self.fit_result.dy=None
-            self.graph.delete(self.fit_result)
+        # Changing the scale might be incompatible with
+        # currently displayed data (for instance, going 
+        # from ln to log when all plotted values have
+        # negative natural logs). 
+        # Go linear and only change the scale at the end.
+        self.set_xscale("linear")
+        self.set_yscale("linear")
+        _xscale = 'linear'
+        _yscale = 'linear'
+        
         
         for item in list:
+            print item.name
             item.setLabel(self.xLabel,self.yLabel)
             if ( self.xLabel=="x" ):
                 item.transformX(transform.toX,transform.errToX)
-                self.set_xscale("linear")
                 name, units = item.get_xaxis()
                 self.graph.xaxis("%s" % name,  "%s" % units)
                 
                 
             if ( self.xLabel=="x^(2)" ):
                 item.transformX(transform.toX2,transform.errToX2)
-                self.set_xscale('linear')
                 name, units = item.get_xaxis()
                 units=convertUnit(2,units) 
                 self.graph.xaxis("%s^{2}" % name,  "%s" % units)
@@ -688,35 +758,32 @@ class PlotPanel(wx.Panel):
                 
             if (self.xLabel=="log10(x)" ):
                 item.transformX(transform.toX_pos,transform.errToX_pos)
-                self.set_xscale("log")
+                _xscale = 'log'
                 name, units = item.get_xaxis() 
                 self.graph.xaxis("\log_{10}\ \  (%s)" % name,  "%s" % units)
                 
                 
             if ( self.yLabel=="ln(y)" ):
                 item.transformY(transform.toLogX,transform.errToLogX)
-                self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("\log\ \ %s" % name,  "%s" % units)
                 
                 
             if ( self.yLabel=="y" ):
                 item.transformY(transform.toX,transform.errToX)
-                self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("%s" % name,  "%s" % units)
                
                 
             if ( self.yLabel=="log10(y)" ): 
                 item.transformY(transform.toX_pos,transform.errToX_pos)
-                self.set_yscale("log")  
+                _yscale = 'log'  
                 name, units = item.get_yaxis()
                 self.graph.yaxis("\log_{10}\ \ (%s)" % name,  "%s" % units)
                 
                 
             if ( self.yLabel=="y^(2)" ):
                 item.transformY( transform.toX2,transform.errToX2 )    
-                self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 units=convertUnit(2,units) 
                 self.graph.yaxis("%s^{2}" % name,  "%s" % units)
@@ -724,21 +791,18 @@ class PlotPanel(wx.Panel):
                 
             if ( self.yLabel =="1/y"):
                 item.transformY(transform.toOneOverX,transform.errOneOverX )
-                self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 units=convertUnit(-1,units)
                 self.graph.yaxis("1/%s" % name,  "%s" % units)
                 
             if ( self.yLabel =="1/sqrt(y)" ):
                 item.transformY(transform.toOneOverSqrtX,transform.errOneOverSqrtX )
-                self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 units=convertUnit(-0.5,units)
                 self.graph.yaxis("1/\sqrt{%s}" %name,  "%s" % units)
                 
             if ( self.yLabel =="ln(y*x)"):
                 item.transformY( transform.toLogXY,transform.errToLogXY)
-                self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
                 self.graph.yaxis("\log\ (%s \ \ %s)" % (yname,xname),  "%s%s" % (yunits,xunits))
@@ -746,7 +810,6 @@ class PlotPanel(wx.Panel):
                 
             if ( self.yLabel =="ln(y*x^(2))"):
                 item.transformY( transform.toLogYX2,transform.errToLogYX2)
-                self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis() 
                 xunits = convertUnit(2,xunits) 
@@ -755,7 +818,6 @@ class PlotPanel(wx.Panel):
             
             if ( self.yLabel =="ln(y*x^(4))"):
                 item.transformY(transform.toLogYX4,transform.errToLogYX4)
-                self.set_yscale("linear")
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
                 xunits = convertUnit(4,xunits) 
@@ -764,25 +826,26 @@ class PlotPanel(wx.Panel):
             if ( self.viewModel == "Guinier lny vs x^(2)"):
                 
                 item.transformX(transform.toX2,transform.errToX2)
-                self.set_xscale('linear')
                 name, units = item.get_xaxis()
                 units = convertUnit(2,units) 
                 self.graph.xaxis("%s^{2}" % name,  "%s" % units)
                 
                 
                 item.transformY(transform.toLogX,transform.errToLogX )
-                self.set_yscale("linear")
                 name, units = item.get_yaxis()
                 self.graph.yaxis("\log\ \ %s" % name,  "%s" % units)
                
                 
             item.transformView()
             
-         
         self.resetFitView()   
         self.prevXtrans = self.xLabel 
         self.prevYtrans = self.yLabel  
         self.graph.render(self)
+        
+        self.set_xscale(_xscale)
+        self.set_yscale(_yscale)
+         
         self.subplot.figure.canvas.draw_idle()
         
         
@@ -823,6 +886,7 @@ class PlotPanel(wx.Panel):
         # Add the new plottable to the graph 
         self.graph.add(self.fit_result) 
         self.graph.render(self)
+        self._offset_graph()
         self.subplot.figure.canvas.draw_idle()
         
    

@@ -26,7 +26,7 @@ def format_number(value, high=False):
 
 class LinearFit(wx.Dialog):
     def __init__(self, parent, plottable, push_data,transform, id, title):
-        wx.Dialog.__init__(self, parent, id, title, size=(400, 380))
+        wx.Dialog.__init__(self, parent, id, title, size=(400, 350))
 
         """
             Dialog window pops- up when select Linear fit on Context menu
@@ -34,6 +34,9 @@ class LinearFit(wx.Dialog):
         """
         self.parent = parent
         self.transform = transform
+        
+        # Registered owner for close event
+        self._registered_close = None
         
         #dialog panel self call function to plot the fitting function
         self.push_data = push_data
@@ -64,22 +67,14 @@ class LinearFit(wx.Dialog):
         self.xminFit.SetToolTipString("Enter the minimum value on the x-axis to be included in the fit.")
         self.xmaxFit  = wx.TextCtrl(self,-1,size=(_BOX_WIDTH,20))
         self.xmaxFit.SetToolTipString("Enter the maximum value on the x-axis to be included in the fit.")
-        self.xminTransFit = wx.TextCtrl(self,-1,size=(_BOX_WIDTH,20))
-        self.xminTransFit.SetToolTipString("Minimum value on the x-axis for the plotted data.")
-        self.xmaxTransFit = wx.TextCtrl(self,-1,size=(_BOX_WIDTH,20))
-        self.xmaxTransFit.SetToolTipString("Maximum value on the x-axis for the plotted data.")
         self.initXmin = wx.TextCtrl(self,-1,size=(_BOX_WIDTH,20))
-        self.initXmin.SetToolTipString("Minimum value available on the x-axis for the plotted data.")
+        self.initXmin.SetToolTipString("Minimum value on the x-axis for the plotted data.")
         self.initXmax = wx.TextCtrl(self,-1,size=(_BOX_WIDTH,20))
-        self.initXmax.SetToolTipString("Maximum value available on the x-axis for the plotted data.")
+        self.initXmax.SetToolTipString("Maximum value on the x-axis for the plotted data.")
 
         # Make the info box not editable
         #_BACKGROUND_COLOR = '#ffdf85'
         _BACKGROUND_COLOR = self.GetBackgroundColour()
-        self.xminTransFit.SetEditable(False)
-        self.xminTransFit.SetBackgroundColour(_BACKGROUND_COLOR)
-        self.xmaxTransFit.SetEditable(False)
-        self.xmaxTransFit.SetBackgroundColour(_BACKGROUND_COLOR)
         self.initXmin.SetEditable(False)
         self.initXmin.SetBackgroundColour(_BACKGROUND_COLOR)
         self.initXmax.SetEditable(False)
@@ -92,6 +87,7 @@ class LinearFit(wx.Dialog):
         self.btFit.Bind(wx.EVT_BUTTON, self._onFit)
         self.btFit.SetToolTipString("Perform fit.")
         self.btClose =wx.Button(self, wx.ID_CANCEL,'Close')
+        self.btClose.Bind(wx.EVT_BUTTON, self._on_close)
         
         # Intro
         explanation  = "Perform fit for y(x) = Ax + B"
@@ -135,7 +131,7 @@ class LinearFit(wx.Dialog):
         sizer.Add(wx.StaticText(self, -1, 'Max'),(iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
-        sizer.Add(wx.StaticText(self, -1, 'Maximum range'),(iy, ix),(1,1),\
+        sizer.Add(wx.StaticText(self, -1, 'Maximum range (linear scale)'),(iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix +=1
         sizer.Add(self.initXmin, (iy, ix),(1,1),\
@@ -146,16 +142,6 @@ class LinearFit(wx.Dialog):
         iy += 1
         ix = 0
         sizer.Add(wx.StaticText(self, -1, 'Fit range of '+self.xLabel),(iy, ix),(1,1),\
-                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix += 1
-        sizer.Add(self.xminTransFit, (iy, ix),(1,1),\
-                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix += 2
-        sizer.Add(self.xmaxTransFit, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-      
-        iy += 1
-        ix = 0
-        sizer.Add(wx.StaticText(self, -1, 'Fit range of x'),(iy, ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         sizer.Add(self.xminFit, (iy, ix),(1,1),\
@@ -215,22 +201,38 @@ class LinearFit(wx.Dialog):
         else:
             self.tcChi.SetLabel(format_number(self.Chivalue))
         if self.plottable.x !=[]:
-            self.mini =min(self.plottable.x)
-            self.maxi =max(self.plottable.x)
             #store the values of View in self.x,self.y,self.dx,self.dy
             self.x,self.y,self.dx,self.dy= self.plottable.returnValuesOfView()
             
+            self.mini =min(self.x)
+            self.maxi =max(self.x)
             
-            self.xminTransFit.SetLabel(format_number(min(self.x)))
-            self.xmaxTransFit.SetLabel(format_number(max(self.x)))
             
-            self.initXmin.SetValue(format_number(self.mini))
-            self.initXmax.SetValue(format_number(self.maxi))
+            self.initXmin.SetValue(format_number(min(self.plottable.x)))
+            self.initXmax.SetValue(format_number(max(self.plottable.x)))
             
             self.xminFit.SetLabel(format_number(self.mini))
             self.xmaxFit.SetLabel(format_number(self.maxi))
         
       
+    def register_close(self, owner):
+        """
+            Method to register the close event to a parent
+            window that needs notification when the dialog
+            is closed
+            @param owner: parent window
+        """
+        self._registered_close = owner
+        
+    def _on_close(self, event):
+        """
+            Close event. 
+            Notify registered owner if available.
+        """
+        event.Skip()
+        if self._registered_close is not None:
+            self._registered_close()
+        
     def _onFit(self ,event):
         """
             Performs the fit. Receive an event when clicking on the button Fit.Computes chisqr ,
@@ -251,16 +253,11 @@ class LinearFit(wx.Dialog):
                 
             if(self.checkFitValues(self.xminFit) == True):
                 #Check if the field of Fit Dialog contain values and use the x max and min of the user
-                xmin,xmax = self._checkVal(self.xminFit.GetValue(),self.xmaxFit.GetValue())
+                xminView,xmaxView = self._checkVal(self.xminFit.GetValue(),self.xmaxFit.GetValue())
+                xmin = self.floatInvTransform(xminView)
+                xmax = self.floatInvTransform(xmaxView)
                 
-                xminView=self.floatTransform(xmin)
-                xmaxView=self.floatTransform(xmax)
-                if (self.xLabel=="log10(x)"):
-                    self.xminTransFit.SetValue(format_number(math.log10(xminView)))
-                    self.xmaxTransFit.SetValue(format_number(math.log10(xmaxView)))
-                else:
-                    self.xminTransFit.SetValue(format_number(xminView))
-                    self.xmaxTransFit.SetValue(format_number(xmaxView))
+                
                 # Store the transformed values of view x, y,dy in variables  before the fit
                 if  self.yLabel.lower() == "log10(y)":
                     if (self.xLabel.lower() == "log10(x)"):
@@ -401,6 +398,9 @@ class LinearFit(wx.Dialog):
              transform a float.It is use to determine the x.View min and x.View max for values
              not in x
         """
+        #TODO: refactor this with proper object-oriented design
+        # This code stinks.
+        
         if ( self.xLabel=="x" ):
             return transform.toX(x)
         
@@ -412,6 +412,23 @@ class LinearFit(wx.Dialog):
                 return x
             else:
                 raise ValueError,"cannot compute log of a negative number"
+            
+    def floatInvTransform(self,x):
+        """
+             transform a float.It is use to determine the x.View min and x.View max for values
+             not in x
+        """
+        #TODO: refactor this. This is just a hack to make the
+        # functionality work without rewritting the whole code
+        # with good design (which really should be done...).
+        
+        if ( self.xLabel=="x^(2)" ): 
+            return math.sqrt(x)
+        
+        elif (self.xLabel=="log10(x)" ):
+            return math.pow(10, x)
+        
+        return x
             
     def checkFitValues(self,item):
         """
@@ -437,9 +454,21 @@ class LinearFit(wx.Dialog):
         """
         self.xminFit.SetValue(format_number(xmin))
         self.xmaxFit.SetValue(format_number(xmax))
-        self.xminTransFit.SetValue(format_number(xminTrans))
-        self.xmaxTransFit.SetValue(format_number(xmaxTrans))
         
+    def set_fit_region(self, xmin, xmax):
+        """
+            Set the fit region
+            @param xmin: minimum x-value to be included in fit
+            @param xmax: maximum x-value to be included in fit 
+        """
+        # Check values
+        try:
+            float(xmin)
+            float(xmax)
+        except:
+            raise ValueError, "LinearFit.set_fit_region: fit range must be floats"
+        self.xminFit.SetValue(format_number(xmin))
+        self.xmaxFit.SetValue(format_number(xmax))
   
 class MyApp(wx.App):
     def OnInit(self):
