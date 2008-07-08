@@ -64,9 +64,6 @@ class Invertor(Cinvertor):
         - get_positive(pars): returns the fraction of P(r) that is above zero
         - get_pos_err(pars): returns the fraction of P(r) that is 1-sigma above zero
     """
-    #TODO: Allow for slit smearing. Smear each base function once before filling
-    # the A matrix.
-    
     ## Chisqr of the last computation
     chi2  = 0
     ## Time elapsed for last computation
@@ -79,8 +76,6 @@ class Invertor(Cinvertor):
     out = None
     ## Last errors on output values
     cov = None
-    ## Flag to allow I(q) data with constant background
-    #has_bck = False
     ## Background value
     background = 0
     
@@ -132,8 +127,6 @@ class Invertor(Cinvertor):
     def __getattr__(self, name):
         """
            Return the value of an attribute
-           For the moment x, y, err and d_max are write-only
-           TODO: change that!
         """
         import numpy
         if   name=='x':
@@ -183,6 +176,7 @@ class Invertor(Cinvertor):
         invertor = Invertor()
         invertor.chi2    = self.chi2 
         invertor.elapsed = self.elapsed 
+        invertor.nfunc   = self.nfunc 
         invertor.alpha   = self.alpha
         invertor.d_max   = self.d_max
         invertor.q_min   = self.q_min

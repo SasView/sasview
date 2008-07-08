@@ -1,9 +1,19 @@
 Release Notes
 =============
 
-Package name: pr_inversion 0.1
+Package name: pr_inversion 0.2
 
-1- Version 0.1.0
+1- 	Version 0.2.1
+	- Release date: 7/8/2008
+	- Minor change to clone method
+	  
+	Version 0.2.0
+	
+	- Release date: 7/4/2008
+	- Number of term estimator
+	- Faster implementation
+
+	Version 0.1.0
 
 	- Release date: 5/28/2008
 	- Provide python module sans.pr
