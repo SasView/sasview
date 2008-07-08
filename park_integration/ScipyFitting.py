@@ -1,86 +1,141 @@
-#class Fitting
+"""
+    @organization: ScipyFitting module contains FitArrange , ScipyFit,
+    Parameter classes.All listed classes work together to perform a 
+    simple fit with scipy optimizer.
+"""
 from sans.guitools.plottables import Data1D
 from Loader import Load
 from scipy import optimize
-#from Fitting import Fit
+
 
 class FitArrange:
     def __init__(self):
         """
-            Store a set of data for a given model to perform the Fit
-            @param model: the model selected by the user
-            @param Ldata: a list of data what the user want to fit
+            Class FitArrange contains a set of data for a given model
+            to perform the Fit.FitArrange must contain exactly one model
+            and at least one data for the fit to be performed.
+            model: the model selected by the user
+            Ldata: a list of data what the user wants to fit
+            
         """
         self.model = None
         self.dList =[]
         
     def set_model(self,model):
-        """ set the model """
+        """ 
+            set_model save a copy of the model
+            @param model: the model being set
+        """
         self.model = model
         
     def add_data(self,data):
         """ 
-            @param data: Data to add in the list
-            fill a self.dataList with data to fit
+            add_data fill a self.dList with data to fit
+            @param data: Data to add in the list  
         """
         if not data in self.dList:
             self.dList.append(data)
             
     def get_model(self):
-        """ Return the model"""
+        """ @return: saved model """
         return self.model   
      
     def get_data(self):
-        """ Return list of data"""
+        """ @return:  list of data dList"""
         return self.dList 
       
     def remove_data(self,data):
         """
             Remove one element from the list
-            @param data: Data to remove from the the lsit of data
+            @param data: Data to remove from dList
         """
         if data in self.dList:
             self.dList.remove(data)
+    def remove_datalist(self):
+        """ empty the complet list dLst"""
+        self.dList=[]
             
 class ScipyFit:
     """ 
-        Performs the Fit.he user determine what kind of data 
-    """
-    def __init__(self,data=[]):
-        #this is a dictionary of FitArrange elements
-        self.fitArrangeList={}
-        #the constraint of the Fit
-        self.constraint =None
-        #Specify the use of scipy or park fit
-        self.fitType =None
+        ScipyFit performs the Fit.This class can be used as follow:
+        #Do the fit SCIPY
+        create an engine: engine = ScipyFit()
+        Use data must be of type plottable
+        Use a sans model
         
-  
-    
+        Add data with a dictionnary of FitArrangeList where Uid is a key and data
+        is saved in FitArrange object.
+        engine.set_data(data,Uid)
+        
+        Set model parameter "M1"= model.name add {model.parameter.name:value}.
+        @note: Set_param() if used must always preceded set_model()
+             for the fit to be performed.In case of Scipyfit set_param is called in
+             fit () automatically.
+        engine.set_param( model,"M1", {'A':2,'B':4})
+        
+        Add model with a dictionnary of FitArrangeList{} where Uid is a key and model
+        is save in FitArrange object.
+        engine.set_model(model,Uid)
+        
+        engine.fit return chisqr,[model.parameter 1,2,..],[[err1....][..err2...]]
+        chisqr1, out1, cov1=engine.fit({model.parameter.name:value},qmin,qmax)
+    """
+    def __init__(self):
+        """
+            Creates a dictionary (self.fitArrangeList={})of FitArrange elements
+            with Uid as keys
+        """
+        self.fitArrangeList={}
+        
     def fit(self,pars, qmin=None, qmax=None):
         """
-             Do the fit 
+            Performs fit with scipy optimizer.It can only perform fit with one model
+            and a set of data.
+            @note: Cannot perform more than one fit at the time.
+            
+            @param pars: Dictionary of parameter names for the model and their values
+            @param qmin: The minimum value of data's range to be fit
+            @param qmax: The maximum value of data's range to be fit
+            @return chisqr: Value of the goodness of fit metric
+            @return out: list of parameter with the best value found during fitting
+            @return cov: Covariance matrix
         """
-        #for item in self.fitArrangeList.:
-        
+        # fitproblem contains first fitArrange object(one model and a list of data)
         fitproblem=self.fitArrangeList.values()[0]
         listdata=[]
         model = fitproblem.get_model()
         listdata = fitproblem.get_data()
         
+        #Create list of Parameter instances and save parameters values in model
         parameters = self.set_param(model,model.name,pars)
        
-        # Do the fit with  data set (contains one or more data) and one model 
+        # Concatenate dList set (contains one or more data)before fitting
         xtemp,ytemp,dytemp=self._concatenateData( listdata)
-        print "dytemp",dytemp
+        
+        #print "dytemp",dytemp
+        #Assign a fit range is not boundaries were given
         if qmin==None:
             qmin= min(xtemp)
         if qmax==None:
-            qmax= max(xtemp)  
+            qmax= max(xtemp) 
+            
+        #perform the fit 
         chisqr, out, cov = fitHelper(model,parameters, xtemp,ytemp, dytemp ,qmin,qmax)
         return chisqr, out, cov
     
     def _concatenateData(self, listdata=[]):
-        """ concatenate each fields of all data contains ins listdata"""
+        """  
+            _concatenateData method concatenates each fields of all data contains ins listdata.
+            @param listdata: list of data 
+            
+            @return xtemp, ytemp,dytemp:  x,y,dy respectively of data all combined
+                if xi,yi,dyi of two or more data are the same the second appearance of xi,yi,
+                dyi is ignored in the concatenation.
+                
+            @raise: if listdata is empty  will return None
+            @raise: if data in listdata don't contain dy field ,will create an error
+            during fitting
+        """
         if listdata==[]:
             raise ValueError, " data list missing"
         else:
@@ -95,36 +150,65 @@ class ScipyFit:
                        
                     if not data.y[i] in ytemp:
                         ytemp.append(data.y[i])
-                        
-                    if not data.dy[i] in dytemp:
-                        dytemp.append(data.dy[i])
+                    if data.dy and len(data.dy)>0:   
+                        if not data.dy[i] in dytemp:
+                            dytemp.append(data.dy[i])
+                    else:
+                        raise ValueError,"dy is missing will not be able to fit later on"
             return xtemp, ytemp,dytemp
         
     def set_model(self,model,Uid):
-        """ Set model """
+        """ 
+            Set model in a FitArrange object and add that object in a dictionary
+            with key Uid.
+            @param model: the model added
+            @param Uid: unique key corresponding to a fitArrange object with model
+        """
+        #A fitArrange is already created but contains dList only at Uid
         if self.fitArrangeList.has_key(Uid):
             self.fitArrangeList[Uid].set_model(model)
         else:
+        #no fitArrange object has been create with this Uid
             fitproblem= FitArrange()
             fitproblem.set_model(model)
             self.fitArrangeList[Uid]=fitproblem
         
     def set_data(self,data,Uid):
-        """ Receive plottable and create a list of data to fit"""
-        
+        """ Receives plottable, creates a list of data to fit,set data
+            in a FitArrange object and adds that object in a dictionary 
+            with key Uid.
+            @param data: data added
+            @param Uid: unique key corresponding to a fitArrange object with data
+            """
+        #A fitArrange is already created but contains model only at Uid
         if self.fitArrangeList.has_key(Uid):
             self.fitArrangeList[Uid].add_data(data)
         else:
+        #no fitArrange object has been create with this Uid
             fitproblem= FitArrange()
             fitproblem.add_data(data)
             self.fitArrangeList[Uid]=fitproblem
             
     def get_model(self,Uid):
-        """ return list of data"""
-        return self.fitArrangeList[Uid]
+        """ 
+            @param Uid: Uid is key in the dictionary containing the model to return
+            @return  a model at this uid or None if no FitArrange element was created
+            with this Uid
+        """
+        if self.fitArrangeList.has_key(Uid):
+            return self.fitArrangeList[Uid].get_model()
+        else:
+            return None
     
     def set_param(self,model,name, pars):
-        """ Recieve a dictionary of parameter and save it """
+        """ 
+            Recieve a dictionary of parameter and save it 
+            @param model: model on with parameter values are set
+            @param name: model name
+            @param pars: dictionary of paramaters name and value
+            pars={parameter's name: parameter's value}
+            @return list of Parameter instance
+        """
         parameters=[]
         if model==None:
             raise ValueError, "Cannot set parameters for empty model"
@@ -135,46 +219,27 @@ class ScipyFit:
                 parameters.append(param)
         return parameters
     
-    def add_constraint(self, constraint):
-        """ User specify contraint to fit """
-        self.constraint = str(constraint)
-        
-    def get_constraint(self):
-        """ return the contraint value """
-        return self.constraint
-   
-    def set_constraint(self,constraint):
-        """ 
-            receive a string as a constraint
-            @param constraint: a string used to constraint some parameters to get a 
-                specific value
-        """
-        self.constraint= constraint
-    
-    def createProblem(self):
-        """
-            Check the contraint value and specify what kind of fit to use
-        """
-        mylist=[]
-        for k,value in self.fitArrangeList.iteritems():
-            couple=()
-            model=value.get_model()
-            data=value.get_data()
-            couple=(model,data)
-            mylist.append(couple)
-        #print mylist
-        return mylist
     def remove_data(self,Uid,data=None):
-        """ remove one or all data"""
-        if data==None:# remove all element in data list
+        """ remove one or all data.if data ==None will remove the whole
+            list of data at Uid; else will remove only data in that list.
+            @param Uid: unique id containing FitArrange object with data
+            @param data:data to be removed
+        """
+        if data==None:
+        # remove all element in data list
             if self.fitArrangeList.has_key(Uid):
                 self.fitArrangeList[Uid].remove_datalist()
         else:
+        #remove only data in dList
             if self.fitArrangeList.has_key(Uid):
                 self.fitArrangeList[Uid].remove_data(data)
                 
     def remove_model(self,Uid):
-        """ remove model """
+        """ 
+            remove model in FitArrange object with Uid.
+            @param Uid: Unique id corresponding to the FitArrange object 
+            where model must be removed.
+        """
         if self.fitArrangeList.has_key(Uid):
             self.fitArrangeList[Uid].remove_model()
                 
@@ -209,6 +274,9 @@ def fitHelper(model, pars, x, y, err_y ,qmin=None, qmax=None):
         @param x: vector of x data
         @param y: vector of y data
         @param err_y: vector of y errors 
+        @return chisqr: Value of the goodness of fit metric
+        @return out: list of parameter with the best value found during fitting
+        @return cov: Covariance matrix
     """
     def f(params):
         """

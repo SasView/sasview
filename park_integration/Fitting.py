@@ -1,4 +1,8 @@
-#class Fitting
+"""
+    @organization: Class Fit contains ScipyFit and ParkFit methods declaration
+    allows to create instance of type ScipyFit or ParkFit to perform either
+    a park fit or a scipy fit.
+"""
 from sans.guitools.plottables import Data1D
 from Loader import Load
 from scipy import optimize
@@ -8,17 +12,31 @@ from ParkFitting import ParkFit
 
 class Fit:
     """ 
-        Wrap class that allows to select the fitting type 
+        Wrap class that allows to select the fitting type.this class 
+        can be used as follow :
+        
+        from sans.fit.Fitting import Fit
+        fitter= Fit()
+        fitter.fit_engine('scipy') or fitter.fit_engine('park')
+        engine = fitter.returnEngine()
+        engine.set_data(data,Uid)
+        engine.set_param( model,model.name, pars)
+        engine.set_model(model,Uid)
+        
+        chisqr1, out1, cov1=engine.fit(pars,qmin,qmax)
     """  
     def __init__(self):
-        
-        # To initialize a type of Fit
+        """
+            self._engine will contain an instance of ScipyFit or ParkFit
+        """
         self._engine=None
           
     def fit_engine(self,word):
         """
             Select the type of Fit 
             @param word: the keyword to select the fit type 
+            @raise: if the user does not enter 'scipy' or 'park',
+             a valueError is rase
         """
         if word=="scipy":
             self._engine=ScipyFit()
@@ -27,10 +45,11 @@ class Fit:
         else:
             raise ValueError, "enter the keyword scipy or park"
     def returnEngine(self):
+        """ @return self._engine""" 
         return self._engine
     
     def fit(self,pars, qmin=None, qmax=None):
-        """ Do the fit """
+        """Perform the fit """
       
     def set_model(self,model,Uid):
         """ Set model """
