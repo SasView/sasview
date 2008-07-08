@@ -5,8 +5,9 @@ import time
 
 # Version of the application
 __appname__ = "PrView"
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 __download_page__ = 'http://danse.chem.utk.edu'
+__update_URL__ = 'http://danse.chem.utk.edu/prview_version.txt'
 
 
 # Debug message flag

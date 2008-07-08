@@ -5,8 +5,13 @@ PrView 0.2
 
 Package name: None
 
-1- Version 0.2.1
+1- Version 0.2.2
 
+	- Release date: 7/8/2008
+	- Added option to normalize P(r) to 1, scale P_max to 1, or leave as is.
+	- Fixed problem with changing the number of P(r) points.
+
+   Version 0.2.1
 	- Release date: 7/04/2008
 	- Improved user interface.
 	- Automated estimate of the number of terms.

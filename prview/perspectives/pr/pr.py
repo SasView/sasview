@@ -59,7 +59,10 @@ class Plugin:
         ## Current invertor
         self.invertor    = None
         self.pr          = None
-        self.pr_estimate = None
+        # Copy of the last result in case we need to display it.
+        self._last_pr    = None
+        self._last_out   = None
+        self._last_cov   = None
         ## Calculation thread
         self.calc_thread = None
         ## Estimation thread
@@ -72,6 +75,8 @@ class Plugin:
         self._pr_npts = 51
         ## Flag to let the plug-in know that it is running standalone
         self.standalone = True
+        self._normalize_output = False
+        self._scale_output_unity = False
         
         # Log startup
         logging.info("Pr(r) plug-in started")
@@ -264,7 +269,7 @@ class Plugin:
         if dialog.ShowModal() == wx.ID_OK:
             self._pr_npts= dialog.get_content()
             dialog.Destroy()
-            self.show_pr(self.pr.out, self.pr, self.pr.cov)
+            self.show_pr(self._last_out, self._last_pr, self._last_cov)
         else:
             dialog.Destroy()
         
@@ -284,6 +289,7 @@ class Plugin:
         y_true = numpy.zeros(len(x))
 
         sum = 0.0
+        pmax = 0.0
         cov2 = numpy.ascontiguousarray(cov)
         
         for i in range(len(x)):
@@ -292,10 +298,19 @@ class Plugin:
             else:
                 (value, dy[i]) = pr.pr_err(out, cov2, x[i])
             sum += value*pr.d_max/len(x)
-            y[i] = value
             
-        y = y/sum
-        dy = dy/sum
+            # keep track of the maximum P(r) value
+            if value>pmax:
+                pmax = value
+                
+            y[i] = value
+                
+        if self._normalize_output==True:
+            y = y/sum
+            dy = dy/sum
+        elif self._scale_output_unity==True:
+            y = y/pmax
+            dy = dy/pmax
         
         if cov2==None:
             new_plot = Theory1D(x, y)
@@ -377,14 +392,61 @@ class Plugin:
         #if graph.selected_plottable==IQ_DATA_LABEL:
         for item in graph.plottables:
             if item.name==PR_FIT_LABEL:
-                return [["Add P(r) data", "Load a data file and display it on this plot", self._on_add_data],
+                m_list = [["Add P(r) data", "Load a data file and display it on this plot", self._on_add_data],
                        ["Change number of P(r) points", "Change the number of points on the P(r) output", self._on_pr_npts]]
+
+                m_list.append(["Disable P(r) scaling", 
+                               "Let the output P(r) keep the scale of the data", 
+                               self._on_disable_scaling])
+                
+                if self._scale_output_unity==False:
+                    m_list.append(["Scale P_max(r) to unity", 
+                                   "Scale P(r) so that its maximum is 1", 
+                                   self._on_scale_unity])
+                    
+                if self._normalize_output==False:
+                    m_list.append(["Normalize P(r) to unity", 
+                                   "Normalize the integral of P(r) to 1", 
+                                   self._on_normalize])
+                    
+                return m_list
+                #return [["Add P(r) data", "Load a data file and display it on this plot", self._on_add_data],
+                #       ["Change number of P(r) points", "Change the number of points on the P(r) output", self._on_pr_npts]]
 
             elif item.name==graph.selected_plottable:
                 return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion]]      
                 
         return []
 
+    def _on_disable_scaling(self, evt):
+        """
+            Disable P(r) scaling
+            @param evt: Menu event
+        """
+        self._normalize_output = False
+        self._scale_output_unity = False
+        self.show_pr(self._last_out, self._last_pr, self._last_cov)
+        
+    def _on_normalize(self, evt):
+        """
+            Switch normalization ON/OFF
+            @param evt: Menu event
+        """
+        self._normalize_output = True
+        self._scale_output_unity = False
+            
+        self.show_pr(self._last_out, self._last_pr, self._last_cov)
+        
+    def _on_scale_unity(self, evt):
+        """
+            Switch normalization ON/OFF
+            @param evt: Menu event
+        """
+        self._scale_output_unity = True
+        self._normalize_output = False
+            
+        self.show_pr(self._last_out, self._last_pr, self._last_cov)
+        
     def _on_add_data(self, evt):
         """
             Add a data curve to the plot
@@ -467,6 +529,11 @@ class Plugin:
         from copy import deepcopy
         # Save useful info
         self.elapsed = elapsed
+        # Keep a copy of the last result
+        self._last_pr  = pr.clone()
+        self._last_out = out
+        self._last_cov = cov
+        
         # Save Pr invertor
         self.pr = pr
         
