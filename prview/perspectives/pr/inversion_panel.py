@@ -571,10 +571,6 @@ class InversionControl(wx.Panel):
         vbox.Add(ressizer, (iy_vb,0), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
 
         # ----- Buttons -----
-        static_line = wx.StaticLine(self, -1)
-        iy_vb += 1
-        vbox.Add(static_line, (iy_vb,0), (1,1), wx.EXPAND|wx.TOP, 10)
-        
         id = wx.NewId()
         button_OK = wx.Button(self, id, "Compute")
         button_OK.SetToolTipString("Perform P(r) inversion.")
