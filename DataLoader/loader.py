@@ -170,7 +170,7 @@ class Loader(object):
                 return self.readers[ext]
             except:
                 
-                raise ValueError, "Unknown file type '%s'"%ext
+                raise RuntimeError, "Unknown file type '%s'"%ext
                 
        
         

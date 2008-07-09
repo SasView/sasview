@@ -39,7 +39,6 @@ class Reader:
     """
         Example data manipulation
     """
-   
     ## File type
     type = []
     ## Extension
@@ -75,9 +74,10 @@ class Reader:
             xmax = None
             Z = None
         
-            
-            im = Image.open(filename)
-            
+            try:
+                im = Image.open(filename)
+            except :
+                raise  RuntimeError,"cannot open %s"%(filename)
             # Detector size should be 128x128, the file is 190x190
             print "-> Image size:", im.size, im.format, im.mode
             data = im.getdata()
