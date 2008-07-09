@@ -188,17 +188,21 @@ class PlotPanel(wx.Panel):
         
     def onLeftDown(self,event): 
         """ left button down and ready to drag"""
-        self.leftdown=True
-        ax = event.inaxes
-        if ax != None:
-            self.xInit,self.yInit=event.xdata,event.ydata
+        # Check that the LEFT button was pressed
+        if event.button == 1:
+            self.leftdown=True
+            ax = event.inaxes
+            if ax != None:
+                self.xInit,self.yInit=event.xdata,event.ydata
             
             
     def onLeftUp(self,event): 
         """ Dragging is done """
-        self.leftdown=False
-        self.mousemotion=False 
-        self.leftup=True
+        # Check that the LEFT button was released
+        if event.button == 1:
+            self.leftdown=False
+            self.mousemotion=False 
+            self.leftup=True
       
     def onMouseMotion(self,event): 
         """
