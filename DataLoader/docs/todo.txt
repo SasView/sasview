@@ -16,3 +16,13 @@
 - The return object of a load seems to be inconsistent and depend only on the particular reader. This will cause problems since
   the calling modules will be unable to know what to expect. An interface should be defined.
  
+ * Functional requirements
+ - Multiple readers might be able to read files with a given extension. (For instance, .txt can
+   be read by the 2-column reader and the 3-column reader.) If the first one raises an exception,
+   the second should be tried. This means that all exceptions raised by a reader should be caught.
+   
+ - All data loaded from a file should be stored in a common class object.  
+ 
+ * Error conditions
+ - Trying to load a file with an unknown extension should raise a RuntimeException.
+ - Trying to load a corrupted file with a know file extension should raise a RuntimeException.  
