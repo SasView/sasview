@@ -37,7 +37,8 @@ class Properties(wx.Dialog):
         ix +=2
         self.view =wx.ComboBox(self, -1)
         x_size += self.view.GetSize()[0]
-        sizer.Add(self.view,(iy,ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        self.view.SetMinSize((160,30))
+        sizer.Add(self.view,(iy,ix), (1,1), wx.EXPAND|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         
         self.SetMinSize((x_size,50))
         
