@@ -1,8 +1,5 @@
 import sys, time
 from calcthread import CalcThread
-from sans.pr.invertor import Invertor
-import numpy
-from config import printEVT
 
 class CalcPr(CalcThread):
     """
@@ -27,15 +24,10 @@ class CalcPr(CalcThread):
         self.error_func = error_func
         self.starttime = 0
         
-    def isquit(self):
-        try:
-            CalcThread.isquit(self)
-        except KeyboardInterrupt:
-            printEVT("P(r) calc interrupted")
-            raise KeyboardInterrupt
-        
     def compute(self):
-        import time
+        """
+            Perform P(r) inversion
+        """
         try:
             self.starttime = time.time()
             out, cov = self.pr.invert(self.nfunc)
@@ -45,7 +37,7 @@ class CalcPr(CalcThread):
             self.complete(out=out, cov=cov, pr=self.pr, elapsed=elapsed)
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed
-            printEVT("P(r) calc interrupted")
+            pass
         except:
             if not self.error_func==None:
                 self.error_func("CalcPr.compute: %s" % sys.exc_value)
@@ -83,7 +75,7 @@ class EstimatePr(CalcThread):
             self.complete(alpha=alpha, message=message, elapsed=elapsed)
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed
-            printEVT("Alpha estimator thread interrupted")
+            pass
         except:
             if not self.error_func==None:
                 self.error_func("EstimatePr.compute: %s" % sys.exc_value)
@@ -118,7 +110,6 @@ class EstimateNT(CalcThread):
         """
             Calculates the estimate
         """
-        import time
         try:            
             t_0 = time.time()
             self._time_for_sleep = t_0
@@ -128,7 +119,7 @@ class EstimateNT(CalcThread):
             self.complete(nterms=nterms, alpha=alpha, message=message, elapsed=t_1)
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed
-            printEVT("Number of terms thread interrupted")
+            pass
         except:
             if not self.error_func==None:
                 self.error_func("EstimatePr2.compute: %s" % sys.exc_value)

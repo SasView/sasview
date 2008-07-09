@@ -6,6 +6,13 @@ from sans.guiframe import gui_manager
 import local_config
 from perspectives.pr.pr import NewPrFileEvent
 
+# OS-dependent preferred height
+#TODO: refactor this
+_DEFAULT_HEIGHT=650
+import sys
+if sys.platform.count("darwin")>0:
+	_DEFAULT_HEIGHT=720
+
 class PrFrame(gui_manager.ViewerFrame):
     def _on_open(self, event):
         wx.PostEvent(self, NewPrFileEvent())
@@ -14,11 +21,10 @@ class PrApp(gui_manager.ViewApp):
     def OnInit(self):
         #from gui_manager import ViewerFrame
         self.frame = PrFrame(None, -1, local_config.__appname__, 
-                             window_height=650, window_width=750)    
+                             window_height=_DEFAULT_HEIGHT, window_width=750)    
         self.frame.Show(True)
 
         if hasattr(self.frame, 'special'):
-            print "Special?", self.frame.special.__class__.__name__
             self.frame.special.SetCurrent()
         self.SetTopWindow(self.frame)
         return True

@@ -296,9 +296,8 @@ class InversionControl(wx.Panel):
         
         
     def _do_layout(self):
-        #panel = wx.Panel(self, -1)
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        #vbox.SetMinSize((1000,50))
+        vbox = wx.GridBagSizer(0,0)
+        iy_vb = 0
 
         # ----- I(q) data -----
         databox = wx.StaticBox(self, -1, "I(q) data source")
@@ -337,7 +336,7 @@ class InversionControl(wx.Panel):
         iy += 1
         pars_sizer.Add(self.bck_chk, (iy,0), (1,2), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         boxsizer1.Add(pars_sizer, 0, wx.EXPAND)  
-        vbox.Add(boxsizer1)
+        vbox.Add(boxsizer1, (iy_vb,0), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
         # ----- Add slit parameters -----
         if True:
@@ -347,10 +346,10 @@ class InversionControl(wx.Panel):
             
             sizer_slit = wx.GridBagSizer(5,5)
     
-            label_sheight = wx.StaticText(self, -1, "Height", size=(35,20))
-            label_swidth = wx.StaticText(self, -1, "Width", size=(35,20))
+            label_sheight = wx.StaticText(self, -1, "Height", size=(40,20))
+            label_swidth = wx.StaticText(self, -1, "Width", size=(40,20))
             #label_sunits1 = wx.StaticText(self, -1, "[A^(-1)]")
-            label_sunits2 = wx.StaticText(self, -1, "[A^(-1)]", size=(40,20))
+            label_sunits2 = wx.StaticText(self, -1, "[A^(-1)]", size=(55,20))
             self.sheight_ctl = wx.TextCtrl(self, -1, size=(60,20))
             self.swidth_ctl = wx.TextCtrl(self, -1, size=(60,20))
             self.sheight_ctl.SetToolTipString("Enter slit height in units of Q or leave blank.")
@@ -367,7 +366,8 @@ class InversionControl(wx.Panel):
             sizer_slit.Add(label_sunits2,    (iy,4), (1,1), wx.LEFT|wx.EXPAND, 5)
             
             sboxsizer.Add(sizer_slit, wx.TOP, 15)
-            vbox.Add(sboxsizer)
+            iy_vb += 1
+            vbox.Add(sboxsizer, (iy_vb,0), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
         
         # ----- Q range -----
@@ -377,10 +377,10 @@ class InversionControl(wx.Panel):
         
         sizer_q = wx.GridBagSizer(5,5)
 
-        label_qmin = wx.StaticText(self, -1, "Q min", size=(35,20))
-        label_qmax = wx.StaticText(self, -1, "Q max", size=(35,20))
+        label_qmin = wx.StaticText(self, -1, "Q min", size=(40,20))
+        label_qmax = wx.StaticText(self, -1, "Q max", size=(40,20))
         #label_qunits1 = wx.StaticText(self, -1, "[A^(-1)]")
-        label_qunits2 = wx.StaticText(self, -1, "[A^(-1)]", size=(40,20))
+        label_qunits2 = wx.StaticText(self, -1, "[A^(-1)]", size=(55,20))
         self.qmin_ctl = wx.TextCtrl(self, -1, size=(60,20))
         self.qmax_ctl = wx.TextCtrl(self, -1, size=(60,20))
         self.qmin_ctl.SetToolTipString("Select a lower bound for Q or leave blank.")
@@ -396,7 +396,9 @@ class InversionControl(wx.Panel):
         sizer_q.Add(self.qmax_ctl, (iy,3), (1,1), wx.LEFT|wx.EXPAND, 5)
         sizer_q.Add(label_qunits2, (iy,4), (1,1), wx.LEFT|wx.EXPAND, 5)
         qboxsizer.Add(sizer_q, wx.TOP, 15)
-        vbox.Add(qboxsizer)
+
+        iy_vb += 1
+        vbox.Add(qboxsizer, (iy_vb,0), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
         
         
@@ -471,7 +473,8 @@ class InversionControl(wx.Panel):
 
         boxsizer2.Add(sizer_params, 0)
         
-        vbox.Add(boxsizer2)
+        iy_vb += 1
+        vbox.Add(boxsizer2, (iy_vb,0), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
 
 
         # ----- Results -----
@@ -564,11 +567,13 @@ class InversionControl(wx.Panel):
         sizer_res.Add(self.pos_err_ctl,   (iy,1), (1,1), wx.RIGHT|wx.EXPAND, 15)
 
         ressizer.Add(sizer_res, 0)
-        vbox.Add(ressizer)
+        iy_vb += 1
+        vbox.Add(ressizer, (iy_vb,0), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
 
         # ----- Buttons -----
         static_line = wx.StaticLine(self, -1)
-        vbox.Add(static_line, 0, wx.EXPAND|wx.TOP, 10)
+        iy_vb += 1
+        vbox.Add(static_line, (iy_vb,0), (1,1), wx.EXPAND|wx.TOP, 10)
         
         id = wx.NewId()
         button_OK = wx.Button(self, id, "Compute")
@@ -586,7 +591,8 @@ class InversionControl(wx.Panel):
         sizer_button.Add(button_Reset, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
         sizer_button.Add(button_OK, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
         #sizer_button.Add(button_Cancel, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)        
-        vbox.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
+        iy_vb += 1
+        vbox.Add(sizer_button, (iy_vb,0), (1,1), wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
 
 
         self.SetSizer(vbox)
