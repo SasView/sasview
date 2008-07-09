@@ -56,7 +56,14 @@ def load_ascii_1D(path):
 def plot_data(parent, path, name="Loaded Data"):
     from sans.guicomm.events import NewPlotEvent
     from sans.guitools.plottables import Data1D, Theory1D
-    x, y, dy = load_ascii_1D(path)
+    from DataLoader.loader import  Loader
+    #Instantiate a loader 
+    L=Loader()
+    
+    #Recieves data 
+    x,y,dy=L.load(path)
+   
+    import numpy
     
     if dy==None:
         new_plot = Theory1D(x, y)

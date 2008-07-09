@@ -588,12 +588,13 @@ class ViewerFrame(wx.Frame):
             self._mgr.Update()
         
     def _on_open(self, event):
+   
         from data_loader import plot_data
         path = self.choose_file()
             
         if path and os.path.isfile(path):
             plot_data(self, path)
-                
+           
         
         
     def _onClose(self, event):
