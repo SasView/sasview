@@ -4,7 +4,7 @@ from copy import deepcopy
 import math
 class Reader:
     """ Simple data reader for Igor data files """
-    
+    ext=['.ASC']
     def __init__(self, filename=None):
         """ Init
             @param filename: Name of Igor data file to read

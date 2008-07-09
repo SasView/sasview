@@ -72,12 +72,13 @@ class Loader(object):
             self.__setitem__()
             
             
-        def __setitem__(self, ext=None, reader=None):
+        def __setitem__(self,dir=None, ext=None, reader=None):
             """
                 __setitem__  sets in a dictionary(self.readers) a given reader
                 with a file extension that it can read.
                 @param ext: extension given of type string
                 @param reader:instance Reader class
+                @param dir: directory name where plugins readers will be saved
                 @raise : ValueError will be raise if a "plugins" directory is not found
                 and the user didn't add a reader as parameter or if the user didn't 
                 add a reader as a parameter and plugins directory doesn't contain
@@ -85,24 +86,32 @@ class Loader(object):
                 if an extension is not specified and a reader does not contain a field
                 ext , a ValueError "missing extension" is raised.
                 @note: when called without parameters __setitem__ will try to load
-                readers inside a "plugins" directory 
+                readers inside a "readers" directory 
+                if call with a directory name will try find readers 
+                from that directory "dir"
             """
-            import os
+            if dir==None:
+                dir='readers'
+            
             if reader==None and  ext==None:#1st load
                 plugReader=None
-                if os.path.isdir('plugins'):
-                    plugReader=_findReaders('plugins')# import all module in plugins
-                if os.path.isdir('../plugins'):
-                    plugReader=_findReaders('../plugins')
+                if os.path.isdir(dir):
+                    plugReader=_findReaders(dir)# import all module in plugins
+                if os.path.isdir('../'+dir):
+                    plugReader=_findReaders('../'+dir)
                 else:
-                    if os.path.isdir('..\DataLoader\plugins'):
-                        os.chdir(os.path.abspath('..\DataLoader\plugins'))# change the current 
-                        plugReader=_findReaders('plugins')
+                    if os.path.isdir('../DataLoader/'+dir):
+                        os.chdir(os.path.abspath('../DataLoader/'+dir))# change the current 
+                        plugReader=_findReaders(dir)
                        
                 if plugReader !=None:
                     for preader in plugReader:# for each modules takes list of extensions
-                        print preader,preader.ext
-                        for item in preader.ext:
+                        try:
+                            list=preader.ext
+                        except:
+                            raise AttributeError," %s instance has no attribute 'ext'"\
+                            %(preader.__class__)
+                        for item in list:
                             ext=item
                             if ext not in self.readers:#assign extension with its reader
                                 self.readers[ext] = []
@@ -114,14 +123,17 @@ class Loader(object):
                 self.readers[ext].insert(0,reader)
             elif reader!=None:
                 #only reader is receive try to find a field ext
-                if reader.ext:
-                    for item in reader.ext:
-                        ext=item
-                        if ext not in self.readers:#assign extension with its reader
-                            self.readers[ext] = []
-                        self.readers[ext].insert(0,reader)
-                else:
-                    raise ValueError,"missing extension"
+                try:
+                    list=preader.ext
+                except:
+                    raise AttributeError," Reader instance has no attribute 'ext'"
+                for item in list:
+                
+                    ext=item
+                    if ext not in self.readers:#assign extension with its reader
+                        self.readers[ext] = []
+                    self.readers[ext].insert(0,reader)
+
             else:
                 raise ValueError,"missing reader"
                 
