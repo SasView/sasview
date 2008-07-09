@@ -1,6 +1,16 @@
 """
     Unit tests for DataLoader module 
+    log file "test_log.txt" contains all errors when running loader
+    It is create in the folder where test is runned
 """
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    filename='test_log.txt',
+                    filemode='w')
+
+
+#logger.info('oops I did it again')
 
 import unittest
 import math
@@ -37,11 +47,13 @@ class testLoader(unittest.TestCase):
     L.__setitem__('.gif',read5)
     L.__setitem__('.bmp',read5)
        
-    def testLoad1(self):
-        """test reading empty file, no file can read it"""
+    def testLoad0(self):
+        """test reading empty file"""
         self.assertEqual(self.L.load('empty.txt'),None)
-        self.assertEqual( self.L.getAcTReader('empty.txt'),None)
-         
+        
+    def testLoad1(self):
+        """test reading 2 columns"""
+        
         #Testing loading a txt file of 2 columns, the only reader should be read1 
         xload,yload,dyload=self.L.load('test_2_columns.txt') 
         x=[2.83954,0.204082,0.408163,0.612245,0.816327,1.02041,1.22449,1.42857,1.63265]
@@ -54,10 +66,10 @@ class testLoader(unittest.TestCase):
         for i in range(len(x)):
             self.assertEqual(xload[i],x[i])
             self.assertEqual(yload[i],y[i])
-        self.assertEqual( self.L.getAcTReader('test_2_columns.txt'),self.read1.__class__)
+       
     
     def testLoad2(self):
-        """Testing loading a txt file of 3 columns, the only reader should be read2"""
+        """Testing loading a txt file of 3 columns"""
         xload,yload,dyload= self.L.load('test_3_columns.txt') 
         x=[0,0.204082,0.408163,0.612245,0.816327,1.02041,1.22449]    
         y=[2.83954,3.44938,5.82026,5.27591,5.2781,5.22531,7.47487]
@@ -70,7 +82,7 @@ class testLoader(unittest.TestCase):
             self.assertEqual(xload[i],x[i])
             self.assertEqual(yload[i],y[i])
             self.assertEqual(dyload[i],dy[i])
-        self.assertEqual(self.L.getAcTReader('test_3_columns.txt'),self.read2.__class__)
+       
     
     def testload3(self):
         """ Testing loading Igor data"""
@@ -80,24 +92,44 @@ class testLoader(unittest.TestCase):
         self.assertEqual(xmax, 0.016234058202440633,)
         self.assertEqual(ymin,-0.01684257151702391)
         self.assertEqual(ymax,0.017950440578015116)
-        self.assertEqual(self.L.getAcTReader('MAR07232_rest.ASC'),self.read3.__class__)
+       
         #tested corrupted file.asc
-        self.assertEqual(self.L.load('AR07232_rest.ASC') ,None)
-    
+        try:self.L.load('AR07232_rest.ASC')
+        except ValueError,msg:
+           #logging.log(10,str(msg))
+           logging.error(str(msg))
     def testload4(self):
         """ Testing loading danse file"""
         #tested good file.sans
         data=self.L.load('MP_New.sans')
         
         self.assertEqual(data.__class__,danse_reader.ReaderInfo)
-        self.assertEqual(self.L.getAcTReader('MP_New.sans'),self.read4.__class__)
+        
         #tested corrupted file.sans
-        self.assertEqual(self.L.load('P_New.sans'),None)
-    
+        try: self.L.load('P_New.sans')
+        except ValueError,msg:
+           #logging.log(40,str(msg))
+           logging.error(str(msg))
+        #else: raise ValueError,"No error raised for missing extension"
     def testload5(self):
         """ Testing loading image file"""
         data=self.L.load('angles_flat.png')
         self.assertEqual(data.__class__,tiff_reader.ReaderInfo)
-        self.assertEqual(self.L.getAcTReader('angles_flat.png'),self.read5.__class__)
-   
+        
+    def testload6(self):
+        """test file with unknown extension"""
+        try:self.L.load('hello.missing')
+        except ValueError,msg:
+           self.assertEqual( str(msg),"Unknown file type '.missing'")
+        else: raise ValueError,"No error raised for missing extension"
+        
+        #self.L.lookup('hello.missing')
+        try: self.L.lookup('hello.missing')
+        except ValueError,msg:
+           self.assertEqual( str(msg),"Unknown file type '.missing'")
+        else: raise ValueError,"No error raised for missing extension"
+        
+    def testload7(self):
+        """ test file containing an image but as extension .txt"""
+        self.assertEqual(self.L.load('angles_flat.txt'),None)
    

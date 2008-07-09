@@ -39,6 +39,7 @@ class Reader:
     """
         Example data manipulation
     """
+   
     ## File type
     type = []
     ## Extension
