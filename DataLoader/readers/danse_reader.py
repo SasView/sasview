@@ -6,6 +6,7 @@ import math
 import pylab
 import copy
 import numpy
+import logging
 class ReaderInfo:
     """
     """
@@ -60,8 +61,11 @@ class Reader:
                 read_it = True
                 
         if read_it:
+            try:
+                 datafile = open(filename, 'r')
+            except :
+                raise  RuntimeError,"danse_reader cannot open %s"%(filename)
             
-            datafile = open(filename, 'r')
             
             # defaults
             # wavelength in Angstrom
@@ -125,8 +129,9 @@ class Reader:
                             data.append(val)
                             error.append(err)
                         except:
-                            print "Skipping line:%s" % data_str
-                            print sys.exc_value
+                            logging.info("Skipping line:%s,%s" %( data_str,sys.exc_value))
+                            #print "Skipping line:%s" % data_str
+                            #print sys.exc_value
             
             # Initialize 
             x_vals = []
@@ -208,7 +213,7 @@ class Reader:
                 #output.error  = E
                 raise ValueError,"Danse_reader can't read this file %s"%filename
             else:
-                print "Danse_reader Reading %s \n"%filename
+                logging.info("Danse_reader Reading %s \n"%filename)
                 return output
         
         return None

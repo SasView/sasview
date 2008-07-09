@@ -93,7 +93,7 @@ class Loader(object):
             if dir==None:
                 dir='readers'
             
-            if reader==None and  ext==None:#1st load
+            if (reader==None and  ext==None) or dir:#1st load
                 plugReader=None
                 if os.path.isdir(dir):
                     plugReader=_findReaders(dir)# import all module in plugins

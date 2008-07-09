@@ -103,7 +103,7 @@ class testLoader(unittest.TestCase):
         #tested good file.sans
         data=self.L.load('MP_New.sans')
         
-        self.assertEqual(data.__class__,danse_reader.ReaderInfo)
+        self.assertEqual(data.wavelength,7.5)
         
         #tested corrupted file.sans
         try: self.L.load('P_New.sans')
@@ -111,21 +111,22 @@ class testLoader(unittest.TestCase):
            #logging.log(40,str(msg))
            logging.error(str(msg))
         #else: raise ValueError,"No error raised for missing extension"
+        
     def testload5(self):
         """ Testing loading image file"""
         data=self.L.load('angles_flat.png')
-        self.assertEqual(data.__class__,tiff_reader.ReaderInfo)
+        self.assertEqual(data.xbins ,200)
         
     def testload6(self):
         """test file with unknown extension"""
         try:self.L.load('hello.missing')
-        except ValueError,msg:
+        except RuntimeError,msg:
            self.assertEqual( str(msg),"Unknown file type '.missing'")
         else: raise ValueError,"No error raised for missing extension"
         
         #self.L.lookup('hello.missing')
         try: self.L.lookup('hello.missing')
-        except ValueError,msg:
+        except RuntimeError,msg:
            self.assertEqual( str(msg),"Unknown file type '.missing'")
         else: raise ValueError,"No error raised for missing extension"
         

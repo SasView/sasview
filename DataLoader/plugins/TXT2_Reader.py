@@ -1,6 +1,7 @@
 # class Loader  to load any king of file
 import wx
 import string,numpy
+import logging
 class Reader:
     """
         This class is loading values from given file or value giving by the user
@@ -26,7 +27,10 @@ class Reader:
             if read_it==False:
                 return None
             else:
-                input_f =  open(path,'r')
+                try:
+                    input_f =  open(path,'r')
+                except :
+                    raise  RuntimeError,"TXT2_Reader cannot open %s"%(path)
                 buff = input_f.read()
                 lines = buff.split('\n')
                 self.x=[]
@@ -62,7 +66,7 @@ class Reader:
                 else:
                     #msg="R1 reading: \n"+"this x :"+ str(self.x) +"\n"+"this y:"+str(self.y)+"\n"+"this dy :"+str(self.dy)+"\n"
                     #return msg
-                    print "TXT2_Reader reading  %s\n" %path
+                    logging.info("TXT2_Reader reading  %s\n" %path)
                     return self.x,self.y,self.dy
         return None
    

@@ -1,7 +1,7 @@
 import os, sys
 import pylab
 from copy import deepcopy
-import math
+import math,logging
 class Reader:
     """ Simple data reader for Igor data files """
     ext=['.ASC']
@@ -164,6 +164,6 @@ class Reader:
         self.distance   = distance*1000.0
         self.center_x = center_x
         self.center_y = center_y
-        print "IgorReader reading %s"%self.file
+        logging.info("IgorReader reading %s"%self.file)
         return Z, xmin-xstep/2.0, xmax+xstep/2.0, ymin-ystep/2.0, ymax+ystep/2.0
      

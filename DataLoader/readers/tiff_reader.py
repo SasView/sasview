@@ -1,6 +1,6 @@
 
 import Image
-import math
+import math,logging
 class ReaderInfo:
     """
     """
@@ -45,6 +45,7 @@ class Reader:
     ext  = ['tif', 'jpg', '.png', 'jpeg', '.tiff', 'gif', 'bmp']    
         
     def read(self, filename=None):
+        print "in tiff"
         """
             Open and read the data in a file
             @param file: path of the file
@@ -143,7 +144,8 @@ class Reader:
             output.ymax       = ymax
             output.image      = Z
             output.pixel_size = pixel
-                
+            logging.info("tiff_reader reading %s"%(filename))
+            
             return output
         
         return None
