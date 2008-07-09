@@ -68,5 +68,4 @@ class Fit:
                  
     def remove_model(self,Uid):
         """ remove model """
-        
-        """
+ 
