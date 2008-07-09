@@ -33,19 +33,19 @@ class testLoader(unittest.TestCase):
     read4=danse_reader.Reader()
     read5=tiff_reader.Reader()
     #for each readers set an extensions inside the loader
-    L.__setitem__('.txt',read2)
-    L.__setitem__('.txt',read1)
-    L.__setitem__('.dat',read1)
+    L.__setitem__("plugins",'.txt',read2)
+    L.__setitem__(None,'.txt',read1)
+    L.__setitem__(None,'.dat',read1)
     
-    L.__setitem__('.dat',read2)
-    L.__setitem__('.ASC',read3)
-    L.__setitem__('.sans',read4)
-    L.__setitem__('.tif',read5)
-    L.__setitem__('.jpg',read5)
-    L.__setitem__('.png',read5)
-    L.__setitem__('.jpeg',read5)
-    L.__setitem__('.gif',read5)
-    L.__setitem__('.bmp',read5)
+    L.__setitem__(None,'.dat',read2)
+    L.__setitem__(None,'.ASC',read3)
+    L.__setitem__(None,'.sans',read4)
+    L.__setitem__(None,'.tif',read5)
+    L.__setitem__(None,'.jpg',read5)
+    L.__setitem__(None,'.png',read5)
+    L.__setitem__(None,'.jpeg',read5)
+    L.__setitem__(None,'.gif',read5)
+    L.__setitem__(None,'.bmp',read5)
        
     def testLoad0(self):
         """test reading empty file"""

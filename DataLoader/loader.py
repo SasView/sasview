@@ -33,9 +33,9 @@ def _findReaders(dir):
                         try:
                             plugins.append(module.Reader())
                         except:
-                            logging("Error accessing Reader in %s\n  %s" % (name, sys.exc_value))
+                            logging.error("Error accessing Reader in %s\n  %s" % (name, sys.exc_value))
                 except :
-                    logging("Error importing %s\n  %s" % (name, sys.exc_value))
+                    logging.error("Error importing %s\n  %s" % (name, sys.exc_value))
                 finally:
                     if not file==None:
                         file.close()

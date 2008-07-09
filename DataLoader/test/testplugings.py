@@ -21,6 +21,9 @@ class testLoader(unittest.TestCase):
     def testplugin1(self):
         """ test loading with plugging"""
         self.L.__setitem__(dir='plugins')
+        read3=IgorReader.Reader()
+        self.L.__setitem__('plugins','.ASC',read3)
+        self.assertEqual(self.L.__contains__('.ASC'),True)
         #Testing loading a txt file of 2 columns, the only reader should be read1 
         xload,yload,dyload=self.L.load('test_2_columns.txt') 
         x=[2.83954,0.204082,0.408163,0.612245,0.816327,1.02041,1.22449,1.42857,1.63265]
