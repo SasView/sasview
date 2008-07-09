@@ -83,7 +83,6 @@ class Properties(wx.Dialog):
         
         self.Fit()        
         self.Centre()
-        self.CaptureMouse()
            
         
     def setValues(self,x,y,view):
