@@ -25,13 +25,14 @@ class Fit:
         
         chisqr1, out1, cov1=engine.fit(pars,qmin,qmax)
     """  
-    def __init__(self):
+    def __init__(self, engine='scipy'):
         """
             self._engine will contain an instance of ScipyFit or ParkFit
         """
         self._engine=None
+        self.set_engine(engine)
           
-    def fit_engine(self,word):
+    def set_engine(self,word):
         """
             Select the type of Fit 
             @param word: the keyword to select the fit type 
@@ -62,6 +63,7 @@ class Fit:
     
     def set_param(self,model,name, pars):
         """ Recieve a dictionary of parameter and save it """
+        self._engine.set_param(model, name, pars)
    
     def remove_data(self,Uid,data=None):
         """ remove one or all data"""
