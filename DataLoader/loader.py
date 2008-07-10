@@ -91,8 +91,8 @@ class Loader(object):
                 from that directory "dir"
             """
             if dir==None:
-                dir='readers'
-            
+                dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),'readers')
+                
             if (reader==None and  ext==None) or dir:#1st load
                 plugReader=None
                 if os.path.isdir(dir):
