@@ -63,7 +63,7 @@ class View1DPanel(PlotPanel):
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
         self.graph.render(self)
-        
+   
     def _reset(self):
         """
             Resets internal data and graph

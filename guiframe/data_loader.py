@@ -61,14 +61,14 @@ def plot_data(parent, path, name="Loaded Data"):
     L=Loader()
     
     #Recieves data 
-    x,y,dy=L.load(path)
-   
+    output=L.load(path)
+    
     import numpy
     
-    if dy==None:
-        new_plot = Theory1D(x, y)
+    if output.dy==None:
+        new_plot = Theory1D(output.x, output.y)
     else:
-        new_plot = Data1D(x, y, dy=dy)
+        new_plot = Data1D(output.x, output.y, dy=output.dy)
     new_plot.name = name
     new_plot.interactive = True
     
