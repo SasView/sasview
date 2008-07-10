@@ -10,14 +10,27 @@ from DataLoader.readers import TXT3_Reader,TXT2_Reader
 from DataLoader.readers import IgorReader,danse_reader,tiff_reader
 import os.path
 import os 
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    filename='test_log.txt',
+                    filemode='w')
 class testLoader(unittest.TestCase):
-    L=Loader()
+    
+    try:L=Loader()
+    except AttributeError,msg:
+        logging.warning(msg)
     def testplugin(self):
         """ test loading with readers"""
         
         self.assertEqual(self.L.__contains__('.tiff'),True)
         self.assertEqual(self.L.__contains__('.png'),True)
         self.assertEqual(self.L.__contains__('.txt'),True)
+         #tested corrupted file.asc
+        try:self.L.load('MAR07232_rest.ASC')
+        except AttributeError,msg:
+           #logging.log(10,str(msg))
+           logging.warning(str(msg))
     def testplugin1(self):
         """ test loading with plugging"""
         self.L.__setitem__(dir='plugins')

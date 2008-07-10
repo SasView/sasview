@@ -9,7 +9,7 @@ import logging
 import os.path
 logging.basicConfig(level=logging.ERROR,
                     format='%(asctime)s %(levelname)s %(message)s',
-                    filename='loader_log.txt',
+                    filename='test_log.txt',
                     filemode='w')
 
 def _findReaders(dir):
@@ -84,14 +84,15 @@ class Loader(object):
                 add a reader as a parameter and plugins directory doesn't contain
                 plugin reader.
                 if an extension is not specified and a reader does not contain a field
-                ext , a ValueError "missing extension" is raised.
+                ext , a warning is printed in test_log.txt file.
                 @note: when called without parameters __setitem__ will try to load
                 readers inside a "readers" directory 
                 if call with a directory name will try find readers 
                 from that directory "dir"
             """
             if dir==None:
-                dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),'readers')
+                dir = 'readers'
+            dir=os.path.join(os.path.dirname(os.path.abspath(__file__)),dir)
                 
             if (reader==None and  ext==None) or dir:#1st load
                 plugReader=None
@@ -99,23 +100,24 @@ class Loader(object):
                     plugReader=_findReaders(dir)# import all module in plugins
                 if os.path.isdir('../'+dir):
                     plugReader=_findReaders('../'+dir)
-                else:
-                    if os.path.isdir('../DataLoader/'+dir):
-                        os.chdir(os.path.abspath('../DataLoader/'+dir))# change the current 
-                        plugReader=_findReaders(dir)
-                       
+ 
+                
                 if plugReader !=None:
+                    list=[]
                     for preader in plugReader:# for each modules takes list of extensions
                         try:
                             list=preader.ext
-                        except:
-                            raise AttributeError," %s instance has no attribute 'ext'"\
-                            %(preader.__class__)
-                        for item in list:
-                            ext=item
-                            if ext not in self.readers:#assign extension with its reader
-                                self.readers[ext] = []
-                            self.readers[ext].insert(0,preader)
+                        except AttributeError,msg:
+                            logging.warning(msg)
+                            pass
+                            #raise  AttributeError," %s instance has no attribute 'ext'"\
+                            #%(preader.__class__)
+                        if list !=[]:
+                            for item in list:
+                                ext=item
+                                if ext not in self.readers:#assign extension with its reader
+                                    self.readers[ext] = []
+                                self.readers[ext].insert(0,preader)
             #Reader and extension are given
             elif reader !=None and  ext !=None:
                 if ext not in self.readers:
@@ -181,7 +183,7 @@ class Loader(object):
             try:
                 return self.readers[ext]
             except:
-                
+                logging.warning("Unknown file type '%s'"%ext)
                 raise RuntimeError, "Unknown file type '%s'"%ext
                 
        

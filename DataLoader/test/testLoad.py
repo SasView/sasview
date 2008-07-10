@@ -20,7 +20,7 @@ from DataLoader.readers import TXT3_Reader,TXT2_Reader
 from DataLoader.readers import IgorReader,danse_reader,tiff_reader
 import os.path
 class testLoader(unittest.TestCase):
-   
+    logging.debug("Inside testLoad module")
         
     """ test fitting """
     #Creating a loader
