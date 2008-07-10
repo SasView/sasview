@@ -49,25 +49,20 @@ class Fit:
         """ @return self._engine""" 
         return self._engine
     
-    def fit(self,pars, qmin=None, qmax=None):
+    def fit(self, qmin=None, qmax=None):
         """Perform the fit """
-      
-    def set_model(self,model,Uid):
+        return self._engine.fit(qmin,qmax)
+    def set_model(self,model,name,Uid,pars={}):
         """ Set model """
-       
+        self._engine.set_model(model,name,Uid, pars)
     def set_data(self,data,Uid):
         """ Receive plottable and create a list of data to fit"""
-            
+        self._engine.set_data(data,Uid)
     def get_model(self,Uid):
         """ return list of data"""
-    
-    def set_param(self,model,name, pars):
-        """ Recieve a dictionary of parameter and save it """
-        self._engine.set_param(model, name, pars)
+        self._engine.get_model(Uid)
    
-    def remove_data(self,Uid,data=None):
-        """ remove one or all data"""
-                 
-    def remove_model(self,Uid):
-        """ remove model """
+    def remove_Fit_Problem(self,Uid):
+        """remove   fitarrange in Uid"""
+        self._engine.remove_Fit_Problem(Uid)
  

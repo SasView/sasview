@@ -4,7 +4,7 @@
 import unittest
 from sans.guitools.plottables import Theory1D
 from sans.guitools.plottables import Data1D
-from sans.fit.ScipyFitting import Parameter
+
 import math
 class testFitModule(unittest.TestCase):
     """ test fitting """
@@ -63,35 +63,30 @@ class testFitModule(unittest.TestCase):
         
         #Importing the Fit module
         from sans.fit.Fitting import Fit
-        fitter= Fit()
-        fitter.fit_engine('scipy')
-        engine = fitter.returnEngine()
+        fitter= Fit('scipy')
+        
         # Receives the type of model for the fitting
         from sans.guitools.LineModel import LineModel
         model1  = LineModel()
         model2  = LineModel()
         
         #Do the fit SCIPY
-        engine.set_data(data1,1)
-        #engine.set_param( model1,"M1", {'A':2,'B':4})
-        engine.set_model(model1,1)
+        fitter.set_data(data1,1)
+        fitter.set_model(model1,"M1",1,{'A':2,'B':1})
         
-        chisqr1, out1, cov1=engine.fit({'A':2,'B':1},None,None)
+        chisqr1, out1, cov1=fitter.fit()
         """ testing SCIPy results"""
         self.assert_(math.fabs(out1[1]-2.5)/math.sqrt(cov1[1][1]) < 2)
         self.assert_(math.fabs(out1[0]-4.0)/math.sqrt(cov1[0][0]) < 2)
         self.assert_(chisqr1/len(data1.x) < 2)
         # PARK
-        fitter= Fit()
-        fitter.fit_engine('park')
-        engine = fitter.returnEngine()
+        fitter= Fit('park')
         
         #Do the fit
-        engine.set_data(data1,1)
-        engine.set_param( model2,"M1", {'A':2,'B':1})
-        engine.set_model(model2,1)
+        fitter.set_data(data1,1)
+        fitter.set_model(model2,"M1",1,{'A':2,'B':1})
        
-        chisqr2, out2, cov2=engine.fit({'A':2,'B':1},None,None)
+        chisqr2, out2, cov2=fitter.fit(None,None)
         
         self.assert_(math.fabs(out2[1]-2.5)/math.sqrt(cov2[1][1]) < 2)
         self.assert_(math.fabs(out2[0]-4.0)/math.sqrt(cov2[0][0]) < 2)

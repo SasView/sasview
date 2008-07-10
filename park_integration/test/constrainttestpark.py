@@ -26,26 +26,22 @@ class testFitModule(unittest.TestCase):
         
         #Importing the Fit module
         from sans.fit.Fitting import Fit
-        fitter= Fit()
+        fitter= Fit('park')
         # Receives the type of model for the fitting
         from sans.guitools.LineModel import LineModel
         model1  = LineModel()
         model2  = LineModel()
-        #set engine for scipy 
-        fitter.fit_engine('park')
-        engine = fitter.returnEngine()
-        #Do the fit
-        engine.set_param( model1,"M1", {'A':2,'B':3})
-        engine.set_model(model1,1)
-        engine.set_data(data1,1)
-        #print "m1 param b", M1.B
-        engine.set_param( model2,"M2", {'A':'M1.A','B':'M1.B'})
-        engine.set_model(model2,2)
         
-        engine.set_data(data2,2)
+        #Do the fit
+        
+        fitter.set_model(model1,"M1",1, {'A':1,'B':2})
+        fitter.set_data(data1,1)
+       
+        fitter.set_model(model2,"M2",2, {'A':'M1.A','B':'M1.B'})
+        fitter.set_data(data2,2)
     
         
-        chisqr2, out2, cov2= engine.fit({'A':2,'B':1},None,None)
+        chisqr2, out2, cov2= fitter.fit()
         print "chisqr2",chisqr2
         print "out2", out2
         print " cov2", cov2

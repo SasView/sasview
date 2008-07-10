@@ -87,7 +87,7 @@ class ScipyFit:
         """
         self.fitArrangeList={}
         
-    def fit(self,pars, qmin=None, qmax=None):
+    def fit(self,qmin=None, qmax=None):
         """
             Performs fit with scipy optimizer.It can only perform fit with one model
             and a set of data.
@@ -106,8 +106,6 @@ class ScipyFit:
         model = fitproblem.get_model()
         listdata = fitproblem.get_data()
         
-        #Create list of Parameter instances and save parameters values in model
-        parameters = self.set_param(model,model.name,pars)
        
         # Concatenate dList set (contains one or more data)before fitting
         xtemp,ytemp,dytemp=self._concatenateData( listdata)
@@ -118,9 +116,10 @@ class ScipyFit:
             qmin= min(xtemp)
         if qmax==None:
             qmax= max(xtemp) 
-            
+        
         #perform the fit 
-        chisqr, out, cov = fitHelper(model,parameters, xtemp,ytemp, dytemp ,qmin,qmax)
+        chisqr, out, cov = fitHelper(model,self.parameters, xtemp,ytemp, dytemp ,qmin,qmax)
+        
         return chisqr, out, cov
     
     def _concatenateData(self, listdata=[]):
@@ -157,13 +156,29 @@ class ScipyFit:
                         raise ValueError,"dy is missing will not be able to fit later on"
             return xtemp, ytemp,dytemp
         
-    def set_model(self,model,Uid):
+    def set_model(self,model,name,Uid,pars={}):
         """ 
+      
+            Receive a dictionary of parameter and save it Parameter list
+            For scipy.fit use.
             Set model in a FitArrange object and add that object in a dictionary
             with key Uid.
-            @param model: the model added
+            @param model: model on with parameter values are set
+            @param name: model name
             @param Uid: unique key corresponding to a fitArrange object with model
+            @param pars: dictionary of paramaters name and value
+            pars={parameter's name: parameter's value}
+            
         """
+        self.parameters=[]
+        if model==None:
+            raise ValueError, "Cannot set parameters for empty model"
+        else:
+            model.name=name
+            for key, value in pars.iteritems():
+                param = Parameter(model, key, value)
+                self.parameters.append(param)
+        
         #A fitArrange is already created but contains dList only at Uid
         if self.fitArrangeList.has_key(Uid):
             self.fitArrangeList[Uid].set_model(model)
@@ -200,48 +215,12 @@ class ScipyFit:
         else:
             return None
     
-    def set_param(self,model,name, pars):
-        """ 
-            Recieve a dictionary of parameter and save it 
-            @param model: model on with parameter values are set
-            @param name: model name
-            @param pars: dictionary of paramaters name and value
-            pars={parameter's name: parameter's value}
-            @return list of Parameter instance
-        """
-        parameters=[]
-        if model==None:
-            raise ValueError, "Cannot set parameters for empty model"
-        else:
-            model.name=name
-            for key, value in pars.iteritems():
-                param = Parameter(model, key, value)
-                parameters.append(param)
-        return parameters
     
-    def remove_data(self,Uid,data=None):
-        """ remove one or all data.if data ==None will remove the whole
-            list of data at Uid; else will remove only data in that list.
-            @param Uid: unique id containing FitArrange object with data
-            @param data:data to be removed
-        """
-        if data==None:
-        # remove all element in data list
-            if self.fitArrangeList.has_key(Uid):
-                self.fitArrangeList[Uid].remove_datalist()
-        else:
-        #remove only data in dList
-            if self.fitArrangeList.has_key(Uid):
-                self.fitArrangeList[Uid].remove_data(data)
-                
-    def remove_model(self,Uid):
-        """ 
-            remove model in FitArrange object with Uid.
-            @param Uid: Unique id corresponding to the FitArrange object 
-            where model must be removed.
-        """
+    
+    def remove_Fit_Problem(self,Uid):
+        """remove   fitarrange in Uid"""
         if self.fitArrangeList.has_key(Uid):
-            self.fitArrangeList[Uid].remove_model()
+            del self.fitArrangeList[Uid]
                 
 
 class Parameter:

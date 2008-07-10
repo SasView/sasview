@@ -32,24 +32,20 @@ class testFitModule(unittest.TestCase):
         
         #Importing the Fit module
         from sans.fit.Fitting import Fit
-        fitter= Fit()
+        fitter= Fit('park')
         # Receives the type of model for the fitting
         from sans.guitools.LineModel import LineModel
         model1  = LineModel()
         model2  = LineModel()
-        #set engine for scipy 
-        fitter.fit_engine('park')
-        engine = fitter.returnEngine()
+        
         #Do the fit
-        engine.set_param( model1,"M1", {'A':2.5,'B':4})
-        engine.set_model(model1,1)
-        engine.set_data(data1,1)
+        fitter.set_model(model1,"M1",1, {'A':2.5,'B':4})
+        fitter.set_data(data1,1)
         
-        engine.set_param( model2,"M2", {'A':2,'B':4})
-        engine.set_model(model2,2)
-        engine.set_data(data2,2)
+        fitter.set_model(model2,"M2",2, {'A':2,'B':3})
+        fitter.set_data(data2,2)
         
-        chisqr1, out1, cov1= engine.fit({'A':2,'B':1},None,None)
+        chisqr1, out1, cov1= fitter.fit()
         
         self.assert_(math.fabs(out1[1]-2.5)/math.sqrt(cov1[1][1]) < 2)
         print math.fabs(out1[0]-4.0)/math.sqrt(cov1[0][0])
@@ -62,8 +58,8 @@ class testFitModule(unittest.TestCase):
         #self.assert_(chisqr2/len(data2.x) < 2)
         
         
-        engine.set_data(data3,1)
-        chisqr2, out2, cov2= engine.fit({'A':2,'B':1},None,None)
+        fitter.set_data(data3,1)
+        chisqr2, out2, cov2= fitter.fit(None,None)
         self.assert_(math.fabs(out2[1]-2.5)/math.sqrt(cov2[1][1]) < 2)
         print math.fabs(out2[0]-4.0)/math.sqrt(cov2[0][0])
         #self.assert_(math.fabs(out1[0]-4.0)/math.sqrt(cov1[0][0]) < 2)
@@ -74,10 +70,9 @@ class testFitModule(unittest.TestCase):
         print chisqr2/len(data2.x)
         #self.assert_(chisqr2/len(data2.x) < 2)
         
+        fitter.remove_Fit_Problem(2)
         
-        
-        engine.remove_Fit_Problem(2)
-        chisqr3, out3, cov3= engine.fit({'A':2,'B':1},None,None)
+        chisqr3, out3, cov3= fitter.fit()
         #print "park",chisqr3, out3, cov3
         self.assert_(math.fabs(out1[1]-2.5)/math.sqrt(cov1[1][1]) < 2)
         print math.fabs(out1[0]-4.0)
