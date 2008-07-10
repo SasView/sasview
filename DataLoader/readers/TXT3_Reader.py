@@ -68,7 +68,14 @@ class Reader:
                     #msg="txtReader  Reading:\n"+"this x :"+ str(self.x) +"\n"+"this y:"+str(self.y)+"\n"+"this dy :"+str(self.dy)+"\n"
                     #return msg
                     logging.info("TXT3_Reader reading %s \n" %path)
-                    return self.x,self.y,self.dy
+                    from readInfo import ReaderInfo   
+                    output = ReaderInfo()
+                    output.x    = self.x
+                    output.y    = self.y
+                    output.dy   = self.dy
+                    output.type = "1D"
+                    
+                    return output
                 
         return None
 if __name__ == "__main__": 

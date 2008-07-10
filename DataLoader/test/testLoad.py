@@ -18,6 +18,7 @@ import DataLoader
 from DataLoader.loader import  Loader
 from DataLoader.readers import TXT3_Reader,TXT2_Reader
 from DataLoader.readers import IgorReader,danse_reader,tiff_reader
+ 
 import os.path
 class testLoader(unittest.TestCase):
     logging.debug("Inside testLoad module")
@@ -55,43 +56,43 @@ class testLoader(unittest.TestCase):
         """test reading 2 columns"""
         
         #Testing loading a txt file of 2 columns, the only reader should be read1 
-        xload,yload,dyload=self.L.load('test_2_columns.txt') 
+        output=self.L.load('test_2_columns.txt') 
         x=[2.83954,0.204082,0.408163,0.612245,0.816327,1.02041,1.22449,1.42857,1.63265]
         y=[0.6,3.44938, 5.82026,5.27591,5.2781,5.22531,7.47487,7.85852,10.2278]
         dx=[]
         dy=[]
-        self.assertEqual(len(xload),len(x))
-        self.assertEqual(len(yload),len(y))
-        self.assertEqual(len(dyload),0)
+        self.assertEqual(len(output.x),len(x))
+        self.assertEqual(len(output.y),len(y))
+        
         for i in range(len(x)):
-            self.assertEqual(xload[i],x[i])
-            self.assertEqual(yload[i],y[i])
+            self.assertEqual(output.x[i],x[i])
+            self.assertEqual(output.y[i],y[i])
        
     
     def testLoad2(self):
         """Testing loading a txt file of 3 columns"""
-        xload,yload,dyload= self.L.load('test_3_columns.txt') 
+        output= self.L.load('test_3_columns.txt') 
         x=[0,0.204082,0.408163,0.612245,0.816327,1.02041,1.22449]    
         y=[2.83954,3.44938,5.82026,5.27591,5.2781,5.22531,7.47487]
         dx=[]
         dy=[0.6,0.676531,0.753061,0.829592,0.906122,0.982653,1.05918]
-        self.assertEqual(len(xload),len(x))
-        self.assertEqual(len(yload),len(y))
-        self.assertEqual(len(dyload),len(dy))
+        self.assertEqual(len(output.x),len(x))
+        self.assertEqual(len(output.y),len(y))
+        self.assertEqual(len(output.dy),len(dy))
         for i in range(len(x)):
-            self.assertEqual(xload[i],x[i])
-            self.assertEqual(yload[i],y[i])
-            self.assertEqual(dyload[i],dy[i])
+            self.assertEqual(output.x[i],x[i])
+            self.assertEqual(output.y[i],y[i])
+            self.assertEqual(output.dy[i],dy[i])
        
     
     def testload3(self):
         """ Testing loading Igor data"""
         #tested good file.asc
-        Z,xmin, xmax, ymin, ymax= self.L.load('MAR07232_rest.ASC') 
-        self.assertEqual(xmin,-0.018558945804750416)
-        self.assertEqual(xmax, 0.016234058202440633,)
-        self.assertEqual(ymin,-0.01684257151702391)
-        self.assertEqual(ymax,0.017950440578015116)
+        output= self.L.load('MAR07232_rest.ASC') 
+        self.assertEqual(output.xmin,-0.018558945804750416)
+        self.assertEqual(output.xmax, 0.016234058202440633,)
+        self.assertEqual(output.ymin,-0.01684257151702391)
+        self.assertEqual(output.ymax,0.017950440578015116)
        
         #tested corrupted file.asc
         try:self.L.load('AR07232_rest.ASC')
@@ -101,9 +102,9 @@ class testLoader(unittest.TestCase):
     def testload4(self):
         """ Testing loading danse file"""
         #tested good file.sans
-        data=self.L.load('MP_New.sans')
+        output=self.L.load('MP_New.sans')
         
-        self.assertEqual(data.wavelength,7.5)
+        self.assertEqual(output.wavelength,7.5)
         
         #tested corrupted file.sans
         try: self.L.load('P_New.sans')
@@ -114,8 +115,8 @@ class testLoader(unittest.TestCase):
         
     def testload5(self):
         """ Testing loading image file"""
-        data=self.L.load('angles_flat.png')
-        self.assertEqual(data.xbins ,200)
+        output=self.L.load('angles_flat.png')
+        self.assertEqual(output.xbins ,200)
         
     def testload6(self):
         """test file with unknown extension"""

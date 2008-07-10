@@ -38,14 +38,14 @@ class testLoader(unittest.TestCase):
         self.L.__setitem__('plugins','.ASC',read3)
         self.assertEqual(self.L.__contains__('.ASC'),True)
         #Testing loading a txt file of 2 columns, the only reader should be read1 
-        xload,yload,dyload=self.L.load('test_2_columns.txt') 
+        output=self.L.load('test_2_columns.txt') 
         x=[2.83954,0.204082,0.408163,0.612245,0.816327,1.02041,1.22449,1.42857,1.63265]
         y=[0.6,3.44938, 5.82026,5.27591,5.2781,5.22531,7.47487,7.85852,10.2278]
         dx=[]
         dy=[]
-        self.assertEqual(len(xload),len(x))
-        self.assertEqual(len(yload),len(y))
-        self.assertEqual(len(dyload),0)
+        self.assertEqual(len(output.x),len(x))
+        self.assertEqual(len(output.y),len(y))
+        
         for i in range(len(x)):
-            self.assertEqual(xload[i],x[i])
-            self.assertEqual(yload[i],y[i])
+            self.assertEqual(output.x[i],x[i])
+            self.assertEqual(output.y[i],y[i])

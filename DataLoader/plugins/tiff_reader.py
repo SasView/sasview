@@ -3,6 +3,7 @@ import Image
 import math
 class ReaderInfo:
     """
+        This class is a container of data. It stores values read from files
     """
     ## Wavelength [A]
     wavelength = 0.0
@@ -32,9 +33,21 @@ class ReaderInfo:
     image = None
     ## Pixel size
     pixel_size = 0.5
+    ## x coordinate
+    x=[]
+    ##y coordinate
+    y=[]
+    ##dx error on y
+    dx=None
+    ## dy error on y
+    dy=None
     ## Error on each pixel
     error = None
-    
+    ##type of data
+    type=""
+    ##z
+    Z=None
+
 class Reader:
     """
         Example data manipulation
@@ -143,7 +156,8 @@ class Reader:
             output.ymax       = ymax
             output.image      = Z
             output.pixel_size = pixel
-                
+            output.type       ="2D"
+              
             return output
         
         return None

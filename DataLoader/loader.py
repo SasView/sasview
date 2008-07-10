@@ -93,7 +93,7 @@ class Loader(object):
             if dir==None:
                 dir = 'readers'
             dir=os.path.join(os.path.dirname(os.path.abspath(__file__)),dir)
-                
+            
             if (reader==None and  ext==None) or dir:#1st load
                 plugReader=None
                 if os.path.isdir(dir):
@@ -201,7 +201,7 @@ class Loader(object):
             try:
                 os.path.isfile( os.path.abspath(path)) 
             except:
-                raise ValueError," file  path unknown"
+                raise ValueError," file path unknown"
             
             if format is None:
                 try:

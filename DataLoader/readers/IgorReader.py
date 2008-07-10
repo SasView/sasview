@@ -164,6 +164,16 @@ class Reader:
         self.distance   = distance*1000.0
         self.center_x = center_x
         self.center_y = center_y
+        
+        from readInfo import ReaderInfo   
+        output = ReaderInfo()
+        output.Z=Z
+        output.xmin    =xmin-xstep/2.0
+        output.xmax    = xmax+xstep/2.0
+        output.ymin    =ymin-ystep/2.0
+        output.ymax    =ymax+ystep/2.0
+        output.type    ="2D"
+        
         logging.info("IgorReader reading %s"%self.file)
-        return Z, xmin-xstep/2.0, xmax+xstep/2.0, ymin-ystep/2.0, ymax+ystep/2.0
+        return output
      

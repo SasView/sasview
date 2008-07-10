@@ -7,39 +7,7 @@ import pylab
 import copy
 import numpy
 import logging
-class ReaderInfo:
-    """
-    """
-    ## Wavelength [A]
-    wavelength = 0.0
-    ## Number of x bins
-    xbins = 128
-    ## Number of y bins
-    ybins = 128
-    ## Beam center X [pixel number]
-    center_x = 65
-    ## Beam center Y [pixel number]
-    center_y = 65
-    ## Distance from sample to detector [m]
-    distance = 11.0
-    ## Qx values [A-1]
-    x_vals = []
-    ## Qy xalues [A-1]
-    y_vals = []
-    ## Qx min
-    xmin = 0.0
-    ## Qx max
-    xmax = 1.0
-    ## Qy min
-    ymin = 0.0
-    ## Qy max
-    ymax = 1.0
-    ## Image
-    image = None
-    ## Pixel size
-    pixel_size = 0.5
-    ## Error on each pixel
-    error = None
+
 class Reader:
     """
         Example data manipulation
@@ -192,7 +160,7 @@ class Reader:
                     E[size_y-1-i_y][i_x] = error[i_pt]
                 
                 itot += 1
-                
+            from readInfo import ReaderInfo   
             output = ReaderInfo()
             output.wavelength = wavelength
             output.xbins      = size_x
@@ -209,7 +177,9 @@ class Reader:
             output.ymax       = ymax
             output.pixel_size = pixel
             output.image      = Z
-            if not fversion==1.1:
+            output.type       = "2D "
+           
+            if not fversion>=1.0:
                 #output.error  = E
                 raise ValueError,"Danse_reader can't read this file %s"%filename
             else:

@@ -65,8 +65,13 @@ class Reader:
                 else:
                     #msg="R1 reading: \n"+"this x :"+ str(self.x) +"\n"+"this y:"+str(self.y)+"\n"+"this dy :"+str(self.dy)+"\n"
                     #return msg
+                    from readInfo import ReaderInfo   
+                    output = ReaderInfo()
+                    output.x=self.x
+                    output.y=self.y
+                    
                     logging.info("TXT2_Reader reading  %s\n" %path)
-                    return self.x,self.y,self.dy
+                    return output
         return None
    
        
