@@ -20,33 +20,61 @@ from DataLoader.readers import TXT3_Reader,TXT2_Reader
 from DataLoader.readers import IgorReader,danse_reader,tiff_reader
  
 import os.path
+
+class designtest(unittest.TestCase):
+    
+    def setUp(self):
+        self.loader = Loader()
+        
+        
+    def test_singleton(self):
+        """
+            Testing whether Loader is truly a singleton
+        """
+        # Set a new data member
+        self.loader._test_data_member = 1.45
+        
+        # Create a 'new' Loader
+        b = Loader()
+        
+        # Test that the new loader has the new data member
+        self.assertEqual(b._test_data_member, self.loader._test_data_member)
+
 class testLoader(unittest.TestCase):
     logging.debug("Inside testLoad module")
-        
+    
     """ test fitting """
-    #Creating a loader
-    L=Loader()
-    
-    #creating readers
-    read1=TXT2_Reader.Reader()
-    read2=TXT3_Reader.Reader()
-    read3=IgorReader.Reader()
-    read4=danse_reader.Reader()
-    read5=tiff_reader.Reader()
-    #for each readers set an extensions inside the loader
-    L.__setitem__("plugins",'.txt',read2)
-    L.__setitem__(None,'.txt',read1)
-    L.__setitem__(None,'.dat',read1)
-    
-    L.__setitem__(None,'.dat',read2)
-    L.__setitem__(None,'.ASC',read3)
-    L.__setitem__(None,'.sans',read4)
-    L.__setitem__(None,'.tif',read5)
-    L.__setitem__(None,'.jpg',read5)
-    L.__setitem__(None,'.png',read5)
-    L.__setitem__(None,'.jpeg',read5)
-    L.__setitem__(None,'.gif',read5)
-    L.__setitem__(None,'.bmp',read5)
+    def setUp(self):
+        """
+            Set up the initial conditions before _each_ test
+            so that they all start from the same well-defined state. 
+        """
+        #Creating a loader
+        self.L=Loader()
+        
+        #creating readers
+        read1=TXT2_Reader.Reader()
+        read2=TXT3_Reader.Reader()
+        read3=IgorReader.Reader()
+        read4=danse_reader.Reader()
+        read5=tiff_reader.Reader()
+        #for each readers set an extensions inside the loader
+        
+        #TODO: should not call __setitem__ from outside 
+        # the class. That's not the purpose of __setitem__
+        self.L.__setitem__("plugins",'.txt',read2)
+        self.L.__setitem__(None,'.txt',read1)
+        self.L.__setitem__(None,'.dat',read1)
+        
+        self.L.__setitem__(None,'.dat',read2)
+        self.L.__setitem__(None,'.ASC',read3)
+        self.L.__setitem__(None,'.sans',read4)
+        self.L.__setitem__(None,'.tif',read5)
+        self.L.__setitem__(None,'.jpg',read5)
+        self.L.__setitem__(None,'.png',read5)
+        self.L.__setitem__(None,'.jpeg',read5)
+        self.L.__setitem__(None,'.gif',read5)
+        self.L.__setitem__(None,'.bmp',read5)
        
     def testLoad0(self):
         """test reading empty file"""
@@ -134,4 +162,7 @@ class testLoader(unittest.TestCase):
     def testload7(self):
         """ test file containing an image but as extension .txt"""
         self.assertEqual(self.L.load('angles_flat.txt'),None)
+
+if __name__ == '__main__':
+    unittest.main()
    
