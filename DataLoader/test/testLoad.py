@@ -10,7 +10,6 @@ logging.basicConfig(level=logging.DEBUG,
                     filemode='w')
 
 
-#logger.info('oops I did it again')
 
 import unittest
 import math
@@ -52,30 +51,7 @@ class testLoader(unittest.TestCase):
         #Creating a loader
         self.L=Loader()
         
-        #creating readers
-        read1=TXT2_Reader.Reader()
-        read2=TXT3_Reader.Reader()
-        read3=IgorReader.Reader()
-        read4=danse_reader.Reader()
-        read5=tiff_reader.Reader()
-        #for each readers set an extensions inside the loader
-        
-        #TODO: should not call __setitem__ from outside 
-        # the class. That's not the purpose of __setitem__
-        self.L.__setitem__("plugins",'.txt',read2)
-        self.L.__setitem__(None,'.txt',read1)
-        self.L.__setitem__(None,'.dat',read1)
-        
-        self.L.__setitem__(None,'.dat',read2)
-        self.L.__setitem__(None,'.ASC',read3)
-        self.L.__setitem__(None,'.sans',read4)
-        self.L.__setitem__(None,'.tif',read5)
-        self.L.__setitem__(None,'.jpg',read5)
-        self.L.__setitem__(None,'.png',read5)
-        self.L.__setitem__(None,'.jpeg',read5)
-        self.L.__setitem__(None,'.gif',read5)
-        self.L.__setitem__(None,'.bmp',read5)
-       
+     
     def testLoad0(self):
         """test reading empty file"""
         self.assertEqual(self.L.load('empty.txt'),None)
