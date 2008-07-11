@@ -177,6 +177,8 @@ class Reader:
             output.ymax       = ymax
             output.pixel_size = pixel
             output.image      = Z
+            output.x          = x_vals
+            output.y          = y_vals
             output.type       = "2D "
            
             if not fversion>=1.0:

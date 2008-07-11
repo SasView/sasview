@@ -112,6 +112,8 @@ class Reader:
             output.ymax       = ymax
             output.image      = Z
             output.pixel_size = pixel
+            output.x          = x_vals
+            output.y          = y_vals
             output.type       ="2D"
             logging.info("tiff_reader reading %s"%(filename))
             

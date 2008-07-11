@@ -172,6 +172,12 @@ class Reader:
         output.xmax    = xmax+xstep/2.0
         output.ymin    =ymin-ystep/2.0
         output.ymax    =ymax+ystep/2.0
+        output.x          = x
+        output.y          = y
+        output.wavelength = wavelength
+        output.distance   = distance*1000.0
+        output.center_x = center_x
+        output.center_y = center_y
         output.type    ="2D"
         
         logging.info("IgorReader reading %s"%self.file)
