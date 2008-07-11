@@ -5,7 +5,8 @@ def choose_data_file(parent, location=None):
     path = None
     if location==None:
         location = os.getcwd()
-    dlg = wx.FileDialog(parent, "Choose a file", location, "", "*", wx.OPEN)
+       
+    dlg = wx.FileDialog(parent, "Choose a file", location, "","*", wx.OPEN)
     if dlg.ShowModal() == wx.ID_OK:
         path = dlg.GetPath()
         mypath = os.path.basename(path)
