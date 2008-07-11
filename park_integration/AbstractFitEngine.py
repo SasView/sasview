@@ -164,10 +164,7 @@ class FitArrange:
         """
         if data in self.dList:
             self.dList.remove(data)
-    def remove_datalist(self):
-        """ empty the complet list dLst"""
-        self.dList=[]
-              
+    
 
 
     
