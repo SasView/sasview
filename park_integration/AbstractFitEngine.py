@@ -45,23 +45,26 @@ class FitEngine:
             pars={parameter's name: parameter's value}
             
         """
-        self.parameters=[]
-        if model==None:
-            raise ValueError, "Cannot set parameters for empty model"
+        if pars !={}:
+            self.parameters=[]
+            if model==None:
+                raise ValueError, "Cannot set parameters for empty model"
+            else:
+                model.name=name
+                for key, value in pars.iteritems():
+                    param = Parameter(model, key, value)
+                    self.parameters.append(param)
+            
+            #A fitArrange is already created but contains dList only at Uid
+            if self.fitArrangeList.has_key(Uid):
+                self.fitArrangeList[Uid].set_model(model)
+            else:
+            #no fitArrange object has been create with this Uid
+                fitproblem= FitArrange()
+                fitproblem.set_model(model)
+                self.fitArrangeList[Uid]=fitproblem
         else:
-            model.name=name
-            for key, value in pars.iteritems():
-                param = Parameter(model, key, value)
-                self.parameters.append(param)
-        
-        #A fitArrange is already created but contains dList only at Uid
-        if self.fitArrangeList.has_key(Uid):
-            self.fitArrangeList[Uid].set_model(model)
-        else:
-        #no fitArrange object has been create with this Uid
-            fitproblem= FitArrange()
-            fitproblem.set_model(model)
-            self.fitArrangeList[Uid]=fitproblem
+            raise ValueError, "park_integration:missing parameters"
         
         
     def set_data(self,data,Uid):
