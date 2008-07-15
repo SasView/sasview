@@ -25,7 +25,7 @@ class LineModel(BaseComponent):
         BaseComponent.__init__(self)
         
         ## Name of the model
-        self.name = "Line"
+        self.name = "LineModel"
 
         ## Define parameters
         self.params = {}
