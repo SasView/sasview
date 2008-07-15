@@ -39,7 +39,7 @@ Package name: None
 			svn://danse.us/sans/releases/guiframe-0.1.2
 			svn://danse.us/sans/releases/pr_inversion-0.2.1
 		- The following modules are required:
-			* matplotlib
+			* matplotlib 0.91.4 (avoid 0.98.1)
 			* numpy
 			* scipy
 			* wxpython
