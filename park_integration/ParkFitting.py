@@ -191,7 +191,7 @@ class ParkFit(FitEngine):
         result = fit.fit(self.problem,
                          fitter=fitter,
                          handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
-        print "result",result
+       
         return result.fitness,result.pvec,result.cov
     
    
