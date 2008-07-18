@@ -684,7 +684,6 @@ class ViewerFrame(wx.Frame):
             
             @param panels: list of panels
         """
-        print "gui_mng.set_perspective"
         for item in self.panels:
             # Check whether this is a sticky panel
             if hasattr(self.panels[item], "ALWAYS_ON"):

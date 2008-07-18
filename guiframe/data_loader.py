@@ -6,7 +6,7 @@ def choose_data_file(parent, location=None):
     if location==None:
         location = os.getcwd()
        
-    dlg = wx.FileDialog(parent, "Choose a file", location, "","*", wx.OPEN)
+    dlg = wx.FileDialog(parent, "Choose a file", location, "","*.*", wx.OPEN)
     if dlg.ShowModal() == wx.ID_OK:
         path = dlg.GetPath()
         mypath = os.path.basename(path)
@@ -70,11 +70,15 @@ def plot_data(parent, path, name="Loaded Data"):
         new_plot = Theory1D(output.x, output.y)
     else:
         new_plot = Data1D(output.x, output.y, dy=output.dy)
+        
+    filename = os.path.basename(path)
+        
     new_plot.name = name
     new_plot.interactive = True
     
     # If the data file does not tell us what the axes are, just assume...
     new_plot.xaxis("\\rm{Q}", 'A^{-1}')
     new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+    new_plot.group_id = filename
         
-    wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title="Loaded data"))
+    wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))
