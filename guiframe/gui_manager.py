@@ -235,6 +235,8 @@ class ViewerFrame(wx.Frame):
         self._setup_menus()
         
         self.Fit()
+        
+        #self._check_update(None)
              
     def _setup_layout(self):
         """
@@ -629,8 +631,9 @@ class ViewerFrame(wx.Frame):
                 toks_current = config.__version__.split('.')
                 update_available = False
                 for i in range(len(toks)):
-                    if int(toks[i])>int(toks_current[i]):
-                        update_available = True
+                    if len(toks[i].strip())>0:
+                        if int(toks[i].strip())>int(toks_current[i]):
+                            update_available = True
                 if update_available:
                     #print "Version %s is available" % line.rstrip().lstrip()
                     self.SetStatusText("Version %s is available! See the Help menu to download it." % line.rstrip().lstrip())
@@ -638,10 +641,11 @@ class ViewerFrame(wx.Frame):
                         import webbrowser
                         webbrowser.open(config.__download_page__)
                 else:
-                    self.SetStatusText("You have the latest version of %s" % config.__appname__)
-                    #print "Server version = %s"  % line.rstrip().lstrip()
+                    if event != None:
+                        self.SetStatusText("You have the latest version of %s" % config.__appname__)
         except:
-            self.SetStatusText("You have the latest version of %s" % config.__appname__)
+            if event != None:
+                self.SetStatusText("You have the latest version of %s" % config.__appname__)
             
             
     def _onAbout(self, evt):
