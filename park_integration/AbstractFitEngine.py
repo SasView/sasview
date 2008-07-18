@@ -47,6 +47,7 @@ class FitEngine:
         """
         if pars !={}:
             self.parameters=[]
+            self.paramList=[]
             if model==None:
                 raise ValueError, "Cannot set parameters for empty model"
             else:
@@ -54,6 +55,7 @@ class FitEngine:
                 for key, value in pars.iteritems():
                     param = Parameter(model, key, value)
                     self.parameters.append(param)
+                    self.paramList.append(key)
             
             #A fitArrange is already created but contains dList only at Uid
             if self.fitArrangeList.has_key(Uid):

@@ -49,6 +49,7 @@ class Model(object):
     def __init__(self, sans_model):
         self.model = sans_model
         sansp = sans_model.getParamList()
+       
         parkp = [SansParameter(p,sans_model) for p in sansp]
         self.parameterset = park.ParameterSet(sans_model.name,pars=parkp)
         
@@ -135,7 +136,7 @@ class ParkFit(FitEngine):
             with Uid as keys
         """
         self.fitArrangeList={}
-       
+        
     def createProblem(self):
         """
         Extract sansmodel and sansdata from self.FitArrangelist ={Uid:FitArrange}
@@ -144,12 +145,14 @@ class ParkFit(FitEngine):
         """
         mylist=[]
         listmodel=[]
+        
         for k,value in self.fitArrangeList.iteritems():
             sansmodel=value.get_model()
             #wrap sans model
             parkmodel = Model(sansmodel)
             for p in parkmodel.parameterset:
-                if p.isfixed():
+                #self.param_list.append(p._getname())
+                if p.isfixed() and p._getname()in self.paramList:
                     p.set([-numpy.inf,numpy.inf])
                 
             Ldata=value.get_data()
@@ -179,7 +182,6 @@ class ParkFit(FitEngine):
             @return result.cov: Covariance matrix
         """
 
-       
         self.createProblem()
         pars=self.problem.fit_parameters()
         self.problem.eval()
