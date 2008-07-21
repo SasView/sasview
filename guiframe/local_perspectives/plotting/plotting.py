@@ -359,8 +359,8 @@ class Plugin:
         # as the plottable we just received. 
         is_available = False
         for panel in self.plot_panels:
-            if event.plot._xunit == panel.graph.prop["xunit"] \
-            and event.plot._yunit == panel.graph.prop["yunit"]:
+            if event.plot._xunit == panel.graph.prop["xunit_base"] \
+            and event.plot._yunit == panel.graph.prop["yunit_base"]:
                 if hasattr(event.plot, "group_id"):
                     if not event.plot.group_id==None \
                         and event.plot.group_id==panel.group_id:
