@@ -115,23 +115,39 @@ class Graph:
     Graphs need to be printable.  A page layout program for entire plots
     would be nice.
     """
+    def _xaxis_transformed(self, name, units):
+        """
+            Change the property of the x axis
+            according to an axis transformation
+            (as opposed to changing the basic properties)
+        """
+        self.prop["xlabel"] = "%s (%s)"%(name,units)
+        self.prop["xunit"] = units
+        
+    def _yaxis_transformed(self, name, units):
+        """
+            Change the property of the y axis
+            according to an axis transformation
+            (as opposed to changing the basic properties)
+        """
+        self.prop["ylabel"] = "%s (%s)"%(name,units)
+        self.prop["yunit"] = units
+        
     def xaxis(self,name,units):
         """Properties of the x axis.
         """
-        if self.prop["xunit"] and units != self.prop["xunit"]:
-            pass
-            #print "Plottable: how do we handle non-commensurate units"
         self.prop["xlabel"] = "%s (%s)"%(name,units)
         self.prop["xunit"] = units
+        self.prop["xlabel_base"] = "%s (%s)"%(name,units)
+        self.prop["xunit_base"] = units
 
     def yaxis(self,name,units):
         """Properties of the y axis.
         """
-        if self.prop["yunit"] and units != self.prop["yunit"]:
-            pass
-            #print "Plottable: how do we handle non-commensurate units"
         self.prop["ylabel"] = "%s (%s)"%(name,units)
         self.prop["yunit"] = units
+        self.prop["ylabel_base"] = "%s (%s)"%(name,units)
+        self.prop["yunit_base"] = units
         
     def title(self,name):
         """Graph title

@@ -745,71 +745,71 @@ class PlotPanel(wx.Panel):
         
         
         for item in list:
-            print item.name
+            print item.name, self.xLabel, item.get_xaxis()
             item.setLabel(self.xLabel,self.yLabel)
             if ( self.xLabel=="x" ):
                 item.transformX(transform.toX,transform.errToX)
                 name, units = item.get_xaxis()
-                self.graph.xaxis("%s" % name,  "%s" % units)
+                self.graph._xaxis_transformed("%s" % name,  "%s" % units)
                 
                 
             if ( self.xLabel=="x^(2)" ):
                 item.transformX(transform.toX2,transform.errToX2)
                 name, units = item.get_xaxis()
                 units=convertUnit(2,units) 
-                self.graph.xaxis("%s^{2}" % name,  "%s" % units)
+                self.graph._xaxis_transformed("%s^{2}" % name,  "%s" % units)
                 
                 
             if (self.xLabel=="log10(x)" ):
                 item.transformX(transform.toX_pos,transform.errToX_pos)
                 _xscale = 'log'
                 name, units = item.get_xaxis() 
-                self.graph.xaxis("\log_{10}\ \  (%s)" % name,  "%s" % units)
+                self.graph._xaxis_transformed("\log_{10}\ \  (%s)" % name,  "%s" % units)
                 
                 
             if ( self.yLabel=="ln(y)" ):
                 item.transformY(transform.toLogX,transform.errToLogX)
                 name, units = item.get_yaxis()
-                self.graph.yaxis("\log\ \ %s" % name,  "%s" % units)
+                self.graph._yaxis_transformed("\log\ \ %s" % name,  "%s" % units)
                 
                 
             if ( self.yLabel=="y" ):
                 item.transformY(transform.toX,transform.errToX)
                 name, units = item.get_yaxis()
-                self.graph.yaxis("%s" % name,  "%s" % units)
+                self.graph._yaxis_transformed("%s" % name,  "%s" % units)
                
                 
             if ( self.yLabel=="log10(y)" ): 
                 item.transformY(transform.toX_pos,transform.errToX_pos)
                 _yscale = 'log'  
                 name, units = item.get_yaxis()
-                self.graph.yaxis("\log_{10}\ \ (%s)" % name,  "%s" % units)
+                self.graph._yaxis_transformed("\log_{10}\ \ (%s)" % name,  "%s" % units)
                 
                 
             if ( self.yLabel=="y^(2)" ):
                 item.transformY( transform.toX2,transform.errToX2 )    
                 name, units = item.get_yaxis()
                 units=convertUnit(2,units) 
-                self.graph.yaxis("%s^{2}" % name,  "%s" % units)
+                self.graph._yaxis_transformed("%s^{2}" % name,  "%s" % units)
                 
                 
             if ( self.yLabel =="1/y"):
                 item.transformY(transform.toOneOverX,transform.errOneOverX )
                 name, units = item.get_yaxis()
                 units=convertUnit(-1,units)
-                self.graph.yaxis("1/%s" % name,  "%s" % units)
+                self.graph._yaxis_transformed("1/%s" % name,  "%s" % units)
                 
             if ( self.yLabel =="1/sqrt(y)" ):
                 item.transformY(transform.toOneOverSqrtX,transform.errOneOverSqrtX )
                 name, units = item.get_yaxis()
                 units=convertUnit(-0.5,units)
-                self.graph.yaxis("1/\sqrt{%s}" %name,  "%s" % units)
+                self.graph._yaxis_transformed("1/\sqrt{%s}" %name,  "%s" % units)
                 
             if ( self.yLabel =="ln(y*x)"):
                 item.transformY( transform.toLogXY,transform.errToLogXY)
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
-                self.graph.yaxis("\log\ (%s \ \ %s)" % (yname,xname),  "%s%s" % (yunits,xunits))
+                self.graph._yaxis_transformed("\log\ (%s \ \ %s)" % (yname,xname),  "%s%s" % (yunits,xunits))
                
                 
             if ( self.yLabel =="ln(y*x^(2))"):
@@ -817,7 +817,7 @@ class PlotPanel(wx.Panel):
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis() 
                 xunits = convertUnit(2,xunits) 
-                self.graph.yaxis("\log (%s \ \ %s^{2})" % (yname,xname),  "%s%s" % (yunits,xunits))
+                self.graph._yaxis_transformed("\log (%s \ \ %s^{2})" % (yname,xname),  "%s%s" % (yunits,xunits))
                 
             
             if ( self.yLabel =="ln(y*x^(4))"):
@@ -825,19 +825,19 @@ class PlotPanel(wx.Panel):
                 yname, yunits = item.get_yaxis()
                 xname, xunits = item.get_xaxis()
                 xunits = convertUnit(4,xunits) 
-                self.graph.yaxis("\log (%s \ \ %s^{4})" % (yname,xname),  "%s%s" % (yunits,xunits))
+                self.graph._yaxis_transformed("\log (%s \ \ %s^{4})" % (yname,xname),  "%s%s" % (yunits,xunits))
                 
             if ( self.viewModel == "Guinier lny vs x^(2)"):
                 
                 item.transformX(transform.toX2,transform.errToX2)
                 name, units = item.get_xaxis()
                 units = convertUnit(2,units) 
-                self.graph.xaxis("%s^{2}" % name,  "%s" % units)
+                self.graph._xaxis_transformed("%s^{2}" % name,  "%s" % units)
                 
                 
                 item.transformY(transform.toLogX,transform.errToLogX )
                 name, units = item.get_yaxis()
-                self.graph.yaxis("\log\ \ %s" % name,  "%s" % units)
+                self.graph._yaxis_transformed("\log\ \ %s" % name,  "%s" % units)
                
                 
             item.transformView()
