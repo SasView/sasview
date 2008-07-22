@@ -745,7 +745,6 @@ class PlotPanel(wx.Panel):
         
         
         for item in list:
-            print item.name, self.xLabel, item.get_xaxis()
             item.setLabel(self.xLabel,self.yLabel)
             if ( self.xLabel=="x" ):
                 item.transformX(transform.toX,transform.errToX)
