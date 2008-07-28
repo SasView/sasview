@@ -15,8 +15,6 @@ import unittest
 import math
 import DataLoader
 from DataLoader.loader import  Loader
-from DataLoader.readers import TXT3_Reader,TXT2_Reader
-from DataLoader.readers import IgorReader,danse_reader,tiff_reader
  
 import os.path
 

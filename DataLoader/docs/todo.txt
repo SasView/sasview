@@ -23,6 +23,11 @@
    
  - All data loaded from a file should be stored in a common class object.  
  
+ - Avoid use of __setitem__ from outside a class.
+ - Bug: Loading blah.my.txt won't work. Is fixed in reflectivity registry.py
+ - Bug: The extension recognition is case sensitive and shouldn't be.
+ - BUG: if a reader raises an exception other than ValueError, the loader doesn't catch it.
+ 
  * Error conditions
  - Trying to load a file with an unknown extension should raise a RuntimeException.
  - Trying to load a corrupted file with a know file extension should raise a RuntimeException.  

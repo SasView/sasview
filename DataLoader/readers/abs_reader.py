@@ -17,7 +17,7 @@ class Reader:
         Class to load IGOR reduced .ABS files
     """
     ## List of allowed extensions
-    ext=['.abs']  
+    ext=['.abs', '.ABS']  
     
     def read(self, path):
         """ 
@@ -130,12 +130,17 @@ class Reader:
                 # Sanity check
                 if not len(y) == len(dy):
                     raise ValueError, "abs_reader: y and dy have different length"
+
+                # If the data length is zero, consider this as
+                # though we were not able to read the file.
+                if len(x)==0:
+                    raise ValueError, "ascii_reader: could not load file"
                
                 output.x = x
                 output.y = y
                 output.dy = dy
                 output.xaxis("\\rm{Q}", 'A^{-1}')
-                output.yaxis("\\rm{I(Q)} ","cm^{-1}")
+                output.yaxis("\\rm{I(Q)}","cm^{-1}")
                 
                 return output
         else:

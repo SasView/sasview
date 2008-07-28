@@ -1,5 +1,4 @@
 
-import Image
 import math,logging
 
     
@@ -13,6 +12,7 @@ class Reader:
     ext  = ['tif', 'jpg', '.png', 'jpeg', '.tiff', 'gif', 'bmp']    
         
     def read(self, filename=None):
+        import Image
         print "in tiff"
         """
             Open and read the data in a file
