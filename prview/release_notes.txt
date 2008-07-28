@@ -9,6 +9,7 @@ Package name: None
 	- Release date: ?
 	- Added functionality for .ABS IGOR reduced 1D files.
 	- Fixed problem with loading additional data after the P(r) graph's scale has been changed.
+	- Fixed problem of silent failure upon loading a file with a point at Q=0.
 
    Version 0.2.2
 

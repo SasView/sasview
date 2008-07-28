@@ -339,7 +339,7 @@ class Plugin:
             Load data. This will eventually be replaced
             by our standard DataLoader class.
         """
-        
+        #TODO: use DataLoader
         class FileData:
             x = None
             y = None
@@ -350,7 +350,6 @@ class Plugin:
                 self.path = path
                 
         self._current_file_data = FileData(path)
-        print "load", path
         basename = os.path.basename(path)
         root, ext = os.path.splitext(basename)
         if ext.lower()=='.abs':
@@ -677,8 +676,12 @@ class Plugin:
         
         
         if path is not None:
-            pr = self._create_file_pr(path)
-            self.pr = pr  
+            try:
+                pr = self._create_file_pr(path)
+                self.pr = pr
+            except:  
+                wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
+                return
               
         # Make a plot of I(q) data
         if self.pr.err==None:

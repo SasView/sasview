@@ -1,4 +1,4 @@
-1. Thread
+1. Thread [done]
 2. Find good defaults. Automate the inversion.
    -How do we estimate d_max? Guinier fit?
    -How do we estimate alpha? [done]
@@ -29,3 +29,4 @@
 25. If no data is available, disable the Fit button. [Message sent instead]
 26. Remove an added curve...
 27. Add multiple additional data curves.
+28. Use Data Loader.
