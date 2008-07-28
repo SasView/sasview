@@ -410,7 +410,7 @@ class InversionControl(wx.Panel):
         
         explanation  = "P(r) is found by fitting a set of base functions to I(Q). "
         explanation += "The minimization involves a regularization term to ensure "
-        explanation += "a smooth P(r). The alpha parameter gives the size of that "  
+        explanation += "a smooth P(r). The regularization constant gives the size of that "  
         explanation += "term. The suggested value is the value above which the "
         explanation += "output P(r) will have only one peak."
         label_explain = wx.StaticText(self, -1, explanation, size=(280,80))
@@ -836,11 +836,8 @@ class InversionControl(wx.Panel):
                 self.data_file.SetValue(str(path))
                 if self.standalone==False:
                     self.file_radio.SetValue(True)
-                self._on_pars_changed(None)
                 self.manager.show_data(path, reset=True)
-        
-
-
+                self._on_pars_changed(None)
 
 class HelpDialog(wx.Dialog):
     def __init__(self, parent, id):

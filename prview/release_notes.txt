@@ -5,7 +5,12 @@ PrView 0.2
 
 Package name: None
 
-1- Version 0.2.2
+1- Version 0.2.x
+	- Release date: ?
+	- Added functionality for .ABS IGOR reduced 1D files.
+	- Fixed problem with loading additional data after the P(r) graph's scale has been changed.
+
+   Version 0.2.2
 
 	- Release date: 7/8/2008
 	- Added option to normalize P(r) to 1, scale P_max to 1, or leave as is.
@@ -47,7 +52,13 @@ Package name: None
 3- Known Issues
 
 	3.1- All systems:
-		- None
+		Version 0.2.2:
+		- The application only loads .txt files. The expected format is 2- or 3-column ascii.
+    	- More than a single additional data set should be plottable on the P(r) graph.
+    	- Additional data plotted on the P(r) graph should also be normalizable.
+    	- If additional P(r) data is loaded after a scale change has been done, the loaded data appears in another window rather than on the same graph. If additional P(r) data is loaded while the scale of the P(r) graph is linear, the behavior is correct.
+    	- The application will not load data files with a point at Q=0. The user will not be notified.
+
 
 	3.2- Windows:
 		- None

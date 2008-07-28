@@ -51,6 +51,7 @@ class Plugin:
         self.slit_width  = 0
         ## Remember last plottable processed
         self.last_data  = "sphere_60_q0_2.txt"
+        self._current_file_data = None
         ## Time elapsed for last computation [sec]
         # Start with a good default
         self.elapsed = 0.022
@@ -332,7 +333,41 @@ class Plugin:
         #TODO: this should be in a common module
         return self.parent.choose_file()
                 
-    def load(self, path = "sphere_60_q0_2.txt"):
+                
+    def load(self, path):
+        """
+            Load data. This will eventually be replaced
+            by our standard DataLoader class.
+        """
+        
+        class FileData:
+            x = None
+            y = None
+            err = None
+            path = None
+            
+            def __init__(self, path):
+                self.path = path
+                
+        self._current_file_data = FileData(path)
+        print "load", path
+        basename = os.path.basename(path)
+        root, ext = os.path.splitext(basename)
+        if ext.lower()=='.abs':
+            x, y, err = self.load_abs(path)
+        
+        else: 
+            x, y, err = self.load_columns(path)
+            
+        self._current_file_data.x = x
+        self._current_file_data.y = y
+        self._current_file_data.err = err
+        return x, y, err
+                
+    def load_columns(self, path = "sphere_60_q0_2.txt"):
+        """
+            Load 2- or 3- column ascii
+        """
         import numpy, math, sys
         # Read the data from the data file
         data_x   = numpy.zeros(0)
@@ -372,6 +407,59 @@ class Plugin:
             wx.PostEvent(self.parent, StatusEvent(status=''))
                         
         return data_x, data_y, data_err     
+        
+    def load_abs(self, path):
+        """
+            Load an IGOR .ABS reduced file
+            @param path: file path
+            @return: x, y, err vectors
+        """
+        import numpy, math, sys
+        # Read the data from the data file
+        data_x   = numpy.zeros(0)
+        data_y   = numpy.zeros(0)
+        data_err = numpy.zeros(0)
+        scale    = None
+        min_err  = 0.0
+        
+        data_started = False
+        if not path == None:
+            input_f = open(path,'r')
+            buff    = input_f.read()
+            lines   = buff.split('\n')
+            for line in lines:
+                if data_started==True:
+                    try:
+                        toks = line.split()
+                        x = float(toks[0])
+                        y = float(toks[1])
+                        if len(toks)>2:
+                            err = float(toks[2])
+                        else:
+                            if scale==None:
+                                scale = 0.05*math.sqrt(y)
+                                #scale = 0.05/math.sqrt(y)
+                                min_err = 0.01*y
+                            err = scale*math.sqrt(y)+min_err
+                            #err = 0
+                            
+                        data_x = numpy.append(data_x, x)
+                        data_y = numpy.append(data_y, y)
+                        data_err = numpy.append(data_err, err)
+                    except:
+                        pass
+                elif line.find("The 6 columns")>=0:
+                    data_started = True      
+                   
+        if not scale==None:
+            message = "The loaded file had no error bars, statistical errors are assumed."
+            wx.PostEvent(self.parent, StatusEvent(status=message))
+        else:
+            wx.PostEvent(self.parent, StatusEvent(status=''))
+                        
+        return data_x, data_y, data_err     
+        
+        
         
     def pr_theory(self, r, R):
         """
@@ -555,15 +643,15 @@ class Plugin:
         self.control_panel.iq0 = pr.iq0(out)
         self.control_panel.bck = pr.background
         
-        for i in range(len(out)):
-            try:
-                print "%d: %g +- %g" % (i, out[i], math.sqrt(math.fabs(cov[i][i])))
-            except: 
-                print sys.exc_value
-                print "%d: %g +- ?" % (i, out[i])        
-        
-        # Make a plot of I(q) data
         if False:
+            for i in range(len(out)):
+                try:
+                    print "%d: %g +- %g" % (i, out[i], math.sqrt(math.fabs(cov[i][i])))
+                except: 
+                    print sys.exc_value
+                    print "%d: %g +- ?" % (i, out[i])        
+        
+            # Make a plot of I(q) data
             new_plot = Data1D(self.pr.x, self.pr.y, dy=self.pr.err)
             new_plot.name = "I_{obs}(q)"
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
@@ -588,8 +676,9 @@ class Plugin:
         """
         
         
-        if not path==None:
-            self._create_file_pr(path)  
+        if path is not None:
+            pr = self._create_file_pr(path)
+            self.pr = pr  
               
         # Make a plot of I(q) data
         if self.pr.err==None:
@@ -726,10 +815,17 @@ class Plugin:
         """
         from sans.guiframe.data_loader import load_ascii_1D
         import numpy
+        
         # Load data
         if os.path.isfile(path):
             
-            x, y, err = self.load(path)
+            if self._current_file_data is not None \
+                and self._current_file_data.path==path:
+                x = self._current_file_data.x
+                y = self._current_file_data.y
+                err = self._current_file_data.err
+            else:
+                x, y, err = self.load(path)
             #x, y, err = load_ascii_1D(path)
             
             # If we have not errors, add statistical errors
@@ -755,9 +851,6 @@ class Plugin:
             pr.slit_height = self.slit_height
             pr.slit_width = self.slit_width
             return pr
-            #self.pr = pr
-            #return True
-        #return False
         return None
         
     def perform_estimate(self):
