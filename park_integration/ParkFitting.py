@@ -54,6 +54,7 @@ class Model(object):
         self.parameterset = park.ParameterSet(sans_model.name,pars=parkp)
         
     def eval(self,x):
+        print "eval",self.parameterset[0].value
         return self.model.run(x)
     
 class Data(object):
@@ -161,7 +162,7 @@ class ParkFit(FitEngine):
             parkdata=Data(x,y,dy,None)
             couple=(parkmodel,parkdata)
             mylist.append(couple)
-        
+        print "mylist",mylist
         self.problem =  park.Assembly(mylist)
         
     
@@ -181,19 +182,22 @@ class ParkFit(FitEngine):
             @return result.pvec: list of parameter with the best value found during fitting
             @return result.cov: Covariance matrix
         """
-
+        print "Parkfitting: fit method probably breaking just right before \
+        call fit"
         self.createProblem()
         pars=self.problem.fit_parameters()
         self.problem.eval()
-    
+        #print "M0.B",self.problem[1].parameterset['B'].value,self.problem[0].parameterset['B'].value
+
         localfit = FitSimplex()
         localfit.ftol = 1e-8
         fitter = FitMC(localfit=localfit)
-
+        
         result = fit.fit(self.problem,
                          fitter=fitter,
                          handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
-       
+        for p in result.parameters:
+            print "fit in park fitting", p.name, p.value
         return result.fitness,result.pvec,result.cov
     
    

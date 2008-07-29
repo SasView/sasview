@@ -61,9 +61,7 @@ class Fit:
     def get_model(self,Uid):
         """ return list of data"""
         self._engine.get_model(Uid)
-   
+
     def remove_Fit_Problem(self,Uid):
         """remove   fitarrange in Uid"""
         self._engine.remove_Fit_Problem(Uid)
-
-
