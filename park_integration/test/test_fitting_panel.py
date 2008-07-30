@@ -41,7 +41,7 @@ class testFitModule(unittest.TestCase):
         fitter.set_model(model1,"M1",1, {'A':1,'B':1})
         fitter.set_data(data1,1)
        
-        fitter.set_model(model2,"M2",2, {'A':'M1.A','B':'M1.B'})
+        fitter.set_model(model2,"M2",2, {'A':1,'B':1})
         fitter.set_data(data2,2)
     
         
@@ -150,7 +150,7 @@ class testFitModule(unittest.TestCase):
         
         #Importing the Fit module
         from sans.fit.Fitting import Fit
-        fitter= Fit('scipy')
+        fitter= Fit('park')
         # Receives the type of model for the fitting
         from sans.guitools.LineModel import LineModel
         model1  = LineModel()
@@ -161,7 +161,7 @@ class testFitModule(unittest.TestCase):
         fitter.set_model(model1,"M1",1, {'A':1,'B':1})
         fitter.set_data(data1,1)
        
-        fitter.set_model(model2,"M2",2, {'A':1,'B':1})
+        fitter.set_model(model2,"M2",2, {'A':1})
         fitter.set_data(data2,2)
     
         
@@ -182,7 +182,7 @@ class testFitModule(unittest.TestCase):
         fitter.set_model(model1,"M1",1, {'A':1,'B':1})
         fitter.set_data(data1,1)
        
-        fitter.set_model(model2,"M2",2, {'A':1,'B':1})
+        fitter.set_model(model2,"M2",2, {'A':1,'B':None})
         fitter.set_data(data2,2)
     
         
