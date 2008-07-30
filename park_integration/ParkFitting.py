@@ -48,16 +48,16 @@ class Model(object):
     """
     def __init__(self, sans_model):
         self.model = sans_model
-        print "ParkFitting:sans model",self.model
+        #print "ParkFitting:sans model",self.model
         sansp = sans_model.getParamList()
-        print "ParkFitting: sans model parameter list",sansp
+        #print "ParkFitting: sans model parameter list",sansp
         parkp = [SansParameter(p,sans_model) for p in sansp]
-        print "ParkFitting: park model parameter ",parkp
+        #print "ParkFitting: park model parameter ",parkp
         self.parameterset = park.ParameterSet(sans_model.name,pars=parkp)
         
     def eval(self,x):
-        print "eval",self.parameterset[0].value,self.parameterset[1].value
-        print "model run ",self.model.run(x)
+        #print "eval",self.parameterset[0].value,self.parameterset[1].value
+        #print "model run ",self.model.run(x)
         return self.model.run(x)
     
 class Data(object):
@@ -155,10 +155,11 @@ class ParkFit(FitEngine):
             sansmodel=value.get_model()
             #wrap sans model
             parkmodel = Model(sansmodel)
-            print "ParkFitting: createproblem: just create a model",parkmodel.parameterset
+            #print "ParkFitting: createproblem: just create a model",parkmodel.parameterset
             for p in parkmodel.parameterset:
                 #self.param_list.append(p._getname())
-                if p.isfixed() and p._getname()in self.paramList:
+                if p.isfixed():
+                #if p.isfixed() and p._getname()in self.paramList:
                     p.set([-numpy.inf,numpy.inf])
             
             Ldata=value.get_data()
@@ -166,9 +167,9 @@ class ParkFit(FitEngine):
             #wrap sansdata
             parkdata=Data(x,y,dy,None)
             couple=(parkmodel,parkdata)
-            print "Parkfitting: fitness",couple   
+            #print "Parkfitting: fitness",couple   
             mylist.append(couple)
-        print "mylist",mylist
+        #print "mylist",mylist
         self.problem =  park.Assembly(mylist)
         
     
@@ -189,8 +190,8 @@ class ParkFit(FitEngine):
             @return result.cov: Covariance matrix
         """
         #from numpy.linalg.linalg.LinAlgError import LinAlgError
-        print "Parkfitting: fit method probably breaking just right before \
-        call fit"
+        #print "Parkfitting: fit method probably breaking just right before \
+        #call fit"
         self.createProblem()
         pars=self.problem.fit_parameters()
         self.problem.eval()
@@ -205,9 +206,9 @@ class ParkFit(FitEngine):
                          fitter=fitter,
                          handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
           
-            for p in result.parameters:
-                print "fit in park fitting", p.name, p.value
-            return result.fitness,result.pvec,result.cov
+            #for p in result.parameters:
+            #    print "fit in park fitting", p.name, p.value,p.stderr
+            return result.fitness,result.pvec,result.cov,result
            
         except :
             raise
