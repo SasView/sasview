@@ -20,6 +20,16 @@ copyright 2008, University of Tennessee
 
 from sans.guitools.plottables import Data1D as plottable_1D
 
+class Data2D:
+    """
+        Data2D is a place holder for 2D plottables, which are 
+        not yet implemented.
+    """
+    xmin = None
+    xmax = None
+    ymin = None
+    ymax = None
+    image = None
   
 class Vector:
     """
@@ -57,27 +67,68 @@ class Detector:
     name = ''
     ## Sample to detector distance [float] [mm]
     distance = None
+    distance_unit = 'm'
     ## Offset of this detector position in X, Y, (and Z if necessary) [Vector] [mm] 
     offset = Vector()
+    offset_unit = 'mm'
     ## Orientation (rotation) of this detector in roll, pitch, and yaw [Vector] [degrees]
     orientation = Vector()
+    orientation_unit = 'degree'
     ## Center of the beam on the detector in X and Y (and Z if necessary) [Vector] [pixel]
     beam_center = Vector()
+    beam_center_unit = 'mm'
     ## Pixel size in X, Y, (and Z if necessary) [Vector] [mm]
     pixel_size = Vector()
+    pixel_size_unit = 'mm'
     ## Slit length of the instrument for this detector.[float] [mm]
     slit_length = None
+    slit_length_unit = 'mm'
+    
+    def __str__(self):
+        _str  = "Detector:\n"
+        _str += "   Name:         %s\n" % self.name
+        _str += "   Distance:     %s [%s]\n" % \
+            (str(self.distance), str(self.distance_unit))
+        _str += "   Offset:       %s [%s]\n" % \
+            (str(self.offset), str(self.offset_unit))
+        _str += "   Orientation:  %s [%s]\n" % \
+            (str(self.orientation), str(self.orientation_unit))
+        _str += "   Beam center:  %s [%s]\n" % \
+            (str(self.beam_center), str(self.beam_center_unit))
+        _str += "   Pixel size:   %s [%s]\n" % \
+            (str(self.pixel_size), str(self.pixel_size_unit))
+        _str += "   Slit length:  %s [%s]\n" % \
+            (str(self.slit_length), str(self.slit_length_unit))
+        return _str
 
 class Collimation:
     """
         Class to hold collimation information
     """
+    class Aperture:
+        # Aperture size [Vector]
+        size = Vector()
+        size_unit = 'mm'
+        # Aperture distance [float]
+        distance = None
+        distance_unit = 'mm'
+    
     ## Length [float] [mm]
     length = None
-    ## Aperture size [Vector] [mm]
-    aperture_size = Vector()
-    ## Aperture distance [float] [m]
-    aperture_distance = None
+    length_unit = 'mm'
+    ## Aperture
+    aperture = []
+    
+    def __str__(self):
+        _str = "Collimation:\n"
+        _str += "   Length:       %s [%s]\n" % \
+            (str(self.length), str(self.length_unit))
+        for item in self.aperture:
+            _str += "   Aperture size:%s [%s]\n" % \
+                (str(item.size), str(item.size_unit))
+            _str += "   Aperture_dist:%s [%s]\n" % \
+                (str(item.distance), str(item.distance_unit))
+        return _str
 
 class Source:
     """
@@ -87,16 +138,38 @@ class Source:
     radiation = ''
     ## Beam size [Vector] [mm]
     beam_size = Vector()
+    beam_size_unit = 'mm'
     ## Beam shape [string]
     beam_shape = ''
     ## Wavelength [float] [Angstrom]
     wavelength = None
+    wavelength_unit = 'A'
     ## Minimum wavelength [float] [Angstrom]
     wavelength_min = None
+    wavelength_min_unit = 'nm'
     ## Maximum wavelength [float] [Angstrom]
     wavelength_max = None
+    wavelength_max_unit = 'nm'
     ## Wavelength spread [float] [Angstrom]
     wavelength_spread = None
+    wavelength_spread_unit = 'percent'
+    
+    def __str__(self):
+        _str  = "Source:\n"
+        _str += "   Radiation:    %s\n" % str(self.radiation)
+        _str += "   Shape:        %s\n" % str(self.beam_shape)
+        _str += "   Wavelength:   %s [%s]\n" % \
+            (str(self.wavelength), str(self.wavelength_unit))
+        _str += "   Waveln_min:   %s [%s]\n" % \
+            (str(self.wavelength_min), str(self.wavelength_min_unit))
+        _str += "   Waveln_max:   %s [%s]\n" % \
+            (str(self.wavelength_max), str(self.wavelength_max_unit))
+        _str += "   Waveln_spread:%s [%s]\n" % \
+            (str(self.wavelength_spread), str(self.wavelength_spread_unit))
+        _str += "   Beam_size:    %s [%s]\n" % \
+            (str(self.beam_size), str(self.beam_size_unit))
+        return _str
+    
     
 """ 
     Definitions of radiation types
@@ -114,16 +187,61 @@ class Sample:
     ID = ''
     ## Thickness [float] [mm]
     thickness = None
-    ## Transmission [float] [%]
+    thickness_unit = 'mm'
+    ## Transmission [float] [fraction]
     transmission = None
     ## Temperature [float] [C]
     temperature = None
+    temperature_unit = 'C'
     ## Position [Vector] [mm]
     position = Vector()
+    position_unit = 'mm'
     ## Orientation [Vector] [degrees]
     orientation = Vector()
+    orientation_unit = 'degree'
     ## Details
-    details = ''
+    details = []
+    
+    def __str__(self):
+        _str  = "Sample:\n"
+        _str += "   ID:           %s\n" % str(self.ID)
+        _str += "   Transmission: %s\n" % str(self.transmission)
+        _str += "   Thickness:    %s [%s]\n" % \
+            (str(self.thickness), str(self.thickness_unit))
+        _str += "   Temperature:  %s [%s]\n" % \
+            (str(self.temperature), str(self.temperature_unit))
+        _str += "   Position:     %s [%s]\n" % \
+            (str(self.position), str(self.position_unit))
+        _str += "   Orientation:  %s [%s]\n" % \
+            (str(self.orientation), str(self.orientation_unit))
+        
+        _str += "   Details:\n"
+        for item in self.details:
+            _str += "      %s\n" % item
+            
+        return _str
+  
+class Process:
+    """
+        Class that holds information about the processes
+        performed on the data.
+    """
+    name = ''
+    date = ''
+    description= ''
+    term = []
+    notes = []
+    
+    def __str__(self):
+        _str  = "Process:\n"
+        _str += "   Name:         %s\n" % self.name
+        _str += "   Date:         %s\n" % self.date
+        _str += "   Description:  %s\n" % self.description
+        for item in self.term:
+            _str += "   Term:         %s\n" % item
+        for item in self.notes:
+            _str += "   Note:         %s\n" % item
+        return _str
     
   
 class DataInfo:
@@ -133,22 +251,30 @@ class DataInfo:
         instrument description, the sample description,
         the data itself and any other meta data.
     """
+    ## Title 
+    title      = ''
     ## Run number
     run        = None
     ## File name
     filename   = ''
     ## Notes
-    notes      = ''
+    notes      = []
     ## Processes (Action on the data)
     process    = []
+    ## Instrument name
+    instrument = ''
     ## Detector information
-    detector   = Detector()
+    detector   = []
     ## Sample information
     sample     = Sample()
     ## Source information
     source     = Source()
+    ## Collimation information
+    collimation = []
     ## Additional meta-data
     meta_data  = {}
+    ## Loading errors
+    errors = []
     
     def __add__(self, data):
         """
@@ -190,6 +316,9 @@ class Data1D(plottable_1D, DataInfo):
     """
         1D data class
     """
+    x_unit = '1/A'
+    y_unit = '1/cm'
+    
     def __init__(self, x, y, dx=None, dy=None):
         plottable_1D.__init__(self, x, y, dx, dy)
         
@@ -197,19 +326,21 @@ class Data1D(plottable_1D, DataInfo):
         """
             Nice printout
         """
-        _str = "File: %s\n" % self.filename
+        _str =  "File:            %s\n" % self.filename
+        _str += "Title:           %s\n" % self.title
+        _str += "Run:             %s\n" % str(self.run)
+        _str += "Instrument:      %s\n" % str(self.instrument)
+        _str += "%s\n" % str(self.sample)
+        _str += "%s\n" % str(self.source)
+        for item in self.detector:
+            _str += "%s\n" % str(item)
+        for item in self.collimation:
+            _str += "%s\n" % str(item)
+        for item in self.process:
+            _str += "%s\n" % str(item)
+        for item in self.notes:
+            _str += "%s\n" % str(item)
         
-        _str += "Sample:\n"
-        _str += "   Transmission: %s\n" % str(self.sample.transmission)
-        _str += "   Thickness:    %s\n" % str(self.sample.thickness)
-        
-        _str += "Source:\n"
-        _str += "   Wavelength:   %s [A]\n" % str(self.source.wavelength)
-
-        _str += "Detector:\n"
-        _str += "   Name:         %s\n" % self.detector.name
-        _str += "   Distance:     %s [mm]\n" % str(self.detector.distance)
-        _str += "   Beam_center:  %s [pixel]\n" % str(self.detector.beam_center)
         
         _str += "Data:\n"
         _str += "   Type:         %s\n" % self.__class__.__name__

@@ -16,6 +16,9 @@ class Reader:
     """
         Class to load ascii files (2 or 3 columns)
     """
+    ## File type
+    type = ["ASCII files (*.txt)|*.txt",
+            "ASCII files (*.dat)|*.dat"]
     ## List of allowed extensions
     ext=['.txt', '.TXT', '.dat', '.DAT']  
     
