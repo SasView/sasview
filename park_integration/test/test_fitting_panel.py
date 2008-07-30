@@ -88,7 +88,7 @@ class testFitModule(unittest.TestCase):
         print "chisqr1",chisqr1
         print "out1", out1
         print " cov1", cov1
-       
+        self.assert_(chisqr1)
       
     
     
@@ -129,7 +129,7 @@ class testFitModule(unittest.TestCase):
         print "chisqr1",chisqr1
         print "out1", out1
         print " cov1", cov1
-       
+        self.assert_(chisqr1)
       
     
     def test2(self):
@@ -169,7 +169,7 @@ class testFitModule(unittest.TestCase):
         print "chisqr1",chisqr1
         print "out1", out1
         print " cov1", cov1
-     
+        self.assert_(chisqr1)
         
         fitter= Fit('park')
         # Receives the type of model for the fitting
@@ -190,7 +190,7 @@ class testFitModule(unittest.TestCase):
         print "chisqr2",chisqr2
         print "out2", out2
         print " cov2", cov2
-        
+        self.assert_(chisqr2)
         
        
     
