@@ -48,13 +48,16 @@ class Model(object):
     """
     def __init__(self, sans_model):
         self.model = sans_model
+        print "ParkFitting:sans model",self.model
         sansp = sans_model.getParamList()
-       
+        print "ParkFitting: sans model parameter list",sansp
         parkp = [SansParameter(p,sans_model) for p in sansp]
+        print "ParkFitting: park model parameter ",parkp
         self.parameterset = park.ParameterSet(sans_model.name,pars=parkp)
         
     def eval(self,x):
-        print "eval",self.parameterset[0].value
+        print "eval",self.parameterset[0].value,self.parameterset[1].value
+        print "model run ",self.model.run(x)
         return self.model.run(x)
     
 class Data(object):
@@ -144,6 +147,7 @@ class ParkFit(FitEngine):
         Create parkmodel and park data ,form a list couple of parkmodel and parkdata
         create an assembly self.problem=  park.Assembly([(parkmodel,parkdata)])
         """
+        print "ParkFitting: In createproblem"
         mylist=[]
         listmodel=[]
         
@@ -151,16 +155,18 @@ class ParkFit(FitEngine):
             sansmodel=value.get_model()
             #wrap sans model
             parkmodel = Model(sansmodel)
+            print "ParkFitting: createproblem: just create a model",parkmodel.parameterset
             for p in parkmodel.parameterset:
                 #self.param_list.append(p._getname())
                 if p.isfixed() and p._getname()in self.paramList:
                     p.set([-numpy.inf,numpy.inf])
-                
+            
             Ldata=value.get_data()
             x,y,dy=self._concatenateData(Ldata)
             #wrap sansdata
             parkdata=Data(x,y,dy,None)
             couple=(parkmodel,parkdata)
+            print "Parkfitting: fitness",couple   
             mylist.append(couple)
         print "mylist",mylist
         self.problem =  park.Assembly(mylist)
@@ -182,6 +188,7 @@ class ParkFit(FitEngine):
             @return result.pvec: list of parameter with the best value found during fitting
             @return result.cov: Covariance matrix
         """
+        #from numpy.linalg.linalg.LinAlgError import LinAlgError
         print "Parkfitting: fit method probably breaking just right before \
         call fit"
         self.createProblem()
@@ -192,12 +199,19 @@ class ParkFit(FitEngine):
         localfit = FitSimplex()
         localfit.ftol = 1e-8
         fitter = FitMC(localfit=localfit)
-        
-        result = fit.fit(self.problem,
+        try:
+            
+            result = fit.fit(self.problem,
                          fitter=fitter,
                          handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
-        for p in result.parameters:
-            print "fit in park fitting", p.name, p.value
-        return result.fitness,result.pvec,result.cov
+          
+            for p in result.parameters:
+                print "fit in park fitting", p.name, p.value
+            return result.fitness,result.pvec,result.cov
+           
+        except :
+            raise
+            return
+        
     
    
