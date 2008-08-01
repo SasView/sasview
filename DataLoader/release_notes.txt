@@ -1,0 +1,50 @@
+Release Notes
+=============
+
+Package name: DataLoader 0.2
+
+1- 	Version 0.1
+	- Release date: ?
+	- First version of SANS data loader
+	- Formats: IGOR 1D, IGOR 2D, CanSAS 1D, 2- or 3-column ascii
+	- Includes SANS data class, with arithmetic operations
+	
+2- Downloading and Installing
+
+	2.1- System Requirements:
+		- Python version >= 2.4 should be running on the system
+
+	2.2- Installing:
+		- Get the code from svn://danse.us/sans/releases/DataLoader-0.1
+		- The following modules are required:
+			* numpy
+			* data_util from svn://danse.us/common/releases/data_util-0.1
+
+3- Known Issues
+
+	3.1- All systems:
+		- None
+
+	3.2- Windows:
+		- None
+
+	3.3- Linux:
+		- None
+
+4- Troubleshooting
+
+	- None
+
+5- Frequently Asked Questions
+
+	- None
+
+6- Other Resources
+
+	- None
+
+	
+
+	
+
+

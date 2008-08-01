@@ -19,6 +19,9 @@ copyright 2008, University of Tennessee
 """
 
 from sans.guitools.plottables import Data1D as plottable_1D
+from data_util.uncertainty import Uncertainty
+import numpy
+import math
 
 class Data2D:
     """
@@ -275,43 +278,7 @@ class DataInfo:
     meta_data  = {}
     ## Loading errors
     errors = []
-    
-    def __add__(self, data):
-        """
-            Add two data sets
             
-            @param data: data set to add to the current one
-            @return: new data set
-            @raise ValueError: raised when two data sets are incompatible
-        """
-        raise RuntimeError, "DataInfo addition is not implemented yet"
-    
-    def __sub__(self, data):
-        """
-            Subtract two data sets
-            
-            @param data: data set to subtract from the current one
-            @return: new data set
-            @raise ValueError: raised when two data sets are incompatible
-        """
-        raise RuntimeError, "DataInfo subtraction is not implemented yet"
-    
-    def __mul__(self, constant):
-        """
-            Multiply every entry of the current data set by a constant
-            
-            @param constant: constant to multiply the data by
-            @return: new data set
-            @raise ValueError: raised when the constant is not a float
-        """
-        raise RuntimeError, "DataInfo multiplication is not implemented yet"
-    
-    def __div__(self, constant):
-        """
-        """
-        raise RuntimeError, "DataInfo division is not implemented yet"
-    
-        
 class Data1D(plottable_1D, DataInfo):
     """
         1D data class
@@ -350,6 +317,177 @@ class Data1D(plottable_1D, DataInfo):
 
         return _str
 
+    def clone_without_data(self, length=0):
+        from copy import deepcopy
+        
+        x  = numpy.zeros(length) 
+        dx = numpy.zeros(length) 
+        y  = numpy.zeros(length) 
+        dy = numpy.zeros(length) 
+        
+        clone = Data1D(x, y, dx=dx, dy=dy)
+        clone.title       = self.title
+        clone.run         = self.run
+        clone.filename    = self.filename
+        clone.notes       = deepcopy(self.notes) 
+        clone.process     = deepcopy(self.process) 
+        clone.detector    = deepcopy(self.detector) 
+        clone.sample      = deepcopy(self.sample) 
+        clone.source      = deepcopy(self.source) 
+        clone.collimation = deepcopy(self.collimation) 
+        clone.meta_data   = deepcopy(self.meta_data) 
+        clone.errors      = deepcopy(self.errors) 
+        
+        return clone
 
+    def _validity_check(self, other):
+        """
+            Checks that the data lengths are compatible.
+            Checks that the x vectors are compatible.
+            Returns errors vectors equal to original
+            errors vectors if they were present or vectors
+            of zeros when none was found.
+            
+            @param other: other data set for operation
+            @return: dy for self, dy for other [numpy arrays]
+            @raise ValueError: when lengths are not compatible
+        """
+        dy_other = None
+        if isinstance(other, Data1D):
+            # Check that data lengths are the same
+            if len(self.x) != len(other.x) or \
+                len(self.y) != len(other.y):
+                raise ValueError, "Unable to perform operation: data length are not equal"
+            
+            # Here we could also extrapolate between data points
+            for i in range(len(self.x)):
+                if self.x[i] != other.x[i]:
+                    raise ValueError, "Incompatible data sets: x-values do not match"
+            
+            # Check that the other data set has errors, otherwise
+            # create zero vector
+            dy_other = other.dy
+            if other.dy==None or (len(other.dy) != len(other.y)):
+                dy_other = numpy.zeros(len(other.y))
+            
+        # Check that we have errors, otherwise create zero vector
+        dy = self.dy
+        if self.dy==None or (len(self.dy) != len(self.y)):
+            dy = numpy.zeros(len(self.y))            
+            
+        return dy, dy_other
+
+    def _perform_operation(self, other, operation):
+        """
+        """
+        # First, check the data compatibility
+        dy, dy_other = self._validity_check(other)
+        result = self.clone_without_data(len(self.x))
+        
+        for i in range(len(self.x)):
+            result.x[i] = self.x[i]
+            if self.dx is not None and len(self.x)==len(self.dx):
+                result.dx[i] = self.dx[i]
+            
+            a = Uncertainty(self.y[i], dy[i]**2)
+            if isinstance(other, Data1D):
+                b = Uncertainty(other.y[i], dy_other[i]**2)
+            else:
+                b = other
+            
+            output = operation(a, b)
+            result.y[i] = output.x
+            result.dy[i] = math.sqrt(math.fabs(output.variance))
+        return result
+        
+
+    def __add__(self, other):
+        """
+            Add two data sets
+            
+            @param other: data set to add to the current one
+            @return: new data set
+            @raise ValueError: raised when two data sets are incompatible
+        """
+        def operation(a, b): return a+b
+        return self._perform_operation(other, operation)
+        
+    def __radd__(self, other):
+        """
+            Add two data sets
+            
+            @param other: data set to add to the current one
+            @return: new data set
+            @raise ValueError: raised when two data sets are incompatible
+        """
+        def operation(a, b): return b+a
+        return self._perform_operation(other, operation)
+        
+    def __sub__(self, other):
+        """
+            Subtract two data sets
+            
+            @param other: data set to subtract from the current one
+            @return: new data set
+            @raise ValueError: raised when two data sets are incompatible
+        """
+        def operation(a, b): return a-b
+        return self._perform_operation(other, operation)
+        
+    def __rsub__(self, other):
+        """
+            Subtract two data sets
+            
+            @param other: data set to subtract from the current one
+            @return: new data set
+            @raise ValueError: raised when two data sets are incompatible
+        """
+        def operation(a, b): return b-a
+        return self._perform_operation(other, operation)
+        
+    def __mul__(self, other):
+        """
+            Multiply two data sets
+            
+            @param other: data set to subtract from the current one
+            @return: new data set
+            @raise ValueError: raised when two data sets are incompatible
+        """
+        def operation(a, b): return a*b
+        return self._perform_operation(other, operation)
+        
+    def __rmul__(self, other):
+        """
+            Multiply two data sets
+            
+            @param other: data set to subtract from the current one
+            @return: new data set
+            @raise ValueError: raised when two data sets are incompatible
+        """
+        def operation(a, b): return b*a
+        return self._perform_operation(other, operation)
+        
+    def __div__(self, other):
+        """
+            Divided a data set by another
+            
+            @param other: data set that the current one is divided by
+            @return: new data set
+            @raise ValueError: raised when two data sets are incompatible
+        """
+        def operation(a, b): return a/b
+        return self._perform_operation(other, operation)
+        
+    def __rdiv__(self, other):
+        """
+            Divided a data set by another
+            
+            @param other: data set that the current one is divided by
+            @return: new data set
+            @raise ValueError: raised when two data sets are incompatible
+        """
+        def operation(a, b): return b/a
+        return self._perform_operation(other, operation)
+        
 
 
