@@ -22,6 +22,12 @@ import os, sys
 from DataLoader.data_info import Data1D, Collimation, Detector, Process
 from xml import xpath
 
+has_converter = True
+try:
+    from data_util.nxsunit import Converter
+except:
+    has_converter = False
+
 def get_node_text(node):
     """
         Get the text context of a node
@@ -86,7 +92,7 @@ def get_float(location, node):
     content, attr = get_content(location, node)
     if content is not None:
         try:
-            value = float(content)        
+            value = float(content)   
         except:
             # Could not pass, skip and return None
             logging.error("cansas_reader.get_float: could not convert '%s' to float" % content)
@@ -112,16 +118,27 @@ def _store_float(location, node, variable, storage):
     """
     value, attr = get_float(location, node)
     if value is not None:
-        exec "storage.%s = value" % variable
-        
         # If the entry has units, check to see that they are
         # compatible with what we currently have in the data object
         if attr.has_key('unit'):
             toks = variable.split('.')
             exec "local_unit = storage.%s_unit.lower()" % toks[0]
             if attr['unit'].lower()!=local_unit:
-                raise ValueError, "CanSAS reader: unrecognized %s unit [%s]; expecting [%s]" \
-                    % (variable, attr['unit'], local_unit)
+                if has_converter==True:
+                    try:
+                        conv = Converter(attr['unit'])
+                        exec "storage.%s = %g" % (variable, conv(value, units=local_unit))
+                    except:
+                        raise ValueError, "CanSAS reader: could not convert %s unit [%s]; expecting [%s]\n  %s" \
+                        % (variable, attr['unit'], local_unit, sys.exc_value)
+                else:
+                    raise ValueError, "CanSAS reader: unrecognized %s unit [%s]; expecting [%s]" \
+                        % (variable, attr['unit'], local_unit)
+            else:
+                exec "storage.%s = value" % variable
+        else:
+            exec "storage.%s = value" % variable
+            
 
 def _store_content(location, node, variable, storage):
     """
