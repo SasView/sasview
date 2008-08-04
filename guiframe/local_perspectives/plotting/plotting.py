@@ -209,6 +209,7 @@ class View1DPanel(PlotPanel):
                               dy=dy)
             new_plot.interactive = True
             new_plot.name = self.plots[self.graph.selected_plottable].name
+            new_plot.group_id = self.plots[self.graph.selected_plottable].group_id
             label, unit = self.plots[self.graph.selected_plottable].get_xaxis()
             new_plot.xaxis(label, unit)
             label, unit = self.plots[self.graph.selected_plottable].get_yaxis()
