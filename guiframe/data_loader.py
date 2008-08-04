@@ -1,4 +1,4 @@
-import os
+import os, sys
 import wx
 
 def choose_data_file(parent, location=None):
@@ -55,17 +55,20 @@ def load_ascii_1D(path):
     return None, None, None
 
 def plot_data(parent, path, name="Loaded Data"):
-    from sans.guicomm.events import NewPlotEvent
+    from sans.guicomm.events import NewPlotEvent, StatusEvent
     from sans.guitools.plottables import Data1D, Theory1D
     from DataLoader.loader import  Loader
+    import numpy
     #Instantiate a loader 
     L=Loader()
     
     #Recieves data 
-    output=L.load(path)
-    
-    import numpy
-    
+    try:
+        output=L.load(path)
+    except:
+        wx.PostEvent(parent, StatusEvent(status="Problem loading file: %s" % sys.exc_value))
+        return
+        
     if output.dy==None:
         new_plot = Theory1D(output.x, output.y)
     else:
