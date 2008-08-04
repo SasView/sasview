@@ -94,7 +94,7 @@ class Reader:
                
                 output.x = x
                 output.y = y
-                output.dy = dy
+                output.dy = dy if has_error == True else None
                 output.xaxis("\\rm{Q}", 'A^{-1}')
                 output.yaxis("\\rm{I(Q)}","cm^{-1}")
                 
