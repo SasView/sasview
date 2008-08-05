@@ -25,7 +25,7 @@ from data_util.uncertainty import Uncertainty
 import numpy
 import math
 
-class Data2D:
+class plottable_2D:
     """
         Data2D is a place holder for 2D plottables, which are 
         not yet implemented.
@@ -34,8 +34,33 @@ class Data2D:
     xmax = None
     ymin = None
     ymax = None
-    image = None
-  
+    data = None
+    err_data = None
+    
+    # Units
+    _xaxis = ''
+    _xunit = ''
+    _yaxis = ''
+    _yunit = ''
+    _zaxis = ''
+    _zunit = ''
+    
+    def __init__(self, data=None, err_data=None):
+        self.data = data
+        self.err_data = err_data
+        
+    def xaxis(self, label, unit):
+        self._xaxis = label
+        self._xunit = unit
+        
+    def yaxis(self, label, unit):
+        self._yaxis = label
+        self._yunit = unit
+            
+    def zaxis(self, label, unit):
+        self._zaxis = label
+        self._zunit = unit
+            
 class Vector:
     """
         Vector class to hold multi-dimensional objects
@@ -79,7 +104,7 @@ class Detector:
     ## Orientation (rotation) of this detector in roll, pitch, and yaw [Vector] [degrees]
     orientation = Vector()
     orientation_unit = 'degree'
-    ## Center of the beam on the detector in X and Y (and Z if necessary) [Vector] [pixel]
+    ## Center of the beam on the detector in X and Y (and Z if necessary) [Vector] [mm]
     beam_center = Vector()
     beam_center_unit = 'mm'
     ## Pixel size in X, Y, (and Z if necessary) [Vector] [mm]
@@ -281,6 +306,27 @@ class DataInfo:
     ## Loading errors
     errors = []
             
+    def __str__(self):
+        """
+            Nice printout
+        """
+        _str =  "File:            %s\n" % self.filename
+        _str += "Title:           %s\n" % self.title
+        _str += "Run:             %s\n" % str(self.run)
+        _str += "Instrument:      %s\n" % str(self.instrument)
+        _str += "%s\n" % str(self.sample)
+        _str += "%s\n" % str(self.source)
+        for item in self.detector:
+            _str += "%s\n" % str(item)
+        for item in self.collimation:
+            _str += "%s\n" % str(item)
+        for item in self.process:
+            _str += "%s\n" % str(item)
+        for item in self.notes:
+            _str += "%s\n" % str(item)
+
+        return _str
+            
     # Private method to perform operation. Not implemented for DataInfo,
     # but should be implemented for each data class inherited from DataInfo
     # that holds actual data (ex.: Data1D)
@@ -388,21 +434,8 @@ class Data1D(plottable_1D, DataInfo):
         """
             Nice printout
         """
-        _str =  "File:            %s\n" % self.filename
-        _str += "Title:           %s\n" % self.title
-        _str += "Run:             %s\n" % str(self.run)
-        _str += "Instrument:      %s\n" % str(self.instrument)
-        _str += "%s\n" % str(self.sample)
-        _str += "%s\n" % str(self.source)
-        for item in self.detector:
-            _str += "%s\n" % str(item)
-        for item in self.collimation:
-            _str += "%s\n" % str(item)
-        for item in self.process:
-            _str += "%s\n" % str(item)
-        for item in self.notes:
-            _str += "%s\n" % str(item)
-        
+        _str =  "%s\n" % DataInfo.__str__(self)
+    
         _str += "Data:\n"
         _str += "   Type:         %s\n" % self.__class__.__name__
         _str += "   X-axis:       %s\t[%s]\n" % (self._xaxis, self._xunit)
@@ -501,3 +534,37 @@ class Data1D(plottable_1D, DataInfo):
             result.dy[i] = math.sqrt(math.fabs(output.variance))
         return result
         
+class Data2D(plottable_2D, DataInfo):
+    """
+        2D data class
+    """
+    ## Units for Q-values
+    Q_unit = '1/A'
+    
+    ## Units for I(Q) values
+    I_unit = '1/cm'
+    
+    ## Vector of Q-values at the center of each bin in x
+    x_bins = []
+    
+    ## Vector of Q-values at the center of each bin in y
+    y_bins = []
+    
+    
+    def __init__(self, data=None, err_data=None):
+        plottable_2D.__init__(self, data, err_data)
+
+    def __str__(self):
+        _str =  "%s\n" % DataInfo.__str__(self)
+        
+        _str += "Data:\n"
+        _str += "   Type:         %s\n" % self.__class__.__name__
+        _str += "   X- & Y-axis:  %s\t[%s]\n" % (self._yaxis, self._yunit)
+        _str += "   Z-axis:       %s\t[%s]\n" % (self._zaxis, self._zunit)
+        leny = 0
+        if len(self.data)>0:
+            leny = len(self.data[0])
+        _str += "   Length:       %g x %g\n" % (len(self.data), leny)
+        
+        return _str
+  

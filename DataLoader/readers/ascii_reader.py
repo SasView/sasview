@@ -12,6 +12,12 @@ import numpy
 import os
 from DataLoader.data_info import Data1D
 
+has_converter = True
+try:
+    from data_util.nxsunit import Converter
+except:
+    has_converter = False
+
 class Reader:
     """
         Class to load ascii files (2 or 3 columns)
@@ -46,6 +52,20 @@ class Reader:
                 dy = numpy.zeros(0)
                 output = Data1D(x, y, dy=dy)
                 self.filename = output.filename = basename
+           
+                data_conv_q = None
+                data_conv_i = None
+                
+                if has_converter == True and output.x_unit != '1/A':
+                    data_conv_q = Converter('1/A')
+                    # Test it
+                    data_conv_q(1.0, output.x_unit)
+                    
+                if has_converter == True and output.y_unit != '1/cm':
+                    data_conv_i = Converter('1/cm')
+                    # Test it
+                    data_conv_i(1.0, output.y_unit)
+           
                 
                 # The first good line of data will define whether
                 # we have 2-column or 3-column ascii
@@ -57,6 +77,12 @@ class Reader:
                         _x = float(toks[0])
                         _y = float(toks[1])
                         
+                        if data_conv_q is not None:
+                            _x = data_conv_q(_x, units=output.x_unit)
+                            
+                        if data_conv_i is not None:
+                            _y = data_conv_i(_y, units=output.y_unit)                        
+                        
                         # If we have an extra token, check
                         # whether it can be interpreted as a
                         # third column.
@@ -64,6 +90,10 @@ class Reader:
                         if len(toks)>2:
                             try:
                                 _dy = float(toks[2])
+                                
+                                if data_conv_i is not None:
+                                    _dy = data_conv_i(_dy, units=output.y_unit)
+                                
                             except:
                                 # The third column is not a float, skip it.
                                 pass
@@ -95,9 +125,14 @@ class Reader:
                 output.x = x
                 output.y = y
                 output.dy = dy if has_error == True else None
-                output.xaxis("\\rm{Q}", 'A^{-1}')
-                output.yaxis("\\rm{I(Q)}","cm^{-1}")
-                
+                if data_conv_q is not None:
+                    output.xaxis("\\rm{Q}", output.x_unit)
+                else:
+                    output.xaxis("\\rm{Q}", 'A^{-1}')
+                if data_conv_i is not None:
+                    output.yaxis("\\{I(Q)}", output.y_unit)
+                else:
+                    output.yaxis("\\rm{I(Q)}","cm^{-1}")
                 
                 return output
         else:

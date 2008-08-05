@@ -425,9 +425,15 @@ class Reader:
         data_info.y = y
         data_info.dx = dx
         data_info.dy = dy
-        data_info.xaxis("\\rm{Q}", 'A^{-1}')
-        data_info.yaxis("\\rm{I(Q)}","cm^{-1}")
-
+        if data_conv_q is not None:
+            data_info.xaxis("\\rm{Q}", output.x_unit)
+        else:
+            data_info.xaxis("\\rm{Q}", 'A^{-1}')
+        if data_conv_i is not None:
+            data_info.yaxis("\\{I(Q)}", output.y_unit)
+        else:
+            data_info.yaxis("\\rm{I(Q)}","cm^{-1}")
+        
         return data_info
 
     

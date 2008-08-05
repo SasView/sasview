@@ -1,12 +1,20 @@
 """
-    Test plug-in
+    DANSE/SANS file reader
 """
 
 import math
-import pylab
+import os
 import copy
 import numpy
 import logging
+from DataLoader.data_info import Data2D, Detector
+
+# Look for unit converter
+has_converter = True
+try:
+    from data_util.nxsunit import Converter
+except:
+    has_converter = False
 
 class Reader:
     """
@@ -53,6 +61,27 @@ class Reader:
             # Format version
             fversion   = 1.0
             
+            output = Data2D()
+            output.filename = os.path.basename(filename)
+            detector = Detector()
+            output.detector.append(detector)
+            
+            output.data = numpy.zeros([size_x,size_y])
+            output.err_data = numpy.zeros([size_x,size_y])
+            
+            data_conv_q = None
+            data_conv_i = None
+            
+            if has_converter == True and output.Q_unit != '1/A':
+                data_conv_q = Converter('1/A')
+                # Test it
+                data_conv_q(1.0, output.Q_unit)
+                
+            if has_converter == True and output.I_unit != '1/cm':
+                data_conv_i = Converter('1/cm')
+                # Test it
+                data_conv_i(1.0, output.I_unit)            
+        
             read_on = True
             while read_on:
                 line = datafile.readline()
@@ -62,8 +91,8 @@ class Reader:
                 toks = line.split(':')
                 if toks[0]=="FORMATVERSION":
                     fversion = float(toks[1])
-                if toks[0]=="WAVELENGTH":
-                    wavelength = float(toks[1])
+                if toks[0]=="WAVELENGTH":    
+                    wavelength = float(toks[1])                
                 elif toks[0]=="DISTANCE":
                     distance = float(toks[1])
                 elif toks[0]=="CENTER_X":
@@ -94,12 +123,13 @@ class Reader:
                         try:
                             val = float(toks[0])
                             err = float(toks[1])
+                            if data_conv_i is not None:
+                                val = data_conv_i(val, units=output.y_unit)
+                                err = data_conv_i(err, units=output.y_unit)
                             data.append(val)
                             error.append(err)
                         except:
                             logging.info("Skipping line:%s,%s" %( data_str,sys.exc_value))
-                            #print "Skipping line:%s" % data_str
-                            #print sys.exc_value
             
             # Initialize 
             x_vals = []
@@ -108,14 +138,12 @@ class Reader:
             ymax = None
             xmin = None
             xmax = None
-            Z = None
-        
             
-            x = numpy.zeros(size_x)
-            y = numpy.zeros(size_y)
-            X, Y = pylab.meshgrid(x, y)
-            Z = copy.deepcopy(X)
-            E = copy.deepcopy(X)
+            #x = numpy.zeros(size_x)
+            #y = numpy.zeros(size_y)
+            #X, Y = pylab.meshgrid(x, y)
+            #Z = copy.deepcopy(X)
+            #E = copy.deepcopy(X)
             itot = 0
             i_x = 0
             i_y = 0
@@ -124,6 +152,10 @@ class Reader:
             for i_x in range(size_x):
                 theta = (i_x-center_x+1)*pixel / distance / 100.0
                 qx = 4.0*math.pi/wavelength * math.sin(theta/2.0)
+                
+                if has_converter == True and output.Q_unit != '1/A':
+                    qx = data_conv_q(qx, units=output.Q_unit)
+                
                 x_vals.append(qx)
                 if xmin==None or qx<xmin:
                     xmin = qx
@@ -135,18 +167,24 @@ class Reader:
             for i_y in range(size_y):
                 theta = (i_y-center_y+1)*pixel / distance / 100.0
                 qy = 4.0*math.pi/wavelength * math.sin(theta/2.0)
+                
+                if has_converter == True and output.Q_unit != '1/A':
+                    qy = data_conv_q(qy, units=output.Q_unit)
+                
                 y_vals.append(qy)
                 if ymin==None or qy<ymin:
                     ymin = qy
                 if ymax==None or qy>ymax:
                     ymax = qy
             
+            # Store the data in the 2D array
             for i_pt in range(len(data)):
-                val = data[i_pt]
                 try:
-                    value = float(val)
+                    value = float(data[i_pt])
                 except:
-                    continue
+                    # For version 1.0, the data were still
+                    # stored as strings at this point.
+                    logging.info("Skipping entry (v1.0):%s,%s" %(str(data[i_pt]), sys.exc_value))
                 
                 # Get bin number
                 if math.fmod(itot, size_x)==0:
@@ -155,37 +193,73 @@ class Reader:
                 else:
                     i_x += 1
                     
-                Z[size_y-1-i_y][i_x] = value
+                output.data[size_y-1-i_y][i_x] = value
                 if fversion>1.0:
-                    E[size_y-1-i_y][i_x] = error[i_pt]
+                    output.err_data[size_y-1-i_y][i_x] = error[i_pt]
                 
                 itot += 1
-            from readInfo import ReaderInfo   
-            output = ReaderInfo()
-            output.wavelength = wavelength
-            output.xbins      = size_x
-            output.ybins      = size_y
-            output.center_x   = center_x
-            output.center_y   = center_y
-            # Store the distance in [mm]
-            output.distance   = distance*1000.0
-            output.x_vals     = x_vals
-            output.y_vals     = y_vals
-            output.xmin       = xmin
-            output.xmax       = xmax
-            output.ymin       = ymin
-            output.ymax       = ymax
-            output.pixel_size = pixel
-            output.image      = Z
-            output.x          = x_vals
-            output.y          = y_vals
-            output.type       = "2D "
+                
+            # Store all data ######################################
+            # Store wavelength
+            if has_converter==True and output.source.wavelength_unit != 'A':
+                conv = Converter('A')
+                wavelength = conv(wavelength, units=output.source.wavelength_unit)
+            output.source.wavelength = wavelength
+                
+            # Store distance
+            if has_converter==True and detector.distance_unit != 'm':
+                conv = Converter('m')
+                distance = conv(distance, units=detector.distance_unit)
+            detector.distance = distance
+            
+            # Store pixel size
+            if has_converter==True and detector.pixel_size_unit != 'mm':
+                conv = Converter('mm')
+                pixel = conv(pixel, units=detector.pixel_size_unit)
+            detector.pixel_size.x = pixel
+            detector.pixel_size.y = pixel
+
+            # Store beam center in distance units
+            detector.beam_center.x = center_x*pixel
+            detector.beam_center.y = center_y*pixel
+            
+            # Store limits of the image (2D array)
+            if has_converter == True and output.Q_unit != '1/A':
+                xmin = data_conv_q(xmin, units=output.Q_unit)
+                xmax = data_conv_q(xmax, units=output.Q_unit)
+                ymin = data_conv_q(ymin, units=output.Q_unit)
+                ymax = data_conv_q(ymax, units=output.Q_unit)
+            output.xmin = xmin
+            output.xmax = xmax
+            output.ymin = ymin
+            output.ymax = ymax
+            
+            # Store x and y axis bin centers
+            output.x_bins     = x_vals
+            output.y_bins     = y_vals
+           
+            # Units
+            if data_conv_q is not None:
+                output.xaxis("\\rm{Q}", output.Q_unit)
+                output.yaxis("\\rm{Q}", output.Q_unit)
+            else:
+                output.xaxis("\\rm{Q}", 'A^{-1}')
+                output.yaxis("\\rm{Q}", 'A^{-1}')
+                
+            if data_conv_i is not None:
+                output.zaxis("\\{I(Q)}", output.I_unit)
+            else:
+                output.zaxis("\\rm{I(Q)}","cm^{-1}")
            
             if not fversion>=1.0:
-                #output.error  = E
                 raise ValueError,"Danse_reader can't read this file %s"%filename
             else:
                 logging.info("Danse_reader Reading %s \n"%filename)
                 return output
         
         return None
+
+if __name__ == "__main__": 
+    reader = Reader()
+    print reader.read("../test/MP_New.sans")
+    

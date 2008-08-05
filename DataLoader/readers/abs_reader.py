@@ -10,8 +10,14 @@ copyright 2008, University of Tennessee
 
 import numpy
 import os
-from DataLoader.data_info import Data1D
+from DataLoader.data_info import Data1D, Detector
 
+has_converter = True
+try:
+    from data_util.nxsunit import Converter
+except:
+    has_converter = False
+    
 class Reader:
     """
         Class to load IGOR reduced .ABS files
@@ -44,11 +50,26 @@ class Reader:
                 y  = numpy.zeros(0)
                 dy = numpy.zeros(0)
                 output = Data1D(x, y, dy=dy)
+                detector = Detector()
+                output.detector.append(detector)
                 self.filename = output.filename = basename
                 
                 is_info = False
                 is_center = False
                 is_data_started = False
+                
+                data_conv_q = None
+                data_conv_i = None
+                
+                if has_converter == True and output.x_unit != '1/A':
+                    data_conv_q = Converter('1/A')
+                    # Test it
+                    data_conv_q(1.0, output.x_unit)
+                    
+                if has_converter == True and output.y_unit != '1/cm':
+                    data_conv_i = Converter('1/cm')
+                    # Test it
+                    data_conv_i(1.0, output.y_unit)
                 
                 for line in lines:
                     
@@ -59,26 +80,41 @@ class Reader:
                         
                         # Wavelength in Angstrom
                         try:
-                            output.source.wavelength = float(line_toks[1])
+                            value = float(line_toks[1])
+                            if has_converter==True and output.source.wavelength_unit != 'A':
+                                conv = Converter('A')
+                                output.source.wavelength = conv(value, units=output.source.wavelength_unit)
+                            else:
+                                output.source.wavelength = value
                         except:
                             raise ValueError,"IgorReader: can't read this file, missing wavelength"
                         
                         # Distance in meters
                         try:
-                            output.detector.distance = float(line_toks[3])*1000.0
+                            value = float(line_toks[3])
+                            if has_converter==True and detector.distance_unit != 'm':
+                                conv = Converter('m')
+                                detector.distance = conv(value, units=detector.distance_unit)
+                            else:
+                                detector.distance = value
                         except:
                             raise ValueError,"IgorReader: can't read this file, missing distance"
                         
-                        # Transmission
+                        # Transmission 
                         try:
                             output.sample.transmission = float(line_toks[4])
                         except:
                             # Transmission is not a mandatory entry
                             pass
                     
-                        # Thickness
+                        # Thickness in mm
                         try:
-                            output.sample.thickness = float(line_toks[5])
+                            value = float(line_toks[5])
+                            if has_converter==True and output.sample.thickness_unit != 'mm':
+                                conv = Converter('mm')
+                                output.sample.thickness = conv(value, units=output.sample.thickness_unit)
+                            else:
+                                output.sample.thickness = value
                         except:
                             # Thickness is not a mandatory entry
                             pass
@@ -94,12 +130,29 @@ class Reader:
                         # Center in bin number
                         center_x = float(line_toks[0])
                         center_y = float(line_toks[1])
-                        output.detector.beam_center.x = center_x
-                        output.detector.beam_center.y = center_y
+                        
+                        # Bin size
+                        if has_converter==True and detector.pixel_size_unit != 'mm':
+                            conv = Converter('mm')
+                            detector.pixel_size.x = conv(5.0, units=detector.pixel_size_unit)
+                            detector.pixel_size.y = conv(5.0, units=detector.pixel_size_unit)
+                        else:
+                            detector.pixel_size.x = 5.0
+                            detector.pixel_size.y = 5.0
+                        
+                        # Store beam center in distance units
+                        # Det 640 x 640 mm
+                        if has_converter==True and detector.beam_center_unit != 'mm':
+                            conv = Converter('mm')
+                            detector.beam_center.x = conv(center_x*5.0, units=detector.beam_center_unit)
+                            detector.beam_center.y = conv(center_y*5.0, units=detector.beam_center_unit)
+                        else:
+                            detector.beam_center.x = center_x*5.0
+                            detector.beam_center.y = center_y*5.0
                         
                         # Detector type
                         try:
-                            output.detector.name = line_toks[7]
+                            detector.name = line_toks[7]
                         except:
                             # Detector name is not a mandatory entry
                             pass
@@ -115,6 +168,13 @@ class Reader:
                             _x  = float(toks[0])
                             _y  = float(toks[1]) 
                             _dy = float(toks[2])
+                            
+                            if data_conv_q is not None:
+                                _x = data_conv_q(_x, units=output.x_unit)
+                                
+                            if data_conv_i is not None:
+                                _y = data_conv_i(_y, units=output.y_unit)
+                                _dy = data_conv_i(_dy, units=output.y_unit)
                            
                             x  = numpy.append(x,   _x) 
                             y  = numpy.append(y,   _y)
@@ -141,8 +201,14 @@ class Reader:
                 output.x = x
                 output.y = y
                 output.dy = dy
-                output.xaxis("\\rm{Q}", 'A^{-1}')
-                output.yaxis("\\rm{I(Q)}","cm^{-1}")
+                if data_conv_q is not None:
+                    output.xaxis("\\rm{Q}", output.x_unit)
+                else:
+                    output.xaxis("\\rm{Q}", 'A^{-1}')
+                if data_conv_i is not None:
+                    output.yaxis("\\{I(Q)}", output.y_unit)
+                else:
+                    output.yaxis("\\rm{I(Q)}","cm^{-1}")
                 
                 return output
         else:
