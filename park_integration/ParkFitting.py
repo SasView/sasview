@@ -141,6 +141,7 @@ class ParkFit(FitEngine):
         """
         self.fitArrangeList={}
         
+        
     def createProblem(self):
         """
         Extract sansmodel and sansdata from self.FitArrangelist ={Uid:FitArrange}
@@ -150,7 +151,7 @@ class ParkFit(FitEngine):
         print "ParkFitting: In createproblem"
         mylist=[]
         listmodel=[]
-        
+        i=0
         for k,value in self.fitArrangeList.iteritems():
             sansmodel=value.get_model()
             #wrap sans model
@@ -158,10 +159,12 @@ class ParkFit(FitEngine):
             #print "ParkFitting: createproblem: just create a model",parkmodel.parameterset
             for p in parkmodel.parameterset:
                 #self.param_list.append(p._getname())
-                if p.isfixed():
-                #if p.isfixed() and p._getname()in self.paramList:
+                #if p.isfixed():
+                #print 'parameters',p.name
+                #print "self.paramList",self.paramList
+                if p.isfixed() and p._getname()in self.paramList:
                     p.set([-numpy.inf,numpy.inf])
-            
+            i+=1    
             Ldata=value.get_data()
             x,y,dy=self._concatenateData(Ldata)
             #wrap sansdata
