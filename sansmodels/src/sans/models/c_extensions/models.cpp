@@ -11,7 +11,7 @@ extern "C" {
 	#include "libCylinder.h"
 }
 
-Cylinder :: Cylinder() {
+Cylindser :: Cylinder() {
 	scale = 1.0;
 	radius = 10.0;
 	length = 400.0;
