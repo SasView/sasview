@@ -52,7 +52,7 @@ class Reader:
                 output = Data1D(x, y, dy=dy)
                 detector = Detector()
                 output.detector.append(detector)
-                self.filename = output.filename = basename
+                output.filename = basename
                 
                 is_info = False
                 is_center = False
@@ -110,8 +110,8 @@ class Reader:
                         # Thickness in mm
                         try:
                             value = float(line_toks[5])
-                            if has_converter==True and output.sample.thickness_unit != 'mm':
-                                conv = Converter('mm')
+                            if has_converter==True and output.sample.thickness_unit != 'cm':
+                                conv = Converter('cm')
                                 output.sample.thickness = conv(value, units=output.sample.thickness_unit)
                             else:
                                 output.sample.thickness = value

@@ -13,7 +13,11 @@ This software was developed by the University of Tennessee as part of the
 Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
 project funded by the US National Science Foundation. 
 
-See the license text in license.txt
+If you use DANSE applications to do scientific research that leads to 
+publication, we ask that you acknowledge the use of the software with the 
+following sentence:
+
+"This work benefited from DANSE software developed under NSF award DMR-0520547." 
 
 copyright 2008, University of Tennessee
 """
@@ -306,6 +310,35 @@ class DataInfo:
     ## Loading errors
     errors = []
             
+    def __init__(self):
+        """
+            Initialization
+        """
+        ## Title 
+        self.title      = ''
+        ## Run number
+        self.run        = None
+        ## File name
+        self.filename   = ''
+        ## Notes
+        self.notes      = []
+        ## Processes (Action on the data)
+        self.process    = []
+        ## Instrument name
+        self.instrument = ''
+        ## Detector information
+        self.detector   = []
+        ## Sample information
+        self.sample     = Sample()
+        ## Source information
+        self.source     = Source()
+        ## Collimation information
+        self.collimation = []
+        ## Additional meta-data
+        self.meta_data  = {}
+        ## Loading errors
+        self.errors = []        
+        
     def __str__(self):
         """
             Nice printout
@@ -428,7 +461,11 @@ class Data1D(plottable_1D, DataInfo):
     y_unit = '1/cm'
     
     def __init__(self, x, y, dx=None, dy=None):
+        DataInfo.__init__(self)
         plottable_1D.__init__(self, x, y, dx, dy)
+        if len(self.detector)>0:
+            raise RuntimeError, "Data1D: Detector bank already filled at init"
+        
         
     def __str__(self):
         """
@@ -552,7 +589,10 @@ class Data2D(plottable_2D, DataInfo):
     
     
     def __init__(self, data=None, err_data=None):
+        DataInfo.__init__(self)
         plottable_2D.__init__(self, data, err_data)
+        if len(self.detector)>0:
+            raise RuntimeError, "Data2D: Detector bank already filled at init"
 
     def __str__(self):
         _str =  "%s\n" % DataInfo.__str__(self)

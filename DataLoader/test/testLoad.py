@@ -106,7 +106,7 @@ class testLoader(unittest.TestCase):
         #tested good file.sans
         output=self.L.load('MP_New.sans')
         
-        self.assertEqual(output.wavelength,7.5)
+        self.assertEqual(output.source.wavelength,7.5)
         
         #tested corrupted file.sans
         try: self.L.load('P_New.sans')

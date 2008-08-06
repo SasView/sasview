@@ -2,6 +2,20 @@
     DANSE/SANS file reader
 """
 
+"""
+This software was developed by the University of Tennessee as part of the
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+project funded by the US National Science Foundation. 
+
+If you use DANSE applications to do scientific research that leads to 
+publication, we ask that you acknowledge the use of the software with the 
+following sentence:
+
+"This work benefited from DANSE software developed under NSF award DMR-0520547." 
+
+copyright 2008, University of Tennessee
+"""
+
 import math
 import os
 import copy
@@ -23,7 +37,7 @@ class Reader:
     ## File type
     type = ["DANSE files (*.sans)|*.sans"]
     ## Extension
-    ext  = ['.sans']    
+    ext  = ['.sans', '.SANS']    
         
     def read(self, filename=None):
         """
@@ -139,15 +153,6 @@ class Reader:
             xmin = None
             xmax = None
             
-            #x = numpy.zeros(size_x)
-            #y = numpy.zeros(size_y)
-            #X, Y = pylab.meshgrid(x, y)
-            #Z = copy.deepcopy(X)
-            #E = copy.deepcopy(X)
-            itot = 0
-            i_x = 0
-            i_y = 0
-            
             # Qx and Qy vectors
             for i_x in range(size_x):
                 theta = (i_x-center_x+1)*pixel / distance / 100.0
@@ -178,6 +183,10 @@ class Reader:
                     ymax = qy
             
             # Store the data in the 2D array
+            itot = 0
+            i_x  = 0
+            i_y  = -1
+            
             for i_pt in range(len(data)):
                 try:
                     value = float(data[i_pt])
@@ -187,17 +196,18 @@ class Reader:
                     logging.info("Skipping entry (v1.0):%s,%s" %(str(data[i_pt]), sys.exc_value))
                 
                 # Get bin number
-                if math.fmod(itot, size_x)==0:
+                if math.fmod(i_pt, size_x)==0:
                     i_x = 0
                     i_y += 1
                 else:
                     i_x += 1
                     
-                output.data[size_y-1-i_y][i_x] = value
+                output.data[i_y][i_x] = value       
+                #output.data[size_y-1-i_y][i_x] = value
                 if fversion>1.0:
-                    output.err_data[size_y-1-i_y][i_x] = error[i_pt]
+                    output.err_data[i_y][i_x] = error[i_pt]
+                    #output.err_data[size_y-1-i_y][i_x] = error[i_pt]
                 
-                itot += 1
                 
             # Store all data ######################################
             # Store wavelength
