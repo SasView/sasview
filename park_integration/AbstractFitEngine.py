@@ -45,7 +45,7 @@ class FitEngine:
             pars={parameter's name: parameter's value}
             
         """
-        print "fitting parmater",pars
+        print "AbstractFitEngine:  fitting parmater",pars
         temp=[]
         if pars !={}:
             self.parameters=[]
@@ -59,7 +59,7 @@ class FitEngine:
                     self.parameters.append(param)
                     temp.append(key)
             self.paramList.append(temp)
-            print "self.paramList2", self.paramList
+            print "AbstractFitEngine: self.paramList2", self.paramList
             #A fitArrange is already created but contains dList only at Uid
             if self.fitArrangeList.has_key(Uid):
                 self.fitArrangeList[Uid].set_model(model)
