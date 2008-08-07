@@ -124,6 +124,19 @@ class View1DPanel(PlotPanel):
             position = "x: %8.3g    y: %8.3g" % (event.xdata, event.ydata)
             wx.PostEvent(self.parent, StatusEvent(status=position))
 
+    def _onRemove(self, event):
+        """
+        """
+        if not self.graph.selected_plottable == None:
+            print self.graph.selected_plottable
+            
+            
+            self.graph.delete(self.plots[self.graph.selected_plottable])
+            del self.plots[self.graph.selected_plottable]
+            self.graph.render(self)
+            self.subplot.figure.canvas.draw_idle()    
+            
+            
 
     def onContextMenu(self, event):
         """
@@ -145,6 +158,16 @@ class View1DPanel(PlotPanel):
             slicerpop.Append(id, "&Save %s points" % name)
             self.action_ids[str(id)] = plot
             wx.EVT_MENU(self, id, self._onSave)
+                
+            # Option to delete plottable
+            id = wx.NewId()
+            slicerpop.Append(id, "Remove %s curve" % name)
+            self.action_ids[str(id)] = plot
+            wx.EVT_MENU(self, id, self._onRemove)
+            
+            # Option to hide
+            #TODO: implement functionality to hide a plottable (legend click)
+            slicerpop.AppendSeparator()
                 
         # Various plot options
         id = wx.NewId()
