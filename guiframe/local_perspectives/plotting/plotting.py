@@ -78,6 +78,12 @@ class View1DPanel(PlotPanel):
             @param event: data event
         """
         #TODO: Check for existence of plot attribute
+
+        # Check whether this is a replot. If we ask for a replot
+        # and the plottable no longer exists, ignore the event.
+        if hasattr(event, "update") and event.update==True \
+            and event.plot.name not in self.plots.keys():
+            return
         
         if hasattr(event, "reset"):
             self._reset()
