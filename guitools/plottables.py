@@ -857,7 +857,8 @@ class Data1D(Plottable):
         map = {}
         for item in collection:
             #map[item] = label(item, collection)
-            map[item] = r"$\rm{%s}$" % item.name
+            #map[item] = r"$\rm{%s}$" % item.name
+            map[item] = item.name
         return map
     
 class Theory1D(Plottable):
@@ -896,7 +897,8 @@ class Theory1D(Plottable):
         map = {}
         for item in collection:
             #map[item] = label(item, collection)
-            map[item] = r"$\rm{%s}$" % item.name
+            #map[item] = r"$\rm{%s}$" % item.name
+            map[item] = item.name
         return map
    
    

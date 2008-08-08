@@ -594,9 +594,7 @@ class PlotPanel(wx.Panel):
         """Commit the plot after all objects are drawn"""
         # TODO: this is when the backing store should be swapped in.
         from matplotlib.font_manager import FontProperties
-        self.subplot.legend(prop=FontProperties(size=10))
-        #self.subplot.legend()
-        pass
+        self.subplot.legend(prop=FontProperties(size=10), handletextsep=.05)
 
     def xaxis(self,label,units):
         """xaxis label and units.
