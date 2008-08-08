@@ -11,11 +11,11 @@ from sans.guicomm.events import NewPlotEvent, StatusEvent
 import math, numpy
 from sans.pr.invertor import Invertor
 
-PR_FIT_LABEL       = "P_{fit}(r)"
-PR_LOADED_LABEL    = "P_{loaded}(r)"
-IQ_DATA_LABEL      = "I_{obs}(q)"
-IQ_FIT_LABEL       = "I_{fit}(q)"
-IQ_SMEARED_LABEL   = "I_{smeared}(q)"
+PR_FIT_LABEL       = r"$P_{fit}(r)$"
+PR_LOADED_LABEL    = r"$P_{loaded}(r)$"
+IQ_DATA_LABEL      = r"$I_{obs}(q)$"
+IQ_FIT_LABEL       = r"$I_{fit}(q)$"
+IQ_SMEARED_LABEL   = r"$I_{smeared}(q)$"
 
 import wx.lib
 (NewPrFileEvent, EVT_PR_FILE) = wx.lib.newevent.NewEvent()
@@ -78,6 +78,10 @@ class Plugin:
         self.standalone = True
         self._normalize_output = False
         self._scale_output_unity = False
+        
+        ## List of added P(r) plots
+        self._added_plots = {}
+        self._default_Iq  = {}
         
         # Log startup
         logging.info("Pr(r) plug-in started")
@@ -317,7 +321,7 @@ class Plugin:
             new_plot = Theory1D(x, y)
         else:
             new_plot = Data1D(x, y, dy=dy)
-        new_plot.name = "P_{fit}(r)"
+        new_plot.name = PR_FIT_LABEL
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
             
@@ -515,9 +519,21 @@ class Plugin:
         self._scale_output_unity = False
         self.show_pr(self._last_out, self._last_pr, self._last_cov)
         
+        # Now replot the original added data
+        for plot in self._added_plots:
+            self._added_plots[plot].y = numpy.copy(self._default_Iq[plot])
+            wx.PostEvent(self.parent, NewPlotEvent(plot=self._added_plots[plot], 
+                                                   title=self._added_plots[plot].name,
+                                                   update=True))        
+        
+        # Need the update flag in the NewPlotEvent to protect against
+        # the plot no longer being there...
+        
     def _on_normalize(self, evt):
         """
-            Switch normalization ON/OFF
+            Normalize the area under the P(r) curve to 1.
+            This operation is done for all displayed plots.
+            
             @param evt: Menu event
         """
         self._normalize_output = True
@@ -525,15 +541,50 @@ class Plugin:
             
         self.show_pr(self._last_out, self._last_pr, self._last_cov)
         
+        # Now scale the added plots too
+        for plot in self._added_plots:
+            sum = numpy.sum(self._added_plots[plot].y)
+            npts = len(self._added_plots[plot].x)
+            sum *= self._added_plots[plot].x[npts-1]/npts
+            y = self._added_plots[plot].y/sum
+            
+            new_plot = Theory1D(self._added_plots[plot].x, y)
+            new_plot.name = self._added_plots[plot].name
+            new_plot.xaxis("\\rm{r}", 'A')
+            new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
+            
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, update=True,
+                                                   title=self._added_plots[plot].name))
+                
+        
+        
     def _on_scale_unity(self, evt):
         """
-            Switch normalization ON/OFF
+            Scale the maximum P(r) value on each displayed plot to 1.
+            
             @param evt: Menu event
         """
         self._scale_output_unity = True
         self._normalize_output = False
             
         self.show_pr(self._last_out, self._last_pr, self._last_cov)
+        
+        # Now scale the added plots too
+        for plot in self._added_plots:
+            _max = 0
+            for y in self._added_plots[plot].y:
+                if y>_max: 
+                    _max = y
+            y = self._added_plots[plot].y/_max
+            
+            new_plot = Theory1D(self._added_plots[plot].x, y)
+            new_plot.name = self._added_plots[plot].name
+            new_plot.xaxis("\\rm{r}", 'A')
+            new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
+            
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, update=True,
+                                                   title=self._added_plots[plot].name))        
+        
         
     def _on_add_data(self, evt):
         """
@@ -546,13 +597,19 @@ class Plugin:
         
         x, y, err = self.parent.load_ascii_1D(path)
         
+        filename = os.path.basename(path)
+        
         #new_plot = Data1D(x, y, dy=err)
         new_plot = Theory1D(x, y)
-        new_plot.name = "P_{loaded}(r)"
+        new_plot.name = filename
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
             
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="P(r) fit"))
+        # Store a ref to the plottable for later use
+        self._added_plots[filename] = new_plot
+        self._default_Iq[filename]  = numpy.copy(y)
+        
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=filename))
         
         
 
@@ -652,7 +709,7 @@ class Plugin:
         
             # Make a plot of I(q) data
             new_plot = Data1D(self.pr.x, self.pr.y, dy=self.pr.err)
-            new_plot.name = "I_{obs}(q)"
+            new_plot.name = IQ_DATA_LABEL
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
             #new_plot.group_id = "test group"
@@ -688,7 +745,7 @@ class Plugin:
             new_plot = Theory1D(self.pr.x, self.pr.y)
         else:
             new_plot = Data1D(self.pr.x, self.pr.y, dy=self.pr.err)
-        new_plot.name = "I_{obs}(q)"
+        new_plot.name = IQ_DATA_LABEL
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.interactive = True
