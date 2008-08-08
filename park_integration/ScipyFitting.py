@@ -54,6 +54,10 @@ class ScipyFit(FitEngine):
             @return out: list of parameter with the best value found during fitting
             @return cov: Covariance matrix
         """
+        # Protect against simultanous fitting attempts
+        if len(self.fitArrangeList)>1: 
+            raise RuntimeError, "Scipy can't fit more than a single fit problem at a time."
+        
         # fitproblem contains first fitArrange object(one model and a list of data)
         fitproblem=self.fitArrangeList.values()[0]
         listdata=[]
@@ -122,7 +126,7 @@ def fitHelper(model, pars, x, y, err_y ,qmin=None, qmax=None):
         
     p = [param() for param in pars]
     out, cov_x, info, mesg, success = optimize.leastsq(f, p, full_output=1, warning=True)
-    print info, mesg, success
+    #print info, mesg, success
     # Calculate chi squared
     if len(pars)>1:
         chisqr = chi2(out)
