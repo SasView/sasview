@@ -1,6 +1,7 @@
 
 class FitEngine:
-    
+    def __init__(self):
+        self.paramList=[]
     def _concatenateData(self, listdata=[]):
         """  
             _concatenateData method concatenates each fields of all data contains ins listdata.
@@ -28,7 +29,7 @@ class FitEngine:
                     if data.dy is not None and len(data.dy)==len(data.y):   
                         dytemp.append(data.dy[i])
                     else:
-                        raise RuntimeError, "Fit._concatenateData: y-errors missinge"
+                        raise RuntimeError, "Fit._concatenateData: y-errors missing"
             return xtemp, ytemp,dytemp
     
     def set_model(self,model,name,Uid,pars={}):
@@ -46,10 +47,10 @@ class FitEngine:
             
         """
         print "AbstractFitEngine:  fitting parmater",pars
-        temp=[]
+       
         if pars !={}:
             self.parameters=[]
-            self.paramList=[]
+            
             if model==None:
                 raise ValueError, "Cannot set parameters for empty model"
             else:
@@ -57,8 +58,8 @@ class FitEngine:
                 for key, value in pars.iteritems():
                     param = Parameter(model, key, value)
                     self.parameters.append(param)
-                    temp.append(key)
-            self.paramList.append(temp)
+                   
+                    self.paramList.append(key)
             print "AbstractFitEngine: self.paramList2", self.paramList
             #A fitArrange is already created but contains dList only at Uid
             if self.fitArrangeList.has_key(Uid):

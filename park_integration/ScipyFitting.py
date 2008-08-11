@@ -40,6 +40,7 @@ class ScipyFit(FitEngine):
             with Uid as keys
         """
         self.fitArrangeList={}
+        self.paramList=[]
         
     def fit(self,qmin=None, qmax=None):
         """
@@ -63,21 +64,15 @@ class ScipyFit(FitEngine):
         listdata=[]
         model = fitproblem.get_model()
         listdata = fitproblem.get_data()
-        
-       
         # Concatenate dList set (contains one or more data)before fitting
         xtemp,ytemp,dytemp=self._concatenateData( listdata)
-        
-        #print "dytemp",dytemp
         #Assign a fit range is not boundaries were given
         if qmin==None:
             qmin= min(xtemp)
         if qmax==None:
             qmax= max(xtemp) 
-        
         #perform the fit 
         chisqr, out, cov = fitHelper(model,self.parameters, xtemp,ytemp, dytemp ,qmin,qmax)
-        
         return chisqr, out, cov
     
 
@@ -107,7 +102,7 @@ def fitHelper(model, pars, x, y, err_y ,qmin=None, qmax=None):
         
         residuals = []
         for j in range(len(x)):
-            if x[j]>qmin and x[j]<qmax:
+            if x[j] >= qmin and x[j] <= qmax:
                 residuals.append( ( y[j] - model.runXY(x[j]) ) / err_y[j] )
             
         return residuals

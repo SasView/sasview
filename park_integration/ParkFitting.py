@@ -140,7 +140,7 @@ class ParkFit(FitEngine):
             with Uid as keys
         """
         self.fitArrangeList={}
-        
+        self.paramList=[]
         
     def createProblem(self):
         """
@@ -203,19 +203,19 @@ class ParkFit(FitEngine):
         localfit = FitSimplex()
         localfit.ftol = 1e-8
         fitter = FitMC(localfit=localfit)
-        try:
-            
-            result = fit.fit(self.problem,
-                         fitter=fitter,
-                         handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
-          
+        
+        result = fit.fit(self.problem,
+                     fitter=fitter,
+                     handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
+        print "ParkFitting: result",result
+        if result !=None:
             #for p in result.parameters:
             #    print "fit in park fitting", p.name, p.value,p.stderr
             return result.fitness,result.pvec,result.cov,result
-           
-        except :
-            raise
-            return
+        else:
+            raise ValueError, "SVD did not converge"
+            
+        
         
     
    
