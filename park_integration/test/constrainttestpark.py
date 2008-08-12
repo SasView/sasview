@@ -33,15 +33,18 @@ class testFitModule(unittest.TestCase):
         model2  = LineModel()
         
         #Do the fit
-        
-        fitter.set_model(model1,"M1",1, {'A':1,'B':2})
+        model1.setParam( 'A', 1)
+        model1.setParam( 'B', 2)
+        fitter.set_model(model1,"M1",1, ['A','B'])
         fitter.set_data(data1,1)
-       
-        fitter.set_model(model2,"M2",2, {'A':'M1.A','B':'M1.B'})
+        
+        model2.setParam( 'A', 'M1.A')
+        model2.setParam( 'B','M1.B')
+        fitter.set_model(model2,"M2",2, ['A','B'])
         fitter.set_data(data2,2)
     
         
-        chisqr2, out2, cov2= fitter.fit()
+        chisqr2, out2, cov2,result= fitter.fit()
         print "chisqr2",chisqr2
         print "out2", out2
         print " cov2", cov2
@@ -76,13 +79,13 @@ class testFitModule(unittest.TestCase):
        
         
         #Do the fit
-        
-        fitter.set_model(model1,"M1",1, {'A':1})
+        model1.setParam( 'A', 1)
+        fitter.set_model(model1,"M1",1, ['A'])
         fitter.set_data(data1,1)
        
      
         
-        chisqr2, out2, cov2 = fitter.fit()
+        chisqr2, out2, cov2,result = fitter.fit()
         print "chisqr2",chisqr2
         print "out2", out2
         print " cov2", cov2

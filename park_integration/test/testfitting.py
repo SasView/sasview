@@ -71,8 +71,10 @@ class testFitModule(unittest.TestCase):
         model2  = LineModel()
         
         #Do the fit SCIPY
+        model1.setParam( 'A', 2)
+        model1.setParam( 'B', 1)
         fitter.set_data(data1,1)
-        fitter.set_model(model1,"M1",1,{'A':2,'B':1})
+        fitter.set_model(model1,"M1",1,['A','B'])
         
         chisqr1, out1, cov1=fitter.fit()
         """ testing SCIPy results"""
@@ -84,9 +86,11 @@ class testFitModule(unittest.TestCase):
         
         #Do the fit
         fitter.set_data(data1,1)
-        fitter.set_model(model2,"M1",1,{'A':2,'B':1})
+        model2.setParam( 'A', 2)
+        model2.setParam( 'B', 1)
+        fitter.set_model(model2,"M1",1,['A','B'])
        
-        chisqr2, out2, cov2=fitter.fit(None,None)
+        chisqr2, out2, cov2,result=fitter.fit(None,None)
         
         self.assert_(math.fabs(out2[1]-2.5)/math.sqrt(cov2[1][1]) < 2)
         self.assert_(math.fabs(out2[0]-4.0)/math.sqrt(cov2[0][0]) < 2)

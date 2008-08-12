@@ -39,13 +39,17 @@ class testFitModule(unittest.TestCase):
         model2  = LineModel()
         
         #Do the fit
-        fitter.set_model(model1,"M1",1, {'A':2.5,'B':4})
+        model1.setParam( 'A', 2.5)
+        model1.setParam( 'B', 4)
+        fitter.set_model(model1,"M1",1, ['A','B'])
         fitter.set_data(data1,1)
         
-        fitter.set_model(model2,"M2",2, {'A':2,'B':3})
+        model1.setParam( 'A', 2)
+        model1.setParam( 'B', 3)
+        fitter.set_model(model2,"M2",2, ['A','B'])
         fitter.set_data(data2,2)
         
-        chisqr1, out1, cov1= fitter.fit()
+        chisqr1, out1, cov1,result= fitter.fit()
         
         self.assert_(math.fabs(out1[1]-2.5)/math.sqrt(cov1[1][1]) < 2)
         print math.fabs(out1[0]-4.0)/math.sqrt(cov1[0][0])
@@ -59,7 +63,7 @@ class testFitModule(unittest.TestCase):
         
         
         fitter.set_data(data3,1)
-        chisqr2, out2, cov2= fitter.fit(None,None)
+        chisqr2, out2, cov2, result= fitter.fit(None,None)
         self.assert_(math.fabs(out2[1]-2.5)/math.sqrt(cov2[1][1]) < 2)
         print math.fabs(out2[0]-4.0)/math.sqrt(cov2[0][0])
         #self.assert_(math.fabs(out1[0]-4.0)/math.sqrt(cov1[0][0]) < 2)
@@ -97,3 +101,4 @@ class testFitModule(unittest.TestCase):
         self.assertAlmostEquals(cov2[0][0],cov3[0][0])
         print chisqr1,chisqr2,chisqr3
         #self.assertAlmostEquals(chisqr1,chisqr2)
+        self.assert_(chisqr1)

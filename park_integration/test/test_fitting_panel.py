@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.DEBUG,
                     filemode='w')
 class testFitModule(unittest.TestCase):
     def test0(self):
-        """ test fitting for two set of data  and one model B constraint"""
+        """ test fitting for two set of data  and 2 models no constraint"""
         from sans.fit.Loader import Load
         load= Load()
         #Load the first set of data
@@ -37,22 +37,25 @@ class testFitModule(unittest.TestCase):
         model2  = LineModel()
         
         #Do the fit
-        
-        fitter.set_model(model1,"M1",1, {'A':1,'B':1})
+        model1.setParam( 'A', 1)
+        model1.setParam( 'B', 2)
+        fitter.set_model(model1,"M1",1, ['A','B'])
         fitter.set_data(data1,1)
-       
-        fitter.set_model(model2,"M2",2, {'A':1,'B':1})
+        
+        model2.setParam( 'A', 1)
+        model2.setParam( 'B', 1)
+        fitter.set_model(model2,"M2",2, ['A','B'])
         fitter.set_data(data2,2)
     
         
         chisqr1, out1, cov1,result= fitter.fit()
-        self.assert_(chisqr1)
         print "chisqr1",chisqr1
         print "out1", out1
         print " cov1", cov1
+        self.assert_(chisqr1)
         
     def test01(self):
-        """ test fitting for two set of data  and one model B constraint"""
+        """ test fitting for two set of data  and 2 models and 2 constraints set on on model"""
         from sans.fit.Loader import Load
         load= Load()
         #Load the first set of data
@@ -76,11 +79,14 @@ class testFitModule(unittest.TestCase):
         model2  = LineModel()
         
         #Do the fit
-        
-        fitter.set_model(model1,"M1",1, {'A':1,'B':1})
+        model1.setParam( 'A', 1)
+        model1.setParam( 'B', 1)
+        fitter.set_model(model1,"M1",1, ['A','B'])
         fitter.set_data(data1,1)
-       
-        fitter.set_model(model2,"M2",2, {'A':'M1.A','B':'M1.B'})
+        
+        model2.setParam( 'A','M1.A')
+        model2.setParam( 'B', 'M1.B')
+        fitter.set_model(model2,"M2",2, ['A','B'])
         fitter.set_data(data2,2)
     
         
@@ -93,7 +99,7 @@ class testFitModule(unittest.TestCase):
     
     
     def test1(self):
-        """ test fitting for two set of data  and one model 1 constraint"""
+        """ test fitting for two set of data 2 model on constraint set on 1 model"""
         from sans.fit.Loader import Load
         load= Load()
         #Load the first set of data
@@ -117,11 +123,14 @@ class testFitModule(unittest.TestCase):
         model2  = LineModel()
         
         #Do the fit
-        
-        fitter.set_model(model1,"M1",1, {'A':1,'B':1})
+        model1.setParam( 'A',1)
+        model1.setParam( 'B',1)
+        fitter.set_model(model1,"M1",1, ['A','B'])
         fitter.set_data(data1,1)
-       
-        fitter.set_model(model2,"M2",2, {'A':'M1.A','B':1})
+        
+        model2.setParam( 'A','M1.A')
+        model2.setParam( 'B', 1)
+        fitter.set_model(model2,"M2",2, ['A','B'])
         fitter.set_data(data2,2)
     
         
@@ -133,7 +142,7 @@ class testFitModule(unittest.TestCase):
       
     
     def test2(self):
-        """ test fitting for two set of data  and one model no constraint"""
+        """ test fitting for two data 2 model not equal nombre of parameters fit"""
         from sans.fit.Loader import Load
         load= Load()
         #Load the first set of data
@@ -157,11 +166,14 @@ class testFitModule(unittest.TestCase):
         model2  = LineModel()
         
         #Do the fit
-        
-        fitter.set_model(model1,"M1",1, {'A':1,'B':1})
+        model1.setParam( 'A',1)
+        model1.setParam( 'B',1)
+        fitter.set_model(model1,"M1",1, ['A','B'])
         fitter.set_data(data1,1)
+        
+        model2.setParam( 'A',1)
        
-        fitter.set_model(model2,"M2",2, {'A':1})
+        fitter.set_model(model2,"M2",2, ['A'])
         fitter.set_data(data2,2)
     
         
@@ -171,26 +183,7 @@ class testFitModule(unittest.TestCase):
         print " cov1", cov1
         self.assert_(chisqr1)
         
-        fitter= Fit('park')
-        # Receives the type of model for the fitting
-        from sans.guitools.LineModel import LineModel
-        model1  = LineModel()
-        model2  = LineModel()
-        
-        #Do the fit
-        
-        fitter.set_model(model1,"M1",1, {'A':1,'B':1})
-        fitter.set_data(data1,1)
        
-        fitter.set_model(model2,"M2",2, {'A':1,'B':None})
-        fitter.set_data(data2,2)
-    
-        
-        chisqr2, out2, cov2,result= fitter.fit()
-        print "chisqr2",chisqr2
-        print "out2", out2
-        print " cov2", cov2
-        self.assert_(chisqr2)
         
        
     

@@ -61,7 +61,7 @@ class FitEngine:
                     param = Parameter(model,param_name,value)
                     self.parameters.append(param)
                    
-                    self.paramList.append(key)
+                    self.paramList.append(param_name)
             print "AbstractFitEngine: self.paramList2", self.paramList
             #A fitArrange is already created but contains dList only at Uid
             if self.fitArrangeList.has_key(Uid):
