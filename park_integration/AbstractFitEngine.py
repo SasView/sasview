@@ -32,7 +32,7 @@ class FitEngine:
                         raise RuntimeError, "Fit._concatenateData: y-errors missing"
             return xtemp, ytemp,dytemp
     
-    def set_model(self,model,name,Uid,pars={}):
+    def set_model(self,model,name,Uid,pars=[]):
         """ 
       
             Receive a dictionary of parameter and save it Parameter list
@@ -48,15 +48,17 @@ class FitEngine:
         """
         print "AbstractFitEngine:  fitting parmater",pars
        
-        if pars !={}:
+        if len(pars) >0:
             self.parameters=[]
-            
             if model==None:
-                raise ValueError, "Cannot set parameters for empty model"
+                raise ValueError, "AbstractFitEngine: Specify parameters to fit"
             else:
                 model.name=name
-                for key, value in pars.iteritems():
-                    param = Parameter(model, key, value)
+                for param_name in pars:
+                    value=model.getParam(param_name)
+                    if value==None:
+                        raise ValueError ,"%s has not value set"%param_name
+                    param = Parameter(model,param_name,value)
                     self.parameters.append(param)
                    
                     self.paramList.append(key)
