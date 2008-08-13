@@ -2,7 +2,8 @@
 """
     @organization: Module loader contains class Loader which uses 
     some readers to return values contained in a file readed.
-    
+    @ author : Paul Kienzler
+    @modifiied by gervaise alina
 """
 import imp,os,sys
 import logging
