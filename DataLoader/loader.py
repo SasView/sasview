@@ -215,8 +215,8 @@ class Loader(object):
                     try:
                         value=fn.read(path)
                         return value
-                    except msg:
-                        logging.error(str(msg))
+                    except:
+                        logging.error("Load Error: %s"% (sys.exc_value))
             else:
                 raise ValueError,"Loader contains no reader"
                         
