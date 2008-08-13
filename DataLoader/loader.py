@@ -206,8 +206,8 @@ class Loader(object):
             if format is None:
                 try:
                     readers = self.lookup(path)
-                except ValueError,msg:
-                    raise ValueError,str(msg)
+                except :
+                    raise 
             else:
                 readers = self.readers[format]
             if readers!=None:
@@ -215,7 +215,7 @@ class Loader(object):
                     try:
                         value=fn.read(path)
                         return value
-                    except ValueError,msg:
+                    except msg:
                         logging.error(str(msg))
             else:
                 raise ValueError,"Loader contains no reader"
