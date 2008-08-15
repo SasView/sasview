@@ -1,0 +1,13 @@
+The design of the SANS models is not easily scalable. Although a more efficient
+way (in terms of design and speed) as been implemented on the C/C++ side, the python
+design should be revisited. Areas of improvements include:
+
+1- [C side] Incorporate the C functions that use libigor directly into the new C++ class.
+  	That would mean rewritting the script generator to eliminate all the .c files.
+  
+2- Re-design the sans.models.BaseComponent class to store the parameters as objects,
+	like it's done on the C++ side. A better design may allow us to avoid the awful
+	hard-coding of the translation between the python dictionary holding the 
+	parameters and the C++ Parameter class.
+	 
+ 
