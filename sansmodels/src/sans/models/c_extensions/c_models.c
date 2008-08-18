@@ -1,6 +1,6 @@
 /** c_models
  *
- * Module containing all SANS model extensions 
+ * Module containing all SANS model extensions
  *
  * @author   M.Doucet / UTK
  */
@@ -10,7 +10,7 @@
  * Define empty module
  */
 static PyMethodDef module_methods[] = {
-    {NULL} 
+    {NULL}
 };
 
 
@@ -18,13 +18,13 @@ static PyMethodDef module_methods[] = {
 #define PyMODINIT_FUNC void
 #endif
 PyMODINIT_FUNC
-initc_models(void) 
+initc_models(void)
 {
     PyObject* m;
 
     m = Py_InitModule3("c_models", module_methods,
                        "C extension module for SANS scattering models.");
-                       
+
 	addCCylinderModel(m);
 	addCCoreShellCylinderModel(m);
 	addCCoreShellModel(m);

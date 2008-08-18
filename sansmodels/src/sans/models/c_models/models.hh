@@ -22,7 +22,7 @@ extern "C" {
 
 using namespace std;
 
-class Cylinder{
+class CylinderModel{
 
 public:
 	// Model parameters
@@ -36,7 +36,7 @@ public:
 	// TODO: replace this by an array of parameters
 
 	// Constructor
-	Cylinder();
+	CylinderModel();
 
 	// Operators to get I(Q)
 	double operator()(double q);

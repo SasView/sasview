@@ -1,15 +1,16 @@
 #if !defined(cylinder_h)
 #define cylinder_h
 
-/** Structure definition for cylinder parameters 
+/** Structure definition for cylinder parameters
  * [PYTHONCLASS] = CylinderModel
+ * [DISP_PARAMS] = radius, length, cyl_theta, cyl_phi
  * */
 typedef struct {
-    /// Scale factor 
+    /// Scale factor
     //  [DEFAULT]=scale=1.0
     double scale;
     /// Radius of the cylinder [A]
-    //  [DEFAULT]=radius=20.0 A 
+    //  [DEFAULT]=radius=20.0 A
     double radius;
     /// Length of the cylinder [A]
     //  [DEFAULT]=length=400.0 A
@@ -19,13 +20,13 @@ typedef struct {
     double contrast;
 	/// Incoherent Background (cm-1) 0.000
 	//  [DEFAULT]=background=0 cm-1
-	double background;    
+	double background;
     /// Orientation of the cylinder axis w/respect incoming beam [rad]
     //  [DEFAULT]=cyl_theta=1.0 rad
     double cyl_theta;
     /// Orientation of the cylinder in the plane of the detector [rad]
     //  [DEFAULT]=cyl_phi=1.0 rad
-    double cyl_phi;    
+    double cyl_phi;
 } CylinderParameters;
 
 

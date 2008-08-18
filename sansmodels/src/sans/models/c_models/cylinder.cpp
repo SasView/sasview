@@ -31,7 +31,7 @@ extern "C" {
 	#include "cylinder.h"
 }
 
-Cylinder :: Cylinder() {
+CylinderModel :: CylinderModel() {
 	scale      = Parameter(1.0);
 	radius     = Parameter(20.0, true);
 	radius.set_min(0.0);
@@ -49,7 +49,7 @@ Cylinder :: Cylinder() {
  * @param q: q-value
  * @return: function value
  */
-double Cylinder :: operator()(double q) {
+double CylinderModel :: operator()(double q) {
 	double dp[5];
 
 	// Fill parameter array for IGOR library
@@ -95,7 +95,7 @@ double Cylinder :: operator()(double q) {
  * @param q_y: value of Q along y
  * @return: function value
  */
-double Cylinder :: operator()(double qx, double qy) {
+double CylinderModel :: operator()(double qx, double qy) {
 	CylinderParameters dp;
 	// Fill parameter array
 	dp.scale      = scale();
@@ -176,7 +176,7 @@ double Cylinder :: operator()(double qx, double qy) {
  * @param phi: angle phi
  * @return: function value
  */
-double Cylinder :: evaluate_rphi(double q, double phi) {
+double CylinderModel :: evaluate_rphi(double q, double phi) {
 	double qx = q*cos(phi);
 	double qy = q*sin(phi);
 	return (*this).operator()(qx, qy);
@@ -185,7 +185,7 @@ double Cylinder :: evaluate_rphi(double q, double phi) {
 // Testing code
 int main(void)
 {
-	Cylinder c = Cylinder();
+	CylinderModel c = CylinderModel();
 
 	printf("Length = %g\n", c.length());
 	printf("I(Q=%g) = %g\n", 0.001, c(0.001));

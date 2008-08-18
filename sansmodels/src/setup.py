@@ -91,10 +91,14 @@ setup(
     
     ext_modules = [ Extension("sans_extension.c_models",
      sources = [
-        srcdir+"/c_models.c",
+        srcdir+"/c_models.cpp",
         srcdir+"/CSphereModel.c",
         srcdir+"/sphere.c",
-        srcdir+"/CCylinderModel.c",
+        #srcdir+"/CCylinderModel.c",
+        "sans/models/c_models/CCylinderModel.cpp",
+        "sans/models/c_models/cylinder.cpp",
+        "sans/models/c_models/parameters.cpp",
+        "sans/models/c_models/dispersion_visitor.cpp",
         srcdir+"/cylinder.c",
         srcdir+"/CCoreShellCylinderModel.c",
         srcdir+"/core_shell_cylinder.c",
@@ -112,5 +116,5 @@ setup(
         srcdir+"/lorentzian.c",
         srcdir+"/CLorentzian.c"
             ],
-         include_dirs=[igordir])])
+         include_dirs=[igordir,srcdir,"sans/models/c_models"])])
         
