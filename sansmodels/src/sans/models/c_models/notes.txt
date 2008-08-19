@@ -10,4 +10,39 @@ design should be revisited. Areas of improvements include:
 	hard-coding of the translation between the python dictionary holding the 
 	parameters and the C++ Parameter class.
 	 
- 
+ Length = 400
+I(Q=0.001) = 450.355
+I(Q=0.001) = 472.332
+I(Q=0.001) = 4723.32
+I(Qx=0.001, Qy=0.001) = 4743.56
+I(Q=0.00447,  Phi=0.7854) = 4733
+pi=3.14159
+
+I(Qx=0.01, Qy=0.01) = 2299
+I(Q=0.0141421)         = 2326.75
+ratio 0.988074 1.01207
+
+Cyl (python):  450.35506578
+Disp(pyhton):  472.332213339
+
+--------------
+Hello cylinder
+450.35506578
+449.358988524
+446.344929175
+
+{'npts': 1, 'type': 'gaussian', 'nsigmas': 2, 'width': 0.0}
+{'npts': 1, 'type': 'flat', 'width': 0.0}
+
+ q= 0.001
+New Cyl :  450.35506578
+New Disp:  472.332213339
+
+cyl(0.01, 0.01) =96.8691
+cyl(0.0141421) =232.675
+{'type': 'array'}
+cyl(0.01, 0.01) =229.9
+Hello cylinder
+
+Old Cyl :  450.35506578
+Old Disp:  472.332213339

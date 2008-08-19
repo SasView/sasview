@@ -1,12 +1,13 @@
 #if !defined(core_shell_h)
 #define core_shell_h
 
-/** 
- * Structure definition for core-shell parameters 
+/**
+ * Structure definition for core-shell parameters
  */
  //[PYTHONCLASS] = CoreShellModel
+ //[DISP_PARAMS] = radius, thickness
 typedef struct {
-    /// Scale factor 
+    /// Scale factor
     //  [DEFAULT]=scale=1.0
     double scale;
     ///	Core Radius (A) 60.0
@@ -26,7 +27,7 @@ typedef struct {
 	double solvent_sld;
 	/// Incoherent Background (cm-1) 0.000
 	//  [DEFAULT]=background=0 cm-1
-	double background;    
+	double background;
 } CoreShellParameters;
 
 

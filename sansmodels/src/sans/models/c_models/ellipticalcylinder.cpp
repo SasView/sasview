@@ -28,19 +28,22 @@ using namespace std;
 
 extern "C" {
 	#include "libCylinder.h"
-	#include "cylinder.h"
+	#include "elliptical_cylinder.h"
 }
 
-CylinderModel :: CylinderModel() {
+EllipticalCylinderModel :: EllipticalCylinderModel() {
 	scale      = Parameter(1.0);
-	radius     = Parameter(20.0, true);
-	radius.set_min(0.0);
+	r_minor    = Parameter(20.0, true);
+	r_minor.set_min(0.0);
+	r_ratio    = Parameter(1.5, true);
+	r_ratio.set_min(0.0);
 	length     = Parameter(400.0, true);
 	length.set_min(0.0);
 	contrast   = Parameter(3.e-6);
 	background = Parameter(0.0);
-	cyl_theta  = Parameter(0.0, true);
+	cyl_theta  = Parameter(1.57, true);
 	cyl_phi    = Parameter(0.0, true);
+	cyl_psi    = Parameter(0.0, true);
 }
 
 /**
@@ -49,20 +52,23 @@ CylinderModel :: CylinderModel() {
  * @param q: q-value
  * @return: function value
  */
-double CylinderModel :: operator()(double q) {
-	double dp[5];
+double EllipticalCylinderModel :: operator()(double q) {
+	double dp[6];
 
-	// Fill parameter array for IGOR library
-	// Add the background after averaging
 	dp[0] = scale();
-	dp[1] = radius();
-	dp[2] = length();
-	dp[3] = contrast();
-	dp[4] = 0.0;
+	dp[1] = r_minor();
+	dp[2] = r_ratio();
+	dp[3] = length();
+	dp[4] = contrast();
+	dp[5] = 0.0;
 
-	// Get the dispersion points for the radius
+	// Get the dispersion points for the r_minor
 	vector<WeightPoint> weights_rad;
-	radius.get_weights(weights_rad);
+	r_minor.get_weights(weights_rad);
+
+	// Get the dispersion points for the r_ratio
+	vector<WeightPoint> weights_rat;
+	r_ratio.get_weights(weights_rat);
 
 	// Get the dispersion points for the length
 	vector<WeightPoint> weights_len;
@@ -72,18 +78,26 @@ double CylinderModel :: operator()(double q) {
 	double sum = 0.0;
 	double norm = 0.0;
 
-	// Loop over radius weight points
+	// Loop over r_minor weight points
 	for(int i=0; i<weights_rad.size(); i++) {
 		dp[1] = weights_rad[i].value;
 
-		// Loop over length weight points
-		for(int j=0; j<weights_len.size(); j++) {
-			dp[2] = weights_len[j].value;
+		// Loop over r_ratio weight points
+		for(int j=0; j<weights_rat.size(); j++) {
+			dp[2] = weights_rat[j].value;
 
-			sum += weights_rad[i].weight
-				* weights_len[j].weight * CylinderForm(dp, q);
-			norm += weights_rad[i].weight
-				* weights_len[j].weight;
+			// Loop over length weight points
+			for(int k=0; k<weights_len.size(); k++) {
+				dp[3] = weights_len[k].value;
+
+				sum += weights_rad[i].weight
+					* weights_len[k].weight
+					* weights_rat[j].weight
+					* EllipCyl20(dp, q);
+				norm += weights_rad[i].weight
+				* weights_len[k].weight
+				* weights_rat[j].weight;
+			}
 		}
 	}
 	return sum/norm + background();
@@ -95,20 +109,26 @@ double CylinderModel :: operator()(double q) {
  * @param q_y: value of Q along y
  * @return: function value
  */
-double CylinderModel :: operator()(double qx, double qy) {
-	CylinderParameters dp;
+double EllipticalCylinderModel :: operator()(double qx, double qy) {
+	EllipticalCylinderParameters dp;
 	// Fill parameter array
 	dp.scale      = scale();
-	dp.radius     = radius();
+	dp.r_minor    = r_minor();
+	dp.r_ratio    = r_ratio();
 	dp.length     = length();
 	dp.contrast   = contrast();
 	dp.background = 0.0;
 	dp.cyl_theta  = cyl_theta();
 	dp.cyl_phi    = cyl_phi();
+	dp.cyl_psi    = cyl_psi();
 
-	// Get the dispersion points for the radius
+	// Get the dispersion points for the r_minor
 	vector<WeightPoint> weights_rad;
-	radius.get_weights(weights_rad);
+	r_minor.get_weights(weights_rad);
+
+	// Get the dispersion points for the r_ratio
+	vector<WeightPoint> weights_rat;
+	r_ratio.get_weights(weights_rat);
 
 	// Get the dispersion points for the length
 	vector<WeightPoint> weights_len;
@@ -122,18 +142,26 @@ double CylinderModel :: operator()(double qx, double qy) {
 	vector<WeightPoint> weights_phi;
 	cyl_phi.get_weights(weights_phi);
 
+	// Get angular averaging for psi
+	vector<WeightPoint> weights_psi;
+	cyl_psi.get_weights(weights_psi);
+
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
 
-	// Loop over radius weight points
+	// Loop over minor radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
-		dp.radius = weights_rad[i].value;
+		dp.r_minor = weights_rad[i].value;
 
 
 		// Loop over length weight points
 		for(int j=0; j<weights_len.size(); j++) {
 			dp.length = weights_len[j].value;
+
+			// Loop over r_ration weight points
+			for(int m=0; m<weights_rat.size(); m++) {
+				dp.r_ratio = weights_rat[m].value;
 
 			// Average over theta distribution
 			for(int k=0; k<weights_theta.size(); k++) {
@@ -143,11 +171,17 @@ double CylinderModel :: operator()(double qx, double qy) {
 				for(int l=0; l<weights_phi.size(); l++) {
 					dp.cyl_phi = weights_phi[l].value;
 
+				// Average over phi distribution
+				for(int o=0; o<weights_psi.size(); o++) {
+					dp.cyl_psi = weights_psi[o].value;
+
 					double _ptvalue = weights_rad[i].weight
 						* weights_len[j].weight
+						* weights_rat[m].weight
 						* weights_theta[k].weight
 						* weights_phi[l].weight
-						* cylinder_analytical_2DXY(&dp, qx, qy);
+						* weights_psi[o].weight
+						* elliptical_cylinder_analytical_2DXY(&dp, qx, qy);
 					if (weights_theta.size()>1) {
 						_ptvalue *= sin(weights_theta[k].value);
 					}
@@ -155,10 +189,14 @@ double CylinderModel :: operator()(double qx, double qy) {
 
 					norm += weights_rad[i].weight
 						* weights_len[j].weight
+						* weights_rat[m].weight
 						* weights_theta[k].weight
-						* weights_phi[l].weight;
+						* weights_phi[l].weight
+						* weights_psi[o].weight;
 
 				}
+				}
+			}
 			}
 		}
 	}
@@ -176,59 +214,8 @@ double CylinderModel :: operator()(double qx, double qy) {
  * @param phi: angle phi
  * @return: function value
  */
-double CylinderModel :: evaluate_rphi(double q, double phi) {
+double EllipticalCylinderModel :: evaluate_rphi(double q, double phi) {
 	double qx = q*cos(phi);
 	double qy = q*sin(phi);
 	return (*this).operator()(qx, qy);
-}
-
-// Testing code
-int main(void)
-{
-	CylinderModel c = CylinderModel();
-
-	printf("Length = %g\n", c.length());
-	printf("I(Qx=%g,Qy=%g) = %g\n", 0.001, 0.001, c(0.001, 0.001));
-	printf("I(Q=%g) = %g\n", 0.001, c(0.001));
-	c.radius.dispersion = new GaussianDispersion();
-	c.radius.dispersion->npts = 100;
-	c.radius.dispersion->width = 5;
-
-	//c.length.dispersion = GaussianDispersion();
-	//c.length.dispersion.npts = 20;
-	//c.length.dispersion.width = 65;
-
-	printf("I(Q=%g) = %g\n", 0.001, c(0.001));
-	c.scale = 10.0;
-	printf("I(Q=%g) = %g\n", 0.001, c(0.001));
-	printf("I(Qx=%g, Qy=%g) = %g\n", 0.001, 0.001, c(0.001, 0.001));
-	printf("I(Q=%g,  Phi=%g) = %g\n", 0.00447, .7854, c.evaluate_rphi(sqrt(0.00002), .7854));
-
-	// Average over phi at theta=90 deg
-	c.cyl_theta = 1.57;
-	double values_th[100];
-	double values[100];
-	double weights[100];
-	double pi = acos(-1.0);
-	printf("pi=%g\n", pi);
-	for(int i=0; i<100; i++){
-		values[i] = (float)i*2.0*pi/99.0;
-		values_th[i] = (float)i*pi/99.0;
-		weights[i] = 1.0;
-	}
-	//c.radius.dispersion->width = 0;
-	c.cyl_phi.dispersion = new ArrayDispersion();
-	c.cyl_theta.dispersion = new ArrayDispersion();
-	(*c.cyl_phi.dispersion).set_weights(100, values, weights);
-	(*c.cyl_theta.dispersion).set_weights(100, values_th, weights);
-
-	double i_avg = c(0.01, 0.01);
-	double i_1d = c(sqrt(0.0002));
-
-	printf("\nI(Qx=%g, Qy=%g) = %g\n", 0.01, 0.01, i_avg);
-	printf("I(Q=%g)         = %g\n", sqrt(0.0002), i_1d);
-	printf("ratio %g %g\n", i_avg/i_1d, i_1d/i_avg);
-
-
-	return 0;
 }

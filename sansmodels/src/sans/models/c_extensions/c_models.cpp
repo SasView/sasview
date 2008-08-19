@@ -8,12 +8,18 @@
 #include <parameters.hh>
 
 void addCCylinderModel(PyObject *module);
+void addCSphereModel(PyObject *module);
+void addCCoreShellModel(PyObject *module);
+void addCCoreShellCylinderModel(PyObject *module);
+void addCEllipsoidModel(PyObject *module);
+void addCEllipticalCylinderModel(PyObject *module);
+
 extern "C" {
-	void addCCoreShellCylinderModel(PyObject *module);
-	void addCCoreShellModel(PyObject *module);
-	void addCEllipsoidModel(PyObject *module);
-	void addCSphereModel(PyObject *module);
-	void addCEllipticalCylinderModel(PyObject *module);
+	//void addCCoreShellCylinderModel(PyObject *module);
+	//void addCCoreShellModel(PyObject *module);
+	//void addCEllipsoidModel(PyObject *module);
+	//void addCSphereModel(PyObject *module);
+	//void addCEllipticalCylinderModel(PyObject *module);
 	void addDisperser(PyObject *module);
 	void addCGaussian(PyObject *module);
 	void addCLorentzian(PyObject *module);

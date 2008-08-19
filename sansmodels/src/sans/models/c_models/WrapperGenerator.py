@@ -212,8 +212,8 @@ class WrapperGenerator:
             # Dictionary initialization
             param_str = "// Initialize parameter dictionary\n"            
             for par in self.params:
-                param_str += "        PyDict_SetItemString(self->params,\"%s\",Py_BuildValue(\"d\", self->model->%s()));\n" % \
-                    (par, par)
+                param_str += "        PyDict_SetItemString(self->params,\"%s\",Py_BuildValue(\"d\",%f));\n" % \
+                    (par, self.params[par])
 
             param_str += "        // Initialize dispersion / averaging parameter dict\n"
             param_str += "        DispersionVisitor* visitor = new DispersionVisitor();\n"

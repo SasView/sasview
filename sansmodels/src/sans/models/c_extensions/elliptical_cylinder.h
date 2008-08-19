@@ -1,11 +1,13 @@
 #if !defined(ell_cylinder_h)
 #define ell_cylinder_h
 
-/** Structure definition for cylinder parameters 
+/** Structure definition for cylinder parameters
  * [PYTHONCLASS] = EllipticalCylinderModel
+ * [DISP_PARAMS] = r_minor, r_ratio, length, cyl_theta, cyl_phi, cyl_psi
+ *
  * */
 typedef struct {
-    /// Scale factor 
+    /// Scale factor
     //  [DEFAULT]=scale=1.0
     double scale;
     /// Minor radius [A]
@@ -22,16 +24,16 @@ typedef struct {
     double contrast;
 	/// Incoherent Background (cm-1) 0.000
 	//  [DEFAULT]=background=0 cm-1
-	double background;    
+	double background;
     /// Orientation of the cylinder axis w/respect incoming beam [rad]
     //  [DEFAULT]=cyl_theta=1.57 rad
     double cyl_theta;
     /// Orientation of the cylinder in the plane of the detector [rad]
     //  [DEFAULT]=cyl_phi=0.0 rad
-    double cyl_phi;    
+    double cyl_phi;
     /// Orientation of major radius of the cross-section w/respect vector q [rad]
     //  [DEFAULT]=cyl_psi=0.0 rad
-    double cyl_psi;    
+    double cyl_psi;
 } EllipticalCylinderParameters;
 
 

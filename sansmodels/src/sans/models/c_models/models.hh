@@ -23,7 +23,6 @@ extern "C" {
 using namespace std;
 
 class CylinderModel{
-
 public:
 	// Model parameters
 	Parameter radius;
@@ -33,10 +32,111 @@ public:
 	Parameter background;
 	Parameter cyl_theta;
 	Parameter cyl_phi;
-	// TODO: replace this by an array of parameters
 
 	// Constructor
 	CylinderModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class SphereModel{
+public:
+	// Model parameters
+	Parameter radius;
+	Parameter scale;
+	Parameter contrast;
+	Parameter background;
+
+	// Constructor
+	SphereModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class CoreShellModel{
+public:
+	// Model parameters
+	Parameter radius;
+	Parameter scale;
+	Parameter thickness;
+	Parameter core_sld;
+	Parameter shell_sld;
+	Parameter solvent_sld;
+	Parameter background;
+
+	// Constructor
+	CoreShellModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class CoreShellCylinderModel{
+public:
+	// Model parameters
+	Parameter radius;
+	Parameter scale;
+	Parameter thickness;
+	Parameter length;
+	Parameter core_sld;
+	Parameter shell_sld;
+	Parameter solvent_sld;
+	Parameter background;
+	Parameter axis_theta;
+	Parameter axis_phi;
+
+	// Constructor
+	CoreShellCylinderModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class EllipsoidModel{
+public:
+	// Model parameters
+	Parameter radius_a;
+	Parameter scale;
+	Parameter radius_b;
+	Parameter contrast;
+	Parameter background;
+	Parameter axis_theta;
+	Parameter axis_phi;
+
+	// Constructor
+	EllipsoidModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class EllipticalCylinderModel{
+public:
+	// Model parameters
+	Parameter r_minor;
+	Parameter scale;
+	Parameter r_ratio;
+	Parameter length;
+	Parameter contrast;
+	Parameter background;
+	Parameter cyl_theta;
+	Parameter cyl_phi;
+	Parameter cyl_psi;
+
+	// Constructor
+	EllipticalCylinderModel();
 
 	// Operators to get I(Q)
 	double operator()(double q);
