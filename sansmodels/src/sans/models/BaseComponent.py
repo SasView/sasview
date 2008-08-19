@@ -47,6 +47,9 @@ class BaseComponent:
         ## Parameters to be accessed by client
         self.params = {}
         self.details = {}
+        ## Dictionary used to store the dispersity/averaging
+        #  parameters of dispersed/averaged parameters.
+        self.dispersion = {}
            
     def __str__(self):
         """ Prints an XML representation of the model
