@@ -191,7 +191,7 @@ class FitEngine:
             if model==None:
                 raise ValueError, "AbstractFitEngine: Specify parameters to fit"
             else:
-                model.name = name
+                model.model.name = name
                 self.paramList=pars
             #A fitArrange is already created but contains dList only at Uid
             if self.fitArrangeList.has_key(Uid):
