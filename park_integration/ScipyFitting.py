@@ -3,12 +3,29 @@
     Parameter classes.All listed classes work together to perform a 
     simple fit with scipy optimizer.
 """
+#import scipy.linalg
+import numpy 
 from sans.guitools.plottables import Data1D
 from Loader import Load
 from scipy import optimize
-from AbstractFitEngine import FitEngine, Parameter
-from AbstractFitEngine import FitArrange
 
+from AbstractFitEngine import FitEngine, sansAssembly
+from AbstractFitEngine import FitArrange,Data
+class fitresult:
+    """
+        Storing fit result
+    """
+    calls     = None
+    fitness   = None
+    chisqr    = None
+    pvec      = None
+    cov       = None
+    info      = None
+    mesg      = None
+    success   = None
+    stderr    = None
+    parameters= None
+    
 class ScipyFit(FitEngine):
     """ 
         ScipyFit performs the Fit.This class can be used as follow:
@@ -41,21 +58,8 @@ class ScipyFit(FitEngine):
         """
         self.fitArrangeList={}
         self.paramList=[]
-        
     def fit(self,qmin=None, qmax=None):
-        """
-            Performs fit with scipy optimizer.It can only perform fit with one model
-            and a set of data.
-            @note: Cannot perform more than one fit at the time.
-            
-            @param pars: Dictionary of parameter names for the model and their values
-            @param qmin: The minimum value of data's range to be fit
-            @param qmax: The maximum value of data's range to be fit
-            @return chisqr: Value of the goodness of fit metric
-            @return out: list of parameter with the best value found during fitting
-            @return cov: Covariance matrix
-        """
-        # Protect against simultanous fitting attempts
+         # Protect against simultanous fitting attempts
         if len(self.fitArrangeList)>1: 
             raise RuntimeError, "Scipy can't fit more than a single fit problem at a time."
         
@@ -65,68 +69,38 @@ class ScipyFit(FitEngine):
         model = fitproblem.get_model()
         listdata = fitproblem.get_data()
         # Concatenate dList set (contains one or more data)before fitting
-        xtemp,ytemp,dytemp=self._concatenateData( listdata)
+        data=self._concatenateData( listdata)
         #Assign a fit range is not boundaries were given
         if qmin==None:
-            qmin= min(xtemp)
+            qmin= min(data.x)
         if qmax==None:
-            qmax= max(xtemp) 
-        #perform the fit 
-        chisqr, out, cov = fitHelper(model,self.parameters, xtemp,ytemp, dytemp ,qmin,qmax)
-        return chisqr, out, cov
+            qmax= max(data.x) 
+        functor= sansAssembly(model,data)
+        print "scipyfitting:param list",model.getParams(self.paramList)
+        print "scipyfitting:functor",functor(model.getParams(self.paramList))
     
-
-def fitHelper(model, pars, x, y, err_y ,qmin=None, qmax=None):
-    """
-        Fit function
-        @param model: sans model object
-        @param pars: list of parameters
-        @param x: vector of x data
-        @param y: vector of y data
-        @param err_y: vector of y errors 
-        @return chisqr: Value of the goodness of fit metric
-        @return out: list of parameter with the best value found during fitting
-        @return cov: Covariance matrix
-    """
-    def f(params):
-        """
-            Calculates the vector of residuals for each point 
-            in y for a given set of input parameters.
-            @param params: list of parameter values
-            @return: vector of residuals
-        """
-        i = 0
-        for p in pars:
-            p.set(params[i])
-            i += 1
+        out, cov_x, info, mesg, success = optimize.leastsq(functor,model.getParams(self.paramList), full_output=1, warning=True)
+        chisqr = functor.chisq(out)
         
-        residuals = []
-        for j in range(len(x)):
-            if x[j] >= qmin and x[j] <= qmax:
-                residuals.append( ( y[j] - model.runXY(x[j]) ) / err_y[j] )
+        print "scipyfitting: info",mesg
+        print"scipyfitting : success",success
+        print "scipyfitting: out", out
+        print "scipyfitting: cov_x", cov_x
+        print "scipyfitting: chisqr", chisqr
+        
+        if not (numpy.isnan(out).any()):
+                result = fitresult()
+                result.fitness = chisqr
+                result.cov  = cov_x
+                
+                result.pvec = out
+                result.success =success
+               
+                return result
+        else:  
+            raise ValueError, "SVD did not converge"
+        
+       
+              
             
-        return residuals
-        
-    def chi2(params):
-        """
-            Calculates chi^2
-            @param params: list of parameter values
-            @return: chi^2
-        """
-        sum = 0
-        res = f(params)
-        for item in res:
-            sum += item*item
-        return sum
-        
-    p = [param() for param in pars]
-    out, cov_x, info, mesg, success = optimize.leastsq(f, p, full_output=1, warning=True)
-    #print info, mesg, success
-    # Calculate chi squared
-    if len(pars)>1:
-        chisqr = chi2(out)
-    elif len(pars)==1:
-        chisqr = chi2([out])
-        
-    return chisqr, out, cov_x    
-
+      

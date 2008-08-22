@@ -5,109 +5,14 @@
 """
 import time
 import numpy
-
 import park
 from park import fit,fitresult
 from park import assembly
 from park.fitmc import FitSimplex, FitMC
-
 from sans.guitools.plottables import Data1D
 from Loader import Load
-from AbstractFitEngine import FitEngine, Parameter, FitArrange
-class SansParameter(park.Parameter):
-    """
-        SANS model parameters for use in the PARK fitting service.
-        The parameter attribute value is redirected to the underlying
-        parameter value in the SANS model.
-    """
-    def __init__(self, name, model):
-         self._model, self._name = model,name
-         self.set(model.getParam(name))
-         
-    def _getvalue(self): return self._model.getParam(self.name)
-    
-    def _setvalue(self,value): 
-        self._model.setParam(self.name, value)
-        
-    value = property(_getvalue,_setvalue)
-    
-    def _getrange(self):
-        lo,hi = self._model.details[self.name][1:]
-        if lo is None: lo = -numpy.inf
-        if hi is None: hi = numpy.inf
-        return lo,hi
-    
-    def _setrange(self,r):
-        self._model.details[self.name][1:] = r
-    range = property(_getrange,_setrange)
+from AbstractFitEngine import FitEngine,FitArrange,Model
 
-
-class Model(object):
-    """
-        PARK wrapper for SANS models.
-    """
-    def __init__(self, sans_model):
-        self.model = sans_model
-        #print "ParkFitting:sans model",self.model
-        sansp = sans_model.getParamList()
-        #print "ParkFitting: sans model parameter list",sansp
-        parkp = [SansParameter(p,sans_model) for p in sansp]
-        #print "ParkFitting: park model parameter ",parkp
-        self.parameterset = park.ParameterSet(sans_model.name,pars=parkp)
-        
-    def eval(self,x):
-        #print "eval",self.parameterset[0].value,self.parameterset[1].value
-        #print "model run ",self.model.run(x)
-        return self.model.run(x)
-    
-class Data(object):
-    """ Wrapper class  for SANS data """
-    def __init__(self,x=None,y=None,dy=None,dx=None,sans_data=None):
-        if not sans_data==None:
-            self.x= sans_data.x
-            self.y= sans_data.y
-            self.dx= sans_data.dx
-            self.dy= sans_data.dy
-        else:
-            if x!=None and y!=None and dy!=None:
-                self.x=x
-                self.y=y
-                self.dx=dx
-                self.dy=dy
-            else:
-                raise ValueError,\
-                "Data is missing x, y or dy, impossible to compute residuals later on"
-        self.qmin=None
-        self.qmax=None
-       
-    def setFitRange(self,mini=None,maxi=None):
-        """ to set the fit range"""
-        self.qmin=mini
-        self.qmax=maxi
-        
-    def residuals(self, fn):
-        """ @param fn: function that return model value
-            @return residuals
-        """
-        x,y,dy = [numpy.asarray(v) for v in (self.x,self.y,self.dy)]
-        if self.qmin==None and self.qmax==None: 
-            self.fx = fn(x)
-            return (y - fn(x))/dy
-        
-        else:
-            self.fx = fn(x[idx])
-            idx = x>=self.qmin & x <= self.qmax
-            return (y[idx] - fn(x[idx]))/dy[idx]
-            
-         
-    def residuals_deriv(self, model, pars=[]):
-        """ 
-            @return residuals derivatives .
-            @note: in this case just return empty array
-        """
-        return []
-
-            
 class ParkFit(FitEngine):
     """ 
         ParkFit performs the Fit.This class can be used as follow:
@@ -153,22 +58,22 @@ class ParkFit(FitEngine):
         listmodel=[]
         i=0
         for k,value in self.fitArrangeList.iteritems():
-            sansmodel=value.get_model()
+            #sansmodel=value.get_model()
             #wrap sans model
-            parkmodel = Model(sansmodel)
+            #parkmodel = Model(sansmodel)
+            parkmodel = value.get_model()
             #print "ParkFitting: createproblem: just create a model",parkmodel.parameterset
             for p in parkmodel.parameterset:
                 #self.param_list.append(p._getname())
                 #if p.isfixed():
                 #print 'parameters',p.name
-                #print "self.paramList",self.paramList
+                print "parkfitting: self.paramList",self.paramList
                 if p.isfixed() and p._getname()in self.paramList:
                     p.set([-numpy.inf,numpy.inf])
             i+=1    
             Ldata=value.get_data()
-            x,y,dy=self._concatenateData(Ldata)
-            #wrap sansdata
-            parkdata=Data(x,y,dy,None)
+            parkdata=self._concatenateData(Ldata)
+            
             couple=(parkmodel,parkdata)
             #print "Parkfitting: fitness",couple   
             mylist.append(couple)
@@ -203,7 +108,7 @@ class ParkFit(FitEngine):
         localfit = FitSimplex()
         localfit.ftol = 1e-8
         fitter = FitMC(localfit=localfit)
-        
+        print "ParkFitting: result1"
         result = fit.fit(self.problem,
                      fitter=fitter,
                      handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
@@ -211,7 +116,8 @@ class ParkFit(FitEngine):
         if result !=None:
             #for p in result.parameters:
             #    print "fit in park fitting", p.name, p.value,p.stderr
-            return result.fitness,result.pvec,result.cov,result
+            #return result.fitness,result.pvec,result.cov,result
+            return result
         else:
             raise ValueError, "SVD did not converge"
             

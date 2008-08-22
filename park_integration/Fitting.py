@@ -52,12 +52,11 @@ class Fit:
     def fit(self, qmin=None, qmax=None):
         """Perform the fit """
         return self._engine.fit(qmin,qmax)
-    def set_model(self,model,name,Uid,pars={}):
-        """ Set model """
-        self._engine.set_model(model,name,Uid, pars)
-    def set_data(self,data,Uid):
-        """ Receive plottable and create a list of data to fit"""
-        self._engine.set_data(data,Uid)
+    def set_model(self,model,name,Uid,pars=[]):
+         self._engine.set_model(model,name,Uid,pars)
+   
+    def set_data(self,data,Uid,qmin=None, qmax=None):
+        self._engine.set_data(data,Uid,qmin,qmax)
     def get_model(self,Uid):
         """ return list of data"""
         self._engine.get_model(Uid)
