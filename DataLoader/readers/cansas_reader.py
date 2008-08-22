@@ -19,7 +19,7 @@ copyright 2008, University of Tennessee
 import logging
 import numpy
 import os, sys
-from DataLoader.data_info import Data1D, Collimation, Detector, Process
+from DataLoader.data_info import Data1D, Collimation, Detector, Process, Aperture
 from xml import xpath
 
 has_converter = True
@@ -69,10 +69,10 @@ def get_content(location, node):
                     value = item.nodeValue.strip()
                     break
                 
-                if nodes[0].hasAttributes():
-                    for i in range(nodes[0].attributes.length):
-                        attr[nodes[0].attributes.item(i).nodeName] \
-                            = nodes[0].attributes.item(i).nodeValue
+            if nodes[0].hasAttributes():
+                for i in range(nodes[0].attributes.length):
+                    attr[nodes[0].attributes.item(i).nodeName] \
+                        = nodes[0].attributes.item(i).nodeValue
         except:
             # problem reading the node. Skip it and return that
             # nothing was found
@@ -316,8 +316,7 @@ class Reader:
             # Look for apertures
             apert_list = xpath.Evaluate('aperture', item)
             for apert in apert_list:
-                aperture =  collim.Aperture()
-                
+                aperture =  Aperture()
                 _store_float('distance', apert, 'distance', aperture)    
                 _store_float('size/x', apert, 'size.x', aperture)    
                 _store_float('size/y', apert, 'size.y', aperture)    
@@ -425,12 +424,27 @@ class Reader:
         data_info.y = y
         data_info.dx = dx
         data_info.dy = dy
+        
+        data_conv_q = None
+        data_conv_i = None
+        
+        if has_converter == True and data_info.x_unit != '1/A':
+            data_conv_q = Converter('1/A')
+            # Test it
+            data_conv_q(1.0, output.Q_unit)
+            
+        if has_converter == True and data_info.y_unit != '1/cm':
+            data_conv_i = Converter('1/cm')
+            # Test it
+            data_conv_i(1.0, output.I_unit)            
+    
+        
         if data_conv_q is not None:
-            data_info.xaxis("\\rm{Q}", output.x_unit)
+            data_info.xaxis("\\rm{Q}", data_info.x_unit)
         else:
             data_info.xaxis("\\rm{Q}", 'A^{-1}')
         if data_conv_i is not None:
-            data_info.yaxis("\\{I(Q)}", output.y_unit)
+            data_info.yaxis("\\{I(Q)}", data_info.y_unit)
         else:
             data_info.yaxis("\\rm{I(Q)}","cm^{-1}")
         

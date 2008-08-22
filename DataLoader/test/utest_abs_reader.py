@@ -133,7 +133,79 @@ class cansas_reader(unittest.TestCase):
     def setUp(self):
         self.data = Loader().load("cansas1d.xml")
  
+    def test_checkdata(self):
+        """
+            Check the data content to see whether 
+            it matches the specific file we loaded.
+            Check the units too to see whether the
+            Data1D defaults changed. Otherwise the
+            tests won't pass
+        """
+        self.assertEqual(self.data.filename, "cansas1d.xml")
+        self.assertEqual(self.data.run, "1234")
         
+        # Sample info
+        self.assertEqual(self.data.sample.ID, "SI600-new-long")
+        self.assertEqual(self.data.sample.thickness_unit, 'mm')
+        self.assertEqual(self.data.sample.thickness, 1.03)
+        
+        self.assertEqual(self.data.sample.transmission, 0.327)
+        
+        self.assertEqual(self.data.sample.temperature_unit, 'C')
+        self.assertEqual(self.data.sample.temperature, 0)
+
+        self.assertEqual(self.data.sample.position_unit, 'mm')
+        self.assertEqual(self.data.sample.position.x, 10)
+        self.assertEqual(self.data.sample.position.y, 0)
+
+        self.assertEqual(self.data.sample.orientation_unit, 'degree')
+        self.assertEqual(self.data.sample.orientation.x, 22.5)
+        self.assertEqual(self.data.sample.orientation.y, 0.02)
+
+        self.assertEqual(self.data.sample.details[0], "http://chemtools.chem.soton.ac.uk/projects/blog/blogs.php/bit_id/2720") 
+        self.assertEqual(self.data.sample.details[1], "Some text here") 
+        
+        # Instrument info
+        self.assertEqual(self.data.instrument, "TEST instrument")
+        
+        # Source
+        self.assertEqual(self.data.source.radiation, "neutron")
+        
+        self.assertEqual(self.data.source.beam_size_unit, "mm")
+        self.assertEqual(self.data.source.beam_size.x, 12)
+        self.assertEqual(self.data.source.beam_size.y, 12)
+        
+        self.assertEqual(self.data.source.beam_shape, "disc")
+        
+        self.assertEqual(self.data.source.wavelength_unit, "A")
+        self.assertEqual(self.data.source.wavelength, 6)
+        
+        self.assertEqual(self.data.source.wavelength_max_unit, "nm")
+        self.assertEqual(self.data.source.wavelength_max, 1.0)
+        self.assertEqual(self.data.source.wavelength_min_unit, "nm")
+        self.assertEqual(self.data.source.wavelength_min, 0.22)
+        self.assertEqual(self.data.source.wavelength_spread_unit, "percent")
+        self.assertEqual(self.data.source.wavelength_spread, 14.3)
+        
+        # Collimation
+        _found1 = False
+        _found2 = False
+        self.assertEqual(self.data.collimation[0].length, 123.)
+        
+        for item in self.data.collimation[0].aperture:
+            self.assertEqual(item.size_unit,'mm')
+            self.assertEqual(item.distance_unit,'mm')
+            
+            if item.size.x==50 \
+                and item.distance==11000.:
+                _found1 = True
+            elif item.size.x==1.0:
+                _found2 = True
+                
+        if _found1==False or _found2==False:
+            print item.distance
+            raise RuntimeError, "Could not find all data %s %s" % (_found1, _found2) 
+            
         
         
             

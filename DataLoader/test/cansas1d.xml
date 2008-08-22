@@ -65,6 +65,7 @@
 				</wavelength_spread>
 			</SASsource>
 			<SAScollimation>
+				<length unit='mm'> 123.0</length>
 				<aperture name="source" type="radius">
 					<size>
 						<x unit="mm">50</x>

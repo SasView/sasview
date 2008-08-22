@@ -103,20 +103,30 @@ class Detector:
     distance = None
     distance_unit = 'mm'
     ## Offset of this detector position in X, Y, (and Z if necessary) [Vector] [mm] 
-    offset = Vector()
+    offset = None
     offset_unit = 'm'
     ## Orientation (rotation) of this detector in roll, pitch, and yaw [Vector] [degrees]
-    orientation = Vector()
+    orientation = None
     orientation_unit = 'degree'
     ## Center of the beam on the detector in X and Y (and Z if necessary) [Vector] [mm]
-    beam_center = Vector()
+    beam_center = None
     beam_center_unit = 'mm'
     ## Pixel size in X, Y, (and Z if necessary) [Vector] [mm]
-    pixel_size = Vector()
+    pixel_size = None
     pixel_size_unit = 'mm'
     ## Slit length of the instrument for this detector.[float] [mm]
     slit_length = None
     slit_length_unit = 'mm'
+    
+    def __init__(self):
+        """
+            Initialize class attribute that are objects...
+        """
+        self.offset      = Vector()
+        self.orientation = Vector()
+        self.beam_center = Vector()
+        self.pixel_size  = Vector()
+        
     
     def __str__(self):
         _str  = "Detector:\n"
@@ -135,23 +145,30 @@ class Detector:
             (str(self.slit_length), str(self.slit_length_unit))
         return _str
 
+class Aperture:
+    # Aperture size [Vector]
+    size = None
+    size_unit = 'mm'
+    # Aperture distance [float]
+    distance = None
+    distance_unit = 'mm'
+    
+    def __init__(self):
+        self.size = Vector()
+    
 class Collimation:
     """
         Class to hold collimation information
     """
-    class Aperture:
-        # Aperture size [Vector]
-        size = Vector()
-        size_unit = 'mm'
-        # Aperture distance [float]
-        distance = None
-        distance_unit = 'mm'
     
     ## Length [float] [mm]
     length = None
     length_unit = 'mm'
     ## Aperture
-    aperture = []
+    aperture = None
+    
+    def __init__(self):
+        self.aperture = []
     
     def __str__(self):
         _str = "Collimation:\n"
@@ -171,7 +188,7 @@ class Source:
     ## Radiation type [string]
     radiation = ''
     ## Beam size [Vector] [mm]
-    beam_size = Vector()
+    beam_size = None
     beam_size_unit = 'mm'
     ## Beam shape [string]
     beam_shape = ''
@@ -187,6 +204,10 @@ class Source:
     ## Wavelength spread [float] [Angstrom]
     wavelength_spread = None
     wavelength_spread_unit = 'percent'
+    
+    def __init__(self):
+        self.beam_size = Vector()
+        
     
     def __str__(self):
         _str  = "Source:\n"
@@ -228,13 +249,18 @@ class Sample:
     temperature = None
     temperature_unit = 'C'
     ## Position [Vector] [mm]
-    position = Vector()
+    position = None
     position_unit = 'mm'
     ## Orientation [Vector] [degrees]
-    orientation = Vector()
+    orientation = None
     orientation_unit = 'degree'
     ## Details
-    details = []
+    details = None
+    
+    def __init__(self):
+        self.position    = Vector()
+        self.orientation = Vector()
+        self.details     = []
     
     def __str__(self):
         _str  = "Sample:\n"
@@ -263,8 +289,12 @@ class Process:
     name = ''
     date = ''
     description= ''
-    term = []
-    notes = []
+    term = None
+    notes = None
+    
+    def __init__(self):
+        self.term = []
+        self.notes = []
     
     def __str__(self):
         _str  = "Process:\n"
@@ -292,23 +322,23 @@ class DataInfo:
     ## File name
     filename   = ''
     ## Notes
-    notes      = []
+    notes      = None
     ## Processes (Action on the data)
-    process    = []
+    process    = None
     ## Instrument name
     instrument = ''
     ## Detector information
-    detector   = []
+    detector   = None
     ## Sample information
-    sample     = Sample()
+    sample     = None
     ## Source information
-    source     = Source()
+    source     = None
     ## Collimation information
-    collimation = []
+    collimation = None
     ## Additional meta-data
-    meta_data  = {}
+    meta_data  = None
     ## Loading errors
-    errors = []
+    errors = None
             
     def __init__(self):
         """
@@ -582,13 +612,15 @@ class Data2D(plottable_2D, DataInfo):
     I_unit = '1/cm'
     
     ## Vector of Q-values at the center of each bin in x
-    x_bins = []
+    x_bins = None
     
     ## Vector of Q-values at the center of each bin in y
-    y_bins = []
+    y_bins = None
     
     
     def __init__(self, data=None, err_data=None):
+        self.y_bins = []
+        self.x_bins = []
         DataInfo.__init__(self)
         plottable_2D.__init__(self, data, err_data)
         if len(self.detector)>0:
