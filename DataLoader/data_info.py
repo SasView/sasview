@@ -146,10 +146,14 @@ class Detector:
         return _str
 
 class Aperture:
-    # Aperture size [Vector]
+    ## Name
+    name = ''
+    ## Type
+    type = ''
+    ## Aperture size [Vector]
     size = None
     size_unit = 'mm'
-    # Aperture distance [float]
+    ## Aperture distance [float]
     distance = None
     distance_unit = 'mm'
     
@@ -160,7 +164,8 @@ class Collimation:
     """
         Class to hold collimation information
     """
-    
+    ## Name
+    name = ''
     ## Length [float] [mm]
     length = None
     length_unit = 'mm'
@@ -185,6 +190,8 @@ class Source:
     """
         Class to hold source information
     """  
+    ## Name
+    name = ''
     ## Radiation type [string]
     radiation = ''
     ## Beam size [Vector] [mm]

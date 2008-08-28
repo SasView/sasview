@@ -9,6 +9,9 @@ copyright 2008, University of Tennessee
 """
 
 #TODO: Unit conversion
+#TODO: missing aperture type: go through all entries and check for additional attributes
+#TODO: check that all vectors are written only if they have at least one non-empty value
+#TODO: multiple SASEntrys
 #TODO: Store error list
 #TODO: convert from pixel to mm for beam center...
 #TODO: Allow for additional meta data for each section
@@ -21,12 +24,32 @@ import numpy
 import os, sys
 from DataLoader.data_info import Data1D, Collimation, Detector, Process, Aperture
 from xml import xpath
+import xml.dom.minidom 
+
 
 has_converter = True
 try:
     from data_util.nxsunit import Converter
 except:
     has_converter = False
+
+def write_node(doc, parent, name, value, attr={}):
+    """
+        @param doc: document DOM
+        @param parent: parent node
+        @param name: tag of the element
+        @param value: value of the child text node
+        @param attr: attribute dictionary
+        @return: True if something was appended, otherwise False
+    """
+    if value is not None:
+        node = doc.createElement(name)
+        node.appendChild(doc.createTextNode(str(value)))
+        for item in attr:
+            node.setAttribute(item, attr[item])
+        parent.appendChild(node)
+        return True
+    return False
 
 def get_node_text(node):
     """
@@ -286,6 +309,10 @@ class Reader:
                      dom, 'orientation.z', data_info.sample)          
        
         # Source info ###################
+        value, attr = get_content('SASinstrument/SASsource', dom)
+        if attr.has_key('name'):
+            data_info.source.name = attr['name']
+        
         _store_content('SASinstrument/SASsource/radiation', 
                      dom, 'radiation', data_info.source)                    
         _store_content('SASinstrument/SASsource/beam_shape', 
@@ -311,12 +338,23 @@ class Reader:
         nodes = xpath.Evaluate('SASinstrument/SAScollimation', dom)
         for item in nodes:
             collim = Collimation()
+            value, attr = get_node_text(item)
+            if attr.has_key('name'):
+                collim.name = attr['name']
             _store_float('length', item, 'length', collim)  
             
             # Look for apertures
             apert_list = xpath.Evaluate('aperture', item)
             for apert in apert_list:
                 aperture =  Aperture()
+                
+                # Get the name and type of the aperture
+                ap_value, ap_attr = get_node_text(item)
+                if ap_attr.has_key('name'):
+                    aperture.name = ap_attr['name']
+                if ap_attr.has_key('type'):
+                    aperture.type = ap_attr['type']
+                    
                 _store_float('distance', apert, 'distance', aperture)    
                 _store_float('size/x', apert, 'size.x', aperture)    
                 _store_float('size/y', apert, 'size.y', aperture)    
@@ -450,7 +488,143 @@ class Reader:
         
         return data_info
 
-    
+    def write(self, filename, datainfo):
+        """
+            Write the content of a Data1D as a CanSAS XML file
+            
+            @param filename: name of the file to write
+            @param datainfo: Data1D object
+        """
+        
+        if not datainfo.__class__ == Data1D: 
+            raise RuntimeError, "The cansas writer expects a Data1D instance"
+        
+        doc = xml.dom.minidom.Document()
+        main_node = doc.createElement("SASroot")
+        main_node.setAttribute("version", "1.0")
+        doc.appendChild(main_node)
+        
+        entry_node = doc.createElement("SASentry")
+        main_node.appendChild(entry_node)
+        
+        write_node(doc, entry_node, "title", datainfo.title)
+        write_node(doc, entry_node, "run", datainfo.run)
+        
+        # Data info
+        node = doc.createElement("SASdata")
+        entry_node.appendChild(node)
+        
+        # Sample info
+        sample = doc.createElement("SASsample")
+        entry_node.appendChild(sample)
+        write_node(doc, sample, "ID", datainfo.sample.ID)
+        write_node(doc, sample, "thickness", datainfo.sample.thickness, {"unit":datainfo.sample.thickness_unit})
+        write_node(doc, sample, "transmission", datainfo.sample.transmission)
+        write_node(doc, sample, "temperature", datainfo.sample.temperature, {"unit":datainfo.sample.temperature_unit})
+        
+        for item in datainfo.sample.details:
+            write_node(doc, sample, "details", item)
+        
+        pos = doc.createElement("position")
+        written = False
+        written = written or write_node(doc, pos, "x", datainfo.sample.position.x, {"unit":datainfo.sample.position_unit})
+        written = written or write_node(doc, pos, "y", datainfo.sample.position.y, {"unit":datainfo.sample.position_unit})
+        written = written or write_node(doc, pos, "z", datainfo.sample.position.z, {"unit":datainfo.sample.position_unit})
+        if written == True:
+            sample.appendChild(pos)
+        
+        ori = doc.createElement("orientation")
+        written = False
+        written = written or write_node(doc, ori, "roll",  datainfo.sample.orientation.x, {"unit":datainfo.sample.orientation_unit})
+        written = written or write_node(doc, ori, "pitch", datainfo.sample.orientation.y, {"unit":datainfo.sample.orientation_unit})
+        written = written or write_node(doc, ori, "yaw",   datainfo.sample.orientation.z, {"unit":datainfo.sample.orientation_unit})
+        if written == True:
+            sample.appendChild(ori)
+        
+        # Instrument info
+        instr = doc.createElement("SASinstrument")
+        entry_node.appendChild(instr)
+        
+        write_node(doc, instr, "name", datainfo.instrument)
+        
+        #   Source
+        source = doc.createElement("SASsource")
+        source.setAttribute("name", str(datainfo.source.name))
+        instr.appendChild(source)
+        
+        write_node(doc, source, "radiation", datainfo.source.radiation)
+        write_node(doc, source, "beam_shape", datainfo.source.beam_shape)
+        write_node(doc, source, "wavelength", datainfo.source.wavelength, {"unit":datainfo.source.wavelength_unit})
+        write_node(doc, source, "wavelength_min", datainfo.source.wavelength_min, {"unit":datainfo.source.wavelength_min_unit})
+        write_node(doc, source, "wavelength_max", datainfo.source.wavelength_max, {"unit":datainfo.source.wavelength_max_unit})
+        write_node(doc, source, "wavelength_spread", datainfo.source.wavelength_spread, {"unit":datainfo.source.wavelength_spread_unit})
+        
+        #   Collimation
+        for item in datainfo.collimation:
+            coll = doc.createElement("SAScollimation")
+            coll.setAttribute("name", item.name)
+            instr.appendChild(coll)
+            
+            write_node(doc, coll, "length", item.length, {"unit":item.length_unit})
+            
+            for apert in item.aperture:
+                ap = doc.createElement("SAScollimation")
+                ap.setAttribute("name", apert.name)
+                ap.setAttribute("type", apert.type)
+                instr.appendChild(ap)
+                
+                write_node(doc, ap, "distance", apert.distance, {"unit":apert.distance_unit})
+                
+                size = doc.createElement("size")
+                ap.appendChild(size)
+                write_node(doc, size, "x", apert.size.x, {"unit":apert.size_unit})
+                write_node(doc, size, "y", apert.size.y, {"unit":apert.size_unit})
+                write_node(doc, size, "z", apert.size.z, {"unit":apert.size_unit})
+                
+
+        #   Detectors
+        for item in datainfo.detector:
+            det = doc.createElement("SASdetector")
+            instr.appendChild(det)
+            
+            write_node(doc, det, "name", item.name)
+            write_node(doc, det, "SDD", item.distance, {"unit":item.distance_unit})
+            write_node(doc, det, "slit_length", item.slit_length, {"unit":item.slit_length_unit})
+            
+            off = doc.createElement("offset")
+            det.appendChild(off)
+            write_node(doc, off, "x", item.offset.x, {"unit":item.offset_unit})
+            write_node(doc, off, "y", item.offset.y, {"unit":item.offset_unit})
+            write_node(doc, off, "z", item.offset.z, {"unit":item.offset_unit})
+            
+            
+            center = doc.createElement("beam_center")
+            det.appendChild(center)
+            write_node(doc, center, "x", item.beam_center.x, {"unit":item.beam_center_unit})
+            write_node(doc, center, "y", item.beam_center.y, {"unit":item.beam_center_unit})
+            write_node(doc, center, "z", item.beam_center.z, {"unit":item.beam_center_unit})
+            
+            pix = doc.createElement("pixel_size")
+            det.appendChild(pix)
+            write_node(doc, pix, "x", item.pixel_size.x, {"unit":item.pixel_size_unit})
+            write_node(doc, pix, "y", item.pixel_size.y, {"unit":item.pixel_size_unit})
+            write_node(doc, pix, "z", item.pixel_size.z, {"unit":item.pixel_size_unit})
+            
+        
+        # Sample info
+        for item in datainfo.process:
+            node = doc.createElement("SASprocess")
+            entry_node.appendChild(node)
+
+            write_node(doc, entry_node, "run", item.name)
+            
+        
+        # Write the file
+        fd = open(filename, 'w')
+        fd.write(doc.toprettyxml())
+        fd.close()
+        
+        
 if __name__ == "__main__": 
     logging.basicConfig(level=logging.ERROR,
                         format='%(asctime)s %(levelname)s %(message)s',

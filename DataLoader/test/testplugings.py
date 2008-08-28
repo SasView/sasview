@@ -49,3 +49,7 @@ class testLoader(unittest.TestCase):
         for i in range(len(x)):
             self.assertEqual(output.x[i],x[i])
             self.assertEqual(output.y[i],y[i])
+
+# How about actually executing the tests...
+if __name__ == '__main__':
+    unittest.main()

@@ -19,7 +19,8 @@ Package name: DataLoader 0.2
 		- The following modules are required:
 			* numpy
 			* data_util from svn://danse.us/common/releases/data_util-0.1
-
+			* The CanSAS reader needs PyXML installed
+	
 3- Known Issues
 
 	3.1- All systems:

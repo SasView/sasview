@@ -50,7 +50,7 @@
 		</SASsample>
 		<SASinstrument name="TEST instrument">
 			<name>canSAS instrument</name>
-			<SASsource>
+			<SASsource name="source name">
 				<radiation>neutron</radiation>
 				<beam_size>
 					<x unit="mm">12.00</x>
@@ -64,7 +64,7 @@
 					14.3
 				</wavelength_spread>
 			</SASsource>
-			<SAScollimation>
+			<SAScollimation name="test coll name">
 				<length unit='mm'> 123.0</length>
 				<aperture name="source" type="radius">
 					<size>
@@ -89,6 +89,10 @@
 					<pitch unit="degree">0.00</pitch>
 					<yaw unit="degree">0.00</yaw>
 				</orientation>
+				<offset>
+					<x unit="mm">1</x>
+					<y unit="mm">2</y>
+				</offset>
 				<beam_center>
 					<x unit="mm">322.64</x>
 					<y unit="mm">327.68</y>

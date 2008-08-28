@@ -206,6 +206,47 @@ class cansas_reader(unittest.TestCase):
             print item.distance
             raise RuntimeError, "Could not find all data %s %s" % (_found1, _found2) 
             
+        # Detector
+        self.assertEqual(self.data.detector[0].name, "fictional hybrid")
+        self.assertEqual(self.data.detector[0].distance_unit, "m")
+        self.assertEqual(self.data.detector[0].distance, 4.150)
+        
+        self.assertEqual(self.data.detector[0].orientation_unit, "degree")
+        self.assertEqual(self.data.detector[0].orientation.x, 1.0)
+        self.assertEqual(self.data.detector[0].orientation.y, 0.0)
+        self.assertEqual(self.data.detector[0].orientation.z, 0.0)
+        
+        self.assertEqual(self.data.detector[0].offset_unit, "m")
+        self.assertEqual(self.data.detector[0].offset.x, .01)
+        self.assertEqual(self.data.detector[0].offset.y, .02)
+        self.assertEqual(self.data.detector[0].offset.z, None)
+        
+        self.assertEqual(self.data.detector[0].beam_center_unit, "mm")
+        self.assertEqual(self.data.detector[0].beam_center.x, 322.64)
+        self.assertEqual(self.data.detector[0].beam_center.y, 327.68)
+        self.assertEqual(self.data.detector[0].beam_center.z, None)
+        
+        self.assertEqual(self.data.detector[0].pixel_size_unit, "mm")
+        self.assertEqual(self.data.detector[0].pixel_size.x, 5)
+        self.assertEqual(self.data.detector[0].pixel_size.y, 5)
+        self.assertEqual(self.data.detector[0].pixel_size.z, None)
+        
+        # Process
+        
+        
+        
+    def test_writer(self):
+        from DataLoader.readers.cansas_reader import Reader
+        r = Reader()
+        x = numpy.ones(5)
+        y = numpy.ones(5)
+        dy = numpy.ones(5)
+        
+        d = Loader().load("jan08002.ABS")
+        #d = Data1D(x, y, dy)
+        r.write("write_test.xml", d)
+        
+        
         
         
             
