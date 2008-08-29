@@ -5,7 +5,12 @@ SANS Models version 0.4.1
 
 Package name: sans.models 
 
-1- What's New in Version 0.4.1
+1- What's New in Version 0.?
+    - Release date: ?
+    - C extension models now use new C++ classes that incorporate dispersity and averaging
+      functionality. 
+    
+    Version 0.4.1
     - Release date: 6/9/2008
     - Modified non-shape models so that the 2D output is the 1D output for the length of Q
 
@@ -41,6 +46,13 @@ Package name: sans.models
 			the 2D model I(q,phi) over all orientations of the object
 			will not yield the exact same result as the NCNR calculation
 			for q > 0.3 A-1.
+		- Refactoring needs to be done to update the model base class.
+		  We should get rid of the useless arithmetics and store the parameters
+		  as class objects rather than values. This would eliminate the multitude
+		  of dictionaries needed to store all the various aspects of a parameter
+		  (limits, units, dispersity information). The C++ design it relies
+		  on is much cleaner in that respect, but it still depends on the old
+		  C computation. Those should be incorporated in the C++ classes.
 
 	3.2- Windows:
 		- None
