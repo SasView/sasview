@@ -134,6 +134,10 @@ class cansas_reader(unittest.TestCase):
         self.data = Loader().load("cansas1d.xml")
  
     def test_checkdata(self):
+        self.assertEqual(self.data.filename, "cansas1d.xml")
+        self._checkdata()
+        
+    def _checkdata(self):
         """
             Check the data content to see whether 
             it matches the specific file we loaded.
@@ -141,11 +145,27 @@ class cansas_reader(unittest.TestCase):
             Data1D defaults changed. Otherwise the
             tests won't pass
         """
-        self.assertEqual(self.data.filename, "cansas1d.xml")
-        self.assertEqual(self.data.run, "1234")
+        
+        self.assertEqual(self.data.run[0], "1234")
+        
+        # Data
+        self.assertEqual(len(self.data.x), 2)
+        self.assertEqual(self.data.x_unit, '1/A')
+        self.assertEqual(self.data.y_unit, '1/cm')
+        self.assertEqual(self.data.x[0], 0.02)
+        self.assertEqual(self.data.y[0], 1000)
+        self.assertEqual(self.data.dx[0], 0.01)
+        self.assertEqual(self.data.dy[0], 3)
+        self.assertEqual(self.data.x[1], 0.03)
+        self.assertEqual(self.data.y[1], 1001)
+        self.assertEqual(self.data.dx[1], 0.02)
+        self.assertEqual(self.data.dy[1], 4)
+        self.assertEqual(self.data.run_name['1234'], 'run name')
+        self.assertEqual(self.data.title, "Test title")
         
         # Sample info
         self.assertEqual(self.data.sample.ID, "SI600-new-long")
+        self.assertEqual(self.data.sample.name, "my sample")
         self.assertEqual(self.data.sample.thickness_unit, 'mm')
         self.assertEqual(self.data.sample.thickness, 1.03)
         
@@ -166,14 +186,15 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.sample.details[1], "Some text here") 
         
         # Instrument info
-        self.assertEqual(self.data.instrument, "TEST instrument")
+        self.assertEqual(self.data.instrument, "canSAS instrument")
         
         # Source
         self.assertEqual(self.data.source.radiation, "neutron")
         
         self.assertEqual(self.data.source.beam_size_unit, "mm")
+        self.assertEqual(self.data.source.beam_size_name, "bm")
         self.assertEqual(self.data.source.beam_size.x, 12)
-        self.assertEqual(self.data.source.beam_size.y, 12)
+        self.assertEqual(self.data.source.beam_size.y, 13)
         
         self.assertEqual(self.data.source.beam_shape, "disc")
         
@@ -191,15 +212,20 @@ class cansas_reader(unittest.TestCase):
         _found1 = False
         _found2 = False
         self.assertEqual(self.data.collimation[0].length, 123.)
+        self.assertEqual(self.data.collimation[0].name, 'test coll name')
         
         for item in self.data.collimation[0].aperture:
             self.assertEqual(item.size_unit,'mm')
             self.assertEqual(item.distance_unit,'mm')
             
             if item.size.x==50 \
-                and item.distance==11000.:
+                and item.distance==11000.0 \
+                and item.name=='source' \
+                and item.type=='radius':
                 _found1 = True
-            elif item.size.x==1.0:
+            elif item.size.x==1.0 \
+                and item.name=='sample' \
+                and item.type=='radius':
                 _found2 = True
                 
         if _found1==False or _found2==False:
@@ -208,8 +234,8 @@ class cansas_reader(unittest.TestCase):
             
         # Detector
         self.assertEqual(self.data.detector[0].name, "fictional hybrid")
-        self.assertEqual(self.data.detector[0].distance_unit, "m")
-        self.assertEqual(self.data.detector[0].distance, 4.150)
+        self.assertEqual(self.data.detector[0].distance_unit, "mm")
+        self.assertEqual(self.data.detector[0].distance, 4150)
         
         self.assertEqual(self.data.detector[0].orientation_unit, "degree")
         self.assertEqual(self.data.detector[0].orientation.x, 1.0)
@@ -217,8 +243,8 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.detector[0].orientation.z, 0.0)
         
         self.assertEqual(self.data.detector[0].offset_unit, "m")
-        self.assertEqual(self.data.detector[0].offset.x, .01)
-        self.assertEqual(self.data.detector[0].offset.y, .02)
+        self.assertEqual(self.data.detector[0].offset.x, .001)
+        self.assertEqual(self.data.detector[0].offset.y, .002)
         self.assertEqual(self.data.detector[0].offset.z, None)
         
         self.assertEqual(self.data.detector[0].beam_center_unit, "mm")
@@ -232,6 +258,25 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.detector[0].pixel_size.z, None)
         
         # Process
+        _found_term1 = False
+        _found_term2 = False
+        for item in self.data.process:
+            self.assertTrue(item.name in ['NCNR-IGOR', 'spol'])
+            self.assertTrue(item.date in ['04-Sep-2007 18:35:02',
+                                          '03-SEP-2006 11:42:47'])
+            for t in item.term:
+                if t['name']=="ABS:DSTAND" \
+                    and t['unit']=='mm' \
+                    and float(t['value'])==1.0:
+                    _found_term2 = True
+                elif t['name']=="radialstep" \
+                    and t['unit']=='mm' \
+                    and float(t['value'])==10.0:
+                    _found_term1 = True
+                    
+        if _found_term1==False or _found_term2==False:
+            raise RuntimeError, "Could not find all process terms %s %s" % (_found_term1, _found_term2) 
+            
         
         
         
@@ -242,9 +287,12 @@ class cansas_reader(unittest.TestCase):
         y = numpy.ones(5)
         dy = numpy.ones(5)
         
-        d = Loader().load("jan08002.ABS")
-        #d = Data1D(x, y, dy)
-        r.write("write_test.xml", d)
+        filename = "write_test.xml"
+        r.write(filename, self.data)
+        self.data = Loader().load(filename)
+        self.assertEqual(self.data.filename, filename)
+        self._checkdata()
+        
         
         
         

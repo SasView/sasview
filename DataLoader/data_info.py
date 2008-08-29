@@ -23,16 +23,46 @@ copyright 2008, University of Tennessee
 """
 
 #TODO: Keep track of data manipulation in the 'process' data structure.
+#TODO: This module should be independent of plottables. We should write
+#        an adapter class for plottables when needed.
 
-from sans.guitools.plottables import Data1D as plottable_1D
+#from sans.guitools.plottables import Data1D as plottable_1D
 from data_util.uncertainty import Uncertainty
 import numpy
 import math
 
+class plottable_1D:
+    """
+        Data1D is a place holder for 1D plottables.
+    """
+    x = None
+    y = None
+    dx = None
+    dy = None
+    
+    # Units
+    _xaxis = ''
+    _xunit = ''
+    _yaxis = ''
+    _yunit = ''
+    
+    def __init__(self,x,y,dx=None,dy=None):
+        self.x = x
+        self.y = y
+        self.dx = dx
+        self.dy = dy
+
+    def xaxis(self, label, unit):
+        self._xaxis = label
+        self._xunit = unit
+        
+    def yaxis(self, label, unit):
+        self._yaxis = label
+        self._yunit = unit
+
 class plottable_2D:
     """
-        Data2D is a place holder for 2D plottables, which are 
-        not yet implemented.
+        Data2D is a place holder for 2D plottables.
     """
     xmin = None
     xmax = None
@@ -147,9 +177,11 @@ class Detector:
 
 class Aperture:
     ## Name
-    name = ''
+    name = None
     ## Type
-    type = ''
+    type = None
+    ## Size name
+    size_name = None
     ## Aperture size [Vector]
     size = None
     size_unit = 'mm'
@@ -191,14 +223,16 @@ class Source:
         Class to hold source information
     """  
     ## Name
-    name = ''
+    name = None
     ## Radiation type [string]
-    radiation = ''
+    radiation = None
+    ## Beam size name
+    beam_size_name = None
     ## Beam size [Vector] [mm]
     beam_size = None
     beam_size_unit = 'mm'
     ## Beam shape [string]
-    beam_shape = ''
+    beam_shape = None
     ## Wavelength [float] [Angstrom]
     wavelength = None
     wavelength_unit = 'A'
@@ -245,6 +279,8 @@ class Sample:
     """
         Class to hold the sample description
     """
+    ## Short name for sample
+    name = ''
     ## ID
     ID = ''
     ## Thickness [float] [mm]
@@ -326,6 +362,8 @@ class DataInfo:
     title      = ''
     ## Run number
     run        = None
+    ## Run name
+    run_name   = None
     ## File name
     filename   = ''
     ## Notes
@@ -354,7 +392,8 @@ class DataInfo:
         ## Title 
         self.title      = ''
         ## Run number
-        self.run        = None
+        self.run        = []
+        self.run_name   = {}
         ## File name
         self.filename   = ''
         ## Notes

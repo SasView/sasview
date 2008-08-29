@@ -3,8 +3,12 @@ Release Notes
 
 Package name: DataLoader 0.2
 
-1- 	Version 0.1
+1- 	Version 0.2
 	- Release date: ?
+	- First version of CanSAS reader/writer
+	- 1D data manipulations available
+	
+	Version 0.1
 	- First version of SANS data loader
 	- Formats: IGOR 1D, IGOR 2D, CanSAS 1D, 2- or 3-column ascii
 	- Includes SANS data class, with arithmetic operations
@@ -24,7 +28,8 @@ Package name: DataLoader 0.2
 3- Known Issues
 
 	3.1- All systems:
-		- None
+		- CanSAS format only allows a single SASdata section per SASentry.
+		- CanSAS format only allows one SASentry per file, for a single DataInfo object.
 
 	3.2- Windows:
 		- None

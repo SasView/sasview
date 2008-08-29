@@ -7,7 +7,7 @@
     >
 	<SASentry>
 		<Title>Test title</Title>
-		<Run>1234</Run>
+		<Run name='run name'>1234</Run>
 		<SASdata>
 			<Idata>
 				<Q unit="1/A">0.02</Q>
@@ -18,15 +18,15 @@
 				<Shadowfactor><!-- Shadowfactor is optional --></Shadowfactor>
 			</Idata>
 			<Idata>
-				<Q unit="1/A">0.02</Q>
-				<I unit="1/cm">1000</I>
-				<Idev unit="1/cm">3</Idev>
-				<Qdev unit="1/A">0.01</Qdev>
+				<Q unit="1/A">0.03</Q>
+				<I unit="1/cm">1001</I>
+				<Idev unit="1/cm">4</Idev>
+				<Qdev unit="1/A">0.02</Qdev>
 				<Qmean unit="1/A"><!-- Qmean is optional --></Qmean>
 				<Shadowfactor><!-- Shadowfactor is optional --></Shadowfactor>
 			</Idata>
 		</SASdata>
-		<SASsample>
+		<SASsample name='my sample'>
 			<ID>SI600-new-long</ID>
 			<thickness unit="mm">1.03</thickness>
 			<transmission>0.327</transmission>
@@ -52,9 +52,9 @@
 			<name>canSAS instrument</name>
 			<SASsource name="source name">
 				<radiation>neutron</radiation>
-				<beam_size>
+				<beam_size name='bm'>
 					<x unit="mm">12.00</x>
-					<y unit="mm">12.00</y>
+					<y unit="mm">13.00</y>
 				</beam_size>
 				<beam_shape>disc</beam_shape>
 				<wavelength unit="A">6.00</wavelength>
@@ -73,7 +73,7 @@
 					<distance unit="m">11.000<!-- was: distance_coll --></distance>
 				</aperture>
 				<aperture name="sample" type="radius">
-					<size>
+					<size name='size name'>
 						<x unit="mm">1</x>
 					</size>
 				</aperture>

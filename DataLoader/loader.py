@@ -70,7 +70,10 @@ class Loader(object):
             #Dictionary containing readers and extension as keys
             self.readers = {}
             #Load all readers in plugins
-            self.__setitem__()
+            
+            #TODO: misuse of __setitem__
+            #TODO: this bad call is done twice: here, and in Loader.__init__
+            #self.__setitem__()
             
             
         def __setitem__(self,dir=None, ext=None, reader=None):
@@ -93,12 +96,22 @@ class Loader(object):
             """
             if dir==None:
                 dir = 'readers'
+                
+            #TODO Probably name the new path something else...
+            
+            #TODO: The whole concept of plug-ins was missed here.
+            # First we want to always load the reader we have (in 'readers')
+            # and THEN we want to add any additional readers found in
+            # a pre-defined plug-in path (that path should be a variable).
             dir=os.path.join(os.path.dirname(os.path.abspath(__file__)),dir)
             
             if (reader==None and  ext==None) or dir:#1st load
                 plugReader=None
                 if os.path.isdir(dir):
                     plugReader=_findReaders(dir)# import all module in plugins
+                
+                #TODO The following just doesn't make sense
+                # ../C:\Python25\lib... ????
                 if os.path.isdir('../'+dir):
                     plugReader=_findReaders('../'+dir)
  
@@ -106,6 +119,7 @@ class Loader(object):
                 if plugReader !=None:
                     list=[]
                     for preader in plugReader:# for each modules takes list of extensions
+                        #TODO should use hasattr rather than a try/except block
                         try:
                             list=preader.ext
                         except AttributeError,msg:
