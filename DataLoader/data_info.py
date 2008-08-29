@@ -80,8 +80,8 @@ class plottable_2D:
     _zunit = ''
     
     def __init__(self, data=None, err_data=None):
-        self.data = data
-        self.err_data = err_data
+        self.data = numpy.asarray(data)
+        self.err_data = numpy.asarray(err_data)
         
     def xaxis(self, label, unit):
         self._xaxis = label
@@ -686,3 +686,97 @@ class Data2D(plottable_2D, DataInfo):
         
         return _str
   
+    def clone_without_data(self, length=0):
+        """
+            Clone the current object, without copying the data (which
+            will be filled out by a subsequent operation).
+            The data arrays will be initialized to zero.
+            
+            @param length: length of the data array to be initialized
+        """
+        from copy import deepcopy
+        
+        data     = numpy.zeros(length) 
+        err_data = numpy.zeros(length) 
+        
+        clone = Data2D(data, err_data)
+        clone.title       = self.title
+        clone.run         = self.run
+        clone.filename    = self.filename
+        clone.notes       = deepcopy(self.notes) 
+        clone.process     = deepcopy(self.process) 
+        clone.detector    = deepcopy(self.detector) 
+        clone.sample      = deepcopy(self.sample) 
+        clone.source      = deepcopy(self.source) 
+        clone.collimation = deepcopy(self.collimation) 
+        clone.meta_data   = deepcopy(self.meta_data) 
+        clone.errors      = deepcopy(self.errors) 
+        
+        return clone
+  
+  
+    def _validity_check(self, other):
+        """
+            Checks that the data lengths are compatible.
+            Checks that the x vectors are compatible.
+            Returns errors vectors equal to original
+            errors vectors if they were present or vectors
+            of zeros when none was found.
+            
+            @param other: other data set for operation
+            @return: dy for self, dy for other [numpy arrays]
+            @raise ValueError: when lengths are not compatible
+        """
+        err_other = None
+        if isinstance(other, Data2D):
+            # Check that data lengths are the same
+            if numpy.size(self.data) != numpy.size(other.data):
+                raise ValueError, "Unable to perform operation: data length are not equal"
+               
+            # Check that the scales match
+            #TODO: matching scales?     
+            
+            # Check that the other data set has errors, otherwise
+            # create zero vector
+            #TODO: test this
+            err_other = other.err_data
+            if other.err_data==None or (numpy.size(other.err_data) != numpy.size(other.data)):
+                err_other = numpy.zeros([numpy.size(other.data,0), numpy.size(other.data,1)])
+            
+        # Check that we have errors, otherwise create zero vector
+        err = self.err_data
+        if self.err_data==None or (numpy.size(self.err_data) != numpy.size(self.data)):
+            err = numpy.zeros([numpy.size(self.data,0), numpy.size(self.data,1)])
+            
+        return err, err_other
+  
+  
+    def _perform_operation(self, other, operation):
+        """
+            Perform 2D operations between data sets
+            
+            @param other: other data set
+            @param operation: function defining the operation
+        """
+        # First, check the data compatibility
+        dy, dy_other = self._validity_check(other)
+    
+        result = self.clone_without_data([numpy.size(self.data,0), numpy.size(self.data,1)])
+        
+        for i in range(numpy.size(self.data,0)):
+            for j in range(numpy.size(self.data,1)):
+                result.data[i][j] = self.data[i][j]
+                if self.err_data is not None and numpy.size(self.data)==numpy.size(self.err_data):
+                    result.err_data[i][j] = self.err_data[i][j]
+                
+                a = Uncertainty(self.data[i][j], dy[i][j]**2)
+                if isinstance(other, Data2D):
+                    b = Uncertainty(other.data[i][j], dy_other[i][j]**2)
+                else:
+                    b = other
+                
+                output = operation(a, b)
+                result.data[i][j] = output.x
+                result.err_data[i][j] = math.sqrt(math.fabs(output.variance))
+        return result
+    
