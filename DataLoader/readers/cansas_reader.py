@@ -16,6 +16,7 @@ copyright 2008, University of Tennessee
 #TODO: Allow for additional meta data for each section
 #TODO: Notes need to be implemented. They can be any XML structure in version 1.0
 #      Process notes have the same problem.
+#TODO: Unit conversion is not complete (temperature units are missing)
 
 
 import logging
@@ -144,8 +145,8 @@ def _store_float(location, node, variable, storage):
         # compatible with what we currently have in the data object
         if attr.has_key('unit'):
             toks = variable.split('.')
-            exec "local_unit = storage.%s_unit.lower()" % toks[0]
-            if attr['unit'].lower()!=local_unit:
+            exec "local_unit = storage.%s_unit" % toks[0]
+            if attr['unit'].lower()!=local_unit.lower():
                 if has_converter==True:
                     try:
                         conv = Converter(attr['unit'])
@@ -461,20 +462,59 @@ class Reader:
         
         for item in nodes:
             _x, attr = get_float('Q', item)
-            _dx, attr = get_float('Qdev', item)
+            _dx, attr_d = get_float('Qdev', item)
             if _dx == None:
                 _dx = 0.0
-            if attr.has_key('unit') and attr['unit'].lower() != data_info.x_unit.lower():
-                raise ValueError, "CanSAS reader: unrecognized %s unit [%s]; expecting [%s]" \
-                    % (variable, attr['unit'], local_unit)
                 
+            if attr.has_key('unit') and attr['unit'].lower() != data_info.x_unit.lower():
+                if has_converter==True:
+                    try:
+                        data_conv_q = Converter(attr['unit'])
+                        _x = data_conv_q(_x, units=data_info.x_unit)
+                    except:
+                        raise ValueError, "CanSAS reader: could not convert Q unit [%s]; expecting [%s]\n  %s" \
+                        % (attr['unit'], data_info.x_unit, sys.exc_value)
+                else:
+                    raise ValueError, "CanSAS reader: unrecognized Q unit [%s]; expecting [%s]" \
+                        % (attr['unit'], data_info.x_unit)
+            if attr_d.has_key('unit') and attr_d['unit'].lower() != data_info.x_unit.lower():
+                if has_converter==True:
+                    try:
+                        data_conv_q = Converter(attr_d['unit'])
+                        _dx = data_conv_q(_dx, units=data_info.x_unit)
+                    except:
+                        raise ValueError, "CanSAS reader: could not convert dQ unit [%s]; expecting [%s]\n  %s" \
+                        % (attr['unit'], data_info.x_unit, sys.exc_value)
+                else:
+                    raise ValueError, "CanSAS reader: unrecognized dQ unit [%s]; expecting [%s]" \
+                        % (attr['unit'], data_info.x_unit)
+                    
             _y, attr = get_float('I', item)
-            _dy, attr = get_float('Idev', item)
+            _dy, attr_d = get_float('Idev', item)
             if _dy == None:
                 _dy = 0.0
             if attr.has_key('unit') and attr['unit'].lower() != data_info.y_unit.lower():
-                raise ValueError, "CanSAS reader: unrecognized %s unit [%s]; expecting [%s]" \
-                    % (variable, attr['unit'], local_unit)
+                if has_converter==True:
+                    try:
+                        data_conv_i = Converter(attr['unit'])
+                        _y = data_conv_i(_y, units=data_info.y_unit)
+                    except:
+                        raise ValueError, "CanSAS reader: could not convert I(q) unit [%s]; expecting [%s]\n  %s" \
+                        % (attr['unit'], data_info.y_unit, sys.exc_value)
+                else:
+                    raise ValueError, "CanSAS reader: unrecognized I(q) unit [%s]; expecting [%s]" \
+                        % (attr['unit'], data_info.y_unit)
+            if attr_d.has_key('unit') and attr_d['unit'].lower() != data_info.y_unit.lower():
+                if has_converter==True:
+                    try:
+                        data_conv_i = Converter(attr_d['unit'])
+                        _dy = data_conv_i(_dy, units=data_info.y_unit)
+                    except:
+                        raise ValueError, "CanSAS reader: could not convert dI(q) unit [%s]; expecting [%s]\n  %s" \
+                        % (attr_d['unit'], data_info.y_unit, sys.exc_value)
+                else:
+                    raise ValueError, "CanSAS reader: unrecognized dI(q) unit [%s]; expecting [%s]" \
+                        % (attr_d['unit'], data_info.y_unit)
                 
             if _x is not None and _y is not None:
                 x  = numpy.append(x, _x)
@@ -498,9 +538,8 @@ class Reader:
         if has_converter == True and data_info.y_unit != '1/cm':
             data_conv_i = Converter('1/cm')
             # Test it
-            data_conv_i(1.0, output.I_unit)            
-    
-        
+            data_conv_i(1.0, output.I_unit)                    
+                
         if data_conv_q is not None:
             data_info.xaxis("\\rm{Q}", data_info.x_unit)
         else:

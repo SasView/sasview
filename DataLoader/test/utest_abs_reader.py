@@ -157,7 +157,7 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.dx[0], 0.01)
         self.assertEqual(self.data.dy[0], 3)
         self.assertEqual(self.data.x[1], 0.03)
-        self.assertEqual(self.data.y[1], 1001)
+        self.assertAlmostEquals(self.data.y[1], 1001.0)
         self.assertEqual(self.data.dx[1], 0.02)
         self.assertEqual(self.data.dy[1], 4)
         self.assertEqual(self.data.run_name['1234'], 'run name')
@@ -293,7 +293,15 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.filename, filename)
         self._checkdata()
         
-        
+    def test_units(self):
+        """
+            Check units.
+            Note that not all units are available.
+        """
+        filename = "cansas1d_units.xml"
+        self.data = Loader().load(filename)
+        self.assertEqual(self.data.filename, filename)
+        self._checkdata()
         
         
         
