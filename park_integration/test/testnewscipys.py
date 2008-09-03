@@ -1,5 +1,5 @@
 """
-    Unit tests for fitting module 
+    test Data, Model , fucntor classes of AbstractFittingModule
 """
 import unittest
 from sans.guitools.plottables import Theory1D
@@ -11,7 +11,7 @@ class testFitModule(unittest.TestCase):
     """ test fitting """
     
     def test_Data(self):
-        """ test data"""
+        """ test Data"""
         #load data
         from sans.fit.Loader import Load
         load= Load()
@@ -36,7 +36,7 @@ class testFitModule(unittest.TestCase):
         #fitter.set_data_assembly(data1,1)
         #fitter.set_model_assembly(model,"M1",1,['A','B'])
     def test_Model(self):
-        """ test model"""
+        """ test Model"""
         #load data
         from sans.fit.Loader import Load
         load= Load()

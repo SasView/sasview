@@ -35,6 +35,7 @@ class Model(object):
     """
     def __init__(self, sans_model):
         self.model = sans_model
+        self.name=sans_model.name
         #print "ParkFitting:sans model",self.model
         self.sansp = sans_model.getParamList()
         #print "ParkFitting: sans model parameter list",sansp
@@ -66,7 +67,7 @@ class Model(object):
             self.model.setParam(list[i],params[i])
   
     def eval(self,x):
-        #print "eval",self.parameterset[0].value,self.parameterset[1].value
+       
         return self.model.runXY(x)
        
 
@@ -192,6 +193,7 @@ class FitEngine:
                 raise ValueError, "AbstractFitEngine: Specify parameters to fit"
             else:
                 model.model.name = name
+                model.name = name
                 self.paramList=pars
             #A fitArrange is already created but contains dList only at Uid
             if self.fitArrangeList.has_key(Uid):

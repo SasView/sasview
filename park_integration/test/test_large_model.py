@@ -30,7 +30,7 @@ class testFitModule(unittest.TestCase):
         model =Model(model1)
         
         #Do the fit SCIPY
-        fitter.set_data(data1,1)
+        
         import math
         #pars1=['background','contrast', 'length']
         pars1=['background','contrast',\
