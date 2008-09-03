@@ -15,7 +15,15 @@ import unittest
 import math
 import DataLoader
 from DataLoader.loader import  Loader
- 
+
+# Check whether we should test image loading on this system 
+HAS_IMAGE = False
+try:
+    import Image
+    HAS_IMAGE = True
+except:
+    print "IMAGE TESTS WILL NOT BE PERFORMED: MISSING PIL MODULE"
+    
 import os.path
 
 class designtest(unittest.TestCase):
@@ -23,19 +31,14 @@ class designtest(unittest.TestCase):
     def setUp(self):
         self.loader = Loader()
         
-        
     def test_singleton(self):
         """
             Testing whether Loader is truly a singleton
         """
-        # Set a new data member
-        self.loader._test_data_member = 1.45
-        
         # Create a 'new' Loader
         b = Loader()
-        
-        # Test that the new loader has the new data member
-        self.assertEqual(b._test_data_member, self.loader._test_data_member)
+        self.assertEqual(self.loader._get_registry_creation_time(),
+                         b._get_registry_creation_time())
 
 class testLoader(unittest.TestCase):
     logging.debug("Inside testLoad module")
@@ -52,7 +55,7 @@ class testLoader(unittest.TestCase):
      
     def testLoad0(self):
         """test reading empty file"""
-        self.assertEqual(self.L.load('empty.txt'),None)
+        self.assertRaises(RuntimeError, self.L.load, 'empty.txt')
         
     def testLoad1(self):
         """test reading 2 columns"""
@@ -86,11 +89,41 @@ class testLoader(unittest.TestCase):
             self.assertEqual(output.y[i],y[i])
             self.assertEqual(output.dy[i],dy[i])
        
+    def testLoad2_uppercase(self):
+        """Testing loading a txt file of 3 columns"""
+        output= self.L.load('test_3_columns.TXT') 
+        x=[0,0.204082,0.408163,0.612245,0.816327,1.02041,1.22449]    
+        y=[2.83954,3.44938,5.82026,5.27591,5.2781,5.22531,7.47487]
+        dx=[]
+        dy=[0.6,0.676531,0.753061,0.829592,0.906122,0.982653,1.05918]
+        self.assertEqual(len(output.x),len(x))
+        self.assertEqual(len(output.y),len(y))
+        self.assertEqual(len(output.dy),len(dy))
+        for i in range(len(x)):
+            self.assertEqual(output.x[i],x[i])
+            self.assertEqual(output.y[i],y[i])
+            self.assertEqual(output.dy[i],dy[i])
+       
     
     def testload3(self):
         """ Testing loading Igor data"""
         #tested good file.asc
         output= self.L.load('MAR07232_rest.ASC') 
+        self.assertEqual(output.xmin,-0.018558945804750416)
+        self.assertEqual(output.xmax, 0.016234058202440633,)
+        self.assertEqual(output.ymin,-0.01684257151702391)
+        self.assertEqual(output.ymax,0.017950440578015116)
+       
+        #tested corrupted file.asc
+        try:self.L.load('AR07232_rest.ASC')
+        except ValueError,msg:
+           #logging.log(10,str(msg))
+           logging.error(str(msg))
+
+    def testload3_lowercase(self):
+        """ Testing loading Igor data"""
+        #tested good file.asc
+        output= self.L.load('MAR07232_rest.asc') 
         self.assertEqual(output.xmin,-0.018558945804750416)
         self.assertEqual(output.xmax, 0.016234058202440633,)
         self.assertEqual(output.ymin,-0.01684257151702391)
@@ -117,25 +150,21 @@ class testLoader(unittest.TestCase):
         
     def testload5(self):
         """ Testing loading image file"""
-        output=self.L.load('angles_flat.png')
-        self.assertEqual(output.xbins ,200)
+        if HAS_IMAGE:
+            output=self.L.load('angles_flat.png')
+            self.assertEqual(output.xbins ,200)
         
     def testload6(self):
         """test file with unknown extension"""
-        try:self.L.load('hello.missing')
-        except RuntimeError,msg:
-           self.assertEqual( str(msg),"Unknown file type '.missing'")
-        else: raise ValueError,"No error raised for missing extension"
+        self.assertRaises(ValueError, self.L.load, 'hello.missing')
         
-        #self.L.lookup('hello.missing')
-        try: self.L.lookup('hello.missing')
-        except RuntimeError,msg:
-           self.assertEqual( str(msg),"Unknown file type '.missing'")
-        else: raise ValueError,"No error raised for missing extension"
+        # Lookup is not supported as a public method
+        #self.assertRaises(ValueError, self.L.lookup, 'hello.missing')
+        
         
     def testload7(self):
         """ test file containing an image but as extension .txt"""
-        self.assertEqual(self.L.load('angles_flat.txt'),None)
+        self.assertRaises(RuntimeError, self.L.load, 'angles_flat.txt')
 
 if __name__ == '__main__':
     unittest.main()

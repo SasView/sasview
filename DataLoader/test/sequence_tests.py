@@ -28,3 +28,4 @@ if __name__ == "__main__":
     #consecutive_reader()
     single_igor()
     single_abs()
+    print "Test passed"

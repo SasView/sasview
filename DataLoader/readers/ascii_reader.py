@@ -12,6 +12,7 @@ import numpy
 import os
 from DataLoader.data_info import Data1D
 
+# Check whether we have a converter available
 has_converter = True
 try:
     from data_util.nxsunit import Converter
@@ -115,12 +116,12 @@ class Reader:
                      
                 # Sanity check
                 if has_error == True and not len(y) == len(dy):
-                    raise ValueError, "ascii_reader: y and dy have different length"
+                    raise RuntimeError, "ascii_reader: y and dy have different length"
 
                 # If the data length is zero, consider this as
                 # though we were not able to read the file.
                 if len(x)==0:
-                    raise ValueError, "ascii_reader: could not load file"
+                    raise RuntimeError, "ascii_reader: could not load file"
                
                 output.x = x
                 output.y = y

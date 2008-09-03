@@ -8,9 +8,9 @@ class testLoader(unittest.TestCase):
     def test_load_unknown(self):
         """
             self.s.load('blah.mat') on an unknown type
-            should raise a runtime exception
+            should raise a ValueError exception (thrown by data_util.registry)
         """
-        self.assertRaises(RuntimeError, self.s.load, 'angles_flat.mat')
+        self.assertRaises(ValueError, self.s.load, 'angles_flat.mat')
         
     def test_corrupt(self):
         """

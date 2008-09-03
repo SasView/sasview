@@ -1,124 +1,102 @@
+"""
+    Image reader. Untested. 
+"""
 
-import math,logging
+"""
+This software was developed by the University of Tennessee as part of the
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+project funded by the US National Science Foundation. 
 
+See the license text in license.txt
+
+copyright 2008, University of Tennessee
+"""
+#TODO: load and check data and orientation of the image (needs rendering)
+
+import math, logging, os
+import numpy
+from DataLoader.data_info import Data2D
     
 class Reader:
     """
         Example data manipulation
     """
     ## File type
-    type = []
+    type = ["TIF files (*.tif)|*.tif",
+            "JPG files (*.jpg)|*.jpg",
+            "JPEG files (*.jpeg)|*.jpeg",
+            "PNG files (*.png)|*.png",
+            "TIFF files (*.tiff)|*.tiff",
+            "BMP files (*.bmp)|*.bmp",
+            "GIF files (*.gif)|*.gif",
+            ]
     ## Extension
-    ext  = ['tif', 'jpg', '.png', 'jpeg', '.tiff', 'gif', 'bmp']    
+    ext  = ['.tif', '.jpg', '.png', '.jpeg', '.tiff', '.gif', '.bmp']    
         
     def read(self, filename=None):
-        import Image
-        print "in tiff"
         """
             Open and read the data in a file
             @param file: path of the file
         """
-        
-        read_it = False
-        for item in self.ext:
-            if filename.lower().find(item)>=0:
-                read_it = True
-                
-        if read_it:
+        try:
             import Image
-            import pylab
-            import copy
-            import numpy
-            
-            wavelength, distance, center_x, center_y, pixel = 10.0, 11.0, 65, 65, 1.0
-            
-            
-            
-            # Initialize 
-            x_vals = []
-            y_vals = [] 
-            ymin = None
-            ymax = None
-            xmin = None
-            xmax = None
-            Z = None
+        except:
+            raise RuntimeError, "tiff_reader: could not load file. Missing Image module."
         
+        # Instantiate data object
+        output = Data2D()
+        output.filename = os.path.basename(filename)
+            
+        # Read in the image
+        try:
+            im = Image.open(filename)
+        except :
+            raise  RuntimeError,"cannot open %s"%(filename)
+        data = im.getdata()
+        
+        # Initiazed the output data object
+        output.data = numpy.zeros([im.size[0],im.size[1]])
+        
+        # Initialize 
+        x_vals = []
+        y_vals = [] 
+
+        # x and y vectors
+        for i_x in range(im.size[0]):
+            x_vals.append(i_x)
+            
+        itot = 0
+        for i_y in range(im.size[1]):
+            y_vals.append(i_y)
+
+        for val in data:
             try:
-                im = Image.open(filename)
-            except :
-                raise  RuntimeError,"cannot open %s"%(filename)
-            # Detector size should be 128x128, the file is 190x190
-            print "-> Image size:", im.size, im.format, im.mode
-            data = im.getdata()
-            x = numpy.zeros(im.size[0])
-            y = numpy.zeros(im.size[1])
-            X, Y = pylab.meshgrid(x, y)
-            Z = copy.deepcopy(X)
-            itot = 0
-            i_x = 0
-            i_y = 0
+                value = float(val)
+            except:
+                logging.error("tiff_reader: had to skip a non-float point")
+                continue
             
-            # Qx and Qy vectors
-            for i_x in range(im.size[0]):
-                theta = (i_x-center_x+1)*pixel / distance / 100.0
-                qx = 4.0*math.pi/wavelength * math.sin(theta/2.0)
-                x_vals.append(qx)
-                if xmin==None or qx<xmin:
-                    xmin = qx
-                if xmax==None or qx>xmax:
-                    xmax = qx
-            
-            ymin = None
-            ymax = None
-            for i_y in range(im.size[1]):
-                theta = (i_y-center_y+1)*pixel / distance / 100.0
-                qy = 4.0*math.pi/wavelength * math.sin(theta/2.0)
-                y_vals.append(qy)
-                if ymin==None or qy<ymin:
-                    ymin = qy
-                if ymax==None or qy>ymax:
-                    ymax = qy
-            
-            for val in data:
+            # Get bin number
+            if math.fmod(itot, im.size[0])==0:
+                i_x = 0
+                i_y += 1
+            else:
+                i_x += 1
                 
-                try:
-                    value = float(val)
-                except:
-                    continue
-                
-                # Get bin number
-                if math.fmod(itot, im.size[0])==0:
-                    i_x = 0
-                    i_y += 1
-                else:
-                    i_x += 1
-                    
-                Z[im.size[1]-1-i_y][i_x] = value
-                
-                itot += 1
-            from readInfo import ReaderInfo      
-            output = ReaderInfo()
-            output.wavelength = wavelength
-            output.xbins      = im.size[0]
-            output.ybins      = im.size[1]
-            output.center_x   = center_x
-            output.center_y   = center_y
-            output.distance   = distance
-            output.x_vals     = x_vals
-            output.y_vals     = y_vals
-            output.xmin       = xmin
-            output.xmax       = xmax
-            output.ymin       = ymin
-            output.ymax       = ymax
-            output.image      = Z
-            output.pixel_size = pixel
-            output.x          = x_vals
-            output.y          = y_vals
-            output.type       ="2D"
-            logging.info("tiff_reader reading %s"%(filename))
+            output.data[im.size[1]-1-i_y][i_x] = value
             
-            return output
+            itot += 1
+                
+        output.xbins      = im.size[0]
+        output.ybins      = im.size[1]
+        output.x_bins     = x_vals
+        output.y_bins     = y_vals
+        output.xmin       = 0
+        output.xmax       = im.size[0]-1
+        output.ymin       = 0
+        output.ymax       = im.size[0]-1
         
-        return None
+        return output
+        
 
 

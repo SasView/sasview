@@ -1,29 +1,63 @@
-# This program is public domain
 """
-    @organization: Module loader contains class Loader which uses 
-    some readers to return values contained in a file readed.
-    @ author : Paul Kienzler
-    @modifiied by gervaise alina
+    File handler to support different file extensions.
+    Uses reflectometry's registry utility.
 """
-import imp,os,sys
-import logging
-import os.path
-logging.basicConfig(level=logging.ERROR,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename='test_log.txt',
-                    filemode='w')
 
-def _findReaders(dir):
-    # List of plugin objects
-    plugins = []
-    # Go through files in plug-in directory
-    try:
+"""
+This software was developed by the University of Tennessee as part of the
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+project funded by the US National Science Foundation. 
+
+See the license text in license.txt
+
+copyright 2008, University of Tennessee
+"""
+
+from data_util.registry import ExtensionRegistry
+import os 
+import sys
+import logging
+import imp
+import time
+
+class Registry(ExtensionRegistry):
+    """
+        Registry class for file format extensions.
+        Readers and writers are supported.
+    """
+    
+    def __init__(self):
+        super(Registry, self).__init__()
         
-        list = os.listdir(dir)
-        for item in list:
+        ## Writers
+        self.writers = {}
+        
+        ## Creation time, for testing
+        self._created = time.time()
+        
+        # Find internal readers
+        try:
+            cwd = os.path.split(__file__)[0]
+        except:
+            cwd = os.getcwd()
+            logging.error("Registry: could not find the installed reader's directory\n %s" % sys.exc_value)
             
-            toks = os.path.splitext(os.path.basename(item))
-            if toks[1]=='.py' and not toks[0]=='__init__':
+        dir = os.path.join(cwd, 'readers')
+        n = self.find_plugins(dir)
+        logging.info("Loader found %i readers" % n)
+        
+    def find_plugins(self, dir):
+        """
+            Find readers in a given directory
+            
+            @param dir: directory to search into
+            @return: number of readers found
+        """
+        readers_found = 0
+        for item in os.listdir(dir):
+            full_path = os.path.join(dir, item)
+            if os.path.isfile(full_path) and item.endswith('.py'):
+                toks = os.path.splitext(os.path.basename(item))
                 name = toks[0]
                 path = [os.path.abspath(dir)]
                 file = None
@@ -32,224 +66,125 @@ def _findReaders(dir):
                     module = imp.load_module( name, file, item, info )
                     if hasattr(module, "Reader"):
                         try:
-                            plugins.append(module.Reader())
+                            # Find supported extensions
+                            loader = module.Reader()
+                            for ext in loader.ext:
+                                if ext not in self.loaders:
+                                    self.loaders[ext] = []
+                                self.loaders[ext].insert(0,loader.read)
+                            readers_found += 1
+                            
+                            # Check whether writing is supported
+                            if hasattr(loader, 'write'):
+                                for ext in loader.ext:
+                                    if ext not in self.writers:
+                                        self.writers[ext] = []
+                                    self.writers[ext].insert(0,loader.write)
                         except:
-                            logging.error("Error accessing Reader in %s\n  %s" % (name, sys.exc_value))
+                            logging.error("Loader: Error accessing Reader in %s\n  %s" % (name, sys.exc_value))
                 except :
-                    logging.error("Error importing %s\n  %s" % (name, sys.exc_value))
+                    logging.error("Loader: Error importing %s\n  %s" % (name, sys.exc_value))
                 finally:
                     if not file==None:
                         file.close()
-    except:
-        # Should raise and catch at a higher level and display error on status bar
-        pass   
-    return plugins
+        return readers_found 
 
+    def lookup_writers(self, path):
+        """
+        Return the loader associated with the file type of path.
+        
+        Raises ValueError if file type is not known.
+        """        
+        # Find matching extensions
+        extlist = [ext for ext in self.extensions() if path.endswith(ext)]
+        # Sort matching extensions by decreasing order of length
+        extlist.sort(lambda a,b: len(a)<len(b))
+        # Combine loaders for matching extensions into one big list
+        writers = []
+        for L in [self.writers[ext] for ext in extlist]:
+            writers.extend(L)
+        # Remove duplicates if they exist
+        if len(writers) != len(set(writers)):
+            result = []
+            for L in writers:
+                if L not in result: result.append(L)
+            writers = L
+        # Raise an error if there are no matching extensions
+        if len(writers) == 0:
+            raise ValueError, "Unknown file type for "+path
+        # All done
+        return writers
 
+    def save(self, path, data, format=None):
+        """
+        Call the writer for the file type of path.
+
+        Raises ValueError if no writer is available.
+        Raises KeyError if format is not available.
+        May raise a writer-defined exception if writer fails.        
+        """
+        if format is None:
+            writers = self.lookup_writers(path)
+        else:
+            writers = self.writers[format]
+        for fn in writers:
+            try:
+                return fn(path, data)
+            except:
+                pass # give other loaders a chance to succeed
+        # If we get here it is because all loaders failed
+        raise # reraises last exception
+
+        
 class Loader(object):
     """
-        Loader class extracts data from a given file.
-        This provides routines for opening files based on extension,
-        and readers built-in file extensions.
-        It uses functionalities for class Load
-        @note: For loader to operate properly each readers used should 
-        contain a class name "Reader" that contains a field call ext.
-        Can be used as follow:
-        L=Loader()
-        self.assertEqual(l.__contains__('.tiff'),True)
-        #Recieves data 
-        data=L.load(path)
+        Utility class to use the Registry as a singleton.
     """
-    #Store instance of class Load
-    __load = None
+    ## Registry instance
+    __registry = Registry()
     
+    def load(self, file, format=None):
+        """
+            Load a file
+            
+            @param file: file name (path)
+            @param format: specified format to use (optional)
+            @return: DataInfo object
+        """
+        return self.__registry.load(file, format)
     
-    class Load(object):
+    def save(self, file, data, format):
+        """
+            Save a DataInfo object to file
+            @param file: file name (path)
+            @param data: DataInfo object
+            @param format: format to write the data in 
+        """
+        return self.__registry.save(file, data, format)
+        
+    def _get_registry_creation_time(self):
+        """
+            Internal method used to test the uniqueness
+            of the registry object
+        """
+        return self.__registry._created
     
-        def __init__(self):
-            #Dictionary containing readers and extension as keys
-            self.readers = {}
-            #Load all readers in plugins
-            
-            #TODO: misuse of __setitem__
-            #TODO: this bad call is done twice: here, and in Loader.__init__
-            #self.__setitem__()
-            
-            
-        def __setitem__(self,dir=None, ext=None, reader=None):
-            """
-                __setitem__  sets in a dictionary(self.readers) a given reader
-                with a file extension that it can read.
-                @param ext: extension given of type string
-                @param reader:instance Reader class
-                @param dir: directory name where plugins readers will be saved
-                @raise : ValueError will be raise if a "plugins" directory is not found
-                and the user didn't add a reader as parameter or if the user didn't 
-                add a reader as a parameter and plugins directory doesn't contain
-                plugin reader.
-                if an extension is not specified and a reader does not contain a field
-                ext , a warning is printed in test_log.txt file.
-                @note: when called without parameters __setitem__ will try to load
-                readers inside a "readers" directory 
-                if call with a directory name will try find readers 
-                from that directory "dir"
-            """
-            if dir==None:
-                dir = 'readers'
-                
-            #TODO Probably name the new path something else...
-            
-            #TODO: The whole concept of plug-ins was missed here.
-            # First we want to always load the reader we have (in 'readers')
-            # and THEN we want to add any additional readers found in
-            # a pre-defined plug-in path (that path should be a variable).
-            dir=os.path.join(os.path.dirname(os.path.abspath(__file__)),dir)
-            
-            if (reader==None and  ext==None) or dir:#1st load
-                plugReader=None
-                if os.path.isdir(dir):
-                    plugReader=_findReaders(dir)# import all module in plugins
-                
-                #TODO The following just doesn't make sense
-                # ../C:\Python25\lib... ????
-                if os.path.isdir('../'+dir):
-                    plugReader=_findReaders('../'+dir)
- 
-                
-                if plugReader !=None:
-                    list=[]
-                    for preader in plugReader:# for each modules takes list of extensions
-                        #TODO should use hasattr rather than a try/except block
-                        try:
-                            list=preader.ext
-                        except AttributeError,msg:
-                            logging.warning(msg)
-                            pass
-                            #raise  AttributeError," %s instance has no attribute 'ext'"\
-                            #%(preader.__class__)
-                        if list !=[]:
-                            for item in list:
-                                ext=item
-                                if ext not in self.readers:#assign extension with its reader
-                                    self.readers[ext] = []
-                                self.readers[ext].insert(0,preader)
-            #Reader and extension are given
-            elif reader !=None and  ext !=None:
-                if ext not in self.readers:
-                    self.readers[ext] = []
-                self.readers[ext].insert(0,reader)
-            elif reader!=None:
-                #only reader is receive try to find a field ext
-                try:
-                    list=preader.ext
-                except:
-                    raise AttributeError," Reader instance has no attribute 'ext'"
-                for item in list:
-                
-                    ext=item
-                    if ext not in self.readers:#assign extension with its reader
-                        self.readers[ext] = []
-                    self.readers[ext].insert(0,reader)
-
-            else:
-                raise ValueError,"missing reader"
-                
-            
-        def __getitem__(self, ext):
-            """
-                __getitem__ get a list of readers that can read a file with that extension
-                @param ext: file extension
-                @return self.readers[ext]:list of readers that can read a file 
-                with that extension
-            """
-            return self.readers[ext]
-            
-        def __contains__(self, ext):
-            """
-                @param ext:file extension
-                @return: True or False whether there is a reader file with that extension
-            """
-            return ext in self.readers
+    def find_plugins(self, dir):
+        """
+            Find plugins in a given directory
+            @param dir: directory to look into to find new readers/writers
+        """
+        return self.__registry.find_plugins(dir)
+    
+        
+if __name__ == "__main__": 
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(levelname)s %(message)s',
+                        filename='loader.log',
+                        filemode='w')
+    l = Loader()
+    data = l.load('test/cansas1d.xml')
+    l.save('test_file.xml', data)
         
         
-        def formats(self, name=True, ext=False):
-            """
-            Return a list of the registered formats.  If name=True then
-            named formats are returned.  If ext=True then extensions
-            are returned.
-            """
-            names = [a for a in self.readers.keys() if not a.startswith('.')]
-            exts = [a for a in self.readers.keys() if a.startswith('.')]
-            names.sort()
-            exts.sort()
-            ret = []
-            if name: ret += names
-            if ext: ret += exts
-            return ret
-            
-        def lookup(self, path):
-            """
-            Return the loader associated with the file type of path.
-            """        
-            file = os.path.basename(path)
-            idx = file.find('.')
-            ext = file[idx:] if idx >= 0 else ''
-           
-            try:
-                return self.readers[ext]
-            except:
-                logging.warning("Unknown file type '%s'"%ext)
-                raise RuntimeError, "Unknown file type '%s'"%ext
-                
-       
-        
-        def load(self, path, format=None):
-            """
-                Call reader for the file type of path.
-                @param path: path to file to load
-                @param format: extension of file to load
-                @return Data if sucessful
-                  or None is not reader was able to read that file
-                Raises ValueError if no reader is available.
-                May raise a loader-defined exception if loader fails.
-            """
-            try:
-                os.path.isfile( os.path.abspath(path)) 
-            except:
-                raise ValueError," file path unknown"
-            
-            if format is None:
-                try:
-                    readers = self.lookup(path)
-                except :
-                    raise 
-            else:
-                readers = self.readers[format]
-            if readers!=None:
-                for fn in readers:
-                    try:
-                        value=fn.read(path)
-                        return value
-                    except:
-                        logging.error("Load Error: %s"% (sys.exc_value))
-            else:
-                raise ValueError,"Loader contains no reader"
-                        
-                         
-    def __init__(self):
-        """ Create singleton instance """
-        # Check whether we already have an instance
-        if Loader.__load is None:
-            # Create and remember instance
-            Loader.__load = Loader.Load()
-            Loader.__load.__setitem__()
-        # Store instance reference as the only member in the handle
-        self.__dict__['_Loader__load'] = Loader.__load
-
-    def __getattr__(self, attr):
-        """ Delegate access to implementation """
-        return getattr(self.__load, attr)
-
-    def __setattr__(self, attr, value):
-        """ Delegate access to implementation """
-        return setattr(self.__load, attr, value)
+    
