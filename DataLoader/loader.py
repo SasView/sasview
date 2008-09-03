@@ -17,8 +17,8 @@ from data_util.registry import ExtensionRegistry
 import os 
 import sys
 import logging
-import imp
 import time
+from zipfile import ZipFile
 
 class Registry(ExtensionRegistry):
     """
@@ -56,38 +56,71 @@ class Registry(ExtensionRegistry):
         readers_found = 0
         for item in os.listdir(dir):
             full_path = os.path.join(dir, item)
-            if os.path.isfile(full_path) and item.endswith('.py'):
-                toks = os.path.splitext(os.path.basename(item))
-                name = toks[0]
-                path = [os.path.abspath(dir)]
-                file = None
-                try:
-                    (file, path, info) = imp.find_module(name, path)
-                    module = imp.load_module( name, file, item, info )
-                    if hasattr(module, "Reader"):
-                        try:
-                            # Find supported extensions
-                            loader = module.Reader()
-                            for ext in loader.ext:
-                                if ext not in self.loaders:
-                                    self.loaders[ext] = []
-                                self.loaders[ext].insert(0,loader.read)
+            if os.path.isfile(full_path):
+                
+                # Process python files
+                if item.endswith('.py'):
+                    toks = os.path.splitext(os.path.basename(item))
+                    try:
+                        sys.path.insert(0, os.path.abspath(dir))
+                        module = __import__(toks[0], globals(), locals())
+                        if self._identify_plugin(module):
                             readers_found += 1
+                    except :
+                        logging.error("Loader: Error importing %s\n  %s" % (name, sys.exc_value))
                             
-                            # Check whether writing is supported
-                            if hasattr(loader, 'write'):
-                                for ext in loader.ext:
-                                    if ext not in self.writers:
-                                        self.writers[ext] = []
-                                    self.writers[ext].insert(0,loader.write)
-                        except:
-                            logging.error("Loader: Error accessing Reader in %s\n  %s" % (name, sys.exc_value))
-                except :
-                    logging.error("Loader: Error importing %s\n  %s" % (name, sys.exc_value))
-                finally:
-                    if not file==None:
-                        file.close()
+                # Process zip files
+                elif item.endswith('.zip'):
+                    try:
+                        # Find the modules in the zip file
+                        zfile = ZipFile(item)
+                        nlist = zfile.namelist()
+                        
+                        sys.path.insert(0, item)
+                        for mfile in nlist:
+                            try:
+                                # Change OS path to python path
+                                fullname = mfile.replace('/', '.')
+                                fullname = os.path.splitext(fullname)[0]
+                                module = __import__(fullname, globals(), locals(), [""])
+                                if self._identify_plugin(module):
+                                    readers_found += 1
+                            except:
+                                logging.error("Loader: Error importing %s\n  %s" % (mfile, sys.exc_value))
+                            
+                    except:
+                        logging.error("Loader: Error importing %s\n  %s" % (item, sys.exc_value))
+                     
         return readers_found 
+    
+    def _identify_plugin(self, module):
+        """
+            Look into a module to find whether it contains a 
+            Reader class. If so, add it to readers and (potentially)
+            to the list of writers.
+            @param module: module object
+        """
+        reader_found = False
+        
+        if hasattr(module, "Reader"):
+            try:
+                # Find supported extensions
+                loader = module.Reader()
+                for ext in loader.ext:
+                    if ext not in self.loaders:
+                        self.loaders[ext] = []
+                    self.loaders[ext].insert(0,loader.read)
+                    reader_found = True
+                     
+                # Check whether writing is supported
+                if hasattr(loader, 'write'):
+                    for ext in loader.ext:
+                        if ext not in self.writers:
+                            self.writers[ext] = []
+                        self.writers[ext].insert(0,loader.write)
+            except:
+                logging.error("Loader: Error accessing Reader in %s\n  %s" % (name, sys.exc_value))
+        return reader_found
 
     def lookup_writers(self, path):
         """
