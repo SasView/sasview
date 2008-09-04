@@ -381,8 +381,14 @@ class PlotPanel(wx.Panel):
         """
             when clicking on linear Fit on context menu , display Fitting Dialog
         """
-        list =[]
-        list = self.graph.returnPlottable()
+        list = {}
+        plotlist = self.graph.returnPlottable()
+        if self.graph.selected_plottable is not None:
+            for item in plotlist:
+                if item.name==self.graph.selected_plottable:
+                    list[item] = plotlist[item]
+        else:
+            list = plotlist
         from fitDialog import LinearFit
         
         if len(list.keys())>0:
