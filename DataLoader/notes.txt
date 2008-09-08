@@ -1,2 +1,1 @@
 - Need support for images. tiff_reader.py needs to be tested.
-- Need support for zip file plugins for when we use py2exe.

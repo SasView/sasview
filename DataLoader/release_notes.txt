@@ -6,7 +6,10 @@ Package name: DataLoader 0.2
 1- 	Version 0.2
 	- Release date: ?
 	- First version of CanSAS reader/writer
-	- 1D data manipulations available
+	- 1D and 2D data manipulations available
+	- 1D CanSAS writer available
+	- HFIR 1D 4-col reader available (*.d1d)
+	- Allows plugins through python source or zip files
 	
 	Version 0.1
 	- First version of SANS data loader

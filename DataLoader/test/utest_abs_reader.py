@@ -56,6 +56,25 @@ class abs_reader(unittest.TestCase):
         
     def test_checkdata2(self):
         self.assertEqual(self.data.dy[126], 1)
+        
+class hfir_reader(unittest.TestCase):
+    
+    def setUp(self):
+        self.data = Loader().load("S2-30dq.d1d")
+        
+    def test_checkdata(self):
+        """
+            Check the data content to see whether 
+            it matches the specific file we loaded.
+        """
+        self.assertEqual(self.data.filename, "S2-30dq.d1d")
+        #          Q           I               dI          dQ  
+        # Point 1: 0.003014    0.003010        0.000315    0.008249
+        self.assertEqual(self.data.x[1], 0.003014)
+        self.assertEqual(self.data.y[1], 0.003010)
+        self.assertEqual(self.data.dy[1], 0.000315)
+        self.assertEqual(self.data.dx[1], 0.008249)
+        
 
 class igor_reader(unittest.TestCase):
     
