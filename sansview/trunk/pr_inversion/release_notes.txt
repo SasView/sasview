@@ -1,0 +1,60 @@
+Release Notes
+=============
+
+Package name: pr_inversion 0.2
+
+1- 	Version 0.2.1
+	- Release date: 7/8/2008
+	- Minor change to clone method
+	  
+	Version 0.2.0
+	
+	- Release date: 7/4/2008
+	- Number of term estimator
+	- Faster implementation
+
+	Version 0.1.0
+
+	- Release date: 5/28/2008
+	- Provide python module sans.pr
+
+2- Downloading and Installing
+
+	2.1- System Requirements:
+		- Python version >= 2.4 should be running on the system
+
+	2.2- Installing:
+		- Get the code from svn://danse.us/sans/releases/pr_inversion-0.1.0
+		- The following modules are required:
+			* matplotlib
+			* numpy
+			* scipy
+
+3- Known Issues
+
+	3.1- All systems:
+		- None
+
+	3.2- Windows:
+		- None
+
+	3.3- Linux:
+		- None
+
+4- Troubleshooting
+
+	- None
+
+5- Frequently Asked Questions
+
+	- None
+
+6- Other Resources
+
+	- See: http://danse.chem.utk.edu/prview.html
+
+	
+
+	
+
+

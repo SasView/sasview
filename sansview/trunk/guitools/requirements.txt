@@ -1,0 +1,118 @@
+- BUGS
+
+  1- [DONE] After fitting, the fit panel is not updated with the output values of the fit. 
+  
+  2- [DONE] Do this:
+      a) load the file line_in_x2_y.txt
+      b) fit a straight line, close the Fit Dialog
+      c) change the scale using the "Properties" menu to x vs y (linear vs linear)
+      You will see an exception that should be fixed.
+
+  3-  [DONE] Load the file line_in_x2_y.txt in miniView. Select x^2 and y for the scales. Fit it. 
+      a) The fit range is wrong, it's not update for the X^2 view.
+      b) the fit result is wrong
+      c) Even if you update the range, the fit and the plots are wrong.
+      
+  4- [DONE]At the python command prompt, try:
+       from sans.guitools.PlotPanel import PlotPanel
+       
+       You will get an exception: ImportError: No module named fittings
+       
+     Guitools should not depend on your miniView code.
+     
+  5- [QUESTION] Each time you open and close the Fit Dialog, a new label "Theory1D" is created in the
+     legend. There should always be only one, for the _last_ fit, and the name should be "Fit".
+     [alina] is it fine if I delete the fit line from the graph
+      and remove  it when I close the Fit Dialog window?
+     [Mathieu] That might work. I kind of like it. Let's do it like that and see what the users
+      need. 
+     
+  6-[QUESTION ] Do this:
+  		a) Load the file 'line_in_logy_x.txt'
+  		b) Fit a straight line
+  		c) The fit shown does not start from the first point and it's not a straight line. 
+  	[ALINA] then for transformation to log Do I have to transform x to log and set x linear?
+  	[Mathieu] No. That would confuse the user, who expects a log scale. The answer here is to fit 
+  	 y = A * log(x) + B, which is a straight line in the y vs log(x) representation.
+  	 
+--> [ALINA] woring better...I am concerned how to fit a straight line when x is changing too?
+  	 
+      
+- NOTES that might help for bugs
+  1- Make sure you are fitting the View data, not the underlying data
+  2- Since you are using the log scale from matplotlib, the fit for when one of 
+  		the axis is in log will NOT be a straight line
+  3- Make sure that you are filling the View of the fit result correctly.
+  [ALINA] not using the log of matplotlib anymore but the axis are never in the log scale by the value are in log10 x
+  [Mathieu] See my comment to point 6. The right answer is to go back to using the log scale of matplotlib.
+
+- NEEDED IMPROVEMENTS
+  1-[DONE] After loading a new file or changing the scale using the "Properties" menu, remove any previously displayed fit from the graph.
+  
+  2- There are additional y scales we need: y, y^2, log(y), 1/y, 1/sqrt(y), log(y * x), log(y * x^2)
+  [QUESTION] when plottong y=log(y*x) is the user allowed to do transformation on x at the same time 
+  for example x---> log X with  y=log(x*y)
+  [PROBLEM]WITH  log(y * x), log(y * x^2)
+  	
+  3-[DONE] You should change the label according to what the user chose, and not hard-code them.
+     For example, in PlotPanel._onEVT_FUNC_PROPERTY, replace
+          
+            self.graph.xaxis('\\rm{q^{2}} ', 'A^{-2}')
+         
+         with
+            name, units = self.some_plottable.get_xaxis()
+            self.graph.xaxis("(%s)^2" % name,  "(%s)^2" % units)
+    
+     That way it still works even if the user is not plotting Intensity versus Q.
+     
+  4- [DONE] In the fit dialog, put the "fit" and "Close" button in the bottom right corner, like in a standard file dialog.
+  
+  5- The layout of the Fit Dialog should be improved.
+  
+  6- The code should be well documented and clean-up (no print statements).
+  
+  
+  
+  AFTER TALKING WITH STEEVE KLEIN
+  
+ This is a list the changes Steeve wants :
+ 
+  1- [DONE] Add curves : ln(y) in linear scale, ln(x^(4)*I)
+  
+  2- [DONE]Specify in the fitDialog if natural log or log base 10
+  
+  3- [FIXED]When fitting sphere.txt , logx --logy ,fitting is not correct
+  
+  4- [FIXED]the line to fit always is displayed from x min to max all the time even if xmin is changed
+     or xmax is changed
+     
+  5- [FIXED]The fitting errors are too small (order of 10^(-7))for that case too,certainly wrong
+  
+  6- When to see errors bars appear when loading sphere.txt file. 
+  
+  7- Add zoom in option when xmax and xmin(user) are entered.
+  
+  8-[FIXED] Always want to know the initial value of xmin and xmax when opening the fitDialog.These values
+     should always be independant of the transformation
+     
+  9-[FIXED] the user should be able to add point to fit without knowing the exact range or guessing
+  		a range to fit.
+
+	TO Dr. MATHIEU 
+  1- I probably have to change the interface of the fitdialog, I would like to discuss 
+     it before proceeding
+	ALINA
+ 1- Would like to change the y axis label display
+ 
+ 
+Cleaning up for deployment:
+
+ - When zooming, check that the new lower bound is positive if on a log scale [DONE] 
+ - Fixed bug with the zooming dependency on scale [DONE]
+ - Improved look of Fit dialog [DONE]
+ 
+ - Improve labels
+ 
+ - Problem scales:
+     - x vs 1/y
+     

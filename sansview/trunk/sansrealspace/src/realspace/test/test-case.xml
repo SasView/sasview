@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<TestCase>
+  <Stimulus id="Add"/>
+  <Stimulus id="GetIq"/>
+</TestCase>

@@ -1,0 +1,7 @@
+
+
+def model():
+    from test_pyre_scatt import ToyModel
+    
+    # Invoke ModelFactory to get a model object
+    return ToyModel('toymodel', facility='sans')

@@ -1,0 +1,8 @@
+
+
+def model():
+    from ScatteringIntensityFactory import ScatteringIntensityFactory
+    from sans.models.CylinderModel import CylinderModel
+    
+    # Invoke ModelFactory to get a model object
+    return ScatteringIntensityFactory( CylinderModel )('cylinder')

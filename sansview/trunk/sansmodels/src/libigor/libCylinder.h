@@ -1,0 +1,71 @@
+/*
+	libCylinderFit.h -- equates for CylinderFit XOP
+*/
+
+
+/* Prototypes */
+/* IGOR Fit Functions */
+double CylinderForm(double dp[], double q);
+double EllipCyl76(double dp[], double q);
+double EllipCyl20(double dp[], double q);
+double TriaxialEllipsoid(double dp[], double q);
+double Parallelepiped(double dp[], double q);
+double HollowCylinder(double dp[], double q);
+double EllipsoidForm(double dp[], double q);
+double Cyl_PolyRadius(double dp[], double q);
+double Cyl_PolyLength(double dp[], double q);
+double CoreShellCylinder(double dp[], double q);
+double OblateForm(double dp[], double q);
+double ProlateForm(double dp[], double q);
+double FlexExclVolCyl(double dp[], double q);
+double FlexCyl_PolyLen(double dp[], double q);
+double FlexCyl_PolyRad(double dp[], double q);
+double FlexCyl_Ellip(double dp[], double q);
+double PolyCoShCylinder(double dp[], double q);
+double StackedDiscs(double dp[], double q);
+double LamellarFF(double dp[], double q);
+double LamellarFF_HG(double dp[], double q);
+double LamellarPS(double dp[], double q);
+double LamellarPS_HG(double dp[], double q);
+
+/* internal functions */
+double CylKernel(double qq, double rr,double h, double theta);
+double NR_BessJ1(double x);
+double EllipCylKernel(double qq, double ra,double nu, double theta);
+double TriaxialKernel(double q, double aa, double bb, double cc, double dx, double dy);
+double PPKernel(double aa, double mu, double uu);
+double HolCylKernel(double qq, double rcore, double rshell, double length, double dum);
+double EllipsoidKernel(double qq, double a, double va, double dum);
+double Cyl_PolyRadKernel(double q, double radius, double length, double zz, double delrho, double dumRad);
+double SchulzPoint_cpr(double dumRad, double radius, double zz);
+double Cyl_PolyLenKernel(double q, double radius, double len_avg, double zz, double delrho, double dumLen);
+double CoreShellCylKernel(double qq, double rcore, double thick, double rhoc, double rhos, double rhosolv, double length, double dum);
+double gfn4(double xx, double crmaj, double crmin, double trmaj, double trmin, double delpc, double delps, double qq);
+double gfn2(double xx, double crmaj, double crmin, double trmaj, double trmin, double delpc, double delps, double qq);
+double FlePolyLen_kernel(double q, double radius, double length, double lb, double zz, double delrho, double zi);
+double FlePolyRad_kernel(double q, double ravg, double Lc, double Lb, double zz, double delrho, double zi);
+double EllipticalCross_fn(double qq, double a, double b);
+double CScyl(double qq, double rad, double radthick, double facthick, double rhoc, double rhos, double rhosolv, double length, double dum);
+double CSCylIntegration(double qq, double rad, double radthick, double facthick, double rhoc, double rhos, double rhosolv, double length);
+double Stackdisc_kern(double qq, double rcore, double rhoc, double rhol, double rhosolv, double length, double thick, double dum, double gsd, double d, double N);
+
+/////////functions for WRC implementation of flexible cylinders
+static double Sk_WR(double q, double L, double b);
+static double w_WR(double x);
+static double u1(double q, double L, double b);
+static double u_WR(double q, double L, double b);
+static double Rgsquarezero(double q, double L, double b);
+static double Rgsquareshort(double q, double L, double b);
+static double Rgsquare(double q, double L, double b);
+static double AlphaSquare(double x);
+static double miu(double x);
+static double Sdebye(double q, double L, double b);
+static double Sdebye1(double q, double L, double b);
+static double Sexv(double q, double L, double b);
+static double Sexvnew(double q, double L, double b);
+static double a2short(double q, double L, double b, double p1short, double p2short, double q0);
+static double a1short(double q, double L, double b, double p1short, double p2short, double q0);
+static double a2long(double q, double L, double b, double p1, double p2, double q0);
+static double sech_WR(double x);
+static double a1long(double q, double L, double b, double p1, double p2, double q0);
+static double gammaln(double xx);

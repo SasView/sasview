@@ -1,0 +1,8 @@
+Release Notes for 'libigor'
+
+The C code in 'libigor' has been written as part of the SANS analysis package
+that uses IGOR. More information can be found here:
+
+	http://www.ncnr.nist.gov/programs/sans/data/red_anal.html
+	 
+    "Reduction and Analysis of SANS and USANS Data using Igor Pro", Kline, S. R. J Appl. Cryst. 39(6), 895 (2006).
