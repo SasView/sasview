@@ -64,9 +64,8 @@ class FitProblem:
             @param value: value of that parameter
         """
         
-        self.model_list[0].model.setParam(name,value)
-        new_model=Model(self.model_list[0].model)
-        self.model_list[0]=new_model
+        self.model_list[0].setParam(name,value)
+       
         
     def reset_model(self,model):
         """ 

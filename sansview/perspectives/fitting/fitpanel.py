@@ -48,7 +48,8 @@ class FitPanel(wx.Panel):
         #dictionary of miodel {model class name, model class}
         self.model_list_box={}
         # save the title of the last page tab added
-        self.name=None
+        self.fit_page_name=None
+        self.draw_model_name=[]
         self.nb.Update()
         self.SetSizer(self.sizer)
         self.sizer.Fit(self)
@@ -71,22 +72,32 @@ class FitPanel(wx.Panel):
         self.event_owner=owner
       
         
-    def add_page( self,page_title ):
+    def add_fit_page( self,page_title ):
         """ 
             Add a fitting page on the notebook contained by fitpanel
             @param panel: contains in the page to add
             @param name: title of the page tab
             @return panel : page just added for futher used. is used by fitting module
         """     
-        if self.name != page_title:
+        if self.fit_page_name != page_title:
             from fitpage import FitPage
             panel = FitPage(self.nb, -1)
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
             self.nb.AddPage(page=panel,text=page_title,select=True)
             panel.populate_box( self.model_list_box)
-            self.name = page_title
+            self.fit_page_name = page_title
             return panel
+    def add_model_page(self,model,page_title):
+        if not  page_title in self.draw_model_name: 
+            from modelpage import ModelPage
+            panel = ModelPage(self.nb,model, -1)
+            panel.set_manager(self.manager)
+            panel.set_owner(self.event_owner)
+            self.nb.AddPage(page=panel,text=page_title,select=True)
+            panel.populate_box( self.model_list_box)
+            self.draw_model_name.append(page_title)
+           
   
     def get_notebook(self):
         """

@@ -494,6 +494,9 @@ class FitPage(wx.Panel):
         """ 
             when enter value on panel redraw model according to changed
         """
+        self.set_model_parameter()
+        
+    def set_model_parameter(self):
         if len(self.parameters) !=0 and self.model !=None:
             for item in self.parameters:
                 try:
@@ -506,8 +509,6 @@ class FitPage(wx.Panel):
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Drawing  Error:wrong value entered : %s"% sys.exc_value))
-        
-       
     def select_all_param(self,event): 
         """
              set to true or false all checkBox given the main checkbox value cb1

@@ -73,6 +73,7 @@ class Plugin:
         self.fit_panel.set_owner(owner)
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
         owner.Bind(fitpage.EVT_MODEL_BOX,self._on_model_panel)
+        #owner.Bind(modelpage.EVT_MODEL_DRAW,self.draw_model)
       
         return [(id, self.menu1, "Fitting"),(id2, menu2, "Model")]
     
@@ -153,7 +154,7 @@ class Plugin:
                 except:
                     name = 'Fit'
                 try:
-                    page = self.fit_panel.add_page(name)
+                    page = self.fit_panel.add_fit_page(name)
                     page.set_data_name(item)
                     self.page_finder[page]= FitProblem()
                     #creating Data type
@@ -218,9 +219,9 @@ class Plugin:
             i = 0
             for name in pars:
                 if result.pvec.__class__==numpy.float64:
-                    model.model.setParam(name,result.pvec)
+                    model.setParam(name,result.pvec)
                 else:
-                    model.model.setParam(name,result.pvec[i])
+                    model.setParam(name,result.pvec[i])
                     #print "fitting: i name out[i]", i,name,float(result.pvec[i])
                     i += 1
             new_cov=[]
@@ -254,12 +255,12 @@ class Plugin:
                 for p in result.parameters:
                     print "fitting: fit in park fitting", p.name, p.value,p.stderr
                     model_name,param_name = self.split_string(p.name)  
-                    print "fitting: simultfit",model.model.name,model_name,param_name ,p.name,param_name,p.value
-                    if model.model.name == model_name:
+                    print "fitting: simultfit",model.name,model_name,param_name ,p.name,param_name,p.value
+                    if model.name == model_name:
                         print "fitting: hello",p.name,param_name,p.value
                         small_out.append(p.value )
                         small_cov.append(p.stderr)
-                        model.model.setParam(param_name,p.value)   
+                        model.setParam(param_name,p.value)   
                 #print "fitting: out of each page",page,small_out,small_cov,data.group_id
                 page.onsetValues(result.fitness, small_out,small_cov)
                 self.plot_helper(currpage= page,qmin= qmin,qmax= qmax) 
@@ -407,7 +408,7 @@ class Plugin:
                     print "fitting: pars",pars,model.name
                     #print "fitter",self.fitter
                     #print "fitting: model name",model.name
-                    self.fitter.set_model(model,model.model.name, self.id, pars) 
+                    self.fitter.set_model(Model(model),model.name, self.id, pars) 
                     self.fitter.set_data(data,self.id,qmin,qmax)
                 else:
                     raise ValueError," Fitting: cannot set model with empty parameter"
@@ -454,7 +455,7 @@ class Plugin:
             self.index_model += 1  
             self.page_finder[current_pg].set_theory("Fitness")
             #print "on model",model.name
-            self.page_finder[current_pg].set_model(Model(model),M_name)
+            self.page_finder[current_pg].set_model(model,M_name)
             self.plot_helper(currpage= current_pg,qmin= None,qmax= None)
             sim_page.add_model(self.page_finder)
         
@@ -502,7 +503,7 @@ class Plugin:
                     qmax = max(data.x)
                 try:
                     tempx = qmin
-                    tempy = model.eval(qmin)
+                    tempy = model.run(qmin)
                     theory.x.append(tempx)
                     theory.y.append(tempy)
                 except :
@@ -513,7 +514,7 @@ class Plugin:
                     try:
                         if data.x[i]> qmin and data.x[i]< qmax:
                             tempx = data.x[i]
-                            tempy = model.eval(tempx)
+                            tempy = model.run(tempx)
                             
                             theory.x.append(tempx) 
                             theory.y.append(tempy)
@@ -522,7 +523,7 @@ class Plugin:
                         skipping point x %g %s" %(data.x[i], sys.exc_value)))   
                 try:
                     tempx = qmax
-                    tempy = model.eval(qmax)
+                    tempy = model.run(qmax)
                     theory.x.append(tempx)
                     theory.y.append(tempy)
                 except:
@@ -541,13 +542,19 @@ class Plugin:
         """
             Plot a theory from a model selected from the menu
         """
+        #name = evt.model.__class__.__name__
+        name="Model View"
+        self.fit_panel.add_model_page(evt.model,name)       
+        self.draw_model(evt.model)
+        
+    def draw_model(self,model):
         x = pylab.arange(0.001, 0.1, 0.001)
         xlen = len(x)
         dy = numpy.zeros(xlen)
         y = numpy.zeros(xlen)
         
         for i in range(xlen):
-            y[i] = evt.model.run(x[i])
+            y[i] = model.run(x[i])
             dy[i] = math.sqrt(math.fabs(y[i]))
         try:
            
@@ -560,7 +567,6 @@ class Plugin:
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model"))
         except:
             print "SimView.complete1D: could not import sans.guicomm.events"
-
 
 if __name__ == "__main__":
     i = Plugin()

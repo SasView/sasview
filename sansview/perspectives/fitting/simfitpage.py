@@ -1,5 +1,4 @@
 
-
 import sys,re,string, wx   
 from sans.guicomm.events import StatusEvent    
 
@@ -54,6 +53,7 @@ class SimultaneousFitPage(wx.Panel):
         self.params=[]
         self.model_list=[]
         self.model_toFit=[]
+        self.page_finder={}
         iy +=1
         self.sizer2.Add((20,20),(iy, ix))
         self.vbox.Layout()
@@ -63,12 +63,16 @@ class SimultaneousFitPage(wx.Panel):
         
         
     def onFit(self,event):
-         """ signal for fitting"""
-         if len(self.model_toFit) >0 :
-             self.set_model()
-             self.manager._on_simul_fit()
-         else:
-             wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+        """ signal for fitting"""
+        if len(self.model_toFit) >0 :
+            if len(self.params)>0:
+                self.set_model()
+            else:
+                for page in self.page_finder.iterkeys():
+                    page.set_model_parameter()
+            self.manager._on_simul_fit()
+        else:
+            wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Select at least on model to fit "))
     def set_manager(self, manager):
         """
@@ -98,9 +102,11 @@ class SimultaneousFitPage(wx.Panel):
             Receive a dictionary containing information to display model name
             @param page_finder: the dictionary containing models information
         """
+        import copy 
         self.model_list=[]
         self.model_toFit=[]
         self.sizer1.Clear(True)
+        self.page_finder=page_finder
         ix = 0
         iy = 1 
         list=[]
@@ -178,20 +184,20 @@ class SimultaneousFitPage(wx.Panel):
                 list=item[1].get_model()
                 #print "simfitpage: list fitpanel2",list,list[0]
                 model=list[0]
-                param_list=model.model.getParamList()
+                param_list=model.getParamList()
                 #print "simfitpage: on set_model ",self.params
                 if self.params !=[]:
                     for element in self.params:
-                        if model.model.name == str(element[0]):
+                        if model.name == str(element[0]):
                             for item in param_list:
                                 if item==str(element[1]):
                                     #print "simfitpage: on set_model page 1",param_list
                                     #print "simfitpage: model name",element[0], model.name
                                     #print "simfitpage: param name ,param value",element[1],element[2]
-                                    self.manager.set_page_finder(model.model.name,element[1],\
+                                    self.manager.set_page_finder(model.name,element[1],\
                                                                  str(element[2]))
                             #print "simfitpage:on set_model page 2",model.params['A'],self.params[2]
-                
+    
                 
     def _onTextEnter(self,event):
         """
