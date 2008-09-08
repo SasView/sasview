@@ -49,7 +49,8 @@ class FitPanel(wx.Panel):
         self.model_list_box={}
         # save the title of the last page tab added
         self.fit_page_name=None
-        self.draw_model_name=[]
+        self.draw_model_name=None
+        self.page_name="Model View"
         self.nb.Update()
         self.SetSizer(self.sizer)
         self.sizer.Fit(self)
@@ -89,14 +90,24 @@ class FitPanel(wx.Panel):
             self.fit_page_name = page_title
             return panel
     def add_model_page(self,model,page_title):
-        if not  page_title in self.draw_model_name: 
+        print "fitpanel: self.draw_model_name",self.draw_model_name
+        if  page_title !=self.draw_model_name or self.draw_model_name ==None: 
+            print "went here"
             from modelpage import ModelPage
             panel = ModelPage(self.nb,model, -1)
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
             self.nb.AddPage(page=panel,text=page_title,select=True)
             panel.populate_box( self.model_list_box)
-            self.draw_model_name.append(page_title)
+            self.draw_model_name=page_title
+        else:
+            print "fitpanel: a page was added already "
+            for i in range(self.nb.GetPageCount()):
+                if self.nb.GetPageText(i)==self.page_name:
+                    page=self.nb.GetPage(i)
+                    page.set_page(model)
+                    break
+                
            
   
     def get_notebook(self):
@@ -146,9 +157,13 @@ class FitPanel(wx.Panel):
                 if page==selected_page:
                     del page_finder[page]
                     break
-            #delete the page from notebook
+            #Delete the page from notebook
+            page_number = self.nb.GetSelection()
+            if self.nb.GetPageText(page_number)== self.page_name:
+                self.draw_model_name=None
+                
             selected_page.Destroy()
-            self.nb.RemovePage(self.nb.GetSelection())
+            self.nb.RemovePage(page_number)
             self.name=None
             
             

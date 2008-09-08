@@ -5,6 +5,7 @@ import os.path
 (ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
 
 
+
 class ModelManager:
     
     ## Dictionary of models

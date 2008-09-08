@@ -233,7 +233,8 @@ class Plugin:
             current_pg.onsetValues(result.fitness, result.pvec,new_cov)
             self.plot_helper(currpage=current_pg,qmin=qmin,qmax=qmax)
         except:
-             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+            raise
+            wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
        
     def _simul_fit_completed(self,result,qmin,qmax):
@@ -351,8 +352,8 @@ class Plugin:
                         return
                 #print "fitting: pars",pars
                 pars.sort()
-                
-                self.fitter.set_model(model,model.name, self.id, pars) 
+                print "fitting: model ",model.__class__.__name__
+                self.fitter.set_model(Model(model),model.name, self.id, pars) 
                 self.fitter.set_data(data,self.id,qmin,qmax)
                 #Do the fit SCIPY
                 try:
@@ -542,6 +543,7 @@ class Plugin:
         """
             Plot a theory from a model selected from the menu
         """
+        print "_on_model_menu done"
         #name = evt.model.__class__.__name__
         name="Model View"
         self.fit_panel.add_model_page(evt.model,name)       

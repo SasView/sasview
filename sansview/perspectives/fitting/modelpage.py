@@ -48,24 +48,18 @@ class ModelPage(wx.Panel):
         self.event_owner=None
         #panel interface
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
-       
         self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer2 = wx.GridBagSizer(5,5)
-       
         self.modelbox = wx.ComboBox(self, -1)
         id = wx.NewId()
-       
         self.vbox.Add(self.sizer3)
         self.vbox.Add(self.sizer2)
-      
         ix = 0
         iy = 1
-        
         self.sizer3.Add(wx.StaticText(self,-1,'Model'),(iy,ix),(1,1)\
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer3.Add(self.modelbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-       
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         #contains link between a model and selected parameters to fit 
@@ -78,12 +72,10 @@ class ModelPage(wx.Panel):
         self.modelbox.SetValue(self.prevmodel_name)
         # flag to check if the user has selected a new model in the combox box
         self.model_hasChanged=False
-       
         #dictionary of model name and model class
         self.model_list_box={}
         # Data1D to make a deep comparison between 2 Data1D for checking data
         #change
-       
         self.vbox.Layout()
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)
@@ -123,8 +115,17 @@ class ModelPage(wx.Panel):
             
             wx.EVT_COMBOBOX(self.modelbox,-1, self._on_select_model) 
         return 0
-    
-    
+   
+    def set_page(self, model):
+        print " modelpage: set_page was called",model
+        self.model=model
+        if hasattr(self.model, "name"):
+            name = self.model.name
+        else:
+            name = self.model.__class__.__name__
+        self.modelbox.SetValue(name)
+        self.set_panel(self.model)
+        self.manager.draw_model(self.model)
     def _on_select_model(self,event):
         """
             react when a model is selected from page's combo box
@@ -190,6 +191,7 @@ class ModelPage(wx.Panel):
         keys.sort()
         iy = 1
         ix = 0
+        
         self.cb1 = wx.StaticText(self, -1,'Parameters')
         self.sizer2.Add(self.cb1,(iy, ix),(1,1),\
                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -245,9 +247,9 @@ class ModelPage(wx.Panel):
         if len(self.parameters) !=0 and self.model !=None:
             for item in self.parameters:
                 try:
-                     name=str(item[0])
+                     name=str(item[0].GetLabelText())
                      value= float(item[1].GetValue())
-                     
+                     print "modelpage: name. value",name , value
                      self.model.setParam(name,value)
                      self.manager.draw_model(self.model)
                 except:
