@@ -89,10 +89,16 @@ class FitPanel(wx.Panel):
             panel.populate_box( self.model_list_box)
             self.fit_page_name = page_title
             return panel
+        
+        
     def add_model_page(self,model,page_title):
-        print "fitpanel: self.draw_model_name",self.draw_model_name
+        """
+            Add a model page only one  to display any model selected from the menu or the page combo box.
+            when this page is closed than the user will be able to open a new one
+            @param model: the model for which paramters will be changed
+            @param page_title: the name of the page
+        """
         if  page_title !=self.draw_model_name or self.draw_model_name ==None: 
-            print "went here"
             from modelpage import ModelPage
             panel = ModelPage(self.nb,model, -1)
             panel.set_manager(self.manager)
@@ -101,7 +107,6 @@ class FitPanel(wx.Panel):
             panel.populate_box( self.model_list_box)
             self.draw_model_name=page_title
         else:
-            print "fitpanel: a page was added already "
             for i in range(self.nb.GetPageCount()):
                 if self.nb.GetPageText(i)==self.page_name:
                     page=self.nb.GetPage(i)
@@ -109,7 +114,6 @@ class FitPanel(wx.Panel):
                     break
                 
            
-  
     def get_notebook(self):
         """
             @return self.nb: return its own notebook mostly used by fitting module 

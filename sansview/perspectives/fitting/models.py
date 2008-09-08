@@ -3,7 +3,35 @@ import os
 import os.path
 
 (ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
-
+def _findModels(dir):
+    # List of plugin objects
+    plugins = []
+    # Go through files in plug-in directory
+    try:
+        list = os.listdir(dir)
+        for item in list:
+            toks = os.path.splitext(os.path.basename(item))
+            if toks[1]=='.py' and not toks[0]=='__init__':
+                name = toks[0]
+            
+                path = [os.path.abspath(dir)]
+                file = None
+                try:
+                    (file, path, info) = imp.find_module(name, path)
+                    module = imp.load_module( name, file, item, info )
+                    if hasattr(module, "Model"):
+                        try:
+                            plugins.append(module.Model)
+                        except:
+                            log("Error accessing Model in %s\n  %s" % (name, sys.exc_value))
+                except:
+                    pass
+                finally:
+                    if not file==None:
+                        file.close()
+    except:
+        pass
+    return plugins
 
 
 class ModelManager:
