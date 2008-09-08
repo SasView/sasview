@@ -1,8 +1,0 @@
-
-
-def model():
-    from ScatteringIntensityFactory import ScatteringIntensityFactory
-    from sans.models.SphereModel import SphereModel
-    
-    # Invoke ModelFactory to get a model object
-    return ScatteringIntensityFactory( SphereModel )('sphere')

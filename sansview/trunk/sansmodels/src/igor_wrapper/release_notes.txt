@@ -1,8 +1,0 @@
-The files in this directory should be compiled with files 
-in the following directory:
-
- ../libigor  (or equivalent if you are using the NIST igor libraries)
-
- You will also need the DANSE models and disperser.c in:
- 
- ../sans/models/c_extensions  					
