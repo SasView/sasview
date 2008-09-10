@@ -3,6 +3,22 @@ import os
 import os.path
 
 (ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
+def findModels():
+    print "looking for models"
+    try:
+        cwd= os.path.split(__file__)[0]
+    except:
+        cwd= os.getcwd()
+    print "models cwd",cwd
+    dir=os.path.join(cwd,'plugins')
+    print "models: find plugins",dir
+    if os.path.isdir(dir):
+        return _findModels(dir)
+    else:
+        return []
+    
+    
+    
 def _findModels(dir):
     # List of plugin objects
     plugins = []
@@ -10,7 +26,9 @@ def _findModels(dir):
     try:
         list = os.listdir(dir)
         for item in list:
+            print "models: _findModels:",item
             toks = os.path.splitext(os.path.basename(item))
+            print "models: toks:",toks
             if toks[1]=='.py' and not toks[0]=='__init__':
                 name = toks[0]
             
@@ -32,6 +50,7 @@ def _findModels(dir):
     except:
         pass
     return plugins
+    
 
 
 class ModelManager:
@@ -88,7 +107,8 @@ class ModelManager:
             
             modelmenu.Append(int(id_str), name, name)
             wx.EVT_MENU(event_owner, int(id_str), self._on_model)       
-    
+        plugings=findModels()
+        print "models: plugings",plugings
         return 0
     
     def _on_model(self, evt):
