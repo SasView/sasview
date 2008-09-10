@@ -1,23 +1,20 @@
 import wx
-import os
+import imp
+import os,sys
 import os.path
 
 (ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
+def log(message):
+    print message
+    out = open("plugins.log", 'a')
+    out.write("%10g:  %s\n" % (time.clock(), message))
+    out.close()
+
 def findModels():
     print "looking for models"
-    try:
-        cwd= os.path.split(__file__)[0]
-    except:
-        cwd= os.getcwd()
-    print "models cwd",cwd
-    dir=os.path.join(cwd,'plugins')
-    print "models: find plugins",dir
-    if os.path.isdir(dir):
-        return _findModels(dir)
-    else:
-        return []
-    
-    
+    if os.path.isdir('plugins'):
+        return _findModels('plugins')
+    return []
     
 def _findModels(dir):
     # List of plugin objects
@@ -26,9 +23,7 @@ def _findModels(dir):
     try:
         list = os.listdir(dir)
         for item in list:
-            print "models: _findModels:",item
             toks = os.path.splitext(os.path.basename(item))
-            print "models: toks:",toks
             if toks[1]=='.py' and not toks[0]=='__init__':
                 name = toks[0]
             
@@ -36,28 +31,29 @@ def _findModels(dir):
                 file = None
                 try:
                     (file, path, info) = imp.find_module(name, path)
+                    print "models:module ",file
                     module = imp.load_module( name, file, item, info )
+                    print "models:module ",module
                     if hasattr(module, "Model"):
                         try:
                             plugins.append(module.Model)
                         except:
                             log("Error accessing Model in %s\n  %s" % (name, sys.exc_value))
                 except:
-                    pass
+                    log("Error accessing Model in %s\n  %s" % (name, sys.exc_value))
                 finally:
                     if not file==None:
                         file.close()
     except:
         pass
     return plugins
-    
-
-
 class ModelManager:
     
     ## Dictionary of models
     model_list = {}
     model_list_box = {}
+    custom_models={}
+    plugins=[]
     ## Event owner
     event_owner = None
     
@@ -79,7 +75,9 @@ class ModelManager:
    
         from sans.guitools.LineModel import LineModel
         self.model_list[str(wx.NewId())]  = LineModel
-      
+        self.plugins =findModels()
+        
+        print "models: plugings",self.plugins
         return 0
 
     
@@ -95,7 +93,9 @@ class ModelManager:
         
         self._getModelList()
         self.event_owner = event_owner
-
+        shape_submenu= wx.Menu() 
+        indep_submenu = wx.Menu()
+        added_models = wx.Menu()
         for id_str,value in self.model_list.iteritems():
             item = self.model_list[id_str]
             
@@ -104,11 +104,29 @@ class ModelManager:
                 name = item.name
                 
             self.model_list_box[name] =value
-            
-            modelmenu.Append(int(id_str), name, name)
-            wx.EVT_MENU(event_owner, int(id_str), self._on_model)       
-        plugings=findModels()
-        print "models: plugings",plugings
+
+               
+            shape_submenu.Append(int(id_str), name, name)
+            wx.EVT_MENU(event_owner, int(id_str), self._on_model)
+        modelmenu.AppendMenu(wx.NewId(), "Shapes...", shape_submenu, "List of shape-based models")
+        modelmenu.AppendMenu(wx.NewId(), "Shape-independent...", indep_submenu, "List of shape-independent models")
+        
+        id = wx.NewId()
+        if len(self.custom_models) == 0:
+            print self.plugins
+            for item in self.plugins:
+                if item not in self.custom_models.keys():
+                    self.custom_models[str(id)] = item
+                    self.model_list[str(id)]=item
+                    added_models.Append(id, item.name, item.name)
+                    wx.EVT_MENU(event_owner, int(id), self._on_model)
+                    id = wx.NewId()
+       
+           
+        modelmenu.AppendMenu(wx.NewId(),"Added models...", added_models, "List of additional models")
+        
+        
+        
         return 0
     
     def _on_model(self, evt):
