@@ -91,7 +91,7 @@ class FitPanel(wx.Panel):
             return panel
         
         
-    def add_model_page(self,model,page_title):
+    def add_model_page(self,model,description,page_title):
         """
             Add a model page only one  to display any model selected from the menu or the page combo box.
             when this page is closed than the user will be able to open a new one
@@ -100,7 +100,7 @@ class FitPanel(wx.Panel):
         """
         if  page_title !=self.draw_model_name or self.draw_model_name ==None: 
             from modelpage import ModelPage
-            panel = ModelPage(self.nb,model, -1)
+            panel = ModelPage(self.nb,model,description, -1)
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
             self.nb.AddPage(page=panel,text=page_title,select=True)
@@ -110,7 +110,7 @@ class FitPanel(wx.Panel):
             for i in range(self.nb.GetPageCount()):
                 if self.nb.GetPageText(i)==self.page_name:
                     page=self.nb.GetPage(i)
-                    page.set_page(model)
+                    page.set_page(model,description)
                     break
                 
            

@@ -223,16 +223,18 @@ class FitPage(wx.Panel):
         """
         id=0
         self.model_list_box=dict
-        for item in self.model_list_box.itervalues():
+        list_name=[]
+        for item in  self.model_list_box.itervalues():
             if hasattr(item, "name"):
                 name = item.name
             else:
                 name = item.__name__
-            
+            list_name.append(name)
+        list_name.sort()   
+        for name in list_name:
             self.modelbox.Insert(name,int(id))
             id+=1
-            
-            wx.EVT_COMBOBOX(self.modelbox,-1, self._on_select_model) 
+        wx.EVT_COMBOBOX(self.modelbox,-1, self._on_select_model) 
         return 0
     
     
@@ -253,7 +255,6 @@ class FitPage(wx.Panel):
                     wx.PostEvent(self.event_owner, evt)
             except:
                 raise #ValueError,"model.name is not equal to model class name"
-
 
     
     def _onTextEnter(self,event):

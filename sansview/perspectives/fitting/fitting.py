@@ -48,7 +48,7 @@ class Plugin:
         #Flag to let the plug-in know that it is running standalone
         self.standalone=True
         ## Fit engine
-        self._fit_engine = 'park'
+        self._fit_engine = 'scipy'
         # Log startup
         logging.info("Fitting plug-in started")   
 
@@ -207,7 +207,6 @@ class Plugin:
         """
           
         """
-       
         try:
             for page, value in self.page_finder.iteritems():
                 if page== current_pg:
@@ -546,8 +545,10 @@ class Plugin:
         print "_on_model_menu done"
         #name = evt.model.__class__.__name__
         name="Model View"
-        self.fit_panel.add_model_page(evt.model,name)       
-        self.draw_model(evt.model)
+        model=evt.modelinfo.model()
+        description=evt.modelinfo.description
+        self.fit_panel.add_model_page(model,description,name)       
+        self.draw_model(model)
         
     def draw_model(self,model):
         x = pylab.arange(0.001, 0.1, 0.001)

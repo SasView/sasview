@@ -38,7 +38,7 @@ class ModelPage(wx.Panel):
     window_caption = "Fit Page"
     
     
-    def __init__(self, parent,model, *args, **kwargs):
+    def __init__(self, parent,model,description, *args, **kwargs):
         wx.Panel.__init__(self, parent, *args, **kwargs)
         """ 
             Initialization of the Panel
@@ -49,13 +49,16 @@ class ModelPage(wx.Panel):
         #panel interface
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
         self.sizer3 = wx.GridBagSizer(5,5)
+        self.sizer1 = wx.GridBagSizer(5,5)
         self.sizer2 = wx.GridBagSizer(5,5)
         self.modelbox = wx.ComboBox(self, -1)
         id = wx.NewId()
         self.vbox.Add(self.sizer3)
+        self.vbox.Add(self.sizer1)
         self.vbox.Add(self.sizer2)
         ix = 0
         iy = 1
+       
         self.sizer3.Add(wx.StaticText(self,-1,'Model'),(iy,ix),(1,1)\
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
@@ -66,7 +69,8 @@ class ModelPage(wx.Panel):
         self.param_toFit=[]
         # model on which the fit would be performed
         self.model=model
-        self.set_panel(model)
+        self.description=description
+        self.set_panel(model,description)
         # preview selected model name
         self.prevmodel_name=model.__class__.__name__
         self.modelbox.SetValue(self.prevmodel_name)
@@ -116,15 +120,16 @@ class ModelPage(wx.Panel):
             wx.EVT_COMBOBOX(self.modelbox,-1, self._on_select_model) 
         return 0
    
-    def set_page(self, model):
+    def set_page(self, model,description):
         print " modelpage: set_page was called",model
         self.model=model
+        self.description=description
         if hasattr(self.model, "name"):
             name = self.model.name
         else:
             name = self.model.__class__.__name__
         self.modelbox.SetValue(name)
-        self.set_panel(self.model)
+        self.set_panel(self.model,description)
         self.manager.draw_model(self.model)
     def _on_select_model(self,event):
         """
@@ -177,13 +182,14 @@ class ModelPage(wx.Panel):
             raise ValueError,"missing parameter to fit"
         
         
-    def set_panel(self,model):
+    def set_panel(self,model,description=None):
         """
             Build the panel from the model content
             @param model: the model selected in combo box for fitting purpose
         """
     
         self.sizer2.Clear(True)
+        self.sizer1.Clear(True)
         self.parameters = []
         self.param_toFit=[]
         self.model = model
@@ -191,7 +197,15 @@ class ModelPage(wx.Panel):
         keys.sort()
         iy = 1
         ix = 0
-        
+        self.cb0 = wx.StaticText(self, -1,'Model Description:')
+        self.sizer1.Add(self.cb0,(iy, ix),(1,1),\
+                          wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        self.cb01 = wx.StaticText(self, -1,str(description))
+        self.sizer1.Add(self.cb01,(iy, ix),(1,1),\
+                          wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix = 0
+        iy = 1
         self.cb1 = wx.StaticText(self, -1,'Parameters')
         self.sizer2.Add(self.cb1,(iy, ix),(1,1),\
                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)

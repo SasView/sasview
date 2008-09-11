@@ -4,6 +4,14 @@ import os,sys
 import os.path
 
 (ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
+class ModelInfo(object):
+    def __init__(self,model,description=None):
+        self.model=model
+        self.description=description
+    def set_description(self, descrition):
+        self.description =str(description)
+    def get_description(self):
+        return self.description
 def log(message):
     print message
     out = open("plugins.log", 'a')
@@ -51,9 +59,11 @@ class ModelManager:
     
     ## Dictionary of models
     model_list = {}
+    indep_model_list = {}
     model_list_box = {}
     custom_models={}
     plugins=[]
+    indep_model=[]
     ## Event owner
     event_owner = None
     
@@ -67,17 +77,22 @@ class ModelManager:
         """
         self.model_list = {}
         self.model_list_box = {}
+        model_info="shape-based models"
         from sans.models.CylinderModel import CylinderModel
-        self.model_list[str(wx.NewId())] = CylinderModel 
+        self.model_list[str(wx.NewId())] = ModelInfo(CylinderModel , model_info)
       
         from sans.models.SphereModel import SphereModel
-        self.model_list[str(wx.NewId())] = SphereModel
+        self.model_list[str(wx.NewId())] =  ModelInfo(SphereModel , model_info)
    
         from sans.guitools.LineModel import LineModel
-        self.model_list[str(wx.NewId())]  = LineModel
-        self.plugins =findModels()
+        self.model_list[str(wx.NewId())]  = ModelInfo(LineModel , model_info)
+        model_info="shape-independent models"
+        from sans.models.Lorentzian import Lorentzian
+        self.indep_model.append( ModelInfo(Lorentzian , model_info) )
         
-        print "models: plugings",self.plugins
+        #Looking for plugins
+        self.plugins = findModels()
+       
         return 0
 
     
@@ -90,41 +105,56 @@ class ModelManager:
             @param event_owner: wx object to bind the menu events to
             @return: the next free event ID following the new menu events
         """
-        
         self._getModelList()
         self.event_owner = event_owner
+        
         shape_submenu= wx.Menu() 
         indep_submenu = wx.Menu()
         added_models = wx.Menu()
+        
         for id_str,value in self.model_list.iteritems():
             item = self.model_list[id_str]
-            
-            name = item.__name__
+            name = item.model.__name__
             if hasattr(item, "name"):
-                name = item.name
-                
-            self.model_list_box[name] =value
-
-               
+                name = item.model.name
+            self.model_list_box[name] =value.model
             shape_submenu.Append(int(id_str), name, name)
             wx.EVT_MENU(event_owner, int(id_str), self._on_model)
         modelmenu.AppendMenu(wx.NewId(), "Shapes...", shape_submenu, "List of shape-based models")
-        modelmenu.AppendMenu(wx.NewId(), "Shape-independent...", indep_submenu, "List of shape-independent models")
         
         id = wx.NewId()
-        if len(self.custom_models) == 0:
-            print self.plugins
-            for item in self.plugins:
-                if item not in self.custom_models.keys():
-                    self.custom_models[str(id)] = item
+        if len(self.indep_model_list) == 0:
+            print "models: self.indep_model",self.indep_model
+            for item in self.indep_model:
+                if item not in self.indep_model_list.values():
+                    self.indep_model_list[str(id)] = item
                     self.model_list[str(id)]=item
-                    added_models.Append(id, item.name, item.name)
+                    if hasattr(item, "name"):
+                        name = item.model.name
+                    else:
+                        name = item.model.__name__
+                    indep_submenu.Append(id,name, name)
+                    self.model_list_box[name] =item.model
+                    wx.EVT_MENU(event_owner, int(id), self._on_model)
+                    id = wx.NewId()         
+        modelmenu.AppendMenu(wx.NewId(), "Shape-independent...", indep_submenu, "List of shape-independent models")
+        model_info="additional models"
+        id = wx.NewId()
+        if len(self.custom_models) == 0:
+            for item in self.plugins:
+                if item not in self.custom_models.values():
+                    self.custom_models[str(id)] = item
+                    
+                    self.model_list[str(id)]=ModelInfo(item,model_info)
+                    if hasattr(item, "name"):
+                        name = item.name
+                    else:
+                        name = item.__name__
+                    added_models.Append(id, name, name)
+                    self.model_list_box[name] =item
                     wx.EVT_MENU(event_owner, int(id), self._on_model)
                     id = wx.NewId()
-       
-           
         modelmenu.AppendMenu(wx.NewId(),"Added models...", added_models, "List of additional models")
-        
         
         
         return 0
@@ -141,8 +171,8 @@ class ModelManager:
             #TODO: post a model event to update all panels that need
             #evt = ModelEvent(model=self.model_list[str(evt.GetId())]())
            
-            model = self.model_list[str(evt.GetId())]()
-            evt = ModelEvent(model=model)
+            model = self.model_list[str(evt.GetId())]
+            evt = ModelEvent(modelinfo=model)
             wx.PostEvent(self.event_owner, evt)
         
     def get_model_list(self):    
