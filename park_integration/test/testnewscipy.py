@@ -14,7 +14,7 @@ class testFitModule(unittest.TestCase):
         #load data
         from sans.fit.Loader import Load
         load= Load()
-        load.set_filename("testdata_line.txt")
+        load.set_filename("cyl_testdata.txt")
         load.set_values()
         data11 = Data1D(x=[], y=[],dx=None, dy=None)
         load.load_data(data11)
@@ -24,17 +24,17 @@ class testFitModule(unittest.TestCase):
         fitter= Fit('park')
         
         # Receives the type of model for the fitting
-        from sans.guitools.LineModel import LineModel
-        model1  = LineModel()
+        from sans.models.Lorentzian import Lorentzian
+        model1  = Lorentzian()
         data1=Data(sans_data=data11)
         model =Model(model1)
         #Do the fit SCIPY
-       
+        pars1=['center','gamma','scale']
         fitter.set_data(data1,1)
-        fitter.set_model(model,"M1",1,['A','B'])
-    
+        fitter.set_model(model,"M1",1,pars1)
+        
         result=fitter.fit()
-        print "park",result.pvec,
+        print "park1",result.pvec,result.fitness,result.cov
         
         self.assert_(result)
       
@@ -70,7 +70,7 @@ class testFitModule(unittest.TestCase):
         fitter.set_data(data1,1)
       
         result=fitter.fit()
-        print "park",result.fitness,result.cov, result.pvec
+        print "park2",result.fitness,result.cov, result.pvec
         self.assert_(result.fitness)
         
     
