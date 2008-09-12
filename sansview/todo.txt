@@ -1,0 +1,7 @@
+- In the fit tab, when I hit enter in a parameter box, it should update. 
+	Right now the only way to update is to click somewhere else.
+- When fitting data with a model, the plotted model should have a proper name, not "Fitness"
+- The constrained fit button should have a normal, fixed, size.
+- The close tab button should be inside the tab it closes, like the fit button.
+- If I load data, select if for fitting, then close the fit tab, I can't re-select it 
+	for fitting if all other fit tabs are closed and I'm looking at the simultaneous fitting tab. 
