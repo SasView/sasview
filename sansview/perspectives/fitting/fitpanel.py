@@ -168,8 +168,8 @@ class FitPanel(wx.Panel):
                 
             selected_page.Destroy()
             self.nb.RemovePage(page_number)
-            self.name=None
-            
+            #self.name=None
+            self.fit_page_name=None
             
     def set_model_list(self,dict):
          """ 

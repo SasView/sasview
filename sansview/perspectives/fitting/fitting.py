@@ -48,7 +48,7 @@ class Plugin:
         #Flag to let the plug-in know that it is running standalone
         self.standalone=True
         ## Fit engine
-        self._fit_engine = 'scipy'
+        self._fit_engine = 'park'
         # Log startup
         logging.info("Fitting plug-in started")   
 
@@ -195,7 +195,6 @@ class Plugin:
             recieve a word containing ""
         """
         #print "fitting: split :went here" 
-        
         if string.find(item,".")!=-1:
             param_names= re.split("\.",item)
             model_name=param_names[0]
@@ -267,46 +266,7 @@ class Plugin:
         except:
              wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
-     
-    def _completed(self,result,pars,current_pg, elapsed):
-        """
-            Method called with the results when the inversion
-            is done
-            
-            @param out: output coefficient for the base functions
-            @param cov: covariance matrix
-            @param pr: Invertor instance
-            @param elapsed: time spent computing
-        """
-       
-        # Save useful info
-        self.elapsed = elapsed
-        # Keep a copy of the last result
-        self._last_out = result.pvec
-        self._last_cov = result.cov
-        self._last_chisqr=result.fitness
-        #print "fitting: initial parameter ",pars
-        #result=self.fitter.fit(qmin,qmax)
-        
-        #print "fitting : result",result,result.pvec,result.cov,result.fitness
-        i = 0
-        for name in pars:
-            if result.pvec.__class__==numpy.float64:
-                model.model.setParam(name,result.pvec)
-            else:
-                model.model.setParam(name,result.pvec[i])
-                #print "fitting: i name out[i]", i,name,float(result.pvec[i])
-                i += 1
-        new_cov=[]
-        if result.cov !=None:
-             for j in range(len(result.cov)):
-                 new_cov.append(result.cov[j][j])  
-        else:
-            new_cov=None
-        current_pg.onsetValues(result.fitness, result.pvec,new_cov)
-        self.plot_helper(currpage=current_pg,qmin=qmin,qmax=qmax)
- 
-        
+    
     def _on_single_fit(self,id=None,qmin=None,qmax=None):
         """ 
             perform fit for the  current page  and return chisqr,out and cov
