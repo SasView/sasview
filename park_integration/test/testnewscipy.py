@@ -21,7 +21,7 @@ class testFitModule(unittest.TestCase):
         
         #Importing the Fit module
         from sans.fit.Fitting import Fit
-        fitter= Fit('scipy')
+        fitter= Fit('park')
         
         # Receives the type of model for the fitting
         from sans.guitools.LineModel import LineModel
@@ -30,15 +30,48 @@ class testFitModule(unittest.TestCase):
         model =Model(model1)
         #Do the fit SCIPY
        
-        fitter.set_data_assembly(data1,1)
-        fitter.set_model_assembly(model,"M1",1,['A','B'])
+        fitter.set_data(data1,1)
+        fitter.set_model(model,"M1",1,['A','B'])
     
         result=fitter.fit()
-        print "scipy",result.pvec,
-        chisqr1, out1, cov1=fitter.fit()
-        """ testing SCIPy results"""
-        self.assert_(math.fabs(out1[1]-2.5)/math.sqrt(cov1[1][1]) < 2)
-        self.assert_(math.fabs(out1[0]-4.0)/math.sqrt(cov1[0][0]) < 2)
-        self.assert_(chisqr1/len(data1.x) < 2)
-       
+        print "park",result.pvec,
+        
+        self.assert_(result)
+      
+    def test_cylinder_scipy(self):
+        """ test fitting large model with scipy"""
+        #load data
+        from sans.fit.Loader import Load
+        load= Load()
+        load.set_filename("cyl_testdata.txt")
+        load.set_values()
+        data11 = Data1D(x=[], y=[],dx=None, dy=None)
+        load.load_data(data11)
+        data1=Data(sans_data=data11)
+        
+        
+        #Importing the Fit module
+        from sans.fit.Fitting import Fit
+        fitter= Fit('park')
+        
+        # Receives the type of model for the fitting
+        from sans.models.CylinderModel import CylinderModel
+        model1  = CylinderModel()
+        model =Model(model1)
+        
+        #Do the fit SCIPY
+        fitter.set_data(data1,1)
+        import math
+        pars1=['background','contrast', 'length']
+        #pars1=['background','contrast',\
+        #        'cyl_phi','cyl_theta','length','radius','scale']
+        pars1.sort()
+        fitter.set_model(model,"M1",1,pars1)
+        fitter.set_data(data1,1)
+      
+        result=fitter.fit()
+        print "park",result.fitness,result.cov, result.pvec
+        self.assert_(result.fitness)
+        
+    
       

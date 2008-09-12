@@ -67,8 +67,9 @@ class ParkFit(FitEngine):
                 #self.param_list.append(p._getname())
                 #if p.isfixed():
                 #print 'parameters',p.name
-                print "parkfitting: self.paramList",self.paramList
+                #print "parkfitting: self.paramList",self.paramList
                 if p.isfixed() and p._getname()in self.paramList:
+                #if p.isfixed():
                     p.set([-numpy.inf,numpy.inf])
             i+=1    
             Ldata=value.get_data()
@@ -107,12 +108,20 @@ class ParkFit(FitEngine):
 
         localfit = FitSimplex()
         localfit.ftol = 1e-8
+        #localfit.ftol = 1e-6
         fitter = FitMC(localfit=localfit)
-        print "ParkFitting: result1"
+        print "ParkFitting: result1",pars
+        print "Parkfitting: in fit function fitness resid",self.problem[0].residuals()
+        
+        list=self.problem[0]._parameterset()
+        print "Parkfitting: in fit function fitness paramset",list
+        for item in list:
+            print "Parkfitting: in fit function fitness",item.name, item.value,item.path,item.range
         result = fit.fit(self.problem,
                      fitter=fitter,
                      handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
-        print "ParkFitting: result",result
+        #result = fit.fit(self.problem)
+        print "ParkFitting: result",result.fitness,result.pvec,result.cov
         if result !=None:
             #for p in result.parameters:
             #    print "fit in park fitting", p.name, p.value,p.stderr

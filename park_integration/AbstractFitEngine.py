@@ -33,7 +33,7 @@ class Model(object):
     """
         PARK wrapper for SANS models.
     """
-    def __init__(self, sans_model):
+    def __init__(self, sans_model, **kw):
         self.model = sans_model
         self.name=sans_model.name
         #print "ParkFitting:sans model",self.model
@@ -43,7 +43,9 @@ class Model(object):
         #print "ParkFitting: park model parameter ",self.parkp
         self.parameterset = park.ParameterSet(sans_model.name,pars=self.parkp)
         self.pars=[]
-        
+      
+    #def __call__(self, x, pars=[]):
+    #    return self.eval(x)   
     def getParams(self,fitparams):
         list=[]
         self.pars=[]
@@ -61,16 +63,26 @@ class Model(object):
             list.append(item.name)
         list.sort()
         for i in range(len(params)):
-            #self.parkp[i].value = params[i]
-            #print "abstractfitengine: set-params",list[i],params[i]
+            self.parkp[i].value = params[i]
+            print "abstractfitengine: set-params",list[i],params[i]
             
             self.model.setParam(list[i],params[i])
   
     def eval(self,x):
        
         return self.model.runXY(x)
-       
-
+   
+    #def set(self, **kw):
+        #"""
+            #Set the initial value for a set of parameters.
+            #E.g., model.set(width=3,center=5)
+        #"""
+        #print "Abstractfitting : set called"
+        # This is a convenience funciton for the user.
+        # 
+        #for k,v in kw.items(): 
+        #    self.parameterset[k].set(v)
+   
 class Data(object):
     """ Wrapper class  for SANS data """
     def __init__(self,x=None,y=None,dy=None,dx=None,sans_data=None):
