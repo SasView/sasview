@@ -3,16 +3,20 @@ Release Notes
 
 PrView 0.2
 
-Package name: None
+Package name: prview
 
 1- Version 0.2.x
 	- Release date: ?
 	- Added functionality for .ABS IGOR reduced 1D files.
 	- Fixed problem with loading additional data after the P(r) graph's scale has been changed.
 	- Fixed problem of silent failure upon loading a file with a point at Q=0.
-
+	- Added use of SANS DataLoader
+   
+   Version 0.2.3
+    - Release date: 7/9/2008
+    - Mac compatibility 
+    
    Version 0.2.2
-
 	- Release date: 7/8/2008
 	- Added option to normalize P(r) to 1, scale P_max to 1, or leave as is.
 	- Fixed problem with changing the number of P(r) points.
@@ -25,7 +29,7 @@ Package name: None
 	- Slit smearing has been added.
 	- Constant background estimation.
 	- Functionality to compare p(r) output with data from a file.
-	- Functionality to change the number of p(r) points of the output dsitribution.
+	- Functionality to change the number of p(r) points of the output distribution.
 
    Version 0.1.0
 
@@ -45,7 +49,7 @@ Package name: None
 			svn://danse.us/sans/releases/guiframe-0.1.2
 			svn://danse.us/sans/releases/pr_inversion-0.2.1
 		- The following modules are required:
-			* matplotlib 0.91.4 (avoid 0.98.1)
+			* matplotlib
 			* numpy
 			* scipy
 			* wxpython
@@ -53,19 +57,13 @@ Package name: None
 3- Known Issues
 
 	3.1- All systems:
-		Version 0.2.2:
-		- The application only loads .txt files. The expected format is 2- or 3-column ascii.
-    	- More than a single additional data set should be plottable on the P(r) graph.
-    	- Additional data plotted on the P(r) graph should also be normalizable.
-    	- If additional P(r) data is loaded after a scale change has been done, the loaded data appears in another window rather than on the same graph. If additional P(r) data is loaded while the scale of the P(r) graph is linear, the behavior is correct.
-    	- The application will not load data files with a point at Q=0. The user will not be notified.
-
+		- None
 
 	3.2- Windows:
 		- None
 
-	3.3- Linux:
-		- None
+	3.3- Mac OS:
+		- Context menu dialog interfere with dragging when displayed over plots.
 
 4- Troubleshooting
 

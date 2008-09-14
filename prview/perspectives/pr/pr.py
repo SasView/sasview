@@ -10,6 +10,7 @@ from sans.guitools.plottables import Data1D, Theory1D
 from sans.guicomm.events import NewPlotEvent, StatusEvent    
 import math, numpy
 from sans.pr.invertor import Invertor
+from DataLoader.loader import Loader
 
 PR_FIT_LABEL       = r"$P_{fit}(r)$"
 PR_LOADED_LABEL    = r"$P_{loaded}(r)$"
@@ -343,7 +344,6 @@ class Plugin:
             Load data. This will eventually be replaced
             by our standard DataLoader class.
         """
-        #TODO: use DataLoader
         class FileData:
             x = None
             y = None
@@ -354,14 +354,19 @@ class Plugin:
                 self.path = path
                 
         self._current_file_data = FileData(path)
-        basename = os.path.basename(path)
-        root, ext = os.path.splitext(basename)
-        if ext.lower()=='.abs':
-            x, y, err = self.load_abs(path)
         
-        else: 
-            x, y, err = self.load_columns(path)
-            
+        # Use data loader to load file
+        dataread = Loader().load(path)
+        x = None
+        y = None
+        err = None
+        if dataread.__class__.__name__ == 'Data1D':
+            x = dataread.x
+            y = dataread.y
+            err = dataread.dy
+        else:
+            raise RuntimeError, "This tool can only read 1D data"
+        
         self._current_file_data.x = x
         self._current_file_data.y = y
         self._current_file_data.err = err
@@ -873,44 +878,53 @@ class Plugin:
             a file data set.
             @param path: path of the file to read in 
         """
-        from sans.guiframe.data_loader import load_ascii_1D
-        import numpy
-        
         # Load data
         if os.path.isfile(path):
             
             if self._current_file_data is not None \
                 and self._current_file_data.path==path:
+                # Protect against corrupted data from 
+                # previous failed load attempt
+                if self._current_file_data.x is None:
+                    return None
                 x = self._current_file_data.x
                 y = self._current_file_data.y
                 err = self._current_file_data.err
             else:
                 x, y, err = self.load(path)
-            #x, y, err = load_ascii_1D(path)
             
             # If we have not errors, add statistical errors
-            if err==None:
+            if err==None and y is not None:
                 err = numpy.zeros(len(y))
+                scale = None
+                min_err = 0.0
                 for i in range(len(y)):
-                    err[i] = math.sqrt( math.fabs(y[i]) )
+                    # Scale the error so that we can fit over several decades of Q
+                    if scale==None:
+                        scale = 0.05*math.sqrt(y[i])
+                        min_err = 0.01*y[i]
+                    err[i] = scale*math.sqrt( math.fabs(y[i]) ) + min_err
                 message = "The loaded file had no error bars, statistical errors are assumed."
                 wx.PostEvent(self.parent, StatusEvent(status=message))
             else:
                 wx.PostEvent(self.parent, StatusEvent(status=''))
             
-            # Get the data from the chosen data set and perform inversion
-            pr = Invertor()
-            pr.d_max = self.max_length
-            pr.alpha = self.alpha
-            pr.q_min = self.q_min
-            pr.q_max = self.q_max
-            pr.x = x
-            pr.y = y
-            pr.err = err
-            pr.has_bck = self.has_bck
-            pr.slit_height = self.slit_height
-            pr.slit_width = self.slit_width
-            return pr
+            try:
+                # Get the data from the chosen data set and perform inversion
+                pr = Invertor()
+                pr.d_max = self.max_length
+                pr.alpha = self.alpha
+                pr.q_min = self.q_min
+                pr.q_max = self.q_max
+                pr.x = x
+                pr.y = y
+                pr.err = err
+                pr.has_bck = self.has_bck
+                pr.slit_height = self.slit_height
+                pr.slit_width = self.slit_width
+                return pr
+            except:
+                wx.PostEvent(self.parent, StatusEvent(status="Problem reading data: %s" % sys.exc_value))
         return None
         
     def perform_estimate(self):
