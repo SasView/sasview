@@ -600,7 +600,23 @@ class Plugin:
         if path==None:
             return
         
-        x, y, err = self.parent.load_ascii_1D(path)
+        #x, y, err = self.parent.load_ascii_1D(path)
+        # Use data loader to load file
+        try:
+            dataread = Loader().load(path)
+            x = None
+            y = None
+            err = None
+            if dataread.__class__.__name__ == 'Data1D':
+                x = dataread.x
+                y = dataread.y
+                err = dataread.dy
+            else:
+                wx.PostEvent(self.parent, StatusEvent(status="This tool can only read 1D data"))
+                return
+        except:
+            wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
+            return
         
         filename = os.path.basename(path)
         
