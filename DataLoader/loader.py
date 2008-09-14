@@ -32,6 +32,9 @@ class Registry(ExtensionRegistry):
         ## Writers
         self.writers = {}
         
+        ## List of wildcards
+        self.wildcards = ['All (*.*)|*.*']
+        
         ## Creation time, for testing
         self._created = time.time()
         
@@ -67,7 +70,7 @@ class Registry(ExtensionRegistry):
                         if self._identify_plugin(module):
                             readers_found += 1
                     except :
-                        logging.error("Loader: Error importing %s\n  %s" % (name, sys.exc_value))
+                        logging.error("Loader: Error importing %s\n  %s" % (item, sys.exc_value))
                             
                 # Process zip files
                 elif item.endswith('.zip'):
@@ -111,7 +114,12 @@ class Registry(ExtensionRegistry):
                         self.loaders[ext] = []
                     self.loaders[ext].insert(0,loader.read)
                     reader_found = True
-                     
+                        
+                    # Keep track of wildcards
+                    for wcard in loader.type:
+                        if wcard not in self.wildcards:
+                            self.wildcards.append(wcard)
+                            
                 # Check whether writing is supported
                 if hasattr(loader, 'write'):
                     for ext in loader.ext:
@@ -209,6 +217,8 @@ class Loader(object):
         """
         return self.__registry.find_plugins(dir)
     
+    def get_wildcards(self):
+        return self.__registry.wildcards
         
 if __name__ == "__main__": 
     logging.basicConfig(level=logging.INFO,
@@ -217,7 +227,9 @@ if __name__ == "__main__":
                         filemode='w')
     l = Loader()
     data = l.load('test/cansas1d.xml')
-    l.save('test_file.xml', data)
+    l.save('test_file.xml', data, '.xml')
+    
+    print l.get_wildcards()
         
         
     
