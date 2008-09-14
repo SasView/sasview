@@ -1,12 +1,17 @@
 import os, sys
 import wx
+from DataLoader.loader import Loader
 
 def choose_data_file(parent, location=None):
     path = None
     if location==None:
         location = os.getcwd()
-       
-    dlg = wx.FileDialog(parent, "Choose a file", location, "","*.*", wx.OPEN)
+    
+    l = Loader()
+    cards = l.get_wildcards()
+    wlist = '|'.join(cards)
+    
+    dlg = wx.FileDialog(parent, "Choose a file", location, "", wlist, wx.OPEN)
     if dlg.ShowModal() == wx.ID_OK:
         path = dlg.GetPath()
         mypath = os.path.basename(path)
