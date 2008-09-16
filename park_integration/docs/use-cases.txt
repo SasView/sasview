@@ -22,6 +22,8 @@ Any of the following actions can take place:
 1.1.3. Error Conditions
 1.1.3.1. 	The user does not choose a data set before starting the fit.
 1.1.3.2. 	The user does not choose a model before starting the fit.
+1.1.3.3.	the user does not specify the list of parameter to fit 
+1.1.3.4.	the user enters a list of parameters that do not belong to the model
 
 
 1.2.	Special requirements
@@ -54,6 +56,7 @@ data sets with a single model.
 Any of the following actions can take place:
 
 2.1.2.1.	The client does not enter initial parameters
+2.1.2.2.	the user enters a list of parameters not belonging to the model
 
 
 2.1.3. Error Conditions

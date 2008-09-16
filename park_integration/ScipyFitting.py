@@ -34,7 +34,7 @@ class ScipyFit(FitEngine):
         Use data must be of type plottable
         Use a sans model
         
-        Add data with a dictionnary of FitArrangeList where Uid is a key and data
+        Add data with a dictionnary of FitArrangeDict where Uid is a key and data
         is saved in FitArrange object.
         engine.set_data(data,Uid)
         
@@ -44,7 +44,7 @@ class ScipyFit(FitEngine):
              fit () automatically.
         engine.set_param( model,"M1", {'A':2,'B':4})
         
-        Add model with a dictionnary of FitArrangeList{} where Uid is a key and model
+        Add model with a dictionnary of FitArrangeDict{} where Uid is a key and model
         is save in FitArrange object.
         engine.set_model(model,Uid)
         
@@ -53,18 +53,18 @@ class ScipyFit(FitEngine):
     """
     def __init__(self):
         """
-            Creates a dictionary (self.fitArrangeList={})of FitArrange elements
+            Creates a dictionary (self.fitArrangeDict={})of FitArrange elements
             with Uid as keys
         """
-        self.fitArrangeList={}
+        self.fitArrangeDict={}
         self.paramList=[]
     def fit(self,qmin=None, qmax=None):
          # Protect against simultanous fitting attempts
-        if len(self.fitArrangeList)>1: 
+        if len(self.fitArrangeDict)>1: 
             raise RuntimeError, "Scipy can't fit more than a single fit problem at a time."
         
         # fitproblem contains first fitArrange object(one model and a list of data)
-        fitproblem=self.fitArrangeList.values()[0]
+        fitproblem=self.fitArrangeDict.values()[0]
         listdata=[]
         model = fitproblem.get_model()
         listdata = fitproblem.get_data()
@@ -76,29 +76,22 @@ class ScipyFit(FitEngine):
         if qmax==None:
             qmax= max(data.x) 
         functor= sansAssembly(model,data)
-        print "scipyfitting:param list",model.getParams(self.paramList)
-        print "scipyfitting:functor",functor(model.getParams(self.paramList))
-    
+       
         out, cov_x, info, mesg, success = optimize.leastsq(functor,model.getParams(self.paramList), full_output=1, warning=True)
         chisqr = functor.chisq(out)
+        if cov_x is not None and numpy.isfinite(cov_x).all():
+            stderr = numpy.sqrt(numpy.diag(cov_x))
         
-        print "scipyfitting: info",mesg
-        print"scipyfitting : success",success
-        print "scipyfitting: out", out
-        print "scipyfitting: cov_x", cov_x
-        print "scipyfitting: chisqr", chisqr
-        
-        if not (numpy.isnan(out).any()):
+        if not (numpy.isnan(out).any()) or ( cov_x !=None) :
                 result = fitresult()
                 result.fitness = chisqr
-                result.cov  = cov_x
-                
+                result.stderr  = stderr
                 result.pvec = out
                 result.success =success
                
                 return result
         else:  
-            raise ValueError, "SVD did not converge"
+            raise ValueError, "SVD did not converge"+str(success)
         
        
               

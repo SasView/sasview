@@ -44,41 +44,30 @@ class ParkFit(FitEngine):
             Creates a dictionary (self.fitArrangeList={})of FitArrange elements
             with Uid as keys
         """
-        self.fitArrangeList={}
+        self.fitArrangeDict={}
         self.paramList=[]
         
-    def createProblem(self):
+    def createAssembly(self):
         """
         Extract sansmodel and sansdata from self.FitArrangelist ={Uid:FitArrange}
         Create parkmodel and park data ,form a list couple of parkmodel and parkdata
         create an assembly self.problem=  park.Assembly([(parkmodel,parkdata)])
         """
-        print "ParkFitting: In createproblem"
         mylist=[]
         listmodel=[]
         i=0
-        for k,value in self.fitArrangeList.iteritems():
-            #sansmodel=value.get_model()
-            #wrap sans model
-            #parkmodel = Model(sansmodel)
+        for k,value in self.fitArrangeDict.iteritems():
             parkmodel = value.get_model()
-            #print "ParkFitting: createproblem: just create a model",parkmodel.parameterset
             for p in parkmodel.parameterset:
-                #self.param_list.append(p._getname())
-                #if p.isfixed():
-                #print 'parameters',p.name
-                #print "parkfitting: self.paramList",self.paramList
                 if p.isfixed() and p._getname()in self.paramList:
-                #if p.isfixed():
                     p.set([-numpy.inf,numpy.inf])
             i+=1    
             Ldata=value.get_data()
             parkdata=self._concatenateData(Ldata)
             
-            couple=(parkmodel,parkdata)
-            #print "Parkfitting: fitness",couple   
-            mylist.append(couple)
-        #print "mylist",mylist
+            fitness=(parkmodel,parkdata)
+            mylist.append(fitness)
+    
         self.problem =  park.Assembly(mylist)
         
     
@@ -98,34 +87,19 @@ class ParkFit(FitEngine):
             @return result.pvec: list of parameter with the best value found during fitting
             @return result.cov: Covariance matrix
         """
-        #from numpy.linalg.linalg.LinAlgError import LinAlgError
-        #print "Parkfitting: fit method probably breaking just right before \
-        #call fit"
-        self.createProblem()
+        
+        self.createAssembly()
         pars=self.problem.fit_parameters()
         self.problem.eval()
-        #print "M0.B",self.problem[1].parameterset['B'].value,self.problem[0].parameterset['B'].value
-
         localfit = FitSimplex()
         localfit.ftol = 1e-8
-        #localfit.ftol = 1e-6
         fitter = FitMC(localfit=localfit)
-        print "ParkFitting: result1",pars
-        print "Parkfitting: in fit function fitness resid",self.problem[0].residuals()
-        
         list=self.problem[0]._parameterset()
-        print "Parkfitting: in fit function fitness paramset",list
-        for item in list:
-            print "Parkfitting: in fit function fitness",item.name, item.value,item.path,item.range
         result = fit.fit(self.problem,
                      fitter=fitter,
                      handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
-        #result = fit.fit(self.problem)
-        print "ParkFitting: result",result.fitness,result.pvec,result.cov
+       
         if result !=None:
-            #for p in result.parameters:
-            #    print "fit in park fitting", p.name, p.value,p.stderr
-            #return result.fitness,result.pvec,result.cov,result
             return result
         else:
             raise ValueError, "SVD did not converge"

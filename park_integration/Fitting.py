@@ -45,6 +45,7 @@ class Fit:
             self._engine=ParkFit()
         else:
             raise ValueError, "enter the keyword scipy or park"
+        
     def returnEngine(self):
         """ @return self._engine""" 
         return self._engine
@@ -52,11 +53,13 @@ class Fit:
     def fit(self, qmin=None, qmax=None):
         """Perform the fit """
         return self._engine.fit(qmin,qmax)
-    def set_model(self,model,name,Uid,pars=[]):
-         self._engine.set_model(model,name,Uid,pars)
+    
+    def set_model(self,model,Uid,pars=[]):
+         self._engine.set_model(model,Uid,pars)
    
     def set_data(self,data,Uid,qmin=None, qmax=None):
         self._engine.set_data(data,Uid,qmin,qmax)
+        
     def get_model(self,Uid):
         """ return list of data"""
         self._engine.get_model(Uid)
@@ -64,3 +67,5 @@ class Fit:
     def remove_Fit_Problem(self,Uid):
         """remove   fitarrange in Uid"""
         self._engine.remove_Fit_Problem(Uid)
+        
+        
