@@ -2,36 +2,36 @@ import os,os.path, re
 import sys, wx, logging
 import string, numpy, pylab, math
 
+from copy import deepcopy 
 from sans.guitools.plottables import Data1D, Theory1D
 from sans.guitools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
-from copy import deepcopy 
-from sans.fit.AbstractFitEngine import Model
-from sans.fit.AbstractFitEngine import Data
+from sans.fit.AbstractFitEngine import Model,Data
 from fitproblem import FitProblem
 from fitpanel import FitPanel
 
 import models
 import fitpage
+
 class PlottableData(Data,Data1D):
-    """ class plottable data"""
+    """ class plottable data: class allowing to plot Data type on panel"""
     def __init__(self,data,data1d):
         self.x = data1d.x
         self.y = data1d.y
-        self.dx= data1d.dx
-        self.dy= data1d.dy
+        self.dx = data1d.dx
+        self.dy = data1d.dy
        
-        self.group_id= data1d.group_id
+        self.group_id = data1d.group_id
         x_name, x_units = data1d.get_xaxis() 
         y_name, y_units = data1d.get_yaxis() 
         self.xaxis( x_name, x_units)
         self.yaxis( y_name, y_units )
-        self.qmin=data.qmin
-        self.qmax=data.qmax
+        self.qmin = data.qmin
+        self.qmax = data.qmax
+
 class Plugin:
     """
     """
-    
     def __init__(self):
         ## Plug-in name
         self.sub_menu = "Fitting"
@@ -48,7 +48,7 @@ class Plugin:
         #Flag to let the plug-in know that it is running standalone
         self.standalone=True
         ## Fit engine
-        self._fit_engine = 'park'
+        self._fit_engine = 'scipy'
         # Log startup
         logging.info("Fitting plug-in started")   
 
@@ -64,6 +64,9 @@ class Plugin:
         id1 = wx.NewId()
         self.menu1.Append(id1, '&Show fit panel')
         wx.EVT_MENU(owner, id1, self.on_perspective)
+        id3 = wx.NewId()
+        self.menu1.Append(id3,'&scipy \ park','toggle engine to park or scipy')
+        wx.EVT_MENU(owner, id3, self._onset_engine)
         
         #menu for model
         menu2 = wx.Menu()
@@ -73,8 +76,7 @@ class Plugin:
         self.fit_panel.set_owner(owner)
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
         owner.Bind(fitpage.EVT_MODEL_BOX,self._on_model_panel)
-        #owner.Bind(modelpage.EVT_MODEL_DRAW,self.draw_model)
-      
+        #create  menubar items
         return [(id, self.menu1, "Fitting"),(id2, menu2, "Model")]
     
     
@@ -112,8 +114,10 @@ class Plugin:
         self.perspective = []
         self.perspective.append(self.fit_panel.window_name)
         # take care of saving  data, model and page associated with each other
-        self.page_finder={}
-        self.index_model=0
+        self.page_finder = {}
+        #index number to create random model name
+        self.index_model = 0
+        #create the fitting panel
         return [self.fit_panel]
    
       
@@ -149,18 +153,20 @@ class Plugin:
         self.panel = event.GetEventObject()
         for item in self.panel.graph.plottables:
             if item.name == self.panel.graph.selected_plottable:
+                #find a name for the page created for notebook
                 try:
                     name = item.group_id # item in Data1D
                 except:
                     name = 'Fit'
                 try:
                     page = self.fit_panel.add_fit_page(name)
+                    # add data associated to the page created
                     page.set_data_name(item)
+                    #create a fitproblem storing all link to data,model,page creation
                     self.page_finder[page]= FitProblem()
-                    #creating Data type
-                    data1= Data(sans_data=item)
-                    datas=PlottableData(data=data1,data1d=item)
-                    self.page_finder[page].add_data(datas)
+                    data_for_park= Data(sans_data=item)
+                    datap=PlottableData(data=data_for_park,data1d=item)
+                    self.page_finder[page].add_data(datap)
                 except:
                     raise 
                     wx.PostEvent(self.parent, StatusEvent(status="Fitting error: \
@@ -172,11 +178,12 @@ class Plugin:
         return self.page_finder 
     
     
-    def set_page_finder(self,modelname,param,values):
+    def set_page_finder(self,modelname,names,values):
         """
              Used by simfitpage.py to reset a parameter given the string constrainst.
              @param modelname: the name ot the model for with the parameter has to reset
              @param value: can be a string in this case.
+             @param names: the paramter name
              @note: expecting park used for fit.
         """  
         sim_page=self.fit_panel.get_page(0)
@@ -185,16 +192,19 @@ class Plugin:
                 list=value.get_model()
                 model=list[0]
                 if model.name== modelname:
-                    value.set_model_param(param,values)
+                    value.set_model_param(names,values)
+                    
                     break
 
    
                             
     def split_string(self,item): 
         """
-            recieve a word containing ""
+            receive a word containing dot and split it. used to split parameterset
+            name into model name and parameter name example:
+            paramaterset (item) = M1.A
+            @return model_name =M1 , parameter name =A
         """
-        #print "fitting: split :went here" 
         if string.find(item,".")!=-1:
             param_names= re.split("\.",item)
             model_name=param_names[0]
@@ -204,6 +214,12 @@ class Plugin:
         
     def _single_fit_completed(self,result,pars,current_pg,qmin,qmax):
         """
+            Display fit result on one page of the notebook.
+            @param result: result of fit 
+            @param pars: list of names of parameters fitted
+            @param current_pg: the page where information will be displayed
+            @param qmin: the minimum value of x to replot the model 
+            @param qmax: the maximum value of x to replot model
           
         """
         try:
@@ -213,25 +229,16 @@ class Plugin:
                     list = value.get_model()
                     model= list[0]
                     break
-            #print "fitting : result",result,result.pvec,result.cov,result.fitness
             i = 0
             for name in pars:
                 if result.pvec.__class__==numpy.float64:
                     model.setParam(name,result.pvec)
                 else:
                     model.setParam(name,result.pvec[i])
-                    #print "fitting: i name out[i]", i,name,float(result.pvec[i])
                     i += 1
-            new_cov=[]
-            if result.cov !=None:
-                 for j in range(len(result.cov)):
-                     new_cov.append(result.cov[j][j])  
-            else:
-                new_cov=None
-            current_pg.onsetValues(result.fitness, result.pvec,new_cov)
+            current_pg.onsetValues(result.fitness, result.pvec,result.stderr)
             self.plot_helper(currpage=current_pg,qmin=qmin,qmax=qmax)
         except:
-            raise
             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
        
@@ -244,25 +251,26 @@ class Plugin:
         """
         try:
             for page, value in self.page_finder.iteritems():
-                data = value.get_data()
-                list = value.get_model()
-                model= list[0]
-               
-                small_out = []
-                small_cov = []
-                i = 0
-                for p in result.parameters:
-                    print "fitting: fit in park fitting", p.name, p.value,p.stderr
-                    model_name,param_name = self.split_string(p.name)  
-                    print "fitting: simultfit",model.name,model_name,param_name ,p.name,param_name,p.value
-                    if model.name == model_name:
-                        print "fitting: hello",p.name,param_name,p.value
-                        small_out.append(p.value )
-                        small_cov.append(p.stderr)
-                        model.setParam(param_name,p.value)   
-                #print "fitting: out of each page",page,small_out,small_cov,data.group_id
-                page.onsetValues(result.fitness, small_out,small_cov)
-                self.plot_helper(currpage= page,qmin= qmin,qmax= qmax) 
+                print "fitting : simultaneous scheduled ",value.get_scheduled()
+                if value.get_scheduled()=='True':
+                    data = value.get_data()
+                    list = value.get_model()
+                    model= list[0]
+                   
+                    small_out = []
+                    small_cov = []
+                    i = 0
+                    #Separate result in to data corresponding to each page
+                    for p in result.parameters:
+                        model_name,param_name = self.split_string(p.name)  
+                        if model.name == model_name:
+                            small_out.append(p.value )
+                            small_cov.append(p.stderr)
+                            model.setParam(param_name,p.value)  
+                    # Display result on each page 
+                    page.onsetValues(result.fitness, small_out,small_cov)
+                    #Replot model
+                    self.plot_helper(currpage= page,qmin= qmin,qmax= qmax) 
         except:
              wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
@@ -278,19 +286,20 @@ class Plugin:
         #set an engine to perform fit
         from sans.fit.Fitting import Fit
         self.fitter= Fit(self._fit_engine)
-        #Setting an id to store model and data
+        #Setting an id to store model and data in fit engine
         if id==None:
             id=0
-        self.id=id
+        self.id = id
+        #Get information (model , data) related to the page on 
+        #with the fit will be perform
         current_pg=self.fit_panel.get_current_page() 
         for page, value in self.page_finder.iteritems():
             if page ==current_pg :
-                #print "fitting: self.page_finder",self.page_finder
                 data = value.get_data()
                 list=value.get_model()
                 model=list[0]
                 
-                #Create dictionary of parameters for fitting used
+                #Create list of parameters for fitting used
                 pars=[]
                 templist=[]
                 try:
@@ -299,23 +308,21 @@ class Plugin:
                     raise
                     wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                     return
-                #for element in templist:
-                #    print "fitting: templist",str(element[0].GetLabelText())
-                #print "fitting: model list",model.getParamList()
+              
                 for element in templist:
                     try:
                        pars.append(str(element[0].GetLabelText()))
                     except:
-                        raise
                         wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                         return
-                #print "fitting: pars",pars
+                # make sure to keep an alphabetic order 
+                #of parameter names in the list
                 pars.sort()
-                print "fitting: model ",model.__class__.__name__
-                self.fitter.set_model(Model(model),model.name, self.id, pars) 
-                self.fitter.set_data(data,self.id,qmin,qmax)
-                #Do the fit SCIPY
+                #Do the single fit
                 try:
+                    self.fitter.set_model(Model(model), self.id, pars) 
+                    self.fitter.set_data(data,self.id,qmin,qmax)
+                
                     result=self.fitter.fit()
                     self._single_fit_completed(result,pars,current_pg,qmin,qmax)
                    
@@ -332,31 +339,28 @@ class Plugin:
             @param model: model to fit
             
         """
-        #print "fitting: probabily breaking on fit call"
         #set an engine to perform fit
         from sans.fit.Fitting import Fit
         self.fitter= Fit(self._fit_engine)
+        
         #Setting an id to store model and data
         if id==None:
              id = 0
         self.id = id
+        
         for page, value in self.page_finder.iteritems():
             try:
-                #print "fitting: self.page_finder",value
-                data = value.get_data()
-                #print "fitting: data",data
-                list = value.get_model()
-                model= list[0]
-                if data != None :
+                print "fitting : simultaneous scheduled ",value.get_scheduled(),value.schedule
+                if value.get_scheduled()=='True':
+                    print "fitting: self.page_finder",value.get_scheduled()
+                    data = value.get_data()
+                    #print "fitting: data",data
+                    list = value.get_model()
+                    model= list[0]
                     #Create dictionary of parameters for fitting used
                     pars = []
                     templist = []
-                    try:
-                        templist = page.get_param_list()
-                    except:
-                        wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
-                        return
-                    
+                    templist = page.get_param_list()
                     for element in templist:
                         try:
                             name = str(element[0].GetLabelText())
@@ -364,28 +368,32 @@ class Plugin:
                         except:
                             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                             return
-                
-                    print "fitting: pars",pars,model.name
-                    #print "fitter",self.fitter
-                    #print "fitting: model name",model.name
-                    self.fitter.set_model(Model(model),model.name, self.id, pars) 
+                    self.fitter.set_model(Model(model), self.id, pars) 
                     self.fitter.set_data(data,self.id,qmin,qmax)
-                else:
-                    raise ValueError," Fitting: cannot set model with empty parameter"
-                self.id += 1 
+                
+                    self.id += 1 
             except:
-                    raise
-                    wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
-                    return 
-        #Do the fit SCIPY
+                wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+                return 
+            #Do the simultaneous fit
         try:
             result=self.fitter.fit()
             self._simul_fit_completed(result,qmin,qmax)
         except:
-            raise
             wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fitting error: %s" % sys.exc_value))
             return
-   
+        
+        
+    def _onset_engine(self,event):
+        """ set engine to scipy"""
+        if self._fit_engine== 'park':
+            self._on_change_engine('scipy')
+        else:
+            self._on_change_engine('park')
+        wx.PostEvent(self.parent, StatusEvent(status="Engine set to: %s" % self._fit_engine))
+    
+  
+    
     def _on_change_engine(self, engine='park'):
         """
             Allow to select the type of engine to perform fit 
@@ -438,7 +446,6 @@ class Plugin:
             @param model: the model from where the theory is derived
             @param currpage: page in a dictionary referring to some data
         """
-        #print "fitting: plot helper"
         if self.fit_panel.get_page_count() >1:
             for page in self.page_finder.iterkeys():
                 if  page==currpage :  
@@ -491,7 +498,6 @@ class Plugin:
                         skipping point x %g %s" %(qmax, sys.exc_value)))
                 try:
                     from sans.guicomm.events import NewPlotEvent
-                    #print"fitting: theory",theory
                     wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model"))
                 except:
                     raise
@@ -502,8 +508,6 @@ class Plugin:
         """
             Plot a theory from a model selected from the menu
         """
-        print "_on_model_menu done"
-        #name = evt.model.__class__.__name__
         name="Model View"
         model=evt.modelinfo.model()
         description=evt.modelinfo.description
@@ -511,6 +515,9 @@ class Plugin:
         self.draw_model(model)
         
     def draw_model(self,model):
+        """
+             draw model with default data value
+        """
         x = pylab.arange(0.001, 0.1, 0.001)
         xlen = len(x)
         dy = numpy.zeros(xlen)
@@ -522,7 +529,6 @@ class Plugin:
         try:
            
             new_plot = Theory1D(x, y)
-            #new_plot.name = evt.model.__class__.__name__
             new_plot.name ="Fitness"
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")

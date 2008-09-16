@@ -39,9 +39,7 @@ def _findModels(dir):
                 file = None
                 try:
                     (file, path, info) = imp.find_module(name, path)
-                    print "models:module ",file
                     module = imp.load_module( name, file, item, info )
-                    print "models:module ",module
                     if hasattr(module, "Model"):
                         try:
                             plugins.append(module.Model)
@@ -124,7 +122,6 @@ class ModelManager:
         
         id = wx.NewId()
         if len(self.indep_model_list) == 0:
-            print "models: self.indep_model",self.indep_model
             for item in self.indep_model:
                 if item not in self.indep_model_list.values():
                     self.indep_model_list[str(id)] = item
@@ -138,6 +135,9 @@ class ModelManager:
                     wx.EVT_MENU(event_owner, int(id), self._on_model)
                     id = wx.NewId()         
         modelmenu.AppendMenu(wx.NewId(), "Shape-independent...", indep_submenu, "List of shape-independent models")
+        
+        
+        
         model_info="additional models"
         id = wx.NewId()
         if len(self.custom_models) == 0:
@@ -155,8 +155,6 @@ class ModelManager:
                     wx.EVT_MENU(event_owner, int(id), self._on_model)
                     id = wx.NewId()
         modelmenu.AppendMenu(wx.NewId(),"Added models...", added_models, "List of additional models")
-        
-        
         return 0
     
     def _on_model(self, evt):

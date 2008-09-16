@@ -18,6 +18,7 @@ class FitProblem:
         self.data=None
         self.theory_name=None
         self.model_list=[]
+        self.schedule='False'
         
     def set_model(self,model,name):
         """ 
@@ -75,4 +76,13 @@ class FitProblem:
         print "fitproblem : reset model"
         self.model_list[0]=model
         
-        
+    def schedule_tofit(self, schedule='False'):
+        """
+             set schedule to true to decide if this fit  must be performed
+        """
+        self.schedule=schedule
+    def get_scheduled(self):
+        """ return true or false if a problem as being schedule for fitting"""
+        return self.schedule
+    
+    

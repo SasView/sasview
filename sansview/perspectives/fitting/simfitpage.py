@@ -90,10 +90,12 @@ class SimultaneousFitPage(wx.Panel):
         if self.cb1.GetValue()==True:
             for item in self.model_list:
                 item[0].SetValue(True)
+                item[1].schedule_tofit('True')
                 self.model_toFit.append(item)
         else:
             for item in self.model_list:
                 item[0].SetValue(False) 
+                item[1].schedule_tofit('False')
             self.model_toFit=[]
        
             
@@ -162,10 +164,12 @@ class SimultaneousFitPage(wx.Panel):
         self.model_toFit=[]
         for item in self.model_list:
             if item[0].GetValue()==True:
+                item[1].schedule_tofit('True')
                 self.model_toFit.append(item)
             else:
                 if item in self.model_toFit:
                     self.model_toFit.remove(item)
+                    item[1].schedule_tofit('False')
                     self.cb1.SetValue(False)
         if len(self.model_list)==len(self.model_toFit):
             self.cb1.SetValue(True)
