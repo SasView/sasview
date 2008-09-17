@@ -12,6 +12,7 @@ from fitpanel import FitPanel
 
 import models
 import fitpage
+import park
 
 class PlottableData(Data,Data1D):
     """ class plottable data: class allowing to plot Data type on panel"""
@@ -31,6 +32,7 @@ class PlottableData(Data,Data1D):
 
 class Plugin:
     """
+        Fitting plugin is used to perform fit 
     """
     def __init__(self):
         ## Plug-in name
@@ -168,7 +170,6 @@ class Plugin:
                     datap=PlottableData(data=data_for_park,data1d=item)
                     self.page_finder[page].add_data(datap)
                 except:
-                    raise 
                     wx.PostEvent(self.parent, StatusEvent(status="Fitting error: \
                     data already Selected "))
                     
@@ -193,7 +194,6 @@ class Plugin:
                 model=list[0]
                 if model.name== modelname:
                     value.set_model_param(names,values)
-                    
                     break
 
    
@@ -251,7 +251,6 @@ class Plugin:
         """
         try:
             for page, value in self.page_finder.iteritems():
-                print "fitting : simultaneous scheduled ",value.get_scheduled()
                 if value.get_scheduled()=='True':
                     data = value.get_data()
                     list = value.get_model()
@@ -305,7 +304,6 @@ class Plugin:
                 try:
                     templist=current_pg.get_param_list()
                 except:
-                    raise
                     wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                     return
               
@@ -350,11 +348,8 @@ class Plugin:
         
         for page, value in self.page_finder.iteritems():
             try:
-                print "fitting : simultaneous scheduled ",value.get_scheduled(),value.schedule
                 if value.get_scheduled()=='True':
-                    print "fitting: self.page_finder",value.get_scheduled()
                     data = value.get_data()
-                    #print "fitting: data",data
                     list = value.get_model()
                     model= list[0]
                     #Create dictionary of parameters for fitting used
@@ -375,7 +370,7 @@ class Plugin:
             except:
                 wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                 return 
-            #Do the simultaneous fit
+        #Do the simultaneous fit
         try:
             result=self.fitter.fit()
             self._simul_fit_completed(result,qmin,qmax)
@@ -391,7 +386,6 @@ class Plugin:
         else:
             self._on_change_engine('park')
         wx.PostEvent(self.parent, StatusEvent(status="Engine set to: %s" % self._fit_engine))
-    
   
     
     def _on_change_engine(self, engine='park'):
@@ -422,7 +416,6 @@ class Plugin:
             model.name="M"+str(self.index_model)
             self.index_model += 1  
             self.page_finder[current_pg].set_theory("Fitness")
-            #print "on model",model.name
             self.page_finder[current_pg].set_model(model,M_name)
             self.plot_helper(currpage= current_pg,qmin= None,qmax= None)
             sim_page.add_model(self.page_finder)
@@ -450,7 +443,6 @@ class Plugin:
             for page in self.page_finder.iterkeys():
                 if  page==currpage :  
                     break 
-           
             data=self.page_finder[page].get_data()
             list=self.page_finder[page].get_model()
             model=list[0]
@@ -500,7 +492,6 @@ class Plugin:
                     from sans.guicomm.events import NewPlotEvent
                     wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model"))
                 except:
-                    raise
                     print "SimView.complete1D: could not import sans.guicomm.events"
             
             
