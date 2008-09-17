@@ -68,6 +68,8 @@ class hfir_reader(unittest.TestCase):
             it matches the specific file we loaded.
         """
         self.assertEqual(self.data.filename, "S2-30dq.d1d")
+        self.assertEqual(len(self.data.x), 134)
+        self.assertEqual(len(self.data.y), 134)
         #          Q           I               dI          dQ  
         # Point 1: 0.003014    0.003010        0.000315    0.008249
         self.assertEqual(self.data.x[1], 0.003014)
