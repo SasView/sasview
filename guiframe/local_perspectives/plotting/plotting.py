@@ -226,6 +226,7 @@ class View1DPanel(PlotPanel):
         import math
         import numpy
         from sans.guitools.plottables import Data1D
+        import time
         
         if not self.graph.selected_plottable == None:
             length = len(self.plots[self.graph.selected_plottable].x)
@@ -237,8 +238,12 @@ class View1DPanel(PlotPanel):
                               self.plots[self.graph.selected_plottable].y,
                               dy=dy)
             new_plot.interactive = True
-            new_plot.name = self.plots[self.graph.selected_plottable].name
-            new_plot.group_id = self.plots[self.graph.selected_plottable].group_id
+            new_plot.name = self.plots[self.graph.selected_plottable].name+" data"
+            if hasattr(self.plots[self.graph.selected_plottable], "group_id"):
+                new_plot.group_id = self.plots[self.graph.selected_plottable].group_id
+            else:
+                new_plot.group_id = str(time.time())
+            
             label, unit = self.plots[self.graph.selected_plottable].get_xaxis()
             new_plot.xaxis(label, unit)
             label, unit = self.plots[self.graph.selected_plottable].get_yaxis()
