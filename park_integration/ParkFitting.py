@@ -13,6 +13,7 @@ from sans.guitools.plottables import Data1D
 from Loader import Load
 from AbstractFitEngine import FitEngine,FitArrange,Model
 
+
 class ParkFit(FitEngine):
     """ 
         ParkFit performs the Fit.This class can be used as follow:
@@ -95,9 +96,13 @@ class ParkFit(FitEngine):
         localfit.ftol = 1e-8
         fitter = FitMC(localfit=localfit)
         list=self.problem[0]._parameterset()
+        #result = fit.fit(self.problem,
+        #             fitter=fitter,
+        #            handler= GuiUpdate(window))
         result = fit.fit(self.problem,
-                     fitter=fitter,
-                     handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
+                         fitter=fitter,
+                         handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
+
        
         if result !=None:
             return result
