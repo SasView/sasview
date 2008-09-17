@@ -10,6 +10,7 @@ Package name: DataLoader 0.2
 	- 1D CanSAS writer available
 	- HFIR 1D 4-col reader available (*.d1d)
 	- Allows plugins through python source or zip files
+	- Added ring averaging and circular averaging
 	
 	Version 0.1
 	- First version of SANS data loader
@@ -22,10 +23,10 @@ Package name: DataLoader 0.2
 		- Python version >= 2.4 should be running on the system
 
 	2.2- Installing:
-		- Get the code from svn://danse.us/sans/releases/DataLoader-0.1
+		- Get the code from svn://danse.us/sans/trunk/DataLoader
 		- The following modules are required:
 			* numpy
-			* data_util from svn://danse.us/common/releases/data_util-0.1
+			* data_util from svn://danse.us/common/util
 			* The CanSAS reader needs PyXML installed
 	
 3- Known Issues

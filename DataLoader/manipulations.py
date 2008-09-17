@@ -1,5 +1,7 @@
 """
-    
+    Data manipulations for 2D data sets.
+    Using the meta data information, various types of averaging
+    are performed in Q-space 
 """
 
 """
@@ -35,8 +37,141 @@ class Slabs:
     def __init__(self):
         pass
     
-class Boxsum:
-    pass
+        
+class Boxsum(object):
+    """
+        Perform the sum of counts in a 2D region of interest.
+    """
+    def __init__(self, x_min=0.0, x_max=0.0, y_min=0.0, y_max=0.0):
+        # Minimum Qx value [A-1]
+        self.x_min = x_min
+        # Maximum Qx value [A-1]
+        self.x_max = x_max
+        # Minimum Qy value [A-1]
+        self.y_min = y_min
+        # Maximum Qy value [A-1]
+        self.y_max = y_max
+
+    def __call__(self, data2D):
+        """
+             Perform the sum in the region of interest 
+             
+             @param data2D: Data2D object
+             @return: number of counts, error on number of counts
+        """
+        y, err_y, y_counts = self._sum(data2D)
+        
+        # Average the sums
+        counts = 0 if y_counts==0 else y
+        error  = 0 if y_counts==0 else math.sqrt(err_y)
+        
+        return counts, error
+        
+    def _sum(self, data2D):
+        """
+             Perform the sum in the region of interest 
+             @param data2D: Data2D object
+             @return: number of counts, error on number of counts, number of entries summed
+        """
+        if len(data2D.detector) != 1:
+            raise RuntimeError, "Circular averaging: invalid number of detectors: %g" % len(data2D.detector)
+        
+        pixel_width = data2D.detector[0].pixel_size.x
+        det_dist    = data2D.detector[0].distance
+        wavelength  = data2D.source.wavelength
+        center_x    = data2D.detector[0].beam_center.x/pixel_width
+        center_y    = data2D.detector[0].beam_center.y/pixel_width
+                
+        y  = 0.0
+        err_y = 0.0
+        y_counts = 0.0
+                
+        for i in range(len(data2D.data)):
+            # Min and max x-value for the pixel
+            minx = pixel_width*(i - center_x)
+            maxx = pixel_width*(i+1.0 - center_x)
+            
+            qxmin = get_q(minx, 0.0, det_dist, wavelength)
+            qxmax = get_q(maxx, 0.0, det_dist, wavelength)
+            
+            # Get the count fraction in x for that pixel
+            frac_min = get_pixel_fraction_square(self.x_min, qxmin, qxmax)
+            frac_max = get_pixel_fraction_square(self.x_max, qxmin, qxmax)
+            frac_x = frac_max - frac_min
+            
+            for j in range(len(data2D.data)):
+                # Min and max y-value for the pixel
+                miny = pixel_width*(j - center_y)
+                maxy = pixel_width*(j+1.0 - center_y)
+
+                qymin = get_q(0.0, miny, det_dist, wavelength)
+                qymax = get_q(0.0, maxy, det_dist, wavelength)
+                
+                # Get the count fraction in x for that pixel
+                frac_min = get_pixel_fraction_square(self.y_min, qymin, qymax)
+                frac_max = get_pixel_fraction_square(self.y_max, qymin, qymax)
+                frac_y = frac_max - frac_min
+                
+                frac = frac_x * frac_y
+
+                y += frac * data2D.data[j][i]
+                if data2D.err_data == None or data2D.err_data[j][i]==0.0:
+                    err_y += frac * frac * math.fabs(data2D.data[j][i])
+                else:
+                    err_y += frac * frac * data2D.err_data[j][i] * data2D.err_data[j][i]
+                y_counts += frac
+        
+        return y, err_y, y_counts
+        # Average the sums
+        counts = 0 if y_counts==0 else y/y_counts
+        error  = 0 if y_counts==0 else math.sqrt(err_y)/y_counts
+        
+        return counts, error
+      
+class Boxavg(Boxsum):
+    """
+        Perform the average of counts in a 2D region of interest.
+    """
+    def __init__(self, x_min=0.0, x_max=0.0, y_min=0.0, y_max=0.0):
+        super(Boxavg, self).__init__(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
+
+    def __call__(self, data2D):
+        """
+             Perform the sum in the region of interest 
+             
+             @param data2D: Data2D object
+             @return: average counts, error on average counts
+        """
+        y, err_y, y_counts = self._sum(data2D)
+        
+        # Average the sums
+        counts = 0 if y_counts==0 else y/y_counts
+        error  = 0 if y_counts==0 else math.sqrt(err_y)/y_counts
+        
+        return counts, error
+        
+def get_pixel_fraction_square(x, xmin, xmax):
+    """
+         Return the fraction of the length 
+         from xmin to x. 
+         
+             A            B
+         +-----------+---------+
+         xmin        x         xmax
+         
+         @param x: x-value
+         @param xmin: minimum x for the length considered
+         @param xmax: minimum x for the length considered
+         @return: (x-xmin)/(xmax-xmin) when xmin < x < xmax
+         
+    """
+    if x<=xmin:
+        return 0.0
+    if x>xmin and x<xmax:
+        return (x-xmin)/(xmax-xmin)
+    else:
+        return 1.0
+
 
 class CircularAverage(object):
     """
@@ -366,14 +501,18 @@ if __name__ == "__main__":
     from loader import Loader
     
 
-    #d = Loader().load('test/MAR07232_rest.ASC')
-    d = Loader().load('test/MP_New.sans')
+    d = Loader().load('test/MAR07232_rest.ASC')
+    #d = Loader().load('test/MP_New.sans')
 
     
-    r = CircularAverage(r_min=.0, r_max=.075,bin_width=0.0003)
+    #r = Boxsum(x_min=.2, x_max=.4, y_min=0.2, y_max=0.4)
+    r = Boxsum(x_min=.01, x_max=.015, y_min=0.01, y_max=0.015)
     o = r(d)
-    for i in range(len(o.x)):
-        print o.x[i], o.y[i], o.dy[i]
+    print o
+    
+    r = Boxavg(x_min=.01, x_max=.015, y_min=0.01, y_max=0.015)
+    o = r(d)
+    print o
     
  
     
