@@ -520,13 +520,15 @@ class Plugin:
         try:
            
             new_plot = Theory1D(x, y)
-            new_plot.name ="Fitness"
+            new_plot.name = model.name
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+            new_plot.group_id = model.name
          
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model"))
         except:
-            print "SimView.complete1D: could not import sans.guicomm.events"
+            print "SimView.complete1D: could not import sans.guicomm.events\n %s" % sys.exc_value
+            logging.error("SimView.complete1D: could not import sans.guicomm.events\n %s" % sys.exc_value)
 
 if __name__ == "__main__":
     i = Plugin()
