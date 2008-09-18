@@ -14,6 +14,7 @@ See the license text in license.txt
 copyright 2008, University of Tennessee
 """
 #TODO: copy the meta data from the 2D object to the resulting 1D object
+#TODO: Don't assume square pixels
 
 from data_info import plottable_2D, Data1D
 import math
@@ -31,12 +32,156 @@ def get_q(dx, dy, det_dist, wavelength):
     theta      = 0.5*math.atan(plane_dist/det_dist)
     return (4.0*math.pi/wavelength)*math.sin(theta)
     
+class _Slab(object):
+    """
+        Compute average I(Q) for a region of interest
+    """
+    def __init__(self, x_min=0.0, x_max=0.0, y_min=0.0, y_max=0.0, bin_width=0.001):
+        # Minimum Qx value [A-1]
+        self.x_min = x_min
+        # Maximum Qx value [A-1]
+        self.x_max = x_max
+        # Minimum Qy value [A-1]
+        self.y_min = y_min
+        # Maximum Qy value [A-1]
+        self.y_max = y_max
+        # Bin width (step size) [A-1]
+        self.bin_width = bin_width
+        # If True, I(|Q|) will be return, otherwise, negative q-values are allowed
+        self.fold = False
+        
+    def __call__(self, data2D): return NotImplemented
+        
+    def _avg(self, data2D, maj):
+        """
+             Compute average I(Q_maj) for a region of interest.
+             The major axis is defined as the axis of Q_maj.
+             The minor axis is the axis that we average over.
+             
+             @param data2D: Data2D object
+             @param maj_min: min value on the major axis
+             @return: Data1D object
+        """
+        if len(data2D.detector) != 1:
+            raise RuntimeError, "_Slab._avg: invalid number of detectors: %g" % len(data2D.detector)
+        
+        pixel_width_x = data2D.detector[0].pixel_size.x
+        pixel_width_y = data2D.detector[0].pixel_size.y
+        det_dist    = data2D.detector[0].distance
+        wavelength  = data2D.source.wavelength
+        center_x    = data2D.detector[0].beam_center.x/pixel_width_x
+        center_y    = data2D.detector[0].beam_center.y/pixel_width_y
+                
+        # Build array of Q intervals
+        if maj=='x':
+            nbins = int(math.ceil((self.x_max-self.x_min)/self.bin_width))
+            qbins = self.bin_width*numpy.arange(nbins)+self.x_min
+        elif maj=='y':
+            nbins = int(math.ceil((self.y_max-self.y_min)/self.bin_width))
+            qbins = self.bin_width*numpy.arange(nbins)+self.y_min            
+        else:
+            raise RuntimeError, "_Slab._avg: unrecognized axis %s" % str(maj)
+                                
+        x  = numpy.zeros(nbins)
+        y  = numpy.zeros(nbins)
+        err_y = numpy.zeros(nbins)
+        y_counts = numpy.zeros(nbins)
+                                                
+        for i in range(numpy.size(data2D.data,1)):
+            # Min and max x-value for the pixel
+            minx = pixel_width_x*(i - center_x)
+            maxx = pixel_width_x*(i+1.0 - center_x)
+            
+            qxmin = get_q(minx, 0.0, det_dist, wavelength)
+            qxmax = get_q(maxx, 0.0, det_dist, wavelength)
+            
+            # Get the count fraction in x for that pixel
+            frac_min = get_pixel_fraction_square(self.x_min, qxmin, qxmax)
+            frac_max = get_pixel_fraction_square(self.x_max, qxmin, qxmax)
+            frac_x = frac_max - frac_min
+            
+            if frac_x == 0: 
+                continue
+            
+            if maj=='x':
+                dx = pixel_width_x*(i+0.5 - center_x)
+                q_value = get_q(dx, 0.0, det_dist, wavelength)
+                if self.fold==False and dx<0:
+                    q_value = -q_value
+                i_q = int(math.ceil((q_value-self.x_min)/self.bin_width)) - 1
+                
+                if i_q<0 or i_q>=nbins:
+                    continue
+                        
+            for j in range(numpy.size(data2D.data,0)):
+                # Min and max y-value for the pixel
+                miny = pixel_width_y*(j - center_y)
+                maxy = pixel_width_y*(j+1.0 - center_y)
 
+                qymin = get_q(0.0, miny, det_dist, wavelength)
+                qymax = get_q(0.0, maxy, det_dist, wavelength)
+                
+                # Get the count fraction in x for that pixel
+                frac_min = get_pixel_fraction_square(self.y_min, qymin, qymax)
+                frac_max = get_pixel_fraction_square(self.y_max, qymin, qymax)
+                frac_y = frac_max - frac_min
+                
+                frac = frac_x * frac_y
+                
+                if frac == 0:
+                    continue
 
-class Slabs:
-    def __init__(self):
-        pass
-    
+                if maj=='y':
+                    dy = pixel_width_y*(j+0.5 - center_y)
+                    q_value = get_q(0.0, dy, det_dist, wavelength)
+                    if self.fold==False and dy<0:
+                        q_value = -q_value
+                    i_q = int(math.ceil((q_value-self.y_min)/self.bin_width)) - 1
+                    
+                    if i_q<0 or i_q>=nbins:
+                        continue
+            
+                x[i_q]          = q_value
+                y[i_q]         += frac * data2D.data[j][i]
+                if data2D.err_data == None or data2D.err_data[j][i]==0.0:
+                    err_y[i_q] += frac * frac * math.fabs(data2D.data[j][i])
+                else:
+                    err_y[i_q] += frac * frac * data2D.err_data[j][i] * data2D.err_data[j][i]
+                y_counts[i_q]  += frac
+
+        # Average the sums
+        for i in range(nbins):
+            if y_counts[i]>0:
+                err_y[i] = math.sqrt(err_y[i])/y_counts[i]
+                y[i]     = y[i]/y_counts[i]
+        
+        return Data1D(x=x, y=y, dy=err_y)
+        
+class SlabY(_Slab):
+    """
+        Compute average I(Qy) for a region of interest
+    """
+    def __call__(self, data2D):
+        """
+             Compute average I(Qy) for a region of interest
+             
+             @param data2D: Data2D object
+             @return: Data1D object
+        """
+        return self._avg(data2D, 'y')
+        
+class SlabX(_Slab):
+    """
+        Compute average I(Qx) for a region of interest
+    """
+    def __call__(self, data2D):
+        """
+             Compute average I(Qx) for a region of interest
+             
+             @param data2D: Data2D object
+             @return: Data1D object
+        """
+        return self._avg(data2D, 'x') 
         
 class Boxsum(object):
     """
@@ -122,11 +267,6 @@ class Boxsum(object):
                 y_counts += frac
         
         return y, err_y, y_counts
-        # Average the sums
-        counts = 0 if y_counts==0 else y/y_counts
-        error  = 0 if y_counts==0 else math.sqrt(err_y)/y_counts
-        
-        return counts, error
       
 class Boxavg(Boxsum):
     """
@@ -506,13 +646,16 @@ if __name__ == "__main__":
 
     
     #r = Boxsum(x_min=.2, x_max=.4, y_min=0.2, y_max=0.4)
-    r = Boxsum(x_min=.01, x_max=.015, y_min=0.01, y_max=0.015)
+    r = SlabX(x_min=-.01, x_max=.01, y_min=-0.0002, y_max=0.0002, bin_width=0.0004)
+    r.fold = False
     o = r(d)
-    print o
     
-    r = Boxavg(x_min=.01, x_max=.015, y_min=0.01, y_max=0.015)
-    o = r(d)
-    print o
+    #s = SlabY(x_min=-.01, x_max=.01, y_min=-0.0002, y_max=0.0002, bin_width=0.0004)
+    #s.fold = False
+    #p = s(d)
+    
+    for i in range(len(o.x)):
+        print o.x[i], o.y[i], o.dy[i]
     
  
     
