@@ -5,3 +5,5 @@
 - The close tab button should be inside the tab it closes, like the fit button.
 - If I load data, select if for fitting, then close the fit tab, I can't re-select it 
 	for fitting if all other fit tabs are closed and I'm looking at the simultaneous fitting tab. 
+- Chi squared should be updated when model parameters are changed.
+- The parameters resulting from contraints should be updated on the fit panel.
