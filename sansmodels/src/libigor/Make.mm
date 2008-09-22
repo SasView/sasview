@@ -69,8 +69,8 @@ EXPORT_BINS = $(PROJ_DLL)
 
 
 
-include doxygen/default.def
-docs: export-doxygen-docs
+#include doxygen/default.def
+#docs: export-doxygen-docs
 
 
 # version
