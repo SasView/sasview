@@ -152,11 +152,9 @@ class testFitModule(unittest.TestCase):
         
         result2 = fitter.fit()
         self.assert_(result2)
-        print result2.pvec[0],  result2.stderr[0]
-        print result2.pvec[1],  result2.stderr[1]
-        self.assertTrue( ( math.fabs(result2.pvec[0]-2.5)/3. < result2.stderr[0]) ) 
+        self.assertTrue( ( math.fabs(result2.pvec[0]-4.0)/3. < result2.stderr[0]) ) 
         
-        self.assertTrue( ( math.fabs(result2.pvec[1]-4.0)/3. < result2.stderr[1]) )
+        self.assertTrue( ( math.fabs(result2.pvec[1]-2.5)/3. < result2.stderr[1]) )
         self.assertTrue(result2.fitness/49 < 2)
         
         
