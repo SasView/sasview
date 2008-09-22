@@ -95,7 +95,6 @@ class Plugin:
             @param graph: the Graph object to which we attach the context menu
             @return: a list of menu items with call-back function
         """
-        
         self.graph=graph
         for item in graph.plottables:
             if item.name==graph.selected_plottable and item.__class__.__name__ is not "Theory1D":
@@ -415,7 +414,7 @@ class Plugin:
                 M_name="M"+str(self.index_model)+"= "+name
             model.name="M"+str(self.index_model)
             self.index_model += 1  
-            self.page_finder[current_pg].set_theory("Fitness")
+            #self.page_finder[current_pg].set_theory("Fitness")
             self.page_finder[current_pg].set_model(model,M_name)
             self.plot_helper(currpage= current_pg,qmin= None,qmax= None)
             sim_page.add_model(self.page_finder)
@@ -448,7 +447,7 @@ class Plugin:
             model=list[0]
             if data!=None:
                 theory = Theory1D(x=[], y=[])
-                theory.name = self.page_finder[page].get_theory()
+                theory.name = model.name
                 theory.group_id = data.group_id
               
                 x_name, x_units = data.get_xaxis() 
@@ -523,7 +522,7 @@ class Plugin:
             new_plot.name = model.name
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-            new_plot.group_id = model.name
+            new_plot.group_id ="Fitness"
          
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model"))
         except:

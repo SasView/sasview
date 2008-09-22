@@ -22,7 +22,8 @@ class SimultaneousFitPage(wx.Panel):
         self.parent = parent
         self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer1 = wx.GridBagSizer(5,5)
-        self.sizer2 = wx.GridBagSizer(5,5)
+        #self.sizer2 = wx.GridBagSizer(5,5)
+        self.sizer2  = wx.BoxSizer(wx.HORIZONTAL)
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
         self.vbox.Add(self.sizer3)
         self.vbox.Add(self.sizer1)
@@ -37,25 +38,26 @@ class SimultaneousFitPage(wx.Panel):
         self.sizer3.Add(self.cb1,(iy, ix),(1,1),\
                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_model_name)
-        wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_model_name)
+       
         ix  = 0
         iy  = 1
         text=wx.StaticText(self, -1, 'Constraint')
-        self.sizer2.Add(text,(iy, ix),(1,1),\
-                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        self.sizer2.Add(text,0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         ix  = 0
         iy  += 1
         self.ctl2 = wx.TextCtrl(self, -1, style=wx.TE_MULTILINE)
         self.ctl2.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
-        self.sizer2.Add(self.ctl2, (iy, ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        self.ctl2.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
+        self.sizer2.Add(self.ctl2, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         ix +=2
-        self.sizer2.Add(self.btFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        self.sizer2.Add(self.btFit, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         self.params=[]
         self.model_list=[]
         self.model_toFit=[]
         self.page_finder={}
         iy +=1
-        self.sizer2.Add((20,20),(iy, ix))
+        #self.sizer2.Add((20,20),(iy, ix))
+        self.sizer2.Add((20,20), 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         self.vbox.Layout()
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)

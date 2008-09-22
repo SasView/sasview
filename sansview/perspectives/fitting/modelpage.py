@@ -228,6 +228,7 @@ class ModelPage(wx.Panel):
             ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
             ctl1.SetValue(str (format_number(value)))
             ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+            ctl1.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
             self.sizer2.Add(ctl1, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
            
             ix +=1
@@ -263,7 +264,6 @@ class ModelPage(wx.Panel):
                 try:
                      name=str(item[0].GetLabelText())
                      value= float(item[1].GetValue())
-                     print "modelpage: name. value",name , value
                      self.model.setParam(name,value)
                      self.manager.draw_model(self.model)
                 except:

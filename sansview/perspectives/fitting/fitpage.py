@@ -101,12 +101,14 @@ class FitPage(wx.Panel):
         self.xmin.SetToolTipString("Minimun value of x in linear scale.")
         self.sizer4.Add(self.xmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.xmin.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
+        self.xmin.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
         self.xmin.Hide()
         ix += 2
         self.xmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.xmax.SetToolTipString("Maximum value of x in linear scale.")
         self.sizer4.Add(self.xmax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
+        self.xmax.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
         self.xmax.Hide()
         #Set chisqr  result into TextCtrl
         ix = 0
@@ -447,6 +449,7 @@ class FitPage(wx.Panel):
             ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
             ctl1.SetValue(str (format_number(value)))
             ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+            ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
             self.sizer2.Add(ctl1, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             ix += 1
             text2=wx.StaticText(self, -1, '+/-')
