@@ -14,7 +14,6 @@ See the license text in license.txt
 copyright 2008, University of Tennessee
 """
 #TODO: copy the meta data from the 2D object to the resulting 1D object
-#TODO: Don't assume square pixels
 
 from data_info import plottable_2D, Data1D
 import math
@@ -221,20 +220,21 @@ class Boxsum(object):
         if len(data2D.detector) != 1:
             raise RuntimeError, "Circular averaging: invalid number of detectors: %g" % len(data2D.detector)
         
-        pixel_width = data2D.detector[0].pixel_size.x
+        pixel_width_x = data2D.detector[0].pixel_size.x
+        pixel_width_y = data2D.detector[0].pixel_size.y
         det_dist    = data2D.detector[0].distance
         wavelength  = data2D.source.wavelength
-        center_x    = data2D.detector[0].beam_center.x/pixel_width
-        center_y    = data2D.detector[0].beam_center.y/pixel_width
+        center_x    = data2D.detector[0].beam_center.x/pixel_width_x
+        center_y    = data2D.detector[0].beam_center.y/pixel_width_y
                 
         y  = 0.0
         err_y = 0.0
         y_counts = 0.0
                 
-        for i in range(len(data2D.data)):
+        for i in range(numpy.size(data2D.data,1)):
             # Min and max x-value for the pixel
-            minx = pixel_width*(i - center_x)
-            maxx = pixel_width*(i+1.0 - center_x)
+            minx = pixel_width_x*(i - center_x)
+            maxx = pixel_width_x*(i+1.0 - center_x)
             
             qxmin = get_q(minx, 0.0, det_dist, wavelength)
             qxmax = get_q(maxx, 0.0, det_dist, wavelength)
@@ -244,10 +244,10 @@ class Boxsum(object):
             frac_max = get_pixel_fraction_square(self.x_max, qxmin, qxmax)
             frac_x = frac_max - frac_min
             
-            for j in range(len(data2D.data)):
+            for j in range(numpy.size(data2D.data,0)):
                 # Min and max y-value for the pixel
-                miny = pixel_width*(j - center_y)
-                maxy = pixel_width*(j+1.0 - center_y)
+                miny = pixel_width_y*(j - center_y)
+                maxy = pixel_width_y*(j+1.0 - center_y)
 
                 qymin = get_q(0.0, miny, det_dist, wavelength)
                 qymax = get_q(0.0, maxy, det_dist, wavelength)
@@ -338,19 +338,20 @@ class CircularAverage(object):
         if len(data2D.detector) != 1:
             raise RuntimeError, "Circular averaging: invalid number of detectors: %g" % len(data2D.detector)
         
-        pixel_width = data2D.detector[0].pixel_size.x
+        pixel_width_x = data2D.detector[0].pixel_size.x
+        pixel_width_y = data2D.detector[0].pixel_size.y
         det_dist    = data2D.detector[0].distance
         wavelength  = data2D.source.wavelength
-        center_x    = data2D.detector[0].beam_center.x/pixel_width
-        center_y    = data2D.detector[0].beam_center.y/pixel_width
+        center_x    = data2D.detector[0].beam_center.x/pixel_width_x
+        center_y    = data2D.detector[0].beam_center.y/pixel_width_y
         
         # Find out the maximum Q range
-        xwidth = numpy.size(data2D.data,1)*pixel_width
+        xwidth = numpy.size(data2D.data,1)*pixel_width_x
         dx_max = xwidth - data2D.detector[0].beam_center.x
         if xwidth-dx_max>dx_max:
             dx_max = xwidth-dx_max
             
-        ywidth = numpy.size(data2D.data,0)*pixel_width
+        ywidth = numpy.size(data2D.data,0)*pixel_width_y
         dy_max = ywidth - data2D.detector[0].beam_center.y
         if ywidth-dy_max>dy_max:
             dy_max = ywidth-dy_max
@@ -366,21 +367,21 @@ class CircularAverage(object):
         err_y = numpy.zeros(nbins)
         y_counts = numpy.zeros(nbins)
         
-        for i in range(len(data2D.data)):
-            dx = pixel_width*(i+0.5 - center_x)
+        for i in range(numpy.size(data2D.data,1)):
+            dx = pixel_width_x*(i+0.5 - center_x)
             
             # Min and max x-value for the pixel
-            minx = pixel_width*(i - center_x)
-            maxx = pixel_width*(i+1.0 - center_x)
+            minx = pixel_width_x*(i - center_x)
+            maxx = pixel_width_x*(i+1.0 - center_x)
             
-            for j in range(len(data2D.data)):
-                dy = pixel_width*(j+0.5 - center_y)
+            for j in range(numpy.size(data2D.data,0)):
+                dy = pixel_width_y*(j+0.5 - center_y)
             
                 q_value = get_q(dx, dy, det_dist, wavelength)
             
                 # Min and max y-value for the pixel
-                miny = pixel_width*(j - center_y)
-                maxy = pixel_width*(j+1.0 - center_y)
+                miny = pixel_width_y*(j - center_y)
+                maxy = pixel_width_y*(j+1.0 - center_y)
                 
                 # Calculate the q-value for each corner
                 # q_[x min or max][y min or max]
@@ -462,32 +463,36 @@ class Ring(object):
         
         if len(data2D.detector) != 1:
             raise RuntimeError, "Ring averaging: invalid number of detectors: %g" % len(data2D.detector)
-        pixel_width = data2D.detector[0].pixel_size.x
+        pixel_width_x = data2D.detector[0].pixel_size.x
+        pixel_width_y = data2D.detector[0].pixel_size.y
         det_dist = data2D.detector[0].distance
         wavelength = data2D.source.wavelength
-        center_x = self.center_x/pixel_width
-        center_y = self.center_y/pixel_width
+        #center_x = self.center_x/pixel_width_x
+        #center_y = self.center_y/pixel_width_y
+        center_x    = data2D.detector[0].beam_center.x/pixel_width_x
+        center_y    = data2D.detector[0].beam_center.y/pixel_width_y
+        
         
         phi_bins   = numpy.zeros(self.nbins_phi)
         phi_counts = numpy.zeros(self.nbins_phi)
         phi_values = numpy.zeros(self.nbins_phi)
         phi_err    = numpy.zeros(self.nbins_phi)
         
-        for i in range(len(data)):
-            dx = pixel_width*(i+0.5 - center_x)
+        for i in range(numpy.size(data,1)):
+            dx = pixel_width_x*(i+0.5 - center_x)
             
             # Min and max x-value for the pixel
-            minx = pixel_width*(i - center_x)
-            maxx = pixel_width*(i+1.0 - center_x)
+            minx = pixel_width_x*(i - center_x)
+            maxx = pixel_width_x*(i+1.0 - center_x)
             
-            for j in range(len(data)):
-                dy = pixel_width*(j+0.5 - center_y)
+            for j in range(numpy.size(data,0)):
+                dy = pixel_width_y*(j+0.5 - center_y)
             
                 q_value = get_q(dx, dy, det_dist, wavelength)
             
                 # Min and max y-value for the pixel
-                miny = pixel_width*(j - center_y)
-                maxy = pixel_width*(j+1.0 - center_y)
+                miny = pixel_width_y*(j - center_y)
+                maxy = pixel_width_y*(j+1.0 - center_y)
                 
                 # Calculate the q-value for each corner
                 # q_[x min or max][y min or max]
@@ -511,7 +516,7 @@ class Ring(object):
                 
                 frac = frac_max - frac_min
 
-                i_phi = int(math.ceil(self.nbins_phi*(math.atan2(dy, dx)+math.pi)/(2.0*math.pi)) - 1)
+                i_phi = int(math.ceil(self.nbins_phi*(math.atan2(dy, dx)+math.pi)/(2.0*math.pi))) - 1
             
                 phi_bins[i_phi] += frac * data[j][i]
                 
@@ -628,13 +633,164 @@ def get_intercept(q, q_0, q_1):
     return None
     
 
-class Sector:
+class _Sector:
     """
         Defines a sector region on a 2D data set.
         The sector is defined by r_min, r_max, phi_min, phi_max,
         and the position of the center of the ring. 
+        
+        Phi is defined between 0 and 2pi
     """
-    pass
+    def __init__(self, r_min, r_max, phi_min, phi_max):
+        self.r_min = r_min
+        self.r_max = r_max
+        self.phi_min = phi_min
+        self.phi_max = phi_max
+        self.nbins = 20
+        
+    def _agv(self, data2D, run='phi'):
+        """
+            Perform sector averaging.
+            
+            @param data2D: Data2D object
+            @param run:  define the varying parameter ('phi' or 'q')
+            @return: Data1D object
+        """
+        if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
+            raise RuntimeError, "Ring averaging only take plottable_2D objects"
+        
+        data = data2D.data
+        qmin = self.r_min
+        qmax = self.r_max
+        
+        if len(data2D.detector) != 1:
+            raise RuntimeError, "Ring averaging: invalid number of detectors: %g" % len(data2D.detector)
+        pixel_width_x = data2D.detector[0].pixel_size.x
+        pixel_width_y = data2D.detector[0].pixel_size.y
+        det_dist      = data2D.detector[0].distance
+        wavelength    = data2D.source.wavelength
+        center_x      = data2D.detector[0].beam_center.x/pixel_width_x
+        center_y      = data2D.detector[0].beam_center.y/pixel_width_y
+        
+        y        = numpy.zeros(self.nbins)
+        y_counts = numpy.zeros(self.nbins)
+        x        = numpy.zeros(self.nbins)
+        y_err    = numpy.zeros(self.nbins)
+        
+        for i in range(numpy.size(data,1)):
+            dx = pixel_width_x*(i+0.5 - center_x)
+            
+            # Min and max x-value for the pixel
+            minx = pixel_width_x*(i - center_x)
+            maxx = pixel_width_x*(i+1.0 - center_x)
+            
+            for j in range(numpy.size(data,0)):
+                dy = pixel_width_y*(j+0.5 - center_y)
+            
+                q_value = get_q(dx, dy, det_dist, wavelength)
+
+                # Min and max y-value for the pixel
+                miny = pixel_width_y*(j - center_y)
+                maxy = pixel_width_y*(j+1.0 - center_y)
+                
+                # Calculate the q-value for each corner
+                # q_[x min or max][y min or max]
+                q_00 = get_q(minx, miny, det_dist, wavelength)
+                q_01 = get_q(minx, maxy, det_dist, wavelength)
+                q_10 = get_q(maxx, miny, det_dist, wavelength)
+                q_11 = get_q(maxx, maxy, det_dist, wavelength)
+                
+                # Look for intercept between each side of the pixel
+                # and the constant-q ring for qmax
+                frac_max = get_pixel_fraction(qmax, q_00, q_01, q_10, q_11)
+                
+                # Look for intercept between each side of the pixel
+                # and the constant-q ring for qmin
+                frac_min = get_pixel_fraction(qmin, q_00, q_01, q_10, q_11)
+                
+                # We are interested in the region between qmin and qmax
+                # therefore the fraction of the surface of the pixel
+                # that we will use to calculate the number of counts to 
+                # include is given by:
+                
+                frac = frac_max - frac_min
+
+                # Compute phi and check whether it's within the limits
+                phi_value = math.atan2(dy, dx)+math.pi
+                if phi_value<self.phi_min or phi_value>self.phi_max:
+                    continue
+                                                    
+                # Check which type of averaging we need
+                if run.lower()=='phi': 
+                    i_bin = int(math.ceil(self.nbins*(phi_value-self.phi_min)/(self.phi_max-self.phi_min))) - 1
+                else:
+                    # If we don't need this pixel, skip the rest of the work
+                    #TODO: an improvement here would be to compute the average
+                    # Q for the pixel from the part that is covered by
+                    # the ring defined by q_min/q_max rather than the complete
+                    # pixel 
+                    if q_value<self.r_min or q_value>self.r_max:
+                        continue
+                    i_bin = int(math.ceil(self.nbins*(q_value-self.r_min)/(self.r_max-self.r_min))) - 1
+            
+                try:
+                    y[i_bin] += frac * data[j][i]
+                except:
+                    import sys
+                    print sys.exc_value
+                    print i_bin, frac
+                
+                if data2D.err_data == None or data2D.err_data[j][i]==0.0:
+                    y_err[i_bin] += frac * frac * math.fabs(data2D.data[j][i])
+                else:
+                    y_err[i_bin] += frac * frac * data2D.err_data[j][i] * data2D.err_data[j][i]
+                y_counts[i_bin] += frac
+        
+        for i in range(self.nbins):
+            y[i] = y[i] / y_counts[i]
+            y_err[i] = math.sqrt(y_err[i]) / y_counts[i]
+            # Check which type of averaging we need
+            if run.lower()=='phi':
+                x[i] = (self.phi_max-self.phi_min)/self.nbins*(1.0*i + 0.5)+self.phi_min
+            else:
+                x[i] = (self.r_max-self.r_min)/self.nbins*(1.0*i + 0.5)+self.r_min
+            
+        return Data1D(x=x, y=y, dy=y_err)
+        
+        
+class SectorPhi(_Sector):
+    """
+        Sector average as a function of phi.
+        I(phi) is return and the data is averaged over Q.
+        
+        A sector is defined by r_min, r_max, phi_min, phi_max.
+        The number of bin in phi also has to be defined.
+    """
+    def __call__(self, data2D):
+        """
+            Perform sector average and return I(phi).
+            
+            @param data2D: Data2D object
+            @return: Data1D object
+        """
+        return self._agv(data2D, 'phi')
+
+class SectorQ(_Sector):
+    """
+        Sector average as a function of Q.
+        I(Q) is return and the data is averaged over phi.
+        
+        A sector is defined by r_min, r_max, phi_min, phi_max.
+        The number of bin in Q also has to be defined.
+    """
+    def __call__(self, data2D):
+        """
+            Perform sector average and return I(Q).
+            
+            @param data2D: Data2D object
+            @return: Data1D object
+        """
+        return self._agv(data2D, 'q')
 
 if __name__ == "__main__": 
 
@@ -645,14 +801,11 @@ if __name__ == "__main__":
     #d = Loader().load('test/MP_New.sans')
 
     
-    #r = Boxsum(x_min=.2, x_max=.4, y_min=0.2, y_max=0.4)
-    r = SlabX(x_min=-.01, x_max=.01, y_min=-0.0002, y_max=0.0002, bin_width=0.0004)
-    r.fold = False
+    r = SectorQ(r_min=.005, r_max=.01, phi_min=0.0, phi_max=math.pi/2.0)
     o = r(d)
     
-    #s = SlabY(x_min=-.01, x_max=.01, y_min=-0.0002, y_max=0.0002, bin_width=0.0004)
-    #s.fold = False
-    #p = s(d)
+    s = Ring(r_min=.005, r_max=.01) 
+    p = s(d)
     
     for i in range(len(o.x)):
         print o.x[i], o.y[i], o.dy[i]
