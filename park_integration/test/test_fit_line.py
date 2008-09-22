@@ -11,12 +11,8 @@ class testFitModule(unittest.TestCase):
     def test1(self):
         """ Fit 1 data (testdata_line.txt)and 1 model(lineModel)  """
         #load data
-        from sans.fit.Loader import Load
-        load = Load()
-        load.set_filename("testdata_line.txt")
-        load.set_values()
-        data1 = Data1D(x=[], y=[],dx=None, dy=None)
-        load.load_data(data1)
+        from DataLoader.loader import Loader
+        data1 = Loader().load("testdata_line.txt")
         #Importing the Fit module
         from sans.fit.Fitting import Fit
         fitter = Fit('scipy')
@@ -156,11 +152,11 @@ class testFitModule(unittest.TestCase):
         
         result2 = fitter.fit()
         self.assert_(result2)
-        self.assertTrue( ( math.fabs(result2.pvec[0]-4)/3 == result2.stderr[0] ) or 
-                         ( math.fabs(result2.pvec[0]-4)/3 < result2.stderr[0]) ) 
+        print result2.pvec[0],  result2.stderr[0]
+        print result2.pvec[1],  result2.stderr[1]
+        self.assertTrue( ( math.fabs(result2.pvec[0]-2.5)/3. < result2.stderr[0]) ) 
         
-        self.assertTrue( ( math.fabs(result2.pvec[1]-2.5)/3 == result2.stderr[1] ) or
-                         ( math.fabs(result2.pvec[1]-2.5)/3 < result2.stderr[1]) )
+        self.assertTrue( ( math.fabs(result2.pvec[1]-4.0)/3. < result2.stderr[1]) )
         self.assertTrue(result2.fitness/49 < 2)
         
         
