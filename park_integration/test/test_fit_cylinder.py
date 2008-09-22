@@ -30,7 +30,7 @@ class testFitModule(unittest.TestCase):
         pars1 =['length','radius','scale']
         fitter.set_data(data,1)
         model.model.setParam('scale',10)
-        fitter.set_model(model,"M1",1,pars1)
+        fitter.set_model(model,1,pars1)
         result1 = fitter.fit()
         print "test scipy result:",result1.stderr,result1.pvec,result1.fitness
         self.assert_(result1)

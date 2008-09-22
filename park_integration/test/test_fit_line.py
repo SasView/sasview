@@ -135,6 +135,8 @@ class testFitModule(unittest.TestCase):
         from sans.models.Constant import Constant
         model11  = LineModel()
         model11.name= "line"
+        model11.setParam('A',4)
+        model11.setParam('B',3)
         model22  = Constant()
         model22.name= "cst"
         model22.setParam('value','line.A')
@@ -178,7 +180,7 @@ class testFitModule(unittest.TestCase):
         from sans.guitools.LineModel import LineModel
         model1  = LineModel()
         model1.name= "M1"
-        
+      
         data1 = Data(sans_data=data11 )
         data2 = Data(sans_data=data22 )
         model = Model(model1)
@@ -191,7 +193,7 @@ class testFitModule(unittest.TestCase):
         
         result1 = fitter.fit()
         self.assert_(result1)
-        
+
         self.assertTrue( ( math.fabs(result1.pvec[0]-4)/3 == result1.stderr[0] ) or 
                          ( math.fabs(result1.pvec[0]-4)/3 < result1.stderr[0]) ) 
         

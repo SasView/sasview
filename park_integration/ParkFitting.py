@@ -40,7 +40,7 @@ class ParkFit(FitEngine):
         @note: {model.parameter.name:value} is ignored in fit function since 
         the user should make sure to call set_param himself.
     """
-    def __init__(self,data=[]):
+    def __init__(self):
         """
             Creates a dictionary (self.fitArrangeList={})of FitArrange elements
             with Uid as keys
@@ -60,9 +60,11 @@ class ParkFit(FitEngine):
         for k,value in self.fitArrangeDict.iteritems():
             parkmodel = value.get_model()
             for p in parkmodel.parameterset:
-                if p.isfixed() and p._getname()in self.paramList:
-                    p.set([-numpy.inf,numpy.inf])
-            i+=1    
+                if p._getname()in self.paramList and not p.iscomputed():
+                    p.status = 'fitted' # make it a fitted parameter
+                            #iscomputed  paramter with string inside
+               
+            i+=1
             Ldata=value.get_data()
             parkdata=self._concatenateData(Ldata)
             
@@ -88,22 +90,27 @@ class ParkFit(FitEngine):
             @return result.pvec: list of parameter with the best value found during fitting
             @return result.cov: Covariance matrix
         """
-        
         self.createAssembly()
-        pars=self.problem.fit_parameters()
-        self.problem.eval()
+    
         localfit = FitSimplex()
         localfit.ftol = 1e-8
+        # fitmc(fitness,localfit,n,handler):
+        #Run a monte carlo fit.
+        #This procedure maps a local optimizer across a set of n initial points.
+        #The initial parameter value defined by the fitness parameters defines
+        #one initial point.  The remainder are randomly generated within the
+        #bounds of the problem.
+        #localfit is the local optimizer to use.  It should be a bounded
+        #optimizer following the `park.fitmc.LocalFit` interface.
+        #handler accepts updates to the current best set of fit parameters.
+        # See `park.fitresult.FitHandler` for details.
         fitter = FitMC(localfit=localfit)
-        list=self.problem[0]._parameterset()
         #result = fit.fit(self.problem,
         #             fitter=fitter,
         #            handler= GuiUpdate(window))
         result = fit.fit(self.problem,
                          fitter=fitter,
                          handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
-
-       
         if result !=None:
             return result
         else:
