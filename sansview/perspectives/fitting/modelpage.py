@@ -267,7 +267,8 @@ class ModelPage(wx.Panel):
                      self.model.setParam(name,value)
                      self.manager.draw_model(self.model)
                 except:
+                    
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                            "Drawing  Error:wrong value entered : %s"% sys.exc_value))
+                            "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
    
   

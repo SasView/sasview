@@ -1,6 +1,6 @@
 import wx
 import imp
-import os,sys
+import os,sys,math
 import os.path
 
 (ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
@@ -75,18 +75,73 @@ class ModelManager:
         """
         self.model_list = {}
         self.model_list_box = {}
+        
         model_info="shape-based models"
+        
+        from sans.models.SphereModel import SphereModel
+        self.model_list[str(wx.NewId())] =  ModelInfo(SphereModel , model_info)
+        
         from sans.models.CylinderModel import CylinderModel
         self.model_list[str(wx.NewId())] = ModelInfo(CylinderModel , model_info)
       
-        from sans.models.SphereModel import SphereModel
-        self.model_list[str(wx.NewId())] =  ModelInfo(SphereModel , model_info)
-   
+        from sans.models.CoreShellModel import CoreShellModel
+        self.model_list[str(wx.NewId())] = ModelInfo(CoreShellModel , model_info)
+        
+        from sans.models.CoreShellCylinderModel import CoreShellCylinderModel
+        self.model_list[str(wx.NewId())] = ModelInfo(CoreShellCylinderModel , model_info)
+        
+        from sans.models.EllipticalCylinderModel import EllipticalCylinderModel
+        self.model_list[str(wx.NewId())] = ModelInfo(EllipticalCylinderModel , model_info)
+        
+        from sans.models.EllipsoidModel import EllipsoidModel
+        self.model_list[str(wx.NewId())] = ModelInfo(EllipsoidModel , model_info)
+        
         from sans.guitools.LineModel import LineModel
         self.model_list[str(wx.NewId())]  = ModelInfo(LineModel , model_info)
+        
+        
         model_info="shape-independent models"
-        from sans.models.Lorentzian import Lorentzian
-        self.indep_model.append( ModelInfo(Lorentzian , model_info) )
+        
+        from sans.models.BEPolyelectrolyte import BEPolyelectrolyte
+        self.indep_model.append( ModelInfo( BEPolyelectrolyte , model_info) )
+        
+        from sans.models.DABModel import DABModel
+        self.indep_model.append( ModelInfo(DABModel , model_info+
+        "\n Evaluates F(x) = scale/( 1 + (x*L)^2 )^(2) +bkd") )
+        
+        from sans.models.DebyeModel import DebyeModel
+        self.indep_model.append( ModelInfo(DebyeModel , model_info+
+        "\n Evaluates F(x) = 2( exp(-x)+x -1 )/x**2") )
+        
+        from sans.models.FractalModel import FractalModel
+        class FractalAbsModel(FractalModel):
+            def _Fractal(self, x):
+                return FractalModel._Fractal(self, math.fabs(x))
+        self.indep_model.append( ModelInfo(FractalAbsModel , model_info) )
+        
+        from sans.models.LorentzModel import LorentzModel
+        self.indep_model.append( ModelInfo(LorentzModel , model_info+
+                "\n Evaluates F(x)= scale/( 1 + (x*L)^2 ) + bkd ") ) 
+            
+        from sans.models.PowerLawModel import PowerLawModel
+        class PowerLawAbsModel(PowerLawModel):
+            def _PowerLaw(self, x):
+                try:
+                    return PowerLawModel._PowerLaw(self, math.fabs(x))
+                except:
+                    print sys.exc_value  
+        self.indep_model.append( ModelInfo(PowerLawAbsModel , model_info+
+        "\n Evaluates abs(F(x)) \n with F(x) = scale* (x)^(m) + bkd ") )
+                    
+       
+        from sans.models.TeubnerStreyModel import TeubnerStreyModel
+        self.indep_model.append( ModelInfo(TeubnerStreyModel , model_info) )
+        
+        
+          
+        
+        
+      
         
         #Looking for plugins
         self.plugins = findModels()

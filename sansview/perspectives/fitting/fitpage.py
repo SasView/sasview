@@ -1,7 +1,7 @@
 import sys
 import wx
 import wx.lib
-import numpy
+import numpy,math
 import copy
 
 from sans.guicomm.events import StatusEvent   
@@ -64,6 +64,10 @@ class FitPage(wx.Panel):
         self.vbox.Add(self.sizer4)
         self.vbox.Add(self.sizer1)
         
+        id = wx.NewId()
+        self.btClose =wx.Button(self,id,'Close')
+        self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
+        self.btClose.SetToolTipString("Close page.")
         ix = 0
         iy = 1
         self.sizer3.Add(wx.StaticText(self, -1, 'Data Source'),(iy,ix),\
@@ -122,7 +126,9 @@ class FitPage(wx.Panel):
         self.sizer1.Add(self.tcChi,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix +=2
         self.sizer1.Add(self.btFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        
+        iy+= 1
+        ix = 3
+        self.sizer1.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         #contains link between a model and selected parameters to fit 
@@ -192,7 +198,6 @@ class FitPage(wx.Panel):
              @note : everything a data is selected, the panel check is it is different 
              from the previous selected data
         """
-       
         try:
             if dataset !=None:
                 self.prevData.x= copy.deepcopy(dataset.x)
@@ -204,6 +209,33 @@ class FitPage(wx.Panel):
             raise ValueError, " copy_data: cannot copy data" 
         
         
+    def onClose(self,event):
+        self.GrandParent.onClose()
+        
+        
+    def compute_chisqr(self):
+        """ @param fn: function that return model value
+            @return residuals
+        """
+        flag=self.checkFitRange()
+        if flag== True:
+            qmin = float(self.xmin.GetValue())
+            qmax = float(self.xmax.GetValue())
+            x,y,dy = [numpy.asarray(v) for v in (self.data.x,self.data.y,self.data.dy)]
+            if qmin==None and qmax==None: 
+                fx =numpy.asarray([self.model.run(v) for v in x])
+                res=(y - fx)/dy
+            else:
+                idx = (x>= qmin) & (x <=qmax)
+                fx = numpy.asarray([self.model.run(item)for item in x[idx ]])
+                res= (y[idx] - fx)/dy[idx]  
+            
+            sum=0
+            for item in res:
+                sum +=item
+        self.tcChi.SetValue(format_number(math.fabs(sum)))
+            
+            
     def onFit(self,event):
         """ signal for fitting"""
          
@@ -213,7 +245,6 @@ class FitPage(wx.Panel):
         qmin=float(self.xmin.GetValue())
         qmax =float( self.xmax.GetValue())
         if len(self.param_toFit) >0 and flag==True:
-            #self.manager._on_single_fit(model=self.model,qmin=qmin,qmax=qmax)
             self.manager._on_single_fit(qmin=qmin,qmax=qmax)
         else:
               wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
@@ -263,11 +294,13 @@ class FitPage(wx.Panel):
         """
             set a flag to determine if the fitting range entered by the user is valid
         """
+      
         try:
             flag=self.checkFitRange()
             if flag==True and self.model!=None:
                  self.manager.redraw_model(float(self.xmin.GetValue())\
                                                ,float(self.xmax.GetValue()))
+           
         except:
             wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Drawing  Error:wrong value entered %s"% sys.exc_value))
@@ -488,7 +521,7 @@ class FitPage(wx.Panel):
         else:
             self.xmin.Disable()
             self.xmax.Disable()
-      
+        self.compute_chisqr()
         self.vbox.Layout()
         self.GrandParent.GetSizer().Layout()
         
@@ -499,8 +532,13 @@ class FitPage(wx.Panel):
             when enter value on panel redraw model according to changed
         """
         self.set_model_parameter()
-        
+        self.compute_chisqr()
+     
     def set_model_parameter(self):
+        """
+            this method redraws the model according to parameters values changes
+            and the reset model according to paramaters changes
+        """
         if len(self.parameters) !=0 and self.model !=None:
             for item in self.parameters:
                 try:
@@ -513,6 +551,8 @@ class FitPage(wx.Panel):
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Drawing  Error:wrong value entered : %s"% sys.exc_value))
+                     
+                     
     def select_all_param(self,event): 
         """
              set to true or false all checkBox given the main checkbox value cb1
@@ -602,7 +642,8 @@ class FitPage(wx.Panel):
             #    print "fitpage: list display",item[0].GetLabelText()
             for item in self.param_toFit:
                 if( out != None ) and len(out)<=len(self.param_toFit)and i < len(out):
-                    item[1].SetValue(format_number(out[i]))
+                    #item[1].SetValue(format_number(out[i]))
+                    item[1].SetValue(format_number(self.model.getParam(item[0].GetLabelText())))
                     item[1].Refresh() 
                 if (cov !=None)and len(cov)<=len(self.param_toFit)and i < len(cov):
                     self.text2_3.Show() 

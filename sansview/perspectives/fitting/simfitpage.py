@@ -38,26 +38,24 @@ class SimultaneousFitPage(wx.Panel):
         self.sizer3.Add(self.cb1,(iy, ix),(1,1),\
                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_model_name)
-       
-        ix  = 0
-        iy  = 1
+      
         text=wx.StaticText(self, -1, 'Constraint')
         self.sizer2.Add(text,0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        ix  = 0
-        iy  += 1
+
         self.ctl2 = wx.TextCtrl(self, -1, style=wx.TE_MULTILINE)
         self.ctl2.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         self.ctl2.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
         self.sizer2.Add(self.ctl2, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        ix +=2
+       
         self.sizer2.Add(self.btFit, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         self.params=[]
         self.model_list=[]
         self.model_toFit=[]
         self.page_finder={}
-        iy +=1
+       
+
         #self.sizer2.Add((20,20),(iy, ix))
-        self.sizer2.Add((20,20), 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+        #self.sizer2.Add((20,20), 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         self.vbox.Layout()
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)
@@ -116,9 +114,9 @@ class SimultaneousFitPage(wx.Panel):
         list=[]
         for page, value in page_finder.iteritems():
             try:
-                list=value.get_model()
-                model=list[0]
-                modelname=list[1]
+                list = value.get_model()
+                model = list[0]
+                modelname = list[1]
                 cb = wx.CheckBox(self, -1, modelname, (10, 10))
                 cb.SetValue(False)
                 self.sizer1.Add( cb,( iy,ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -130,6 +128,8 @@ class SimultaneousFitPage(wx.Panel):
                 #wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Simultaneous fit: %s doesn't have a model selected yet %s" % \
                 #(value.get_data().group_id,sys.exc_value)))
                 pass
+        iy +=1
+        self.sizer1.Add((20,20),( iy,ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         self.sizer1.Layout()        
         self.vbox.Layout()
         

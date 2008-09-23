@@ -13,15 +13,37 @@ from fitpanel import FitPanel
 import models
 import fitpage
 import park
+class PlottableDatas(Data,Data1D):
+    """ class plottable data: class allowing to plot Data type on panel"""
+    
+    def __init__(self,data=None,data1d=None):
+        Data.__init__(self,sans_data=data1d)
+        Data1D.__init__(self,x=data1d.x,y = data1d.y,dx = data1d.dx,dy = data1d.dy)
+        #self.x = data1d.x
+        #self.y = data1d.y
+        #self.dx = data1d.dx
+        #self.dy = data1d.dy
+        #self.data=data
+        self.group_id = data1d.group_id
+        #x_name, x_units = data1d.get_xaxis() 
+        #y_name, y_units = data1d.get_yaxis() 
+        #self.xaxis( x_name, x_units)
+        #self.yaxis( y_name, y_units )
+        #self.qmin = data.qmin
+        #self.qmax = data.qmax
+       
 
 class PlottableData(Data,Data1D):
     """ class plottable data: class allowing to plot Data type on panel"""
-    def __init__(self,data,data1d):
+    
+    def __init__(self,data=None,data1d=None):
+        #Data.__init__(self,*args)
+        #Data1D.__init__(self,**kw)
         self.x = data1d.x
         self.y = data1d.y
         self.dx = data1d.dx
         self.dy = data1d.dy
-       
+        self.data=data
         self.group_id = data1d.group_id
         x_name, x_units = data1d.get_xaxis() 
         y_name, y_units = data1d.get_yaxis() 
@@ -29,6 +51,8 @@ class PlottableData(Data,Data1D):
         self.yaxis( y_name, y_units )
         self.qmin = data.qmin
         self.qmax = data.qmax
+        def residuals(self, fn):
+            return self.data.residuals(fn)
 
 class Plugin:
     """
@@ -67,7 +91,7 @@ class Plugin:
         self.menu1.Append(id1, '&Show fit panel')
         wx.EVT_MENU(owner, id1, self.on_perspective)
         id3 = wx.NewId()
-        self.menu1.Append(id3,'&scipy \ park','toggle engine to park or scipy')
+        self.menu1.AppendCheckItem(id3, "park") 
         wx.EVT_MENU(owner, id3, self._onset_engine)
         
         #menu for model
@@ -165,10 +189,12 @@ class Plugin:
                     page.set_data_name(item)
                     #create a fitproblem storing all link to data,model,page creation
                     self.page_finder[page]= FitProblem()
-                    data_for_park= Data(sans_data=item)
-                    datap=PlottableData(data=data_for_park,data1d=item)
-                    self.page_finder[page].add_data(datap)
+                    #data_for_park= Data(sans_data=item)
+                    #datap = PlottableData(data=data_for_park,data1d=item)
+                    #self.page_finder[page].add_data(datap)
+                    self.page_finder[page].add_data(item)
                 except:
+                    #raise
                     wx.PostEvent(self.parent, StatusEvent(status="Fitting error: \
                     data already Selected "))
                     
@@ -229,15 +255,22 @@ class Plugin:
                     model= list[0]
                     break
             i = 0
+#            print "fitting: single fit pars ", pars
             for name in pars:
                 if result.pvec.__class__==numpy.float64:
                     model.setParam(name,result.pvec)
                 else:
                     model.setParam(name,result.pvec[i])
+#                    print "fitting: single fit", name, result.pvec[i]
                     i += 1
+#            print "fitting result : chisqr",result.fitness
+#            print "fitting result : pvec",result.pvec
+#            print "fitting result : stderr",result.stderr
+            
             current_pg.onsetValues(result.fitness, result.pvec,result.stderr)
             self.plot_helper(currpage=current_pg,qmin=qmin,qmax=qmax)
         except:
+            raise
             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
        
@@ -318,12 +351,16 @@ class Plugin:
                 #Do the single fit
                 try:
                     self.fitter.set_model(Model(model), self.id, pars) 
-                    self.fitter.set_data(data,self.id,qmin,qmax)
+                    #print "fitting: data .x",data.x
+                    #print "fitting: data .y",data.y
+                    #print "fitting: data .dy",data.dy
+                    self.fitter.set_data(Data(sans_data=data),self.id,qmin,qmax)
                 
                     result=self.fitter.fit()
                     self._single_fit_completed(result,pars,current_pg,qmin,qmax)
                    
                 except:
+                    raise
                     wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
                     return
          
@@ -363,7 +400,7 @@ class Plugin:
                             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                             return
                     self.fitter.set_model(Model(model), self.id, pars) 
-                    self.fitter.set_data(data,self.id,qmin,qmax)
+                    self.fitter.set_data(Data(sans_data=data),self.id,qmin,qmax)
                 
                     self.id += 1 
             except:
@@ -414,7 +451,7 @@ class Plugin:
                 M_name="M"+str(self.index_model)+"= "+name
             model.name="M"+str(self.index_model)
             self.index_model += 1  
-            #self.page_finder[current_pg].set_theory("Fitness")
+            
             self.page_finder[current_pg].set_model(model,M_name)
             self.plot_helper(currpage= current_pg,qmin= None,qmax= None)
             sim_page.add_model(self.page_finder)
@@ -447,14 +484,16 @@ class Plugin:
             model=list[0]
             if data!=None:
                 theory = Theory1D(x=[], y=[])
-                theory.name = model.name
+                theory.name = "Model"
                 theory.group_id = data.group_id
               
                 x_name, x_units = data.get_xaxis() 
                 y_name, y_units = data.get_yaxis() 
                 theory.xaxis(x_name, x_units)
                 theory.yaxis(y_name, y_units)
-              
+                #print"fitting : redraw data.x",data.x
+                #print"fitting : redraw data.y",data.y
+                #print"fitting : redraw data.dy",data.dy
                 if qmin == None :
                    qmin = min(data.x)
                 if qmax == None :
@@ -488,9 +527,13 @@ class Plugin:
                         wx.PostEvent(self.parent, StatusEvent(status="fitting \
                         skipping point x %g %s" %(qmax, sys.exc_value)))
                 try:
-                    from sans.guicomm.events import NewPlotEvent
+                    #print "fitting redraw for plot thoery .x",theory.x
+                    #print "fitting redraw for plot thoery .y",theory.y
+                    #print "fitting redraw for plot thoery .dy",theory.dy
+                    #rom sans.guicomm.events import NewPlotEvent
                     wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model"))
                 except:
+                    raise
                     print "SimView.complete1D: could not import sans.guicomm.events"
             
             
@@ -519,7 +562,7 @@ class Plugin:
         try:
            
             new_plot = Theory1D(x, y)
-            new_plot.name = model.name
+            new_plot.name = "Model"
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
             new_plot.group_id ="Fitness"

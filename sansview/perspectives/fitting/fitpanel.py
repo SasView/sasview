@@ -36,15 +36,6 @@ class FitPanel(wx.Panel):
         #self.fit_panel.add_page(self.sim_page,"Simultaneous Fit")
         self.nb.AddPage(self.sim_page,"Simultaneous Fit")
         
-        id = wx.NewId()
-        self.btClose =wx.Button(self,id,'Close')
-        self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
-        self.btClose.SetToolTipString("Close page.")
-    
-        sizer_button = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        sizer_button.Add(self.btClose, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        self.sizer.Add(sizer_button,1, wx.EXPAND)
         #dictionary of miodel {model class name, model class}
         self.model_list_box={}
         # save the title of the last page tab added
@@ -144,11 +135,12 @@ class FitPanel(wx.Panel):
         """ @return the page just selected by the user """
         return self.nb.GetPage(self.nb.GetSelection())
     
-    def onClose(self,event):
+    def onClose(self):
         """
              close the current page except the simpage. remove each check box link to the model
              selected on that page. remove its reference into page_finder (fitting module)
         """
+       
         sim_page = self.nb.GetPage(0)
         selected_page = self.nb.GetPage(self.nb.GetSelection())
         
