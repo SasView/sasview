@@ -75,13 +75,14 @@ class ScipyFit(FitEngine):
             qmin= min(data.x)
         if qmax==None:
             qmax= max(data.x) 
-        functor= sansAssembly(model,data)
-       
+        functor= sansAssembly(self.paramList,model,data)
         out, cov_x, info, mesg, success = optimize.leastsq(functor,model.getParams(self.paramList), full_output=1, warning=True)
         chisqr = functor.chisq(out)
+        
         if cov_x is not None and numpy.isfinite(cov_x).all():
             stderr = numpy.sqrt(numpy.diag(cov_x))
-        
+        else:
+            stderr=None
         if not (numpy.isnan(out).any()) or ( cov_x !=None) :
                 result = fitresult()
                 result.fitness = chisqr

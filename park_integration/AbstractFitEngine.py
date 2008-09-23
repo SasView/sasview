@@ -85,19 +85,19 @@ class Model(object):
         return list
     
     
-    def setParams(self, params):
+    def setParams(self,paramlist, params):
         """
             Set value for parameters to fit
             @param params: list of value for parameters to fit 
         """
-        list=[]
-        for item in self.parkp:
-            list.append(item.name)
-        list.sort()
-        for i in range(len(params)):
-            self.parkp[i].value = params[i]
-            self.model.setParam(list[i],params[i])
-  
+        try:
+            for i in range(len(self.parkp)):
+                for j in range(len(paramlist)):
+                    if self.parkp[i].name==paramlist[j]:
+                        self.parkp[i].value = params[j]
+                        self.model.setParam(self.parkp[i].name,params[j])
+        except:
+            raise
   
     def eval(self,x):
         """
@@ -157,9 +157,7 @@ class Data(object):
             idx = (x>=self.qmin) & (x <= self.qmax)
             fx = numpy.asarray([fn(item)for item in x[idx ]])
             return (y[idx] - fx)/dy[idx]
-          
-            
-         
+        
     def residuals_deriv(self, model, pars=[]):
         """ 
             @return residuals derivatives .
@@ -171,13 +169,14 @@ class sansAssembly:
     """
          Sans Assembly class a class wrapper to be call in optimizer.leastsq method
     """
-    def __init__(self,Model=None , Data=None):
+    def __init__(self,paramlist,Model=None , Data=None):
         """
             @param Model: the model wrapper fro sans -model
             @param Data: the data wrapper for sans data
         """
         self.model = Model
         self.data  = Data
+        self.paramlist=paramlist
         self.res=[]
     def chisq(self, params):
         """
@@ -194,7 +193,7 @@ class sansAssembly:
             Compute residuals
             @param params: value of parameters to fit
         """
-        self.model.setParams(params)
+        self.model.setParams(self.paramlist,params)
         self.res= self.data.residuals(self.model.eval)
         return self.res
     
