@@ -135,7 +135,8 @@ class testFitModule(unittest.TestCase):
         model11.setParam('B',3)
         model22  = Constant()
         model22.name= "cst"
-        model22.setParam('value','line.A')
+        # Constrain the constant value to be equal to parameter B (the real value is 2.5)
+        model22.setParam('value','line.B')
         
         data1 = Data(sans_data=data11 )
         data2 = Data(sans_data=data22 )
