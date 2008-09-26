@@ -6,43 +6,133 @@ from sans.guitools.plottables import Theory1D
 from sans.guitools.plottables import Data1D
 from sans.fit.AbstractFitEngine import Data, Model
 import math
+from sans.fit.Fitting import Fit
+from DataLoader.loader import Loader
+
 class testFitModule(unittest.TestCase):
     """ test fitting """
-    def test1(self):
-        """ Fit 1 data (cyl_testdata.txt)and 1 model(CylinderModel)  """
-        #load data
-        from sans.fit.Loader import Load
-        load = Load()
-        load.set_filename("cyl_testdata.txt")
-        load.set_values()
-        data1 = Data1D(x=[], y=[],dx=None, dy=None)
-        load.load_data(data1)
-        #Importing the Fit module
-        from sans.fit.Fitting import Fit
+    
+    def test_scipy(self):
+        """ Simple cylinder model fit (scipy)  """
+        
+        out=Loader().load("cyl_400_20.txt")
+        data1 = Data1D(x=out.x, y=out.y, dx=out.dx, dy=out.y)
+        
         fitter = Fit('scipy')
         # Receives the type of model for the fitting
         from sans.models.CylinderModel import CylinderModel
         model1  = CylinderModel()
-        model1.setParam('contrast',1)
-        data = Data(sans_data=data1 )
+        model1.setParam('contrast', 1)
+        data = Data(sans_data=data1)
         model = Model(model1)
         
         pars1 =['length','radius','scale']
         fitter.set_data(data,1)
-        model.model.setParam('scale',10)
+        model.model.setParam('scale',1e-10)
         fitter.set_model(model,1,pars1)
         result1 = fitter.fit()
-        print "test scipy result:",result1.stderr,result1.pvec,result1.fitness
+        
         self.assert_(result1)
         self.assertTrue(len(result1.pvec)>0 or len(result1.pvec)==0 )
         self.assertTrue(len(result1.stderr)> 0 or len(result1.stderr)==0)
-        self.assertAlmostEquals( result1.pvec[0],0 )
-        self.assertAlmostEquals( result1.pvec[1],3*math.pow(10,-6) )
-        self.assertAlmostEquals( result1.pvec[2] , 1 )
-        self.assertAlmostEquals( result1.pvec[3] , 1 )
-        self.assertAlmostEquals( result1.pvec[4] , 400 )
-        self.assertAlmostEquals( result1.pvec[5] , 20 )
-        self.assertAlmostEquals ( result1.pvec[6] , 1 )
-        self.assertTrue( result1.fitness/43 < 2 )
+        
+        self.assertTrue( math.fabs(result1.pvec[0]-400.0)/3.0 < result1.stderr[0] )
+        self.assertTrue( math.fabs(result1.pvec[1]-20.0)/3.0  < result1.stderr[1] )
+        self.assertTrue( math.fabs(result1.pvec[2]-9.0e-12)/3.0   < result1.stderr[2] )
+        self.assertTrue( result1.fitness < 1.0 )
+        
+    def test_park(self):
+        """ Simple cylinder model fit (park)  """
+        
+        out=Loader().load("cyl_400_20.txt")
+        data1 = Data1D(x=out.x, y=out.y, dx=out.dx, dy=out.y)
+        
+        fitter = Fit('park')
+        # Receives the type of model for the fitting
+        from sans.models.CylinderModel import CylinderModel
+        model1  = CylinderModel()
+        model1.setParam('contrast', 1)
+        data = Data(sans_data=data1)
+        model = Model(model1)
+        
+        pars1 =['length','radius','scale']
+        fitter.set_data(data,1)
+        model.model.setParam('scale',1e-10)
+        fitter.set_model(model,1,pars1)
+        result1 = fitter.fit()
+        
+        self.assert_(result1)
+        self.assertTrue(len(result1.pvec)>0 or len(result1.pvec)==0 )
+        self.assertTrue(len(result1.stderr)> 0 or len(result1.stderr)==0)
+        
+        print result1.pvec[0]-400.0, result1.pvec[0]
+        print math.fabs(result1.pvec[0]-400.0)/3.0
+        self.assertTrue( math.fabs(result1.pvec[0]-400.0)/3.0 < result1.stderr[0] )
+        self.assertTrue( math.fabs(result1.pvec[1]-20.0)/3.0  < result1.stderr[1] )
+        self.assertTrue( math.fabs(result1.pvec[2]-9.0e-12)/3.0   < result1.stderr[2] )
+        self.assertTrue( result1.fitness < 1.0 )
+        
+    def test_park2(self):
+        """ Simultaneous cylinder model fit (park)  """
+        
+        out=Loader().load("cyl_400_20.txt")
+        data1 = Data1D(x=out.x, y=out.y, dx=out.dx, dy=out.y)
+        
+        out2=Loader().load("cyl_400_40.txt")
+        data2 = Data1D(x=out2.x, y=out2.y, dx=out2.dx, dy=out2.y)
+        
+        fitter = Fit('park')
+        # Receives the type of model for the fitting
+        from sans.models.CylinderModel import CylinderModel
+        cyl1  = CylinderModel()
+        cyl1.name = "C1"
+        cyl1.setParam('contrast', 1)
+        cyl1.setParam('scale', 1e-10)
+        data1 = Data(sans_data=data1)
+        model1 = Model(cyl1)
+        fitter.set_data(data1,1)
+        fitter.set_model(model1, 1, ['length','radius','scale'])
+        
+        cyl2  = CylinderModel()
+        cyl2.name = "C2"
+        cyl2.setParam('contrast', 1)
+        cyl2.setParam('scale', 1e-10)
+        data2 = Data(sans_data=data2)
+        # This is wrong. We should not store string as 
+        # parameter values
+        # Why not inherit our AbstracFitEngine.Model from Park.Model?
+        
+        #cyl2.setParam('length', 'C1.length')
+        #print "read back:", cyl2.getParam('length')
+        
+        model2 = Model(cyl2)
+        model2.set(length='C1.length')
+        
+        fitter.set_data(data2,2)
+        fitter.set_model(model2, 2, ['radius','scale'])
+        
+        result1 = fitter.fit()
+        
+        self.assert_(result1)
+        self.assertTrue(len(result1.pvec)>0 or len(result1.pvec)==0 )
+        self.assertTrue(len(result1.stderr)> 0 or len(result1.stderr)==0)
+        
+        for par in result1.parameters:
+            if par.name=='C1.length':
+                print par.name, par.value
+                self.assertTrue( math.fabs(par.value-400.0)/3.0 < par.stderr )
+            elif par.name=='C1.radius':
+                print par.name, par.value
+                self.assertTrue( math.fabs(par.value-20.0)/3.0 < par.stderr )
+            elif par.name=='C2.radius':
+                print par.name, par.value
+                self.assertTrue( math.fabs(par.value-40.0)/3.0 < par.stderr )
+            elif par.name=='C1.scale':
+                print par.name, par.value
+                self.assertTrue( math.fabs(par.value-9.0e-12)/3.0 < par.stderr )
+            elif par.name=='C2.scale':
+                print par.name, par.value
+                self.assertTrue( math.fabs(par.value-9.0e-12)/3.0 < par.stderr )
+            
         
        
