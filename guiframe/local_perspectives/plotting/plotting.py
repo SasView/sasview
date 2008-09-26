@@ -204,6 +204,10 @@ class View1DPanel(PlotPanel):
                 id = wx.NewId()
                 slicerpop.Append(id, '&Add errors to data')
                 wx.EVT_MENU(self, id, self._on_add_errors)
+            else:
+                id = wx.NewId()
+                slicerpop.Append(id, '&Linear fit')
+                wx.EVT_MENU(self, id, self.onFitting)
 
         id = wx.NewId()
         slicerpop.Append(id, '&Change scale')
@@ -238,7 +242,7 @@ class View1DPanel(PlotPanel):
                               self.plots[self.graph.selected_plottable].y,
                               dy=dy)
             new_plot.interactive = True
-            new_plot.name = self.plots[self.graph.selected_plottable].name+" data"
+            new_plot.name = self.plots[self.graph.selected_plottable].name #+" data"
             if hasattr(self.plots[self.graph.selected_plottable], "group_id"):
                 new_plot.group_id = self.plots[self.graph.selected_plottable].group_id
             else:
