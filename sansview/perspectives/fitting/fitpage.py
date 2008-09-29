@@ -210,6 +210,7 @@ class FitPage(wx.Panel):
         
         
     def onClose(self,event):
+        """ close the page associated with this panel"""
         self.GrandParent.onClose()
         
         
@@ -232,8 +233,9 @@ class FitPage(wx.Panel):
             
             sum=0
             for item in res:
-                sum +=item
-        self.tcChi.SetValue(format_number(math.fabs(sum)))
+                if numpy.isfinite(item):
+                    sum +=item
+            self.tcChi.SetValue(format_number(math.fabs(sum)))
             
             
     def onFit(self,event):
@@ -258,10 +260,9 @@ class FitPage(wx.Panel):
         self.model_list_box=dict
         list_name=[]
         for item in  self.model_list_box.itervalues():
+            name = item.__name__
             if hasattr(item, "name"):
                 name = item.name
-            else:
-                name = item.__name__
             list_name.append(name)
         list_name.sort()   
         for name in list_name:
@@ -276,19 +277,19 @@ class FitPage(wx.Panel):
             react when a model is selected from page's combo box
             post an event to its owner to draw an appropriate theory
         """
+        
         for item in self.model_list_box.itervalues():
-            model=item()
-            if hasattr(model, "name"):
-                name = model.name
-            else:
-                name = model.__class__.__name__
-            try:
-                if name ==event.GetString():
-                    evt = ModelEventbox(model=model,name=name)
+            name = item.__name__
+            if hasattr(item, "name"):
+                name = item.name
+            #print "fitpage: _on_select_model model name",name ,event.GetString()
+            if name ==event.GetString():
+                try:
+                    evt = ModelEventbox(model=item(),name=name)
                     wx.PostEvent(self.event_owner, evt)
-            except:
-                raise #ValueError,"model.name is not equal to model class name"
-
+                except:
+                    raise #ValueError,"model.name is not equal to model class name"
+                break
     
     def _onTextEnter(self,event):
         """

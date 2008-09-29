@@ -4,14 +4,22 @@ import os,sys,math
 import os.path
 
 (ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
+
 class ModelInfo(object):
+    """
+         this class contains description for a given model
+    """
     def __init__(self,model,description=None):
         self.model=model
         self.description=description
+        
     def set_description(self, descrition):
         self.description =str(description)
+        
     def get_description(self):
         return self.description
+    
+    
 def log(message):
     print message
     out = open("plugins.log", 'a')
@@ -178,17 +186,16 @@ class ModelManager:
         id = wx.NewId()
         if len(self.indep_model_list) == 0:
             for item in self.indep_model:
-                if item not in self.indep_model_list.values():
-                    self.indep_model_list[str(id)] = item
-                    self.model_list[str(id)]=item
-                    if hasattr(item, "name"):
-                        name = item.model.name
-                    else:
-                        name = item.model.__name__
-                    indep_submenu.Append(id,name, name)
-                    self.model_list_box[name] =item.model
-                    wx.EVT_MENU(event_owner, int(id), self._on_model)
-                    id = wx.NewId()         
+                #if item not in self.indep_model_list.values():
+                    #self.indep_model_list[str(id)] = item
+                self.model_list[str(id)]=item
+                name = item.model.__name__
+                if hasattr(item, "name"):
+                    name = item.model.name
+                indep_submenu.Append(id,name, name)
+                self.model_list_box[name] =item.model
+                wx.EVT_MENU(event_owner, int(id), self._on_model)
+                id = wx.NewId()         
         modelmenu.AppendMenu(wx.NewId(), "Shape-independent...", indep_submenu, "List of shape-independent models")
         
         
@@ -197,18 +204,16 @@ class ModelManager:
         id = wx.NewId()
         if len(self.custom_models) == 0:
             for item in self.plugins:
-                if item not in self.custom_models.values():
-                    self.custom_models[str(id)] = item
-                    
-                    self.model_list[str(id)]=ModelInfo(item,model_info)
-                    if hasattr(item, "name"):
-                        name = item.name
-                    else:
-                        name = item.__name__
-                    added_models.Append(id, name, name)
-                    self.model_list_box[name] =item
-                    wx.EVT_MENU(event_owner, int(id), self._on_model)
-                    id = wx.NewId()
+                #if item not in self.custom_models.values():
+                    #self.custom_models[str(id)] = item
+                self.model_list[str(id)]=ModelInfo(item,model_info)
+                name = item.__name__
+                if hasattr(item, "name"):
+                    name = item.name
+                added_models.Append(id, name, name)
+                self.model_list_box[name] =item
+                wx.EVT_MENU(event_owner, int(id), self._on_model)
+                id = wx.NewId()
         modelmenu.AppendMenu(wx.NewId(),"Added models...", added_models, "List of additional models")
         return 0
     

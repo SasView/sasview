@@ -43,8 +43,8 @@ class SimultaneousFitPage(wx.Panel):
         self.sizer2.Add(text,0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
 
         self.ctl2 = wx.TextCtrl(self, -1, style=wx.TE_MULTILINE)
-        self.ctl2.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
-        self.ctl2.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
+        #self.ctl2.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
+        #self.ctl2.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
         self.sizer2.Add(self.ctl2, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
        
         self.sizer2.Add(self.btFit, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
@@ -64,6 +64,7 @@ class SimultaneousFitPage(wx.Panel):
         
     def onFit(self,event):
         """ signal for fitting"""
+        self._onTextEnter()
         if len(self.model_toFit) >0 :
             if len(self.params)>0:
                 self.set_model()
@@ -74,6 +75,8 @@ class SimultaneousFitPage(wx.Panel):
         else:
             wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Select at least on model to fit "))
+            
+            
     def set_manager(self, manager):
         """
             set panel manager
@@ -104,7 +107,7 @@ class SimultaneousFitPage(wx.Panel):
             Receive a dictionary containing information to display model name
             @param page_finder: the dictionary containing models information
         """
-        import copy 
+       
         self.model_list=[]
         self.model_toFit=[]
         self.sizer1.Clear(True)
@@ -205,7 +208,8 @@ class SimultaneousFitPage(wx.Panel):
                             #print "simfitpage:on set_model page 2",model.params['A'],self.params[2]
     
                 
-    def _onTextEnter(self,event):
+    #def _onTextEnter(self,event):
+    def _onTextEnter(self):
         """
             get values from the constrainst textcrtl ,parses them into model name
             parameter name and parameters values.
@@ -224,12 +228,12 @@ class SimultaneousFitPage(wx.Panel):
                     try:
                         self.params.append(self.parser_helper(item))
                     except:
-                        wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Loading Error: %s" % sys.exc_value))
+                        wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Constraint Error: %s" % sys.exc_value))
             else:
                 try:
                     self.params.append(self.parser_helper(value))
                 except:
-                     wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Loading Error: %s" % sys.exc_value))
+                     wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Constraint Error: %s" % sys.exc_value))
         except:
             raise
         #print "simfitpage: self.params",self.params
@@ -252,7 +256,14 @@ class SimultaneousFitPage(wx.Panel):
                 param_names= re.split("\.",param_name)
                 model_name=param_names[0]
                 param_name=param_names[1]
-                param=[str(model_name),str(param_name),str(param_value)]
+                ##### just added
+                if string.find(param_name,".")!=-1:
+                ########
+                    param_new_name= re.split("\.",param_name)
+                else:  
+                    param_new_name=  param_name
+                print "simfitpage: param name",param_new_name
+                param=[str(model_name),str(param_new_name[1]),str(param_value)]
                 #print "simfitpage: param",param
                 return param
             else:

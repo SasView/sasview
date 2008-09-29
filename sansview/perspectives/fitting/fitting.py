@@ -13,46 +13,6 @@ from fitpanel import FitPanel
 import models
 import fitpage
 import park
-class PlottableDatas(Data,Data1D):
-    """ class plottable data: class allowing to plot Data type on panel"""
-    
-    def __init__(self,data=None,data1d=None):
-        Data.__init__(self,sans_data=data1d)
-        Data1D.__init__(self,x=data1d.x,y = data1d.y,dx = data1d.dx,dy = data1d.dy)
-        #self.x = data1d.x
-        #self.y = data1d.y
-        #self.dx = data1d.dx
-        #self.dy = data1d.dy
-        #self.data=data
-        self.group_id = data1d.group_id
-        #x_name, x_units = data1d.get_xaxis() 
-        #y_name, y_units = data1d.get_yaxis() 
-        #self.xaxis( x_name, x_units)
-        #self.yaxis( y_name, y_units )
-        #self.qmin = data.qmin
-        #self.qmax = data.qmax
-       
-
-class PlottableData(Data,Data1D):
-    """ class plottable data: class allowing to plot Data type on panel"""
-    
-    def __init__(self,data=None,data1d=None):
-        #Data.__init__(self,*args)
-        #Data1D.__init__(self,**kw)
-        self.x = data1d.x
-        self.y = data1d.y
-        self.dx = data1d.dx
-        self.dy = data1d.dy
-        self.data=data
-        self.group_id = data1d.group_id
-        x_name, x_units = data1d.get_xaxis() 
-        y_name, y_units = data1d.get_yaxis() 
-        self.xaxis( x_name, x_units)
-        self.yaxis( y_name, y_units )
-        self.qmin = data.qmin
-        self.qmax = data.qmax
-        def residuals(self, fn):
-            return self.data.residuals(fn)
 
 class Plugin:
     """
@@ -217,6 +177,7 @@ class Plugin:
             if page != sim_page:
                 list=value.get_model()
                 model=list[0]
+                print "fitting",model.name,modelname
                 if model.name== modelname:
                     value.set_model_param(names,values)
                     break
@@ -399,7 +360,11 @@ class Plugin:
                         except:
                             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                             return
-                    self.fitter.set_model(Model(model), self.id, pars) 
+                    new_model=Model(model)
+                    param_name,param_value=value.get_model_param()
+                    print "fitting ",param_name
+                    new_model.set( param_name =str(param_value))
+                    #self.fitter.set_model(new_model, self.id, pars) 
                     self.fitter.set_data(Data(sans_data=data),self.id,qmin,qmax)
                 
                     self.id += 1 
@@ -491,9 +456,6 @@ class Plugin:
                 y_name, y_units = data.get_yaxis() 
                 theory.xaxis(x_name, x_units)
                 theory.yaxis(y_name, y_units)
-                #print"fitting : redraw data.x",data.x
-                #print"fitting : redraw data.y",data.y
-                #print"fitting : redraw data.dy",data.dy
                 if qmin == None :
                    qmin = min(data.x)
                 if qmax == None :
@@ -523,19 +485,11 @@ class Plugin:
                     tempy = model.run(qmax)
                     theory.x.append(tempx)
                     theory.y.append(tempy)
-                except:
-                        wx.PostEvent(self.parent, StatusEvent(status="fitting \
-                        skipping point x %g %s" %(qmax, sys.exc_value)))
-                try:
-                    #print "fitting redraw for plot thoery .x",theory.x
-                    #print "fitting redraw for plot thoery .y",theory.y
-                    #print "fitting redraw for plot thoery .dy",theory.dy
-                    #rom sans.guicomm.events import NewPlotEvent
                     wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model"))
                 except:
-                    raise
-                    print "SimView.complete1D: could not import sans.guicomm.events"
-            
+                    wx.PostEvent(self.parent, StatusEvent(status="fitting \
+                        skipping point x %g %s" %(qmax, sys.exc_value)))
+               
             
     def _on_model_menu(self, evt):
         """
@@ -566,11 +520,10 @@ class Plugin:
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
             new_plot.group_id ="Fitness"
-         
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model"))
         except:
-            print "SimView.complete1D: could not import sans.guicomm.events\n %s" % sys.exc_value
-            logging.error("SimView.complete1D: could not import sans.guicomm.events\n %s" % sys.exc_value)
+            wx.PostEvent(self.parent, StatusEvent(status="fitting \
+                        skipping point x %g %s" %(qmax, sys.exc_value)))
 
 if __name__ == "__main__":
     i = Plugin()

@@ -51,14 +51,24 @@ class ModelPage(wx.Panel):
         self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer1 = wx.GridBagSizer(5,5)
         self.sizer2 = wx.GridBagSizer(5,5)
+        self.sizer4 = wx.GridBagSizer(5,5)
         self.modelbox = wx.ComboBox(self, -1)
         id = wx.NewId()
         self.vbox.Add(self.sizer3)
         self.vbox.Add(self.sizer1)
         self.vbox.Add(self.sizer2)
+        self.vbox.Add(self.sizer4)
+        
+        id = wx.NewId()
+        self.btClose =wx.Button(self,id,'Close')
+        self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
+        self.btClose.SetToolTipString("Close page.")
+        
+        ix = 12
+        iy = 1
+        self.sizer4.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix = 0
         iy = 1
-       
         self.sizer3.Add(wx.StaticText(self,-1,'Model'),(iy,ix),(1,1)\
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
@@ -85,6 +95,10 @@ class ModelPage(wx.Panel):
         self.SetSizer(self.vbox)
         self.Centre()
         
+        
+    def onClose(self,event):
+        """ close the page associated with this panel"""
+        self.GrandParent.onClose()
         
     def set_owner(self,owner):
         """ 
@@ -121,7 +135,7 @@ class ModelPage(wx.Panel):
         return 0
    
     def set_page(self, model,description):
-        print " modelpage: set_page was called",model
+        #print " modelpage: set_page was called",model
         self.model=model
         self.description=description
         if hasattr(self.model, "name"):
@@ -136,10 +150,10 @@ class ModelPage(wx.Panel):
             react when a model is selected from page's combo box
             post an event to its owner to draw an appropriate theory
         """
-        print "modelpage: self.model_list_box ",self.model_list_box
+        #print "modelpage: self.model_list_box ",self.model_list_box
         for item in self.model_list_box.itervalues():
             model=item()
-            print "modelpage:model",model
+            #print "modelpage:model",model
             if hasattr(model, "name"):
                 name = model.name
             else:

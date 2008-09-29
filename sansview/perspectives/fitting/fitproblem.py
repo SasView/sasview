@@ -19,6 +19,8 @@ class FitProblem:
         self.theory_name=None
         self.model_list=[]
         self.schedule='False'
+        self.param_name= None
+        self.param_value=None
         
     def set_model(self,model,name):
         """ 
@@ -38,6 +40,7 @@ class FitProblem:
             
     def get_model(self):
         """ @return: saved model """
+        print "fitproblem",self.model_list
         return self.model_list
      
     def get_data(self):
@@ -64,9 +67,19 @@ class FitProblem:
             @param name: name of the given parameter
             @param value: value of that parameter
         """
-        
-        self.model_list[0].setParam(name,value)
-       
+        print "fitproblem",name,value
+        #self.model_list[0].setParam(name,value)
+        self.param_name = name
+        self.param_value= value
+    def get_model_param(self):
+        """ 
+            set the value of a given parameter of this model
+            @param name: name of the given parameter
+            @param value: value of that parameter
+        """
+        print self.param_name, self.param_value
+        #self.model_list[0].setParam(name,value)
+        return self.param_name, self.param_value
         
     def reset_model(self,model):
         """ 
