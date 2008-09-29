@@ -380,14 +380,14 @@ class LinearFit(wx.Dialog):
         """
         if float(usermin) < float(usermax):
             if float(usermin) >= float(self.mini) and float(usermin) < float(self.maxi):
-                self.xminFit.SetValue(format_number(float(usermin)))
+                self.xminFit.SetValue(format_number(usermin))
             else:
-                self.xminFit.SetValue(format_number(float(self.mini)))
+                self.xminFit.SetValue(format_number(self.mini))
                 
             if float(usermax) > float(self.mini) and float(usermax) <= float(self.maxi):
-                self.xmaxFit.SetLabel(format_number(float(usermax)))
+                self.xmaxFit.SetLabel(format_number(usermax))
             else:
-                self.xmaxFit.SetLabel(format_number(float(self.maxi)))
+                self.xmaxFit.SetLabel(format_number(self.maxi))
                 
             mini =float(self.xminFit.GetValue())
             maxi =float(self.xmaxFit.GetValue())
@@ -426,6 +426,7 @@ class LinearFit(wx.Dialog):
             return math.sqrt(x)
         
         elif (self.xLabel=="log10(x)" ):
+            print "fitdialog: x",x
             return math.pow(10, x)
         
         return x
