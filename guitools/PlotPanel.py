@@ -1,5 +1,11 @@
 import wx.lib.newevent
-import matplotlib
+try:
+    import matplotlib
+except:
+    import pkg_resources
+    pkg_resources.require("matplotlib<0.92.0")
+    import matplotlib
+    
 matplotlib.interactive(False)
 #Use the WxAgg back end. The Wx one takes too long to render
 matplotlib.use('WXAgg')

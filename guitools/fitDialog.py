@@ -204,9 +204,17 @@ class LinearFit(wx.Dialog):
             #store the values of View in self.x,self.y,self.dx,self.dy
             self.x,self.y,self.dx,self.dy= self.plottable.returnValuesOfView()
             
-            self.mini =min(self.x)
-            self.maxi =max(self.x)
+            #self.mini =min(self.x)
+            #self.maxi =max(self.x)
             
+            try:
+                self.mini = self.floatForwardTransform(min(self.x))
+            except:
+                self.mini = "Invalid"
+            try:
+                self.maxi = self.floatForwardTransform(max(self.x))
+            except:
+                self.maxi = "Invalid"
             
             self.initXmin.SetValue(format_number(min(self.plottable.x)))
             self.initXmax.SetValue(format_number(max(self.plottable.x)))
@@ -380,19 +388,36 @@ class LinearFit(wx.Dialog):
         """
         if float(usermin) < float(usermax):
             if float(usermin) >= float(self.mini) and float(usermin) < float(self.maxi):
-                self.xminFit.SetValue(format_number(usermin))
+                self.xminFit.SetValue(format_number(float(usermin)))
             else:
-                self.xminFit.SetValue(format_number(self.mini))
+                self.xminFit.SetValue(format_number(float(self.mini)))
                 
             if float(usermax) > float(self.mini) and float(usermax) <= float(self.maxi):
-                self.xmaxFit.SetLabel(format_number(usermax))
+                self.xmaxFit.SetLabel(format_number(float(usermax)))
             else:
-                self.xmaxFit.SetLabel(format_number(self.maxi))
+                self.xmaxFit.SetLabel(format_number(float(self.maxi)))
                 
             mini =float(self.xminFit.GetValue())
             maxi =float(self.xmaxFit.GetValue())
             
             return mini, maxi
+        
+    def floatForwardTransform(self,x):
+        """
+             transform a float.
+        """
+        #TODO: refactor this with proper object-oriented design
+        # This code stinks.
+        
+        if ( self.xLabel=="x" ):
+            return transform.toX(x)
+        
+        if ( self.xLabel=="x^(2)" ): 
+            return transform.toX2(x)
+        
+        if (self.xLabel=="log10(x)" ):
+            return math.log10(x)
+            
     def floatTransform(self,x):
         """
              transform a float.It is use to determine the x.View min and x.View max for values
@@ -426,7 +451,6 @@ class LinearFit(wx.Dialog):
             return math.sqrt(x)
         
         elif (self.xLabel=="log10(x)" ):
-            print "fitdialog: x",x
             return math.pow(10, x)
         
         return x
