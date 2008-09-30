@@ -18,3 +18,5 @@ the status bar but still does something! If you complain, stop everything.
 
 
 - Write a message to the status bar when points are skipped after changing scale/transform
+
+- [problem] looking for a way to reduce 2 fitting functions to 1 

@@ -299,8 +299,8 @@ class Plugin:
         fit_problem=None
         #Get information (model , data) related to the page on 
         #with the fit will be perform
-        current_pg=self.fit_panel.get_current_page() 
-        simul_pg=self.fit_panel.get_page(0)
+        #current_pg=self.fit_panel.get_current_page() 
+        #simul_pg=self.fit_panel.get_page(0)
             
         for page, value in self.page_finder.iteritems():
             if  value.get_scheduled() ==1 :
