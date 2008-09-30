@@ -59,15 +59,26 @@ class ScipyFit(FitEngine):
         self.fitArrangeDict={}
         self.paramList=[]
     def fit(self,qmin=None, qmax=None):
-         # Protect against simultanous fitting attempts
-        if len(self.fitArrangeDict)>1: 
-            raise RuntimeError, "Scipy can't fit more than a single fit problem at a time."
-        
+        # Protect against simultanous fitting attempts
+        #if len(self.fitArrangeDict)>1: 
+        #    raise RuntimeError, "Scipy can't fit more than a single fit problem at a time."
         # fitproblem contains first fitArrange object(one model and a list of data)
-        fitproblem=self.fitArrangeDict.values()[0]
+        #list of fitproblem
+        fitproblem=[]
+        for id ,fproblem in self.fitArrangeDict.iteritems():
+            print "ScipyFitting:fproblem.get_to_fit() ",fproblem.get_to_fit()
+            if fproblem.get_to_fit()==1:
+                fitproblem.append(fproblem)
+        if len(fitproblem)>1 : 
+            raise RuntimeError, "Scipy can't fit more than a single fit problem at a time."
+            return
+        elif len(fitproblem)==0 : 
+            raise RuntimeError, "No Assembly scheduled for Scipy fitting."
+            return
+    
         listdata=[]
-        model = fitproblem.get_model()
-        listdata = fitproblem.get_data()
+        model = fitproblem[0].get_model()
+        listdata = fitproblem[0].get_data()
         # Concatenate dList set (contains one or more data)before fitting
         data=self._concatenateData( listdata)
         #Assign a fit range is not boundaries were given

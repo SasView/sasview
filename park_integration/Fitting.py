@@ -68,4 +68,17 @@ class Fit:
         """remove   fitarrange in Uid"""
         self._engine.remove_Fit_Problem(Uid)
         
+    def select_problem_for_fit(self,Uid,value):
+        """
+            select a couple of model and data at the Uid position in dictionary
+            and set in self.selected value to value
+            @param value: the value to allow fitting. can only have the value one or zero
+        """
+        self._engine.select_problem_for_fit(Uid,value)
         
+    def get_problem_to_fit(self,Uid):
+        """
+            return the self.selected value of the fit problem of Uid
+           @param Uid: the Uid of the problem
+        """
+        return self._engine.get_problem_to_fit(Uid)

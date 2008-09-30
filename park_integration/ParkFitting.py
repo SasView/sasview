@@ -57,15 +57,23 @@ class ParkFit(FitEngine):
         mylist=[]
         listmodel=[]
         i=0
-        for k,value in self.fitArrangeDict.iteritems():
-            parkmodel = value.get_model()
+        fitproblems=[]
+        for id ,fproblem in self.fitArrangeDict.iteritems():
+            if fproblem.get_to_fit()==1:
+                fitproblems.append(fproblem)
+                
+        if len(fitproblems)==0 : 
+            raise RuntimeError, "No Assembly scheduled for Park fitting."
+            return
+        for item in fitproblems:
+            parkmodel = item.get_model()
             for p in parkmodel.parameterset:
                 if p._getname()in self.paramList and not p.iscomputed():
                     p.status = 'fitted' # make it a fitted parameter
                             #iscomputed  paramter with string inside
                
             i+=1
-            Ldata=value.get_data()
+            Ldata=item.get_data()
             parkdata=self._concatenateData(Ldata)
             
             fitness=(parkmodel,parkdata)

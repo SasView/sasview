@@ -49,9 +49,8 @@ class SansParameter(park.Parameter):
         """
         self._model.details[self.name][1:] = r
     range = property(_getrange,_setrange)
-
-
-class Model(object):
+    
+class Model(park.Model):
     """
         PARK wrapper for SANS models.
     """
@@ -59,6 +58,7 @@ class Model(object):
         """
             @param sans_model: the sans model to wrap using park interface
         """
+        park.Model.__init__(self, **kw)
         self.model = sans_model
         self.name = sans_model.name
         #list of parameters names
@@ -107,6 +107,8 @@ class Model(object):
         return self.model.runXY(x)
    
    
+
+
 class Data(object):
     """ Wrapper class  for SANS data """
     def __init__(self,x=None,y=None,dy=None,dx=None,sans_data=None):
@@ -313,7 +315,22 @@ class FitEngine:
         """remove   fitarrange in Uid"""
         if self.fitArrangeDict.has_key(Uid):
             del self.fitArrangeDict[Uid]
-
+            
+    def select_problem_for_fit(self,Uid,value):
+        """
+            select a couple of model and data at the Uid position in dictionary
+            and set in self.selected value to value
+            @param value: the value to allow fitting. can only have the value one or zero
+        """
+        if self.fitArrangeDict.has_key(Uid):
+             self.fitArrangeDict[Uid].set_to_fit( value)
+    def get_problem_to_fit(self,Uid):
+        """
+            return the self.selected value of the fit problem of Uid
+           @param Uid: the Uid of the problem
+        """
+        if self.fitArrangeDict.has_key(Uid):
+             self.fitArrangeDict[Uid].get_to_fit()
     
 class FitArrange:
     def __init__(self):
@@ -327,6 +344,9 @@ class FitArrange:
         """
         self.model = None
         self.dList =[]
+        #self.selected  is zero when this fit problem is not schedule to fit 
+        #self.selected is 1 when schedule to fit 
+        self.selected = 0
         
     def set_model(self,model):
         """ 
@@ -358,6 +378,18 @@ class FitArrange:
         """
         if data in self.dList:
             self.dList.remove(data)
+    def set_to_fit (self, value=0):
+        """
+           set self.selected to 0 or 1  for other values raise an exception
+           @param value: integer between 0 or 1
+        """
+        self.selected= value
+        
+    def get_to_fit(self):
+        """
+            @return self.selected value
+        """
+        return self.selected
     
 
 
