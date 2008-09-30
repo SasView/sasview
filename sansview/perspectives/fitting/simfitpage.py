@@ -52,9 +52,6 @@ class SimultaneousFitPage(wx.Panel):
         self.model_toFit=[]
         self.page_finder={}
        
-
-        #self.sizer2.Add((20,20),(iy, ix))
-        #self.sizer2.Add((20,20), 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         self.vbox.Layout()
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)
@@ -63,17 +60,15 @@ class SimultaneousFitPage(wx.Panel):
         
     def onFit(self,event):
         """ signal for fitting"""
-        
+        for page in self.page_finder.iterkeys():
+            page.set_model_parameter()
+            
         if len(self.model_toFit) ==1 :
             self.manager._on_single_fit()
-            print "simfitpage: when here"
+           # print "simfitpage: when here"
         elif len(self.model_toFit) > 1 :
-            if len(self.params)>0:
-                self._onTextEnter()
-                self.set_model()
-            else:
-                for page in self.page_finder.iterkeys():
-                    page.set_model_parameter()
+            self._onTextEnter()
+            self.set_model()
             self.manager._on_simul_fit()
         else:
             wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
@@ -100,7 +95,7 @@ class SimultaneousFitPage(wx.Panel):
                 self.manager.schedule_for_fit( value=1,fitproblem =item[1]) 
                 self.model_toFit.append(item)
         else:
-            print"simfit: deselected all"
+            #print"simfit: deselected all"
             self.manager.schedule_for_fit( value=0,fitproblem =item[1]) 
             for item in self.model_list:
                 item[0].SetValue(False) 
@@ -185,13 +180,12 @@ class SimultaneousFitPage(wx.Panel):
                 self.model_toFit.append(item)
                 self.manager.schedule_for_fit( value=1,fitproblem =item[1]) 
             else:
-                print"simfit: deselected one"
+                #print"simfit: deselected one"
                 self.manager.schedule_for_fit( value=0,fitproblem =item[1]) 
                 if item in self.model_toFit:
                     self.model_toFit.remove(item)
-                    
-                    
                     self.cb1.SetValue(False)
+                    
         if len(self.model_list)==len(self.model_toFit):
             self.cb1.SetValue(True)
         else:
@@ -211,21 +205,19 @@ class SimultaneousFitPage(wx.Panel):
                 #print "simfitpage: list fitpanel2",list,list[0]
                 model=list[0]
                 param_list=model.getParamList()
-                #print "simfitpage: on set_model ",self.params
+                print "simfitpage: on set_model self.params ",self.params
                 if self.params !=[]:
                     for element in self.params:
                         if model.name == str(element[0]):
                             for item in param_list:
                                 if item==str(element[1]):
-                                    #print "simfitpage: on set_model page 1",param_list
-                                    #print "simfitpage: model name",element[0], model.name
-                                    #print "simfitpage: param name ,param value",element[1],element[2]
+                                    print "simfitpage: on set_model page 1",param_list
+                                    print "simfitpage: model name",element[0], model.name
+                                    print "simfitpage: param name ,param value",element[1],element[2]
                                     self.manager.set_page_finder(model.name,element[1],\
                                                                  str(element[2]))
                             #print "simfitpage:on set_model page 2",model.params['A'],self.params[2]
     
-                
-    #def _onTextEnter(self,event):
     def _onTextEnter(self):
         """
             get values from the constrainst textcrtl ,parses them into model name
@@ -234,26 +226,21 @@ class SimultaneousFitPage(wx.Panel):
             to reset the appropriate model and its appropriates parameters
         """
         value= self.ctl2.GetValue()
-        self.params=[]
-        #print "simfitpage: value",value
-        try:
-            expression='[\s,;]'
-            if re.search(expression,value) !=None:
-                word=re.split(expression,value)
-                #print "simfitpage: when herre",word
-                for item in word:
-                    try:
+        if value:
+            self.params=[]
+            #print "simfitpage: value",value
+            try:
+                expression='[\s,;]'
+                if re.search(expression,value) !=None:
+                    word=re.split(expression,value)
+                    #print "simfitpage: when herre",word
+                    for item in word:
                         self.params.append(self.parser_helper(item))
-                    except:
-                        wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Constraint Error: %s" % sys.exc_value))
-            else:
-                try:
-                    self.params.append(self.parser_helper(value))
-                except:
-                     wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Constraint Error: %s" % sys.exc_value))
-                     return
-        except:
-            raise
+                else:
+                    self.params.append(self.parser_helper(value))  
+            except:
+                raise
+                wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Constraint Error: %s" % sys.exc_value))
         #print "simfitpage: self.params",self.params
         
         
@@ -275,13 +262,9 @@ class SimultaneousFitPage(wx.Panel):
                 model_name=param_names[0]
                 param_name=param_names[1]
                 ##### just added
-                if string.find(param_name,".")!=-1:
-                ########
-                    param_new_name= re.split("\.",param_name)
-                else:  
-                    param_new_name=  param_name
-                print "simfitpage: param name",param_new_name
-                param=[str(model_name),str(param_new_name[1]),str(param_value)]
+                print "simfitpage: param name",model_name,param_name
+            
+                param=[str(model_name),param_name,str(param_value)]
                 #print "simfitpage: param",param
                 return param
             else:

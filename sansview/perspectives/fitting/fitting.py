@@ -374,10 +374,19 @@ class Plugin:
                             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                             return
                     new_model=Model(model)
-                    param_name,param_value=value.get_model_param()
-                    print "fitting ",param_name,value.get_model_param()
-                    if param_value !=None:
-                        new_model.set( param_name =str(param_value))
+                    param=value.get_model_param()
+                    
+                    if len(param)>0:
+                        for item in param:
+                            param_value = item[1]
+                            param_name = item[0]
+                            #print "fitting ", param,param_name, param_value
+                           
+                            #new_model.set( model.getParam(param_name[0])= param_value)
+                            #new_model.set( exec"%s=%s"%(param_name[0], param_value))
+                            #new_model.set( exec "%s"%(param_nam) = param_value)
+                            new_model.parameterset[ param_name].set( param_value )
+                            
                     self.fitter.set_model(new_model, self.id, pars) 
                     self.fitter.set_data(Data(sans_data=data),self.id,qmin,qmax)
                     self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
