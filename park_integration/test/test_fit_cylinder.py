@@ -28,8 +28,9 @@ class testFitModule(unittest.TestCase):
         
         pars1 =['length','radius','scale']
         fitter.set_data(data,1)
-        model.model.setParam('scale',1e-10)
+        model.set(scale=1e-10)
         fitter.set_model(model,1,pars1)
+        fitter.select_problem_for_fit(Uid=1,value=1)
         result1 = fitter.fit()
         
         self.assert_(result1)
@@ -51,14 +52,16 @@ class testFitModule(unittest.TestCase):
         # Receives the type of model for the fitting
         from sans.models.CylinderModel import CylinderModel
         model1  = CylinderModel()
-        model1.setParam('contrast', 1)
+        
         data = Data(sans_data=data1)
         model = Model(model1)
         
         pars1 =['length','radius','scale']
         fitter.set_data(data,1)
-        model.model.setParam('scale',1e-10)
+        model.set(contrast= 1)
+        model.set(scale=1e-10)
         fitter.set_model(model,1,pars1)
+        fitter.select_problem_for_fit(Uid=1,value=1)
         result1 = fitter.fit()
         
         self.assert_(result1)
@@ -86,17 +89,17 @@ class testFitModule(unittest.TestCase):
         from sans.models.CylinderModel import CylinderModel
         cyl1  = CylinderModel()
         cyl1.name = "C1"
-        cyl1.setParam('contrast', 1)
-        cyl1.setParam('scale', 1e-10)
+        
         data1 = Data(sans_data=data1)
         model1 = Model(cyl1)
+        model1.set(contrast=1)
+        model1.set(scale= 1e-10)
         fitter.set_data(data1,1)
         fitter.set_model(model1, 1, ['length','radius','scale'])
         
         cyl2  = CylinderModel()
         cyl2.name = "C2"
-        cyl2.setParam('contrast', 1)
-        cyl2.setParam('scale', 1e-10)
+        
         data2 = Data(sans_data=data2)
         # This is wrong. We should not store string as 
         # parameter values
@@ -107,10 +110,12 @@ class testFitModule(unittest.TestCase):
         
         model2 = Model(cyl2)
         model2.set(length='C1.length')
-        
+        model2.set(contrast=1)
+        model2.set(scale= 1e-10)
         fitter.set_data(data2,2)
         fitter.set_model(model2, 2, ['radius','scale'])
-        
+        fitter.select_problem_for_fit(Uid=1,value=1)
+        fitter.select_problem_for_fit(Uid=2,value=1)
         result1 = fitter.fit()
         
         self.assert_(result1)
