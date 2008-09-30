@@ -220,22 +220,25 @@ class FitPage(wx.Panel):
         """
         flag=self.checkFitRange()
         if flag== True:
-            qmin = float(self.xmin.GetValue())
-            qmax = float(self.xmax.GetValue())
-            x,y,dy = [numpy.asarray(v) for v in (self.data.x,self.data.y,self.data.dy)]
-            if qmin==None and qmax==None: 
-                fx =numpy.asarray([self.model.run(v) for v in x])
-                res=(y - fx)/dy
-            else:
-                idx = (x>= qmin) & (x <=qmax)
-                fx = numpy.asarray([self.model.run(item)for item in x[idx ]])
-                res= (y[idx] - fx)/dy[idx]  
-            
-            sum=0
-            for item in res:
-                if numpy.isfinite(item):
-                    sum +=item
-            self.tcChi.SetValue(format_number(math.fabs(sum)))
+            try:
+                qmin = float(self.xmin.GetValue())
+                qmax = float(self.xmax.GetValue())
+                x,y,dy = [numpy.asarray(v) for v in (self.data.x,self.data.y,self.data.dy)]
+                if qmin==None and qmax==None: 
+                    fx =numpy.asarray([self.model.run(v) for v in x])
+                    res=(y - fx)/dy
+                else:
+                    idx = (x>= qmin) & (x <=qmax)
+                    fx = numpy.asarray([self.model.run(item)for item in x[idx ]])
+                    res= (y[idx] - fx)/dy[idx]  
+                sum=0
+                for item in res:
+                    if numpy.isfinite(item):
+                        sum +=item
+                self.tcChi.SetValue(format_number(math.fabs(sum)))
+            except:
+                wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+                            "Chisqr cannot be compute: %s"% sys.exc_value))
             
             
     def onFit(self,event):
@@ -247,6 +250,7 @@ class FitPage(wx.Panel):
         qmin=float(self.xmin.GetValue())
         qmax =float( self.xmax.GetValue())
         if len(self.param_toFit) >0 and flag==True:
+            self.manager.schedule_for_fit( value=1,fitproblem =None) 
             self.manager._on_single_fit(qmin=qmin,qmax=qmax)
         else:
               wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
@@ -545,7 +549,6 @@ class FitPage(wx.Panel):
                 try:
                      name=str(item[0].GetLabelText())
                      value= float(item[1].GetValue())
-                     
                      self.model.setParam(name,value)
                      self.manager.redraw_model(float(self.xmin.GetValue())\
                                                ,float(self.xmax.GetValue()))

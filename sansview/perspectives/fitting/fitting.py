@@ -157,7 +157,19 @@ class Plugin:
                     #raise
                     wx.PostEvent(self.parent, StatusEvent(status="Fitting error: \
                     data already Selected "))
-                    
+    def schedule_for_fit(self,value=0,fitproblem =None):  
+        """
+        
+        """   
+        if fitproblem !=None:
+            fitproblem.schedule_tofit(value)
+        else:
+            current_pg=self.fit_panel.get_current_page() 
+            for page, val in self.page_finder.iteritems():
+                if page ==current_pg :
+                    val.schedule_tofit(value)
+                    break
+                      
                     
     def get_page_finder(self):
         """ @return self.page_finder used also by simfitpage.py"""  
@@ -198,7 +210,7 @@ class Plugin:
             return model_name,param_name
         
         
-    def _single_fit_completed(self,result,pars,current_pg,qmin,qmax):
+    def _single_fit_completed(self,result,pars,cpage,qmin,qmax):
         """
             Display fit result on one page of the notebook.
             @param result: result of fit 
@@ -210,7 +222,7 @@ class Plugin:
         """
         try:
             for page, value in self.page_finder.iteritems():
-                if page== current_pg:
+                if page==cpage :
                     data = value.get_data()
                     list = value.get_model()
                     model= list[0]
@@ -228,8 +240,8 @@ class Plugin:
 #            print "fitting result : pvec",result.pvec
 #            print "fitting result : stderr",result.stderr
             
-            current_pg.onsetValues(result.fitness, result.pvec,result.stderr)
-            self.plot_helper(currpage=current_pg,qmin=qmin,qmax=qmax)
+            cpage.onsetValues(result.fitness, result.pvec,result.stderr)
+            self.plot_helper(currpage=cpage,qmin=qmin,qmax=qmax)
         except:
             raise
             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
@@ -244,7 +256,7 @@ class Plugin:
         """
         try:
             for page, value in self.page_finder.iteritems():
-                if value.get_scheduled()=='True':
+                if value.get_scheduled()==1:
                     data = value.get_data()
                     list = value.get_model()
                     model= list[0]
@@ -275,6 +287,7 @@ class Plugin:
             @param model: model to fit
             
         """
+        #print "in single fitting"
         #set an engine to perform fit
         from sans.fit.Fitting import Fit
         self.fitter= Fit(self._fit_engine)
@@ -282,48 +295,48 @@ class Plugin:
         if id==None:
             id=0
         self.id = id
+        page_fitted=None
+        fit_problem=None
         #Get information (model , data) related to the page on 
         #with the fit will be perform
         current_pg=self.fit_panel.get_current_page() 
+        simul_pg=self.fit_panel.get_page(0)
+            
         for page, value in self.page_finder.iteritems():
-            if page ==current_pg :
+            if  value.get_scheduled() ==1 :
                 data = value.get_data()
                 list=value.get_model()
                 model=list[0]
-                
                 #Create list of parameters for fitting used
                 pars=[]
                 templist=[]
                 try:
-                    templist=current_pg.get_param_list()
+                    #templist=current_pg.get_param_list()
+                    templist=page.get_param_list()
+                    for element in templist:
+                        pars.append(str(element[0].GetLabelText()))
+                    pars.sort()
+                    #Do the single fit
+                    self.fitter.set_model(Model(model), self.id, pars) 
+                    self.fitter.set_data(Data(sans_data=data),self.id,qmin,qmax)
+                    self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
+                    page_fitted=page
+                    self.id+=1
+                    self.schedule_for_fit( 0,value) 
                 except:
                     wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                     return
-              
-                for element in templist:
-                    try:
-                       pars.append(str(element[0].GetLabelText()))
-                    except:
-                        wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
-                        return
                 # make sure to keep an alphabetic order 
-                #of parameter names in the list
-                pars.sort()
-                #Do the single fit
-                try:
-                    self.fitter.set_model(Model(model), self.id, pars) 
-                    #print "fitting: data .x",data.x
-                    #print "fitting: data .y",data.y
-                    #print "fitting: data .dy",data.dy
-                    self.fitter.set_data(Data(sans_data=data),self.id,qmin,qmax)
-                
-                    result=self.fitter.fit()
-                    self._single_fit_completed(result,pars,current_pg,qmin,qmax)
-                   
-                except:
-                    raise
-                    wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
-                    return
+                #of parameter names in the list      
+        try:
+            result=self.fitter.fit()
+            #self._single_fit_completed(result,pars,current_pg,qmin,qmax)
+            print "single_fit: result",result.fitness,result.pvec,result.stderr
+            #self._single_fit_completed(result,pars,page,qmin,qmax)
+            self._single_fit_completed(result,pars,page_fitted,qmin,qmax)
+        except:
+            wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
+            return
          
     def _on_simul_fit(self, id=None,qmin=None,qmax=None):
         """ 
@@ -345,7 +358,7 @@ class Plugin:
         
         for page, value in self.page_finder.iteritems():
             try:
-                if value.get_scheduled()=='True':
+                if value.get_scheduled()==1:
                     data = value.get_data()
                     list = value.get_model()
                     model= list[0]
@@ -362,11 +375,12 @@ class Plugin:
                             return
                     new_model=Model(model)
                     param_name,param_value=value.get_model_param()
-                    print "fitting ",param_name
-                    new_model.set( param_name =str(param_value))
-                    #self.fitter.set_model(new_model, self.id, pars) 
+                    print "fitting ",param_name,value.get_model_param()
+                    if param_value !=None:
+                        new_model.set( param_name =str(param_value))
+                    self.fitter.set_model(new_model, self.id, pars) 
                     self.fitter.set_data(Data(sans_data=data),self.id,qmin,qmax)
-                
+                    self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
                     self.id += 1 
             except:
                 wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))

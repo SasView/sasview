@@ -2,6 +2,7 @@
     Test plug-in model
 """
 from sans.models.pluginmodel import Model1DPlugin
+
 import math
 
 

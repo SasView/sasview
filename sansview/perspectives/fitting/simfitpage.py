@@ -43,8 +43,7 @@ class SimultaneousFitPage(wx.Panel):
         self.sizer2.Add(text,0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
 
         self.ctl2 = wx.TextCtrl(self, -1, style=wx.TE_MULTILINE)
-        #self.ctl2.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
-        #self.ctl2.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
+       
         self.sizer2.Add(self.ctl2, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
        
         self.sizer2.Add(self.btFit, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
@@ -64,9 +63,13 @@ class SimultaneousFitPage(wx.Panel):
         
     def onFit(self,event):
         """ signal for fitting"""
-        self._onTextEnter()
-        if len(self.model_toFit) >0 :
+        
+        if len(self.model_toFit) ==1 :
+            self.manager._on_single_fit()
+            print "simfitpage: when here"
+        elif len(self.model_toFit) > 1 :
             if len(self.params)>0:
+                self._onTextEnter()
                 self.set_model()
             else:
                 for page in self.page_finder.iterkeys():
@@ -93,12 +96,16 @@ class SimultaneousFitPage(wx.Panel):
         if self.cb1.GetValue()==True:
             for item in self.model_list:
                 item[0].SetValue(True)
-                item[1].schedule_tofit('True')
+                #item[1].schedule_tofit(1)
+                self.manager.schedule_for_fit( value=1,fitproblem =item[1]) 
                 self.model_toFit.append(item)
         else:
+            print"simfit: deselected all"
+            self.manager.schedule_for_fit( value=0,fitproblem =item[1]) 
             for item in self.model_list:
                 item[0].SetValue(False) 
-                item[1].schedule_tofit('False')
+                #item[1].schedule_tofit(0)
+                
             self.model_toFit=[]
        
             
@@ -112,6 +119,7 @@ class SimultaneousFitPage(wx.Panel):
         self.model_toFit=[]
         self.sizer1.Clear(True)
         self.page_finder=page_finder
+        self.cb1.SetValue(False)
         ix = 0
         iy = 1 
         list=[]
@@ -138,7 +146,7 @@ class SimultaneousFitPage(wx.Panel):
         
     def remove_model(self,delpage):
         """
-             Remove  a checkbox and the name realted to a model selected on page delpage
+             Remove  a checkbox and the name related to a model selected on page delpage
              @param delpage: the page removed
         """
         self.sizer1.Clear(True)
@@ -146,6 +154,8 @@ class SimultaneousFitPage(wx.Panel):
         iy = 1 
         for item in self.model_list:
             try:
+                # redraw the panel without the name of the model associated 
+                # with the page to delete
                 if not delpage in item:
                     #print "simfitpage:  redraw modelname",item[3]
                     cb = wx.CheckBox(self, -1, item[3], (10, 10))
@@ -155,9 +165,11 @@ class SimultaneousFitPage(wx.Panel):
                     iy += 1 
                     wx.EVT_CHECKBOX(self, cb.GetId(), self.select_model_name)
                 else:
+                    # if the page to delete in item remove it from the model list
                     self.model_list.remove(item)
             except:
-                raise
+                 wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Page deletion Error: %s" % sys.exc_value))
+                 
         self.sizer1.Layout()        
         self.vbox.Layout()
             
@@ -171,16 +183,21 @@ class SimultaneousFitPage(wx.Panel):
             if item[0].GetValue()==True:
                 item[1].schedule_tofit('True')
                 self.model_toFit.append(item)
+                self.manager.schedule_for_fit( value=1,fitproblem =item[1]) 
             else:
+                print"simfit: deselected one"
+                self.manager.schedule_for_fit( value=0,fitproblem =item[1]) 
                 if item in self.model_toFit:
                     self.model_toFit.remove(item)
-                    item[1].schedule_tofit('False')
+                    
+                    
                     self.cb1.SetValue(False)
         if len(self.model_list)==len(self.model_toFit):
             self.cb1.SetValue(True)
         else:
             self.cb1.SetValue(False)
-  
+     
+        
    
     def set_model(self):
         """
@@ -234,6 +251,7 @@ class SimultaneousFitPage(wx.Panel):
                     self.params.append(self.parser_helper(value))
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Constraint Error: %s" % sys.exc_value))
+                     return
         except:
             raise
         #print "simfitpage: self.params",self.params

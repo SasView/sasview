@@ -18,7 +18,7 @@ class FitProblem:
         self.data=None
         self.theory_name=None
         self.model_list=[]
-        self.schedule='False'
+        self.schedule=0
         self.param_name= None
         self.param_value=None
         
@@ -40,7 +40,7 @@ class FitProblem:
             
     def get_model(self):
         """ @return: saved model """
-        print "fitproblem",self.model_list
+        #print "fitproblem",self.model_list
         return self.model_list
      
     def get_data(self):
@@ -67,7 +67,7 @@ class FitProblem:
             @param name: name of the given parameter
             @param value: value of that parameter
         """
-        print "fitproblem",name,value
+        #print "fitproblem",name,value
         #self.model_list[0].setParam(name,value)
         self.param_name = name
         self.param_value= value
@@ -77,7 +77,7 @@ class FitProblem:
             @param name: name of the given parameter
             @param value: value of that parameter
         """
-        print self.param_name, self.param_value
+        #print self.param_name, self.param_value
         #self.model_list[0].setParam(name,value)
         return self.param_name, self.param_value
         
@@ -86,10 +86,10 @@ class FitProblem:
             reset a model when parameter has changed
             @param value: new model
         """
-        print "fitproblem : reset model"
+        #print "fitproblem : reset model"
         self.model_list[0]=model
         
-    def schedule_tofit(self, schedule='False'):
+    def schedule_tofit(self, schedule=0):
         """
              set schedule to true to decide if this fit  must be performed
         """
