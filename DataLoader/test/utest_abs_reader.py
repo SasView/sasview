@@ -325,7 +325,33 @@ class cansas_reader(unittest.TestCase):
         self._checkdata()
         
         
+    def test_slits(self):
+        """
+            Check slit data
+        """
+        filename = "cansas1d_slit.xml"
+        self.data = Loader().load(filename)
+        self.assertEqual(self.data.filename, filename)
+        self.assertEqual(self.data.run[0], "1234")
         
+        # Data
+        self.assertEqual(len(self.data.x), 2)
+        self.assertEqual(self.data.x_unit, '1/A')
+        self.assertEqual(self.data.y_unit, '1/cm')
+        self.assertEqual(self.data.x[0], 0.02)
+        self.assertEqual(self.data.y[0], 1000)
+        self.assertEqual(self.data.dxl[0], 0.005)
+        self.assertEqual(self.data.dxw[0], 0.001)
+        self.assertEqual(self.data.dy[0], 3)
+        self.assertEqual(self.data.x[1], 0.03)
+        self.assertAlmostEquals(self.data.y[1], 1001.0)
+        self.assertEqual(self.data.dx[1], 0.0)
+        self.assertEqual(self.data.dxl[1], 0.005)
+        self.assertEqual(self.data.dxw[1], 0.001)
+        self.assertEqual(self.data.dy[1], 4)
+        self.assertEqual(self.data.run_name['1234'], 'run name')
+        self.assertEqual(self.data.title, "Test title")
+
             
 
 if __name__ == '__main__':

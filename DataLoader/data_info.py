@@ -35,10 +35,15 @@ class plottable_1D:
     """
         Data1D is a place holder for 1D plottables.
     """
+    # The presence of these should be mutually exclusive with the presence of Qdev (dx)
     x = None
     y = None
     dx = None
     dy = None
+    ## Slit smearing length
+    dxl = None
+    ## Slit smearing width
+    dxw = None
     
     # Units
     _xaxis = ''
@@ -46,11 +51,13 @@ class plottable_1D:
     _yaxis = ''
     _yunit = ''
     
-    def __init__(self,x,y,dx=None,dy=None):
+    def __init__(self,x,y,dx=None,dy=None,dxl=None,dxw=None):
         self.x = x
         self.y = y
         self.dx = dx
         self.dy = dy
+        self.dxl = dxl
+        self.dxw = dxw
 
     def xaxis(self, label, unit):
         self._xaxis = label

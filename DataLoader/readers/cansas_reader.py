@@ -459,12 +459,20 @@ class Reader:
         y  = numpy.zeros(0)
         dx = numpy.zeros(0)
         dy = numpy.zeros(0)
+        dxw = numpy.zeros(0)
+        dxl = numpy.zeros(0)
         
         for item in nodes:
             _x, attr = get_float('Q', item)
             _dx, attr_d = get_float('Qdev', item)
+            _dxl, attr_l = get_float('dQl', item)
+            _dxw, attr_w = get_float('dQw', item)
             if _dx == None:
                 _dx = 0.0
+            if _dxl == None:
+                _dxl = 0.0
+            if _dxw == None:
+                _dxw = 0.0
                 
             if attr.has_key('unit') and attr['unit'].lower() != data_info.x_unit.lower():
                 if has_converter==True:
@@ -477,6 +485,7 @@ class Reader:
                 else:
                     raise ValueError, "CanSAS reader: unrecognized Q unit [%s]; expecting [%s]" \
                         % (attr['unit'], data_info.x_unit)
+            # Error in Q
             if attr_d.has_key('unit') and attr_d['unit'].lower() != data_info.x_unit.lower():
                 if has_converter==True:
                     try:
@@ -487,6 +496,30 @@ class Reader:
                         % (attr['unit'], data_info.x_unit, sys.exc_value)
                 else:
                     raise ValueError, "CanSAS reader: unrecognized dQ unit [%s]; expecting [%s]" \
+                        % (attr['unit'], data_info.x_unit)
+            # Slit length
+            if attr_l.has_key('unit') and attr_l['unit'].lower() != data_info.x_unit.lower():
+                if has_converter==True:
+                    try:
+                        data_conv_q = Converter(attr_l['unit'])
+                        _dxl = data_conv_q(_dxl, units=data_info.x_unit)
+                    except:
+                        raise ValueError, "CanSAS reader: could not convert dQl unit [%s]; expecting [%s]\n  %s" \
+                        % (attr['unit'], data_info.x_unit, sys.exc_value)
+                else:
+                    raise ValueError, "CanSAS reader: unrecognized dQl unit [%s]; expecting [%s]" \
+                        % (attr['unit'], data_info.x_unit)
+            # Slit width
+            if attr_w.has_key('unit') and attr_w['unit'].lower() != data_info.x_unit.lower():
+                if has_converter==True:
+                    try:
+                        data_conv_q = Converter(attr_w['unit'])
+                        _dxw = data_conv_q(_dxw, units=data_info.x_unit)
+                    except:
+                        raise ValueError, "CanSAS reader: could not convert dQw unit [%s]; expecting [%s]\n  %s" \
+                        % (attr['unit'], data_info.x_unit, sys.exc_value)
+                else:
+                    raise ValueError, "CanSAS reader: unrecognized dQw unit [%s]; expecting [%s]" \
                         % (attr['unit'], data_info.x_unit)
                     
             _y, attr = get_float('I', item)
@@ -521,11 +554,16 @@ class Reader:
                 y  = numpy.append(y, _y)
                 dx = numpy.append(dx, _dx)
                 dy = numpy.append(dy, _dy)
+                dxl = numpy.append(dxl, _dxl)
+                dxw = numpy.append(dxw, _dxw)
+                
             
         data_info.x = x
         data_info.y = y
         data_info.dx = dx
         data_info.dy = dy
+        data_info.dxl = dxl
+        data_info.dxw = dxw
         
         data_conv_q = None
         data_conv_i = None
