@@ -1,7 +1,7 @@
-from sans.models.BaseModel import BaseModel
+from sans.models.BaseComponent import BaseComponent
 import math
 
-class Model1DPlugin(BaseModel):
+class Model1DPlugin(BaseComponent):
     ## Name of the model
     name = "Plugin Model"
 
