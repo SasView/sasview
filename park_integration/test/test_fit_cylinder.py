@@ -4,7 +4,7 @@
 import unittest
 from sans.guitools.plottables import Theory1D
 from sans.guitools.plottables import Data1D
-from sans.fit.AbstractFitEngine import Data, Model
+from sans.fit.AbstractFitEngine import Data, Model,FitData1D
 import math
 from sans.fit.Fitting import Fit
 from DataLoader.loader import Loader
@@ -23,7 +23,8 @@ class testFitModule(unittest.TestCase):
         from sans.models.CylinderModel import CylinderModel
         model1  = CylinderModel()
         model1.setParam('contrast', 1)
-        data = Data(sans_data=data1)
+        #data = Data(sans_data=data1)
+        data = FitData1D(data1)
         model = Model(model1)
         
         pars1 =['length','radius','scale']
@@ -53,7 +54,8 @@ class testFitModule(unittest.TestCase):
         from sans.models.CylinderModel import CylinderModel
         model1  = CylinderModel()
         
-        data = Data(sans_data=data1)
+        #data = Data(sans_data=data1)
+        data = FitData1D(data1)
         model = Model(model1)
         
         pars1 =['length','radius','scale']
@@ -90,7 +92,8 @@ class testFitModule(unittest.TestCase):
         cyl1  = CylinderModel()
         cyl1.name = "C1"
         
-        data1 = Data(sans_data=data1)
+        #data1 = Data(sans_data=data1)
+        data1 = FitData1D(data1)
         model1 = Model(cyl1)
         model1.set(contrast=1)
         model1.set(scale= 1e-10)
@@ -100,7 +103,8 @@ class testFitModule(unittest.TestCase):
         cyl2  = CylinderModel()
         cyl2.name = "C2"
         
-        data2 = Data(sans_data=data2)
+        #data2 = Data(sans_data=data2)
+        data2 = FitData1D(data2)
         # This is wrong. We should not store string as 
         # parameter values
         # Why not inherit our AbstracFitEngine.Model from Park.Model?

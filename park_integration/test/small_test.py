@@ -4,7 +4,7 @@
 import unittest
 from sans.guitools.plottables import Theory1D
 from sans.guitools.plottables import Data1D
-from sans.fit.AbstractFitEngine import Data, Model
+from sans.fit.AbstractFitEngine import Data, Model,FitData1D
 import math
 from sans.fit.Fitting import Fit
 from DataLoader.loader import Loader
@@ -22,7 +22,8 @@ class testFitModule(unittest.TestCase):
         from sans.models.CylinderModel import CylinderModel
         model1  = CylinderModel()
         model1.setParam('contrast', 1)
-        data = Data(sans_data=data1)
+        #data = Data(sans_data=data1)
+        data = FitData1D(data1)
         model = Model(model1)
         
         pars1 =['length','radius','scale']
