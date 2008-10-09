@@ -80,12 +80,19 @@ class ScipyFit(FitEngine):
         model = fitproblem[0].get_model()
         listdata = fitproblem[0].get_data()
         # Concatenate dList set (contains one or more data)before fitting
-        data=self._concatenateData( listdata)
+        #data=self._concatenateData( listdata)
+        data=listdata
         #Assign a fit range is not boundaries were given
-        if qmin==None:
-            qmin= min(data.x)
-        if qmax==None:
-            qmax= max(data.x) 
+        if data.__class__.__name__=='Data1D':
+            if qmin==None:
+                qmin= min(data.x)
+            if qmax==None:
+                qmax= max(data.x) 
+        else:
+            if qmin==None:
+                qmin= numpy.min(data.image)
+            if qmax==None:
+                qmax= numpy.max(data.image) 
         functor= sansAssembly(self.paramList,model,data)
         out, cov_x, info, mesg, success = optimize.leastsq(functor,model.getParams(self.paramList), full_output=1, warning=True)
         chisqr = functor.chisq(out)

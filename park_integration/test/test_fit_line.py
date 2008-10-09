@@ -4,7 +4,7 @@
 import unittest
 from sans.guitools.plottables import Theory1D
 from sans.guitools.plottables import Data1D
-from sans.fit.AbstractFitEngine import Data, Model
+from sans.fit.AbstractFitEngine import Data, Model,FitData1D
 import math
 class testFitModule(unittest.TestCase):
     """ test fitting """
@@ -20,7 +20,8 @@ class testFitModule(unittest.TestCase):
         from sans.guitools.LineModel import LineModel
         model1  = LineModel()
         model1.name = "M1"
-        data = Data(sans_data=data1 )
+        #data = Data(sans_data=data1 )
+        data = FitData1D(data1 )
         model = Model(model1)
         #fit with scipy test
         
@@ -84,8 +85,11 @@ class testFitModule(unittest.TestCase):
         model11.name= "M1"
         model22  = LineModel()
         model11.name= "M2"
-        data1 = Data(sans_data=data11 )
-        data2 = Data(sans_data=data22 )
+        #data1 = Data(sans_data=data11 )
+        #data2 = Data(sans_data=data22 )
+        data1 = FitData1D(data11 )
+        data2 = FitData1D(data22 )
+        
         model1 = Model(model11)
         model2 = Model(model22)
         #fit with scipy test
@@ -149,9 +153,11 @@ class testFitModule(unittest.TestCase):
         model22.name= "cst"
         # Constrain the constant value to be equal to parameter B (the real value is 2.5)
         
+        #data1 = Data(sans_data=data11 )
+        #data2 = Data(sans_data=data22 )
         
-        data1 = Data(sans_data=data11 )
-        data2 = Data(sans_data=data22 )
+        data1 = FitData1D(data11 )
+        data2 = FitData1D(data22 )
         model1 = Model(model11)
         model2 = Model(model22)
         model1.set(A=4)
@@ -193,8 +199,10 @@ class testFitModule(unittest.TestCase):
         model1  = LineModel()
         model1.name= "M1"
       
-        data1 = Data(sans_data=data11 )
-        data2 = Data(sans_data=data22 )
+        #data1 = Data(sans_data=data11 )
+        #data2 = Data(sans_data=data22 )
+        data1 = FitData1D(data11 )
+        data2 = FitData1D(data22 )
         model = Model(model1)
         
         #fit with scipy test

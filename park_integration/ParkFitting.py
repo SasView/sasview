@@ -9,9 +9,9 @@ import park
 from park import fit,fitresult
 from park import assembly
 from park.fitmc import FitSimplex, FitMC
-from sans.guitools.plottables import Data1D
+
 from Loader import Load
-from AbstractFitEngine import FitEngine,FitArrange,Model
+from AbstractFitEngine import FitEngine
 
 
 class ParkFit(FitEngine):
@@ -74,8 +74,8 @@ class ParkFit(FitEngine):
                
             i+=1
             Ldata=item.get_data()
-            parkdata=self._concatenateData(Ldata)
-            
+            #parkdata=self._concatenateData(Ldata)
+            parkdata=Ldata
             fitness=(parkmodel,parkdata)
             mylist.append(fitness)
     
@@ -119,6 +119,24 @@ class ParkFit(FitEngine):
         result = fit.fit(self.problem,
                          fitter=fitter,
                          handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
+        #handler = fitresult.ConsoleUpdate(improvement_delta=0.1)
+        #models=self.problem
+        #service=None
+        #if models is None: raise RuntimeError('fit expected a list of models')
+        #from park.fit import LocalQueue,FitJob
+        #if service is None: service = LocalQueue()
+        #if fitter is None: fitter = fitmc.FitMC()
+        #if handler is None: handler = fitresult.FitHandler()
+    
+        #objective = assembly.Assembly(models) if isinstance(models,list) else models
+        #job = FitJob(self.problem,fitter,handler)
+        #service.start(job)
+        #import wx
+        #while not self.job.handler.done:
+        #    time.sleep(interval)
+        #    wx.Yield()
+        #result=service.job.handler.result
+        
         if result !=None:
             return result
         else:

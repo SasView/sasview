@@ -166,6 +166,110 @@ class Data(object):
             @note: in this case just return empty array
         """
         return []
+class FitData1D(object):
+    """ Wrapper class  for SANS data """
+    def __init__(self,sans_data1d):
+        """
+            Data can be initital with a data (sans plottable)
+            or with vectors.
+        """
+        self.data=sans_data1d
+        self.x= sans_data1d.x
+        self.y= sans_data1d.y
+        self.dx= sans_data1d.dx
+        self.dy= sans_data1d.dy
+        self.qmin=None
+        self.qmax=None
+       
+       
+    def setFitRange(self,mini=None,maxi=None):
+        """ to set the fit range"""
+        self.qmin=mini
+        self.qmax=maxi
+        
+        
+    def getFitRange(self):
+        """
+            @return the range of data.x to fit
+        """
+        return self.qmin, self.qmax
+     
+     
+    def residuals(self, fn):
+        """ @param fn: function that return model value
+            @return residuals
+        """
+        x,y,dy = [numpy.asarray(v) for v in (self.x,self.y,self.dy)]
+        if self.qmin==None and self.qmax==None: 
+            fx =numpy.asarray([fn(v) for v in x])
+            return (y - fx)/dy
+        else:
+            idx = (x>=self.qmin) & (x <= self.qmax)
+            fx = numpy.asarray([fn(item)for item in x[idx ]])
+            return (y[idx] - fx)/dy[idx]
+        
+    def residuals_deriv(self, model, pars=[]):
+        """ 
+            @return residuals derivatives .
+            @note: in this case just return empty array
+        """
+        return []
+    
+    
+class FitData2D(object):
+    """ Wrapper class  for SANS data """
+    def __init__(self,sans_data2d):
+        """
+            Data can be initital with a data (sans plottable)
+            or with vectors.
+        """
+        self.data=sans_data2d
+        self.image = sans_data2d.image
+        self.err_image = sans_data2d.err_image
+        self.x_bins= sans_data2d.x_bins
+        self.y_bins= sans_data2d.y_bins
+       
+        self.qmin= None
+        self.qmax= None
+       
+       
+    def setFitRange(self,mini=None,maxi=None):
+        """ to set the fit range"""
+        self.qmin= mini
+        self.qmax= maxi
+        
+        
+    def getFitRange(self):
+        """
+            @return the range of data.x to fit
+        """
+        return self.qmin, self.qmax
+     
+     
+    def residuals(self, fn):
+        """ @param fn: function that return model value
+            @return residuals
+        """
+        res=[]
+        if self.qmin==None and self.qmax==None: 
+            for i in range(len(self.x_bins)):
+                res.append( (self.image[i][i]- fn([self.x_bins[i],self.y_bins[i]]))\
+                            /self.err_image[i][i] )
+            return numpy.array(res)
+        else:
+            #idx = (x>=self.qmin) & (x <= self.qmax)
+            #fx = numpy.asarray([fn(item)for item in x[idx ]])
+            #return (y[idx] - fx)/dy[idx]
+            for i in range(len(self.x_bins)):
+                res.append( (self.image[i][i]- fn([self.x_bins[i],self.y_bins[i]]))\
+                            /self.err_image[i][i] )
+            return numpy.array(res)
+    def residuals_deriv(self, model, pars=[]):
+        """ 
+            @return residuals derivatives .
+            @note: in this case just return empty array
+        """
+        return []
     
 class sansAssembly:
     """
@@ -228,7 +332,8 @@ class FitEngine:
             self.mini=None
             self.maxi=None
                
-            for data in listdata:
+            for item in listdata:
+                data=item.data
                 mini,maxi=data.getFitRange()
                 if self.mini==None and self.maxi==None:
                     self.mini=mini
@@ -369,7 +474,8 @@ class FitArrange:
      
     def get_data(self):
         """ @return:  list of data dList"""
-        return self.dList 
+        #return self.dList 
+        return self.dList[0] 
       
     def remove_data(self,data):
         """
