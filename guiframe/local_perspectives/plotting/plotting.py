@@ -11,8 +11,11 @@ copyright 2008, University of Tennessee
 
 import wx
 import sys
-from sans.guitools.PlotPanel import PlotPanel
-from sans.guitools.plottables import Graph
+#from sans.guitools.PlotPanel import PlotPanel
+import danse.common.plottools
+from danse.common.plottools.PlotPanel import PlotPanel
+#from sans.guitools.plottables import Graph
+from danse.common.plottools.plottables import Graph
 from sans.guicomm.events import EVT_NEW_PLOT
 
 class PanelMenu(wx.Menu):
@@ -208,6 +211,10 @@ class View1DPanel(PlotPanel):
                 id = wx.NewId()
                 slicerpop.Append(id, '&Linear fit')
                 wx.EVT_MENU(self, id, self.onFitting)
+                
+        id = wx.NewId()
+        slicerpop.Append(id, '&Toggle Linear/Log scale')
+        wx.EVT_MENU(self, id,  self._onToggleScale)
 
         id = wx.NewId()
         slicerpop.Append(id, '&Change scale')

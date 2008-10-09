@@ -61,7 +61,10 @@ def load_ascii_1D(path):
 
 def plot_data(parent, path, name="Loaded Data"):
     from sans.guicomm.events import NewPlotEvent, StatusEvent
+    #from sans.guitools.plottables import Data1D, Theory1D
+    from danse.common.plottools.plottables import Data1D, Theory1D, Data2D
     from DataLoader.loader import  Loader
+    import numpy
     #Instantiate a loader 
     L=Loader()
     
@@ -71,29 +74,16 @@ def plot_data(parent, path, name="Loaded Data"):
     except:
         wx.PostEvent(parent, StatusEvent(status="Problem loading file: %s" % sys.exc_value))
         return
-        
-    if type(output).__name__=='list':
-        for i in range(len(output)):
-            _plot_single_data(parent, output[i], path, name, str(i))
+    if hasattr(data):
+        new_plot = Data2D(image= output.data)
+        new_plot.setValues(output)
     else:
-        _plot_single_data(parent, output, path, name)
-        
-def _plot_single_data(parent, output, path, name="Loaded Data", index=None):
-    """
-        Plot a single data set
-        @param output: data set to plot
-    """
-    from sans.guicomm.events import NewPlotEvent
-    from sans.guitools.plottables import Data1D, Theory1D
-    
-    if output.dy==None:
-        new_plot = Theory1D(output.x, output.y)
-    else:
-        new_plot = Data1D(output.x, output.y, dy=output.dy)
+        if output.dy==None:
+            new_plot = Theory1D(output.x, output.y)
+        else:
+            new_plot = Data1D(output.x, output.y, dy=output.dy)
         
     filename = os.path.basename(path)
-    if index is not None:
-        filename += "(%s)" % index
         
     new_plot.name = name
     new_plot.interactive = True
@@ -103,8 +93,4 @@ def _plot_single_data(parent, output, path, name="Loaded Data", index=None):
     new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
     new_plot.group_id = filename
         
-    title = filename
-    if len(output.title) > 0:
-        title = filename+'['+output.title+']'
-
-    wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=title))
+    wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))
