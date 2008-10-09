@@ -3,10 +3,12 @@ import sys, wx, logging
 import string, numpy, pylab, math
 
 from copy import deepcopy 
-from sans.guitools.plottables import Data1D, Theory1D
-from sans.guitools.PlotPanel import PlotPanel
+#from sans.guitools.plottables import Data1D, Theory1D
+#from sans.guitools.PlotPanel import PlotPanel
+from danse.common.plottools.plottables import Data1D, Theory1D, Data2D
+from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
-from sans.fit.AbstractFitEngine import Model,Data
+from sans.fit.AbstractFitEngine import Model,Data,FitData1D,FitData2D
 from fitproblem import FitProblem
 from fitpanel import FitPanel
 
@@ -81,8 +83,11 @@ class Plugin:
         """
         self.graph=graph
         for item in graph.plottables:
-            if item.name==graph.selected_plottable and item.__class__.__name__ is not "Theory1D":
-                return [["Select Data", "Dialog with fitting parameters ", self._onSelect]] 
+            if item.__class__.__name__ is "Data2D":
+                return [["Fit Data2D", "Dialog with fitting parameters ", self._onSelect]] 
+            else:
+                if item.name==graph.selected_plottable and item.__class__.__name__ is not "Theory1D":
+                    return [["Select Data", "Dialog with fitting parameters ", self._onSelect]] 
         return []   
 
 
@@ -137,7 +142,7 @@ class Plugin:
         """
         self.panel = event.GetEventObject()
         for item in self.panel.graph.plottables:
-            if item.name == self.panel.graph.selected_plottable:
+            if item.name == self.panel.graph.selected_plottable or item.__class__.__name__ is "Data2D":
                 #find a name for the page created for notebook
                 try:
                     name = item.group_id # item in Data1D
@@ -146,17 +151,22 @@ class Plugin:
                 try:
                     page = self.fit_panel.add_fit_page(name)
                     # add data associated to the page created
-                    page.set_data_name(item)
-                    #create a fitproblem storing all link to data,model,page creation
-                    self.page_finder[page]= FitProblem()
-                    #data_for_park= Data(sans_data=item)
-                    #datap = PlottableData(data=data_for_park,data1d=item)
-                    #self.page_finder[page].add_data(datap)
-                    self.page_finder[page].add_data(item)
+                    if item.__class__.__name__=='Data1D':
+                        new_item=FitData1D(item)
+                    else:
+                        new_item=FitData2D(item)
+                    if page !=None:    
+                        page.set_data_name(new_item)
+                        #create a fitproblem storing all link to data,model,page creation
+                        self.page_finder[page]= FitProblem()
+                        #data_for_park= Data(sans_data=item)
+                        #datap = PlottableData(data=data_for_park,data1d=item)
+                        #self.page_finder[page].add_data(datap)
+                        self.page_finder[page].add_data(new_item)
                 except:
-                    #raise
-                    wx.PostEvent(self.parent, StatusEvent(status="Fitting error: \
-                    data already Selected "))
+                    raise
+                    wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
+                    %sys.exc_value))
     def schedule_for_fit(self,value=0,fitproblem =None):  
         """
         
@@ -223,7 +233,7 @@ class Plugin:
         try:
             for page, value in self.page_finder.iteritems():
                 if page==cpage :
-                    data = value.get_data()
+                    #fitdata = value.get_data()
                     list = value.get_model()
                     model= list[0]
                     break
@@ -257,7 +267,7 @@ class Plugin:
         try:
             for page, value in self.page_finder.iteritems():
                 if value.get_scheduled()==1:
-                    data = value.get_data()
+                    #fitdata = value.get_data()
                     list = value.get_model()
                     model= list[0]
                    
@@ -304,7 +314,7 @@ class Plugin:
             
         for page, value in self.page_finder.iteritems():
             if  value.get_scheduled() ==1 :
-                data = value.get_data()
+                fitdata = value.get_data()
                 list=value.get_model()
                 model=list[0]
                 #Create list of parameters for fitting used
@@ -318,7 +328,7 @@ class Plugin:
                     pars.sort()
                     #Do the single fit
                     self.fitter.set_model(Model(model), self.id, pars) 
-                    self.fitter.set_data(Data(sans_data=data),self.id,qmin,qmax)
+                    self.fitter.set_data(fitdata,self.id,qmin,qmax)
                     self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
                     page_fitted=page
                     self.id+=1
@@ -335,6 +345,7 @@ class Plugin:
             #self._single_fit_completed(result,pars,page,qmin,qmax)
             self._single_fit_completed(result,pars,page_fitted,qmin,qmax)
         except:
+            raise
             wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
             return
          
@@ -359,7 +370,7 @@ class Plugin:
         for page, value in self.page_finder.iteritems():
             try:
                 if value.get_scheduled()==1:
-                    data = value.get_data()
+                    fitdata = value.get_data()
                     list = value.get_model()
                     model= list[0]
                     #Create dictionary of parameters for fitting used
@@ -388,7 +399,7 @@ class Plugin:
                             new_model.parameterset[ param_name].set( param_value )
                             
                     self.fitter.set_model(new_model, self.id, pars) 
-                    self.fitter.set_data(Data(sans_data=data),self.id,qmin,qmax)
+                    self.fitter.set_data(fitdata,self.id,qmin,qmax)
                     self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
                     self.id += 1 
             except:
@@ -432,8 +443,8 @@ class Plugin:
             current_pg.set_model_name(name)
             current_pg.set_panel(model)
             try:
-                data=self.page_finder[current_pg].get_data()
-                M_name="M"+str(self.index_model)+"= "+name+"("+data.group_id+")"
+                fitdata=self.page_finder[current_pg].get_data()
+                M_name="M"+str(self.index_model)+"= "+name+"("+fitdata.data.group_id+")"
             except:
                 raise 
                 M_name="M"+str(self.index_model)+"= "+name
@@ -467,10 +478,12 @@ class Plugin:
             for page in self.page_finder.iterkeys():
                 if  page==currpage :  
                     break 
-            data=self.page_finder[page].get_data()
+            fitdata=self.page_finder[page].get_data()
             list=self.page_finder[page].get_model()
             model=list[0]
-            if data!=None:
+            data=fitdata.data
+            
+            if data!=None and data.__class__.__name__ != 'Data2D':
                 theory = Theory1D(x=[], y=[])
                 theory.name = "Model"
                 theory.group_id = data.group_id
@@ -497,7 +510,6 @@ class Plugin:
                         if data.x[i]> qmin and data.x[i]< qmax:
                             tempx = data.x[i]
                             tempy = model.run(tempx)
-                            
                             theory.x.append(tempx) 
                             theory.y.append(tempy)
                     except:
@@ -508,12 +520,32 @@ class Plugin:
                     tempy = model.run(qmax)
                     theory.x.append(tempx)
                     theory.y.append(tempy)
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model"))
+                   
                 except:
                     wx.PostEvent(self.parent, StatusEvent(status="fitting \
                         skipping point x %g %s" %(qmax, sys.exc_value)))
-               
-            
+            else:
+                theory=Data2D(data.image, data.err_image)
+                theory.x_bins= data.x_bins
+                theory.y_bins= data.y_bins
+                tempy=[]
+                for i in range(len(data.x_bins)):
+                    theory.image= model.runXY([data.x_bins[i],data.y_bins[i]])
+                    #print "fitting : plot_helper:", theory.image
+                #print data.image
+                #theory.image=model.runXY(data.image)
+                theory.image=model.run(data.image)
+                print "fitting : plot_helper:",theory.image
+                theory.zmin= data.zmin
+                theory.zmax= data.zmax
+                theory.xmin= data.xmin
+                theory.xmax= data.xmax
+                theory.ymin= data.ymin
+                theory.ymax= data.ymax
+                
+        wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model"))
+        
+        
     def _on_model_menu(self, evt):
         """
             Plot a theory from a model selected from the menu

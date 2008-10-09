@@ -139,15 +139,11 @@ class FitPage(wx.Panel):
         self.prevmodel_name=None
         # flag to check if the user has selected a new model in the combox box
         self.model_hasChanged=False
-        #flag to check if the user has selected a new data
-        self.data_hasChanged=False
+        
         #dictionary of model name and model class
         self.model_list_box={}
-        # Data1D to make a deep comparison between 2 Data1D for checking data
-        #change
-        from sans.guitools.plottables import Data1D
-        self.prevData = Data1D(x=[], y=[],dx=None, dy=None)
-        self.prevData.name= None
+        #  comparison between 2 group_id for checking data changes
+        self.prev_group_id= None
         
         self.data=None
         self.vbox.Layout()
@@ -190,24 +186,7 @@ class FitPage(wx.Panel):
                 self.vbox.Layout() 
                 self.GrandParent.GetSizer().Layout()
                 
-                
-    def copy_data(self,dataset):
-        """
-             copy a select data in the panel to compared with the previous selected data
-             @param dataset: the data selected
-             @note : everything a data is selected, the panel check is it is different 
-             from the previous selected data
-        """
-        try:
-            if dataset !=None:
-                self.prevData.x= copy.deepcopy(dataset.x)
-                self.prevData.y= copy.deepcopy(dataset.y)
-                self.prevData.name=dataset.name
-                if dataset.dy==None:
-                    self.prevData.dy= copy.deepcopy(dataset.dy)
-        except:
-            raise ValueError, " copy_data: cannot copy data" 
-        
+  
         
     def onClose(self,event):
         """ close the page associated with this panel"""
@@ -223,14 +202,16 @@ class FitPage(wx.Panel):
             try:
                 qmin = float(self.xmin.GetValue())
                 qmax = float(self.xmax.GetValue())
-                x,y,dy = [numpy.asarray(v) for v in (self.data.x,self.data.y,self.data.dy)]
-                if qmin==None and qmax==None: 
-                    fx =numpy.asarray([self.model.run(v) for v in x])
-                    res=(y - fx)/dy
-                else:
-                    idx = (x>= qmin) & (x <=qmax)
-                    fx = numpy.asarray([self.model.run(item)for item in x[idx ]])
-                    res= (y[idx] - fx)/dy[idx]  
+                #x,y,dy = [numpy.asarray(v) for v in (self.data.x,self.data.y,self.data.dy)]
+                #if qmin==None and qmax==None: 
+                #    fx =numpy.asarray([self.model.run(v) for v in x])
+                #    res=(y - fx)/dy
+                #else:
+                #    idx = (x>= qmin) & (x <=qmax)
+                #    fx = numpy.asarray([self.model.run(item)for item in x[idx ]])
+                #    res= (y[idx] - fx)/dy[idx]  
+                self.data.setFitRange(qmin,qmax)
+                res=self.data.residuals(self.model.runXY)
                 sum=0
                 for item in res:
                     if numpy.isfinite(item):
@@ -303,10 +284,11 @@ class FitPage(wx.Panel):
         try:
             flag=self.checkFitRange()
             if flag==True and self.model!=None:
-                 self.manager.redraw_model(float(self.xmin.GetValue())\
+                print"fit page",self.xmin.GetValue(),self.xmax.GetValue()
+                self.manager.redraw_model(float(self.xmin.GetValue())\
                                                ,float(self.xmax.GetValue()))
-           
         except:
+
             wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Drawing  Error:wrong value entered %s"% sys.exc_value))
         
@@ -321,7 +303,7 @@ class FitPage(wx.Panel):
         valueMin = self.xmin.GetValue()
         valueMax = self.xmax.GetValue()
         # Check for possible values entered
-        
+        print "fitpage: checkfitrange:",valueMin,valueMax
         try:
             if (float(valueMax)> float(valueMin)):
                 self.xmax.SetBackgroundColour(wx.WHITE)
@@ -339,37 +321,7 @@ class FitPage(wx.Panel):
         self.xmax.Refresh()
         return flag
     
-    def check_data_change(self,dataset):
-        """
-             check if data selected has changed and set flag self.data_hasChanged
-             has true is changed or false is unchanged
-             @param dataset: data selected
-        """
-        self.data_hasChanged=False
-        if self.prevData.__class__ !=dataset.__class__:
-            self.data_hasChanged=True
-            
-        elif self.prevData.name != dataset.name:
-            self.data_hasChanged=True
-            
-        elif len(self.prevData.x) != len(self.prevData.y):
-            self.data_hasChanged=True
-            
-        else:
-            for i in range(len(dataset.x)):
-                if self.prevData.x[i] !=dataset.x[i]:
-                    self.data_hasChanged=True
-                    break
-                
-                if self.prevData.y[i] !=dataset.y[i]:
-                    self.data_hasChanged=True
-                    break
-                
-                if dataset.dy !=None:
-                    if self.prevData.dy[i] !=dataset.dy[i]:
-                        self.data_hasChanged=True
-                        break
-                    
+   
                     
     def set_data_name(self,dataset):
         """ 
@@ -378,25 +330,28 @@ class FitPage(wx.Panel):
             @attention:  still  haven't find a better way to display Q name and unit
             for xmin and xmax range sizer
         """
-        self.check_data_change(dataset)
-        if self.data_hasChanged==True:
+        
+        if self.prev_group_id !=dataset.data.group_id:
             self._DataNameEnter()
-        self.data=dataset
-        self.copy_data(dataset)
+        self.data = dataset
+        self.prev_group_id=dataset.data.group_id
         #Displaying Data information
-        self.DataSource.SetValue(str(dataset.name))
-        self._xaxis,self._xunit=dataset.get_xaxis()
+        self.DataSource.SetValue(str(dataset.data.name))
+        self._xaxis,self._xunit=dataset.data.get_xaxis()
         self.text4_3.SetLabel(self._xaxis+"["+self._xunit+"]")
         self.text4_1.Show()
         self.text4_2.Show()
         self.text4_3.Show()
-        
-        self.xmin.SetValue(format_number(min(dataset.x)))
-        self.xmin.Show()
-
-        self.xmax.SetValue(format_number(max(dataset.x)))
-        self.xmax.Show()
-        
+        if not dataset.data.__class__.__name__=='Data2D':
+            self.xmin.SetValue(format_number(min(dataset.data.x)))
+            self.xmin.Show()
+            self.xmax.SetValue(format_number(max(dataset.data.x)))
+            self.xmax.Show()
+        else:
+            self.xmin.SetValue(format_number(numpy.min(dataset.data.image)))
+            self.xmin.Show()
+            self.xmax.SetValue(format_number(numpy.max(dataset.data.image)))
+            self.xmax.Show()
         if ((len(self.param_toFit ) >0) and self.DataSource.GetValue()and \
             self.modelbox.GetValue() and (self.model_hasChanged ==False)):
             self.xmin.Enable()
