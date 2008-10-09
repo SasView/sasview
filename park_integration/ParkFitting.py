@@ -78,7 +78,7 @@ class ParkFit(FitEngine):
             parkdata=Ldata
             fitness=(parkmodel,parkdata)
             mylist.append(fitness)
-    
+        
         self.problem =  park.Assembly(mylist)
         
     
