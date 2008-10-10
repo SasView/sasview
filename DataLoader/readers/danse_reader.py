@@ -154,6 +154,8 @@ class Reader:
             xmax = None
             
             # Qx and Qy vectors
+            theta = pixel / distance / 100.0
+            stepq = 4.0*math.pi/wavelength * math.sin(theta/2.0) 
             for i_x in range(size_x):
                 theta = (i_x-center_x+1)*pixel / distance / 100.0
                 qx = 4.0*math.pi/wavelength * math.sin(theta/2.0)
@@ -234,6 +236,11 @@ class Reader:
             detector.beam_center.y = center_y*pixel
             
             # Store limits of the image (2D array)
+            xmin    =xmin-stepq/2.0
+            xmax    =xmax+stepq/2.0
+            ymin    =ymin-stepq/2.0
+            ymax    =ymax+stepq/2.0
+            
             if has_converter == True and output.Q_unit != '1/A':
                 xmin = data_conv_q(xmin, units=output.Q_unit)
                 xmax = data_conv_q(xmax, units=output.Q_unit)

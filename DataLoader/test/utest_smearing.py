@@ -7,7 +7,7 @@ import unittest
 import numpy, math
 from DataLoader.loader import  Loader
 from DataLoader.data_info import Data1D, Data2D
-from DataLoader.qsmearing import SlitSmearer, QSmearer
+from DataLoader.qsmearing import SlitSmearer, QSmearer, smear_selection
  
 import os.path
 
@@ -20,7 +20,9 @@ class smear_tests(unittest.TestCase):
         y = 12.0-numpy.arange(1,11)
         dxl = 0.00*numpy.ones(10)
         dxw = 0.00*numpy.ones(10)
+        dx = 0.00*numpy.ones(10)
         
+        self.data.dx = dx
         self.data.x = x
         self.data.y = y
         self.data.dxl = dxl

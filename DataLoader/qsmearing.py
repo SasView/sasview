@@ -7,6 +7,9 @@ See the license text in license.txt
 
 copyright 2008, University of Tennessee
 """
+
+#TODO: improvement: allow for varying dQ as a function of Q
+
 import numpy
 import math
 import scipy.special
@@ -14,9 +17,64 @@ import scipy.special
 def smear_selection(data1D):
     """
         Creates the right type of smearer according 
-        to the data
+        to the data.
+    
+        The canSAS format has a rule that either
+        slit smearing data OR resolution smearing data
+        is available. 
+        
+        For the present purpose, we choose the one that
+        has none-zero data. If both slit and resolution
+        smearing arrays are filled with good data 
+        (which should not happen), then we choose the
+        resolution smearing data. 
+        
+        @param data1D: Data1D object
     """
-    pass
+    # Sanity check. If we are not dealing with a SANS Data1D
+    # object, just return None
+    if data1D.__class__.__name__ != 'Data1D' \
+        or not hasattr(data1D, "dxl") or not hasattr(data1D, "dxw"):
+        return None
+    
+    # Look for resolution smearing data
+    _found_resolution = False
+    if data1D.dx is not None and len(data1D.dx)==len(data1D.x):
+        
+        # Check that we have non-zero data
+        if data1D.dx[0]>0.0:
+            _found_resolution = True
+        
+    # If we found resolution smearing data, return a QSmearer
+    if _found_resolution == True:
+        return QSmearer(data1D)
+
+    # Look for slit smearing data
+    _found_slit = False
+    if data1D.dxl is not None and len(data1D.dxl)==len(data1D.x) \
+        and data1D.dxw is not None and len(data1D.dxw)==len(data1D.x):
+        
+        # Check that we have non-zero data
+        if data1D.dxl[0]>0.0 or data1D.dxw[0]>0.0:
+            _found_slit = True
+        
+        # Sanity check: all data should be the same as a function of Q
+        for item in data1D.dxl:
+            if data1D.dxl[0] != item:
+                _found_resolution = False
+                break
+            
+        for item in data1D.dxw:
+            if data1D.dxw[0] != item:
+                _found_resolution = False
+                break
+            
+    # If we found slit smearing data, return a slit smearer
+    if _found_slit == True:
+        return SlitSmearer(data1D)
+    
+    return None
+            
 
 class _BaseSmearer(object):
     
@@ -212,8 +270,8 @@ class _QSmearer(_BaseSmearer):
                 
                 # Compute the fraction of the Gaussian contributing
                 # to the q bin between q_min and q_max
-                value =  scipy.special.erf( (q_max-q_j)/(math.sqrt(2.0)*self.width) ) 
-                value -=scipy.special.erf( (q_min-q_j)/(math.sqrt(2.0)*self.width) ) 
+                value =  scipy.special.erf( (q_max-q_j)/(math.sqrt(2.0)*self.width[j]) ) 
+                value -=scipy.special.erf( (q_min-q_j)/(math.sqrt(2.0)*self.width[j]) ) 
 
                 weights[i][j] += value
                                 
@@ -234,13 +292,9 @@ class QSmearer(_QSmearer):
         super(QSmearer, self).__init__()
         
         ## Slit width
-        self.width = 0
+        self.width = numpy.zeros(len(data1D.x))
         if data1D.dx is not None and len(data1D.dx)==len(data1D.x):
-            self.width = data1D.dx[0]
-            # Sanity check
-            for value in data1D.dx:
-                if value != self.width:
-                    raise RuntimeError, "dQ must be the same for all data"
+            self.width = data1D.dx
         
         ## Number of Q bins
         self.nbins = len(data1D.x)
