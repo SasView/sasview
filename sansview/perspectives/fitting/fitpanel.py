@@ -18,6 +18,7 @@ class FitPanel(wx.Panel):
     window_name = "Fit panel"
     ## Title to appear on top of the window
     window_caption = "Fit Panel "
+    CENTER_PANE = True
    
     
     def __init__(self, parent, *args, **kwargs):
