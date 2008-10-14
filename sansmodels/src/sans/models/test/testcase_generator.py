@@ -1,8 +1,6 @@
 """
     Random test-case generator for BaseComponents
     
-    @author: Mathieu Doucet / UTK
-    @license: This software is provided as part of the DANSE project.
 """
 import time
 
@@ -759,10 +757,13 @@ def divStimulus(model):
     return tmp, report
 
 if __name__ == '__main__':
-
+    print "Model operations are no longer supported."
+    print "The TestCase generator for model operation can't be used with this version of sansmodels." 
+    
+    
     #print randomModel()
-    g = TestCaseGenerator()
-    g.generateAndRun(20000)
+    #g = TestCaseGenerator()
+    #g.generateAndRun(20000)
     
     #t = TestCase(filename = "error_1.17721e+009.xml")
     #print t.run()

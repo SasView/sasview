@@ -63,8 +63,15 @@ class BaseModel(ModelAdaptor):
     """
     ## Name of the model
     name = "BaseModel"
-    ## Dictionary of Parameter objects
-    parameters = {}
+    
+    def __init__(self):
+        ## Dictionary of Parameter objects
+        self.parameters = {}
+        
+        for item in self.params:
+            self.parameters[item] = Parameter(item, self.params[item])
+
+        
 
     # Evaluation methods to be implemented by the models
     def run(self, x=0):  return NotImplemented
@@ -96,7 +103,9 @@ class BaseModel(ModelAdaptor):
         """
         # Lowercase for case insensitivity
         name = name.lower()
-        return object.__setattribute__(self, name, value)
+        if name in self.parameters:
+            print "found"
+        return object.__setattr__(self, name, value)
         
     def getParam(self, name):
         """ 

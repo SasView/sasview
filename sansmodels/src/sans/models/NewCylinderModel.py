@@ -45,8 +45,8 @@ class CylinderModel(CCylinderModel, BaseModel):
         """ Initialization """
         
         # Initialize BaseComponent first, then sphere
-        BaseModel.__init__(self)
         CCylinderModel.__init__(self)
+        BaseModel.__init__(self)
         
         ## Name of the model
         self.name = "CylinderModel"

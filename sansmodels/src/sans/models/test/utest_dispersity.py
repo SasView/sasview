@@ -47,6 +47,17 @@ class TestCylinder(unittest.TestCase):
         self.assertAlmostEqual(self.model.run(0.001), 4723.32213339, 3)
         self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 4743.56, 2)
         
+    def test_gaussian_zero(self):
+        from sans.models.dispersion_models import GaussianDispersion
+        disp = GaussianDispersion()
+        self.model.set_dispersion('radius', disp)
+        self.model.dispersion['radius']['width'] = 0.0
+        self.model.dispersion['radius']['npts'] = 100
+        self.model.setParam('scale', 1.0)
+        
+        self.assertAlmostEqual(self.model.run(0.001), 450.355, 3)
+        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 452.299, 3)
+        
     def test_array(self):
         """
             Perform complete rotational average and
@@ -428,6 +439,19 @@ class TestEllipticalCylinder(unittest.TestCase):
         
         self.assertTrue(math.fabs(val_1d-val_2d)/val_1d < 0.02)
         
+class TestDispModel(unittest.TestCase):
+    def setUp(self):
+        from sans.models.CylinderModel import CylinderModel
+        self.model = CylinderModel()
+        
+        
+    def test_disp_params(self):
+        
+        self.assertEqual(self.model.dispersion['radius']['width'], 0.0)
+        self.model.setParam('radius.width', 5.0)
+        self.assertEqual(self.model.dispersion['radius']['width'], 5.0)
+        self.assertEqual(self.model.getParam('radius.width'), 5.0)
+        self.assertEqual(self.model.dispersion['radius']['type'], 'gaussian')
         
   
 if __name__ == '__main__':

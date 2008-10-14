@@ -61,17 +61,7 @@ class ModelAdaptor(object):
         #  parameters of dispersed/averaged parameters.
         ## Provided for backward compatibility
         self.dispersion = {}
-           
-    def __getattribute__(self, name):
-        """
-            Provide additional information when accessing old-style
-            data members.
-        """
-        if name in ['operateOn', 'other']:
-            raise AttributeError, "Model operation are no longer supported"
-
-        return object.__getattribute__(self, name)
-                   
+                              
     # Old-style methods that are no longer used
     def setParamWithToken(self, name, value, token, member): return NotImplemented
     def getParamWithToken(self, name, token, member): return NotImplemented

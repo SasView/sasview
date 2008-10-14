@@ -2,7 +2,7 @@
     Unit tests for dispersion functionality of 
     C++ model classes
 """
-
+print "New style models are still under development"
 import unittest, math, numpy
 
 class TestModel(object):
@@ -21,7 +21,7 @@ class TestModel(object):
     def run(self, x):
         return self.params['scale']*x
 
-from BaseModel import BaseModel
+from sans.models.BaseModel import BaseModel,ParameterProperty
 class NewTestModel(BaseModel):
     scale = ParameterProperty('scale')
     
@@ -56,12 +56,20 @@ class TestAdaptor(unittest.TestCase):
         Testing C++ Cylinder model
     """
     def setUp(self):
-        from sans.models.NewCylinderModel import NewCylinderModel
-        self.model = NewCylinderModel()
+        from sans.models.NewCylinderModel import CylinderModel
+        self.model = CylinderModel()
         
         
     def test_setparam(self):
-        pass
+        self.model.setParam("length", 151.0)
+        self.assertEquals(self.model.getParam("length"), 151.0)
+        
+        
+        print self.model.parameters
+        
+        print self.model(0.001)
+        self.model.setParam("length", 250.0)
+        print self.model(0.001)
         
     
   

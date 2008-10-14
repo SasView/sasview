@@ -65,6 +65,8 @@ class TestCyl(unittest.TestCase):
         self.assertEqual(value, loaded.run(1))
         
     def testIO_add(self):
+        # version 0.5.0: No longer supported
+        return
         from sans.models.ModelFactory import ModelFactory
         from sans.models.ModelIO import ModelIO
         factory = ModelFactory()
@@ -78,6 +80,8 @@ class TestCyl(unittest.TestCase):
         self.assertEqual(value, loaded.run(1))
         
     def testIO_add2(self):
+        # version 0.5.0: No longer supported
+        return
         from sans.models.ModelFactory import ModelFactory
         #from sans.models.ModelIO import ModelIO
         factory = ModelFactory()
@@ -107,19 +111,6 @@ class TestFactory(unittest.TestCase):
     def test1D(self):
         """ Test 1D model of a cylinder """ 
         self.assertAlmostEqual(self.comp.run(0.2), 0.041761386790780453, 4)
-        
-class TestAddition(unittest.TestCase):
-    """Unit tests for Model Factory"""
-    
-    def setUp(self):
-        from sans.models.ModelFactory import ModelFactory
-        self.comp1 = ModelFactory().getModel('CylinderModel')
-        self.comp2 = ModelFactory().getModel('CylinderModel')
-        self.comp3 = self.comp1+self.comp2
-        
-    def test1D(self):
-        """ Test 1D model of a cylinder """
-        self.assertAlmostEqual(self.comp3.run(0.2), 2*0.041761386790780453, 4)
         
  
 class TestGaussian(unittest.TestCase):
@@ -229,6 +220,8 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(self.const.runXY([1.13,0.56]), 56.1)
         
     def testFunction(self):
+        # version 0.5.0: No longer supported
+        return
         from sans.models.Sin import Sin
         s = Sin()
         A = self.const
