@@ -3,9 +3,9 @@ import sys, wx, logging
 import string, numpy, pylab, math
 
 from copy import deepcopy 
-#from sans.guitools.plottables import Data1D, Theory1D
-#from sans.guitools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Data1D, Theory1D, Data2D
+
+from sans.guiframe.data_loader import MetaData1D, MetaTheory1D, MetaData2D
 from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
 from sans.fit.AbstractFitEngine import Model,Data,FitData1D,FitData2D
@@ -83,11 +83,12 @@ class Plugin:
         """
         self.graph=graph
         for item in graph.plottables:
-            if item.__class__.__name__ is "Data2D":
+            if item.__class__.__name__ is "MetaData2D":
                 return [["Fit Data2D", "Dialog with fitting parameters ", self._onSelect]] 
             else:
-                if item.name==graph.selected_plottable and item.__class__.__name__ is not "Theory1D":
-                    return [["Select Data", "Dialog with fitting parameters ", self._onSelect]] 
+                if item.name==graph.selected_plottable and (item.__class__.__name__ is  "MetaData1D"or \
+                                        item.__class__.__name__ is  "Data1D" ):
+                    return [["Fit Data1D", "Dialog with fitting parameters ", self._onSelect]] 
         return []   
 
 
@@ -142,7 +143,7 @@ class Plugin:
         """
         self.panel = event.GetEventObject()
         for item in self.panel.graph.plottables:
-            if item.name == self.panel.graph.selected_plottable or item.__class__.__name__ is "Data2D":
+            if item.name == self.panel.graph.selected_plottable or item.__class__.__name__ is "MetaData2D":
                 #find a name for the page created for notebook
                 try:
                     name = item.group_id # item in Data1D
@@ -151,7 +152,7 @@ class Plugin:
                 try:
                     page = self.fit_panel.add_fit_page(name)
                     # add data associated to the page created
-                    if item.__class__.__name__=='Data1D':
+                    if item.__class__.__name__=='MetaData1D' or item.__class__.__name__=='Data1D' :
                         new_item=FitData1D(item)
                     else:
                         new_item=FitData2D(item)
@@ -483,7 +484,7 @@ class Plugin:
             model=list[0]
             data=fitdata.data
             
-            if data!=None and data.__class__.__name__ != 'Data2D':
+            if data!=None and data.__class__.__name__ != 'MetaData2D':
                 theory = Theory1D(x=[], y=[])
                 theory.name = "Model"
                 theory.group_id = data.group_id

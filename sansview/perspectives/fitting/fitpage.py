@@ -342,7 +342,7 @@ class FitPage(wx.Panel):
         self.text4_1.Show()
         self.text4_2.Show()
         self.text4_3.Show()
-        if not dataset.data.__class__.__name__=='Data2D':
+        if not hasattr(dataset.data,'image'):
             self.xmin.SetValue(format_number(min(dataset.data.x)))
             self.xmin.Show()
             self.xmax.SetValue(format_number(max(dataset.data.x)))
@@ -504,13 +504,12 @@ class FitPage(wx.Panel):
                 try:
                      name=str(item[0].GetLabelText())
                      value= float(item[1].GetValue())
-                     self.model.setParam(name,value)
-                     self.manager.redraw_model(float(self.xmin.GetValue())\
-                                               ,float(self.xmax.GetValue()))
+                     self.model.setParam(name,value) 
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Drawing  Error:wrong value entered : %s"% sys.exc_value))
-                     
+            self.manager.redraw_model(float(self.xmin.GetValue())\
+                                               ,float(self.xmax.GetValue()))      
                      
     def select_all_param(self,event): 
         """
@@ -520,7 +519,6 @@ class FitPage(wx.Panel):
         if  self.parameters !=[]:
             if  self.cb1.GetValue()==True:
                 for item in self.parameters:
-                   
                     item[0].SetValue(True)
                     list= [item[0],item[1],item[2],item[3]]
                     self.param_toFit.append(list )
