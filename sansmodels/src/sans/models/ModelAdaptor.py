@@ -52,6 +52,8 @@ class ModelAdaptor(object):
 
     def __init__(self):
         """ Initialization"""
+        ## Dictionary of Parameter objects
+        self.parameters = {}
         ## Dictionary of parameters, available for backward compatibility
         self.params = ParameterDict(self.parameters)
         ## Additional details, provided for backward compatibility

@@ -21,7 +21,7 @@ class TestModel(object):
     def run(self, x):
         return self.params['scale']*x
 
-from sans.models.BaseModel import BaseModel,ParameterProperty
+from sans.models.BaseModel import BaseModel, Parameter, ParameterProperty
 class NewTestModel(BaseModel):
     scale = ParameterProperty('scale')
     
@@ -30,10 +30,22 @@ class NewTestModel(BaseModel):
         self.parameters = {}
         self.parameters['scale'] = Parameter('scale', 4.0) 
         
-    def run(self, x):
+        
+    def runXY(self, x):
         return self.scale*x
         
-
+class TestBogusModel(unittest.TestCase):
+    def setUp(self):
+        self.model = NewTestModel()
+        
+    def test_call(self):
+        self.assertEqual(self.model(1), 4.0)
+        self.model.scale = 1.0
+        self.assertEqual(self.model(1), 1.0)
+        self.model.setParam('scale',2.0)
+        self.assertEqual(self.model(1), 2.0)
+        self.assertEqual(self.model.getParam('scale'), 2.0)
+        
 class TestBaseModel(unittest.TestCase):
     """
         Testing C++ Cylinder model
@@ -65,10 +77,13 @@ class TestAdaptor(unittest.TestCase):
         self.assertEquals(self.model.getParam("length"), 151.0)
         
         
-        print self.model.parameters
         
         print self.model(0.001)
+        print self.model.parameters['length']
         self.model.setParam("length", 250.0)
+        self.assertEquals(self.model.getParam("length"), 250.0)
+        
+        print self.model.parameters['length']
         print self.model(0.001)
         
     

@@ -21,7 +21,7 @@
 
 """
 
-from sans.models.BaseModel import BaseModel
+from sans.models.BaseModel import BaseModel, Parameter, ParameterProperty
 from sans_extension.c_models import CCylinderModel
 import copy    
     
@@ -40,7 +40,14 @@ class CylinderModel(CCylinderModel, BaseModel):
          cyl_phi         = 1.0 rad
 
     """
-        
+    scale      = ParameterProperty('scale')
+    radius     = ParameterProperty('radius')
+    length     = ParameterProperty('length')
+    contrast   = ParameterProperty('contrast')
+    background = ParameterProperty('background')
+    cyl_theta  = ParameterProperty('cyl_theta')
+    cyl_phi    = ParameterProperty('cyl_phi')
+    	
     def __init__(self):
         """ Initialization """
         
@@ -61,7 +68,10 @@ class CylinderModel(CCylinderModel, BaseModel):
         self.details['cyl_theta'] = ['rad', None, None]
         self.details['cyl_phi'] = ['rad', None, None]
 
-   
+        # The C models have a self.params dictionary
+        for item in self.params:
+            self.parameters[item] = Parameter(item, self.params[item])
+
     def clone(self):
         """ Return a identical copy of self """
         obj = CylinderModel()

@@ -37,12 +37,17 @@ class BaseComponent:
     
     def clone(self):
         """ Returns a new object identical to the current object """
-        
         obj = copy.deepcopy(self)
+        return self._clone(obj)
+    
+    def _clone(self, obj):
+        """
+            Internal utility function to copy the internal
+            data members to a fresh copy.
+        """
         obj.params     = copy.deepcopy(self.params)
         obj.details    = copy.deepcopy(self.details)
         obj.dispersion = copy.deepcopy(self.dispersion)
-    
         return obj
 
     def setParam(self, name, value):
@@ -69,49 +74,6 @@ class BaseComponent:
                     return
             
         raise ValueError, "Model does not contain parameter %s" % name
-        
-
-    def _setParam(self, name, value):
-        """ 
-            Set the value of a model parameter
-        
-            @param name: name of the parameter
-            @param value: value of the parameter
-        """
-        # Look for dispersion parameters
-        toks = name.split('.')
-        if len(toks)==2 and toks[0] in self.dispersion:
-            # Setting a dispersion model parameter
-            if toks[1] in self.dispersion[toks[0]]: 
-                self.dispersion[toks[0]][toks[1]] = value
-                return
-            else:
-                raise ValueError, "Model does not contain parameter %s.%s" % (toks[0], toks[1])
-        
-        if name in self.params.keys():
-            self.params[name] = value
-        else:
-            raise ValueError, "Model does not contain parameter %s" % name
-        
-    def _getParam(self, name):
-        """ 
-            Set the value of a model parameter
-
-            @param name: name of the parameter
-        """
-        # Look for dispersion parameters
-        toks = name.split('.')
-        if len(toks)==2 and toks[0] in self.dispersion:
-            # Setting a dispersion model parameter
-            if toks[1] in self.dispersion[toks[0]]: 
-                return self.dispersion[toks[0]][toks[1]] 
-            else:
-                raise ValueError, "Model does not contain parameter %s.%s" % (toks[0], toks[1])
-
-        if name in self.params.keys():
-            return self.params[name]
-        else:
-            raise ValueError, "Model does not contain parameter %s" % name
         
     def getParam(self, name):
         """ 

@@ -130,6 +130,17 @@ class TestDebye(unittest.TestCase):
         # An exceptio is raised
         self.assertRaises(ZeroDivisionError, self.model.run, 0.0)
         
+    def test1D_clone(self):
+        value = self._func(50.0, 1.0, 10.0, 2.0)
+        self.model.setParam('background', 10.0)
+        clone = self.model.clone()
+        self.assertEqual(clone.run(2.0), value)
+        self.assertEqual(clone.runXY(2.0), value)
+        
+        # User enter zero as a value of x
+        # An exceptio is raised
+        self.assertRaises(ZeroDivisionError, clone.run, 0.0)
+        
     def test2D(self):
         #value = self._func(50.0, 1.0, 0.001, 1.0)*self._func(50.0, 1.0, 0.001, 2.0)
         value = self._func(50.0, 1.0, 0.001, math.sqrt(5.0))

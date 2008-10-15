@@ -8,7 +8,22 @@ Package name: sans.models
 1- What's New in Version 0.?
     - Release date: ?
     - C extension models now use new C++ classes that incorporate dispersity and averaging
-      functionality. 
+      functionality. See utest_dispersity.py for examples of how to use the new dispersion
+      classes.
+      
+      # Create a model
+      model= CylinderModel()
+      
+      # Create a dispersion model
+      disp = GaussianDispersion()
+      
+	  # Set the dispersion for a chosen parameter
+	  model.set_dispersion('radius', disp)
+	  
+	  # Set the parameters of the dispersion model
+      model.dispersion['radius']['width'] = 5.0
+      model.dispersion['radius']['npts'] = 100
+
     
     Version 0.4.1
     - Release date: 6/9/2008

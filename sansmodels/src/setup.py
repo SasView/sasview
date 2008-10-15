@@ -91,7 +91,7 @@ setup(
     
     ext_modules = [ Extension("sans_extension.c_models",
      sources = [
-        srcdir+"/c_models.cpp",
+        "sans/models/c_models/c_models.cpp",
         #srcdir+"/CSphereModel.c",
         #srcdir+"/sphere.c",
         "sans/models/c_models/CSphereModel.cpp",

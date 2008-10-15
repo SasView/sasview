@@ -58,9 +58,7 @@ class SphereModel(CSphereModel, BaseComponent):
    
     def clone(self):
         """ Return a identical copy of self """
-        obj = SphereModel()
-        obj.params = copy.deepcopy(self.params)
-        return obj   
+        return self._clone(SphereModel())   
    
     def run(self, x = 0.0):
         """ Evaluate the model
