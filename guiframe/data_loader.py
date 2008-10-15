@@ -1,7 +1,31 @@
 import os, sys
 import wx
+from danse.common.plottools.plottables import Data1D, Theory1D, Data2D
 from DataLoader.loader import Loader
+class MetaData1D(Data1D):
+    def __init__(self, output):
+        self.datainfo = output
+        Data1D.__init__(self,x=output.x, y=output.y, dy=output.dy)
+        
+class MetaTheory1D(Theory1D):
+    def __init__(self, output):
+        self.datainfo = output
+        Theory1D.__init__(self, x=output.x, y=output.y)
+        
 
+class MetaData2D(Data2D):
+    def __init__(self, output):
+        self.datainfo = output
+        Data2D.__init__(self,image= output.data,err_image=output.err_data,
+                       xmin=output.xmin,xmax=output.xmax,ymin=output.ymin,ymax=output.ymax)
+class MetaTheory2D(Data2D):
+    def __init__(self, output):
+        self.datainfo = output
+        Data2D.__init__(self,image= output.data,err_image=output.err_data,
+                       xmin=output.xmin,xmax=output.xmax,ymin=output.ymin,ymax=output.ymax)
+        
+        
+    
 def choose_data_file(parent, location=None):
     path = None
     if location==None:
@@ -61,8 +85,7 @@ def load_ascii_1D(path):
 
 def plot_data(parent, path, name="Loaded Data"):
     from sans.guicomm.events import NewPlotEvent, StatusEvent
-    #from sans.guitools.plottables import Data1D, Theory1D
-    from danse.common.plottools.plottables import Data1D, Theory1D, Data2D
+   
     from DataLoader.loader import  Loader
     import numpy
     #Instantiate a loader 
@@ -74,23 +97,21 @@ def plot_data(parent, path, name="Loaded Data"):
     except:
         wx.PostEvent(parent, StatusEvent(status="Problem loading file: %s" % sys.exc_value))
         return
-    if hasattr(data):
-        new_plot = Data2D(image= output.data)
-        new_plot.setValues(output)
+    if hasattr(output,'data'):
+        new_plot = MetaData2D(output)
     else:
         if output.dy==None:
-            new_plot = Theory1D(output.x, output.y)
+            new_plot = MetaTheory1D(output)
         else:
-            new_plot = Data1D(output.x, output.y, dy=output.dy)
+            new_plot = MetaData1D(output)
         
     filename = os.path.basename(path)
         
     new_plot.name = name
     new_plot.interactive = True
-    
     # If the data file does not tell us what the axes are, just assume...
-    new_plot.xaxis("\\rm{Q}", 'A^{-1}')
+    new_plot.xaxis("\\rm{Q}",'A^{-1}')
     new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
     new_plot.group_id = filename
-        
+       
     wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))

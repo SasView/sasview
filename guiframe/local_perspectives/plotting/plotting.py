@@ -11,11 +11,9 @@ copyright 2008, University of Tennessee
 
 import wx
 import sys
-#from sans.guitools.PlotPanel import PlotPanel
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
-#from sans.guitools.plottables import Graph
-from danse.common.plottools.plottables import Graph
+from danse.common.plottools.plottables import Graph,Data1D
 from sans.guicomm.events import EVT_NEW_PLOT
 
 class PanelMenu(wx.Menu):
@@ -27,8 +25,8 @@ class PanelMenu(wx.Menu):
     
     def set_graph(self, graph):
         self.graph = graph
-
-class View1DPanel(PlotPanel):
+        
+class View1DPanel1D(PlotPanel):
     """
         Plot panel for use with the GUI manager
     """
@@ -145,7 +143,6 @@ class View1DPanel(PlotPanel):
             self.graph.render(self)
             self.subplot.figure.canvas.draw_idle()    
             
-            
 
     def onContextMenu(self, event):
         """
@@ -198,10 +195,6 @@ class View1DPanel(PlotPanel):
         
         slicerpop.AppendSeparator()
         
-        #id = wx.NewId()
-        #slicerpop.Append(id, '&Toggle Linear/Log scale')
-        #wx.EVT_MENU(self, id, self._onToggleScale)
-
         if self.graph.selected_plottable in self.plots:
             if self.plots[self.graph.selected_plottable].__class__.__name__=="Theory1D":
                 id = wx.NewId()
@@ -212,9 +205,7 @@ class View1DPanel(PlotPanel):
                 slicerpop.Append(id, '&Linear fit')
                 wx.EVT_MENU(self, id, self.onFitting)
                 
-        id = wx.NewId()
-        slicerpop.Append(id, '&Toggle Linear/Log scale')
-        wx.EVT_MENU(self, id,  self._onToggleScale)
+        
 
         id = wx.NewId()
         slicerpop.Append(id, '&Change scale')
@@ -229,6 +220,7 @@ class View1DPanel(PlotPanel):
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
     
+    
     def _on_add_errors(self, evt):
         """
             Compute reasonable errors for a data set without 
@@ -236,7 +228,6 @@ class View1DPanel(PlotPanel):
         """
         import math
         import numpy
-        from sans.guitools.plottables import Data1D
         import time
         
         if not self.graph.selected_plottable == None:
@@ -249,7 +240,7 @@ class View1DPanel(PlotPanel):
                               self.plots[self.graph.selected_plottable].y,
                               dy=dy)
             new_plot.interactive = True
-            new_plot.name = self.plots[self.graph.selected_plottable].name #+" data"
+            new_plot.name = self.plots[self.graph.selected_plottable].name 
             if hasattr(self.plots[self.graph.selected_plottable], "group_id"):
                 new_plot.group_id = self.plots[self.graph.selected_plottable].group_id
             else:
@@ -323,7 +314,139 @@ class View1DPanel(PlotPanel):
         else:
             self.set_yscale('log')
         self.subplot.figure.canvas.draw_idle()    
+        
+class View1DPanel2D( View1DPanel1D):
+    """
+        Plot panel for use with the GUI manager
+    """
     
+    ## Internal name for the AUI manager
+    window_name = "plotpanel"
+    ## Title to appear on top of the window
+    window_caption = "Plot Panel"
+    ## Flag to tell the GUI manager that this panel is not
+    #  tied to any perspective
+    ALWAYS_ON = True
+    ## Group ID
+    group_id = None
+    
+    def __init__(self, parent, id = -1, color = None,\
+        dpi = None, style = wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
+        """
+            Initialize the panel
+        """
+        View1DPanel1D.__init__(self, parent, id = id, style = style, **kwargs)
+        
+        ## Reference to the parent window
+        self.parent = parent
+        ## Plottables
+        self.plots = {}
+        
+        ## Unique ID (from gui_manager)
+        self.uid = None
+        
+        ## Action IDs for internal call-backs
+        self.action_ids = {}
+        
+        ## Graph        
+        self.graph = Graph()
+        self.graph.xaxis("\\rm{Q}", 'A^{-1}')
+        self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
+        self.graph.render(self)
+  
+    def _onEVT_1DREPLOT(self, event):
+        """
+            Data is ready to be displayed
+            @param event: data event
+        """
+        #TODO: Check for existence of plot attribute
+
+        # Check whether this is a replot. If we ask for a replot
+        # and the plottable no longer exists, ignore the event.
+        if hasattr(event, "update") and event.update==True \
+            and event.plot.name not in self.plots.keys():
+            return
+        
+        if hasattr(event, "reset"):
+            self._reset()
+        
+        is_new = True
+        if event.plot.name in self.plots.keys():
+            # Check whether the class of plottable changed
+            if not event.plot.__class__==self.plots[event.plot.name].__class__:
+                self.graph.delete(self.plots[event.plot.name])
+            else:
+                is_new = False
+        
+        if is_new:
+            self.plots[event.plot.name] = event.plot
+            self.graph.add(self.plots[event.plot.name])
+        else:
+            self.plots[event.plot.name].x = event.plot.x    
+            self.plots[event.plot.name].y = event.plot.y    
+            self.plots[event.plot.name].dy = event.plot.dy  
+            if hasattr(event.plot, 'dx') and hasattr(self.plots[event.plot.name], 'dx'):
+                self.plots[event.plot.name].dx = event.plot.dx    
+ 
+        
+        # Check axis labels
+        #TODO: Should re-factor this
+        #if event.plot._xunit != self.graph.prop["xunit"]:
+        self.graph.xaxis(event.plot._xaxis, event.plot._xunit)
+            
+        #if event.plot._yunit != self.graph.prop["yunit"]:
+        self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
+      
+       
+        self.graph.render(self)
+        self.subplot.figure.canvas.draw_idle()
+
+
+    def onContextMenu(self, event):
+        """
+            1D plot context menu
+            @param event: wx context event
+        """
+        #slicerpop = wx.Menu()
+        slicerpop = PanelMenu()
+        slicerpop.set_plots(self.plots)
+        slicerpop.set_graph(self.graph)
+                
+        # Option to save the data displayed
+        
+       
+        # Various plot options
+        id = wx.NewId()
+        slicerpop.Append(id,'&Save image', 'Save image as PNG')
+        wx.EVT_MENU(self, id, self.onSaveImage)
+        
+        
+        item_list = self.parent.get_context_menu(self.graph)
+        if (not item_list==None) and (not len(item_list)==0):
+                slicerpop.AppendSeparator()
+                for item in item_list:
+                    try:
+                        id = wx.NewId()
+                        slicerpop.Append(id, item[0], item[1])
+                        wx.EVT_MENU(self, id, item[2])
+                    except:
+                        print sys.exc_value
+                        print RuntimeError, "View1DPanel2D.onContextMenu: bad menu item"
+        
+        slicerpop.AppendSeparator()
+       
+                
+        id = wx.NewId()
+        slicerpop.Append(id, '&Toggle Linear/Log scale')
+        wx.EVT_MENU(self, id,  self._onToggleScale)    
+
+        pos = event.GetPosition()
+        pos = self.ScreenToClient(pos)
+        self.PopupMenu(slicerpop, pos)
+    
+    
+  
+      
 class Plugin:
     """
         Plug-in class to be instantiated by the GUI manager
@@ -422,7 +545,10 @@ class Plugin:
         
         # Create a new plot panel if none was available        
         if not is_available:
-            new_panel = View1DPanel(self.parent, -1, style=wx.RAISED_BORDER)
+            if not hasattr(event.plot,'image'):
+                new_panel = View1DPanel1D(self.parent, -1, style=wx.RAISED_BORDER)
+            else:
+                new_panel = View1DPanel2D(self.parent, -1, style=wx.RAISED_BORDER)
             # Set group ID if available
             group_id_str = ''
             if hasattr(event.plot, "group_id"):
@@ -439,10 +565,8 @@ class Plugin:
             event_id = self.parent.popup_panel(new_panel)
             self.menu.Append(event_id, new_panel.window_caption, 
                              "Show %s plot panel" % new_panel.window_caption)
-            
             # Set UID to allow us to reference the panel later
             new_panel.uid = event_id
-            
             # Ship the plottable to its panel
             new_panel._onEVT_1DREPLOT(event)
             self.plot_panels.append(new_panel)        
