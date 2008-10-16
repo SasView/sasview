@@ -394,15 +394,19 @@ class FitEngine:
             @param data: data added
             @param Uid: unique key corresponding to a fitArrange object with data
         """
+        if data.__class__.__name__=='MetaData2D':
+            fitdata=FitData2D(data)
+        else:
+            fitdata=FitData1D(data)
         if qmin !=None and qmax !=None:
-            data.setFitRange(mini=qmin,maxi=qmax)
+            fitdata.setFitRange(mini=qmin,maxi=qmax)
         #A fitArrange is already created but contains model only at Uid
         if self.fitArrangeDict.has_key(Uid):
-            self.fitArrangeDict[Uid].add_data(data)
+            self.fitArrangeDict[Uid].add_data(fitdata)
         else:
         #no fitArrange object has been create with this Uid
             fitproblem= FitArrange()
-            fitproblem.add_data(data)
+            fitproblem.add_data(fitdata)
             self.fitArrangeDict[Uid]=fitproblem    
    
     def get_model(self,Uid):

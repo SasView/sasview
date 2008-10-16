@@ -83,7 +83,7 @@ class ScipyFit(FitEngine):
         #data=self._concatenateData( listdata)
         data=listdata
         #Assign a fit range is not boundaries were given
-        if data.__class__.__name__=='Data1D':
+        if not hasattr(data, 'image'):
             if qmin==None:
                 qmin= min(data.x)
             if qmax==None:
