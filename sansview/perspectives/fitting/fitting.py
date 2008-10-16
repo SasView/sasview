@@ -13,7 +13,7 @@ from fitproblem import FitProblem
 from fitpanel import FitPanel
 
 import models
-import fitpage
+import fitpage1D
 import park
 
 class Plugin:
@@ -63,7 +63,7 @@ class Plugin:
         owner.Bind(models.EVT_MODEL,self._on_model_menu)
         self.fit_panel.set_owner(owner)
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
-        owner.Bind(fitpage.EVT_MODEL_BOX,self._on_model_panel)
+        owner.Bind(fitpage1D.EVT_MODEL_BOX,self._on_model_panel)
         #create  menubar items
         return [(id, self.menu1, "Fitting"),(id2, menu2, "Model")]
     
@@ -145,27 +145,20 @@ class Plugin:
         for item in self.panel.graph.plottables:
             if item.name == self.panel.graph.selected_plottable or item.__class__.__name__ is "MetaData2D":
                 #find a name for the page created for notebook
+                
                 try:
-                    name = item.group_id # item in Data1D
-                except:
-                    name = 'Fit'
-                try:
-                    page = self.fit_panel.add_fit_page(name)
+                    page = self.fit_panel.add_fit_page(item)
                     # add data associated to the page created
-                    if item.__class__.__name__=='MetaData1D' or item.__class__.__name__=='Data1D' :
-                        new_item=FitData1D(item)
-                    else:
-                        new_item=FitData2D(item)
+                    
                     if page !=None:    
-                        page.set_data_name(new_item)
+                        page.set_data_name(item)
                         #create a fitproblem storing all link to data,model,page creation
                         self.page_finder[page]= FitProblem()
                         #data_for_park= Data(sans_data=item)
                         #datap = PlottableData(data=data_for_park,data1d=item)
                         #self.page_finder[page].add_data(datap)
-                        self.page_finder[page].add_data(new_item)
+                        self.page_finder[page].add_data(item)
                 except:
-                    raise
                     wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
                     %sys.exc_value))
     def schedule_for_fit(self,value=0,fitproblem =None):  
@@ -200,7 +193,7 @@ class Plugin:
             if page != sim_page:
                 list=value.get_model()
                 model=list[0]
-                print "fitting",model.name,modelname
+                #print "fitting",model.name,modelname
                 if model.name== modelname:
                     value.set_model_param(names,values)
                     break
@@ -436,6 +429,7 @@ class Plugin:
         """
             react to model selection on any combo box or model menu.plot the model  
         """
+        
         model = evt.model
         name = evt.name
         sim_page=self.fit_panel.get_page(0)
@@ -443,11 +437,11 @@ class Plugin:
         if current_pg != sim_page:
             current_pg.set_model_name(name)
             current_pg.set_panel(model)
+            
             try:
-                fitdata=self.page_finder[current_pg].get_data()
-                M_name="M"+str(self.index_model)+"= "+name+"("+fitdata.data.group_id+")"
+                metadata=self.page_finder[current_pg].get_data()
+                M_name="M"+str(self.index_model)+"= "+name+"("+metadata.group_id+")"
             except:
-                raise 
                 M_name="M"+str(self.index_model)+"= "+name
             model.name="M"+str(self.index_model)
             self.index_model += 1  
@@ -478,11 +472,10 @@ class Plugin:
         if self.fit_panel.get_page_count() >1:
             for page in self.page_finder.iterkeys():
                 if  page==currpage :  
+                    data=self.page_finder[page].get_data()
+                    list=self.page_finder[page].get_model()
+                    model=list[0]
                     break 
-            fitdata=self.page_finder[page].get_data()
-            list=self.page_finder[page].get_model()
-            model=list[0]
-            data=fitdata.data
             
             if data!=None and data.__class__.__name__ != 'MetaData2D':
                 theory = Theory1D(x=[], y=[])

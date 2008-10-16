@@ -24,7 +24,7 @@ def format_number(value, high=False):
         return "%-5.3g" % value
 
     
-class FitPage(wx.Panel):
+class FitPage2D(wx.Panel):
     """
         FitPanel class contains fields allowing to display results when
         fitting  a model and one data

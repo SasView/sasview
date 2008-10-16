@@ -65,21 +65,29 @@ class FitPanel(wx.Panel):
         self.event_owner=owner
       
         
-    def add_fit_page( self,page_title ):
+    def add_fit_page( self,data ):
         """ 
             Add a fitting page on the notebook contained by fitpanel
             @param panel: contains in the page to add
             @param name: title of the page tab
             @return panel : page just added for futher used. is used by fitting module
         """     
-        if self.fit_page_name != page_title:
-            from fitpage import FitPage
-            panel = FitPage(self.nb, -1)
+        try:
+            name = data.group_id # item in Data1D
+        except:
+            name = 'Fit'
+        if self.fit_page_name != name:
+            if data.__class__.__name__=='MetaData2D':
+                 from fitpage2D import FitPage2D
+                 panel = FitPage2D(self.nb, -1)
+            else:
+                from fitpage1D import FitPage1D
+                panel = FitPage1D(self.nb, -1)
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
-            self.nb.AddPage(page=panel,text=page_title,select=True)
+            self.nb.AddPage(page=panel,text=name,select=True)
             panel.populate_box( self.model_list_box)
-            self.fit_page_name = page_title
+            self.fit_page_name = name
             return panel
         
         
