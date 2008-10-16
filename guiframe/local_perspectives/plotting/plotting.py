@@ -360,16 +360,13 @@ class View1DPanel2D( View1DPanel1D):
             @param event: data event
         """
         #TODO: Check for existence of plot attribute
-
         # Check whether this is a replot. If we ask for a replot
         # and the plottable no longer exists, ignore the event.
         if hasattr(event, "update") and event.update==True \
             and event.plot.name not in self.plots.keys():
             return
-        
         if hasattr(event, "reset"):
             self._reset()
-        
         is_new = True
         if event.plot.name in self.plots.keys():
             # Check whether the class of plottable changed
@@ -377,27 +374,18 @@ class View1DPanel2D( View1DPanel1D):
                 self.graph.delete(self.plots[event.plot.name])
             else:
                 is_new = False
+        self.plots[event.plot.name] = event.plot
+        #if is_new:
+        self.graph.add(self.plots[event.plot.name])
         
-        if is_new:
-            self.plots[event.plot.name] = event.plot
-            self.graph.add(self.plots[event.plot.name])
-        else:
-            self.plots[event.plot.name].x = event.plot.x    
-            self.plots[event.plot.name].y = event.plot.y    
-            self.plots[event.plot.name].dy = event.plot.dy  
-            if hasattr(event.plot, 'dx') and hasattr(self.plots[event.plot.name], 'dx'):
-                self.plots[event.plot.name].dx = event.plot.dx    
- 
-        
+
         # Check axis labels
         #TODO: Should re-factor this
         #if event.plot._xunit != self.graph.prop["xunit"]:
+       
         self.graph.xaxis(event.plot._xaxis, event.plot._xunit)
-            
         #if event.plot._yunit != self.graph.prop["yunit"]:
         self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
-      
-       
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
 
@@ -413,8 +401,7 @@ class View1DPanel2D( View1DPanel1D):
         slicerpop.set_graph(self.graph)
                 
         # Option to save the data displayed
-        
-       
+    
         # Various plot options
         id = wx.NewId()
         slicerpop.Append(id,'&Save image', 'Save image as PNG')
@@ -434,18 +421,26 @@ class View1DPanel2D( View1DPanel1D):
                         print RuntimeError, "View1DPanel2D.onContextMenu: bad menu item"
         
         slicerpop.AppendSeparator()
-       
-                
+      
         id = wx.NewId()
         slicerpop.Append(id, '&Toggle Linear/Log scale')
-        wx.EVT_MENU(self, id,  self._onToggleScale)    
+        wx.EVT_MENU(self, id, self._onToggleScale) 
 
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
     
-    
-  
+    def _onToggleScale(self, event):
+        """
+            toggle axis and replot image
+        """
+        if self.scale == 'log':
+            self.scale = 'linear'
+        else:
+            self.scale = 'log'
+        self.image(self.data,self.xmin_2D,self.xmax_2D,self.ymin_2D,
+                   self.ymax_2D,self.zmin_2D ,self.zmax_2D )
+ 
       
 class Plugin:
     """
