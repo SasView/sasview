@@ -202,16 +202,21 @@ class FitPage2D(wx.Panel):
             try:
                 qmin = float(self.xmin.GetValue())
                 qmax = float(self.xmax.GetValue())
-                #x,y,dy = [numpy.asarray(v) for v in (self.data.x,self.data.y,self.data.dy)]
-                #if qmin==None and qmax==None: 
-                #    fx =numpy.asarray([self.model.run(v) for v in x])
-                #    res=(y - fx)/dy
-                #else:
-                #    idx = (x>= qmin) & (x <=qmax)
-                #    fx = numpy.asarray([self.model.run(item)for item in x[idx ]])
-                #    res= (y[idx] - fx)/dy[idx]  
-                self.data.setFitRange(qmin,qmax)
-                res=self.data.residuals(self.model.runXY)
+                res=[]
+                if qmin==None and qmax==None: 
+                    for i in range(len(self.data.x_bins)):
+                        res.append( (self.data.image[i][i]- fn([self.data.x_bins[i],self.data.y_bins[i]]))\
+                                    /self.data.err_image[i][i] )
+                    
+                else:
+                    #idx = (x>=self.qmin) & (x <= self.qmax)
+                    #fx = numpy.asarray([fn(item)for item in x[idx ]])
+                    #return (y[idx] - fx)/dy[idx]
+                    for i in range(len(self.data.x_bins)):
+                        res.append( (self.data.image[i][i]- fn([self.data.x_bins[i],self.data.y_bins[i]]))\
+                                    /self.data.err_image[i][i] )
+                
+                
                 sum=0
                 for item in res:
                     if numpy.isfinite(item):
@@ -331,27 +336,22 @@ class FitPage2D(wx.Panel):
             for xmin and xmax range sizer
         """
         
-        if self.prev_group_id !=dataset.data.group_id:
+        if self.prev_group_id !=dataset.group_id:
             self._DataNameEnter()
         self.data = dataset
-        self.prev_group_id=dataset.data.group_id
+        self.prev_group_id=dataset.group_id
         #Displaying Data information
-        self.DataSource.SetValue(str(dataset.data.name))
-        self._xaxis,self._xunit=dataset.data.get_xaxis()
+        self.DataSource.SetValue(str(dataset.name))
+        self._xaxis,self._xunit=dataset.get_xaxis()
         self.text4_3.SetLabel(self._xaxis+"["+self._xunit+"]")
         self.text4_1.Show()
         self.text4_2.Show()
         self.text4_3.Show()
-        if not hasattr(dataset.data,'image'):
-            self.xmin.SetValue(format_number(min(dataset.data.x)))
-            self.xmin.Show()
-            self.xmax.SetValue(format_number(max(dataset.data.x)))
-            self.xmax.Show()
-        else:
-            self.xmin.SetValue(format_number(numpy.min(dataset.data.image)))
-            self.xmin.Show()
-            self.xmax.SetValue(format_number(numpy.max(dataset.data.image)))
-            self.xmax.Show()
+        
+        self.xmin.SetValue(format_number(numpy.min(dataset.image)))
+        self.xmin.Show()
+        self.xmax.SetValue(format_number(numpy.max(dataset.image)))
+        self.xmax.Show()
         if ((len(self.param_toFit ) >0) and self.DataSource.GetValue()and \
             self.modelbox.GetValue() and (self.model_hasChanged ==False)):
             self.xmin.Enable()

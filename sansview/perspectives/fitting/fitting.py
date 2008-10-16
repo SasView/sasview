@@ -145,18 +145,14 @@ class Plugin:
         for item in self.panel.graph.plottables:
             if item.name == self.panel.graph.selected_plottable or item.__class__.__name__ is "MetaData2D":
                 #find a name for the page created for notebook
-                
                 try:
                     page = self.fit_panel.add_fit_page(item)
                     # add data associated to the page created
                     
                     if page !=None:    
-                        page.set_data_name(item)
+                        
                         #create a fitproblem storing all link to data,model,page creation
                         self.page_finder[page]= FitProblem()
-                        #data_for_park= Data(sans_data=item)
-                        #datap = PlottableData(data=data_for_park,data1d=item)
-                        #self.page_finder[page].add_data(datap)
                         self.page_finder[page].add_data(item)
                 except:
                     wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\

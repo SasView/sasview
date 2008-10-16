@@ -85,6 +85,7 @@ class FitPanel(wx.Panel):
                 panel = FitPage1D(self.nb, -1)
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
+            panel.set_data_name(data)
             self.nb.AddPage(page=panel,text=name,select=True)
             panel.populate_box( self.model_list_box)
             self.fit_page_name = name
