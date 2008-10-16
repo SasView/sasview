@@ -602,7 +602,11 @@ class Reader:
         
         doc = xml.dom.minidom.Document()
         main_node = doc.createElement("SASroot")
-        main_node.setAttribute("version", "1.0")
+        main_node.setAttribute("version", self.version)
+        main_node.setAttribute("xmlns", "cansas1d/%s" % self.version)
+        main_node.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+        main_node.setAttribute("xsi:schemaLocation", "cansas1d/%s http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd" % self.version)
+        
         doc.appendChild(main_node)
         
         entry_node = doc.createElement("SASentry")
