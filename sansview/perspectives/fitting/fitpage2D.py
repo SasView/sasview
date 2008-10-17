@@ -87,33 +87,48 @@ class FitPage2D(wx.Panel):
         self.text4_1 = wx.StaticText(self, -1, 'Min')
         self.sizer4.Add(self.text4_1,(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        self.text4_1.Hide()
+        #self.text4_1.Hide()
         ix += 2
         self.text4_2 = wx.StaticText(self, -1, 'Max')
         self.sizer4.Add(self.text4_2,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        self.text4_2.Hide()
+        #self.text4_2.Hide()
         ix = 0
         iy += 1
         #set maximum range for x in linear scale
         self.text4_3 = wx.StaticText(self, -1, 'Maximum Data\n Range (Linear)', style=wx.ALIGN_LEFT)
         self.sizer4.Add(self.text4_3,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        self.text4_3.Hide()
+        #self.text4_3.Hide()
         ix += 1
         self.xmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.xmin.SetToolTipString("Minimun value of x in linear scale.")
         self.sizer4.Add(self.xmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.xmin.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         self.xmin.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
-        self.xmin.Hide()
+        
         ix += 2
         self.xmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.xmax.SetToolTipString("Maximum value of x in linear scale.")
         self.sizer4.Add(self.xmax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         self.xmax.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
-        self.xmax.Hide()
+        
+        iy +=1
+        ix = 1
+        self.ymin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.ymin.SetToolTipString("Minimun value of y in linear scale.")
+        self.sizer4.Add(self.ymin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        self.ymin.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
+        self.ymin.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
+       
+        ix += 2
+        self.ymax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.ymax.SetToolTipString("Maximum value of y in linear scale.")
+        self.sizer4.Add(self.ymax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        self.ymax.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
+        self.ymax.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
+        
         #Set chisqr  result into TextCtrl
         ix = 0
         iy = 1
@@ -207,16 +222,10 @@ class FitPage2D(wx.Panel):
                     for i in range(len(self.data.x_bins)):
                         res.append( (self.data.image[i][i]- fn([self.data.x_bins[i],self.data.y_bins[i]]))\
                                     /self.data.err_image[i][i] )
-                    
                 else:
-                    #idx = (x>=self.qmin) & (x <= self.qmax)
-                    #fx = numpy.asarray([fn(item)for item in x[idx ]])
-                    #return (y[idx] - fx)/dy[idx]
                     for i in range(len(self.data.x_bins)):
                         res.append( (self.data.image[i][i]- fn([self.data.x_bins[i],self.data.y_bins[i]]))\
                                     /self.data.err_image[i][i] )
-                
-                
                 sum=0
                 for item in res:
                     if numpy.isfinite(item):
@@ -229,7 +238,6 @@ class FitPage2D(wx.Panel):
             
     def onFit(self,event):
         """ signal for fitting"""
-         
         flag=self.checkFitRange()
         self.set_manager(self.manager)
      
@@ -239,7 +247,7 @@ class FitPage2D(wx.Panel):
             self.manager.schedule_for_fit( value=1,fitproblem =None) 
             self.manager._on_single_fit(qmin=qmin,qmax=qmax)
         else:
-              wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+            wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Select at least on parameter to fit "))
     def populate_box(self, dict):
         """
@@ -336,29 +344,32 @@ class FitPage2D(wx.Panel):
             for xmin and xmax range sizer
         """
         
-        if self.prev_group_id !=dataset.group_id:
-            self._DataNameEnter()
+        #if self.prev_group_id !=dataset.group_id:
+        #    self._DataNameEnter()
         self.data = dataset
         self.prev_group_id=dataset.group_id
         #Displaying Data information
         self.DataSource.SetValue(str(dataset.name))
-        self._xaxis,self._xunit=dataset.get_xaxis()
-        self.text4_3.SetLabel(self._xaxis+"["+self._xunit+"]")
+        self.text4_3.SetLabel(self.data._xaxis+"["+self.data._xunit+"]")
         self.text4_1.Show()
         self.text4_2.Show()
         self.text4_3.Show()
         
-        self.xmin.SetValue(format_number(numpy.min(dataset.image)))
-        self.xmin.Show()
-        self.xmax.SetValue(format_number(numpy.max(dataset.image)))
-        self.xmax.Show()
+        self.xmin.SetValue(format_number(dataset.xmin))
+        self.xmax.SetValue(format_number(dataset.xmax))
+        self.ymin.SetValue(format_number(dataset.ymin))
+        self.ymax.SetValue(format_number(dataset.ymax))
         if ((len(self.param_toFit ) >0) and self.DataSource.GetValue()and \
             self.modelbox.GetValue() and (self.model_hasChanged ==False)):
             self.xmin.Enable()
             self.xmax.Enable()
+            self.ymin.Enable()
+            self.ymax.Enable()
         else:
             self.xmin.Disable()
             self.xmax.Disable()
+            self.ymin.Disable()
+            self.ymax.Disable()
             
         self.vbox.Layout()
         self.GrandParent.GetSizer().Layout()
@@ -475,12 +486,18 @@ class FitPage2D(wx.Panel):
             if not (len(self.param_toFit ) >0):
                 self.xmin.Disable()
                 self.xmax.Disable()
+                self.ymin.Disable()
+                self.ymax.Disable()
             else:
                 self.xmin.Enable()
                 self.xmax.Enable()
+                self.ymin.Enable()
+                self.ymax.Enable()
         else:
             self.xmin.Disable()
             self.xmax.Disable()
+            self.ymin.Disable()
+            self.ymax.Disable()
         self.compute_chisqr()
         self.vbox.Layout()
         self.GrandParent.GetSizer().Layout()
@@ -526,9 +543,13 @@ class FitPage2D(wx.Panel):
                     if not (len(self.param_toFit ) >0):
                         self.xmin.Disable()
                         self.xmax.Disable()
+                        self.ymin.Disable()
+                        self.ymax.Disable()
                     else:
                         self.xmin.Enable()
                         self.xmax.Enable()
+                        self.ymin.Enable()
+                        self.ymax.Enable()
             else:
                 for item in self.parameters:
                     item[0].SetValue(False)
@@ -536,6 +557,8 @@ class FitPage2D(wx.Panel):
               
                 self.xmin.Disable()
                 self.xmax.Disable()
+                self.ymin.Disable()
+                self.ymax.Disable()
                 
                 
     def select_param(self,event):
@@ -559,12 +582,18 @@ class FitPage2D(wx.Panel):
             if not (len(self.param_toFit ) >0):
                 self.xmin.Disable()
                 self.xmax.Disable()
+                self.ymin.Disable()
+                self.ymax.Disable()
             else:
                 self.xmin.Enable()
                 self.xmax.Enable()
+                self.ymin.Enable()
+                self.ymax.Enable()
         else:
             self.xmin.Disable()
             self.xmax.Disable()
+            self.ymin.Disable()
+            self.ymax.Disable()
    
        
   

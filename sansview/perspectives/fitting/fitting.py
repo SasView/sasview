@@ -13,7 +13,7 @@ from fitproblem import FitProblem
 from fitpanel import FitPanel
 
 import models
-import fitpage1D
+import fitpage1D,fitpage2D
 import park
 
 class Plugin:
@@ -64,6 +64,7 @@ class Plugin:
         self.fit_panel.set_owner(owner)
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
         owner.Bind(fitpage1D.EVT_MODEL_BOX,self._on_model_panel)
+        owner.Bind(fitpage2D.EVT_MODEL_BOX,self._on_model_panel)
         #create  menubar items
         return [(id, self.menu1, "Fitting"),(id2, menu2, "Model")]
     
@@ -425,7 +426,7 @@ class Plugin:
         """
             react to model selection on any combo box or model menu.plot the model  
         """
-        
+       
         model = evt.model
         name = evt.name
         sim_page=self.fit_panel.get_page(0)
