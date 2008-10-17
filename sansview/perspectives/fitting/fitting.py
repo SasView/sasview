@@ -211,7 +211,7 @@ class Plugin:
             return model_name,param_name
         
         
-    def _single_fit_completed(self,result,pars,cpage,qmin,qmax):
+    def _single_fit_completed(self,result,pars,cpage,qmin,qmax,ymin=None, ymax=None):
         """
             Display fit result on one page of the notebook.
             @param result: result of fit 
@@ -242,13 +242,13 @@ class Plugin:
 #            print "fitting result : stderr",result.stderr
             
             cpage.onsetValues(result.fitness, result.pvec,result.stderr)
-            self.plot_helper(currpage=cpage,qmin=qmin,qmax=qmax)
+            self.plot_helper(currpage=cpage,qmin=qmin,qmax=qmax,ymin=ymin, ymax=ymax)
         except:
             raise
             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
        
-    def _simul_fit_completed(self,result,qmin,qmax):
+    def _simul_fit_completed(self,result,qmin,qmax,ymin=None, ymax=None):
         """
             Parameter estimation completed, 
             display the results to the user
@@ -275,12 +275,12 @@ class Plugin:
                     # Display result on each page 
                     page.onsetValues(result.fitness, small_out,small_cov)
                     #Replot model
-                    self.plot_helper(currpage= page,qmin= qmin,qmax= qmax) 
+                    self.plot_helper(currpage= page,qmin= qmin,qmax= qmax,ymin=ymin, ymax=ymax) 
         except:
              wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
     
-    def _on_single_fit(self,id=None,qmin=None,qmax=None):
+    def _on_single_fit(self,id=None,qmin=None,qmax=None,ymin=None,ymax=None):
         """ 
             perform fit for the  current page  and return chisqr,out and cov
             @param engineName: type of fit to be performed
@@ -305,7 +305,7 @@ class Plugin:
             
         for page, value in self.page_finder.iteritems():
             if  value.get_scheduled() ==1 :
-                fitdata = value.get_data()
+                metadata = value.get_data()
                 list=value.get_model()
                 model=list[0]
                 #Create list of parameters for fitting used
@@ -319,7 +319,7 @@ class Plugin:
                     pars.sort()
                     #Do the single fit
                     self.fitter.set_model(Model(model), self.id, pars) 
-                    self.fitter.set_data(fitdata,self.id,qmin,qmax)
+                    self.fitter.set_data(metadata,self.id,qmin,qmax)
                     self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
                     page_fitted=page
                     self.id+=1
@@ -334,13 +334,13 @@ class Plugin:
             #self._single_fit_completed(result,pars,current_pg,qmin,qmax)
             print "single_fit: result",result.fitness,result.pvec,result.stderr
             #self._single_fit_completed(result,pars,page,qmin,qmax)
-            self._single_fit_completed(result,pars,page_fitted,qmin,qmax)
+            self._single_fit_completed(result,pars,page_fitted,qmin,qmax,ymin,ymax)
         except:
             raise
             wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
             return
          
-    def _on_simul_fit(self, id=None,qmin=None,qmax=None):
+    def _on_simul_fit(self, id=None,qmin=None,qmax=None, ymin=None, ymax=None):
         """ 
             perform fit for all the pages selected on simpage and return chisqr,out and cov
             @param engineName: type of fit to be performed
@@ -361,7 +361,7 @@ class Plugin:
         for page, value in self.page_finder.iteritems():
             try:
                 if value.get_scheduled()==1:
-                    fitdata = value.get_data()
+                    metadata = value.get_data()
                     list = value.get_model()
                     model= list[0]
                     #Create dictionary of parameters for fitting used
@@ -390,7 +390,7 @@ class Plugin:
                             new_model.parameterset[ param_name].set( param_value )
                             
                     self.fitter.set_model(new_model, self.id, pars) 
-                    self.fitter.set_data(fitdata,self.id,qmin,qmax)
+                    self.fitter.set_data(metadata,self.id,qmin,qmax,ymin,ymax)
                     self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
                     self.id += 1 
             except:
@@ -399,7 +399,7 @@ class Plugin:
         #Do the simultaneous fit
         try:
             result=self.fitter.fit()
-            self._simul_fit_completed(result,qmin,qmax)
+            self._simul_fit_completed(result,qmin,qmax,ymin,ymax)
         except:
             wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fitting error: %s" % sys.exc_value))
             return
@@ -432,7 +432,6 @@ class Plugin:
         sim_page=self.fit_panel.get_page(0)
         current_pg = self.fit_panel.get_current_page() 
         if current_pg != sim_page:
-            current_pg.set_model_name(name)
             current_pg.set_panel(model)
             
             try:
@@ -460,7 +459,7 @@ class Plugin:
                 break 
         self.plot_helper(currpage=page,qmin= qmin,qmax= qmax)
         
-    def plot_helper(self,currpage,qmin=None,qmax=None):
+    def plot_helper(self,currpage,qmin=None,qmax=None,ymin=None,ymax=None):
         """
             Plot a theory given a model and data
             @param model: the model from where the theory is derived
@@ -520,8 +519,19 @@ class Plugin:
                 theory.x_bins= data.x_bins
                 theory.y_bins= data.y_bins
                 tempy=[]
-                for i in range(len(data.x_bins)):
-                    theory.image= model.runXY([data.x_bins[i],data.y_bins[i]])
+                if qmin==None:
+                    qmin=data.xmin
+                if qmax==None:
+                    qmin=data.xmax
+                if ymin==None:
+                    ymin=data.ymin
+                if ymax==None:
+                    qmin=data.ymax
+                for i in range(len(data.y_bins)):
+                    if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
+                        for j in range(len(data.x_bins)):
+                            if data.x_bins[i]>= xmin and data.x_bins[i]<= xmax:
+                                theory.image= model.runXY([data.x_bins[j],data.y_bins[i]])
                     #print "fitting : plot_helper:", theory.image
                 #print data.image
                 #theory.image=model.runXY(data.image)

@@ -38,7 +38,7 @@ class FitPage2D(wx.Panel):
     window_caption = "Fit Page"
     
     
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent,data, *args, **kwargs):
         wx.Panel.__init__(self, parent, *args, **kwargs)
         """ 
             Initialization of the Panel
@@ -53,6 +53,7 @@ class FitPage2D(wx.Panel):
         self.sizer2 = wx.GridBagSizer(5,5)
         self.sizer1 = wx.GridBagSizer(5,5)
         self.DataSource      = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.DataSource.SetValue(str(data.name))
         self.DataSource.SetToolTipString("name of data to fit")
         self.modelbox = wx.ComboBox(self, -1)
         id = wx.NewId()
@@ -82,8 +83,14 @@ class FitPage2D(wx.Panel):
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer3.Add(self.modelbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix = 1
+        
+        ix = 0
         iy = 1
+        #set maximum range for x in linear scale
+        self.text4_3 = wx.StaticText(self, -1, 'Maximum Data\n Range (Linear)', style=wx.ALIGN_LEFT)
+        self.sizer4.Add(self.text4_3,(iy,ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
         self.text4_1 = wx.StaticText(self, -1, 'Min')
         self.sizer4.Add(self.text4_1,(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -93,15 +100,16 @@ class FitPage2D(wx.Panel):
         self.sizer4.Add(self.text4_2,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         #self.text4_2.Hide()
+       
+        #self.text4_3.Hide()
         ix = 0
         iy += 1
-        #set maximum range for x in linear scale
-        self.text4_3 = wx.StaticText(self, -1, 'Maximum Data\n Range (Linear)', style=wx.ALIGN_LEFT)
-        self.sizer4.Add(self.text4_3,(iy,ix),(1,1),\
-                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        #self.text4_3.Hide()
+        self.text4_4 = wx.StaticText(self, -1, 'x range')
+        self.sizer4.Add(self.text4_4,(iy, ix),(1,1),\
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.xmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.xmin.SetValue(format_number(data.xmin))
         self.xmin.SetToolTipString("Minimun value of x in linear scale.")
         self.sizer4.Add(self.xmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.xmin.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
@@ -109,14 +117,20 @@ class FitPage2D(wx.Panel):
         
         ix += 2
         self.xmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.xmax.SetValue(format_number(data.xmax))
         self.xmax.SetToolTipString("Maximum value of x in linear scale.")
         self.sizer4.Add(self.xmax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         self.xmax.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
         
         iy +=1
-        ix = 1
+        ix = 0
+        self.text4_5 = wx.StaticText(self, -1, 'y range')
+        self.sizer4.Add(self.text4_5,(iy, ix),(1,1),\
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
         self.ymin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.ymin.SetValue(format_number(data.ymin))
         self.ymin.SetToolTipString("Minimun value of y in linear scale.")
         self.sizer4.Add(self.ymin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.ymin.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
@@ -124,6 +138,7 @@ class FitPage2D(wx.Panel):
        
         ix += 2
         self.ymax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.ymax.SetValue(format_number(data.ymax))
         self.ymax.SetToolTipString("Maximum value of y in linear scale.")
         self.sizer4.Add(self.ymax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.ymax.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
@@ -151,16 +166,12 @@ class FitPage2D(wx.Panel):
         # model on which the fit would be performed
         self.model=None
         # preview selected model name
-        self.prevmodel_name=None
-        # flag to check if the user has selected a new model in the combox box
-        self.model_hasChanged=False
+       
         
         #dictionary of model name and model class
         self.model_list_box={}
-        #  comparison between 2 group_id for checking data changes
-        self.prev_group_id= None
-        
-        self.data=None
+       
+        self.data = data
         self.vbox.Layout()
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)
@@ -182,26 +193,6 @@ class FitPage2D(wx.Panel):
         """
         self.manager = manager
  
-         
-    def _DataNameEnter(self):
-        """
-            reset the panel when a new data is selected
-        """
-        if len(self.parameters )>0:
-            for item in self.parameters:
-                item[0].SetValue(False)
-                wx.EVT_CHECKBOX(self, item[0].GetId(), self.select_param)
-                item[2].Hide()
-                item[3].Clear()
-                item[3].Hide()
-                self.xmax.Disable()
-                self.xmin.Disable()
-                self.text1_1.Hide()
-                self.tcChi.Clear()
-                self.vbox.Layout() 
-                self.GrandParent.GetSizer().Layout()
-                
-  
         
     def onClose(self,event):
         """ close the page associated with this panel"""
@@ -213,20 +204,23 @@ class FitPage2D(wx.Panel):
             @return residuals
         """
         flag=self.checkFitRange()
+        res=[]
         if flag== True:
             try:
-                qmin = float(self.xmin.GetValue())
-                qmax = float(self.xmax.GetValue())
-                res=[]
-                if qmin==None and qmax==None: 
-                    for i in range(len(self.data.x_bins)):
-                        res.append( (self.data.image[i][i]- fn([self.data.x_bins[i],self.data.y_bins[i]]))\
-                                    /self.data.err_image[i][i] )
-                else:
-                    for i in range(len(self.data.x_bins)):
-                        res.append( (self.data.image[i][i]- fn([self.data.x_bins[i],self.data.y_bins[i]]))\
-                                    /self.data.err_image[i][i] )
+                xmin = float(self.xmin.GetValue())
+                xmax = float(self.xmax.GetValue())
+                ymin = float(self.ymin.GetValue())
+                ymax = float(self.ymax.GetValue())
+               
+                for i in range(len(self.data.y_bins)):
+                    if self.data.y_bins[i]>= ymin and self.data.y_bins[i]<= ymax:
+                        for j in range(len(self.data.x_bins)):
+                            if self.data.x_bins[j]>= xmin and self.data.x_bins[j]<= xmax:
+                                res.append( (self.data.image[j][i]- self.model.runXY(\
+                                 [self.data.x_bins[j],self.data.y_bins[i]]))\
+                                    /self.data.err_image[j][i] )
                 sum=0
+               
                 for item in res:
                     if numpy.isfinite(item):
                         sum +=item
@@ -334,61 +328,7 @@ class FitPage2D(wx.Panel):
         self.xmax.Refresh()
         return flag
     
-   
-                    
-    def set_data_name(self,dataset):
-        """ 
-            set data's name.if data has changed reset the panel and xmin and xmax
-            @param name: data 's name
-            @attention:  still  haven't find a better way to display Q name and unit
-            for xmin and xmax range sizer
-        """
-        
-        #if self.prev_group_id !=dataset.group_id:
-        #    self._DataNameEnter()
-        self.data = dataset
-        self.prev_group_id=dataset.group_id
-        #Displaying Data information
-        self.DataSource.SetValue(str(dataset.name))
-        self.text4_3.SetLabel(self.data._xaxis+"["+self.data._xunit+"]")
-        self.text4_1.Show()
-        self.text4_2.Show()
-        self.text4_3.Show()
-        
-        self.xmin.SetValue(format_number(dataset.xmin))
-        self.xmax.SetValue(format_number(dataset.xmax))
-        self.ymin.SetValue(format_number(dataset.ymin))
-        self.ymax.SetValue(format_number(dataset.ymax))
-        if ((len(self.param_toFit ) >0) and self.DataSource.GetValue()and \
-            self.modelbox.GetValue() and (self.model_hasChanged ==False)):
-            self.xmin.Enable()
-            self.xmax.Enable()
-            self.ymin.Enable()
-            self.ymax.Enable()
-        else:
-            self.xmin.Disable()
-            self.xmax.Disable()
-            self.ymin.Disable()
-            self.ymax.Disable()
-            
-        self.vbox.Layout()
-        self.GrandParent.GetSizer().Layout()
-        
-        
-    def set_model_name(self,name):
-        """ 
-            set model name. set also self.model_hasChanged to true is the model 
-            type has changed or false if it didn't
-            @param name: model 's name
-        """
-        self.model_hasChanged=False
-        if (name != self.prevmodel_name):
-            self.model_hasChanged=True
-        self.tcChi.Clear()
-        #self.modelbox.SetValue(str(name))
-        self.prevmodel_name=self.modelbox.GetValue()
-       
-            
+  
     def get_model_box(self): 
         """ return reference to combox box self.model"""
         return self.modelbox
@@ -539,17 +479,17 @@ class FitPage2D(wx.Panel):
                     item[0].SetValue(True)
                     list= [item[0],item[1],item[2],item[3]]
                     self.param_toFit.append(list )
-                if (self.modelbox.GetValue() and self.DataSource.GetValue()):
-                    if not (len(self.param_toFit ) >0):
-                        self.xmin.Disable()
-                        self.xmax.Disable()
-                        self.ymin.Disable()
-                        self.ymax.Disable()
-                    else:
-                        self.xmin.Enable()
-                        self.xmax.Enable()
-                        self.ymin.Enable()
-                        self.ymax.Enable()
+               
+                if not (len(self.param_toFit ) >0):
+                    self.xmin.Disable()
+                    self.xmax.Disable()
+                    self.ymin.Disable()
+                    self.ymax.Disable()
+                else:
+                    self.xmin.Enable()
+                    self.xmax.Enable()
+                    self.ymin.Enable()
+                    self.ymax.Enable()
             else:
                 for item in self.parameters:
                     item[0].SetValue(False)
@@ -578,22 +518,18 @@ class FitPage2D(wx.Panel):
             self.cb1.SetValue(True)
         else:
             self.cb1.SetValue(False)
-        if (self.modelbox.GetValue() and self.DataSource.GetValue()):
-            if not (len(self.param_toFit ) >0):
-                self.xmin.Disable()
-                self.xmax.Disable()
-                self.ymin.Disable()
-                self.ymax.Disable()
-            else:
-                self.xmin.Enable()
-                self.xmax.Enable()
-                self.ymin.Enable()
-                self.ymax.Enable()
-        else:
+       
+        if not (len(self.param_toFit ) >0):
             self.xmin.Disable()
             self.xmax.Disable()
             self.ymin.Disable()
             self.ymax.Disable()
+        else:
+            self.xmin.Enable()
+            self.xmax.Enable()
+            self.ymin.Enable()
+            self.ymax.Enable()
+      
    
        
   
