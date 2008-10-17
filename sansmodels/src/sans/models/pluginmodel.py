@@ -7,6 +7,7 @@ class Model1DPlugin(BaseComponent):
 
     def __init__(self):
         """ Initialization """
+        BaseComponent.__init__(self)
         self.details = {}
         self.params  = {}
         
