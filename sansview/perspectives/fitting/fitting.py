@@ -522,30 +522,30 @@ class Plugin:
                 if qmin==None:
                     qmin=data.xmin
                 if qmax==None:
-                    qmin=data.xmax
+                    qmax=data.xmax
                 if ymin==None:
                     ymin=data.ymin
                 if ymax==None:
-                    qmin=data.ymax
+                    ymax=data.ymax
               
-                for i in range(len(data.y_bins)):
-                    if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
-                        for j in range(len(data.x_bins)):
-                            if data.x_bins[i]>= xmin and data.x_bins[i]<= xmax:
-                                theory.image= model.runXY([data.x_bins[j],data.y_bins[i]])
+                #for i in range(len(data.y_bins)):
+                #    if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
+                #        for j in range(len(data.x_bins)):
+                #            if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
+                #                theory.image= model.runXY([data.x_bins[j],data.y_bins[i]])
                
                     
                     #print "fitting : plot_helper:", theory.image
                 #print data.image
-                #theory.image=model.runXY(data.image)
-               
-                #print "fitting : plot_helper:",theory.image
+                theory.image=model.runXY(data.image)
+                
+                print "fitting : plot_helper:",theory.image
                 theory.zmin= data.zmin
                 theory.zmax= data.zmax
-                theory.xmin= data.xmin
-                theory.xmax= data.xmax
-                theory.ymin= data.ymin
-                theory.ymax= data.ymax
+                theory.xmin= qmin
+                theory.xmax= qmax
+                theory.ymin= ymin
+                theory.ymax= ymax
                 
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model"))
         
