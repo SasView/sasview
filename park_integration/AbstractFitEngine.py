@@ -182,10 +182,10 @@ class FitData1D(object):
         self.qmax=None
        
        
-    def setFitRange(self,mini=None,maxi=None):
+    def setFitRange(self,qmin=None,qmax=None,ymin=None,ymax=None,):
         """ to set the fit range"""
-        self.qmin=mini
-        self.qmax=maxi
+        self.qmin=qmin
+        self.qmax=qmax
         
         
     def getFitRange(self):
@@ -229,21 +229,24 @@ class FitData2D(object):
         self.x_bins= sans_data2d.x_bins
         self.y_bins= sans_data2d.y_bins
        
-        self.qmin= None
-        self.qmax= None
+        self.xmin= self.data.xmin
+        self.xmax= self.data.xmax
+        self.ymin= self.data.ymin
+        self.ymax= self.data.ymax
        
        
-    def setFitRange(self,mini=None,maxi=None):
+    def setFitRange(self,qmin=None,qmax=None,ymin=None,ymax=None):
         """ to set the fit range"""
-        self.qmin= mini
-        self.qmax= maxi
-        
+        self.xmin= qmin
+        self.xmax= qmax
+        self.ymin= ymin
+        self.ymax= ymax
         
     def getFitRange(self):
         """
             @return the range of data.x to fit
         """
-        return self.qmin, self.qmax
+        return self.xmin, self.xmax,self.ymin, self.ymax
      
      
     def residuals(self, fn):
@@ -251,19 +254,25 @@ class FitData2D(object):
             @return residuals
         """
         res=[]
-        if self.qmin==None and self.qmax==None: 
-            for i in range(len(self.x_bins)):
-                res.append( (self.image[i][i]- fn([self.x_bins[i],self.y_bins[i]]))\
-                            /self.err_image[i][i] )
-            return numpy.array(res)
-        else:
-            #idx = (x>=self.qmin) & (x <= self.qmax)
-            #fx = numpy.asarray([fn(item)for item in x[idx ]])
-            #return (y[idx] - fx)/dy[idx]
-            for i in range(len(self.x_bins)):
-                res.append( (self.image[i][i]- fn([self.x_bins[i],self.y_bins[i]]))\
-                            /self.err_image[i][i] )
-            return numpy.array(res)
+        if self.xmin==None:
+            self.xmin= self.data.xmin
+        if self.xmax==None:
+            self.xmax= self.data.xmax
+        if self.ymin==None:
+            self.ymin= self.data.ymin
+        if self.ymax==None:
+            self.ymax= self.data.ymax
+            
+        for i in range(len(self.y_bins)):
+            #if self.y_bins[i]>= self.ymin and self.y_bins[i]<= self.ymax:
+            for j in range(len(self.x_bins)):
+                #if self.x_bins[j]>= self.xmin and self.x_bins[j]<= self.xmax:
+                res.append( (self.image[j][i]- fn([self.x_bins[j],self.y_bins[i]]))\
+                            /self.err_image[j][i] )
+        
+        return numpy.array(res)
+       
+          
     def residuals_deriv(self, model, pars=[]):
         """ 
             @return residuals derivatives .
@@ -387,7 +396,7 @@ class FitEngine:
         else:
             raise ValueError, "park_integration:missing parameters"
     
-    def set_data(self,data,Uid,qmin=None,qmax=None):
+    def set_data(self,data,Uid,qmin=None,qmax=None,ymin=None,ymax=None):
         """ Receives plottable, creates a list of data to fit,set data
             in a FitArrange object and adds that object in a dictionary 
             with key Uid.
@@ -398,8 +407,8 @@ class FitEngine:
             fitdata=FitData2D(data)
         else:
             fitdata=FitData1D(data)
-        if qmin !=None and qmax !=None:
-            fitdata.setFitRange(mini=qmin,maxi=qmax)
+       
+        fitdata.setFitRange(qmin=qmin,qmax=qmax, ymin=ymin,ymax=ymax)
         #A fitArrange is already created but contains model only at Uid
         if self.fitArrangeDict.has_key(Uid):
             self.fitArrangeDict[Uid].add_data(fitdata)
