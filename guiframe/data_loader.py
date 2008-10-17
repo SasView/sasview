@@ -99,6 +99,8 @@ def plot_data(parent, path, name="Loaded Data"):
         return
     if hasattr(output,'data'):
         new_plot = MetaData2D(output)
+        new_plot.x_bins=output.x_bins
+        new_plot.y_bins=output.y_bins
     else:
         if output.dy==None:
             new_plot = MetaTheory1D(output)
