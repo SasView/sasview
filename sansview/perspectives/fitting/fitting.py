@@ -527,16 +527,19 @@ class Plugin:
                     ymin=data.ymin
                 if ymax==None:
                     qmin=data.ymax
+              
                 for i in range(len(data.y_bins)):
                     if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
                         for j in range(len(data.x_bins)):
                             if data.x_bins[i]>= xmin and data.x_bins[i]<= xmax:
                                 theory.image= model.runXY([data.x_bins[j],data.y_bins[i]])
+               
+                    
                     #print "fitting : plot_helper:", theory.image
                 #print data.image
                 #theory.image=model.runXY(data.image)
-                theory.image=model.run(data.image)
-                print "fitting : plot_helper:",theory.image
+               
+                #print "fitting : plot_helper:",theory.image
                 theory.zmin= data.zmin
                 theory.zmax= data.zmax
                 theory.xmin= data.xmin
