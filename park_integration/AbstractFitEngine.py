@@ -403,7 +403,7 @@ class FitEngine:
             @param data: data added
             @param Uid: unique key corresponding to a fitArrange object with data
         """
-        if data.__class__.__name__=='MetaData2D':
+        if data.__class__.__name__=='Data2D':
             fitdata=FitData2D(data)
         else:
             fitdata=FitData1D(data)
