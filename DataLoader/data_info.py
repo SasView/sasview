@@ -153,7 +153,7 @@ class Detector:
     pixel_size_unit = 'mm'
     ## Slit length of the instrument for this detector.[float] [mm]
     slit_length = None
-    slit_length_unit = 'mm'
+    slit_length_unit = '1/A'
     
     def __init__(self):
         """
