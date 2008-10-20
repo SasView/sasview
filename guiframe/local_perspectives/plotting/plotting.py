@@ -392,9 +392,10 @@ class View1DPanel2D( View1DPanel1D):
 
     def onContextMenu(self, event):
         """
-            1D plot context menu
+            2D plot context menu
             @param event: wx context event
         """
+        
         #slicerpop = wx.Menu()
         slicerpop = PanelMenu()
         slicerpop.set_plots(self.plots)
