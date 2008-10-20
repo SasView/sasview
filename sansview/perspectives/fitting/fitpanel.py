@@ -77,7 +77,7 @@ class FitPanel(wx.Panel):
         except:
             name = 'Fit'
         if self.fit_page_name != name:
-            if data.__class__.__name__=='MetaData2D':
+            if data.__class__.__name__=='Data2D':
                  from fitpage2D import FitPage2D
                  panel = FitPage2D(self.nb,data, -1)
             else:

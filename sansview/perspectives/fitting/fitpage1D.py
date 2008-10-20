@@ -182,6 +182,10 @@ class FitPage1D(wx.Panel):
         """ @param fn: function that return model value
             @return residuals
         """
+        print self.data.x
+        print self.data.y
+        print self.data.dy
+        
         flag=self.checkFitRange()
         if flag== True:
             try:
