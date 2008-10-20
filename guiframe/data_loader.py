@@ -2,30 +2,11 @@ import os, sys
 import wx
 from danse.common.plottools.plottables import Data1D, Theory1D, Data2D
 from DataLoader.loader import Loader
-class MetaData1D(Data1D):
-    def __init__(self, output):
-        self.datainfo = output
-        Data1D.__init__(self,x=output.x, y=output.y, dy=output.dy)
-        
-class MetaTheory1D(Theory1D):
-    def __init__(self, output):
-        self.datainfo = output
-        Theory1D.__init__(self, x=output.x, y=output.y)
-        
-
-class MetaData2D(Data2D):
-    def __init__(self, output):
-        self.datainfo = output
-        Data2D.__init__(self,image= output.data,err_image=output.err_data,
-                       xmin=output.xmin,xmax=output.xmax,ymin=output.ymin,ymax=output.ymax)
-class MetaTheory2D(Data2D):
-    def __init__(self, output):
-        self.datainfo = output
-        Data2D.__init__(self,image= output.data,err_image=output.err_data,
-                       xmin=output.xmin,xmax=output.xmax,ymin=output.ymin,ymax=output.ymax)
-        
-        
-    
+class Theory2D(Data2D):
+    def __init__(self,image=None,err_image=None,xmin=None,
+                 xmax=None,ymin=None,ymax=None,zmin=None,zmax=None):
+        Data2D.__init__(self,image,err_image,xmin,
+                        xmax,ymin,ymax,zmin,zmax)
 def choose_data_file(parent, location=None):
     path = None
     if location==None:
@@ -98,17 +79,19 @@ def plot_data(parent, path, name="Loaded Data"):
         wx.PostEvent(parent, StatusEvent(status="Problem loading file: %s" % sys.exc_value))
         return
     if hasattr(output,'data'):
-        new_plot = MetaData2D(output)
+        new_plot = Data2D(image=output.data,err_image=output.err_data,
+                          xmin=output.xmin,xmax=output.xmax,
+                          ymin=output.ymin,ymax=output.ymax)
         new_plot.x_bins=output.x_bins
         new_plot.y_bins=output.y_bins
     else:
         if output.dy==None:
-            new_plot = MetaTheory1D(output)
+            new_plot = Theory1D(output.x,output.y)
         else:
-            new_plot = MetaData1D(output)
+            new_plot = Data1D(x=output.x,y=output.y,dy=output.dy)
         
     filename = os.path.basename(path)
-        
+    new_plot.source=output   
     new_plot.name = name
     new_plot.interactive = True
     # If the data file does not tell us what the axes are, just assume...
