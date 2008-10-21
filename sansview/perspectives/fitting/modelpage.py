@@ -212,6 +212,9 @@ class ModelPage(wx.Panel):
         self.model = model
         keys = self.model.getParamList()
         keys.sort()
+        description=None
+        if hasattr(self.model,'description'):
+            description =model.description
         print "went here",self.model.name,model.description
         iy = 1
         ix = 0
@@ -219,7 +222,7 @@ class ModelPage(wx.Panel):
         self.sizer1.Add(self.cb0,(iy, ix),(1,1),\
                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.cb01 = wx.StaticText(self, -1,str(model.description))
+        self.cb01 = wx.StaticText(self, -1,str(description))
         self.sizer1.Add(self.cb01,(iy, ix),(1,1),\
                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix = 0
