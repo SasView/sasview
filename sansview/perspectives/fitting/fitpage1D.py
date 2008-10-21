@@ -134,9 +134,11 @@ class FitPage1D(wx.Panel):
         self.sizer1.Add(self.tcChi,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix +=2
         self.sizer1.Add(self.btFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        iy+= 1
-        ix = 3
+        ix+= 1
         self.sizer1.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix= 1
+        iy+=1
+        self.sizer1.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         #contains link between a model and selected parameters to fit 
@@ -182,9 +184,6 @@ class FitPage1D(wx.Panel):
         """ @param fn: function that return model value
             @return residuals
         """
-        print self.data.x
-        print self.data.y
-        print self.data.dy
         
         flag=self.checkFitRange()
         if flag== True:
@@ -292,7 +291,7 @@ class FitPage1D(wx.Panel):
         valueMin = self.xmin.GetValue()
         valueMax = self.xmax.GetValue()
         # Check for possible values entered
-        print "fitpage: checkfitrange:",valueMin,valueMax
+        #print "fitpage: checkfitrange:",valueMin,valueMax
         try:
             if (float(valueMax)> float(valueMin)):
                 self.xmax.SetBackgroundColour(wx.WHITE)
@@ -340,6 +339,7 @@ class FitPage1D(wx.Panel):
         self.param_toFit=[]
         self.model = model
         keys = self.model.getParamList()
+        print "fitpage1D : dispersion list",self.model.getDispParamList()
         keys.sort()
         iy = 1
         ix = 0
@@ -435,9 +435,10 @@ class FitPage1D(wx.Panel):
         if len(self.parameters) !=0 and self.model !=None:
             for item in self.parameters:
                 try:
-                     name=str(item[0].GetLabelText())
-                     value= float(item[1].GetValue())
-                     self.model.setParam(name,value) 
+                     
+                    name=str(item[0].GetLabelText())
+                    value= float(item[1].GetValue())
+                    self.model.setParam(name,value) 
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Drawing  Error:wrong value entered : %s"% sys.exc_value))

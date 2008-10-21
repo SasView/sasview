@@ -38,7 +38,7 @@ class ModelPage(wx.Panel):
     window_caption = "Fit Page"
     
     
-    def __init__(self, parent,model,description, *args, **kwargs):
+    def __init__(self, parent,model, *args, **kwargs):
         wx.Panel.__init__(self, parent, *args, **kwargs)
         """ 
             Initialization of the Panel
@@ -79,8 +79,11 @@ class ModelPage(wx.Panel):
         self.param_toFit=[]
         # model on which the fit would be performed
         self.model=model
-        self.description=description
-        self.set_panel(model,description)
+        try:
+            print"init modelpage",model.name
+            self.set_panel(model)
+        except:
+            raise
         # preview selected model name
         self.prevmodel_name=model.__class__.__name__
         self.modelbox.SetValue(self.prevmodel_name)
@@ -94,7 +97,7 @@ class ModelPage(wx.Panel):
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)
         self.Centre()
-        
+       
         
     def onClose(self,event):
         """ close the page associated with this panel"""
@@ -122,29 +125,32 @@ class ModelPage(wx.Panel):
         """
         id=0
         self.model_list_box=dict
-        for item in self.model_list_box.itervalues():
-            if hasattr(item, "name"):
-                name = item.name
-            else:
-                name = item.__name__
-            
+        list_name=[]
+        for item in  self.model_list_box.itervalues():
+            name = item.__name__
+            model=item()
+            if hasattr(model, "name"):
+                name = model.name
+            list_name.append(name)
+        list_name.sort()   
+        for name in list_name:
             self.modelbox.Insert(name,int(id))
             id+=1
-            
-            wx.EVT_COMBOBOX(self.modelbox,-1, self._on_select_model) 
+        wx.EVT_COMBOBOX(self.modelbox,-1, self._on_select_model) 
         return 0
    
-    def set_page(self, model,description):
+    def set_page(self, model,description=None):
         #print " modelpage: set_page was called",model
         self.model=model
-        self.description=description
+        name = self.model.__class__.__name__
         if hasattr(self.model, "name"):
             name = self.model.name
-        else:
-            name = self.model.__class__.__name__
+        
+           
         self.modelbox.SetValue(name)
-        self.set_panel(self.model,description)
+        self.set_panel(self.model)
         self.manager.draw_model(self.model)
+        
     def _on_select_model(self,event):
         """
             react when a model is selected from page's combo box
@@ -152,19 +158,16 @@ class ModelPage(wx.Panel):
         """
         #print "modelpage: self.model_list_box ",self.model_list_box
         for item in self.model_list_box.itervalues():
-            model=item()
-            #print "modelpage:model",model
-            if hasattr(model, "name"):
-                name = model.name
-            else:
-                name = model.__class__.__name__
-            try:
-                if name ==event.GetString():
-                    self.model=model
-                    self.set_panel(self.model)
-                    self.manager.draw_model(self.model)
-            except:
-                raise #ValueError,"model.name is not equal to model class name"
+            name = item.__name__
+            items=item()
+            if hasattr(items, "name"):
+                name = items.name
+            print "fitpage: _on_select_model model name",name ,event.GetString()
+            if name ==event.GetString():
+                model=items
+                print "fitpage: _on_select_model model name",name ,event.GetString()
+                self.manager.draw_model(model)
+                self.set_panel(model)
     def set_model_name(self,name):
         """ 
             set model name. set also self.model_hasChanged to true is the model 
@@ -196,12 +199,12 @@ class ModelPage(wx.Panel):
             raise ValueError,"missing parameter to fit"
         
         
-    def set_panel(self,model,description=None):
+    def set_panel(self,model):
         """
             Build the panel from the model content
             @param model: the model selected in combo box for fitting purpose
         """
-    
+        
         self.sizer2.Clear(True)
         self.sizer1.Clear(True)
         self.parameters = []
@@ -209,13 +212,14 @@ class ModelPage(wx.Panel):
         self.model = model
         keys = self.model.getParamList()
         keys.sort()
+        print "went here",self.model.name,model.description
         iy = 1
         ix = 0
         self.cb0 = wx.StaticText(self, -1,'Model Description:')
         self.sizer1.Add(self.cb0,(iy, ix),(1,1),\
                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.cb01 = wx.StaticText(self, -1,str(description))
+        self.cb01 = wx.StaticText(self, -1,str(model.description))
         self.sizer1.Add(self.cb01,(iy, ix),(1,1),\
                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix = 0
@@ -244,7 +248,6 @@ class ModelPage(wx.Panel):
             ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
             ctl1.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
             self.sizer2.Add(ctl1, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-           
             ix +=1
             # Units
             try:
@@ -261,10 +264,9 @@ class ModelPage(wx.Panel):
                 break
             else:
                 self.text2_4.Hide()
-       
         self.vbox.Layout()
         self.GrandParent.GetSizer().Layout()
-        
+        print "out"
         
     def _onparamEnter(self,event):
         """ 
@@ -279,10 +281,8 @@ class ModelPage(wx.Panel):
                      name=str(item[0].GetLabelText())
                      value= float(item[1].GetValue())
                      self.model.setParam(name,value)
-                     self.manager.draw_model(self.model)
                 except:
-                    
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
-   
+            self.manager.draw_model(self.model)
   

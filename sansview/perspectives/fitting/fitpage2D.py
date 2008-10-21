@@ -156,9 +156,11 @@ class FitPage2D(wx.Panel):
         self.sizer1.Add(self.tcChi,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix +=2
         self.sizer1.Add(self.btFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        iy+= 1
-        ix = 3
+        ix+= 1
         self.sizer1.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix= 1
+        iy+=1
+        self.sizer1.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         #contains link between a model and selected parameters to fit 

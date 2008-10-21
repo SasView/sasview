@@ -5,19 +5,7 @@ import os.path
 
 (ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
 
-class ModelInfo(object):
-    """
-         this class contains description for a given model
-    """
-    def __init__(self,model,description=None):
-        self.model=model
-        self.description=description
-        
-    def set_description(self, descrition):
-        self.description =str(description)
-        
-    def get_description(self):
-        return self.description
+
     
     
 def log(message):
@@ -83,53 +71,49 @@ class ModelManager:
         """
         self.model_list = {}
         self.model_list_box = {}
-        
-        model_info="shape-based models"
+       
         
         from sans.models.SphereModel import SphereModel
-        self.model_list[str(wx.NewId())] =  ModelInfo(SphereModel , model_info)
+        self.model_list[str(wx.NewId())] =  SphereModel
         
         from sans.models.CylinderModel import CylinderModel
-        self.model_list[str(wx.NewId())] = ModelInfo(CylinderModel , model_info)
+        self.model_list[str(wx.NewId())] =CylinderModel
       
         from sans.models.CoreShellModel import CoreShellModel
-        self.model_list[str(wx.NewId())] = ModelInfo(CoreShellModel , model_info)
+        self.model_list[str(wx.NewId())] = CoreShellModel 
         
         from sans.models.CoreShellCylinderModel import CoreShellCylinderModel
-        self.model_list[str(wx.NewId())] = ModelInfo(CoreShellCylinderModel , model_info)
+        self.model_list[str(wx.NewId())] =CoreShellCylinderModel
         
         from sans.models.EllipticalCylinderModel import EllipticalCylinderModel
-        self.model_list[str(wx.NewId())] = ModelInfo(EllipticalCylinderModel , model_info)
+        self.model_list[str(wx.NewId())] =EllipticalCylinderModel
         
         from sans.models.EllipsoidModel import EllipsoidModel
-        self.model_list[str(wx.NewId())] = ModelInfo(EllipsoidModel , model_info)
+        self.model_list[str(wx.NewId())] = EllipsoidModel 
         
         from sans.guitools.LineModel import LineModel
-        self.model_list[str(wx.NewId())]  = ModelInfo(LineModel , model_info)
+        self.model_list[str(wx.NewId())]  = LineModel
         
         
         model_info="shape-independent models"
         
         from sans.models.BEPolyelectrolyte import BEPolyelectrolyte
-        self.indep_model.append( ModelInfo( BEPolyelectrolyte , model_info) )
+        self.indep_model.append(BEPolyelectrolyte )
         
         from sans.models.DABModel import DABModel
-        self.indep_model.append( ModelInfo(DABModel , model_info+
-        "\n Evaluates F(x) = scale/( 1 + (x*L)^2 )^(2) +bkd") )
+        self.indep_model.append(DABModel )
         
         from sans.models.DebyeModel import DebyeModel
-        self.indep_model.append( ModelInfo(DebyeModel , model_info+
-        "\n Evaluates F(x) = 2( exp(-x)+x -1 )/x**2") )
+        self.indep_model.append(DebyeModel )
         
         from sans.models.FractalModel import FractalModel
         class FractalAbsModel(FractalModel):
             def _Fractal(self, x):
                 return FractalModel._Fractal(self, math.fabs(x))
-        self.indep_model.append( ModelInfo(FractalAbsModel , model_info) )
+        self.indep_model.append(FractalAbsModel)
         
         from sans.models.LorentzModel import LorentzModel
-        self.indep_model.append( ModelInfo(LorentzModel , model_info+
-                "\n Evaluates F(x)= scale/( 1 + (x*L)^2 ) + bkd ") ) 
+        self.indep_model.append( LorentzModel) 
             
         from sans.models.PowerLawModel import PowerLawModel
         class PowerLawAbsModel(PowerLawModel):
@@ -138,19 +122,10 @@ class ModelManager:
                     return PowerLawModel._PowerLaw(self, math.fabs(x))
                 except:
                     print sys.exc_value  
-        self.indep_model.append( ModelInfo(PowerLawAbsModel , model_info+
-        "\n Evaluates abs(F(x)) \n with F(x) = scale* (x)^(m) + bkd ") )
-                    
-       
+        self.indep_model.append( PowerLawAbsModel )
         from sans.models.TeubnerStreyModel import TeubnerStreyModel
-        self.indep_model.append( ModelInfo(TeubnerStreyModel , model_info) )
-        
-        
-          
-        
-        
-      
-        
+        self.indep_model.append(TeubnerStreyModel )
+    
         #Looking for plugins
         self.plugins = findModels()
        
@@ -168,50 +143,45 @@ class ModelManager:
         """
         self._getModelList()
         self.event_owner = event_owner
-        
         shape_submenu= wx.Menu() 
         indep_submenu = wx.Menu()
         added_models = wx.Menu()
-        
         for id_str,value in self.model_list.iteritems():
-            item = self.model_list[id_str]
-            name = item.model.__name__
+            item = self.model_list[id_str]()
+            name = item.__class__.__name__
             if hasattr(item, "name"):
-                name = item.model.name
-            self.model_list_box[name] =value.model
+                name = item.name
+            self.model_list_box[name] =value
             shape_submenu.Append(int(id_str), name, name)
             wx.EVT_MENU(event_owner, int(id_str), self._on_model)
         modelmenu.AppendMenu(wx.NewId(), "Shapes...", shape_submenu, "List of shape-based models")
-        
         id = wx.NewId()
         if len(self.indep_model_list) == 0:
-            for item in self.indep_model:
+            for items in self.indep_model:
                 #if item not in self.indep_model_list.values():
                     #self.indep_model_list[str(id)] = item
-                self.model_list[str(id)]=item
-                name = item.model.__name__
+                self.model_list[str(id)]=items
+                item=items()
+                name = item.__class__.__name__
                 if hasattr(item, "name"):
-                    name = item.model.name
+                    name = item.name
                 indep_submenu.Append(id,name, name)
-                self.model_list_box[name] =item.model
+                self.model_list_box[name] =items
                 wx.EVT_MENU(event_owner, int(id), self._on_model)
                 id = wx.NewId()         
         modelmenu.AppendMenu(wx.NewId(), "Shape-independent...", indep_submenu, "List of shape-independent models")
-        
-        
-        
-        model_info="additional models"
         id = wx.NewId()
         if len(self.custom_models) == 0:
-            for item in self.plugins:
+            for items in self.plugins:
                 #if item not in self.custom_models.values():
                     #self.custom_models[str(id)] = item
-                self.model_list[str(id)]=ModelInfo(item,model_info)
-                name = item.__name__
+                self.model_list[str(id)]=items
+                item=items()
+                name = item.__class__.__name__
                 if hasattr(item, "name"):
                     name = item.name
                 added_models.Append(id, name, name)
-                self.model_list_box[name] =item
+                self.model_list_box[name] =items
                 wx.EVT_MENU(event_owner, int(id), self._on_model)
                 id = wx.NewId()
         modelmenu.AppendMenu(wx.NewId(),"Added models...", added_models, "List of additional models")
@@ -230,7 +200,7 @@ class ModelManager:
             #evt = ModelEvent(model=self.model_list[str(evt.GetId())]())
            
             model = self.model_list[str(evt.GetId())]
-            evt = ModelEvent(modelinfo=model)
+            evt = ModelEvent(model= model )
             wx.PostEvent(self.event_owner, evt)
         
     def get_model_list(self):    

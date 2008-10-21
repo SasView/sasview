@@ -10,7 +10,7 @@ from sans.fit.AbstractFitEngine import Model,Data,FitData1D,FitData2D
 from fitproblem import FitProblem
 from fitpanel import FitPanel
 
-import models
+import models,modelpage
 import fitpage1D,fitpage2D
 import park
 
@@ -59,6 +59,7 @@ class Plugin:
         self.menu_mng.populate_menu(menu2, owner)
         id2 = wx.NewId()
         owner.Bind(models.EVT_MODEL,self._on_model_menu)
+        #owner.Bind(modelpage.EVT_MODEL,self._on_model_menu)
         self.fit_panel.set_owner(owner)
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
         owner.Bind(fitpage1D.EVT_MODEL_BOX,self._on_model_panel)
@@ -83,11 +84,13 @@ class Plugin:
         self.graph=graph
         for item in graph.plottables:
             if item.__class__.__name__ is "Data2D":
-                return [["Fit Data2D", "Dialog with fitting parameters ", self._onSelect]] 
+                return [["Select data  for Fitting",\
+                          "Dialog with fitting parameters ", self._onSelect]] 
             else:
                 if item.name==graph.selected_plottable and\
                  item.__class__.__name__ is  "Data1D":
-                    return [["Fit Data1D", "Dialog with fitting parameters ", self._onSelect]] 
+                    return [["Select data  for Fitting", \
+                             "Dialog with fitting parameters ", self._onSelect]] 
         return []   
 
 
@@ -538,7 +541,7 @@ class Plugin:
                 #print data.image
                 theory.image=model.runXY(data.image)
                 
-                print "fitting : plot_helper:",theory.image
+                #print "fitting : plot_helper:",theory.image
                 theory.zmin= data.zmin
                 theory.zmax= data.zmax
                 theory.xmin= qmin
@@ -554,8 +557,9 @@ class Plugin:
             Plot a theory from a model selected from the menu
         """
         name="Model View"
-        model=evt.modelinfo.model()
-        description=evt.modelinfo.description
+        model=evt.model()
+        
+        description=model.description
         self.fit_panel.add_model_page(model,description,name)       
         self.draw_model(model)
         
@@ -572,7 +576,6 @@ class Plugin:
             y[i] = model.run(x[i])
             dy[i] = math.sqrt(math.fabs(y[i]))
         try:
-           
             new_plot = Theory1D(x, y)
             new_plot.name = "Model"
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
@@ -580,9 +583,7 @@ class Plugin:
             new_plot.group_id ="Fitness"
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model"))
         except:
-            wx.PostEvent(self.parent, StatusEvent(status="fitting \
-                        skipping point x %g %s" %(qmax, sys.exc_value)))
-
+            raise
 if __name__ == "__main__":
     i = Plugin()
     

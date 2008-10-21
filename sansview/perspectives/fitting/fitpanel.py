@@ -101,7 +101,7 @@ class FitPanel(wx.Panel):
         """
         if  page_title !=self.draw_model_name or self.draw_model_name ==None: 
             from modelpage import ModelPage
-            panel = ModelPage(self.nb,model,description, -1)
+            panel = ModelPage(self.nb,model, -1)
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
             self.nb.AddPage(page=panel,text=page_title,select=True)
@@ -150,29 +150,31 @@ class FitPanel(wx.Panel):
              close the current page except the simpage. remove each check box link to the model
              selected on that page. remove its reference into page_finder (fitting module)
         """
-       
-        sim_page = self.nb.GetPage(0)
-        selected_page = self.nb.GetPage(self.nb.GetSelection())
-        
-        if sim_page != selected_page:
-            # remove the check box link to the model name of this page (selected_page)
-            sim_page.remove_model(selected_page)
-            #remove that page from page_finder of fitting module
-            page_finder=self.manager.get_page_finder() 
-            for page, value in page_finder.iteritems():
-                if page==selected_page:
-                    del page_finder[page]
-                    break
-            #Delete the page from notebook
-            page_number = self.nb.GetSelection()
-            if self.nb.GetPageText(page_number)== self.page_name:
-                self.draw_model_name=None
-                
-            selected_page.Destroy()
-            self.nb.RemovePage(page_number)
-            #self.name=None
-            self.fit_page_name=None
+        try:
+            sim_page = self.nb.GetPage(0)
+            selected_page = self.nb.GetPage(self.nb.GetSelection())
             
+            if sim_page != selected_page:
+                # remove the check box link to the model name of this page (selected_page)
+                sim_page.remove_model(selected_page)
+                #remove that page from page_finder of fitting module
+                page_finder=self.manager.get_page_finder() 
+                for page, value in page_finder.iteritems():
+                    if page==selected_page:
+                        del page_finder[page]
+                        break
+                #Delete the page from notebook
+                page_number = self.nb.GetSelection()
+                if self.nb.GetPageText(page_number)== self.page_name:
+                    self.draw_model_name=None
+                    
+                selected_page.Destroy()
+                self.nb.RemovePage(page_number)
+                #self.name=None
+                self.fit_page_name=None
+        except:
+            raise
+        print "fitpanel", self.draw_model_name 
     def set_model_list(self,dict):
          """ 
              copy a dictionary of model into its own dictionary
