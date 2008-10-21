@@ -172,13 +172,36 @@ class FitData1D(object):
         """
             Data can be initital with a data (sans plottable)
             or with vectors.
+            
+            self.smearer is an object of class QSmearer or SlitSmearer
+            that will smear the theory data (slit smearing or resolution 
+            smearing) when set.
+            
+            The proper way to set the smearing object would be to
+            do the following:
+            
+            from DataLoader.qsmearing import smear_selection
+            fitdata1d = FitData1D(some_data)
+            fitdata1d.smearer = smear_selection(some_data)
+            
+            Note that some_data _HAS_ to be of class DataLoader.data_info.Data1D
+            
+            Setting it back to None will turn smearing off.
+            
         """
+        ## Smearing object
+        self.smearer = None
+
+        # Initialize from Data1D object
         self.data=sans_data1d
         self.x= sans_data1d.x
         self.y= sans_data1d.y
         self.dx= sans_data1d.dx
         self.dy= sans_data1d.dy
+        
+        ## Min Q-value
         self.qmin=None
+        ## Max Q-value
         self.qmax=None
        
        
@@ -196,6 +219,38 @@ class FitData1D(object):
      
      
     def residuals(self, fn):
+        """ 
+            Compute residuals.
+            
+            If self.smearer has been set, use if to smear
+            the data before computing chi squared.
+            
+            @param fn: function that return model value
+            @return residuals
+        """
+        x,y,dy = [numpy.asarray(v) for v in (self.x,self.y,self.dy)]
+           
+        # Find entries to consider
+        if self.qmin==None and self.qmax==None:
+            idx = Ellipsis
+        else:
+            idx = (x>=self.qmin) & (x <= self.qmax)
+                        
+        # Compute theory data f(x)
+        fx = numpy.zeros(len(x))
+        fx[idx] = numpy.asarray([fn(v) for v in x[idx]])
+        
+        # Smear theory data
+        if self.smearer is not None:
+            fx = self.smearer(fx)
+            
+        # Sanity check
+        if numpy.size(dy) < numpy.size(x):
+            raise RuntimeError, "FitData1D: invalid error array"
+                            
+        return (y[idx] - fx[idx])/dy[idx]
+     
+    def residuals_old(self, fn):
         """ @param fn: function that return model value
             @return residuals
         """
@@ -332,6 +387,15 @@ class FitEngine:
             @raise: if data in listdata don't contain dy field ,will create an error
             during fitting
         """
+        #TODO: we have to refactor the way we handle data.
+        # We should move away from plottables and move towards the Data1D objects
+        # defined in DataLoader. Data1D allows data manipulations, which should be
+        # used to concatenate. 
+        # In the meantime we should switch off the concatenation.
+        #if len(listdata)>1:
+        #    raise RuntimeError, "FitEngine._concatenateData: Multiple data files is not currently supported"
+        #return listdata[0]
+        
         if listdata==[]:
             raise ValueError, " data list missing"
         else:
