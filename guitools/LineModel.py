@@ -14,8 +14,8 @@ class LineModel(BaseComponent):
         f(x) = A + Bx
          
         List of default parameters:
-          A = 0.0
-          B = 0.0 
+          A = 1.0
+          B = 1.0 
     """
         
     def __init__(self):
@@ -31,7 +31,7 @@ class LineModel(BaseComponent):
         self.params = {}
         self.params['A'] = 1.0
         self.params['B'] = 1.0
-
+        self.description='f(x) = A + Bx'
         ## Parameter details [units, min, max]
         self.details = {}
         self.details['A'] = ['', None, None]
