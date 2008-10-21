@@ -28,7 +28,7 @@ class LorentzModel(BaseComponent):
         
         ## Name of the model
         self.name = "Lorentz"
-
+        self.description=''
         ## Define parameters
         self.params = {}
         self.params['length']      = 50.0

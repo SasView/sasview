@@ -27,7 +27,7 @@ class GuinierModel(BaseComponent):
         
         ## Name of the model
         self.name = "Guinier"
-
+        self.description=''
         ## Define parameters
         self.params = {}
         self.params['scale']  = 1.0

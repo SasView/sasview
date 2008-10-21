@@ -58,7 +58,7 @@ class ModelAdaptor(object):
         self.params = ParameterDict(self.parameters)
         ## Additional details, provided for backward compatibility
         self.details = {}
-        
+        self.description=''
         ## Dictionary used to store the dispersity/averaging
         #  parameters of dispersed/averaged parameters.
         ## Provided for backward compatibility

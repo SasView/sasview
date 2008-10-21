@@ -10,7 +10,7 @@ class Model1DPlugin(BaseComponent):
         BaseComponent.__init__(self)
         self.details = {}
         self.params  = {}
-        
+        self.description=''
     def function(self, x):
         """
             Function to be implemented by the plug-in writer

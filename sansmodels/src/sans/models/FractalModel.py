@@ -34,7 +34,7 @@ class FractalModel(BaseComponent):
         
         ## Name of the model
         self.name = "Number Density Fractal"
-
+        self.description=''
         ## Define parameters
         self.params = {}
         self.params['scale']       = 0.05

@@ -50,7 +50,7 @@ class EllipsoidModel(CEllipsoidModel, BaseComponent):
         
         ## Name of the model
         self.name = "EllipsoidModel"
-
+        self.description=''
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]

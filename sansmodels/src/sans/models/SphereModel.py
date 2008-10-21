@@ -47,7 +47,7 @@ class SphereModel(CSphereModel, BaseComponent):
         
         ## Name of the model
         self.name = "SphereModel"
-
+        self.description=''
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]

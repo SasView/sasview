@@ -36,7 +36,7 @@ class BEPolyelectrolyte(BaseComponent):
         
         ## Name of the model
         self.name = "BEPolyelectrolyte"
-
+        self.description=''
         ## Define parameters
         self.params = {}
         self.params['k']    = 10

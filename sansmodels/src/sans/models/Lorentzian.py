@@ -34,7 +34,7 @@ class Lorentzian(CLorentzian, BaseComponent):
         
         ## Name of the model
         self.name = "Lorentzian"
-
+        self.description=''
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]

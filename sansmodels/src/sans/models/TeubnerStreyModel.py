@@ -30,7 +30,7 @@ class TeubnerStreyModel(BaseComponent):
         
         ## Name of the model
         self.name = "Teubner Strey"
-
+        self.description=''
         ## Define parameters
         self.params = {}
         self.params['c1']     = -30.0

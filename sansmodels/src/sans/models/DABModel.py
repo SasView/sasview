@@ -28,7 +28,7 @@ class DABModel(BaseComponent):
         
         ## Name of the model
         self.name = "DAB_Model"
-
+        self.description=''
         ## Define parameters
         self.params = {}
         self.params['length']             = 50.0

@@ -50,7 +50,7 @@ class CylinderModel(CCylinderModel, BaseComponent):
         
         ## Name of the model
         self.name = "CylinderModel"
-
+        self.description=''
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]

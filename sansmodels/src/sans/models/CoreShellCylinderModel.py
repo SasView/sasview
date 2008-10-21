@@ -53,7 +53,7 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
         
         ## Name of the model
         self.name = "CoreShellCylinderModel"
-
+        self.description=''
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]

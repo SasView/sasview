@@ -17,7 +17,7 @@ class Sin(BaseComponent):
         
         ## Name of the model
         self.name = "Sin"
-
+        self.description=''
         ## Parameter details [units, min, max]
         self.details = {}
    

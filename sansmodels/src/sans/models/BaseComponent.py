@@ -25,6 +25,9 @@ class BaseComponent:
         ## Dictionary used to store the dispersity/averaging
         #  parameters of dispersed/averaged parameters.
         self.dispersion = {}
+        # string containing information about the model such as the equation
+        #of the given model, exception or possible use
+        self.description=''
            
     def __str__(self):
         """ 

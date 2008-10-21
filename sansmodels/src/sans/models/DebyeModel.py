@@ -31,7 +31,7 @@ class DebyeModel(BaseComponent):
         
         ## Name of the model
         self.name = "Debye"
-
+        self.description=''
         ## Define parameters
         self.params = {}
         self.params['rg']          = 50.0

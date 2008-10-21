@@ -39,7 +39,7 @@ class DisperseModel(Disperser, BaseComponent):
         self.name = model.name
         ## Keep track of the underlying model
         self.model = model
-   
+        self.description=''
     def clone(self):
         """ Return a identical copy of self """
         obj = DisperseModel(self.model, self.params['paramList'], self.params['sigmaList'])
