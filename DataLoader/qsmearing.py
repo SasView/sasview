@@ -8,7 +8,6 @@ See the license text in license.txt
 copyright 2008, University of Tennessee
 """
 
-#TODO: improvement: allow for varying dQ as a function of Q
 
 import numpy
 import math
@@ -237,7 +236,7 @@ class _QSmearer(_BaseSmearer):
             Initialization
             
             @param nbins: number of Q bins
-            @param width: standard deviation in Q [A-1]
+            @param width: array standard deviation in Q [A-1]
             @param min: Q_min [A-1]
             @param max: Q_max [A-1]
         """
@@ -291,7 +290,7 @@ class QSmearer(_QSmearer):
         # Initialization from parent class
         super(QSmearer, self).__init__()
         
-        ## Slit width
+        ## Resolution
         self.width = numpy.zeros(len(data1D.x))
         if data1D.dx is not None and len(data1D.dx)==len(data1D.x):
             self.width = data1D.dx

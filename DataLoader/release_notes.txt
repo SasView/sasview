@@ -4,9 +4,10 @@ Release Notes
 Package name: DataLoader 0.2
 
 1- 	Version 0.2
-	- Release date: ?
+	- Release date: 10/22/2008
+	- Added slit smearing and resolution smearing
 	- First version of CanSAS reader/writer
-	- 1D and 2D data manipulations available
+	- 1D and 2D data manipulations available (circular avg, box sum, box avg, sector avg, ring avg)
 	- 1D CanSAS writer available
 	- HFIR 1D 4-col reader available (*.d1d)
 	- Allows plugins through python source or zip files
@@ -33,7 +34,6 @@ Package name: DataLoader 0.2
 
 	3.1- All systems:
 		- CanSAS format only allows a single SASdata section per SASentry.
-		- CanSAS format only allows one SASentry per file, for a single DataInfo object.
 
 	3.2- Windows:
 		- None
