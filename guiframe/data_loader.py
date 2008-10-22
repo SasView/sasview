@@ -84,19 +84,23 @@ def plot_data(parent, path, name="Loaded Data"):
                           ymin=output.ymin,ymax=output.ymax)
         new_plot.x_bins=output.x_bins
         new_plot.y_bins=output.y_bins
+        #print "data_loader",output
     else:
         if output.dy==None:
             new_plot = Theory1D(output.x,output.y)
         else:
             new_plot = Data1D(x=output.x,y=output.y,dy=output.dy)
-        
+    
     filename = os.path.basename(path)
     new_plot.source=output   
-    new_plot.name = name
+    new_plot.name = filename
     new_plot.interactive = True
     # If the data file does not tell us what the axes are, just assume...
-    new_plot.xaxis("\\rm{Q}",'A^{-1}')
-    new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+    new_plot.xaxis(output._xaxis,output._xunit)
+    new_plot.yaxis(output._yaxis,output._yunit)
+    #new_plot.xaxis("\\rm{Q}",'A^{-1}')
+    #new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+    
     new_plot.group_id = filename
        
     wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))
