@@ -28,7 +28,12 @@ class DABModel(BaseComponent):
         
         ## Name of the model
         self.name = "DAB_Model"
-        self.description=''
+        self.description=" Name: DAB model.\n\
+        F(x) = scale/( 1 + (x*L)^2 )^(2) + background\n\
+        The model has three parameters:\n \
+        L             =  Correlation Length\n\
+        scale         =  scale factor\n\
+        background    =  incoherent background\n"
         ## Define parameters
         self.params = {}
         self.params['length']             = 50.0
