@@ -53,9 +53,12 @@ class FitPage1D(wx.Panel):
         self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer2 = wx.GridBagSizer(5,5)
         self.sizer1 = wx.GridBagSizer(5,5)
-        self.DataSource      = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        self.DataSource.SetToolTipString("name of data to fit")
-        self.DataSource.SetValue(str(data.name))
+        #self.DataSource      = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        #self.DataSource.SetToolTipString("name of data to fit")
+        #self.DataSource.SetValue(str(data.name))
+        #self.DataSource.Disable()
+        self.DataSource  =wx.StaticText(self, -1,str(data.name))
+        
         self.modelbox = wx.ComboBox(self, -1)
         id = wx.NewId()
         self.btFit =wx.Button(self,id,'Fit')
@@ -63,17 +66,12 @@ class FitPage1D(wx.Panel):
         self.btFit.SetToolTipString("Perform fit.")
         self.static_line_1 = wx.StaticLine(self, -1)
        
-        
-       
         self.vbox.Add(self.sizer3)
         self.vbox.Add(self.sizer2)
         self.vbox.Add(self.static_line_1, 0, wx.EXPAND, 0)
         self.vbox.Add(self.sizer5)
-        
         self.vbox.Add(self.sizer4)
         self.vbox.Add(self.sizer1)
-        
-        
         
         id = wx.NewId()
         self.btClose =wx.Button(self,id,'Close')
@@ -81,7 +79,7 @@ class FitPage1D(wx.Panel):
         self.btClose.SetToolTipString("Close page.")
         ix = 0
         iy = 1
-        self.sizer3.Add(wx.StaticText(self, -1, 'Data Source'),(iy,ix),\
+        self.sizer3.Add(wx.StaticText(self, -1, 'Data Source Name : '),(iy,ix),\
                  (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer3.Add(self.DataSource,(iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -119,6 +117,7 @@ class FitPage1D(wx.Panel):
         self.sizer4.Add(self.xmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.xmin.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         self.xmin.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
+        self.xmin.Disable()
         ix += 2
         self.xmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.xmax.SetValue(format_number(numpy.max(data.x)))
@@ -126,6 +125,7 @@ class FitPage1D(wx.Panel):
         self.sizer4.Add(self.xmax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         self.xmax.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
+        self.xmax.Disable()
         #Set chisqr  result into TextCtrl
         ix = 0
         iy = 1
@@ -251,7 +251,7 @@ class FitPage1D(wx.Panel):
             react when a model is selected from page's combo box
             post an event to its owner to draw an appropriate theory
         """
-        
+        self.btFit.SetFocus()
         for item in self.model_list_box.itervalues():
             name = item.__name__
             if hasattr(item, "name"):
@@ -341,7 +341,7 @@ class FitPage1D(wx.Panel):
         self.param_toFit=[]
         self.model = model
         keys = self.model.getParamList()
-        print "fitpage1D : dispersion list",self.model.getDispParamList()
+        #print "fitpage1D : dispersion list",self.model.getDispParamList()
         keys.sort()
         disp_list=self.model.getDispParamList()
         disp_list.sort()
@@ -406,9 +406,20 @@ class FitPage1D(wx.Panel):
         self.sizer2.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix= 0
         iy=1
-        self.disp = wx.StaticText(self, -1, 'Dispersion')
-        self.sizer5.Add(self.disp,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        iy+=1
+        if len(disp_list)>0:
+            disp = wx.StaticText(self, -1, 'Dispersion')
+            self.sizer5.Add(disp,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+            ix += 1 
+            values = wx.StaticText(self, -1, 'Values')
+            self.sizer5.Add(values,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            #ix += 1 
+            #disps = wx.StaticText(self, -1, 'Disp')
+            #self.sizer5.Add(disps,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            #ix += 1 
+            #npts = wx.StaticText(self, -1, 'npts')
+            #self.sizer5.Add(npts,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            iy+=1
+            
         for item in disp_list:
             ix = 0
             cb2 = wx.CheckBox(self, -1, item, (10, 10))

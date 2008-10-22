@@ -176,10 +176,9 @@ class ModelManager:
                 #if item not in self.custom_models.values():
                     #self.custom_models[str(id)] = item
                 self.model_list[str(id)]=items
-                item=items()
-                name = item.__class__.__name__
-                if hasattr(item, "name"):
-                    name = item.name
+                name = items.__name__
+                if hasattr(items, "name"):
+                    name = items.name
                 added_models.Append(id, name, name)
                 self.model_list_box[name] =items
                 wx.EVT_MENU(event_owner, int(id), self._on_model)

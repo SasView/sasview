@@ -13,7 +13,11 @@ from fitpanel import FitPanel
 import models,modelpage
 import fitpage1D,fitpage2D
 import park
-
+class Theory2D(Data2D):
+    def __init__(self,image=None,err_image=None,xmin=None,
+                 xmax=None,ymin=None,ymax=None,zmin=None,zmax=None):
+        Data2D.__init__(self,image,err_image,xmin,
+                        xmax,ymin,ymax,zmin,zmax)
 class Plugin:
     """
         Fitting plugin is used to perform fit 
@@ -512,12 +516,12 @@ class Plugin:
                     tempy = model.run(qmax)
                     theory.x.append(tempx)
                     theory.y.append(tempy)
-                   
                 except:
                     wx.PostEvent(self.parent, StatusEvent(status="fitting \
                         skipping point x %g %s" %(qmax, sys.exc_value)))
             else:
                 theory=Data2D(data.image, data.err_image)
+                #theory=Theory2D(data.image, data.err_image)
                 theory.x_bins= data.x_bins
                 theory.y_bins= data.y_bins
                 tempy=[]
@@ -529,18 +533,16 @@ class Plugin:
                     ymin=data.ymin
                 if ymax==None:
                     ymax=data.ymax
-              
-                #for i in range(len(data.y_bins)):
-                #    if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
-                #        for j in range(len(data.x_bins)):
-                #            if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
-                #                theory.image= model.runXY([data.x_bins[j],data.y_bins[i]])
-               
                     
-                    #print "fitting : plot_helper:", theory.image
+                theory.image = numpy.zeros((len(data.y_bins),len(data.x_bins)))
+                for i in range(len(data.y_bins)):
+                    if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
+                        for j in range(len(data.x_bins)):
+                            if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
+                                theory.image[j][i]=model.runXY([data.x_bins[j],data.y_bins[i]])
+               
+                #print "fitting : plot_helper:", theory.image
                 #print data.image
-                theory.image=model.runXY(data.image)
-                
                 #print "fitting : plot_helper:",theory.image
                 theory.zmin= data.zmin
                 theory.zmax= data.zmax
