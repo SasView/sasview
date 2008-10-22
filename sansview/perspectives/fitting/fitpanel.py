@@ -28,8 +28,8 @@ class FitPanel(wx.Panel):
         self.event_owner=None
         #self.menu_mng = models.ModelManager()
         self.nb = wx.Notebook(self)
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.sizer.Add(self.nb, 0, wx.EXPAND)
+        self.sizer = wx.BoxSizer()
+        self.sizer.Add(self.nb, 1, wx.EXPAND)
         #Creating an initial page for simultaneous fitting
         from simfitpage import SimultaneousFitPage
         self.sim_page = SimultaneousFitPage(self.nb, -1)
@@ -48,6 +48,7 @@ class FitPanel(wx.Panel):
         self.sizer.Fit(self)
         self.Center()
         
+
         
     def set_manager(self, manager):
         """
