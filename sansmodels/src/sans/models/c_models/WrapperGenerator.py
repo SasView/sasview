@@ -78,6 +78,8 @@ class WrapperGenerator:
         self.details = ""
         ## List of dispersed parameters
         self.disp_params = []
+        #model description
+        self.description=''
         
     def __repr__(self):
         """ Simple output for printing """
@@ -329,6 +331,9 @@ class WrapperGenerator:
             # Parameter details
             newline = self.replaceToken(newline, 
                                         "[PAR_DETAILS]", self.details)
+            # Parameter details
+            newline = self.replaceToken(newline, 
+                                        "[DESCRIPTION]", self.description)
 
             # Write new line to the wrapper .c file
             file.write(newline+'\n')

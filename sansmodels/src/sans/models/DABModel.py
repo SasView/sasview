@@ -28,7 +28,7 @@ class DABModel(BaseComponent):
         
         ## Name of the model
         self.name = "DAB_Model"
-        self.description=" Name: DAB model.\n\
+        self.description=" DAB (Debye Anderson Brumberger) function.\n\
         F(x) = scale/( 1 + (x*L)^2 )^(2) + background\n\
         The model has three parameters:\n \
         L             =  Correlation Length\n\

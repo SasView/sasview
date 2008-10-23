@@ -28,7 +28,12 @@ class LorentzModel(BaseComponent):
         
         ## Name of the model
         self.name = "Lorentz"
-        self.description=''
+        self.description="Lorentz (Ornstein-Zernicke) model.\n\
+        F(x) = scale/( 1 + (x*L)^2 ) + bkd\n\
+        The model has three parameters:\n \
+        L     =  screen Length\n\
+        scale  =  scale factor\n\
+        bkd    =  incoherent background"
         ## Define parameters
         self.params = {}
         self.params['length']      = 50.0

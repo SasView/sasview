@@ -1,9 +1,11 @@
 #if !defined(cylinder_h)
 #define cylinder_h
-
+#include string 
 /** Structure definition for cylinder parameters
  * [PYTHONCLASS] = CylinderModel
  * [DISP_PARAMS] = radius, length, cyl_theta, cyl_phi
+   [DESCRIPTION] = ''
+	
  * */
 typedef struct {
     /// Scale factor
@@ -27,6 +29,7 @@ typedef struct {
     /// Orientation of the cylinder in the plane of the detector [rad]
     //  [DEFAULT]=cyl_phi=1.0 rad
     double cyl_phi;
+	
 } CylinderParameters;
 
 

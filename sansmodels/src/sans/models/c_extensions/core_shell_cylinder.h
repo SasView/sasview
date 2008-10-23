@@ -6,6 +6,7 @@
  */
  //[PYTHONCLASS] = CoreShellCylinderModel
  //[DISP_PARAMS] = radius, thickness, length, axis_theta, axis_phi
+ //[DESCRIPTION] = ''
 typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0
