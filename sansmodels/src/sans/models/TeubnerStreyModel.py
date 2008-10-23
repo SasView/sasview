@@ -30,7 +30,13 @@ class TeubnerStreyModel(BaseComponent):
         
         ## Name of the model
         self.name = "Teubner Strey"
-        self.description=''
+        self.description="""The TeubnerStrey model.
+        F(x) = 1/( scale + c1*(x)^(2)+  c2*(x)^(4)) + bkd
+        The model has Four parameters: 
+        scale  =  scale factor
+        c1     =  constant
+        c2     =  constant
+        bkd    =  incoherent background"""
         ## Define parameters
         self.params = {}
         self.params['c1']     = -30.0

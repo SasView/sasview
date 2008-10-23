@@ -27,7 +27,8 @@ class PorodModel(BaseComponent):
         self.params = {}
         self.params['scale'] = 1.0
         self.params['background'] = 0.0
-        self.description=''
+        self.description= """The Porod model.
+        I(q) = scale/q^4"""
 
         ## Parameter details [units, min, max]
         self.details = {}

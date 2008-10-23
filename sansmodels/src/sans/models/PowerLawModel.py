@@ -34,7 +34,12 @@ class PowerLawModel(BaseComponent):
         self.params['m']            = 4.0
         self.params['scale']        = 1.0
         self.params['background']   = 0.0
-
+        self.description=""" The Power_Law model.
+        F(x) = scale* (x)^(-m) + bkd
+        The model has three parameters: 
+        m     =  power
+        scale  =  scale factor
+        bkd    =  incoherent background"""
         ## Parameter details [units, min, max]
         self.details = {}
         self.details['m']           = ['', 0,    None]

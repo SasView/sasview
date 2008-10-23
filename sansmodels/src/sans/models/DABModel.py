@@ -28,12 +28,12 @@ class DABModel(BaseComponent):
         
         ## Name of the model
         self.name = "DAB_Model"
-        self.description=" DAB (Debye Anderson Brumberger) function.\n\
-        F(x) = scale/( 1 + (x*L)^2 )^(2) + background\n\
-        The model has three parameters:\n \
-        L             =  Correlation Length\n\
-        scale         =  scale factor\n\
-        background    =  incoherent background\n"
+        self.description="""F(x) = scale/( 1 + (x*L)^2 )^(2) + background
+        
+        The model has three parameters: 
+        L             =  Correlation Length
+        scale         =  scale factor
+        background    =  incoherent background"""
         ## Define parameters
         self.params = {}
         self.params['length']             = 50.0
