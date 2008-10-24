@@ -365,7 +365,15 @@ class Plugin:
             y = dataread.y
             err = dataread.dy
         else:
-            raise RuntimeError, "This tool can only read 1D data"
+            if isinstance(dataread, list) and len(dataread)>0:
+                x = dataread[0].x
+                y = dataread[0].y
+                err = dataread[0].dy
+                msg = "PrView only allows a single data set at a time. "
+                msg += "Only the first data set was loaded." 
+                wx.PostEvent(self.parent, StatusEvent(status=msg))
+            else:
+                raise RuntimeError, "This tool can only read 1D data"
         
         self._current_file_data.x = x
         self._current_file_data.y = y
@@ -612,8 +620,17 @@ class Plugin:
                 y = dataread.y
                 err = dataread.dy
             else:
-                wx.PostEvent(self.parent, StatusEvent(status="This tool can only read 1D data"))
-                return
+                if isinstance(dataread, list) and len(dataread)>0:
+                    x = dataread[0].x
+                    y = dataread[0].y
+                    err = dataread[0].dy
+                    msg = "PrView only allows a single data set at a time. "
+                    msg += "Only the first data set was loaded." 
+                    wx.PostEvent(self.parent, StatusEvent(status=msg))
+                else:
+                    wx.PostEvent(self.parent, StatusEvent(status="This tool can only read 1D data"))
+                    return
+            
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
             return
@@ -907,6 +924,10 @@ class Plugin:
                 y = self._current_file_data.y
                 err = self._current_file_data.err
             else:
+                # Reset the status bar so that we don't get mixed up
+                # with old messages. 
+                #TODO: refactor this into a proper status handling
+                wx.PostEvent(self.parent, StatusEvent(status=''))
                 x, y, err = self.load(path)
             
             # If we have not errors, add statistical errors
@@ -922,8 +943,6 @@ class Plugin:
                     err[i] = scale*math.sqrt( math.fabs(y[i]) ) + min_err
                 message = "The loaded file had no error bars, statistical errors are assumed."
                 wx.PostEvent(self.parent, StatusEvent(status=message))
-            else:
-                wx.PostEvent(self.parent, StatusEvent(status=''))
             
             try:
                 # Get the data from the chosen data set and perform inversion
