@@ -1,17 +1,22 @@
 #!/usr/bin/env python
 
 #
-# The setup to create a single exe file.
+# The setup to create a Windows executable.
+# Inno Setup can then be used with the installer.iss file 
+# in the top source directory to create an installer. 
 #
+# Setuptools clashes with py2exe 0.6.8 (and probably later too).
+# For that reason, most of the code needs to have direct imports
+# that are not going through pkg_resources. 
+#
+# Attention should be paid to dynamic imports. Data files can
+# be added to the distribution directory for that purpose.
+# See for example the 'images' directory below.
 
 import os, sys
-
 from distutils.core import setup
-
 from distutils.filelist import findall
-
 import matplotlib
-
 import py2exe
 
 manifest = """
@@ -45,7 +50,7 @@ class Target:
     def __init__(self, **kw):
         self.__dict__.update(kw)
         # for the versioninfo resources
-        self.version = "0.1"
+        self.version = "0.2"
         self.company_name = "U Tennessee"
         self.copyright = "copyright 2008"
         self.name = "PrView"
@@ -56,21 +61,23 @@ class Target:
 #
 matplotlibdatadir = matplotlib.get_data_path()
 matplotlibdata = findall(matplotlibdatadir)
-matplotlibdata_files = []
+data_files = []
 
 for f in matplotlibdata:
-    dirname = os.path.join('matplotlibdata', f[len(matplotlibdatadir)+1:])
-    matplotlibdata_files.append((os.path.split(dirname)[0], [f]))
+    dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
+    data_files.append((os.path.split(dirname)[0], [f]))
 
+# Copying the images directory to the distribution directory.
+for f in findall('images'):
+    if os.path.split(f)[0].count('.svn')==0:
+        data_files.append((os.path.split(f)[0], [f]))
+    
 #
 # packages
 #
-packages = [
-    'matplotlib', 'pytz'
-    ]
-
+packages = ['matplotlib', 'pytz']
 includes = []
-excludes = ['OpenGL'] 
+excludes = [] 
 
 dll_excludes = [
     'libgdk_pixbuf-2.0-0.dll', 
@@ -78,11 +85,9 @@ dll_excludes = [
     'libgdk-win32-2.0-0.dll',
     ]
 
-## This is the client for PARK: run on wx
 target_wx_client = Target(
     description = 'P(r) inversion viewer',
     script = 'sansview.py',
-    #other_resources = [(RT_MANIFEST, 1, manifest_template % dict(prog="AppJob"))],
     icon_resources = [(1, "images/ball.ico")],
     other_resources = [(24,1,manifest)],
     dest_base = "prView"
@@ -105,10 +110,8 @@ setup(
             "bundle_files":2,
             },
     },
-    data_files=matplotlibdata_files
+    data_files=data_files
     
-    # Do something like this to add images to the distribution
-    #data_files=[ ("prog",["kategorien.xml",])]
 )
 
 
