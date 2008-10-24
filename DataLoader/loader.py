@@ -1,6 +1,16 @@
 """
     File handler to support different file extensions.
     Uses reflectometry's registry utility.
+    
+    The default readers are found in the 'readers' sub-module
+    and registered by default at initialization time.
+    
+    To add a new default reader, one must register it in
+    the register_readers method found in readers/__init__.py. 
+    
+    A utility method (find_plugins) is available to inspect 
+    a directory (for instance, a user plug-in directory) and
+    look for new readers/writers.
 """
 
 """
@@ -20,6 +30,9 @@ import logging
 import time
 from zipfile import ZipFile
 
+# Default readers are defined in the readers sub-module
+import readers
+
 class Registry(ExtensionRegistry):
     """
         Registry class for file format extensions.
@@ -38,25 +51,25 @@ class Registry(ExtensionRegistry):
         ## Creation time, for testing
         self._created = time.time()
         
-        # Find internal readers
-        try:
-            cwd = os.path.split(__file__)[0]
-        except:
-            cwd = os.getcwd()
-            logging.error("Registry: could not find the installed reader's directory\n %s" % sys.exc_value)
-            
-        dir = os.path.join(cwd, 'readers')
-        n = self.find_plugins(dir)
-        logging.info("Loader found %i readers" % n)
+        # Register default readers
+        readers.register_readers(self._identify_plugin)
         
     def find_plugins(self, dir):
         """
-            Find readers in a given directory
+            Find readers in a given directory. This method
+            can be used to inspect user plug-in directories to
+            find new readers/writers.
             
             @param dir: directory to search into
             @return: number of readers found
         """
         readers_found = 0
+        
+        # Check whether the directory exists
+        if not os.path.isdir(dir): 
+            logging.warning("DataLoader couldn't load from %s" % dir)
+            return readers_found
+        
         for item in os.listdir(dir):
             full_path = os.path.join(dir, item)
             if os.path.isfile(full_path):
