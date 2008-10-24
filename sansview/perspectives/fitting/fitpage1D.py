@@ -53,6 +53,7 @@ class FitPage1D(wx.Panel):
         self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer2 = wx.GridBagSizer(5,5)
         self.sizer1 = wx.GridBagSizer(5,5)
+        #self.sizer1 =wx.BoxSizer(wx.HORIZONTAL)
         #self.DataSource      = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         #self.DataSource.SetToolTipString("name of data to fit")
         #self.DataSource.SetValue(str(data.name))
@@ -126,23 +127,32 @@ class FitPage1D(wx.Panel):
         self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         self.xmax.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
         self.xmax.Disable()
+        iy+=1
+        self.sizer4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         #Set chisqr  result into TextCtrl
         ix = 0
         iy = 1
+        
         self.text1_1 = wx.StaticText(self, -1, 'Chi2/dof', style=wx.ALIGN_LEFT)
+        #self.sizer1.Add(self.text1_1,1)
         self.sizer1.Add(self.text1_1,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.tcChi    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.tcChi.SetToolTipString("Chi^2 over degrees of freedom.")
+        #self.sizer1.Add(self.tcChi, 1, wx.R | wx.BOTTOM , 5)
         self.sizer1.Add(self.tcChi,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix +=2
+        #self.sizer1.Add(self.btFit, 1, wx.LEFT | wx.BOTTOM , 5)
         self.sizer1.Add(self.btFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix+= 1
         self.sizer1.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        #self.sizer1.Add( self.btClose,1, wx.LEFT | wx.BOTTOM , 5)
+
         ix= 1
         iy+=1
         self.sizer1.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        #self.sizer1.Add((20,20), 0)
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         #contains link between a model and selected parameters to fit 
@@ -165,7 +175,7 @@ class FitPage1D(wx.Panel):
             set owner of fitpage
             @param owner: the class responsible of plotting
         """
-        self.event_owner=owner    
+        self.event_owner = owner    
    
   
     def set_manager(self, manager):

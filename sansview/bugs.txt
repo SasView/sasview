@@ -5,3 +5,8 @@
 it
 4-select a model from the model menu , hit close , select it again from the model menu :
 the parameters don't appear
+
+------>bugs [1,2,3,4] fixed---9.46 am 10/22/2008
+
+5- plot data2D theory not working for all models
+---->bugs[5] fixed

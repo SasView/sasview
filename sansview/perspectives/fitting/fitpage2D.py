@@ -278,7 +278,7 @@ class FitPage2D(wx.Panel):
             react when a model is selected from page's combo box
             post an event to its owner to draw an appropriate theory
         """
-        
+        self.btFit.SetFocus()
         for item in self.model_list_box.itervalues():
             name = item.__name__
             if hasattr(item, "name"):
@@ -363,6 +363,7 @@ class FitPage2D(wx.Panel):
         """
     
         self.sizer2.Clear(True)
+        self.sizer5.Clear(True)
         self.parameters = []
         self.param_toFit=[]
         self.model = model
@@ -428,9 +429,10 @@ class FitPage2D(wx.Panel):
                 self.sizer2.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy+=1
         self.sizer2.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix= 0
-        iy=1
+        
         if len(disp_list)>0:
+            ix= 0
+            iy=1
             disp = wx.StaticText(self, -1, 'Dispersion')
             self.sizer5.Add(disp,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
             ix += 1 
@@ -442,23 +444,23 @@ class FitPage2D(wx.Panel):
             #ix += 1 
             #npts = wx.StaticText(self, -1, 'npts')
             #self.sizer5.Add(npts,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-            iy+=1
+            iy +=1
             
-        for item in disp_list:
-            ix = 0
-            cb2 = wx.CheckBox(self, -1, item, (10, 10))
-            cb2.SetValue(False)
-            self.sizer5.Add( cb2,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-            wx.EVT_CHECKBOX(self, cb2.GetId(), self.select_param)
-            
-            ix += 1
-            value= self.model.getParam(item)
-            ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
-            ctl2.SetValue(str (format_number(value)))
-            ctl2.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-            ctl2.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-            self.sizer5.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-            iy += 1
+            for item in disp_list:
+                ix = 0
+                cb2 = wx.CheckBox(self, -1, item, (10, 10))
+                cb2.SetValue(False)
+                self.sizer5.Add( cb2,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                wx.EVT_CHECKBOX(self, cb2.GetId(), self.select_param)
+                
+                ix += 1
+                value= self.model.getParam(item)
+                ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                ctl2.SetValue(str (format_number(value)))
+                ctl2.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                ctl2.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                self.sizer5.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                iy += 1
         #Display units text on panel
         for item in keys:   
             if self.model.details[item][0]!='':

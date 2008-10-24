@@ -215,14 +215,20 @@ class ModelPage(wx.Panel):
         description=None
         if hasattr(self.model,'description'):
             description =model.description
+        
+
         print "went here",self.model.name,model.description
         iy = 1
         ix = 0
         self.cb0 = wx.StaticText(self, -1,'Model Description:')
         self.sizer1.Add(self.cb0,(iy, ix),(1,1),\
                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix += 1
-        self.cb01 = wx.StaticText(self, -1,str(description))
+        iy += 1
+        
+        self.cb01 = wx.StaticText(self, -1,str(description),style=wx.ALIGN_LEFT)
+        self.cb01.Wrap(400) 
+        #self.cb01 = wx.StaticText(self, -1,str(description),(45, 25),style=wx.ALIGN_LEFT)
+        
         self.sizer1.Add(self.cb01,(iy, ix),(1,1),\
                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix = 0
