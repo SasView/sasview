@@ -27,7 +27,10 @@ class GuinierModel(BaseComponent):
         
         ## Name of the model
         self.name = "Guinier"
-        self.description=''
+        self.description=" I(q) = I_0 exp ( - R_g^2 q^2 / 3.0 )\
+                        List of default parameters:\
+                        I_0 = Scale\
+                        R_g = Radius of gyration"
         ## Define parameters
         self.params = {}
         self.params['scale']  = 1.0
