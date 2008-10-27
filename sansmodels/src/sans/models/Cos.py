@@ -17,7 +17,7 @@ class Cos(BaseComponent):
         
         ## Name of the model
         self.name = "Cos"
-        self.description=''
+        self.description='F(x)=cos(x)'
         ## Parameter details [units, min, max]
         self.details = {}
    

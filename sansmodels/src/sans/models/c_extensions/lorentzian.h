@@ -7,6 +7,7 @@
  * f(x)=scale * 1/pi 0.5gamma / [ (x-x_0)^2 + (0.5gamma)^2 ]
  * 
  * [PYTHONCLASS] = Lorentzian
+ * [DESCRIPTION] = <text>f(x)=scale * 1/pi 0.5gamma / [ (x-x_0)^2 + (0.5gamma)^2 ]</text>
  */
 typedef struct {
     /// Scale factor 

@@ -7,6 +7,7 @@
  * f(x)=scale * 1/(sigma^2*2pi)e^(-(x-mu)^2/2sigma^2)
  * 
  * [PYTHONCLASS] = Gaussian
+ * [DESCRIPTION] = <text>f(x)=scale * 1/(sigma^2*2pi)e^(-(x-mu)^2/2sigma^2)</text>
  */
 typedef struct {
     /// Scale factor 

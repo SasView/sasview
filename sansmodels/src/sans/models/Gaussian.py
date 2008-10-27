@@ -34,7 +34,7 @@ class Gaussian(CGaussian, BaseComponent):
         
         ## Name of the model
         self.name = "Gaussian"
-        self.description=''
+
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]

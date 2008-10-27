@@ -36,7 +36,19 @@ class BEPolyelectrolyte(BaseComponent):
         
         ## Name of the model
         self.name = "BEPolyelectrolyte"
-        self.description=''
+        self.description="""
+        F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k2)/(1+(r02)^(2))*(q^(2)+k2)\
+                       *(q^(2)-(12*h*C/b^(2)))
+        The model has Eight parameters: 
+        K        =  Constrast factor of the polymer
+        Lb       =  Bjerrum length
+        H        =  virial parameter
+        B        =  monomer length
+        Cs       =  Concentration of monovalent salt 
+        alpha    =  ionazation degree 
+        C        = polymer molar concentration
+        bkd      = background
+        """
         ## Define parameters
         self.params = {}
         self.params['k']    = 10

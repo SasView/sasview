@@ -34,7 +34,19 @@ class FractalModel(BaseComponent):
         
         ## Name of the model
         self.name = "Number Density Fractal"
-        self.description=''
+        self.description="""
+        I(x)= P(x)*S(x) + bkd
+        p(x)= scale* V^(2)*delta^(2)* F(x*Radius)^(2)
+        F(x) = 3*[sin(x)-xcos(x)]/x**3
+        The model has Seven parameters: 
+        scale        =  Volume fraction
+        radius       =  Block radius
+        fractal_dim  =  Fractal dimension
+        corr_length  =  correlation Length
+        block_sld    =  SDL block
+        solvent_sld  =  SDL solvent
+        background   =  background
+        """
         ## Define parameters
         self.params = {}
         self.params['scale']       = 0.05

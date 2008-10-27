@@ -3,6 +3,7 @@
 """
 
 import os, sys
+import re
 
 class WrapperGenerator:
     """ Python wrapper generator for C models
@@ -74,6 +75,8 @@ class WrapperGenerator:
         self.modelCalcFlag = False
         ## List of default parameters (text)
         self.default_list = ""
+        ##description
+        self.description=''
         ## Dictionary of units
         self.details = ""
         
@@ -83,6 +86,7 @@ class WrapperGenerator:
         rep  = "Python class: %s\n" % self.pythonClass
         rep += "  struc name: %s\n" % self.structName
         rep += "  params:     %s\n" % self.params
+        rep += "  description: %s\n"% self.description
         return rep
         
     def read(self):
@@ -95,12 +99,62 @@ class WrapperGenerator:
         # Read file
         f = open(self.file,'r')
         buf = f.read()
-        
+       
         self.default_list = "List of default parameters:\n"
         #lines = string.split(buf,'\n')
         lines = buf.split('\n')
         self.details  = "## Parameter details [units, min, max]\n"
         self.details += "        self.details = {}\n"
+        # Catch Description
+        key = "[DESCRIPTION]"
+        find_description= 0
+        temp=""
+        for line in lines:
+            if line.count(key)>0 :
+                
+                try:
+                    find_description= 1
+                    index = line.index(key)
+                    toks = line[index:].split("=",1 )
+                    temp=toks[1].lstrip().rstrip()
+                    text='text'
+                    key2="<%s>"%text.lower()
+                    if re.match(key2,temp)!=None:
+                        #index2 = line.index(key2)
+                        #temp = temp[index2:]
+                        toks2=temp.split(key2,1)
+                        self.description=toks2[1]
+                        text='text'
+                        key2="</%s>"%text.lower()
+                        if re.search(key2,toks2[1])!=None:
+                            temp=toks2[1].split(key2,1)
+                            self.description=temp[0]
+                            break
+                        print self.description
+                    else:
+                        self.description=temp
+                        break
+                except:
+                     raise ValueError, "Could not parse file %s" % self.file
+            elif find_description==1:
+                text='text'
+                key2="</%s>"%text.lower()
+                #print "second line",line,key2,re.search(key2,line)
+                if re.search(key2,line)!=None:
+                    tok=line.split(key2,1)
+                    temp=tok[0].split("//",1)
+                    self.description+=tok[1].lstrip().rstrip()
+                    break
+                else:
+                    print re.search("//",line)
+                    if re.search("//",line)!=None:
+                        temp=line.split("//",1)
+                        self.description+='\n'+temp[1].lstrip().rstrip()
+                        
+                    else:
+                        self.description+=line
+                    
+                
         for line in lines:
             
             # Catch class name
@@ -131,7 +185,7 @@ class WrapperGenerator:
                 #toks2 = string.split(toks[0],',')
                 toks2 = toks[0].split(',')
                 self.structName = toks2[0].lstrip().rstrip()
-                
+          
             # Catch struct content
             key = "[DEFAULT]"
             if self.inStruct and line.count(key)>0:
@@ -273,7 +327,9 @@ class WrapperGenerator:
             # Include file
             newline = self.replaceToken(newline, 
                                         "[DEFAULT_LIST]", self.default_list)
-
+            # Model Description
+            newline = self.replaceToken(newline, 
+                                        "[DESCRIPTION]", self.description)
             # Parameter details
             newline = self.replaceToken(newline, 
                                         "[PAR_DETAILS]", self.details)

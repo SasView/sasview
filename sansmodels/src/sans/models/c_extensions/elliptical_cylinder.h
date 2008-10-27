@@ -4,7 +4,7 @@
 /** Structure definition for cylinder parameters
  * [PYTHONCLASS] = EllipticalCylinderModel
  * [DISP_PARAMS] = r_minor, r_ratio, length, cyl_theta, cyl_phi, cyl_psi
- *
+ * [DESCRIPTION] = ""
  * */
 typedef struct {
     /// Scale factor

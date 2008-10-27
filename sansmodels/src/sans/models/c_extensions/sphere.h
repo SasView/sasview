@@ -6,6 +6,15 @@
  */
  //[PYTHONCLASS] = SphereModel
  //[DISP_PARAMS] = radius
+ //[DESCRIPTION] =<text>P(q)=(scale/V)*[3V(scatter_sld-solvent_sld)*(sin(qR)-qRcos(qR))/(qR)^3]^(2)
+ //						+bkg
+ //						bkg: background level
+ //						R: radius of the sphere
+ //						V:The volume of the scatter
+ //						scatter_sld: the scattering length density of the scatter
+ //						solvent_sld: the scattering length density of the solvent
+ //				</text>
+ 
 typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0e-6

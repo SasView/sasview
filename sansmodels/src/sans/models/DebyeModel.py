@@ -31,7 +31,14 @@ class DebyeModel(BaseComponent):
         
         ## Name of the model
         self.name = "Debye"
-        self.description=''
+        self.description=""" 
+        F(x) = 2( exp(-x) + x - 1 )/x**2
+        with x = (q*R_g)**2
+        The model has three parameters: 
+        Rg     =  radius of gyration
+        scale  =  scale factor
+        bkd    =  Constant background
+        """
         ## Define parameters
         self.params = {}
         self.params['rg']          = 50.0

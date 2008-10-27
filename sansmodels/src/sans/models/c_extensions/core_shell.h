@@ -6,6 +6,7 @@
  */
  //[PYTHONCLASS] = CoreShellModel
  //[DISP_PARAMS] = radius, thickness
+ //[DESCRIPTION] =""
 typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0

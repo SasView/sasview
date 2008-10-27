@@ -87,6 +87,7 @@ class WrapperGenerator:
         rep  = "Python class: %s\n" % self.pythonClass
         rep += "  struc name: %s\n" % self.structName
         rep += "  params:     %s\n" % self.params
+        rep += "  description:     %s\n" % self.description
         return rep
         
     def read(self):
@@ -105,6 +106,35 @@ class WrapperGenerator:
         lines = buf.split('\n')
         self.details  = "## Parameter details [units, min, max]\n"
         self.details += "        self.details = {}\n"
+         # Catch Description
+        key = "[DESCRIPTION]"
+        find_description= False
+        temp=""
+        for line in lines:
+            if line.count(key)>0 :
+                find_description= True
+                try:
+                    index = line.index(key)
+                    toks = line[index:].split("=",1 )
+                    temp=toks[1].lstrip().rstrip()
+                    text='text'
+                    key2="<%s>"%text.lower
+                    if re.match(key2,temp)!=None:
+                        index2 = line.index(key2)
+                        temp=line[index:]
+                    else:
+                        self.description=temp
+                except:
+                     raise ValueError, "Could not parse file %s" % self.file
+                if find_description:
+                    text='text'
+                    key2="</%s>"%text.lower
+                    if re.match(key2,temp)!=None:
+                        index2 = line.index(key2)
+                        temp=line[:index]
+                    temp+=line
+        self.description= temp
+                
         for line in lines:
             
             # Catch class name
@@ -135,7 +165,9 @@ class WrapperGenerator:
                 #toks2 = string.split(toks[0],',')
                 toks2 = toks[0].split(',')
                 self.structName = toks2[0].lstrip().rstrip()
+           
                 
+           
             # Catch struct content
             key = "[DEFAULT]"
             if self.inStruct and line.count(key)>0:
