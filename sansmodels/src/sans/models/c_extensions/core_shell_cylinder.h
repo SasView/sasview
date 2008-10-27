@@ -6,25 +6,25 @@
  */
  //[PYTHONCLASS] = CoreShellCylinderModel
  //[DISP_PARAMS] = radius, thickness, length, axis_theta, axis_phi
- //[DESCRIPTION] = <text>"P(q,alpha)= scale/Vs*f(q)^(2) + bkg  Where:\n\
-						 f(q)= 2(core_sld- solvant_sld)* Vc*sin[qLcos(alpha/2)]/\n\
-						[qLcos(alpha/2)]*J1(qRsin(alpha))/[qRsin(alpha)] +\n 2(shell_sld-solvent_sld)*Vs\n\
-						*sin[q(L+T)cos(alpha/2)]/[[q(L+T)cos(alpha/2)]\n\
-						*J1(q(R+T)sin(alpha))/q(R+T)sin(alpha)]\n\
-						alpha:is the angle between the axis of the cylinder and the q-vector\n\
-						Vs: the volume of the outer shell\n\
- 						Vc: the volume of the core\n\
- 						L: the length of the core\n\
-     					shell_sld: the scattering length density of the shell\n\
-						solvent_sld: the scattering length density of the solvent\n\
- 						bkg: the background\n\
- 						T: the thickness\n\
-    					R+T: is the outer radius\n\
- 						L+2T: The total length of the outershell\n\
-						J1: the first order Bessel function\n\
- 						theta: axis_theta of the cylinder\n\
- 						phi: the axis_phi of the cylinder"\
-					</text>
+ //[DESCRIPTION] = <text>P(q,alpha)= scale/Vs*f(q)^(2) + bkg  Where:\n\
+ //						 f(q)= 2(core_sld- solvant_sld)* Vc*sin[qLcos(alpha/2)]/\n\
+ //						[qLcos(alpha/2)]*J1(qRsin(alpha))/[qRsin(alpha)] +\n 2(shell_sld-solvent_sld)*Vs
+ //						*sin[q(L+T)cos(alpha/2)]/[[q(L+T)cos(alpha/2)]
+ //						*J1(q(R+T)sin(alpha))/q(R+T)sin(alpha)]
+ //						alpha:is the angle between the axis of the cylinder and the q-vector
+ //						Vs: the volume of the outer shell
+ //						Vc: the volume of the core
+ //						L: the length of the core
+ //    					shell_sld: the scattering length density of the shell
+ //						solvent_sld: the scattering length density of the solvent
+ //						bkg: the background
+ //						T: the thickness
+ //    					R+T: is the outer radius
+ // 					L+2T: The total length of the outershell
+ //						J1: the first order Bessel function
+ // 					theta: axis_theta of the cylinder
+ // 					phi: the axis_phi of the cylinder
+ //					</text>
 
 typedef struct {
     /// Scale factor

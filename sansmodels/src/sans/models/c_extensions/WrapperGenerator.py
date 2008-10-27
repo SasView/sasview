@@ -146,13 +146,15 @@ class WrapperGenerator:
                     self.description+=tok[1].lstrip().rstrip()
                     break
                 else:
-                    print re.search("//",line)
+                    if re.search("*",line)!=None:
+                        temp=line.split("//",1)
+                        self.description+='\n'+temp[1].lstrip().rstrip()
                     if re.search("//",line)!=None:
                         temp=line.split("//",1)
                         self.description+='\n'+temp[1].lstrip().rstrip()
                         
                     else:
-                        self.description+=line
+                        self.description+='\n'+line.lstrip().rstrip()
                     
                 
         for line in lines:

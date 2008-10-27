@@ -4,16 +4,16 @@
 /** Structure definition for cylinder parameters
  * [PYTHONCLASS] = CylinderModel
  * [DISP_PARAMS] = radius, length, cyl_theta, cyl_phi
-   [DESCRIPTION] = <text>"P(q,alpha)= scale/V*f(q)^(2)+bkg\n\
-						f(q)= 2*(scatter_sld - solvent_sld)*V*sin(qLcos(alpha/2))/[qLcos(alpha/2)]*\n\
-						J1(qRsin(alpha/2))/[qRsin(alpha)]\n\
-						V: Volume of the cylinder\n\
-						R: Radius of the cylinder\n\
-						L: Length of the cylinder\n\
-						J1: The bessel function\n\
-						alpha: angle betweenthe axis of the cylinder and the q-vector\n\
-						for 1D:the ouput is P(q)=scale/V*integral from pi/2 to zero of f(q)^(2)*\n\
-						sin(alpha)*dalpha+ bkg"
+   [DESCRIPTION] = <text>P(q,alpha)= scale/V*f(q)^(2)+bkg
+						f(q)= 2*(scatter_sld - solvent_sld)*V*sin(qLcos(alpha/2))/[qLcos(alpha/2)]*
+						J1(qRsin(alpha/2))/[qRsin(alpha)]
+						V: Volume of the cylinder
+						R: Radius of the cylinder
+						L: Length of the cylinder
+						J1: The bessel function
+						alpha: angle betweenthe axis of the cylinder and the q-vector
+						for 1D:the ouput is P(q)=scale/V*integral from pi/2 to zero of f(q)^(2)*
+						sin(alpha)*dalpha+ bkg
 					</text>
 	
  * */

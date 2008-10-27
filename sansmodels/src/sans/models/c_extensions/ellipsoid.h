@@ -9,15 +9,15 @@
  //[PYTHONCLASS] = EllipsoidModel
  //[DISP_PARAMS] = radius_a, radius_b, axis_theta, axis_phi
  //[DESCRIPTION] = <text>"P(q.alpha)= scale*f(q)^(2)+ bkg\n\
-						f(q)= 3*(scatter_sld- scatter_solvent)*V*[sin(q*r(Ra,Rb,alpha)) - q*r*cos(qr(Ra,Rb,alpha))]\n\
-							/[qr(Ra,Rb,alpha)]^(3)"\
-						r(Ra,Rb,alpha)= [Rb^(2)*(sin(alpha))^(2) + Ra^(2)*(cos(alpha))^(2)]^(1/2)\
-						scatter_sld: scattering length density of the scatter\n\
-						solvent_sld: scattering length density of the solvent\n\
-						V: volune of the Eliipsoid\n\
-						Ra: radius along the rotation axis of the Ellipsoid\n\
-						Rb: radius perpendicular to the rotation axis of the ellipsoid\n\
-						</text>
+ //					f(q)= 3*(scatter_sld- scatter_solvent)*V*[sin(q*r(Ra,Rb,alpha)) - q*r*cos(qr(Ra,Rb,alpha))]
+ //							/[qr(Ra,Rb,alpha)]^(3)"
+ //						r(Ra,Rb,alpha)= [Rb^(2)*(sin(alpha))^(2) + Ra^(2)*(cos(alpha))^(2)]^(1/2)
+ //						scatter_sld: scattering length density of the scatter
+ //						solvent_sld: scattering length density of the solvent
+ //						V: volune of the Eliipsoid
+ //						Ra: radius along the rotation axis of the Ellipsoid
+ //						Rb: radius perpendicular to the rotation axis of the ellipsoid
+ //						</text>
 typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0
