@@ -52,11 +52,15 @@ class ModelPage(wx.Panel):
         self.sizer1 = wx.GridBagSizer(5,5)
         self.sizer2 = wx.GridBagSizer(5,5)
         self.sizer4 = wx.GridBagSizer(5,5)
+        self.sizer5 = wx.GridBagSizer(5,5)
+        self.static_line_1 = wx.StaticLine(self, -1)
         self.modelbox = wx.ComboBox(self, -1)
         id = wx.NewId()
         self.vbox.Add(self.sizer3)
         self.vbox.Add(self.sizer1)
         self.vbox.Add(self.sizer2)
+        self.vbox.Add(self.static_line_1, 0, wx.EXPAND, 0)
+        self.vbox.Add(self.sizer5)
         self.vbox.Add(self.sizer4)
         
         id = wx.NewId()
@@ -207,6 +211,7 @@ class ModelPage(wx.Panel):
         
         self.sizer2.Clear(True)
         self.sizer1.Clear(True)
+        self.sizer5.Clear(True)
         self.parameters = []
         self.param_toFit=[]
         self.model = model
@@ -215,8 +220,17 @@ class ModelPage(wx.Panel):
         description=None
         if hasattr(self.model,'description'):
             description =model.description
-        
-
+        disp_list=self.model.getDispParamList()
+        ip=0
+        iq=1
+        if len(disp_list)>0:
+            disp = wx.StaticText(self, -1, 'Dispersion')
+            self.sizer5.Add(disp,( iq, ip),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+            ip += 1 
+            values = wx.StaticText(self, -1, 'Values')
+            self.sizer5.Add(values,( iq, ip),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            
+        disp_list.sort()
         print "went here",self.model.name,model.description
         iy = 1
         ix = 0
@@ -246,26 +260,46 @@ class ModelPage(wx.Panel):
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_4.Hide()
         for item in keys:
-            iy += 1
-            ix = 0
-            cb=wx.StaticText(self, -1, item)
-            self.sizer2.Add( cb,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-            ix += 1
-            value= self.model.getParam(item)
-            ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
-            ctl1.SetValue(str (format_number(value)))
-            ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-            ctl1.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
-            self.sizer2.Add(ctl1, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-            ix +=1
-            # Units
-            try:
-                units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
-            except:
-                units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
-            self.sizer2.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            if not item in disp_list:
+                iy += 1
+                ix = 0
+                cb=wx.StaticText(self, -1, item)
+                self.sizer2.Add( cb,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                ix += 1
+                value= self.model.getParam(item)
+                ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                ctl1.SetValue(str (format_number(value)))
+                ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                ctl1.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
+                self.sizer2.Add(ctl1, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                ix +=1
+                
+                # Units
+                try:
+                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
+                except:
+                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
+                self.sizer2.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            else:
+                ip = 0
+                iq += 1
+                cb = wx.CheckBox(self, -1, item, (10, 10))
+                cb.SetValue(False)
+                self.sizer5.Add( cb,( iq, ip),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                wx.EVT_CHECKBOX(self, cb.GetId(), self._on_select_model)
+                
+                ip += 1
+                value= self.model.getParam(item)
+                ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                ctl1.SetValue(str (format_number(value)))
+                ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                self.sizer5.Add(ctl1, (iq,ip),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             #save data
             self.parameters.append([cb,ctl1])
+        iy+=1
+        self.sizer2.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        
         #Display units text on panel
         for item in keys:   
             if self.model.details[item][0]!='':
@@ -275,7 +309,7 @@ class ModelPage(wx.Panel):
                 self.text2_4.Hide()
         self.vbox.Layout()
         self.GrandParent.GetSizer().Layout()
-        print "out"
+       
         
     def _onparamEnter(self,event):
         """ 

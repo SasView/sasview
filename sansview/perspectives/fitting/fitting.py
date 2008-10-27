@@ -508,6 +508,7 @@ class Plugin:
                             tempy = model.run(tempx)
                             theory.x.append(tempx) 
                             theory.y.append(tempy)
+                           
                     except:
                         wx.PostEvent(self.parent, StatusEvent(status="fitting \
                         skipping point x %g %s" %(data.x[i], sys.exc_value)))   
@@ -519,6 +520,7 @@ class Plugin:
                 except:
                     wx.PostEvent(self.parent, StatusEvent(status="fitting \
                         skipping point x %g %s" %(qmax, sys.exc_value)))
+                
             else:
                 theory=Data2D(data.image, data.err_image)
                 #theory=Theory2D(data.image, data.err_image)
@@ -550,7 +552,7 @@ class Plugin:
                 theory.xmax= qmax
                 theory.ymin= ymin
                 theory.ymax= ymax
-                
+        
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model"))
         
         
