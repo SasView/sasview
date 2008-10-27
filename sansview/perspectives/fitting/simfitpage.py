@@ -96,10 +96,10 @@ class SimultaneousFitPage(wx.Panel):
                 self.model_toFit.append(item)
         else:
             #print"simfit: deselected all"
-            self.manager.schedule_for_fit( value=0,fitproblem =item[1]) 
+            
             for item in self.model_list:
                 item[0].SetValue(False) 
-                #item[1].schedule_tofit(0)
+                self.manager.schedule_for_fit( value=0,fitproblem =item[1]) 
                 
             self.model_toFit=[]
        
