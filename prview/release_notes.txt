@@ -42,7 +42,7 @@ Package name: prview
 	2.2- Installing:
 		- Get the code from svn://danse.us/sans/releases/prview-0.2.3
 		- This application is also dependent on the following DANSE code:
-			svn://danse.us/common/releases/plottools-0.1.1-dev
+			svn://danse.us/common/releases/plottools-0.1.2-dev
 			svn://danse.us/common/releases/util-0.1
 			svn://danse.us/sans/releases/DataLoader-0.2.1
 			svn://danse.us/sans/releases/guicomm-0.1.0
