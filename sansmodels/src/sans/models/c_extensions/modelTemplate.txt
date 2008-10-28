@@ -30,7 +30,7 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         
         ## Name of the model
         self.name = "[PYTHONCLASS]"
-
+        self.description= """[DESCRIPTION]"""
 		[PAR_DETAILS]
    
     def clone(self):

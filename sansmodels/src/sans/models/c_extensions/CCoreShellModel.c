@@ -1,4 +1,4 @@
-/** CCoreShellModel
+/** [PYTHONCLASS]
  *
  * C extension 
  *
@@ -19,7 +19,7 @@
 #include "core_shell.h"
 
 /// Error object for raised exceptions
-static PyObject * CCoreShellModelError = NULL;
+static PyObject * [PYTHONCLASS]Error = NULL;
 
 
 // Class definition
@@ -31,11 +31,11 @@ typedef struct {
     PyObject * log;
     /// Model parameters
 	CoreShellParameters model_pars;
-} CCoreShellModel;
+} [PYTHONCLASS];
 
 
 static void
-CCoreShellModel_dealloc(CCoreShellModel* self)
+[PYTHONCLASS]_dealloc([PYTHONCLASS]* self)
 {
     self->ob_type->tp_free((PyObject*)self);
     
@@ -43,17 +43,17 @@ CCoreShellModel_dealloc(CCoreShellModel* self)
 }
 
 static PyObject *
-CCoreShellModel_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+[PYTHONCLASS]_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-    CCoreShellModel *self;
+    [PYTHONCLASS] *self;
     
-    self = (CCoreShellModel *)type->tp_alloc(type, 0);
+    self = ([PYTHONCLASS] *)type->tp_alloc(type, 0);
    
     return (PyObject *)self;
 }
 
 static int
-CCoreShellModel_init(CCoreShellModel *self, PyObject *args, PyObject *kwds)
+[PYTHONCLASS]_init([PYTHONCLASS] *self, PyObject *args, PyObject *kwds)
 {
     if (self != NULL) {
     	
@@ -79,10 +79,10 @@ CCoreShellModel_init(CCoreShellModel *self, PyObject *args, PyObject *kwds)
     return 0;
 }
 
-static PyMemberDef CCoreShellModel_members[] = {
-    {"params", T_OBJECT, offsetof(CCoreShellModel, params), 0,
+static PyMemberDef [PYTHONCLASS]_members[] = {
+    {"params", T_OBJECT, offsetof([PYTHONCLASS], params), 0,
      "Parameters"},
-    {"log", T_OBJECT, offsetof(CCoreShellModel, log), 0,
+    {"log", T_OBJECT, offsetof([PYTHONCLASS], log), 0,
      "Log"},
     {NULL}  /* Sentinel */
 };
@@ -91,7 +91,7 @@ static PyMemberDef CCoreShellModel_members[] = {
     @param p PyObject
     @return double
 */
-double CCoreShellModel_readDouble(PyObject *p) {
+double [PYTHONCLASS]_readDouble(PyObject *p) {
     if (PyFloat_Check(p)==1) {
         return (double)(((PyFloatObject *)(p))->ob_fval);
     } else if (PyInt_Check(p)==1) {
@@ -109,7 +109,7 @@ double CCoreShellModel_readDouble(PyObject *p) {
  * @param args: input q or [q,phi]
  * @return: function value
  */
-static PyObject * run(CCoreShellModel *self, PyObject *args) {
+static PyObject * run([PYTHONCLASS] *self, PyObject *args) {
 	double q_value, phi_value;
 	PyObject* pars;
 	int npars;
@@ -128,8 +128,8 @@ static PyObject * run(CCoreShellModel *self, PyObject *args) {
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
 	if ( !PyArg_ParseTuple(args,"O",&pars) ) {
-	    PyErr_SetString(CCoreShellModelError, 
-	    	"CCoreShellModel.run expects a q value.");
+	    PyErr_SetString([PYTHONCLASS]Error, 
+	    	"[PYTHONCLASS].run expects a q value.");
 		return NULL;
 	}
 	  
@@ -139,14 +139,14 @@ static PyObject * run(CCoreShellModel *self, PyObject *args) {
 		// Length of list should be 2 for I(q,phi)
 	    npars = PyList_GET_SIZE(pars); 
 	    if(npars!=2) {
-	    	PyErr_SetString(CCoreShellModelError, 
-	    		"CCoreShellModel.run expects a double or a list of dimension 2.");
+	    	PyErr_SetString([PYTHONCLASS]Error, 
+	    		"[PYTHONCLASS].run expects a double or a list of dimension 2.");
 	    	return NULL;
 	    }
 	    // We have a vector q, get the q and phi values at which
 	    // to evaluate I(q,phi)
-	    q_value = CCoreShellModel_readDouble(PyList_GET_ITEM(pars,0));
-	    phi_value = CCoreShellModel_readDouble(PyList_GET_ITEM(pars,1));
+	    q_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,0));
+	    phi_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,1));
 	    // Skip zero
 	    if (q_value==0) {
 	    	return Py_BuildValue("d",0.0);
@@ -156,7 +156,7 @@ static PyObject * run(CCoreShellModel *self, PyObject *args) {
 	} else {
 
 		// We have a scalar q, we will evaluate I(q)
-		q_value = CCoreShellModel_readDouble(pars);		
+		q_value = [PYTHONCLASS]_readDouble(pars);		
 		
 		return Py_BuildValue("d",core_shell_analytical_1D(&(self->model_pars),q_value));
 	}	
@@ -167,7 +167,7 @@ static PyObject * run(CCoreShellModel *self, PyObject *args) {
  * @param args: input q or [qx, qy]]
  * @return: function value
  */
-static PyObject * runXY(CCoreShellModel *self, PyObject *args) {
+static PyObject * runXY([PYTHONCLASS] *self, PyObject *args) {
 	double qx_value, qy_value;
 	PyObject* pars;
 	int npars;
@@ -186,8 +186,8 @@ static PyObject * runXY(CCoreShellModel *self, PyObject *args) {
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
 	if ( !PyArg_ParseTuple(args,"O",&pars) ) {
-	    PyErr_SetString(CCoreShellModelError, 
-	    	"CCoreShellModel.run expects a q value.");
+	    PyErr_SetString([PYTHONCLASS]Error, 
+	    	"[PYTHONCLASS].run expects a q value.");
 		return NULL;
 	}
 	  
@@ -197,33 +197,33 @@ static PyObject * runXY(CCoreShellModel *self, PyObject *args) {
 		// Length of list should be 2 for I(qx, qy))
 	    npars = PyList_GET_SIZE(pars); 
 	    if(npars!=2) {
-	    	PyErr_SetString(CCoreShellModelError, 
-	    		"CCoreShellModel.run expects a double or a list of dimension 2.");
+	    	PyErr_SetString([PYTHONCLASS]Error, 
+	    		"[PYTHONCLASS].run expects a double or a list of dimension 2.");
 	    	return NULL;
 	    }
 	    // We have a vector q, get the qx and qy values at which
 	    // to evaluate I(qx,qy)
-	    qx_value = CCoreShellModel_readDouble(PyList_GET_ITEM(pars,0));
-	    qy_value = CCoreShellModel_readDouble(PyList_GET_ITEM(pars,1));
+	    qx_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,0));
+	    qy_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,1));
 		return Py_BuildValue("d",core_shell_analytical_2DXY(&(self->model_pars),qx_value,qy_value));
 
 	} else {
 
 		// We have a scalar q, we will evaluate I(q)
-		qx_value = CCoreShellModel_readDouble(pars);		
+		qx_value = [PYTHONCLASS]_readDouble(pars);		
 		
 		return Py_BuildValue("d",core_shell_analytical_1D(&(self->model_pars),qx_value));
 	}	
 }
 
-static PyObject * reset(CCoreShellModel *self, PyObject *args) {
+static PyObject * reset([PYTHONCLASS] *self, PyObject *args) {
     
 
     return Py_BuildValue("d",0.0);
 }
 
 
-static PyMethodDef CCoreShellModel_methods[] = {
+static PyMethodDef [PYTHONCLASS]_methods[] = {
     {"run",      (PyCFunction)run     , METH_VARARGS,
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
@@ -235,13 +235,13 @@ static PyMethodDef CCoreShellModel_methods[] = {
    {NULL}
 };
 
-static PyTypeObject CCoreShellModelType = {
+static PyTypeObject [PYTHONCLASS]Type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "CCoreShellModel",             /*tp_name*/
-    sizeof(CCoreShellModel),             /*tp_basicsize*/
+    "[PYTHONCLASS]",             /*tp_name*/
+    sizeof([PYTHONCLASS]),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
-    (destructor)CCoreShellModel_dealloc, /*tp_dealloc*/
+    (destructor)[PYTHONCLASS]_dealloc, /*tp_dealloc*/
     0,                         /*tp_print*/
     0,                         /*tp_getattr*/
     0,                         /*tp_setattr*/
@@ -257,24 +257,24 @@ static PyTypeObject CCoreShellModelType = {
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-    "CCoreShellModel objects",           /* tp_doc */
+    "[PYTHONCLASS] objects",           /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
     0,		               /* tp_richcompare */
     0,		               /* tp_weaklistoffset */
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
-    CCoreShellModel_methods,             /* tp_methods */
-    CCoreShellModel_members,             /* tp_members */
+    [PYTHONCLASS]_methods,             /* tp_methods */
+    [PYTHONCLASS]_members,             /* tp_members */
     0,                         /* tp_getset */
     0,                         /* tp_base */
     0,                         /* tp_dict */
     0,                         /* tp_descr_get */
     0,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
-    (initproc)CCoreShellModel_init,      /* tp_init */
+    (initproc)[PYTHONCLASS]_init,      /* tp_init */
     0,                         /* tp_alloc */
-    CCoreShellModel_new,                 /* tp_new */
+    [PYTHONCLASS]_new,                 /* tp_new */
 };
 
 
@@ -286,17 +286,17 @@ static PyMethodDef module_methods[] = {
  * Function used to add the model class to a module
  * @param module: module to add the class to
  */ 
-void addCCoreShellModel(PyObject *module) {
+void add[PYTHONCLASS](PyObject *module) {
 	PyObject *d;
 	
-    if (PyType_Ready(&CCoreShellModelType) < 0)
+    if (PyType_Ready(&[PYTHONCLASS]Type) < 0)
         return;
 
-    Py_INCREF(&CCoreShellModelType);
-    PyModule_AddObject(module, "CCoreShellModel", (PyObject *)&CCoreShellModelType);
+    Py_INCREF(&[PYTHONCLASS]Type);
+    PyModule_AddObject(module, "[PYTHONCLASS]", (PyObject *)&[PYTHONCLASS]Type);
     
     d = PyModule_GetDict(module);
-    CCoreShellModelError = PyErr_NewException("CCoreShellModel.error", NULL, NULL);
-    PyDict_SetItemString(d, "CCoreShellModelError", CCoreShellModelError);
+    [PYTHONCLASS]Error = PyErr_NewException("[PYTHONCLASS].error", NULL, NULL);
+    PyDict_SetItemString(d, "[PYTHONCLASS]Error", [PYTHONCLASS]Error);
 }
 

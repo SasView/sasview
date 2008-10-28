@@ -34,7 +34,7 @@ class Gaussian(CGaussian, BaseComponent):
         
         ## Name of the model
         self.name = "Gaussian"
-
+        self.description= """f(x)=scale * 1/(sigma^2*2pi)e^(-(x-mu)^2/2sigma^2)"""
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]

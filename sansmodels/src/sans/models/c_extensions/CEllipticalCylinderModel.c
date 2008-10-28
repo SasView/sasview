@@ -1,4 +1,4 @@
-/** CEllipticalCylinderModel
+/** [PYTHONCLASS]
  *
  * C extension 
  *
@@ -19,7 +19,7 @@
 #include "elliptical_cylinder.h"
 
 /// Error object for raised exceptions
-static PyObject * CEllipticalCylinderModelError = NULL;
+static PyObject * [PYTHONCLASS]Error = NULL;
 
 
 // Class definition
@@ -31,11 +31,11 @@ typedef struct {
     PyObject * log;
     /// Model parameters
 	EllipticalCylinderParameters model_pars;
-} CEllipticalCylinderModel;
+} [PYTHONCLASS];
 
 
 static void
-CEllipticalCylinderModel_dealloc(CEllipticalCylinderModel* self)
+[PYTHONCLASS]_dealloc([PYTHONCLASS]* self)
 {
     self->ob_type->tp_free((PyObject*)self);
     
@@ -43,17 +43,17 @@ CEllipticalCylinderModel_dealloc(CEllipticalCylinderModel* self)
 }
 
 static PyObject *
-CEllipticalCylinderModel_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+[PYTHONCLASS]_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-    CEllipticalCylinderModel *self;
+    [PYTHONCLASS] *self;
     
-    self = (CEllipticalCylinderModel *)type->tp_alloc(type, 0);
+    self = ([PYTHONCLASS] *)type->tp_alloc(type, 0);
    
     return (PyObject *)self;
 }
 
 static int
-CEllipticalCylinderModel_init(CEllipticalCylinderModel *self, PyObject *args, PyObject *kwds)
+[PYTHONCLASS]_init([PYTHONCLASS] *self, PyObject *args, PyObject *kwds)
 {
     if (self != NULL) {
     	
@@ -81,10 +81,10 @@ CEllipticalCylinderModel_init(CEllipticalCylinderModel *self, PyObject *args, Py
     return 0;
 }
 
-static PyMemberDef CEllipticalCylinderModel_members[] = {
-    {"params", T_OBJECT, offsetof(CEllipticalCylinderModel, params), 0,
+static PyMemberDef [PYTHONCLASS]_members[] = {
+    {"params", T_OBJECT, offsetof([PYTHONCLASS], params), 0,
      "Parameters"},
-    {"log", T_OBJECT, offsetof(CEllipticalCylinderModel, log), 0,
+    {"log", T_OBJECT, offsetof([PYTHONCLASS], log), 0,
      "Log"},
     {NULL}  /* Sentinel */
 };
@@ -93,7 +93,7 @@ static PyMemberDef CEllipticalCylinderModel_members[] = {
     @param p PyObject
     @return double
 */
-double CEllipticalCylinderModel_readDouble(PyObject *p) {
+double [PYTHONCLASS]_readDouble(PyObject *p) {
     if (PyFloat_Check(p)==1) {
         return (double)(((PyFloatObject *)(p))->ob_fval);
     } else if (PyInt_Check(p)==1) {
@@ -111,7 +111,7 @@ double CEllipticalCylinderModel_readDouble(PyObject *p) {
  * @param args: input q or [q,phi]
  * @return: function value
  */
-static PyObject * run(CEllipticalCylinderModel *self, PyObject *args) {
+static PyObject * run([PYTHONCLASS] *self, PyObject *args) {
 	double q_value, phi_value;
 	PyObject* pars;
 	int npars;
@@ -132,8 +132,8 @@ static PyObject * run(CEllipticalCylinderModel *self, PyObject *args) {
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
 	if ( !PyArg_ParseTuple(args,"O",&pars) ) {
-	    PyErr_SetString(CEllipticalCylinderModelError, 
-	    	"CEllipticalCylinderModel.run expects a q value.");
+	    PyErr_SetString([PYTHONCLASS]Error, 
+	    	"[PYTHONCLASS].run expects a q value.");
 		return NULL;
 	}
 	  
@@ -143,14 +143,14 @@ static PyObject * run(CEllipticalCylinderModel *self, PyObject *args) {
 		// Length of list should be 2 for I(q,phi)
 	    npars = PyList_GET_SIZE(pars); 
 	    if(npars!=2) {
-	    	PyErr_SetString(CEllipticalCylinderModelError, 
-	    		"CEllipticalCylinderModel.run expects a double or a list of dimension 2.");
+	    	PyErr_SetString([PYTHONCLASS]Error, 
+	    		"[PYTHONCLASS].run expects a double or a list of dimension 2.");
 	    	return NULL;
 	    }
 	    // We have a vector q, get the q and phi values at which
 	    // to evaluate I(q,phi)
-	    q_value = CEllipticalCylinderModel_readDouble(PyList_GET_ITEM(pars,0));
-	    phi_value = CEllipticalCylinderModel_readDouble(PyList_GET_ITEM(pars,1));
+	    q_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,0));
+	    phi_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,1));
 	    // Skip zero
 	    if (q_value==0) {
 	    	return Py_BuildValue("d",0.0);
@@ -160,7 +160,7 @@ static PyObject * run(CEllipticalCylinderModel *self, PyObject *args) {
 	} else {
 
 		// We have a scalar q, we will evaluate I(q)
-		q_value = CEllipticalCylinderModel_readDouble(pars);		
+		q_value = [PYTHONCLASS]_readDouble(pars);		
 		
 		return Py_BuildValue("d",elliptical_cylinder_analytical_1D(&(self->model_pars),q_value));
 	}	
@@ -171,7 +171,7 @@ static PyObject * run(CEllipticalCylinderModel *self, PyObject *args) {
  * @param args: input q or [qx, qy]]
  * @return: function value
  */
-static PyObject * runXY(CEllipticalCylinderModel *self, PyObject *args) {
+static PyObject * runXY([PYTHONCLASS] *self, PyObject *args) {
 	double qx_value, qy_value;
 	PyObject* pars;
 	int npars;
@@ -192,8 +192,8 @@ static PyObject * runXY(CEllipticalCylinderModel *self, PyObject *args) {
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
 	if ( !PyArg_ParseTuple(args,"O",&pars) ) {
-	    PyErr_SetString(CEllipticalCylinderModelError, 
-	    	"CEllipticalCylinderModel.run expects a q value.");
+	    PyErr_SetString([PYTHONCLASS]Error, 
+	    	"[PYTHONCLASS].run expects a q value.");
 		return NULL;
 	}
 	  
@@ -203,33 +203,33 @@ static PyObject * runXY(CEllipticalCylinderModel *self, PyObject *args) {
 		// Length of list should be 2 for I(qx, qy))
 	    npars = PyList_GET_SIZE(pars); 
 	    if(npars!=2) {
-	    	PyErr_SetString(CEllipticalCylinderModelError, 
-	    		"CEllipticalCylinderModel.run expects a double or a list of dimension 2.");
+	    	PyErr_SetString([PYTHONCLASS]Error, 
+	    		"[PYTHONCLASS].run expects a double or a list of dimension 2.");
 	    	return NULL;
 	    }
 	    // We have a vector q, get the qx and qy values at which
 	    // to evaluate I(qx,qy)
-	    qx_value = CEllipticalCylinderModel_readDouble(PyList_GET_ITEM(pars,0));
-	    qy_value = CEllipticalCylinderModel_readDouble(PyList_GET_ITEM(pars,1));
+	    qx_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,0));
+	    qy_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,1));
 		return Py_BuildValue("d",elliptical_cylinder_analytical_2DXY(&(self->model_pars),qx_value,qy_value));
 
 	} else {
 
 		// We have a scalar q, we will evaluate I(q)
-		qx_value = CEllipticalCylinderModel_readDouble(pars);		
+		qx_value = [PYTHONCLASS]_readDouble(pars);		
 		
 		return Py_BuildValue("d",elliptical_cylinder_analytical_1D(&(self->model_pars),qx_value));
 	}	
 }
 
-static PyObject * reset(CEllipticalCylinderModel *self, PyObject *args) {
+static PyObject * reset([PYTHONCLASS] *self, PyObject *args) {
     
 
     return Py_BuildValue("d",0.0);
 }
 
 
-static PyMethodDef CEllipticalCylinderModel_methods[] = {
+static PyMethodDef [PYTHONCLASS]_methods[] = {
     {"run",      (PyCFunction)run     , METH_VARARGS,
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
@@ -241,13 +241,13 @@ static PyMethodDef CEllipticalCylinderModel_methods[] = {
    {NULL}
 };
 
-static PyTypeObject CEllipticalCylinderModelType = {
+static PyTypeObject [PYTHONCLASS]Type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "CEllipticalCylinderModel",             /*tp_name*/
-    sizeof(CEllipticalCylinderModel),             /*tp_basicsize*/
+    "[PYTHONCLASS]",             /*tp_name*/
+    sizeof([PYTHONCLASS]),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
-    (destructor)CEllipticalCylinderModel_dealloc, /*tp_dealloc*/
+    (destructor)[PYTHONCLASS]_dealloc, /*tp_dealloc*/
     0,                         /*tp_print*/
     0,                         /*tp_getattr*/
     0,                         /*tp_setattr*/
@@ -263,24 +263,24 @@ static PyTypeObject CEllipticalCylinderModelType = {
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-    "CEllipticalCylinderModel objects",           /* tp_doc */
+    "[PYTHONCLASS] objects",           /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
     0,		               /* tp_richcompare */
     0,		               /* tp_weaklistoffset */
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
-    CEllipticalCylinderModel_methods,             /* tp_methods */
-    CEllipticalCylinderModel_members,             /* tp_members */
+    [PYTHONCLASS]_methods,             /* tp_methods */
+    [PYTHONCLASS]_members,             /* tp_members */
     0,                         /* tp_getset */
     0,                         /* tp_base */
     0,                         /* tp_dict */
     0,                         /* tp_descr_get */
     0,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
-    (initproc)CEllipticalCylinderModel_init,      /* tp_init */
+    (initproc)[PYTHONCLASS]_init,      /* tp_init */
     0,                         /* tp_alloc */
-    CEllipticalCylinderModel_new,                 /* tp_new */
+    [PYTHONCLASS]_new,                 /* tp_new */
 };
 
 
@@ -292,17 +292,17 @@ static PyMethodDef module_methods[] = {
  * Function used to add the model class to a module
  * @param module: module to add the class to
  */ 
-void addCEllipticalCylinderModel(PyObject *module) {
+void add[PYTHONCLASS](PyObject *module) {
 	PyObject *d;
 	
-    if (PyType_Ready(&CEllipticalCylinderModelType) < 0)
+    if (PyType_Ready(&[PYTHONCLASS]Type) < 0)
         return;
 
-    Py_INCREF(&CEllipticalCylinderModelType);
-    PyModule_AddObject(module, "CEllipticalCylinderModel", (PyObject *)&CEllipticalCylinderModelType);
+    Py_INCREF(&[PYTHONCLASS]Type);
+    PyModule_AddObject(module, "[PYTHONCLASS]", (PyObject *)&[PYTHONCLASS]Type);
     
     d = PyModule_GetDict(module);
-    CEllipticalCylinderModelError = PyErr_NewException("CEllipticalCylinderModel.error", NULL, NULL);
-    PyDict_SetItemString(d, "CEllipticalCylinderModelError", CEllipticalCylinderModelError);
+    [PYTHONCLASS]Error = PyErr_NewException("[PYTHONCLASS].error", NULL, NULL);
+    PyDict_SetItemString(d, "[PYTHONCLASS]Error", [PYTHONCLASS]Error);
 }
 

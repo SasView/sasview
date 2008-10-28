@@ -35,7 +35,13 @@ class SphereModel(CSphereModel, BaseComponent):
         
         ## Name of the model
         self.name = "SphereModel"
-
+        self.description= """P(q)=(scale/V)*[3V(scatter_sld-solvent_sld)*(sin(qR)-qRcos(qR))/(qR)^3]^(2)
+		+bkg
+		bkg: background level
+		R: radius of the sphere
+		V:The volume of the scatter
+		scatter_sld: the scattering length density of the scatter
+		solvent_sld: the scattering length density of the solvent"""
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]

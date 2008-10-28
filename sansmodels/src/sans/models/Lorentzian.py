@@ -34,7 +34,7 @@ class Lorentzian(CLorentzian, BaseComponent):
         
         ## Name of the model
         self.name = "Lorentzian"
-        self.description=''
+        self.description= """f(x)=scale * 1/pi 0.5gamma / [ (x-x_0)^2 + (0.5gamma)^2 ]"""
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]

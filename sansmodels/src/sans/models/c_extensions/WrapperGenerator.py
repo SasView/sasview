@@ -130,7 +130,7 @@ class WrapperGenerator:
                             temp=toks2[1].split(key2,1)
                             self.description=temp[0]
                             break
-                        print self.description
+                        #print self.description
                     else:
                         self.description=temp
                         break
@@ -146,15 +146,15 @@ class WrapperGenerator:
                     self.description+=tok[1].lstrip().rstrip()
                     break
                 else:
-                    if re.search("*",line)!=None:
-                        temp=line.split("//",1)
-                        self.description+='\n'+temp[1].lstrip().rstrip()
+                    #if re.search("*",line)!=None:
+                    #    temp=line.split("*",1)
+                    #    self.description+='\n'+temp[1].lstrip().rstrip()
                     if re.search("//",line)!=None:
                         temp=line.split("//",1)
-                        self.description+='\n'+temp[1].lstrip().rstrip()
+                        self.description+='\n\t\t'+temp[1].lstrip().rstrip()
                         
                     else:
-                        self.description+='\n'+line.lstrip().rstrip()
+                        self.description+='\n\t\t'+line.lstrip().rstrip()
                     
                 
         for line in lines:
@@ -223,7 +223,7 @@ class WrapperGenerator:
             key = "CalcParameters calcPars"
             if line.count(key)>0:
                 self.modelCalcFlag = True
-                
+            
                 
                 
     def write_c_wrapper(self):
@@ -243,7 +243,9 @@ class WrapperGenerator:
             # Catch class name
             newline = self.replaceToken(tmp_line, 
                                         "[PYTHONCLASS]", 'C'+self.pythonClass)
-            
+            ##catch description
+            #newline = self.replaceToken(tmp_line, 
+            #                            "[DESCRIPTION]", self.description)
             # Catch class name
             newline = self.replaceToken(newline, 
                                         "[MODELSTRUCT]", self.structName)
@@ -335,10 +337,10 @@ class WrapperGenerator:
             # Parameter details
             newline = self.replaceToken(newline, 
                                         "[PAR_DETAILS]", self.details)
-
+            #print"write",tmp_line 
             # Write new line to the wrapper .c file
             file.write(newline+'\n')
-               
+           
         file.close()
         
         

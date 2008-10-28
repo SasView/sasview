@@ -108,32 +108,56 @@ class WrapperGenerator:
         self.details += "        self.details = {}\n"
          # Catch Description
         key = "[DESCRIPTION]"
-        find_description= False
+        find_description= 0
         temp=""
         for line in lines:
             if line.count(key)>0 :
-                find_description= True
+                
                 try:
+                    find_description= 1
                     index = line.index(key)
                     toks = line[index:].split("=",1 )
                     temp=toks[1].lstrip().rstrip()
                     text='text'
-                    key2="<%s>"%text.lower
+                    key2="<%s>"%text.lower()
                     if re.match(key2,temp)!=None:
-                        index2 = line.index(key2)
-                        temp=line[index:]
+                        #index2 = line.index(key2)
+                        #temp = temp[index2:]
+                        toks2=temp.split(key2,1)
+                        self.description=toks2[1]
+                        text='text'
+                        key2="</%s>"%text.lower()
+                        if re.search(key2,toks2[1])!=None:
+                            temp=toks2[1].split(key2,1)
+                            self.description=temp[0]
+                            break
+                        #print self.description
                     else:
                         self.description=temp
+                        break
                 except:
                      raise ValueError, "Could not parse file %s" % self.file
-                if find_description:
-                    text='text'
-                    key2="</%s>"%text.lower
-                    if re.match(key2,temp)!=None:
-                        index2 = line.index(key2)
-                        temp=line[:index]
-                    temp+=line
-        self.description= temp
+            elif find_description==1:
+                text='text'
+                key2="</%s>"%text.lower()
+                #print "second line",line,key2,re.search(key2,line)
+                if re.search(key2,line)!=None:
+                    tok=line.split(key2,1)
+                    temp=tok[0].split("//",1)
+                    self.description+=tok[1].lstrip().rstrip()
+                    break
+                else:
+                    #if re.search("*",line)!=None:
+                    #    temp=line.split("*",1)
+                    #    self.description+='\n'+temp[1].lstrip().rstrip()
+                    if re.search("//",line)!=None:
+                        temp=line.split("//",1)
+                        self.description+='\n\t\t'+temp[1].lstrip().rstrip()
+                        
+                    else:
+                        self.description+='\n\t\t'+line.lstrip().rstrip()
+                    
+                
                 
         for line in lines:
             
@@ -234,7 +258,9 @@ class WrapperGenerator:
             # Catch class name
             newline = self.replaceToken(tmp_line, 
                                         "[PYTHONCLASS]", 'C'+self.pythonClass)
-            
+            #Catch model description
+            newline = self.replaceToken(tmp_line, 
+                                        "[DESCRIPTION]", self.description)
             # Catch C model name
             newline = self.replaceToken(newline, 
                                         "[CMODEL]", self.pythonClass)
