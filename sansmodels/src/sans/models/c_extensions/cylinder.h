@@ -16,7 +16,7 @@
 						sin(alpha)*dalpha+ bkg
 					</text>
 	
- * */
+ **/
 typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0
