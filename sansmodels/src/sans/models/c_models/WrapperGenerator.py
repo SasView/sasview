@@ -2,7 +2,7 @@
 """ WrapperGenerator class to generate model code automatically.
 """
 
-import os, sys
+import os, sys,re
 
 class WrapperGenerator:
     """ Python wrapper generator for C models
@@ -136,6 +136,7 @@ class WrapperGenerator:
                         self.description=temp
                         break
                 except:
+                     raise
                      raise ValueError, "Could not parse file %s" % self.file
             elif find_description==1:
                 text='text'
@@ -239,7 +240,7 @@ class WrapperGenerator:
                 except:
                     raise ValueError, "Could not parse file %s" % self.file
                
-                
+        
                 
     def write_c_wrapper(self):
         """ Writes the C file to create the python extension class 
@@ -259,8 +260,8 @@ class WrapperGenerator:
             newline = self.replaceToken(tmp_line, 
                                         "[PYTHONCLASS]", 'C'+self.pythonClass)
             #Catch model description
-            newline = self.replaceToken(tmp_line, 
-                                        "[DESCRIPTION]", self.description)
+            #newline = self.replaceToken(tmp_line, 
+            #                            "[DESCRIPTION]", self.description)
             # Catch C model name
             newline = self.replaceToken(newline, 
                                         "[CMODEL]", self.pythonClass)
@@ -350,7 +351,6 @@ class WrapperGenerator:
             newline = self.replaceToken(newline, 
                                         "[SET_DISPERSION]", set_weights)     
             
-            
             # Write new line to the wrapper .c file
             file.write(newline+'\n')
             
@@ -385,13 +385,13 @@ class WrapperGenerator:
             # Include file
             newline = self.replaceToken(newline, 
                                         "[DEFAULT_LIST]", self.default_list)
-
+            # model description
+            newline = self.replaceToken(newline, 
+                                        "[DESCRIPTION]", self.description)
             # Parameter details
             newline = self.replaceToken(newline, 
                                         "[PAR_DETAILS]", self.details)
-            # Parameter details
-            newline = self.replaceToken(newline, 
-                                        "[DESCRIPTION]", self.description)
+           
 
             # Write new line to the wrapper .c file
             file.write(newline+'\n')
@@ -418,6 +418,7 @@ class WrapperGenerator:
 if __name__ == '__main__':
     if len(sys.argv)>1:
         print "Will look for file %s" % sys.argv[1]
+    #app = WrapperGenerator('../c_extensions/elliptical_cylinder.h')
         app = WrapperGenerator(sys.argv[1])
     else:
         app = WrapperGenerator("test.h")
