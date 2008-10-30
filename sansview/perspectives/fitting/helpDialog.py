@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import wx
 import wx.html as html
+import os
 
 class HelpWindow(wx.Dialog):
     def __init__(self, parent, id, title):
@@ -30,7 +31,21 @@ class HelpWindow(wx.Dialog):
        
 
         help = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER)
-        help.LoadPage('help.html')
+        try:
+           cwd = os.path.split(__file__)[0]
+        except:
+            cwd = os.getcwd()
+       
+        
+        
+        dir = os.path.dirname(os.path.dirname(cwd))
+        filename="doc\load_data_help.html"
+        print os.path.join(dir,filename)
+        fname=os.path.join(dir,filename)
+        help.LoadPage( fname )
+        
+         
+        #print help.ToText()
        
         vbox.Add(help, 1, wx.EXPAND)
         
