@@ -1,0 +1,36 @@
+<html>
+<body>
+
+<h4>Simultaneous Fit</h4>
+<p>
+	Can only happen with more than 2 data select with their associated model.
+	Can only operate with the park engine selected <b>Fitting</b> on the menu.
+	check <b> park</b>.
+</p>
+<ul>
+<li><a href="#noconstraint">Simultaneous Fit without constraint</a></li>
+<li><a href="#constraint">Simultaneous Fit with constraint</a></li>
+</ul>
+
+<h5><a name="noconstraint">Simultaneous Fit without constraint</a></h5>
+<p> 
+	Highlight the data to fit. Select from the context menu <b>Select Data for fitting</b>.
+	A new tab with the name of the data selected will appears. Select a model used for the fit
+	from the combo box. Model's parameters will be display.Set initial parameters if need.
+	Check at least one parameter to fit.Go to <b>Simultaneous Fit</b> and check at least 2
+	models name to fit.Click on <b> constraint fit </b> button. results will be displayed on 
+	tabs corresponding to each model select.
+	
+</p>
+
+<h5><a name="constraint">Simultaneous Fit with constraint</a></h5>
+<p>
+	Perform <a href="#noconstraint">Simultaneous Fit without constraint</a> step.
+	Enter constraint in the text control next to  <b>constraint fit</b> button.
+	Constraint should be of type model1 parameter name = f(model2 parameter name).
+	Many constraints can be entered for a single fit.Each of them should be separated 
+	by a newline charater or ";"
+</p>
+
+</body>
+</html>
