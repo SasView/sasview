@@ -2,11 +2,7 @@ import os, sys
 import wx
 from danse.common.plottools.plottables import Data1D, Theory1D, Data2D
 from DataLoader.loader import Loader
-class Theory2D(Data2D):
-    def __init__(self,image=None,err_image=None,xmin=None,
-                 xmax=None,ymin=None,ymax=None,zmin=None,zmax=None):
-        Data2D.__init__(self,image,err_image,xmin,
-                        xmax,ymin,ymax,zmin,zmax)
+
 def choose_data_file(parent, location=None):
     path = None
     if location==None:

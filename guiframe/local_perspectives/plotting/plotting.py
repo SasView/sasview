@@ -15,7 +15,7 @@ import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph,Data1D
 from sans.guicomm.events import EVT_NEW_PLOT
-
+from sans.guicomm.events import StatusEvent 
 class PanelMenu(wx.Menu):
     plots = None
     graph = None
@@ -124,7 +124,7 @@ class View1DPanel1D(PlotPanel):
 
     def onLeftDown(self,event): 
         """ left button down and ready to drag"""
-        from sans.guicomm.events import StatusEvent    
+           
         PlotPanel.onLeftDown(self, event)
         ax = event.inaxes
         if ax != None:
@@ -441,7 +441,7 @@ class View1DPanel2D( View1DPanel1D):
             self.scale = 'log'
         self.image(self.data,self.xmin_2D,self.xmax_2D,self.ymin_2D,
                    self.ymax_2D,self.zmin_2D ,self.zmax_2D )
- 
+        wx.PostEvent(self.parent, StatusEvent(status="Image is in %s scale"%self.scale))
       
 class Plugin:
     """
