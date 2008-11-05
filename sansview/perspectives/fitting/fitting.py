@@ -1,9 +1,9 @@
 import os,os.path, re
 import sys, wx, logging
-import string, numpy, pylab, math
+import string, numpy,  math
 
 from copy import deepcopy 
-from danse.common.plottools.plottables import Data1D, Theory1D, Data2D
+from danse.common.plottools.plottables import Data1D, Theory1D,Data2D,Theory2D
 from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
 from sans.fit.AbstractFitEngine import Model,Data,FitData1D,FitData2D
@@ -13,11 +13,7 @@ from fitpanel import FitPanel
 import models,modelpage
 import fitpage1D,fitpage2D
 import park
-class Theory2D(Data2D):
-    def __init__(self,image=None,err_image=None,xmin=None,
-                 xmax=None,ymin=None,ymax=None,zmin=None,zmax=None):
-        Data2D.__init__(self,image,err_image,xmin,
-                        xmax,ymin,ymax,zmin,zmax)
+
 class Plugin:
     """
         Fitting plugin is used to perform fit 
@@ -95,6 +91,11 @@ class Plugin:
             if item.__class__.__name__ is "Data2D":
                 return [["Select data  for Fitting",\
                           "Dialog with fitting parameters ", self._onSelect]] 
+            #elif item.__class__.__name__ is "Theory2D":
+            #     return [["Line Slicer [Q-view]","Sector Averaging as a function of Q",
+            #             self.onLineSlicer],
+            #             ["Annulus Slicer [Phi-view]","Sector Averaging as a function of Phi",
+            #             self.onLineSlicer]]
             else:
                 if item.name==graph.selected_plottable and\
                  item.__class__.__name__ is  "Data1D":
@@ -527,7 +528,7 @@ class Plugin:
                         skipping point x %g %s" %(qmax, sys.exc_value)))
                 
             else:
-                theory=Data2D(data.image, data.err_image)
+                theory=Theory2D(data.data, data.err_data)
                 #theory=Theory2D(data.image, data.err_image)
                 theory.x_bins= data.x_bins
                 theory.y_bins= data.y_bins
@@ -541,12 +542,12 @@ class Plugin:
                 if ymax==None:
                     ymax=data.ymax
                     
-                theory.image = numpy.zeros((len(data.y_bins),len(data.x_bins)))
+                theory.data = numpy.zeros((len(data.y_bins),len(data.x_bins)))
                 for i in range(len(data.y_bins)):
                     if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
                         for j in range(len(data.x_bins)):
                             if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
-                                theory.image[j][i]=model.runXY([data.x_bins[j],data.y_bins[i]])
+                                theory.data[j][i]=model.runXY([data.x_bins[j],data.y_bins[i]])
                
                 #print "fitting : plot_helper:", theory.image
                 #print data.image

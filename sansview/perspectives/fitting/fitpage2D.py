@@ -225,9 +225,9 @@ class FitPage2D(wx.Panel):
                     if self.data.y_bins[i]>= ymin and self.data.y_bins[i]<= ymax:
                         for j in range(len(self.data.x_bins)):
                             if self.data.x_bins[j]>= xmin and self.data.x_bins[j]<= xmax:
-                                res.append( (self.data.image[j][i]- self.model.runXY(\
+                                res.append( (self.data.data[j][i]- self.model.runXY(\
                                  [self.data.x_bins[j],self.data.y_bins[i]]))\
-                                    /self.data.err_image[j][i] )
+                                    /self.data.err_data[j][i] )
                 sum=0
                
                 for item in res:
