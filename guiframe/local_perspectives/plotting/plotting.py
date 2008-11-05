@@ -442,7 +442,30 @@ class View1DPanel2D( View1DPanel1D):
         self.image(self.data,self.xmin_2D,self.xmax_2D,self.ymin_2D,
                    self.ymax_2D,self.zmin_2D ,self.zmax_2D )
         wx.PostEvent(self.parent, StatusEvent(status="Image is in %s scale"%self.scale))
-      
+        
+class View1DModelPanel2D( View1DPanel2D):
+    """
+        Plot panel for use with the GUI manager
+    """
+    
+    ## Internal name for the AUI manager
+    window_name = "plotpanel"
+    ## Title to appear on top of the window
+    window_caption = "Plot Panel"
+    ## Flag to tell the GUI manager that this panel is not
+    #  tied to any perspective
+    ALWAYS_ON = True
+    ## Group ID
+    group_id = None
+    
+    def __init__(self, parent, id = -1, color = None,\
+        dpi = None, style = wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
+        """
+            Initialize the panel
+        """
+        View1DPanel2D.__init__(self, parent, id = id, style = style, **kwargs)
+        
+       
 class Plugin:
     """
         Plug-in class to be instantiated by the GUI manager
@@ -541,10 +564,12 @@ class Plugin:
         
         # Create a new plot panel if none was available        
         if not is_available:
-            if not hasattr(event.plot,'image'):
+            if event.plot.__class__.__name__=='Data1D':
                 new_panel = View1DPanel1D(self.parent, -1, style=wx.RAISED_BORDER)
-            else:
+            if event.plot.__class__.__name__=='Data2D':
                 new_panel = View1DPanel2D(self.parent, -1, style=wx.RAISED_BORDER)
+            if event.plot.__class__.__name__=='Theory2D':
+                new_panel = View1DModelPanel2D(self.parent, -1, style=wx.RAISED_BORDER)
             # Set group ID if available
             group_id_str = ''
             if hasattr(event.plot, "group_id"):
