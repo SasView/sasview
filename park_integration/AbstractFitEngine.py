@@ -279,8 +279,8 @@ class FitData2D(object):
             or with vectors.
         """
         self.data=sans_data2d
-        self.image = sans_data2d.image
-        self.err_image = sans_data2d.err_image
+        self.image = sans_data2d.data
+        self.err_image = sans_data2d.err_data
         self.x_bins= sans_data2d.x_bins
         self.y_bins= sans_data2d.y_bins
        
