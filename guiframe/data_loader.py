@@ -91,6 +91,8 @@ def plot_data(parent, path, name="Loaded Data"):
     new_plot.source=output   
     new_plot.name = filename
     new_plot.interactive = True
+    print "loader output.detector",output.detector
+    new_plot.detector =output.detector
     # If the data file does not tell us what the axes are, just assume...
     new_plot.xaxis(output._xaxis,output._xunit)
     new_plot.yaxis(output._yaxis,output._yunit)

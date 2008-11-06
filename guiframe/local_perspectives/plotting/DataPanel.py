@@ -16,6 +16,7 @@ from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph,Data1D
 from sans.guicomm.events import EVT_NEW_PLOT
 from sans.guicomm.events import StatusEvent 
+
 class PanelMenu(wx.Menu):
     plots = None
     graph = None
@@ -25,7 +26,6 @@ class PanelMenu(wx.Menu):
     
     def set_graph(self, graph):
         self.graph = graph
-        
 class View1DPanel1D(PlotPanel):
     """
         Plot panel for use with the GUI manager
@@ -330,7 +330,7 @@ class View1DPanel2D( View1DPanel1D):
     ## Group ID
     group_id = None
     
-    def __init__(self, parent, id = -1, color = None,\
+    def __init__(self, parent, id = -1,data2d=None, color = None,\
         dpi = None, style = wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
         """
             Initialize the panel
@@ -341,7 +341,7 @@ class View1DPanel2D( View1DPanel1D):
         self.parent = parent
         ## Plottables
         self.plots = {}
-        
+        self.data = data2d
         ## Unique ID (from gui_manager)
         self.uid = None
         
@@ -442,130 +442,106 @@ class View1DPanel2D( View1DPanel1D):
         self.image(self.data,self.xmin_2D,self.xmax_2D,self.ymin_2D,
                    self.ymax_2D,self.zmin_2D ,self.zmax_2D )
         wx.PostEvent(self.parent, StatusEvent(status="Image is in %s scale"%self.scale))
-      
-class Plugin:
+        
+class View1DModelPanel2D( View1DPanel2D):
     """
-        Plug-in class to be instantiated by the GUI manager
+        Plot panel for use with the GUI manager
     """
     
-    def __init__(self):
+    ## Internal name for the AUI manager
+    window_name = "plotpanel"
+    ## Title to appear on top of the window
+    window_caption = "Plot Panel"
+    ## Flag to tell the GUI manager that this panel is not
+    #  tied to any perspective
+    ALWAYS_ON = True
+    ## Group ID
+    group_id = None
+    
+    def __init__(self, parent, id = -1,color = None,\
+        dpi = None, style = wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
         """
-            Initialize the plug-in
+            Initialize the panel
         """
-        ## Plug-in name
-        self.sub_menu = "Plotting"
-        
+        View1DPanel2D.__init__(self, parent, id = id, style = style, **kwargs)
         ## Reference to the parent window
-        self.parent = None
-        
-        ## List of panels for the simulation perspective (names)
-        self.perspective = []
-        
-        ## Plot panels
-        self.plot_panels = []
-        
-
-    def populate_menu(self, id, parent):
-        """
-            Create a 'Plot' menu to list the panels
-            available for displaying
-            @param id: next available unique ID for wx events
-            @param parent: parent window
-        """
-        self.menu = wx.Menu()
-        return [(id, self.menu, "Plot")]
-    
-        
-    def get_panels(self, parent):
-        """
-            Create and return a list of panel objects
-        """
-        ## Save a reference to the parent
         self.parent = parent
-        # Connect to plotting events
-        self.parent.Bind(EVT_NEW_PLOT, self._on_plot_event)
+        ## Plottables
+        self.plots = {}
+        print "Model 2d panel"
         
-        # We have no initial panels for this plug-in
-        return []
-    
-    def get_perspective(self):
-        """
-            Get the list of panel names for this perspective
-        """
-        return self.perspective
-    
-    def on_perspective(self, event):
-        """
-            Call back function for the perspective menu item.
-            We notify the parent window that the perspective
-            has changed.
-            @param event: menu event
-        """
-        self.parent.set_perspective(self.perspective)
-    
-    def post_init(self):
-        """
-            Post initialization call back to close the loose ends
-            [Somehow openGL needs this call]
-        """
-        pass
-    
-    def _on_show_panel(self, event):
-        print "_on_show_panel"
-    
-    def _on_plot_event(self, event):
-        """
-            A new plottable is being shipped to the plotting plug-in.
-            Check whether we have a panel to put in on, or create
-            a new one
-            @param event: EVT_NEW_PLOT event
-        """
-        # Check whether we already have a graph with the same units
-        # as the plottable we just received. 
-        is_available = False
-        for panel in self.plot_panels:
-            if event.plot._xunit == panel.graph.prop["xunit_base"] \
-            and event.plot._yunit == panel.graph.prop["yunit_base"]:
-                if hasattr(event.plot, "group_id"):
-                    if not event.plot.group_id==None \
-                        and event.plot.group_id==panel.group_id:
-                        is_available = True
-                        panel._onEVT_1DREPLOT(event)
-                        self.parent.show_panel(panel.uid)
-                else:
-                    # Check that the plot panel has no group ID
-                    if panel.group_id==None:
-                        is_available = True
-                        panel._onEVT_1DREPLOT(event)
-                        self.parent.show_panel(panel.uid)
+        ## Unique ID (from gui_manager)
+        self.uid = None
         
-        # Create a new plot panel if none was available        
-        if not is_available:
-            if not hasattr(event.plot,'image'):
-                new_panel = View1DPanel1D(self.parent, -1, style=wx.RAISED_BORDER)
-            else:
-                new_panel = View1DPanel2D(self.parent, -1, style=wx.RAISED_BORDER)
-            # Set group ID if available
-            group_id_str = ''
-            if hasattr(event.plot, "group_id"):
-                if not event.plot.group_id==None:
-                    new_panel.group_id = event.plot.group_id
-                    group_id_str = ' [%s]' % event.plot.group_id
-            
-            if hasattr(event, "title"):
-                new_panel.window_caption = event.title
-                new_panel.window_name = event.title
-                #new_panel.window_caption = event.title+group_id_str
-                #new_panel.window_name = event.title+group_id_str
-            
-            event_id = self.parent.popup_panel(new_panel)
-            self.menu.Append(event_id, new_panel.window_caption, 
-                             "Show %s plot panel" % new_panel.window_caption)
-            # Set UID to allow us to reference the panel later
-            new_panel.uid = event_id
-            # Ship the plottable to its panel
-            new_panel._onEVT_1DREPLOT(event)
-            self.plot_panels.append(new_panel)        
-            
-        return
+        ## Action IDs for internal call-backs
+        self.action_ids = {}
         
+        ## Graph        
+        self.graph = Graph()
+        self.graph.xaxis("\\rm{Q}", 'A^{-1}')
+        self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
+        self.graph.render(self)
+    def onContextMenu(self, event):
+        # Slicer plot popup menu
+         #slicerpop = wx.Menu()
+        slicerpop = PanelMenu()
+        slicerpop.set_plots(self.plots)
+        slicerpop.set_graph(self.graph)
+                
+        # Option to save the data displayed
+    
+        # Various plot options
+        id = wx.NewId()
+        slicerpop.Append(id,'&Save image', 'Save image as PNG')
+        wx.EVT_MENU(self, id, self.onSaveImage)
+        
+        
+        item_list = self.parent.get_context_menu(self.graph)
+        if (not item_list==None) and (not len(item_list)==0):
+                slicerpop.AppendSeparator()
+                for item in item_list:
+                    try:
+                        id = wx.NewId()
+                        slicerpop.Append(id, item[0], item[1])
+                        wx.EVT_MENU(self, id, item[2])
+                    except:
+                        print sys.exc_value
+                        print RuntimeError, "View1DPanel2D.onContextMenu: bad menu item"
+        
+        slicerpop.AppendSeparator()
+      
+        id = wx.NewId()
+        slicerpop.Append(id, '&Line slicer [Q-view]')
+        wx.EVT_MENU(self, id, self.onLineSlicer) 
+        
+        id = wx.NewId()
+        slicerpop.Append(id, '&Annulus slicer [Phi-view]')
+        wx.EVT_MENU(self, id, self.onAnnulusSlicer) 
+        
+        id = wx.NewId()
+        slicerpop.Append(id, '&Clear slicer')
+        wx.EVT_MENU(self, id, self.onClearSlicer) 
+        
+        id = wx.NewId()
+        slicerpop.Append(id, '&Edit Parameters')
+        wx.EVT_MENU(self, id, self._onEditDetector) 
+        
+        pos = event.GetPosition()
+        pos = self.ScreenToClient(pos)
+        self.PopupMenu(slicerpop, pos)
+      
+    def onLineSlicer(self, event):
+        print "onLineSlicer"
+        
+    def onAnnulusSlicer(self, event):
+        print "onAnnulusSlicer"
+    def onClearSlicer(self, event):
+        print "onClearSlicer"
+    def _onEditDetector(self, event):
+        print "_onEditDetector"
+    def onSaveImage(self, event):
+        print "onSaveImage"
+    def _onToggleScale(self, event):
+        print "_onToggleScale"
+    def _onToggleEnable(self, event):
+        print "_onToggleEnable"
