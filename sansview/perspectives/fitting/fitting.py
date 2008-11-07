@@ -552,6 +552,8 @@ class Plugin:
                 #print "fitting : plot_helper:", theory.image
                 #print data.image
                 #print "fitting : plot_helper:",theory.image
+                theory.detector= data.detector
+                theory.source= data.source
                 theory.zmin= data.zmin
                 theory.zmax= data.zmax
                 theory.xmin= qmin

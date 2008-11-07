@@ -54,6 +54,7 @@ class FitPage1D(wx.Panel):
         self.sizer2 = wx.GridBagSizer(5,5)
         self.sizer1 = wx.GridBagSizer(5,5)
         
+        
         self.DataSource  =wx.StaticText(self, -1,str(data.name))
         
         self.modelbox = wx.ComboBox(self, -1)
@@ -168,6 +169,7 @@ class FitPage1D(wx.Panel):
         self.GrandParent.GetSizer().Layout()
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)
+        #self.scrollbar= wx.ScrollBar(self, -1,pos = wx.DefaultPosition,style = wx.VERTICAL)
         self.Centre()
         
         
