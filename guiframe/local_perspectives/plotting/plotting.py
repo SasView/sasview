@@ -92,6 +92,8 @@ class View1DPanel1D(PlotPanel):
         is_new = True
         if event.plot.name in self.plots.keys():
             # Check whether the class of plottable changed
+            print "panel1D ",event.plot.__class_
+            print "event panel 1d",self.plots[event.plot.name].__class__
             if not event.plot.__class__==self.plots[event.plot.name].__class__:
                 self.graph.delete(self.plots[event.plot.name])
             else:

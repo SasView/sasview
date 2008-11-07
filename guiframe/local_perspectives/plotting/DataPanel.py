@@ -90,8 +90,10 @@ class View1DPanel1D(PlotPanel):
             self._reset()
         
         is_new = True
+        print "model panel name",event.plot.name
         if event.plot.name in self.plots.keys():
             # Check whether the class of plottable changed
+            print "model panel",event.plot.name,event.plot.__class__
             if not event.plot.__class__==self.plots[event.plot.name].__class__:
                 self.graph.delete(self.plots[event.plot.name])
             else:
@@ -529,7 +531,8 @@ class View1DModelPanel2D( View1DPanel2D):
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
-      
+   
+
     def onLineSlicer(self, event):
         print "onLineSlicer"
         
