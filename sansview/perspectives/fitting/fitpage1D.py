@@ -64,9 +64,11 @@ class FitPage1D(wx.Panel):
         self.static_line_1 = wx.StaticLine(self, -1)
        
         self.vbox.Add(self.sizer3)
+        
         self.vbox.Add(self.sizer2)
         self.vbox.Add(self.static_line_1, 0, wx.EXPAND, 0)
         self.vbox.Add(self.sizer5)
+        
         self.vbox.Add(self.sizer4)
         self.vbox.Add(self.sizer1)
         
@@ -88,47 +90,51 @@ class FitPage1D(wx.Panel):
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer3.Add(self.modelbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
         ix = 0
         iy = 1
         #set maximum range for x in linear scale
-        self.text4_3 = wx.StaticText(self, -1, 'Maximum Data\n Range (Linear)', style=wx.ALIGN_LEFT)
+        self.text4_3 = wx.StaticText(self, -1, 'Maximum Data Range(Linear)', style=wx.ALIGN_LEFT)
         self.sizer4.Add(self.text4_3,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.text4_1 = wx.StaticText(self, -1, 'Min')
-        self.sizer4.Add(self.text4_1,(iy, ix),(1,1),\
+        self.sizer4.Add(wx.StaticText(self, -1, 'Min'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 2
-        self.text4_2 = wx.StaticText(self, -1, 'Max')
-        self.sizer4.Add(self.text4_2,(iy, ix),(1,1),\
+        self.sizer4.Add(wx.StaticText(self, -1, 'Max'),(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix = 0
         iy += 1
-        self.text4_4 = wx.StaticText(self, -1, 'x range')
-        self.sizer4.Add(self.text4_4,(iy, ix),(1,1),\
+        self.sizer4.Add(wx.StaticText(self, -1, 'x range'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.xmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.xmin.SetValue(format_number(numpy.min(data.x)))
         self.xmin.SetToolTipString("Minimun value of x in linear scale.")
-        self.sizer4.Add(self.xmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.xmin.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         self.xmin.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
         self.xmin.Disable()
+        self.sizer4.Add(self.xmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        
+       
         ix += 2
         self.xmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.xmax.SetValue(format_number(numpy.max(data.x)))
         self.xmax.SetToolTipString("Maximum value of x in linear scale.")
-        self.sizer4.Add(self.xmax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
         self.xmax.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
         self.xmax.Disable()
+        self.sizer4.Add(self.xmax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix =0
         iy+=1
-        self.sizer4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        self.sizer4.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         #Set chisqr  result into TextCtrl
         ix = 0
         iy = 1
-        
+        self.smear= wx.CheckBox(self, -1, "Smear", (10, 10))
+        self.sizer1.Add(self.smear,(iy,ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        iy+=1
         self.text1_1 = wx.StaticText(self, -1, 'Chi2/dof', style=wx.ALIGN_LEFT)
         #self.sizer1.Add(self.text1_1,1)
         self.sizer1.Add(self.text1_1,(iy,ix),(1,1),\
@@ -141,11 +147,11 @@ class FitPage1D(wx.Panel):
         ix +=2
         #self.sizer1.Add(self.btFit, 1, wx.LEFT | wx.BOTTOM , 5)
         self.sizer1.Add(self.btFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix+= 1
+        ix+= 2
         self.sizer1.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         #self.sizer1.Add( self.btClose,1, wx.LEFT | wx.BOTTOM , 5)
 
-        ix= 1
+        ix= 0
         iy+=1
         self.sizer1.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         #self.sizer1.Add((20,20), 0)
@@ -463,6 +469,7 @@ class FitPage1D(wx.Panel):
         """
         self.set_model_parameter()
         self.compute_chisqr()
+        
      
     def set_model_parameter(self):
         """
@@ -472,7 +479,9 @@ class FitPage1D(wx.Panel):
         if len(self.parameters) !=0 and self.model !=None:
             for item in self.parameters:
                 try:
-                    
+                    item[2].Hide()
+                    item[3].Clear()
+                    item[3].Hide()
                     name=str(item[0].GetLabelText())
                     value= float(item[1].GetValue())
                     self.model.setParam(name,value) 

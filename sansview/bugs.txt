@@ -10,3 +10,8 @@ the parameters don't appear
 
 5- plot data2D theory not working for all models
 ---->bugs[5] fixed
+---------------------------------------------------------------------------------
+1. close button does not show up properly when selecting model.
+static text is showing when  randomly when slecting the model to fit for the first time
+
+2.

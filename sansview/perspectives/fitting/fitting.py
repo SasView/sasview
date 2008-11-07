@@ -1,6 +1,6 @@
 import os,os.path, re
 import sys, wx, logging
-import string, numpy,  math
+import string, numpy, math
 
 from copy import deepcopy 
 from danse.common.plottools.plottables import Data1D, Theory1D,Data2D,Theory2D
@@ -577,19 +577,19 @@ class Plugin:
         """
              draw model with default data value
         """
-        x = pylab.arange(0.001, 0.1, 0.001)
+        x = numpy.arange(0.001, 0.1, 0.001)
         xlen = len(x)
-        dy = numpy.zeros(xlen)
         y = numpy.zeros(xlen)
         
         for i in range(xlen):
             y[i] = model.run(x[i])
-            dy[i] = math.sqrt(math.fabs(y[i]))
+
         try:
             new_plot = Theory1D(x, y)
             new_plot.name = "Model"
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+             
             new_plot.group_id ="Fitness"
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model"))
         except:
