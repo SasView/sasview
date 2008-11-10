@@ -1,6 +1,5 @@
 #if !defined(cylinder_h)
 #define cylinder_h
-#include string 
 /** Structure definition for cylinder parameters
  * [PYTHONCLASS] = CylinderModel
  * [DISP_PARAMS] = radius, length, cyl_theta, cyl_phi
