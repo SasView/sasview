@@ -88,10 +88,10 @@ def plot_data(parent, path, name="Loaded Data"):
             new_plot = Data1D(x=output.x,y=output.y,dy=output.dy)
     
     filename = os.path.basename(path)
-    new_plot.source=output   
+    new_plot.source=output.source
     new_plot.name = filename
     new_plot.interactive = True
-    print "loader output.detector",output.detector
+    #print "loader output.detector",output.source
     new_plot.detector =output.detector
     # If the data file does not tell us what the axes are, just assume...
     new_plot.xaxis(output._xaxis,output._xunit)

@@ -15,7 +15,7 @@ import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph,Data1D
 from sans.guicomm.events import EVT_NEW_PLOT
-from sans.guicomm.events import StatusEvent 
+from sans.guicomm.events import StatusEvent ,NewPlotEvent
 
 class PanelMenu(wx.Menu):
     plots = None
@@ -513,38 +513,29 @@ class View1DModelPanel2D( View1DPanel2D):
         slicerpop.AppendSeparator()
       
         id = wx.NewId()
-        slicerpop.Append(id, '&Line slicer [Q-view]')
-        wx.EVT_MENU(self, id, self.onLineSlicer) 
+        slicerpop.Append(id, '&sector averaging')
+        wx.EVT_MENU(self, id, self.onSectorSlicer) 
         
-        id = wx.NewId()
-        slicerpop.Append(id, '&Annulus slicer [Phi-view]')
-        wx.EVT_MENU(self, id, self.onAnnulusSlicer) 
-        
-        id = wx.NewId()
-        slicerpop.Append(id, '&Clear slicer')
-        wx.EVT_MENU(self, id, self.onClearSlicer) 
-        
-        id = wx.NewId()
-        slicerpop.Append(id, '&Edit Parameters')
-        wx.EVT_MENU(self, id, self._onEditDetector) 
+    
         
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
    
 
-    def onLineSlicer(self, event):
+    def onSectorSlicer(self, event):
         print "onLineSlicer"
+        import math
+        from DataLoader.manipulations import SectorPhi
+        for item in self.graph.plottables:
+            r= SectorPhi(005,.01, 0.0, math.pi/2.0)
+            print r(item)
+            data=r(item)
+        new_plot= Data1D(x=data.x,y=data.y,dy=data.dy )
+        new_plot.name = "sector"
+        new_plot.group_id= "sector"
+        #wx.PostEvent(self.parent, NewPlotEvent(plot=r(item), title="Analytical model"))
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model"))
         
-    def onAnnulusSlicer(self, event):
-        print "onAnnulusSlicer"
-    def onClearSlicer(self, event):
-        print "onClearSlicer"
-    def _onEditDetector(self, event):
-        print "_onEditDetector"
-    def onSaveImage(self, event):
-        print "onSaveImage"
-    def _onToggleScale(self, event):
-        print "_onToggleScale"
-    def _onToggleEnable(self, event):
-        print "_onToggleEnable"
+        
+        
