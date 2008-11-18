@@ -91,7 +91,7 @@ class ModelManager:
         from sans.models.EllipsoidModel import EllipsoidModel
         self.model_list[str(wx.NewId())] = EllipsoidModel 
         
-        from sans.guitools.LineModel import LineModel
+        from sans.models.LineModel import LineModel
         self.model_list[str(wx.NewId())]  = LineModel
         
         

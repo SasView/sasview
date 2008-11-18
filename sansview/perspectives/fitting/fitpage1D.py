@@ -132,7 +132,8 @@ class FitPage1D(wx.Panel):
         #Set chisqr  result into TextCtrl
         ix = 0
         iy = 1
-        self.smear= wx.CheckBox(self, -1, "Smear", (10, 10))
+        self.smear= wx.CheckBox(self, -1, "Fit with Smear", (10, 10))
+        wx.EVT_CHECKBOX(self, self.smear.GetId(), self.onSmear)
         self.sizer1.Add(self.smear,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         iy+=1
@@ -593,4 +594,12 @@ class FitPage1D(wx.Panel):
         
         self.vbox.Layout()
         self.GrandParent.GetSizer().Layout()
-    
+    def onSmear(self, event):
+        if self.smear.GetValue()==True:
+            from DataLoader.qsmearing import smear_selection
+            smear =smear_selection( self.data )
+            self.data.smearer= smear
+            #print "on smearing", self.data.smearer._compute_matrix()
+        else:
+            self.data.smearer=None
+        

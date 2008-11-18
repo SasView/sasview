@@ -74,7 +74,7 @@ class FitPanel(wx.Panel):
             @return panel : page just added for futher used. is used by fitting module
         """     
         try:
-            name = data.group_id # item in Data1D
+            name = data.name # item in Data1D
         except:
             name = 'Fit'
         if self.fit_page_name != name:
@@ -176,6 +176,7 @@ class FitPanel(wx.Panel):
         except:
             raise
         print "fitpanel", self.draw_model_name 
+        
     def set_model_list(self,dict):
          """ 
              copy a dictionary of model into its own dictionary
