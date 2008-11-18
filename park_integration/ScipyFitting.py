@@ -5,7 +5,8 @@
 """
 #import scipy.linalg
 import numpy 
-from sans.guitools.plottables import Data1D
+#from sans.guitools.plottables import Data1D
+from danse.common.plottools.plottables import Data1D
 from Loader import Load
 from scipy import optimize
 

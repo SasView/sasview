@@ -122,7 +122,7 @@ class smear_testdata(unittest.TestCase):
         # data for a given fit.
         fitter.set_data(self.data_res,1)
         fitter._engine.fitArrangeDict[1].dList[0].smearer = smear
-        
+        print "smear ",smear
         # Model: maybe there's a better way to do this.
         # Ideally we should have to create a new model from our sans model.
         fitter.set_model(Model(self.sphere),1, ['radius','scale'])

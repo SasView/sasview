@@ -190,7 +190,7 @@ class FitData1D(object):
             
         """
         ## Smearing object
-        self.smearer = None
+        self.smearer = sans_data1d.smearer
 
         # Initialize from Data1D object
         self.data=sans_data1d
