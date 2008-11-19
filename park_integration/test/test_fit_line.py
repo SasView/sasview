@@ -18,11 +18,11 @@ class testFitModule(unittest.TestCase):
         from sans.fit.Fitting import Fit
         fitter = Fit('scipy')
         # Receives the type of model for the fitting
-        from sans.guitools.LineModel import LineModel
+        from sans.models.LineModel import LineModel
         model1  = LineModel()
         model1.name = "M1"
         #data = Data(sans_data=data1 )
-        data1.smearer=None
+        #data1.smearer=None
         data = FitData1D(data1 )
         model = Model(model1)
         #fit with scipy test
@@ -82,7 +82,7 @@ class testFitModule(unittest.TestCase):
         from sans.fit.Fitting import Fit
         fitter = Fit('scipy')
         # Receives the type of model for the fitting
-        from sans.guitools.LineModel import LineModel
+        from sans.models.LineModel import LineModel
         model11  = LineModel()
         model11.name= "M1"
         model22  = LineModel()
@@ -146,7 +146,7 @@ class testFitModule(unittest.TestCase):
         from sans.fit.Fitting import Fit
         fitter = Fit('park')
         # Receives the type of model for the fitting
-        from sans.guitools.LineModel import LineModel
+        from sans.models.LineModel import LineModel
         from sans.models.Constant import Constant
         model11  = LineModel()
         model11.name= "line"
@@ -198,7 +198,7 @@ class testFitModule(unittest.TestCase):
         from sans.fit.Fitting import Fit
         fitter = Fit('scipy')
         # Receives the type of model for the fitting
-        from sans.guitools.LineModel import LineModel
+        from sans.models.LineModel import LineModel
         model1  = LineModel()
         model1.name= "M1"
       
