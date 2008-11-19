@@ -10,7 +10,7 @@ from park import fit,fitresult
 from park import assembly
 from park.fitmc import FitSimplex, FitMC
 
-from Loader import Load
+#from Loader import Load
 from AbstractFitEngine import FitEngine
 
 

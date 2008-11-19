@@ -5,13 +5,12 @@
 """
 #import scipy.linalg
 import numpy 
-#from sans.guitools.plottables import Data1D
-from danse.common.plottools.plottables import Data1D
+
 from Loader import Load
 from scipy import optimize
 
 from AbstractFitEngine import FitEngine, sansAssembly
-from AbstractFitEngine import FitArrange,Data
+
 class fitresult:
     """
         Storing fit result

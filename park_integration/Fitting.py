@@ -4,8 +4,8 @@
     a park fit or a scipy fit.
 """
 #from sans.guitools.plottables import Data1D
-from danse.common.plottools.plottables import Data1D
-from Loader import Load
+#from danse.common.plottools.plottables import Data1D
+#from Loader import Load
 from scipy import optimize
 from ScipyFitting import ScipyFit
 from ParkFitting import ParkFit
