@@ -1,6 +1,8 @@
 import os, sys
 import wx
-from danse.common.plottools.plottables import Data1D, Theory1D, Data2D
+from dataFitting import Data1D, Theory1D
+from danse.common.plottools.plottables import Data2D
+
 from DataLoader.loader import Loader
 
 def choose_data_file(parent, location=None):
@@ -66,39 +68,79 @@ def plot_data(parent, path, name="Loaded Data"):
     from DataLoader.loader import  Loader
     import numpy
     #Instantiate a loader 
-    L=Loader()
+    L = Loader()
     
     #Recieves data 
     try:
         output=L.load(path)
+        
     except:
         wx.PostEvent(parent, StatusEvent(status="Problem loading file: %s" % sys.exc_value))
         return
-    if hasattr(output,'data'):
-        new_plot = Data2D(image=output.data,err_image=output.err_data,
-                          xmin=output.xmin,xmax=output.xmax,
-                          ymin=output.ymin,ymax=output.ymax)
-        new_plot.x_bins=output.x_bins
-        new_plot.y_bins=output.y_bins
-        #print "data_loader",output
-    else:
-        if output.dy==None:
-            new_plot = Theory1D(output.x,output.y)
-        else:
-            new_plot = Data1D(x=output.x,y=output.y,dy=output.dy)
-    
     filename = os.path.basename(path)
-    new_plot.source=output.source
-    new_plot.name = filename
-    new_plot.interactive = True
-    #print "loader output.detector",output.source
-    new_plot.detector =output.detector
-    # If the data file does not tell us what the axes are, just assume...
-    new_plot.xaxis(output._xaxis,output._xunit)
-    new_plot.yaxis(output._yaxis,output._yunit)
-    #new_plot.xaxis("\\rm{Q}",'A^{-1}')
-    #new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-    
-    new_plot.group_id = filename
-       
-    wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))
+    if not  output.__class__.__name__=="list":
+        try:
+            dxl=output.dxl
+            dxw=output.dxw
+        except:
+            dxl=None
+            dxw=None
+        if hasattr(output,'data'):
+            new_plot = Data2D(image=output.data,err_image=output.err_data,
+                              xmin=output.xmin,xmax=output.xmax,
+                              ymin=output.ymin,ymax=output.ymax)
+            new_plot.x_bins=output.x_bins
+            new_plot.y_bins=output.y_bins
+            #print "data_loader",output
+        else:
+            if not hasattr(output,"dy"):
+                new_plot = Theory1D(output.x,output.y, dxl, dxw)
+            else:
+                new_plot = Data1D(x=output.x,y=output.y,dy=output.dy, dxl=dxl, dxw=dxw)
+        #print "dataloader",output[0],output[1]
+        
+        new_plot.source=output.source
+        new_plot.name = filename
+        new_plot.interactive = True
+        new_plot.info= output
+        if hasattr(output, "dxl"):
+            new_plot.dxl = output.dxl
+        if hasattr(output, "dxw"):
+            new_plot.dxw = output.dxw
+        #print "loader output.detector",output.source
+        new_plot.detector =output.detector
+        
+        # If the data file does not tell us what the axes are, just assume...
+        new_plot.xaxis(output._xaxis,output._xunit)
+        new_plot.yaxis(output._yaxis,output._yunit)
+        new_plot.group_id = filename
+        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))
+    else:
+        i="res"
+        for item in output:
+            try:
+                dxl=item.dxl
+                dxw=item.dxw
+            except:
+                dxl=None
+                dxw=None
+            if not hasattr(item,"dy"):
+                new_plot = Theory1D(item.x,item.y,dxl,dxw)
+            else:
+                new_plot = Data1D(x=item.x,y=item.y,dy=item.dy,dxl=dxl,dxw=dxw)
+           
+            new_plot.source=item.source
+            new_plot.info=output
+            new_plot.name = filename+" "+ str(i)
+            new_plot.interactive = True
+            
+            #print "loader output.detector",output.source
+            new_plot.detector =item.detector
+            # If the data file does not tell us what the axes are, just assume...
+            new_plot.xaxis(item._xaxis,item._xunit)
+            new_plot.yaxis(item._yaxis,item._yunit)
+            new_plot.group_id = filename
+            wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))
+            i="slit"
+           
+            
