@@ -331,7 +331,7 @@ class Plugin:
                     pars.sort()
                     #Do the single fit
                     self.fitter.set_model(Model(model), self.id, pars) 
-                    print "Single fit : on smearing",metadata.smearer
+                   
                     self.fitter.set_data(metadata,self.id,qmin,qmax)
                     self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
                     page_fitted=page
