@@ -92,8 +92,8 @@ class View1DPanel1D(PlotPanel):
         is_new = True
         if event.plot.name in self.plots.keys():
             # Check whether the class of plottable changed
-            print "panel1D ",event.plot.__class_
-            print "event panel 1d",self.plots[event.plot.name].__class__
+            #print "panel1D ",event.plot.__class_
+            #print "event panel 1d",self.plots[event.plot.name].__class__
             if not event.plot.__class__==self.plots[event.plot.name].__class__:
                 self.graph.delete(self.plots[event.plot.name])
             else:
@@ -543,7 +543,7 @@ class Plugin:
         
         # Create a new plot panel if none was available        
         if not is_available:
-            if not hasattr(event.plot,'image'):
+            if not hasattr(event.plot,'data'):
                 new_panel = View1DPanel1D(self.parent, -1, style=wx.RAISED_BORDER)
             else:
                 new_panel = View1DPanel2D(self.parent, -1, style=wx.RAISED_BORDER)
