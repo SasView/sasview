@@ -22,7 +22,7 @@ class testFitModule(unittest.TestCase):
         from sans.models.CylinderModel import CylinderModel
         model1  = CylinderModel()
         model1.setParam('contrast', 1)
-        #data = Data(sans_data=data1)
+        data1.smearer = None
         data = FitData1D(data1)
         model = Model(model1)
         

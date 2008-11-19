@@ -22,6 +22,7 @@ class testFitModule(unittest.TestCase):
         model1  = LineModel()
         model1.name = "M1"
         #data = Data(sans_data=data1 )
+        data1.smearer=None
         data = FitData1D(data1 )
         model = Model(model1)
         #fit with scipy test
@@ -86,8 +87,8 @@ class testFitModule(unittest.TestCase):
         model11.name= "M1"
         model22  = LineModel()
         model11.name= "M2"
-        #data1 = Data(sans_data=data11 )
-        #data2 = Data(sans_data=data22 )
+        data11.smearer=None
+        data22.smearer=None
         data1 = FitData1D(data11 )
         data2 = FitData1D(data22 )
         
@@ -156,7 +157,8 @@ class testFitModule(unittest.TestCase):
         
         #data1 = Data(sans_data=data11 )
         #data2 = Data(sans_data=data22 )
-        
+        data11.smearer= None
+        data22.smearer= None
         data1 = FitData1D(data11 )
         data2 = FitData1D(data22 )
         model1 = Model(model11)
@@ -200,8 +202,8 @@ class testFitModule(unittest.TestCase):
         model1  = LineModel()
         model1.name= "M1"
       
-        #data1 = Data(sans_data=data11 )
-        #data2 = Data(sans_data=data22 )
+        data11.smearer=None
+        data22.smearer=None
         data1 = FitData1D(data11 )
         data2 = FitData1D(data22 )
         model = Model(model1)
