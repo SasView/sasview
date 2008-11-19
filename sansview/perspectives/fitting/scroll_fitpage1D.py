@@ -43,11 +43,11 @@ class FitPage1D(wx.Panel):
         """ 
             Initialization of the Panel
         """
-        self.scroll = wx.ScrolledWindow(self)
+        self.scroll = wx.ScrolledWindow(self,-1)
         
         self.manager = None
         self.parent  = parent
-        self.event_owner = None
+        self.event_owner=None
         #panel interface
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
         self.sizer5 = wx.GridBagSizer(5,5)
@@ -172,16 +172,22 @@ class FitPage1D(wx.Panel):
         
         bs = wx.BoxSizer(wx.VERTICAL)
         bs.Add(self.scroll, 1, wx.EXPAND)
-       
         self.SetSizer(bs)
-
-        self.scroll.SetSizer(self.vbox)        
         
-        self.scroll.SetScrollbars(20,20,55,40)
-    
-        self.Centre()
-        self.Layout()
+        
         self.GrandParent.GetSizer().Layout()
+        self.vbox.Fit(self) 
+        self.SetSizer(self.vbox)
+        
+        self.Centre()
+       
+        #self.scrollbar= wx.ScrollBar(self, -1,pos = wx.DefaultPosition,style = wx.VERTICAL)
+        
+        unit = 20
+        width,height = self.GetSize()
+        self.scroll.SetVirtualSize((width+unit, height+unit))
+        self.scroll.SetScrollRate(unit, unit)
+
         print self.GetSize()
         print self.scroll.GetSize()
 

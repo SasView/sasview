@@ -82,8 +82,10 @@ class FitPanel(wx.Panel):
                  from fitpage2D import FitPage2D
                  panel = FitPage2D(self.nb,data, -1)
             else:
+                
                 from fitpage1D import FitPage1D
                 panel = FitPage1D(self.nb,data, -1)
+               
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
             

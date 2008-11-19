@@ -43,11 +43,12 @@ class FitPage1D(wx.Panel):
         """ 
             Initialization of the Panel
         """
-        self.scroll = wx.ScrolledWindow(self)
         
+#        sw = wx.ScrolledWindow(self)
+
         self.manager = None
         self.parent  = parent
-        self.event_owner = None
+        self.event_owner=None
         #panel interface
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
         self.sizer5 = wx.GridBagSizer(5,5)
@@ -57,14 +58,14 @@ class FitPage1D(wx.Panel):
         self.sizer1 = wx.GridBagSizer(5,5)
         
         
-        self.DataSource  =wx.StaticText(self.scroll, -1,str(data.name))
+        self.DataSource  =wx.StaticText(self, -1,str(data.name))
         
-        self.modelbox = wx.ComboBox(self.scroll, -1)
+        self.modelbox = wx.ComboBox(self, -1)
         id = wx.NewId()
-        self.btFit =wx.Button(self.scroll,id,'Fit')
+        self.btFit =wx.Button(self,id,'Fit')
         self.btFit.Bind(wx.EVT_BUTTON, self.onFit,id=id)
         self.btFit.SetToolTipString("Perform fit.")
-        self.static_line_1 = wx.StaticLine(self.scroll, -1)
+        self.static_line_1 = wx.StaticLine(self, -1)
        
         self.vbox.Add(self.sizer3)
         
@@ -76,12 +77,12 @@ class FitPage1D(wx.Panel):
         self.vbox.Add(self.sizer1)
         
         id = wx.NewId()
-        self.btClose =wx.Button(self.scroll,id,'Close')
+        self.btClose =wx.Button(self,id,'Close')
         self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
         self.btClose.SetToolTipString("Close page.")
         ix = 0
         iy = 1
-        self.sizer3.Add(wx.StaticText(self.scroll, -1, 'Data Source Name : '),(iy,ix),\
+        self.sizer3.Add(wx.StaticText(self, -1, 'Data Source Name : '),(iy,ix),\
                  (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer3.Add(self.DataSource,(iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -89,7 +90,7 @@ class FitPage1D(wx.Panel):
         self.sizer3.Add((20,20),(iy,ix),(1,1),wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE,0)
         ix = 0
         iy += 1
-        self.sizer3.Add(wx.StaticText(self.scroll,-1,'Model'),(iy,ix),(1,1)\
+        self.sizer3.Add(wx.StaticText(self,-1,'Model'),(iy,ix),(1,1)\
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer3.Add(self.modelbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -97,21 +98,21 @@ class FitPage1D(wx.Panel):
         ix = 0
         iy = 1
         #set maximum range for x in linear scale
-        self.text4_3 = wx.StaticText(self.scroll, -1, 'Maximum Data Range(Linear)', style=wx.ALIGN_LEFT)
+        self.text4_3 = wx.StaticText(self, -1, 'Maximum Data Range(Linear)', style=wx.ALIGN_LEFT)
         self.sizer4.Add(self.text4_3,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.sizer4.Add(wx.StaticText(self.scroll, -1, 'Min'),(iy, ix),(1,1),\
+        self.sizer4.Add(wx.StaticText(self, -1, 'Min'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 2
-        self.sizer4.Add(wx.StaticText(self.scroll, -1, 'Max'),(iy, ix),(1,1),\
+        self.sizer4.Add(wx.StaticText(self, -1, 'Max'),(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix = 0
         iy += 1
-        self.sizer4.Add(wx.StaticText(self.scroll, -1, 'x range'),(iy, ix),(1,1),\
+        self.sizer4.Add(wx.StaticText(self, -1, 'x range'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.xmin    = wx.TextCtrl(self.scroll, -1,size=(_BOX_WIDTH,20))
+        self.xmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.xmin.SetValue(format_number(numpy.min(data.x)))
         self.xmin.SetToolTipString("Minimun value of x in linear scale.")
         self.xmin.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
@@ -121,7 +122,7 @@ class FitPage1D(wx.Panel):
         
        
         ix += 2
-        self.xmax    = wx.TextCtrl(self.scroll, -1,size=(_BOX_WIDTH,20))
+        self.xmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.xmax.SetValue(format_number(numpy.max(data.x)))
         self.xmax.SetToolTipString("Maximum value of x in linear scale.")
         self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
@@ -134,17 +135,17 @@ class FitPage1D(wx.Panel):
         #Set chisqr  result into TextCtrl
         ix = 0
         iy = 1
-        self.smear= wx.CheckBox(self.scroll, -1, "Fit with Smear", (10, 10))
-        wx.EVT_CHECKBOX(self.scroll, self.smear.GetId(), self.onSmear)
+        self.smear= wx.CheckBox(self, -1, "Fit with Smear", (10, 10))
+        wx.EVT_CHECKBOX(self, self.smear.GetId(), self.onSmear)
         self.sizer1.Add(self.smear,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         iy+=1
-        self.text1_1 = wx.StaticText(self.scroll, -1, 'Chi2/dof', style=wx.ALIGN_LEFT)
+        self.text1_1 = wx.StaticText(self, -1, 'Chi2/dof', style=wx.ALIGN_LEFT)
         #self.sizer1.Add(self.text1_1,1)
         self.sizer1.Add(self.text1_1,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.tcChi    = wx.TextCtrl(self.scroll, -1,size=(_BOX_WIDTH,20))
+        self.tcChi    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.tcChi.SetToolTipString("Chi^2 over degrees of freedom.")
         #self.sizer1.Add(self.tcChi, 1, wx.R | wx.BOTTOM , 5)
         self.sizer1.Add(self.tcChi,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -169,25 +170,11 @@ class FitPage1D(wx.Panel):
         self.model_list_box={}
         self.data = data
         self.vbox.Layout()
-        
-        bs = wx.BoxSizer(wx.VERTICAL)
-        bs.Add(self.scroll, 1, wx.EXPAND)
-       
-        self.SetSizer(bs)
-
-        self.scroll.SetSizer(self.vbox)        
-        
-        self.scroll.SetScrollbars(20,20,55,40)
-    
-        self.Centre()
-        self.Layout()
         self.GrandParent.GetSizer().Layout()
-        print self.GetSize()
-        print self.scroll.GetSize()
-
-        
-        
-        
+        self.vbox.Fit(self) 
+        self.SetSizer(self.vbox)
+        #self.scrollbar= wx.ScrollBar(self, -1,pos = wx.DefaultPosition,style = wx.VERTICAL)
+        self.Centre()
         
         
         
@@ -377,30 +364,30 @@ class FitPage1D(wx.Panel):
         ip=0
         iq=1
         if len(disp_list)>0:
-            disp = wx.StaticText(self.scroll, -1, 'Dispersion')
+            disp = wx.StaticText(self, -1, 'Dispersion')
             self.sizer5.Add(disp,( iq, ip),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
             ip += 1 
-            values = wx.StaticText(self.scroll, -1, 'Values')
+            values = wx.StaticText(self, -1, 'Values')
             self.sizer5.Add(values,( iq, ip),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             
         disp_list.sort()
         iy = 1
         ix = 0
-        self.cb1 = wx.CheckBox(self.scroll, -1,'Parameters', (10, 10))
-        wx.EVT_CHECKBOX(self.scroll, self.cb1.GetId(), self.select_all_param)
+        self.cb1 = wx.CheckBox(self, -1,'Parameters', (10, 10))
+        wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_param)
         self.sizer2.Add(self.cb1,(iy, ix),(1,1),\
                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix +=1
-        self.text2_2 = wx.StaticText(self.scroll, -1, 'Values')
+        self.text2_2 = wx.StaticText(self, -1, 'Values')
         self.sizer2.Add(self.text2_2,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix +=2
-        self.text2_3 = wx.StaticText(self.scroll, -1, 'Errors')
+        self.text2_3 = wx.StaticText(self, -1, 'Errors')
         self.sizer2.Add(self.text2_3,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.text2_3.Hide() 
         ix +=1
-        self.text2_4 = wx.StaticText(self.scroll, -1, 'Units')
+        self.text2_4 = wx.StaticText(self, -1, 'Units')
         self.sizer2.Add(self.text2_4,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_4.Hide()
@@ -410,45 +397,45 @@ class FitPage1D(wx.Panel):
                 iy += 1
                 ix = 0
     
-                cb = wx.CheckBox(self.scroll, -1, item, (10, 10))
+                cb = wx.CheckBox(self, -1, item, (10, 10))
                 cb.SetValue(False)
                 self.sizer2.Add( cb,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-                wx.EVT_CHECKBOX(self.scroll, cb.GetId(), self.select_param)
+                wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                 
                 ix += 1
                 value= self.model.getParam(item)
-                ctl1 = wx.TextCtrl(self.scroll, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
                 ctl1.SetValue(str (format_number(value)))
                 ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 self.sizer2.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                 ix += 1
-                text2=wx.StaticText(self.scroll, -1, '+/-')
+                text2=wx.StaticText(self, -1, '+/-')
                 self.sizer2.Add(text2,(iy, ix),(1,1),\
                                 wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
                 text2.Hide()  
                 ix += 1
-                ctl2 = wx.TextCtrl(self.scroll, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
                 self.sizer2.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl2.Hide()
                 ix +=1
                 # Units
                 try:
-                    units = wx.StaticText(self.scroll, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
+                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
                 except:
-                    units = wx.StaticText(self.scroll, -1, "", style=wx.ALIGN_LEFT)
+                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                 self.sizer2.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             else:
                 ip = 0
                 iq += 1
-                cb = wx.CheckBox(self.scroll, -1, item, (10, 10))
+                cb = wx.CheckBox(self, -1, item, (10, 10))
                 cb.SetValue(False)
                 self.sizer5.Add( cb,( iq, ip),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-                wx.EVT_CHECKBOX(self.scroll, cb.GetId(), self.select_param)
+                wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                 
                 ip += 1
                 value= self.model.getParam(item)
-                ctl1 = wx.TextCtrl(self.scroll, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
                 ctl1.SetValue(str (format_number(value)))
                 ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
