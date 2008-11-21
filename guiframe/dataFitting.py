@@ -15,7 +15,7 @@ class Data1D(plotData1D,DataInfo):
  
 class Theory1D(plotTheory1D,DataInfo):
     def __init__(self,x=[],y=[],dy=None,dxl=None, dxw=None):
-        Theory1D.__init__(self, x, y, dx)
+        plotTheory1D.__init__(self, x, y)
         self.smearer=None
         if dxl !=None:
             self.dxl = dxl

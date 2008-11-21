@@ -93,7 +93,9 @@ def plot_data(parent, path, name="Loaded Data"):
             new_plot.y_bins=output.y_bins
             #print "data_loader",output
         else:
-            if not hasattr(output,"dy"):
+            print "output.dx, output.dy",output.dx, output.dy,len(output.dy)
+            if len(output.dy) ==0 :
+                print "went here theory1D"
                 new_plot = Theory1D(output.x,output.y, dxl, dxw)
             else:
                 new_plot = Data1D(x=output.x,y=output.y,dy=output.dy, dxl=dxl, dxw=dxw)
