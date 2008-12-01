@@ -17,6 +17,16 @@ from danse.common.plottools.plottables import Graph,Data1D
 from sans.guicomm.events import EVT_NEW_PLOT
 from sans.guicomm.events import StatusEvent ,NewPlotEvent
 
+from binder import BindArtist
+#from SlicerParameters import SlicerEvent
+#(InternalEvent, EVT_INTERNAL)   = wx.lib.newevent.NewEvent()
+DEFAULT_QMAX = 0.05
+
+DEFAULT_QSTEP = 0.001
+DEFAULT_BEAM = 0.005
+
+import pylab
+
 class PanelMenu(wx.Menu):
     plots = None
     graph = None
@@ -343,13 +353,29 @@ class View1DPanel2D( View1DPanel1D):
         self.parent = parent
         ## Plottables
         self.plots = {}
-        self.data = data2d
+        self.data2D= data2d
+        self.data = data2d.data
         ## Unique ID (from gui_manager)
         self.uid = None
         
         ## Action IDs for internal call-backs
         self.action_ids = {}
+        self.connect = BindArtist(self.subplot.figure)
         
+        # Beam stop
+        self.beamstop_radius = DEFAULT_BEAM
+        # Slicer
+        
+        self.qmax = data2d.xmax
+        self.imax= data2d.ymax
+        self.qstep = DEFAULT_QSTEP
+        self.x = pylab.arange(-self.qmax, self.qmax+self.qstep*0.01, self.qstep)
+        self.y = pylab.arange(-self.imax, self.imax+self.qstep*0.01, self.qstep)
+
+        self.slicer_z = 5
+        self.slicer = None
+        #self.parent.Bind(EVT_INTERNAL, self._onEVT_INTERNAL)
+        self.axes_frozen = False
         ## Graph        
         self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
@@ -426,13 +452,94 @@ class View1DPanel2D( View1DPanel1D):
         slicerpop.AppendSeparator()
       
         id = wx.NewId()
+        slicerpop.Append(id, '&Sector')
+        wx.EVT_MENU(self, id, self.onSector) 
+        
+      
+        
+        id = wx.NewId()
+        slicerpop.Append(id, '&Clear slicer')
+        wx.EVT_MENU(self, id,  self.onClearSlicer) 
+        
+        id = wx.NewId()
+        slicerpop.Append(id, '&Edit Parameters')
+        wx.EVT_MENU(self, id, self._onEditDetector) 
+        
+        slicerpop.AppendSeparator()
+        
+        id = wx.NewId()
+        slicerpop.Append(id, '&Save image')
+        wx.EVT_MENU(self, id, self.onSaveImage) 
+     
+        id = wx.NewId()
         slicerpop.Append(id, '&Toggle Linear/Log scale')
         wx.EVT_MENU(self, id, self._onToggleScale) 
-
+         
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
-    
+   
+    def _setSlicer(self, slicer):
+        # Clear current slicer
+        #printEVT("Plotter2D._setSlicer %s" % slicer)
+        
+        if not self.slicer == None:  
+            self.slicer.clear()            
+            
+        self.slicer_z += 1
+        self.slicer = slicer(self, self.subplot, zorder=self.slicer_z)
+        self.subplot.set_ylim(-self.qmax, self.qmax)
+        self.subplot.set_xlim(-self.qmax, self.qmax)
+        self.update()
+        self.slicer.update()
+        
+        
+    def get_corrected_data(self):
+        # Protect against empty data set
+        if self.data == None:
+            return None
+        import copy
+        output = copy.deepcopy(self.data)
+        return output
+    def freeze_axes(self):
+        self.axes_frozen = True
+        
+    def thaw_axes(self):
+        self.axes_frozen = False
+        
+    def onMouseMotion(self,event):
+        pass
+    def onWheel(self, event):
+        pass    
+    def update(self, draw=True):
+        """
+            Respond to changes in the model by recalculating the 
+            profiles and resetting the widgets.
+        """
+        #self.slicer.update()
+        self.draw()
+            
+  
+    def onSector(self, event):
+        
+        from SectorSlicer import SectorInteractor
+              
+        self.slicer_z += 1
+        self.slicer = SectorInteractor(self, self.subplot, zorder=self.slicer_z)
+        self.subplot.set_ylim(-self.qmax, self.qmax)
+        self.subplot.set_xlim(-self.qmax, self.qmax)
+        self.update()
+        self.slicer.update()
+        
+       
+    def onClearSlicer(self, event):
+        print "on clear"  
+        
+          
+    def _onEditDetector(self, event):
+        print "on parameter"
+        
+        
     def _onToggleScale(self, event):
         """
             toggle axis and replot image
@@ -523,19 +630,5 @@ class View1DModelPanel2D( View1DPanel2D):
         self.PopupMenu(slicerpop, pos)
    
 
-    def onSectorSlicer(self, event):
-        print "onLineSlicer"
-        import math
-        from DataLoader.manipulations import SectorPhi
-        for item in self.graph.plottables:
-            r= SectorPhi(005,.01, 0.0, math.pi/2.0)
-            print r(item)
-            data=r(item)
-        new_plot= Data1D(x=data.x,y=data.y,dy=data.dy )
-        new_plot.name = "sector"
-        new_plot.group_id= "sector"
-        #wx.PostEvent(self.parent, NewPlotEvent(plot=r(item), title="Analytical model"))
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model"))
-        
         
         
