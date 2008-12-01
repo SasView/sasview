@@ -67,11 +67,9 @@ class FitPage1D(wx.Panel):
         self.static_line_1 = wx.StaticLine(self.scroll, -1)
        
         self.vbox.Add(self.sizer3)
-        
         self.vbox.Add(self.sizer2)
         self.vbox.Add(self.static_line_1, 0, wx.EXPAND, 0)
         self.vbox.Add(self.sizer5)
-        
         self.vbox.Add(self.sizer4)
         self.vbox.Add(self.sizer1)
         
@@ -172,13 +170,11 @@ class FitPage1D(wx.Panel):
         
         bs = wx.BoxSizer(wx.VERTICAL)
         bs.Add(self.scroll, 1, wx.EXPAND)
-       
         self.SetSizer(bs)
-
         self.scroll.SetSizer(self.vbox)        
-        
         self.scroll.SetScrollbars(20,20,55,40)
-    
+        width,height = self.GetSize()
+     
         self.Centre()
         self.Layout()
         self.GrandParent.GetSizer().Layout()
@@ -610,6 +606,8 @@ class FitPage1D(wx.Panel):
         
         self.vbox.Layout()
         self.GrandParent.GetSizer().Layout()
+        
+        
     def onSmear(self, event):
         if self.smear.GetValue()==True:
             from DataLoader.qsmearing import smear_selection

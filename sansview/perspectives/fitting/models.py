@@ -44,6 +44,7 @@ def _findModels(dir):
                 except:
                     log("Error accessing Model in %s\n  %s" % (name, sys.exc_value))
                 finally:
+              
                     if not file==None:
                         file.close()
     except:
