@@ -269,7 +269,11 @@ class BindArtist:
             transform = self._hasclick.artist.get_transform()
             #x,y = event.xdata,event.ydata
             x,y = event.x,event.y
-            x,y = transform.inverse_xy_tup((x,y))
+            try:
+                x,y = transform.inverted().transform_point((x, y))
+
+            except:
+                x,y = transform.inverse_xy_tup((x,y))
             event.xdata,event.ydata = x,y
             self.trigger(self._hasclick,'drag',event)
         else:
