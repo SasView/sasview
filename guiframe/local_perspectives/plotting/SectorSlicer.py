@@ -12,7 +12,7 @@ from BaseInteractor import _BaseInteractor
 from copy import deepcopy
 import math
 
-
+from sans.guicomm.events import NewPlotEvent, StatusEvent
 import SlicerParameters
 import wx
 
@@ -53,7 +53,7 @@ class SectorInteractor(_BaseInteractor):
                                              arc2=self.outer_circle,
                                             theta=math.pi/2)
         self.update()
-        #self._post_data()
+        self._post_data()
         
         # Bind to slice parameter events
         #self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
@@ -66,9 +66,11 @@ class SectorInteractor(_BaseInteractor):
             self.set_params(event.params)
             self.base.update()
 
+
     def update_and_post(self):
         self.update()
         self._post_data()
+
 
     def save_data(self, path, image, x, y):
         output = open(path, 'w')
@@ -86,10 +88,10 @@ class SectorInteractor(_BaseInteractor):
         
     def clear(self):
         self.clear_markers()
-        #self.outer_circle.clear()
+        self.outer_circle.clear()
         self.inner_circle.clear()
         #self.base.connect.disconnect()
-        self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
+        #self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
         
     def update(self):
         """
@@ -101,56 +103,16 @@ class SectorInteractor(_BaseInteractor):
         self.outer_circle.update()
         r1=self.inner_circle.get_radius()
         r2=self.outer_circle.get_radius()
-        print"annulus update",r1, r2
+        #print"annulus update",r1, r2
         if self.inner_radius.update(r1,r2)==1:
-            print "went here"
+            #print "went here"
             self.inner_circle.update(theta1=self.inner_radius.get_radius(), theta2=None)
             self.outer_circle.update(theta1=self.inner_radius.get_radius(),theta2=None)
-        if self.outer_radius.update(r1,r2)==1:
-             #self.outer_circle.update(self.outer_radius.get_radius())
+        
+        if self.outer_radius.update(r1,r2)==1:#self.outer_circle.update(self.outer_radius.get_radius())
              self.inner_circle.update(theta1=None, theta2=self.outer_radius.get_radius())
              self.outer_circle.update(theta1=None,theta2=self.outer_radius.get_radius())
-    def get_data(self, image, x, y):
-        """ 
-            Return a 1D vector corresponding to the slice
-            @param image: data matrix
-            @param x: x matrix
-            @param y: y matrix
-        """
-        # If we have no data, just return
-        if image == None:
-            return        
-        
-        nbins = self.nbins
-        
-        data_x = nbins*[0]
-        data_y = nbins*[0]
-        counts = nbins*[0]
-        length = len(image)
-        
-        
-        for i_x in range(length):
-            for i_y in range(length):
-                        
-                q = math.sqrt(x[i_x]*x[i_x] + y[i_y]*y[i_y])
-                if (q>self.inner_circle._inner_mouse_x \
-                    and q<self.outer_circle._inner_mouse_x) \
-                    or (q<self.inner_circle._inner_mouse_x \
-                    and q>self.outer_circle._inner_mouse_x):
-                            
-                    i_bin = int(math.ceil(nbins*(math.atan2(y[i_y], x[i_x])+math.pi)/(2.0*math.pi)) - 1)
-                    
-                    
-                    #data_y[i_bin] += math.exp(image[i_x][i_y])
-                    data_y[i_bin] += image[i_y][i_x]
-                    counts[i_bin] += 1.0
-                    
-        for i in range(nbins):
-            data_x[i] = (1.0*i+0.5)*2.0*math.pi/nbins
-            if counts[i]>0:
-                data_y[i] = data_y[i]/counts[i]
-        
-        return data_x, data_y
+    
 
     def save(self, ev):
         """
@@ -159,34 +121,61 @@ class SectorInteractor(_BaseInteractor):
         """
         self.base.freeze_axes()
         self.inner_circle.save(ev)
-        #self.outer_circle.save(ev)
+        self.outer_circle.save(ev)
 
     def _post_data(self):
-        # Compute data
-        data = self.base.get_corrected_data()
-        # If we have no data, just return
-        if data == None:
-            return
-
-        data_x, data_y = self.get_data(data, self.base.x, self.base.y)
+        """ post data"""
+        rmin=self.inner_circle.get_radius()
+        rmax=self.outer_circle.get_radius()
+        phimin=self.inner_radius.get_radius()
+        phimax=self.outer_radius.get_radius()
+        from DataLoader.manipulations import SectorQ, SectorPhi
+        sectQ = SectorQ(r_min=rmin, r_max=rmax, phi_min=phimin, phi_max=phimax)
+        sectorQ = sectQ(self.base.data2D)
         
-        name = "Ring"
-        if hasattr(self.base, "name"):
-            name += " %s" % self.base.name
+        sectPhi = SectorPhi(r_min=rmin, r_max=rmax, phi_min=phimin, phi_max=phimax)
+        sectorPhi = sectPhi(self.base.data2D)
+        from sans.guiframe.dataFitting import Data1D
+        if hasattr(sectorQ,"dxl"):
+            dxl= sectorQ.dxl
+        else:
+            dxl= None
+        if hasattr(sectorQ,"dxw"):
+            dxw= sectorQ.dxw
+        else:
+            dxw= None
+            
+        new_plot1 = Data1D(x=sectorQ.x,y=sectorQ.y,dy=sectorQ.dy,dxl=dxl,dxw=dxw)
+        new_plot1.name = "SectorQ ("+ self.base.data2D.name+")"
+        if hasattr(sectorPhi,"dxl"):
+            dxl= sectorPhi.dxl
+        else:
+            dxl= None
+        if hasattr(sectorPhi,"dxw"):
+            dxw= sectorPhi.dxw
+        else:
+            dxw= None
+        new_plot2 = Data1D(x=sectorPhi.x,y=sectorPhi.y,dy=sectorPhi.dy,dxl=dxl,dxw=dxw)
+        new_plot2.name = "SectorPhi ("+ self.base.data2D.name+")"
+        self.plot_data( new_plot1)
+        self.plot_data( new_plot2)
         
-        wx.PostEvent(self.base.parent, AddPlotEvent(name=name,
-                                               x = data_x,
-                                               y = data_y,
-                                               qmin = self.inner_circle._inner_mouse_x,
-                                               qmax = self.outer_circle._inner_mouse_x,
-                                               yscale = 'log',
-                                               variable = 'ANGLE',
-                                               ylabel = "\\rm{Intensity} ",
-                                               yunits = "cm^{-1}",
-                                               xlabel = "\\rm{\phi}",
-                                               xunits = "rad",
-                                               parent = self.base.__class__.__name__))
-                                               
+        
+    def plot_data(self, new_plot): 
+        """
+             plot a new data 1D corresponding to the phi and Q sector average
+        """
+        new_plot.source=self.base.data2D.source
+        new_plot.info=self.base.data2D.info
+        new_plot.interactive = True
+        #print "loader output.detector",output.source
+        new_plot.detector =self.base.data2D.detector
+        # If the data file does not tell us what the axes are, just assume...
+        new_plot.xaxis(self.base.data2D._xaxis,self.base.data2D._xunit)
+        new_plot.yaxis(self.base.data2D._yaxis,self.base.data2D._yunit)
+        new_plot.group_id = "sector"+self.base.data2D.name
+        wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot, title=new_plot.name))
+        
         
     def moveend(self, ev):
         self.base.thaw_axes()
@@ -225,11 +214,11 @@ class SectorInteractor(_BaseInteractor):
     def set_params(self, params):
         
         inner = params["inner_radius"] 
-        #outer = params["outer_radius"] 
+        outer = params["outer_radius"] 
         self.nbins = int(params["nbins"])
         self.inner_circle.set_cursor(inner, self.inner_circle._inner_mouse_y)
-        #self.outer_circle.set_cursor(outer, self.outer_circle._inner_mouse_y)
-        self._post_data()
+        self.outer_circle.set_cursor(outer, self.outer_circle._inner_mouse_y)
+        #self._post_data()
         
     def freeze_axes(self):
         self.base.freeze_axes()
