@@ -450,10 +450,15 @@ class View1DPanel2D( View1DPanel1D):
                         print RuntimeError, "View1DPanel2D.onContextMenu: bad menu item"
         
         slicerpop.AppendSeparator()
-      
+        
+        id = wx.NewId()
+        slicerpop.Append(id, '&Perform circular average')
+        wx.EVT_MENU(self, id, self.onCircular) 
+        
         id = wx.NewId()
         slicerpop.Append(id, '&Sector')
         wx.EVT_MENU(self, id, self.onSector) 
+        
         
       
         
@@ -518,10 +523,15 @@ class View1DPanel2D( View1DPanel1D):
         """
         #self.slicer.update()
         self.draw()
-            
-  
+    def onCircular(self, event):
+        """
+            perform circular averaging
+        """
+        from DataLoader.manipulations import CircularAverage
     def onSector(self, event):
-        
+        """
+            Perform sector averaging
+        """
         from SectorSlicer import SectorInteractor
               
         self.slicer_z += 1

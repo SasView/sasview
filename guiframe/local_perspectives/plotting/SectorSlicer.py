@@ -207,7 +207,9 @@ class SectorInteractor(_BaseInteractor):
     def get_params(self):
         params = {}
         params["inner_radius"] = self.inner_circle._inner_mouse_x
-        #params["outer_radius"] = self.outer_circle._inner_mouse_x
+        params["outer_radius"] = self.outer_circle._inner_mouse_x
+        params["phi_min"] = self.inner_radious.get_radious()
+        params["phi_max"] = self.inner_radious.get_radious()
         params["nbins"] = self.nbins
         return params
     
@@ -218,7 +220,7 @@ class SectorInteractor(_BaseInteractor):
         self.nbins = int(params["nbins"])
         self.inner_circle.set_cursor(inner, self.inner_circle._inner_mouse_y)
         self.outer_circle.set_cursor(outer, self.outer_circle._inner_mouse_y)
-        #self._post_data()
+        self._post_data()
         
     def freeze_axes(self):
         self.base.freeze_axes()

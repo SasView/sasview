@@ -118,7 +118,7 @@ def plot_data(parent, path, name="Loaded Data"):
         new_plot.group_id = filename
         wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))
     else:
-        i="res"
+        i=1
         for item in output:
             try:
                 dxl=item.dxl
@@ -143,6 +143,6 @@ def plot_data(parent, path, name="Loaded Data"):
             new_plot.yaxis(item._yaxis,item._yunit)
             new_plot.group_id = filename
             wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))
-            i="slit"
+            i+=1
            
             
