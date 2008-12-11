@@ -33,7 +33,7 @@ class ArcInteractor(_BaseInteractor):
                                       linestyle='-', marker='',
                                       color=self.color)
         self.npts = 20
-            
+        self.has_move= False    
         self.connect_markers([self.inner_circle])
         self.update()
 
@@ -114,6 +114,7 @@ class ArcInteractor(_BaseInteractor):
         self.base.freeze_axes()
 
     def moveend(self, ev):
+        self.has_move= False
         self.base.moveend(ev)
             
     def restore(self):
@@ -130,7 +131,7 @@ class ArcInteractor(_BaseInteractor):
         #print "ring move x, y", x,y
         self._inner_mouse_x = x
         self._inner_mouse_y = y
-      
+        self.has_move= True
         self.base.base.update()
         
     def set_cursor(self, x, y):

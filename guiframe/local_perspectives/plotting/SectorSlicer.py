@@ -54,7 +54,6 @@ class SectorInteractor(_BaseInteractor):
                                             theta=math.pi/2)
         self.update()
         self._post_data()
-        
         # Bind to slice parameter events
         #self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
 
@@ -66,12 +65,12 @@ class SectorInteractor(_BaseInteractor):
             self.set_params(event.params)
             self.base.update()
 
-
+    """
     def update_and_post(self):
         self.update()
         self._post_data()
 
-
+    """
     def save_data(self, path, image, x, y):
         output = open(path, 'w')
         
@@ -90,6 +89,8 @@ class SectorInteractor(_BaseInteractor):
         self.clear_markers()
         self.outer_circle.clear()
         self.inner_circle.clear()
+        self.inner_radius.clear()
+        self.outer_radius.clear()
         #self.base.connect.disconnect()
         #self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
         
@@ -98,22 +99,33 @@ class SectorInteractor(_BaseInteractor):
         Respond to changes in the model by recalculating the profiles and
         resetting the widgets.
         """
-        # Update locations        
-        self.inner_circle.update()
-        self.outer_circle.update()
-        r1=self.inner_circle.get_radius()
-        r2=self.outer_circle.get_radius()
-        #print"annulus update",r1, r2
-        if self.inner_radius.update(r1,r2)==1:
-            #print "went here"
+        # Update locations   
+        if self.inner_circle.has_move:    
+            print "inner circle has moved" 
+            self.inner_circle.update()
+            r1=self.inner_circle.get_radius()
+            r2=self.outer_circle.get_radius()
+            self.inner_radius.update(r1,r2)
+            self.outer_radius.update(r1,r2)
+        if self.outer_circle.has_move:    
+            print "outer circle has moved" 
+            self.outer_circle.update()
+            r1=self.inner_circle.get_radius()
+            r2=self.outer_circle.get_radius()
+            self.inner_radius.update(r1,r2)
+            self.outer_radius.update(r1,r2)
+        if self.inner_radius.has_move:
+            print "inner radius has moved"
+            self.inner_radius.update()
             self.inner_circle.update(theta1=self.inner_radius.get_radius(), theta2=None)
-            self.outer_circle.update(theta1=self.inner_radius.get_radius(),theta2=None)
-        
-        if self.outer_radius.update(r1,r2)==1:#self.outer_circle.update(self.outer_radius.get_radius())
+            self.outer_circle.update(theta1=self.inner_radius.get_radius(), theta2=None)
+        if  self.outer_radius.has_move:
+             print "outer radius has moved"
+             self.outer_radius.update()
              self.inner_circle.update(theta1=None, theta2=self.outer_radius.get_radius())
-             self.outer_circle.update(theta1=None,theta2=self.outer_radius.get_radius())
-    
-
+             self.outer_circle.update(theta1=None, theta2=self.outer_radius.get_radius())
+             
+        
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
@@ -122,49 +134,33 @@ class SectorInteractor(_BaseInteractor):
         self.base.freeze_axes()
         self.inner_circle.save(ev)
         self.outer_circle.save(ev)
-
     def _post_data(self):
-        """ post data"""
+        pass
+    def post_data(self,new_sector ):
+        """ post data averaging in Q"""
         rmin=self.inner_circle.get_radius()
         rmax=self.outer_circle.get_radius()
         phimin=self.inner_radius.get_radius()
         phimax=self.outer_radius.get_radius()
-        from DataLoader.manipulations import SectorQ, SectorPhi
-        sectQ = SectorQ(r_min=rmin, r_max=rmax, phi_min=phimin, phi_max=phimax)
-        sectorQ = sectQ(self.base.data2D)
+        #from DataLoader.manipulations import SectorQ
+        sect = new_sector(r_min=rmin, r_max=rmax, phi_min=phimin, phi_max=phimax)
+        sector = sect(self.base.data2D)
         
-        sectPhi = SectorPhi(r_min=rmin, r_max=rmax, phi_min=phimin, phi_max=phimax)
-        sectorPhi = sectPhi(self.base.data2D)
         from sans.guiframe.dataFitting import Data1D
-        if hasattr(sectorQ,"dxl"):
-            dxl= sectorQ.dxl
+        if hasattr(sector,"dxl"):
+            dxl= sector.dxl
         else:
             dxl= None
-        if hasattr(sectorQ,"dxw"):
-            dxw= sectorQ.dxw
+        if hasattr(sector,"dxw"):
+            dxw= sector.dxw
         else:
             dxw= None
             
-        new_plot1 = Data1D(x=sectorQ.x,y=sectorQ.y,dy=sectorQ.dy,dxl=dxl,dxw=dxw)
-        new_plot1.name = "SectorQ ("+ self.base.data2D.name+")"
-        if hasattr(sectorPhi,"dxl"):
-            dxl= sectorPhi.dxl
-        else:
-            dxl= None
-        if hasattr(sectorPhi,"dxw"):
-            dxw= sectorPhi.dxw
-        else:
-            dxw= None
-        new_plot2 = Data1D(x=sectorPhi.x,y=sectorPhi.y,dy=sectorPhi.dy,dxl=dxl,dxw=dxw)
-        new_plot2.name = "SectorPhi ("+ self.base.data2D.name+")"
-        self.plot_data( new_plot1)
-        self.plot_data( new_plot2)
+        new_plot = Data1D(x=sector.x,y=sector.y,dy=sector.dy,dxl=dxl,dxw=dxw)
+        new_plot.name = str(new_sector.__name__) +"("+ self.base.data2D.name+")"
         
-        
-    def plot_data(self, new_plot): 
-        """
-             plot a new data 1D corresponding to the phi and Q sector average
-        """
+       
+
         new_plot.source=self.base.data2D.source
         new_plot.info=self.base.data2D.info
         new_plot.interactive = True
@@ -174,7 +170,8 @@ class SectorInteractor(_BaseInteractor):
         new_plot.xaxis(self.base.data2D._xaxis,self.base.data2D._xunit)
         new_plot.yaxis(self.base.data2D._yaxis,self.base.data2D._yunit)
         new_plot.group_id = "sector"+self.base.data2D.name
-        wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot, title=new_plot.name))
+        wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
+                                                 title=str(new_sector.__name__) ))
         
         
     def moveend(self, ev):
@@ -208,8 +205,8 @@ class SectorInteractor(_BaseInteractor):
         params = {}
         params["inner_radius"] = self.inner_circle._inner_mouse_x
         params["outer_radius"] = self.outer_circle._inner_mouse_x
-        params["phi_min"] = self.inner_radious.get_radious()
-        params["phi_max"] = self.inner_radious.get_radious()
+        params["phi_min"] = self.inner_radius.get_radius()
+        params["phi_max"] = self.inner_radius.get_radius()
         params["nbins"] = self.nbins
         return params
     
@@ -217,9 +214,15 @@ class SectorInteractor(_BaseInteractor):
         
         inner = params["inner_radius"] 
         outer = params["outer_radius"] 
+        phi_min= params["phi_min"]
+        phi_min=params["phi_max"]
         self.nbins = int(params["nbins"])
+        
+        
         self.inner_circle.set_cursor(inner, self.inner_circle._inner_mouse_y)
         self.outer_circle.set_cursor(outer, self.outer_circle._inner_mouse_y)
+        self.inner_radius.set_cursor(inner, self.inner_circle._inner_mouse_y)
+        self.outer_radius.set_cursor(outer, self.outer_circle._inner_mouse_y)
         self._post_data()
         
     def freeze_axes(self):
@@ -231,4 +234,11 @@ class SectorInteractor(_BaseInteractor):
     def draw(self):
         self.base.draw()
 
-    
+class SectorInteractorQ(SectorInteractor):
+    def __init__(self,base,axes,color='black', zorder=3):
+        SectorInteractor.__init__(self, base, axes, color=color)
+        self.base=base
+        self._post_data()
+    def _post_data(self):
+        from DataLoader.manipulations import SectorQ
+        self.post_data(SectorQ )   

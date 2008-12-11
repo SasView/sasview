@@ -40,7 +40,7 @@ class RadiusInteractor(_BaseInteractor):
                                       visible=True)[0]
        
         self.npts = 20
-      
+        self.has_move= False
         self.connect_markers([self.line])
         self.update()
         
@@ -93,6 +93,7 @@ class RadiusInteractor(_BaseInteractor):
         self.base.freeze_axes()
    
     def moveend(self, ev):
+        self.has_move= False
         self.base.moveend(ev)
             
     def restore(self):
@@ -107,7 +108,7 @@ class RadiusInteractor(_BaseInteractor):
         """
         self.theta= math.atan2(y,x)
         
-        
+        self.has_move= True
         self.base.base.update()
         
     def set_cursor(self, x, y):

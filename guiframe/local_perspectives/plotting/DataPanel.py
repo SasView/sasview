@@ -17,7 +17,10 @@ from danse.common.plottools.plottables import Graph,Data1D
 from sans.guicomm.events import EVT_NEW_PLOT
 from sans.guicomm.events import StatusEvent ,NewPlotEvent
 
+
+from SlicerParameters import SlicerEvent
 from binder import BindArtist
+(InternalEvent, EVT_INTERNAL)   = wx.lib.newevent.NewEvent()
 #from SlicerParameters import SlicerEvent
 #(InternalEvent, EVT_INTERNAL)   = wx.lib.newevent.NewEvent()
 DEFAULT_QMAX = 0.05
@@ -374,7 +377,7 @@ class View1DPanel2D( View1DPanel1D):
 
         self.slicer_z = 5
         self.slicer = None
-        #self.parent.Bind(EVT_INTERNAL, self._onEVT_INTERNAL)
+        self.parent.Bind(EVT_INTERNAL, self._onEVT_INTERNAL)
         self.axes_frozen = False
         ## Graph        
         self.graph = Graph()
@@ -456,10 +459,12 @@ class View1DPanel2D( View1DPanel1D):
         wx.EVT_MENU(self, id, self.onCircular) 
         
         id = wx.NewId()
-        slicerpop.Append(id, '&Sector')
-        wx.EVT_MENU(self, id, self.onSector) 
+        slicerpop.Append(id, '&Sector Q')
+        wx.EVT_MENU(self, id, self.onSectorQ) 
         
-        
+        id = wx.NewId()
+        slicerpop.Append(id, '&Sector Phi')
+        wx.EVT_MENU(self, id, self.onSectorPhi) 
       
         
         id = wx.NewId()
@@ -523,14 +528,94 @@ class View1DPanel2D( View1DPanel1D):
         """
         #self.slicer.update()
         self.draw()
+        
+        
+    def _getEmptySlicerEvent(self):
+        return SlicerEvent(type=None,
+                           params=None,
+                           obj_class=None)
+    def _onEVT_INTERNAL(self, event):
+        """
+            I don't understand why Unbind followed by a Bind
+            using a modified self.slicer doesn't work.
+            For now, I post a clear event followed by
+            a new slicer event...
+        """
+        self._setSlicer(event.slicer)
+            
+    def _setSlicer(self, slicer):
+        # Clear current slicer
+        #printEVT("Plotter2D._setSlicer %s" % slicer)
+        
+        if not self.slicer == None:  
+            self.slicer.clear()            
+            
+        self.slicer_z += 1
+        self.slicer = slicer(self, self.subplot, zorder=self.slicer_z)
+        self.subplot.set_ylim(-self.qmax, self.qmax)
+        self.subplot.set_xlim(-self.qmax, self.qmax)
+        self.update()
+        self.slicer.update()
+        
+        # Post slicer event
+        event = self._getEmptySlicerEvent()
+        event.type = self.slicer.__class__.__name__
+        event.obj_class = self.slicer.__class__
+        event.params = self.slicer.get_params()
+        wx.PostEvent(self.parent, event)
+
     def onCircular(self, event):
         """
-            perform circular averaging
+            perform circular averaging on Data2D
         """
+        
         from DataLoader.manipulations import CircularAverage
-    def onSector(self, event):
+        Circle = CircularAverage( r_min= -self.qmax, r_max= self.qmax, bin_width=0.001)
+        circ = Circle(self.data2D)
+        from sans.guiframe.dataFitting import Data1D
+        if hasattr(circ,"dxl"):
+            dxl= circ.dxl
+        else:
+            dxl= None
+        if hasattr(circ,"dxw"):
+            dxw= circ.dxw
+        else:
+            dxw= None
+            
+        new_plot = Data1D(x=circ.x,y=circ.y,dy=circ.dy,dxl=dxl,dxw=dxw)
+        new_plot.name = "Circ avg "+ self.data2D.name
+        new_plot.source=self.data2D.source
+        new_plot.info=self.data2D.info
+        new_plot.interactive = True
+        #print "loader output.detector",output.source
+        new_plot.detector =self.data2D.detector
+        
+        # If the data file does not tell us what the axes are, just assume...
+        new_plot.xaxis("\\rm{q}","A^{-1}")
+        new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+        new_plot.group_id = "Circ avg "+ self.data2D.name
+        self.scale = 'log'
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=new_plot.name))
+        
+        
+        
+    def onSectorQ(self, event):
         """
-            Perform sector averaging
+            Perform sector averaging on Q
+        """
+        from SectorSlicer import SectorInteractorQ
+              
+        self.slicer_z += 1
+        self.slicer = SectorInteractorQ(self, self.subplot, zorder=self.slicer_z)
+        self.subplot.set_ylim(-self.qmax, self.qmax)
+        self.subplot.set_xlim(-self.qmax, self.qmax)
+        self.update()
+        self.slicer.update()
+        
+        
+    def onSectorPhi(self, event):
+        """
+            Perform sector averaging on Phi
         """
         from SectorSlicer import SectorInteractor
               
@@ -543,8 +628,17 @@ class View1DPanel2D( View1DPanel1D):
         
        
     def onClearSlicer(self, event):
-        print "on clear"  
+        """
+            Clear the slicer on the plot
+        """
+        if not self.slicer==None:
+            self.slicer.clear()
+            self.subplot.figure.canvas.draw()
+            self.slicer = None
         
+            # Post slicer None event
+            event = self._getEmptySlicerEvent()
+            wx.PostEvent(self.parent, event)
           
     def _onEditDetector(self, event):
         print "on parameter"
@@ -552,7 +646,7 @@ class View1DPanel2D( View1DPanel1D):
         
     def _onToggleScale(self, event):
         """
-            toggle axis and replot image
+            toggle pixel scale and replot image
         """
         if self.scale == 'log':
             self.scale = 'linear'
@@ -561,6 +655,11 @@ class View1DPanel2D( View1DPanel1D):
         self.image(self.data,self.xmin_2D,self.xmax_2D,self.ymin_2D,
                    self.ymax_2D,self.zmin_2D ,self.zmax_2D )
         wx.PostEvent(self.parent, StatusEvent(status="Image is in %s scale"%self.scale))
+        
+        
+        
+        
+        
         
 class View1DModelPanel2D( View1DPanel2D):
     """
