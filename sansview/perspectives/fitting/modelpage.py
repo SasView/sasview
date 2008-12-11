@@ -170,6 +170,7 @@ class ModelPage(wx.Panel):
             if name ==event.GetString():
                 model=items
                 print "fitpage: _on_select_model model name",name ,event.GetString()
+                self.model= model
                 self.manager.draw_model(model)
                 self.set_panel(model)
     def set_model_name(self,name):

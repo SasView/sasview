@@ -103,6 +103,7 @@ class FitPanel(wx.Panel):
             @param page_title: the name of the page
         """
         if  page_title !=self.draw_model_name or self.draw_model_name ==None: 
+            self.onClose()
             from modelpage import ModelPage
             panel = ModelPage(self.nb,model, -1)
             panel.set_manager(self.manager)

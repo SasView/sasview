@@ -35,6 +35,7 @@ class Plugin:
         self.standalone=True
         ## Fit engine
         self._fit_engine = 'scipy'
+        self.enable_model2D=False
         # Log startup
         logging.info("Fitting plug-in started")   
 
@@ -56,6 +57,10 @@ class Plugin:
         
         #menu for model
         menu2 = wx.Menu()
+        id4 = wx.NewId()
+        menu2.AppendCheckItem(id4, "model view 2D") 
+        wx.EVT_MENU(owner, id4, self.on_draw_model2D)
+        
         self.menu_mng.populate_menu(menu2, owner)
         id2 = wx.NewId()
         owner.Bind(models.EVT_MODEL,self._on_model_menu)
@@ -569,34 +574,64 @@ class Plugin:
         """
             Plot a theory from a model selected from the menu
         """
-        name="Model View"
+        
         model=evt.model()
-        
+        name="Model View"
+        print "mon menu",model.name
         description=model.description
-        self.fit_panel.add_model_page(model,description,name)       
-        self.draw_model(model)
+        #self.fit_panel.add_model_page(model,description,model.name)   
+        self.fit_panel.add_model_page(model,description,name)          
+        self.draw_model(model,self.enable_model2D)
         
-    def draw_model(self,model):
+    def draw_model(self,model,enable2D=False):
         """
              draw model with default data value
         """
-        x = numpy.arange(0.001, 0.1, 0.001)
+        x = numpy.arange(0.001, 1.0, 0.001)
         xlen = len(x)
         y = numpy.zeros(xlen)
+        if not enable2D:
+            for i in range(xlen):
+                y[i] = model.run(x[i])
+    
+            try:
+                new_plot = Theory1D(x, y)
+                new_plot.name = model.name
+                #new_plot.name = "Model"
+                new_plot.xaxis("\\rm{Q}", 'A^{-1}')
+                new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+                 
+                new_plot.group_id ="Fitness"
+                wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model 1D"))
+                
+            except:
+                raise
+        else:
+            for i in range(xlen):
+                y[i] = model.run(x[i])
+    
+            try:
+                new_plot = Theory1D(x, y)
+                new_plot.name = model.name
+                #new_plot.name = "Model"
+                new_plot.xaxis("\\rm{Q}", 'A^{-1}')
+                new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+                 
+                new_plot.group_id ="Fitness"
+                wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model 1D"))
+                
+            except:
+                raise
+    def on_draw_model2D(self, event):
+        """
+             plot view model 2D
+        """
         
-        for i in range(xlen):
-            y[i] = model.run(x[i])
-
-        try:
-            new_plot = Theory1D(x, y)
-            new_plot.name = "Model"
-            new_plot.xaxis("\\rm{Q}", 'A^{-1}')
-            new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-             
-            new_plot.group_id ="Fitness"
-            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model"))
-        except:
-            raise
+        if self.enable_model2D== True:
+            self.enable_model2D=False
+        else:
+            self.enable_model2D=True
+        print "self.enable_model2D",self.enable_model2D
 if __name__ == "__main__":
     i = Plugin()
     
