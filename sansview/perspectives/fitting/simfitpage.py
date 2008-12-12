@@ -2,7 +2,7 @@
 import sys,re,string, wx   
 from sans.guicomm.events import StatusEvent    
 
-class SimultaneousFitPage(wx.Panel):
+class SimultaneousFitPage(wx.ScrolledWindow):
     """
         Simultaneous fitting panel
         All that needs to be defined are the
@@ -15,7 +15,7 @@ class SimultaneousFitPage(wx.Panel):
     
     
     def __init__(self, parent, *args, **kwargs):
-        wx.Panel.__init__(self, parent, *args, **kwargs)
+        wx.ScrolledWindow.__init__(self, parent, *args, **kwargs)
         """
              Simultaneous page display
         """
@@ -55,6 +55,7 @@ class SimultaneousFitPage(wx.Panel):
         self.vbox.Layout()
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)
+        self.SetScrollbars(20,20,55,40)
         self.Centre()
         
         
