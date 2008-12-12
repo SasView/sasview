@@ -26,7 +26,9 @@ class RadiusInteractor(_BaseInteractor):
         self.theta=theta
         self.save_theta= theta
         #self.scale = 10.0
-        
+        self.move_stop=False
+        self.theta_left=None
+        self.theta_right=None
         self.arc1= arc1
         self.arc2=arc2
         #raise "Version error", message
@@ -38,7 +40,7 @@ class RadiusInteractor(_BaseInteractor):
                                       linestyle='-', marker='',
                                       color=self.color,
                                       visible=True)[0]
-       
+        self.phi= theta
         self.npts = 20
         self.has_move= False
         self.connect_markers([self.line])
@@ -64,25 +66,36 @@ class RadiusInteractor(_BaseInteractor):
     def get_radius(self):
         return self.theta
         
-    def update(self,r1=None, r2=None):
+    def update(self,r1=None, r2=None, theta_right=None, theta_left=None):
         """
         Draw the new roughness on the graph.
         """
-        # Plot inner circle
+        self.theta_left=theta_left
+        self.theta_right=theta_right
         if r1 !=None:
             self.r1=r1
         if r2!=None:
             self.r2=r2
-        #print "update line ",self.r1,self.r2
-        #if self.theta <0:
-        #    self.theta= 2*math.pi + self.theta
+        if theta_right!=None:
+            if theta_right < self.theta:
+                self.move_stop=True
+            else:
+                self.move_stop=False
+        if theta_left !=None:
+            if theta_left > self.theta:
+                self.move_stop=True
+            else:
+                self.move_stop=False
+        if theta_left ==None and theta_right==None:
+            self.move_stop=True
+        print "in the edge theta_right theta_left",theta_right,theta_left,self.theta
         x1= self.r1*math.cos(self.theta)
         y1= self.r1*math.sin(self.theta)
         x2= self.r2*math.cos(self.theta)
         y2= self.r2*math.sin(self.theta)  
              
         self.line.set(xdata=[x1,x2], ydata=[y1,y2])
-        return 1
+        
  
     def save(self, ev):
         """
@@ -106,9 +119,21 @@ class RadiusInteractor(_BaseInteractor):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        self.theta= math.atan2(y,x)
-        
-        self.has_move= True
+        #print "on move theta left , theta right",self.theta_left,self.theta_right
+        theta= math.atan2(y,x)
+        print "on move theta left , theta right",self.theta_left,self.theta_right,theta
+        if self.theta_left !=None:
+            if self.theta_left >= theta:
+                print "went hier"
+                self.move_stop= True
+        if self.theta_right !=None:
+            if self.theta_right <= theta:
+                self.move_stop= True
+
+        if self.move_stop:
+            self.theta= math.atan2(y,x)
+            self.has_move= True
+            
         self.base.base.update()
         
     def set_cursor(self, x, y):

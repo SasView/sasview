@@ -71,6 +71,10 @@ class ArcInteractor(_BaseInteractor):
         #print "ring update theta1 theta2", self.theta1, self.theta2
         while self.theta2 < self.theta1: self.theta2 += 2*math.pi
         npts = int((self.theta2 - self.theta1)/(math.pi/120))
+        
+        
+            
+            
         for i in range(self.npts):
             
             phi =(self.theta2-self.theta1)/(self.npts-1)*i +self.theta1
@@ -88,20 +92,17 @@ class ArcInteractor(_BaseInteractor):
         #self.inner_marker.set(xdata=[self._inner_mouse_x],ydata=[0])
         self.inner_circle.set_data(x, y) 
         
-       
-        if self._inner_mouse_x <0:
-            self._inner_mouse_x= 0
-            self._inner_mouse_y= 0
+        """
         r=  math.sqrt(math.pow(self._inner_mouse_x, 2)+math.pow(self._inner_mouse_y, 2))
         x1=  r*math.cos(self.theta1)
         y1= r*math.sin(self.theta1)
+        """
         #x1= self._inner_mouse_x*math.cos(self.theta1)
         #y1= self._inner_mouse_x*math.sin(self.theta1)
         #x2= r2*math.cos(self.theta1)
         #y2= r2*math.sin(self.theta1)
        
-            
-       
+   
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
@@ -109,8 +110,9 @@ class ArcInteractor(_BaseInteractor):
         """
         #self._inner_save_x = self._inner_mouse_x
         #self._inner_save_y = self._inner_mouse_y
-        self._inner_save_x = self._inner_mouse_x
-        self._inner_save_y = self._inner_mouse_y
+        self._inner_save_x = ev.xdata
+        self._inner_save_y = ev.ydata
+        print "save value",self._inner_save_x ,self._inner_save_y
         self.base.freeze_axes()
 
     def moveend(self, ev):
@@ -128,7 +130,7 @@ class ArcInteractor(_BaseInteractor):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        #print "ring move x, y", x,y
+        print "ring move x, y", x,y
         self._inner_mouse_x = x
         self._inner_mouse_y = y
         self.has_move= True

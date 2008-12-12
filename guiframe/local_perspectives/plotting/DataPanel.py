@@ -103,10 +103,10 @@ class View1DPanel1D(PlotPanel):
             self._reset()
         
         is_new = True
-        print "model panel name",event.plot.name
+        #print "model panel name",event.plot.name
         if event.plot.name in self.plots.keys():
             # Check whether the class of plottable changed
-            print "model panel",event.plot.name,event.plot.__class__
+            #print "model panel",event.plot.name,event.plot.__class__
             if not event.plot.__class__==self.plots[event.plot.name].__class__:
                 self.graph.delete(self.plots[event.plot.name])
             else:
@@ -345,6 +345,7 @@ class View1DPanel2D( View1DPanel1D):
     ## Group ID
     group_id = None
     
+    
     def __init__(self, parent, id = -1,data2d=None, color = None,\
         dpi = None, style = wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
         """
@@ -368,17 +369,25 @@ class View1DPanel2D( View1DPanel1D):
         # Beam stop
         self.beamstop_radius = DEFAULT_BEAM
         # Slicer
+        if data2d.xmax==None:
+            data2d.xmax=DEFAULT_QMAX
         
         self.qmax = data2d.xmax
-        self.imax= data2d.ymax
+        if data2d.ymax==None:
+            data2d.ymax=DEFAULT_QMAX
+        self.imax = data2d.ymax
+      
         self.qstep = DEFAULT_QSTEP
-        self.x = pylab.arange(-self.qmax, self.qmax+self.qstep*0.01, self.qstep)
-        self.y = pylab.arange(-self.imax, self.imax+self.qstep*0.01, self.qstep)
+        print "panel2D qmax",self.qmax,
+        self.x = pylab.arange(-1*self.qmax, self.qmax+self.qstep*0.01, self.qstep)
+        self.y = pylab.arange(-1*self.imax, self.imax+self.qstep*0.01, self.qstep)
 
         self.slicer_z = 5
         self.slicer = None
         self.parent.Bind(EVT_INTERNAL, self._onEVT_INTERNAL)
         self.axes_frozen = False
+        
+       
         ## Graph        
         self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
@@ -603,28 +612,18 @@ class View1DPanel2D( View1DPanel1D):
         """
             Perform sector averaging on Q
         """
-        from SectorSlicer import SectorInteractorQ
-              
-        self.slicer_z += 1
-        self.slicer = SectorInteractorQ(self, self.subplot, zorder=self.slicer_z)
-        self.subplot.set_ylim(-self.qmax, self.qmax)
-        self.subplot.set_xlim(-self.qmax, self.qmax)
-        self.update()
-        self.slicer.update()
         
+        from SectorSlicer import SectorInteractorQ
+        self.onClearSlicer(event)
+        wx.PostEvent(self.parent, InternalEvent(slicer= SectorInteractorQ))
         
     def onSectorPhi(self, event):
         """
             Perform sector averaging on Phi
         """
-        from SectorSlicer import SectorInteractor
-              
-        self.slicer_z += 1
-        self.slicer = SectorInteractor(self, self.subplot, zorder=self.slicer_z)
-        self.subplot.set_ylim(-self.qmax, self.qmax)
-        self.subplot.set_xlim(-self.qmax, self.qmax)
-        self.update()
-        self.slicer.update()
+        from SectorSlicer import SectorInteractorPhi
+        self.onClearSlicer(event)
+        wx.PostEvent(self.parent, InternalEvent(slicer= SectorInteractorPhi))
         
        
     def onClearSlicer(self, event):
@@ -699,6 +698,8 @@ class View1DModelPanel2D( View1DPanel2D):
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
         self.graph.render(self)
+        
+        
     def onContextMenu(self, event):
         # Slicer plot popup menu
          #slicerpop = wx.Menu()

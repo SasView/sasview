@@ -116,12 +116,12 @@ class SectorInteractor(_BaseInteractor):
             self.outer_radius.update(r1,r2)
         if self.inner_radius.has_move:
             print "inner radius has moved"
-            self.inner_radius.update()
+            self.inner_radius.update(theta_left=self.outer_radius.get_radius())
             self.inner_circle.update(theta1=self.inner_radius.get_radius(), theta2=None)
             self.outer_circle.update(theta1=self.inner_radius.get_radius(), theta2=None)
         if  self.outer_radius.has_move:
              print "outer radius has moved"
-             self.outer_radius.update()
+             self.outer_radius.update(theta_right=self.inner_radius.get_radius())
              self.inner_circle.update(theta1=None, theta2=self.outer_radius.get_radius())
              self.outer_circle.update(theta1=None, theta2=self.outer_radius.get_radius())
              
@@ -138,11 +138,22 @@ class SectorInteractor(_BaseInteractor):
         pass
     def post_data(self,new_sector ):
         """ post data averaging in Q"""
-        rmin=self.inner_circle.get_radius()
-        rmax=self.outer_circle.get_radius()
-        phimin=self.inner_radius.get_radius()
-        phimax=self.outer_radius.get_radius()
+        if self.inner_circle.get_radius() < self.outer_circle.get_radius():
+            rmin=self.inner_circle.get_radius()
+            rmax=self.outer_circle.get_radius()
+        else:
+            rmin=self.outer_circle.get_radius()
+            rmax=self.inner_circle.get_radius()
+        if self.inner_radius.get_radius() < self.outer_radius.get_radius():
+            phimin=self.inner_radius.get_radius()
+            phimax=self.outer_radius.get_radius()
+        else:
+            phimin=self.outer_radius.get_radius()
+            phimax=self.inner_radius.get_radius()
+            
+        print "phimin, phimax, rmin ,rmax",math.degrees(phimin), math.degrees(phimax), rmin ,rmax
         #from DataLoader.manipulations import SectorQ
+        
         sect = new_sector(r_min=rmin, r_max=rmax, phi_min=phimin, phi_max=phimax)
         sector = sect(self.base.data2D)
         
@@ -155,7 +166,7 @@ class SectorInteractor(_BaseInteractor):
             dxw= sector.dxw
         else:
             dxw= None
-            
+       
         new_plot = Data1D(x=sector.x,y=sector.y,dy=sector.dy,dxl=dxl,dxw=dxw)
         new_plot.name = str(new_sector.__name__) +"("+ self.base.data2D.name+")"
         
@@ -167,9 +178,9 @@ class SectorInteractor(_BaseInteractor):
         #print "loader output.detector",output.source
         new_plot.detector =self.base.data2D.detector
         # If the data file does not tell us what the axes are, just assume...
-        new_plot.xaxis(self.base.data2D._xaxis,self.base.data2D._xunit)
-        new_plot.yaxis(self.base.data2D._yaxis,self.base.data2D._yunit)
-        new_plot.group_id = "sector"+self.base.data2D.name
+        new_plot.xaxis("\\rm{Q}", 'rad')
+        new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+        new_plot.group_id = str(new_sector.__name__)+self.base.data2D.name
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
                                                  title=str(new_sector.__name__) ))
         
@@ -242,3 +253,15 @@ class SectorInteractorQ(SectorInteractor):
     def _post_data(self):
         from DataLoader.manipulations import SectorQ
         self.post_data(SectorQ )   
+        
+
+class SectorInteractorPhi(SectorInteractor):
+    def __init__(self,base,axes,color='black', zorder=3):
+        SectorInteractor.__init__(self, base, axes, color=color)
+        self.base=base
+        self._post_data()
+    def _post_data(self):
+        from DataLoader.manipulations import SectorPhi
+        self.post_data(SectorPhi )   
+        
+        
