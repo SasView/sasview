@@ -42,7 +42,11 @@ class FitPanel(wx.Panel):
         # save the title of the last page tab added
         self.fit_page_name=None
         self.draw_model_name=None
-        self.page_name="Model View"
+        #model page info
+        self.model_page_number=None
+        self.page_name=None
+        self.model_page=None
+        #updating the panel
         self.nb.Update()
         self.SetSizer(self.sizer)
         self.sizer.Fit(self)
@@ -94,6 +98,17 @@ class FitPanel(wx.Panel):
             self.fit_page_name = name
             return panel
         
+    def _help_add_model_page(self,model,description,page_title):
+        from modelpage import ModelPage
+        panel = ModelPage(self.nb,model, -1)
+        panel.set_manager(self.manager)
+        panel.set_owner(self.event_owner)
+        self.nb.AddPage(page=panel,text=page_title,select=True)
+        panel.populate_box( self.model_list_box)
+        self.draw_model_name=page_title
+        self.model_page_number=self.nb.GetSelection()
+        self.model_page=self.nb.GetPage(self.nb.GetSelection())
+        
         
     def add_model_page(self,model,description,page_title):
         """
@@ -102,8 +117,19 @@ class FitPanel(wx.Panel):
             @param model: the model for which paramters will be changed
             @param page_title: the name of the page
         """
-        if  page_title !=self.draw_model_name or self.draw_model_name ==None: 
-            self.onClose()
+        if  self.draw_model_name ==None:
+            # or  self.draw_model_name !=page_title: 
+            #print "removing the prevois model page ",self.model_page, self.model_page_number
+            #self.onClose(self.model_page, self.model_page_number)
+            self._help_add_model_page(model,description,page_title)
+        else:
+            if  self.draw_model_name !=page_title: 
+                self.onClose(self.model_page, self.model_page_number)
+                #print "removing the prevois model page ",self.model_page, self.model_page_number
+                self._help_add_model_page(model,description,page_title)
+        """
+        if  self.draw_model_name ==None : 
+            
             from modelpage import ModelPage
             panel = ModelPage(self.nb,model, -1)
             panel.set_manager(self.manager)
@@ -111,12 +137,15 @@ class FitPanel(wx.Panel):
             self.nb.AddPage(page=panel,text=page_title,select=True)
             panel.populate_box( self.model_list_box)
             self.draw_model_name=page_title
+            self.model_page_number = self.nb.GetPage(self.nb.GetSelection())
+            print "model page",self.model_page_number,self.nb.GetSelection()
         else:
             for i in range(self.nb.GetPageCount()):
                 if self.nb.GetPageText(i)==self.page_name:
                     page=self.nb.GetPage(i)
                     page.set_page(model,description)
                     break
+        """
                 
            
     def get_notebook(self):
@@ -149,11 +178,17 @@ class FitPanel(wx.Panel):
         """ @return the page just selected by the user """
         return self.nb.GetPage(self.nb.GetSelection())
     
-    def onClose(self):
+    def onClose(self, page=None,page_number=None):
         """
              close the current page except the simpage. remove each check box link to the model
              selected on that page. remove its reference into page_finder (fitting module)
         """
+        if page!=None and page_number!=None:
+            page.Destroy()
+            self.nb.RemovePage(page_number)
+            self.model_page_number=None
+            self.model_page=None
+            return 
         try:
             sim_page = self.nb.GetPage(0)
             selected_page = self.nb.GetPage(self.nb.GetSelection())
@@ -178,7 +213,7 @@ class FitPanel(wx.Panel):
                 self.fit_page_name=None
         except:
             raise
-        print "fitpanel", self.draw_model_name 
+        #print "fitpanel", self.draw_model_name 
         
     def set_model_list(self,dict):
          """ 

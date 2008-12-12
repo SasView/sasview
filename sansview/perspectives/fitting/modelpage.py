@@ -24,7 +24,7 @@ def format_number(value, high=False):
         return "%-5.3g" % value
 
     
-class ModelPage(wx.Panel):
+class ModelPage(wx.ScrolledWindow):
     """
         FitPanel class contains fields allowing to display results when
         fitting  a model and one data
@@ -39,10 +39,11 @@ class ModelPage(wx.Panel):
     
     
     def __init__(self, parent,model, *args, **kwargs):
-        wx.Panel.__init__(self, parent, *args, **kwargs)
+        wx.ScrolledWindow.__init__(self, parent, *args, **kwargs)
         """ 
             Initialization of the Panel
         """
+        #self.scroll = wx.ScrolledWindow(self)
         self.manager = None
         self.parent  = parent
         self.event_owner=None
@@ -77,6 +78,12 @@ class ModelPage(wx.Panel):
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer3.Add(self.modelbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix = 0
+        iy += 1
+        self.model_view= wx.CheckBox(self, -1, "View in 2D", (10, 10))
+        wx.EVT_CHECKBOX(self, self.model_view.GetId(), self.onModel2D)
+        self.sizer3.Add(self.model_view,(iy,ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         #contains link between a model and selected parameters to fit 
@@ -84,7 +91,7 @@ class ModelPage(wx.Panel):
         # model on which the fit would be performed
         self.model=model
         try:
-            print"init modelpage",model.name
+            #print"init modelpage",model.name
             self.set_panel(model)
         except:
             raise
@@ -99,7 +106,9 @@ class ModelPage(wx.Panel):
         #change
         self.vbox.Layout()
         self.vbox.Fit(self) 
+        
         self.SetSizer(self.vbox)
+        self.SetScrollbars(20,20,55,40)
         self.Centre()
        
         
@@ -121,7 +130,12 @@ class ModelPage(wx.Panel):
              @param manager: instance of plugin fitting
         """
         self.manager = manager
-  
+    def onModel2D(self, event):
+        
+        if self.model_view.GetValue()==True:
+            print "2D model"
+            self.manager.draw_model(self.model,
+                                    description=None, enable2D=True,qmin=None, qmax=None)
     def populate_box(self, dict):
         """
             Populate each combox box of each page
@@ -166,13 +180,14 @@ class ModelPage(wx.Panel):
             items=item()
             if hasattr(items, "name"):
                 name = items.name
-            print "fitpage: _on_select_model model name",name ,event.GetString()
+            #print "fitpage: _on_select_model model name",name ,event.GetString()
             if name ==event.GetString():
                 model=items
-                print "fitpage: _on_select_model model name",name ,event.GetString()
+                #print "fitpage: _on_select_model model name",name ,event.GetString()
                 self.model= model
-                self.manager.draw_model(model)
                 self.set_panel(model)
+                self.manager.draw_model(model)
+                
     def set_model_name(self,name):
         """ 
             set model name. set also self.model_hasChanged to true is the model 
@@ -232,7 +247,7 @@ class ModelPage(wx.Panel):
             self.sizer5.Add(values,( iq, ip),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             
         disp_list.sort()
-        print "went here",self.model.name,model.description
+        #print "went here",self.model.name,model.description
         iy = 1
         ix = 0
         self.cb0 = wx.StaticText(self, -1,'Model Description:')

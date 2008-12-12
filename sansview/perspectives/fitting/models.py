@@ -104,6 +104,9 @@ class ModelManager:
         from sans.models.DABModel import DABModel
         self.indep_model.append(DABModel )
         
+        from sans.models.GuinierModel import GuinierModel
+        self.indep_model.append(GuinierModel )
+        
         from sans.models.DebyeModel import DebyeModel
         self.indep_model.append(DebyeModel )
         
