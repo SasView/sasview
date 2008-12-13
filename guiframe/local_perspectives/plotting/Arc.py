@@ -68,7 +68,7 @@ class ArcInteractor(_BaseInteractor):
             self.theta1= theta1
         if theta2 !=None:
             self.theta2= theta2
-        #print "ring update theta1 theta2", self.theta1, self.theta2
+        print "ring update theta1 theta2", math.degrees(self.theta1), math.degrees(self.theta2)
         while self.theta2 < self.theta1: self.theta2 += 2*math.pi
         npts = int((self.theta2 - self.theta1)/(math.pi/120))
         

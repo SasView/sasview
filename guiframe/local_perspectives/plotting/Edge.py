@@ -70,6 +70,11 @@ class RadiusInteractor(_BaseInteractor):
         """
         Draw the new roughness on the graph.
         """
+        if r1 !=None:
+            self.r1=r1
+        if r2!=None:
+            self.r2=r2
+        """
         self.theta_left=theta_left
         self.theta_right=theta_right
         if r1 !=None:
@@ -88,7 +93,8 @@ class RadiusInteractor(_BaseInteractor):
                 self.move_stop=False
         if theta_left ==None and theta_right==None:
             self.move_stop=True
-        print "in the edge theta_right theta_left",theta_right,theta_left,self.theta
+        """
+        #print "in the edge theta_right theta_left",theta_right,theta_left,self.theta
         x1= self.r1*math.cos(self.theta)
         y1= self.r1*math.sin(self.theta)
         x2= self.r2*math.cos(self.theta)
@@ -121,18 +127,20 @@ class RadiusInteractor(_BaseInteractor):
         """
         #print "on move theta left , theta right",self.theta_left,self.theta_right
         theta= math.atan2(y,x)
-        print "on move theta left , theta right",self.theta_left,self.theta_right,theta
-        if self.theta_left !=None:
-            if self.theta_left >= theta:
-                print "went hier"
-                self.move_stop= True
-        if self.theta_right !=None:
-            if self.theta_right <= theta:
-                self.move_stop= True
-
-        if self.move_stop:
-            self.theta= math.atan2(y,x)
-            self.has_move= True
+        """print "on move theta left , theta right",self.theta_left,self.theta_right,theta
+            if self.theta_left !=None:
+                if self.theta_left >= theta:
+                    print "went hier"
+                        self.move_stop= True
+                if self.theta_right !=None:
+                    if self.theta_right <= theta:
+                        self.move_stop= True
+           
+            self.move_stop= True
+            if self.move_stop:
+         """
+        self.theta= math.atan2(y,x)
+        self.has_move= True
             
         self.base.base.update()
         

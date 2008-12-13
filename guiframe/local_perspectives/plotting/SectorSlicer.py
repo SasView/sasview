@@ -32,8 +32,11 @@ class SectorInteractor(_BaseInteractor):
         self.nbins = 20
         theta1=math.pi/8
         theta2=math.pi/2
+        theta1=2*math.pi/3
+        theta2=-2*math.pi/3
         r1=self.qmax/2.0
         r2=self.qmax/1.8
+       
         # Inner circle
         from Arc import ArcInteractor
         self.inner_circle = ArcInteractor(self, self.base.subplot, zorder=zorder, r=self.qmax/2.0,theta1= theta1,
@@ -47,11 +50,11 @@ class SectorInteractor(_BaseInteractor):
         self.inner_radius= RadiusInteractor(self, self.base.subplot, zorder=zorder+1,
                                              arc1=self.inner_circle,
                                              arc2=self.outer_circle,
-                                            theta=math.pi/8)
+                                            theta=theta1)
         self.outer_radius= RadiusInteractor(self, self.base.subplot, zorder=zorder+1,
                                              arc1=self.inner_circle,
                                              arc2=self.outer_circle,
-                                            theta=math.pi/2)
+                                            theta=theta2)
         self.update()
         self._post_data()
         # Bind to slice parameter events
