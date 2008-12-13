@@ -589,12 +589,16 @@ class Plugin:
         #y = numpy.arange(0.001, 1.0, 0.001)
         x = numpy.arange(-0.05, 0.05, 0.001)
         y = numpy.arange(-0.05, 0.05, 0.001)
-        print "went here ",enable2D
+        
+        print "went here ",len(x)
         if enable2D:
             data=numpy.zeros([len(x),len(y)])
             for i in range(len(y)):
                 for j in range(len(x)):
-                    data[i][j]=model.runXY([j,i])
+                    if i >=0 and i<=0.005 or j >=0 and j<=0.005:
+                        data[i][j]=0
+                    else:
+                        data[i][j]=model.runXY([j,i])
             theory = Theory2D(data)  
             theory.group_id =str(model.name)+" 2D"
             theory.xmin=-0.05
