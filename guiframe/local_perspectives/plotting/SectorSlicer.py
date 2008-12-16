@@ -196,11 +196,11 @@ class SectorInteractor(_BaseInteractor):
         #self.base.thaw_axes()
         
          # Post paramters
-        event = SlicerParameters.SlicerParameterEvent()
-        event.type = self.__class__.__name__
-        event.params = self.get_params()
-        print "main moveend ", event.params
-        wx.PostEvent(self.base.parent, event)
+        #event = SlicerParameters.SlicerParameterEvent()
+        #event.type = self.__class__.__name__
+        #event.params = self.get_params()
+        #print "main moveend ", event.params
+        #wx.PostEvent(self.base.parent, event)
         self._post_data()
             
     def restore(self):

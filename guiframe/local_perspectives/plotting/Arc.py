@@ -18,23 +18,23 @@ class ArcInteractor(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self._inner_mouse_x = r
-        self._inner_mouse_y = 0
+        self._mouse_x = r
+        self._mouse_y = 0
         
-        self._inner_save_x  = r
-        self._inner_save_y  = 0
+        self._save_x  = r
+        self._save_y  = 0
         
         self.scale = 10.0
         
         self.theta1=theta1
         self.theta2=theta2
         self.radius= r
-        [self.inner_circle] = self.axes.plot([],[],
+        [self.arc] = self.axes.plot([],[],
                                       linestyle='-', marker='',
                                       color=self.color)
         self.npts = 20
         self.has_move= False    
-        self.connect_markers([self.inner_circle])
+        self.connect_markers([self.arc])
         self.update()
 
     def set_layer(self, n):
@@ -44,8 +44,8 @@ class ArcInteractor(_BaseInteractor):
     def clear(self):
         self.clear_markers()
         try:
-            self.inner_marker.remove()
-            self.inner_circle.remove()
+            self.marker.remove()
+            self.arc.remove()
         except:
             # Old version of matplotlib
             for item in range(len(self.axes.lines)):
@@ -54,12 +54,11 @@ class ArcInteractor(_BaseInteractor):
         
         
     def get_radius(self):
-        radius =math.sqrt(math.pow(self._inner_mouse_x, 2)+math.pow(self._inner_mouse_y, 2))
+        radius =math.sqrt(math.pow(self._mouse_x, 2)+math.pow(self._mouse_y, 2))
         return radius
         
     def update(self,theta1=None,theta2=None, nbins=None, r=None):
         """
-        Draw the new roughness on the graph.
         """
         # Plot inner circle
         x = []
@@ -71,22 +70,23 @@ class ArcInteractor(_BaseInteractor):
         
         print "ring update theta1 theta2", math.degrees(self.theta1), math.degrees(self.theta2)
         while self.theta2 < self.theta1: self.theta2 += 2*math.pi
-        
-        
-        
-            
+        while self.theta2 >= self.theta1+2*math.pi: self.theta2 -= 2*math.pi
+
+        """
         if nbins!=None:
             self.npts =nbins
         else:
-            npts = int((self.theta2 - self.theta1)/(math.pi/120))   
+        """
+        npts = int((self.theta2 - self.theta1)/(math.pi/120))  
+             
+        if r ==None:
+            self.radius=  math.sqrt(math.pow(self._mouse_x, 2)+math.pow(self._mouse_y, 2))
+        else:
+            self.radius= r
+            
         for i in range(self.npts):
             
             phi =(self.theta2-self.theta1)/(self.npts-1)*i +self.theta1
-            #delta= phi1-phi
-            if r ==None:
-                self.radius=  math.sqrt(math.pow(self._inner_mouse_x, 2)+math.pow(self._inner_mouse_y, 2))
-            else:
-                self.radius= r
             
             xval = 1.0*self.radius*math.cos(phi) 
             yval = 1.0*self.radius*math.sin(phi) 
@@ -94,8 +94,8 @@ class ArcInteractor(_BaseInteractor):
             x.append(xval)
             y.append(yval)
         
-        #self.inner_marker.set(xdata=[self._inner_mouse_x],ydata=[0])
-        self.inner_circle.set_data(x, y) 
+        #self.marker.set(xdata=[self._mouse_x],ydata=[0])
+        self.arc.set_data(x, y) 
         
       
     def save(self, ev):
@@ -103,10 +103,10 @@ class ArcInteractor(_BaseInteractor):
         Remember the roughness for this layer and the next so that we
         can restore on Esc.
         """
-        self._inner_save_x = self._inner_mouse_x
-        self._inner_save_y = self._inner_mouse_y
-        #self._inner_save_x = ev.xdata
-        #self._inner_save_y = ev.ydata
+        self._save_x = self._mouse_x
+        self._save_y = self._mouse_y
+        #self._save_x = ev.xdata
+        #self._save_y = ev.ydata
         
         self.base.freeze_axes()
 
@@ -125,16 +125,16 @@ class ArcInteractor(_BaseInteractor):
         """
         Restore the roughness for this layer.
         """
-        self._inner_mouse_x = self._inner_save_x
-        self._inner_mouse_y = self._inner_save_y
+        self._mouse_x = self._save_x
+        self._mouse_y = self._save_y
        
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
         """
         #print "ring move x, y", x,y
-        self._inner_mouse_x = x
-        self._inner_mouse_y = y
+        self._mouse_x = x
+        self._mouse_y = y
         self.has_move= True
         self.base.base.update()
         
@@ -155,6 +155,6 @@ class ArcInteractor(_BaseInteractor):
     def set_params(self, params):
 
         x = params["radius"] 
-        self.set_cursor(x, self._inner_mouse_y)
+        self.set_cursor(x, self._mouse_y)
         
     

@@ -78,6 +78,7 @@ def plot_data(parent, path, name="Loaded Data"):
         wx.PostEvent(parent, StatusEvent(status="Problem loading file: %s" % sys.exc_value))
         return
     filename = os.path.basename(path)
+    
     if not  output.__class__.__name__=="list":
         try:
             dxl=output.dxl
@@ -102,7 +103,7 @@ def plot_data(parent, path, name="Loaded Data"):
         #print "dataloader",output[0],output[1]
         
         new_plot.source=output.source
-        new_plot.name = filename
+        new_plot.name = output.filename
         new_plot.interactive = True
         new_plot.info= output
         if hasattr(output, "dxl"):
@@ -120,6 +121,7 @@ def plot_data(parent, path, name="Loaded Data"):
     else:
         i=1
         for item in output:
+            
             try:
                 dxl=item.dxl
                 dxw=item.dxw
@@ -133,7 +135,7 @@ def plot_data(parent, path, name="Loaded Data"):
            
             new_plot.source=item.source
             new_plot.info=output
-            new_plot.name = filename+" "+ str(i)
+            new_plot.name = str(item.run[0])
             new_plot.interactive = True
             
             #print "loader output.detector",output.source

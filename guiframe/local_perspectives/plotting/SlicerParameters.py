@@ -9,25 +9,12 @@ from copy import deepcopy
 (SlicerEvent, EVT_SLICER)   = wx.lib.newevent.NewEvent()
 (SlicerParameterEvent, EVT_SLICER_PARS)   = wx.lib.newevent.NewEvent()
 
-def format_number(value, high=False):
-    """
-        Return a float in a standardized, human-readable formatted string 
-    """
-    try: 
-        value = float(value)
-    except:
-        return "NaN"
-    
-    if high:
-        return "%-6.4g" % value
-    else:
-        return "%-5.3g" % value
-class SlicerParameterPanel(wx.Dialog):
+class SlicerParameterPanel(wx.Panel):
     #TODO: show units
     #TODO: order parameters properly
     
-    def __init__(self, parent, id, title):
-        wx.Dialog.__init__(self, parent, id, title, size=(400, 350))
+    def __init__(self, parent, *args, **kwargs):
+        wx.Panel.__init__(self, parent, *args, **kwargs)
         self.params = {}
         self.parent = parent
         self.type = None
@@ -42,8 +29,6 @@ class SlicerParameterPanel(wx.Dialog):
         # Bindings
         self.parent.Bind(EVT_SLICER, self.onEVT_SLICER)
         self.parent.Bind(EVT_SLICER_PARS, self.onParamChange)
-        
-       
 
     def onEVT_SLICER(self, event):
         """
@@ -53,7 +38,6 @@ class SlicerParameterPanel(wx.Dialog):
             @param event: EVT_SLICER event
         """
         event.Skip()
-        print "on event slicer parameters"
         if event.obj_class==None:
             self.set_slicer(None, None)
         else:
@@ -63,7 +47,6 @@ class SlicerParameterPanel(wx.Dialog):
         """
             Rebuild the panel
         """
-        
         self.bck.Clear(True)  
         self.type = type  
         
@@ -90,7 +73,7 @@ class SlicerParameterPanel(wx.Dialog):
                 ctl.SetToolTipString("Modify the value of %s to change the 2D slicer" % item)
                 
                 
-                ctl.SetValue(format_number(str(params[item])))
+                ctl.SetValue(str(params[item]))
                 self.Bind(wx.EVT_TEXT_ENTER, self.onTextEnter)
                 ctl.Bind(wx.EVT_KILL_FOCUS, self.onTextEnter)
                 self.parameters.append([item, ctl])
@@ -129,8 +112,4 @@ class SlicerParameterPanel(wx.Dialog):
             # Post parameter event
             event = SlicerParameterEvent(type=self.type, params=params)
             wx.PostEvent(self.parent, event)
-            
- 
-       
-
         
