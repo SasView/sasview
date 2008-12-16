@@ -13,7 +13,7 @@ from fitpanel import FitPanel
 import models,modelpage
 import fitpage1D,fitpage2D
 import park
-
+DEFAULT_BEAM = 0.005
 class Plugin:
     """
         Fitting plugin is used to perform fit 
@@ -580,37 +580,29 @@ class Plugin:
             
         self.draw_model(model,self.enable_model2D)
         
-    def draw_model(self,model,description=None, enable2D=False,qmin=None, qmax=None):
+    def draw_model(self,model,description=None,enable1D=True, enable2D=False,qmin=None, qmax=None,qstep=None):
         """
              draw model with default data value
         """
         self.fit_panel.add_model_page(model,model.description,model.name) 
-        #x = numpy.arange(0.001, 1.0, 0.001)
-        #y = numpy.arange(0.001, 1.0, 0.001)
-        x = numpy.arange(-0.05, 0.05, 0.001)
-        y = numpy.arange(-0.05, 0.05, 0.001)
+        self._draw_model2D(model,model.description, enable2D,qmin,qmax,qstep)
+        self._draw_model1D(model,model.description, enable1D,qmin,qmax, qstep)
+       
+    def _draw_model1D(self,model,description=None, enable1D=True,qmin=None,qmax=None, qstep=None):
         
-        print "went here ",len(x)
-        if enable2D:
-            data=numpy.zeros([len(x),len(y)])
-            for i in range(len(y)):
-                for j in range(len(x)):
-                    if i >=0 and i<=0.005 or j >=0 and j<=0.005:
-                        data[i][j]=0
-                    else:
-                        data[i][j]=model.runXY([j,i])
-            theory = Theory2D(data)  
-            theory.group_id =str(model.name)+" 2D"
-            theory.xmin=-0.05
-            theory.xmax= 0.05
-            theory.ymin= -0.05
-            theory.ymax= 0.05
-            wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model 2D"))
-        else:
-            x = numpy.arange(0.001, 1.0, 0.001)        
+        if enable1D:
+            if qmin==None:
+                qmin= 0.001
+            if qmax==None:
+                qmax= 1.0
+            if qstep ==None:
+                qstep =0.001
+           
+            
+            x = numpy.arange(qmin, qmax, qstep)        
             xlen= len(x)
             y = numpy.zeros(xlen)
-            if not enable2D:
+            if not enable1D:
                 for i in range(xlen):
                     y[i] = model.run(x[i])
         
@@ -642,6 +634,35 @@ class Plugin:
                     
                 except:
                     raise
+                
+                
+                
+    def _draw_model2D(self,model,description=None, enable2D=False,qmin=None,qmax=None, qstep=None):
+        if qmin==None:
+            qmin= -0.05
+        if qmax==None:
+            qmax= 0.05
+        if qstep ==None:
+            qstep =0.001
+        x = numpy.arange(qmin,qmax, qstep)
+        y = numpy.arange(qmin,qmax,qstep)
+        
+        if enable2D:
+            data=numpy.zeros([len(x),len(y)])
+            for i in range(len(x)):
+                for j in range(len(x)):
+                    try:
+                        data[i][j]=model.runXY([j,i])
+                    except:
+                         wx.PostEvent(self.parent, StatusEvent(status="\
+                        Model 2D cannot be plot %g %s %s" %(data[i][j],model.name, sys.exc_value)))
+            theory = Theory2D(data)  
+            theory.group_id =str(model.name)+" 2D"
+            theory.xmin= qmin
+            theory.xmax= qmax
+            theory.ymin= qmin
+            theory.ymax= qmax
+            wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model 2D"))
     def on_draw_model2D(self, event):
         """
              plot view model 2D

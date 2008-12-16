@@ -343,5 +343,5 @@ class ModelPage(wx.ScrolledWindow):
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
-            self.manager.draw_model(self.model)
+            self.manager.draw_model(self.model,enable2D=self.model_view.GetValue())
   
