@@ -47,18 +47,18 @@ class SectorInteractor(_BaseInteractor):
         self.outer_circle.qmax = self.base.qmax*1.2
         #self.outer_circle.set_cursor(self.base.qmax/1.8, 0)
         from Edge import RadiusInteractor
-        self.inner_radius= RadiusInteractor(self, self.base.subplot, zorder=zorder+1,
+        self.right_edge= RadiusInteractor(self, self.base.subplot, zorder=zorder+1,
                                              arc1=self.inner_circle,
                                              arc2=self.outer_circle,
                                             theta=theta1)
-        self.outer_radius= RadiusInteractor(self, self.base.subplot, zorder=zorder+1,
+        self.left_edge= RadiusInteractor(self, self.base.subplot, zorder=zorder+1,
                                              arc1=self.inner_circle,
                                              arc2=self.outer_circle,
                                             theta=theta2)
         self.update()
         self._post_data()
         # Bind to slice parameter events
-        #self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
+        self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
 
 
     def _onEVT_SLICER_PARS(self, event):
@@ -92,10 +92,10 @@ class SectorInteractor(_BaseInteractor):
         self.clear_markers()
         self.outer_circle.clear()
         self.inner_circle.clear()
-        self.inner_radius.clear()
-        self.outer_radius.clear()
+        self.right_edge.clear()
+        self.left_edge.clear()
         #self.base.connect.disconnect()
-        #self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
+        self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
         
     def update(self):
         """
@@ -108,25 +108,25 @@ class SectorInteractor(_BaseInteractor):
             self.inner_circle.update()
             r1=self.inner_circle.get_radius()
             r2=self.outer_circle.get_radius()
-            self.inner_radius.update(r1,r2)
-            self.outer_radius.update(r1,r2)
+            self.right_edge.update(r1,r2)
+            self.left_edge.update(r1,r2)
         if self.outer_circle.has_move:    
             print "outer circle has moved" 
             self.outer_circle.update()
             r1=self.inner_circle.get_radius()
             r2=self.outer_circle.get_radius()
-            self.inner_radius.update(r1,r2)
-            self.outer_radius.update(r1,r2)
-        if self.inner_radius.has_move:
-            print "inner radius has moved"
-            self.inner_radius.update(theta_left=self.outer_radius.get_radius())
-            self.inner_circle.update(theta1=self.inner_radius.get_radius(), theta2=None)
-            self.outer_circle.update(theta1=self.inner_radius.get_radius(), theta2=None)
-        if  self.outer_radius.has_move:
-             print "outer radius has moved"
-             self.outer_radius.update(theta_right=self.inner_radius.get_radius())
-             self.inner_circle.update(theta1=None, theta2=self.outer_radius.get_radius())
-             self.outer_circle.update(theta1=None, theta2=self.outer_radius.get_radius())
+            self.left_edge.update(r1,r2)
+            self.right_edge.update(r1,r2)
+        if self.right_edge.has_move:
+            print "right edge has moved"
+            self.right_edge.update()
+            self.inner_circle.update(theta1=self.right_edge.get_angle(), theta2=None)
+            self.outer_circle.update(theta1=self.right_edge.get_angle(), theta2=None)
+        if  self.left_edge.has_move:
+            print "left Edge has moved"
+            self.left_edge.update()
+            self.inner_circle.update(theta1=None, theta2=self.left_edge.get_angle())
+            self.outer_circle.update(theta1=None, theta2=self.left_edge.get_angle())
              
         
     def save(self, ev):
@@ -137,8 +137,12 @@ class SectorInteractor(_BaseInteractor):
         self.base.freeze_axes()
         self.inner_circle.save(ev)
         self.outer_circle.save(ev)
+        self.right_edge.save(ev)
+        self.left_edge.save(ev)
+        
     def _post_data(self):
         pass
+    
     def post_data(self,new_sector ):
         """ post data averaging in Q"""
         if self.inner_circle.get_radius() < self.outer_circle.get_radius():
@@ -147,12 +151,12 @@ class SectorInteractor(_BaseInteractor):
         else:
             rmin=self.outer_circle.get_radius()
             rmax=self.inner_circle.get_radius()
-        if self.inner_radius.get_radius() < self.outer_radius.get_radius():
-            phimin=self.inner_radius.get_radius()
-            phimax=self.outer_radius.get_radius()
+        if self.right_edge.get_angle() < self.left_edge.get_angle():
+            phimin=self.right_edge.get_angle()
+            phimax=self.left_edge.get_angle()
         else:
-            phimin=self.outer_radius.get_radius()
-            phimax=self.inner_radius.get_radius()
+            phimin=self.left_edge.get_angle()
+            phimax=self.right_edge.get_angle()
             
         print "phimin, phimax, rmin ,rmax",math.degrees(phimin), math.degrees(phimax), rmin ,rmax
         #from DataLoader.manipulations import SectorQ
@@ -189,14 +193,14 @@ class SectorInteractor(_BaseInteractor):
         
         
     def moveend(self, ev):
-        self.base.thaw_axes()
+        #self.base.thaw_axes()
         
-        # Post paramters
+         # Post paramters
         event = SlicerParameters.SlicerParameterEvent()
         event.type = self.__class__.__name__
         event.params = self.get_params()
+        print "main moveend ", event.params
         wx.PostEvent(self.base.parent, event)
-
         self._post_data()
             
     def restore(self):
@@ -204,7 +208,9 @@ class SectorInteractor(_BaseInteractor):
         Restore the roughness for this layer.
         """
         self.inner_circle.restore()
-        #self.outer_circle.restore()
+        self.outer_circle.restore()
+        self.right_edge.restore()
+        self.left_edge.restore()
 
     def move(self, x, y, ev):
         """
@@ -217,26 +223,26 @@ class SectorInteractor(_BaseInteractor):
         
     def get_params(self):
         params = {}
-        params["inner_radius"] = self.inner_circle._inner_mouse_x
-        params["outer_radius"] = self.outer_circle._inner_mouse_x
-        params["phi_min"] = self.inner_radius.get_radius()
-        params["phi_max"] = self.inner_radius.get_radius()
+        params["r_min"] = self.inner_circle.get_radius()
+        params["r_max"] = self.outer_circle.get_radius()
+        params["phi_min"] = self.right_edge.get_angle()
+        params["phi_max"] = self.left_edge.get_angle()
         params["nbins"] = self.nbins
         return params
     
     def set_params(self, params):
-        
-        inner = params["inner_radius"] 
-        outer = params["outer_radius"] 
+        print "setparams on main slicer ",params
+        inner = params["r_min"] 
+        outer = params["r_max"] 
         phi_min= params["phi_min"]
-        phi_min=params["phi_max"]
+        phi_max=params["phi_max"]
         self.nbins = int(params["nbins"])
         
         
-        self.inner_circle.set_cursor(inner, self.inner_circle._inner_mouse_y)
-        self.outer_circle.set_cursor(outer, self.outer_circle._inner_mouse_y)
-        self.inner_radius.set_cursor(inner, self.inner_circle._inner_mouse_y)
-        self.outer_radius.set_cursor(outer, self.outer_circle._inner_mouse_y)
+        self.inner_circle.set_cursor(inner, phi_min, phi_max,self.nbins)
+        self.outer_circle.set_cursor(outer,  phi_min, phi_max, self.nbins)
+        self.right_edge.set_cursor(inner, outer, phi_min)
+        self.left_edge.set_cursor(inner, outer, phi_max)
         self._post_data()
         
     def freeze_axes(self):

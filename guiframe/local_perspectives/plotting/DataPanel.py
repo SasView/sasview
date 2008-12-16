@@ -27,7 +27,7 @@ DEFAULT_QMAX = 0.05
 
 DEFAULT_QSTEP = 0.001
 DEFAULT_BEAM = 0.005
-
+BIN_WIDTH =1
 import pylab
 
 class PanelMenu(wx.Menu):
@@ -481,8 +481,8 @@ class View1DPanel2D( View1DPanel1D):
         wx.EVT_MENU(self, id,  self.onClearSlicer) 
         
         id = wx.NewId()
-        slicerpop.Append(id, '&Edit Parameters')
-        wx.EVT_MENU(self, id, self._onEditDetector) 
+        slicerpop.Append(id, '&Edit Slicer Parameters')
+        wx.EVT_MENU(self, id, self._onEditSlicer) 
         
         slicerpop.AppendSeparator()
         
@@ -579,7 +579,8 @@ class View1DPanel2D( View1DPanel1D):
         """
         
         from DataLoader.manipulations import CircularAverage
-        Circle = CircularAverage( r_min= -self.qmax, r_max= self.qmax, bin_width=0.001)
+        #Circle = CircularAverage( r_min= -self.qmax, r_max= self.qmax, bin_width=BIN_WIDTH )
+        Circle = CircularAverage( r_min= -1, r_max= 1, bin_width=0.001 )
         circ = Circle(self.data2D)
         from sans.guiframe.dataFitting import Data1D
         if hasattr(circ,"dxl"):
@@ -607,6 +608,14 @@ class View1DPanel2D( View1DPanel1D):
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=new_plot.name))
         
         
+    def _onEditSlicer(self, event):
+        if self.slicer !=None:
+            from SlicerParameters import SlicerParameterPanel
+            dialog = SlicerParameterPanel(self.parent, -1, "Slicer Parameters")
+            dialog.set_slicer(self.slicer.__class__.__name__,
+                            self.slicer.get_params())
+            if dialog.ShowModal() == wx.ID_OK:
+                dialog.Destroy() 
         
     def onSectorQ(self, event):
         """

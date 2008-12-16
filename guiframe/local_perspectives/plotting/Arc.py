@@ -28,7 +28,7 @@ class ArcInteractor(_BaseInteractor):
         
         self.theta1=theta1
         self.theta2=theta2
-      
+        self.radius= r
         [self.inner_circle] = self.axes.plot([],[],
                                       linestyle='-', marker='',
                                       color=self.color)
@@ -57,7 +57,7 @@ class ArcInteractor(_BaseInteractor):
         radius =math.sqrt(math.pow(self._inner_mouse_x, 2)+math.pow(self._inner_mouse_y, 2))
         return radius
         
-    def update(self,theta1=None,theta2=None):
+    def update(self,theta1=None,theta2=None, nbins=None, r=None):
         """
         Draw the new roughness on the graph.
         """
@@ -68,55 +68,57 @@ class ArcInteractor(_BaseInteractor):
             self.theta1= theta1
         if theta2 !=None:
             self.theta2= theta2
+        
         print "ring update theta1 theta2", math.degrees(self.theta1), math.degrees(self.theta2)
         while self.theta2 < self.theta1: self.theta2 += 2*math.pi
-        npts = int((self.theta2 - self.theta1)/(math.pi/120))
+        
         
         
             
-            
+        if nbins!=None:
+            self.npts =nbins
+        else:
+            npts = int((self.theta2 - self.theta1)/(math.pi/120))   
         for i in range(self.npts):
             
             phi =(self.theta2-self.theta1)/(self.npts-1)*i +self.theta1
             #delta= phi1-phi
-            r=  math.sqrt(math.pow(self._inner_mouse_x, 2)+math.pow(self._inner_mouse_y, 2))
-            xval = 1.0*r*math.cos(phi) 
-            yval = 1.0*r*math.sin(phi) 
-            #xval = 1.0*self._inner_mouse_x*math.cos(phi) 
-            #yval = 1.0*self._inner_mouse_x*math.sin(phi)
-          
-           
+            if r ==None:
+                self.radius=  math.sqrt(math.pow(self._inner_mouse_x, 2)+math.pow(self._inner_mouse_y, 2))
+            else:
+                self.radius= r
+            
+            xval = 1.0*self.radius*math.cos(phi) 
+            yval = 1.0*self.radius*math.sin(phi) 
+            
             x.append(xval)
             y.append(yval)
         
         #self.inner_marker.set(xdata=[self._inner_mouse_x],ydata=[0])
         self.inner_circle.set_data(x, y) 
         
-        """
-        r=  math.sqrt(math.pow(self._inner_mouse_x, 2)+math.pow(self._inner_mouse_y, 2))
-        x1=  r*math.cos(self.theta1)
-        y1= r*math.sin(self.theta1)
-        """
-        #x1= self._inner_mouse_x*math.cos(self.theta1)
-        #y1= self._inner_mouse_x*math.sin(self.theta1)
-        #x2= r2*math.cos(self.theta1)
-        #y2= r2*math.sin(self.theta1)
-       
-   
+      
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
         can restore on Esc.
         """
-        #self._inner_save_x = self._inner_mouse_x
-        #self._inner_save_y = self._inner_mouse_y
-        self._inner_save_x = ev.xdata
-        self._inner_save_y = ev.ydata
-        print "save value",self._inner_save_x ,self._inner_save_y
+        self._inner_save_x = self._inner_mouse_x
+        self._inner_save_y = self._inner_mouse_y
+        #self._inner_save_x = ev.xdata
+        #self._inner_save_y = ev.ydata
+        
         self.base.freeze_axes()
 
     def moveend(self, ev):
         self.has_move= False
+        
+        event = SlicerParameters.SlicerParameterEvent()
+        event.type = self.__class__.__name__
+        event.params = self.get_params()
+        print "in arc moveend params",self.get_params()
+        #wx.PostEvent(self.base.base.parent, event)
+        
         self.base.moveend(ev)
             
     def restore(self):
@@ -130,20 +132,24 @@ class ArcInteractor(_BaseInteractor):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        print "ring move x, y", x,y
+        #print "ring move x, y", x,y
         self._inner_mouse_x = x
         self._inner_mouse_y = y
         self.has_move= True
         self.base.base.update()
         
-    def set_cursor(self, x, y):
-        self.move(x, y, None)
-        self.update()
+    def set_cursor(self,radius, phi_min, phi_max,nbins):
+        
+        self.theta1= phi_min
+        self.theta2= phi_max
+        self.update(nbins=nbins, r=radius)
         
         
     def get_params(self):
         params = {}
-        params["radius"] = self._inner_mouse_x
+        params["radius"] = self.radius
+        params["theta1"] = self.theta1
+        params["theta2"] = self.theta2
         return params
     
     def set_params(self, params):
