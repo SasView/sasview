@@ -105,6 +105,7 @@ def plot_data(parent, path, name="Loaded Data"):
         new_plot.source=output.source
         new_plot.name = output.filename
         new_plot.interactive = True
+        new_plot.id = True
         new_plot.info= output
         if hasattr(output, "dxl"):
             new_plot.dxl = output.dxl
@@ -117,6 +118,7 @@ def plot_data(parent, path, name="Loaded Data"):
         new_plot.xaxis(output._xaxis,output._xunit)
         new_plot.yaxis(output._yaxis,output._yunit)
         new_plot.group_id = filename
+        new_plot.id =None
         wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))
     else:
         i=1
@@ -137,7 +139,7 @@ def plot_data(parent, path, name="Loaded Data"):
             new_plot.info=output
             new_plot.name = str(item.run[0])
             new_plot.interactive = True
-            
+           
             #print "loader output.detector",output.source
             new_plot.detector =item.detector
             # If the data file does not tell us what the axes are, just assume...
