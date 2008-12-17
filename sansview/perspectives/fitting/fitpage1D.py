@@ -481,6 +481,7 @@ class FitPage1D(wx.ScrolledWindow):
        
         self.compute_chisqr()
         self.vbox.Layout()
+        self.Layout()
         self.GrandParent.GetSizer().Layout()
         
        

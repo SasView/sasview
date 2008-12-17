@@ -68,9 +68,44 @@ class ModelPage(wx.ScrolledWindow):
         self.btClose =wx.Button(self,id,'Close')
         self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
         self.btClose.SetToolTipString("Close page.")
+        ix = 0
+        iy = 1 
+        self.sizer4.Add(wx.StaticText(self, -1, 'Min'),(iy, ix),(1,1),\
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 2
+        self.sizer4.Add(wx.StaticText(self, -1, 'Max'),(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix = 0
+        iy += 1
+        self.sizer4.Add(wx.StaticText(self, -1, 'x range'),(iy, ix),(1,1),\
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        try:
+            if hasattr(model,'x'):
+                qmin= numpy.min(model.x)
+            
+        except:
+            qmin= numpy.min(model.xmin)
+        ix += 1
+        self.xmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        #self.xmin.SetValue(format_number(numpy.min(model.x)))
+        self.xmin.SetToolTipString("Minimun value of x in linear scale.")
+        self.xmin.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+        self.xmin.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
+        self.sizer4.Add(self.xmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
-        ix = 12
-        iy = 1
+       
+        ix += 2
+        self.xmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        #self.xmax.SetValue(format_number(numpy.max(data.x)))
+        self.xmax.SetToolTipString("Maximum value of x in linear scale.")
+        self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+        self.xmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
+       
+        self.sizer4.Add(self.xmax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix = 0
+        iy += 1
+        self.sizer4.Add((20,20),(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix +=3
         self.sizer4.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix = 0
         iy = 1
@@ -130,6 +165,7 @@ class ModelPage(wx.ScrolledWindow):
              @param manager: instance of plugin fitting
         """
         self.manager = manager
+        
     def onModel2D(self, event):
         
         if self.model_view.GetValue()==True:
@@ -344,4 +380,4 @@ class ModelPage(wx.ScrolledWindow):
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
             self.manager.draw_model(self.model,enable2D=self.model_view.GetValue())
-  
+            #self.manager.draw_model(self,model,description=None, enable1D=True,qmin=None,qmax=None, qstep=None)

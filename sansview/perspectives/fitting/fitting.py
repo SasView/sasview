@@ -3,7 +3,7 @@ import sys, wx, logging
 import string, numpy, math
 
 from copy import deepcopy 
-from danse.common.plottools.plottables import Data1D, Theory1D,Data2D,Theory2D
+from danse.common.plottools.plottables import Data1D, Theory1D,Data2D
 from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
 from sans.fit.AbstractFitEngine import Model,Data,FitData1D,FitData2D
@@ -93,11 +93,6 @@ class Plugin:
             if item.__class__.__name__ is "Data2D":
                 return [["Select data  for Fitting",\
                           "Dialog with fitting parameters ", self._onSelect]] 
-            #elif item.__class__.__name__ is "Theory2D":
-            #     return [["Line Slicer [Q-view]","Sector Averaging as a function of Q",
-            #             self.onLineSlicer],
-            #             ["Annulus Slicer [Phi-view]","Sector Averaging as a function of Phi",
-            #             self.onLineSlicer]]
             else:
                 if item.name==graph.selected_plottable and\
                  item.__class__.__name__ is  "Data1D":
@@ -531,8 +526,8 @@ class Plugin:
                         skipping point x %g %s" %(qmax, sys.exc_value)))
                 
             else:
-                theory=Theory2D(data.data, data.err_data)
-                #theory=Theory2D(data.image, data.err_image)
+                theory=Data2D(data.data, data.err_data)
+                
                 theory.x_bins= data.x_bins
                 theory.y_bins= data.y_bins
                 tempy=[]
@@ -634,9 +629,6 @@ class Plugin:
                     
                 except:
                     raise
-                
-                
-                
     def _draw_model2D(self,model,description=None, enable2D=False,qmin=None,qmax=None, qstep=None):
         if qmin==None:
             qmin= -0.05
@@ -646,7 +638,74 @@ class Plugin:
             qstep =0.001
         x = numpy.arange(qmin,qmax, qstep)
         y = numpy.arange(qmin,qmax,qstep)
-        
+        lx = len(x)
+        data=numpy.zeros([len(x),len(y)])
+        if enable2D:
+            """
+            for i_x in range(int(len(x)/2)):
+                if i_x%2==1:
+                    continue
+            for i_y in range(len(y)):
+                try:
+                    value = model.runXY([x[i_x], y[i_y]])
+                    #output[i_x][i_y] = value
+                    #output[lx-i_x-1][lx-i_y-1] = value
+                    data[i_y][i_x] = value
+                    data[lx-i_y-1][lx-i_x-1] = value
+                except:
+                     wx.PostEvent(self.parent, StatusEvent(status="\
+                        Error computing %s at [%g,%g] :%s" %(model.name,x[i_x],y[i_y], sys.exc_value)))
+                    
+            if lx%2==1:
+                i_x = int(len(x)/2)
+                for i_y in range(len(y)):
+                    try:
+                        value = model.runXY([x[i_x],y[i_y]])
+                        #output[i_x][i_y] = value
+                        data[i_y][i_x] = value
+                    except:
+                         wx.PostEvent(self.parent, StatusEvent(status="\
+                        Error computing %s at [%g,%g] :%s" %(model.name,x[i_x],y[i_y], sys.exc_value)))
+                       
+            """
+            for i_x in range(int(len(x)/2)):
+                """
+                if not i_x%2==1:
+                    continue
+                """
+                for i_y in range(len(y)):
+                    try:
+                        value = model.runXY([x[i_x],y[i_y]])
+                        #output[i_x][i_y] = value
+                        #output[lx-i_x-1][lx-i_y-1] = value
+                        data[i_y][i_x] = value
+                        data[lx-i_y-1][lx-i_x-1] = value
+                    except:
+                         wx.PostEvent(self.parent, StatusEvent(status="\
+                        Error computing %s at [%g,%g] :%s" %(model.name,x[i_x],y[i_y], sys.exc_value)))
+                       
+          
+
+            theory = (data)  
+            theory.group_id =str(model.name)+" 2D"
+            theory.xmin= qmin
+            theory.xmax= qmax
+            theory.ymin= qmin
+            theory.ymax= qmax
+            wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model 2D"))
+             
+                
+                
+    def H_draw_model2D(self,model,description=None, enable2D=False,qmin=None,qmax=None, qstep=None):
+        if qmin==None:
+            qmin= -0.05
+        if qmax==None:
+            qmax= 0.05
+        if qstep ==None:
+            qstep =0.001
+        x = numpy.arange(qmin,qmax, qstep)
+        y = numpy.arange(qmin,qmax,qstep)
+        lx = len(self.x)
         if enable2D:
             data=numpy.zeros([len(x),len(y)])
             for i in range(len(x)):
@@ -656,13 +715,15 @@ class Plugin:
                     except:
                          wx.PostEvent(self.parent, StatusEvent(status="\
                         Model 2D cannot be plot %g %s %s" %(data[i][j],model.name, sys.exc_value)))
-            theory = Theory2D(data)  
+            theory = Data2D(data)  
             theory.group_id =str(model.name)+" 2D"
             theory.xmin= qmin
             theory.xmax= qmax
             theory.ymin= qmin
             theory.ymax= qmax
             wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model 2D"))
+    
+    
     def on_draw_model2D(self, event):
         """
              plot view model 2D
