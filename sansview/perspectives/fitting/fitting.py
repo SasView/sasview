@@ -686,7 +686,7 @@ class Plugin:
                        
           
 
-            theory = (data)  
+            theory= Data2D(data)
             theory.group_id =str(model.name)+" 2D"
             theory.xmin= qmin
             theory.xmax= qmax
