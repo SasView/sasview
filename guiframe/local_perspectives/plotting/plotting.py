@@ -116,11 +116,11 @@ class Plugin:
         # Create a new plot panel if none was available        
         if not is_available:
             if not hasattr(event.plot,'data'):
-                from DataPanel import View1DPanel1D
-                new_panel = View1DPanel1D(self.parent, -1, style=wx.RAISED_BORDER)
+                from Plotter1D import ModelPanel1D
+                new_panel = ModelPanel1D(self.parent, -1, style=wx.RAISED_BORDER)
             else:
-                from DataPanel import View1DPanel2D
-                new_panel = View1DPanel2D(self.parent, -1, data2d=event.plot,style=wx.RAISED_BORDER)
+                from Plotter2D import ModelPanel2D
+                new_panel = ModelPanel2D(self.parent, -1, data2d=event.plot,style=wx.RAISED_BORDER)
             # Set group ID if available
             group_id_str = ''
             if hasattr(event.plot, "group_id"):
