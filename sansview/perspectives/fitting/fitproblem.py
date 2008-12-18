@@ -20,7 +20,11 @@ class FitProblem:
         self.model_list=[]
         self.schedule=0
         self.list_param=[]
-        
+        self.name_per_page=None
+    def save_model_name(self, name):  
+        self.name_per_page= name
+    def get_name(self):
+        return self.name_per_page
     def set_model(self,model,name):
         """ 
              associates each model with its new created name
@@ -92,6 +96,7 @@ class FitProblem:
              set schedule to true to decide if this fit  must be performed
         """
         self.schedule=schedule
+        
     def get_scheduled(self):
         """ return true or false if a problem as being schedule for fitting"""
         return self.schedule

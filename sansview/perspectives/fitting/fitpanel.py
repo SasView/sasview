@@ -46,6 +46,8 @@ class FitPanel(wx.Panel):
         self.model_page_number=None
         self.page_name=None
         self.model_page=None
+        # increment number for model name
+        self.count=0
         #updating the panel
         self.nb.Update()
         self.SetSizer(self.sizer)
@@ -82,21 +84,23 @@ class FitPanel(wx.Panel):
         except:
             name = 'Fit'
         if self.fit_page_name != name:
+            self.count +=1
             if data.__class__.__name__=='Data2D':
                  from fitpage2D import FitPage2D
                  panel = FitPage2D(self.nb,data, -1)
+                 
             else:
                 
                 from fitpage1D import FitPage1D
                 panel = FitPage1D(self.nb,data, -1)
-               
+            m_name= "M"+str(self.count)  
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
             
             self.nb.AddPage(page=panel,text=name,select=True)
             panel.populate_box( self.model_list_box)
             self.fit_page_name = name
-            return panel
+            return panel,m_name
         
     def _help_add_model_page(self,model,description,page_title):
         from modelpage import ModelPage
@@ -118,35 +122,13 @@ class FitPanel(wx.Panel):
             @param page_title: the name of the page
         """
         if  self.draw_model_name ==None:
-            # or  self.draw_model_name !=page_title: 
-            #print "removing the prevois model page ",self.model_page, self.model_page_number
-            #self.onClose(self.model_page, self.model_page_number)
+            
             self._help_add_model_page(model,description,page_title)
         else:
             if  self.draw_model_name !=page_title: 
                 self.onClose(self.model_page, self.model_page_number)
-                #print "removing the prevois model page ",self.model_page, self.model_page_number
                 self._help_add_model_page(model,description,page_title)
-        """
-        if  self.draw_model_name ==None : 
-            
-            from modelpage import ModelPage
-            panel = ModelPage(self.nb,model, -1)
-            panel.set_manager(self.manager)
-            panel.set_owner(self.event_owner)
-            self.nb.AddPage(page=panel,text=page_title,select=True)
-            panel.populate_box( self.model_list_box)
-            self.draw_model_name=page_title
-            self.model_page_number = self.nb.GetPage(self.nb.GetSelection())
-            print "model page",self.model_page_number,self.nb.GetSelection()
-        else:
-            for i in range(self.nb.GetPageCount()):
-                if self.nb.GetPageText(i)==self.page_name:
-                    page=self.nb.GetPage(i)
-                    page.set_page(model,description)
-                    break
-        """
-                
+      
            
     def get_notebook(self):
         """
@@ -178,6 +160,10 @@ class FitPanel(wx.Panel):
         """ @return the page just selected by the user """
         return self.nb.GetPage(self.nb.GetSelection())
     
+    
+    def get_page_number(self):
+        return self.nb.GetSelection()
+    
     def onClose(self, page=None,page_number=None):
         """
              close the current page except the simpage. remove each check box link to the model
@@ -206,10 +192,10 @@ class FitPanel(wx.Panel):
                 page_number = self.nb.GetSelection()
                 if self.nb.GetPageText(page_number)== self.page_name:
                     self.draw_model_name=None
-                    
+               
                 selected_page.Destroy()
                 self.nb.RemovePage(page_number)
-                #self.name=None
+                #self.count =self.count -1 
                 self.fit_page_name=None
         except:
             raise

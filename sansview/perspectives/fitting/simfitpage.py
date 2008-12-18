@@ -145,30 +145,37 @@ class SimultaneousFitPage(wx.ScrolledWindow):
              Remove  a checkbox and the name related to a model selected on page delpage
              @param delpage: the page removed
         """
+        print "self.model_list",self.model_list
+       
+        self.model_list=[]
+        self.model_toFit=[]
         self.sizer1.Clear(True)
+       
+        self.cb1.SetValue(False)
         ix = 0
         iy = 1 
-        for item in self.model_list:
+        list=[]
+        for page, value in self.page_finder.iteritems():
             try:
-                # redraw the panel without the name of the model associated 
-                # with the page to delete
-                if not delpage in item:
-                    #print "simfitpage:  redraw modelname",item[3]
-                    cb = wx.CheckBox(self, -1, item[3], (10, 10))
+                if page!= delpage:
+                    list = value.get_model()
+                    model = list[0]
+                    modelname = list[1]
+                    cb = wx.CheckBox(self, -1, modelname, (10, 10))
                     cb.SetValue(False)
                     self.sizer1.Add( cb,( iy,ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                     ix = 0
                     iy += 1 
                     wx.EVT_CHECKBOX(self, cb.GetId(), self.select_model_name)
-                else:
-                    # if the page to delete in item remove it from the model list
-                    self.model_list.remove(item)
+                    self.model_list.append([cb,value,page,modelname])
             except:
-                 wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Page deletion Error: %s" % sys.exc_value))
-                 
+                #wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Simultaneous fit: %s doesn't have a model selected yet %s" % \
+                #(value.get_data().group_id,sys.exc_value)))
+                pass
+        iy +=1
+        self.sizer1.Add((20,20),( iy,ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         self.sizer1.Layout()        
         self.vbox.Layout()
-            
         
     def select_model_name(self,event):
         """

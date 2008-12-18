@@ -156,13 +156,14 @@ class Plugin:
                  item.__class__.__name__ is "Data2D":
                 #find a name for the page created for notebook
                 try:
-                    page = self.fit_panel.add_fit_page(item)
+                    page, model_name = self.fit_panel.add_fit_page(item)
                     # add data associated to the page created
                     
                     if page !=None:    
                         
                         #create a fitproblem storing all link to data,model,page creation
                         self.page_finder[page]= FitProblem()
+                        self.page_finder[page].save_model_name(model_name)  
                         self.page_finder[page].add_data(item)
                 except:
                     wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
@@ -441,17 +442,20 @@ class Plugin:
         name = evt.name
         sim_page=self.fit_panel.get_page(0)
         current_pg = self.fit_panel.get_current_page() 
+        selected_page = self.fit_panel.get_selected_page()
         if current_pg != sim_page:
             current_pg.set_panel(model)
-            
+            model.name = self.page_finder[current_pg].get_name()
             try:
                 metadata=self.page_finder[current_pg].get_data()
-                M_name="M"+str(self.index_model)+"= "+name+"("+metadata.group_id+")"
+                M_name=model.name+"= "+name+"("+metadata.group_id+")"
             except:
-                M_name="M"+str(self.index_model)+"= "+name
-            model.name="M"+str(self.index_model)
+                M_name=model.name+"= "+name
+            #model.name="M"+str(self.index_model)
             self.index_model += 1  
+            # save model name
             
+            # save the name containing the data name with the appropriate model
             self.page_finder[current_pg].set_model(model,M_name)
             self.plot_helper(currpage= current_pg,qmin= None,qmax= None)
             sim_page.add_model(self.page_finder)
@@ -485,9 +489,9 @@ class Plugin:
             
             if data!=None and data.__class__.__name__ != 'Data2D':
                 theory = Theory1D(x=[], y=[])
-                theory.name = "Model"
+                theory.name = model.name
                 theory.group_id = data.group_id
-              
+                theory.id = "Model"
                 x_name, x_units = data.get_xaxis() 
                 y_name, y_units = data.get_yaxis() 
                 theory.xaxis(x_name, x_units)
@@ -527,7 +531,9 @@ class Plugin:
                 
             else:
                 theory=Data2D(data.data, data.err_data)
-                
+                theory.name= model.name
+                theory.id= "Model"
+                theory.group_id= "Model"+data.name
                 theory.x_bins= data.x_bins
                 theory.y_bins= data.y_bins
                 tempy=[]
@@ -559,7 +565,8 @@ class Plugin:
                 theory.ymin= ymin
                 theory.ymax= ymax
         
-        wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model"))
+        wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
+                                                title="Analytical model %s"%str(data.name)))
         
         
     def _on_model_menu(self, evt):
@@ -604,11 +611,11 @@ class Plugin:
                 try:
                     new_plot = Theory1D(x, y)
                     #new_plot.name = model.name
-                    new_plot.name = "Model"
+                    new_plot.name = model.name
                     new_plot.xaxis("\\rm{Q}", 'A^{-1}')
                     new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-                     
-                    new_plot.group_id ="Fitness"
+                    new_plot.id = "Model"
+                    new_plot.group_id ="Model"
                     wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model 1D"))
                     
                 except:
@@ -620,12 +627,12 @@ class Plugin:
                 try:
                     new_plot = Theory1D(x, y)
                     new_plot.name = model.name
-                    #new_plot.name = "Model"
                     new_plot.xaxis("\\rm{Q}", 'A^{-1}')
                     new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-                     
-                    new_plot.group_id ="Fitness"
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model 1D"))
+                    new_plot.id ="Model"
+                    new_plot.group_id ="Model"
+                    wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
+                                     title="Analytical model 1D %s"%str(model.name) ))
                     
                 except:
                     raise
@@ -685,14 +692,17 @@ class Plugin:
                         Error computing %s at [%g,%g] :%s" %(model.name,x[i_x],y[i_y], sys.exc_value)))
                        
           
-
+                
             theory= Data2D(data)
-            theory.group_id =str(model.name)+" 2D"
+            theory.name= model.name
+            theory.group_id ="Model"
+            theory.id ="Model"
             theory.xmin= qmin
             theory.xmax= qmax
             theory.ymin= qmin
             theory.ymax= qmax
-            wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model 2D"))
+            wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
+                             title="Analytical model 2D %s" %str(model.name)))
              
                 
                 
