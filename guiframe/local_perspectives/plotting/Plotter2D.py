@@ -102,32 +102,56 @@ class ModelPanel2D( ModelPanel1D):
             @param event: data event
         """
         #TODO: Check for existence of plot attribute
+
         # Check whether this is a replot. If we ask for a replot
         # and the plottable no longer exists, ignore the event.
         if hasattr(event, "update") and event.update==True \
             and event.plot.name not in self.plots.keys():
             return
+        
         if hasattr(event, "reset"):
             self._reset()
+        print "model2 d event",event.plot.name, event.plot.id, event.plot.group_id
+        print "plottable list ",self.plots.keys()
+        print self.plots
         is_new = True
         if event.plot.name in self.plots.keys():
             # Check whether the class of plottable changed
             if not event.plot.__class__==self.plots[event.plot.name].__class__:
+                #overwrite a plottable using the same name
+                print "is deleting the new plottable"
                 self.graph.delete(self.plots[event.plot.name])
             else:
+                # plottable is already draw on the panel
                 is_new = False
-        self.plots[event.plot.name] = event.plot
-        #if is_new:
-        self.graph.add(self.plots[event.plot.name])
-        
 
+           
+        if is_new:
+            # a new plottable overwrites a plotted one  using the same id
+            print "went here",self.plots.itervalues()
+            for plottable in self.plots.itervalues():
+                if event.plot.id==plottable.id :
+                    self.graph.delete(plottable)
+            
+            self.plots[event.plot.name] = event.plot
+            self.graph.add(self.plots[event.plot.name])
+        else:
+            #replot the graph
+            self.plots[event.plot.name].x = event.plot.x    
+            self.plots[event.plot.name].y = event.plot.y    
+            self.plots[event.plot.name].dy = event.plot.dy  
+            if hasattr(event.plot, 'dx') and hasattr(self.plots[event.plot.name], 'dx'):
+                self.plots[event.plot.name].dx = event.plot.dx    
+ 
+        
         # Check axis labels
         #TODO: Should re-factor this
         #if event.plot._xunit != self.graph.prop["xunit"]:
-       
         self.graph.xaxis(event.plot._xaxis, event.plot._xunit)
+            
         #if event.plot._yunit != self.graph.prop["yunit"]:
         self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
+      
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
 

@@ -117,8 +117,8 @@ def plot_data(parent, path, name="Loaded Data"):
         # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis(output._xaxis,output._xunit)
         new_plot.yaxis(output._yaxis,output._yunit)
-        new_plot.group_id = filename
-        new_plot.id =None
+        new_plot.group_id = output.filename
+        new_plot.id = output.filename
         wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))
     else:
         i=1
@@ -145,7 +145,9 @@ def plot_data(parent, path, name="Loaded Data"):
             # If the data file does not tell us what the axes are, just assume...
             new_plot.xaxis(item._xaxis,item._xunit)
             new_plot.yaxis(item._yaxis,item._yunit)
-            new_plot.group_id = filename
+            new_plot.group_id = str(item.run[0])
+            new_plot.id = str(item.run[0])
+            
             wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))
             i+=1
            

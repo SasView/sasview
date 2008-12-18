@@ -103,19 +103,26 @@ class ModelPanel1D(PlotPanel):
             self._reset()
         
         is_new = True
-        #print "model panel name",event.plot.name
         if event.plot.name in self.plots.keys():
             # Check whether the class of plottable changed
-            #print "model panel",event.plot.name,event.plot.__class__
             if not event.plot.__class__==self.plots[event.plot.name].__class__:
+                #overwrite a plottable using the same name
                 self.graph.delete(self.plots[event.plot.name])
             else:
+                # plottable is already draw on the panel
                 is_new = False
-        
+
+           
         if is_new:
+            # a new plottable overwrites a plotted one  using the same id
+            for plottable in self.plots.itervalues():
+                if event.plot.id==plottable.id :
+                    self.graph.delete(plottable)
+            
             self.plots[event.plot.name] = event.plot
             self.graph.add(self.plots[event.plot.name])
         else:
+            #replot the graph
             self.plots[event.plot.name].x = event.plot.x    
             self.plots[event.plot.name].y = event.plot.y    
             self.plots[event.plot.name].dy = event.plot.dy  

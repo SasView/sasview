@@ -96,6 +96,7 @@ class Plugin:
         """
         # Check whether we already have a graph with the same units
         # as the plottable we just received. 
+        
         is_available = False
         for panel in self.plot_panels:
             if event.plot._xunit == panel.graph.prop["xunit_base"] \
