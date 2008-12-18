@@ -139,8 +139,9 @@ class ModelPanel1D(PlotPanel):
         self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
       
         # Set the view scale for all plots
+       
         self._onEVT_FUNC_PROPERTY()
-      
+    
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
 

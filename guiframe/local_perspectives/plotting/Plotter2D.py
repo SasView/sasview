@@ -28,7 +28,7 @@ DEFAULT_QMAX = 0.05
 
 DEFAULT_QSTEP = 0.001
 DEFAULT_BEAM = 0.005
-BIN_WIDTH =1
+BIN_WIDTH = 1.0
 import pylab
 from Plotter1D import PanelMenu
 
@@ -80,7 +80,8 @@ class ModelPanel2D( ModelPanel1D):
         self.imax = data2d.ymax
         #self.radius = math.sqrt(data2d.)
         self.qstep = DEFAULT_QSTEP
-        print "panel2D qmax",self.qmax,
+        #print "panel2D qmax",self.qmax,
+        
         self.x = pylab.arange(-1*self.qmax, self.qmax+self.qstep*0.01, self.qstep)
         self.y = pylab.arange(-1*self.imax, self.imax+self.qstep*0.01, self.qstep)
 
@@ -111,9 +112,9 @@ class ModelPanel2D( ModelPanel1D):
         
         if hasattr(event, "reset"):
             self._reset()
-        print "model2 d event",event.plot.name, event.plot.id, event.plot.group_id
-        print "plottable list ",self.plots.keys()
-        print self.plots
+        #print "model2 d event",event.plot.name, event.plot.id, event.plot.group_id
+        #print "plottable list ",self.plots.keys()
+        #print self.plots
         is_new = True
         if event.plot.name in self.plots.keys():
             # Check whether the class of plottable changed
@@ -128,7 +129,7 @@ class ModelPanel2D( ModelPanel1D):
            
         if is_new:
             # a new plottable overwrites a plotted one  using the same id
-            print "went here",self.plots.itervalues()
+            #print "went here",self.plots.itervalues()
             for plottable in self.plots.itervalues():
                 if event.plot.id==plottable.id :
                     self.graph.delete(plottable)
@@ -194,11 +195,11 @@ class ModelPanel2D( ModelPanel1D):
         wx.EVT_MENU(self, id, self.onCircular) 
         
         id = wx.NewId()
-        slicerpop.Append(id, '&Sector Q')
+        slicerpop.Append(id, '&Sector [Q view]')
         wx.EVT_MENU(self, id, self.onSectorQ) 
         
         id = wx.NewId()
-        slicerpop.Append(id, '&Sector Phi')
+        slicerpop.Append(id, '&Annulus [Phi view ]')
         wx.EVT_MENU(self, id, self.onSectorPhi) 
       
         
@@ -305,8 +306,13 @@ class ModelPanel2D( ModelPanel1D):
         """
         
         from DataLoader.manipulations import CircularAverage
-        Circle = CircularAverage( r_min= 0, r_max= self.qmax, bin_width=BIN_WIDTH )
+        import math
+        self.radius= math.sqrt( math.pow(self.qmax,2)+math.pow(self.qmax,2)) 
+        print "radius?",self.radius
+        Circle = CircularAverage( r_min=0, r_max=self.radius, bin_width=0.001)
+        #Circle = CircularAverage( r_min=0, r_max=13705.0, bin_width=BIN_WIDTH )
         #Circle = CircularAverage( r_min= -1, r_max= 1, bin_width=0.001 )
+        #Circle = CircularAverage( r_min= -1*self.radius, r_max= self.radius, bin_width=0.001 )
         circ = Circle(self.data2D)
         from sans.guiframe.dataFitting import Data1D
         if hasattr(circ,"dxl"):
@@ -317,7 +323,7 @@ class ModelPanel2D( ModelPanel1D):
             dxw= circ.dxw
         else:
             dxw= None
-            
+        
         new_plot = Data1D(x=circ.x,y=circ.y,dy=circ.dy,dxl=dxl,dxw=dxw)
         new_plot.name = "Circ avg "+ self.data2D.name
         new_plot.source=self.data2D.source
@@ -331,9 +337,9 @@ class ModelPanel2D( ModelPanel1D):
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = "Circ avg "+ self.data2D.name
         self.scale = 'log'
+       
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=new_plot.name))
-        
-        
+       
     def _onEditSlicer(self, event):
         if self.slicer !=None:
             from SlicerParameters import SlicerParameterPanel
@@ -348,17 +354,17 @@ class ModelPanel2D( ModelPanel1D):
             Perform sector averaging on Q
         """
         
-        from SectorSlicer import SectorInteractorQ
+        from SectorSlicer import SectorInteractor
         self.onClearSlicer(event)
-        wx.PostEvent(self.parent, InternalEvent(slicer= SectorInteractorQ))
+        wx.PostEvent(self.parent, InternalEvent(slicer= SectorInteractor))
         
     def onSectorPhi(self, event):
         """
             Perform sector averaging on Phi
         """
-        from SectorSlicer import SectorInteractorPhi
+        from AnnulusSlicer import AnnulusInteractor
         self.onClearSlicer(event)
-        wx.PostEvent(self.parent, InternalEvent(slicer= SectorInteractorPhi))
+        wx.PostEvent(self.parent, InternalEvent(slicer= AnnulusInteractor))
         
        
     def onClearSlicer(self, event):

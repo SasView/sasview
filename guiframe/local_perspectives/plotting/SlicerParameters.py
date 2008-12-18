@@ -9,12 +9,27 @@ from copy import deepcopy
 (SlicerEvent, EVT_SLICER)   = wx.lib.newevent.NewEvent()
 (SlicerParameterEvent, EVT_SLICER_PARS)   = wx.lib.newevent.NewEvent()
 
-class SlicerParameterPanel(wx.Panel):
+
+def format_number(value, high=False):
+    """
+        Return a float in a standardized, human-readable formatted string 
+    """
+    try: 
+        value = float(value)
+    except:
+        return "NaN"
+    
+    if high:
+        return "%-6.4g" % value
+    else:
+        return "%-5.3g" % value
+
+class SlicerParameterPanel(wx.Dialog):
     #TODO: show units
     #TODO: order parameters properly
     
     def __init__(self, parent, *args, **kwargs):
-        wx.Panel.__init__(self, parent, *args, **kwargs)
+        wx.Dialog.__init__(self, parent, *args, **kwargs)
         self.params = {}
         self.parent = parent
         self.type = None
@@ -57,28 +72,36 @@ class SlicerParameterPanel(wx.Panel):
         else:
             title = wx.StaticText(self, -1, "Slicer Parameters", style=wx.ALIGN_LEFT)
             self.bck.Add(title, (0,0), (1,2), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
-            
-            n = 1
+            ix = 0
+            iy = 0
             self.parameters = []
             #params = slicer.get_params()
             keys = params.keys()
             keys.sort()
             
             for item in keys:
-                n += 1
+                iy += 1
+                ix = 0
                 text = wx.StaticText(self, -1, item, style=wx.ALIGN_LEFT)
-                self.bck.Add(text, (n-1,0), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
+                #self.bck.Add(text, (iy,ix), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
+                self.bck.Add(text, (iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                 ctl = wx.TextCtrl(self, -1, size=(80,20), style=wx.TE_PROCESS_ENTER)
                 
                 ctl.SetToolTipString("Modify the value of %s to change the 2D slicer" % item)
                 
-                
-                ctl.SetValue(str(params[item]))
+                ix = 1
+                ctl.SetValue(format_number(str(params[item])))
                 self.Bind(wx.EVT_TEXT_ENTER, self.onTextEnter)
                 ctl.Bind(wx.EVT_KILL_FOCUS, self.onTextEnter)
                 self.parameters.append([item, ctl])
-                self.bck.Add(ctl, (n-1,1), flag=wx.TOP|wx.BOTTOM, border = 0)
-
+                #self.bck.Add(ctl, (iy,ix), flag=wx.TOP|wx.BOTTOM, border = 0)
+                self.bck.Add(ctl, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                
+                ix =3
+                self.bck.Add((20,20), (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            iy +=1
+            ix = 1
+            self.bck.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         self.bck.Layout()
         self.bck.Fit(self)
         self.parent.GetSizer().Layout()
