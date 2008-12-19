@@ -163,7 +163,9 @@ class BoxInteractor(_BaseInteractor):
         box =  Boxavg (x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
        
         self.count, self.error= box(self.base.data2D)
-                      
+        
+        
+              
                                        
     def moveend(self, ev):
         self.base.thaw_axes()

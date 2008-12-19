@@ -372,15 +372,17 @@ class ModelPanel2D( ModelPanel1D):
     def onBoxavg(self,event):
         from boxSlicer import BoxInteractor
         self.onClearSlicer(event)
+        self.slicer=BoxInteractor
+        from SlicerParameters import SlicerParameterPanel
+        dialog = SlicerParameterPanel(self.parent, -1, "Slicer Parameters")
+        dialog.set_slicer(self.slicer.__name__,
+                        self.slicer.get_params())
+        if dialog.ShowModal() == wx.ID_OK:
+            dialog.Destroy()
         wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractor))
         print "onboxavg",self.slicer
-        if self.slicer !=None:
-            from SlicerParameters import SlicerParameterPanel
-            dialog = SlicerParameterPanel(self.parent, -1, "Slicer Parameters")
-            dialog.set_slicer(self.slicer.__class__.__name__,
-                            self.slicer.get_params())
-            if dialog.ShowModal() == wx.ID_OK:
-                dialog.Destroy() 
+        
+        
     def onClearSlicer(self, event):
         """
             Clear the slicer on the plot
