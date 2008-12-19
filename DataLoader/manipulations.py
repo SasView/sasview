@@ -641,12 +641,12 @@ class _Sector:
         
         Phi is defined between 0 and 2pi
     """
-    def __init__(self, r_min, r_max, phi_min, phi_max):
+    def __init__(self, r_min, r_max, phi_min, phi_max,nbins=20):
         self.r_min = r_min
         self.r_max = r_max
         self.phi_min = phi_min
         self.phi_max = phi_max
-        self.nbins = 20
+        self.nbins = nbins
         
     def _agv(self, data2D, run='phi'):
         """
