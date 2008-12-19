@@ -98,7 +98,7 @@ class AnnulusInteractor(_BaseInteractor):
         self.inner_circle.save(ev)
         self.outer_circle.save(ev)
 
-    def _post_data(self):
+    def _post_data(self,nbins=None):
          # Compute data
         data = self.base.data2D
         # If we have no data, just return
@@ -107,9 +107,9 @@ class AnnulusInteractor(_BaseInteractor):
         
         from DataLoader.manipulations import SectorPhi
         radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
-        phimin = self.right_line.theta
-        phimax = self.left_line.theta
-        sect = SectorPhi(r_min=-1*radius , r_max= radius , phi_min=phimin, phi_max=phimax)
+        rmin= self.inner_circle.get_radius()
+        rmax = self.outer_circle.get_radius()
+        sect = SectorPhi(r_min=rmin , r_max= rmax, phi_min=-1*math.pi, phi_max=math.pi)
         if nbins!=None:
             sect.nbins = nbins
         
@@ -186,7 +186,7 @@ class AnnulusInteractor(_BaseInteractor):
         self.nbins = int(params["nbins"])
         self.inner_circle.set_cursor(inner, self.inner_circle._inner_mouse_y)
         self.outer_circle.set_cursor(outer, self.outer_circle._inner_mouse_y)
-        self._post_data()
+        self._post_data(self.nbins)
         
     def freeze_axes(self):
         self.base.freeze_axes()
