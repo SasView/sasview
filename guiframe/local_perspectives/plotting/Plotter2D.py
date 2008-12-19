@@ -202,6 +202,9 @@ class ModelPanel2D( ModelPanel1D):
         slicerpop.Append(id, '&Annulus [Phi view ]')
         wx.EVT_MENU(self, id, self.onSectorPhi) 
       
+        id = wx.NewId()
+        slicerpop.Append(id, '&Box averaging')
+        wx.EVT_MENU(self, id, self.onBoxavg) 
         
         id = wx.NewId()
         slicerpop.Append(id, '&Clear slicer')
@@ -366,7 +369,18 @@ class ModelPanel2D( ModelPanel1D):
         self.onClearSlicer(event)
         wx.PostEvent(self.parent, InternalEvent(slicer= AnnulusInteractor))
         
-       
+    def onBoxavg(self,event):
+        from boxSlicer import BoxInteractor
+        self.onClearSlicer(event)
+        wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractor))
+        print "onboxavg",self.slicer
+        if self.slicer !=None:
+            from SlicerParameters import SlicerParameterPanel
+            dialog = SlicerParameterPanel(self.parent, -1, "Slicer Parameters")
+            dialog.set_slicer(self.slicer.__class__.__name__,
+                            self.slicer.get_params())
+            if dialog.ShowModal() == wx.ID_OK:
+                dialog.Destroy() 
     def onClearSlicer(self, event):
         """
             Clear the slicer on the plot

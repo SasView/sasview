@@ -7,33 +7,34 @@
 
 
 # Debug printout
-from config import printEVT
+#from config import printEVT
 from BaseInteractor import _BaseInteractor
 from copy import deepcopy
 import math
 
-from Plotter1D import AddPlotEvent
+#from Plotter1D import AddPlotEvent
 import SlicerParameters
 import wx
 
-class AnnulusInteractor(_BaseInteractor):
+class BoxInteractor(_BaseInteractor):
     """
          Select an annulus through a 2D plot
     """
-    def __init__(self,base,axes,color='black', zorder=3, x_min=0.025, x_max=0.025, y_min=0.025, y_max=0.025):
+    def __init__(self,base,axes,color='black', zorder=3, x_min=0.0025, x_max=0.0025, y_min=0.0025, y_max=0.0025):
         
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
         self.qmax = self.base.qmax
         self.connect = self.base.connect
-        self.xmin=xmin
-        self.ymin=ymin
-        self.xmax=xmax
-        self.ymax=ymax
+        self.xmin=x_min
+        self.ymin=y_min
+        self.xmax=x_max
+        self.ymax=y_max
         ## Number of points on the plot
         self.nbins = 20
-        
+        self.count=0
+        self.error=0
         #self.theta3= 2*self.theta2 -self.theta1
         # Inner circle
         self.left_line = VerticalLine(self, self.base.subplot,color='blue', zorder=zorder, 
@@ -58,15 +59,15 @@ class AnnulusInteractor(_BaseInteractor):
         #self.outer_circle.set_cursor(self.base.qmax/1.8, 0)
         
                       
-        #self.update()
-        self._post_data()
+        self.update()
+        #self._post_data()
         
         # Bind to slice parameter events
         self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
 
 
     def _onEVT_SLICER_PARS(self, event):
-        printEVT("AnnulusSlicer._onEVT_SLICER_PARS")
+        #printEVT("AnnulusSlicer._onEVT_SLICER_PARS")
         event.Skip()
         if event.type == self.__class__.__name__:
             #self.set_params(event.params)
@@ -92,8 +93,10 @@ class AnnulusInteractor(_BaseInteractor):
         
     def clear(self):
         self.clear_markers()
-        self.outer_circle.clear()
-        self.inner_circle.clear()
+        self.left_line.clear()
+        self.right_line.clear()
+        self.top_line.clear()
+        self.bottom_line.clear()
         #self.base.connect.disconnect()
         self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
         
@@ -102,6 +105,10 @@ class AnnulusInteractor(_BaseInteractor):
         Respond to changes in the model by recalculating the profiles and
         resetting the widgets.
         """
+        self.left_line.update()
+        self.right_line.update()
+        self.top_line.update()
+        self.bottom_line.update()
         if self.left_line.has_move:
             print "left has moved"
             self.left_line.update()
@@ -134,48 +141,7 @@ class AnnulusInteractor(_BaseInteractor):
             self.left_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y)
             self.right_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y)
             
-    def get_data(self, image, x, y):
-        """ 
-            Return a 1D vector corresponding to the slice
-            @param image: data matrix
-            @param x: x matrix
-            @param y: y matrix
-        """
-        # If we have no data, just return
-        if image == None:
-            return        
-        
-        nbins = self.nbins
-        
-        data_x = nbins*[0]
-        data_y = nbins*[0]
-        counts = nbins*[0]
-        length = len(image)
-        print "length x , y , image", len(x), len(y), length
-        
-        for i_x in range(length):
-            for i_y in range(length):
-                        
-                q = math.sqrt(x[i_x]*x[i_x] + y[i_y]*y[i_y])
-                if (q>self.inner_circle._inner_mouse_x \
-                    and q<self.outer_circle._inner_mouse_x) \
-                    or (q<self.inner_circle._inner_mouse_x \
-                    and q>self.outer_circle._inner_mouse_x):
-                            
-                    i_bin = int(math.ceil(nbins*(math.atan2(y[i_y], x[i_x])+math.pi)/(2.0*math.pi)) - 1)
-                    
-                    
-                    #data_y[i_bin] += math.exp(image[i_x][i_y])
-                    data_y[i_bin] += image[i_y][i_x]
-                    counts[i_bin] += 1.0
-                    
-        for i in range(nbins):
-            data_x[i] = (1.0*i+0.5)*2.0*math.pi/nbins
-            if counts[i]>0:
-                data_y[i] = data_y[i]/counts[i]
-        
-        return data_x, data_y
-
+    
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
@@ -187,31 +153,18 @@ class AnnulusInteractor(_BaseInteractor):
 
     def _post_data(self):
         # Compute data
-        data = self.base.get_corrected_data()
-        # If we have no data, just return
-        if data == None:
-            return
-
-        data_x, data_y = self.get_data(data, self.base.x, self.base.y)
-        
-        name = "Ring"
-        if hasattr(self.base, "name"):
-            name += " %s" % self.base.name
-        
-        wx.PostEvent(self.base.parent, AddPlotEvent(name=name,
-                                               x = data_x,
-                                               y = data_y,
-                                               qmin = self.inner_circle._inner_mouse_x,
-                                               qmax = self.outer_circle._inner_mouse_x,
-                                               yscale = 'log',
-                                               variable = 'ANGLE',
-                                               ylabel = "\\rm{Intensity} ",
-                                               yunits = "cm^{-1}",
-                                               xlabel = "\\rm{\phi}",
-                                               xunits = "rad",
-                                               parent = self.base.__class__.__name__))
-                                               
-        
+        data = self.base.data2D
+        from DataLoader.manipulations import  Boxavg
+        radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
+        x_min= self.left_line.x 
+        x_max= self.right_line.x 
+        y_min= self.bottom_line.y
+        y_max= self.top_line.y
+        box =  Boxavg (x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
+       
+        self.count, self.error= box(self.base.data2D)
+                      
+                                       
     def moveend(self, ev):
         self.base.thaw_axes()
         
@@ -241,22 +194,27 @@ class AnnulusInteractor(_BaseInteractor):
         
     def get_params(self):
         params = {}
-        #params["main_phi"] = self.right_line.get_radius()
-        #params["left_phi"] = self.left_line.get_radius()
-        
-        params["nbins"] = self.nbins
+        params["x_min"] = self.left_line.x 
+        params["x_max"] = self.right_line.x 
+        params["y_min"] = self.bottom_line.y
+        params["y_max"] = self.top_line.y
+        params["count"] = self.count
+        params["error"] = self.error
         return params
     
     def set_params(self, params):
         
-        main = params["main_phi"] 
-        left = params["left_phi"] 
+        x_min = params["x_min"] 
+        x_max = params["x_max"] 
+        y_min = params["y_min"]
+        y_max = params["y_max"] 
        
-        self.nbins = int(params["nbins"])
-        #self.main_line.set_cursor(inner, self.inner_circle._inner_mouse_y)
-        #self.outer_circle.set_cursor(outer, self.outer_circle._inner_mouse_y)
-        self._post_data()
         
+        self.left_line.update(ymin= y_min ,ymax= y_max)
+        self.right_line.update(ymin= y_min ,ymax= y_max)
+        self.top_line.update( xmin= x_min ,xmax= xmax)
+        self.bottom_line.update(xmin= xmin ,xmax= xmax)
+        self._post_data()
     def freeze_axes(self):
         self.base.freeze_axes()
         
