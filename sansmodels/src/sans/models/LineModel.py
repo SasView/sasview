@@ -36,7 +36,8 @@ class LineModel(BaseComponent):
         self.details = {}
         self.details['A'] = ['', None, None]
         self.details['B'] = ['', None, None]
-               
+        # fixed paramaters
+        self.fixed=[]
     def _line(self, x):
         """
             Evaluate the function

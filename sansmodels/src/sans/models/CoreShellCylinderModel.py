@@ -83,7 +83,12 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
         self.details['background'] = ['cm-1', None, None]
         self.details['axis_theta'] = ['rad', None, None]
         self.details['axis_phi'] = ['rad', None, None]
-
+        # fixed paramaters
+        self.fixed=['axis_phi.npts','axis_phi.nsigmas',
+				    'axis_theta.npts','axis_theta.nsigmas',
+				    'length.npts','length.nsigmas',
+				    'radius.npts','radius.nsigmas',
+				    'thickness.npts','thickness.nsigmas' ]
    
     def clone(self):
         """ Return a identical copy of self """

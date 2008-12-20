@@ -52,7 +52,8 @@ class Lorentzian(CLorentzian, BaseComponent):
         self.details['scale'] = ['', None, None]
         self.details['gamma'] = ['', None, None]
         self.details['center'] = ['', None, None]
-
+        #list of parameter that cannot be fitted
+        self.fixed= []
    
     def clone(self):
         """ Return a identical copy of self """

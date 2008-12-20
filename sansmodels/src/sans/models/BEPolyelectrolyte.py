@@ -71,7 +71,8 @@ class BEPolyelectrolyte(BaseComponent):
         self.details['alpha']   = ['', None, None]
         self.details['c']    = ['mol/L', None, None]
         self.details['background'] = ['cm-1', None, None]
-       
+        #list of parameter that cannot be fitted
+        self.fixed= []
                
     def _BEPoly(self, x):
         """

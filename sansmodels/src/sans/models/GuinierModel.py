@@ -40,7 +40,8 @@ class GuinierModel(BaseComponent):
         self.details = {}
         self.details['scale'] = ['cm-1', None, None]
         self.details['rg']    = ['A', None, None]
-               
+        #list of parameter that cannot be fitted
+        self.fixed= []  
     def _guinier(self, x):
         return self.params['scale'] * math.exp( -(self.params['rg']*x)**2 / 3.0 )  
    

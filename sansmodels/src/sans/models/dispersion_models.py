@@ -43,6 +43,8 @@
 """
 import sans_extension.c_models as c_models 
 
+
+
 class DispersionModel:
     """
         Python bridge class for a basic dispersion model 
@@ -96,5 +98,6 @@ class ArrayDispersion(DispersionModel):
             raise ValueError, "ArrayDispersion.set_weights: given arrays are of different lengths"
         
         c_models.set_dispersion_weights(self.cdisp, values, weights)
-        
+ 
+models = {GaussianDispersion:"GaussianModel", ArrayDispersion:"MyModel"}       
         

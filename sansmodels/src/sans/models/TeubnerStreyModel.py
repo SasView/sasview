@@ -50,7 +50,8 @@ class TeubnerStreyModel(BaseComponent):
         self.details['c2']    = ['', None, None ]
         self.details['scale'] = ['', None, None]
         self.details['background']   = ['', None, None]
-    
+        #list of parameter that cannot be fitted
+        self.fixed= []
                
     def _TeubnerStrey(self, x):
         """

@@ -60,7 +60,8 @@ class SphereModel(CSphereModel, BaseComponent):
         self.details['radius'] = ['A', None, None]
         self.details['contrast'] = ['A-2', None, None]
         self.details['background'] = ['cm-1', None, None]
-
+        # Fixed parameters
+        self.fixed = ['radius.npts','radius.nsigmas']
    
     def clone(self):
         """ Return a identical copy of self """

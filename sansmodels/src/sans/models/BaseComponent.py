@@ -5,7 +5,8 @@
 
 # imports   
 import copy
-   
+#TO DO: that about a way to make the parameter
+#is self return if it is fittable or not  
 class BaseComponent:
     """ 
         Basic model component
@@ -28,12 +29,19 @@ class BaseComponent:
         # string containing information about the model such as the equation
         #of the given model, exception or possible use
         self.description=''
+        #list of parameter that cannot be fitted
+        self.fixed= []
            
     def __str__(self):
         """ 
             @return: string representation
         """
         return self.name
+   
+    def is_fittable(self, par_name):
+        return par_name.lower() not in self.fixed
+        #For the future
+        #return self.params['par_name'].is_fittable()
    
     def run(self, x): return NotImplemented
     def runXY(self, x): return NotImplemented  

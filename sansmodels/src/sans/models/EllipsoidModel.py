@@ -68,7 +68,11 @@ class EllipsoidModel(CEllipsoidModel, BaseComponent):
         self.details['background'] = ['cm-1', None, None]
         self.details['axis_theta'] = ['rad', None, None]
         self.details['axis_phi'] = ['rad', None, None]
-
+        # fixed paramaters
+        self.fixed=['axis_phi.npts','axis_phi.nsigmas',
+				    'axis_theta.npts','axis_theta.nsigmas',
+				    'radius_a.npts','radius_a.nsigmas',
+				    'radius_b.npts','radius_b.nsigmas' ]
    
     def clone(self):
         """ Return a identical copy of self """

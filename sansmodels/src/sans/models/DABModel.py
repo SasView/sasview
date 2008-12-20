@@ -45,7 +45,8 @@ class DABModel(BaseComponent):
         self.details['length']            = ['', None, None]
         self.details['scale']             = ['', None, None]
         self.details['background']        = ['', None, None]
-               
+        #list of parameter that cannot be fitted
+        self.fixed= []      
     def _DAB(self, x):
         """
             Evaluate  F(x) = scale/( 1 + (x*L)^2 )^(2) + background

@@ -40,6 +40,8 @@ class DisperseModel(Disperser, BaseComponent):
         ## Keep track of the underlying model
         self.model = model
         self.description=''
+        #list of parameter that cannot be fitted
+        self.fixed= []
     def clone(self):
         """ Return a identical copy of self """
         obj = DisperseModel(self.model, self.params['paramList'], self.params['sigmaList'])

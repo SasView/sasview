@@ -24,7 +24,8 @@ class Constant(BaseComponent):
         self.details = {}
         self.details['value'] = ['', None, None]
         self.params['value'] = 1.0
-   
+        #list of parameter that cannot be fitted
+        self.fixed= []
     def clone(self):
         """ Return a identical copy of self """
         obj = Constant()

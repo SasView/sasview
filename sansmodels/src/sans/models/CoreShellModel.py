@@ -60,7 +60,8 @@ class CoreShellModel(CCoreShellModel, BaseComponent):
         self.details['shell_sld'] = ['A-2', None, None]
         self.details['solvent_sld'] = ['A-2', None, None]
         self.details['background'] = ['cm-1', None, None]
-
+        
+        self.fixed = ['radius.npts','radius.nsigmas','thickness.npts','thickness.nsigmas']
    
     def clone(self):
         """ Return a identical copy of self """

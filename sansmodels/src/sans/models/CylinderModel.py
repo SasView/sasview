@@ -69,7 +69,9 @@ class CylinderModel(CCylinderModel, BaseComponent):
         self.details['background'] = ['cm-1', None, None]
         self.details['cyl_theta'] = ['rad', None, None]
         self.details['cyl_phi'] = ['rad', None, None]
-
+        # fixed parameters
+        self.fixed = ['cyl_phi.npts','cyl_phi.nsigmas','cyl_theta.npts','cyl_theta.nsigmas',
+					  'length.npts','length.nsigmas','radius.npts','radius.nsigmas'] 
    
     def clone(self):
         """ Return a identical copy of self """

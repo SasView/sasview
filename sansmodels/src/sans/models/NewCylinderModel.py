@@ -67,7 +67,8 @@ class CylinderModel(CCylinderModel, BaseModel):
         self.details['background'] = ['cm-1', None, None]
         self.details['cyl_theta'] = ['rad', None, None]
         self.details['cyl_phi'] = ['rad', None, None]
-
+        #list of parameter that cannot be fitted
+        self.fixed= []
         # The C models have a self.params dictionary
         for item in self.params:
             self.parameters[item] = Parameter(item, self.params[item])

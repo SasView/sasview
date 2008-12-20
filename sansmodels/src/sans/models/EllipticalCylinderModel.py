@@ -64,7 +64,13 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
         self.details['cyl_theta'] = ['rad', None, None]
         self.details['cyl_phi'] = ['rad', None, None]
         self.details['cyl_psi'] = ['rad', None, None]
-
+        # fixed paramaters
+        self.fixed=['cyl_phi.npts','cyl_phi.nsigmas',
+				    'cyl_psi.npts','cyl_phi.nsigmas',
+				    'cyl_theta.npts','cyl_theta.nsigmas',
+				    'length.npts','length.nsigmas',
+				    'r_minor.npts','r_miror.nsigmas',
+				    'r_ratio.npts','r_ratio.nsigmas' ]
    
     def clone(self):
         """ Return a identical copy of self """

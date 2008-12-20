@@ -45,7 +45,8 @@ class PowerLawModel(BaseComponent):
         self.details['m']           = ['', 0,    None]
         self.details['scale']       = ['', None, None]
         self.details['background']  = ['', None, None]
-               
+        #list of parameter that cannot be fitted
+        self.fixed= []    
     def _PowerLaw(self, x):
         """
             Evaluate  F(x) = scale* (x)^(-m) + bkd

@@ -22,7 +22,8 @@ class Sin(BaseComponent):
         """
         ## Parameter details [units, min, max]
         self.details = {}
-   
+        #list of parameter that cannot be fitted
+        self.fixed= []
     def clone(self):
         """ Return a identical copy of self """
         return Sin()
