@@ -3,7 +3,7 @@ import wx
 import wx.lib
 import numpy,math
 import copy
-
+import sans.models.dispersion_models 
 from sans.guicomm.events import StatusEvent   
 (ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 80
@@ -50,6 +50,7 @@ class FitPage1D(wx.ScrolledWindow):
         self.event_owner = None
         #panel interface
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
+        self.sizer6 = wx.GridBagSizer(5,5)
         self.sizer5 = wx.GridBagSizer(5,5)
         self.sizer4 = wx.GridBagSizer(5,5)
         self.sizer3 = wx.GridBagSizer(5,5)
@@ -58,7 +59,15 @@ class FitPage1D(wx.ScrolledWindow):
         
         
         self.DataSource  =wx.StaticText(self, -1,str(data.name))
-        
+        self.smearer_box = wx.ComboBox(self, -1)
+        wx.EVT_COMBOBOX( self.smearer_box,-1, self.onSmear ) 
+        self.smeares= sans.models.dispersion_models.models
+        i=0
+        self.smearer_box.SetValue(str(None))
+        self.smearer_box.Insert(str(None),i)
+        for k,v in self.smeares.iteritems():
+            self.smearer_box.Insert(str(v),i)
+            i+=1
         self.modelbox = wx.ComboBox(self, -1)
         id = wx.NewId()
         self.btFit =wx.Button(self,id,'Fit')
@@ -70,6 +79,7 @@ class FitPage1D(wx.ScrolledWindow):
         self.vbox.Add(self.sizer2)
         self.vbox.Add(self.static_line_1, 0, wx.EXPAND, 0)
         self.vbox.Add(self.sizer5)
+        self.vbox.Add(self.sizer6)
         self.vbox.Add(self.sizer4)
         self.vbox.Add(self.sizer1)
         
@@ -85,6 +95,13 @@ class FitPage1D(wx.ScrolledWindow):
         self.sizer3.Add(self.DataSource,(iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 1
         self.sizer3.Add((20,20),(iy,ix),(1,1),wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE,0)
+        ix = 0
+        iy += 1
+        self.sizer3.Add(wx.StaticText(self,-1,'Averaging (Smearer Type)'),(iy,ix),(1,1)\
+                  , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        self.sizer3.Add(self.smearer_box,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
         ix = 0
         iy += 1
         self.sizer3.Add(wx.StaticText(self,-1,'Model'),(iy,ix),(1,1)\
@@ -132,11 +149,7 @@ class FitPage1D(wx.ScrolledWindow):
         #Set chisqr  result into TextCtrl
         ix = 0
         iy = 1
-        self.smear= wx.CheckBox(self, -1, "Fit with Smear", (10, 10))
-        wx.EVT_CHECKBOX(self, self.smear.GetId(), self.onSmear)
-        self.sizer1.Add(self.smear,(iy,ix),(1,1),\
-                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        iy+=1
+        
         self.text1_1 = wx.StaticText(self, -1, 'Chi2/dof', style=wx.ALIGN_LEFT)
         #self.sizer1.Add(self.text1_1,1)
         self.sizer1.Add(self.text1_1,(iy,ix),(1,1),\
@@ -159,6 +172,7 @@ class FitPage1D(wx.ScrolledWindow):
         #self.sizer1.Add((20,20), 0)
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
+        self.fixed_param=[]
         #contains link between a model and selected parameters to fit 
         self.param_toFit=[]
         # model on which the fit would be performed
@@ -370,6 +384,7 @@ class FitPage1D(wx.ScrolledWindow):
         """
         self.sizer2.Clear(True)
         self.sizer5.Clear(True)
+        self.sizer6.Clear(True)
         self.parameters = []
         self.param_toFit=[]
         self.model = model
@@ -377,8 +392,12 @@ class FitPage1D(wx.ScrolledWindow):
         #print "fitpage1D : dispersion list",self.model.getDispParamList()
         keys.sort()
         disp_list=self.model.getDispParamList()
+        fixed=self.model.fixed
         ip=0
         iq=1
+        
+        ik=0
+        im=1
         if len(disp_list)>0:
             disp = wx.StaticText(self, -1, 'Dispersion')
             self.sizer5.Add(disp,( iq, ip),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -417,7 +436,7 @@ class FitPage1D(wx.ScrolledWindow):
                 cb.SetValue(False)
                 self.sizer2.Add( cb,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                 wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
-                
+            
                 ix += 1
                 value= self.model.getParam(item)
                 ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
@@ -425,6 +444,7 @@ class FitPage1D(wx.ScrolledWindow):
                 ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 self.sizer2.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
+                
                 ix += 1
                 text2=wx.StaticText(self, -1, '+/-')
                 self.sizer2.Add(text2,(iy, ix),(1,1),\
@@ -442,21 +462,35 @@ class FitPage1D(wx.ScrolledWindow):
                     units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                 self.sizer2.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             else:
-                ip = 0
-                iq += 1
-                cb = wx.CheckBox(self, -1, item, (10, 10))
-                cb.SetValue(False)
-                self.sizer5.Add( cb,( iq, ip),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-                wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
-                
-                ip += 1
-                value= self.model.getParam(item)
-                ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
-                ctl1.SetValue(str (format_number(value)))
-                ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                self.sizer5.Add(ctl1, (iq,ip),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                
+                if not item in fixed:
+                    ip = 0
+                    iq += 1
+                    cb = wx.CheckBox(self, -1, item, (10, 10))
+                    cb.SetValue(False)
+                    self.sizer5.Add( cb,( iq, ip),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                    wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
+                    
+                    ip += 1
+                    value= self.model.getParam(item)
+                    ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                    ctl1.SetValue(str (format_number(value)))
+                    ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                    ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                    self.sizer5.Add(ctl1, (iq,ip),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                else:
+                    ik = 0
+                    text = wx.StaticText(self, -1, item, style=wx.ALIGN_LEFT)
+                    self.sizer6.Add(text,( im, ik),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+            
+                    ik += 1
+                    value= self.model.getParam(item)
+                    Tctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                    Tctl.SetValue(str (format_number(value)))
+                    Tctl.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                    Tctl.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                    self.sizer6.Add(Tctl, (im,ik),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    self.fixed_param.append([item, Tctl])
+                    im += 1
             #save data
             self.parameters.append([cb,ctl1,text2,ctl2])
                 
@@ -511,7 +545,16 @@ class FitPage1D(wx.ScrolledWindow):
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Drawing  Error:wrong value entered : %s"% sys.exc_value))
-           
+            for item in self.fixed_param:
+                try:
+                    
+                    name=str(item[0])
+                    value= float(item[1].GetValue())
+                    self.model.setParam(name,value) 
+                except:
+                    raise 
+                    wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+                            "Drawing  Error:wrong value entered : %s"% sys.exc_value))
             self.manager.redraw_model(float(self.xmin.GetValue())\
                                                ,float(self.xmax.GetValue()))      
                      
@@ -559,7 +602,7 @@ class FitPage1D(wx.ScrolledWindow):
             self.cb1.SetValue(True)
         else:
             self.cb1.SetValue(False)
-        
+            
         if not (len(self.param_toFit ) >0):
             self.xmin.Disable()
             self.xmax.Disable()
@@ -617,11 +660,13 @@ class FitPage1D(wx.ScrolledWindow):
         
         
     def onSmear(self, event):
-        if self.smear.GetValue()==True:
+        if event.GetString()=="None":
+            self.manager.set_smearer(None)   
+            
+            
+        if event.GetString()=="GaussianModel":
             from DataLoader.qsmearing import smear_selection
             smear =smear_selection( self.data )
-            self.data.smearer= smear
-            #print "on smearing", self.data.smearer._compute_matrix()
-        else:
-            self.data.smearer=None
-        
+            self.manager.set_smearer(smear)   
+            print "on smearing"
+       

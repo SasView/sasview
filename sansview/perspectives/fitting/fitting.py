@@ -318,6 +318,7 @@ class Plugin:
                 metadata = value.get_data()
                 list=value.get_model()
                 model=list[0]
+                smearer= value.get_smearer()
                 #Create list of parameters for fitting used
                 pars=[]
                 templist=[]
@@ -330,7 +331,7 @@ class Plugin:
                     #Do the single fit
                     self.fitter.set_model(Model(model), self.id, pars) 
                    
-                    self.fitter.set_data(metadata,self.id,qmin,qmax)
+                    self.fitter.set_data(metadata,self.id,smearer, qmin,qmax)
                     self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
                     page_fitted=page
                     self.id+=1
@@ -460,7 +461,10 @@ class Plugin:
             self.plot_helper(currpage= current_pg,qmin= None,qmax= None)
             sim_page.add_model(self.page_finder)
         
-            
+    def  set_smearer(self,smearer):     
+         current_pg=self.fit_panel.get_current_page()
+         self.page_finder[current_pg].set_smearer(smearer)
+         
     def redraw_model(self,qmin= None,qmax= None):
         """
             Draw a theory according to model changes or data range.
@@ -573,13 +577,11 @@ class Plugin:
         """
             Plot a theory from a model selected from the menu
         """
-        
         model=evt.model()
         #name="Model View"
         #print "mon menu",model.name
         description=model.description
-        #self.fit_panel.add_model_page(model,description,name)   
-            
+        #self.fit_panel.add_model_page(model,description,name)    
         self.draw_model(model,self.enable_model2D)
         
     def draw_model(self,model,description=None,enable1D=True, enable2D=False,qmin=None, qmax=None,qstep=None):

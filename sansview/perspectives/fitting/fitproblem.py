@@ -21,10 +21,21 @@ class FitProblem:
         self.schedule=0
         self.list_param=[]
         self.name_per_page=None
+        self.smearer= None
+        
+    def set_smearer(self, smearer):
+        self.smearer= smearer
+        print "smeaerer in fitproblem",self.smearer
+    def get_smearer(self):
+        return self.smearer
+    
     def save_model_name(self, name):  
         self.name_per_page= name
+        
+        
     def get_name(self):
         return self.name_per_page
+    
     def set_model(self,model,name):
         """ 
              associates each model with its new created name
