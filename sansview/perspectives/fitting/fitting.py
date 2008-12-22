@@ -581,7 +581,8 @@ class Plugin:
         #name="Model View"
         #print "mon menu",model.name
         description=model.description
-        #self.fit_panel.add_model_page(model,description,name)    
+        #self.fit_panel.add_model_page(model,description,name)  
+        
         self.draw_model(model,self.enable_model2D)
         
     def draw_model(self,model,description=None,enable1D=True, enable2D=False,qmin=None, qmax=None,qstep=None):
@@ -602,7 +603,7 @@ class Plugin:
             if qstep ==None:
                 qstep =0.001
            
-            
+            print "x in data1D",qmin,qmax
             x = numpy.arange(qmin, qmax, qstep)        
             xlen= len(x)
             y = numpy.zeros(xlen)

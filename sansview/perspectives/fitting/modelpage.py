@@ -79,15 +79,12 @@ class ModelPage(wx.ScrolledWindow):
         iy += 1
         self.sizer4.Add(wx.StaticText(self, -1, 'x range'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        try:
-            if hasattr(model,'x'):
-                qmin= numpy.min(model.x)
-            
-        except:
-            qmin= numpy.min(model.xmin)
+       
+        qmin= 0.001
+        qmax= 1.0
         ix += 1
         self.xmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        #self.xmin.SetValue(format_number(numpy.min(model.x)))
+        self.xmin.SetValue(format_number(qmin))
         self.xmin.SetToolTipString("Minimun value of x in linear scale.")
         self.xmin.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         self.xmin.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
@@ -96,7 +93,7 @@ class ModelPage(wx.ScrolledWindow):
        
         ix += 2
         self.xmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        #self.xmax.SetValue(format_number(numpy.max(data.x)))
+        self.xmax.SetValue(format_number(qmax))
         self.xmax.SetToolTipString("Maximum value of x in linear scale.")
         self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         self.xmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
@@ -379,5 +376,13 @@ class ModelPage(wx.ScrolledWindow):
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
-            self.manager.draw_model(self.model,enable2D=self.model_view.GetValue())
-            #self.manager.draw_model(self,model,description=None, enable1D=True,qmin=None,qmax=None, qstep=None)
+            self.manager.draw_model(self.model,qmin=float(self.xmin.GetValue()),
+                                    qmax=float(self.xmax.GetValue()),
+                                    enable2D=self.model_view.GetValue())
+            #self.manager.draw_model(self,model,description=None,
+            # enable1D=True,qmin=None,qmax=None, qstep=None)
+            
+            
+            
+            
+            
