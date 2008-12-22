@@ -649,53 +649,20 @@ class Plugin:
         x = numpy.arange(qmin,qmax, qstep)
         y = numpy.arange(qmin,qmax,qstep)
         lx = len(x)
+        #print x
         data=numpy.zeros([len(x),len(y)])
         if enable2D:
-            """
-            for i_x in range(int(len(x)/2)):
-                if i_x%2==1:
-                    continue
-            for i_y in range(len(y)):
-                try:
-                    value = model.runXY([x[i_x], y[i_y]])
-                    #output[i_x][i_y] = value
-                    #output[lx-i_x-1][lx-i_y-1] = value
-                    data[i_y][i_x] = value
-                    data[lx-i_y-1][lx-i_x-1] = value
-                except:
-                     wx.PostEvent(self.parent, StatusEvent(status="\
-                        Error computing %s at [%g,%g] :%s" %(model.name,x[i_x],y[i_y], sys.exc_value)))
-                    
-            if lx%2==1:
-                i_x = int(len(x)/2)
+           
+            #for i_x in range(int(len(x)/2)):
+            for i_x in range(int(len(x))):
                 for i_y in range(len(y)):
                     try:
                         value = model.runXY([x[i_x],y[i_y]])
-                        #output[i_x][i_y] = value
                         data[i_y][i_x] = value
                     except:
                          wx.PostEvent(self.parent, StatusEvent(status="\
                         Error computing %s at [%g,%g] :%s" %(model.name,x[i_x],y[i_y], sys.exc_value)))
                        
-            """
-            for i_x in range(int(len(x)/2)):
-                """
-                if not i_x%2==1:
-                    continue
-                """
-                for i_y in range(len(y)):
-                    try:
-                        value = model.runXY([x[i_x],y[i_y]])
-                        #output[i_x][i_y] = value
-                        #output[lx-i_x-1][lx-i_y-1] = value
-                        data[i_y][i_x] = value
-                        data[lx-i_y-1][lx-i_x-1] = value
-                    except:
-                         wx.PostEvent(self.parent, StatusEvent(status="\
-                        Error computing %s at [%g,%g] :%s" %(model.name,x[i_x],y[i_y], sys.exc_value)))
-                       
-          
-                
             theory= Data2D(data)
             theory.name= model.name
             theory.group_id ="Model"
