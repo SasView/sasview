@@ -652,8 +652,7 @@ class Plugin:
         #print x
         data=numpy.zeros([len(x),len(y)])
         if enable2D:
-           
-            #for i_x in range(int(len(x)/2)):
+        
             for i_x in range(int(len(x))):
                 for i_y in range(len(y)):
                     try:
