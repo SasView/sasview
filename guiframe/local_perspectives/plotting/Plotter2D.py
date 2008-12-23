@@ -372,8 +372,12 @@ class ModelPanel2D( ModelPanel1D):
     def onBoxavg(self,event):
         from boxSlicer import BoxInteractor
         self.onClearSlicer(event)
+        wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractor))
+        """
+        self.onClearSlicer(event)
         self.slicer=BoxInteractor
         from SlicerParameters import SlicerParameterPanel
+       
         dialog = SlicerParameterPanel(self.parent, -1, "Slicer Parameters")
         dialog.set_slicer(self.slicer.__name__,
                         self.slicer.get_params())
@@ -381,7 +385,7 @@ class ModelPanel2D( ModelPanel1D):
             dialog.Destroy()
         wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractor))
         print "onboxavg",self.slicer
-        
+        """
         
     def onClearSlicer(self, event):
         """
