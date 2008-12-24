@@ -168,7 +168,7 @@ class Data(object):
         return []
 class FitData1D(object):
     """ Wrapper class  for SANS data """
-    def __init__(self,sans_data1d):
+    def __init__(self,sans_data1d, smearer=None):
         """
             Data can be initital with a data (sans plottable)
             or with vectors.
@@ -189,12 +189,9 @@ class FitData1D(object):
             Setting it back to None will turn smearing off.
             
         """
-        ## Smearing object
-        try:
-            self.smearer = sans_data1d.smearer
-        except:
-            self.smearer= None
-
+        
+        self.smearer = smearer
+      
         # Initialize from Data1D object
         self.data=sans_data1d
         self.x= sans_data1d.x
@@ -320,11 +317,11 @@ class FitData2D(object):
             self.ymin= self.data.ymin
         if self.ymax==None:
             self.ymax= self.data.ymax
-            
         for i in range(len(self.y_bins)):
             #if self.y_bins[i]>= self.ymin and self.y_bins[i]<= self.ymax:
             for j in range(len(self.x_bins)):
                 #if self.x_bins[j]>= self.xmin and self.x_bins[j]<= self.xmax:
+                
                 res.append( (self.image[j][i]- fn([self.x_bins[j],self.y_bins[i]]))\
                             /self.err_image[j][i] )
         
@@ -463,7 +460,7 @@ class FitEngine:
         else:
             raise ValueError, "park_integration:missing parameters"
     
-    def set_data(self,data,Uid,qmin=None,qmax=None,ymin=None,ymax=None):
+    def set_data(self,data,Uid,smearer=None,qmin=None,qmax=None,ymin=None,ymax=None):
         """ Receives plottable, creates a list of data to fit,set data
             in a FitArrange object and adds that object in a dictionary 
             with key Uid.
@@ -473,7 +470,7 @@ class FitEngine:
         if data.__class__.__name__=='Data2D':
             fitdata=FitData2D(data)
         else:
-            fitdata=FitData1D(data)
+            fitdata=FitData1D(data, smearer)
        
         fitdata.setFitRange(qmin=qmin,qmax=qmax, ymin=ymin,ymax=ymax)
         #A fitArrange is already created but contains model only at Uid

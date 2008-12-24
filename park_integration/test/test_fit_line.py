@@ -8,6 +8,13 @@ from danse.common.plottools.plottables import Data1D,Theory1D
 from sans.fit.AbstractFitEngine import Data, Model,FitData1D
 import math
 class testFitModule(unittest.TestCase):
+    def smalltest(self):
+        
+        import numpy
+        x=[1,22,3]
+        y=[5,6,7,8]
+        array= numpy.zeros(len(x), len(y))
+        
     """ test fitting """
     def test1(self):
         """ Fit 1 data (testdata_line.txt)and 1 model(lineModel) """
