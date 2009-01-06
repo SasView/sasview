@@ -38,7 +38,7 @@ class ModelPage(wx.ScrolledWindow):
     window_caption = "Fit Page"
     
     
-    def __init__(self, parent,model, *args, **kwargs):
+    def __init__(self, parent,model,name, *args, **kwargs):
         wx.ScrolledWindow.__init__(self, parent, *args, **kwargs)
         """ 
             Initialization of the Panel
@@ -68,7 +68,7 @@ class ModelPage(wx.ScrolledWindow):
         self.btClose =wx.Button(self,id,'Close')
         self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
         self.btClose.SetToolTipString("Close page.")
-        ix = 0
+        ix = 1
         iy = 1 
         self.sizer4.Add(wx.StaticText(self, -1, 'Min'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -110,10 +110,13 @@ class ModelPage(wx.ScrolledWindow):
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer3.Add(self.modelbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix = 0
-        iy += 1
-        self.model_view= wx.CheckBox(self, -1, "View in 2D", (10, 10))
-        wx.EVT_CHECKBOX(self, self.model_view.GetId(), self.onModel2D)
+        #ix = 0
+        #iy += 1
+        ix += 1
+        id = wx.NewId()
+        self.model_view =wx.Button(self,id,'View 2D')
+        self.model_view.Bind(wx.EVT_BUTTON, self.onModel2D,id=id)
+        self.model_view.SetToolTipString("View model in 2D")
         self.sizer3.Add(self.model_view,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         # contains link between  model ,all its parameters, and panel organization
@@ -128,12 +131,15 @@ class ModelPage(wx.ScrolledWindow):
         except:
             raise
         # preview selected model name
-        self.prevmodel_name=model.__class__.__name__
+        self.prevmodel_name=name
         self.modelbox.SetValue(self.prevmodel_name)
         # flag to check if the user has selected a new model in the combox box
         self.model_hasChanged=False
         #dictionary of model name and model class
         self.model_list_box={}
+       
+        #enable model 2D draw
+        self.enable2D= False
         # Data1D to make a deep comparison between 2 Data1D for checking data
         #change
         self.vbox.Layout()
@@ -164,11 +170,16 @@ class ModelPage(wx.ScrolledWindow):
         self.manager = manager
         
     def onModel2D(self, event):
-        
-        if self.model_view.GetValue()==True:
-            print "2D model"
-            self.manager.draw_model(self.model,
-                                    description=None, enable2D=True,qmin=None, qmax=None)
+        """
+         call manager to plot model in 2D
+        """
+        self.enable2D=True
+        print "modelpage name", self.prevmodel_name
+        self.manager.draw_model(model=self.model,name=self.prevmodel_name,
+                                    description=None,
+                                     enable2D=self.enable2D,
+                                     qmin=float(self.xmin.GetValue()),
+                                    qmax=float(self.xmax.GetValue()))
     def populate_box(self, dict):
         """
             Populate each combox box of each page
@@ -179,9 +190,8 @@ class ModelPage(wx.ScrolledWindow):
         list_name=[]
         for item in  self.model_list_box.itervalues():
             name = item.__name__
-            model=item()
-            if hasattr(model, "name"):
-                name = model.name
+            if hasattr(item, "name"):
+                name = item.name
             list_name.append(name)
         list_name.sort()   
         for name in list_name:
@@ -189,19 +199,9 @@ class ModelPage(wx.ScrolledWindow):
             id+=1
         wx.EVT_COMBOBOX(self.modelbox,-1, self._on_select_model) 
         return 0
+    
+  
    
-    def set_page(self, model,description=None):
-        #print " modelpage: set_page was called",model
-        self.model=model
-        name = self.model.__class__.__name__
-        if hasattr(self.model, "name"):
-            name = self.model.name
-        
-           
-        self.modelbox.SetValue(name)
-        self.set_panel(self.model)
-        self.manager.draw_model(self.model)
-        
     def _on_select_model(self,event):
         """
             react when a model is selected from page's combo box
@@ -210,28 +210,17 @@ class ModelPage(wx.ScrolledWindow):
         #print "modelpage: self.model_list_box ",self.model_list_box
         for item in self.model_list_box.itervalues():
             name = item.__name__
-            items=item()
-            if hasattr(items, "name"):
-                name = items.name
-            #print "fitpage: _on_select_model model name",name ,event.GetString()
+            if hasattr(item, "name"):
+                name = item.name
             if name ==event.GetString():
-                model=items
+                model=item()
                 #print "fitpage: _on_select_model model name",name ,event.GetString()
                 self.model= model
                 self.set_panel(model)
-                self.manager.draw_model(model)
+                print "name in model page", name,event.GetString()
+                self.name= name
+                self.manager.draw_model(model, name)
                 
-    def set_model_name(self,name):
-        """ 
-            set model name. set also self.model_hasChanged to true is the model 
-            type has changed or false if it didn't
-            @param name: model 's name
-        """
-        self.model_hasChanged=False
-        if (name != self.prevmodel_name):
-            self.model_hasChanged=True
-       
-        self.prevmodel_name=self.modelbox.GetValue()
        
             
     def get_model_box(self): 
@@ -376,9 +365,11 @@ class ModelPage(wx.ScrolledWindow):
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
+            
+            print self.enable2D
             self.manager.draw_model(self.model,qmin=float(self.xmin.GetValue()),
                                     qmax=float(self.xmax.GetValue()),
-                                    enable2D=self.model_view.GetValue())
+                                    enable2D=self.enable2D)
             #self.manager.draw_model(self,model,description=None,
             # enable1D=True,qmin=None,qmax=None, qstep=None)
             

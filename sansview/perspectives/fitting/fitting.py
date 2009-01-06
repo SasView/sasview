@@ -577,23 +577,27 @@ class Plugin:
         """
             Plot a theory from a model selected from the menu
         """
+        name = evt.model.__name__
+        if hasattr(evt.model, "name"):
+            name = evt.model.name
         model=evt.model()
         #name="Model View"
         #print "mon menu",model.name
         description=model.description
         #self.fit_panel.add_model_page(model,description,name)  
         
-        self.draw_model(model,self.enable_model2D)
+        self.draw_model(model=model,name=name,enable2D=self.enable_model2D)
         
-    def draw_model(self,model,description=None,enable1D=True, enable2D=False,qmin=None, qmax=None,qstep=None):
+    def draw_model(self,model,name ,description=None,enable1D=True, enable2D=False,qmin=None, qmax=None,qstep=None):
         """
              draw model with default data value
         """
-        self.fit_panel.add_model_page(model,model.description,model.name) 
-        self._draw_model2D(model,model.description, enable2D,qmin,qmax,qstep)
-        self._draw_model1D(model,model.description, enable1D,qmin,qmax, qstep)
+        
+        self.fit_panel.add_model_page(model=model,description=model.description,page_title=name) 
+        self._draw_model2D(model,name,model.description, enable2D,qmin,qmax,qstep)
+        self._draw_model1D(model,name,model.description, enable1D,qmin,qmax, qstep)
        
-    def _draw_model1D(self,model,description=None, enable1D=True,qmin=None,qmax=None, qstep=None):
+    def _draw_model1D(self,model,name,description=None, enable1D=True,qmin=None,qmax=None, qstep=None):
         
         if enable1D:
             if qmin==None:
@@ -603,7 +607,7 @@ class Plugin:
             if qstep ==None:
                 qstep =0.001
            
-            print "x in data1D",qmin,qmax
+            #print "x in data1D",qmin,qmax
             x = numpy.arange(qmin, qmax, qstep)        
             xlen= len(x)
             y = numpy.zeros(xlen)
@@ -613,8 +617,7 @@ class Plugin:
         
                 try:
                     new_plot = Theory1D(x, y)
-                    #new_plot.name = model.name
-                    new_plot.name = model.name
+                    new_plot.name = name
                     new_plot.xaxis("\\rm{Q}", 'A^{-1}')
                     new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
                     new_plot.id = "Model"
@@ -626,20 +629,20 @@ class Plugin:
             else:
                 for i in range(xlen):
                     y[i] = model.run(x[i])
-        
+                    
                 try:
                     new_plot = Theory1D(x, y)
-                    new_plot.name = model.name
+                    new_plot.name = name
                     new_plot.xaxis("\\rm{Q}", 'A^{-1}')
                     new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
                     new_plot.id ="Model"
                     new_plot.group_id ="Model"
                     wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                                     title="Analytical model 1D %s"%str(model.name) ))
+                                     title="Analytical model 1D " ))
                     
                 except:
                     raise
-    def _draw_model2D(self,model,description=None, enable2D=False,qmin=None,qmax=None, qstep=None):
+    def _draw_model2D(self,model,name,description=None, enable2D=False,qmin=None,qmax=None, qstep=None):
         if qmin==None:
             qmin= -0.05
         if qmax==None:
@@ -652,7 +655,7 @@ class Plugin:
         #print x
         data=numpy.zeros([len(x),len(y)])
         if enable2D:
-        
+            #print "drawing model 2D params",qmin, qmax,model.getParamList()
             for i_x in range(int(len(x))):
                 for i_y in range(len(y)):
                     try:
@@ -661,9 +664,9 @@ class Plugin:
                     except:
                          wx.PostEvent(self.parent, StatusEvent(status="\
                         Error computing %s at [%g,%g] :%s" %(model.name,x[i_x],y[i_y], sys.exc_value)))
-                       
+            #print "data2 draw" ,data          
             theory= Data2D(data)
-            theory.name= model.name
+            theory.name= name
             theory.group_id ="Model"
             theory.id ="Model"
             theory.xmin= qmin
@@ -671,48 +674,9 @@ class Plugin:
             theory.ymin= qmin
             theory.ymax= qmax
             wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
-                             title="Analytical model 2D %s" %str(model.name)))
+                             title="Analytical model 2D %s" %str(name)))
              
-                
-                
-    def H_draw_model2D(self,model,description=None, enable2D=False,qmin=None,qmax=None, qstep=None):
-        if qmin==None:
-            qmin= -0.05
-        if qmax==None:
-            qmax= 0.05
-        if qstep ==None:
-            qstep =0.001
-        x = numpy.arange(qmin,qmax, qstep)
-        y = numpy.arange(qmin,qmax,qstep)
-        lx = len(self.x)
-        if enable2D:
-            data=numpy.zeros([len(x),len(y)])
-            for i in range(len(x)):
-                for j in range(len(x)):
-                    try:
-                        data[i][j]=model.runXY([j,i])
-                    except:
-                         wx.PostEvent(self.parent, StatusEvent(status="\
-                        Model 2D cannot be plot %g %s %s" %(data[i][j],model.name, sys.exc_value)))
-            theory = Data2D(data)  
-            theory.group_id =str(model.name)+" 2D"
-            theory.xmin= qmin
-            theory.xmax= qmax
-            theory.ymin= qmin
-            theory.ymax= qmax
-            wx.PostEvent(self.parent, NewPlotEvent(plot=theory, title="Analytical model 2D"))
-    
-    
-    def on_draw_model2D(self, event):
-        """
-             plot view model 2D
-        """
-        
-        if self.enable_model2D== True:
-            self.enable_model2D=False
-        else:
-            self.enable_model2D=True
-        print "self.enable_model2D",self.enable_model2D
+  
 if __name__ == "__main__":
     i = Plugin()
     

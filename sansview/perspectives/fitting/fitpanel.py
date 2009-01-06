@@ -104,7 +104,7 @@ class FitPanel(wx.Panel):
         
     def _help_add_model_page(self,model,description,page_title):
         from modelpage import ModelPage
-        panel = ModelPage(self.nb,model, -1)
+        panel = ModelPage(self.nb,model,page_title, -1)
         panel.set_manager(self.manager)
         panel.set_owner(self.event_owner)
         self.nb.AddPage(page=panel,text=page_title,select=True)
@@ -121,6 +121,7 @@ class FitPanel(wx.Panel):
             @param model: the model for which paramters will be changed
             @param page_title: the name of the page
         """
+        print "page_title fitpanel", page_title
         if  self.draw_model_name ==None:
             
             self._help_add_model_page(model,description,page_title)
