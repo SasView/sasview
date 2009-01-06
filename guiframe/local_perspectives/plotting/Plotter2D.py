@@ -201,7 +201,11 @@ class ModelPanel2D( ModelPanel1D):
         id = wx.NewId()
         slicerpop.Append(id, '&Annulus [Phi view ]')
         wx.EVT_MENU(self, id, self.onSectorPhi) 
-      
+        
+        id = wx.NewId()
+        slicerpop.Append(id, '&Box Sum')
+        wx.EVT_MENU(self, id, self.onBoxSum) 
+        
         id = wx.NewId()
         slicerpop.Append(id, '&Box averaging')
         wx.EVT_MENU(self, id, self.onBoxavg) 
@@ -369,6 +373,23 @@ class ModelPanel2D( ModelPanel1D):
         self.onClearSlicer(event)
         wx.PostEvent(self.parent, InternalEvent(slicer= AnnulusInteractor))
         
+    def onBoxSum(self,event):
+        from boxSum import BoxSum
+        self.onClearSlicer(event)
+        wx.PostEvent(self.parent, InternalEvent(slicer= BoxSum))
+        """
+        self.onClearSlicer(event)
+        self.slicer=BoxInteractor
+        from SlicerParameters import SlicerParameterPanel
+       
+        dialog = SlicerParameterPanel(self.parent, -1, "Slicer Parameters")
+        dialog.set_slicer(self.slicer.__name__,
+                        self.slicer.get_params())
+        if dialog.ShowModal() == wx.ID_OK:
+            dialog.Destroy()
+        wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractor))
+        print "onboxavg",self.slicer
+        """ 
     def onBoxavg(self,event):
         from boxSlicer import BoxInteractor
         self.onClearSlicer(event)

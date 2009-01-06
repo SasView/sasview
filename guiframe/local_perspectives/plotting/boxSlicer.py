@@ -263,16 +263,16 @@ class HorizontalLine(_BaseInteractor):
         self.markers = []
         self.axes = axes
         
-        self.y=y
-        self.save_y=y
+        self.y = y
+        self.save_y = y 
         
-        self.xmin=xmin
-        self.save_xmin=xmin
-        self.xmax=xmax
-        self.save_xmax=xmax
-        self.theta2= theta2
-        self.radius1= math.sqrt(math.pow(self.xmin, 2)+ math.pow(self.y, 2))
-        self.radius2= math.sqrt(math.pow(self.xmax, 2)+ math.pow(self.y, 2))
+        self.xmin = xmin
+        self.save_xmin = xmin
+        self.xmax = xmax
+        self.save_xmax = xmax
+        self.theta2 = theta2
+        self.radius1 = math.sqrt(math.pow(self.xmin, 2)+ math.pow(self.y, 2))
+        self.radius2 = math.sqrt(math.pow(self.xmax, 2)+ math.pow(self.y, 2))
         
        
         #print "phi and theta2", math.degrees(math.atan2(self.y, self.xmax))
@@ -372,14 +372,14 @@ class HorizontalLine(_BaseInteractor):
         Process move to a new position, making sure that the move is allowed.
         """
         self.y=y
-        self.radius1= math.sqrt(math.pow(self.xmin, 2)+ math.pow(self.y, 2))
-        self.radius2= math.sqrt(math.pow(self.xmax, 2)+ math.pow(self.y, 2))
+        #self.radius1= math.sqrt(math.pow(self.xmin, 2)+ math.pow(self.y, 2))
+        #self.radius2= math.sqrt(math.pow(self.xmax, 2)+ math.pow(self.y, 2))
         
-        self.theta_right= math.atan2(self.y,self.xmin)
-        self.theta_left= math.atan2(self.y,self.xmax)
+        #self.theta_right= math.atan2(self.y,self.xmin)
+        #self.theta_left= math.atan2(self.y,self.xmax)
         
-        self.phi_left= self.theta_left - self.theta2
-        self.phi_right=  self.theta_right -  self.theta2 
+        #self.phi_left= self.theta_left - self.theta2
+        #self.phi_right=  self.theta_right -  self.theta2 
         
         self.has_move=True
         self.base.base.update()

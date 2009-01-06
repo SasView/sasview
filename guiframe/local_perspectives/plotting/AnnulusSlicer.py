@@ -40,7 +40,7 @@ class AnnulusInteractor(_BaseInteractor):
         
                       
         self.update()
-        #self._post_data()
+        self._post_data()
         
         # Bind to slice parameter events
         self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
