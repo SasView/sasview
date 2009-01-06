@@ -125,34 +125,43 @@ class BoxInteractor(_BaseInteractor):
         
         if self.left_line.has_move:
             print "left has moved"
-            self.left_line.update()
-            self.right_line.update()
+            self.left_line.update(mline= self.main_line,translation=True)
+            self.right_line.update(mline= self.main_line,translation=True)
             #self.right_line.update(xmin= self.left_line.x ,xmax=-1*self.left_line.x)
-            self.top_line.update( xmin= self.left_line.x ,xmax= self.right_line.x)
-            self.bottom_line.update(xmin= self.left_line.x ,xmax= self.right_line.x)
+            self.top_line.update( xmin= self.left_line.x ,xmax= self.right_line.x,
+                                  mline= self.main_line,translation=True)
+            self.bottom_line.update(xmin= self.left_line.x ,xmax= self.right_line.x,
+                                    mline= self.main_line,translation=True)
         if self.right_line.has_move:
             print "right has moved"
-            self.right_line.update()
-            self.left_line.update()
+            self.right_line.update(mline= self.main_line,translation=True)
+            self.left_line.update(mline= self.main_line,translation=True)
             #self.left_line.update(xmin= self.right_line.x ,xmax=-1*self.right_line.x)
-            self.top_line.update( xmin= self.left_line.x ,xmax= self.right_line.x)
-            self.bottom_line.update(xmin= self.left_line.x ,xmax= self.right_line.x)
+            self.top_line.update( xmin= self.left_line.x ,xmax= self.right_line.x,
+                                  mline= self.main_line,translation=True)
+            self.bottom_line.update(xmin= self.left_line.x ,xmax= self.right_line.x,
+                                    mline= self.main_line,translation=True)
             
             
         if self.bottom_line.has_move:
             print "bottom has moved"
-            self.bottom_line.update()
-            self.top_line.update(y= -1*self.top_line.y)
-            self.left_line.update( ymin= self.bottom_line.y ,ymax= self.top_line.y)
-            self.right_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y)
+            self.bottom_line.update(mline= self.main_line,translation=True)
+            self.top_line.update(y= -1*self.top_line.y,translation=True)
+            self.left_line.update( ymin= self.bottom_line.y ,ymax= self.top_line.y,
+                                   mline= self.main_line,translation=True)
+            self.right_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y,
+                                   mline= self.main_line,translation=True)
             
         if self.top_line.has_move:
             print "top has moved"
-            self.top_line.update()
+            self.top_line.update(mline= self.main_line,translation=True)
             #self.bottom_line.update()xmin=None, xmax=None,y=None, mline=None):
-            self.bottom_line.update(y= -1*self.top_line.y )
-            self.left_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y)
-            self.right_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y)
+            self.bottom_line.update(y= -1*self.top_line.y,mline= self.main_line,
+                                    translation=True )
+            self.left_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y,
+                                  mline= self.main_line,translation=True)
+            self.right_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y,
+                                   mline= self.main_line,translation=True)
             
     
     def save(self, ev):
@@ -273,8 +282,8 @@ class HorizontalLine(_BaseInteractor):
         
         self.phi_left= self.theta_left - self.theta2
         self.phi_right=  self.theta_right -  self.theta2 
-        #print "phi left right", math.degrees(self.phi_left),math.degrees(self.phi_right)
-        print "theta left right ", math.degrees(self.theta_left),math.degrees(self.theta_right)
+        print "phi left right", math.degrees(self.phi_left),math.degrees(self.phi_right)
+        #print "theta left right ", math.degrees(self.theta_left),math.degrees(self.theta_right)
         
         self.line = self.axes.plot([self.xmin,self.xmax],[self.y,self.y],
                                       linestyle='-', marker='',
@@ -305,7 +314,7 @@ class HorizontalLine(_BaseInteractor):
         
         return 0
    
-    def update(self,xmin=None, xmax=None,y=None, mline=None):
+    def update(self,xmin=None, xmax=None,y=None, mline=None,translation=False):
         """
         Draw the new roughness on the graph.
         """
@@ -330,8 +339,8 @@ class HorizontalLine(_BaseInteractor):
             print "Horizontal: update ",math.degrees(self.phi_left +delta),math.degrees(self.phi_right+delta)
             print x1,x2,y1,y2
            
-        else:
-            self.line.set(xdata=[self.xmin,self.xmax], ydata=[self.y,self.y])
+        #else:
+        #    self.line.set(xdata=[self.xmin,self.xmax], ydata=[self.y,self.y])
      
         
         
@@ -363,7 +372,14 @@ class HorizontalLine(_BaseInteractor):
         Process move to a new position, making sure that the move is allowed.
         """
         self.y=y
-       
+        self.radius1= math.sqrt(math.pow(self.xmin, 2)+ math.pow(self.y, 2))
+        self.radius2= math.sqrt(math.pow(self.xmax, 2)+ math.pow(self.y, 2))
+        
+        self.theta_right= math.atan2(self.y,self.xmin)
+        self.theta_left= math.atan2(self.y,self.xmax)
+        
+        self.phi_left= self.theta_left - self.theta2
+        self.phi_right=  self.theta_right -  self.theta2 
         
         self.has_move=True
         self.base.base.update()
@@ -419,7 +435,7 @@ class VerticalLine(_BaseInteractor):
         self.phi_down= self.theta_down - self.theta2
         self.phi_up= self.theta_up - self.theta2
         print "phi up down", math.degrees(self.phi_up),math.degrees(self.phi_down)
-        print "theta up down ", math.degrees(self.theta_up),math.degrees(self.theta_down)
+        #print "theta up down ", math.degrees(self.theta_up),math.degrees(self.theta_down)
         # Draw vertical line
         self.line = self.axes.plot([self.x,self.x],[self.ymin,self.ymax],
                                       linestyle='-', marker='',
@@ -449,7 +465,7 @@ class VerticalLine(_BaseInteractor):
     def get_radius(self):
         return 0
     
-    def update(self,x=None,ymin=None, ymax=None, mline=None):
+    def update(self,x=None,ymin=None, ymax=None, mline=None,translation=False):
         """
         Draw the new roughness on the graph.
         """
@@ -460,8 +476,11 @@ class VerticalLine(_BaseInteractor):
         if ymax !=None:
             self.ymax = ymax
         if mline !=None:
+            
             self.theta2= mline.theta
             delta = mline.get_delta_angle()
+            if translation:
+                delta= 0
             # rotation
             x1 = self.radius1 * math.cos(self.phi_down +  delta)
             y1= self.radius1 * math.sin(self.phi_down + delta)
@@ -471,8 +490,8 @@ class VerticalLine(_BaseInteractor):
             
             self.line.set(xdata=[x1,x2], ydata=[y1,y2])  
            
-        else:
-           self.line.set(xdata=[self.x,self.x], ydata=[self.ymin,self.ymax])
+        #else:
+        #   self.line.set(xdata=[self.x,self.x], ydata=[self.ymin,self.ymax])
      
         
         
@@ -505,6 +524,17 @@ class VerticalLine(_BaseInteractor):
         Process move to a new position, making sure that the move is allowed.
         """
         self.x = x
+        self.radius1= math.sqrt(math.pow(self.x, 2)+ math.pow(self.ymin, 2))
+        self.radius2= math.sqrt(math.pow(self.x, 2)+ math.pow(self.ymax, 2))
+        
+        
+        self.theta_down = math.atan2(self.ymin, self.x)
+        self.theta_up = math.atan2(self.ymax, self.x)
+        
+        
+        self.phi_down= self.theta_down - self.theta2
+        self.phi_up= self.theta_up - self.theta2
+       
         self.has_move=True
         self.base.base.update()
         
