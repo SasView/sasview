@@ -148,13 +148,13 @@ class BoxInteractor(_BaseInteractor):
         if self.main_line.has_move:
             
             self.main_line.update()
-            self.left_line.update(mline= self.main_line,
+            self.left_line.update(
                                   xmin= self.xmin,
                                   xmax= self.xmin,
                                   ymin= self.ymin,
                                   ymax=self.ymax,
                                   translation=True)
-            self.right_line.update(mline= self.main_line,
+            self.right_line.update(
                                    xmin= self.xmax,
                                   xmax= self.xmax,
                                   ymin= self.ymin,
@@ -165,12 +165,8 @@ class BoxInteractor(_BaseInteractor):
         
         if self.left_line.has_move:
             print "left has moved"
-            self.left_line.update(mline= self.main_line,
-                                  xmin= self.xmin,
-                                  translation=True)
-            self.right_line.update(mline= self.main_line,
-                                   xmin=-1*self.xmin,
-                                   translation=True)
+            self.left_line.update()
+            self.right_line.update(opline= self.left_line )
             """
             self.top_line.update( xmin= self.left_line.xmax ,xmax= self.right_line.xmax,
                                   translation=True)
@@ -179,12 +175,8 @@ class BoxInteractor(_BaseInteractor):
             """
         if self.right_line.has_move:
             print "right has moved"
-            self.right_line.update(mline= self.main_line,
-                                  xmin= self.xmax,
-                                  translation=True)
-            self.left_line.update(mline= self.main_line,
-                                   xmin=-1*self.xmax,
-                                   translation=True)
+            self.right_line.update()
+            self.left_line.update(opline= self.right_line )
             """
             self.top_line.update( xmin= self.left_line.xmax ,xmax= self.right_line.xmax,
                                   translation=True)
@@ -507,8 +499,7 @@ class VerticalLine(_BaseInteractor):
         self.detax=0
         self.deltay=0
         
-        self.clickx=0
-        self.clicky=0
+       
         self.clickxf=0
         self.clickyf=0
         self.x1= mline.x1 + xmin*math.cos(math.pi/2 - self.theta2)
@@ -554,11 +545,14 @@ class VerticalLine(_BaseInteractor):
     def get_radius(self):
         return 0
     
-    def update(self,xmin=None,xmax=None,ymin=None, ymax=None, mline=None,translation=False):
+    def update(self,xmin=None,xmax=None,ymin=None, ymax=None, opline=None,translation=False):
         """
         Draw the new roughness on the graph.
         """
-        
+        if opline !=None:
+            self.line.set(xdata=[-1*opline.x1,-1*opline.x2],
+                           ydata=[-opline.y1,-opline.y2]) 
+            return
         if xmin== None:
             xmin= self.L_width
         if xmax== None:
@@ -572,15 +566,19 @@ class VerticalLine(_BaseInteractor):
         print "vertical line: new value ", self.x1, self.x2, self.y1,self.y2
 
         self.line.set(xdata=[self.x1,self.x2], ydata=[self.y1,self.y2])  
-           
+        if opline !=None:
+            self.line.set(xdata=[-1*self.opline.x1,-1*self.opline.x2],
+                           ydata=[self.opline.y1,self.opline.y2]) 
+            return
         if translation:
-            self.deltax= self.clickxf +self.clickx
-            self.deltay= self.clickyf +self.clicky
-            print"translation deltax deltay", self.deltax, self.deltay
-            self.x1=self.x1 +self.deltax
-            self.y1=self.y1+ self.deltay
-            self.x2=self.x2+ self.deltax
-            self.y2=self.y2+self.deltay
+            #if xmin !=None:
+            #    self.L_width=xmin
+            self.x1= self.mline.x1 + self.L_width*math.cos(math.pi/2 - self.mline.theta)
+            self.x2= self.mline.x2 + self.L_width*math.cos(math.pi/2 - self.mline.theta)
+            self.y1= self.mline.y1 - self.L_width*math.sin(math.pi/2 - self.mline.theta)
+            self.y2= self.mline.y2 - self.L_width*math.sin(math.pi/2 - self.mline.theta)
+            
+            print"translation x1, x2,y1,y2",self.x1, self.x2,self.y1,self.y2
             self.line.set(xdata=[self.x1,self.x2], ydata=[self.y1,self.y2]) 
     def save(self, ev):
         """
@@ -607,16 +605,18 @@ class VerticalLine(_BaseInteractor):
         """
         self.xmin = self.save_xmin
         self.xmax = self.save_xmax
-        self.ymin=self.save_ymin
-        self.ymax=self.save_ymax
+        self.ymin = self.save_ymin
+        self.ymax = self.save_ymax
         
         
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        
         self.has_move=True
+        self.L_width=x
+        
+       
         self.base.base.update()
         
         
