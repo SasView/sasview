@@ -316,10 +316,12 @@ class ModelPanel2D( ModelPanel1D):
         import math
         self.radius= math.sqrt( math.pow(self.qmax,2)+math.pow(self.qmax,2)) 
         print "radius?",self.radius
-        Circle = CircularAverage( r_min=0, r_max=self.radius, bin_width=0.001)
-        #Circle = CircularAverage( r_min=0, r_max=13705.0, bin_width=BIN_WIDTH )
-        #Circle = CircularAverage( r_min= -1, r_max= 1, bin_width=0.001 )
-        #Circle = CircularAverage( r_min= -1*self.radius, r_max= self.radius, bin_width=0.001 )
+        # bin_width = self.qmax -self.qmin/nbins 
+        #nbins= 30
+        bin_width = (self.qmax +self.qmax)/30
+        
+        Circle = CircularAverage( r_min=0, r_max=self.radius, bin_width=bin_width)
+       
         circ = Circle(self.data2D)
         from sans.guiframe.dataFitting import Data1D
         if hasattr(circ,"dxl"):
