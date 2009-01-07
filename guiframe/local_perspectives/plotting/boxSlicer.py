@@ -227,18 +227,18 @@ class BoxInteractor(_BaseInteractor):
 
     def _post_data(self):
         # Compute data
-        data = self.base.data2D
-        from DataLoader.manipulations import  Boxavg
-        radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
-        x_min= self.left_line.xmin 
-        x_max= self.right_line.xmax 
+        #data = self.base.data2D
+        #from DataLoader.manipulations import  Boxavg
+        #radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
+        #x_min= self.left_line.xmin 
+        #x_max= self.right_line.xmax 
         #y_min= self.bottom_line.y
         #y_max= self.top_line.y
         #box =  Boxavg (x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
        
         #self.count, self.error= box(self.base.data2D)
         
-        
+        print "post data"
               
                                        
     def moveend(self, ev):
@@ -588,10 +588,10 @@ class VerticalLine(_BaseInteractor):
         can restore on Esc.
         """
         #self.save_x= self.x
-        self.save_xmin= self.xmin
-        self.save_xmax= self.xmax
-        self.save_ymin= self.ymin
-        self.save_ymax= self.ymax
+        self.save_xmin= self.x1
+        self.save_xmax= self.x2
+        self.save_ymin= self.y1
+        self.save_ymax= self.y2
         
         self.base.freeze_axes()
 
