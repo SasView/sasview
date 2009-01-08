@@ -30,7 +30,7 @@ class SectorInteractor(_BaseInteractor):
         self.connect = self.base.connect
         
         ## Number of points on the plot
-        self.nbins = 20
+        self.nbins = 30
         self.theta1= math.pi/4
         self.theta2= math.pi/3
         self.phi=math.pi/12
@@ -110,8 +110,8 @@ class SectorInteractor(_BaseInteractor):
             self.main_line.update()
             self.right_line.update( delta = self.main_line.get_radius(),mline= self.main_line)
             self.left_line.update( delta = self.main_line.get_radius() ,mline= self.main_line)
-            print "Main line has moved ---> phi right",math.degrees(self.main_line.theta-self.right_line.theta)
-            print "Main line has moved ---> phi left",math.degrees(self.main_line.theta-self.left_line.theta)
+            print "Main line has moved ---> phi right",math.degrees(self.main_line.get_radius()+self.right_line.theta)
+            print "Main line has moved ---> phi left",math.degrees(self.left_line.theta+self.main_line.get_radius())
         if self.left_line.has_move:
             print "left line has moved --->"
             self.main_line.update()
@@ -148,8 +148,9 @@ class SectorInteractor(_BaseInteractor):
         name = "Sector "
         from DataLoader.manipulations import SectorQ
         radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
-        phimin = self.right_line.theta
-        phimax = self.left_line.theta
+        phimin = self.right_line.theta+math.pi
+        phimax = self.left_line.theta+math.pi
+        #sect = SectorQ(r_min=0.000001, r_max= radius , phi_min=phimin, phi_max=phimax)
         sect = SectorQ(r_min=-1*radius , r_max= radius , phi_min=phimin, phi_max=phimax)
         if nbins!=None:
             sect.nbins = nbins
