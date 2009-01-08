@@ -16,6 +16,17 @@ import math
 import SlicerParameters
 import wx
 
+def find_intersection(a1= 2, a2= -0.5,b1= 1,b2= 1 ):
+    """ @ return x, y  coordinates of an intersection between 2 lines
+        @param a1: the slope of the first line
+        @param a2 : the slope of the 2nd line
+        @param b1 : line intercept of the 1 st line
+        @param b2 : line intercept of the 2 nd ligne
+        @note 1st line equation  is y= a1*x +b1 ; 2nd line equation  is y= a2*x +b2 
+    """
+    x= ( b2- b1) /(a1- a1)
+    y= ( -a2*b1 + a1*b2 )/(a1 -a2)
+    return x, y
 class BoxInteractor(_BaseInteractor):
     """
          Select an annulus through a 2D plot
@@ -34,7 +45,7 @@ class BoxInteractor(_BaseInteractor):
         self.xmax= x_max
         self.ymax=  y_max
         
-        self.theta2= math.pi/4
+        self.theta2= math.pi/3
         ## Number of points on the plot
         self.nbins = 20
         self.count=0
@@ -43,7 +54,6 @@ class BoxInteractor(_BaseInteractor):
                                          zorder=zorder, ymin=y_min ,ymax=y_max,
                                            theta= self.theta2)
         self.main_line.qmax = self.base.qmax
-        
         self.left_line = VerticalLine(self, self.base.subplot,color='blue', 
                                       zorder=zorder,
                                       mline= self.main_line, 
@@ -53,34 +63,6 @@ class BoxInteractor(_BaseInteractor):
                                         xmax=self.xmin,
                                         theta2= self.theta2)
         self.left_line.qmax = self.base.qmax
-        
-        self.right_line= VerticalLine(self, self.base.subplot,color='black', 
-                                      zorder=zorder,
-                                      mline= self.main_line, 
-                                     ymin= self.ymin , 
-                                     ymax= self.ymax,
-                                    xmin= self.xmax,
-                                    xmax= self.xmax,
-                                    theta2= self.theta2)
-        self.right_line.qmax = self.base.qmax
-        
-        self.top_line= HorizontalLine(self, self.base.subplot,color='green', 
-                                      zorder=zorder,
-                                      mline= self.main_line,
-                                      xmin=self.right_line.x1,
-                                      xmax=self.left_line.x1,
-                                      ymin=self.right_line.y1,
-                                      ymax=self.left_line.y1)
-        self.top_line.qmax= self.base.qmax
-        
-        self.bottom_line= HorizontalLine(self, self.base.subplot,color='grey', 
-                                      zorder=zorder,
-                                      mline= self.main_line,
-                                      xmin=self.right_line.x2,
-                                      xmax=self.left_line.x2,
-                                      ymin=self.right_line.y2,
-                                      ymax=self.left_line.y2)
-        self.bottom_line.qmax= self.base.qmax
         self.update()
         #self._post_data()
         
@@ -115,10 +97,8 @@ class BoxInteractor(_BaseInteractor):
         
     def clear(self):
         self.clear_markers()
-        self.left_line.clear()
-        self.right_line.clear()
-        self.top_line.clear()
-        self.bottom_line.clear()
+       
+       
         self.main_line.clear()
         #self.base.connect.disconnect()
         self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
@@ -138,52 +118,7 @@ class BoxInteractor(_BaseInteractor):
                                   ymin= self.ymin,
                                   ymax=self.ymax,
                                   translation=True)
-            self.right_line.update(
-                                   xmin= self.xmax,
-                                  xmax= self.xmax,
-                                  ymin= self.ymin,
-                                  ymax=self.ymax,
-                                  translation=True)
-            self.top_line.update(xmin= self.right_line.x1,
-                                 xmax= self.left_line.x1,
-                                 ymin= self.right_line.y1,
-                                 ymax= self.left_line.y1)
-            self.bottom_line.update(xmin= self.right_line.x2,
-                                 xmax= self.left_line.x2,
-                                 ymin= self.right_line.y2,
-                                 ymax= self.left_line.y2)
-        if self.left_line.has_move:
-            print "left has moved"
-            self.left_line.update()
-            self.right_line.update(opline= self.left_line )
-            
-            self.top_line.update(xmin= self.right_line.x2,
-                                 xmax= self.left_line.x1,
-                                 ymin= self.right_line.y2,
-                                 ymax= self.left_line.y1)
-            
-            
-            self.bottom_line.update(xmin= self.right_line.x1,
-                                 xmax= self.left_line.x2,
-                                 ymin= self.right_line.y1,
-                                 ymax= self.left_line.y2)
-           
-        if self.right_line.has_move:
-            print "right has moved"
-            self.right_line.update()
-            self.left_line.update(opline= self.right_line )
-            
-            self.top_line.update(xmin= self.right_line.x1,
-                                 xmax= self.left_line.x2,
-                                 ymin= self.right_line.y1,
-                                 ymax= self.left_line.y2)
-            
-            self.bottom_line.update(xmin= self.right_line.x2,
-                                 xmax= self.left_line.x1,
-                                 ymin= self.right_line.y2,
-                                 ymax= self.left_line.y1)
-        if self.top_line.has_move:
-            self.top_line.update(translation=True)
+          
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
@@ -238,27 +173,15 @@ class BoxInteractor(_BaseInteractor):
         
     def get_params(self):
         params = {}
-        params["x_min"] = self.left_line.L_width
-        params["x_max"] = self.right_line.R_width
-        #params["y_min"] = self.bottom_line.y
-        #params["y_max"] = self.top_line.y
-        params["count"] = self.count
-        params["error"] = self.error
+       
         params["phi"] = self.main_line.theta
         return params
     
     def set_params(self, params):
         
-        x_min = params["x_min"] 
-        x_max = params["x_max"] 
-        #y_min = params["y_min"]
-        #y_max = params["y_max"] 
+       
         theta = params["theta"]
-        
-        self.left_line.update(ymin= y_min ,ymax= y_max)
-        self.right_line.update(ymin= y_min ,ymax= y_max)
-        #self.top_line.update( xmin= x_min ,xmax= xmax)
-        #self.bottom_line.update(xmin= xmin ,xmax= xmax)
+        print "theta setparams",theta
         self.main_line.update(theta)
         
         self._post_data()
@@ -282,35 +205,34 @@ class HorizontalLine(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
+        self.x1= self.xmax
+        self.save_x1= self.xmax
         
-        self.ymin= ymin
-        self.save_ymin = ymin
-        self.mline = mline
-        self.ymax= ymax
-        self.save_ymax = ymax
-        self.xmin = xmin
-        self.save_xmin = xmin
-        self.xmax = xmax
-        self.save_xmax = xmax
-        self.top_hight= self.ymax
+        self.x2= self.xmin
+        self.save_x2= self.xmin
         
-        self.theta2 = theta2
+        self.y1= self.ymax
+        self.save_y1= self.ymax
         
-        self.line = self.axes.plot([self.xmax,self.xmin],
-                                   [self.ymax,self.ymin],
+        self.y2= self.ymin
+        self.save_y2= self.ymin
+        self.mline= mline
+        self.line = self.axes.plot([self.x1,self.x2],
+                                   [self.y1,self.y2],
                                       linestyle='-', marker='',
                                       color=self.color,
                                       visible=True)[0]
- 
         
+        self.slope= -1*math.tan(self.mline.theta)
+        self.b= self.y1- self.slope* self.x1
         
+        print "slope from point",(self.y2- self.y1)/(self.x2- self.x1)
+        print "my slope horizontal", self.slope
+        print "b from point ", self.y2- self.slope*self.x1, self.b
         self.npts = 20
         self.has_move=False
         self.connect_markers([self.line])
-        self.update(xmin= self.xmin,
-                    xmax= self.xmax,
-                    ymin= self.ymin,
-                    ymax=  self.ymax)
+        self.update()
 
     def set_layer(self, n):
         self.layernum = n
@@ -336,20 +258,23 @@ class HorizontalLine(_BaseInteractor):
         """
         if translation :
             print "translation ",self.top_hight
-            self.x1= self.xmax + self.top_hight*math.sin(math.pi/2 + self.mline.theta)
-            self.x2= self.xmin + self.top_hight*math.sin(math.pi/2 + self.mline.theta)
-            self.y1= self.ymin - self.top_hight*math.cos(math.pi/2 + self.mline.theta)
-            self.y2= self.ymax -self.top_hight*math.cos(math.pi/2 + self.mline.theta)
+            self.x1= self.xmax +_self.top_hight*math.sin(math.pi/2 + self.mline.theta)
+            self.x2= self.xmin +self.top_hight*math.sin(math.pi/2 + self.mline.theta)
+            self.y1= self.ymin - self.top_hight*math.sin(math.pi/2 + self.mline.theta)
+            self.y2= self.ymax -self.top_hight*math.sin(math.pi/2 + self.mline.theta)
             self.line.set(xdata=[self.x1,self.x2],
                        ydata=[self.y1,self.y2])
             return
-        #print "update main line", self.has_move
-        self.xmin=xmin
-        self.xmax=xmax
-        self.ymin=ymin
-        self.ymax=ymax
-        self.line.set(xdata=[self.xmin,self.xmax],
-                       ydata=[self.ymin,self.ymax])
+        if xmin !=None:
+            self.x2 = xmin
+        if xmax !=None:
+            self.x1 = xmax
+        if ymin !=None:
+            self.y2 = ymin
+        if ymax != None:
+            self.y1 = ymax
+        self.line.set(xdata=[self.x1,self.x2],
+                       ydata=[self.y1,self.y2])
     
         
         
@@ -358,12 +283,12 @@ class HorizontalLine(_BaseInteractor):
         Remember the roughness for this layer and the next so that we
         can restore on Esc.
         """
-        self.save_xmin= self.xmin
-        self.save_xmax= self.xmax
+        self.save_x1= self.x1
+        self.save_x2= self.x2
        
-        self.save_ymin= self.ymin
-        self.save_ymax= self.ymax
-        self.top_hight= self.ymax
+        self.save_y1= self.y1
+        self.save_y2= self.y2
+        
         self.base.freeze_axes()
 
     def moveend(self, ev):
@@ -375,17 +300,16 @@ class HorizontalLine(_BaseInteractor):
         """
         Restore the roughness for this layer.
         """
-        self.xmin = self.save_xmin
-        self.xmax = self.save_xmax
-        self.ymin = self.save_ymin
-        self.ymax = self.save_ymax
+        self.x1 = self.save_x1
+        self.x2 = self.save_x2
+        self.y1 = self.save_y1
+        self.y2 = self.save_y2
 
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        
-        self.top_hight= y
+        self.b = - self.slope.x
         self.has_move=True
         self.base.base.update()
         
@@ -396,8 +320,8 @@ class HorizontalLine(_BaseInteractor):
         
     def get_params(self):
         params = {}
-        params["radius"] = self.xmin
-        params["theta"] = self.xmax
+        params["radius"] = self.x1
+        #params["theta"] = self.xmax
         return params
     
     def set_params(self, params):
@@ -420,39 +344,23 @@ class VerticalLine(_BaseInteractor):
         self.markers = []
         self.axes = axes
         
-        self.L_width=xmin
-        self.save_L_width=xmin
-        
-        self.save_xmin= xmin
-        self.R_width=xmax
-        self.save_xmax=xmax
-        self.ymin=ymin
-        self.save_ymin= ymin
-        self.ymax=ymax
-        self.save_ymax= ymax
-        
-        self.theta2= theta2
-        
-        self.mline= mline
-      
-        self.detax=0
-        self.deltay=0
-        
-       
-        self.clickxf=0
-        self.clickyf=0
+        self.theta2 = mline.theta
+        self.mline =mline
+        self.xmin= xmin
         self.x1= mline.x1 + xmin*math.cos(math.pi/2 - self.theta2)
         self.x2= mline.x2 + xmin*math.cos(math.pi/2 - self.theta2)
         self.y1= mline.y1 - xmin*math.sin(math.pi/2 - self.theta2)
         self.y2= mline.y2 - xmin*math.sin(math.pi/2 - self.theta2)
-        
         self.line = self.axes.plot([self.x1,self.x2],[self.y1,self.y2],
                                       linestyle='-', marker='',
                                       color=self.color,
                                       visible=True)[0]
       
-        self.npts = 20
-        # Check vertical line motion
+        
+        self.slope= math.tan(self.mline.theta)
+        print "vertical line intercetp ",self.y2- self.slope*self.x2, self.y1- self.slope* self.x1 
+       
+        self.b = self.y1- self.slope* self.x1 
         self.has_move=False
         self.connect_markers([self.line])
         self.update()
@@ -479,42 +387,15 @@ class VerticalLine(_BaseInteractor):
         """
         Draw the new roughness on the graph.
         """
-        if opline !=None:
-            self.x1= -1*opline.x1
-            self.x2= -1*opline.x2
-            self.y1= -1*opline.y1
-            self.y2= -1*opline.y2
-            self.line.set(xdata=[self.x1,self.x2],
+        self.x1= self.mline.x1 + self.xmin*math.cos(math.pi/2 - self.mline.theta)
+        self.x2= self.mline.x2 + self.xmin*math.cos(math.pi/2 - self.mline.theta)
+        self.y1= self.mline.y1 - self.xmin*math.sin(math.pi/2 - self.mline.theta)
+        self.y2= self.mline.y2 - self.xmin*math.sin(math.pi/2 - self.mline.theta)
+        self.line.set(xdata=[self.x1,self.x2],
                            ydata=[self.y1,self.y2]) 
-            return
-        if xmin== None:
-            xmin= self.L_width
-        if xmax== None:
-            xmax= self.R_width
-        #print "vertical line: xmin, xmax , ymin , ymax", xmin, self.mline.theta
-        self.x1= self.mline.x1 + xmin*math.cos(math.pi/2 - self.mline.theta)
-        self.x2= self.mline.x2 + xmin*math.cos(math.pi/2 - self.mline.theta)
-        self.y1= self.mline.y1 - xmin*math.sin(math.pi/2 - self.mline.theta)
-        self.y2= self.mline.y2 - xmin*math.sin(math.pi/2 - self.mline.theta)
-        #print "vertical line: main line  value ", self.mline.x1, self.mline.x2, self.mline.y1,self.mline.y2
-        #print "vertical line: new value ", self.x1, self.x2, self.y1,self.y2
-
-        self.line.set(xdata=[self.x1,self.x2], ydata=[self.y1,self.y2])  
-        if opline !=None:
-            self.line.set(xdata=[-1*self.opline.x1,-1*self.opline.x2],
-                           ydata=[self.opline.y1,self.opline.y2]) 
-            return
-        if translation:
-            print "xmin L_width", xmin, self.L_width
-            self.x1= self.mline.x1 + self.L_width*math.cos(math.pi/2 - self.mline.theta)
-            self.x2= self.mline.x2 + self.L_width*math.cos(math.pi/2 - self.mline.theta)
-            self.y1= self.mline.y1 - self.L_width*math.sin(math.pi/2 - self.mline.theta)
-            self.y2= self.mline.y2 - self.L_width*math.sin(math.pi/2 - self.mline.theta)
-            
-            print"translation x1, x2,y1,y2",self.x1, self.x2,self.y1,self.y2
-            self.line.set(xdata=[self.x1,self.x2], ydata=[self.y1,self.y2]) 
-            
-            
+        #print "update slope ", (self.y2-self.y1)/(self.x2- self.x1)
+        #print "main slope", math.tan(self.mline.theta)
+        
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
@@ -537,19 +418,23 @@ class VerticalLine(_BaseInteractor):
         """
         Restore the roughness for this layer.
         """
-        self.xmin = self.save_xmin
-        self.xmax = self.save_xmax
-        self.ymin = self.save_ymin
-        self.ymax = self.save_ymax
-        self.L_width= self.save_L_width
+        self.x1 = self.save_x1
+        self.x2 = self.save_x2
+        self.y1 = self.save_y1
+        self.y2= self.save_y2
+      
         
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
         """
         self.has_move=True
-        self.L_width = x
-        print "move L_width", self.L_width
+        
+        # compute the b intercept of the vertical line
+        self.b= math.fabs( y - self.mline.theta * x)
+        
+        
+        print "move L_width", self.L_width, self.L_hight
         self.base.base.update()
         
         
@@ -595,7 +480,7 @@ class LineInteractor(_BaseInteractor):
         self.radius1 = ymax
         self.radius2 = ymin
         self.scale = 10.0
-            
+           
         # Inner circle
         self.x1= self.radius1*math.cos(self.theta)
         self.y1= self.radius1*math.sin(self.theta)
@@ -652,11 +537,15 @@ class LineInteractor(_BaseInteractor):
         if radius2 !=None:
             self.radius2 =radius2
         print "update main line", math.degrees(self.theta),self.radius1, self.radius2
+        
         self.x1= self.radius1*math.cos(self.theta)
         self.y1= self.radius1*math.sin(self.theta)
         self.x2= -1*self.radius2*math.cos(self.theta)
         self.y2= -1*self.radius2*math.sin(self.theta)
-      
+        print "init mainline sintercept ", self.y1 - math.tan(self.theta)*self.x1,\
+         self.y2 - math.tan(self.theta)*self.x2
+        print "main line slope ", (self.y2- self.y1)/(self.x2- self.x1)
+        print "theta", math.tan(self.theta)
         self.line.set(xdata=[self.x1,self.x2], ydata=[self.y1,self.y2])  
      
         
