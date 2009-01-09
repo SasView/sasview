@@ -24,7 +24,7 @@ def find_intersection(a1= 2, a2= -0.5,b1= 1,b2= 1 ):
         @param b2 : line intercept of the 2 nd ligne
         @note 1st line equation  is y= a1*x +b1 ; 2nd line equation  is y= a2*x +b2 
     """
-    x= ( b2- b1) /(a1- a1)
+    x= ( b2- b1) /(a1- a2)
     y= ( -a2*b1 + a1*b2 )/(a1 -a2)
     return x, y
 class BoxInteractor(_BaseInteractor):
@@ -63,6 +63,35 @@ class BoxInteractor(_BaseInteractor):
                                         xmax=self.xmin,
                                         theta2= self.theta2)
         self.left_line.qmax = self.base.qmax
+        
+        self.right_line= VerticalLine(self, self.base.subplot,color='black', 
+                                      zorder=zorder,
+                                      mline= self.main_line, 
+                                     ymin= self.ymin , 
+                                     ymax= self.ymax,
+                                    xmin= self.xmax,
+                                    xmax= self.xmax,
+                                    theta2= self.theta2)
+        self.right_line.qmax = self.base.qmax
+        
+        self.top_line= HorizontalLine(self, self.base.subplot,color='green', 
+                                      zorder=zorder,
+                                      mline= self.main_line,
+                                      xmin=self.right_line.x1,
+                                      xmax=self.left_line.x1,
+                                      ymin=self.right_line.y1,
+                                      ymax=self.left_line.y1)
+        self.top_line.qmax= self.base.qmax
+        
+        self.bottom_line= HorizontalLine(self, self.base.subplot,color='gray', 
+                                      zorder=zorder,
+                                      mline= self.main_line,
+                                      xmin=self.right_line.x2,
+                                      xmax=self.left_line.x2,
+                                      ymin=self.right_line.y2,
+                                      ymax=self.left_line.y2)
+        self.bottom_line.qmax= self.base.qmax
+        
         self.update()
         #self._post_data()
         
@@ -116,9 +145,192 @@ class BoxInteractor(_BaseInteractor):
                                   xmin= self.xmin,
                                   xmax= self.xmin,
                                   ymin= self.ymin,
-                                  ymax=self.ymax,
-                                  translation=True)
-          
+                                  ymax=self.ymax
+                                  )
+            self.right_line.update(
+                                   xmin= self.xmax,
+                                  xmax= self.xmax,
+                                  ymin= self.ymin,
+                                  ymax=self.ymax)
+            self.top_line.update(xmin= self.right_line.x1,
+                                 xmax= self.left_line.x1,
+                                 ymin= self.right_line.y1,
+                                 ymax= self.left_line.y1)
+            self.bottom_line.update(xmin= self.right_line.x2,
+                                 xmax= self.left_line.x2,
+                                 ymin= self.right_line.y2,
+                                 ymax= self.left_line.y2)
+        if self.top_line.has_move:
+            print "top has moved",self.left_line.slope, self.top_line.slope
+            x2, y2= find_intersection(a1= self.left_line.slope,
+                                     a2= self.top_line.slope,
+                                     b1= self.left_line.b,
+                                     b2= self.top_line.b )
+            print "x, y max: ",x2,y2
+            x1, y1= find_intersection(a1= self.right_line.slope,
+                                     a2= self.top_line.slope,
+                                     b1= self.right_line.b,
+                                     b2= self.top_line.b )
+            print "x, y min: ",x1 ,y1
+            self.top_line.update(xmin= x2,
+                                 ymin= y2,
+                                 xmax= x1,
+                                 ymax= y1)
+            
+            self.bottom_line.update(xmin= -x2,
+                                    ymin= -y2,
+                                    xmax= -x1,
+                                    ymax= -y1)
+            self.left_line.update(xmin= -x1,
+                                  ymin= -y1,
+                                  xmax= x2,
+                                  ymax= y2,
+                                  translation= True)
+            self.right_line.update(
+                                   xmin= -x2,
+                                   ymin= -y2,
+                                   xmax= x1,
+                                   ymax= y1,
+                                  translation= True)
+            print "top has moved",self.left_line.slope, self.top_line.slope
+            x2, y2= find_intersection(a1= self.main_line.slope,
+                                     a2= self.top_line.slope,
+                                     b1= self.main_line.b,
+                                     b2= self.top_line.b )
+            print "main x, y max: ",x2,y2
+            x1, y1= find_intersection(a1= self.main_line.slope,
+                                     a2= self.bottom_line.slope,
+                                     b1= self.main_line.b,
+                                     b2= self.bottom_line.b )
+            print "main x, y min: ",x1,y1
+            self.main_line.update(x1= -x2,
+                                  y1= -y2,
+                                  x2= x2,
+                                  y2= y2,
+                                  translation= True)
+        if self.bottom_line.has_move:
+            
+            print "bottom has moved",self.left_line.slope, self.bottom_line.slope
+            x2, y2= find_intersection(a1= self.left_line.slope,
+                                     a2= self.bottom_line.slope,
+                                     b1= self.left_line.b,
+                                     b2= self.bottom_line.b )
+            print "x, y max: ",x2,y2
+            x1, y1= find_intersection(a1= self.right_line.slope,
+                                     a2= self.bottom_line.slope,
+                                     b1= self.right_line.b,
+                                     b2= self.bottom_line.b )
+            print "x, y min: ",x1 ,y1
+            self.bottom_line.update(xmin= x2,
+                                 ymin= y2,
+                                 xmax= x1,
+                                 ymax= y1)
+            
+            self.top_line.update(xmin= -x2,
+                                    ymin= -y2,
+                                    xmax= -x1,
+                                    ymax= -y1)
+            self.left_line.update(xmin= -x1,
+                                  ymin= -y1,
+                                  xmax= x2,
+                                  ymax= y2,
+                                  translation= True)
+            self.right_line.update(
+                                   xmin= -x2,
+                                   ymin= -y2,
+                                   xmax= x1,
+                                   ymax= y1,
+                                  translation= True)
+            print "bottom has moved",self.left_line.slope, self.bottom_line.slope
+            x2, y2= find_intersection(a1= self.main_line.slope,
+                                     a2= self.bottom_line.slope,
+                                     b1= self.main_line.b,
+                                     b2= self.bottom_line.b )
+            print "main x, y max: ",x2,y2
+            x1, y1= find_intersection(a1= self.main_line.slope,
+                                     a2= self.top_line.slope,
+                                     b1= self.main_line.b,
+                                     b2= self.top_line.b )
+            print "main x, y min: ",x1,y1
+            self.main_line.update(x1= -x2,
+                                  y1= -y2,
+                                  x2= x2,
+                                  y2= y2,
+                                  translation= True)
+        if self.left_line.has_move:
+            print "left_line has moved",self.left_line.slope, self.top_line.slope
+            x2, y2= find_intersection(a1= self.left_line.slope,
+                                     a2= self.top_line.slope,
+                                     b1= self.left_line.b,
+                                     b2= self.top_line.b )
+            print "main x, y max: ",x2,y2
+            x1, y1= find_intersection(a1= self.left_line.slope,
+                                     a2= self.bottom_line.slope,
+                                     b1= self.left_line.b,
+                                     b2= self.bottom_line.b )
+            self.left_line.update(xmin = x1,
+                                   xmax = x2,
+                                    ymin= y1, 
+                                    ymax= y2,
+                                   translation=True)
+            
+            self.right_line.update(xmin = -x1,
+                                   xmax = -x2,
+                                    ymin= -y1, 
+                                    ymax= -y2,
+                                   translation=True)
+            
+            self.bottom_line.update(xmin= x1,
+                                 ymin= y1,
+                                 xmax= -x2,
+                                 ymax= -y2)
+            
+            self.top_line.update(xmin= x2,
+                                    ymin= y2,
+                                    xmax= -x1,
+                                    ymax= -y1)
+            print "initial xmin", self.xmin
+            self.xmin= math.sqrt(math.pow((self.main_line.x2 - self.left_line.x2),2)\
+                                 +math.pow((self.main_line.y2 - self.left_line.y2),2))
+                                 
+            print "new xmin ", self.xmin, self.main_line.x2 , self.left_line.x2
+        if self.right_line.has_move:
+            print "right_line has moved",self.right_line.slope, self.top_line.slope
+            x2, y2= find_intersection(a1= self.right_line.slope,
+                                     a2= self.top_line.slope,
+                                     b1= self.right_line.b,
+                                     b2= self.top_line.b )
+            print "main x, y max: ",x2,y2
+            x1, y1= find_intersection(a1= self.right_line.slope,
+                                     a2= self.bottom_line.slope,
+                                     b1= self.right_line.b,
+                                     b2= self.bottom_line.b )
+            self.right_line.update(xmin = x1,
+                                   xmax = x2,
+                                    ymin= y1, 
+                                    ymax= y2,
+                                   translation=True)
+            
+            self.left_line.update(xmin = -x1,
+                                   xmax = -x2,
+                                    ymin= -y1, 
+                                    ymax= -y2,
+                                   translation=True)
+            
+            self.bottom_line.update(xmin= x1,
+                                 ymin= y1,
+                                 xmax= -x2,
+                                 ymax= -y2)
+            
+            self.top_line.update(xmin= x2,
+                                    ymin= y2,
+                                    xmax= -x1,
+                                    ymax= -y1)
+               
+            print "initial xmax", self.xmax
+            self.xmax= math.sqrt(math.pow((self.main_line.x2 - self.right_line.x2),2)\
+                                 +math.pow((self.main_line.y2 - self.right_line.y2),2))
+            print "new xmax",self.xmax
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
@@ -173,17 +385,32 @@ class BoxInteractor(_BaseInteractor):
         
     def get_params(self):
         params = {}
-       
+        params["x1"]= self.xmax
+        params["y1"]= self.ymin
+        params["x2"]= self.xmin
+        params["y2"]= self.ymax
         params["phi"] = self.main_line.theta
         return params
     
     def set_params(self, params):
-        
-       
+        self.xmax = params["x1"]
+        self.ymin = params["y1"] 
+        self.xmin = params["x2"]
+        self.ymax = params["y2"]
         theta = params["theta"]
         print "theta setparams",theta
-        self.main_line.update(theta)
+        self.main_line.update(radius1= math.fabs(self.ymax), radius2= math.fabs(self.ymin), theta= theta)
+        self.left_line.update(xmin= -1*self.xmin)
+        self.right_line.update(xmin= self.xmax)
         
+        self.top_line.update(xmin= self.right_line.x1,
+                                 xmax= self.left_line.x1,
+                                 ymin= self.right_line.y1,
+                                 ymax= self.left_line.y1)
+        self.bottom_line.update(xmin= self.right_line.x2,
+                                 xmax= self.left_line.x2,
+                                 ymin= self.right_line.y2,
+                                 ymax= self.left_line.y2)
         self._post_data()
     def freeze_axes(self):
         self.base.freeze_axes()
@@ -205,17 +432,17 @@ class HorizontalLine(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.x1= self.xmax
-        self.save_x1= self.xmax
+        self.x1= xmax
+        self.save_x1= xmax
         
-        self.x2= self.xmin
-        self.save_x2= self.xmin
+        self.x2= xmin
+        self.save_x2= xmin
         
-        self.y1= self.ymax
-        self.save_y1= self.ymax
+        self.y1= ymax
+        self.save_y1= ymax
         
-        self.y2= self.ymin
-        self.save_y2= self.ymin
+        self.y2= ymin
+        self.save_y2= ymin
         self.mline= mline
         self.line = self.axes.plot([self.x1,self.x2],
                                    [self.y1,self.y2],
@@ -223,12 +450,12 @@ class HorizontalLine(_BaseInteractor):
                                       color=self.color,
                                       visible=True)[0]
         
-        self.slope= -1*math.tan(self.mline.theta)
+        self.slope= -1/math.tan(self.mline.theta)
         self.b= self.y1- self.slope* self.x1
-        
+        self.save_b= self.b
         print "slope from point",(self.y2- self.y1)/(self.x2- self.x1)
         print "my slope horizontal", self.slope
-        print "b from point ", self.y2- self.slope*self.x1, self.b
+        print "b from point ", self.y2- self.slope*self.x2, self.b
         self.npts = 20
         self.has_move=False
         self.connect_markers([self.line])
@@ -256,15 +483,7 @@ class HorizontalLine(_BaseInteractor):
         """
         Draw the new roughness on the graph.
         """
-        if translation :
-            print "translation ",self.top_hight
-            self.x1= self.xmax +_self.top_hight*math.sin(math.pi/2 + self.mline.theta)
-            self.x2= self.xmin +self.top_hight*math.sin(math.pi/2 + self.mline.theta)
-            self.y1= self.ymin - self.top_hight*math.sin(math.pi/2 + self.mline.theta)
-            self.y2= self.ymax -self.top_hight*math.sin(math.pi/2 + self.mline.theta)
-            self.line.set(xdata=[self.x1,self.x2],
-                       ydata=[self.y1,self.y2])
-            return
+        self.slope= -1/math.tan(self.mline.theta)
         if xmin !=None:
             self.x2 = xmin
         if xmax !=None:
@@ -273,6 +492,7 @@ class HorizontalLine(_BaseInteractor):
             self.y2 = ymin
         if ymax != None:
             self.y1 = ymax
+        self.b= self.y1- self.slope * self.x1
         self.line.set(xdata=[self.x1,self.x2],
                        ydata=[self.y1,self.y2])
     
@@ -288,6 +508,7 @@ class HorizontalLine(_BaseInteractor):
        
         self.save_y1= self.y1
         self.save_y2= self.y2
+        self.save_b= self.b
         
         self.base.freeze_axes()
 
@@ -304,12 +525,14 @@ class HorizontalLine(_BaseInteractor):
         self.x2 = self.save_x2
         self.y1 = self.save_y1
         self.y2 = self.save_y2
+        self.b = self.save_b
 
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        self.b = - self.slope.x
+        print "horizontal move x y ", x, y
+        self.b =  y - (-1/self.mline.slope) *x
         self.has_move=True
         self.base.base.update()
         
@@ -387,13 +610,30 @@ class VerticalLine(_BaseInteractor):
         """
         Draw the new roughness on the graph.
         """
+        
+        self.slope= math.tan(self.mline.theta)
+        if translation:
+            if xmin!=None:
+                self.x2=xmin
+                self.xmin= xmin
+            if xmax!=None:
+                self.x1=xmax
+            if ymin!=None:
+                self.y2=ymin
+            if ymax!=None:
+                self.y1=ymax
+            self.line.set(xdata=[self.x1,self.x2],
+                           ydata=[self.y1,self.y2]) 
+            self.b= self.y1- self.slope * self.x1
+            return 
+        
         self.x1= self.mline.x1 + self.xmin*math.cos(math.pi/2 - self.mline.theta)
         self.x2= self.mline.x2 + self.xmin*math.cos(math.pi/2 - self.mline.theta)
         self.y1= self.mline.y1 - self.xmin*math.sin(math.pi/2 - self.mline.theta)
         self.y2= self.mline.y2 - self.xmin*math.sin(math.pi/2 - self.mline.theta)
         self.line.set(xdata=[self.x1,self.x2],
                            ydata=[self.y1,self.y2]) 
-        #print "update slope ", (self.y2-self.y1)/(self.x2- self.x1)
+        print "update slope ", (self.y2-self.y1)/(self.x2- self.x1)
         #print "main slope", math.tan(self.mline.theta)
         
     def save(self, ev):
@@ -401,11 +641,10 @@ class VerticalLine(_BaseInteractor):
         Remember the roughness for this layer and the next so that we
         can restore on Esc.
         """
-        self.save_L_width= self.L_width
-        self.save_xmin= self.x1
-        self.save_xmax= self.x2
-        self.save_ymin= self.y1
-        self.save_ymax= self.y2
+        self.save_x1= self.x1
+        self.save_x2= self.x2
+        self.save_y1= self.y1
+        self.save_y2= self.y2
         
         self.base.freeze_axes()
 
@@ -431,10 +670,9 @@ class VerticalLine(_BaseInteractor):
         self.has_move=True
         
         # compute the b intercept of the vertical line
-        self.b= math.fabs( y - self.mline.theta * x)
+        self.b=y - self.mline.slope * x
         
         
-        print "move L_width", self.L_width, self.L_hight
         self.base.base.update()
         
         
@@ -477,8 +715,8 @@ class LineInteractor(_BaseInteractor):
         self.save_theta = theta 
         self.theta= theta
         
-        self.radius1 = ymax
-        self.radius2 = ymin
+        self.radius1 = math.fabs(ymax)
+        self.radius2 = math.fabs(ymin)
         self.scale = 10.0
            
         # Inner circle
@@ -491,7 +729,9 @@ class LineInteractor(_BaseInteractor):
                                       linestyle='-', marker='',
                                       color=self.color,
                                       visible=True)[0]
-      
+        self.slope= math.tan(self.theta)
+        self.b= math.fabs(self.y1- self.slope * self.x1)
+        print "intercept main",math.fabs(self.y2- self.slope * self.x2),math.fabs(self.y1- self.slope * self.x1)
         self.npts = 20
         self.has_move=False
         self.connect_markers([self.line])
@@ -523,13 +763,33 @@ class LineInteractor(_BaseInteractor):
         """
         return self.theta - self.save_theta
         
-    def update(self, theta=None,radius1=None,radius2=None):
+    def update(self,x1=None,
+               y1=None,
+               x2=None,
+               y2=None,
+               translation=False,
+               xmin=None,vline=None, theta=None,radius1=None,radius2=None):
         """
             Draw a line given and angle relative to the x-axis and a radius
             @param  theta: the angle realtive to the x-axis
             @param radius: the distance between the center and one end of the line
         """
+        if translation:
+            if x1 !=None:
+                self.x1= x1
+            if x2 !=None:
+                self.x2= x2
+            if y1 !=None:
+                self.y1= y1
+            if y2 !=None:
+                self.y2= y2
         
+            self.line.set(xdata=[self.x1,self.x2], ydata=[self.y1,self.y2])
+            self.radius1= math.fabs(self.x1/math.cos(self.theta))
+            self.radius2= math.fabs(self.x2/math.cos(self.theta))
+            print "radius 1, radius2", self.radius1, self.radius2
+            return     
+      
         if theta !=None:
             self.theta= theta
         if radius1 !=None:
@@ -537,7 +797,7 @@ class LineInteractor(_BaseInteractor):
         if radius2 !=None:
             self.radius2 =radius2
         print "update main line", math.degrees(self.theta),self.radius1, self.radius2
-        
+        print "smain radius 1 2", self.radius1, self.radius2
         self.x1= self.radius1*math.cos(self.theta)
         self.y1= self.radius1*math.sin(self.theta)
         self.x2= -1*self.radius2*math.cos(self.theta)
@@ -574,6 +834,11 @@ class LineInteractor(_BaseInteractor):
         Process move to a new position, making sure that the move is allowed.
         """
         self.theta= math.atan2(y,x)
+        self.slope= math.tan(self.theta)
+        self.b=  y - self.slope *x
+        
+        print "main move slope , theta, b", self.slope, self.theta, self.b
+        
         #print "main_line previous theta --- next theta ",math.degrees(self.save_theta),math.degrees(self.theta)
         self.has_move=True
         self.base.base.update()
