@@ -33,8 +33,8 @@ class BoxSum(_BaseInteractor):
         self.xmax= x_max
         self.ymax=  y_max
         # center of the figure
-        self.center_x= 0.0005
-        self.center_y= 0.0005
+        self.center_x= 0.0
+        self.center_y= 0.0
        
         ## Number of points on the plot
         self.nbins = 20
@@ -122,7 +122,8 @@ class BoxSum(_BaseInteractor):
         if self.left_line.has_move:
             print "left has moved"
             self.left_line.update(mline=[self.center_x, self.center_y],translation=True)
-            self.right_line.update(mline= [self.center_x, self.center_y],translation=True)
+            
+            #self.right_line.update(mline= [self.center_x, self.center_y],translation=True)
             self.top_line.update( xmin= self.left_line.x ,xmax= self.right_line.x,
                                   mline= [self.center_x, self.center_y],translation=True)
             self.bottom_line.update(xmin= self.left_line.x ,xmax= self.right_line.x,
@@ -130,7 +131,7 @@ class BoxSum(_BaseInteractor):
         if self.right_line.has_move:
             print "right has moved"
             self.right_line.update(mline= [self.center_x, self.center_y],translation=True)
-            self.left_line.update(mline=[self.center_x, self.center_y],translation=True)
+            #self.left_line.update(mline=[self.center_x, self.center_y],translation=True)
             #self.left_line.update(xmin= self.right_line.x ,xmax=-1*self.right_line.x)
             self.top_line.update( xmin= self.left_line.x ,xmax= self.right_line.x,
                                   mline= [self.center_x, self.center_y],translation=True)
@@ -141,7 +142,7 @@ class BoxSum(_BaseInteractor):
         if self.bottom_line.has_move:
             print "bottom has moved"
             self.bottom_line.update(mline= [self.center_x, self.center_y],translation=True)
-            self.top_line.update(y= -1*self.top_line.y,translation=True)
+            #self.top_line.update(y= -1*self.top_line.y,translation=True)
             self.left_line.update( ymin= self.bottom_line.y ,ymax= self.top_line.y,
                                    mline= [self.center_x, self.center_y],translation=True)
             self.right_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y,
@@ -150,9 +151,9 @@ class BoxSum(_BaseInteractor):
         if self.top_line.has_move:
             print "top has moved"
             self.top_line.update(mline= [self.center_x, self.center_y],translation=True)
-            #self.bottom_line.update()xmin=None, xmax=None,y=None, mline=None):
-            self.bottom_line.update(y= -1*self.top_line.y,mline= [self.center_x, self.center_y],
-                                    translation=True )
+            
+            #self.bottom_line.update(y= -1*self.top_line.y,mline= [self.center_x, self.center_y],
+            #                        translation=True )
             self.left_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y,
                                   mline= [self.center_x, self.center_y],translation=True)
             self.right_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y,
@@ -257,8 +258,8 @@ class HorizontalLine(_BaseInteractor):
     """
     def __init__(self,base,axes,color='black', zorder=5, y=0.5,
                  xmin=0.0,xmax=0.5,
-                 center_x= 0,
-                 center_y= 0):
+                 center_x= 0.0,
+                 center_y= 0.0):
         
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
@@ -341,9 +342,8 @@ class HorizontalLine(_BaseInteractor):
         """
         Restore the roughness for this layer.
         """
-        self.ymin = self.save_ymin
-        self.ymax = self.save_ymax
-
+        self.y= self.save_y
+       
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
