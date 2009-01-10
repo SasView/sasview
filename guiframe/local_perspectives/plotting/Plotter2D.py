@@ -100,6 +100,11 @@ class ModelPanel2D( ModelPanel1D):
     def _onEVT_1DREPLOT(self, event):
         """
             Data is ready to be displayed
+            
+            #TODO: this name should be changed to something more appropriate
+            # Don't forget that changing this name will mean changing code
+            # in plotting.py
+             
             @param event: data event
         """
         #TODO: Check for existence of plot attribute
@@ -112,24 +117,18 @@ class ModelPanel2D( ModelPanel1D):
         
         if hasattr(event, "reset"):
             self._reset()
-        #print "model2 d event",event.plot.name, event.plot.id, event.plot.group_id
-        #print "plottable list ",self.plots.keys()
-        #print self.plots
         is_new = True
         if event.plot.name in self.plots.keys():
             # Check whether the class of plottable changed
             if not event.plot.__class__==self.plots[event.plot.name].__class__:
                 #overwrite a plottable using the same name
-                print "is deleting the new plottable"
                 self.graph.delete(self.plots[event.plot.name])
             else:
                 # plottable is already draw on the panel
                 is_new = False
-
            
         if is_new:
             # a new plottable overwrites a plotted one  using the same id
-            #print "went here",self.plots.itervalues()
             for plottable in self.plots.itervalues():
                 if event.plot.id==plottable.id :
                     self.graph.delete(plottable)
@@ -137,12 +136,19 @@ class ModelPanel2D( ModelPanel1D):
             self.plots[event.plot.name] = event.plot
             self.graph.add(self.plots[event.plot.name])
         else:
-            #replot the graph
-            self.plots[event.plot.name].x = event.plot.x    
-            self.plots[event.plot.name].y = event.plot.y    
-            self.plots[event.plot.name].dy = event.plot.dy  
-            if hasattr(event.plot, 'dx') and hasattr(self.plots[event.plot.name], 'dx'):
-                self.plots[event.plot.name].dx = event.plot.dx    
+            # Update the plottable with the new data
+            
+            #TODO: we should have a method to do this, 
+            #      something along the lines of:
+            #      plottable1.update_data_from_plottable(plottable2)
+            
+            self.plots[event.plot.name].xmin = event.plot.xmin
+            self.plots[event.plot.name].xmax = event.plot.xmax
+            self.plots[event.plot.name].ymin = event.plot.ymin
+            self.plots[event.plot.name].ymax = event.plot.ymax
+            self.plots[event.plot.name].data = event.plot.data
+            self.plots[event.plot.name].err_data = event.plot.err_data
+            
  
         
         # Check axis labels
