@@ -79,12 +79,13 @@ class ModelPage(wx.ScrolledWindow):
         iy += 1
         self.sizer4.Add(wx.StaticText(self, -1, 'x range'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-       
-        qmin= 0.001
-        qmax= 1.0
+        ## Q range
+        self.qmin= 0.001
+        self.qmax= 0.1
+        
         ix += 1
         self.xmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        self.xmin.SetValue(format_number(qmin))
+        self.xmin.SetValue(format_number(self.qmin))
         self.xmin.SetToolTipString("Minimun value of x in linear scale.")
         self.xmin.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         self.xmin.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
@@ -93,7 +94,7 @@ class ModelPage(wx.ScrolledWindow):
        
         ix += 2
         self.xmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        self.xmax.SetValue(format_number(qmax))
+        self.xmax.SetValue(format_number(self.qmax))
         self.xmax.SetToolTipString("Maximum value of x in linear scale.")
         self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         self.xmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
@@ -173,13 +174,16 @@ class ModelPage(wx.ScrolledWindow):
         """
          call manager to plot model in 2D
         """
-        self.enable2D=True
-        print "modelpage name", self.prevmodel_name
-        self.manager.draw_model(model=self.model,name=self.prevmodel_name,
+        # If the 2D display is not currently enabled, plot the model in 2D 
+        # and set the enable2D flag.
+        if self.enable2D==False:
+            self.enable2D=True
+            self.manager.draw_model(model=self.model,name=self.prevmodel_name,
                                     description=None,
                                      enable2D=self.enable2D,
-                                     qmin=float(self.xmin.GetValue()),
-                                    qmax=float(self.xmax.GetValue()))
+                                     qmin=float(self.qmin),
+                                    qmax=float(self.qmax))
+            
     def populate_box(self, dict):
         """
             Populate each combox box of each page
@@ -357,19 +361,35 @@ class ModelPage(wx.ScrolledWindow):
         
     def set_model_parameter(self):
         if len(self.parameters) !=0 and self.model !=None:
+            # Flag to register when a parameter has changed.
+            is_modified = False
             for item in self.parameters:
                 try:
                      name=str(item[0].GetLabelText())
                      value= float(item[1].GetValue())
-                     self.model.setParam(name,value)
+                     # If the value of the parameter has changed,
+                     # update the model and set the is_modified flag
+                     if value != self.model.getParam(name):
+                         self.model.setParam(name,value)
+                         is_modified = True
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
             
-            print self.enable2D
-            self.manager.draw_model(self.model,qmin=float(self.xmin.GetValue()),
-                                    qmax=float(self.xmax.GetValue()),
-                                    enable2D=self.enable2D)
+            # Here we should check whether the boundaries have been modified.
+            # If qmin and qmax have been modified, update qmin and qmax and 
+            # set the is_modified flag to True
+            if float(self.xmin.GetValue()) != self.qmin:
+                self.qmin = float(self.xmin.GetValue())
+                is_modified = True
+            if float(self.xmax.GetValue()) != self.qmax:
+                self.qmax = float(self.xmax.GetValue())
+                is_modified = True
+            
+            if is_modified:
+                self.manager.draw_model(self.model, self.model.name, 
+                                        qmin=self.qmin, qmax=self.qmax,
+                                        enable2D=self.enable2D)
             #self.manager.draw_model(self,model,description=None,
             # enable1D=True,qmin=None,qmax=None, qstep=None)
             
