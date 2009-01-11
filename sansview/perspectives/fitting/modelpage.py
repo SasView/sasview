@@ -133,6 +133,7 @@ class ModelPage(wx.ScrolledWindow):
             raise
         # preview selected model name
         self.prevmodel_name=name
+        print "model view prev_model",name
         self.modelbox.SetValue(self.prevmodel_name)
         # flag to check if the user has selected a new model in the combox box
         self.model_hasChanged=False
@@ -178,7 +179,7 @@ class ModelPage(wx.ScrolledWindow):
         # and set the enable2D flag.
         if self.enable2D==False:
             self.enable2D=True
-            self.manager.draw_model(model=self.model,name=self.prevmodel_name,
+            self.manager.draw_model(model=self.model,
                                     description=None,
                                      enable2D=self.enable2D,
                                      qmin=float(self.qmin),

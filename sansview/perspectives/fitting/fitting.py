@@ -642,7 +642,30 @@ class Plugin:
                     
                 except:
                     raise
-    def _draw_model2D(self,model,name,description=None, enable2D=False,qmin=None,qmax=None, qstep=None):
+    def update(self, output):
+        print "Got an update"
+    
+    def complete(self, output, elapsed, model, qmin, qmax):
+        #printEVT("Calc complete in %g sec" % elapsed) 
+        wx.PostEvent(self.parent, StatusEvent(status="Calc \
+        complete in %g sec" % elapsed))
+                           
+        print "complete",output, model,qmin, qmax
+        data = output
+        theory= Data2D(data)
+        theory.name= model.name
+        theory.group_id ="Model"
+        theory.id ="Model"
+        theory.xmin= qmin
+        theory.xmax= qmax
+        theory.ymin= qmin
+        theory.ymax= qmax
+        wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
+                         title="Analytical model 2D %s" %str(model.name)))
+         
+        
+         
+    def _draw_model2D(self,model,description=None, enable2D=False,qmin=None,qmax=None, qstep=None):
         if qmin==None:
             qmin= -0.05
         if qmax==None:
@@ -654,29 +677,48 @@ class Plugin:
         lx = len(x)
         #print x
         data=numpy.zeros([len(x),len(y)])
+        self.model= model
         if enable2D:
-            #print "drawing model 2D params",qmin, qmax,model.getParamList()
-            for i_x in range(int(len(x))):
-                for i_y in range(len(y)):
+            from model_thread import Calc2D
+            self.calc_thread = Calc2D(parent =self.parent,x=x, y=y,model= self.model, qmin=qmin,qmax=qmax,
+                            completefn=self.complete,
+                            updatefn=self.update)
+            self.calc_thread.queue()
+            self.calc_thread.ready(2.5)
+           
+                
+                
+    def H_draw_model2D(self,model,description=None, enable2D=False,qmin=None,qmax=None, qstep=None):
+        if qmin==None:
+            qmin= -0.05
+        if qmax==None:
+            qmax= 0.05
+        if qstep ==None:
+            qstep =0.001
+        x = numpy.arange(qmin,qmax, qstep)
+        y = numpy.arange(qmin,qmax,qstep)
+        lx = len(self.x)
+        if enable2D:
+            data=numpy.zeros([len(x),len(y)])
+            for i in range(len(x)):
+                for j in range(len(x)):
                     try:
-                        value = model.runXY([x[i_x],y[i_y]])
-                        data[i_y][i_x] = value
+                        data[i][j]=model.runXY([j,i])
                     except:
                          wx.PostEvent(self.parent, StatusEvent(status="\
-                        Error computing %s at [%g,%g] :%s" %(model.name,x[i_x],y[i_y], sys.exc_value)))
-            #print "data2 draw" ,data          
-            theory= Data2D(data)
-            theory.name= name
-            theory.group_id ="Model"
-            theory.id ="Model"
-            theory.xmin= qmin
-            theory.xmax= qmax
-            theory.ymin= qmin
-            theory.ymax= qmax
-            wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
-                             title="Analytical model 2D %s" %str(name)))
-             
-  
+                        Model 2D cannot be plot %g %s %s" %(data[i][j],model.name, sys.exc_value)))
+           
+    
+    def on_draw_model2D(self, event):
+        """
+             plot view model 2D
+        """
+        
+        if self.enable_model2D== True:
+            self.enable_model2D=False
+        else:
+            self.enable_model2D=True
+        print "self.enable_model2D",self.enable_model2D
 if __name__ == "__main__":
     i = Plugin()
     
