@@ -26,7 +26,7 @@ class SectorInteractor(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.qmax = self.base.qmax
+        self.qmax = math.sqrt(2)*self.base.qmax
         self.connect = self.base.connect
         
         ## Number of points on the plot
@@ -36,9 +36,9 @@ class SectorInteractor(_BaseInteractor):
         self.phi=math.pi/12
         #self.theta3= 2*self.theta2 -self.theta1
         # Inner circle
-        self.main_line = LineInteractor(self, self.base.subplot,color='blue', zorder=zorder, r=self.qmax,
+        self.main_line = LineInteractor(self, self.base.subplot,color='green', zorder=zorder, r=self.qmax,
                                            theta= self.theta2)
-        self.main_line.qmax = self.base.qmax
+        self.main_line.qmax = math.sqrt(2)*self.base.qmax
         #self.left_line = SectionInteractor(self, self.base.subplot, zorder=zorder+1, r=self.qmax,
         #                                   theta1= self.theta1, theta2= self.theta2)
         #self.left_line.qmax = self.base.qmax
@@ -46,12 +46,12 @@ class SectorInteractor(_BaseInteractor):
                                      r=self.qmax,
                                            phi= -1*self.phi,
                                            theta2=self.theta2)
-        self.right_line.qmax = self.base.qmax
-        self.left_line= SideInteractor(self, self.base.subplot,color='green', zorder=zorder,
+        self.right_line.qmax = math.sqrt(2)*self.base.qmax
+        self.left_line= SideInteractor(self, self.base.subplot,color='blue', zorder=zorder,
                                      r=self.qmax,
                                            phi= self.phi,
                                            theta2=self.theta2)
-        self.left_line.qmax = self.base.qmax
+        self.left_line.qmax = math.sqrt(2)*self.base.qmax
         #self.outer_circle.set_cursor(self.base.qmax/1.8, 0)
         
                       
@@ -115,16 +115,16 @@ class SectorInteractor(_BaseInteractor):
         if self.left_line.has_move:
             print "left line has moved --->"
             self.main_line.update()
-            self.left_line.update(phi=None,delta=None, mline=self.main_line,side=True)
+            self.left_line.update(phi=None,delta=None, mline=self.main_line,side=True, left=True)
             #self.right_line.update(-1*delta,linem=self.main_line,linel=self.left_line)
-            self.right_line.update(phi=-1*self.left_line.phi,delta=None, mline=self.main_line,side=True)
+            self.right_line.update(phi=-1*self.left_line.phi,delta=None, mline=self.main_line,side=True, left=True)
         if self.right_line.has_move:
             print "right line has moved --->"
            
             self.main_line.update()
-            self.right_line.update(phi=None,delta=None, mline=self.main_line,side=True)
+            self.right_line.update(phi=None,delta=None, mline=self.main_line,side=True, right=True)
             #self.right_line.update(-1*delta,linem=self.main_line,linel=self.left_line)
-            self.left_line.update(phi=-1*self.right_line.phi,delta=None, mline=self.main_line,side=True)
+            self.left_line.update(phi=-1*self.right_line.phi,delta=None, mline=self.main_line,side=True, left=True)
    
     
     
@@ -150,8 +150,9 @@ class SectorInteractor(_BaseInteractor):
         radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
         phimin = self.right_line.theta+math.pi
         phimax = self.left_line.theta+math.pi
-        #sect = SectorQ(r_min=0.000001, r_max= radius , phi_min=phimin, phi_max=phimax)
-        sect = SectorQ(r_min=-1*radius , r_max= radius , phi_min=phimin, phi_max=phimax)
+
+        sect = SectorQ(r_min=0.000001, r_max= radius , phi_min=phimin, phi_max=phimax)
+        #sect = SectorQ(r_min=-1*radius , r_max= radius , phi_min=phimin, phi_max=phimax)
         if nbins!=None:
             sect.nbins = nbins
         
@@ -178,7 +179,7 @@ class SectorInteractor(_BaseInteractor):
         #print "loader output.detector",output.source
         new_plot.detector =self.base.data2D.detector
         # If the data file does not tell us what the axes are, just assume...
-        new_plot.xaxis("\\rm{Q}", 'rad')
+        new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = "SectorQ"+self.base.data2D.name
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
@@ -218,7 +219,7 @@ class SectorInteractor(_BaseInteractor):
         params["main_phi"] = self.main_line.theta
         if math.fabs(self.left_line.phi) != math.fabs(self.right_line.phi):
             raise ValueError,"Phi left and phi right are different %f, %f"%(self.left_line.phi, self.right_line.phi)
-        params["left_phi"] = self.left_line.phi
+        params["left_phi"] = math.fabs(self.left_line.phi)
         params["nbins"] = self.nbins
         return params
     
@@ -300,7 +301,7 @@ class SideInteractor(_BaseInteractor):
         
         return self.theta - self.save_theta
         
-    def update(self,phi=None,delta=None, mline=None,side=False):
+    def update(self,phi=None,delta=None, mline=None,side=False, left= False, right=False):
         """
         Draw the new roughness on the graph.
         """
@@ -310,10 +311,13 @@ class SideInteractor(_BaseInteractor):
             self.phi = phi
         if delta==None:
             delta = 0
-        if side== True:
+        if side:
             self.theta=  mline.theta + self.phi
+            
+            
         if mline!=None:
             self.theta2 = mline.theta
+            #self.phi= math.fabs(self.theta2 - (self.theta+delta))
         #print "U:for line side theta2, phi, theta",math.degrees(self.theta2),math.degrees(self.phi),math.degrees(self.theta) 
         #if self.theta2 >= self.theta and self.theta>=0:
         #    print "between 0-pi",math.degrees(self.theta) 
@@ -354,7 +358,8 @@ class SideInteractor(_BaseInteractor):
         """
         
         self.theta= math.atan2(y,x)
-        self.phi= self.theta2 - self.theta
+        
+        self.phi= math.fabs(self.theta2 - self.theta)
         
         print "move left or right phi ---theta--thetaM", self.phi, self.theta, self.theta2
         self.has_move=True
