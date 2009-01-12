@@ -180,6 +180,7 @@ class ModelPage(wx.ScrolledWindow):
         if self.enable2D==False:
             self.enable2D=True
             self.manager.draw_model(model=self.model,
+                                    name=self.model.name,
                                     description=None,
                                      enable2D=self.enable2D,
                                      qmin=float(self.qmin),
@@ -226,7 +227,7 @@ class ModelPage(wx.ScrolledWindow):
                 self.name= name
                 self.manager.draw_model(model, name)
                 
-       
+            self.model_view.SetFocus()
             
     def get_model_box(self): 
         """ return reference to combox box self.model"""
@@ -394,7 +395,7 @@ class ModelPage(wx.ScrolledWindow):
             #self.manager.draw_model(self,model,description=None,
             # enable1D=True,qmin=None,qmax=None, qstep=None)
             
-            
+            self.model_view.SetFocus()
             
             
             

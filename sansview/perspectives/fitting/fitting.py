@@ -594,7 +594,12 @@ class Plugin:
         """
         
         self.fit_panel.add_model_page(model=model,description=model.description,page_title=name) 
-        self._draw_model2D(model,name,model.description, enable2D,qmin,qmax,qstep)
+        self._draw_model2D(model=model,
+                           description=model.description,
+                           enable2D= enable2D,
+                           qmin=qmin,
+                           qmax=qmax,
+                           qstep=qstep)
         self._draw_model1D(model,name,model.description, enable1D,qmin,qmax, qstep)
        
     def _draw_model1D(self,model,name,description=None, enable1D=True,qmin=None,qmax=None, qstep=None):

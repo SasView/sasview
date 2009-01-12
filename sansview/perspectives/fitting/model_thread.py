@@ -152,12 +152,15 @@ class Calc2D(CalcThread):
                 try:
                     value1 = self.model.runXY([self.x[i_x]-center_x, self.y[i_y]-center_y])
                     value2 = self.model.runXY([self.x[i_x]-center_x, self.y[lx-i_y-1]-center_y])
-                    output[i_y][i_x] = value1 +value2
-                    output[lx-i_y-1][lx-i_x-1] = value1 + value2
-                    output[lx-i_y-1][i_x] = value1 + value2
-                    output[i_y][lx-i_x-1] = value1 + value2
-          
-
+                    value3 = self.model.runXY([self.x[lx-i_x-1]-center_x, self.y[i_y]-center_y])
+                    value4 = self.model.runXY([self.x[lx-i_x-1]-center_x, self.y[lx-i_y-1]-center_y])
+                    
+                    output[i_x] [i_y]=value1 
+                    output[lx-i_x-1][lx-i_y-1] =value4 
+                    output[i_x] [lx-i_y-1]= value2 
+                    output[lx-i_x-1][i_y] = value3 
+                    
+                  
                 except:
                      wx.PostEvent(self.parent, StatusEvent(status=\
                        "Error computing %s at [%g,%g]" %(self.model.name, self.x[i_x],self.y[i_y])))
@@ -167,108 +170,6 @@ class Calc2D(CalcThread):
                       output=output, elapsed=elapsed,model= self.model,
                       qmin= self.qmin,
                       qmax=self.qmax)
-
-class Calc2D_old(CalcThread):
-    """
-        Compute 2D model
-        This calculation assumes a 2-fold symmetry of the model
-        where points are computed for one half of the detector
-        and I(qx, qy) = I(-qx, -qy) is assumed.
-    """
-    
-    def __init__(self, x, y, model,qmin, qmax,
-                 completefn = None,
-                 updatefn   = None,
-                 yieldtime  = 0.01,
-                 worktime   = 0.01
-                 ):
-        CalcThread.__init__(self,completefn,
-                 updatefn,
-                 yieldtime,
-                 worktime)
-        self.qmin= qmin
-        self.qmax=qmax
-        self.x = x
-        self.y = y
-        self.model = model
-        self.starttime = 0
-        
-    def isquit(self):
-        try:
-            CalcThread.isquit(self)
-        except KeyboardInterrupt:
-            #printEVT("Calc %s interrupted" % self.model.name)
-            wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Calc %s interrupted" % self.model.name))
-           
-            raise KeyboardInterrupt
-        
-    def compute(self):
-        import numpy
-        x = self.x
-        y = self.y
-        output = numpy.zeros((len(x),len(y)))
-            
-        self.starttime = time.time()
-        lx = len(self.x)
-        
-        for i_x in range(int(len(self.x)/2)):
-            if i_x%2==1:
-                continue
-            
-            # Check whether we need to bail out (before updating!)
-            self.isquit()
-            self.update(output=output)
-                
-            for i_y in range(len(self.y)):
-                try:
-                    value = self.model.runXY([self.x[i_x], self.y[i_y]])
-                    #output[i_x][i_y] = value
-                    #output[lx-i_x-1][lx-i_y-1] = value
-                    output[i_y][i_x] = value
-                    output[lx-i_y-1][lx-i_x-1] = value
-                except:
-                    wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Error computing %s at [%g,%g]" %(self.model.name, self.x[i_x],self.y[i_y])))
-           
-        if lx%2==1:
-            i_x = int(len(self.x)/2)
-            for i_y in range(len(self.y)):
-                try:
-                    value = self.model.runXY([self.x[i_x], self.y[i_y]])
-                    #output[i_x][i_y] = value
-                    output[i_y][i_x] = value
-                except:
-                    
-                    wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Error computing %s at [%g,%g]" %(self.model.name, self.x[i_x],self.y[i_y])))
-           
-        for i_x in range(int(len(self.x)/2)):
-            if not i_x%2==1:
-                continue
-
-            # Check whether we need to bail out
-            self.isquit()
-            self.update(output=output)
-            
-            for i_y in range(len(self.y)):
-                try:
-                    value = self.model.runXY([self.x[i_x], self.y[i_y]])
-                    #output[i_x][i_y] = value
-                    #output[lx-i_x-1][lx-i_y-1] = value
-                    output[i_y][i_x] = value
-                    output[lx-i_y-1][lx-i_x-1] = value
-                except:
-                    
-                    wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Error computing %s at [%g,%g]" %(self.model.name, self.x[i_x],self.y[i_y])))
-           
-        elapsed = time.time()-self.starttime
-        self.complete(
-                      output=output, elapsed=elapsed,model= self.model,
-                      qmin= self.qmin,
-                      qmax=self.qmax)
-
 
 class Calc2D_4fold(CalcThread):
     """
