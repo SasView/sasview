@@ -207,7 +207,7 @@ class ModelPanel2D( ModelPanel1D):
         id = wx.NewId()
         slicerpop.Append(id, '&Annulus [Phi view ]')
         wx.EVT_MENU(self, id, self.onSectorPhi) 
-        
+       
         id = wx.NewId()
         slicerpop.Append(id, '&Box Sum')
         wx.EVT_MENU(self, id, self.onBoxSum) 
@@ -215,14 +215,15 @@ class ModelPanel2D( ModelPanel1D):
         id = wx.NewId()
         slicerpop.Append(id, '&Box averaging')
         wx.EVT_MENU(self, id, self.onBoxavg) 
+        if self.slicer !=None:
+            id = wx.NewId()
+            slicerpop.Append(id, '&Clear slicer')
+            wx.EVT_MENU(self, id,  self.onClearSlicer) 
         
-        id = wx.NewId()
-        slicerpop.Append(id, '&Clear slicer')
-        wx.EVT_MENU(self, id,  self.onClearSlicer) 
         
-        id = wx.NewId()
-        slicerpop.Append(id, '&Edit Slicer Parameters')
-        wx.EVT_MENU(self, id, self._onEditSlicer) 
+            id = wx.NewId()
+            slicerpop.Append(id, '&Edit Slicer Parameters')
+            wx.EVT_MENU(self, id, self._onEditSlicer) 
         
         slicerpop.AppendSeparator()
         
@@ -309,8 +310,14 @@ class ModelPanel2D( ModelPanel1D):
         # Post slicer event
         event = self._getEmptySlicerEvent()
         event.type = self.slicer.__class__.__name__
+        print "event.type",event.type
         event.obj_class = self.slicer.__class__
         event.params = self.slicer.get_params()
+        try:
+            event.result= self.slicer.get_result()
+        except:
+            event.result= None
+        print "event.result", event.result
         wx.PostEvent(self.parent, event)
 
     def onCircular(self, event):
@@ -368,7 +375,6 @@ class ModelPanel2D( ModelPanel1D):
         """
             Perform sector averaging on Q
         """
-        
         from SectorSlicer import SectorInteractor
         self.onClearSlicer(event)
         wx.PostEvent(self.parent, InternalEvent(slicer= SectorInteractor))
@@ -385,19 +391,13 @@ class ModelPanel2D( ModelPanel1D):
         from boxSum import BoxSum
         self.onClearSlicer(event)
         wx.PostEvent(self.parent, InternalEvent(slicer= BoxSum))
-        """
-        self.onClearSlicer(event)
-        self.slicer=BoxInteractor
-        from SlicerParameters import SlicerParameterPanel
+        from BoxParameters import SlicerParameterPanel
        
         dialog = SlicerParameterPanel(self.parent, -1, "Slicer Parameters")
-        dialog.set_slicer(self.slicer.__name__,
-                        self.slicer.get_params())
+       
         if dialog.ShowModal() == wx.ID_OK:
             dialog.Destroy()
-        wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractor))
-        print "onboxavg",self.slicer
-        """ 
+            
     def onBoxavg(self,event):
         from boxSlicer import BoxInteractor
         self.onClearSlicer(event)

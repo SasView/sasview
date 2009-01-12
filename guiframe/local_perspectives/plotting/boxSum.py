@@ -73,7 +73,7 @@ class BoxSum(_BaseInteractor):
         self.connect_markers([])
                       
         self.update()
-        #self._post_data()
+        self._post_data()
         
         # Bind to slice parameter events
         self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
@@ -83,7 +83,7 @@ class BoxSum(_BaseInteractor):
         #printEVT("AnnulusSlicer._onEVT_SLICER_PARS")
         event.Skip()
         if event.type == self.__class__.__name__:
-            #self.set_params(event.params)
+            self.set_params(event.params)
             self.base.update()
 
     def update_and_post(self):
@@ -179,11 +179,9 @@ class BoxSum(_BaseInteractor):
         y_min= self.bottom_line.y
         y_max= self.top_line.y
         box =  Boxavg (x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
-       
-        self.count, self.error= box(self.base.data2D)
+        self.count, self.error = box(self.base.data2D)
+        print "count, error",self.count, self.error
         
-        
-              
                                        
     def moveend(self, ev):
         self.base.thaw_axes()
@@ -191,7 +189,9 @@ class BoxSum(_BaseInteractor):
         # Post paramters
         event = SlicerParameters.SlicerParameterEvent()
         event.type = self.__class__.__name__
-        #event.params = self.get_params()
+        print "event type boxsum: ", event.type
+        event.params = self.get_params()
+        
         wx.PostEvent(self.base.parent, event)
 
         self._post_data()
@@ -208,7 +208,7 @@ class BoxSum(_BaseInteractor):
         Process move to a new position, making sure that the move is allowed.
         """
         print "in move"
-        if self.xmin <= x and x<= self.xmax:
+        if self.xmin <= x and x <= self.xmax:
             print "has move whole", x
         
     def set_cursor(self, x, y):
@@ -220,27 +220,37 @@ class BoxSum(_BaseInteractor):
         params["x_max"] = self.right_line.x 
         params["y_min"] = self.bottom_line.y
         params["y_max"] = self.top_line.y
-        params["count"] = self.count
-        params["error"] = self.error
-        params["center_x"] = self.center_x
-        params["center_y"] = self.center_y
+       
         return params
     
+    
+    def get_result(self):
+        """
+            return the result of box summation
+        """
+        result={}
+        result["count"] = self.count
+        result["error"] = self.error
+        return result
+        
+        
     def set_params(self, params):
         
-        x_min = params["x_min"] 
-        x_max = params["x_max"] 
-        y_min = params["y_min"]
-        y_max = params["y_max"] 
-        theta = params["theta"]
-        center_x = params["center_x"]
-        center_y = params["center_y"]
+        x_min = -math.fabs(params["x_min"] )
+        x_max = math.fabs(params["x_max"] )
+        y_min = -math.fabs(params["y_min"])
+        y_max = math.fabs(params["y_max"]) 
         
+        self.left_line.update(ymin= y_min ,ymax= y_max , x= x_min)
+        self.right_line.update(ymin= y_min ,ymax= y_max, x= x_max)
+        self.top_line.update( xmin= x_min ,xmax= x_max, y= y_max)
+        self.bottom_line.update(xmin= x_min ,xmax= x_max, y=y_min)
+        """
         self.left_line.update(mline= [center_x, center_y],ymin= y_min ,ymax= y_max)
         self.right_line.update(mline= [center_x, center_y],ymin= y_min ,ymax= y_max)
         self.top_line.update(mline= [center_x, center_y], xmin= x_min ,xmax= xmax)
         self.bottom_line.update(mline= [center_x, center_y],xmin= xmin ,xmax= xmax)
-        
+        """
         
         self._post_data()
     def freeze_axes(self):
@@ -362,6 +372,7 @@ class HorizontalLine(_BaseInteractor):
         params = {}
         params["radius"] = self.xmin
         params["theta"] = self.xmax
+        
         return params
     
     def set_params(self, params):
