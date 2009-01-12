@@ -633,12 +633,11 @@ def get_intercept(q, q_0, q_1):
     return None
     
 
-class _Sector:
+class _Sectorold:
     """
         Defines a sector region on a 2D data set.
         The sector is defined by r_min, r_max, phi_min, phi_max,
-        and the position of the center of the ring. 
-        
+        and the position of the center of the ring.         
         Phi is defined between 0 and 2pi
     """
     def __init__(self, r_min, r_max, phi_min, phi_max,nbins=20):
@@ -658,10 +657,10 @@ class _Sector:
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
             raise RuntimeError, "Ring averaging only take plottable_2D objects"
-        
-        data = data2D.data
-        qmin = self.r_min
+                   
+        data = data2D.data      
         qmax = self.r_max
+        qmin = self.r_min
         
         if len(data2D.detector) != 1:
             raise RuntimeError, "Ring averaging: invalid number of detectors: %g" % len(data2D.detector)
@@ -716,7 +715,8 @@ class _Sector:
                 frac = frac_max - frac_min
 
                 # Compute phi and check whether it's within the limits
-                phi_value = math.atan2(dy, dx)+math.pi
+                phi_value=math.atan2(dy,dx)+math.pi
+ #               if phi_value<self.phi_min or phi_value>self.phi_max:                
                 if phi_value<self.phi_min or phi_value>self.phi_max:
                     continue
                                                     
@@ -757,7 +757,165 @@ class _Sector:
             
         return Data1D(x=x, y=y, dy=y_err)
         
+class _Sector:
+    """
+        Defines a sector region on a 2D data set.
+        The sector is defined by r_min, r_max, phi_min, phi_max,
+        and the position of the center of the ring 
+        where phi_min and phi_max are defined by the right and left lines wrt central line
+        and phi_max could be less than phi_min. 
+       
+        Phi is defined between 0 and 2pi
+    """
+    def __init__(self, r_min, r_max, phi_min, phi_max,nbins=20):
+        self.r_min = r_min
+        self.r_max = r_max
+        self.phi_min = phi_min
+        self.phi_max = phi_max
+        self.nbins = nbins
         
+    def _agv(self, data2D, run='phi'):
+        """
+            Perform sector averaging.
+            
+            @param data2D: Data2D object
+            @param run:  define the varying parameter ('phi' or 'q')
+            @return: Data1D object
+        """
+        if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
+            raise RuntimeError, "Ring averaging only take plottable_2D objects"
+                   
+        data = data2D.data      
+        qmax = self.r_max
+        qmin = self.r_min
+        
+        if len(data2D.detector) != 1:
+            raise RuntimeError, "Ring averaging: invalid number of detectors: %g" % len(data2D.detector)
+        pixel_width_x = data2D.detector[0].pixel_size.x
+        pixel_width_y = data2D.detector[0].pixel_size.y
+        det_dist      = data2D.detector[0].distance
+        wavelength    = data2D.source.wavelength
+        center_x      = data2D.detector[0].beam_center.x/pixel_width_x
+        center_y      = data2D.detector[0].beam_center.y/pixel_width_y
+        
+        y        = numpy.zeros(self.nbins)
+        y_counts = numpy.zeros(self.nbins)
+        x        = numpy.zeros(self.nbins)
+        y_err    = numpy.zeros(self.nbins)
+        
+        for i in range(numpy.size(data,1)):
+            dx = pixel_width_x*(i+0.5 - center_x)
+            
+            # Min and max x-value for the pixel
+            minx = pixel_width_x*(i - center_x)
+            maxx = pixel_width_x*(i+1.0 - center_x)
+            
+            for j in range(numpy.size(data,0)):
+                dy = pixel_width_y*(j+0.5 - center_y)
+            
+                q_value = get_q(dx, dy, det_dist, wavelength)
+
+                # Min and max y-value for the pixel
+                miny = pixel_width_y*(j - center_y)
+                maxy = pixel_width_y*(j+1.0 - center_y)
+                
+                # Calculate the q-value for each corner
+                # q_[x min or max][y min or max]
+                q_00 = get_q(minx, miny, det_dist, wavelength)
+                q_01 = get_q(minx, maxy, det_dist, wavelength)
+                q_10 = get_q(maxx, miny, det_dist, wavelength)
+                q_11 = get_q(maxx, maxy, det_dist, wavelength)
+                
+                # Look for intercept between each side of the pixel
+                # and the constant-q ring for qmax
+                frac_max = get_pixel_fraction(qmax, q_00, q_01, q_10, q_11)
+                
+                # Look for intercept between each side of the pixel
+                # and the constant-q ring for qmin
+                frac_min = get_pixel_fraction(qmin, q_00, q_01, q_10, q_11)
+                
+                # We are interested in the region between qmin and qmax
+                # therefore the fraction of the surface of the pixel
+                # that we will use to calculate the number of counts to 
+                # include is given by:
+                
+                frac = frac_max - frac_min
+
+                # Compute phi and check whether it's within the limits
+                phi_value=math.atan2(dy,dx)+math.pi
+                if self.phi_max>2*math.pi:
+                    self.phi_max=self.phi_max-2*math.pi
+                if self.phi_min<0:
+                    self.phi_max=self.phi_max+2*math.pi
+
+                #In case of two ROI (symetric major and minor regions)(for 'q2')
+                if run.lower()=='q2':
+                    if ((self.phi_max>=0 and self.phi_max<math.pi)and (self.phi_min>=0 and self.phi_min<math.pi)):
+                        temp_max=self.phi_max+math.pi
+                        temp_min=self.phi_min+math.pi
+                    else:
+                        temp_max=self.phi_max
+                        temp_min=self.phi_min
+                       
+                    if ((temp_max>=math.pi and temp_max<2*math.pi)and (temp_min>=math.pi and temp_min<2*math.pi)):
+                        if (phi_value<temp_min  or phi_value>temp_max):
+                            if (phi_value<temp_min-math.pi  or phi_value>temp_max-math.pi):
+                                continue
+                    if (self.phi_max<self.phi_min):
+                        tmp_max=self.phi_max+math.pi
+                        tmp_min=self.phi_min-math.pi
+                    else:
+                        tmp_max=self.phi_max
+                        tmp_min=self.phi_min
+                    if (tmp_min<math.pi and tmp_max>math.pi):
+                        if((phi_value>tmp_max and phi_value<tmp_min+math.pi)or (phi_value>tmp_max-math.pi and phi_value<tmp_min)):
+                            continue
+                #In case of one ROI (major only)(for 'q' and 'phi')
+                else: 
+                    if (self.phi_max>=self.phi_min):
+                        if (phi_value<self.phi_min  or phi_value>self.phi_max):
+                            continue
+                    else:
+                        if (phi_value<self.phi_min and phi_value>self.phi_max):
+                            continue
+                                                    
+                # Check which type of averaging we need
+                if run.lower()=='phi': 
+                    i_bin = int(math.ceil(self.nbins*(phi_value-self.phi_min)/(self.phi_max-self.phi_min))) - 1
+                else:
+                    # If we don't need this pixel, skip the rest of the work
+                    #TODO: an improvement here would be to compute the average
+                    # Q for the pixel from the part that is covered by
+                    # the ring defined by q_min/q_max rather than the complete
+                    # pixel 
+                    if q_value<self.r_min or q_value>self.r_max:
+                        continue
+                    i_bin = int(math.ceil(self.nbins*(q_value-self.r_min)/(self.r_max-self.r_min))) - 1
+            
+                try:
+                    y[i_bin] += frac * data[j][i]
+                except:
+                    import sys
+                    print sys.exc_value
+                    print i_bin, frac
+                
+                if data2D.err_data == None or data2D.err_data[j][i]==0.0:
+                    y_err[i_bin] += frac * frac * math.fabs(data2D.data[j][i])
+                else:
+                    y_err[i_bin] += frac * frac * data2D.err_data[j][i] * data2D.err_data[j][i]
+                y_counts[i_bin] += frac
+        
+        for i in range(self.nbins):
+            y[i] = y[i] / y_counts[i]
+            y_err[i] = math.sqrt(y_err[i]) / y_counts[i]
+            # Check which type of averaging we need
+            if run.lower()=='phi':
+                x[i] = (self.phi_max-self.phi_min)/self.nbins*(1.0*i + 0.5)+self.phi_min
+            else:
+                x[i] = (self.r_max-self.r_min)/self.nbins*(1.0*i + 0.5)+self.r_min
+            
+        return Data1D(x=x, y=y, dy=y_err)
+                
 class SectorPhi(_Sector):
     """
         Sector average as a function of phi.
@@ -775,7 +933,7 @@ class SectorPhi(_Sector):
         """
         return self._agv(data2D, 'phi')
 
-class SectorQ(_Sector):
+class SectorQold(_Sector):
     """
         Sector average as a function of Q.
         I(Q) is return and the data is averaged over phi.
@@ -791,7 +949,24 @@ class SectorQ(_Sector):
             @return: Data1D object
         """
         return self._agv(data2D, 'q')
-
+    
+class SectorQ(_Sector):
+    """
+        Sector average as a function of Q for both symatric wings.
+        I(Q) is return and the data is averaged over phi.
+        
+        A sector is defined by r_min, r_max, phi_min, phi_max.
+        r_min, r_max, phi_min, phi_max >0.  
+        The number of bin in Q also has to be defined.
+    """
+    def __call__(self, data2D):
+        """
+            Perform sector average and return I(Q).
+            
+            @param data2D: Data2D object
+            @return: Data1D object
+        """
+        return self._agv(data2D, 'q2')
 if __name__ == "__main__": 
 
     from loader import Loader
