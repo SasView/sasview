@@ -365,15 +365,29 @@ class ModelPage(wx.ScrolledWindow):
         if len(self.parameters) !=0 and self.model !=None:
             # Flag to register when a parameter has changed.
             is_modified = False
+            if float(self.xmin.GetValue()) != self.qmin:
+                self.qmin = float(self.xmin.GetValue())
+                is_modified = True
+            if float(self.xmax.GetValue()) != self.qmax:
+                self.qmax = float(self.xmax.GetValue())
+                is_modified = True
             for item in self.parameters:
-                try:
-                     name=str(item[0].GetLabelText())
-                     value= float(item[1].GetValue())
-                     # If the value of the parameter has changed,
-                     # update the model and set the is_modified flag
-                     if value != self.model.getParam(name):
-                         self.model.setParam(name,value)
-                         is_modified = True
+                try: 
+                    
+                    if item[1].IsModified() or is_modified:
+                        print str(item[0].GetLabelText()),item[1].IsModified()
+                        item[1].SetModified(False)
+                        name=str(item[0].GetLabelText())
+                        value= float(item[1].GetValue())
+                        self.model.setParam(name,value)
+
+                        is_modified=False
+                        print "self.enable2d",self.enable2D
+                        self.manager.draw_model(self.model, self.model.name, 
+                                        qmin=self.qmin, qmax=self.qmax,
+                                        enable2D=self.enable2D)
+                
+                    
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
@@ -381,18 +395,7 @@ class ModelPage(wx.ScrolledWindow):
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
-            if float(self.xmin.GetValue()) != self.qmin:
-                self.qmin = float(self.xmin.GetValue())
-                is_modified = True
-            if float(self.xmax.GetValue()) != self.qmax:
-                self.qmax = float(self.xmax.GetValue())
-                is_modified = True
-            
-            if is_modified:
-                self.manager.draw_model(self.model, self.model.name, 
-                                        qmin=self.qmin, qmax=self.qmax,
-                                        enable2D=self.enable2D)
-            #self.manager.draw_model(self,model,description=None,
+          
             # enable1D=True,qmin=None,qmax=None, qstep=None)
             
             self.model_view.SetFocus()

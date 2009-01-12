@@ -497,16 +497,34 @@ class FitPage2D(wx.ScrolledWindow):
         """
         if len(self.parameters) !=0 and self.model !=None:
             for item in self.parameters:
-                try:
-                     name=str(item[0].GetLabelText())
-                     value= float(item[1].GetValue())
-                     self.model.setParam(name,value) 
+                
+                is_modified = False
+                if self.xmin.IsModified():
+                    is_modified = True
+                if self.xmax.IsModified():
+                    is_modified = True
+                
+                try: 
+                    
+                    if item[1].IsModified() or is_modified:
+                        print str(item[0].GetLabelText()),item[1].IsModified()
+                        item[1].SetModified(False)
+                        name=str(item[0].GetLabelText())
+                        value= float(item[1].GetValue())
+                        self.model.setParam(name,value)
+                        self.xmin.SetModified(False)
+                        self.xmax.SetModified(False)
+                        is_modified=False
+                        
+                        self.manager.redraw_model(
+                        float(self.xmin.GetValue()),
+                        float(self.xmax.GetValue())  )    
+            
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                            "Drawing  Error:wrong value entered : %s"% sys.exc_value))
-            self.manager.redraw_model(float(self.xmin.GetValue())\
-                                               ,float(self.xmax.GetValue()))      
-                     
+                            "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
+            
+           
     def select_all_param(self,event): 
         """
              set to true or false all checkBox given the main checkbox value cb1

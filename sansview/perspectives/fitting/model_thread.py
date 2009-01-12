@@ -135,10 +135,10 @@ class Calc2D(CalcThread):
         else:
             center_x=0
             center_y=0
-        print "center_x , center_y",center_x , center_y
-        print "x ",len(x)
-        print "y", y
-        print "int(len(self.x)/2)",int(len(self.x)/2)
+        #print "center_x , center_y",center_x , center_y
+        #print "x ",len(x)
+        #print "y", y
+        #print "int(len(self.x)/2)",int(len(self.x)/2)
         self.starttime = time.time()
         lx = len(self.x)
        

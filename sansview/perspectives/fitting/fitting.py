@@ -585,8 +585,8 @@ class Plugin:
         #print "mon menu",model.name
         description=model.description
         #self.fit_panel.add_model_page(model,description,name)  
-        
-        self.draw_model(model=model,name=name,enable2D=self.enable_model2D)
+    
+        self.draw_model(model=model,name=name)
         
     def draw_model(self,model,name ,description=None,enable1D=True, enable2D=False,qmin=None, qmax=None,qstep=None):
         """
@@ -691,39 +691,7 @@ class Plugin:
             self.calc_thread.queue()
             self.calc_thread.ready(2.5)
            
-                
-                
-    def H_draw_model2D(self,model,description=None, enable2D=False,qmin=None,qmax=None, qstep=None):
-        if qmin==None:
-            qmin= -0.05
-        if qmax==None:
-            qmax= 0.05
-        if qstep ==None:
-            qstep =0.001
-        x = numpy.arange(qmin,qmax, qstep)
-        y = numpy.arange(qmin,qmax,qstep)
-        lx = len(self.x)
-        if enable2D:
-            data=numpy.zeros([len(x),len(y)])
-            for i in range(len(x)):
-                for j in range(len(x)):
-                    try:
-                        data[i][j]=model.runXY([j,i])
-                    except:
-                         wx.PostEvent(self.parent, StatusEvent(status="\
-                        Model 2D cannot be plot %g %s %s" %(data[i][j],model.name, sys.exc_value)))
-           
-    
-    def on_draw_model2D(self, event):
-        """
-             plot view model 2D
-        """
-        
-        if self.enable_model2D== True:
-            self.enable_model2D=False
-        else:
-            self.enable_model2D=True
-        print "self.enable_model2D",self.enable_model2D
+   
 if __name__ == "__main__":
     i = Plugin()
     

@@ -533,6 +533,7 @@ class FitPage1D(wx.ScrolledWindow):
             this method redraws the model according to parameters values changes
             and the reset model according to paramaters changes
         """
+        print "went here",len(self.parameters) ,self.model
         if len(self.parameters) !=0 and self.model !=None:
             for item in self.parameters:
                 try:
@@ -545,19 +546,34 @@ class FitPage1D(wx.ScrolledWindow):
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Drawing  Error:wrong value entered : %s"% sys.exc_value))
-            for item in self.fixed_param:
-                try:
+           
+                is_modified = False
+                if self.xmin.IsModified():
+                    is_modified = True
+                if self.xmax.IsModified():
+                    is_modified = True
+                
+                try: 
                     
-                    name=str(item[0])
-                    value= float(item[1].GetValue())
-                    self.model.setParam(name,value) 
+                    if item[1].IsModified() or is_modified:
+                        print str(item[0].GetLabelText()),item[1].IsModified()
+                        item[1].SetModified(False)
+                        name=str(item[0].GetLabelText())
+                        value= float(item[1].GetValue())
+                        self.model.setParam(name,value)
+                        self.xmin.SetModified(False)
+                        self.xmax.SetModified(False)
+                        is_modified=False
+                        
+                        self.manager.redraw_model(
+                        float(self.xmin.GetValue()),
+                        float(self.xmax.GetValue())  )    
+            
                 except:
-                    raise 
-                    wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                            "Drawing  Error:wrong value entered : %s"% sys.exc_value))
-            self.manager.redraw_model(float(self.xmin.GetValue())\
-                                               ,float(self.xmax.GetValue()))      
-                     
+                     wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+                            "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
+            
+           
     def select_all_param(self,event): 
         """
              set to true or false all checkBox given the main checkbox value cb1
