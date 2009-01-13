@@ -109,7 +109,11 @@ class AnnulusInteractor(_BaseInteractor):
         radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
         rmin= self.inner_circle.get_radius()
         rmax = self.outer_circle.get_radius()
-        sect = SectorPhi(r_min=rmin , r_max= rmax, phi_min=-1*math.pi, phi_max=math.pi)
+        phi_min=-math.pi
+        phi_max=math.pi
+        phimi=phi_min+math.pi
+        phima=phi_max+math.pi
+        sect = SectorPhi(r_min=rmin , r_max= rmax, phi_min=phimi, phi_max=phima)
         if nbins!=None:
             sect.nbins = nbins
         
@@ -129,16 +133,17 @@ class AnnulusInteractor(_BaseInteractor):
         new_plot.name = "SectorPhi" +"("+ self.base.data2D.name+")"
         
        
-
+        
         new_plot.source=self.base.data2D.source
         #new_plot.info=self.base.data2D.info
         new_plot.interactive = True
         #print "loader output.detector",output.source
         new_plot.detector =self.base.data2D.detector
         # If the data file does not tell us what the axes are, just assume...
-        new_plot.xaxis("\\rm{Q}", 'rad')
+        new_plot.xaxis("\\rm{\phi}", 'rad')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = "SectorPhi"+self.base.data2D.name
+        
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
                                                  title="SectorPhi" ))
         
@@ -238,7 +243,7 @@ class RingInteractor(_BaseInteractor):
         [self.inner_circle] = self.axes.plot([],[],
                                       linestyle='-', marker='',
                                       color=self.color)
-        self.npts = 20
+        self.npts = 40
             
         self.connect_markers([self.inner_marker])
         self.update()
