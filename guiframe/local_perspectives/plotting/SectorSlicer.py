@@ -30,7 +30,7 @@ class SectorInteractor(_BaseInteractor):
         self.connect = self.base.connect
         
         ## Number of points on the plot
-        self.nbins = 30
+        self.nbins = 20
         self.theta1= math.pi/4
         self.theta2= math.pi/3
         self.phi=math.pi/12
@@ -38,7 +38,7 @@ class SectorInteractor(_BaseInteractor):
         # Inner circle
         self.main_line = LineInteractor(self, self.base.subplot,color='green', zorder=zorder, r=self.qmax,
                                            theta= self.theta2)
-        self.main_line.qmax = math.sqrt(2)*self.base.qmax
+        self.main_line.qmax = self.base.qmax
         #self.left_line = SectionInteractor(self, self.base.subplot, zorder=zorder+1, r=self.qmax,
         #                                   theta1= self.theta1, theta2= self.theta2)
         #self.left_line.qmax = self.base.qmax
@@ -46,12 +46,12 @@ class SectorInteractor(_BaseInteractor):
                                      r=self.qmax,
                                            phi= -1*self.phi,
                                            theta2=self.theta2)
-        self.right_line.qmax = math.sqrt(2)*self.base.qmax
+        self.right_line.qmax = self.base.qmax
         self.left_line= SideInteractor(self, self.base.subplot,color='blue', zorder=zorder,
                                      r=self.qmax,
                                            phi= self.phi,
                                            theta2=self.theta2)
-        self.left_line.qmax = math.sqrt(2)*self.base.qmax
+        self.left_line.qmax = self.base.qmax
         #self.outer_circle.set_cursor(self.base.qmax/1.8, 0)
         
                       
@@ -147,11 +147,11 @@ class SectorInteractor(_BaseInteractor):
 
         name = "Sector "
         from DataLoader.manipulations import SectorQ
-        radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
+        radius = self.qmax #radius=math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
         phimin = self.right_line.theta+math.pi
         phimax = self.left_line.theta+math.pi
 
-        sect = SectorQ(r_min=0.000001, r_max= radius , phi_min=phimin, phi_max=phimax)
+        sect = SectorQ(r_min=0.0, r_max= radius , phi_min=phimin, phi_max=phimax)
         #sect = SectorQ(r_min=-1*radius , r_max= radius , phi_min=phimin, phi_max=phimax)
         if nbins!=None:
             sect.nbins = nbins
