@@ -121,7 +121,7 @@ class FitPanel(wx.Panel):
             @param model: the model for which paramters will be changed
             @param page_title: the name of the page
         """
-        print "page_title fitpanel", page_title
+        #print "page_title fitpanel", page_title
         if  self.draw_model_name ==None:
             
             self._help_add_model_page(model,description,page_title)

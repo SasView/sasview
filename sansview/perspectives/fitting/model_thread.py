@@ -124,6 +124,7 @@ class Calc2D(CalcThread):
         x = self.x
         y = self.y
         output = numpy.zeros((len(x),len(y)))
+        """
         if self.qmin *self.qmax >=0:
             print "same signe plotting"
             if self.qmax==0:
@@ -133,8 +134,9 @@ class Calc2D(CalcThread):
                 center_x= (self.qmax -self.qmin)/2
                 center_y= (self.qmax -self.qmin)/2
         else:
-            center_x=0
-            center_y=0
+        """
+        center_x=0
+        center_y=0
         #print "center_x , center_y",center_x , center_y
         #print "x ",len(x)
         #print "y", y
@@ -142,25 +144,25 @@ class Calc2D(CalcThread):
         self.starttime = time.time()
         lx = len(self.x)
        
-        for i_x in range(int(len(self.x)/2)+1):
+        for i_x in range(len(self.x)):
            
             # Check whether we need to bail out
             self.update(output=output)
             self.isquit()
             
-            for i_y in range(int(len(self.y)/2)+1):
+            for i_y in range(int(len(self.y))):
                 try:
-                    value1 = self.model.runXY([self.x[i_x]-center_x, self.y[i_y]-center_y])
-                    value2 = self.model.runXY([self.x[i_x]-center_x, self.y[lx-i_y-1]-center_y])
-                    value3 = self.model.runXY([self.x[lx-i_x-1]-center_x, self.y[i_y]-center_y])
-                    value4 = self.model.runXY([self.x[lx-i_x-1]-center_x, self.y[lx-i_y-1]-center_y])
+                    if (self.x[i_x]*self.x[i_x]+self.y[i_y]*self.y[i_y]) \
+                    < self.qmin * self.qmin:
+                        output[i_x] [i_y]=0
+                         
+                    else:
+                        value1 = self.model.runXY([self.x[i_x]-center_x, self.y[i_y]-center_y])
+                       
+                        
+                        output[i_x] [i_y]=value1 
+                       
                     
-                    output[i_x] [i_y]=value1 
-                    output[lx-i_x-1][lx-i_y-1] =value4 
-                    output[i_x] [lx-i_y-1]= value2 
-                    output[lx-i_x-1][i_y] = value3 
-                    
-                  
                 except:
                      wx.PostEvent(self.parent, StatusEvent(status=\
                        "Error computing %s at [%g,%g]" %(self.model.name, self.x[i_x],self.y[i_y])))

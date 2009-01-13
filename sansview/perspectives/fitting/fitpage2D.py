@@ -71,6 +71,9 @@ class FitPage2D(wx.ScrolledWindow):
         self.vbox.Add(self.sizer5)
         self.vbox.Add(self.sizer4)
         self.vbox.Add(self.sizer1)
+        ## Q range
+        self.qmin= 0.001
+        self.qmax= 0.1
         
         id = wx.NewId()
         self.btClose =wx.Button(self,id,'Close')
@@ -495,35 +498,42 @@ class FitPage2D(wx.ScrolledWindow):
             this method redraws the model according to parameters values changes
             and the reset model according to paramaters changes
         """
+        print "went here",len(self.parameters) ,self.model
         if len(self.parameters) !=0 and self.model !=None:
+            # Flag to register when a parameter has changed.
+            is_modified = False
             for item in self.parameters:
-                
-                is_modified = False
-                if self.xmin.IsModified():
-                    is_modified = True
-                if self.xmax.IsModified():
-                    is_modified = True
-                
-                try: 
-                    
-                    if item[1].IsModified() or is_modified:
-                        print str(item[0].GetLabelText()),item[1].IsModified()
-                        item[1].SetModified(False)
-                        name=str(item[0].GetLabelText())
-                        value= float(item[1].GetValue())
+                try:
+                    item[2].Hide()
+                    item[3].Clear()
+                    item[3].Hide()
+                    name=str(item[0].GetLabelText())
+                    value= float(item[1].GetValue())
+                    # If the value of the parameter has changed,
+                    # update the model and set the is_modified flag
+                    if value != self.model.getParam(name):
                         self.model.setParam(name,value)
-                        self.xmin.SetModified(False)
-                        self.xmax.SetModified(False)
-                        is_modified=False
-                        
-                        self.manager.redraw_model(
-                        float(self.xmin.GetValue()),
-                        float(self.xmax.GetValue())  )    
-            
+                        is_modified = True 
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                            "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
+                            "Drawing  Error:wrong value entered : %s"% sys.exc_value))
+            # Here we should check whether the boundaries have been modified.
+            # If qmin and qmax have been modified, update qmin and qmax and 
+            # set the is_modified flag to True
+            if float(self.xmin.GetValue()) != self.qmin:
+                self.qmin = float(self.xmin.GetValue())
+                is_modified = True
+            if float(self.xmax.GetValue()) != self.qmax:
+                self.qmax = float(self.xmax.GetValue())
+                is_modified = True
             
+            if is_modified:
+                
+                self.manager.redraw_model( 
+                                        qmin=self.qmin, qmax=self.qmax,
+                                        )
+                #self.manager.draw_model(self,model,description=None,
+                # enable1D=True,qmin=None,qmax=None, qstep=None)
            
     def select_all_param(self,event): 
         """

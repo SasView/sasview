@@ -610,16 +610,21 @@ class Plugin:
             if qmax==None:
                 qmax= 1.0
             if qstep ==None:
-                qstep =0.001
+                qstep =100
            
             #print "x in data1D",qmin,qmax
-            x = numpy.arange(qmin, qmax, qstep)        
+            #x = numpy.arange(qmin, qmax, qstep)  
+            x=  numpy.linspace(start= qmin,
+                               stop= qmax,
+                               num= qstep,
+                               endpoint=True
+                               )      
             xlen= len(x)
             y = numpy.zeros(xlen)
             if not enable1D:
                 for i in range(xlen):
                     y[i] = model.run(x[i])
-        
+                
                 try:
                     new_plot = Theory1D(x, y)
                     new_plot.name = name
@@ -634,7 +639,7 @@ class Plugin:
             else:
                 for i in range(xlen):
                     y[i] = model.run(x[i])
-                    
+                #print x, y   
                 try:
                     new_plot = Theory1D(x, y)
                     new_plot.name = name
@@ -654,17 +659,33 @@ class Plugin:
         #printEVT("Calc complete in %g sec" % elapsed) 
         wx.PostEvent(self.parent, StatusEvent(status="Calc \
         complete in %g sec" % elapsed))
-                           
-        print "complete",output, model,qmin, qmax
+        #print "complete",output, model,qmin, qmax
         data = output
         theory= Data2D(data)
+        #print data.detector
+        #theory.detector= data.detector
+        from DataLoader.data_info import Detector, Source
+        
+        detector = Detector()
+        theory.detector=[]
+        theory.detector.append(detector)
+            
+        theory.detector[0].pixel_size.x= 5.0
+        theory.detector[0].pixel_size.y= 5.0
+        theory.source= Source()
+        theory.source.wavelength= 8.4
+        theory.detector[0].beam_center.x= 0
+        theory.detector[0].beam_center.y= 0
+        theory.detector[0].distance= 13705.0
+        
         theory.name= model.name
         theory.group_id ="Model"
         theory.id ="Model"
-        theory.xmin= qmin
+        theory.xmin= -qmax
         theory.xmax= qmax
-        theory.ymin= qmin
+        theory.ymin= -qmax
         theory.ymax= qmax
+        print "model draw comptele xmax",theory.xmax
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
                          title="Analytical model 2D %s" %str(model.name)))
          
@@ -672,20 +693,31 @@ class Plugin:
          
     def _draw_model2D(self,model,description=None, enable2D=False,qmin=None,qmax=None, qstep=None):
         if qmin==None:
-            qmin= -0.05
+            qmin= 0.0
         if qmax==None:
             qmax= 0.05
         if qstep ==None:
-            qstep =0.001
-        x = numpy.arange(qmin,qmax, qstep)
-        y = numpy.arange(qmin,qmax,qstep)
+            qstep =100
+       
+        x=  numpy.linspace(start= -1*qmax,
+                               stop= qmax,
+                               num= qstep,
+                               endpoint=True )  
+        y = numpy.linspace(start= -1*qmax,
+                               stop= qmax,
+                               num= qstep,
+                               endpoint=True )
+       
         lx = len(x)
         #print x
         data=numpy.zeros([len(x),len(y)])
         self.model= model
         if enable2D:
             from model_thread import Calc2D
-            self.calc_thread = Calc2D(parent =self.parent,x=x, y=y,model= self.model, qmin=qmin,qmax=qmax,
+            self.calc_thread = Calc2D(parent =self.parent,x=x,
+                                       y=y,model= self.model, 
+                                       qmin=qmin,
+                                       qmax=qmax,
                             completefn=self.complete,
                             updatefn=self.update)
             self.calc_thread.queue()

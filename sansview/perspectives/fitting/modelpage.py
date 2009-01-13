@@ -72,8 +72,11 @@ class ModelPage(wx.ScrolledWindow):
         iy = 1 
         self.sizer4.Add(wx.StaticText(self, -1, 'Min'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix += 2
+        ix += 1
         self.sizer4.Add(wx.StaticText(self, -1, 'Max'),(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer4.Add(wx.StaticText(self, -1, 'Npts'),(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix = 0
         iy += 1
@@ -82,6 +85,7 @@ class ModelPage(wx.ScrolledWindow):
         ## Q range
         self.qmin= 0.001
         self.qmax= 0.1
+        self.num_points= 100
         
         ix += 1
         self.xmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
@@ -92,14 +96,21 @@ class ModelPage(wx.ScrolledWindow):
         self.sizer4.Add(self.xmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
        
-        ix += 2
+        ix += 1
         self.xmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.xmax.SetValue(format_number(self.qmax))
         self.xmax.SetToolTipString("Maximum value of x in linear scale.")
         self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         self.xmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
-       
         self.sizer4.Add(self.xmax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.npts    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.npts.SetValue(format_number(self.num_points))
+        self.npts.SetToolTipString("Number of point to plot.")
+        self.npts.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+        self.npts.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
+       
+        self.sizer4.Add(self.npts,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix = 0
         iy += 1
         self.sizer4.Add((20,20),(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -133,7 +144,7 @@ class ModelPage(wx.ScrolledWindow):
             raise
         # preview selected model name
         self.prevmodel_name=name
-        print "model view prev_model",name
+        #print "model view prev_model",name
         self.modelbox.SetValue(self.prevmodel_name)
         # flag to check if the user has selected a new model in the combox box
         self.model_hasChanged=False
@@ -387,10 +398,14 @@ class ModelPage(wx.ScrolledWindow):
             if float(self.xmax.GetValue()) != self.qmax:
                 self.qmax = float(self.xmax.GetValue())
                 is_modified = True
+            if float(self.npts.GetValue()) !=  self.num_points:
+                self.qmax = float(self.npts.GetValue())
+                is_modified = True
             
             if is_modified:
                 self.manager.draw_model(self.model, self.model.name, 
                                         qmin=self.qmin, qmax=self.qmax,
+                                        qstep= self.num_points,
                                         enable2D=self.enable2D)
             #self.manager.draw_model(self,model,description=None,
             # enable1D=True,qmin=None,qmax=None, qstep=None)
