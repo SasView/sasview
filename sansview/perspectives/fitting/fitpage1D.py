@@ -165,7 +165,7 @@ class FitPage1D(wx.ScrolledWindow):
         ix+= 2
         self.sizer1.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         #self.sizer1.Add( self.btClose,1, wx.LEFT | wx.BOTTOM , 5)
-
+        self.tcChi.Disable()
         ix= 0
         iy+=1
         self.sizer1.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)

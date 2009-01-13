@@ -170,11 +170,14 @@ class FitPanel(wx.Panel):
              close the current page except the simpage. remove each check box link to the model
              selected on that page. remove its reference into page_finder (fitting module)
         """
+        print "model page", page_number, page
         if page!=None and page_number!=None:
-            page.Destroy()
+            
             self.nb.RemovePage(page_number)
+            page.Destroy()
             self.model_page_number=None
             self.model_page=None
+            self.draw_model_name=None
             return 
         try:
             sim_page = self.nb.GetPage(0)
@@ -193,7 +196,9 @@ class FitPanel(wx.Panel):
                 page_number = self.nb.GetSelection()
                 if self.nb.GetPageText(page_number)== self.page_name:
                     self.draw_model_name=None
-               
+                if  page_number == 1:
+                    self.model_page=None
+                    self.draw_model_name=None
                 selected_page.Destroy()
                 self.nb.RemovePage(page_number)
                 #self.count =self.count -1 
