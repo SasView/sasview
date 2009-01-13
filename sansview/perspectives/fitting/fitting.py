@@ -599,7 +599,7 @@ class Plugin:
                            enable2D= enable2D,
                            qmin=qmin,
                            qmax=qmax,
-                           qstep=qstep)
+                           qstep=None)
         self._draw_model1D(model,name,model.description, enable1D,qmin,qmax, qstep)
        
     def _draw_model1D(self,model,name,description=None, enable1D=True,qmin=None,qmax=None, qstep=None):
