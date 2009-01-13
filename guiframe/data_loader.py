@@ -136,7 +136,7 @@ def plot_data(parent, path, name="Loaded Data"):
                 new_plot = Data1D(x=item.x,y=item.y,dy=item.dy,dxl=dxl,dxw=dxw)
            
             new_plot.source=item.source
-            new_plot.info=output
+            #new_plot.info=output
             new_plot.name = str(item.run[0])
             new_plot.interactive = True
            

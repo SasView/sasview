@@ -60,7 +60,7 @@ class ModelPanel2D( ModelPanel1D):
         ## Plottables
         self.plots = {}
         self.data2D= data2d
-        self.data = data2d.data
+        self.data =data2d.data
         ## Unique ID (from gui_manager)
         self.uid = None
         
@@ -148,9 +148,10 @@ class ModelPanel2D( ModelPanel1D):
             self.plots[event.plot.name].ymax = event.plot.ymax
             self.plots[event.plot.name].data = event.plot.data
             self.plots[event.plot.name].err_data = event.plot.err_data
+            # update qmax with the new xmax of data plotted
+            self.qmax= event.plot.xmax
             
- 
-        
+        self.slicer= None
         # Check axis labels
         #TODO: Should re-factor this
         #if event.plot._xunit != self.graph.prop["xunit"]:
@@ -375,6 +376,7 @@ class ModelPanel2D( ModelPanel1D):
         """
             Perform sector averaging on Q
         """
+        print "onsector self.data2Dxmax",self.data2D.xmax
         from SectorSlicer import SectorInteractor
         self.onClearSlicer(event)
         wx.PostEvent(self.parent, InternalEvent(slicer= SectorInteractor))

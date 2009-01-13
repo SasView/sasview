@@ -27,6 +27,7 @@ class SectorInteractor(_BaseInteractor):
         self.markers = []
         self.axes = axes
         self.qmax = math.sqrt(2)*self.base.qmax
+        #print "sector qmax", self.base.qmax
         self.connect = self.base.connect
         
         ## Number of points on the plot
