@@ -393,7 +393,7 @@ class ModelPanel2D( ModelPanel1D):
         from boxSum import BoxSum
         self.onClearSlicer(event)
         wx.PostEvent(self.parent, InternalEvent(slicer= BoxSum))
-        from BoxParameters import SlicerParameterPanel
+        from SlicerParameters import SlicerParameterPanel
        
         dialog = SlicerParameterPanel(self.parent, -1, "Slicer Parameters")
        
@@ -447,7 +447,21 @@ class ModelPanel2D( ModelPanel1D):
                    self.ymax_2D,self.zmin_2D ,self.zmax_2D )
         wx.PostEvent(self.parent, StatusEvent(status="Image is in %s scale"%self.scale))
         
-        
-        
-        
-       
+        """     
+            #TODO: this name should be changed to something more appropriate
+            # Don't forget that changing this name will mean changing code
+            # in plotting.py
+             
+            # Update the plottable with the new data
+            
+            #TODO: we should have a method to do this, 
+            #      something along the lines of:
+            #      plottable1.update_data_from_plottable(plottable2)
+            
+            self.plots[event.plot.name].xmin = event.plot.xmin
+            self.plots[event.plot.name].xmax = event.plot.xmax
+            self.plots[event.plot.name].ymin = event.plot.ymin
+            self.plots[event.plot.name].ymax = event.plot.ymax
+            self.plots[event.plot.name].data = event.plot.data
+            self.plots[event.plot.name].err_data = event.plot.err_data
+        """

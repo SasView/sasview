@@ -82,23 +82,31 @@ class SlicerParameterPanel(wx.Dialog):
             for item in keys:
                 iy += 1
                 ix = 0
-                text = wx.StaticText(self, -1, item, style=wx.ALIGN_LEFT)
-                #self.bck.Add(text, (iy,ix), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
-                self.bck.Add(text, (iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-                ctl = wx.TextCtrl(self, -1, size=(80,20), style=wx.TE_PROCESS_ENTER)
-                
-                ctl.SetToolTipString("Modify the value of %s to change the 2D slicer" % item)
-                
-                ix = 1
-                ctl.SetValue(format_number(str(params[item])))
-                self.Bind(wx.EVT_TEXT_ENTER, self.onTextEnter)
-                ctl.Bind(wx.EVT_KILL_FOCUS, self.onTextEnter)
-                self.parameters.append([item, ctl])
-                #self.bck.Add(ctl, (iy,ix), flag=wx.TOP|wx.BOTTOM, border = 0)
-                self.bck.Add(ctl, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                
-                ix =3
-                self.bck.Add((20,20), (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                if not item in ["count","errors"]:
+                    
+                    text = wx.StaticText(self, -1, item, style=wx.ALIGN_LEFT)
+                    #self.bck.Add(text, (iy,ix), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
+                    self.bck.Add(text, (iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                    ctl = wx.TextCtrl(self, -1, size=(80,20), style=wx.TE_PROCESS_ENTER)
+                    
+                    ctl.SetToolTipString("Modify the value of %s to change the 2D slicer" % item)
+                    
+                    ix = 1
+                    ctl.SetValue(format_number(str(params[item])))
+                    self.Bind(wx.EVT_TEXT_ENTER, self.onTextEnter)
+                    ctl.Bind(wx.EVT_KILL_FOCUS, self.onTextEnter)
+                    self.parameters.append([item, ctl])
+                    #self.bck.Add(ctl, (iy,ix), flag=wx.TOP|wx.BOTTOM, border = 0)
+                    self.bck.Add(ctl, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    
+                    ix =3
+                    self.bck.Add((20,20), (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                else:
+                    text = wx.StaticText(self, -1, item+ " : ", style=wx.ALIGN_LEFT)
+                    self.bck.Add(text, (iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                    ctl =wx.StaticText(self, -1, format_number(str(params[item])), style=wx.ALIGN_LEFT)
+                    ix =1
+                    self.bck.Add(ctl, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             iy +=1
             ix = 1
             self.bck.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)

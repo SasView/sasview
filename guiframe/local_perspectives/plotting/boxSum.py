@@ -220,7 +220,8 @@ class BoxSum(_BaseInteractor):
         params["x_max"] = self.right_line.x 
         params["y_min"] = self.bottom_line.y
         params["y_max"] = self.top_line.y
-       
+        params["count"] = self.count
+        params["errors"]= self.error
         return params
     
     
