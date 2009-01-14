@@ -87,7 +87,12 @@ def plot_data(parent, path, name="Loaded Data"):
             dxl=None
             dxw=None
         if hasattr(output,'data'):
-            new_plot = Data2D(image=output.data,err_image=output.err_data,
+            temp = output.err_data
+            temp[temp==0]=1
+
+            wx.PostEvent(parent, StatusEvent(status="Loading 2D error bars of 1 \
+            created for : %s"% str(temp[temp==0])))
+            new_plot = Data2D(image=output.data,err_image=temp,
                               xmin=output.xmin,xmax=output.xmax,
                               ymin=output.ymin,ymax=output.ymax)
             new_plot.x_bins=output.x_bins
