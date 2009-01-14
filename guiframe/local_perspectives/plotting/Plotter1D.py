@@ -266,8 +266,10 @@ class ModelPanel1D(PlotPanel):
             new_plot.name = self.plots[self.graph.selected_plottable].name 
             if hasattr(self.plots[self.graph.selected_plottable], "group_id"):
                 new_plot.group_id = self.plots[self.graph.selected_plottable].group_id
+                new_plot.id = self.plots[self.graph.selected_plottable].id
             else:
                 new_plot.group_id = str(time.time())
+                new_plot.id = str(time.time())
             
             label, unit = self.plots[self.graph.selected_plottable].get_xaxis()
             new_plot.xaxis(label, unit)
