@@ -239,7 +239,7 @@ class ModelPanel2D( ModelPanel1D):
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
-   
+        
     def _setSlicer(self, slicer):
         # Clear current slicer
         #printEVT("Plotter2D._setSlicer %s" % slicer)
@@ -404,19 +404,13 @@ class ModelPanel2D( ModelPanel1D):
         from boxSlicer import BoxInteractor
         self.onClearSlicer(event)
         wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractor))
-        """
-        self.onClearSlicer(event)
-        self.slicer=BoxInteractor
-        from SlicerParameters import SlicerParameterPanel
-       
-        dialog = SlicerParameterPanel(self.parent, -1, "Slicer Parameters")
-        dialog.set_slicer(self.slicer.__name__,
-                        self.slicer.get_params())
-        if dialog.ShowModal() == wx.ID_OK:
-            dialog.Destroy()
-        wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractor))
-        print "onboxavg",self.slicer
-        """
+        
+        from slicerpanel import SlicerPanel
+        new_panel = SlicerPanel(self.parent, -1, style=wx.RAISED_BORDER)
+        
+        from sans.guicomm.events import SlicerParameterEvent 
+        wx.PostEvent(self.parent, SlicerParameterEvent (panel= new_panel))
+        
         
     def onClearSlicer(self, event):
         """

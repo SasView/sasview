@@ -176,11 +176,10 @@ class BoxInteractor(_BaseInteractor):
         data = self.base.data2D
         from DataLoader.manipulations import  Boxavg
         radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
-        x_min= self.left_line.x1
-        x_max= self.right_line.x1 
-        y_min= self.bottom_line.y1
-        y_max= self.top_line.y1
-        box =  Boxavg (x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
+        self.x= math.fabs(self.right_line.x1)
+        self.y= math.fabs(self.top_line.y1 )
+       
+        box =  Boxavg (x_min=-self.x, x_max=self.x, y_min=-self.y, y_max=self.y)
        
         self.count, self.error= box(self.base.data2D)
         
@@ -219,13 +218,14 @@ class BoxInteractor(_BaseInteractor):
     def get_params(self):
         params = {}
         params["x_max"]= math.fabs(self.right_line.x1)
-        params["y_max"]= math.fabs(self.top_line.x1)
+        params["y_max"]= math.fabs(self.top_line.y1)
         
         params["errors"] = self.error
         params["count"]= self.count
         return params
     
     def set_params(self, params):
+        
         self.x = float(math.fabs(params["x_max"]))
         self.y = float(math.fabs(params["y_max"] ))
         
@@ -247,6 +247,7 @@ class BoxInteractor(_BaseInteractor):
                                  xmax= self.x,
                                  ymin= -1*self.y,
                                  ymax= -1*self.y)
+       
         self._post_data()
     def freeze_axes(self):
         self.base.freeze_axes()
