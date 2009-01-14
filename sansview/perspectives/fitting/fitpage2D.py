@@ -482,6 +482,9 @@ class FitPage2D(wx.ScrolledWindow):
      
         self.compute_chisqr()
         self.vbox.Layout()
+        self.SetScrollbars(20,20,55,40)
+        self.Layout()
+        
         self.GrandParent.GetSizer().Layout()
         
     
@@ -643,5 +646,7 @@ class FitPage2D(wx.ScrolledWindow):
                 i+=1
         
         self.vbox.Layout()
+        self.SetScrollbars(20,20,55,40)
+        self.Layout()
         self.GrandParent.GetSizer().Layout()
     
