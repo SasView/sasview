@@ -119,7 +119,8 @@ class Plugin:
         self.index_model = 0
         #create the fitting panel
         return [self.fit_panel]
-   
+    def _on_show_panel(self, event):
+        print "_on_show_panel: fitting"
       
     def get_perspective(self):
         """
@@ -652,8 +653,10 @@ class Plugin:
                     
                 except:
                     raise
-    def update(self, output):
-        print "Got an update"
+    def update(self, output,elapsed):
+        print "Got an update", elapsed
+        wx.PostEvent(self.parent, StatusEvent(status="Plot \
+        updating ... %g sec" % elapsed))
     
     def complete(self, output, elapsed, model, qmin, qmax):
         #printEVT("Calc complete in %g sec" % elapsed) 

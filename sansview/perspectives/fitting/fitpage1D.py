@@ -23,8 +23,9 @@ def format_number(value, high=False):
     else:
         return "%-5.3g" % value
 
-    
-class FitPage1D(wx.ScrolledWindow):
+from modelpage import format_number
+from modelpage import ModelPage
+class FitPage1D(ModelPage):
     """
         FitPanel class contains fields allowing to display results when
         fitting  a model and one data
@@ -201,32 +202,9 @@ class FitPage1D(wx.ScrolledWindow):
         self.GrandParent.GetSizer().Layout()
        
 
-        
-        
-        
-        
-        
-        
-    def set_owner(self,owner):
-        """ 
-            set owner of fitpage
-            @param owner: the class responsible of plotting
-        """
-        self.event_owner = owner    
-   
   
-    def set_manager(self, manager):
-        """
-             set panel manager
-             @param manager: instance of plugin fitting
-        """
-        self.manager = manager
+  
  
-        
-    def onClose(self,event):
-        """ close the page associated with this panel"""
-        self.GrandParent.onClose()
-        
         
     def compute_chisqr(self):
         """ @param fn: function that return model value
@@ -272,26 +250,7 @@ class FitPage1D(wx.ScrolledWindow):
         else:
               wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Select at least on parameter to fit "))
-    def populate_box(self, dict):
-        """
-            Populate each combox box of each page
-            @param page: the page to populate
-        """
-        id=0
-        self.model_list_box=dict
-        list_name=[]
-        for item in  self.model_list_box.itervalues():
-            name = item.__name__
-            if hasattr(item, "name"):
-                name = item.name
-            list_name.append(name)
-        list_name.sort()   
-        for name in list_name:
-            self.modelbox.Insert(name,int(id))
-            id+=1
-        wx.EVT_COMBOBOX(self.modelbox,-1, self._on_select_model) 
-        return 0
-    
+  
     
     def _on_select_model(self,event):
         """
@@ -360,10 +319,6 @@ class FitPage1D(wx.ScrolledWindow):
         self.xmax.Refresh()
         return flag
     
-
-    def get_model_box(self): 
-        """ return reference to combox box self.model"""
-        return self.modelbox
 
     
     def get_param_list(self):
@@ -542,6 +497,7 @@ class FitPage1D(wx.ScrolledWindow):
             is_modified = False
             for item in self.parameters:
                 try:
+                    self.text2_3.Hide()
                     item[2].Hide()
                     item[3].Clear()
                     item[3].Hide()
@@ -566,12 +522,8 @@ class FitPage1D(wx.ScrolledWindow):
                 is_modified = True
             
             if is_modified:
-                self.manager.redraw_model(
-                                        qmin=self.qmin, qmax=self.qmax,
-                                        )
-            #self.manager.draw_model(self,model,description=None,
-            # enable1D=True,qmin=None,qmax=None, qstep=None)
-           
+                self.manager.redraw_model(qmin=self.qmin, qmax=self.qmax)
+         
     def select_all_param(self,event): 
         """
              set to true or false all checkBox given the main checkbox value cb1

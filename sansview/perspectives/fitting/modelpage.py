@@ -186,6 +186,8 @@ class ModelPage(wx.ScrolledWindow):
         """
          call manager to plot model in 2D
         """
+        if self.enable2D== True:
+            print "modelpage already plot",
         # If the 2D display is not currently enabled, plot the model in 2D 
         # and set the enable2D flag.
         if self.enable2D==False:
@@ -196,6 +198,7 @@ class ModelPage(wx.ScrolledWindow):
                                      enable2D=self.enable2D,
                                      qmin=float(self.qmin),
                                     qmax=float(self.qmax))
+       
             
     def populate_box(self, dict):
         """
@@ -224,7 +227,7 @@ class ModelPage(wx.ScrolledWindow):
             react when a model is selected from page's combo box
             post an event to its owner to draw an appropriate theory
         """
-        #print "modelpage: self.model_list_box ",self.model_list_box
+        self.model_view.SetFocus()
         for item in self.model_list_box.itervalues():
             name = item.__name__
             if hasattr(item, "name"):
@@ -238,7 +241,7 @@ class ModelPage(wx.ScrolledWindow):
                 self.name= name
                 self.manager.draw_model(model, name)
                 
-            self.model_view.SetFocus()
+            
             
     def get_model_box(self): 
         """ return reference to combox box self.model"""
