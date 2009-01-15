@@ -482,35 +482,40 @@ class FitPage1D(ModelPage):
         """ 
             when enter value on panel redraw model according to changed
         """
-        self.set_model_parameter()
+        self.set_model()
         self.compute_chisqr()
         
-     
-    def set_model_parameter(self):
-        """
-            this method redraws the model according to parameters values changes
-            and the reset model according to paramaters changes
-        """
-        print "went here",len(self.parameters) ,self.model
+    def set_model(self): 
         if len(self.parameters) !=0 and self.model !=None:
             # Flag to register when a parameter has changed.
-            is_modified = False
             for item in self.parameters:
                 try:
                     self.text2_3.Hide()
                     item[2].Hide()
                     item[3].Clear()
                     item[3].Hide()
-                    name=str(item[0].GetLabelText())
-                    value= float(item[1].GetValue())
-                    # If the value of the parameter has changed,
-                    # update the model and set the is_modified flag
-                    if value != self.model.getParam(name):
-                        self.model.setParam(name,value)
-                        is_modified = True 
                 except:
                      wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Drawing  Error:wrong value entered : %s"% sys.exc_value))
+        self.set_model_parameter()
+        
+    def set_model_parameter(self):
+        if len(self.parameters) !=0 and self.model !=None:
+            # Flag to register when a parameter has changed.
+            is_modified = False
+            for item in self.parameters:
+                try:
+                     name=str(item[0].GetLabelText())
+                     value= float(item[1].GetValue())
+                     # If the value of the parameter has changed,
+                     # update the model and set the is_modified flag
+                     if value != self.model.getParam(name):
+                         self.model.setParam(name,value)
+                         is_modified = True
+                except:
+                     wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+                            "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
+            
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True

@@ -199,7 +199,6 @@ class FitPage2D(FitPage1D):
                     if self.data.x_bins[i]>= xmin and self.data.x_bins[i]<= xmax:
                         for j in range(len(self.data.y_bins)):
                             if self.data.y_bins[j]>= ymin and self.data.y_bins[j]<= ymax:
-                                print "data error ",self.data.err_data[j][i]
                                 res.append( (self.data.data[j][i]- self.model.runXY(\
                                  [self.data.x_bins[i],self.data.y_bins[j]]))\
                                     /self.data.err_data[j][i] )
@@ -208,7 +207,7 @@ class FitPage2D(FitPage1D):
                 for item in res:
                     if numpy.isfinite(item):
                         sum +=item
-                print "chisqr : sum 2D", xmin, xmax, ymin, ymax,sum
+                #print "chisqr : sum 2D", xmin, xmax, ymin, ymax,sum
                 #print res
                 self.tcChi.SetValue(format_number(math.fabs(sum)))
             except:

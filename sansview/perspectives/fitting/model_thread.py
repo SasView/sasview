@@ -108,6 +108,7 @@ class Calc2D(CalcThread):
         self.y = y
         self.model = model
         self.starttime = 0
+       
         
     def isquit(self):
         try:
@@ -119,50 +120,39 @@ class Calc2D(CalcThread):
            
             raise KeyboardInterrupt
         
+    def update(self, output=None, time=None):
+        
+        wx.PostEvent(self.parent, StatusEvent(status="Plot \
+        updating ... %g sec" % time))
+        
     def compute(self):
         import numpy
         x = self.x
         y = self.y
         output = numpy.zeros((len(x),len(y)))
-        """
-        if self.qmin *self.qmax >=0:
-            print "same signe plotting"
-            if self.qmax==0:
-                center_x= self.qmin/2
-                center_y= self.qmin /2
-            else:
-                center_x= (self.qmax -self.qmin)/2
-                center_y= (self.qmax -self.qmin)/2
-        else:
-        """
+      
         center_x=0
         center_y=0
-        #print "center_x , center_y",center_x , center_y
-        #print "x ",len(x)
-        #print "y", y
-        #print "int(len(self.x)/2)",int(len(self.x)/2)
+       
         self.starttime = time.time()
+        wx.PostEvent(self.parent, StatusEvent(status=\
+                       "Start Drawing model %g " % self.starttime))
         lx = len(self.x)
        
         for i_x in range(len(self.x)):
-           
             # Check whether we need to bail out
-            self.update(output=output)
+            self.update(output=output, time=time.time() )
             self.isquit()
             
             for i_y in range(int(len(self.y))):
                 try:
                     if (self.x[i_x]*self.x[i_x]+self.y[i_y]*self.y[i_y]) \
-                    < self.qmin * self.qmin:
-                        output[i_x] [i_y]=0
-                         
-                    else:
-                        value1 = self.model.runXY([self.x[i_x]-center_x, self.y[i_y]-center_y])
-                       
+                        < self.qmin * self.qmin:
                         
-                        output[i_x] [i_y]=value1 
-                       
-                    
+                        output[i_x] [i_y]=0   
+                    else:
+                        value = self.model.runXY([self.x[i_x]-center_x, self.y[i_y]-center_y])
+                        output[i_x] [i_y]=value   
                 except:
                      wx.PostEvent(self.parent, StatusEvent(status=\
                        "Error computing %s at [%g,%g]" %(self.model.name, self.x[i_x],self.y[i_y])))

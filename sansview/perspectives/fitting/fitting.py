@@ -9,11 +9,15 @@ from sans.guicomm.events import NewPlotEvent, StatusEvent
 from sans.fit.AbstractFitEngine import Model,Data,FitData1D,FitData2D
 from fitproblem import FitProblem
 from fitpanel import FitPanel
-
+from fit_thread import FitThread
 import models,modelpage
 import fitpage1D,fitpage2D
 import park
 DEFAULT_BEAM = 0.005
+import time
+import thread
+print "main",thread.get_ident()
+
 class Plugin:
     """
         Fitting plugin is used to perform fit 
@@ -27,6 +31,9 @@ class Plugin:
         self.menu_mng = models.ModelManager()
         ## List of panels for the simulation perspective (names)
         self.perspective = []
+        
+        self.calc_thread = None
+        self.done = False
         # Start with a good default
         self.elapsed = 0.022
         self.fitter  = None
@@ -221,8 +228,8 @@ class Plugin:
             param_name=param_names[1]  
             return model_name,param_name
         
-        
-    def _single_fit_completed(self,result,pars,cpage,qmin,qmax,ymin=None, ymax=None):
+   
+    def _single_fit_completed(self,result,pars,cpage,qmin,qmax,elapsed,ymin=None, ymax=None):
         """
             Display fit result on one page of the notebook.
             @param result: result of fit 
@@ -232,6 +239,8 @@ class Plugin:
             @param qmax: the maximum value of x to replot model
           
         """
+        #self.done = True
+        #wx.PostEvent(self.parent, StatusEvent(status="Fitting Completed: %g" % elapsed))
         try:
             for page, value in self.page_finder.iteritems():
                 if page==cpage :
@@ -259,13 +268,14 @@ class Plugin:
             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
        
-    def _simul_fit_completed(self,result,qmin,qmax,ymin=None, ymax=None):
+    def _simul_fit_completed(self,result,qmin,qmax, elapsed,pars=None,cpage=None, ymin=None, ymax=None):
         """
             Parameter estimation completed, 
             display the results to the user
             @param alpha: estimated best alpha
             @param elapsed: computation time
         """
+        wx.PostEvent(self.parent, StatusEvent(status="Fitting Completed: %g" % elapsed))
         try:
             for page, value in self.page_finder.iteritems():
                 if value.get_scheduled()==1:
@@ -290,7 +300,7 @@ class Plugin:
         except:
              wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
-    
+  
     def _on_single_fit(self,id=None,qmin=None,qmax=None,ymin=None,ymax=None):
         """ 
             perform fit for the  current page  and return chisqr,out and cov
@@ -343,11 +353,27 @@ class Plugin:
                 # make sure to keep an alphabetic order 
                 #of parameter names in the list      
         try:
-            result=self.fitter.fit()
-            #self._single_fit_completed(result,pars,current_pg,qmin,qmax)
-            #print "single_fit: result",result.fitness,result.pvec,result.stderr
-            #self._single_fit_completed(result,pars,page,qmin,qmax)
-            self._single_fit_completed(result,pars,page_fitted,qmin,qmax,ymin,ymax)
+            # If a thread is already started, stop it
+            if self.calc_thread != None and self.calc_thread.isrunning():
+                self.calc_thread.stop()
+                    
+            self.calc_thread =FitThread(parent =self.parent,
+                                        fn= self.fitter,
+                                        pars= pars,
+                                        cpage= page_fitted,
+                                       qmin=qmin,
+                                       qmax=qmax,
+                                       ymin= ymin,
+                                       ymax= ymax,
+                                       completefn=self._single_fit_completed,
+                                       updatefn=None)
+            self.calc_thread.queue()
+            self.calc_thread.ready(2.5)
+            #while not self.done:
+                #print "when here"
+             #   time.sleep(1)
+            
+           
         except:
             raise
             wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
@@ -411,8 +437,21 @@ class Plugin:
                 return 
         #Do the simultaneous fit
         try:
-            result=self.fitter.fit()
-            self._simul_fit_completed(result,qmin,qmax,ymin,ymax)
+            # If a thread is already started, stop it
+            if self.calc_thread != None and self.calc_thread.isrunning():
+                self.calc_thread.stop()
+                    
+            self.calc_thread =FitThread(parent =self.parent,
+                                        fn= self.fitter,
+                                       qmin=qmin,
+                                       qmax=qmax,
+                                       ymin= ymin,
+                                       ymax= ymax,
+                                       completefn= self._simul_fit_completed,
+                                       updatefn=None)
+            self.calc_thread.queue()
+            self.calc_thread.ready(2.5)
+            
         except:
             wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fitting error: %s" % sys.exc_value))
             return
@@ -478,7 +517,7 @@ class Plugin:
                 break 
         self.plot_helper(currpage=page,qmin= qmin,qmax= qmax)
         
-    def plot_helper(self,currpage,qmin=None,qmax=None,ymin=None,ymax=None):
+    def plot_helper(self,currpage, fitModel=None, qmin=None,qmax=None,ymin=None,ymax=None):
         """
             Plot a theory given a model and data
             @param model: the model from where the theory is derived
@@ -653,13 +692,11 @@ class Plugin:
                     
                 except:
                     raise
-    def update(self, output,elapsed):
-        print "Got an update", elapsed
-        wx.PostEvent(self.parent, StatusEvent(status="Plot \
-        updating ... %g sec" % elapsed))
+    def update(self, output,time):
+        pass
     
     def complete(self, output, elapsed, model, qmin, qmax):
-        #printEVT("Calc complete in %g sec" % elapsed) 
+       
         wx.PostEvent(self.parent, StatusEvent(status="Calc \
         complete in %g sec" % elapsed))
         #print "complete",output, model,qmin, qmax
@@ -722,7 +759,7 @@ class Plugin:
                                        qmin=qmin,
                                        qmax=qmax,
                             completefn=self.complete,
-                            updatefn=self.update)
+                            updatefn=None)
             self.calc_thread.queue()
             self.calc_thread.ready(2.5)
            
