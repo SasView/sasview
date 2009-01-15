@@ -71,6 +71,7 @@ class ModelPanel2D( ModelPanel1D):
         # Beam stop
         self.beamstop_radius = DEFAULT_BEAM
         # Slicer
+        """
         if data2d.xmax==None:
             data2d.xmax=DEFAULT_QMAX+self.qstep*0.01
         
@@ -78,14 +79,14 @@ class ModelPanel2D( ModelPanel1D):
         if data2d.ymax==None:
             data2d.ymax=DEFAULT_QMAX+self.qstep*0.01
         self.imax = data2d.ymax
+        """
         #self.radius = math.sqrt(data2d.)
-        self.qstep = DEFAULT_QSTEP
+        #self.qstep = DEFAULT_QSTEP
         #print "panel2D qmax",self.qmax,
         
-        self.x = pylab.arange(-1*self.qmax, self.qmax+self.qstep*0.01, self.qstep)
-        self.y = pylab.arange(-1*self.imax, self.imax+self.qstep*0.01, self.qstep)
-
-        self.slicer_z = 5
+        #self.x = pylab.arange(-1*self.qmax, self.qmax+self.qstep*0.01, self.qstep)
+        #self.y = pylab.arange(-1*self.imax, self.imax+self.qstep*0.01, self.qstep)
+        #self.slicer_z = 5
         self.slicer = None
         self.parent.Bind(EVT_INTERNAL, self._onEVT_INTERNAL)
         self.axes_frozen = False
@@ -303,8 +304,13 @@ class ModelPanel2D( ModelPanel1D):
             
         self.slicer_z += 1
         self.slicer = slicer(self, self.subplot, zorder=self.slicer_z)
+        print "come here"
+        #self.subplot.set_ylim(self.data2D.ymin, self.data2D.ymax)
+        #self.subplot.set_xlim(self.data2D.xmin, self.data2D.xmax)
+        """
         self.subplot.set_ylim(-self.qmax, self.qmax)
         self.subplot.set_xlim(-self.qmax, self.qmax)
+        """
         self.update()
         self.slicer.update()
         
@@ -328,6 +334,7 @@ class ModelPanel2D( ModelPanel1D):
         
         from DataLoader.manipulations import CircularAverage
         import math
+        self.qmax= self.data2D.xmax
         self.radius= math.sqrt( math.pow(self.qmax,2)+math.pow(self.qmax,2)) 
         print "radius?",self.radius
         # bin_width = self.qmax -self.qmin/nbins 
