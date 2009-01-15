@@ -804,56 +804,68 @@ class _Sector:
         y_err    = numpy.zeros(self.nbins)
         
         # This If finds qmax within ROI defined by sector lines
-        if run.lower()=='q2'or run.lower()=='q':            
-            tempq=0 #to find qmax within ROI
-            for i in range(numpy.size(data,1)):  
-                dx = pixel_width_x*(i+0.5 - center_x)                  
-                for j in range(numpy.size(data,0)):
+        temp=0 #to find qmax within ROI or phimax and phimin
+        temp0=1000000
+        temp1=0
+        for i in range(numpy.size(data,1)):  
+            dx = pixel_width_x*(i+0.5 - center_x)                  
+            for j in range(numpy.size(data,0)):
                     
-                    dy = pixel_width_y*(j+0.5 - center_y)
-                    q_value = get_q(dx, dy, det_dist, wavelength)
-                    # Compute phi and check whether it's within the limits
-                    phi_value=math.atan2(dy,dx)+math.pi
-                    if self.phi_max>2*math.pi:
-                        self.phi_max=self.phi_max-2*math.pi
-                    if self.phi_min<0:
-                        self.phi_max=self.phi_max+2*math.pi
+                dy = pixel_width_y*(j+0.5 - center_y)
+                q_value = get_q(dx, dy, det_dist, wavelength)
+                # Compute phi and check whether it's within the limits
+                phi_value=math.atan2(dy,dx)+math.pi
+                if self.phi_max>2*math.pi:
+                    self.phi_max=self.phi_max-2*math.pi
+                if self.phi_min<0:
+                    self.phi_max=self.phi_max+2*math.pi
                 
-                    #In case of two ROI (symmetric major and minor regions)(for 'q2')
-                    if run.lower()=='q2':
-                        if ((self.phi_max>=0 and self.phi_max<math.pi)and (self.phi_min>=0 and self.phi_min<math.pi)):
-                            temp_max=self.phi_max+math.pi
-                            temp_min=self.phi_min+math.pi
-                        else:
-                            temp_max=self.phi_max
-                            temp_min=self.phi_min
+                #In case of two ROI (symmetric major and minor regions)(for 'q2')
+                if run.lower()=='q2':
+                    if ((self.phi_max>=0 and self.phi_max<math.pi)and (self.phi_min>=0 and self.phi_min<math.pi)):
+                        temp_max=self.phi_max+math.pi
+                        temp_min=self.phi_min+math.pi
+                    else:
+                        temp_max=self.phi_max
+                        temp_min=self.phi_min
                        
-                        if ((temp_max>=math.pi and temp_max<2*math.pi)and (temp_min>=math.pi and temp_min<2*math.pi)):
-                            if (phi_value<temp_min  or phi_value>temp_max):
-                                if (phi_value<temp_min-math.pi  or phi_value>temp_max-math.pi):
-                                    continue
-                        if (self.phi_max<self.phi_min):
-                            tmp_max=self.phi_max+math.pi
-                            tmp_min=self.phi_min-math.pi
-                        else:
-                            tmp_max=self.phi_max
-                            tmp_min=self.phi_min
-                        if (tmp_min<math.pi and tmp_max>math.pi):
-                            if((phi_value>tmp_max and phi_value<tmp_min+math.pi)or (phi_value>tmp_max-math.pi and phi_value<tmp_min)):
-                                continue
-                    #In case of one ROI (major only)(i.e.,for 'q' and 'phi')
-                    else: 
-                        if (self.phi_max>=self.phi_min):
-                            if (phi_value<self.phi_min  or phi_value>self.phi_max):
-                                continue
-                        else:
-                            if (phi_value<self.phi_min and phi_value>self.phi_max):
-                                continue                      
-                    if tempq<q_value:
-                        tempq=q_value
-            qmax=tempq                                            
-        print "qmax=",qmax       
-                
+                    if ((temp_max>=math.pi and temp_max<2*math.pi)and (temp_min>=math.pi and temp_min<2*math.pi)):
+                        if (phi_value<temp_min  or phi_value>temp_max):
+                             if (phi_value<temp_min-math.pi  or phi_value>temp_max-math.pi):
+                                 continue
+                    if (self.phi_max<self.phi_min):
+                        tmp_max=self.phi_max+math.pi
+                        tmp_min=self.phi_min-math.pi
+                    else:
+                        tmp_max=self.phi_max
+                        tmp_min=self.phi_min
+                    if (tmp_min<math.pi and tmp_max>math.pi):
+                        if((phi_value>tmp_max and phi_value<tmp_min+math.pi)or (phi_value>tmp_max-math.pi and phi_value<tmp_min)):
+                            continue
+                #In case of one ROI (major only)(i.e.,for 'q' and 'phi')
+                elif run.lower()=='phi':
+                    if q_value<qmin or q_value>qmax:
+                        continue                    
+                else: 
+                    if (self.phi_max>=self.phi_min):
+                        if (phi_value<self.phi_min  or phi_value>self.phi_max):
+                            continue
+                    else:
+                        if (phi_value<self.phi_min and phi_value>self.phi_max):
+                            continue   
+                if run.lower()=='phi':
+                    if temp1<phi_value:
+                        temp1=phi_value
+                    if temp0>phi_value:
+                        temp0=phi_value                                                                   
+                elif temp<q_value:
+                    temp=q_value
+        if run.lower()=='phi':
+            self.phi_max=temp1
+            self.phi_min=temp0
+        else:
+            qmax=temp
+                 
         for i in range(numpy.size(data,1)):
             dx = pixel_width_x*(i+0.5 - center_x)
             
@@ -929,6 +941,10 @@ class _Sector:
                     else:
                         if (phi_value<self.phi_min and phi_value>self.phi_max):
                             continue
+                #print "qmax=",qmax,qmin       
+
+                if q_value<qmin or q_value>qmax:
+                    continue
                                                     
                 # Check which type of averaging we need
                 if run.lower()=='phi': 
@@ -939,8 +955,6 @@ class _Sector:
                     # Q for the pixel from the part that is covered by
                     # the ring defined by q_min/q_max rather than the complete
                     # pixel 
-                    if q_value<qmin or q_value>qmax:
-                        continue
                     i_bin = int(math.ceil(self.nbins*(q_value-qmin)/(qmax-qmin))) - 1
                            
                 try:
