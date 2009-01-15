@@ -26,7 +26,7 @@ class SectorInteractor(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.qmax = math.sqrt(2)*self.base.qmax
+        self.qmax = math.sqrt(2)*self.base.data2D.xmax
         #print "sector qmax", self.base.qmax
         self.connect = self.base.connect
         
@@ -39,7 +39,7 @@ class SectorInteractor(_BaseInteractor):
         # Inner circle
         self.main_line = LineInteractor(self, self.base.subplot,color='green', zorder=zorder, r=self.qmax,
                                            theta= self.theta2)
-        self.main_line.qmax = self.base.qmax
+        self.main_line.qmax = self.qmax
         #self.left_line = SectionInteractor(self, self.base.subplot, zorder=zorder+1, r=self.qmax,
         #                                   theta1= self.theta1, theta2= self.theta2)
         #self.left_line.qmax = self.base.qmax
@@ -47,12 +47,12 @@ class SectorInteractor(_BaseInteractor):
                                      r=self.qmax,
                                            phi= -1*self.phi,
                                            theta2=self.theta2)
-        self.right_line.qmax = self.base.qmax
+        self.right_line.qmax = self.qmax
         self.left_line= SideInteractor(self, self.base.subplot,color='blue', zorder=zorder,
                                      r=self.qmax,
                                            phi= self.phi,
                                            theta2=self.theta2)
-        self.left_line.qmax = self.base.qmax
+        self.left_line.qmax = self.qmax
         #self.outer_circle.set_cursor(self.base.qmax/1.8, 0)
         
                       
