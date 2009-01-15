@@ -86,7 +86,7 @@ class ModelPanel2D( ModelPanel1D):
         
         #self.x = pylab.arange(-1*self.qmax, self.qmax+self.qstep*0.01, self.qstep)
         #self.y = pylab.arange(-1*self.imax, self.imax+self.qstep*0.01, self.qstep)
-        #self.slicer_z = 5
+        self.slicer_z = 5
         self.slicer = None
         self.parent.Bind(EVT_INTERNAL, self._onEVT_INTERNAL)
         self.axes_frozen = False
