@@ -363,8 +363,10 @@ class sansAssembly:
             Compute residuals
             @param params: value of parameters to fit
         """
+        #import thread
         self.model.setParams(self.paramlist,params)
         self.res= self.data.residuals(self.model.eval)
+        #print "residuals",thread.get_ident()
         return self.res
     
 class FitEngine:

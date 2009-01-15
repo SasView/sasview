@@ -82,7 +82,7 @@ class ParkFit(FitEngine):
         self.problem =  park.Assembly(mylist)
         
     
-    def fit(self, qmin=None, qmax=None):
+    def fit(self,handler=None, qmin=None, qmax=None):
         """
             Performs fit with park.fit module.It can  perform fit with one model
             and a set of data, more than two fit of  one model and sets of data or 
@@ -102,40 +102,17 @@ class ParkFit(FitEngine):
     
         localfit = FitSimplex()
         localfit.ftol = 1e-8
-        # fitmc(fitness,localfit,n,handler):
-        #Run a monte carlo fit.
-        #This procedure maps a local optimizer across a set of n initial points.
-        #The initial parameter value defined by the fitness parameters defines
-        #one initial point.  The remainder are randomly generated within the
-        #bounds of the problem.
-        #localfit is the local optimizer to use.  It should be a bounded
-        #optimizer following the `park.fitmc.LocalFit` interface.
-        #handler accepts updates to the current best set of fit parameters.
+        
         # See `park.fitresult.FitHandler` for details.
         fitter = FitMC(localfit=localfit)
-        #result = fit.fit(self.problem,
-        #             fitter=fitter,
-        #            handler= GuiUpdate(window))
+        if handler == None:
+            print "no handler"
+            handler= fitresult.ConsoleUpdate(improvement_delta=0.1)
+        print "park handler", handler
         result = fit.fit(self.problem,
                          fitter=fitter,
-                         handler= fitresult.ConsoleUpdate(improvement_delta=0.1))
-        #handler = fitresult.ConsoleUpdate(improvement_delta=0.1)
-        #models=self.problem
-        #service=None
-        #if models is None: raise RuntimeError('fit expected a list of models')
-        #from park.fit import LocalQueue,FitJob
-        #if service is None: service = LocalQueue()
-        #if fitter is None: fitter = fitmc.FitMC()
-        #if handler is None: handler = fitresult.FitHandler()
-    
-        #objective = assembly.Assembly(models) if isinstance(models,list) else models
-        #job = FitJob(self.problem,fitter,handler)
-        #service.start(job)
-        #import wx
-        #while not self.job.handler.done:
-        #    time.sleep(interval)
-        #    wx.Yield()
-        #result=service.job.handler.result
+                         handler= handler)
+       
         
         if result !=None:
             return result

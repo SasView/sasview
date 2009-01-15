@@ -58,12 +58,13 @@ class ScipyFit(FitEngine):
         """
         self.fitArrangeDict={}
         self.paramList=[]
-    def fit(self,qmin=None, qmax=None):
+    def fit(self ,handler=None, qmin=None, qmax=None):
         # Protect against simultanous fitting attempts
         #if len(self.fitArrangeDict)>1: 
         #    raise RuntimeError, "Scipy can't fit more than a single fit problem at a time."
         # fitproblem contains first fitArrange object(one model and a list of data)
         #list of fitproblem
+       
         fitproblem=[]
         for id ,fproblem in self.fitArrangeDict.iteritems():
             print "ScipyFitting:fproblem.get_to_fit() ",fproblem.get_to_fit()
