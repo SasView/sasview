@@ -241,19 +241,7 @@ class ModelPanel2D( ModelPanel1D):
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
         
-    def _setSlicer(self, slicer):
-        # Clear current slicer
-        #printEVT("Plotter2D._setSlicer %s" % slicer)
-        
-        if not self.slicer == None:  
-            self.slicer.clear()            
-            
-        self.slicer_z += 1
-        self.slicer = slicer(self, self.subplot, zorder=self.slicer_z)
-        self.subplot.set_ylim(-self.qmax, self.qmax)
-        self.subplot.set_xlim(-self.qmax, self.qmax)
-        self.update()
-        self.slicer.update()
+    
         
         
     def get_corrected_data(self):
@@ -305,12 +293,9 @@ class ModelPanel2D( ModelPanel1D):
         self.slicer_z += 1
         self.slicer = slicer(self, self.subplot, zorder=self.slicer_z)
         print "come here"
-        #self.subplot.set_ylim(self.data2D.ymin, self.data2D.ymax)
-        #self.subplot.set_xlim(self.data2D.xmin, self.data2D.xmax)
-        """
-        self.subplot.set_ylim(-self.qmax, self.qmax)
-        self.subplot.set_xlim(-self.qmax, self.qmax)
-        """
+        self.subplot.set_ylim(self.data2D.ymin, self.data2D.ymax)
+        self.subplot.set_xlim(self.data2D.xmin, self.data2D.xmax)
+       
         self.update()
         self.slicer.update()
         
