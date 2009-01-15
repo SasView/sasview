@@ -632,7 +632,7 @@ def get_intercept(q, q_0, q_1):
             return (q-q_1)/(q_0 - q_1)
     return None
     
-
+#This class can be removed.
 class _Sectorold:
     """
         Defines a sector region on a 2D data set.
@@ -803,6 +803,57 @@ class _Sector:
         x        = numpy.zeros(self.nbins)
         y_err    = numpy.zeros(self.nbins)
         
+        # This If finds qmax within ROI defined by sector lines
+        if run.lower()=='q2'or run.lower()=='q':            
+            tempq=0 #to find qmax within ROI
+            for i in range(numpy.size(data,1)):  
+                dx = pixel_width_x*(i+0.5 - center_x)                  
+                for j in range(numpy.size(data,0)):
+                    
+                    dy = pixel_width_y*(j+0.5 - center_y)
+                    q_value = get_q(dx, dy, det_dist, wavelength)
+                    # Compute phi and check whether it's within the limits
+                    phi_value=math.atan2(dy,dx)+math.pi
+                    if self.phi_max>2*math.pi:
+                        self.phi_max=self.phi_max-2*math.pi
+                    if self.phi_min<0:
+                        self.phi_max=self.phi_max+2*math.pi
+                
+                    #In case of two ROI (symmetric major and minor regions)(for 'q2')
+                    if run.lower()=='q2':
+                        if ((self.phi_max>=0 and self.phi_max<math.pi)and (self.phi_min>=0 and self.phi_min<math.pi)):
+                            temp_max=self.phi_max+math.pi
+                            temp_min=self.phi_min+math.pi
+                        else:
+                            temp_max=self.phi_max
+                            temp_min=self.phi_min
+                       
+                        if ((temp_max>=math.pi and temp_max<2*math.pi)and (temp_min>=math.pi and temp_min<2*math.pi)):
+                            if (phi_value<temp_min  or phi_value>temp_max):
+                                if (phi_value<temp_min-math.pi  or phi_value>temp_max-math.pi):
+                                    continue
+                        if (self.phi_max<self.phi_min):
+                            tmp_max=self.phi_max+math.pi
+                            tmp_min=self.phi_min-math.pi
+                        else:
+                            tmp_max=self.phi_max
+                            tmp_min=self.phi_min
+                        if (tmp_min<math.pi and tmp_max>math.pi):
+                            if((phi_value>tmp_max and phi_value<tmp_min+math.pi)or (phi_value>tmp_max-math.pi and phi_value<tmp_min)):
+                                continue
+                    #In case of one ROI (major only)(i.e.,for 'q' and 'phi')
+                    else: 
+                        if (self.phi_max>=self.phi_min):
+                            if (phi_value<self.phi_min  or phi_value>self.phi_max):
+                                continue
+                        else:
+                            if (phi_value<self.phi_min and phi_value>self.phi_max):
+                                continue                      
+                    if tempq<q_value:
+                        tempq=q_value
+            qmax=tempq                                            
+        print "qmax=",qmax       
+                
         for i in range(numpy.size(data,1)):
             dx = pixel_width_x*(i+0.5 - center_x)
             
@@ -826,6 +877,13 @@ class _Sector:
                 q_10 = get_q(maxx, miny, det_dist, wavelength)
                 q_11 = get_q(maxx, maxy, det_dist, wavelength)
                 
+                # Compute phi and check whether it's within the limits
+                phi_value=math.atan2(dy,dx)+math.pi
+                if self.phi_max>2*math.pi:
+                    self.phi_max=self.phi_max-2*math.pi
+                if self.phi_min<0:
+                    self.phi_max=self.phi_max+2*math.pi
+                    
                 # Look for intercept between each side of the pixel
                 # and the constant-q ring for qmax
                 frac_max = get_pixel_fraction(qmax, q_00, q_01, q_10, q_11)
@@ -841,14 +899,7 @@ class _Sector:
                 
                 frac = frac_max - frac_min
 
-                # Compute phi and check whether it's within the limits
-                phi_value=math.atan2(dy,dx)+math.pi
-                if self.phi_max>2*math.pi:
-                    self.phi_max=self.phi_max-2*math.pi
-                if self.phi_min<0:
-                    self.phi_max=self.phi_max+2*math.pi
-
-                #In case of two ROI (symetric major and minor regions)(for 'q2')
+                #In case of two ROI (symmetric major and minor regions)(for 'q2')
                 if run.lower()=='q2':
                     if ((self.phi_max>=0 and self.phi_max<math.pi)and (self.phi_min>=0 and self.phi_min<math.pi)):
                         temp_max=self.phi_max+math.pi
@@ -870,7 +921,7 @@ class _Sector:
                     if (tmp_min<math.pi and tmp_max>math.pi):
                         if((phi_value>tmp_max and phi_value<tmp_min+math.pi)or (phi_value>tmp_max-math.pi and phi_value<tmp_min)):
                             continue
-                #In case of one ROI (major only)(for 'q' and 'phi')
+                #In case of one ROI (major only)(i.e.,for 'q' and 'phi')
                 else: 
                     if (self.phi_max>=self.phi_min):
                         if (phi_value<self.phi_min  or phi_value>self.phi_max):
@@ -888,10 +939,10 @@ class _Sector:
                     # Q for the pixel from the part that is covered by
                     # the ring defined by q_min/q_max rather than the complete
                     # pixel 
-                    if q_value<self.r_min or q_value>self.r_max:
+                    if q_value<qmin or q_value>qmax:
                         continue
-                    i_bin = int(math.ceil(self.nbins*(q_value-self.r_min)/(self.r_max-self.r_min))) - 1
-            
+                    i_bin = int(math.ceil(self.nbins*(q_value-qmin)/(qmax-qmin))) - 1
+                           
                 try:
                     y[i_bin] += frac * data[j][i]
                 except:
@@ -912,7 +963,7 @@ class _Sector:
             if run.lower()=='phi':
                 x[i] = (self.phi_max-self.phi_min)/self.nbins*(1.0*i + 0.5)+self.phi_min
             else:
-                x[i] = (self.r_max-self.r_min)/self.nbins*(1.0*i + 0.5)+self.r_min
+                x[i] = (qmax-qmin)/self.nbins*(1.0*i + 0.5)+qmin
             
         return Data1D(x=x, y=y, dy=y_err)
                 
@@ -976,7 +1027,7 @@ if __name__ == "__main__":
     #d = Loader().load('test/MP_New.sans')
 
     
-    r = SectorQ(r_min=.005, r_max=.01, phi_min=0.0, phi_max=math.pi/2.0)
+    r = SectorQ(r_min=.000001, r_max=.01, phi_min=0.0, phi_max=math.pi/2.0)
     o = r(d)
     
     s = Ring(r_min=.005, r_max=.01) 
