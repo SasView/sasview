@@ -26,8 +26,8 @@ class SectorInteractor(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.qmax = math.sqrt(2)*self.base.data2D.xmax
-        #print "sector qmax", self.base.qmax
+        self.qmax = math.sqrt((max(self.base.data2D.xmax,abs(self.base.data2D.xmin)))**2+(max(self.base.data2D.xmax,abs(self.base.data2D.xmin)))**2)
+        print "sector qmax", self.qmax
         self.connect = self.base.connect
         
         ## Number of points on the plot
