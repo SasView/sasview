@@ -6,6 +6,8 @@ from copy import deepcopy
 from danse.common.plottools.plottables import Data1D, Theory1D,Data2D
 from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
+from sans.guicomm.events import EVT_SLICER_PARS
+
 from sans.fit.AbstractFitEngine import Model,Data,FitData1D,FitData2D
 from fitproblem import FitProblem
 from fitpanel import FitPanel
@@ -31,7 +33,7 @@ class Plugin:
         self.menu_mng = models.ModelManager()
         ## List of panels for the simulation perspective (names)
         self.perspective = []
-        
+        self.mypanels=[]
         self.calc_thread = None
         self.done = False
         # Start with a good default
@@ -124,8 +126,23 @@ class Plugin:
         self.page_finder = {}
         #index number to create random model name
         self.index_model = 0
+        self.parent.Bind(EVT_SLICER_PARS, self._on_slicer_event)
         #create the fitting panel
-        return [self.fit_panel]
+        #return [self.fit_panel]
+        self.mypanels.append(self.fit_panel)
+        return self.mypanels
+    def _on_slicer_event(self, event):
+        print "slicer event ", event.panel
+        new_panel = event.panel
+        # Set group ID if available
+        event_id = self.parent.popup_panel(new_panel)
+        #self.menu.Append(event_id, new_panel.window_caption, 
+        #                 "Show %s plot panel" % new_panel.window_caption)
+        # Set UID to allow us to reference the panel later
+        new_panel.uid = event_id
+       
+        self.mypanels.append(new_panel) 
+        return        
     def _on_show_panel(self, event):
         print "_on_show_panel: fitting"
       
