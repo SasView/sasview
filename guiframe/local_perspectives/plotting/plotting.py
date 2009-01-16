@@ -16,7 +16,7 @@ import sys
 #from danse.common.plottools.plottables import Graph,Data1D
 from sans.guicomm.events import EVT_NEW_PLOT
 from sans.guicomm.events import StatusEvent 
-from sans.guicomm.events import EVT_SLICER_PARS
+
 
 class Plugin:
     """
@@ -59,7 +59,6 @@ class Plugin:
         self.parent = parent
         # Connect to plotting events
         self.parent.Bind(EVT_NEW_PLOT, self._on_plot_event)
-        self.parent.Bind(EVT_SLICER_PARS, self._on_slicer_event)
         # We have no initial panels for this plug-in
         return []
     
@@ -87,18 +86,7 @@ class Plugin:
     
     def _on_show_panel(self, event):
         print "_on_show_panel"
-    def _on_slicer_event(self, event):
-        print "slicer event ", event.panel
-        new_panel = event.panel
-        # Set group ID if available
-        event_id = self.parent.popup_panel(new_panel)
-        self.menu.Append(event_id, new_panel.window_caption, 
-                         "Show %s plot panel" % new_panel.window_caption)
-        # Set UID to allow us to reference the panel later
-        new_panel.uid = event_id
-       
-        self.plot_panels.append(new_panel) 
-        return        
+   
     def _on_plot_event(self, event):
         """
             A new plottable is being shipped to the plotting plug-in.

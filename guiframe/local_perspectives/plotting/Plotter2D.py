@@ -215,8 +215,12 @@ class ModelPanel2D( ModelPanel1D):
         wx.EVT_MENU(self, id, self.onBoxSum) 
         
         id = wx.NewId()
-        slicerpop.Append(id, '&Box averaging')
-        wx.EVT_MENU(self, id, self.onBoxavg) 
+        slicerpop.Append(id, '&Box averaging in Qx')
+        wx.EVT_MENU(self, id, self.onBoxavgX) 
+        
+        id = wx.NewId()
+        slicerpop.Append(id, '&Box averaging in Qy')
+        wx.EVT_MENU(self, id, self.onBoxavgY) 
         if self.slicer !=None:
             id = wx.NewId()
             slicerpop.Append(id, '&Clear slicer')
@@ -385,17 +389,17 @@ class ModelPanel2D( ModelPanel1D):
         from boxSum import BoxSum
         self.onClearSlicer(event)
         wx.PostEvent(self.parent, InternalEvent(slicer= BoxSum))
-        from SlicerParameters import SlicerParameterPanel
-       
-        dialog = SlicerParameterPanel(self.parent, -1, "Slicer Parameters")
-       
-        if dialog.ShowModal() == wx.ID_OK:
-            dialog.Destroy()
+        
+        from slicerpanel import SlicerPanel
+        new_panel = SlicerPanel(self.parent, -1, style=wx.RAISED_BORDER)
+        
+        from sans.guicomm.events import SlicerParameterEvent 
+        wx.PostEvent(self.parent, SlicerParameterEvent (panel= new_panel))
             
-    def onBoxavg(self,event):
-        from boxSlicer import BoxInteractor
+    def onBoxavgX(self,event):
+        from boxSlicer import BoxInteractorX
         self.onClearSlicer(event)
-        wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractor))
+        wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractorX))
         
         from slicerpanel import SlicerPanel
         new_panel = SlicerPanel(self.parent, -1, style=wx.RAISED_BORDER)
@@ -403,7 +407,17 @@ class ModelPanel2D( ModelPanel1D):
         from sans.guicomm.events import SlicerParameterEvent 
         wx.PostEvent(self.parent, SlicerParameterEvent (panel= new_panel))
         
+    def onBoxavgY(self,event):
+        from boxSlicer import BoxInteractorY
+        self.onClearSlicer(event)
+        wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractorY))
         
+        from slicerpanel import SlicerPanel
+        new_panel = SlicerPanel(self.parent, -1, style=wx.RAISED_BORDER)
+        
+        from sans.guicomm.events import SlicerParameterEvent 
+        wx.PostEvent(self.parent, SlicerParameterEvent (panel= new_panel))
+         
     def onClearSlicer(self, event):
         """
             Clear the slicer on the plot
