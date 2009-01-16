@@ -20,12 +20,12 @@ class BoxSum(_BaseInteractor):
     """
          Select an annulus through a 2D plot
     """
-    def __init__(self,base,axes,color='black', zorder=3, x_min=0.0025, x_max=0.0025, y_min=0.0025, y_max=0.0025):
+    def __init__(self,base,axes,color='black', zorder=3, x_min=0.008, x_max=0.008, y_min=0.0025, y_max=0.0025):
         
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.qmax = self.base.qmax
+        self.qmax = self.base.data2D.xmax
         self.connect = self.base.connect
         
         self.xmin= -1* x_min
@@ -33,43 +33,36 @@ class BoxSum(_BaseInteractor):
         self.xmax= x_max
         self.ymax=  y_max
         # center of the figure
-        self.center_x= 0.0
-        self.center_y= 0.0
+        self.center_x= 0.002
+        self.center_y= 0.003
        
         ## Number of points on the plot
         self.nbins = 20
         self.count=0
         self.error=0
-        
-        self.left_line = VerticalLine(self, self.base.subplot,color='blue', zorder=zorder, 
-                                        ymin= self.ymin, ymax= self.ymax,
-                                        x= self.xmin,
-                                        center_x= self.center_x,
-                                        center_y= self.center_y)
-        self.left_line.qmax = self.base.qmax
-        
-        self.right_line= VerticalLine(self, self.base.subplot,color='black', zorder=zorder,
-                                     ymin= self.ymin, ymax= self.ymax,
-                                     x=self.xmax,
-                                     center_x= self.center_x,
-                                     center_y= self.center_y)
-        self.right_line.qmax = self.base.qmax
-        
-        self.top_line= HorizontalLine(self, self.base.subplot,color='green', zorder=zorder,
+        self.has_move= False
+    
+        self.horizontal_lines= Horizontal_DoubleLine(self, self.base.subplot,color='blue',
+                                                      zorder=zorder,
                                     y= self.ymax,
-                                    xmin= self.xmin, xmax= self.xmax,
+                                    x= self.xmax,
                                     center_x= self.center_x,
                                     center_y= self.center_y)
-        self.top_line.qmax = self.base.qmax
+        self.horizontal_lines.qmax = self.qmax
         
-        self.bottom_line= HorizontalLine(self, self.base.subplot,color='red', zorder=zorder,
-                                    y =self.ymin,
-                                    xmin= self.xmin, xmax= self.xmax,
+        self.vertical_lines= Vertical_DoubleLine(self, self.base.subplot,color='black',
+                                                      zorder=zorder,
+                                    y= self.ymax,
+                                    x= self.xmax,
                                     center_x= self.center_x,
                                     center_y= self.center_y)
-        self.bottom_line.qmax = self.base.qmax
-        #self.outer_circle.set_cursor(self.base.qmax/1.8, 0)
-        
+        self.vertical_lines.qmax = self.qmax
+        self.center= PointInteractor(self, self.base.subplot,color='grey',
+                                                      zorder=zorder,
+                                    center_x= self.center_x,
+                                    center_y= self.center_y)
+      
+            
         self.connect_markers([])
                       
         self.update()
@@ -106,10 +99,9 @@ class BoxSum(_BaseInteractor):
         
     def clear(self):
         self.clear_markers()
-        self.left_line.clear()
-        self.right_line.clear()
-        self.top_line.clear()
-        self.bottom_line.clear()
+        self.horizontal_lines.clear()
+        self.vertical_lines.clear()
+        self.center.clear()
         
         #self.base.connect.disconnect()
         self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
@@ -119,58 +111,40 @@ class BoxSum(_BaseInteractor):
         Respond to changes in the model by recalculating the profiles and
         resetting the widgets.
         """
-        if self.left_line.has_move:
-            print "left has moved"
-            self.left_line.update(mline=[self.center_x, self.center_y],translation=True)
+        if self.center.has_move:
+            print "center has move"
+            self.center.update()
+            self.horizontal_lines.update( center= self.center)
+            self.vertical_lines.update( center= self.center)
             
-            #self.right_line.update(mline= [self.center_x, self.center_y],translation=True)
-            self.top_line.update( xmin= self.left_line.x ,xmax= self.right_line.x,
-                                  mline= [self.center_x, self.center_y],translation=True)
-            self.bottom_line.update(xmin= self.left_line.x ,xmax= self.right_line.x,
-                                    mline= [self.center_x, self.center_y],translation=True)
-        if self.right_line.has_move:
-            print "right has moved"
-            self.right_line.update(mline= [self.center_x, self.center_y],translation=True)
-            #self.left_line.update(mline=[self.center_x, self.center_y],translation=True)
-            #self.left_line.update(xmin= self.right_line.x ,xmax=-1*self.right_line.x)
-            self.top_line.update( xmin= self.left_line.x ,xmax= self.right_line.x,
-                                  mline= [self.center_x, self.center_y],translation=True)
-            self.bottom_line.update(xmin= self.left_line.x ,xmax= self.right_line.x,
-                                    mline= [self.center_x, self.center_y],translation=True)
-            
-            
-        if self.bottom_line.has_move:
-            print "bottom has moved"
-            self.bottom_line.update(mline= [self.center_x, self.center_y],translation=True)
-            #self.top_line.update(y= -1*self.top_line.y,translation=True)
-            self.left_line.update( ymin= self.bottom_line.y ,ymax= self.top_line.y,
-                                   mline= [self.center_x, self.center_y],translation=True)
-            self.right_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y,
-                                   mline= [self.center_x, self.center_y],translation=True)
-            
-        if self.top_line.has_move:
+        if self.horizontal_lines.has_move:
             print "top has moved"
-            self.top_line.update(mline= [self.center_x, self.center_y],translation=True)
+            self.horizontal_lines.update()
+            self.vertical_lines.update(y1=self.horizontal_lines.y1,
+                                       y2=self.horizontal_lines.y2,
+                                       height= self.horizontal_lines.half_height )
+        if self.vertical_lines.has_move:
+            print "right has moved"
+            self.vertical_lines.update()
+            self.horizontal_lines.update(x1=self.vertical_lines.x1,
+                                         x2=self.vertical_lines.x2,
+                                         width=self.vertical_lines.half_width)
             
-            #self.bottom_line.update(y= -1*self.top_line.y,mline= [self.center_x, self.center_y],
-            #                        translation=True )
-            self.left_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y,
-                                  mline= [self.center_x, self.center_y],translation=True)
-            self.right_line.update(ymin= self.bottom_line.y ,ymax= self.top_line.y,
-                                   mline= [self.center_x, self.center_y],translation=True)
-            
-    
+
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
         can restore on Esc.
         """
         self.base.freeze_axes()
-        self.inner_circle.save(ev)
-        self.outer_circle.save(ev)
-
+        self.horizontal_lines.save(ev)
+        self.vertical_lines.save(ev)
+        self.center.save(ev)
+        
     def _post_data(self):
         # Compute data
+        print 
+        """
         data = self.base.data2D
         from DataLoader.manipulations import  Boxavg
         radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
@@ -181,7 +155,7 @@ class BoxSum(_BaseInteractor):
         box =  Boxavg (x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
         self.count, self.error = box(self.base.data2D)
         print "count, error",self.count, self.error
-        
+        """
                                        
     def moveend(self, ev):
         self.base.thaw_axes()
@@ -193,35 +167,36 @@ class BoxSum(_BaseInteractor):
         event.params = self.get_params()
         
         wx.PostEvent(self.base.parent, event)
-
+      
         self._post_data()
             
     def restore(self):
         """
         Restore the roughness for this layer.
         """
-        self.inner_circle.restore()
-        self.outer_circle.restore()
-
+        self.horizontal_lines.restore()
+        self.vertical_lines.restore()
+        self.center.restore()
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        print "in move"
-        if self.xmin <= x and x <= self.xmax:
-            print "has move whole", x
-        
+        pass
+    
     def set_cursor(self, x, y):
         pass
         
     def get_params(self):
         params = {}
-        params["x_min"] = self.left_line.x 
-        params["x_max"] = self.right_line.x 
-        params["y_min"] = self.bottom_line.y
-        params["y_max"] = self.top_line.y
+       
+        params["x"] = math.fabs(self.horizontal_lines.half_width)
+        params["y"] = math.fabs(self.vertical_lines.half_height) 
+        
+        params["center_x"] = self.center.x
+        params["center_y"] =self.center.y
         params["count"] = self.count
         params["errors"]= self.error
+        
         return params
     
     
@@ -237,23 +212,27 @@ class BoxSum(_BaseInteractor):
         
     def set_params(self, params):
         
-        x_min = -math.fabs(params["x_min"] )
-        x_max = math.fabs(params["x_max"] )
-        y_min = -math.fabs(params["y_min"])
-        y_max = math.fabs(params["y_max"]) 
+        x_max = math.fabs(params["x"] )
+        y_max = math.fabs(params["y"] )
         
-        self.left_line.update(ymin= y_min ,ymax= y_max , x= x_min)
-        self.right_line.update(ymin= y_min ,ymax= y_max, x= x_max)
-        self.top_line.update( xmin= x_min ,xmax= x_max, y= y_max)
-        self.bottom_line.update(xmin= x_min ,xmax= x_max, y=y_min)
-        """
-        self.left_line.update(mline= [center_x, center_y],ymin= y_min ,ymax= y_max)
-        self.right_line.update(mline= [center_x, center_y],ymin= y_min ,ymax= y_max)
-        self.top_line.update(mline= [center_x, center_y], xmin= x_min ,xmax= xmax)
-        self.bottom_line.update(mline= [center_x, center_y],xmin= xmin ,xmax= xmax)
-        """
+        self.center_x=params["center_x"] 
+        self.center_y=params["center_y"]
+        
+        self.center.update(center_x=self.center_x,center_y=self.center_y)
+       
+        self.horizontal_lines.update(center= self.center,
+                                     width=x_max,
+                                     height=y_max)
+        
+        
+        self.vertical_lines.update(center= self.center,
+                                    width=x_max,
+                                    height=y_max)
         
         self._post_data()
+        
+        
+        
     def freeze_axes(self):
         self.base.freeze_axes()
         
@@ -262,13 +241,11 @@ class BoxSum(_BaseInteractor):
 
     def draw(self):
         self.base.draw()
-
-class HorizontalLine(_BaseInteractor):
+class PointInteractor(_BaseInteractor):
     """
          Select an annulus through a 2D plot
     """
-    def __init__(self,base,axes,color='black', zorder=5, y=0.5,
-                 xmin=0.0,xmax=0.5,
+    def __init__(self,base,axes,color='black', zorder=5,
                  center_x= 0.0,
                  center_y= 0.0):
         
@@ -276,28 +253,42 @@ class HorizontalLine(_BaseInteractor):
         self.markers = []
         self.axes = axes
         # center
-        self.center_x = center_x
-        self.center_y = center_y
+        self.x = center_x
+        self.y = center_y
         
-        self.y= y - self.center_y
-        self.save_y= y- self.center_y
+        self.save_x = center_x
+        self.save_y = center_y
+         
         
-        self.xmin = xmin - self.center_x
-        self.save_xmin = xmin - self.center_x
-        self.xmax = xmax - self.center_x
-        self.save_xmax = xmax - self.center_x
-        
-       
-        self.line = self.axes.plot([self.xmin,self.xmax],[self.y,self.y],
+        try:
+            self.center_marker = self.axes.plot([self.x],[self.y], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          pickradius=5, label="pick", 
+                                          zorder=zorder, # Prefer this to other lines
+                                          visible=True)[0]
+        except:
+            self.center_marker = self.axes.plot([self.x],[self.y], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          label="pick", 
+                                          visible=True)[0]
+            message  = "\nTHIS PROTOTYPE NEEDS THE LATEST VERSION OF MATPLOTLIB\n"
+            message += "Get the SVN version that is at least as recent as June 1, 2007"
+            
+            #raise "Version error", message
+            
+        # line
+        self.center = self.axes.plot([self.x],[self.y],
                                       linestyle='-', marker='',
                                       color=self.color,
                                       visible=True)[0]
- 
-
-        self.npts = 20
-        self.has_move=False
-        self.connect_markers([self.line])
+    
+        self.npts = 30
+        self.has_move=False    
+        self.connect_markers([self.center_marker])
         self.update()
+
 
     def set_layer(self, n):
         self.layernum = n
@@ -306,8 +297,7 @@ class HorizontalLine(_BaseInteractor):
     def clear(self):
         self.clear_markers()
         try:
-            
-            self.line.remove()
+            self.center.remove()
         except:
             # Old version of matplotlib
             for item in range(len(self.axes.lines)):
@@ -317,20 +307,17 @@ class HorizontalLine(_BaseInteractor):
         
         return 0
    
-    def update(self,xmin=None, xmax=None,y=None, mline=None,translation=False):
+    def update(self, center_x=None,center_y=None):
         """
         Draw the new roughness on the graph.
         """
-        #print "update main line", self.has_move
-        if xmin !=None:
-            self.xmin = xmin # - self.center_x
-        if xmax !=None:
-            self.xmax = xmax #- self.center_x
-        if y !=None:
-            self.y = y #- self.center_y
+        if center_x !=None: self.x= center_x
+        if center_y !=None: self.y= center_y
+   
+        self.center_marker.set(xdata=[self.x], ydata=[self.y])
+        self.center.set(xdata=[self.x], ydata=[self.y])
         
-        self.line.set(xdata=[self.xmin,self.xmax], ydata=[self.y,self.y])
-     
+        
         
         
     def save(self, ev):
@@ -338,10 +325,9 @@ class HorizontalLine(_BaseInteractor):
         Remember the roughness for this layer and the next so that we
         can restore on Esc.
         """
-        self.save_xmin= self.xmin
-        self.save_xmax= self.xmax
-       
+        self.save_x= self.x
         self.save_y= self.y
+        
         self.base.freeze_axes()
 
     def moveend(self, ev):
@@ -354,13 +340,15 @@ class HorizontalLine(_BaseInteractor):
         Restore the roughness for this layer.
         """
         self.y= self.save_y
-       
+        self.x= self.save_x
+        
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        self.y= y - self.center_y
-        
+        self.x= x
+        self.y= y
+       
         self.has_move=True
         self.base.base.update()
         
@@ -371,54 +359,89 @@ class HorizontalLine(_BaseInteractor):
         
     def get_params(self):
         params = {}
-        params["radius"] = self.xmin
-        params["theta"] = self.xmax
+        params["x"] = self.x
+        params["y"] = self.y
         
         return params
     
     def set_params(self, params):
-
-        x = params["radius"] 
-        self.set_cursor(x, self._inner_mouse_y)
+        center_x = params["x"] 
+        center_y = params["y"] 
+        self.update(center_x=center_x,center_y=center_y)
+       
         
-
-
-
-class VerticalLine(_BaseInteractor):
+class Vertical_DoubleLine(_BaseInteractor):
     """
          Select an annulus through a 2D plot
     """
-    def __init__(self,base,axes,color='black', zorder=5, ymin=0.0, 
-                 ymax=0.5,x= 0.5,
-                   center_x= 0,
-                 center_y= 0):
+    def __init__(self,base,axes,color='black', zorder=5, x=0.5,y=0.5,
+                 center_x= 0.0,
+                 center_y= 0.0):
         
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        # x coordinate of the vertical line
-        self.center_x= center_x
-        self.center_y= center_y
-        self.x = x - center_x
-        self.save_x = x - center_x
-        # minimum value of y coordinate of the vertical line 
-        self.ymin = ymin - center_y
-        self.save_ymin = ymin - center_y
-        # maximum value of y coordinate of the vertical line 
-        self.ymax= ymax - center_y
-        self.save_ymax= ymax - center_y
+        # center
+        self.center_x = center_x
+        self.center_y = center_y
         
-        # Draw vertical line
-        self.line = self.axes.plot([self.x,self.x],[self.ymin,self.ymax],
+       
+        
+        self.y1     = y + self.center_y
+        self.save_y1= self.y1
+        
+        delta= self.y1- self.center_y
+        self.y2= self.center_y - delta
+        self.save_y2= self.y2
+        
+        self.x1      = x + self.center_x
+        self.save_x1 = self.x1
+         
+        delta= self.x1- self.center_x
+        self.x2= self.center_x - delta
+        self.save_x2 = self.x2
+        
+        self.color=color
+        
+        self.half_height= math.fabs(y)
+        self.save_half_height= math.fabs(y)
+        
+        self.half_width= math.fabs(x)
+        self.save_half_width=math.fabs(x)
+        
+        try:
+            self.right_marker = self.axes.plot([self.x1],[0], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          pickradius=5, label="pick", 
+                                          zorder=zorder, # Prefer this to other lines
+                                          visible=True)[0]
+        except:
+            self.right_marker = self.axes.plot([self.x1],[0], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          label="pick", 
+                                          visible=True)[0]
+            message  = "\nTHIS PROTOTYPE NEEDS THE LATEST VERSION OF MATPLOTLIB\n"
+            message += "Get the SVN version that is at least as recent as June 1, 2007"
+            
+            #raise "Version error", message
+            
+        # line
+        self.right_line = self.axes.plot([self.x1,self.x1],[self.y1,self.y2],
                                       linestyle='-', marker='',
                                       color=self.color,
                                       visible=True)[0]
-      
-        self.npts = 20
-        # Check vertical line motion
-        self.has_move=False
-        self.connect_markers([self.line])
+        self.left_line = self.axes.plot([self.x2,self.x2],[self.y1,self.y2],
+                                      linestyle='-', marker='',
+                                      color=self.color,
+                                      visible=True)[0]
+    
+        self.npts = 30
+        self.has_move=False    
+        self.connect_markers([self.right_marker])
         self.update()
+
 
     def set_layer(self, n):
         self.layernum = n
@@ -427,29 +450,53 @@ class VerticalLine(_BaseInteractor):
     def clear(self):
         self.clear_markers()
         try:
-            
-            self.line.remove()
+            self.right_line.remove()
+            self.left_line.remove()
         except:
             # Old version of matplotlib
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
         
     def get_radius(self):
+        
         return 0
-    
-    def update(self,x=None,ymin=None, ymax=None, mline=None,translation=False):
+   
+    def update(self,x1=None,x2=None, y1=None,y2=None,width=None, height=None, center=None):
         """
         Draw the new roughness on the graph.
         """
-        if x!=None:
-            self.x = x #-self.center_x
-        if ymin !=None:
-            self.ymin = ymin #- self.center_y
-        if ymax !=None:
-            self.ymax = ymax #- self.center_y
+        if width!=None:
+            self.half_width= width
+        if height!=None:
+            self.half_height= height
+        if center!=None:
+            self.center_x= center.x
+            self.center_y= center.y
+            
+            self.x1 = self.half_width + self.center_x
+            self.x2= -self.half_width + self.center_x
+            
+            self.y1 = self.half_height + self.center_y
+            self.y2= -self.half_height + self.center_y
+         
+            self.right_marker.set(xdata=[self.x1],ydata=[self.center_y])
+            self.right_line.set(xdata=[self.x1,self.x1], ydata=[self.y1,self.y2])
+            self.left_line.set(xdata=[self.x2,self.x2], ydata=[self.y1,self.y2])
+            return 
+        if x1 !=None: 
+            self.x1= x1
+        if x2 !=None: 
+            self.x2= x2
+        if y1 !=None: 
+            self.y1= y1
+        if y2 !=None: 
+            self.y2= y2
         
-        self.line.set(xdata=[self.x,self.x], ydata=[self.ymin,self.ymax])
-     
+       
+       
+        self.right_marker.set(xdata=[self.x1],ydata=[self.center_y])
+        self.right_line.set(xdata=[self.x1,self.x1], ydata=[self.y1,self.y2])
+        self.left_line.set(xdata=[self.x2,self.x2], ydata=[self.y1,self.y2])
         
         
     def save(self, ev):
@@ -457,10 +504,14 @@ class VerticalLine(_BaseInteractor):
         Remember the roughness for this layer and the next so that we
         can restore on Esc.
         """
-        self.save_x= self.x
-        self.save_ymin= self.ymin
-        self.save_ymax= self.ymax
+        self.save_x2= self.x2
+        self.save_y2= self.y2
         
+        self.save_x1= self.x1
+        self.save_y1= self.y1
+        
+        self.save_half_height= self.half_height
+        self.save_half_width =  self.half_width
         self.base.freeze_axes()
 
     def moveend(self, ev):
@@ -472,19 +523,26 @@ class VerticalLine(_BaseInteractor):
         """
         Restore the roughness for this layer.
         """
-        self.x = self.save_x
+        self.y2= self.save_y2
+        self.x2= self.save_x2
         
-        self.ymin=self.save_ymin
-        self.ymax=self.save_ymax
+        self.y1= self.save_y1
+        self.x1= self.save_x1
+        
+        self.half_height= self.save_half_height
+        self.half_width= self.save_half_width
+       
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        self.x = x - self.center_x
-       
+        self.x1= x
+        delta= self.x1- self.center_x
+        self.x2= self.center_x - delta
+        
+        self.half_width= math.fabs(self.x1)-self.center_x
         self.has_move=True
         self.base.base.update()
-        
         
     def set_cursor(self, x, y):
         self.move(x, y, None)
@@ -493,22 +551,201 @@ class VerticalLine(_BaseInteractor):
         
     def get_params(self):
         params = {}
-        params["x"] = self.xmin
-        params["ymin"] = self.ymin
-        params["ymax"] = self.ymax
+        params["x"] = self.x1
+        params["y"] = self.y1
+        
         return params
     
     def set_params(self, params):
-        """
-            Draw a vertical line given some value of params
-            @param params: a dictionary containing value for x, ymin , ymax to draw 
-            a vertical line
-        """
         x = params["x"] 
-        ymin = params["ymin"] 
-        ymax = params["ymax"] 
-        #self.set_cursor(x, self._inner_mouse_y)
-        self.update(self,x =x,ymin =ymin, ymax =ymax)
-        
+        y = params["y"] 
+        self.update(x=x, y=y, center_x=None,center_y=None)
 
+class Horizontal_DoubleLine(_BaseInteractor):
+    """
+         Select an annulus through a 2D plot
+    """
+    def __init__(self,base,axes,color='black', zorder=5, x=0.5,y=0.5,
+                 center_x= 0.0,
+                 center_y= 0.0):
+        
+        _BaseInteractor.__init__(self, base, axes, color=color)
+        self.markers = []
+        self.axes = axes
+        # center
+        self.center_x = center_x
+        self.center_y = center_y
+        
+        self.y1     = y + self.center_y
+        self.save_y1= self.y1
+        
+        delta= self.y1- self.center_y
+        self.y2=  self.center_y - delta
+        self.save_y2= self.y2
+        
+        self.x1      = x + self.center_x
+        self.save_x1 = self.x1
+        
+        delta= self.x1- self.center_x
+        self.x2=  self.center_x - delta
+        self.save_x2 = self.x2
+        
+        self.color=color
+        
+        self.half_height= math.fabs(y)
+        self.save_half_height= math.fabs(y)
+        
+        self.half_width= math.fabs(x)
+        self.save_half_width=math.fabs(x)
+    
+        try:
+            self.top_marker = self.axes.plot([0],[self.y1], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          pickradius=5, label="pick", 
+                                          zorder=zorder, # Prefer this to other lines
+                                          visible=True)[0]
+        except:
+            self.top_marker = self.axes.plot([0],[self.y1], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          label="pick", 
+                                          visible=True)[0]
+            message  = "\nTHIS PROTOTYPE NEEDS THE LATEST VERSION OF MATPLOTLIB\n"
+            message += "Get the SVN version that is at least as recent as June 1, 2007"
+            
+            #raise "Version error", message
+            
+        # line
+        self.top_line = self.axes.plot([self.x1,-self.x1],[self.y1,self.y1],
+                                      linestyle='-', marker='',
+                                      color=self.color,
+                                      visible=True)[0]
+        self.bottom_line = self.axes.plot([self.x1,-self.x1],[self.y2,self.y2],
+                                      linestyle='-', marker='',
+                                      color=self.color,
+                                      visible=True)[0]
+    
+        self.npts = 30
+        self.has_move=False    
+        self.connect_markers([self.top_marker])
+        self.update()
+
+
+    def set_layer(self, n):
+        self.layernum = n
+        self.update()
+        
+    def clear(self):
+        self.clear_markers()
+        try:
+            self.bottom_line.remove()
+            self.top_line.remove()
+        except:
+            # Old version of matplotlib
+            for item in range(len(self.axes.lines)):
+                del self.axes.lines[0]
+        
+    def get_radius(self):
+        
+        return 0
+   
+    def update(self,x1=None,x2=None, y1=None,y2=None,width=None,height=None, center=None):
+        """
+        Draw the new roughness on the graph.
+        """
+        if width!=None:
+            self.half_width= width
+        if height!=None:
+            self.half_height= height
+        if center!=None:
+            self.center_x= center.x
+            self.center_y= center.y
+            
+            self.x1 = self.half_width + self.center_x
+            self.x2= -self.half_width + self.center_x
+            
+            self.y1 = self.half_height + self.center_y
+            self.y2= -self.half_height + self.center_y
+            
+            self.top_marker.set(xdata=[self.center_x],ydata=[self.y1])
+            self.top_line.set(xdata=[self.x1,self.x2], ydata=[self.y1,self.y1])
+            self.bottom_line.set(xdata=[self.x1,self.x2], ydata=[self.y2,self.y2])
+            return 
+        if x1 !=None: 
+            self.x1= x1
+        if x2 !=None: 
+            self.x2= x2
+        if y1 !=None: 
+            self.y1= y1
+        if y2 !=None: 
+            self.y2= y2
+       
+             
+        self.top_marker.set(xdata=[self.center_x],ydata=[self.y1])
+        self.top_line.set(xdata=[self.x1,self.x2], ydata=[self.y1,self.y1])
+        self.bottom_line.set(xdata=[self.x1,self.x2], ydata=[self.y2,self.y2])
+       
+        
+        
+    def save(self, ev):
+        """
+        Remember the roughness for this layer and the next so that we
+        can restore on Esc.
+        """
+        self.save_x2= self.x2
+        self.save_y2= self.y2
+        
+        self.save_x1= self.x1
+        self.save_y1= self.y1
+        
+        self.save_half_height= self.half_height
+        self.save_half_width =  self.half_width
+        self.base.freeze_axes()
+
+
+    def moveend(self, ev):
+        
+        self.has_move=False
+        self.base.moveend(ev)
+            
+    def restore(self):
+        """
+        Restore the roughness for this layer.
+        """
+        self.y2= self.save_y2
+        self.x2= self.save_x2
+        
+        self.y1= self.save_y1
+        self.x1= self.save_x1
+        self.half_height= self.save_half_height
+        self.half_width= self.save_half_width
+        
+    def move(self, x, y, ev):
+        """
+        Process move to a new position, making sure that the move is allowed.
+        """
+        self.y1= y
+        delta= self.y1- self.center_y
+        self.y2=  self.center_y - delta
+        self.half_height=  math.fabs(self.y1)-self.center_y
+        self.has_move=True
+        self.base.base.update()
+        
+    def set_cursor(self, x, y):
+        self.move(x, y, None)
+        self.update()
+        
+        
+    def get_params(self):
+        params = {}
+        params["x"] = self.x
+        params["y"] = self.y
+        
+        return params
+    
+    def set_params(self, params):
+        x = params["x"] 
+        y = params["y"] 
+        self.update(x=x, y=y, center_x=None,center_y=None)
          
