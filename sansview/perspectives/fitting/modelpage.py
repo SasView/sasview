@@ -162,6 +162,22 @@ class ModelPage(wx.ScrolledWindow):
         self.SetScrollbars(20,20,55,40)
         self.Centre()
        
+    def set_range(self, qmin, qmax, npts):
+        """
+            Set the range for the plotted models
+            @param qmin: minimum Q
+            @param qmax: maximum Q
+            @param npts: number of Q bins
+        """
+        # Set the data members
+        self.qmin = qmin
+        self.qmax = qmax
+        self.num_points = npts
+        
+        # Set the controls
+        self.xmin.SetValue(format_number(self.qmin))
+        self.xmax.SetValue(format_number(self.qmax))
+        self.npts.SetValue(format_number(self.num_points))
         
     def onClose(self,event):
         """ close the page associated with this panel"""
@@ -190,14 +206,7 @@ class ModelPage(wx.ScrolledWindow):
         # and set the enable2D flag.
         if self.enable2D==False:
             self.enable2D=True
-            self.manager.draw_model(model=self.model,
-                                    name=self.model.name,
-                                    description=None,
-                                    enable2D=self.enable2D,
-                                    qmin=float(self.qmin),
-                                    qmax=float(self.qmax),
-                                    qstep= self.num_points)
-       
+            self._draw_model()
             
     def populate_box(self, dict):
         """
@@ -233,13 +242,12 @@ class ModelPage(wx.ScrolledWindow):
                 name = item.name
             if name ==event.GetString():
                 model=item()
-                #print "fitpage: _on_select_model model name",name ,event.GetString()
                 self.model= model
                 self.set_panel(model)
                 print "name in model page", name,event.GetString()
                 self.name= name
-                self.manager.draw_model(model, name)
-                
+                #self.manager.draw_model(model, name)
+                self._draw_model()
             
             
     def get_model_box(self): 
@@ -406,12 +414,21 @@ class ModelPage(wx.ScrolledWindow):
                 is_modified = True
           
             if is_modified:
-                self.manager.draw_model(self.model, self.model.name, 
-                                        qmin=self.qmin, qmax=self.qmax,
-                                        qstep= self.num_points,
-                                        enable2D=self.enable2D)
+                self._draw_model()            
             
+    def _draw_model(self):
+        """
+            Method to draw or refresh a plotted model.
+            The method will use the data member from the model page
+            to build a call to the fitting perspective manager.
             
+            [Note to coder: This way future changes will be done in only one place.] 
+        """
+        self.manager.draw_model(self.model, self.model.name, 
+                                qmin=self.qmin, qmax=self.qmax,
+                                qstep= self.num_points,
+                                enable2D=self.enable2D)
+   
             
             
               

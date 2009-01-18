@@ -16,6 +16,9 @@ import models,modelpage
 import fitpage1D,fitpage2D
 import park
 DEFAULT_BEAM = 0.005
+DEFAULT_QMIN = 0.0
+DEFAULT_QMAX = 0.15
+DEFAULT_NPTS = 40
 import time
 import thread
 print "main",thread.get_ident()
@@ -645,12 +648,14 @@ class Plugin:
     
         self.draw_model(model=model,name=name)
         
-    def draw_model(self,model,name ,description=None,enable1D=True, enable2D=False,qmin=None, qmax=None,qstep=None):
+    def draw_model(self,model,name ,description=None,enable1D=True, enable2D=False,
+                   qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
         """
              draw model with default data value
         """
         
-        self.fit_panel.add_model_page(model=model,description=model.description,page_title=name) 
+        self.fit_panel.add_model_page(model=model,description=model.description,page_title=name,
+                                      qmin=qmin, qmax=qmax, npts=qstep) 
         self._draw_model2D(model=model,
                            description=model.description,
                            enable2D= enable2D,
@@ -658,19 +663,11 @@ class Plugin:
                            qmax=qmax,
                            qstep=qstep)
         self._draw_model1D(model,name,model.description, enable1D,qmin,qmax, qstep)
-       
-    def _draw_model1D(self,model,name,description=None, enable1D=True,qmin=None,qmax=None, qstep=None):
+              
+    def _draw_model1D(self,model,name,description=None, enable1D=True,
+                      qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
         
         if enable1D:
-            if qmin==None:
-                qmin= 0.001
-            if qmax==None:
-                qmax= 1.0
-            if qstep ==None:
-                qstep =100
-           
-            #print "x in data1D",qmin,qmax
-            #x = numpy.arange(qmin, qmax, qstep)  
             x=  numpy.linspace(start= qmin,
                                stop= qmax,
                                num= qstep,
@@ -748,13 +745,8 @@ class Plugin:
          
         
          
-    def _draw_model2D(self,model,description=None, enable2D=False,qmin=None,qmax=None, qstep=None):
-        if qmin==None:
-            qmin= 0.0
-        if qmax==None:
-            qmax= 0.05
-        if qstep ==None:
-            qstep =100
+    def _draw_model2D(self,model,description=None, enable2D=False,
+                      qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
        
         x=  numpy.linspace(start= -1*qmax,
                                stop= qmax,
