@@ -228,8 +228,21 @@ class ModelPage(wx.ScrolledWindow):
         wx.EVT_COMBOBOX(self.modelbox,-1, self._on_select_model) 
         return 0
     
-  
-   
+    def select_model(self, model):
+        """
+            Select a new model
+            @param model: model object 
+        """
+        self.model= model
+        self.set_panel(model)
+        self._draw_model()
+        
+        # Select the model from the combo box
+        items = self.modelbox.GetItems()
+        for i in range(len(items)):
+            if items[i]==model.__class__.__name__:
+                self.modelbox.SetSelection(i)
+        
     def _on_select_model(self,event):
         """
             react when a model is selected from page's combo box
@@ -244,7 +257,6 @@ class ModelPage(wx.ScrolledWindow):
                 model=item()
                 self.model= model
                 self.set_panel(model)
-                print "name in model page", name,event.GetString()
                 self.name= name
                 #self.manager.draw_model(model, name)
                 self._draw_model()

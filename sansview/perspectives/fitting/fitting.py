@@ -641,21 +641,18 @@ class Plugin:
         if hasattr(evt.model, "name"):
             name = evt.model.name
         model=evt.model()
-        #name="Model View"
-        #print "mon menu",model.name
         description=model.description
-        #self.fit_panel.add_model_page(model,description,name)  
-    
-        self.draw_model(model=model,name=name)
+        
+        # Create a model page. If a new page is created, the model
+        # will be plotted automatically. If a page already exists,
+        # the content will be updated and the plot refreshed
+        self.fit_panel.add_model_page(model,description,name,topmenu=True)
         
     def draw_model(self,model,name ,description=None,enable1D=True, enable2D=False,
                    qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
         """
              draw model with default data value
         """
-        
-        self.fit_panel.add_model_page(model=model,description=model.description,page_title=name,
-                                      qmin=qmin, qmax=qmax, npts=qstep) 
         self._draw_model2D(model=model,
                            description=model.description,
                            enable2D= enable2D,
@@ -701,8 +698,11 @@ class Plugin:
                     new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
                     new_plot.id ="Model"
                     new_plot.group_id ="Model"
+                    
+                    # Pass the reset flag to let the plotting event handler
+                    # know that we are replacing the whole plot
                     wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                                     title="Analytical model 1D " ))
+                                     title="Analytical model 1D ", reset=True ))
                     
                 except:
                     raise
@@ -741,7 +741,7 @@ class Plugin:
         theory.ymax= qmax
         print "model draw comptele xmax",theory.xmax
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
-                         title="Analytical model 2D %s" %str(model.name)))
+                         title="Analytical model 2D %s" %str(model.name), reset=True))
          
         
          

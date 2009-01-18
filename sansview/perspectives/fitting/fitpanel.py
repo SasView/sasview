@@ -114,7 +114,8 @@ class FitPanel(wx.Panel):
         panel = ModelPage(self.nb,model,page_title, -1)
         panel.set_manager(self.manager)
         panel.set_owner(self.event_owner)
-        self.nb.AddPage(page=panel,text=page_title,select=True)
+        #self.nb.AddPage(page=panel,text=page_title,select=True)
+        self.nb.AddPage(page=panel,text="Model",select=True)
         panel.populate_box( self.model_list_box)
         self.draw_model_name=page_title
         self.model_page_number=self.nb.GetSelection()
@@ -124,8 +125,11 @@ class FitPanel(wx.Panel):
         # Set the range used to plot models
         self.model_page.set_range(qmin, qmax, npts)
         
+        # We just created a model page, we are ready to plot the model
+        self.manager.draw_model(model, model.name)
         
-    def add_model_page(self,model,description,page_title, qmin=0, qmax=0.1, npts=50):
+        
+    def add_model_page(self,model,description,page_title, qmin=0, qmax=0.1, npts=50, topmenu=False):
         """
             Add a model page only one  to display any model selected from the menu or the page combo box.
             when this page is closed than the user will be able to open a new one
@@ -140,11 +144,8 @@ class FitPanel(wx.Panel):
         """
         if  self.draw_model_name ==None:
             self._help_add_model_page(model,description,page_title, qmin=qmin, qmax=qmax, npts=npts)
-        else:
-            if  self.draw_model_name !=page_title: 
-                self.onClose(self.model_page, self.model_page_number)
-                self._help_add_model_page(model,description,page_title, qmin=qmin, qmax=qmax, npts=npts)
-      
+        elif topmenu==True:
+            self.model_page.select_model(model)
            
     def get_notebook(self):
         """
