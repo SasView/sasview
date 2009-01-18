@@ -402,9 +402,9 @@ class ModelPage(wx.ScrolledWindow):
                 self.qmax = float(self.xmax.GetValue())
                 is_modified = True
             
-                if float(self.npts.GetValue()) !=  self.num_points:
-                    self.qmax = float(self.npts.GetValue())
-                    is_modified = True
+            if float(self.npts.GetValue()) !=  self.num_points:
+                self.num_points = float(self.npts.GetValue())
+                is_modified = True
           
             
             if is_modified:
