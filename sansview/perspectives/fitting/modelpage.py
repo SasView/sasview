@@ -186,8 +186,6 @@ class ModelPage(wx.ScrolledWindow):
         """
          call manager to plot model in 2D
         """
-        if self.enable2D== True:
-            print "modelpage already plot",
         # If the 2D display is not currently enabled, plot the model in 2D 
         # and set the enable2D flag.
         if self.enable2D==False:
@@ -195,9 +193,10 @@ class ModelPage(wx.ScrolledWindow):
             self.manager.draw_model(model=self.model,
                                     name=self.model.name,
                                     description=None,
-                                     enable2D=self.enable2D,
-                                     qmin=float(self.qmin),
-                                    qmax=float(self.qmax))
+                                    enable2D=self.enable2D,
+                                    qmin=float(self.qmin),
+                                    qmax=float(self.qmax),
+                                    qstep= self.num_points)
        
             
     def populate_box(self, dict):
@@ -406,14 +405,11 @@ class ModelPage(wx.ScrolledWindow):
                 self.num_points = float(self.npts.GetValue())
                 is_modified = True
           
-            
             if is_modified:
                 self.manager.draw_model(self.model, self.model.name, 
                                         qmin=self.qmin, qmax=self.qmax,
                                         qstep= self.num_points,
                                         enable2D=self.enable2D)
-            #self.manager.draw_model(self,model,description=None,
-            # enable1D=True,qmin=None,qmax=None, qstep=None)
             
             
             
