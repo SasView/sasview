@@ -102,7 +102,14 @@ class FitPanel(wx.Panel):
             self.fit_page_name = name
             return panel,m_name
         
-    def _help_add_model_page(self,model,description,page_title):
+    def _help_add_model_page(self,model,description,page_title, qmin=0, qmax=0.1, npts=50):
+        """
+            #TODO: fill in description
+            
+            @param qmin: mimimum Q
+            @param qmax: maximum Q
+            @param npts: number of Q points
+        """
         from modelpage import ModelPage
         panel = ModelPage(self.nb,model,page_title, -1)
         panel.set_manager(self.manager)
@@ -114,21 +121,29 @@ class FitPanel(wx.Panel):
         self.model_page=self.nb.GetPage(self.nb.GetSelection())
         
         
-    def add_model_page(self,model,description,page_title):
+        # Set the range used to plot models
+        self.model_page.set_range(qmin, qmax, npts)
+        
+        
+    def add_model_page(self,model,description,page_title, qmin=0, qmax=0.1, npts=50):
         """
             Add a model page only one  to display any model selected from the menu or the page combo box.
             when this page is closed than the user will be able to open a new one
+            
             @param model: the model for which paramters will be changed
             @param page_title: the name of the page
+            @param description: [Coder: fill your description!]
+            @param page_title: [Coder: fill your description!]
+            @param qmin: mimimum Q
+            @param qmax: maximum Q
+            @param npts: number of Q points
         """
-        #print "page_title fitpanel", page_title
         if  self.draw_model_name ==None:
-            
-            self._help_add_model_page(model,description,page_title)
+            self._help_add_model_page(model,description,page_title, qmin=qmin, qmax=qmax, npts=npts)
         else:
             if  self.draw_model_name !=page_title: 
                 self.onClose(self.model_page, self.model_page_number)
-                self._help_add_model_page(model,description,page_title)
+                self._help_add_model_page(model,description,page_title, qmin=qmin, qmax=qmax, npts=npts)
       
            
     def get_notebook(self):
