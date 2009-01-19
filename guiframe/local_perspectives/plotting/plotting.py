@@ -118,7 +118,18 @@ class Plugin:
         if not is_available:
             if not hasattr(event.plot,'data'):
                 from Plotter1D import ModelPanel1D
-                new_panel = ModelPanel1D(self.parent, -1, style=wx.RAISED_BORDER)
+                if hasattr(event.plot,"xtransform"):
+                    print "went here"
+                    xtransform = event.plot.xtransform
+                else:
+                   
+                    xtransform =None
+                if hasattr(event.plot,"ytransform"):
+                    ytransform=  event.plot.ytransform
+                else:
+                    ytransform=None
+                new_panel = ModelPanel1D(self.parent, -1,xtransform=xtransform,
+                                         ytransform=ytransform, style=wx.RAISED_BORDER)
             else:
                 from Plotter2D import ModelPanel2D
                 new_panel = ModelPanel2D(self.parent, -1, data2d=event.plot,style=wx.RAISED_BORDER)

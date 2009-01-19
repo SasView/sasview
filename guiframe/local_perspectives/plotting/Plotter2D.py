@@ -153,6 +153,7 @@ class ModelPanel2D( ModelPanel1D):
             self.qmax= event.plot.xmax
             
         self.slicer= None
+       
         # Check axis labels
         #TODO: Should re-factor this
         #if event.plot._xunit != self.graph.prop["xunit"]:

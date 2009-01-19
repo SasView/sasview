@@ -12,7 +12,7 @@ from BaseInteractor import _BaseInteractor
 from copy import deepcopy
 import math
 
-#from Plotter1D import AddPlotEvent
+from sans.guicomm.events import NewPlotEvent, StatusEvent
 import SlicerParameters
 import wx
 
@@ -27,24 +27,24 @@ class BoxInteractor(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.qmax = self.base.qmax
+        self.qmax = self.base.data2D.xmax
         self.connect = self.base.connect
         self.x= x_max
         self.y= y_max
                 
         self.theta2= math.pi/3
         ## Number of points on the plot
-        self.nbins = 20
+        self.nbins = 30
         self.count=0
         self.error=0
-        
+        self.averager=None
         self.left_line = VerticalLine(self, self.base.subplot,color='blue', 
                                       zorder=zorder,
                                         ymin= -self.y , 
                                         ymax= self.y ,
                                         xmin= -self.x,
                                         xmax= -self.x)
-        self.left_line.qmax = self.base.qmax
+        self.left_line.qmax = self.qmax
         
         self.right_line= VerticalLine(self, self.base.subplot,color='black', 
                                       zorder=zorder,
@@ -52,7 +52,7 @@ class BoxInteractor(_BaseInteractor):
                                      ymax= self.y,
                                      xmin= self.x,
                                      xmax= self.x)
-        self.right_line.qmax = self.base.qmax
+        self.right_line.qmax = self.qmax
         
         self.top_line= HorizontalLine(self, self.base.subplot,color='green', 
                                       zorder=zorder,
@@ -60,7 +60,7 @@ class BoxInteractor(_BaseInteractor):
                                       xmax= self.x,
                                       ymin= self.y,
                                       ymax= self.y)
-        self.top_line.qmax= self.base.qmax
+        self.top_line.qmax= self.qmax
         
         self.bottom_line= HorizontalLine(self, self.base.subplot,color='gray', 
                                       zorder=zorder,
@@ -68,7 +68,7 @@ class BoxInteractor(_BaseInteractor):
                                       xmax= self.x,
                                       ymin= -self.y,
                                       ymax= -self.y)
-        self.bottom_line.qmax= self.base.qmax
+        self.bottom_line.qmax= self.qmax
         
         self.update()
         self._post_data()
@@ -103,6 +103,7 @@ class BoxInteractor(_BaseInteractor):
         self.update()
         
     def clear(self):
+        self.averager=None
         self.clear_markers()
         self.left_line.clear()
         self.right_line.clear()
@@ -170,7 +171,60 @@ class BoxInteractor(_BaseInteractor):
         self.right_line.save(ev)
         self.top_line.save(ev)
         self.bottom_line.save(ev)
+    def _post_data(self):
+        pass
+        
+    
+    def post_data(self,new_slab=None , nbins=None):
+        """ post data averaging in Q"""
+        x_min= min(self.left_line.x1, self.right_line.x1)
+        x_max= max(self.left_line.x1, self.right_line.x1)
+        
+        y_min= min(self.top_line.y1, self.bottom_line.y1)
+        y_max= max(self.top_line.y1, self.bottom_line.y1)  
+        
+        if nbins !=None:
+            self.nbins
+        if self.averager==None:
+            if new_slab ==None:
+                raise ValueError,"post data:cannot average , averager is empty"
+            self.averager= new_slab
+        bin_width= (x_max + math.fabs(x_min))/self.nbins
+        
+        box = self.averager( x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
+                         bin_width=bin_width)
+        
+        boxavg = box(self.base.data2D)
+        
+        from sans.guiframe.dataFitting import Data1D
+        if hasattr(boxavg,"dxl"):
+            dxl= boxavg.dxl
+        else:
+            dxl= None
+        if hasattr(boxavg,"dxw"):
+            dxw=boxavg.dxw
+        else:
+            dxw= None
+       
+        new_plot = Data1D(x=boxavg.x,y=boxavg.y,dy=boxavg.dy,dxl=dxl,dxw=dxw)
+        new_plot.name = str(self.averager.__name__) +"("+ self.base.data2D.name+")"
+        
+       
 
+        new_plot.source=self.base.data2D.source
+        new_plot.info=self.base.data2D.info
+        new_plot.interactive = True
+        #print "loader output.detector",output.source
+        new_plot.detector =self.base.data2D.detector
+        # If the data file does not tell us what the axes are, just assume...
+        new_plot.xaxis("\\rm{Q}", 'rad')
+        new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+        new_plot.group_id = str(self.averager.__name__)+self.base.data2D.name
+        new_plot.id = str(self.averager.__name__)
+        wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
+                                                 title=str(self.averager.__name__) ))
+        
+        
     def _post_data(self):
         # Compute data
         data = self.base.data2D
@@ -219,7 +273,7 @@ class BoxInteractor(_BaseInteractor):
         params = {}
         params["x_max"]= math.fabs(self.right_line.x1)
         params["y_max"]= math.fabs(self.top_line.y1)
-        
+        params["nbins"]= self.nbins
         params["errors"] = self.error
         params["count"]= self.count
         return params
@@ -228,7 +282,7 @@ class BoxInteractor(_BaseInteractor):
         
         self.x = float(math.fabs(params["x_max"]))
         self.y = float(math.fabs(params["y_max"] ))
-        
+        self.nbins=params["nbins"]
         self.left_line.update(xmin= -1*self.x,
                               xmax = -1*self.x,
                               ymin= -self.y,
@@ -248,7 +302,7 @@ class BoxInteractor(_BaseInteractor):
                                  ymin= -1*self.y,
                                  ymax= -1*self.y)
        
-        self._post_data()
+        self.post_data( nbins=None)
     def freeze_axes(self):
         self.base.freeze_axes()
         
@@ -502,4 +556,23 @@ class VerticalLine(_BaseInteractor):
         self.update(self,x =x,ymin =ymin, ymax =ymax)
         
 
+class BoxInteractorX(BoxInteractor):
+    def __init__(self,base,axes,color='black', zorder=3):
+        BoxInteractor.__init__(self, base, axes, color=color)
+        self.base=base
+        self._post_data()
+    def _post_data(self):
+        from DataLoader.manipulations import SlabX
+        self.post_data(SlabX )   
+        
+
+class BoxInteractorY(BoxInteractor):
+    def __init__(self,base,axes,color='black', zorder=3):
+        BoxInteractor.__init__(self, base, axes, color=color)
+        self.base=base
+        self._post_data()
+    def _post_data(self):
+        from DataLoader.manipulations import SlabY
+        self.post_data(SlabY )   
+        
         

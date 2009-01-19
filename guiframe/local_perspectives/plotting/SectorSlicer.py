@@ -183,6 +183,7 @@ class SectorInteractor(_BaseInteractor):
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = "SectorQ"+self.base.data2D.name
+        new_plot.xtransform = "ln(x)"
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
                                                  title="SectorQ" ))
         

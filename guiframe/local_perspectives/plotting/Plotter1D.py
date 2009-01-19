@@ -91,6 +91,7 @@ class ModelPanel1D(PlotPanel):
             Data is ready to be displayed
             @param event: data event
         """
+       
         #TODO: Check for existence of plot attribute
 
         # Check whether this is a replot. If we ask for a replot
@@ -111,7 +112,8 @@ class ModelPanel1D(PlotPanel):
             else:
                 # plottable is already draw on the panel
                 is_new = False
-
+        
+            
            
         if is_new:
             # a new plottable overwrites a plotted one  using the same id
@@ -133,6 +135,7 @@ class ModelPanel1D(PlotPanel):
         # Check axis labels
         #TODO: Should re-factor this
         #if event.plot._xunit != self.graph.prop["xunit"]:
+       
         self.graph.xaxis(event.plot._xaxis, event.plot._xunit)
             
         #if event.plot._yunit != self.graph.prop["yunit"]:
@@ -222,6 +225,8 @@ class ModelPanel1D(PlotPanel):
             if self.plots[self.graph.selected_plottable].__class__.__name__=="Theory1D":
                 id = wx.NewId()
                 slicerpop.Append(id, '&Add errors to data')
+                #print "panel scale before  ",self.xLabel, self.yLabel
+                #print "cyllinder before adding error", self.plots[self.graph.selected_plottable].x
                 wx.EVT_MENU(self, id, self._on_add_errors)
             else:
                 id = wx.NewId()
@@ -275,10 +280,13 @@ class ModelPanel1D(PlotPanel):
             new_plot.xaxis(label, unit)
             label, unit = self.plots[self.graph.selected_plottable].get_yaxis()
             new_plot.yaxis(label, unit)
-            
+            #print "panel scale ",self.xLabel, self.yLabel
             self.graph.delete(self.plots[self.graph.selected_plottable])
             
             self.graph.add(new_plot)
+            # transforming the view of the new data into the same of the previous data
+            self._onEVT_FUNC_PROPERTY()
+            #print "cyllinder", self.plots[self.graph.selected_plottable].x,self.plots[self.graph.selected_plottable].view.x, new_plot.x, new_plot.view.x
             self.plots[self.graph.selected_plottable]=new_plot
             
             self.graph.render(self)
