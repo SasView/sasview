@@ -5,7 +5,7 @@
 #TODO: NEED MAJOR REFACTOR
 #
 
-
+ 
 # Debug printout
 from sans.guicomm.events import StatusEvent 
 from sans.guicomm.events import NewPlotEvent
@@ -25,16 +25,29 @@ class AnnulusInteractor(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.qmax = self.base.data2D.xmax
+        self.base= base
+        self.qmax = min(math.fabs(self.base.data2D.xmax),math.fabs(self.base.data2D.xmin))  #must be positive
         self.connect = self.base.connect
         
+
         ## Number of points on the plot
         self.nbins = 20
+        
+        #Cursor position of Rings (Left(-1) or Right(1))
+        self.xmaxd=self.base.data2D.xmax
+        self.xmind=self.base.data2D.xmin
 
+        #self.sign=1
+        
+        if (self.xmaxd+self.xmind)>0:
+            self.sign=1
+        else:
+            self.sign=-1
+                 
         # Inner circle
-        self.inner_circle = RingInteractor(self, self.base.subplot, zorder=zorder, r=self.qmax/2.0)
+        self.inner_circle = RingInteractor(self, self.base.subplot, zorder=zorder, r=self.qmax/2.0,sign=self.sign)
         self.inner_circle.qmax = self.qmax
-        self.outer_circle = RingInteractor(self, self.base.subplot, zorder=zorder+1, r=self.qmax/1.8)
+        self.outer_circle = RingInteractor(self, self.base.subplot, zorder=zorder+1, r=self.qmax/1.8,sign=self.sign)
         self.outer_circle.qmax = self.qmax*1.2
         #self.outer_circle.set_cursor(self.base.qmax/1.8, 0)
         
@@ -44,7 +57,7 @@ class AnnulusInteractor(_BaseInteractor):
         
         # Bind to slice parameter events
         self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
-
+        
 
     def _onEVT_SLICER_PARS(self, event):
         wx.PostEvent(self.base.parent, StatusEvent(status="AnnulusSlicer._onEVT_SLICER_PARS"))
@@ -106,9 +119,9 @@ class AnnulusInteractor(_BaseInteractor):
             return
         
         from DataLoader.manipulations import SectorPhi
-        radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
-        rmin= self.inner_circle.get_radius()
-        rmax = self.outer_circle.get_radius()
+        radius = self.qmax#math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
+        rmin= math.fabs(self.inner_circle.get_radius())
+        rmax = math.fabs(self.outer_circle.get_radius())
         phi_min=-math.pi
         phi_max=math.pi
         phimi=phi_min+math.pi
@@ -207,7 +220,7 @@ class RingInteractor(_BaseInteractor):
     """
          Select an annulus through a 2D plot
     """
-    def __init__(self,base,axes,color='black', zorder=5, r=1.0):
+    def __init__(self,base,axes,color='black', zorder=5, r=1.0,sign=1):
         
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
@@ -217,17 +230,22 @@ class RingInteractor(_BaseInteractor):
         self._inner_save_x  = r
         self._inner_save_y  = 0
         self.scale = 10.0
+        self.base= base
+        self.sign=sign
+         
         
+        print "sign",self.sign,self.sign*math.fabs(self._inner_mouse_x)
+                                                    
         try:
             # Inner circle marker
-            self.inner_marker = self.axes.plot([self._inner_mouse_x],[0], linestyle='',
+            self.inner_marker = self.axes.plot([self.sign*math.fabs(self._inner_mouse_x)],[0], linestyle='',
                                           marker='s', markersize=10,
                                           color=self.color, alpha=0.6,
                                           pickradius=5, label="pick", 
                                           zorder=zorder, # Prefer this to other lines
                                           visible=True)[0]
         except:
-            self.inner_marker = self.axes.plot([self._inner_mouse_x],[0], linestyle='',
+            self.inner_marker = self.axes.plot([self.sign*math.fabs(self._inner_mouse_x)],[0], linestyle='',
                                           marker='s', markersize=10,
                                           color=self.color, alpha=0.6,
                                           label="pick", 
@@ -282,8 +300,8 @@ class RingInteractor(_BaseInteractor):
             
             x.append(xval)
             y.append(yval)
-        
-        self.inner_marker.set(xdata=[self._inner_mouse_x],ydata=[0])
+            
+        self.inner_marker.set(xdata=[self.sign*math.fabs(self._inner_mouse_x)],ydata=[0])
         self.inner_circle.set_data(x, y)        
 
     def save(self, ev):
@@ -320,7 +338,7 @@ class RingInteractor(_BaseInteractor):
         
     def get_params(self):
         params = {}
-        params["radius"] = self._inner_mouse_x
+        params["radius"] = math.fabs(self._inner_mouse_x)
         return params
     
     def set_params(self, params):
