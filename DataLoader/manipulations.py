@@ -843,9 +843,6 @@ class _Sector:
                         if((phi_value>tmp_max and phi_value<tmp_min+math.pi)or (phi_value>tmp_max-math.pi and phi_value<tmp_min)):
                             continue
                 #In case of one ROI (major only)(i.e.,for 'q' and 'phi')
-                elif run.lower()=='phi':
-                    if q_value<qmin or q_value>qmax:
-                        continue                    
                 else: 
                     if (self.phi_max>=self.phi_min):
                         if (phi_value<self.phi_min  or phi_value>self.phi_max):
@@ -853,13 +850,18 @@ class _Sector:
                     else:
                         if (phi_value<self.phi_min and phi_value>self.phi_max):
                             continue   
+                if q_value<qmin or q_value>qmax:
+                        continue                    
+                        
                 if run.lower()=='phi':
                     if temp1<phi_value:
                         temp1=phi_value
                     if temp0>phi_value:
-                        temp0=phi_value                                                                   
+                        temp0=phi_value   
+                                                                                         
                 elif temp<q_value:
                     temp=q_value
+                    
         if run.lower()=='phi':
             self.phi_max=temp1
             self.phi_min=temp0
@@ -938,6 +940,7 @@ class _Sector:
                     if (self.phi_max>=self.phi_min):
                         if (phi_value<self.phi_min  or phi_value>self.phi_max):
                             continue
+                            
                     else:
                         if (phi_value<self.phi_min and phi_value>self.phi_max):
                             continue
@@ -1041,10 +1044,10 @@ if __name__ == "__main__":
     #d = Loader().load('test/MP_New.sans')
 
     
-    r = SectorQ(r_min=.000001, r_max=.01, phi_min=0.0, phi_max=math.pi/2.0)
+    r = SectorQ(r_min=.000001, r_max=.01, phi_min=0.0, phi_max=2*math.pi)
     o = r(d)
     
-    s = Ring(r_min=.005, r_max=.01) 
+    s = Ring(r_min=.000001, r_max=.01) 
     p = s(d)
     
     for i in range(len(o.x)):
