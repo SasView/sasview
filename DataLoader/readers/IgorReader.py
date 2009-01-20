@@ -51,26 +51,7 @@ class Reader:
         detector = Detector()
         if len(output.detector)>0: print str(output.detector[0])
         output.detector.append(detector)
-        
-        size_x = 128
-        size_y = 128
-        output.data = numpy.zeros([size_x,size_y])
-        output.err_data = numpy.zeros([size_x,size_y])
-        
-        data_conv_q = None
-        data_conv_i = None
-        
-        if has_converter == True and output.Q_unit != '1/A':
-            data_conv_q = Converter('1/A')
-            # Test it
-            data_conv_q(1.0, output.Q_unit)
-            
-        if has_converter == True and output.I_unit != '1/cm':
-            data_conv_i = Converter('1/cm')
-            # Test it
-            data_conv_i(1.0, output.I_unit)            
-    
-        
+                
         # Get content
         dataStarted = False
         
@@ -89,11 +70,56 @@ class Reader:
         
         i_x = 0
         i_y = -1
+        i_tot_row = 0
         
         isInfo = False
         isCenter = False
+       
+        data_conv_q = None
+        data_conv_i = None
+        
+        if has_converter == True and output.Q_unit != '1/A':
+            data_conv_q = Converter('1/A')
+            # Test it
+            data_conv_q(1.0, output.Q_unit)
+            
+        if has_converter == True and output.I_unit != '1/cm':
+            data_conv_i = Converter('1/cm')
+            # Test it
+            data_conv_i(1.0, output.I_unit)            
+         
         for line in lines:
             
+            # Find setup info line
+            if isInfo:
+                isInfo = False
+                line_toks = line.split()
+                # Wavelength in Angstrom
+                try:
+                    wavelength = float(line_toks[1])
+                except:
+                    raise ValueError,"IgorReader: can't read this file, missing wavelength"
+                
+            #Find # of bins in a row assuming the detector is square.
+            if dataStarted == True:
+                try:
+                    value = float(line)
+                except:
+                    # Found a non-float entry, skip it
+                    continue
+                
+                # Get total bin number
+                
+            i_tot_row += 1
+        i_tot_row=math.ceil(math.sqrt(i_tot_row))-1 
+        #print "i_tot", i_tot_row
+        size_x = i_tot_row#192#128
+        size_y = i_tot_row#192#128
+        output.data = numpy.zeros([size_x,size_y])
+        output.err_data = numpy.zeros([size_x,size_y])
+     
+        #Read Header and 2D data
+        for line in lines:
             # Find setup info line
             if isInfo:
                 isInfo = False
@@ -114,7 +140,7 @@ class Reader:
                     transmission = float(line_toks[4])
                 except:
                     raise ValueError,"IgorReader: can't read this file, missing transmission"
-                
+                                            
             if line.count("LAMBDA")>0:
                 isInfo = True
                 
@@ -149,7 +175,7 @@ class Reader:
                     continue
                 
                 # Get bin number
-                if math.fmod(itot, 128)==0:
+                if math.fmod(itot, i_tot_row)==0:
                     i_x = 0
                     i_y += 1
                 else:
