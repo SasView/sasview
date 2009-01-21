@@ -350,6 +350,7 @@ class FitPage1D(ModelPage):
         keys.sort()
         disp_list=self.model.getDispParamList()
         fixed=self.model.fixed
+        print "fixed"
         ip=0
         iq=1
         
@@ -383,7 +384,7 @@ class FitPage1D(ModelPage):
         self.sizer2.Add(self.text2_4,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_4.Hide()
-        
+        print "keys", keys
         for item in keys:
             if not item in disp_list:
                 iy += 1
@@ -503,10 +504,27 @@ class FitPage1D(ModelPage):
         if len(self.parameters) !=0 and self.model !=None:
             # Flag to register when a parameter has changed.
             is_modified = False
+            for item in self.fixed_param:
+                
+                try:
+                     name=str(item[0])
+                     value= float(item[1].GetValue())
+                     print "model para", name,value
+                     # If the value of the parameter has changed,
+                     # update the model and set the is_modified flag
+                     if value != self.model.getParam(name):
+                         self.model.setParam(name,value)
+                         is_modified = True
+                except:
+                     wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+                            "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
+                
             for item in self.parameters:
+                print "paramters",str(item[0].GetLabelText())
                 try:
                      name=str(item[0].GetLabelText())
                      value= float(item[1].GetValue())
+                     print "model para", name,value
                      # If the value of the parameter has changed,
                      # update the model and set the is_modified flag
                      if value != self.model.getParam(name):
