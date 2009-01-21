@@ -91,7 +91,7 @@ class Calc2D(CalcThread):
         and I(qx, qy) = I(-qx, -qy) is assumed.
     """
     
-    def __init__(self,parent, x, y, model,qmin, qmax,
+    def __init__(self,parent, x, y, model,qmin, qmax,qstep,
                  completefn = None,
                  updatefn   = None,
                  yieldtime  = 0.01,
@@ -104,6 +104,7 @@ class Calc2D(CalcThread):
         self.parent =parent
         self.qmin= qmin
         self.qmax=qmax
+        self.qstep= qstep
         self.x = x
         self.y = y
         self.model = model
@@ -161,7 +162,8 @@ class Calc2D(CalcThread):
         self.complete(
                       output=output, elapsed=elapsed,model= self.model,
                       qmin= self.qmin,
-                      qmax=self.qmax)
+                      qmax=self.qmax,
+                      qstep=self.qstep)
 
 class Calc2D_4fold(CalcThread):
     """
