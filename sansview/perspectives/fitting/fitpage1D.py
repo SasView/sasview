@@ -184,14 +184,7 @@ class FitPage1D(ModelPage):
         ## Q range
         self.qmin= 0.001
         self.qmax= 0.1
-        """
-        bs = wx.BoxSizer(wx.VERTICAL)
-        bs.Add(self.scroll, 1, wx.EXPAND)
-        self.SetSizer(bs)
-        self.scroll.SetSizer(self.vbox)        
-        self.scroll.SetScrollbars(20,20,55,40)
-        #width,height = self.GetSize()
-         """
+       
         self.vbox.Layout()
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)
