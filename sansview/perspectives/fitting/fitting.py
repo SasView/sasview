@@ -709,7 +709,7 @@ class Plugin:
     def update(self, output,time):
         pass
     
-    def complete(self, output, elapsed, model, qmin, qmax):
+    def complete(self, output, elapsed, model, qmin, qmax,qstep=DEFAULT_NPTS):
        
         wx.PostEvent(self.parent, StatusEvent(status="Calc \
         complete in %g sec" % elapsed))
@@ -724,13 +724,13 @@ class Plugin:
         theory.detector=[]
         theory.detector.append(detector)
             
-        theory.detector[0].pixel_size.x= 5.0
-        theory.detector[0].pixel_size.y= 5.0
+        theory.detector[0].pixel_size.x= qmax/(qstep/2-1)#5.0
+        theory.detector[0].pixel_size.y= qmax/(qstep/2-1)#5.0
+        theory.detector[0].beam_center.x= qmax
+        theory.detector[0].beam_center.y= qmax
+        theory.detector[0].distance= 1e+12#13705.0
         theory.source= Source()
-        theory.source.wavelength= 8.4
-        theory.detector[0].beam_center.x= 0
-        theory.detector[0].beam_center.y= 0
-        theory.detector[0].distance= 13705.0
+        theory.source.wavelength= 2*math.pi/1e+12#8.4
         
         theory.name= model.name
         theory.group_id ="Model"
@@ -739,6 +739,7 @@ class Plugin:
         theory.xmax= qmax
         theory.ymin= -qmax
         theory.ymax= qmax
+        
         print "model draw comptele xmax",theory.xmax
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
                          title="Analytical model 2D %s" %str(model.name), reset=True))
@@ -767,6 +768,7 @@ class Plugin:
                                        y=y,model= self.model, 
                                        qmin=qmin,
                                        qmax=qmax,
+                                       qstep=qstep,
                             completefn=self.complete,
                             updatefn=None)
             self.calc_thread.queue()
