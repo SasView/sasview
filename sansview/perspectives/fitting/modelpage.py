@@ -360,8 +360,7 @@ class ModelPage(wx.ScrolledWindow):
             else:
                 ip = 0
                 iq += 1
-                cb = wx.CheckBox(self, -1, item, (10, 10))
-                cb.SetValue(False)
+                cb=wx.StaticText(self, -1, item)
                 self.sizer5.Add( cb,( iq, ip),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                 wx.EVT_CHECKBOX(self, cb.GetId(), self._on_select_model)
                 
