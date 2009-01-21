@@ -25,9 +25,9 @@ class SectorInteractor(_BaseInteractor):
         
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
-        self.axes = axes
-        self.qmax = math.sqrt((max(self.base.data2D.xmax,abs(self.base.data2D.xmin)))**2+(max(self.base.data2D.xmax,abs(self.base.data2D.xmin)))**2)
-        print "sector qmax", self.qmax
+        self.axes = axes        
+        self.qmax = math.sqrt(math.pow(max(self.base.data2D.xmax,abs(self.base.data2D.xmin)),2)+math.pow(max(self.base.data2D.xmax,abs(self.base.data2D.xmin)),2))
+        #print "sector qmax", self.qmax
         self.connect = self.base.connect
         
         ## Number of points on the plot
@@ -177,15 +177,15 @@ class SectorInteractor(_BaseInteractor):
         new_plot.source=self.base.data2D.source
         #new_plot.info=self.base.data2D.info
         new_plot.interactive = True
-        #print "loader output.detector",output.source
+        #print "loader output.detector",self.base.data2D.info,output.source,
         new_plot.detector =self.base.data2D.detector
+        #print "loader output.detector",new_plot.detector
         # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = "SectorQ"+self.base.data2D.name
-        new_plot.xtransform = "ln(x)"
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
-                                                 title="SectorQ" ))
+                                                 title="SectorQ"+self.base.data2D.name ))
         
          
         
