@@ -15,7 +15,8 @@ import math
 #from Plotter1D import AddPlotEvent
 import SlicerParameters
 import wx
-
+#(SlicerParamUpdateEvent, EVT_SLICER_PARS_UPDATE)   = wx.lib.newevent.NewEvent()
+from sans.guicomm.events import SlicerParamUpdateEvent
 class BoxSum(_BaseInteractor):
     """
          Select an annulus through a 2D plot
@@ -63,15 +64,15 @@ class BoxSum(_BaseInteractor):
                                     center_y= self.center_y)
       
             
-        self.connect_markers([])
+        #self.connect_markers([])
                       
         self.update()
         self._post_data()
         
         # Bind to slice parameter events
+        print "box sum  self.base.parent",self.base.parent
         self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
-
-
+       
     def _onEVT_SLICER_PARS(self, event):
         #printEVT("AnnulusSlicer._onEVT_SLICER_PARS")
         event.Skip()
@@ -144,31 +145,34 @@ class BoxSum(_BaseInteractor):
     def _post_data(self):
         # Compute data
         print 
-        """
+        
         data = self.base.data2D
         from DataLoader.manipulations import  Boxavg
         radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
-        x_min= self.left_line.x 
-        x_max= self.right_line.x 
-        y_min= self.bottom_line.y
-        y_max= self.top_line.y
+        x_min= self.vertical_lines.x2 
+        x_max= self.vertical_lines.x1 
+        y_min= self.vertical_lines.y2
+        y_max= self.vertical_lines.y1
         box =  Boxavg (x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
         self.count, self.error = box(self.base.data2D)
         print "count, error",self.count, self.error
-        """
-                                       
+                          
     def moveend(self, ev):
         self.base.thaw_axes()
-        
         # Post paramters
+        self._post_data()
+        """
         event = SlicerParameters.SlicerParameterEvent()
         event.type = self.__class__.__name__
         print "event type boxsum: ", event.type
         event.params = self.get_params()
+        wx.PostEvent(self.base, event)
+        """
+        self.type= self.__class__.__name__
+        params= self.get_params()
+        event = SlicerParamUpdateEvent(type=self.type, params=params)
+        wx.PostEvent(self.base, event)
         
-        wx.PostEvent(self.base.parent, event)
-      
-        self._post_data()
             
     def restore(self):
         """
@@ -223,8 +227,6 @@ class BoxSum(_BaseInteractor):
         self.horizontal_lines.update(center= self.center,
                                      width=x_max,
                                      height=y_max)
-        
-        
         self.vertical_lines.update(center= self.center,
                                     width=x_max,
                                     height=y_max)
@@ -288,8 +290,7 @@ class PointInteractor(_BaseInteractor):
         self.has_move=False    
         self.connect_markers([self.center_marker])
         self.update()
-
-
+    
     def set_layer(self, n):
         self.layernum = n
         self.update()
@@ -298,6 +299,7 @@ class PointInteractor(_BaseInteractor):
         self.clear_markers()
         try:
             self.center.remove()
+            self.center_marker.remove()
         except:
             # Old version of matplotlib
             for item in range(len(self.axes.lines)):
@@ -450,6 +452,7 @@ class Vertical_DoubleLine(_BaseInteractor):
     def clear(self):
         self.clear_markers()
         try:
+            self.right_marker.remove()
             self.right_line.remove()
             self.left_line.remove()
         except:
@@ -639,6 +642,7 @@ class Horizontal_DoubleLine(_BaseInteractor):
     def clear(self):
         self.clear_markers()
         try:
+            self.top_marker.remove()
             self.bottom_line.remove()
             self.top_line.remove()
         except:

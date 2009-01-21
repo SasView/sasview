@@ -19,20 +19,23 @@ class SlicerPanel(wx.Panel):
     
     CENTER_PANE = False
     
-    def __init__(self, parent, *args, **kwargs):
-        wx.Panel.__init__(self, parent, *args, **kwargs)
-        self.params = {}
+    def __init__(self, parent,id=-1,type=None, params={}, *args, **kwargs):
+        wx.Panel.__init__(self, parent,id, *args, **kwargs)
+        print "panel created"
+        self.params = params
         self.parent = parent
-        self.type = None
+        self.type = type
         self.listeners = []
         self.parameters = []
         self.bck = wx.GridBagSizer(5,5)
         self.SetSizer(self.bck)
-               
-        title = wx.StaticText(self, -1, "Right-click on 2D plot for slicer options", style=wx.ALIGN_LEFT)
-        self.bck.Add(title, (0,0), (1,2), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
-        
+        if type==None and params==None:      
+            title = wx.StaticText(self, -1, "Right-click on 2D plot for slicer options", style=wx.ALIGN_LEFT)
+            self.bck.Add(title, (0,0), (1,2), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
+        else:
+            self.set_slicer( type, params)
         # Bindings
+        #self.parent.Bind(EVT_SLICER, self.onEVT_SLICER)
         self.parent.Bind(EVT_SLICER, self.onEVT_SLICER)
         self.parent.Bind(EVT_SLICER_PARS, self.onParamChange)
 
@@ -43,6 +46,7 @@ class SlicerPanel(wx.Panel):
             
             @param event: EVT_SLICER event
         """
+        print "went here panel"
         event.Skip()
         if event.obj_class==None:
             self.set_slicer(None, None)
@@ -57,12 +61,12 @@ class SlicerPanel(wx.Panel):
         """
         self.bck.Clear(True)  
         self.type = type  
-        
+        print "in set slicer", type, params
         if type==None:
-            #title = wx.StaticText(self, -1, "Right-click on 2D plot for slicer options", style=wx.ALIGN_LEFT)
-            #self.bck.Add(title, (0,0), (1,2), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
+            title = wx.StaticText(self, -1, "Right-click on 2D plot for slicer options", style=wx.ALIGN_LEFT)
+            self.bck.Add(title, (0,0), (1,2), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
 
-        #else:
+        else:
             title = wx.StaticText(self, -1, "Slicer Parameters", style=wx.ALIGN_LEFT)
             self.bck.Add(title, (0,0), (1,2), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
             
@@ -90,8 +94,17 @@ class SlicerPanel(wx.Panel):
         self.bck.Layout()
         self.bck.Fit(self)
         self.parent.GetSizer().Layout()
-
     def onParamChange(self, evt):
+        print "parameters changed"
+        evt.Skip()
+        #if evt.type == "UPDATE":
+        for item in self.parameters:              
+            if item[0] in evt.params:
+                item[1].SetValue("%-5.3g" %evt.params[item[0]])
+                item[1].Refresh()
+        
+
+    def old_onParamChange(self, evt):
         evt.Skip()
         if evt.type == "UPDATE":
             for item in self.parameters:              

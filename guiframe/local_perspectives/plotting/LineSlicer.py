@@ -28,9 +28,9 @@ class LineInteractor(_BaseInteractor):
         self.markers = []
         self.axes = axes
         self._mouse_x = 0
-        self._mouse_y = self.base.qmax/2
+        self._mouse_y = self.base.data2D.xmax/2
         self._save_x  = 0
-        self._save_y  = self.base.qmax/2
+        self._save_y  = self.base.data2D.xmax/2
         self.scale = 10.0
         
         self.npts = 150

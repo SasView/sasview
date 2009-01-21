@@ -38,8 +38,7 @@ class Plugin:
         
         ## Plot panels
         self.plot_panels = []
-        
-
+       
     def populate_menu(self, id, parent):
         """
             Create a 'Plot' menu to list the panels
@@ -60,7 +59,9 @@ class Plugin:
         # Connect to plotting events
         self.parent.Bind(EVT_NEW_PLOT, self._on_plot_event)
         # We have no initial panels for this plug-in
+        
         return []
+   
     
     def get_perspective(self):
         """

@@ -25,7 +25,7 @@ class SectorInteractor(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.qmax = self.base.qmax
+        self.qmax = self.base.data2D.xmax
         self.connect = self.base.connect
         
         ## Number of points on the plot
@@ -41,10 +41,10 @@ class SectorInteractor(_BaseInteractor):
         from Arc import ArcInteractor
         self.inner_circle = ArcInteractor(self, self.base.subplot, zorder=zorder, r=self.qmax/2.0,theta1= theta1,
                                            theta2=theta2)
-        self.inner_circle.qmax = self.base.qmax
+        self.inner_circle.qmax = self.qmax
         self.outer_circle = ArcInteractor(self, self.base.subplot, zorder=zorder+1, r=self.qmax/1.8,theta1= theta1,
                                            theta2=theta2)
-        self.outer_circle.qmax = self.base.qmax*1.2
+        self.outer_circle.qmax = self.qmax*1.2
         #self.outer_circle.set_cursor(self.base.qmax/1.8, 0)
         from Edge import RadiusInteractor
         self.right_edge= RadiusInteractor(self, self.base.subplot, zorder=zorder+1,

@@ -31,7 +31,8 @@ DEFAULT_BEAM = 0.005
 BIN_WIDTH = 1.0
 import pylab
 from Plotter1D import PanelMenu
-
+#import boxSum
+from sans.guicomm.events import EVT_SLICER_PARS_UPDATE
 class ModelPanel2D( ModelPanel1D):
     """
         Plot panel for use with the GUI manager
@@ -70,34 +71,28 @@ class ModelPanel2D( ModelPanel1D):
         
         # Beam stop
         self.beamstop_radius = DEFAULT_BEAM
-        # Slicer
-        """
-        if data2d.xmax==None:
-            data2d.xmax=DEFAULT_QMAX+self.qstep*0.01
-        
-        self.qmax = data2d.xmax
-        if data2d.ymax==None:
-            data2d.ymax=DEFAULT_QMAX+self.qstep*0.01
-        self.imax = data2d.ymax
-        """
-        #self.radius = math.sqrt(data2d.)
-        #self.qstep = DEFAULT_QSTEP
-        #print "panel2D qmax",self.qmax,
-        
-        #self.x = pylab.arange(-1*self.qmax, self.qmax+self.qstep*0.01, self.qstep)
-        #self.y = pylab.arange(-1*self.imax, self.imax+self.qstep*0.01, self.qstep)
+       
         self.slicer_z = 5
         self.slicer = None
         self.parent.Bind(EVT_INTERNAL, self._onEVT_INTERNAL)
         self.axes_frozen = False
         
-       
+        self.panel_slicer=None
+        #self.parent.Bind(EVT_SLICER_PARS, self.onParamChange)
         ## Graph        
         self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
         self.graph.render(self)
-  
+        #self.Bind(boxSum.EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PARS)
+        self.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PARS)
+        
+        
+    def _onEVT_SLICER_PARS(self, event):
+        print "box move plotter2D", event.type, event.params
+        self.panel_slicer.set_slicer(event.type, event.params)
+        from sans.guicomm.events import SlicerPanelEvent
+        wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
     def _onEVT_1DREPLOT(self, event):
         """
             Data is ready to be displayed
@@ -307,14 +302,11 @@ class ModelPanel2D( ModelPanel1D):
         # Post slicer event
         event = self._getEmptySlicerEvent()
         event.type = self.slicer.__class__.__name__
-        print "event.type",event.type
+        
         event.obj_class = self.slicer.__class__
         event.params = self.slicer.get_params()
-        try:
-            event.result= self.slicer.get_result()
-        except:
-            event.result= None
-        print "event.result", event.result
+        print "Plotter2D: event.type",event.type,event.params, self.parent
+        
         wx.PostEvent(self.parent, event)
 
     def onCircular(self, event):
@@ -389,14 +381,40 @@ class ModelPanel2D( ModelPanel1D):
     def onBoxSum(self,event):
         from boxSum import BoxSum
         self.onClearSlicer(event)
-        wx.PostEvent(self.parent, InternalEvent(slicer= BoxSum))
+        #wx.PostEvent(self.parent, InternalEvent(slicer= BoxSum))
+        if not self.slicer == None:  
+            self.slicer.clear()             
+        self.slicer_z += 1
+        self.slicer =  BoxSum(self, self.subplot, zorder=self.slicer_z)
+        print "come here"
+        self.subplot.set_ylim(self.data2D.ymin, self.data2D.ymax)
+        self.subplot.set_xlim(self.data2D.xmin, self.data2D.xmax)
+       
+        self.update()
+        self.slicer.update()
+        
+        # Post slicer event
+        event = self._getEmptySlicerEvent()
+        event.type = self.slicer.__class__.__name__
+        
+        
+        event.obj_class = self.slicer.__class__
+        event.params = self.slicer.get_params()
+        print "Plotter2D: event.type",event.type,event.params, self.parent
         
         from slicerpanel import SlicerPanel
-        new_panel = SlicerPanel(self.parent, -1, style=wx.RAISED_BORDER)
+        new_panel = SlicerPanel(parent= self.parent,id= -1,type=event.type,
+                                 params=event.params, style=wx.RAISED_BORDER)
+        #new_panel.set_slicer(self.slicer.__class__.__name__,
+        new_panel.window_caption=self.slicer.__class__.__name__+" "+ str(self.data2D.name)
+       
+        self.panel_slicer= new_panel
         
-        from sans.guicomm.events import SlicerParameterEvent 
-        wx.PostEvent(self.parent, SlicerParameterEvent (panel= new_panel))
-            
+        wx.PostEvent(self.panel_slicer, event)
+        from sans.guicomm.events import SlicerPanelEvent
+        wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
+        print "finish box sum"
+        
     def onBoxavgX(self,event):
         from boxSlicer import BoxInteractorX
         self.onClearSlicer(event)
@@ -405,8 +423,8 @@ class ModelPanel2D( ModelPanel1D):
         from slicerpanel import SlicerPanel
         new_panel = SlicerPanel(self.parent, -1, style=wx.RAISED_BORDER)
         
-        from sans.guicomm.events import SlicerParameterEvent 
-        wx.PostEvent(self.parent, SlicerParameterEvent (panel= new_panel))
+        from sans.guicomm.events import SlicerPanelEvent
+        wx.PostEvent(self.parent, SlicerPanelEvent (panel= new_panel))
         
     def onBoxavgY(self,event):
         from boxSlicer import BoxInteractorY

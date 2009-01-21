@@ -151,7 +151,7 @@ class SectorInteractor(_BaseInteractor):
         radius = self.qmax #radius=math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
         phimin = self.right_line.theta+math.pi
         phimax = self.left_line.theta+math.pi
-
+        print "sector Q", radius
         sect = SectorQ(r_min=0.0, r_max= radius , phi_min=phimin, phi_max=phimax)
         #sect = SectorQ(r_min=-1*radius , r_max= radius , phi_min=phimin, phi_max=phimax)
         if nbins!=None:
