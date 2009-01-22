@@ -58,6 +58,9 @@ class ScipyFit(FitEngine):
         """
         self.fitArrangeDict={}
         self.paramList=[]
+    #def fit(self, *args, **kw):
+    #    return profile(self._fit, *args, **kw)
+
     def fit(self ,handler=None, qmin=None, qmax=None):
         # Protect against simultanous fitting attempts
         #if len(self.fitArrangeDict)>1: 
@@ -67,7 +70,7 @@ class ScipyFit(FitEngine):
        
         fitproblem=[]
         for id ,fproblem in self.fitArrangeDict.iteritems():
-            print "ScipyFitting:fproblem.get_to_fit() ",fproblem.get_to_fit()
+            #print "ScipyFitting:fproblem.get_to_fit() ",fproblem.get_to_fit()
             if fproblem.get_to_fit()==1:
                 fitproblem.append(fproblem)
         if len(fitproblem)>1 : 
@@ -95,6 +98,8 @@ class ScipyFit(FitEngine):
             if qmax==None:
                 qmax= numpy.max(data.image) 
         functor= sansAssembly(self.paramList,model,data)
+        
+        
         out, cov_x, info, mesg, success = optimize.leastsq(functor,model.getParams(self.paramList), full_output=1, warning=True)
         chisqr = functor.chisq(out)
         
@@ -114,6 +119,18 @@ class ScipyFit(FitEngine):
             raise ValueError, "SVD did not converge"+str(success)
         
        
-              
-            
+def profile(fn, *args, **kw):
+    import cProfile, pstats, os
+    global call_result
+    def call():
+        global call_result
+        call_result = fn(*args, **kw)
+    cProfile.runctx('call()', dict(call=call), {}, 'profile.out')
+    stats = pstats.Stats('profile.out')
+    #stats.sort_stats('time')
+    stats.sort_stats('calls')
+    stats.print_stats()
+    os.unlink('profile.out')
+    return call_result
+
       

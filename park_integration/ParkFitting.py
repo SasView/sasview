@@ -104,11 +104,13 @@ class ParkFit(FitEngine):
         localfit.ftol = 1e-8
         
         # See `park.fitresult.FitHandler` for details.
-        fitter = FitMC(localfit=localfit)
+        fitter = FitMC(localfit=localfit, start_points=1)
         if handler == None:
             print "no handler"
             handler= fitresult.ConsoleUpdate(improvement_delta=0.1)
         print "park handler", handler
+       
+            
         result = fit.fit(self.problem,
                          fitter=fitter,
                          handler= handler)
