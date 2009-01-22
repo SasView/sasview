@@ -260,6 +260,7 @@ class Plugin:
             @param qmax: the maximum value of x to replot model
           
         """
+        #print "single fit ", pars,result.pvec,result.stderr,result.fitness
         #self.done = True
         #wx.PostEvent(self.parent, StatusEvent(status="Fitting Completed: %g" % elapsed))
         try:
@@ -270,7 +271,7 @@ class Plugin:
                     model= list[0]
                     break
             i = 0
-#            print "fitting: single fit pars ", pars
+            #print "fitting: single fit pars ", pars
             for name in pars:
                 if result.pvec.__class__==numpy.float64:
                     model.setParam(name,result.pvec)
@@ -283,9 +284,9 @@ class Plugin:
 #            print "fitting result : stderr",result.stderr
             
             cpage.onsetValues(result.fitness, result.pvec,result.stderr)
-            self.plot_helper(currpage=cpage,qmin=qmin,qmax=qmax,ymin=ymin, ymax=ymax)
+            self.plot_helper(currpage=cpage,qmin=qmin,qmax=qmax,ymin=ymin, ymax=ymax, title="Fitted model 2D ")
         except:
-            raise
+            #raise
             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
        
@@ -360,6 +361,7 @@ class Plugin:
                     for element in templist:
                         pars.append(str(element[0].GetLabelText()))
                     pars.sort()
+                    #print "single fit start pars:", pars
                     #Do the single fit
                     self.fitter.set_model(Model(model), self.id, pars) 
                    
@@ -369,6 +371,7 @@ class Plugin:
                     self.id+=1
                     self.schedule_for_fit( 0,value) 
                 except:
+                    #raise 
                     wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                     return
                 # make sure to keep an alphabetic order 
@@ -396,7 +399,7 @@ class Plugin:
             
            
         except:
-            raise
+            #raise
             wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
             return
          
@@ -454,6 +457,7 @@ class Plugin:
                     self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
                     self.id += 1 
             except:
+                #raise
                 wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                 return 
         #Do the simultaneous fit
@@ -474,6 +478,7 @@ class Plugin:
             self.calc_thread.ready(2.5)
             
         except:
+            #raise
             wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fitting error: %s" % sys.exc_value))
             return
         
@@ -538,7 +543,8 @@ class Plugin:
                 break 
         self.plot_helper(currpage=page,qmin= qmin,qmax= qmax)
         
-    def plot_helper(self,currpage, fitModel=None, qmin=None,qmax=None,ymin=None,ymax=None):
+    def plot_helper(self,currpage, fitModel=None, qmin=None,qmax=None,
+                    ymin=None,ymax=None, title=None ):
         """
             Plot a theory given a model and data
             @param model: the model from where the theory is derived
@@ -595,10 +601,17 @@ class Plugin:
                         skipping point x %g %s" %(qmax, sys.exc_value)))
                 
             else:
+               
                 theory=Data2D(data.data, data.err_data)
                 theory.name= model.name
-                theory.id= "Model"
-                theory.group_id= "Model"+data.name
+                if title !=None:
+                    self.title = title
+                    theory.id= self.title
+                    theory.group_id= self.title+data.name
+                else:
+                    self.title= "Analytical model 2D "
+                    theory.id= "Model"
+                    theory.group_id= "Model"+data.name
                 theory.x_bins= data.x_bins
                 theory.y_bins= data.y_bins
                 tempy=[]
@@ -631,7 +644,7 @@ class Plugin:
                 theory.ymax= ymax
         
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
-                                                title="Analytical model %s"%str(data.name)))
+                                                title=self.title +str(data.name)))
         
         
     def _on_model_menu(self, evt):
@@ -741,9 +754,9 @@ class Plugin:
         theory.ymin= -qmax
         theory.ymax= qmax
         
-        print "model draw comptele xmax",theory.xmax
+        print "model draw comptele xmax",theory.xmax,model.name
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
-                         title="Analytical model 2D %s" %str(model.name), reset=True))
+                         title="Analytical model 2D " ))
          
         
          
@@ -774,6 +787,9 @@ class Plugin:
                             updatefn=None)
             self.calc_thread.queue()
             self.calc_thread.ready(2.5)
+            
+    def show_panel2D(self, id=None ):
+        self.parent.show_panel(147)
            
    
 if __name__ == "__main__":

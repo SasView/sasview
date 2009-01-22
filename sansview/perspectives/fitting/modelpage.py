@@ -207,9 +207,13 @@ class ModelPage(wx.ScrolledWindow):
         if self.enable2D==False:
             self.enable2D=True
             self._draw_model()
+            
         else:
-            self.manager.menu1.Append(event_id, new_panel.window_caption, 
-                         "Show %s plot panel" % new_panel.window_caption)
+            print "enable is true:",self.enable2D
+            #self.manager.parent. show_panel(147)
+            self.manager.show_panel2D( id=None )
+            #self.manager.menu1.Append(event_id, new_panel.window_caption, 
+            #             "Show %s plot panel" % new_panel.window_caption)
             
     def populate_box(self, dict):
         """
@@ -262,6 +266,7 @@ class ModelPage(wx.ScrolledWindow):
                 self.set_panel(model)
                 self.name= name
                 #self.manager.draw_model(model, name)
+                self.enable2D=False
                 self._draw_model()
             
             

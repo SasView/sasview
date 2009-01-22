@@ -378,6 +378,8 @@ class FitPage1D(ModelPage):
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_4.Hide()
         print "keys", keys
+        print "disp_list", disp_list
+        print "fix_list",fixed
         for item in keys:
             if not item in disp_list:
                 iy += 1
@@ -443,6 +445,7 @@ class FitPage1D(ModelPage):
                     self.fixed_param.append([item, Tctl])
                     im += 1
             #save data
+            
             self.parameters.append([cb,ctl1,text2,ctl2])
                 
         iy+=1
@@ -576,7 +579,8 @@ class FitPage1D(ModelPage):
         for item in self.parameters:
             if item[0].GetValue()==True:
                 list= [item[0],item[1],item[2],item[3]]
-                self.param_toFit.append(list )  
+                if not (list  in self.param_toFit):
+                    self.param_toFit.append(list )  
             else:
                 if item in self.param_toFit:
                     self.param_toFit.remove(item)
@@ -591,7 +595,7 @@ class FitPage1D(ModelPage):
         else:
             self.xmin.Enable()
             self.xmax.Enable()
-  
+       
    
        
   
