@@ -106,8 +106,12 @@ class Plugin:
                     if not event.plot.group_id==None \
                         and event.plot.group_id==panel.group_id:
                         is_available = True
+                        
+                        
                         panel._onEVT_1DREPLOT(event)
                         self.parent.show_panel(panel.uid)
+                        print "went here for replottiing", event.plot.name
+                        
                 else:
                     # Check that the plot panel has no group ID
                     if panel.group_id==None:

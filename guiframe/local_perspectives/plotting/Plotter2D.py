@@ -86,8 +86,7 @@ class ModelPanel2D( ModelPanel1D):
         self.graph.render(self)
         #self.Bind(boxSum.EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PARS)
         self.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PARS)
-        
-        
+  
     def _onEVT_SLICER_PARS(self, event):
         print "box move plotter2D", event.type, event.params
         self.panel_slicer.set_slicer(event.type, event.params)
@@ -103,6 +102,9 @@ class ModelPanel2D( ModelPanel1D):
              
             @param event: data event
         """
+              
+        self.data2D= event.plot
+        self.data =event.plot.data
         #TODO: Check for existence of plot attribute
 
         # Check whether this is a replot. If we ask for a replot
@@ -339,7 +341,7 @@ class ModelPanel2D( ModelPanel1D):
         new_plot = Data1D(x=circ.x,y=circ.y,dy=circ.dy,dxl=dxl,dxw=dxw)
         new_plot.name = "Circ avg "+ self.data2D.name
         new_plot.source=self.data2D.source
-        new_plot.info=self.data2D.info
+        #new_plot.info=self.data2D.info
         new_plot.interactive = True
         #print "loader output.detector",output.source
         new_plot.detector =self.data2D.detector
