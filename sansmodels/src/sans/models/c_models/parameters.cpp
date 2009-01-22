@@ -124,7 +124,7 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
 		weights.insert(weights.end(), WeightPoint(value, 1.0));
 	} else {
 		for(int i=0; i<npts; i++) {
-			// We cover 2 sigmas on each side of the mean
+			// We cover n(nsigmas) times sigmas on each side of the mean
 			double val = value + width * (2.0*nsigmas*i/float(npts-1) - nsigmas);
 
 			if ( ((*par).has_min==false || val>(*par).min)
