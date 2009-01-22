@@ -114,6 +114,7 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
 	if (width<=0) {
 		width = 0.0;
 		npts  = 1;
+		nsigmas = 3;
 	}
 
 	Parameter* par = (Parameter*)param;
@@ -124,7 +125,7 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
 	} else {
 		for(int i=0; i<npts; i++) {
 			// We cover 2 sigmas on each side of the mean
-			double val = value + width * (4.0*i/float(npts-1) - 2.0);
+			double val = value + width * (2.0*nsigmas*i/float(npts-1) - nsigmas);
 
 			if ( ((*par).has_min==false || val>(*par).min)
 			  && ((*par).has_max==false || val<(*par).max)  ) {
