@@ -126,7 +126,9 @@ class FitPanel(wx.Panel):
         self.model_page.set_range(qmin, qmax, npts)
         
         # We just created a model page, we are ready to plot the model
-        self.manager.draw_model(model, model.name)
+        #self.manager.draw_model(model, model.name)
+        #FOR PLUGIN  for somereason model.name is = BASEcomponent
+        self.manager.draw_model(model, page_title)
         
         
     def add_model_page(self,model,description,page_title, qmin=0, qmax=0.1, npts=50, topmenu=False):
@@ -145,7 +147,7 @@ class FitPanel(wx.Panel):
         if  self.draw_model_name ==None:
             self._help_add_model_page(model,description,page_title, qmin=qmin, qmax=qmax, npts=npts)
         elif topmenu==True:
-            self.model_page.select_model(model)
+            self.model_page.select_model(model, page_title)
            
     def get_notebook(self):
         """

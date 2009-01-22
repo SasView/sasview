@@ -66,8 +66,12 @@ class FitPage1D(ModelPage):
         i=0
         self.smearer_box.SetValue(str(None))
         self.smearer_box.Insert(str(None),i)
+        
         for k,v in self.smeares.iteritems():
-            self.smearer_box.Insert(str(v),i)
+            if str(v)=="GaussianModel":
+                self.smearer_box.Insert("Gaussian Resolution",i)
+            else:
+              self.smearer_box.Insert(str(v),i)  
             i+=1
         self.modelbox = wx.ComboBox(self, -1)
         id = wx.NewId()
@@ -98,7 +102,7 @@ class FitPage1D(ModelPage):
         self.sizer3.Add((20,20),(iy,ix),(1,1),wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE,0)
         ix = 0
         iy += 1
-        self.sizer3.Add(wx.StaticText(self,-1,'Averaging (Smearer Type)'),(iy,ix),(1,1)\
+        self.sizer3.Add(wx.StaticText(self,-1,'Instrument Smearing'),(iy,ix),(1,1)\
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer3.Add(self.smearer_box,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -343,7 +347,7 @@ class FitPage1D(ModelPage):
         keys.sort()
         disp_list=self.model.getDispParamList()
         fixed=self.model.fixed
-        print "fixed"
+        #print "fixed"
         ip=0
         iq=1
         
@@ -359,7 +363,7 @@ class FitPage1D(ModelPage):
         disp_list.sort()
         iy = 1
         ix = 0
-        self.cb1 = wx.CheckBox(self, -1,'Parameters', (10, 10))
+        self.cb1 = wx.CheckBox(self, -1,"Select all", (10, 10))
         wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_param)
         self.sizer2.Add(self.cb1,(iy, ix),(1,1),\
                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -377,9 +381,9 @@ class FitPage1D(ModelPage):
         self.sizer2.Add(self.text2_4,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_4.Hide()
-        print "keys", keys
-        print "disp_list", disp_list
-        print "fix_list",fixed
+        #print "keys", keys
+        #print "disp_list", disp_list
+        #print "fix_list",fixed
         for item in keys:
             if not item in disp_list:
                 iy += 1
@@ -505,7 +509,7 @@ class FitPage1D(ModelPage):
                 try:
                      name=str(item[0])
                      value= float(item[1].GetValue())
-                     print "model para", name,value
+#                     print "model para", name,value
                      # If the value of the parameter has changed,
                      # update the model and set the is_modified flag
                      if value != self.model.getParam(name):
@@ -516,11 +520,11 @@ class FitPage1D(ModelPage):
                             "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
                 
             for item in self.parameters:
-                print "paramters",str(item[0].GetLabelText())
+#                print "paramters",str(item[0].GetLabelText())
                 try:
                      name=str(item[0].GetLabelText())
                      value= float(item[1].GetValue())
-                     print "model para", name,value
+#                     print "model para", name,value
                      # If the value of the parameter has changed,
                      # update the model and set the is_modified flag
                      if value != self.model.getParam(name):
@@ -652,9 +656,9 @@ class FitPage1D(ModelPage):
             self.manager.set_smearer(None)   
             
             
-        if event.GetString()=="GaussianModel":
+        if event.GetString()=="Gaussian Resolution":
             from DataLoader.qsmearing import smear_selection
             smear =smear_selection( self.data )
             self.manager.set_smearer(smear)   
-            print "on smearing"
+#            print "on smearing"
        

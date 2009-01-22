@@ -235,19 +235,22 @@ class ModelPage(wx.ScrolledWindow):
         wx.EVT_COMBOBOX(self.modelbox,-1, self._on_select_model) 
         return 0
     
-    def select_model(self, model):
+    def select_model(self, model, name):
         """
             Select a new model
             @param model: model object 
         """
         self.model= model
+        print "select_model", model.__class__
         self.set_panel(model)
-        self._draw_model()
+        self._draw_model(name)
         
         # Select the model from the combo box
         items = self.modelbox.GetItems()
         for i in range(len(items)):
-            if items[i]==model.__class__.__name__:
+            print "model name",items[i],model.name, model.__class__.__name__
+            #if items[i]==model.__class__.__name__:
+            if items[i]==name:
                 self.modelbox.SetSelection(i)
         
     def _on_select_model(self,event):
@@ -267,7 +270,7 @@ class ModelPage(wx.ScrolledWindow):
                 self.name= name
                 #self.manager.draw_model(model, name)
                 self.enable2D=False
-                self._draw_model()
+                self._draw_model(name)
             
             
     def get_model_box(self): 
@@ -435,7 +438,7 @@ class ModelPage(wx.ScrolledWindow):
             if is_modified:
                 self._draw_model()            
             
-    def _draw_model(self):
+    def _draw_model(self, name=None):
         """
             Method to draw or refresh a plotted model.
             The method will use the data member from the model page
@@ -443,10 +446,18 @@ class ModelPage(wx.ScrolledWindow):
             
             [Note to coder: This way future changes will be done in only one place.] 
         """
-        self.manager.draw_model(self.model, self.model.name, 
+        if name==None:
+            name= self.model.name
+        self.manager.draw_model(self.model, name, 
                                 qmin=self.qmin, qmax=self.qmax,
                                 qstep= self.num_points,
                                 enable2D=self.enable2D)
+        """
+            self.manager.draw_model(self.model, self.model.name, 
+                                    qmin=self.qmin, qmax=self.qmax,
+                                    qstep= self.num_points,
+                                    enable2D=self.enable2D)
+        """
    
         
               

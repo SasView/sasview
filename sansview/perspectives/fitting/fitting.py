@@ -6,7 +6,7 @@ from copy import deepcopy
 from danse.common.plottools.plottables import Data1D, Theory1D,Data2D
 from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
-from sans.guicomm.events import EVT_SLICER_PANEL
+from sans.guicomm.events import EVT_SLICER_PANEL,EVT_MODEL2D_PANEL
 
 from sans.fit.AbstractFitEngine import Model,Data,FitData1D,FitData2D
 from fitproblem import FitProblem
@@ -50,6 +50,8 @@ class Plugin:
         self.enable_model2D=False
         # Log startup
         logging.info("Fitting plug-in started")   
+        # model 2D view
+        self.model2D_id=None
 
     def populate_menu(self, id, owner):
         """
@@ -58,6 +60,7 @@ class Plugin:
             @param owner: owner of menu
             @ return : list of information to populate the main menu
         """
+        self.parent.Bind(EVT_MODEL2D_PANEL, self._on_model2D_show)
         #Menu for fitting
         self.menu1 = wx.Menu()
         id1 = wx.NewId()
@@ -130,11 +133,14 @@ class Plugin:
         #index number to create random model name
         self.index_model = 0
         self.parent.Bind(EVT_SLICER_PANEL, self._on_slicer_event)
+        
         #create the fitting panel
         #return [self.fit_panel]
         
         self.mypanels.append(self.fit_panel)
         return self.mypanels
+    def _on_model2D_show(self, event ):
+        print "model2D get the id ", event.id
     def _on_slicer_event(self, event):
         print "fitting:slicer event ", event.panel
         new_panel = event.panel
@@ -507,6 +513,7 @@ class Plugin:
        
         model = evt.model
         name = evt.name
+        
         sim_page=self.fit_panel.get_page(0)
         current_pg = self.fit_panel.get_current_page() 
         selected_page = self.fit_panel.get_selected_page()
@@ -598,8 +605,9 @@ class Plugin:
                     theory.y.append(tempy)
                 except:
                     wx.PostEvent(self.parent, StatusEvent(status="fitting \
-                        skipping point x %g %s" %(qmax, sys.exc_value)))
-                
+                        skipping point x %g %s" %(qmin, sys.exc_value)) )
+                wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
+                                                title=str(data.name)))
             else:
                
                 theory=Data2D(data.data, data.err_data)
@@ -643,7 +651,7 @@ class Plugin:
                 theory.ymin= ymin
                 theory.ymax= ymax
         
-        wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
+                wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
                                                 title=self.title +str(data.name)))
         
         
@@ -654,6 +662,7 @@ class Plugin:
         name = evt.model.__name__
         if hasattr(evt.model, "name"):
             name = evt.model.name
+        print "on model menu", name
         model=evt.model()
         description=model.description
         
@@ -692,21 +701,23 @@ class Plugin:
                 
                 try:
                     new_plot = Theory1D(x, y)
+                    
                     new_plot.name = name
                     new_plot.xaxis("\\rm{Q}", 'A^{-1}')
                     new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
                     new_plot.id = "Model"
                     new_plot.group_id ="Model"
                     wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Analytical model 1D"))
-                    
                 except:
-                    raise
+                    wx.PostEvent(self.parent, StatusEvent(status="Draw model 1D error: %s" % sys.exc_value))
+                    #raise
             else:
                 for i in range(xlen):
                     y[i] = model.run(x[i])
                 #print x, y   
                 try:
                     new_plot = Theory1D(x, y)
+                    print "draw model 1D", name
                     new_plot.name = name
                     new_plot.xaxis("\\rm{Q}", 'A^{-1}')
                     new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
@@ -719,7 +730,8 @@ class Plugin:
                                      title="Analytical model 1D ", reset=True ))
                     
                 except:
-                    raise
+                    #raise
+                    wx.PostEvent(self.parent, StatusEvent(status="Draw model 1D error: %s" % sys.exc_value))
     def update(self, output,time):
         pass
     
@@ -756,7 +768,7 @@ class Plugin:
         
         print "model draw comptele xmax",theory.xmax,model.name
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
-                         title="Analytical model 2D " ))
+                         title="Analytical model 2D ", reset=True ))
          
         
          
@@ -789,7 +801,7 @@ class Plugin:
             self.calc_thread.ready(2.5)
             
     def show_panel2D(self, id=None ):
-        self.parent.show_panel(147)
+        self.parent.show_panel(self.model2D_id)
            
    
 if __name__ == "__main__":
