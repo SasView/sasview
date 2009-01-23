@@ -86,6 +86,7 @@ class SlicerPanel(wx.Panel):
                 
                 
                 ctl.SetValue(str(params[item]))
+                ctl.Disable()
                 self.Bind(wx.EVT_TEXT_ENTER, self.onTextEnter)
                 ctl.Bind(wx.EVT_KILL_FOCUS, self.onTextEnter)
                 self.parameters.append([item, ctl])
@@ -128,9 +129,11 @@ class SlicerPanel(wx.Panel):
                 has_error = True
                 item[1].SetBackgroundColour("pink")
                 item[1].Refresh()
-
+            
         if has_error==False:
             # Post parameter event
+            print "post new param"
             event = SlicerParameterEvent(type=self.type, params=params)
             wx.PostEvent(self.parent, event)
+            print "self parent ", self.parent
         

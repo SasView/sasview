@@ -28,14 +28,15 @@ class BoxSum(_BaseInteractor):
         self.axes = axes
         self.qmax = self.base.data2D.xmax
         self.connect = self.base.connect
-        
-        self.xmin= -1* x_min
-        self.ymin= -1* y_min
-        self.xmax= x_max
-        self.ymax=  y_max
+        self.xmin= -1* 0.5*min(math.fabs(self.base.data2D.xmax),math.fabs( self.base.data2D.xmin))
+        self.ymin= -1* 0.5*min(math.fabs(self.base.data2D.xmax),math.fabs( self.base.data2D.xmin))
+        #self.xmax= x_max
+        #self.ymax=  y_max
+        self.xmax= 0.5*min(math.fabs(self.base.data2D.xmax),math.fabs( self.base.data2D.xmin))
+        self.ymax=  0.5*min(math.fabs(self.base.data2D.xmax),math.fabs( self.base.data2D.xmin))
         # center of the figure
-        self.center_x= 0.002
-        self.center_y= 0.003
+        self.center_x= 0.0002
+        self.center_y= 0.0003
        
         ## Number of points on the plot
         self.nbins = 20
