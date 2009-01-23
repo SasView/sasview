@@ -153,7 +153,7 @@ class AnnulusInteractor(_BaseInteractor):
         #print "loader output.detector",output.source
         new_plot.detector =self.base.data2D.detector
         # If the data file does not tell us what the axes are, just assume...
-        new_plot.xaxis("\\rm{\phi}", 'rad')
+        new_plot.xaxis("\\rm{\phi}", ' ^{o}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = "SectorPhi"+self.base.data2D.name
         new_plot.xtransform="x"
