@@ -978,7 +978,10 @@ class _Sector:
             y_err[i] = math.sqrt(y_err[i]) / y_counts[i]
             # Check which type of averaging we need
             if run.lower()=='phi':
-                x[i] = (self.phi_max-self.phi_min)/self.nbins*(1.0*i + 0.5)+self.phi_min
+                #Calculate x[i] and put back the origin of angle back to the right hand side (from the left).
+                x[i] = ((self.phi_max-self.phi_min)/self.nbins*(1.0*i + 0.5)+self.phi_min-math.pi)*180/math.pi
+                if x[i]<0:
+                    x[i]=360+x[i]
             else:
                 x[i] = (qmax-qmin)/self.nbins*(1.0*i + 0.5)+qmin
             
