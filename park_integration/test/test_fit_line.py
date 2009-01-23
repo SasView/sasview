@@ -179,7 +179,7 @@ class testFitModule(unittest.TestCase):
         
         fitter.set_data(data1,1)
         fitter.set_model(model1,1,pars1)
-        fitter.set_data(data2,2)
+        fitter.set_data(data2,2,smearer=None)
         fitter.set_model(model2,2,pars2)
         fitter.select_problem_for_fit(Uid=1,value=1)
         fitter.select_problem_for_fit(Uid=2,value=1)

@@ -114,14 +114,13 @@ class ParkFit(FitEngine):
         result = fit.fit(self.problem,
                          fitter=fitter,
                          handler= handler)
-       
-        
+        self.problem.all_results(result)
         if result !=None:
             return result
         else:
             raise ValueError, "SVD did not converge"
             
-        
+
         
     
    
