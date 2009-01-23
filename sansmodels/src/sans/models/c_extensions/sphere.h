@@ -17,7 +17,7 @@
  
 typedef struct {
     /// Scale factor
-    //  [DEFAULT]=scale=1.0e-6
+    //  [DEFAULT]=scale= 1.0
     double scale;
 
     ///	Radius of sphere [A]
@@ -25,7 +25,7 @@ typedef struct {
     double radius;
 
     ///	Contrast [Å-2]
-    //  [DEFAULT]=contrast=1.0 A-2
+    //  [DEFAULT]=contrast= 1.0e-6 A-2
     double contrast;
 
 	/// Incoherent Background [cm-1]
