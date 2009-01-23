@@ -31,9 +31,9 @@ class SphereModel(CSphereModel, BaseComponent):
     	Refer to that file and the structure it contains
     	for details of the model.
     	List of default parameters:
-         scale           = 1e-006 
+         scale           = 1.0 
          radius          = 60.0 A
-         contrast        = 1.0 A-2
+         contrast        = 1e-006 A-2
          background      = 0.0 cm-1
 
     """
@@ -60,8 +60,7 @@ class SphereModel(CSphereModel, BaseComponent):
         self.details['radius'] = ['A', None, None]
         self.details['contrast'] = ['A-2', None, None]
         self.details['background'] = ['cm-1', None, None]
-        # Fixed parameters
-        self.fixed = ['radius.npts','radius.nsigmas']
+
    
     def clone(self):
         """ Return a identical copy of self """
