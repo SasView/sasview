@@ -82,10 +82,10 @@ CSphereModel_init(CSphereModel *self, PyObject *args, PyObject *kwds)
         self->model = new SphereModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",0.000001));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
         PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",60.000000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",1.000000));
+        PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000001));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

@@ -14,6 +14,7 @@
  //						scatter_sld: the scattering length density of the scatter
  //						solvent_sld: the scattering length density of the solvent
  //				</text>
+ //[FIXED]= <text> radius.width</text>
  
 typedef struct {
     /// Scale factor

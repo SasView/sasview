@@ -42,8 +42,12 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         
         ## Name of the model
         self.name = "[PYTHONCLASS]"
+        ## Model description
         self.description ="""[DESCRIPTION]"""
+       
 		[PAR_DETAILS]
+		## fittable parameters
+        self.fixed=[FIXED]
    
     def clone(self):
         """ Return a identical copy of self """

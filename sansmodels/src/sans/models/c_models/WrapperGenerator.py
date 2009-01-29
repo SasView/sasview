@@ -80,6 +80,8 @@ class WrapperGenerator:
         self.disp_params = []
         #model description
         self.description=''
+        # paramaters for fittable
+        self.fixed= []
         
     def __repr__(self):
         """ Simple output for printing """
@@ -88,6 +90,7 @@ class WrapperGenerator:
         rep += "  struc name: %s\n" % self.structName
         rep += "  params:     %s\n" % self.params
         rep += "  description:     %s\n" % self.description
+        rep += "  fittable paramaters list %s\n"% self.fixed
         return rep
         
     def read(self):
@@ -107,6 +110,93 @@ class WrapperGenerator:
         self.details  = "## Parameter details [units, min, max]\n"
         self.details += "        self.details = {}\n"
          # Catch Description
+        key = "[FIXED]"
+        #open item in this case Fixed
+        text='text'
+        key2="<%s>"%text.lower()
+        # close an item in this case fixed
+        text='text'
+        key3="</%s>"%text.lower()
+        temp=""
+        # flag to found key
+        find_fixed= 0
+        
+        for line in lines:
+            if line.count(key)>0 :#[FIXED]= .....
+                try:
+                    find_fixed= 1
+                    index = line.index(key)
+                    toks  = line[index:].split("=",1 )
+                    temp  = toks[1].lstrip().rstrip()
+                    if re.match(key2,temp)!=None:#[FIXED]= <text> axis_phi.width; axis_theta</text>
+                        print "when here"
+                        toks2=temp.split(key2,1)\
+                        # split the ";" inside the string
+                        print "toks[2]",toks2,toks2[1]
+                        if  re.search(";",toks2[1]) !=None:
+                            params= toks2[1].split(";")
+                            for item in params:
+                                print "item", item
+                                if  re.search( key3,item)!=None:
+                                    par= item.split(key3)#remove key3
+                                    print "par", par, par[0]
+                                    new_par=par[0].lstrip().rstrip()
+                                    break
+                            #print "Key2 and Key3 in the same line , more than 1 param", self.fixed
+                        else:#only 1 param with key2 and key3
+                            if  re.search( key3,toks2[1])!=None:
+                                par= toks2[1].split(key3)#remove key3
+                                new_par=par[0].lstrip().rstrip()
+                                self.fixed.append(new_par.lstrip().rstrip())
+                                #print "Key2 and Key3 in the same line , only 1 param ",self.fixed 
+                                break
+                    else: # no key2 and key3 #[FIXED]=  axis_phi.width; axis_theta
+                        temp2 = temp.lstrip().rstrip()
+                        if  re.search(";", temp2) !=None:# more than 1 param in the same line
+                            params= temp2.split(";")
+                            #print "no key2 and key3  params", params
+                            for item in params:
+                                if item!='':
+                                    self.fixed.append(item.lstrip().rstrip())
+                            #print "no key2 and key3, more than 1 param ",self.fixed
+                        else:# only one param per line #[FIXED]=  axis_phi.width
+                             self.fixed.append(temp2)
+                             #print "no key2 and key3, only 1 param ",self.fixed
+                        break
+                except:
+                     raise
+                     raise ValueError, "Could not parse file %s" % self.file
+            if find_fixed==1:# go to the 2nd line containing info found 1 key2
+                #[FIXED]= <text> axis_phi.width; axis_theta;radius_a.width;
+                #radius_</text>
+                if re.search(key3,line)!=None:# find  </text>
+                    tok=line.split(key3,1)
+                    print "tok",tok,tok[0]
+                    if re.match('//',tok[0].lstrip().rstrip())!=None:# look for '//'
+                        temp=tok[0].split("//",1)# remove "//"
+                    elif re.match('\*',tok[0].lstrip().rstrip())!=None:
+                        temp=tok[0].split("*",1)# remove "*"
+                    else:
+                        # missing "*" or "//" on comment 
+                        raise
+                        #raise ValueError, "Could not parse file %s" % self.file
+                    for item in temp:
+                        if item.lstrip().rstrip() !='':
+                            pars= item.lstrip().rstrip()
+                            if  re.search(";",pars) !=None:# split string by ";" more than 1 parameter
+                                params= pars.split(";")
+                                for name in params:
+                                    if name.lstrip().rstrip() !='':
+                                        self.fixed.append(name.lstrip().rstrip())
+                            else:# contains only one parameter
+                                name=pars.lstrip().rstrip()
+                                if name!='' and name!= key3:#only 1 parameter but ignore key3
+                                    self.fixed.append(name.lstrip().rstrip())
+                                    #print "the line contains only one parameters",name.lstrip().rstrip()
+                                break
+            
+                
+        # Catch Description
         key = "[DESCRIPTION]"
         find_description= 0
         temp=""
@@ -392,7 +482,10 @@ class WrapperGenerator:
             newline = self.replaceToken(newline, 
                                         "[PAR_DETAILS]", self.details)
            
-
+            # fixed list  details
+            newline = self.replaceToken(newline, 
+                                        "[FIXED]",str(self.fixed))
+           
             # Write new line to the wrapper .c file
             file.write(newline+'\n')
                
@@ -408,9 +501,11 @@ class WrapperGenerator:
         """
         lenkey = len(key)
         newline = line
+       
         while newline.count(key)>0:
             index = newline.index(key)
             newline = newline[:index]+value+newline[index+lenkey:]
+        
         return newline
         
         
