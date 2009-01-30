@@ -51,14 +51,41 @@ class FitPage1D(ModelPage):
         self.event_owner = None
         #panel interface
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
+        self.sizer9 = wx.GridBagSizer(5,5)
+        self.sizer8 = wx.GridBagSizer(5,5)
+        self.sizer7 = wx.GridBagSizer(5,5)
         self.sizer6 = wx.GridBagSizer(5,5)
         self.sizer5 = wx.GridBagSizer(5,5)
         self.sizer4 = wx.GridBagSizer(5,5)
         self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer2 = wx.GridBagSizer(5,5)
         self.sizer1 = wx.GridBagSizer(5,5)
+        # Add layer
+        #data info layer
+        self.vbox.Add(self.sizer1)
+        #data range 
+        self.vbox.Add(self.sizer2)
+        #instrument smearing selection layer
+        self.vbox.Add(self.sizer3)
+        #model selection
+        self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+        self.vbox.Add(self.sizer4)
+        #model paramaters layer
+        self.vbox.Add(self.sizer5)
+        #polydispersion selected
+        self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+        self.vbox.Add(self.sizer6)
+        #dispersion parameters layer
+        self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+        self.vbox.Add(self.sizer7)
+        #fit info layer
+        self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+        self.vbox.Add(self.sizer8)
+        #close layer
+        self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+        self.vbox.Add(self.sizer9)
         
-        
+        #---------sizer 1 draw--------------------------------
         self.DataSource  =wx.StaticText(self, -1,str(data.name))
         self.smearer_box = wx.ComboBox(self, -1)
         wx.EVT_COMBOBOX( self.smearer_box,-1, self.onSmear ) 
@@ -73,108 +100,161 @@ class FitPage1D(ModelPage):
             else:
               self.smearer_box.Insert(str(v),i)  
             i+=1
-        self.modelbox = wx.ComboBox(self, -1)
-        id = wx.NewId()
-        self.btFit =wx.Button(self,id,'Fit')
-        self.btFit.Bind(wx.EVT_BUTTON, self.onFit,id=id)
-        self.btFit.SetToolTipString("Perform fit.")
-        self.static_line_1 = wx.StaticLine(self, -1)
-       
-        self.vbox.Add(self.sizer3)
-        self.vbox.Add(self.sizer2)
-        self.vbox.Add(self.static_line_1, 0, wx.EXPAND, 0)
-        self.vbox.Add(self.sizer5)
-        self.vbox.Add(self.sizer6)
-        self.vbox.Add(self.sizer4)
-        self.vbox.Add(self.sizer1)
-        
-        id = wx.NewId()
-        self.btClose =wx.Button(self,id,'Close')
-        self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
-        self.btClose.SetToolTipString("Close page.")
+            
+        # Minimum value of data   
+        self.data_min    = wx.StaticText(self, -1,str(format_number(numpy.min(data.x))))
+        # Maximum value of data  
+        self.data_max    =  wx.StaticText(self, -1,str(format_number(numpy.max(data.x))))
+        #Filing the sizer containing data related fields
         ix = 0
         iy = 1
-        self.sizer3.Add(wx.StaticText(self, -1, 'Data Source Name : '),(iy,ix),\
+        self.sizer1.Add(wx.StaticText(self, -1, 'Data Source Name : '),(iy,ix),\
                  (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+       
         ix += 1
-        self.sizer3.Add(self.DataSource,(iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix += 1
-        self.sizer3.Add((20,20),(iy,ix),(1,1),wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE,0)
+        self.sizer1.Add(self.DataSource,(iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
+        #---------sizer 2 draw--------------------------------
         ix = 0
-        iy += 1
+        iy = 0
+        #set maximum range for x in linear scale
+        self.text4_3 = wx.StaticText(self, -1, 'Maximum Data Range(Linear)', style=wx.ALIGN_LEFT)
+        self.sizer2.Add(self.text4_3,(iy,ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 2
+        self.sizer2.Add(wx.StaticText(self, -1, 'Min :'),(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer2.Add(self.data_min,(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer2.Add(wx.StaticText(self, -1, 'Max : '),(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer2.Add(self.data_max,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
+        #----sizer 3 draw--------------------------------
+        ix = 0
+        iy = 0
         self.sizer3.Add(wx.StaticText(self,-1,'Instrument Smearing'),(iy,ix),(1,1)\
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer3.Add(self.smearer_box,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix =0
+        iy+=1
+        self.sizer3.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
+            
+        #------------------ sizer 4  draw------------------------   
+        self.modelbox = wx.ComboBox(self, -1)
         
-        ix = 0
-        iy += 1
-        self.sizer3.Add(wx.StaticText(self,-1,'Model'),(iy,ix),(1,1)\
-                  , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix += 1
-        self.sizer3.Add(self.modelbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        
+        #filling sizer2
         ix = 0
         iy = 1
-        #set maximum range for x in linear scale
-        self.text4_3 = wx.StaticText(self, -1, 'Maximum Data Range(Linear)', style=wx.ALIGN_LEFT)
-        self.sizer4.Add(self.text4_3,(iy,ix),(1,1),\
-                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        self.sizer4.Add(wx.StaticText(self,-1,'Model'),(iy,ix),(1,1)\
+                  , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.sizer4.Add(wx.StaticText(self, -1, 'Min'),(iy, ix),(1,1),\
+        self.sizer4.Add(self.modelbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
+        #----------sizer6-------------------------------------------------
+        self.disable_disp = wx.RadioButton(self, -1, 'No', (10, 10), style=wx.RB_GROUP)
+        self.enable_disp = wx.RadioButton(self, -1, 'Yes', (10, 30))
+        #self.Bind(wx.EVT_RADIOBUTTON, self.Set_DipersParam, id=self.disable_disp.GetId())
+        #self.Bind(wx.EVT_RADIOBUTTON, self.Set_DipersParam, id=self.enable_disp.GetId())
+        ix= 0
+        iy=1
+        self.sizer6.Add(wx.StaticText(self,-1,'Polydispersity: '),(iy,ix),(1,1)\
+                  , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        self.sizer6.Add(self.enable_disp ,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer6.Add(self.disable_disp ,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
+        
+        #---------sizer 8 draw----------------------------------------
+        self.tcChi    =  wx.StaticText(self, -1, str(0), style=wx.ALIGN_LEFT)
+        self.tcChi.Hide()
+        self.text1_1 = wx.StaticText(self, -1, 'Chi2/dof', style=wx.ALIGN_LEFT)
+        self.text1_1.Hide()
+        
+        id = wx.NewId()
+        self.btFit =wx.Button(self,id,'Fit')
+        self.btFit.Bind(wx.EVT_BUTTON, self.onFit,id=id)
+        self.btFit.SetToolTipString("Perform fit.")
+         ## Q range
+        self.qmin= 0.001
+        self.qmax= 0.1
+        self.num_points= 100
+        
+        
+        self.xmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.xmin.SetValue(format_number(self.qmin))
+        self.xmin.SetToolTipString("Minimun value of x in linear scale.")
+        self.xmin.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+        self.xmin.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
+        self.xmin.Disable()
+        
+        self.xmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.xmax.SetValue(format_number(self.qmax))
+        self.xmax.SetToolTipString("Maximum value of x in linear scale.")
+        self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+        self.xmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
+        self.xmax.Disable()
+
+        self.npts    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.npts.SetValue(format_number(self.num_points))
+        self.npts.SetToolTipString("Number of point to plot.")
+        self.npts.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+        self.npts.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
+        self.npts.Disable()
+        ix = 0
+        iy = 1 
+        self.sizer8.Add(wx.StaticText(self, -1, 'Fitting Range'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix += 2
-        self.sizer4.Add(wx.StaticText(self, -1, 'Max'),(iy, ix),(1,1),\
+        ix += 1 
+        self.sizer8.Add(wx.StaticText(self, -1, 'Min'),(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer8.Add(wx.StaticText(self, -1, 'Max'),(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer8.Add(wx.StaticText(self, -1, 'Npts'),(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix = 0
         iy += 1
-        self.sizer4.Add(wx.StaticText(self, -1, 'x range'),(iy, ix),(1,1),\
+        self.sizer8.Add(wx.StaticText(self, -1, 'x range'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.xmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        self.xmin.SetValue(format_number(numpy.min(data.x)))
-        self.xmin.SetToolTipString("Minimun value of x in linear scale.")
-        self.xmin.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
-        self.xmin.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
-        self.xmin.Disable()
-        self.sizer4.Add(self.xmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        
-       
-        ix += 2
-        self.xmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        self.xmax.SetValue(format_number(numpy.max(data.x)))
-        self.xmax.SetToolTipString("Maximum value of x in linear scale.")
-        self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
-        self.xmax.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
-        self.xmax.Disable()
-        self.sizer4.Add(self.xmax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix =0
-        iy+=1
-        self.sizer4.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        #Set chisqr  result into TextCtrl
+        self.sizer8.Add(self.xmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer8.Add(self.xmax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer8.Add(self.npts,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix = 0
-        iy = 1
-        
-        self.text1_1 = wx.StaticText(self, -1, 'Chi2/dof', style=wx.ALIGN_LEFT)
-        #self.sizer1.Add(self.text1_1,1)
-        self.sizer1.Add(self.text1_1,(iy,ix),(1,1),\
+        iy += 1
+        self.sizer8.Add(self.text1_1,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.tcChi    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        self.tcChi.SetToolTipString("Chi^2 over degrees of freedom.")
-        #self.sizer1.Add(self.tcChi, 1, wx.R | wx.BOTTOM , 5)
-        self.sizer1.Add(self.tcChi,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        self.sizer8.Add(self.tcChi,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix +=2
-        #self.sizer1.Add(self.btFit, 1, wx.LEFT | wx.BOTTOM , 5)
-        self.sizer1.Add(self.btFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix+= 2
-        self.sizer1.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        #self.sizer1.Add( self.btClose,1, wx.LEFT | wx.BOTTOM , 5)
-        self.tcChi.Disable()
+        self.sizer8.Add(self.btFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix =0
+        iy+=1 
+        self.sizer8.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        #----------sizer 9 draw------------------------------------------------------
+        id = wx.NewId()
+        self.btClose =wx.Button(self,id,'Close')
+        self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
+        self.btClose.SetToolTipString("Close page.")
+        
         ix= 0
+        iy= 1
+        self.sizer9.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix +=3
+        self.sizer9.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix =0
         iy+=1
-        self.sizer1.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        #self.sizer1.Add((20,20), 0)
+        self.sizer9.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+       
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         self.fixed_param=[]

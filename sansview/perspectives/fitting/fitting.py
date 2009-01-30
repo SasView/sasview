@@ -195,12 +195,12 @@ class Plugin:
                     # add data associated to the page created
                     
                     if page !=None:    
-                        
                         #create a fitproblem storing all link to data,model,page creation
                         self.page_finder[page]= FitProblem()
                         self.page_finder[page].save_model_name(model_name)  
                         self.page_finder[page].add_data(item)
                 except:
+                    raise
                     wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
                     %sys.exc_value))
     def schedule_for_fit(self,value=0,fitproblem =None):  

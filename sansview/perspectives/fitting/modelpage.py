@@ -160,6 +160,7 @@ class ModelPage(wx.ScrolledWindow):
         
         self.SetSizer(self.vbox)
         self.SetScrollbars(20,20,55,40)
+        
         self.Centre()
        
     def set_range(self, qmin, qmax, npts):
@@ -395,6 +396,8 @@ class ModelPage(wx.ScrolledWindow):
             else:
                 self.text2_4.Hide()
         self.vbox.Layout()
+        self.SetScrollbars(20,20,55,40)
+        
         self.GrandParent.GetSizer().Layout()
        
         
