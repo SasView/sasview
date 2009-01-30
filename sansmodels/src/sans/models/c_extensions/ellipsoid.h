@@ -18,8 +18,9 @@
  //						Ra: radius along the rotation axis of the Ellipsoid
  //						Rb: radius perpendicular to the rotation axis of the ellipsoid
  //						</text>
- //[FIXED]= <text> axis_phi.width; axis_theta;radius_a.width;
- //radius_b.width; length.width; r_minor.width, r_ratio.width</text>
+ //[FIXED]= <text> axis_phi.width; axis_theta.width;radius_a.width;
+ //radius_b.width; length.width; r_minor.width
+ //, r_ratio.width</text>
 typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0

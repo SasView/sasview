@@ -72,7 +72,7 @@ class EllipsoidModel(CEllipsoidModel, BaseComponent):
         self.details['axis_phi'] = ['rad', None, None]
 
 		## fittable parameters
-        self.fixed=['axis_phi.width', 'axis_theta', 'radius_a.width']
+        self.fixed=['axis_phi.width', 'axis_theta.width', 'radius_a.width', 'radius_b.width', 'length.width', 'r_minor.width', 'r_ratio.width']
    
     def clone(self):
         """ Return a identical copy of self """

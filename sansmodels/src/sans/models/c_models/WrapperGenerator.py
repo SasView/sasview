@@ -3,6 +3,56 @@
 """
 
 import os, sys,re
+def split_list(separator, mylist, n=0):
+    """
+        @return a list of string without white space of separator
+        @param separator: the string to remove
+    """
+    list=[]
+    for item in mylist:
+        if re.search( separator,item)!=None:
+            if n >0:
+                word =re.split(separator,item,int(n))
+            else:
+                word =re.split( separator,item)
+            for new_item in word: 
+                if new_item.lstrip().rstrip() !='':
+                    list.append(new_item.lstrip().rstrip())
+    return list
+def split_text(separator, string1, n=0):
+    """
+        @return a list of string without white space of separator
+        @param separator: the string to remove
+    """
+    list=[]
+    if re.search( separator,string1)!=None:
+        if n >0:
+            word =re.split(separator,string1,int(n))
+        else:
+            word =re.split(separator,string1)
+        for item in word: 
+            if item.lstrip().rstrip() !='':
+                list.append(item.lstrip().rstrip())
+    return list
+def look_for_tag( string1,begin, end=None ):
+    """
+        @note: this method  remove the begin and end tags given by the user
+        from the string .
+        @param begin: the initial tag
+        @param end: the final tag
+        @param string: the string to check
+        @return: begin_flag==True if begin was found,
+         end_flag==if end was found else return false, false
+         
+    """
+    begin_flag= False
+    end_flag= False
+    if  re.search( begin,string1)!=None:
+        begin_flag= True
+    if end !=None:
+        if  re.search(end,string1)!=None:
+            end_flag= True
+    return begin_flag, end_flag
 
 class WrapperGenerator:
     """ Python wrapper generator for C models
@@ -115,87 +165,118 @@ class WrapperGenerator:
         text='text'
         key2="<%s>"%text.lower()
         # close an item in this case fixed
-        text='text'
+        text='TexT'
         key3="</%s>"%text.lower()
         temp=""
         # flag to found key
-        find_fixed= 0
+        find_fixed= False
+        find_key2=False
+        find_key3=False
         
         for line in lines:
             if line.count(key)>0 :#[FIXED]= .....
                 try:
-                    find_fixed= 1
+                    find_fixed= True
                     index = line.index(key)
                     toks  = line[index:].split("=",1 )
                     temp  = toks[1].lstrip().rstrip()
-                    if re.match(key2,temp)!=None:#[FIXED]= <text> axis_phi.width; axis_theta</text>
-                        print "when here"
-                        toks2=temp.split(key2,1)\
-                        # split the ";" inside the string
-                        print "toks[2]",toks2,toks2[1]
-                        if  re.search(";",toks2[1]) !=None:
-                            params= toks2[1].split(";")
-                            for item in params:
-                                print "item", item
-                                if  re.search( key3,item)!=None:
-                                    par= item.split(key3)#remove key3
-                                    print "par", par, par[0]
-                                    new_par=par[0].lstrip().rstrip()
-                                    break
-                            #print "Key2 and Key3 in the same line , more than 1 param", self.fixed
-                        else:#only 1 param with key2 and key3
-                            if  re.search( key3,toks2[1])!=None:
-                                par= toks2[1].split(key3)#remove key3
-                                new_par=par[0].lstrip().rstrip()
-                                self.fixed.append(new_par.lstrip().rstrip())
-                                #print "Key2 and Key3 in the same line , only 1 param ",self.fixed 
-                                break
-                    else: # no key2 and key3 #[FIXED]=  axis_phi.width; axis_theta
-                        temp2 = temp.lstrip().rstrip()
-                        if  re.search(";", temp2) !=None:# more than 1 param in the same line
-                            params= temp2.split(";")
-                            #print "no key2 and key3  params", params
-                            for item in params:
-                                if item!='':
-                                    self.fixed.append(item.lstrip().rstrip())
-                            #print "no key2 and key3, more than 1 param ",self.fixed
-                        else:# only one param per line #[FIXED]=  axis_phi.width
-                             self.fixed.append(temp2)
-                             #print "no key2 and key3, only 1 param ",self.fixed
+                    find_key2, find_key3=look_for_tag( string1=temp,begin=key2, end=key3 )
+                    if find_key2 and find_key3:
+                        #print"Found both:find_key2, find_key3", find_key2, find_key3
+                        temp1=[]
+                        temp2=[]
+                        temp3=[]
+                        temp4=[]
+                        temp1=split_text(separator=key2, string1=temp)
+                        temp2=split_list(separator=key3, mylist=temp1)
+                        temp3=split_list(separator=';', mylist=temp2)
+                        temp4=split_list(separator=',', mylist=temp3)
+                        self.fixed= temp3 + temp4
+                        break
+                        
+                    elif find_key2 and not find_key3:
+                        #print"Find  find_key2 not find_key3", find_key2, find_key3
+                        temp1=[]
+                        temp2=[]
+                        temp3=[]
+                        temp4=[]
+                        temp1=split_text(separator=key2, string1=temp)
+                        temp3=split_list(separator=';', mylist=temp1)
+                        temp4=split_list(separator=',', mylist=temp3)
+                        #print "found only key2 , temp4", temp3,temp4
+                        if len(temp3+ temp4)==0:# [FIXED]=  only one param
+                            self.fixed+= temp1
+                        self.fixed+=temp3+temp4 #
+                    elif not (find_key2 and find_key3) :
+                        #print"Find nothing find_key2 not find_key3", find_key2, find_key3
+                        temp3=[]
+                        temp4=[]
+                        if look_for_tag( string1=temp,begin=";")[0]:# split ";" first
+                            temp3=split_text(separator=';',string1=temp)
+                            temp4=split_list(separator=',', mylist=temp3)
+                        else:
+                            temp3=split_text(separator=',',string1=temp)# slip "," first
+                            temp4=split_list(separator=';', mylist=temp3)
+                        if len(temp3+ temp4)==0:# [FIXED]=  only one param
+                            self.fixed= [temp]
+                        self.fixed+=temp3+temp4 #
                         break
                 except:
-                     raise
-                     raise ValueError, "Could not parse file %s" % self.file
-            if find_fixed==1:# go to the 2nd line containing info found 1 key2
-                #[FIXED]= <text> axis_phi.width; axis_theta;radius_a.width;
-                #radius_</text>
-                if re.search(key3,line)!=None:# find  </text>
-                    tok=line.split(key3,1)
-                    print "tok",tok,tok[0]
-                    if re.match('//',tok[0].lstrip().rstrip())!=None:# look for '//'
-                        temp=tok[0].split("//",1)# remove "//"
-                    elif re.match('\*',tok[0].lstrip().rstrip())!=None:
-                        temp=tok[0].split("*",1)# remove "*"
-                    else:
-                        # missing "*" or "//" on comment 
-                        raise
-                        #raise ValueError, "Could not parse file %s" % self.file
-                    for item in temp:
-                        if item.lstrip().rstrip() !='':
-                            pars= item.lstrip().rstrip()
-                            if  re.search(";",pars) !=None:# split string by ";" more than 1 parameter
-                                params= pars.split(";")
-                                for name in params:
-                                    if name.lstrip().rstrip() !='':
-                                        self.fixed.append(name.lstrip().rstrip())
-                            else:# contains only one parameter
-                                name=pars.lstrip().rstrip()
-                                if name!='' and name!= key3:#only 1 parameter but ignore key3
-                                    self.fixed.append(name.lstrip().rstrip())
-                                    #print "the line contains only one parameters",name.lstrip().rstrip()
-                                break
+                    raise ValueError, "Could not parse file %s" % self.file
             
+            elif find_fixed:
+                #looking only for key3
+                if not find_key2:
+                    raise ValueError, "Could not parse file %s" % self.file
+                find_key3=look_for_tag( string1=line,begin=key3)[0]# split "</text>" first
+                #print "find_key3",find_key3,line,key3
+                if find_key3:
+                    temp1=[]
+                    temp2=[]
+                    temp3=[]
+                    temp4=[]
+                    temp5=[]
+                   
+                    temp1=split_text(separator=key3, string1=line)
+                    temp2=split_list(separator='//',mylist=temp1)
+                    temp5=split_list(separator="\*",mylist=temp1)
+                    
+                    if len(temp5)>0:
+                        temp3=split_list(separator=';',mylist=temp5)
+                        temp4=split_list(separator=',', mylist=temp5)
+                    elif len(temp2)>0:
+                        temp3=split_list(separator=';',mylist=temp2)
+                        temp4=split_list(separator=',', mylist=temp2)
+                    else:
+                        temp3=split_list(separator=';',mylist=temp1)
+                        temp4=split_list(separator=',', mylist=temp1)
+                    
+                    if len(temp3+ temp4)==0:# [FIXED]=  only one param
+                        self.fixed+= temp1
+                    self.fixed+=temp3+temp4 #   
+                    break 
+                else:
+                    temp2=split_text(separator='//',string1=line)
+                    temp5=split_text(separator="\*",string1=line)
+                    if len(temp5)>0:
+                        temp3=split_list(separator=';',mylist=temp5)
+                        temp4=split_list(separator=',', mylist=temp5)
+                    elif len(temp2)>0:
+                        temp3=split_list(separator=';',mylist=temp2)
+                        temp4=split_list(separator=',', mylist=temp2)
+                    else:
+                        if look_for_tag( string1=line,begin=";")[0]:# split ";" first
+                            temp3=split_text(separator=';',string1=line)
+                            temp4=split_list(separator=',', mylist=temp3)
+                        else:
+                            temp3=split_text(separator=',',string1=line)# slip "," first
+                            temp4=split_list(separator=';', mylist=temp3)
+                    if len(temp3+ temp4)==0:# [FIXED]=  only one param
+                        self.fixed= [line.lstrip().rstrip()]
+                    self.fixed+=temp3+temp4 #
+                    
                 
+                    
         # Catch Description
         key = "[DESCRIPTION]"
         find_description= 0

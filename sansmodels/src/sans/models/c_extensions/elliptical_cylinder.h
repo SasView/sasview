@@ -6,7 +6,7 @@
  * [DISP_PARAMS] = r_minor, r_ratio, length, cyl_theta, cyl_phi, cyl_psi
  * [DESCRIPTION] = ""
  * [FIXED]= <text> cyl_phi.width;
- * cyl_theta; cyl_psi.width; length.width; r_minor.width; r_ratio.width </text>
+ * cyl_theta.width; cyl_psi.width; length.width; r_minor.width; r_ratio.width </text>
  * */
 typedef struct {
     /// Scale factor
