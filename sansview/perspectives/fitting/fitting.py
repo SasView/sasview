@@ -319,7 +319,10 @@ class Plugin:
                         model_name,param_name = self.split_string(p.name)  
                         if model.name == model_name:
                             small_out.append(p.value )
-                            small_cov.append(p.stderr)
+                            if p.stderr ==None:
+                                small_cov.append(0)
+                            else:
+                                small_cov.append(p.stderr)
                             model.setParam(param_name,p.value)  
                     # Display result on each page 
                     page.onsetValues(result.fitness, small_out,small_cov)
@@ -634,12 +637,12 @@ class Plugin:
                     ymax=data.ymax
                     
                 theory.data = numpy.zeros((len(data.y_bins),len(data.x_bins)))
-                for i in range(len(data.y_bins)):
-                    if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
-                        for j in range(len(data.x_bins)):
-                            if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
-                                theory.data[j][i]=model.runXY([data.x_bins[j],data.y_bins[i]])
-               
+                for i in range(len(data.x_bins)):
+                    if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
+                        for j in range(len(data.y_bins)):
+                            if data.y_bins[j]>= ymin and data.y_bins[j]<= ymax:
+                                theory.data[j][i]=model.runXY([data.x_bins[i],data.y_bins[j]])
+
                 #print "fitting : plot_helper:", theory.image
                 #print data.image
                 #print "fitting : plot_helper:",theory.image
@@ -737,7 +740,7 @@ class Plugin:
         pass
     
     def complete(self, output, elapsed, model, qmin, qmax,qstep=DEFAULT_NPTS):
-       
+  
         wx.PostEvent(self.parent, StatusEvent(status="Calc \
         complete in %g sec" % elapsed))
         #print "complete",output, model,qmin, qmax
