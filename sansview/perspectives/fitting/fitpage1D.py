@@ -421,7 +421,7 @@ class FitPage1D(ModelPage):
                     units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                 self.sizer2.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             else:
-                if not item in fixed:
+                if item in fixed:
                     ip = 0
                     iq += 1
                     cb = wx.CheckBox(self, -1, item, (10, 10))
