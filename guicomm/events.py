@@ -9,3 +9,7 @@ import wx.lib
 (SlicerPanelEvent, EVT_SLICER_PANEL)   = wx.lib.newevent.NewEvent()
 #print update paramaters for panel slicer 
 (SlicerParamUpdateEvent, EVT_SLICER_PARS_UPDATE)   = wx.lib.newevent.NewEvent()
+#update the slicer from the panel 
+(SlicerParameterEvent, EVT_SLICER_PARS)   = wx.lib.newevent.NewEvent()
+#slicer event
+(SlicerEvent, EVT_SLICER)   = wx.lib.newevent.NewEvent()
