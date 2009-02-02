@@ -358,6 +358,7 @@ class Plugin:
                 list=value.get_model()
                 model=list[0]
                 smearer= value.get_smearer()
+                print "single fit", model, smearer
                 #Create list of parameters for fitting used
                 pars=[]
                 templist=[]
@@ -377,8 +378,8 @@ class Plugin:
                     self.id+=1
                     self.schedule_for_fit( 0,value) 
                 except:
-                    #raise 
-                    wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+                    raise 
+                    #wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                     return
                 # make sure to keep an alphabetic order 
                 #of parameter names in the list      
@@ -405,7 +406,7 @@ class Plugin:
             
            
         except:
-            #raise
+            raise
             wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
             return
          
@@ -515,9 +516,8 @@ class Plugin:
         model = evt.model
         name = evt.name
         
-        sim_page=self.fit_panel.get_page(0)
+        sim_page=self.fit_panel.GetPage(0)
         current_pg = self.fit_panel.get_current_page() 
-        selected_page = self.fit_panel.get_selected_page()
         if current_pg != sim_page:
             current_pg.set_panel(model)
             model.name = self.page_finder[current_pg].get_name()
@@ -558,7 +558,7 @@ class Plugin:
             @param model: the model from where the theory is derived
             @param currpage: page in a dictionary referring to some data
         """
-        if self.fit_panel.get_page_count() >1:
+        if self.fit_panel.GetPageCount() >1:
             for page in self.page_finder.iterkeys():
                 if  page==currpage :  
                     data=self.page_finder[page].get_data()
@@ -672,11 +672,14 @@ class Plugin:
         # the content will be updated and the plot refreshed
         self.fit_panel.add_model_page(model,description,name,topmenu=True)
         
-    def draw_model(self,model,name ,description=None,enable1D=True, enable2D=False,
+    def draw_model(self,model,name ,data=None,description=None,enable1D=True, enable2D=False,
                    qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
         """
              draw model with default data value
         """
+        if data !=None:
+            self.redraw_model(qmin,qmax)
+            return 
         self._draw_model2D(model=model,
                            description=model.description,
                            enable2D= enable2D,
