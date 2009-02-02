@@ -12,7 +12,7 @@ from BaseInteractor import _BaseInteractor
 from copy import deepcopy
 import math
 
-from sans.guicomm.events import NewPlotEvent, StatusEvent
+from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,EVT_SLICER_PARS
 import SlicerParameters
 import wx
 
@@ -74,7 +74,7 @@ class BoxInteractor(_BaseInteractor):
         self._post_data()
         
         # Bind to slice parameter events
-        self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
+        self.base.parent.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
 
 
     def _onEVT_SLICER_PARS(self, event):
@@ -110,7 +110,7 @@ class BoxInteractor(_BaseInteractor):
         self.top_line.clear()
         self.bottom_line.clear()
         #self.base.connect.disconnect()
-        self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
+        self.base.parent.Unbind(EVT_SLICER_PARS)
         
     def update(self):
         """
@@ -244,7 +244,7 @@ class BoxInteractor(_BaseInteractor):
         self.base.thaw_axes()
         
         # Post paramters
-        event = SlicerParameters.SlicerParameterEvent()
+        event = SlicerParameterEvent()
         event.type = self.__class__.__name__
         event.params = self.get_params()
         wx.PostEvent(self.base.parent, event)

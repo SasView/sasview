@@ -34,7 +34,7 @@ except:
     # Didn't find local config, load the default 
     import config
     
-from sans.guicomm.events import EVT_STATUS
+from sans.guicomm.events import EVT_STATUS,Model2DPanelEvent
 
 import warnings
 warnings.simplefilter("ignore")
@@ -226,7 +226,7 @@ class ViewerFrame(wx.Frame):
         wx.EVT_CLOSE(self, self._onClose)
         # Register to status events
         self.Bind(EVT_STATUS, self._on_status_event)
-             
+       
     def build_gui(self):
         # Set up the layout
         self._setup_layout()
@@ -418,7 +418,14 @@ class ViewerFrame(wx.Frame):
         for item in self.panels:
             if self.panels[item].window_name.startswith(p.window_name): 
                 count += 1
-                
+                """
+        if p.window_name =="Analytical model 2D ":
+            print "guiframe 2D id",ID, p.window_name
+            event = Model2DPanelEvent(id= ID, pname=p.window_name)
+            for plug in self.plugins:
+                if hasattr(plug, fitpanel)
+                wx.PostEvent(plug, event)
+         """   
         windowname = p.window_name
         caption = p.window_caption
         if count>0:
@@ -449,6 +456,7 @@ class ViewerFrame(wx.Frame):
         
         
         # Register for showing/hiding the panel
+        
         wx.EVT_MENU(self, ID, self._on_view)
         
         self._mgr.Update()
@@ -487,7 +495,7 @@ class ViewerFrame(wx.Frame):
             pers = plug.get_perspective()
             if len(pers)>0:
                 n_panels += 1
-        
+       
         if n_panels>1:
             viewmenu = wx.Menu()
             for plug in self.plugins:
@@ -500,6 +508,9 @@ class ViewerFrame(wx.Frame):
                         panel = self.panels[item]
                         if panel.window_name in pers:
                             plugmenu.Append(int(item), panel.window_caption, "Show %s window" % panel.window_caption)
+                           
+                            
+                            
                             wx.EVT_MENU(self, int(item), self._on_view)
                     
                     viewmenu.AppendMenu(wx.NewId(), plug.sub_menu, plugmenu, plug.sub_menu)
@@ -550,7 +561,7 @@ class ViewerFrame(wx.Frame):
             if hasattr(item, "populate_menu"):
                 for (self.next_id, menu, name) in item.populate_menu(self.next_id, self):
                     menubar.Append(menu, name)
-        
+                   
 
         menubar.Append(helpmenu, '&Help')
          

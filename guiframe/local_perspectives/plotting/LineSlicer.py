@@ -7,14 +7,14 @@
 #
 
 # Debug printout
-from sans.guicomm.events import StatusEvent 
-from BaseInteractor import _BaseInteractor
-from copy import deepcopy
 import math
-
-from sans.guicomm.events import NewPlotEvent
-import SlicerParameters
 import wx
+from copy import deepcopy
+
+from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,EVT_SLICER_PARS
+from BaseInteractor import _BaseInteractor
+
+
 
 class LineInteractor(_BaseInteractor):
     """
@@ -67,7 +67,7 @@ class LineInteractor(_BaseInteractor):
         self._post_data()
         
         # Bind to slice parameter events
-        self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
+        self.base.parent.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
         
     def _onEVT_SLICER_PARS(self, event):
         event.Skip()
@@ -122,7 +122,7 @@ class LineInteractor(_BaseInteractor):
         
         # Unbind panel
         #self.base.connect.disconnect()
-        self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
+        self.base.parent.Unbind(EVT_SLICER_PARS)
 
         
     def update(self):
@@ -240,7 +240,7 @@ class LineInteractor(_BaseInteractor):
         self.base.thaw_axes()
         
         # Post paramters
-        event = SlicerParameters.SlicerParameterEvent()
+        event = SlicerParameterEvent()
         event.type = self.__class__.__name__
         event.params = self.get_params()
         wx.PostEvent(self.base.parent, event)

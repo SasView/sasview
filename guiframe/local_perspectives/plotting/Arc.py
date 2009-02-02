@@ -1,13 +1,12 @@
-#from config import printEVT
-from BaseInteractor import _BaseInteractor
-from copy import deepcopy
-import math
 
-#from Plotter1D import AddPlotEvent
-import SlicerParameters
-import wx   
-#import radii 
-#(FunctionRadiusEvent, EVT_FUNC_RAD) = wx.lib.newevent.NewEvent()      
+import math
+import wx 
+from copy import deepcopy
+
+from BaseInteractor import _BaseInteractor
+from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,EVT_SLICER_PARS
+  
+ 
 class ArcInteractor(_BaseInteractor):
     """
          Select an annulus through a 2D plot
@@ -113,7 +112,7 @@ class ArcInteractor(_BaseInteractor):
     def moveend(self, ev):
         self.has_move= False
         
-        event = SlicerParameters.SlicerParameterEvent()
+        event = SlicerParameterEvent()
         event.type = self.__class__.__name__
         event.params = self.get_params()
         print "in arc moveend params",self.get_params()

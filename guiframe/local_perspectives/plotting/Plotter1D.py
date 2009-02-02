@@ -11,34 +11,24 @@ copyright 2008, University of Tennessee
 
 import wx
 import sys
+import pylab
+
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph,Data1D
 from sans.guicomm.events import EVT_NEW_PLOT
-from sans.guicomm.events import StatusEvent ,NewPlotEvent
+from sans.guicomm.events import StatusEvent ,NewPlotEvent,SlicerEvent
+from sans.guiframe.utils import PanelMenu
 
-
-from SlicerParameters import SlicerEvent
 from binder import BindArtist
-(InternalEvent, EVT_INTERNAL)   = wx.lib.newevent.NewEvent()
-#from SlicerParameters import SlicerEvent
-#(InternalEvent, EVT_INTERNAL)   = wx.lib.newevent.NewEvent()
-DEFAULT_QMAX = 0.05
 
+
+DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001
 DEFAULT_BEAM = 0.005
 BIN_WIDTH =1
-import pylab
 
-class PanelMenu(wx.Menu):
-    plots = None
-    graph = None
-    
-    def set_plots(self, plots):
-        self.plots = plots
-    
-    def set_graph(self, graph):
-        self.graph = graph
+
 class ModelPanel1D(PlotPanel):
     """
         Plot panel for use with the GUI manager

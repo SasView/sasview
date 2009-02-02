@@ -5,16 +5,13 @@
 #TODO: NEED MAJOR REFACTOR
 #
 
- 
-# Debug printout
-from sans.guicomm.events import StatusEvent 
-from sans.guicomm.events import NewPlotEvent
-from BaseInteractor import _BaseInteractor
-from copy import deepcopy
 import math
-
-import SlicerParameters
 import wx
+from copy import deepcopy 
+# Debug printout
+from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,EVT_SLICER_PARS
+from BaseInteractor import _BaseInteractor
+
 
 class AnnulusInteractor(_BaseInteractor):
     """
@@ -56,7 +53,7 @@ class AnnulusInteractor(_BaseInteractor):
         self._post_data()
         
         # Bind to slice parameter events
-        self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
+        self.base.parent.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
         
 
     def _onEVT_SLICER_PARS(self, event):
@@ -89,7 +86,7 @@ class AnnulusInteractor(_BaseInteractor):
         self.outer_circle.clear()
         self.inner_circle.clear()
         #self.base.connect.disconnect()
-        self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
+        self.base.parent.Unbind(EVT_SLICER_PARS)
         
     def update(self):
         """
@@ -153,7 +150,7 @@ class AnnulusInteractor(_BaseInteractor):
         #print "loader output.detector",output.source
         new_plot.detector =self.base.data2D.detector
         # If the data file does not tell us what the axes are, just assume...
-        new_plot.xaxis("\\rm{\phi}", ' ^{o}')
+        new_plot.xaxis("\\rm{\phi}", 'rad')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = "SectorPhi"+self.base.data2D.name
         new_plot.xtransform="x"
@@ -168,7 +165,7 @@ class AnnulusInteractor(_BaseInteractor):
         self.base.thaw_axes()
         
         # Post paramters
-        event = SlicerParameters.SlicerParameterEvent()
+        event = SlicerParameterEvent()
         event.type = self.__class__.__name__
         event.params = self.get_params()
         wx.PostEvent(self.base.parent, event)

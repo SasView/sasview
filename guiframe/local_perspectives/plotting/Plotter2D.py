@@ -11,28 +11,29 @@ copyright 2008, University of Tennessee
 
 import wx
 import sys
+import pylab
+
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph,Data1D
-from sans.guicomm.events import EVT_NEW_PLOT
-from sans.guicomm.events import StatusEvent ,NewPlotEvent
-
-
-from SlicerParameters import SlicerEvent
+from sans.guicomm.events import EVT_NEW_PLOT,EVT_SLICER_PARS_UPDATE
+from sans.guicomm.events import EVT_SLICER_PARS
+from sans.guicomm.events import StatusEvent ,NewPlotEvent,SlicerEvent
+from sans.guiframe.utils import PanelMenu
 from binder import BindArtist
-(InternalEvent, EVT_INTERNAL)   = wx.lib.newevent.NewEvent()
-#from SlicerParameters import SlicerEvent
-#(InternalEvent, EVT_INTERNAL)   = wx.lib.newevent.NewEvent()
 from Plotter1D import ModelPanel1D
-DEFAULT_QMAX = 0.05
+(InternalEvent, EVT_INTERNAL)   = wx.lib.newevent.NewEvent()
 
+
+
+DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001
 DEFAULT_BEAM = 0.005
 BIN_WIDTH = 1.0
-import pylab
-from Plotter1D import PanelMenu
-#import boxSum
-from sans.guicomm.events import EVT_SLICER_PARS_UPDATE
+
+
+
+
 class ModelPanel2D( ModelPanel1D):
     """
         Plot panel for use with the GUI manager
@@ -85,13 +86,23 @@ class ModelPanel2D( ModelPanel1D):
         self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
         self.graph.render(self)
         #self.Bind(boxSum.EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PARS)
-        self.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PARS)
-  
+        self.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
+        self.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PANEL)
+        
+        
     def _onEVT_SLICER_PARS(self, event):
+        print "paramaters entered on slicer panel", event.type, event.params
+        self.slicer.set_params(event.params)
+        from sans.guicomm.events import SlicerPanelEvent
+        wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
+        
+        
+    def _onEVT_SLICER_PANEL(self, event):
         print "box move plotter2D", event.type, event.params
         self.panel_slicer.set_slicer(event.type, event.params)
         from sans.guicomm.events import SlicerPanelEvent
-        wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
+        wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer)) 
+        
     def _onEVT_1DREPLOT(self, event):
         """
             Data is ready to be displayed
@@ -405,7 +416,7 @@ class ModelPanel2D( ModelPanel1D):
         print "Plotter2D: event.type",event.type,event.params, self.parent
         
         from slicerpanel import SlicerPanel
-        new_panel = SlicerPanel(parent= self.parent,id= -1,type=event.type,
+        new_panel = SlicerPanel(parent= self.parent,id= -1,base= self,type=event.type,
                                  params=event.params, style=wx.RAISED_BORDER)
         #new_panel.set_slicer(self.slicer.__class__.__name__,
         new_panel.window_caption=self.slicer.__class__.__name__+" "+ str(self.data2D.name)
@@ -421,24 +432,24 @@ class ModelPanel2D( ModelPanel1D):
         from boxSlicer import BoxInteractorX
         self.onClearSlicer(event)
         wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractorX))
-        
+        """
         from slicerpanel import SlicerPanel
         new_panel = SlicerPanel(self.parent, -1, style=wx.RAISED_BORDER)
         
         from sans.guicomm.events import SlicerPanelEvent
         wx.PostEvent(self.parent, SlicerPanelEvent (panel= new_panel))
-        
+        """
     def onBoxavgY(self,event):
         from boxSlicer import BoxInteractorY
         self.onClearSlicer(event)
         wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractorY))
-        
+        """
         from slicerpanel import SlicerPanel
         new_panel = SlicerPanel(self.parent, -1, style=wx.RAISED_BORDER)
         
         from sans.guicomm.events import SlicerParameterEvent 
         wx.PostEvent(self.parent, SlicerParameterEvent (panel= new_panel))
-         
+        """
     def onClearSlicer(self, event):
         """
             Clear the slicer on the plot

@@ -6,23 +6,11 @@ import wx
 import wx.lib.newevent
 from copy import deepcopy
 
-(SlicerEvent, EVT_SLICER)   = wx.lib.newevent.NewEvent()
-(SlicerParameterEvent, EVT_SLICER_PARS)   = wx.lib.newevent.NewEvent()
+from sans.guiframe.utils import format_number
+from sans.guicomm.events import EVT_SLICER,EVT_SLICER_PARS,SlicerParameterEvent
 
 
-def format_number(value, high=False):
-    """
-        Return a float in a standardized, human-readable formatted string 
-    """
-    try: 
-        value = float(value)
-    except:
-        return "NaN"
-    
-    if high:
-        return "%-6.4g" % value
-    else:
-        return "%-5.3g" % value
+
 
 class SlicerParameterPanel(wx.Dialog):
     #TODO: show units

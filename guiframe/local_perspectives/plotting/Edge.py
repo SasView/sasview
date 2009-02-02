@@ -1,13 +1,13 @@
-#from config import printEVT
-from BaseInteractor import _BaseInteractor
-from copy import deepcopy
+
 import math
+import wx  
+from copy import deepcopy
 
-#from Plotter1D import AddPlotEvent
-import SlicerParameters
-import wx     
+from BaseInteractor import _BaseInteractor
+from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,EVT_SLICER_PARS
+   
 
-import wx.lib.newevent
+
        
 class RadiusInteractor(_BaseInteractor):
     """
