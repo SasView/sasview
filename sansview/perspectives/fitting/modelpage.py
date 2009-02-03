@@ -35,7 +35,11 @@ class ModelPage(wx.ScrolledWindow):
         # model on which the fit would be performed
         self.model=model
         #list of dispersion paramaters
-        self.disp_list=self.model.getDispParamList()
+        self.disp_list=[]
+        try:
+            self.disp_list=self.model.getDispParamList()
+        except:
+            pass 
         self.manager = None
         self.parent  = parent
         self.event_owner = None
@@ -263,15 +267,15 @@ class ModelPage(wx.ScrolledWindow):
                 self.parent.GetSizer().Layout()
                 return 
             else:
-                if self.data !=None: # allow to recognize data panel from model panel
+                if self.data !=None and self.model !=None: # allow to recognize data panel from model panel
                     self.cb1.SetValue(False)
                     self.select_all_param_helper()
                 
-                self.populate_disp_box()
-                self.set_panel_dispers(self.disp_list)
+                    self.populate_disp_box()
+                    self.set_panel_dispers(self.disp_list)
                 
         else:
-            if self.data !=None:
+            if self.data !=None and self.model!=None:
                 if self.cb1.GetValue():
                     self.select_all_param_helper()
             self.fittable_param=[]        
