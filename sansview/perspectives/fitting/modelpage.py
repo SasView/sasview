@@ -127,13 +127,13 @@ class ModelPage(wx.ScrolledWindow):
         
         self.qmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.qmin.SetValue(format_number(self.qmin_x))
-        self.qmin.SetToolTipString("Minimun value of x in linear scale.")
+        self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
         self.qmin.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         self.qmin.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
      
         self.qmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.qmax.SetValue(format_number(self.qmax_x))
-        self.qmax.SetToolTipString("Maximum value of x in linear scale.")
+        self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
         self.qmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         self.qmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
      
@@ -159,7 +159,7 @@ class ModelPage(wx.ScrolledWindow):
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix = 0
         iy += 1
-        self.sizer9.Add(wx.StaticText(self, -1, 'x range'),(iy, ix),(1,1),\
+        self.sizer9.Add(wx.StaticText(self, -1, 'Q range'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer9.Add(self.qmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -266,15 +266,10 @@ class ModelPage(wx.ScrolledWindow):
                 if self.data !=None: # allow to recognize data panel from model panel
                     self.cb1.SetValue(False)
                     self.select_all_param_helper()
-                self.fittable_param=[]
-                self.fixed_param=[]
-                self.sizer8.Clear(True)
+                
                 self.populate_disp_box()
                 self.set_panel_dispers(self.disp_list)
-                self.vbox.Layout()
-                self.SetScrollbars(20,20,55,40)
-                self.Layout()
-                self.parent.GetSizer().Layout()   
+                
         else:
             if self.data !=None:
                 if self.cb1.GetValue():
@@ -303,7 +298,12 @@ class ModelPage(wx.ScrolledWindow):
             self.disp_box.Insert("Gaussian",int(id))
             wx.EVT_COMBOBOX(self.disp_box,-1, self._on_select_Disp) 
             self.sizer7.Add(self.disp_box,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-       
+            self.vbox.Layout()
+            self.SetScrollbars(20,20,55,40)
+            self.Layout()
+            self.parent.GetSizer().Layout()  
+            
+            
     def set_range(self, qmin_x, qmax_x, npts):
         """
             Set the range for the plotted models
@@ -366,13 +366,7 @@ class ModelPage(wx.ScrolledWindow):
         if self.enable2D==False:
             self.enable2D=True
             self._draw_model()
-            
-        else:
-            print "enable is true:",self.enable2D
-            #self.manager.parent. show_panel(147)
-            self.manager.show_panel2D( id=None )
-            #self.manager.menu1.Append(event_id, new_panel.window_caption, 
-            #             "Show %s plot panel" % new_panel.window_caption)
+            self.model_view.Disable()
             
     
     def select_model(self, model, name):
@@ -426,6 +420,7 @@ class ModelPage(wx.ScrolledWindow):
                 self.name= name
                 #self.manager.draw_model(model, name)
                 self.enable2D=False
+                self.model_view.Enable()
                 self._draw_model(name)
             
             
@@ -561,13 +556,15 @@ class ModelPage(wx.ScrolledWindow):
        
     def  set_panel_dispers(self, disp_list, type="Gaussian" ):
         
-        
-       
+        self.fittable_param=[]
+        self.fixed_param=[]
+                
         ix=0
         iy=1
         ### this will become a separate method
         if type== "Gaussian" :
-           
+            print "went here"
+            self.sizer8.Clear(True)
             disp = wx.StaticText(self, -1, 'Dispersion')
             self.sizer8.Add(disp,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
             ix += 1 
@@ -642,8 +639,14 @@ class ModelPage(wx.ScrolledWindow):
                             Tctl.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                             self.sizer8.Add(Tctl, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             self.fixed_param.append([name3, Tctl])
-                            
-           
+                    
+            ix =0
+            iy +=1 
+            self.sizer8.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)        
+            self.vbox.Layout()
+            self.SetScrollbars(20,20,55,40)
+            self.Layout()
+            self.parent.GetSizer().Layout()  
          
            
         
@@ -657,6 +660,23 @@ class ModelPage(wx.ScrolledWindow):
         if len(self.parameters) !=0 and self.model !=None:
             # Flag to register when a parameter has changed.
             is_modified = False
+            for item in self.fittable_param:
+                try:
+                     name=str(item[0].GetLabelText())
+                     value= float(item[1].GetValue())
+                     #print "model para", name,value
+                     # If the value of the parameter has changed,
+                     # update the model and set the is_modified flag
+                     if value != self.model.getParam(name):
+                         #print "went hereee"
+                         self.model.setParam(name,value)
+                         is_modified = True
+                         
+                except:
+                    raise
+                    wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
+                
             for item in self.fixed_param:
                 try:
                      name=str(item[0])
@@ -670,7 +690,8 @@ class ModelPage(wx.ScrolledWindow):
                          is_modified = True
                          
                 except:
-                     wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                    raise
+                    wx.PostEvent(self.parent.parent, StatusEvent(status=\
                             "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
                 
             for item in self.parameters:

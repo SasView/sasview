@@ -68,6 +68,7 @@ class Plugin:
         wx.EVT_MENU(owner, id1, self.on_perspective)
         id3 = wx.NewId()
         self.menu1.AppendCheckItem(id3, "park") 
+    
         wx.EVT_MENU(owner, id3, self._onset_engine)
         
         #menu for model

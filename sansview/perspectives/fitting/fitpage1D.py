@@ -230,7 +230,7 @@ class FitPage1D(ModelPage):
         #                    wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix = 0
         iy += 1
-        self.sizer9.Add(wx.StaticText(self, -1, 'x range'),(iy, ix),(1,1),\
+        self.sizer9.Add(wx.StaticText(self, -1, 'Q range'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer9.Add(self.qmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
