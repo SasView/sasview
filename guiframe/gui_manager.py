@@ -35,7 +35,7 @@ except:
     import config
     
 from sans.guicomm.events import EVT_STATUS,Model2DPanelEvent
-
+import history
 import warnings
 warnings.simplefilter("ignore")
 
@@ -219,7 +219,9 @@ class ViewerFrame(wx.Frame):
 
         ## Default welcome panel
         self.defaultPanel    = DefaultPanel(self, -1, style=wx.RAISED_BORDER)
-
+        
+        # History panel
+        self.histPanel     = history.HistoryPanel(self, style=wx.RAISED_BORDER)
         # self.build_gui()
        
         # Register the close event so it calls our own method
@@ -346,6 +348,9 @@ class ViewerFrame(wx.Frame):
         # Show a default panel with some help information
         # It also sets the size of the application windows
         self.panels["default"] = self.defaultPanel
+         # History panel
+        self.panels["historyPanel"] = self.histPanel  
+        
         self._mgr.AddPane(self.defaultPanel, wx.aui.AuiPaneInfo().
                               Name("default").
                               CenterPane().
@@ -353,6 +358,20 @@ class ViewerFrame(wx.Frame):
                               BestSize(wx.Size(self._window_width, self._window_height)).
                               MinSize(wx.Size(self._window_width, self._window_height)).
                               Show())
+        self._mgr.AddPane(self.histPanel, wx.aui.AuiPaneInfo().
+                          Name("historyPanel").Caption("History").
+                          #Float().
+                          Bottom().
+                          Dock().
+                          TopDockable().
+                          BottomDockable().
+                          LeftDockable().
+                          RightDockable().
+                          MinimizeButton().
+                          Hide().
+                          #Show().
+                          BestSize(wx.Size(500,600)).
+                          MinSize(wx.Size(200,150)))
 
         # Add the panels to the AUI manager
         for panel_class in panels:
@@ -477,6 +496,10 @@ class ViewerFrame(wx.Frame):
         wx.EVT_MENU(self, id, self._on_open)
         
         id = wx.NewId()
+        filemenu.Append(id, '&History', 'Register previous States')
+        wx.EVT_MENU(self, id, self._onHistoryPanel)
+        
+        id = wx.NewId()
         filemenu.Append(id,'&Quit', 'Exit') 
         wx.EVT_MENU(self, id, self.Close)
         
@@ -599,6 +622,12 @@ class ViewerFrame(wx.Frame):
                 
                 
             self._mgr.Update()
+    def _onHistoryPanel(self, event):
+        print "on history"
+        if not self._mgr.GetPane("historyPanel").IsShown():
+            self._mgr.GetPane("historyPanel").Show()
+        self._mgr.Update()
+        return
         
     def _on_open(self, event):
    

@@ -46,9 +46,7 @@ class AnnulusInteractor(_BaseInteractor):
         self.inner_circle.qmax = self.qmax
         self.outer_circle = RingInteractor(self, self.base.subplot, zorder=zorder+1, r=self.qmax/1.8,sign=self.sign)
         self.outer_circle.qmax = self.qmax*1.2
-        #self.outer_circle.set_cursor(self.base.qmax/1.8, 0)
-        
-                      
+       
         self.update()
         self._post_data()
         
