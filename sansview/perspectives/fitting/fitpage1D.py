@@ -263,6 +263,7 @@ class FitPage1D(ModelPage):
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         self.fixed_param=[]
+        self.fittable_param=[]
         #list of dispersion paramaters
         self.disp_list=None
         #contains link between a model and selected parameters to fit 
@@ -588,20 +589,27 @@ class FitPage1D(ModelPage):
                     item[0].SetValue(True)
                     list= [item[0],item[1],item[2],item[3]]
                     self.param_toFit.append(list )
+                if len(self.fittable_param)>0:
+                    for item in self.fittable_param:
+                        item[0].SetValue(True)
+                        list= [item[0],item[1],item[2],item[3]]
+                        self.param_toFit.append(list )
                
                 if not (len(self.param_toFit ) >0):
-                    self.xmin.Disable()
-                    self.xmax.Disable()
+                    self.qmin.Disable()
+                    self.qmax.Disable()
                 else:
-                    self.xmin.Enable()
-                    self.xmax.Enable()
+                    self.qmin.Enable()
+                    self.qmax.Enable()
             else:
                 for item in self.parameters:
                     item[0].SetValue(False)
+                for item in self.fittable_param:
+                    item[0].SetValue(False)
                 self.param_toFit=[]
               
-                self.xmin.Disable()
-                self.xmax.Disable()
+                self.qmin.Disable()
+                self.qmax.Disable()
                 
                 
     def select_param(self,event):
@@ -618,7 +626,18 @@ class FitPage1D(ModelPage):
             else:
                 if item in self.param_toFit:
                     self.param_toFit.remove(item)
-        if len(self.parameters)==len(self.param_toFit):
+                    
+        for item in self.fittable_param:
+            if item[0].GetValue()==True:
+                list= [item[0],item[1],item[2],item[3]]
+                if not (list  in self.param_toFit):
+                    self.param_toFit.append(list )  
+            else:
+                if item in self.param_toFit:
+                    self.param_toFit.remove(item)           
+                    
+                    
+        if len(self.parameters)+len(self.fittable_param) ==len(self.param_toFit):
             self.cb1.SetValue(True)
         else:
             self.cb1.SetValue(False)

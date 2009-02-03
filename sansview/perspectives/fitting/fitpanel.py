@@ -97,14 +97,15 @@ class FitPanel(wx.aui.AuiNotebook):
         if self.fit_page_name != name:
             self.count +=1
             
+            """
             if data.__class__.__name__=='Data2D':
                  from fitpage2D import FitPage2D
                  panel = FitPage2D(self,data, -1)
                  
             else:
-           
-                from fitpage1D import FitPage1D
-                panel = FitPage1D(self,data, -1)
+           """
+            from fitpage1D import FitPage1D
+            panel = FitPage1D(self,data, -1)
             m_name= "M"+str(self.count)  
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)

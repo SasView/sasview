@@ -189,6 +189,7 @@ class ModelPage(wx.ScrolledWindow):
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         self.fixed_param=[]
+        self.fittable_param=[]
         #contains link between a model and selected parameters to fit 
         self.param_toFit=[]
         
@@ -251,6 +252,8 @@ class ModelPage(wx.ScrolledWindow):
             if len(self.disp_list)==0:
                 ix=0
                 iy=1
+                self.fittable_param=[]
+                self.fixed_param=[]
                 self.sizer8.Clear(True)
                 model_disp = wx.StaticText(self, -1, 'No PolyDispersity for this model')
                 self.sizer7.Add(model_disp,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -260,6 +263,8 @@ class ModelPage(wx.ScrolledWindow):
                 self.parent.GetSizer().Layout()
                 return 
             else:
+                self.fittable_param=[]
+                self.fixed_param=[]
                 self.sizer8.Clear(True)
                 self.populate_disp_box()
                 self.set_panel_dispers(self.disp_list)
@@ -268,6 +273,8 @@ class ModelPage(wx.ScrolledWindow):
                 self.Layout()
                 self.parent.GetSizer().Layout()   
         else:
+            self.fittable_param=[]        
+            self.fixed_param=[]
             self.sizer7.Clear(True)
             self.sizer8.Clear(True)
             self.vbox.Layout()
@@ -607,8 +614,8 @@ class ModelPage(wx.ScrolledWindow):
                         ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
                         self.sizer8.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                         ctl2.Hide()
+                        self.fittable_param=[cb,ctl1,text2,ctl2]
                        
-                        self.parameters.append([cb,ctl1,text2,ctl2])
                         
                     elif p=="npts":
                             ix =4 
