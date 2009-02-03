@@ -264,7 +264,7 @@ class FitPage1D(ModelPage):
         self.fixed_param=[]
         self.fittable_param=[]
         #list of dispersion paramaters
-        self.disp_list=None
+        self.disp_list=[]
         #contains link between a model and selected parameters to fit 
         self.param_toFit=[]
         # model on which the fit would be performed
