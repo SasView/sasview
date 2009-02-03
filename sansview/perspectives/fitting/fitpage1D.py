@@ -179,17 +179,22 @@ class FitPage1D(ModelPage):
         self.btFit.SetToolTipString("Perform fit.")
          ## Q range
         print "self.data fitpage1D" , self.data,hasattr(self.data,"data")
+        # Reversed to the codes; Need to think  carefully about consistency in q between 2D plot and fitting
         if not hasattr(self.data,"data"):
             self.qmin_x= numpy.min(self.data.x)
             self.qmax_x= numpy.max(self.data.x)
         else:
-            radius1= math.sqrt(math.pow(self.data.xmin, 2)+ math.pow(self.data.ymin, 2))
-            radius2= math.sqrt(math.pow(self.data.xmax, 2)+ math.pow(self.data.ymin, 2))
-            radius3= math.sqrt(math.pow(self.data.xmin, 2)+ math.pow(self.data.ymax, 2))
-            radius4= math.sqrt(math.pow(self.data.xmax, 2)+ math.pow(self.data.ymax, 2))
-            self.qmin_x =0
-            self.qmax_x= max(radius1, radius2, radius3, radius4)
+            # Reversed to the codes; Need to think  carefully about consistency in q between 2D plot and fitting
+            #radius1= math.sqrt(math.pow(self.data.xmin, 2)+ math.pow(self.data.ymin, 2))
+            #radius2= math.sqrt(math.pow(self.data.xmax, 2)+ math.pow(self.data.ymin, 2))
+            #radius3= math.sqrt(math.pow(self.data.xmin, 2)+ math.pow(self.data.ymax, 2))
+            #radius4= math.sqrt(math.pow(self.data.xmax, 2)+ math.pow(self.data.ymax, 2))
+            #self.qmin_x =numpy.min(self.data.x)#0
+            #self.qmax_x= numpy.max(self.data.x)#max(radius1, radius2, radius3, radius4)
+            self.qmin_x= self.data.xmin
+            self.qmax_x= self.data.xmax           
             print "data2D range",self.qmax_x
+        
         self.num_points= 100
          
         
@@ -308,7 +313,7 @@ class FitPage1D(ModelPage):
                         sum +=item
                 #print "chisqr : sum 2D", xmin, xmax, ymin, ymax,sum
                 #print res
-                self.tcChi.SetValue(format_number(math.fabs(sum)))
+                self.tcChi.SetLabel(format_number(math.fabs(sum)))
             except:
                 wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Chisqr cannot be compute: %s"% sys.exc_value))
@@ -372,6 +377,7 @@ class FitPage1D(ModelPage):
                     evt = ModelEventbox(model=self.model,name=name)
                     wx.PostEvent(self.event_owner, evt)
                     self.text1_1.Show()
+                    self.compute_chisqr()
                     self.tcChi.Show()
                 except:
                     raise #ValueError,"model.name is not equal to model class name"
