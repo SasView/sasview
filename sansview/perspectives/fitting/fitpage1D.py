@@ -388,7 +388,7 @@ class FitPage1D(ModelPage):
             self.manager.schedule_for_fit( value=1,fitproblem =None) 
             self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x)
         else:
-              wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+              wx.PostEvent(self.parent.parent, StatusEvent(status=\
                             "Select at least on parameter to fit "))
   
    
