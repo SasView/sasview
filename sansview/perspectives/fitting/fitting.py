@@ -285,9 +285,10 @@ class Plugin:
                     model.setParam(name,result.pvec[i])
 #                    print "fitting: single fit", name, result.pvec[i]
                     i += 1
-#            print "fitting result : chisqr",result.fitness
-#            print "fitting result : pvec",result.pvec
-#            print "fitting result : stderr",result.stderr
+            print "fitting result : chisqr",result.fitness
+            print "fitting result : pvec",result.pvec
+            print "fitting result : stderr",result.stderr
+            print "xmin xmax ymin , ymax",qmin, qmax, ymin, ymax
             
             cpage.onsetValues(result.fitness, result.pvec,result.stderr)
             self.plot_helper(currpage=cpage,qmin=qmin,qmax=qmax,ymin=ymin, ymax=ymax, title="Fitted model 2D ")
@@ -319,10 +320,7 @@ class Plugin:
                         model_name,param_name = self.split_string(p.name)  
                         if model.name == model_name:
                             small_out.append(p.value )
-                            if p.stderr ==None:
-                                small_cov.append(0)
-                            else:
-                                small_cov.append(p.stderr)
+                            small_cov.append(p.stderr)
                             model.setParam(param_name,p.value)  
                     # Display result on each page 
                     page.onsetValues(result.fitness, small_out,small_cov)
@@ -332,7 +330,7 @@ class Plugin:
              wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
   
-    def _on_single_fit(self,id=None,qmin=None,qmax=None,ymin=None,ymax=None):
+    def _on_single_fit(self,id=None,qmin=None,qmax=None):
         """ 
             perform fit for the  current page  and return chisqr,out and cov
             @param engineName: type of fit to be performed
@@ -361,6 +359,7 @@ class Plugin:
                 list=value.get_model()
                 model=list[0]
                 smearer= value.get_smearer()
+                print "single fit", model, smearer
                 #Create list of parameters for fitting used
                 pars=[]
                 templist=[]
@@ -380,8 +379,8 @@ class Plugin:
                     self.id+=1
                     self.schedule_for_fit( 0,value) 
                 except:
-                    #raise 
-                    wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+                    raise 
+                    #wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                     return
                 # make sure to keep an alphabetic order 
                 #of parameter names in the list      
@@ -396,8 +395,7 @@ class Plugin:
                                         cpage= page_fitted,
                                        qmin=qmin,
                                        qmax=qmax,
-                                       ymin= ymin,
-                                       ymax= ymax,
+                                      
                                        completefn=self._single_fit_completed,
                                        updatefn=None)
             self.calc_thread.queue()
@@ -408,7 +406,7 @@ class Plugin:
             
            
         except:
-            #raise
+            raise
             wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
             return
          
@@ -518,9 +516,8 @@ class Plugin:
         model = evt.model
         name = evt.name
         
-        sim_page=self.fit_panel.get_page(0)
+        sim_page=self.fit_panel.GetPage(0)
         current_pg = self.fit_panel.get_current_page() 
-        selected_page = self.fit_panel.get_selected_page()
         if current_pg != sim_page:
             current_pg.set_panel(model)
             model.name = self.page_finder[current_pg].get_name()
@@ -561,14 +558,14 @@ class Plugin:
             @param model: the model from where the theory is derived
             @param currpage: page in a dictionary referring to some data
         """
-        if self.fit_panel.get_page_count() >1:
+        if self.fit_panel.GetPageCount() >1:
             for page in self.page_finder.iterkeys():
                 if  page==currpage :  
                     data=self.page_finder[page].get_data()
                     list=self.page_finder[page].get_model()
                     model=list[0]
                     break 
-            
+            print "model in fitting",model
             if data!=None and data.__class__.__name__ != 'Data2D':
                 theory = Theory1D(x=[], y=[])
                 theory.name = model.name
@@ -637,12 +634,12 @@ class Plugin:
                     ymax=data.ymax
                     
                 theory.data = numpy.zeros((len(data.y_bins),len(data.x_bins)))
-                for i in range(len(data.x_bins)):
-                    if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
-                        for j in range(len(data.y_bins)):
-                            if data.y_bins[j]>= ymin and data.y_bins[j]<= ymax:
-                                theory.data[j][i]=model.runXY([data.x_bins[i],data.y_bins[j]])
-
+                for i in range(len(data.y_bins)):
+                    if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
+                        for j in range(len(data.x_bins)):
+                            if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
+                                theory.data[j][i]=model.runXY([data.x_bins[j],data.y_bins[i]])
+               
                 #print "fitting : plot_helper:", theory.image
                 #print data.image
                 #print "fitting : plot_helper:",theory.image
@@ -675,11 +672,15 @@ class Plugin:
         # the content will be updated and the plot refreshed
         self.fit_panel.add_model_page(model,description,name,topmenu=True)
         
-    def draw_model(self,model,name ,description=None,enable1D=True, enable2D=False,
+    def draw_model(self,model,name ,data=None,description=None,enable1D=True, enable2D=False,
                    qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
         """
              draw model with default data value
         """
+        if data !=None:
+            print "qmin qmax",qmin, qmax
+            self.redraw_model(qmin,qmax)
+            return 
         self._draw_model2D(model=model,
                            description=model.description,
                            enable2D= enable2D,
@@ -740,7 +741,7 @@ class Plugin:
         pass
     
     def complete(self, output, elapsed, model, qmin, qmax,qstep=DEFAULT_NPTS):
-  
+       
         wx.PostEvent(self.parent, StatusEvent(status="Calc \
         complete in %g sec" % elapsed))
         #print "complete",output, model,qmin, qmax

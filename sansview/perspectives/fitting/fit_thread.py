@@ -169,6 +169,7 @@ class FitThread(CalcThread):
             print "Thread stopped. "
             raise
         except:
-            wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+            raise
+            #wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             return 
     

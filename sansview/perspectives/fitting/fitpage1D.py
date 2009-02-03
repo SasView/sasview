@@ -4,27 +4,15 @@ import wx.lib
 import numpy,math
 import copy
 import sans.models.dispersion_models 
-from sans.guicomm.events import StatusEvent   
+from sans.guicomm.events import StatusEvent 
+from sans.guiframe.utils import format_number
+from modelpage import ModelPage  
+from modelpage import format_number
 (ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 80
 
-def format_number(value, high=False):
-    """
-        Return a float in a standardized, human-readable formatted string 
-    """
-    try: 
-        value = float(value)
-    except:
-        print "returning 0"
-        return "0"
-    
-    if high:
-        return "%-6.4g" % value
-    else:
-        return "%-5.3g" % value
 
-from modelpage import format_number
-from modelpage import ModelPage
+
 class FitPage1D(ModelPage):
     """
         FitPanel class contains fields allowing to display results when
@@ -44,21 +32,50 @@ class FitPage1D(ModelPage):
         """ 
             Initialization of the Panel
         """
-        #self.scroll = wx.ScrolledWindow(self)
-        
+        self.data = data
+        self.enable2D=False
         self.manager = None
         self.parent  = parent
         self.event_owner = None
         #panel interface
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
+        self.sizer10 = wx.GridBagSizer(5,5)
+        self.sizer9 = wx.GridBagSizer(5,5)
+        self.sizer8 = wx.GridBagSizer(5,5)
+        self.sizer7 = wx.GridBagSizer(5,5)
         self.sizer6 = wx.GridBagSizer(5,5)
         self.sizer5 = wx.GridBagSizer(5,5)
         self.sizer4 = wx.GridBagSizer(5,5)
         self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer2 = wx.GridBagSizer(5,5)
         self.sizer1 = wx.GridBagSizer(5,5)
+        # Add layer
+        #data info layer
+        self.vbox.Add(self.sizer1)
+        #data range 
+        self.vbox.Add(self.sizer2)
+        #instrument smearing selection layer
+        self.vbox.Add(self.sizer3)
+        #model selection
+        self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+        self.vbox.Add(self.sizer4)
+        #model paramaters layer
+        self.vbox.Add(self.sizer5)
+        #polydispersion selected
+        self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+        self.vbox.Add(self.sizer6)
+        #combox box for type of dispersion
+        self.vbox.Add(self.sizer7)
+        #dispersion parameters layer
+        self.vbox.Add(self.sizer8)
+        #fit info layer
+        self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+        self.vbox.Add(self.sizer9)
+        #close layer
+        self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+        self.vbox.Add(self.sizer10)
         
-        
+        #---------sizer 1 draw--------------------------------
         self.DataSource  =wx.StaticText(self, -1,str(data.name))
         self.smearer_box = wx.ComboBox(self, -1)
         wx.EVT_COMBOBOX( self.smearer_box,-1, self.onSmear ) 
@@ -73,121 +90,189 @@ class FitPage1D(ModelPage):
             else:
               self.smearer_box.Insert(str(v),i)  
             i+=1
-        self.modelbox = wx.ComboBox(self, -1)
-        id = wx.NewId()
-        self.btFit =wx.Button(self,id,'Fit')
-        self.btFit.Bind(wx.EVT_BUTTON, self.onFit,id=id)
-        self.btFit.SetToolTipString("Perform fit.")
-        self.static_line_1 = wx.StaticLine(self, -1)
-       
-        self.vbox.Add(self.sizer3)
-        self.vbox.Add(self.sizer2)
-        self.vbox.Add(self.static_line_1, 0, wx.EXPAND, 0)
-        self.vbox.Add(self.sizer5)
-        self.vbox.Add(self.sizer6)
-        self.vbox.Add(self.sizer4)
-        self.vbox.Add(self.sizer1)
-        
-        id = wx.NewId()
-        self.btClose =wx.Button(self,id,'Close')
-        self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
-        self.btClose.SetToolTipString("Close page.")
+            
+        # Minimum value of data   
+        self.data_min    = wx.StaticText(self, -1,str(format_number(numpy.min(data.x))))
+        # Maximum value of data  
+        self.data_max    =  wx.StaticText(self, -1,str(format_number(numpy.max(data.x))))
+        #Filing the sizer containing data related fields
         ix = 0
         iy = 1
-        self.sizer3.Add(wx.StaticText(self, -1, 'Data Source Name : '),(iy,ix),\
+        self.sizer1.Add(wx.StaticText(self, -1, 'Data Source Name : '),(iy,ix),\
                  (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+       
         ix += 1
-        self.sizer3.Add(self.DataSource,(iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix += 1
-        self.sizer3.Add((20,20),(iy,ix),(1,1),wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE,0)
-        ix = 0
-        iy += 1
-        self.sizer3.Add(wx.StaticText(self,-1,'Instrument Smearing'),(iy,ix),(1,1)\
-                  , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix += 1
-        self.sizer3.Add(self.smearer_box,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        self.sizer1.Add(self.DataSource,(iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
-        ix = 0
-        iy += 1
-        self.sizer3.Add(wx.StaticText(self,-1,'Model'),(iy,ix),(1,1)\
-                  , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix += 1
-        self.sizer3.Add(self.modelbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        
+        #---------sizer 2 draw--------------------------------
         ix = 0
         iy = 1
         #set maximum range for x in linear scale
         self.text4_3 = wx.StaticText(self, -1, 'Maximum Data Range(Linear)', style=wx.ALIGN_LEFT)
-        self.sizer4.Add(self.text4_3,(iy,ix),(1,1),\
+        self.sizer2.Add(self.text4_3,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix += 1
-        self.sizer4.Add(wx.StaticText(self, -1, 'Min'),(iy, ix),(1,1),\
-                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 2
-        self.sizer4.Add(wx.StaticText(self, -1, 'Max'),(iy, ix),(1,1),\
+        self.sizer2.Add(wx.StaticText(self, -1, 'Min :'),(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix = 0
-        iy += 1
-        self.sizer4.Add(wx.StaticText(self, -1, 'x range'),(iy, ix),(1,1),\
-                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.xmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        self.xmin.SetValue(format_number(numpy.min(data.x)))
-        self.xmin.SetToolTipString("Minimun value of x in linear scale.")
-        self.xmin.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
-        self.xmin.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
-        self.xmin.Disable()
-        self.sizer4.Add(self.xmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        self.sizer2.Add(self.data_min,(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer2.Add(wx.StaticText(self, -1, 'Max : '),(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer2.Add(self.data_max,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
-       
-        ix += 2
-        self.xmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        self.xmax.SetValue(format_number(numpy.max(data.x)))
-        self.xmax.SetToolTipString("Maximum value of x in linear scale.")
-        self.xmax.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
-        self.xmax.Bind(wx.EVT_TEXT_ENTER, self._onTextEnter)
-        self.xmax.Disable()
-        self.sizer4.Add(self.xmax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix =0
-        iy+=1
-        self.sizer4.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        #Set chisqr  result into TextCtrl
+        #----sizer 3 draw--------------------------------
         ix = 0
         iy = 1
+        self.sizer3.Add(wx.StaticText(self,-1,'Instrument Smearing'),(iy,ix),(1,1)\
+                  , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        self.sizer3.Add(self.smearer_box,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix =0
+        iy+=1
+        self.sizer3.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
+            
+        #------------------ sizer 4  draw------------------------   
+        self.modelbox = wx.ComboBox(self, -1)
         
+        #filling sizer2
+        ix = 0
+        iy = 1
+        self.sizer4.Add(wx.StaticText(self,-1,'Model'),(iy,ix),(1,1)\
+                  , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        self.sizer4.Add(self.modelbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
+        #----------sizer6-------------------------------------------------
+        self.disable_disp = wx.RadioButton(self, -1, 'No', (10, 10), style=wx.RB_GROUP)
+        self.enable_disp = wx.RadioButton(self, -1, 'Yes', (10, 30))
+        self.Bind(wx.EVT_RADIOBUTTON, self.Set_DipersParam, id=self.disable_disp.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self.Set_DipersParam, id=self.enable_disp.GetId())
+        ix= 0
+        iy=1
+        self.sizer6.Add(wx.StaticText(self,-1,'Polydispersity: '),(iy,ix),(1,1)\
+                  , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        self.sizer6.Add(self.enable_disp ,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer6.Add(self.disable_disp ,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix =0
+        iy+=1
+        self.sizer6.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
+
+        
+        #---------sizer 9 draw----------------------------------------
+        self.tcChi    =  wx.StaticText(self, -1, str(0), style=wx.ALIGN_LEFT)
+        self.tcChi.Hide()
         self.text1_1 = wx.StaticText(self, -1, 'Chi2/dof', style=wx.ALIGN_LEFT)
-        #self.sizer1.Add(self.text1_1,1)
-        self.sizer1.Add(self.text1_1,(iy,ix),(1,1),\
+        self.text1_1.Hide()
+        
+        id = wx.NewId()
+        self.btFit =wx.Button(self,id,'Fit')
+        self.btFit.Bind(wx.EVT_BUTTON, self.onFit,id=id)
+        self.btFit.SetToolTipString("Perform fit.")
+         ## Q range
+        print "self.data fitpage1D" , self.data,hasattr(self.data,"data")
+        if not hasattr(self.data,"data"):
+            self.qmin_x= numpy.min(self.data.x)
+            self.qmax_x= numpy.max(self.data.x)
+        else:
+            radius1= math.sqrt(math.pow(self.data.xmin, 2)+ math.pow(self.data.ymin, 2))
+            radius2= math.sqrt(math.pow(self.data.xmax, 2)+ math.pow(self.data.ymin, 2))
+            radius3= math.sqrt(math.pow(self.data.xmin, 2)+ math.pow(self.data.ymax, 2))
+            radius4= math.sqrt(math.pow(self.data.xmax, 2)+ math.pow(self.data.ymax, 2))
+            self.qmin_x =0
+            self.qmax_x= max(radius1, radius2, radius3, radius4)
+            print "data2D range",self.qmax_x
+        self.num_points= 100
+         
+        
+        
+        self.qmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.qmin.SetValue(str(format_number(self.qmin_x)))
+        self.qmin.SetToolTipString("Minimun value of x in linear scale.")
+        self.qmin.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+        self.qmin.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
+        self.qmin.Disable()
+        
+        self.qmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.qmax.SetValue(str(format_number(self.qmax_x)))
+        self.qmax.SetToolTipString("Maximum value of x in linear scale.")
+        self.qmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+        self.qmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
+        self.qmax.Disable()
+
+        self.npts    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.npts.SetValue(format_number(self.num_points))
+        self.npts.SetToolTipString("Number of point to plot.")
+        self.npts.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+        self.npts.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
+        self.npts.Disable()
+        self.npts.Hide()
+        ix = 0
+        iy = 1 
+        self.sizer9.Add(wx.StaticText(self, -1, 'Fitting Range'),(iy, ix),(1,1),\
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1 
+        self.sizer9.Add(wx.StaticText(self, -1, 'Min'),(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer9.Add(wx.StaticText(self, -1, 'Max'),(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        #ix += 1
+        #self.sizer9.Add(wx.StaticText(self, -1, 'Npts'),(iy, ix),(1,1),\
+        #                    wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix = 0
+        iy += 1
+        self.sizer9.Add(wx.StaticText(self, -1, 'x range'),(iy, ix),(1,1),\
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        self.sizer9.Add(self.qmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer9.Add(self.qmax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer9.Add(self.npts,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix = 0
+        iy += 1
+        self.sizer9.Add(self.text1_1,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.tcChi    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        self.tcChi.SetToolTipString("Chi^2 over degrees of freedom.")
-        #self.sizer1.Add(self.tcChi, 1, wx.R | wx.BOTTOM , 5)
-        self.sizer1.Add(self.tcChi,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        self.sizer9.Add(self.tcChi,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix +=2
-        #self.sizer1.Add(self.btFit, 1, wx.LEFT | wx.BOTTOM , 5)
-        self.sizer1.Add(self.btFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix+= 2
-        self.sizer1.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        #self.sizer1.Add( self.btClose,1, wx.LEFT | wx.BOTTOM , 5)
-        self.tcChi.Disable()
-        ix= 0
+        self.sizer9.Add(self.btFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix =0
+        iy+=1 
+        self.sizer9.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        #----------sizer 10 draw------------------------------------------------------
+        id = wx.NewId()
+        self.btClose =wx.Button(self,id,'Close')
+        self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
+        self.btClose.SetToolTipString("Close page.")
+        
+        ix= 3
+        iy= 1
+        self.sizer10.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix +=1
+        self.sizer10.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix =0
         iy+=1
-        self.sizer1.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        #self.sizer1.Add((20,20), 0)
+        self.sizer10.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+       
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         self.fixed_param=[]
+        #list of dispersion paramaters
+        self.disp_list=None
         #contains link between a model and selected parameters to fit 
         self.param_toFit=[]
         # model on which the fit would be performed
         self.model=None
         #dictionary of model name and model class
         self.model_list_box={}
-        self.data = data
-        ## Q range
-        self.qmin= 0.001
-        self.qmax= 0.1
+        
+      
        
         self.vbox.Layout()
         self.vbox.Fit(self) 
@@ -197,12 +282,38 @@ class FitPage1D(ModelPage):
         self.Centre()
         self.Layout()
         self.GrandParent.GetSizer().Layout()
-       
-
-  
-  
- 
+   
+    def compute_chisqr2D(self):
+        """ @param fn: function that return model value
+            @return residuals
+        """
+        flag=self.checkFitRange()
+        res=[]
+        if flag== True:
+            try:
+                self.qmin_x = float(self.qmin.GetValue())
+                self.qmax_x = float(self.qmax.GetValue())
+                
+                for i in range(len(self.data.x_bins)):
+                    if self.data.x_bins[i]>= self.qmin_x and self.data.x_bins[i]<= self.qmax_x:
+                        for j in range(len(self.data.y_bins)):
+                            if self.data.y_bins[j]>= self.qmin_x and self.data.y_bins[j]<= self.qmax_x:
+                                res.append( (self.data.data[j][i]- self.model.runXY(\
+                                 [self.data.x_bins[i],self.data.y_bins[j]]))\
+                                    /self.data.err_data[j][i] )
+                sum=0
+               
+                for item in res:
+                    if numpy.isfinite(item):
+                        sum +=item
+                #print "chisqr : sum 2D", xmin, xmax, ymin, ymax,sum
+                #print res
+                self.tcChi.SetValue(format_number(math.fabs(sum)))
+            except:
+                wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+                            "Chisqr cannot be compute: %s"% sys.exc_value))
         
+ 
     def compute_chisqr(self):
         """ @param fn: function that return model value
             @return residuals
@@ -211,50 +322,44 @@ class FitPage1D(ModelPage):
         flag=self.checkFitRange()
         if flag== True:
             try:
-                qmin = float(self.xmin.GetValue())
-                qmax = float(self.xmax.GetValue())
-                x,y,dy = [numpy.asarray(v) for v in (self.data.x,self.data.y,self.data.dy)]
-                if qmin==None and qmax==None: 
-                    fx =numpy.asarray([self.model.run(v) for v in x])
-                    res=(y - fx)/dy
+                if hasattr(self.data,"data"):
+                    self.compute_chisqr2D()
+                    return
                 else:
-                    idx = (x>= qmin) & (x <=qmax)
-                    fx = numpy.asarray([self.model.run(item)for item in x[idx ]])
-                    res= (y[idx] - fx)/dy[idx]  
-                
-               
-                sum=0
-                for item in res:
-                    if numpy.isfinite(item):
-                        sum +=item
-                self.tcChi.SetValue(format_number(math.fabs(sum)))
+                    self.qmin_x = float(self.qmin.GetValue())
+                    self.qmax_x = float(self.qmax.GetValue())
+                    x,y,dy = [numpy.asarray(v) for v in (self.data.x,self.data.y,self.data.dy)]
+                    if self.qmin_x==None and self.qmax_x==None: 
+                        fx =numpy.asarray([self.model.run(v) for v in x])
+                        res=(y - fx)/dy
+                    else:
+                        idx = (x>= self.qmin_x) & (x <=self.qmax_x)
+                        fx = numpy.asarray([self.model.run(item)for item in x[idx ]])
+                        res= (y[idx] - fx)/dy[idx]  
+                    
+                   
+                    sum=0
+                    for item in res:
+                        if numpy.isfinite(item):
+                            sum +=item
+                    self.tcChi.SetLabel(format_number(math.fabs(sum)))
             except:
                 wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Chisqr cannot be compute: %s"% sys.exc_value))
             
-            
-    def onFit(self,event):
-        """ signal for fitting"""
-         
-        flag=self.checkFitRange()
-        self.set_manager(self.manager)
-     
-        qmin=float(self.xmin.GetValue())
-        qmax =float( self.xmax.GetValue())
-        if len(self.param_toFit) >0 and flag==True:
-            self.manager.schedule_for_fit( value=1,fitproblem =None) 
-            self.manager._on_single_fit(qmin=qmin,qmax=qmax)
-        else:
-              wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                            "Select at least on parameter to fit "))
-  
-    
     def _on_select_model(self,event):
         """
             react when a model is selected from page's combo box
             post an event to its owner to draw an appropriate theory
         """
         self.btFit.SetFocus()
+        self.disable_disp.SetValue(True)
+        self.sizer8.Clear(True)
+        self.sizer7.Clear(True)       
+        self.vbox.Layout()
+        self.SetScrollbars(20,20,55,40)
+        self.Layout()
+        self.parent.GetSizer().Layout()
         for item in self.model_list_box.itervalues():
             name = item.__name__
             if hasattr(item, "name"):
@@ -269,8 +374,23 @@ class FitPage1D(ModelPage):
                     #self.set_panel(self.model)
                 except:
                     raise #ValueError,"model.name is not equal to model class name"
-                break
-    
+                break       
+    def onFit(self,event):
+        """ signal for fitting"""
+         
+        flag=self.checkFitRange()
+        self.set_manager(self.manager)
+     
+        self.qmin_x=float(self.qmin.GetValue())
+        self.qmax_x =float( self.qmax.GetValue())
+        if len(self.param_toFit) >0 and flag==True:
+            self.manager.schedule_for_fit( value=1,fitproblem =None) 
+            self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x)
+        else:
+              wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+                            "Select at least on parameter to fit "))
+  
+   
     def _onTextEnter(self,event):
         """
             set a flag to determine if the fitting range entered by the user is valid
@@ -287,36 +407,7 @@ class FitPage1D(ModelPage):
             wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Drawing  Error:wrong value entered %s"% sys.exc_value))
         
-    def checkFitRange(self):
-        """
-            Check the validity of fitting range
-            @note: xmin should always be less than xmax or else each control box
-            background is colored in pink.
-        """
-       
-        flag = True
-        valueMin = self.xmin.GetValue()
-        valueMax = self.xmax.GetValue()
-        # Check for possible values entered
-        #print "fitpage: checkfitrange:",valueMin,valueMax
-        try:
-            if (float(valueMax)> float(valueMin)):
-                self.xmax.SetBackgroundColour(wx.WHITE)
-                self.xmin.SetBackgroundColour(wx.WHITE)
-            else:
-                flag = False
-                self.xmin.SetBackgroundColour("pink")
-                self.xmax.SetBackgroundColour("pink")      
-        except:
-            flag = False
-            self.xmin.SetBackgroundColour("pink")
-            self.xmax.SetBackgroundColour("pink")
-            
-        self.xmin.Refresh()
-        self.xmax.Refresh()
-        return flag
-    
-
+   
     
     def get_param_list(self):
         """
@@ -330,62 +421,44 @@ class FitPage1D(ModelPage):
         else:
             raise ValueError,"missing parameter to fit"
         
-        
-    def set_panel(self,model):
+    
+           
+    def old_set_panel(self,model):
         """
             Build the panel from the model content
             @param model: the model selected in combo box for fitting purpose
         """
-        self.sizer2.Clear(True)
         self.sizer5.Clear(True)
-        self.sizer6.Clear(True)
         self.parameters = []
         self.param_toFit=[]
         self.model = model
         keys = self.model.getParamList()
         #print "fitpage1D : dispersion list",self.model.getDispParamList()
         keys.sort()
-        disp_list=self.model.getDispParamList()
-        fixed=self.model.fixed
-        print "fixed",fixed
-        #model.setParam("scale", 2)
-        #print "model sphere scale fixed?", self.model.is_fittable("scale")
-        ip=0
-        iq=1
-        
         ik=0
         im=1
-        if len(disp_list)>0:
-            disp = wx.StaticText(self, -1, 'Dispersion')
-            self.sizer5.Add(disp,( iq, ip),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-            ip += 1 
-            values = wx.StaticText(self, -1, 'Values')
-            self.sizer5.Add(values,( iq, ip),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-            
-        disp_list.sort()
+        
         iy = 1
         ix = 0
         self.cb1 = wx.CheckBox(self, -1,"Select all", (10, 10))
         wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_param)
-        self.sizer2.Add(self.cb1,(iy, ix),(1,1),\
+        self.sizer5.Add(self.cb1,(iy, ix),(1,1),\
                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix +=1
         self.text2_2 = wx.StaticText(self, -1, 'Values')
-        self.sizer2.Add(self.text2_2,(iy, ix),(1,1),\
+        self.sizer5.Add(self.text2_2,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix +=2
         self.text2_3 = wx.StaticText(self, -1, 'Errors')
-        self.sizer2.Add(self.text2_3,(iy, ix),(1,1),\
+        self.sizer5.Add(self.text2_3,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.text2_3.Hide() 
         ix +=1
         self.text2_4 = wx.StaticText(self, -1, 'Units')
-        self.sizer2.Add(self.text2_4,(iy, ix),(1,1),\
+        self.sizer5.Add(self.text2_4,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_4.Hide()
-        #print "keys", keys
-        #print "disp_list", disp_list
-        #print "fix_list",fixed
+        disp_list=self.model.getDispParamList()
         for item in keys:
             if not item in disp_list:
                 iy += 1
@@ -393,7 +466,7 @@ class FitPage1D(ModelPage):
     
                 cb = wx.CheckBox(self, -1, item, (10, 10))
                 cb.SetValue(False)
-                self.sizer2.Add( cb,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                self.sizer5.Add( cb,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                 wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
             
                 ix += 1
@@ -402,16 +475,16 @@ class FitPage1D(ModelPage):
                 ctl1.SetValue(str (format_number(value)))
                 ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                self.sizer2.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
+                self.sizer5.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                 
                 ix += 1
                 text2=wx.StaticText(self, -1, '+/-')
-                self.sizer2.Add(text2,(iy, ix),(1,1),\
+                self.sizer5.Add(text2,(iy, ix),(1,1),\
                                 wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
                 text2.Hide()  
                 ix += 1
                 ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
-                self.sizer2.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                self.sizer5.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl2.Hide()
                 ix +=1
                 # Units
@@ -419,9 +492,10 @@ class FitPage1D(ModelPage):
                     units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
                 except:
                     units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
-                self.sizer2.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                self.sizer5.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            """
             else:
-                if item in fixed:
+                if not item in fixed:
                     ip = 0
                     iq += 1
                     cb = wx.CheckBox(self, -1, item, (10, 10))
@@ -451,11 +525,11 @@ class FitPage1D(ModelPage):
                     self.fixed_param.append([item, Tctl])
                     im += 1
             #save data
-            
+            """
             self.parameters.append([cb,ctl1,text2,ctl2])
                 
         iy+=1
-        self.sizer2.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        self.sizer5.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
         #Display units text on panel
         for item in keys:   
@@ -498,57 +572,11 @@ class FitPage1D(ModelPage):
                     item[3].Clear()
                     item[3].Hide()
                 except:
-                     wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                            "Drawing  Error:wrong value entered : %s"% sys.exc_value))
+                    #enter dispersion value 
+                    pass
         self.set_model_parameter()
         
-    def set_model_parameter(self):
-        if len(self.parameters) !=0 and self.model !=None:
-            # Flag to register when a parameter has changed.
-            is_modified = False
-            for item in self.fixed_param:
-                
-                try:
-                     name=str(item[0])
-                     value= float(item[1].GetValue())
-#                     print "model para", name,value
-                     # If the value of the parameter has changed,
-                     # update the model and set the is_modified flag
-                     if value != self.model.getParam(name):
-                         self.model.setParam(name,value)
-                         is_modified = True
-                except:
-                     wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                            "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
-                
-            for item in self.parameters:
-#                print "paramters",str(item[0].GetLabelText())
-                try:
-                     name=str(item[0].GetLabelText())
-                     value= float(item[1].GetValue())
-#                     print "model para", name,value
-                     # If the value of the parameter has changed,
-                     # update the model and set the is_modified flag
-                     if value != self.model.getParam(name):
-                         self.model.setParam(name,value)
-                         is_modified = True
-                except:
-                     wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                            "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
-            
-            # Here we should check whether the boundaries have been modified.
-            # If qmin and qmax have been modified, update qmin and qmax and 
-            # set the is_modified flag to True
-            if float(self.xmin.GetValue()) != self.qmin:
-                self.qmin = float(self.xmin.GetValue())
-                is_modified = True
-            if float(self.xmax.GetValue()) != self.qmax:
-                self.qmax = float(self.xmax.GetValue())
-                is_modified = True
-            
-            if is_modified:
-                self.manager.redraw_model(qmin=self.qmin, qmax=self.qmax)
-         
+    
     def select_all_param(self,event): 
         """
              set to true or false all checkBox given the main checkbox value cb1
@@ -596,11 +624,11 @@ class FitPage1D(ModelPage):
             self.cb1.SetValue(False)
             
         if not (len(self.param_toFit ) >0):
-            self.xmin.Disable()
-            self.xmax.Disable()
+            self.qmin.Disable()
+            self.qmax.Disable()
         else:
-            self.xmin.Enable()
-            self.xmax.Enable()
+            self.qmin.Enable()
+            self.qmax.Enable()
        
    
        
@@ -614,8 +642,7 @@ class FitPage1D(ModelPage):
        
         """
         #print "fitting : onsetvalues out",out
-        self.tcChi.Clear()
-        self.tcChi.SetValue(format_number(chisqr))
+        self.tcChi.SetLabel(format_number(chisqr))
         params = {}
         is_modified = False
         has_error = False

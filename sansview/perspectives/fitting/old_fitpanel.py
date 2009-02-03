@@ -1,5 +1,4 @@
 import wx
-import wx.aui
 import wx.lib
 import numpy
 import string ,re
@@ -7,8 +6,8 @@ import string ,re
 _BOX_WIDTH = 80
 
 
-class FitPanel(wx.aui.AuiNotebook):    
-#class FitPanel(wx.aui.AuiNotebook,wx.panel):
+    
+class FitPanel(wx.Panel):
     """
         FitPanel class contains fields allowing to fit  models and  data
         @note: For Fit to be performed the user should check at least one parameter
@@ -20,23 +19,23 @@ class FitPanel(wx.aui.AuiNotebook):
     ## Title to appear on top of the window
     window_caption = "Fit Panel "
     CENTER_PANE = True
+   
+    
     def __init__(self, parent, *args, **kwargs):
-        
-        wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_SCROLL_BUTTONS )
-        
+        wx.Panel.__init__(self, parent, *args, **kwargs)
         self.manager=None
         self.parent=parent
         self.event_owner=None
-        
-        pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
-        self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.onClosePage)
-
+        #self.menu_mng = models.ModelManager()
+        self.nb = wx.Notebook(self)
+        self.sizer = wx.BoxSizer()
+        self.sizer.Add(self.nb, 1, wx.EXPAND)
         #Creating an initial page for simultaneous fitting
         from simfitpage import SimultaneousFitPage
-        self.sim_page = SimultaneousFitPage(self, -1)
-        self.AddPage(self.sim_page,"Simultaneous Fit")
+        self.sim_page = SimultaneousFitPage(self.nb, -1)
         
-
+        #self.fit_panel.add_page(self.sim_page,"Simultaneous Fit")
+        self.nb.AddPage(self.sim_page,"Simultaneous Fit")
         
         #dictionary of miodel {model class name, model class}
         self.model_list_box={}
@@ -50,21 +49,11 @@ class FitPanel(wx.aui.AuiNotebook):
         # increment number for model name
         self.count=0
         #updating the panel
-        self.Update()
+        self.nb.Update()
+        self.SetSizer(self.sizer)
+        self.sizer.Fit(self)
         self.Center()
-    def onClosePage(self, event):
-        self.ToggleWindowStyle(wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB)
-        print "went here",self.get_current_page(), self.GetPage(0)
-        #event.Skip()
-        if self.GetPageCount() <= 2:
-            print "wente here"
-            
-            # Prevent last tab from being closed
-            self.ToggleWindowStyle(~wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB)
-            
-
-   
-
+        
 
         
     def set_manager(self, manager):
@@ -98,17 +87,17 @@ class FitPanel(wx.aui.AuiNotebook):
             self.count +=1
             if data.__class__.__name__=='Data2D':
                  from fitpage2D import FitPage2D
-                 panel = FitPage2D(self,data, -1)
+                 panel = FitPage2D(self.nb,data, -1)
                  
             else:
                 
                 from fitpage1D import FitPage1D
-                panel = FitPage1D(self,data, -1)
+                panel = FitPage1D(self.nb,data, -1)
             m_name= "M"+str(self.count)  
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
             
-            self.AddPage(page=panel,caption=name,select=True)
+            self.nb.AddPage(page=panel,text=name,select=True)
             panel.populate_box( self.model_list_box)
             self.fit_page_name = name
             return panel,m_name
@@ -122,14 +111,15 @@ class FitPanel(wx.aui.AuiNotebook):
             @param npts: number of Q points
         """
         from modelpage import ModelPage
-        panel = ModelPage(self,model,page_title, -1)
+        panel = ModelPage(self.nb,model,page_title, -1)
         panel.set_manager(self.manager)
         panel.set_owner(self.event_owner)
-        self.AddPage(page=panel,caption="Model",select=True)
+        #self.nb.AddPage(page=panel,text=page_title,select=True)
+        self.nb.AddPage(page=panel,text="Model",select=True)
         panel.populate_box( self.model_list_box)
         self.draw_model_name=page_title
-        self.model_page_number=self.GetSelection()
-        self.model_page=self.GetPage(self.GetSelection())
+        self.model_page_number=self.nb.GetSelection()
+        self.model_page=self.nb.GetPage(self.nb.GetSelection())
         
         
         # Set the range used to plot models
@@ -159,15 +149,41 @@ class FitPanel(wx.aui.AuiNotebook):
         elif topmenu==True:
             self.model_page.select_model(model, page_title)
            
+    def get_notebook(self):
+        """
+            @return self.nb: return its own notebook mostly used by fitting module 
+        """
+        return self.nb
+    
+    def get_page(self, n):
+        """
+            @return page at position n
+            @param n: page number
+        """
+        return self.nb.GetPage(n)
+    
+    
+    def get_page_count(self):
+        """ @return  number total of pages contained in notebook"""
+        return self.nb.GetPageCount()
+        
+        
     def get_current_page(self):
         """
             @return the current page selected
         """
-        #return self.nb.GetCurrentPage()
-        return self.GetPage(self.GetSelection() )
-  
+        return self.nb.GetCurrentPage()
     
-    def old_onClose(self, page=None,page_number=None):
+    
+    def get_selected_page(self):
+        """ @return the page just selected by the user """
+        return self.nb.GetPage(self.nb.GetSelection())
+    
+    
+    def get_page_number(self):
+        return self.nb.GetSelection()
+    
+    def onClose(self, page=None,page_number=None):
         """
              close the current page except the simpage. remove each check box link to the model
              selected on that page. remove its reference into page_finder (fitting module)

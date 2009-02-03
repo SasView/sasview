@@ -7,6 +7,9 @@ from danse.common.plottools.plottables import Data1D, Theory1D,Data2D
 from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
 from sans.guicomm.events import EVT_SLICER_PANEL,EVT_MODEL2D_PANEL
+from sans.guiframe.model_thread import Calc2D
+from sans.guiframe.calcthread import CalcThread
+
 
 from sans.fit.AbstractFitEngine import Model,Data,FitData1D,FitData2D
 from fitproblem import FitProblem
@@ -319,7 +322,10 @@ class Plugin:
                         model_name,param_name = self.split_string(p.name)  
                         if model.name == model_name:
                             small_out.append(p.value )
-                            small_cov.append(p.stderr)
+                            if p.stderr ==None:
+                                small_cov.append(0)
+                            else:
+                                small_cov.append(p.stderr)
                             model.setParam(param_name,p.value)  
                     # Display result on each page 
                     page.onsetValues(result.fitness, small_out,small_cov)
@@ -358,7 +364,6 @@ class Plugin:
                 list=value.get_model()
                 model=list[0]
                 smearer= value.get_smearer()
-                print "single fit", model, smearer
                 #Create list of parameters for fitting used
                 pars=[]
                 templist=[]
@@ -378,8 +383,8 @@ class Plugin:
                     self.id+=1
                     self.schedule_for_fit( 0,value) 
                 except:
-                    raise 
-                    #wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+                    #raise 
+                    wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
                     return
                 # make sure to keep an alphabetic order 
                 #of parameter names in the list      
@@ -406,7 +411,7 @@ class Plugin:
             
            
         except:
-            raise
+            #raise
             wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
             return
          
@@ -516,8 +521,9 @@ class Plugin:
         model = evt.model
         name = evt.name
         
-        sim_page=self.fit_panel.GetPage(0)
+        sim_page=self.fit_panel.get_page(0)
         current_pg = self.fit_panel.get_current_page() 
+        selected_page = self.fit_panel.get_selected_page()
         if current_pg != sim_page:
             current_pg.set_panel(model)
             model.name = self.page_finder[current_pg].get_name()
@@ -558,7 +564,7 @@ class Plugin:
             @param model: the model from where the theory is derived
             @param currpage: page in a dictionary referring to some data
         """
-        if self.fit_panel.GetPageCount() >1:
+        if self.fit_panel.get_page_count() >1:
             for page in self.page_finder.iterkeys():
                 if  page==currpage :  
                     data=self.page_finder[page].get_data()
@@ -634,12 +640,12 @@ class Plugin:
                     ymax=data.ymax
                     
                 theory.data = numpy.zeros((len(data.y_bins),len(data.x_bins)))
-                for i in range(len(data.y_bins)):
-                    if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
-                        for j in range(len(data.x_bins)):
-                            if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
-                                theory.data[j][i]=model.runXY([data.x_bins[j],data.y_bins[i]])
-               
+                for i in range(len(data.x_bins)):
+                    if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
+                        for j in range(len(data.y_bins)):
+                            if data.y_bins[j]>= ymin and data.y_bins[j]<= ymax:
+                                theory.data[j][i]=model.runXY([data.x_bins[i],data.y_bins[j]])
+
                 #print "fitting : plot_helper:", theory.image
                 #print data.image
                 #print "fitting : plot_helper:",theory.image
@@ -672,14 +678,11 @@ class Plugin:
         # the content will be updated and the plot refreshed
         self.fit_panel.add_model_page(model,description,name,topmenu=True)
         
-    def draw_model(self,model,name ,data=None,description=None,enable1D=True, enable2D=False,
+    def draw_model(self,model,name ,description=None,enable1D=True, enable2D=False,
                    qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
         """
              draw model with default data value
         """
-        if data !=None:
-            self.redraw_model(qmin,qmax)
-            return 
         self._draw_model2D(model=model,
                            description=model.description,
                            enable2D= enable2D,
@@ -740,7 +743,7 @@ class Plugin:
         pass
     
     def complete(self, output, elapsed, model, qmin, qmax,qstep=DEFAULT_NPTS):
-       
+  
         wx.PostEvent(self.parent, StatusEvent(status="Calc \
         complete in %g sec" % elapsed))
         #print "complete",output, model,qmin, qmax
@@ -793,7 +796,7 @@ class Plugin:
         data=numpy.zeros([len(x),len(y)])
         self.model= model
         if enable2D:
-            from model_thread import Calc2D
+            
             self.calc_thread = Calc2D(parent =self.parent,x=x,
                                        y=y,model= self.model, 
                                        qmin=qmin,
