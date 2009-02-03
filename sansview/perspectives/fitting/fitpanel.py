@@ -22,7 +22,9 @@ class FitPanel(wx.aui.AuiNotebook):
     CENTER_PANE = True
     def __init__(self, parent, *args, **kwargs):
         
-        wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_SCROLL_BUTTONS )
+        #wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_SCROLL_BUTTONS )
+        wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_DEFAULT_STYLE  )
+        
         
         self.manager=None
         self.parent=parent
@@ -30,11 +32,16 @@ class FitPanel(wx.aui.AuiNotebook):
         
         pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.onClosePage)
-
-        #Creating an initial page for simultaneous fitting
+        #Creating the default page --welcomed page
+        from sans.guiframe.welcome_panel import PanelAbout
+        self.about_page = PanelAbout(self, -1)
+        self.AddPage(self.about_page,"welcome!")
+        #self.about_page.Disable()
+        #Creating a page for simultaneous fitting
         from simfitpage import SimultaneousFitPage
         self.sim_page = SimultaneousFitPage(self, -1)
         self.AddPage(self.sim_page,"Simultaneous Fit")
+        
         
 
         
@@ -104,6 +111,7 @@ class FitPanel(wx.aui.AuiNotebook):
                  
             else:
            """
+            #self.about_page.Disable()
             from fitpage1D import FitPage1D
             panel = FitPage1D(self,data, -1)
             m_name= "M"+str(self.count)  

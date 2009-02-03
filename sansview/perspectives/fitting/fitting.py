@@ -230,7 +230,7 @@ class Plugin:
              @param names: the paramter name
              @note: expecting park used for fit.
         """  
-        sim_page=self.fit_panel.get_page(0)
+        sim_page=self.fit_panel.get_page(1)
         for page, value in self.page_finder.iteritems():
             if page != sim_page:
                 list=value.get_model()
@@ -516,7 +516,7 @@ class Plugin:
         model = evt.model
         name = evt.name
         
-        sim_page=self.fit_panel.GetPage(0)
+        sim_page=self.fit_panel.GetPage(1)
         current_pg = self.fit_panel.get_current_page() 
         if current_pg != sim_page:
             current_pg.set_panel(model)
@@ -638,7 +638,7 @@ class Plugin:
                     if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
                         for j in range(len(data.x_bins)):
                             if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
-                                theory.data[j][i]=model.runXY([data.x_bins[j],data.y_bins[i]])
+                                theory.data[i][j]=model.runXY([data.x_bins[j],data.y_bins[i]])
                
                 #print "fitting : plot_helper:", theory.image
                 #print data.image

@@ -263,6 +263,9 @@ class ModelPage(wx.ScrolledWindow):
                 self.parent.GetSizer().Layout()
                 return 
             else:
+                if self.data !=None: # allow to recognize data panel from model panel
+                    self.cb1.SetValue(False)
+                    self.select_all_param_helper()
                 self.fittable_param=[]
                 self.fixed_param=[]
                 self.sizer8.Clear(True)
@@ -273,6 +276,9 @@ class ModelPage(wx.ScrolledWindow):
                 self.Layout()
                 self.parent.GetSizer().Layout()   
         else:
+            if self.data !=None:
+                if self.cb1.GetValue():
+                    self.select_all_param_helper()
             self.fittable_param=[]        
             self.fixed_param=[]
             self.sizer7.Clear(True)
@@ -447,6 +453,7 @@ class ModelPage(wx.ScrolledWindow):
             @param model: the model selected in combo box for fitting purpose
         """
         print "set_panel", model
+        
         self.sizer5.Clear(True)
         self.parameters = []
         self.param_toFit=[]
@@ -614,7 +621,7 @@ class ModelPage(wx.ScrolledWindow):
                         ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
                         self.sizer8.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                         ctl2.Hide()
-                        self.fittable_param=[cb,ctl1,text2,ctl2]
+                        self.fittable_param.append([cb,ctl1,text2,ctl2])
                        
                         
                     elif p=="npts":
@@ -724,5 +731,36 @@ class ModelPage(wx.ScrolledWindow):
         pass
     def select_all_param(self,event): 
         pass
-        
+    def select_all_param_helper(self):
+        """
+             Allows selecting or delecting button
+        """
+        self.param_toFit=[]
+        if  self.parameters !=[]:
+            if  self.cb1.GetValue()==True:
+                for item in self.parameters:
+                    item[0].SetValue(True)
+                    list= [item[0],item[1],item[2],item[3]]
+                    self.param_toFit.append(list )
+                if len(self.fittable_param)>0:
+                    for item in self.fittable_param:
+                        item[0].SetValue(True)
+                        list= [item[0],item[1],item[2],item[3]]
+                        self.param_toFit.append(list )
+               
+                if not (len(self.param_toFit ) >0):
+                    self.qmin.Disable()
+                    self.qmax.Disable()
+                else:
+                    self.qmin.Enable()
+                    self.qmax.Enable()
+            else:
+                for item in self.parameters:
+                    item[0].SetValue(False)
+                for item in self.fittable_param:
+                    item[0].SetValue(False)
+                self.param_toFit=[]
+              
+                self.qmin.Disable()
+                self.qmax.Disable()
        

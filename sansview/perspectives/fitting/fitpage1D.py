@@ -136,7 +136,10 @@ class FitPage1D(ModelPage):
             
         #------------------ sizer 4  draw------------------------   
         self.modelbox = wx.ComboBox(self, -1)
-        
+        self.tcChi    =  wx.StaticText(self, -1, str(0), style=wx.ALIGN_LEFT)
+        self.tcChi.Hide()
+        self.text1_1 = wx.StaticText(self, -1, 'Chi2/dof', style=wx.ALIGN_LEFT)
+        self.text1_1.Hide()
         #filling sizer2
         ix = 0
         iy = 1
@@ -144,7 +147,11 @@ class FitPage1D(ModelPage):
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer4.Add(self.modelbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        
+        ix += 1
+        self.sizer4.Add(self.text1_1,(iy,ix),(1,1),\
+                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        self.sizer4.Add(self.tcChi,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         #----------sizer6-------------------------------------------------
         self.disable_disp = wx.RadioButton(self, -1, 'No', (10, 10), style=wx.RB_GROUP)
         self.enable_disp = wx.RadioButton(self, -1, 'Yes', (10, 30))
@@ -164,10 +171,7 @@ class FitPage1D(ModelPage):
 
         
         #---------sizer 9 draw----------------------------------------
-        self.tcChi    =  wx.StaticText(self, -1, str(0), style=wx.ALIGN_LEFT)
-        self.tcChi.Hide()
-        self.text1_1 = wx.StaticText(self, -1, 'Chi2/dof', style=wx.ALIGN_LEFT)
-        self.text1_1.Hide()
+        
         
         id = wx.NewId()
         self.btFit =wx.Button(self,id,'Fit')
@@ -234,13 +238,8 @@ class FitPage1D(ModelPage):
         self.sizer9.Add(self.qmax,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 1
         self.sizer9.Add(self.npts,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix = 0
-        iy += 1
-        self.sizer9.Add(self.text1_1,(iy,ix),(1,1),\
-                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        
         ix += 1
-        self.sizer9.Add(self.tcChi,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix +=2
         self.sizer9.Add(self.btFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix =0
         iy+=1 
@@ -321,6 +320,7 @@ class FitPage1D(ModelPage):
         """
         
         flag=self.checkFitRange()
+        print "flag", flag
         if flag== True:
             try:
                 if hasattr(self.data,"data"):
@@ -329,6 +329,7 @@ class FitPage1D(ModelPage):
                 else:
                     self.qmin_x = float(self.qmin.GetValue())
                     self.qmax_x = float(self.qmax.GetValue())
+                    print "self.qmin_x, self.qmax_x",self.qmin_x,self.qmax_x
                     x,y,dy = [numpy.asarray(v) for v in (self.data.x,self.data.y,self.data.dy)]
                     if self.qmin_x==None and self.qmax_x==None: 
                         fx =numpy.asarray([self.model.run(v) for v in x])
@@ -337,7 +338,6 @@ class FitPage1D(ModelPage):
                         idx = (x>= self.qmin_x) & (x <=self.qmax_x)
                         fx = numpy.asarray([self.model.run(item)for item in x[idx ]])
                         res= (y[idx] - fx)/dy[idx]  
-                    
                    
                     sum=0
                     for item in res:
@@ -371,8 +371,8 @@ class FitPage1D(ModelPage):
                     self.model=item()
                     evt = ModelEventbox(model=self.model,name=name)
                     wx.PostEvent(self.event_owner, evt)
-                    #self.model= item()
-                    #self.set_panel(self.model)
+                    self.text1_1.Show()
+                    self.tcChi.Show()
                 except:
                     raise #ValueError,"model.name is not equal to model class name"
                 break       
@@ -582,34 +582,7 @@ class FitPage1D(ModelPage):
         """
              set to true or false all checkBox given the main checkbox value cb1
         """
-        self.param_toFit=[]
-        if  self.parameters !=[]:
-            if  self.cb1.GetValue()==True:
-                for item in self.parameters:
-                    item[0].SetValue(True)
-                    list= [item[0],item[1],item[2],item[3]]
-                    self.param_toFit.append(list )
-                if len(self.fittable_param)>0:
-                    for item in self.fittable_param:
-                        item[0].SetValue(True)
-                        list= [item[0],item[1],item[2],item[3]]
-                        self.param_toFit.append(list )
-               
-                if not (len(self.param_toFit ) >0):
-                    self.qmin.Disable()
-                    self.qmax.Disable()
-                else:
-                    self.qmin.Enable()
-                    self.qmax.Enable()
-            else:
-                for item in self.parameters:
-                    item[0].SetValue(False)
-                for item in self.fittable_param:
-                    item[0].SetValue(False)
-                self.param_toFit=[]
-              
-                self.qmin.Disable()
-                self.qmax.Disable()
+        self.select_all_param_helper()
                 
                 
     def select_param(self,event):
