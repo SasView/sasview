@@ -185,14 +185,14 @@ class FitPage1D(ModelPage):
             self.qmax_x= numpy.max(self.data.x)
         else:
             # Reversed to the codes; Need to think  carefully about consistency in q between 2D plot and fitting
-            #radius1= math.sqrt(math.pow(self.data.xmin, 2)+ math.pow(self.data.ymin, 2))
-            #radius2= math.sqrt(math.pow(self.data.xmax, 2)+ math.pow(self.data.ymin, 2))
-            #radius3= math.sqrt(math.pow(self.data.xmin, 2)+ math.pow(self.data.ymax, 2))
-            #radius4= math.sqrt(math.pow(self.data.xmax, 2)+ math.pow(self.data.ymax, 2))
-            #self.qmin_x =numpy.min(self.data.x)#0
-            #self.qmax_x= numpy.max(self.data.x)#max(radius1, radius2, radius3, radius4)
-            self.qmin_x= self.data.xmin
-            self.qmax_x= self.data.xmax           
+            radius1= math.sqrt(math.pow(self.data.xmin, 2)+ math.pow(self.data.ymin, 2))
+            radius2= math.sqrt(math.pow(self.data.xmax, 2)+ math.pow(self.data.ymin, 2))
+            radius3= math.sqrt(math.pow(self.data.xmin, 2)+ math.pow(self.data.ymax, 2))
+            radius4= math.sqrt(math.pow(self.data.xmax, 2)+ math.pow(self.data.ymax, 2))
+            self.qmin_x =0
+            self.qmax_x= max(radius1, radius2, radius3, radius4)
+            #self.qmin_x= self.data.xmin
+            #self.qmax_x= self.data.xmax           
             print "data2D range",self.qmax_x
         
         self.num_points= 100
