@@ -169,7 +169,7 @@ class ModelPanel2D( ModelPanel1D):
             
         #if event.plot._yunit != self.graph.prop["yunit"]:
         self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
-      
+        self.graph.title(self.data2D.name)
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
 
