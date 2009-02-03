@@ -625,15 +625,15 @@ class Plugin:
                 theory.x_bins= data.x_bins
                 theory.y_bins= data.y_bins
                 tempy=[]
-                if qmin==None:
-                    qmin=data.xmin
-                if qmax==None:
-                    qmax=data.xmax
-                if ymin==None:
-                    ymin=data.ymin
-                if ymax==None:
-                    ymax=data.ymax
-                    
+                #if qmin==None:
+                qmin=data.xmin
+                #if qmax==None:
+                qmax=data.xmax
+                #if ymin==None:
+                ymin=data.ymin
+                #if ymax==None:
+                ymax=data.ymax
+                print " q range =",    
                 theory.data = numpy.zeros((len(data.y_bins),len(data.x_bins)))
                 for i in range(len(data.y_bins)):
                     if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
