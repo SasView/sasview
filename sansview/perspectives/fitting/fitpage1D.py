@@ -178,24 +178,25 @@ class FitPage1D(ModelPage):
         self.btFit.Bind(wx.EVT_BUTTON, self.onFit,id=id)
         self.btFit.SetToolTipString("Perform fit.")
          ## Q range
-        print "self.data fitpage1D" , self.data,hasattr(self.data,"data")
+        #print "self.data fitpage1D" , self.data,hasattr(self.data,"data")
         # Reversed to the codes; Need to think  carefully about consistency in q between 2D plot and fitting
         if not hasattr(self.data,"data"):
             self.qmin_x= numpy.min(self.data.x)
             self.qmax_x= numpy.max(self.data.x)
+            self.num_points= len(self.data.x)
         else:
             # Reversed to the codes; Need to think  carefully about consistency in q between 2D plot and fitting
             radius1= math.sqrt(math.pow(self.data.xmin, 2)+ math.pow(self.data.ymin, 2))
             radius2= math.sqrt(math.pow(self.data.xmax, 2)+ math.pow(self.data.ymin, 2))
             radius3= math.sqrt(math.pow(self.data.xmin, 2)+ math.pow(self.data.ymax, 2))
             radius4= math.sqrt(math.pow(self.data.xmax, 2)+ math.pow(self.data.ymax, 2))
-            self.qmin_x =0
-            self.qmax_x= max(radius1, radius2, radius3, radius4)
-            #self.qmin_x= self.data.xmin
-            #self.qmax_x= self.data.xmax           
-            print "data2D range",self.qmax_x
+            #self.qmin_x = 0
+            #self.qmax_x = max(radius1, radius2, radius3, radius4)
+            self.qmin_x= self.data.xmin
+            self.qmax_x= self.data.xmax           
+            #print "data2D range",self.qmax_x
         
-        self.num_points= 100
+            self.num_points= 100
          
         
         
@@ -304,7 +305,7 @@ class FitPage1D(ModelPage):
                         for j in range(len(self.data.y_bins)):
                             if self.data.y_bins[j]>= self.qmin_x and self.data.y_bins[j]<= self.qmax_x:
                                 res.append( (self.data.data[j][i]- self.model.runXY(\
-                                 [self.data.x_bins[i],self.data.y_bins[j]]))\
+                                 [self.data.y_bins[j],self.data.x_bins[i]]))\
                                     /self.data.err_data[j][i] )
                 sum=0
                
@@ -334,7 +335,7 @@ class FitPage1D(ModelPage):
                 else:
                     self.qmin_x = float(self.qmin.GetValue())
                     self.qmax_x = float(self.qmax.GetValue())
-                    print "self.qmin_x, self.qmax_x",self.qmin_x,self.qmax_x
+                    #print "self.qmin_x, self.qmax_x",self.qmin_x,self.qmax_x
                     x,y,dy = [numpy.asarray(v) for v in (self.data.x,self.data.y,self.data.dy)]
                     if self.qmin_x==None and self.qmax_x==None: 
                         fx =numpy.asarray([self.model.run(v) for v in x])
@@ -392,7 +393,11 @@ class FitPage1D(ModelPage):
         self.qmax_x =float( self.qmax.GetValue())
         if len(self.param_toFit) >0 and flag==True:
             self.manager.schedule_for_fit( value=1,fitproblem =None) 
-            self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x)
+            if hasattr(self.data, "data"):
+                self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x,
+                                            ymin=self.data.ymin, ymax=self.data.ymax)
+            else:
+                 self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x)
         else:
               wx.PostEvent(self.parent.parent, StatusEvent(status=\
                             "Select at least on parameter to fit "))
