@@ -51,16 +51,16 @@ class Fit:
         """ @return self._engine""" 
         return self._engine
     
-    def fit(self,handler=None, qmin=None, qmax=None):
+    def fit(self,handler=None):
         """Perform the fit """
     
-        return self._engine.fit(handler, qmin,qmax)
+        return self._engine.fit(handler)
     
     def set_model(self,model,Uid,pars=[]):
          self._engine.set_model(model,Uid,pars)
    
-    def set_data(self,data,Uid,qmin=None, qmax=None,ymin=None, ymax=None):
-        self._engine.set_data(data,Uid,qmin,qmax,ymin,ymax)
+    def set_data(self,data,Uid,smearer=None,qmin=None, qmax=None,ymin=None, ymax=None):
+        self._engine.set_data(data,Uid,smearer,qmin,qmax,ymin,ymax)
         
     def get_model(self,Uid):
         """ return list of data"""
