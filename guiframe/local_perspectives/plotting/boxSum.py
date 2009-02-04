@@ -26,7 +26,7 @@ class BoxSum(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.qmax = self.base.data2D.xmax
+        self.qmax = min(self.base.data2D.xmax, self.base.data2D.xmin)
         self.connect = self.base.connect
         self.xmin= -1* 0.5*min(math.fabs(self.base.data2D.xmax),math.fabs( self.base.data2D.xmin))
         self.ymin= -1* 0.5*min(math.fabs(self.base.data2D.xmax),math.fabs( self.base.data2D.xmin))
@@ -149,26 +149,20 @@ class BoxSum(_BaseInteractor):
         
         data = self.base.data2D
         from DataLoader.manipulations import  Boxavg
-        radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
-        x_min= self.vertical_lines.x2 
-        x_max= self.vertical_lines.x1 
+        #radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
+        x_min= self.horizontal_lines.x2 
+        x_max= self.horizontal_lines.x1 
         y_min= self.vertical_lines.y2
         y_max= self.vertical_lines.y1
         box =  Boxavg (x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
         self.count, self.error = box(self.base.data2D)
-        print "count, error",self.count, self.error
+        #print "count, error",self.count, self.error
                           
     def moveend(self, ev):
         self.base.thaw_axes()
         # Post paramters
         self._post_data()
-        """
-        event = SlicerParameters.SlicerParameterEvent()
-        event.type = self.__class__.__name__
-        print "event type boxsum: ", event.type
-        event.params = self.get_params()
-        wx.PostEvent(self.base, event)
-        """
+       
         self.type= self.__class__.__name__
         params= self.get_params()
         event = SlicerParamUpdateEvent(type=self.type, params=params)
@@ -194,8 +188,8 @@ class BoxSum(_BaseInteractor):
     def get_params(self):
         params = {}
        
-        params["x"] = math.fabs(self.horizontal_lines.half_width)
-        params["y"] = math.fabs(self.vertical_lines.half_height) 
+        params["Width"] = math.fabs(self.vertical_lines.half_width)*2
+        params["Height"] = math.fabs(self.horizontal_lines.half_height)*2 
         
         params["center_x"] = self.center.x
         params["center_y"] =self.center.y
@@ -217,12 +211,12 @@ class BoxSum(_BaseInteractor):
         
     def set_params(self, params):
         
-        x_max = math.fabs(params["x"] )
-        y_max = math.fabs(params["y"] )
+        x_max = math.fabs(params["Width"] )/2
+        y_max = math.fabs(params["Height"] )/2
         
         self.center_x=params["center_x"] 
         self.center_y=params["center_y"]
-        
+        """
         self.center.update(center_x=self.center_x,center_y=self.center_y)
        
         self.horizontal_lines.update(center= self.center,
@@ -234,7 +228,7 @@ class BoxSum(_BaseInteractor):
         
         self._post_data()
         
-        
+        """
         
     def freeze_axes(self):
         self.base.freeze_axes()
@@ -409,8 +403,8 @@ class Vertical_DoubleLine(_BaseInteractor):
         self.half_height= math.fabs(y)
         self.save_half_height= math.fabs(y)
         
-        self.half_width= math.fabs(x)
-        self.save_half_width=math.fabs(x)
+        self.half_width= math.fabs(self.x1- self.x2)/2
+        self.save_half_width=math.fabs(self.x1- self.x2)/2
         
         try:
             self.right_marker = self.axes.plot([self.x1],[0], linestyle='',
@@ -469,6 +463,7 @@ class Vertical_DoubleLine(_BaseInteractor):
         """
         Draw the new roughness on the graph.
         """
+        print "self.half_height",self.half_height,self.half_width
         if width!=None:
             self.half_width= width
         if height!=None:
@@ -476,7 +471,7 @@ class Vertical_DoubleLine(_BaseInteractor):
         if center!=None:
             self.center_x= center.x
             self.center_y= center.y
-            
+            print "vertical width",self.half_width ,self.center_x
             self.x1 = self.half_width + self.center_x
             self.x2= -self.half_width + self.center_x
             
@@ -515,7 +510,8 @@ class Vertical_DoubleLine(_BaseInteractor):
         self.save_y1= self.y1
         
         self.save_half_height= self.half_height
-        self.save_half_width =  self.half_width
+        #self.save_half_width = math.fabs(self.x1-self.x2)/2
+        self.save_half_width = self.half_width
         self.base.freeze_axes()
 
     def moveend(self, ev):
@@ -534,6 +530,7 @@ class Vertical_DoubleLine(_BaseInteractor):
         self.x1= self.save_x1
         
         self.half_height= self.save_half_height
+        #self.half_width= math.fabs(self.x1-self.x2)/2
         self.half_width= self.save_half_width
        
     def move(self, x, y, ev):
@@ -544,7 +541,8 @@ class Vertical_DoubleLine(_BaseInteractor):
         delta= self.x1- self.center_x
         self.x2= self.center_x - delta
         
-        self.half_width= math.fabs(self.x1)-self.center_x
+        self.half_width= math.fabs(self.x1-self.x2)/2
+        print "Move vert: vertical width",self.half_width ,self.center_x
         self.has_move=True
         self.base.base.update()
         
@@ -659,6 +657,7 @@ class Horizontal_DoubleLine(_BaseInteractor):
         """
         Draw the new roughness on the graph.
         """
+        print "self.half_width",self.half_width
         if width!=None:
             self.half_width= width
         if height!=None:
