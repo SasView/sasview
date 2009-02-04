@@ -331,7 +331,7 @@ class Plugin:
              wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
   
-    def _on_single_fit(self,id=None,qmin=None,qmax=None):
+    def _on_single_fit(self,id=None,qmin=None,qmax=None,ymin=None, ymax=None):
         """ 
             perform fit for the  current page  and return chisqr,out and cov
             @param engineName: type of fit to be performed
@@ -345,8 +345,9 @@ class Plugin:
         self.fitter= Fit(self._fit_engine)
         #Setting an id to store model and data in fit engine
         if id==None:
-            id=0
-        self.id = id
+            self.id=0
+        else:
+            self.id = id
         page_fitted=None
         fit_problem=None
         #Get information (model , data) related to the page on 
@@ -373,8 +374,12 @@ class Plugin:
                     #print "single fit start pars:", pars
                     #Do the single fit
                     self.fitter.set_model(Model(model), self.id, pars) 
-                   
-                    self.fitter.set_data(metadata,self.id,smearer, qmin,qmax)
+                    print "args...:",metadata,self.id,smearer,qmin,qmax,ymin,ymax
+                  
+                    self.fitter.set_data(data=metadata,Uid=self.id,
+                                         smearer=smearer,qmin= qmin,qmax=qmax,
+                                         ymin=ymin,ymax=ymax)
+                    
                     self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
                     page_fitted=page
                     self.id+=1
@@ -462,6 +467,7 @@ class Plugin:
                             new_model.parameterset[ param_name].set( param_value )
                           
                     self.fitter.set_model(new_model, self.id, pars) 
+                    
                     self.fitter.set_data(metadata,self.id,qmin,qmax,ymin,ymax)
                     self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
                     self.id += 1 
@@ -625,21 +631,27 @@ class Plugin:
                 theory.x_bins= data.x_bins
                 theory.y_bins= data.y_bins
                 tempy=[]
-                #if qmin==None:
-                qmin=data.xmin
-                #if qmax==None:
-                qmax=data.xmax
-                #if ymin==None:
-                ymin=data.ymin
-                #if ymax==None:
-                ymax=data.ymax
+                if qmin==None:
+                    qmin=data.xmin
+                if qmax==None:
+                    qmax=data.xmax
+                if ymin==None:
+                    ymin=data.ymin
+                if ymax==None:
+                    ymax=data.ymax
+                xmin=data.xmin
+                xmax=data.xmax
                 print " q range =",    
                 theory.data = numpy.zeros((len(data.y_bins),len(data.x_bins)))
-                for i in range(len(data.y_bins)):
-                    if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
-                        for j in range(len(data.x_bins)):
+                for j in range(len(data.y_bins)):
+                    if data.y_bins[j]>= ymin and data.y_bins[j]<= ymax:
+                        for i in range(len(data.x_bins)):
                             if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
-                                theory.data[i][j]=model.runXY([data.x_bins[j],data.y_bins[i]])
+                                theory.data[j][i]=model.runXY([data.y_bins[j],data.x_bins[i]])
+                            else:
+                                Inf=1e+5000
+                                Nan=Inf*0
+                                theory.data[j][i]=Nan
                
                 #print "fitting : plot_helper:", theory.image
                 #print data.image
@@ -648,8 +660,8 @@ class Plugin:
                 theory.source= data.source
                 theory.zmin= data.zmin
                 theory.zmax= data.zmax
-                theory.xmin= qmin
-                theory.xmax= qmax
+                theory.xmin= xmin
+                theory.xmax= xmax
                 theory.ymin= ymin
                 theory.ymax= ymax
         
