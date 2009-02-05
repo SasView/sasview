@@ -263,7 +263,8 @@ class Plugin:
             return model_name,param_name
         
    
-    def _single_fit_completed(self,result,pars,cpage,qmin,qmax,elapsed,ymin=None, ymax=None):
+    def _single_fit_completed(self,result,pars,cpage,qmin,qmax,elapsed,
+                              ymin=None, ymax=None, xmin=None, xmax=None):
         """
             Display fit result on one page of the notebook.
             @param result: result of fit 
@@ -295,10 +296,12 @@ class Plugin:
             print "fitting result : chisqr",result.fitness
             print "fitting result : pvec",result.pvec
             print "fitting result : stderr",result.stderr
-            print "xmin xmax ymin , ymax",qmin, qmax, ymin, ymax
+            print "qmin qmax xmin xmax ymin , ymax",qmin, qmax,xmin, xmax ,ymin, ymax
             
             cpage.onsetValues(result.fitness, result.pvec,result.stderr)
-            self.plot_helper(currpage=cpage,qmin=qmin,qmax=qmax,ymin=ymin, ymax=ymax, title="Fitted model 2D ")
+            self.plot_helper(currpage=cpage,qmin=qmin,qmax=qmax,
+                             ymin=ymin, ymax=ymax,
+                             xmin=xmin, xmax=xmax,title="Fitted model 2D ")
         except:
             #raise
             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
@@ -337,7 +340,7 @@ class Plugin:
              wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
   
-    def _on_single_fit(self,id=None,qmin=None,qmax=None,ymin=None, ymax=None):
+    def _on_single_fit(self,id=None,qmin=None, qmax=None,ymin=None, ymax=None,xmin=None,xmax=None):
         """ 
             perform fit for the  current page  and return chisqr,out and cov
             @param engineName: type of fit to be performed
@@ -564,7 +567,7 @@ class Plugin:
         self.plot_helper(currpage=page,qmin= qmin,qmax= qmax)
         
     def plot_helper(self,currpage, fitModel=None, qmin=None,qmax=None,
-                    ymin=None,ymax=None, title=None ):
+                    ymin=None,ymax=None, xmin=None, xmax=None,title=None ):
         """
             Plot a theory given a model and data
             @param model: the model from where the theory is derived
@@ -590,7 +593,7 @@ class Plugin:
                 if qmin == None :
                    qmin = min(data.x)
                 if qmax == None :
-                    qmax = max(data.x)
+                   qmax = max(data.x)
                 try:
                     tempx = qmin
                     tempy = model.run(qmin)
@@ -636,27 +639,30 @@ class Plugin:
                 theory.x_bins= data.x_bins
                 theory.y_bins= data.y_bins
                 tempy=[]
+                print "max x,y",max(data.xmax,data.xmin),max(data.ymax,data.ymin)
                 if qmin==None:
-                    qmin=data.xmin
+                    qmin=0#data.xmin
                 if qmax==None:
-                    qmax=data.xmax
+                    qmax=math.sqrt(math.pow(max(math.fabs(data.xmax),math.fabs(data.xmin)),2)/
+                                   +math.pow(max(math.fabs(data.ymax),math.fabs(data.ymin)),2))
                 if ymin==None:
                     ymin=data.ymin
                 if ymax==None:
                     ymax=data.ymax
-                xmin=data.xmin
-                xmax=data.xmax
+                if xmin ==None:
+                    xmin=data.xmin
+                if xmax==None:
+                    xmax=data.xmax                    
                 #print " q range =",    
                 theory.data = numpy.zeros((len(data.y_bins),len(data.x_bins)))
-                for i in range(len(data.y_bins)):
-                    if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
-                        for j in range(len(data.x_bins)):
-                            if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
+                for j in range(len(data.y_bins)):
+                    for i in range(len(data.x_bins)):
+                        tempqij=math.sqrt((math.pow(data.y_bins[j],2)+math.pow(data.x_bins[i],2)))
+                        if tempqij>= qmin: 
+                            if tempqij<= qmax:
                                 theory.data[j][i]=model.runXY([data.y_bins[j],data.x_bins[i]])
-                            else:
-                                Inf=1e+5000
-                                Nan=Inf*0
-                                theory.data[j][i]=Nan
+                        else:
+                            theory.data[j][i]=0
                
                 #print "fitting : plot_helper:", theory.image
                 #print data.image
