@@ -109,6 +109,7 @@ class FitThread(CalcThread):
     """Compute 2D data"""
     
     def __init__(self,parent, fn,pars=None,cpage=None, qmin=None,qmax=None,ymin=None, ymax=None,
+                 xmin=None,xmax=None,
                  completefn = None,
                  updatefn   = None,
                  yieldtime  = 0.01,
@@ -125,6 +126,8 @@ class FitThread(CalcThread):
         self.starttime = 0
         self.qmin = qmin
         self.qmax = qmax
+        self.xmin = xmin
+        self.xmax = xmax
         self.ymin = ymin
         self.ymax = ymax
         self.done= False
@@ -160,6 +163,8 @@ class FitThread(CalcThread):
                           cpage= self.cpage,
                           qmin = self.qmin,
                           qmax = self.qmax,
+                          xmin= self.xmin,
+                          xmax= self.xmax,
                           ymin = self.ymin,
                           ymax = self.ymax, 
                           elapsed=elapsed )
