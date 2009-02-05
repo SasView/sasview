@@ -71,7 +71,7 @@ class BaseComponent:
         """
         # Look for dispersion parameters
         toks = name.split('.')
-        print "dispersion",self.dispersion
+        #print "dispersion",self.dispersion
         if len(toks)==2:
             for item in self.dispersion.keys():
                 if item.lower()==toks[0].lower():
