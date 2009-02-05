@@ -194,9 +194,9 @@ class FitPage1D(ModelPage):
             #self.qmax_x = max(radius1, radius2, radius3, radius4)
             self.qmin_x= self.data.xmin
             self.qmax_x= self.data.xmax           
-            #print "data2D range",self.qmax_x
+            print "data2D range",self.qmax_x
         
-            self.num_points= 100
+        self.num_points= 100
          
         
         
@@ -305,7 +305,7 @@ class FitPage1D(ModelPage):
                         for j in range(len(self.data.y_bins)):
                             if self.data.y_bins[j]>= self.qmin_x and self.data.y_bins[j]<= self.qmax_x:
                                 res.append( (self.data.data[j][i]- self.model.runXY(\
-                                 [self.data.y_bins[j],self.data.x_bins[i]]))\
+                                 [self.data.x_bins[i],self.data.y_bins[j]]))\
                                     /self.data.err_data[j][i] )
                 sum=0
                

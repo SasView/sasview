@@ -134,25 +134,31 @@ class Plugin:
         #index number to create random model name
         self.index_model = 0
         self.parent.Bind(EVT_SLICER_PANEL, self._on_slicer_event)
+       
         
         #create the fitting panel
         #return [self.fit_panel]
         
         self.mypanels.append(self.fit_panel)
         return self.mypanels
+    
+    
     def _on_model2D_show(self, event ):
         print "model2D get the id ", event.id
+        
+        
     def _on_slicer_event(self, event):
         print "fitting:slicer event ", event.panel
-        new_panel = event.panel
-        # Set group ID if available
-        event_id = self.parent.popup_panel(new_panel)
-        self.menu1.Append(event_id, new_panel.window_caption, 
-                         "Show %s plot panel" % new_panel.window_caption)
-        # Set UID to allow us to reference the panel later
-        new_panel.uid = event_id
-        new_panel
-        self.mypanels.append(new_panel) 
+        if event.panel!=None:
+            new_panel = event.panel
+            # Set group ID if available
+            event_id = self.parent.popup_panel(new_panel)
+            self.menu1.Append(event_id, new_panel.window_caption, 
+                             "Show %s plot panel" % new_panel.window_caption)
+            # Set UID to allow us to reference the panel later
+            new_panel.uid = event_id
+            new_panel
+            self.mypanels.append(new_panel) 
         return        
     def _on_show_panel(self, event):
         print "_on_show_panel: fitting"
@@ -374,7 +380,7 @@ class Plugin:
                     #print "single fit start pars:", pars
                     #Do the single fit
                     self.fitter.set_model(Model(model), self.id, pars) 
-                    print "args...:",metadata,self.id,smearer,qmin,qmax,ymin,ymax
+                    #print "args...:",metadata,self.id,smearer,qmin,qmax,ymin,ymax
                   
                     self.fitter.set_data(data=metadata,Uid=self.id,
                                          smearer=smearer,qmin= qmin,qmax=qmax,
@@ -467,7 +473,6 @@ class Plugin:
                             new_model.parameterset[ param_name].set( param_value )
                           
                     self.fitter.set_model(new_model, self.id, pars) 
-                    
                     self.fitter.set_data(metadata,self.id,qmin,qmax,ymin,ymax)
                     self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
                     self.id += 1 
@@ -641,11 +646,11 @@ class Plugin:
                     ymax=data.ymax
                 xmin=data.xmin
                 xmax=data.xmax
-                print " q range =",    
+                #print " q range =",    
                 theory.data = numpy.zeros((len(data.y_bins),len(data.x_bins)))
-                for j in range(len(data.y_bins)):
-                    if data.y_bins[j]>= ymin and data.y_bins[j]<= ymax:
-                        for i in range(len(data.x_bins)):
+                for i in range(len(data.y_bins)):
+                    if data.y_bins[i]>= ymin and data.y_bins[i]<= ymax:
+                        for j in range(len(data.x_bins)):
                             if data.x_bins[i]>= qmin and data.x_bins[i]<= qmax:
                                 theory.data[j][i]=model.runXY([data.y_bins[j],data.x_bins[i]])
                             else:

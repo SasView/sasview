@@ -268,11 +268,12 @@ class ModelPage(wx.ScrolledWindow):
                 return 
             else:
                 if self.data !=None and self.model !=None: # allow to recognize data panel from model panel
+                #if self.data !=None and self.model !=None:
                     self.cb1.SetValue(False)
                     self.select_all_param_helper()
                 
-                    self.populate_disp_box()
-                    self.set_panel_dispers(self.disp_list)
+                self.populate_disp_box()
+                self.set_panel_dispers(self.disp_list)
                 
         else:
             if self.data !=None and self.model!=None:

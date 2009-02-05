@@ -145,7 +145,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
              Remove  a checkbox and the name related to a model selected on page delpage
              @param delpage: the page removed
         """
-        print "self.model_list",self.model_list
+        #print "self.model_list",self.model_list
        
         self.model_list=[]
         self.model_toFit=[]
@@ -213,15 +213,15 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 #print "simfitpage: list fitpanel2",list,list[0]
                 model=list[0]
                 param_list=model.getParamList()
-                print "simfitpage: on set_model self.params ",self.params
+                #print "simfitpage: on set_model self.params ",self.params
                 if self.params !=[]:
                     for element in self.params:
                         if model.name == str(element[0]):
                             for item in param_list:
                                 if item==str(element[1]):
-                                    print "simfitpage: on set_model page 1",param_list
-                                    print "simfitpage: model name",element[0], model.name
-                                    print "simfitpage: param name ,param value",element[1],element[2]
+                                    #print "simfitpage: on set_model page 1",param_list
+                                    #print "simfitpage: model name",element[0], model.name
+                                    #print "simfitpage: param name ,param value",element[1],element[2]
                                     self.manager.set_page_finder(model.name,element[1],\
                                                                  str(element[2]))
                             #print "simfitpage:on set_model page 2",model.params['A'],self.params[2]
@@ -270,7 +270,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 model_name=param_names[0]
                 param_name=param_names[1]
                 ##### just added
-                print "simfitpage: param name",model_name,param_name
+                #print "simfitpage: param name",model_name,param_name
             
                 param=[str(model_name),param_name,str(param_value)]
                 #print "simfitpage: param",param

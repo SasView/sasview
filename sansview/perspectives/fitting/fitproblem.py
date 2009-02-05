@@ -25,7 +25,7 @@ class FitProblem:
         
     def set_smearer(self, smearer):
         self.smearer= smearer
-        print "smeaerer in fitproblem",self.smearer
+        #print "smeaerer in fitproblem",self.smearer
     def get_smearer(self):
         return self.smearer
     

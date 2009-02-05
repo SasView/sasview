@@ -61,10 +61,10 @@ class FitPanel(wx.aui.AuiNotebook):
         self.Center()
     def onClosePage(self, event):
         self.ToggleWindowStyle(wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB)
-        print "went here",self.get_current_page(), self.GetPage(0)
+        #print "went here",self.get_current_page(), self.GetPage(0)
         #event.Skip()
         if self.GetPageCount() <= 2:
-            print "wente here"
+            #print "wente here"
             
             # Prevent last tab from being closed
             self.ToggleWindowStyle(~wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB)
@@ -132,7 +132,7 @@ class FitPanel(wx.aui.AuiNotebook):
             @param npts: number of Q points
         """
         from modelpage import ModelPage
-        print "fitpanel model", model
+        #print "fitpanel model", model
         panel = ModelPage(self,model,page_title, -1)
         panel.set_manager(self.manager)
         panel.set_owner(self.event_owner)
@@ -183,7 +183,7 @@ class FitPanel(wx.aui.AuiNotebook):
              close the current page except the simpage. remove each check box link to the model
              selected on that page. remove its reference into page_finder (fitting module)
         """
-        print "model page", page_number, page
+        #print "model page", page_number, page
         if page!=None and page_number!=None:
             
             self.nb.RemovePage(page_number)
