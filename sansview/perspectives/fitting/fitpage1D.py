@@ -626,12 +626,9 @@ class FitPage1D(ModelPage):
         else:
             self.cb1.SetValue(False)
             
-        if not (len(self.param_toFit ) >0):
-            self.qmin.Disable()
-            self.qmax.Disable()
-        else:
-            self.qmin.Enable()
-            self.qmax.Enable()
+        #qmax, qmin Input enabled all the time   
+        self.qmin.Enable()
+        self.qmax.Enable()
        
    
        
