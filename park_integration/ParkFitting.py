@@ -106,9 +106,9 @@ class ParkFit(FitEngine):
         # See `park.fitresult.FitHandler` for details.
         fitter = FitMC(localfit=localfit, start_points=1)
         if handler == None:
-            print "no handler"
+            #print "no handler"
             handler= fitresult.ConsoleUpdate(improvement_delta=0.1)
-        print "park handler", handler
+        #print "park handler", handler
        
             
         result = fit.fit(self.problem,
