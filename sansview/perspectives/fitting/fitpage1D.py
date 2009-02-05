@@ -394,8 +394,11 @@ class FitPage1D(ModelPage):
         if len(self.param_toFit) >0 and flag==True:
             self.manager.schedule_for_fit( value=1,fitproblem =None) 
             if hasattr(self.data, "data"):
-                self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x,
-                                            ymin=self.data.ymin, ymax=self.data.ymax)
+                self.manager._on_single_fit( qmin=self.qmin_x,qmax=self.qmax_x,
+                                            ymin=self.data.ymin, ymax=self.data.ymax,
+                                            xmin=self.data.xmin,xmax=self.data.xmax)
+                #self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x,
+                                            #ymin=self.data.ymin, ymax=self.data.ymax)
             else:
                  self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x)
         else:
