@@ -96,7 +96,8 @@ class SectorInteractor(_BaseInteractor):
         self.left_line.clear()
         self.right_line.clear()
         #self.base.connect.disconnect()
-        self.base.parent.Unbind(EVT_SLICER_PARS)
+        #self.base.parent.Unbind(EVT_SLICER_PARS)
+        self.base.Unbind(EVT_SLICER_PARS)
         
     def update(self):
         """
@@ -198,7 +199,8 @@ class SectorInteractor(_BaseInteractor):
         event = SlicerParameterEvent()
         event.type = self.__class__.__name__
         event.params = self.get_params()
-        wx.PostEvent(self.base.parent, event)
+        #wx.PostEvent(self.base.parent, event)
+        wx.PostEvent(self.base, event)
         self._post_data()
             
     def restore(self):

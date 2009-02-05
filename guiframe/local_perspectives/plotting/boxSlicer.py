@@ -119,7 +119,7 @@ class BoxInteractor(_BaseInteractor):
         """
         
         if self.top_line.has_move:
-            print"top has moved"
+            #print"top has moved"
             self.top_line.update()
             self.bottom_line.update(ymin= -self.top_line.y1,
                                     ymax= -self.top_line.y2)
@@ -129,7 +129,7 @@ class BoxInteractor(_BaseInteractor):
                                     ymax= -self.top_line.y2)
            
         if self.bottom_line.has_move:
-            print "bottom has move"
+            #print "bottom has move"
             self.bottom_line.update()
             self.top_line.update(ymin= -self.bottom_line.y1,
                                     ymax= -self.bottom_line.y2)
@@ -409,7 +409,7 @@ class HorizontalLine(_BaseInteractor):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        print "horizontal move x y "
+        #print "horizontal move x y "
         self.y1= y
         self.has_move=True
         self.base.base.update()

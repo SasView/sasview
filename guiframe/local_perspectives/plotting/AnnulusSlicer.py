@@ -53,6 +53,7 @@ class AnnulusInteractor(_BaseInteractor):
         # Bind to slice parameter events
         self.base.parent.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
         
+        
 
     def _onEVT_SLICER_PARS(self, event):
         wx.PostEvent(self.base.parent, StatusEvent(status="AnnulusSlicer._onEVT_SLICER_PARS"))
@@ -84,7 +85,8 @@ class AnnulusInteractor(_BaseInteractor):
         self.outer_circle.clear()
         self.inner_circle.clear()
         #self.base.connect.disconnect()
-        self.base.parent.Unbind(EVT_SLICER_PARS)
+        #self.base.parent.Unbind(EVT_SLICER_PARS)
+        self.base.Unbind(EVT_SLICER_PARS)
         
     def update(self):
         """
@@ -166,8 +168,8 @@ class AnnulusInteractor(_BaseInteractor):
         event = SlicerParameterEvent()
         event.type = self.__class__.__name__
         event.params = self.get_params()
-        wx.PostEvent(self.base.parent, event)
-
+        #wx.PostEvent(self.base.parent, event)
+        wx.PostEvent(self.base, event)
         self._post_data()
             
     def restore(self):
@@ -230,7 +232,7 @@ class RingInteractor(_BaseInteractor):
         self.sign=sign
          
         
-        print "sign",self.sign,self.sign*math.fabs(self._inner_mouse_x)
+        #print "sign",self.sign,self.sign*math.fabs(self._inner_mouse_x)
                                                     
         try:
             # Inner circle marker

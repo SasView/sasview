@@ -151,9 +151,7 @@ class ModelPanel1D(PlotPanel):
         """
         """
         if not self.graph.selected_plottable == None:
-            print self.graph.selected_plottable
-            
-            
+            #print self.graph.selected_plottable
             self.graph.delete(self.plots[self.graph.selected_plottable])
             del self.plots[self.graph.selected_plottable]
             self.graph.render(self)
@@ -186,31 +184,31 @@ class ModelPanel1D(PlotPanel):
             slicerpop.Append(id, "Remove %s curve" % name)
             self.action_ids[str(id)] = plot
             wx.EVT_MENU(self, id, self._onRemove)
-            
+           
             # Option to hide
             #TODO: implement functionality to hide a plottable (legend click)
-            slicerpop.AppendSeparator()
+            
                 
         # Various plot options
         id = wx.NewId()
         slicerpop.Append(id,'&Save image', 'Save image as PNG')
         wx.EVT_MENU(self, id, self.onSaveImage)
         
-        
+        slicerpop.AppendSeparator()
         item_list = self.parent.get_context_menu(self.graph)
+        #print "item_list",item_list
         if (not item_list==None) and (not len(item_list)==0):
-                slicerpop.AppendSeparator()
                 for item in item_list:
                     try:
                         id = wx.NewId()
                         slicerpop.Append(id, item[0], item[1])
                         wx.EVT_MENU(self, id, item[2])
                     except:
-                        print sys.exc_value
-                        print RuntimeError, "View1DPanel.onContextMenu: bad menu item"
+                        pass
+                        #print sys.exc_value
+                        #print RuntimeError, "View1DPanel.onContextMenu: bad menu item"
         
-        slicerpop.AppendSeparator()
-        
+       
         if self.graph.selected_plottable in self.plots:
             if self.plots[self.graph.selected_plottable].__class__.__name__=="Theory1D":
                 id = wx.NewId()
@@ -223,16 +221,27 @@ class ModelPanel1D(PlotPanel):
                 slicerpop.Append(id, '&Linear fit')
                 wx.EVT_MENU(self, id, self.onFitting)
                 
-        
-
+        slicerpop.AppendSeparator()
         id = wx.NewId()
         slicerpop.Append(id, '&Change scale')
         wx.EVT_MENU(self, id, self._onProperties)
         
         id = wx.NewId()
-        #slicerpop.AppendSeparator()
         slicerpop.Append(id, '&Reset Graph')
-        wx.EVT_MENU(self, id, self.onResetGraph)        
+        wx.EVT_MENU(self, id, self.onResetGraph)  
+        
+        slicerpop.AppendSeparator() 
+        id = wx.NewId()
+        slicerpop.Append(id,'&Printer setup', 'Set image size')
+        wx.EVT_MENU(self, id, self.onPrinterSetup)
+        
+        id = wx.NewId()
+        slicerpop.Append(id,'&Printer Preview', 'Set image size')
+        wx.EVT_MENU(self, id, self.onPrinterPreview)
+    
+        id = wx.NewId()
+        slicerpop.Append(id,'&Print image', 'Print image ')
+        wx.EVT_MENU(self, id, self.onPrint)     
 
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
@@ -296,7 +305,7 @@ class ModelPanel1D(PlotPanel):
             if dlg.ShowModal() == wx.ID_OK:
                 path = dlg.GetPath()
                 mypath = os.path.basename(path)
-                print path
+                #print path
             dlg.Destroy()
             
             if not path == None:
@@ -309,7 +318,7 @@ class ModelPanel1D(PlotPanel):
                 if has_errors:
                     try:
                         if len(self.action_ids[id].y) != len(self.action_ids[id].dy):
-                            print "Y and dY have different lengths"
+                            #print "Y and dY have different lengths"
                             has_errors = False
                     except:
                         has_errors = False
@@ -330,7 +339,8 @@ class ModelPanel1D(PlotPanel):
                         
                 out.close()
     
-    
+ 
+
     def _onToggleScale(self, event):
         if self.get_yscale() == 'log':
             self.set_yscale('linear')

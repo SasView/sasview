@@ -71,7 +71,7 @@ class BoxSum(_BaseInteractor):
         self._post_data()
         
         # Bind to slice parameter events
-        print "box sum  self.base.parent",self.base.parent
+        #print "box sum  self.base.parent",self.base.parent
         self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
        
     def _onEVT_SLICER_PARS(self, event):
@@ -114,19 +114,19 @@ class BoxSum(_BaseInteractor):
         resetting the widgets.
         """
         if self.center.has_move:
-            print "center has move"
+            #print "center has move"
             self.center.update()
             self.horizontal_lines.update( center= self.center)
             self.vertical_lines.update( center= self.center)
             
         if self.horizontal_lines.has_move:
-            print "top has moved"
+            #print "top has moved"
             self.horizontal_lines.update()
             self.vertical_lines.update(y1=self.horizontal_lines.y1,
                                        y2=self.horizontal_lines.y2,
                                        height= self.horizontal_lines.half_height )
         if self.vertical_lines.has_move:
-            print "right has moved"
+            #print "right has moved"
             self.vertical_lines.update()
             self.horizontal_lines.update(x1=self.vertical_lines.x1,
                                          x2=self.vertical_lines.x2,
@@ -463,7 +463,7 @@ class Vertical_DoubleLine(_BaseInteractor):
         """
         Draw the new roughness on the graph.
         """
-        print "self.half_height",self.half_height,self.half_width
+        #print "self.half_height",self.half_height,self.half_width
         if width!=None:
             self.half_width= width
         if height!=None:
@@ -471,7 +471,7 @@ class Vertical_DoubleLine(_BaseInteractor):
         if center!=None:
             self.center_x= center.x
             self.center_y= center.y
-            print "vertical width",self.half_width ,self.center_x
+            #print "vertical width",self.half_width ,self.center_x
             self.x1 = self.half_width + self.center_x
             self.x2= -self.half_width + self.center_x
             
@@ -542,7 +542,7 @@ class Vertical_DoubleLine(_BaseInteractor):
         self.x2= self.center_x - delta
         
         self.half_width= math.fabs(self.x1-self.x2)/2
-        print "Move vert: vertical width",self.half_width ,self.center_x
+        #print "Move vert: vertical width",self.half_width ,self.center_x
         self.has_move=True
         self.base.base.update()
         
@@ -657,7 +657,7 @@ class Horizontal_DoubleLine(_BaseInteractor):
         """
         Draw the new roughness on the graph.
         """
-        print "self.half_width",self.half_width
+        #print "self.half_width",self.half_width
         if width!=None:
             self.half_width= width
         if height!=None:

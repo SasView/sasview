@@ -247,7 +247,7 @@ class ViewerFrame(wx.Frame):
         # Status bar
         self.sb = self.CreateStatusBar()
         self.SetStatusText("")
-        
+
         # Add panel
         self._mgr = wx.aui.AuiManager(self)
         

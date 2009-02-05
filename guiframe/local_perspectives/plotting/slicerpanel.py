@@ -56,7 +56,7 @@ class SlicerPanel(wx.Panel):
             self.set_slicer(None, None)
             
         else:
-            print "when here not empty event",event.type, event.params
+            #print "when here not empty event",event.type, event.params
             self.set_slicer(event.type, event.params)
         
     def set_slicer(self, type, params):
@@ -95,6 +95,7 @@ class SlicerPanel(wx.Panel):
                     self.bck.Add(ctl, (n-1,1), flag=wx.TOP|wx.BOTTOM, border = 0)
             for item in keys:
                 if  item.lower() in ["errors", "count"]:
+                    #print "went here"
                     n += 1
                     text = wx.StaticText(self, -1, item+": ", style=wx.ALIGN_LEFT)
                     self.bck.Add(text, (n-1,0), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)

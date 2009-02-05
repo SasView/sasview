@@ -75,7 +75,8 @@ class ModelPanel2D( ModelPanel1D):
        
         self.slicer_z = 5
         self.slicer = None
-        self.parent.Bind(EVT_INTERNAL, self._onEVT_INTERNAL)
+        #self.parent.Bind(EVT_INTERNAL, self._onEVT_INTERNAL)
+        self.Bind(EVT_INTERNAL, self._onEVT_INTERNAL)
         self.axes_frozen = False
         
         self.panel_slicer=None
@@ -91,14 +92,14 @@ class ModelPanel2D( ModelPanel1D):
         
         
     def _onEVT_SLICER_PARS(self, event):
-        print "paramaters entered on slicer panel", event.type, event.params
+        #print "paramaters entered on slicer panel", event.type, event.params
         self.slicer.set_params(event.params)
         from sans.guicomm.events import SlicerPanelEvent
         wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
         
         
     def _onEVT_SLICER_PANEL(self, event):
-        print "box move plotter2D", event.type, event.params
+        #print "box move plotter2D", event.type, event.params
         self.panel_slicer.set_slicer(event.type, event.params)
         from sans.guicomm.events import SlicerPanelEvent
         wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer)) 
@@ -184,26 +185,19 @@ class ModelPanel2D( ModelPanel1D):
         slicerpop = PanelMenu()
         slicerpop.set_plots(self.plots)
         slicerpop.set_graph(self.graph)
-                
-        # Option to save the data displayed
     
-        # Various plot options
-        id = wx.NewId()
-        slicerpop.Append(id,'&Save image', 'Save image as PNG')
-        wx.EVT_MENU(self, id, self.onSaveImage)
-        
-        
         item_list = self.parent.get_context_menu(self.graph)
         if (not item_list==None) and (not len(item_list)==0):
-                slicerpop.AppendSeparator()
+                
                 for item in item_list:
                     try:
                         id = wx.NewId()
                         slicerpop.Append(id, item[0], item[1])
                         wx.EVT_MENU(self, id, item[2])
                     except:
-                        print sys.exc_value
-                        print RuntimeError, "View1DPanel2D.onContextMenu: bad menu item"
+                        pass
+                        #print sys.exc_value
+                        #print RuntimeError, "View1DPanel2D.onContextMenu: bad menu item"
         
         slicerpop.AppendSeparator()
         
@@ -235,21 +229,33 @@ class ModelPanel2D( ModelPanel1D):
             slicerpop.Append(id, '&Clear slicer')
             wx.EVT_MENU(self, id,  self.onClearSlicer) 
         
-        
             id = wx.NewId()
             slicerpop.Append(id, '&Edit Slicer Parameters')
             wx.EVT_MENU(self, id, self._onEditSlicer) 
-        
-        slicerpop.AppendSeparator()
-        
+        slicerpop.AppendSeparator() 
+           
         id = wx.NewId()
         slicerpop.Append(id, '&Save image')
         wx.EVT_MENU(self, id, self.onSaveImage) 
-     
+        
+        # Option to save the data displayed
+        id = wx.NewId()
+        slicerpop.Append(id,'&Printer setup', 'Set image size')
+        wx.EVT_MENU(self, id, self.onPrinterSetup)
+        
+        id = wx.NewId()
+        slicerpop.Append(id,'&Printer Preview', 'Set image size')
+        wx.EVT_MENU(self, id, self.onPrinterPreview)
+    
+        id = wx.NewId()
+        slicerpop.Append(id,'&Print image', 'Print image ')
+        wx.EVT_MENU(self, id, self.onPrint)
+        slicerpop.AppendSeparator()
         id = wx.NewId()
         slicerpop.Append(id, '&Toggle Linear/Log scale')
         wx.EVT_MENU(self, id, self._onToggleScale) 
-         
+                 
+      
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
@@ -305,7 +311,7 @@ class ModelPanel2D( ModelPanel1D):
             
         self.slicer_z += 1
         self.slicer = slicer(self, self.subplot, zorder=self.slicer_z)
-        print "come here"
+        #print "come here"
         self.subplot.set_ylim(self.data2D.ymin, self.data2D.ymax)
         self.subplot.set_xlim(self.data2D.xmin, self.data2D.xmax)
        
@@ -318,9 +324,10 @@ class ModelPanel2D( ModelPanel1D):
         
         event.obj_class = self.slicer.__class__
         event.params = self.slicer.get_params()
-        print "Plotter2D: event.type",event.type,event.params, self.parent
+        #print "Plotter2D: event.type",event.type,event.params, self.parent
         
-        wx.PostEvent(self.parent, event)
+        #wx.PostEvent(self.parent, event)
+        wx.PostEvent(self, event)
 
     def onCircular(self, event):
         """
@@ -331,7 +338,7 @@ class ModelPanel2D( ModelPanel1D):
         import math
         self.qmax= self.data2D.xmax
         self.radius= math.sqrt( math.pow(self.qmax,2)+math.pow(self.qmax,2)) 
-        print "radius?",self.radius
+        #print "radius?",self.radius
         # bin_width = self.qmax -self.qmin/nbins 
         #nbins= 30
         bin_width = (self.qmax +self.qmax)/30
@@ -378,10 +385,11 @@ class ModelPanel2D( ModelPanel1D):
         """
             Perform sector averaging on Q
         """
-        print "onsector self.data2Dxmax",self.data2D.xmax
+        #print "onsector self.data2Dxmax",self.data2D.xmax, self.parent
         from SectorSlicer import SectorInteractor
         self.onClearSlicer(event)
-        wx.PostEvent(self.parent, InternalEvent(slicer= SectorInteractor))
+        #wx.PostEvent(self.parent, InternalEvent(slicer= SectorInteractor))
+        wx.PostEvent(self, InternalEvent(slicer= SectorInteractor))
         
     def onSectorPhi(self, event):
         """
@@ -389,7 +397,8 @@ class ModelPanel2D( ModelPanel1D):
         """
         from AnnulusSlicer import AnnulusInteractor
         self.onClearSlicer(event)
-        wx.PostEvent(self.parent, InternalEvent(slicer= AnnulusInteractor))
+        #wx.PostEvent(self.parent, InternalEvent(slicer= AnnulusInteractor))
+        wx.PostEvent(self, InternalEvent(slicer= AnnulusInteractor))
         
     def onBoxSum(self,event):
         from boxSum import BoxSum
@@ -399,7 +408,7 @@ class ModelPanel2D( ModelPanel1D):
             self.slicer.clear()             
         self.slicer_z += 1
         self.slicer =  BoxSum(self, self.subplot, zorder=self.slicer_z)
-        print "come here"
+        #print "come here"
         self.subplot.set_ylim(self.data2D.ymin, self.data2D.ymax)
         self.subplot.set_xlim(self.data2D.xmin, self.data2D.xmax)
        
@@ -413,7 +422,7 @@ class ModelPanel2D( ModelPanel1D):
         
         event.obj_class = self.slicer.__class__
         event.params = self.slicer.get_params()
-        print "Plotter2D: event.type",event.type,event.params, self.parent
+        #print "Plotter2D: event.type",event.type,event.params, self.parent
         
         from slicerpanel import SlicerPanel
         new_panel = SlicerPanel(parent= self.parent,id= -1,base= self,type=event.type,
@@ -426,30 +435,21 @@ class ModelPanel2D( ModelPanel1D):
         wx.PostEvent(self.panel_slicer, event)
         from sans.guicomm.events import SlicerPanelEvent
         wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
-        print "finish box sum"
+        #print "finish box sum"
         
     def onBoxavgX(self,event):
         from boxSlicer import BoxInteractorX
         self.onClearSlicer(event)
-        wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractorX))
-        """
-        from slicerpanel import SlicerPanel
-        new_panel = SlicerPanel(self.parent, -1, style=wx.RAISED_BORDER)
-        
-        from sans.guicomm.events import SlicerPanelEvent
-        wx.PostEvent(self.parent, SlicerPanelEvent (panel= new_panel))
-        """
+        #wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractorX))
+        wx.PostEvent(self, InternalEvent(slicer= BoxInteractorX))
+       
+       
     def onBoxavgY(self,event):
         from boxSlicer import BoxInteractorY
         self.onClearSlicer(event)
-        wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractorY))
-        """
-        from slicerpanel import SlicerPanel
-        new_panel = SlicerPanel(self.parent, -1, style=wx.RAISED_BORDER)
+        wx.PostEvent(self, InternalEvent(slicer= BoxInteractorY))
+        #wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractorY))
         
-        from sans.guicomm.events import SlicerParameterEvent 
-        wx.PostEvent(self.parent, SlicerParameterEvent (panel= new_panel))
-        """
     def onClearSlicer(self, event):
         """
             Clear the slicer on the plot
@@ -461,7 +461,8 @@ class ModelPanel2D( ModelPanel1D):
         
             # Post slicer None event
             event = self._getEmptySlicerEvent()
-            wx.PostEvent(self.parent, event)
+            #wx.PostEvent(self.parent, event)
+            wx.PostEvent(self, event)
           
     def _onEditDetector(self, event):
         print "on parameter"

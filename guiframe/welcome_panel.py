@@ -74,7 +74,7 @@ class PanelAbout(wx.Panel):
             self.bitmap_logo = wx.StaticBitmap(self, -1, wx.Bitmap(image))
         else:
             self.bitmap_logo = wx.StaticBitmap(self, -1, wx.Bitmap(image))
-        
+        self.bitmap_logo.SetFocus()
         self.label_title = wx.StaticText(self, -1, config.__appname__)
         self.label_version = wx.StaticText(self, -1, "")
         self.label_build = wx.StaticText(self, -1, "Build:")

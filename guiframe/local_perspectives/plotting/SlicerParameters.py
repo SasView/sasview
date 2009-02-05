@@ -40,7 +40,7 @@ class SlicerParameterPanel(wx.Dialog):
             
             @param event: EVT_SLICER event
         """
-        print "went here"
+        #print "went here"
         event.Skip()
         if event.obj_class==None:
             self.set_slicer(None, None)
