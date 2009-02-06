@@ -114,23 +114,23 @@ class SectorInteractor(_BaseInteractor):
             self.main_line.update()
             self.right_line.update( delta = self.main_line.get_radius(),mline= self.main_line)
             self.left_line.update( delta = self.main_line.get_radius() ,mline= self.main_line)
-            print "Main line has moved ---> phi right",math.degrees(self.main_line.get_radius()+self.right_line.theta)
-            print "Main line has moved ---> phi left",math.degrees(self.left_line.theta+self.main_line.get_radius())
+            #print "Main line has moved ---> phi right",math.degrees(self.main_line.get_radius()+self.right_line.theta)
+            #print "Main line has moved ---> phi left",math.degrees(self.left_line.theta+self.main_line.get_radius())
         if self.left_line.has_move:
-            print "left line has moved --->"
+            #print "left line has moved --->"
             self.main_line.update()
             self.left_line.update(phi=None,delta=None, mline=self.main_line,side=True, left=True)
             #self.right_line.update(-1*delta,linem=self.main_line,linel=self.left_line)
-            self.right_line.update(phi=-1*self.left_line.phi,delta=None, mline=self.main_line,side=True, left=True)
+            self.right_line.update(phi=self.left_line.phi,delta=None, mline=self.main_line,side=True,left=False, right=True)
+        
         if self.right_line.has_move:
-            print "right line has moved --->"
-           
+        
             self.main_line.update()
-            self.right_line.update(phi=None,delta=None, mline=self.main_line,side=True, right=True)
-            #self.right_line.update(-1*delta,linem=self.main_line,linel=self.left_line)
-            self.left_line.update(phi=-1*self.right_line.phi,delta=None, mline=self.main_line,side=True, left=True)
+            self.right_line.update(phi=None,delta=None, mline=self.main_line,side=True, left=False,right=True)
+            #print "right line has moved --->",self.right_line.phi
+            self.left_line.update(phi=self.right_line.phi,delta=None, mline=self.main_line,side=True, left=False)
    
-    
+        
     
 
     def save(self, ev):
@@ -154,7 +154,9 @@ class SectorInteractor(_BaseInteractor):
         radius = self.qmax #radius=math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
         phimin = self.right_line.theta+math.pi
         phimax = self.left_line.theta+math.pi
-        print "sector Q", radius
+        #phimin = min(self.right_line.theta+math.pi,self.left_line.theta+math.pi)
+        #phimax = max(self.right_line.theta+math.pi,self.left_line.theta+math.pi)
+        print "sector Q",phimin,phimax
         sect = SectorQ(r_min=0.0, r_max= radius , phi_min=phimin, phi_max=phimax)
         #sect = SectorQ(r_min=-1*radius , r_max= radius , phi_min=phimin, phi_max=phimax)
         if nbins!=None:
@@ -226,18 +228,19 @@ class SectorInteractor(_BaseInteractor):
         if math.fabs(self.left_line.phi) != math.fabs(self.right_line.phi):
             raise ValueError,"Phi left and phi right are different %f, %f"%(self.left_line.phi, self.right_line.phi)
         params["left_phi"] = math.fabs(self.left_line.phi)
+        params["right_phi"] = math.fabs(self.right_line.phi)
         params["nbins"] = self.nbins
         return params
     
     def set_params(self, params):
         
         main = params["main_phi"] 
-        phi = params["left_phi"] 
+        phi = math.fabs(params["left_phi"] )
         self.nbins = int(params["nbins"])
         self.main_line.theta= main
         
         self.main_line.update()
-        self.right_line.update(phi=-1*phi,delta=None, mline=self.main_line,side=True)
+        self.right_line.update(phi=phi,delta=None, mline=self.main_line,side=True,right=True)
         self.left_line.update(phi=phi,delta=None, mline=self.main_line,side=True)
        
         self._post_data(nbins=self.nbins)
@@ -268,23 +271,41 @@ class SideInteractor(_BaseInteractor):
         self.radius = r
         self.phi = phi
         self.scale = 10.0
-        #print "init for line side theta2, phi, theta",math.degrees(theta2),math.degrees(phi),math.degrees(self.theta) 
-        #raise "Version error", message
-          
-        # Inner circle
+         # Inner circle
         x1= self.radius*math.cos(self.theta)
         y1= self.radius*math.sin(self.theta)
         x2= -1*self.radius*math.cos(self.theta)
         y2= -1*self.radius*math.sin(self.theta)
+        
+        try:
+            # Inner circle marker
+            self.inner_marker = self.axes.plot([x1/2],[y1/2], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          pickradius=5, label="pick", 
+                                          zorder=zorder, # Prefer this to other lines
+                                          visible=True)[0]
+        except:
+            self.inner_marker = self.axes.plot([x1/2],[y1/2], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          label="pick", 
+                                          visible=True)[0]
+            message  = "\nTHIS PROTOTYPE NEEDS THE LATEST VERSION OF MATPLOTLIB\n"
+            message += "Get the SVN version that is at least as recent as June 1, 2007"
+            
+          
+       
        
         self.line = self.axes.plot([x1,x2],[y1,y2],
                                       linestyle='-', marker='',
                                       color=self.color,
                                       visible=True)[0]
-       
+        self.left_moving=False
+        
         self.npts = 20
         self.has_move=False
-        self.connect_markers([self.line])
+        self.connect_markers([self.inner_marker, self.line])
         #self.update()
 
     def set_layer(self, n):
@@ -294,8 +315,8 @@ class SideInteractor(_BaseInteractor):
     def clear(self):
         self.clear_markers()
         try:
-            
             self.line.remove()
+            self.inner_marker.remove()
         except:
             # Old version of matplotlib
             for item in range(len(self.axes.lines)):
@@ -312,14 +333,19 @@ class SideInteractor(_BaseInteractor):
         Draw the new roughness on the graph.
         """
         #print "update left or right ", self.has_move
-        
+        self.left_moving=left
         if phi !=None:
-            self.phi = phi
+            self.phi= phi
+        if  right:
+            self.phi = -1*math.fabs(self.phi)
+        else:
+            self.phi =math.fabs(self.phi)
         if delta==None:
             delta = 0
         if side:
             self.theta=  mline.theta + self.phi
-            
+        
+        
             
         if mline!=None:
             self.theta2 = mline.theta
@@ -333,7 +359,7 @@ class SideInteractor(_BaseInteractor):
         x2= -1*self.radius*math.cos(self.theta + delta)
         y2= -1*self.radius*math.sin(self.theta + delta)
        
-        
+        self.inner_marker.set(xdata=[x1/2],ydata=[y1/2])
         self.line.set(xdata=[x1,x2], ydata=[y1,y2])  
         
        
@@ -364,11 +390,32 @@ class SideInteractor(_BaseInteractor):
         """
         
         self.theta= math.atan2(y,x)
-        
+        self.has_move=True
+        if not self.left_moving:
+            if  self.theta >= self.theta2:
+                print "my theta", self.theta
+                self.restore()
+                return 
+            elif self.theta <= self.theta2 -math.pi/2:
+                print "self theta encore"
+                self.restore()
+                return 
+        else:
+            print "left move"
+            if  self.theta <= self.theta2:
+                print "my theta", self.theta
+                self.restore()
+                return 
+            elif self.theta >= self.theta2 +math.pi/2:
+                print "self theta encore"
+                self.restore()
+                return 
         self.phi= math.fabs(self.theta2 - self.theta)
         
-        print "move left or right phi ---theta--thetaM", self.phi, self.theta, self.theta2
-        self.has_move=True
+        print "move , self.phi, self.theta,", self.theta,self.theta2 -math.pi/2
+       
+            
+        
         self.base.base.update()
         
     def set_cursor(self, x, y):
@@ -387,9 +434,7 @@ class SideInteractor(_BaseInteractor):
         x = params["radius"] 
         self.set_cursor(x, self._inner_mouse_y)
         
-
-
-        
+ 
         
 class LineInteractor(_BaseInteractor):
     """
@@ -411,12 +456,27 @@ class LineInteractor(_BaseInteractor):
         #raise "Version error", message
             
         # Inner circle
-
-           
         x1= self.radius*math.cos(self.theta)
         y1= self.radius*math.sin(self.theta)
         x2= -1*self.radius*math.cos(self.theta)
         y2= -1*self.radius*math.sin(self.theta)
+        try:
+            # Inner circle marker
+            self.inner_marker = self.axes.plot([x1/2],[y1/2], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          pickradius=5, label="pick", 
+                                          zorder=zorder, # Prefer this to other lines
+                                          visible=True)[0]
+        except:
+            self.inner_marker = self.axes.plot([x1/2],[y1/2], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          label="pick", 
+                                          visible=True)[0]
+            message  = "\nTHIS PROTOTYPE NEEDS THE LATEST VERSION OF MATPLOTLIB\n"
+            message += "Get the SVN version that is at least as recent as June 1, 2007"
+            
        
         self.line = self.axes.plot([x1,x2],[y1,y2],
                                       linestyle='-', marker='',
@@ -425,7 +485,7 @@ class LineInteractor(_BaseInteractor):
       
         self.npts = 20
         self.has_move=False
-        self.connect_markers([self.line])
+        self.connect_markers([self.inner_marker, self.line])
         self.update()
 
     def set_layer(self, n):
@@ -435,7 +495,7 @@ class LineInteractor(_BaseInteractor):
     def clear(self):
         self.clear_markers()
         try:
-            
+            self.inner_marker.remove()
             self.line.remove()
         except:
             # Old version of matplotlib
@@ -459,7 +519,8 @@ class LineInteractor(_BaseInteractor):
         y1= self.radius*math.sin(self.theta)
         x2= -1*self.radius*math.cos(self.theta)
         y2= -1*self.radius*math.sin(self.theta)
-      
+        
+        self.inner_marker.set(xdata=[x1/2],ydata=[y1/2])
         self.line.set(xdata=[x1,x2], ydata=[y1,y2])  
      
         
