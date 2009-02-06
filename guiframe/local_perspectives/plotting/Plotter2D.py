@@ -336,8 +336,9 @@ class ModelPanel2D( ModelPanel1D):
         
         from DataLoader.manipulations import CircularAverage
         import math
-        self.qmax= self.data2D.xmax
-        self.radius= math.sqrt( math.pow(self.qmax,2)+math.pow(self.qmax,2)) 
+        self.qmax= max(math.fabs(self.data2D.xmax),math.fabs(self.data2D.xmin))
+        self.ymax=max(math.fabs(self.data2D.ymax),math.fabs(self.data2D.ymin))
+        self.radius= math.sqrt( math.pow(self.qmax,2)+math.pow(self.ymax,2)) 
         #print "radius?",self.radius
         # bin_width = self.qmax -self.qmin/nbins 
         #nbins= 30
