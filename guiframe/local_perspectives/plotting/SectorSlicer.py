@@ -28,7 +28,7 @@ class SectorInteractor(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes        
-        self.qmax = math.sqrt(math.pow(max(self.base.data2D.xmax,abs(self.base.data2D.xmin)),2)+math.pow(max(self.base.data2D.xmax,abs(self.base.data2D.xmin)),2))
+        self.qmax = math.sqrt(math.pow(max(self.base.data2D.xmax,math.fabs(self.base.data2D.xmin)),2)+math.pow(max(self.base.data2D.xmax,math.fabs(self.base.data2D.xmin)),2))
         #print "sector qmax", self.qmax
         self.connect = self.base.connect
         
@@ -156,7 +156,7 @@ class SectorInteractor(_BaseInteractor):
         phimax = self.left_line.theta+math.pi
         #phimin = min(self.right_line.theta+math.pi,self.left_line.theta+math.pi)
         #phimax = max(self.right_line.theta+math.pi,self.left_line.theta+math.pi)
-        print "sector Q",phimin,phimax
+        #print "sector Q",phimin,phimax
         sect = SectorQ(r_min=0.0, r_max= radius , phi_min=phimin, phi_max=phimax)
         #sect = SectorQ(r_min=-1*radius , r_max= radius , phi_min=phimin, phi_max=phimax)
         if nbins!=None:
@@ -279,14 +279,14 @@ class SideInteractor(_BaseInteractor):
         
         try:
             # Inner circle marker
-            self.inner_marker = self.axes.plot([x1/2],[y1/2], linestyle='',
+            self.inner_marker = self.axes.plot([x1/2.5],[y1/2.5], linestyle='',
                                           marker='s', markersize=10,
                                           color=self.color, alpha=0.6,
                                           pickradius=5, label="pick", 
                                           zorder=zorder, # Prefer this to other lines
                                           visible=True)[0]
         except:
-            self.inner_marker = self.axes.plot([x1/2],[y1/2], linestyle='',
+            self.inner_marker = self.axes.plot([x1/2.5],[y1/2.5], linestyle='',
                                           marker='s', markersize=10,
                                           color=self.color, alpha=0.6,
                                           label="pick", 
@@ -359,7 +359,7 @@ class SideInteractor(_BaseInteractor):
         x2= -1*self.radius*math.cos(self.theta + delta)
         y2= -1*self.radius*math.sin(self.theta + delta)
        
-        self.inner_marker.set(xdata=[x1/2],ydata=[y1/2])
+        self.inner_marker.set(xdata=[x1/2.5],ydata=[y1/2.5])
         self.line.set(xdata=[x1,x2], ydata=[y1,y2])  
         
        
@@ -391,28 +391,50 @@ class SideInteractor(_BaseInteractor):
         
         self.theta= math.atan2(y,x)
         self.has_move=True
+        
+        #ToDo: Simplify below
         if not self.left_moving:
-            if  self.theta >= self.theta2:
-                print "my theta", self.theta
+            if  self.theta2-self.theta <= 0 and self.theta2>0:#>= self.theta2:
+                #print "my theta", self.theta
                 self.restore()
                 return 
-            elif self.theta <= self.theta2 -math.pi/2:
-                print "self theta encore"
+            elif self.theta2 < 0 and self.theta < 0 and self.theta-self.theta2 >= 0:
+                self.restore()
+                return                             
+            elif  self.theta2 < 0 and self.theta > 0 and self.theta2+2*math.pi-self.theta >=math.pi/2:
+                #print "my theta", self.theta
+                self.restore()
+                return 
+            elif  self.theta2 < 0 and self.theta < 0 and self.theta2-self.theta >=math.pi/2:
+                #print "my theta", self.theta
+                self.restore()
+                return 
+            elif self.theta2>0 and (self.theta2-self.theta >= math.pi/2 or (self.theta2-self.theta >= math.pi/2)):#<= self.theta2 -math.pi/2:
+                #print "self theta encore"
                 self.restore()
                 return 
         else:
-            print "left move"
-            if  self.theta <= self.theta2:
-                print "my theta", self.theta
+            #print "left move"
+            if  self.theta < 0 and self.theta+math.pi*2-self.theta2 <= 0:
                 self.restore()
                 return 
-            elif self.theta >= self.theta2 +math.pi/2:
-                print "self theta encore"
+            elif self.theta2 < 0 and self.theta-self.theta2 <= 0:
+                self.restore()
+                return                             
+            elif  self.theta > 0 and self.theta-self.theta2 <=0:
+                #print "my theta", self.theta
                 self.restore()
                 return 
+            elif self.theta-self.theta2 >= math.pi/2 or  (self.theta+math.pi*2-self.theta2 >= math.pi/2 and self.theta<0 and self.theta2>0):
+                #print "self theta encore"
+                self.restore()
+                return 
+            
         self.phi= math.fabs(self.theta2 - self.theta)
+        if self.phi>math.pi:
+            self.phi= 2*math.pi-math.fabs(self.theta2 - self.theta)
         
-        print "move , self.phi, self.theta,", self.theta,self.theta2 -math.pi/2
+        #print "move , self.phi, self.theta,", self.theta*180/math.pi,self.theta2*180/math.pi,self.phi*180/math.pi
        
             
         
@@ -462,14 +484,14 @@ class LineInteractor(_BaseInteractor):
         y2= -1*self.radius*math.sin(self.theta)
         try:
             # Inner circle marker
-            self.inner_marker = self.axes.plot([x1/2],[y1/2], linestyle='',
+            self.inner_marker = self.axes.plot([x1/2.5],[y1/2.5], linestyle='',
                                           marker='s', markersize=10,
                                           color=self.color, alpha=0.6,
                                           pickradius=5, label="pick", 
                                           zorder=zorder, # Prefer this to other lines
                                           visible=True)[0]
         except:
-            self.inner_marker = self.axes.plot([x1/2],[y1/2], linestyle='',
+            self.inner_marker = self.axes.plot([x1/2.5],[y1/2.5], linestyle='',
                                           marker='s', markersize=10,
                                           color=self.color, alpha=0.6,
                                           label="pick", 
@@ -512,7 +534,7 @@ class LineInteractor(_BaseInteractor):
         """
         Draw the new roughness on the graph.
         """
-        print "update main line", self.theta
+        #print "update main line", self.theta
         if theta !=None:
             self.theta= theta
         x1= self.radius*math.cos(self.theta)
@@ -520,7 +542,7 @@ class LineInteractor(_BaseInteractor):
         x2= -1*self.radius*math.cos(self.theta)
         y2= -1*self.radius*math.sin(self.theta)
         
-        self.inner_marker.set(xdata=[x1/2],ydata=[y1/2])
+        self.inner_marker.set(xdata=[x1/2.5],ydata=[y1/2.5])
         self.line.set(xdata=[x1,x2], ydata=[y1,y2])  
      
         
@@ -550,9 +572,10 @@ class LineInteractor(_BaseInteractor):
         """
         
         self.theta= math.atan2(y,x)
-        print "main_line previous theta --- next theta ",math.degrees(self.save_theta),math.degrees(self.theta)
+        #print "main_line previous theta --- next theta ",math.degrees(self.save_theta),math.degrees(self.theta)
         
         self.has_move=True
+        
         self.base.base.update()
         
     def set_cursor(self, x, y):
