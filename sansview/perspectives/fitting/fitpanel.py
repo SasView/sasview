@@ -42,7 +42,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.sim_page = SimultaneousFitPage(self, -1)
         self.AddPage(self.sim_page,"Simultaneous Fit")
         
-        
+        self._mgr = wx.aui.AuiManager(self)
 
         
         #dictionary of miodel {model class name, model class}
@@ -52,7 +52,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.draw_model_name=None
         #model page info
         self.model_page_number=None
-        self.page_name=None
+       
         self.model_page=None
         # increment number for model name
         self.count=0
@@ -114,6 +114,7 @@ class FitPanel(wx.aui.AuiNotebook):
             #self.about_page.Disable()
             from fitpage1D import FitPage1D
             panel = FitPage1D(self,data, -1)
+            panel.name=name
             m_name= "M"+str(self.count)  
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
@@ -138,6 +139,7 @@ class FitPanel(wx.aui.AuiNotebook):
         panel.set_owner(self.event_owner)
         self.AddPage(page=panel,caption="Model",select=True)
         panel.populate_box( self.model_list_box)
+        panel.name=page_title
         self.draw_model_name=page_title
         self.model_page_number=self.GetSelection()
         self.model_page=self.GetPage(self.GetSelection())
@@ -165,11 +167,13 @@ class FitPanel(wx.aui.AuiNotebook):
             @param qmax: maximum Q
             @param npts: number of Q points
         """
+        print "self.draw_model_name none",self.draw_model_name
         if  self.draw_model_name ==None:
+            print "self.draw_model_name none"
             self._help_add_model_page(model,description,page_title, qmin=qmin, qmax=qmax, npts=npts)
         elif topmenu==True:
             self.model_page.select_model(model, page_title)
-           
+          
     def get_current_page(self):
         """
             @return the current page selected
@@ -178,25 +182,27 @@ class FitPanel(wx.aui.AuiNotebook):
         return self.GetPage(self.GetSelection() )
   
     
-    def old_onClose(self, page=None,page_number=None):
+    def onClose(self, page=None,page_number=None):
         """
              close the current page except the simpage. remove each check box link to the model
              selected on that page. remove its reference into page_finder (fitting module)
         """
-        #print "model page", page_number, page
+        print "model page", page_number, page, self.draw_model_name
         if page!=None and page_number!=None:
-            
-            self.nb.RemovePage(page_number)
-            page.Destroy()
+            i=self.DeletePage(page_number)
+            #self.nb.RemovePage(page_number)
+            #page.Destroy()
             self.model_page_number=None
             self.model_page=None
             self.draw_model_name=None
+            print"self.draw_model_name",self.draw_model_name
             return 
         try:
-            sim_page = self.nb.GetPage(0)
-            selected_page = self.nb.GetPage(self.nb.GetSelection())
-            
+            sim_page = self.GetPage(1)
+            selected_page = self.GetPage(self.GetSelection())
+            print "sim_page ",sim_page ,selected_page
             if sim_page != selected_page:
+                print "sim_page ",sim_page ,selected_page
                 # remove the check box link to the model name of this page (selected_page)
                 sim_page.remove_model(selected_page)
                 #remove that page from page_finder of fitting module
@@ -206,14 +212,18 @@ class FitPanel(wx.aui.AuiNotebook):
                         del page_finder[page]
                         break
                 #Delete the page from notebook
-                page_number = self.nb.GetSelection()
-                if self.nb.GetPageText(page_number)== self.page_name:
+                page_number = self.GetSelection()
+                print selected_page.name,self.GetPageText(page_number),self.draw_model_name
+                if selected_page.name== self.draw_model_name:
+                    print "went here"
                     self.draw_model_name=None
+                    self.model_page=None
                 if  page_number == 1:
                     self.model_page=None
                     self.draw_model_name=None
-                selected_page.Destroy()
-                self.nb.RemovePage(page_number)
+                #selected_page.Destroy()
+                #self.RemovePage(page_number)
+                i=self.DeletePage(page_number)
                 #self.count =self.count -1 
                 self.fit_page_name=None
         except:

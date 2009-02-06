@@ -25,8 +25,7 @@ class ModelPage(wx.ScrolledWindow):
     window_name = "Fit page"
     ## Title to appear on top of the window
     window_caption = "Fit Page"
-    
-    
+    name=""
     def __init__(self, parent,model,name, *args, **kwargs):
         wx.ScrolledWindow.__init__(self, parent, *args, **kwargs)
         """ 
