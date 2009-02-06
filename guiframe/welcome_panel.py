@@ -81,11 +81,15 @@ class PanelAbout(wx.Panel):
         self.label_svnrevision = wx.StaticText(self, -1, "")
         self.label_copyright = wx.StaticText(self, -1, config._copyright)
         self.label_author = wx.StaticText(self, -1, "authors")
-        self.hyperlink = wx.lib.hyperlink.HyperLinkCtrl(self, -1, config._homepage, URL=config._homepage)
+        self.hyperlink = wx.StaticText(self, -1, str(config._homepage))
+        #self.hyperlink = wx.lib.hyperlink.HyperLinkCtrl(self, -1, config._homepage, URL=config._homepage)
         #self.hyperlink_license = wx.lib.hyperlink.HyperLinkCtrl(self, -1, "Comments? Bugs? Requests?", URL=config._paper)
         self.hyperlink_license = wx.StaticText(self, -1, "Comments? Bugs? Requests?")
-        self.hyperlink_paper = wx.lib.hyperlink.HyperLinkCtrl(self, -1, "Send us a ticket", URL=config._license)
-        self.hyperlink_download = wx.lib.hyperlink.HyperLinkCtrl(self, -1, "Get the latest version", URL=config._download)
+        self.hyperlink_paper = wx.StaticText(self, -1, str(config._license))
+        #self.hyperlink_paper = wx.lib.hyperlink.HyperLinkCtrl(self, -1, "Send us a ticket", URL=config._license)
+        
+        self.hyperlink_download = wx.StaticText(self, -1, str(config._download))
+        #self.hyperlink_download = wx.lib.hyperlink.HyperLinkCtrl(self, -1, "Get the latest version", URL=config._download)
         self.static_line_1 = wx.StaticLine(self, -1)
         self.label_acknowledgement = wx.StaticText(self, -1, config._acknowledgement)
         self.static_line_2 = wx.StaticLine(self, -1)
@@ -97,9 +101,6 @@ class PanelAbout(wx.Panel):
         self.__set_properties()
         self.__do_layout()
 
-        self.Bind(wx.EVT_BUTTON, self.onNsfLogo, self.bitmap_button_nsf)
-        self.Bind(wx.EVT_BUTTON, self.onDanseLogo, self.bitmap_button_danse)
-        self.Bind(wx.EVT_BUTTON, self.onUTLogo, self.bitmap_button_msu)
         # end wxGlade
         
         # fill in acknowledgements
@@ -205,17 +206,7 @@ class PanelAbout(wx.Panel):
         self.Centre()
         # end wxGlade
 
-    def onNsfLogo(self, event): # wxGlade: DialogAbout.<event_handler>
-        launchBrowser(config._nsf_url)
-        event.Skip()
-
-    def onDanseLogo(self, event): # wxGlade: DialogAbout.<event_handler>
-        launchBrowser(config._danse_url)
-        event.Skip()
-
-    def onUTLogo(self, event): # wxGlade: DialogAbout.<event_handler>
-        launchBrowser(config._inst_url)
-        event.Skip()
+    
 
 # end of class DialogAbout
 
