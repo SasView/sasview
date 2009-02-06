@@ -6,7 +6,7 @@ import string ,re
 #import models
 _BOX_WIDTH = 80
 
-
+(FitPageEvent, EVT_FIT_PAGE)   = wx.lib.newevent.NewEvent()
 class FitPanel(wx.aui.AuiNotebook):    
 #class FitPanel(wx.aui.AuiNotebook,wx.panel):
     """
@@ -22,8 +22,8 @@ class FitPanel(wx.aui.AuiNotebook):
     CENTER_PANE = True
     def __init__(self, parent, *args, **kwargs):
         
-        #wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_SCROLL_BUTTONS )
-        wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_DEFAULT_STYLE  )
+        wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_SCROLL_BUTTONS )
+        #wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_DEFAULT_STYLE  )
         
         
         self.manager=None
@@ -103,14 +103,7 @@ class FitPanel(wx.aui.AuiNotebook):
             name = 'Fit'
         if self.fit_page_name != name:
             self.count +=1
-            
-            """
-            if data.__class__.__name__=='Data2D':
-                 from fitpage2D import FitPage2D
-                 panel = FitPage2D(self,data, -1)
-                 
-            else:
-           """
+         
             #self.about_page.Disable()
             from fitpage1D import FitPage1D
             panel = FitPage1D(self,data, -1)
@@ -122,6 +115,7 @@ class FitPanel(wx.aui.AuiNotebook):
             self.AddPage(page=panel,caption=name,select=True)
             panel.populate_box( self.model_list_box)
             self.fit_page_name = name
+            EVT_FIT_PAGE
             return panel,m_name
         
     def _help_add_model_page(self,model,description,page_title, qmin=0, qmax=0.1, npts=50):
