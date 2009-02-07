@@ -192,8 +192,9 @@ class FitPage1D(ModelPage):
             radius4= math.sqrt(math.pow(self.data.xmax, 2)+ math.pow(self.data.ymax, 2))
             #self.qmin_x = 0
             #self.qmax_x = max(radius1, radius2, radius3, radius4)
-            self.qmin_x= self.data.xmin
-            self.qmax_x= self.data.xmax           
+            self.qmin_x= 0#self.data.xmin
+            self.qmax_x= math.sqrt(math.pow(max(math.fabs(self.data.xmax),math.fabs(self.data.xmin)),2)
+                            +math.pow(max(math.fabs(self.data.ymax),math.fabs(self.data.ymin)),2))#self.data.xmax           
             print "data2D range",self.qmax_x
         
         self.num_points= 100
@@ -205,14 +206,14 @@ class FitPage1D(ModelPage):
         self.qmin.SetToolTipString("Minimun value of x in linear scale.")
         self.qmin.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         self.qmin.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
-        self.qmin.Disable()
+        self.qmin.Enable()
         
         self.qmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.qmax.SetValue(str(format_number(self.qmax_x)))
         self.qmax.SetToolTipString("Maximum value of x in linear scale.")
         self.qmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         self.qmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
-        self.qmax.Disable()
+        self.qmax.Enable()
 
         self.npts    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.npts.SetValue(format_number(self.num_points))
@@ -394,7 +395,7 @@ class FitPage1D(ModelPage):
         if len(self.param_toFit) >0 and flag==True:
             self.manager.schedule_for_fit( value=1,fitproblem =None) 
             if hasattr(self.data, "data"):
-                self.manager._on_single_fit( qmin=self.qmin_x,qmax=self.qmax_x,
+                self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x,
                                             ymin=self.data.ymin, ymax=self.data.ymax,
                                             xmin=self.data.xmin,xmax=self.data.xmax)
                 #self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x,
@@ -553,15 +554,17 @@ class FitPage1D(ModelPage):
                 break
             else:
                 self.text2_4.Hide()
-        #Disable or enable fit button
-        
+                
+        #(Disable or )Enable fit button 
+        """       
         if not (len(self.param_toFit ) >0):
-            self.xmin.Disable()
-            self.xmax.Disable()
-        else:
             self.xmin.Enable()
             self.xmax.Enable()
-       
+        else:
+            self.xmin.Enable()
+            self.xmax.Enable()  
+        """
+                 
         self.compute_chisqr()
         self.vbox.Layout()
         self.SetScrollbars(20,20,55,40)
@@ -628,13 +631,11 @@ class FitPage1D(ModelPage):
             self.cb1.SetValue(True)
         else:
             self.cb1.SetValue(False)
-            
+        """    
         #qmax, qmin Input enabled all the time   
         self.qmin.Enable()
-        self.qmax.Enable()
-       
-   
-       
+        self.qmax.Enable()      
+        """
   
     def onsetValues(self,chisqr, out,cov):
         """
@@ -661,7 +662,7 @@ class FitPage1D(ModelPage):
         #out is a list : set parameters and errors in TextCtrl
         else:
             i=0
-            #print "fitpage: list param  model",list
+            #print  "fitpage: list param  model",list
             #for item in self.param_toFit:
             #    print "fitpage: list display",item[0].GetLabelText()
             for item in self.param_toFit:
