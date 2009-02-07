@@ -639,7 +639,7 @@ class Plugin:
                 theory.x_bins= data.x_bins
                 theory.y_bins= data.y_bins
                 tempy=[]
-                print "max x,y",max(data.xmax,data.xmin),max(data.ymax,data.ymin)
+                #print "max x,y",max(data.xmax,data.xmin),max(data.ymax,data.ymin)
                 if qmin==None:
                     qmin=0#data.xmin
                 if qmax==None:
@@ -658,19 +658,16 @@ class Plugin:
                 for j in range(len(data.y_bins)):
                     for i in range(len(data.x_bins)):
                         tempqij=math.sqrt((math.pow(data.y_bins[j],2)+math.pow(data.x_bins[i],2)))
-                        if tempqij>= qmin: 
-                            if tempqij<= qmax:
-                                theory.data[j][i]=model.runXY([data.y_bins[j],data.x_bins[i]])
+                        if tempqij>= qmin and tempqij<= qmax: 
+                            theory.data[j][i]=model.runXY([data.y_bins[j],data.x_bins[i]])
                         else:
-                            theory.data[j][i]=0
-               
+                            theory.data[j][i]=None
+                print "len(data.x_bins),len(data.y_bins);",len(data.x_bins),len(data.y_bins),i,j
                 #print "fitting : plot_helper:", theory.image
-                #print data.image
                 #print "fitting : plot_helper:",theory.image
                 theory.detector= data.detector
                 theory.source= data.source
-                theory.zmin= data.zmin
-                theory.zmax= data.zmax
+                
                 theory.xmin= xmin
                 theory.xmax= xmax
                 theory.ymin= ymin
@@ -702,7 +699,6 @@ class Plugin:
              draw model with default data value
         """
         if data !=None:
-            print "qmin qmax",qmin, qmax
             self.redraw_model(qmin,qmax)
             return 
         self._draw_model2D(model=model,
@@ -790,6 +786,9 @@ class Plugin:
         theory.name= model.name
         theory.group_id ="Model"
         theory.id ="Model"
+        
+       
+        
         theory.xmin= -qmax
         theory.xmax= qmax
         theory.ymin= -qmax
