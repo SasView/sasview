@@ -6,7 +6,7 @@ import os
 import sys
 import wx
 import logging
-from sans.guitools.plottables import Data1D, Theory1D
+from danse.common.plottools import Data1D, Theory1D
 from sans.guicomm.events import NewPlotEvent, StatusEvent    
 import math, numpy
 from sans.pr.invertor import Invertor
@@ -113,7 +113,7 @@ class Plugin:
         import pylab
         import math
         from sans.guicomm.events import NewPlotEvent            
-        from sans.guitools.plottables import Data1D, Theory1D
+        from danse.common.plottools import Data1D, Theory1D
         
         # Generate P(r) for sphere
         radius = 60.0
@@ -169,7 +169,7 @@ class Plugin:
         import pylab
         import math
         from sans.guicomm.events import NewPlotEvent            
-        from sans.guitools.plottables import Data1D, Theory1D
+        from danse.common.plottools import Data1D, Theory1D
         # Show P(r)
         y_true = numpy.zeros(len(x))
 
@@ -204,7 +204,7 @@ class Plugin:
         import pylab
         import math
         from sans.guicomm.events import NewPlotEvent            
-        from sans.guitools.plottables import Data1D, Theory1D
+        from danse.common.plottools import Data1D, Theory1D
 
         qtemp = pr.x
         if not q==None:
@@ -285,7 +285,7 @@ class Plugin:
         import pylab
         import math
         from sans.guicomm.events import NewPlotEvent            
-        from sans.guitools.plottables import Data1D, Theory1D
+        from danse.common.plottools import Data1D, Theory1D
         
         # Show P(r)
         x = pylab.arange(0.0, pr.d_max, pr.d_max/self._pr_npts)
