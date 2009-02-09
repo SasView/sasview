@@ -198,16 +198,20 @@ class Plugin:
                  item.__class__.__name__ is "Data2D":
                 #find a name for the page created for notebook
                 try:
+                   
                     page, model_name = self.fit_panel.add_fit_page(item)
                     # add data associated to the page created
-                    
-                    if page !=None:    
+                   
+                    if page !=None:   
                         #create a fitproblem storing all link to data,model,page creation
                         self.page_finder[page]= FitProblem()
                         self.page_finder[page].save_model_name(model_name)  
                         self.page_finder[page].add_data(item)
+                        wx.PostEvent(self.parent, StatusEvent(status="Page Created"))
+                    else:
+                        wx.PostEvent(self.parent, StatusEvent(status="Page was already Created"))
                 except:
-                    raise
+                    #raise
                     wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
                     %sys.exc_value))
     def schedule_for_fit(self,value=0,fitproblem =None):  
@@ -668,10 +672,12 @@ class Plugin:
                 theory.detector= data.detector
                 theory.source= data.source
                 
-                theory.xmin= xmin
-                theory.xmax= xmax
+                theory.qmin= qmin
+                theory.qmax= qmax
                 theory.ymin= ymin
                 theory.ymax= ymax
+                theory.xmin= xmin
+                theory.xmax= xmax
         
                 wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
                                                 title=self.title +str(data.name)))
