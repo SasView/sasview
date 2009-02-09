@@ -495,9 +495,9 @@ class ViewerFrame(wx.Frame):
         filemenu.Append(id, '&Open', 'Open a file')
         wx.EVT_MENU(self, id, self._on_open)
         
-        id = wx.NewId()
-        filemenu.Append(id, '&History', 'Register previous States')
-        wx.EVT_MENU(self, id, self._onHistoryPanel)
+        #id = wx.NewId()
+        #filemenu.Append(id, '&History', 'Register previous States')
+        #wx.EVT_MENU(self, id, self._onHistoryPanel)
         
         id = wx.NewId()
         filemenu.Append(id,'&Quit', 'Exit') 
