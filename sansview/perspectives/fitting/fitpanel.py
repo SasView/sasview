@@ -102,7 +102,8 @@ class FitPanel(wx.aui.AuiNotebook):
         except:
             name = 'Fit'
         if self.fit_page_name != name:
-            self.count +=1
+            print"went here"
+            #self.count +=1
          
             #self.about_page.Disable()
             from fitpage1D import FitPage1D
@@ -117,6 +118,8 @@ class FitPanel(wx.aui.AuiNotebook):
             self.fit_page_name = name
             EVT_FIT_PAGE
             return panel,m_name
+        else:
+            return None, None
         
     def _help_add_model_page(self,model,description,page_title, qmin=0, qmax=0.1, npts=50):
         """
