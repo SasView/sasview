@@ -277,9 +277,15 @@ class FitPage1D(ModelPage):
         # model on which the fit would be performed
         self.model=None
         #dictionary of model name and model class
-        self.model_list_box={}
-        
-      
+        self.model_list_box={}    
+                     
+        if self.model == None:
+            self.qmin.Disable()
+            self.qmax.Disable() 
+        else:
+            self.qmin.Enable()
+            self.qmax.Enable() 
+
        
         self.vbox.Layout()
         self.vbox.Fit(self) 
@@ -368,11 +374,19 @@ class FitPage1D(ModelPage):
         self.SetScrollbars(20,20,55,40)
         self.Layout()
         self.parent.GetSizer().Layout()
+
         for item in self.model_list_box.itervalues():
             name = item.__name__
             if hasattr(item, "name"):
                 name = item.name
             #print "fitpage: _on_select_model model name",name ,event.GetString()
+            if name == None:
+                self.qmin.Disable()
+                self.qmax.Disable() 
+            else:
+                self.qmin.Enable()
+                self.qmax.Enable() 
+            
             if name ==event.GetString():
                 try:
                     self.model=item()
