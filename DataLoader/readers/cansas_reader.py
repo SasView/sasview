@@ -568,13 +568,13 @@ class Reader:
         data_conv_q = None
         data_conv_i = None
         
-        if has_converter == True and data_info.x_unit != '1/A':
-            data_conv_q = Converter('1/A')
+        if has_converter == True and data_info.x_unit != 'A^{-1}':
+            data_conv_q = Converter('A^{-1}')
             # Test it
             data_conv_q(1.0, output.Q_unit)
             
-        if has_converter == True and data_info.y_unit != '1/cm':
-            data_conv_i = Converter('1/cm')
+        if has_converter == True and data_info.y_unit != 'cm^{-1}':
+            data_conv_i = Converter('cm^{-1}')
             # Test it
             data_conv_i(1.0, output.I_unit)                    
                 
