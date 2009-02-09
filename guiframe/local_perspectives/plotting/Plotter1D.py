@@ -15,7 +15,7 @@ import pylab
 
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools.plottables import Graph,Data1D
+from danse.common.plottools.plottables import Graph,Data1D,Theory1D
 from sans.guicomm.events import EVT_NEW_PLOT
 from sans.guicomm.events import StatusEvent ,NewPlotEvent,SlicerEvent
 from sans.guiframe.utils import PanelMenu
@@ -55,6 +55,8 @@ class ModelPanel1D(PlotPanel):
         self.parent = parent
         ## Plottables
         self.plots = {}
+        ## save errors dy  for each data plotted
+        self.err_dy={}
         
         ## Unique ID (from gui_manager)
         self.uid = None
@@ -135,10 +137,11 @@ class ModelPanel1D(PlotPanel):
         # Set the view scale for all plots
        
         self._onEVT_FUNC_PROPERTY()
-    
+        
         self.graph.render(self)
+       
         self.subplot.figure.canvas.draw_idle()
-
+        
     def onLeftDown(self,event): 
         """ left button down and ready to drag"""
            
@@ -217,6 +220,12 @@ class ModelPanel1D(PlotPanel):
                 #print "panel scale before  ",self.xLabel, self.yLabel
                 #print "cyllinder before adding error", self.plots[self.graph.selected_plottable].x
                 wx.EVT_MENU(self, id, self._on_add_errors)
+            elif self.plots[self.graph.selected_plottable].__class__.__name__=="Data1D":
+                id = wx.NewId()
+                slicerpop.Append(id, '&Remove errors to data')
+                #print "panel scale before  ",self.xLabel, self.yLabel
+                #print "cyllinder before adding error", self.plots[self.graph.selected_plottable].x
+                wx.EVT_MENU(self, id, self._on_remove_errors)
             else:
                 id = wx.NewId()
                 slicerpop.Append(id, '&Linear fit')
@@ -247,7 +256,39 @@ class ModelPanel1D(PlotPanel):
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
-    
+    def _on_remove_errors(self, evt):
+        if not self.graph.selected_plottable == None:
+            name =self.plots[self.graph.selected_plottable].name
+            dy = self.plots[self.graph.selected_plottable].dy
+            self.err_dy[name]= dy
+            new_plot = Theory1D(self.plots[self.graph.selected_plottable].x,
+                              self.plots[self.graph.selected_plottable].y,
+                              dy=None)
+            new_plot.interactive = True
+            new_plot.name = self.plots[self.graph.selected_plottable].name 
+            if hasattr(self.plots[self.graph.selected_plottable], "group_id"):
+                new_plot.group_id = self.plots[self.graph.selected_plottable].group_id
+                new_plot.id = self.plots[self.graph.selected_plottable].id
+            else:
+                new_plot.group_id = str(time.time())
+                new_plot.id = str(time.time())
+            label, unit = self.plots[self.graph.selected_plottable].get_xaxis()
+            new_plot.xaxis(label, unit)
+            label, unit = self.plots[self.graph.selected_plottable].get_yaxis()
+            new_plot.yaxis(label, unit)
+            #print "panel scale ",self.xLabel, self.yLabel
+            print "color",self.graph.plottables[self.plots[self.graph.selected_plottable]]
+            color=self.graph.plottables[self.plots[self.graph.selected_plottable]]
+            self.graph.delete_plottable(self.plots[self.graph.selected_plottable])
+            
+            self.graph.add_plottable(new_plot,color)
+            # transforming the view of the new data into the same of the previous data
+            self._onEVT_FUNC_PROPERTY()
+            #print "cyllinder", self.plots[self.graph.selected_plottable].x,self.plots[self.graph.selected_plottable].view.x, new_plot.x, new_plot.view.x
+            self.plots[self.graph.selected_plottable]=new_plot
+           
+            self.graph.render(self)
+            self.subplot.figure.canvas.draw_idle() 
     
     def _on_add_errors(self, evt):
         """
@@ -261,8 +302,14 @@ class ModelPanel1D(PlotPanel):
         if not self.graph.selected_plottable == None:
             length = len(self.plots[self.graph.selected_plottable].x)
             dy = numpy.zeros(length)
-            for i in range(length):
-                dy[i] = math.sqrt(self.plots[self.graph.selected_plottable].y[i])
+            selected_plot= self.plots[self.graph.selected_plottable]
+            try:
+                dy = self.err_dy[selected_plot.name]
+            except:
+                for i in range(length):
+                    dy[i] = math.sqrt(self.plots[self.graph.selected_plottable].y[i])      
+            #for i in range(length):
+            #    dy[i] = math.sqrt(self.plots[self.graph.selected_plottable].y[i])
                 
             new_plot = Data1D(self.plots[self.graph.selected_plottable].x,
                               self.plots[self.graph.selected_plottable].y,
@@ -281,9 +328,10 @@ class ModelPanel1D(PlotPanel):
             label, unit = self.plots[self.graph.selected_plottable].get_yaxis()
             new_plot.yaxis(label, unit)
             #print "panel scale ",self.xLabel, self.yLabel
-            self.graph.delete(self.plots[self.graph.selected_plottable])
-            
-            self.graph.add(new_plot)
+            color=self.graph.plottables[self.plots[self.graph.selected_plottable]]
+            self.graph.delete_plottable(self.plots[self.graph.selected_plottable])
+            self.graph.add_plottable(new_plot, color)
+            #self.graph.add(new_plot)
             # transforming the view of the new data into the same of the previous data
             self._onEVT_FUNC_PROPERTY()
             #print "cyllinder", self.plots[self.graph.selected_plottable].x,self.plots[self.graph.selected_plottable].view.x, new_plot.x, new_plot.view.x
