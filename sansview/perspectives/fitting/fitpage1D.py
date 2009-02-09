@@ -237,7 +237,7 @@ class FitPage1D(ModelPage):
         #                    wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix = 0
         iy += 1
-        self.sizer9.Add(wx.StaticText(self, -1, 'Q range'),(iy, ix),(1,1),\
+        self.sizer9.Add(wx.StaticText(self, -1, 'Qx range'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer9.Add(self.qmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -304,6 +304,7 @@ class FitPage1D(ModelPage):
         res=[]
         if flag== True:
             try:
+                print "compute",self.data.err_data
                 self.qmin_x = float(self.qmin.GetValue())
                 self.qmax_x = float(self.qmax.GetValue())
                 
@@ -323,6 +324,7 @@ class FitPage1D(ModelPage):
                 #print res
                 self.tcChi.SetLabel(format_number(math.fabs(sum)))
             except:
+                raise
                 wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Chisqr cannot be compute: %s"% sys.exc_value))
         

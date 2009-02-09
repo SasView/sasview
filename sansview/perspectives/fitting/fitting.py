@@ -17,7 +17,7 @@ import fitpage1D,fitpage2D
 import park
 DEFAULT_BEAM = 0.005
 DEFAULT_QMIN = 0.0
-DEFAULT_QMAX = 0.15
+DEFAULT_QMAX = 0.1
 DEFAULT_NPTS = 40
 import time
 import thread
