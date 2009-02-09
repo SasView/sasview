@@ -658,11 +658,11 @@ class Plugin:
                 for j in range(len(data.y_bins)):
                     for i in range(len(data.x_bins)):
                         tempqij=math.sqrt((math.pow(data.y_bins[j],2)+math.pow(data.x_bins[i],2)))
-                        if tempqij>= qmin and tempqij<= qmax: 
-                            theory.data[j][i]=model.runXY([data.y_bins[j],data.x_bins[i]])
-                        else:
-                            theory.data[j][i]=None
-                print "len(data.x_bins),len(data.y_bins);",len(data.x_bins),len(data.y_bins),i,j
+                        #if tempqij>= qmin and tempqij<= qmax: 
+                        theory.data[j][i]=model.runXY([data.y_bins[j],data.x_bins[i]])
+                        #else:
+                            #theory.data[j][i]=None
+                #print "len(data.x_bins),len(data.y_bins);",len(data.x_bins),len(data.y_bins),i,j
                 #print "fitting : plot_helper:", theory.image
                 #print "fitting : plot_helper:",theory.image
                 theory.detector= data.detector
