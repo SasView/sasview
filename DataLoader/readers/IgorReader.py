@@ -78,13 +78,13 @@ class Reader:
         data_conv_q = None
         data_conv_i = None
         
-        if has_converter == True and output.Q_unit != '1/A':
-            data_conv_q = Converter('1/A')
+        if has_converter == True and output.Q_unit != 'A^{-1}':
+            data_conv_q = Converter('A^{-1}')
             # Test it
             data_conv_q(1.0, output.Q_unit)
             
-        if has_converter == True and output.I_unit != '1/cm':
-            data_conv_i = Converter('1/cm')
+        if has_converter == True and output.I_unit != 'cm^{-1}':
+            data_conv_i = Converter('cm^{-1}')
             # Test it
             data_conv_i(1.0, output.I_unit)            
          
@@ -190,7 +190,7 @@ class Reader:
                 theta = (i_x-center_x+1)*0.5 / distance / 100.0
                 qx = 4.0*math.pi/wavelength * math.sin(theta/2.0)
 
-                if has_converter == True and output.Q_unit != '1/A':
+                if has_converter == True and output.Q_unit != 'A^{-1}':
                     qx = data_conv_q(qx, units=output.Q_unit)
 
                 if xmin==None or qx<xmin:
@@ -201,7 +201,7 @@ class Reader:
                 theta = (i_y-center_y+1)*0.5 / distance / 100.0
                 qy = 4.0*math.pi/wavelength * math.sin(theta/2.0)
 
-                if has_converter == True and output.Q_unit != '1/A':
+                if has_converter == True and output.Q_unit != 'A^{-1}':
                     qy = data_conv_q(qy, units=output.Q_unit)
                 
                 if ymin==None or qy<ymin:
@@ -257,7 +257,7 @@ class Reader:
         xmax    =xmax+xstep/2.0
         ymin    =ymin-ystep/2.0
         ymax    =ymax+ystep/2.0
-        if has_converter == True and output.Q_unit != '1/A':
+        if has_converter == True and output.Q_unit != 'A^{-1}':
             xmin = data_conv_q(xmin, units=output.Q_unit)
             xmax = data_conv_q(xmax, units=output.Q_unit)
             ymin = data_conv_q(ymin, units=output.Q_unit)
@@ -273,11 +273,11 @@ class Reader:
         
         # Units
         if data_conv_q is not None:
-            output.xaxis("\\rm{Q}", output.Q_unit)
-            output.yaxis("\\rm{Q}", output.Q_unit)
+            output.xaxis("\\rm{Q_{x}}", output.Q_unit)
+            output.yaxis("\\rm{Q_{y}}", output.Q_unit)
         else:
-            output.xaxis("\\rm{Q}", 'A^{-1}')
-            output.yaxis("\\rm{Q}", 'A^{-1}')
+            output.xaxis("\\rm{Q_{x}}", 'A^{-1}')
+            output.yaxis("\\rm{Q_{y}}", 'A^{-1}')
             
         if data_conv_i is not None:
             output.zaxis("\\{I(Q)}", output.I_unit)
