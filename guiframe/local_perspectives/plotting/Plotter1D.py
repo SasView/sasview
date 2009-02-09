@@ -108,8 +108,9 @@ class ModelPanel1D(PlotPanel):
         if is_new:
             # a new plottable overwrites a plotted one  using the same id
             for plottable in self.plots.itervalues():
-                if event.plot.id==plottable.id :
-                    self.graph.delete(plottable)
+                if hasattr(event.plot,"id"):
+                    if event.plot.id==plottable.id :
+                        self.graph.delete(plottable)
             
             self.plots[event.plot.name] = event.plot
             self.graph.add(self.plots[event.plot.name])
