@@ -133,6 +133,7 @@ class Plugin:
         self.page_finder = {}
         #index number to create random model name
         self.index_model = 0
+        self.index_theory= 0
         self.parent.Bind(EVT_SLICER_PANEL, self._on_slicer_event)
        
         
@@ -535,6 +536,7 @@ class Plugin:
         model = evt.model
         name = evt.name
         
+        print "name fitting", name
         sim_page=self.fit_panel.GetPage(1)
         current_pg = self.fit_panel.get_current_page() 
         if current_pg != sim_page:
@@ -542,10 +544,11 @@ class Plugin:
             model.name = self.page_finder[current_pg].get_name()
             try:
                 metadata=self.page_finder[current_pg].get_data()
-                M_name=model.name+"= "+name+"("+metadata.group_id+")"
+                #M_name=model.name+"= "+name+"("+metadata.group_id+")"
+                M_name=model.name+"= "+name+"("+metadata.id+")"
             except:
-                M_name=model.name+"= "+name
-            #model.name="M"+str(self.index_model)
+                M_name=model.name+"= "+name+"("+metadata.group_id+")"
+            model.name="M"+str(self.index_model)
             self.index_model += 1  
             # save model name
             
@@ -589,7 +592,15 @@ class Plugin:
                 theory = Theory1D(x=[], y=[])
                 theory.name = model.name
                 theory.group_id = data.group_id
-                theory.id = "Model"
+                if hasattr(data, "id"):
+                    import string
+                    if string.find("Model",data.id )!=None:
+                        #allow plotting on the same panel 
+                        theory.id =str(data.id )+" "+str(self.index_theory)
+                        self.index_theory +=1
+                    else:
+                        theory.id = "Model"
+                   
                 x_name, x_units = data.get_xaxis() 
                 y_name, y_units = data.get_yaxis() 
                 theory.xaxis(x_name, x_units)
