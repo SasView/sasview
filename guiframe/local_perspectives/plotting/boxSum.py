@@ -66,14 +66,15 @@ class BoxSum(_BaseInteractor):
       
             
         #self.connect_markers([])
-                      
+        self.panel_name=""      
         self.update()
         self._post_data()
         
         # Bind to slice parameter events
         #print "box sum  self.base.parent",self.base.parent
         self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
-       
+    def set_panel_name(self, name):
+        self.panel_name= name
     def _onEVT_SLICER_PARS(self, event):
         #printEVT("AnnulusSlicer._onEVT_SLICER_PARS")
         event.Skip()
@@ -165,8 +166,9 @@ class BoxSum(_BaseInteractor):
        
         self.type= self.__class__.__name__
         params= self.get_params()
-        event = SlicerParamUpdateEvent(type=self.type, params=params)
-        wx.PostEvent(self.base, event)
+        event = SlicerParamUpdateEvent(type=self.type, params=params,
+                                       panel_name= self.panel_name)
+        wx.PostEvent(self.base.parent, event)
         
             
     def restore(self):

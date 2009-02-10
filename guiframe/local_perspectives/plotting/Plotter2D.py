@@ -16,7 +16,7 @@ import pylab
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph,Data1D
-from sans.guicomm.events import EVT_NEW_PLOT,EVT_SLICER_PARS_UPDATE
+from sans.guicomm.events import EVT_NEW_PLOT
 from sans.guicomm.events import EVT_SLICER_PARS
 from sans.guicomm.events import StatusEvent ,NewPlotEvent,SlicerEvent
 from sans.guiframe.utils import PanelMenu
@@ -88,7 +88,7 @@ class ModelPanel2D( ModelPanel1D):
         self.graph.render(self)
         #self.Bind(boxSum.EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PARS)
         self.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
-        self.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PANEL)
+       
         
         
     def _onEVT_SLICER_PARS(self, event):
@@ -96,13 +96,6 @@ class ModelPanel2D( ModelPanel1D):
         self.slicer.set_params(event.params)
         from sans.guicomm.events import SlicerPanelEvent
         wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
-        
-        
-    def _onEVT_SLICER_PANEL(self, event):
-        #print "box move plotter2D", event.type, event.params
-        self.panel_slicer.set_slicer(event.type, event.params)
-        from sans.guicomm.events import SlicerPanelEvent
-        wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer)) 
         
     def _onEVT_1DREPLOT(self, event):
         """
@@ -432,10 +425,10 @@ class ModelPanel2D( ModelPanel1D):
                                  params=event.params, style=wx.RAISED_BORDER)
         #new_panel.set_slicer(self.slicer.__class__.__name__,
         new_panel.window_caption=self.slicer.__class__.__name__+" "+ str(self.data2D.name)
-       
+        new_panel.window_name = self.slicer.__class__.__name__+" "+ str(self.data2D.name)
         self.panel_slicer= new_panel
-        
-        wx.PostEvent(self.panel_slicer, event)
+        self.slicer.set_panel_name( name= new_panel.window_caption)
+        #wx.PostEvent(self.panel_slicer, event)
         from sans.guicomm.events import SlicerPanelEvent
         wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
         #print "finish box sum"

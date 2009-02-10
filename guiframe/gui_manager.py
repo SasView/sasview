@@ -35,6 +35,7 @@ except:
     import config
     
 from sans.guicomm.events import EVT_STATUS,Model2DPanelEvent
+from sans.guicomm.events import EVT_NEW_PLOT,EVT_SLICER_PARS_UPDATE
 import history
 import warnings
 warnings.simplefilter("ignore")
@@ -230,7 +231,22 @@ class ViewerFrame(wx.Frame):
         wx.EVT_CLOSE(self, self._onClose)
         # Register to status events
         self.Bind(EVT_STATUS, self._on_status_event)
-       
+        self.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PANEL)
+        
+        
+    def _onEVT_SLICER_PANEL(self, event):
+        """
+            receive and event telling to update a panel with a name starting with 
+            event.panel_name. this method update slicer panel for a given interactor.
+            @param event: contains type of slicer , paramaters for updating the panel
+            and panel_name to find the slicer 's panel concerned.
+        """
+        for item in self.panels:
+            if self.panels[item].window_caption.startswith(event.panel_name): 
+                self.panels[item].set_slicer(event.type, event.params)
+                self._mgr.Update()
+                break
+        
     def build_gui(self):
         # Set up the layout
         self._setup_layout()
