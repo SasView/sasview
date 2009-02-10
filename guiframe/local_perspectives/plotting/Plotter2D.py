@@ -343,7 +343,7 @@ class ModelPanel2D( ModelPanel1D):
         #print "radius?",self.radius
         # bin_width = self.qmax -self.qmin/nbins 
         #nbins= 30
-        bin_width = (self.qmax +self.qmax)/30
+        bin_width = (self.qmax +self.qmax)/100
         
         Circle = CircularAverage( r_min=0, r_max=self.radius, bin_width=bin_width)
        
@@ -367,7 +367,7 @@ class ModelPanel2D( ModelPanel1D):
         new_plot.detector =self.data2D.detector
         
         # If the data file does not tell us what the axes are, just assume...
-        new_plot.xaxis("\\rm{q}","A^{-1}")
+        new_plot.xaxis("\\rm{Q}","A^{-1}")
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = "Circ avg "+ self.data2D.name
         self.scale = 'log'
