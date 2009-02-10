@@ -191,15 +191,15 @@ class AnnulusInteractor(_BaseInteractor):
         
     def get_params(self):
         params = {}
-        params["inner_radius"] = self.inner_circle._inner_mouse_x
-        params["outer_radius"] = self.outer_circle._inner_mouse_x
+        params["inner_radius"] = math.fabs(self.inner_circle._inner_mouse_x)
+        params["outer_radius"] = math.fabs(self.outer_circle._inner_mouse_x)
         params["nbins"] = self.nbins
         return params
     
     def set_params(self, params):
         
-        inner = params["inner_radius"] 
-        outer = params["outer_radius"] 
+        inner = math.fabs(params["inner_radius"] )
+        outer = math.fabs(params["outer_radius"] )
         self.nbins = int(params["nbins"])
         self.inner_circle.set_cursor(inner, self.inner_circle._inner_mouse_y)
         self.outer_circle.set_cursor(outer, self.outer_circle._inner_mouse_y)

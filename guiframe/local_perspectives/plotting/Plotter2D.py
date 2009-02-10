@@ -87,15 +87,15 @@ class ModelPanel2D( ModelPanel1D):
         self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
         self.graph.render(self)
         #self.Bind(boxSum.EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PARS)
-        self.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
+        #self.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
        
         
         
     def _onEVT_SLICER_PARS(self, event):
-        #print "paramaters entered on slicer panel", event.type, event.params
+        print "paramaters entered on slicer panel", event.type, event.params
         self.slicer.set_params(event.params)
-        from sans.guicomm.events import SlicerPanelEvent
-        wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
+        #from sans.guicomm.events import SlicerPanelEvent
+        #wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
         
     def _onEVT_1DREPLOT(self, event):
         """
@@ -424,8 +424,8 @@ class ModelPanel2D( ModelPanel1D):
         new_panel = SlicerPanel(parent= self.parent,id= -1,base= self,type=event.type,
                                  params=event.params, style=wx.RAISED_BORDER)
         #new_panel.set_slicer(self.slicer.__class__.__name__,
-        new_panel.window_caption=self.slicer.__class__.__name__+" "+ str(self.data2D.name)
-        new_panel.window_name = self.slicer.__class__.__name__+" "+ str(self.data2D.name)
+        new_panel.window_caption=str(self.slicer_z)+self.slicer.__class__.__name__+" "+ str(self.data2D.name)
+        new_panel.window_name = str(self.slicer_z)+self.slicer.__class__.__name__+" "+ str(self.data2D.name)
         self.panel_slicer= new_panel
         self.slicer.set_panel_name( name= new_panel.window_caption)
         #wx.PostEvent(self.panel_slicer, event)
