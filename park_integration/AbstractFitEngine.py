@@ -1,5 +1,5 @@
 
-import park,numpy
+import park,numpy,math
 
 class SansParameter(park.Parameter):
     """
@@ -309,8 +309,8 @@ class FitData2D(object):
             @return residuals
         """
         res=[]
-        if self.xmin==None:
-            self.xmin= self.data.xmin
+        if self.xmin==None:        #Here we define that xmin = qmin >=0 and xmax=qmax>=qmain
+            self.xmin= 0 #self.data.xmin
         if self.xmax==None:
             self.xmax= self.data.xmax
         if self.ymin==None:
@@ -320,9 +320,10 @@ class FitData2D(object):
         for i in range(len(self.y_bins)):
             #if self.y_bins[i]>= self.ymin and self.y_bins[i]<= self.ymax:
             for j in range(len(self.x_bins)):
-                #if self.x_bins[j]>= self.xmin and self.x_bins[j]<= self.xmax:
-                
-                res.append( (self.image[j][i]- fn([self.x_bins[j],self.y_bins[i]]))\
+                 if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)>=math.pow(self.xmin,2):
+                     if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)<=math.pow(self.xmax,2):
+                         #if self.x_bins[j]>= self.xmin and self.x_bins[j]<= self.xmax:                
+                        res.append( (self.image[j][i]- fn([self.x_bins[j],self.y_bins[i]]))\
                             /self.err_image[j][i] )
         
         return numpy.array(res)
