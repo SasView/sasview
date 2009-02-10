@@ -173,12 +173,14 @@ class ViewerFrame(wx.Frame):
     """
         Main application frame
     """
-    def __init__(self, parent, id, title, window_height=800, window_width=800):
+    def __init__(self, parent, id, title, window_height=700, window_width=900):
+    #def __init__(self, parent, id, title, window_height=800, window_width=800):
         """
             Initialize the Frame object
         """
         from local_perspectives.plotting import plotting
-        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(800, 700))
+        #wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(800, 700))
+        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(900, 600))
         
         # Preferred window size
         self._window_height = window_height
@@ -386,8 +388,10 @@ class ViewerFrame(wx.Frame):
                     self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                                           Name(p.window_name).Caption(p.window_caption).
                                           CenterPane().
-                                          BestSize(wx.Size(500,500)).
-                                          MinSize(wx.Size(200,200)).
+                                          BestSize(wx.Size(600,600)).
+                                          MinSize(wx.Size(400,400)).
+                                          #BestSize(wx.Size(500,500)).
+                                          #MinSize(wx.Size(200,200)).
                                           Hide())
                 
             else:
@@ -405,8 +409,10 @@ class ViewerFrame(wx.Frame):
                                   MinimizeButton().
                                   Hide().
                                   #Show().
-                                  BestSize(wx.Size(400,400)).
-                                  MinSize(wx.Size(300,300)))
+                                  BestSize(wx.Size(600,600)).
+                                  MinSize(wx.Size(500,500)))
+                                  #BestSize(wx.Size(400,400)).
+                                  #MinSize(wx.Size(300,300)))
 
                 
         
@@ -437,20 +443,14 @@ class ViewerFrame(wx.Frame):
         for item in self.panels:
             if self.panels[item].window_name.startswith(p.window_name): 
                 count += 1
-                """
-        if p.window_name =="Analytical model 2D ":
-            print "guiframe 2D id",ID, p.window_name
-            event = Model2DPanelEvent(id= ID, pname=p.window_name)
-            for plug in self.plugins:
-                if hasattr(plug, fitpanel)
-                wx.PostEvent(plug, event)
-         """   
+        
         windowname = p.window_name
         caption = p.window_caption
+        
         if count>0:
             windowname += str(count+1)
             caption += (' '+str(count))
-            
+          
         p.window_name = windowname
         p.window_caption = caption
             
@@ -467,9 +467,12 @@ class ViewerFrame(wx.Frame):
                           MinimizeButton().
                           #Hide().
                           #Show().
-                          BestSize(wx.Size(400,400)).
-                          MinSize(wx.Size(350,350)))
+                          BestSize(wx.Size(600,600)).
+                          MinSize(wx.Size(500,500)))
+                          #BestSize(wx.Size(400,400)).
+                          #MinSize(wx.Size(350,350)))
         pane = self._mgr.GetPane(windowname)
+        print "guiframe pane", pane
         self._mgr.MaximizePane(pane)
         self._mgr.RestoreMaximizedPane()
         
