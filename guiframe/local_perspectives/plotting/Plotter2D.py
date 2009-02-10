@@ -370,6 +370,7 @@ class ModelPanel2D( ModelPanel1D):
         new_plot.xaxis("\\rm{Q}","A^{-1}")
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = "Circ avg "+ self.data2D.name
+        new_plot.id = "Circ avg "+ self.data2D.name
         self.scale = 'log'
        
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=new_plot.name))

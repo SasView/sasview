@@ -180,6 +180,7 @@ class SectorInteractor(_BaseInteractor):
        
 
         new_plot.source=self.base.data2D.source
+        #new_plot.info=self.base.data2D.info
         new_plot.interactive = True
         #print "loader output.detector",self.base.data2D.info,output.source,
         new_plot.detector =self.base.data2D.detector
@@ -188,6 +189,7 @@ class SectorInteractor(_BaseInteractor):
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = "SectorQ"+self.base.data2D.name
+        new_plot.id = "SectorQ"+self.base.data2D.name
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
                                                  title="SectorQ"+self.base.data2D.name ))
         
