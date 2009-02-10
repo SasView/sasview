@@ -861,7 +861,7 @@ class Plugin:
         data=numpy.zeros([len(x),len(y)])
         self.model= model
         if enable2D:
-            from model_thread import Calc2D
+            from sans.guiframe.model_thread import Calc2D
             self.calc_thread = Calc2D(parent =self.parent,x=x,
                                        y=y,model= self.model, 
                                        qmin=qmin,
