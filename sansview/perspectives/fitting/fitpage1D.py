@@ -91,10 +91,7 @@ class FitPage1D(ModelPage):
               self.smearer_box.Insert(str(v),i)  
             i+=1
             
-        # Minimum value of data   
-        self.data_min    = wx.StaticText(self, -1,str(format_number(numpy.min(data.x))))
-        # Maximum value of data  
-        self.data_max    =  wx.StaticText(self, -1,str(format_number(numpy.max(data.x))))
+        
         #Filing the sizer containing data related fields
         ix = 0
         iy = 1
@@ -109,6 +106,10 @@ class FitPage1D(ModelPage):
         iy = 1
         #set maximum range for x in linear scale
         if not hasattr(self.data,"data"): #Display only for 1D data fit
+            # Minimum value of data   
+            self.data_min    = wx.StaticText(self, -1,str(format_number(numpy.min(data.x))))
+            # Maximum value of data  
+            self.data_max    =  wx.StaticText(self, -1,str(format_number(numpy.max(data.x))))   
             self.text4_3 = wx.StaticText(self, -1, 'Maximum Data Range(Linear)', style=wx.ALIGN_LEFT)
             self.sizer2.Add(self.text4_3,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)

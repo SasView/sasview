@@ -91,11 +91,16 @@ class Plugin:
             Show a general help dialog. 
             TODO: replace the text with a nice image
         """
-        from helpDialog import  HelpWindow
-        dialog = HelpWindow(None, -1, 'HelpWindow')
-        if dialog.ShowModal() == wx.ID_OK:
-            pass
-        dialog.Destroy()
+        #from helpDialog import  HelpWindow
+        #dialog = HelpWindow(None, -1, 'HelpWindow')
+        #if dialog.ShowModal() == wx.ID_OK:
+        #    pass
+        #dialog.Destroy()
+        from helpPanel import  HelpWindow
+        frame = HelpWindow(None, -1, 'HelpWindow')    
+        frame.Show(True)
+        
+        
         
     
     def get_context_menu(self, graph=None):

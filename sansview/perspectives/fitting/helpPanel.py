@@ -59,9 +59,9 @@ class HelpDialog(wx.Dialog):
         self.Layout()
         self.Centre()
 
-class HelpWindow(wx.Dialog):
+class HelpWindow(wx.Frame):
     def __init__(self, parent, id, title):
-        wx.Dialog.__init__(self, parent, id, title, size=(600, 450))
+        wx.Frame.__init__(self, parent, id, title, size=(600, 450))
         
         vbox1  = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -75,7 +75,7 @@ class HelpWindow(wx.Dialog):
         header.SetBackgroundColour('#6666FF')
         header.SetForegroundColour('WHITE')
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        st = wx.StaticText(header, -1, '', (5, 5))
+        st = wx.StaticText(header, -1, 'Contents', (5, 5))
         font = st.GetFont()
         font.SetPointSize(10)
         st.SetFont(font)
@@ -89,7 +89,7 @@ class HelpWindow(wx.Dialog):
         headerl.SetBackgroundColour('#6666FF')
         headerl.SetForegroundColour('WHITE')
         hboxl = wx.BoxSizer(wx.HORIZONTAL)
-        lst = wx.StaticText(headerl, -1, 'Contents', (5, 5))
+        lst = wx.StaticText(headerl, -1, 'Menu', (5, 5))
         fontl = lst.GetFont()
         fontl.SetPointSize(10)
         lst.SetFont(fontl)
@@ -98,7 +98,11 @@ class HelpWindow(wx.Dialog):
         vboxl.Add(headerl, 0, wx.EXPAND)
         self.lhelp = html.HtmlWindow(lpanel, -1, style=wx.NO_BORDER)
         self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER)
-       
+        page1="""<html>
+            <body>
+             <p>Select topic on Menu</p>
+            </body>
+            </html>"""
         page="""<html>
             <body>
             <ul>
@@ -108,10 +112,11 @@ class HelpWindow(wx.Dialog):
             <li><a href ="doc/simultaneous_fit_help.html" target ="showframe">Simultaneous Fit</a><br></li>
             <li><a href ="doc/single_fit_help.html" target ="showframe">Single Fit</a><br></li>
             <li><a href ="doc/model_use_help.html" target ="showframe">Visualize Model</a><br></li>
+            <li><a href ="doc/averaging_help.html" target ="showframe">Data Averaging</a><br></li>
             </ul>
             </body>
             </html>"""
-       
+        self.rhelp.SetPage(page1)
         self.lhelp.SetPage(page)
         self.lhelp.Bind(wx.html.EVT_HTML_LINK_CLICKED,self.OnLinkClicked )
         vbox.Add(self.rhelp, 1, wx.EXPAND)
@@ -131,22 +136,15 @@ class HelpWindow(wx.Dialog):
         link= event.GetLinkInfo().GetHref()
         self.rhelp.LoadPage(link)
 
-
-class MyApp(wx.App):
+class ViewApp(wx.App):
     def OnInit(self):
+        frame = HelpWindow(None, -1, 'HelpWindow')    
+        frame.Show(True)
+        self.SetTopWindow(frame)
         
-        dialog = HelpWindow(None, -1, 'HelpWindow')
-        if dialog.ShowModal() == wx.ID_OK:
-            pass
-        dialog.Destroy()
+        return True
         
-        return 1
-   
 
-# end of class MyApp
-
-if __name__ == "__main__":
-    app = MyApp(0)
-    app.MainLoop()
-
-
+if __name__ == "__main__": 
+    app = ViewApp(0)
+    app.MainLoop()     
