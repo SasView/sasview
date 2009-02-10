@@ -323,7 +323,7 @@ class FitData2D(object):
                  if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)>=math.pow(self.xmin,2):
                      if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)<=math.pow(self.xmax,2):
                          #if self.x_bins[j]>= self.xmin and self.x_bins[j]<= self.xmax:                
-                        res.append( (self.image[j][i]- fn([self.x_bins[j],self.y_bins[i]]))\
+                        res.append( (self.image[j][i]- fn([self.x_bins[i],self.y_bins[j]]))\
                             /self.err_image[j][i] )
         
         return numpy.array(res)
@@ -358,7 +358,8 @@ class sansAssembly:
         sum = 0
         for item in self.res:
             sum += item*item
-        return sum
+        #print "length of data =",len(self.res)
+        return sum/ len(self.res)
     def __call__(self,params):
         """
             Compute residuals
