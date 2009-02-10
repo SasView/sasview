@@ -212,7 +212,7 @@ class BoxInteractor(_BaseInteractor):
        
 
         new_plot.source=self.base.data2D.source
-        new_plot.info=self.base.data2D.info
+       
         new_plot.interactive = True
         #print "loader output.detector",output.source
         new_plot.detector =self.base.data2D.detector
