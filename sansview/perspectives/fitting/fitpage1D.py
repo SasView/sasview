@@ -108,20 +108,21 @@ class FitPage1D(ModelPage):
         ix = 0
         iy = 1
         #set maximum range for x in linear scale
-        self.text4_3 = wx.StaticText(self, -1, 'Maximum Data Range(Linear)', style=wx.ALIGN_LEFT)
-        self.sizer2.Add(self.text4_3,(iy,ix),(1,1),\
+        if not hasattr(self.data,"data"): #Display only for 1D data fit
+            self.text4_3 = wx.StaticText(self, -1, 'Maximum Data Range(Linear)', style=wx.ALIGN_LEFT)
+            self.sizer2.Add(self.text4_3,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix += 2
-        self.sizer2.Add(wx.StaticText(self, -1, 'Min :'),(iy, ix),(1,1),\
+            ix += 2
+            self.sizer2.Add(wx.StaticText(self, -1, 'Min :'),(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix += 1
-        self.sizer2.Add(self.data_min,(iy, ix),(1,1),\
+            ix += 1
+            self.sizer2.Add(self.data_min,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix += 1
-        self.sizer2.Add(wx.StaticText(self, -1, 'Max : '),(iy, ix),(1,1),\
+            ix += 1
+            self.sizer2.Add(wx.StaticText(self, -1, 'Max : '),(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix += 1
-        self.sizer2.Add(self.data_max,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            ix += 1
+            self.sizer2.Add(self.data_max,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
         #----sizer 3 draw--------------------------------
         ix = 0
@@ -237,7 +238,7 @@ class FitPage1D(ModelPage):
         #                    wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix = 0
         iy += 1
-        self.sizer9.Add(wx.StaticText(self, -1, 'Qx range'),(iy, ix),(1,1),\
+        self.sizer9.Add(wx.StaticText(self, -1, 'Q range'),(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer9.Add(self.qmin,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
