@@ -222,7 +222,7 @@ class ModelPanel1D(PlotPanel):
                 wx.EVT_MENU(self, id, self._on_add_errors)
             elif self.plots[self.graph.selected_plottable].__class__.__name__=="Data1D":
                 id = wx.NewId()
-                slicerpop.Append(id, '&Remove errors to data')
+                slicerpop.Append(id, '&Remove errors From data')
                 #print "panel scale before  ",self.xLabel, self.yLabel
                 #print "cyllinder before adding error", self.plots[self.graph.selected_plottable].x
                 wx.EVT_MENU(self, id, self._on_remove_errors)
