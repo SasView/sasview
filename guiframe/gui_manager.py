@@ -472,7 +472,6 @@ class ViewerFrame(wx.Frame):
                           #BestSize(wx.Size(400,400)).
                           #MinSize(wx.Size(350,350)))
         pane = self._mgr.GetPane(windowname)
-        print "guiframe pane", pane
         self._mgr.MaximizePane(pane)
         self._mgr.RestoreMaximizedPane()
         
