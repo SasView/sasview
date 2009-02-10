@@ -91,7 +91,6 @@ class FitPage1D(ModelPage):
               self.smearer_box.Insert(str(v),i)  
             i+=1
             
-        
         #Filing the sizer containing data related fields
         ix = 0
         iy = 1
@@ -197,7 +196,7 @@ class FitPage1D(ModelPage):
             self.qmin_x= 0#self.data.xmin
             self.qmax_x= math.sqrt(math.pow(max(math.fabs(self.data.xmax),math.fabs(self.data.xmin)),2)
                             +math.pow(max(math.fabs(self.data.ymax),math.fabs(self.data.ymin)),2))#self.data.xmax           
-            print "data2D range",self.qmax_x
+            #print "data2D range",self.qmax_x
         
         self.num_points= 100
          
@@ -309,22 +308,24 @@ class FitPage1D(ModelPage):
                 print "compute",self.data.err_data
                 self.qmin_x = float(self.qmin.GetValue())
                 self.qmax_x = float(self.qmax.GetValue())
-                
                 for i in range(len(self.data.x_bins)):
-                    if self.data.x_bins[i]>= self.qmin_x and self.data.x_bins[i]<= self.qmax_x:
+                    #if self.data.x_bins[i]>= self.qmin_x and self.data.x_bins[i]<= self.qmax_x:
                         for j in range(len(self.data.y_bins)):
-                            if self.data.y_bins[j]>= self.qmin_x and self.data.y_bins[j]<= self.qmax_x:
-                                res.append( (self.data.data[j][i]- self.model.runXY(\
-                                 [self.data.x_bins[i],self.data.y_bins[j]]))\
-                                    /self.data.err_data[j][i] )
+                            if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)>=math.pow(self.qmin_x,2):
+                                if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)<=math.pow(self.qmax_x,2):
+                            #if self.data.y_bins[j]>= self.qmin_x and self.data.y_bins[j]<= self.qmax_x:
+                                    chisqrji=(self.data.data[j][i]- self.model.runXY(\
+                                                                                        [self.data.y_bins[j],self.data.x_bins[i]]))\
+                                                                                        /self.data.err_data[j][i]
+                                    res.append( math.pow(chisqrji,2) )
                 sum=0
                
                 for item in res:
                     if numpy.isfinite(item):
                         sum +=item
                 #print "chisqr : sum 2D", xmin, xmax, ymin, ymax,sum
-                #print res
-                self.tcChi.SetLabel(format_number(math.fabs(sum)))
+                #print len(res)
+                self.tcChi.SetLabel(format_number(math.fabs(sum/ len(res))))
             except:
                 raise
                 wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
@@ -360,7 +361,7 @@ class FitPage1D(ModelPage):
                     for item in res:
                         if numpy.isfinite(item):
                             sum +=item
-                    self.tcChi.SetLabel(format_number(math.fabs(sum)))
+                    self.tcChi.SetLabel(format_number(math.fabs(sum/ len(res))))
             except:
                 wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Chisqr cannot be compute: %s"% sys.exc_value))
