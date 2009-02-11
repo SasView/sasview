@@ -230,14 +230,21 @@ class Boxsum(object):
         y  = 0.0
         err_y = 0.0
         y_counts = 0.0
-                
+        sign=1
         for i in range(numpy.size(data2D.data,1)):
             # Min and max x-value for the pixel
             minx = pixel_width_x*(i - center_x)
             maxx = pixel_width_x*(i+1.0 - center_x)
-            
-            qxmin = get_q(minx, 0.0, det_dist, wavelength)
-            qxmax = get_q(maxx, 0.0, det_dist, wavelength)
+            if minx>=0:
+                sign=1
+            else:
+                sign=-1           
+            qxmin = sign*get_q(minx, 0.0, det_dist, wavelength)
+            if maxx>=0:
+                sign=1
+            else:
+                sign=-1
+            qxmax = sign*get_q(maxx, 0.0, det_dist, wavelength)
             
             # Get the count fraction in x for that pixel
             frac_min = get_pixel_fraction_square(self.x_min, qxmin, qxmax)
@@ -248,9 +255,18 @@ class Boxsum(object):
                 # Min and max y-value for the pixel
                 miny = pixel_width_y*(j - center_y)
                 maxy = pixel_width_y*(j+1.0 - center_y)
+                if miny>=0:
+                    sign=1
+                else:
+                    sign=-1           
 
-                qymin = get_q(0.0, miny, det_dist, wavelength)
-                qymax = get_q(0.0, maxy, det_dist, wavelength)
+                qymin = sign*get_q(0.0, miny, det_dist, wavelength)
+                if maxy>=0:
+                    sign=1
+                else:
+                    sign=-1           
+                
+                qymax = sign*get_q(0.0, maxy, det_dist, wavelength)
                 
                 # Get the count fraction in x for that pixel
                 frac_min = get_pixel_fraction_square(self.y_min, qymin, qymax)

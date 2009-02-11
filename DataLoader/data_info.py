@@ -153,6 +153,7 @@ class Detector:
     pixel_size_unit = 'mm'
     ## Slit length of the instrument for this detector.[float] [mm]
     slit_length = None
+    #slit_length_unit = '1/A'
     slit_length_unit = 'mm'
     
     def __init__(self):
@@ -540,8 +541,8 @@ class Data1D(plottable_1D, DataInfo):
     """
         1D data class
     """
-    x_unit = 'A^{-1}'
-    y_unit = 'cm^{-1}'
+    x_unit = '1/A'
+    y_unit = '1/cm'
     
     def __init__(self, x, y, dx=None, dy=None):
         DataInfo.__init__(self)
@@ -659,10 +660,10 @@ class Data2D(plottable_2D, DataInfo):
         2D data class
     """
     ## Units for Q-values
-    Q_unit = 'A^{-1}'
+    Q_unit = '1/A'
     
     ## Units for I(Q) values
-    I_unit = 'cm^{-1}'
+    I_unit = '1/cm'
     
     ## Vector of Q-values at the center of each bin in x
     x_bins = None
