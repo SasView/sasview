@@ -30,6 +30,25 @@ def get_q(dx, dy, det_dist, wavelength):
     # Half of the scattering angle
     theta      = 0.5*math.atan(plane_dist/det_dist)
     return (4.0*math.pi/wavelength)*math.sin(theta)
+
+def get_q_compo(dx, dy, det_dist, wavelength,compo=None):
+    #This reduces tiny error at very large q.
+    #Implementation of this func is not started yet.<--ToDo
+    if dy==0:
+        if dx>=0:
+            angle_xy=0
+        else:
+            angle_xy=math.pi
+    else:
+        angle_xy=math.atan(dx/dy)
+        
+    if compo=="x":
+        out=get_q(dx, dy, det_dist, wavelength)*cos(angle_xy)
+    elif compo=="y":
+        out=get_q(dx, dy, det_dist, wavelength)*sin(angle_xy)
+    else:
+        out=get_q(dx, dy, det_dist, wavelength)
+    return out
     
 class _Slab(object):
     """
