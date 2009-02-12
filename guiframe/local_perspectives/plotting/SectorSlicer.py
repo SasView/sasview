@@ -112,9 +112,12 @@ class SectorInteractor(_BaseInteractor):
         #self.left_line.update()     
         if self.main_line.has_move:
             self.main_line.update()
-            self.right_line.update( delta = self.main_line.get_radius(),mline= self.main_line)
-            self.left_line.update( delta = self.main_line.get_radius() ,mline= self.main_line)
-            #print "Main line has moved ---> phi right",math.degrees(self.main_line.get_radius()+self.right_line.theta)
+            #print "main_theta--->",self.main_line.get_radius()*180/3.14
+            self.right_line.update( delta = -self.left_line.phi/2+math.pi,mline= self.main_line.theta)
+            #print "main_theta--->",self.main_line.get_radius()*180/3.14
+            self.left_line.update( delta = self.left_line.phi/2+math.pi ,mline= self.main_line.theta)
+            #print "main_theta--->",self.main_line.get_radius()*180/3.14
+            #print "Main line has moved ---> phi right",math.degrees(self.main_line.theta),math.degrees(self.main_line.get_radius()),math.degrees(self.main_line.get_radius()+self.right_line.theta)
             #print "Main line has moved ---> phi left",math.degrees(self.left_line.theta+self.main_line.get_radius())
         if self.left_line.has_move:
             #print "left line has moved --->"
@@ -152,12 +155,13 @@ class SectorInteractor(_BaseInteractor):
         name = "Sector "
         from DataLoader.manipulations import SectorQ
         radius = self.qmax #radius=math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
-        phimin = self.right_line.theta+math.pi
-        phimax = self.left_line.theta+math.pi
+        phimin =  -self.left_line.phi+self.main_line.theta
+        phimax = self.left_line.phi+self.main_line.theta
         #phimin = min(self.right_line.theta+math.pi,self.left_line.theta+math.pi)
         #phimax = max(self.right_line.theta+math.pi,self.left_line.theta+math.pi)
-        #print "sector Q",phimin,phimax
-        sect = SectorQ(r_min=0.0, r_max= radius , phi_min=phimin, phi_max=phimax)
+        #print "sector Q angles=",phimin*180/math.pi,phimax*180/math.pi,self.main_line.theta*180/math.pi
+        #phi must be 0 to 2pi with cut-off line sts on the left.
+        sect = SectorQ(r_min=0.0, r_max= radius , phi_min=phimin+math.pi, phi_max=phimax+math.pi)
         #sect = SectorQ(r_min=-1*radius , r_max= radius , phi_min=phimin, phi_max=phimax)
         if nbins!=None:
             sect.nbins = nbins
@@ -266,8 +270,9 @@ class SideInteractor(_BaseInteractor):
         self.markers = []
         self.axes = axes
         
+            
         self.save_theta = theta2 + phi
-        self.theta=  theta2 + phi
+        self.theta= theta2 + phi
         self.theta2 = theta2
         self.radius = r
         self.phi = phi
@@ -335,30 +340,39 @@ class SideInteractor(_BaseInteractor):
         """
         #print "update left or right ", self.has_move
         self.left_moving=left
+        theta3=0
         if phi !=None:
             self.phi= phi
-        if  right:
-            self.phi = -1*math.fabs(self.phi)
-        else:
-            self.phi =math.fabs(self.phi)
         if delta==None:
             delta = 0
+
+        if  right:
+            self.phi = -1*math.fabs(self.phi)
+            #delta=-delta
+        else:
+            self.phi =math.fabs(self.phi)
         if side:
             self.theta=  mline.theta + self.phi
+                    
+        if mline!=None :
+            if delta!=0:
+                self.theta2 = mline+delta
+            else:
+                self.theta2 = mline.theta
+        if delta==0:
+            theta3=self.theta+delta
+        else:
+            theta3=self.theta2+delta
         
-        
-            
-        if mline!=None:
-            self.theta2 = mline.theta
             #self.phi= math.fabs(self.theta2 - (self.theta+delta))
         #print "U:for line side theta2, phi, theta",math.degrees(self.theta2),math.degrees(self.phi),math.degrees(self.theta) 
         #if self.theta2 >= self.theta and self.theta>=0:
         #    print "between 0-pi",math.degrees(self.theta) 
         
-        x1= self.radius*math.cos(self.theta + delta)
-        y1= self.radius*math.sin(self.theta + delta)
-        x2= -1*self.radius*math.cos(self.theta + delta)
-        y2= -1*self.radius*math.sin(self.theta + delta)
+        x1= self.radius*math.cos(theta3)
+        y1= self.radius*math.sin(theta3)
+        x2= -1*self.radius*math.cos(theta3)
+        y2= -1*self.radius*math.sin(theta3)
        
         self.inner_marker.set(xdata=[x1/2.5],ydata=[y1/2.5])
         self.line.set(xdata=[x1,x2], ydata=[y1,y2])  
@@ -392,7 +406,6 @@ class SideInteractor(_BaseInteractor):
         
         self.theta= math.atan2(y,x)
         self.has_move=True
-        
         #ToDo: Simplify below
         if not self.left_moving:
             if  self.theta2-self.theta <= 0 and self.theta2>0:#>= self.theta2:
@@ -594,7 +607,6 @@ class LineInteractor(_BaseInteractor):
 
         x = params["radius"] 
         self.set_cursor(x, self._inner_mouse_y)
-        
 
 
         
