@@ -29,9 +29,9 @@ class BoxInteractor(_BaseInteractor):
         self.axes = axes
         self.qmax = self.base.data2D.xmax
         self.connect = self.base.connect
-        self.x= x_max
-        self.y= y_max
-                
+        self.x= 0.5*min(math.fabs(self.base.data2D.xmax),math.fabs( self.base.data2D.xmin))
+        self.y= 0.5*min(math.fabs(self.base.data2D.xmax),math.fabs( self.base.data2D.xmin))        
+         
         self.theta2= math.pi/3
         ## Number of points on the plot
         self.nbins = 30

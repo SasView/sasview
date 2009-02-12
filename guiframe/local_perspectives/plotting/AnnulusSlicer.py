@@ -116,14 +116,14 @@ class AnnulusInteractor(_BaseInteractor):
             return
         
         from DataLoader.manipulations import SectorPhi
-        radius = self.qmax#math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
-        rmin= math.fabs(self.inner_circle.get_radius())
-        rmax = math.fabs(self.outer_circle.get_radius())
-        phi_min=-math.pi
-        phi_max=math.pi
-        phimi=phi_min+math.pi
-        phima=phi_max+math.pi
-        sect = SectorPhi(r_min=rmin , r_max= rmax, phi_min=phimi, phi_max=phima)
+        #radius = self.qmax#math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
+        rmin= min(math.fabs(self.inner_circle.get_radius()),
+                  math.fabs(self.outer_circle.get_radius()))
+        rmax = max(math.fabs(self.inner_circle.get_radius()),
+                   math.fabs(self.outer_circle.get_radius()))
+        print "rmin, rmax", rmin, rmax
+       
+        sect = SectorPhi(r_min=rmin , r_max= rmax, phi_min=0, phi_max=2*math.pi)
         if nbins!=None:
             sect.nbins = nbins
         

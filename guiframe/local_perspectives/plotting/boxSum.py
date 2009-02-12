@@ -155,9 +155,10 @@ class BoxSum(_BaseInteractor):
         x_max= self.horizontal_lines.x1 
         y_min= self.vertical_lines.y2
         y_max= self.vertical_lines.y1
+        print "xmin, xmax, ymin , ymax", x_min, x_max, y_min, y_max
         box =  Boxavg (x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
         self.count, self.error = box(self.base.data2D)
-        #print "count, error",self.count, self.error
+        print "box_sum output",box(self.base.data2D)
                           
     def moveend(self, ev):
         self.base.thaw_axes()
