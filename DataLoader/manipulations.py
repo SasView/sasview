@@ -564,7 +564,7 @@ class Ring(object):
         for i in range(self.nbins_phi):
             phi_bins[i] = phi_bins[i] / phi_counts[i]
             phi_err[i] = math.sqrt(phi_err[i]) / phi_counts[i]
-            phi_values[i] = 2.0*math.pi/self.nbins_phi*(1.0*i + 0.5)
+            phi_values[i] = 2.0*math.pi/self.nbins_phi*(1.0*i + 0.5)-math.pi # move the pi back to -pi <-->+pi
             
         return Data1D(x=phi_values, y=phi_bins, dy=phi_err)
     
@@ -1014,7 +1014,7 @@ class _Sector:
             # Check which type of averaging we need
             if run.lower()=='phi':
                 #Calculate x[i] and put back the origin of angle back to the right hand side (from the left).
-                x[i] = ((self.phi_max-self.phi_min)/self.nbins*(1.0*i + 0.5)+self.phi_min-math.pi)*180/math.pi
+                x[i] = ((self.phi_max-self.phi_min)/self.nbins*(1.0*i + 0.5)+self.phi_min-2*math.pi)*180/math.pi
                 if x[i]<0:
                     x[i]=360+x[i]
             else:
