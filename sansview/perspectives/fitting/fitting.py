@@ -205,13 +205,14 @@ class Plugin:
                 #find a name for the page created for notebook
                 try:
                    
-                    page, model_name = self.fit_panel.add_fit_page(item)
+                    page = self.fit_panel.add_fit_page(item)
+                    #page, model_name = self.fit_panel.add_fit_page(item)
                     # add data associated to the page created
                    
                     if page !=None:   
                         #create a fitproblem storing all link to data,model,page creation
                         self.page_finder[page]= FitProblem()
-                        self.page_finder[page].save_model_name(model_name)  
+                        #self.page_finder[page].save_model_name(model_name)  
                         self.page_finder[page].add_data(item)
                         wx.PostEvent(self.parent, StatusEvent(status="Page Created"))
                     else:
@@ -309,9 +310,10 @@ class Plugin:
             print "qmin qmax xmin xmax ymin , ymax",qmin, qmax,xmin, xmax ,ymin, ymax
             
             cpage.onsetValues(result.fitness, result.pvec,result.stderr)
+            #title="Fitted model 2D "
             self.plot_helper(currpage=cpage,qmin=qmin,qmax=qmax,
                              ymin=ymin, ymax=ymax,
-                             xmin=xmin, xmax=xmax,title="Fitted model 2D ")
+                             xmin=xmin, xmax=xmax,title=None)
         except:
             #raise
             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
@@ -546,15 +548,17 @@ class Plugin:
         current_pg = self.fit_panel.get_current_page() 
         if current_pg != sim_page:
             current_pg.set_panel(model)
-            model.name = self.page_finder[current_pg].get_name()
+            #model.name = self.page_finder[current_pg].get_name()
+            #print "model name", model.name
+            model.name="M"+str(self.index_model)
             try:
                 metadata=self.page_finder[current_pg].get_data()
-                #M_name=model.name+"= "+name+"("+metadata.group_id+")"
-                M_name=model.name+"= "+name+"("+metadata.id+")"
-            except:
                 M_name=model.name+"= "+name+"("+metadata.group_id+")"
-            model.name="M"+str(self.index_model)
+            except:
+                M_name=model.name+"= "+name
             self.index_model += 1  
+            
+            
             # save model name
             
             # save the name containing the data name with the appropriate model
@@ -597,6 +601,7 @@ class Plugin:
                 theory = Theory1D(x=[], y=[])
                 theory.name = model.name
                 theory.group_id = data.group_id
+                """
                 if hasattr(data, "id"):
                     import string
                     if string.find("Model",data.id )!=None:
@@ -604,7 +609,8 @@ class Plugin:
                         theory.id =str(data.id )+" "+str(self.index_theory)
                         self.index_theory +=1
                     else:
-                        theory.id = "Model"
+                    """
+                theory.id = "Model"
                    
                 x_name, x_units = data.get_xaxis() 
                 y_name, y_units = data.get_yaxis() 

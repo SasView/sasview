@@ -101,15 +101,13 @@ class FitPanel(wx.aui.AuiNotebook):
             name = data.name # item in Data1D
         except:
             name = 'Fit'
+        
         if self.fit_page_name != name:
-            print"went here"
-            #self.count +=1
-         
             #self.about_page.Disable()
             from fitpage1D import FitPage1D
             panel = FitPage1D(self,data, -1)
             panel.name=name
-            m_name= "M"+str(self.count)  
+            #m_name= "M"+str(self.count)  
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
             
@@ -117,9 +115,9 @@ class FitPanel(wx.aui.AuiNotebook):
             panel.populate_box( self.model_list_box)
             self.fit_page_name = name
             EVT_FIT_PAGE
-            return panel,m_name
+            return panel #,m_name
         else:
-            return None, None
+            return None #, None
         
     def _help_add_model_page(self,model,description,page_title, qmin=0, qmax=0.1, npts=50):
         """
@@ -136,7 +134,7 @@ class FitPanel(wx.aui.AuiNotebook):
         panel.set_owner(self.event_owner)
         self.AddPage(page=panel,caption="Model",select=True)
         panel.populate_box( self.model_list_box)
-        panel.name=page_title
+        panel.name = page_title
         self.draw_model_name=page_title
         self.model_page_number=self.GetSelection()
         self.model_page=self.GetPage(self.GetSelection())
@@ -165,11 +163,16 @@ class FitPanel(wx.aui.AuiNotebook):
             @param npts: number of Q points
         """
         print "self.draw_model_name none",self.draw_model_name
-        if  self.draw_model_name ==None:
-            print "self.draw_model_name none"
-            self._help_add_model_page(model,description,page_title, qmin=qmin, qmax=qmax, npts=npts)
-        elif topmenu==True:
-            self.model_page.select_model(model, page_title)
+        if topmenu==True:
+            if  self.draw_model_name ==None:
+                print "self.draw_model_name none"
+                self._help_add_model_page(model,description,page_title, qmin=qmin, qmax=qmax, npts=npts)
+            else:
+                #self.model_page.name=page_title
+                #self.draw_model_name=page_title
+                #print "wnent here self.draw_model_name ",self.draw_model_name,self.model_page.name,self.model_page
+                
+                self.model_page.select_model(model, page_title)
           
     def get_current_page(self):
         """
@@ -210,7 +213,7 @@ class FitPanel(wx.aui.AuiNotebook):
                         break
                 #Delete the page from notebook
                 page_number = self.GetSelection()
-                print selected_page.name,self.GetPageText(page_number),self.draw_model_name
+                print "on close",selected_page.name,self.GetPageText(page_number),self.draw_model_name
                 if selected_page.name== self.draw_model_name:
                     print "went here"
                     self.draw_model_name=None

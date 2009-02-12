@@ -3,7 +3,7 @@ import wx
 import wx.lib
 import numpy,math
 import copy
-import sans.models.dispersion_models 
+
 from sans.guicomm.events import StatusEvent 
 from sans.guiframe.utils import format_number
 from modelpage import ModelPage  
@@ -77,20 +77,6 @@ class FitPage1D(ModelPage):
         
         #---------sizer 1 draw--------------------------------
         self.DataSource  =wx.StaticText(self, -1,str(data.name))
-        self.smearer_box = wx.ComboBox(self, -1)
-        wx.EVT_COMBOBOX( self.smearer_box,-1, self.onSmear ) 
-        self.smeares= sans.models.dispersion_models.models
-        i=0
-        self.smearer_box.SetValue(str(None))
-        self.smearer_box.Insert(str(None),i)
-        
-        for k,v in self.smeares.iteritems():
-            if str(v)=="GaussianModel":
-                self.smearer_box.Insert("Gaussian Resolution",i)
-            else:
-              self.smearer_box.Insert(str(v),i)  
-            i+=1
-            
         #Filing the sizer containing data related fields
         ix = 0
         iy = 1
@@ -101,10 +87,10 @@ class FitPage1D(ModelPage):
         self.sizer1.Add(self.DataSource,(iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
         #---------sizer 2 draw--------------------------------
-        ix = 0
-        iy = 1
         #set maximum range for x in linear scale
         if not hasattr(self.data,"data"): #Display only for 1D data fit
+            ix = 0
+            iy = 1
             # Minimum value of data   
             self.data_min    = wx.StaticText(self, -1,str(format_number(numpy.min(data.x))))
             # Maximum value of data  
@@ -125,12 +111,18 @@ class FitPage1D(ModelPage):
             self.sizer2.Add(self.data_max,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
         #----sizer 3 draw--------------------------------
+        self.disable_smearer = wx.RadioButton(self, -1, 'No', (10, 10), style=wx.RB_GROUP)
+        self.enable_smearer = wx.RadioButton(self, -1, 'Yes', (10, 30))
+        self.Bind(wx.EVT_RADIOBUTTON, self.onSmear, id=self.disable_smearer.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self.onSmear, id=self.enable_smearer.GetId())
         ix = 0
         iy = 1
         self.sizer3.Add(wx.StaticText(self,-1,'Instrument Smearing'),(iy,ix),(1,1)\
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.sizer3.Add(self.smearer_box,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        self.sizer3.Add(self.enable_smearer,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer3.Add(self.disable_smearer,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix =0
         iy+=1
         self.sizer3.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
@@ -569,13 +561,19 @@ class FitPage1D(ModelPage):
         
         
     def onSmear(self, event):
-        if event.GetString()=="None":
-            self.manager.set_smearer(None)   
-            
-            
-        if event.GetString()=="Gaussian Resolution":
+        #print "in smearer",self.enable_smearer.GetValue()
+        smear =None
+        if self.enable_smearer.GetValue():
             from DataLoader.qsmearing import smear_selection
             smear =smear_selection( self.data )
-            self.manager.set_smearer(smear)   
-#            print "on smearing"
+            if smear ==None:
+                wx.PostEvent(self.manager.parent, StatusEvent(status=\
+                            "Data contains no smearing information"))
+            else:
+                wx.PostEvent(self.manager.parent, StatusEvent(status=\
+                            "Data contains smearing information"))
+        self.manager.set_smearer(smear)   
+            
+              
+        
        

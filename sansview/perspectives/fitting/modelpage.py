@@ -101,7 +101,9 @@ class ModelPage(wx.ScrolledWindow):
         self.model_view.SetToolTipString("View model in 2D")
         self.sizer4.Add(self.model_view,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        self.model_view.Enable()
         self.model_view.SetFocus()
+        
         #----------sizer6-------------------------------------------------
         self.disable_disp = wx.RadioButton(self, -1, 'No', (10, 10), style=wx.RB_GROUP)
         self.enable_disp = wx.RadioButton(self, -1, 'Yes', (10, 30))
@@ -193,6 +195,7 @@ class ModelPage(wx.ScrolledWindow):
         self.parameters=[]
         self.fixed_param=[]
         self.fittable_param=[]
+        self.polydisp= {}
         #contains link between a model and selected parameters to fit 
         self.param_toFit=[]
         
@@ -297,9 +300,13 @@ class ModelPage(wx.ScrolledWindow):
             ix += 1 
             # set up the combox box
             id = 0
+            import sans.models.dispersion_models 
+            self.polydisp= sans.models.dispersion_models.models
             self.disp_box = wx.ComboBox(self, -1)
-            self.disp_box.SetValue("Gaussian")
-            self.disp_box.Insert("Gaussian",int(id))
+            self.disp_box.SetValue("GaussianModel")
+            for k,v in self.polydisp.iteritems():
+                self.disp_box.Insert(str(v),id)  
+                id+=1
             wx.EVT_COMBOBOX(self.disp_box,-1, self._on_select_Disp) 
             self.sizer7.Add(self.disp_box,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             self.vbox.Layout()
@@ -378,8 +385,11 @@ class ModelPage(wx.ScrolledWindow):
             Select a new model
             @param model: model object 
         """
-        self.model= model
-        print "select_model", model.__class__
+        self.model = model
+        self.parent.model_page.name = name
+        self.parent.draw_model_name = name
+       
+        print "select_model", self.name,model.__class__
         self.set_panel(model)
         self._draw_model(name)
         
@@ -387,7 +397,6 @@ class ModelPage(wx.ScrolledWindow):
         items = self.modelbox.GetItems()
         for i in range(len(items)):
             print "model name",items[i],model.name, model.__class__.__name__
-            #if items[i]==model.__class__.__name__:
             if items[i]==name:
                 self.modelbox.SetSelection(i)
                 
@@ -397,9 +406,8 @@ class ModelPage(wx.ScrolledWindow):
              allow selecting different dispersion
              self.disp_list should change type later .now only gaussian
         """
-        type = "Gaussian" 
-        if type ==event.GetString():
-            self.set_panel_dispers( self.disp_list,type )
+        type =event.GetString()
+        self.set_panel_dispers( self.disp_list,type )
                 
     def _on_select_model(self,event):
         """
@@ -422,9 +430,12 @@ class ModelPage(wx.ScrolledWindow):
                 self.model= model
                 self.set_panel(model)
                 self.name= name
+                
+                self.parent.model_page.name=name
+                self.parent.draw_model_name=name
                 #self.manager.draw_model(model, name)
-                self.enable2D=False
-                self.model_view.Enable()
+                #self.enable2D=False
+                #self.model_view.Enable()
                 self._draw_model(name)
             
             
@@ -556,18 +567,67 @@ class ModelPage(wx.ScrolledWindow):
         self.SetScrollbars(20,20,55,40)
         self.Layout()
         self.parent.GetSizer().Layout()
-        
-       
-    def  set_panel_dispers(self, disp_list, type="Gaussian" ):
+    def _selectDlg(self):
+        import os
+        dlg = wx.FileDialog(self, "Choose a weight file", os.getcwd(), "", "*.*", wx.OPEN)
+        path = None
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+        dlg.Destroy()
+        return path
+    def read_file(self, path):
+        try:
+            input_f = open(path, 'r')
+            buff = input_f.read()
+            lines = buff.split('\n')
+            
+            angles = []
+            weights=[]
+            for line in lines:
+                toks = line.split()
+                if len(toks)==2:
+                    try:
+                        angle = float(toks[0])
+                        weight = float(toks[1])
+                    except:
+                        # Skip non-data lines
+                        pass
+                    angles.append(angle)
+                    weights.append(weight)
+            return numpy.array(angles), numpy.array(weights)
+        except:
+            raise
+                   
+    def  set_panel_dispers(self, disp_list, type="GaussianModel" ):
         
         self.fittable_param=[]
         self.fixed_param=[]
                 
         ix=0
         iy=1
-        ### this will become a separate method
-        if type== "Gaussian" :
+                ### this will become a separate method
+        if type== "MyModel":
+            
+            self.sizer8.Clear(True)
+            path = self._selectDlg()
+            dispersion=None
+            for key, value in self.polydisp.iteritems():
+                if value =="MyModel":
+                    dispersion= key()
+                    break
+            values,weights = self.read_file(path)
+            dispersion.set_weights( values, weights)
+            print "sipersion model", dispersion.value
+            for param in self.model.dispersion.keys():
+                print 
+                print "on MyModel disp",dispersion,param, self.model.set_dispersion(param, dispersion)
+
+            wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            " Selected Distribution: %s"%path))
+                
+        if type== "GaussianModel" :
             print "went here"
+           
             self.sizer8.Clear(True)
             disp = wx.StaticText(self, -1, 'Dispersion')
             self.sizer8.Add(disp,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -588,7 +648,7 @@ class ModelPage(wx.ScrolledWindow):
             self.sizer8.Add(nsigmas,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             
             disp_list.sort()
-            #print disp_list,self.model.fixed,self.model.dispersion
+            print disp_list,self.model.dispersion
             for item in self.model.dispersion.keys():
                 name1=item+".width"
                 name2=item+".npts"
@@ -643,7 +703,8 @@ class ModelPage(wx.ScrolledWindow):
                             Tctl.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                             self.sizer8.Add(Tctl, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             self.fixed_param.append([name3, Tctl])
-                    
+                wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            " Selected Distribution: Gaussian"))   
             ix =0
             iy +=1 
             self.sizer8.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)        
@@ -651,6 +712,7 @@ class ModelPage(wx.ScrolledWindow):
             self.SetScrollbars(20,20,55,40)
             self.Layout()
             self.parent.GetSizer().Layout()  
+          
          
            
         
@@ -746,12 +808,7 @@ class ModelPage(wx.ScrolledWindow):
                                 qmin=self.qmin_x, qmax=self.qmax_x,
                                 qstep= self.num_points,
                                 enable2D=self.enable2D)
-        """
-            self.manager.draw_model(self.model, self.model.name, 
-                                    qmin=self.qmin, qmax=self.qmax,
-                                    qstep= self.num_points,
-                                    enable2D=self.enable2D)
-        """
+       
     def select_param(self,event):
         pass
     def select_all_param(self,event): 
@@ -772,20 +829,12 @@ class ModelPage(wx.ScrolledWindow):
                         item[0].SetValue(True)
                         list= [item[0],item[1],item[2],item[3]]
                         self.param_toFit.append(list )
-               
-                if not (len(self.param_toFit ) >0):
-                    self.qmin.Disable()
-                    self.qmax.Disable()
-                else:
-                    self.qmin.Enable()
-                    self.qmax.Enable()
             else:
                 for item in self.parameters:
                     item[0].SetValue(False)
                 for item in self.fittable_param:
                     item[0].SetValue(False)
                 self.param_toFit=[]
-              
-                self.qmin.Disable()
-                self.qmax.Disable()
+               
+                
        
