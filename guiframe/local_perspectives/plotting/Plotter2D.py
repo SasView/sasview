@@ -179,7 +179,17 @@ class ModelPanel2D( ModelPanel1D):
         slicerpop = PanelMenu()
         slicerpop.set_plots(self.plots)
         slicerpop.set_graph(self.graph)
-    
+        
+             
+        id = wx.NewId()
+        slicerpop.Append(id, '&Save image')
+        wx.EVT_MENU(self, id, self.onSaveImage)
+        
+        id = wx.NewId()
+        slicerpop.Append(id,'&Print image', 'Print image ')
+        wx.EVT_MENU(self, id, self.onPrint)
+        
+        slicerpop.AppendSeparator()
         item_list = self.parent.get_context_menu(self.graph)
         if (not item_list==None) and (not len(item_list)==0):
                 
@@ -193,7 +203,7 @@ class ModelPanel2D( ModelPanel1D):
                         #print sys.exc_value
                         #print RuntimeError, "View1DPanel2D.onContextMenu: bad menu item"
         
-        slicerpop.AppendSeparator()
+                slicerpop.AppendSeparator()
         id = wx.NewId()
         slicerpop.Append(id, '&Edit Detector Parameters')
         wx.EVT_MENU(self, id, self._onEditDetector) 
@@ -230,11 +240,8 @@ class ModelPanel2D( ModelPanel1D):
             slicerpop.Append(id, '&Edit Slicer Parameters')
             wx.EVT_MENU(self, id, self._onEditSlicer) 
         slicerpop.AppendSeparator() 
-           
-        id = wx.NewId()
-        slicerpop.Append(id, '&Save image')
-        wx.EVT_MENU(self, id, self.onSaveImage) 
-        
+       
+        """
         # Option to save the data displayed
         id = wx.NewId()
         slicerpop.Append(id,'&Printer setup', 'Set image size')
@@ -243,11 +250,7 @@ class ModelPanel2D( ModelPanel1D):
         id = wx.NewId()
         slicerpop.Append(id,'&Printer Preview', 'Set image size')
         wx.EVT_MENU(self, id, self.onPrinterPreview)
-    
-        id = wx.NewId()
-        slicerpop.Append(id,'&Print image', 'Print image ')
-        wx.EVT_MENU(self, id, self.onPrint)
-        slicerpop.AppendSeparator()
+        """
         id = wx.NewId()
         slicerpop.Append(id, '&Toggle Linear/Log scale')
         wx.EVT_MENU(self, id, self._onToggleScale) 
@@ -260,7 +263,7 @@ class ModelPanel2D( ModelPanel1D):
     def _onEditDetector(self, event):
         print "edit detortor param",self.zmin_2D, self.zmax_2D
         import detector_dialog
-        dialog = detector_dialog.DetectorDialog(None, -1, "")
+        dialog = detector_dialog.DetectorDialog(self, -1,base=self.parent)
         xnpts = len(self.data2D.x_bins)
         ynpts = len(self.data2D.y_bins)
         xmax = max(self.data2D.xmin, self.data2D.xmax)

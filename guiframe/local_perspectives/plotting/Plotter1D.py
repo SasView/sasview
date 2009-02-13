@@ -174,6 +174,31 @@ class ModelPanel1D(PlotPanel):
                 
         # Option to save the data displayed
         
+      
+                
+        # Various plot options
+        id = wx.NewId()
+        slicerpop.Append(id,'&Save image', 'Save image as PNG')
+        wx.EVT_MENU(self, id, self.onSaveImage)
+        
+        id = wx.NewId()
+        slicerpop.Append(id,'&Print image', 'Print image ')
+        wx.EVT_MENU(self, id, self.onPrint)  
+           
+        slicerpop.AppendSeparator()
+        item_list = self.parent.get_context_menu(self.graph)
+        #print "item_list",item_list
+        if (not item_list==None) and (not len(item_list)==0):
+            for item in item_list:
+                try:
+                    id = wx.NewId()
+                    slicerpop.Append(id, item[0], item[1])
+                    wx.EVT_MENU(self, id, item[2])
+                except:
+                    pass
+                    #print sys.exc_value
+                    #print RuntimeError, "View1DPanel.onContextMenu: bad menu item"
+            slicerpop.AppendSeparator()
         #for plot in self.graph.plottables:
         if self.graph.selected_plottable in self.plots:
             plot = self.plots[self.graph.selected_plottable]
@@ -188,30 +213,10 @@ class ModelPanel1D(PlotPanel):
             slicerpop.Append(id, "Remove %s curve" % name)
             self.action_ids[str(id)] = plot
             wx.EVT_MENU(self, id, self._onRemove)
-           
+            slicerpop.AppendSeparator()
             # Option to hide
             #TODO: implement functionality to hide a plottable (legend click)
             
-                
-        # Various plot options
-        id = wx.NewId()
-        slicerpop.Append(id,'&Save image', 'Save image as PNG')
-        wx.EVT_MENU(self, id, self.onSaveImage)
-        
-        slicerpop.AppendSeparator()
-        item_list = self.parent.get_context_menu(self.graph)
-        #print "item_list",item_list
-        if (not item_list==None) and (not len(item_list)==0):
-                for item in item_list:
-                    try:
-                        id = wx.NewId()
-                        slicerpop.Append(id, item[0], item[1])
-                        wx.EVT_MENU(self, id, item[2])
-                    except:
-                        pass
-                        #print sys.exc_value
-                        #print RuntimeError, "View1DPanel.onContextMenu: bad menu item"
-        
        
         if self.graph.selected_plottable in self.plots:
             if self.plots[self.graph.selected_plottable].__class__.__name__=="Theory1D":
@@ -231,7 +236,7 @@ class ModelPanel1D(PlotPanel):
                 slicerpop.Append(id, '&Linear fit')
                 wx.EVT_MENU(self, id, self.onFitting)
                 
-        slicerpop.AppendSeparator()
+            slicerpop.AppendSeparator()
         id = wx.NewId()
         slicerpop.Append(id, '&Change scale')
         wx.EVT_MENU(self, id, self._onProperties)
@@ -239,7 +244,7 @@ class ModelPanel1D(PlotPanel):
         id = wx.NewId()
         slicerpop.Append(id, '&Reset Graph')
         wx.EVT_MENU(self, id, self.onResetGraph)  
-        
+        """
         slicerpop.AppendSeparator() 
         id = wx.NewId()
         slicerpop.Append(id,'&Printer setup', 'Set image size')
@@ -248,10 +253,8 @@ class ModelPanel1D(PlotPanel):
         id = wx.NewId()
         slicerpop.Append(id,'&Printer Preview', 'Set image size')
         wx.EVT_MENU(self, id, self.onPrinterPreview)
-    
-        id = wx.NewId()
-        slicerpop.Append(id,'&Print image', 'Print image ')
-        wx.EVT_MENU(self, id, self.onPrint)     
+        """
+        
 
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)

@@ -6,17 +6,17 @@ __revision__ = "$Revision: 1193 $"
 
 import wx
 from sans.guiframe.utils import format_number
-
+from sans.guicomm.events import StatusEvent ,NewPlotEvent,SlicerEvent
 class DetectorDialog(wx.Dialog):
     """
         Dialog box to let the user edit detector settings
     """
     
-    def __init__(self, *args, **kwds):
+    def __init__(self,parent,id=1,base=None, *args, **kwds):
 
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
-        wx.Dialog.__init__(self, *args, **kwds)
-        
+        wx.Dialog.__init__(self,parent,id=1, *args, **kwds)
+        self.parent=base
         self.label_xnpts = wx.StaticText(self, -1, "Detector width in pixels")
         self.label_ynpts = wx.StaticText(self, -1, "Detector Height in pixels")
         self.label_qmax = wx.StaticText(self, -1, "Q max")
@@ -65,6 +65,7 @@ class DetectorDialog(wx.Dialog):
             value=self.zmin_ctl.GetValue()
             if value and float( value)==0.0:
                 flag = False
+                wx.PostEvent(self.parent, StatusEvent(status="Enter number greater than zero"))
                 self.zmin_ctl.SetBackgroundColour("pink")
                 self.zmin_ctl.Refresh()
             else:
@@ -72,12 +73,14 @@ class DetectorDialog(wx.Dialog):
                 self.zmin_ctl.Refresh()
         except:
             flag = False
+            wx.PostEvent(self.parent, StatusEvent(status="Enter float value"))
             self.zmin_ctl.SetBackgroundColour("pink")
             self.zmin_ctl.Refresh()
         try:
             value=self.zmax_ctl.GetValue()
             if value and int(value)==0.0:
                 flag = False
+                wx.PostEvent(self.parent, StatusEvent(status="Enter number greater than zero"))
                 self.zmax_ctl.SetBackgroundColour("pink")
                 self.zmax_ctl.Refresh()
             else:
@@ -85,6 +88,7 @@ class DetectorDialog(wx.Dialog):
                 self.zmax_ctl.Refresh()
         except:
             flag = False
+            wx.PostEvent(self.parent, StatusEvent(status="Enter Integer value"))
             self.zmax_ctl.SetBackgroundColour("pink")
             self.zmax_ctl.Refresh()
         
