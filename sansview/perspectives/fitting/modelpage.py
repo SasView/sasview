@@ -388,7 +388,8 @@ class ModelPage(wx.ScrolledWindow):
         self.model = model
         self.parent.model_page.name = name
         self.parent.draw_model_name = name
-       
+        self.model_view.Enable()
+        self.enable2D=False
         print "select_model", self.name,model.__class__
         self.set_panel(model)
         self._draw_model(name)
