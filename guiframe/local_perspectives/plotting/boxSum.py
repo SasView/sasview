@@ -72,7 +72,7 @@ class BoxSum(_BaseInteractor):
         
         # Bind to slice parameter events
         #print "box sum  self.base.parent",self.base.parent
-        self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
+        #self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
     def set_panel_name(self, name):
         self.panel_name= name
     def _onEVT_SLICER_PARS(self, event):

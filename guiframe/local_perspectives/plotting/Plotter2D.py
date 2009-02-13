@@ -10,7 +10,7 @@ copyright 2008, University of Tennessee
 
 
 import wx
-import sys
+import sys, math
 import pylab
 
 import danse.common.plottools
@@ -194,6 +194,9 @@ class ModelPanel2D( ModelPanel1D):
                         #print RuntimeError, "View1DPanel2D.onContextMenu: bad menu item"
         
         slicerpop.AppendSeparator()
+        id = wx.NewId()
+        slicerpop.Append(id, '&Edit Detector Parameters')
+        wx.EVT_MENU(self, id, self._onEditDetector) 
         
         id = wx.NewId()
         slicerpop.Append(id, '&Perform circular average')
@@ -254,8 +257,39 @@ class ModelPanel2D( ModelPanel1D):
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
         
-    
-        
+    def _onEditDetector(self, event):
+        print "edit detortor param",self.zmin_2D, self.zmax_2D
+        import detector_dialog
+        dialog = detector_dialog.DetectorDialog(None, -1, "")
+        xnpts = len(self.data2D.x_bins)
+        ynpts = len(self.data2D.y_bins)
+        xmax = max(self.data2D.xmin, self.data2D.xmax)
+        ymax = max(self.data2D.ymin, self.data2D.ymax)
+        qmax = math.sqrt(math.pow(xmax,2)+math.pow(ymax,2))
+        beam = self.data2D.xmin
+        zmin = self.zmin_2D
+        zmax = self.zmax_2D
+        dialog.setContent(xnpts=xnpts,ynpts=ynpts,qmax=qmax,
+                           beam=self.data2D.xmin,
+                           zmin = self.zmin_2D,
+                          zmax = self.zmax_2D)
+        if dialog.ShowModal() == wx.ID_OK:
+            evt = dialog.getContent()
+            self.zmin_2D = evt.zmin
+            self.zmax_2D = evt.zmax
+       
+        dialog.Destroy()
+        print "zmn ,zmax", self.zmin_2D, self.zmax_2D
+        self.image(data= self.data2D.data,
+                   xmin= self.data2D.xmin,
+                   xmax= self.data2D.xmax,
+                   ymin= self.data2D.ymin,
+                   ymax= self.data2D.ymax,
+                   zmin= self.zmin_2D,
+                   zmax= self.zmax_2D,
+                   color=0,symbol=0,label='data2D')
+        #self.graph.render(self)
+        self.subplot.figure.canvas.draw_idle()
         
     def get_corrected_data(self):
         # Protect against empty data set
@@ -460,9 +494,7 @@ class ModelPanel2D( ModelPanel1D):
             #wx.PostEvent(self.parent, event)
             wx.PostEvent(self, event)
           
-    def _onEditDetector(self, event):
-        print "on parameter"
-        
+  
         
     def _onToggleScale(self, event):
         """
