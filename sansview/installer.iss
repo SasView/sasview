@@ -33,7 +33,7 @@ Source: "images\*"; DestDir: "{app}\images"; Flags: ignoreversion recursesubdirs
 [Icons]
 Name: "{group}\SansView"; Filename: "{app}\SansView.exe"; WorkingDir: "{app}"
 Name: "{group}\{cm:UninstallProgram,SansView}"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\PrView 0.2"; Filename: "{app}\SansView.exe"; Tasks: desktopicon; WorkingDir: "{app}"
+Name: "{commondesktop}\SansView 0.1"; Filename: "{app}\SansView.exe"; Tasks: desktopicon; WorkingDir: "{app}"
 
 [Run]
 Filename: "{app}\SansView.exe"; Description: "{cm:LaunchProgram,SansView}"; Flags: nowait postinstall skipifsilent
