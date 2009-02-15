@@ -804,15 +804,18 @@ class Plugin:
         theory.detector=[]
         theory.detector.append(detector) 
             
-        theory.detector[0].pixel_size.x= qmax/(qstep/2+0.5)#5.0
-        theory.detector[0].pixel_size.y= qmax/(qstep/2+0.5)#5.0
-        theory.detector[0].beam_center.x= qmax
-        theory.detector[0].beam_center.y= qmax
-        theory.detector[0].distance=1e+56#13705.0
+        theory.detector[0].distance=1e+32#13705.0
         theory.source= Source()
-        theory.source.wavelength=2*math.pi/1e+56#8.4
+        theory.source.wavelength=2*math.pi/1e+32#8.4
         theory.x_bins =[]
         theory.y_bins =[]
+        #Now qmax is xmax.
+        xmax=2*theory.detector[0].distance*math.atan(qmax/(4*math.pi/theory.source.wavelength))
+        theory.detector[0].pixel_size.x= xmax/(qstep/2-0.5)#5.0
+        theory.detector[0].pixel_size.y= xmax/(qstep/2-0.5)#5.0
+        theory.detector[0].beam_center.x= qmax
+        theory.detector[0].beam_center.y= qmax
+        #print "xmax,qmax",xmax,qmax
         # compute x_bins and y_bins
         # Qx and Qy vectors
     
@@ -827,15 +830,15 @@ class Plugin:
         
         
         size_x, size_y= numpy.shape(theory.data)
-        print "size_x,size_y",size_x, size_y
+        #print "size_x,size_y",size_x, size_y
         #This case, q and x are equivalent to each other.
         for i_x in range(size_x):
-            theta = (i_x-center_x+1)*pixel_width_x / distance #/ size_x#100.0
-            qx = distance*theta#4.0*math.pi/wavelength * math.sin(theta/2.0)
+            theta = (i_x-center_x)*pixel_width_x / distance #/ size_x#100.0
+            qx = 4.0*math.pi/wavelength * math.tan(theta/2.0)
             theory.x_bins.append(qx)    
         for i_y in range(size_y):
-            theta = (i_y-center_y+1)*pixel_width_y / distance #/ size_y#100.0
-            qy =distance*theta#4.0*math.pi/wavelength * math.sin(theta/2.0)
+            theta = (i_y-center_y)*pixel_width_y / distance #/ size_y#100.0
+            qy =4.0*math.pi/wavelength * math.tan(theta/2.0)
             theory.y_bins.append(qy)
            
         #theory.err_data= numpy.    
