@@ -71,6 +71,11 @@ for f in matplotlibdata:
 for f in findall('images'):
     if os.path.split(f)[0].count('.svn')==0:
         data_files.append((os.path.split(f)[0], [f]))
+
+# Copying the HTML help docs
+for f in findall('doc'):
+    if os.path.split(f)[0].count('.svn')==0:
+        data_files.append((os.path.split(f)[0], [f]))
     
 #
 # packages
