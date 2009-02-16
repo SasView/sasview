@@ -248,7 +248,7 @@ class Plugin:
              @param names: the paramter name
              @note: expecting park used for fit.
         """  
-        sim_page=self.fit_panel.get_page(1)
+        sim_page=self.fit_panel.GetPage(1) 
         for page, value in self.page_finder.iteritems():
             if page != sim_page:
                 list=value.get_model()
@@ -319,7 +319,8 @@ class Plugin:
             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
        
-    def _simul_fit_completed(self,result,qmin,qmax, elapsed,pars=None,cpage=None, ymin=None, ymax=None):
+    def _simul_fit_completed(self,result,qmin,qmax, elapsed,pars=None,cpage=None,
+                             xmin=None, xmax=None, ymin=None, ymax=None):
         """
             Parameter estimation completed, 
             display the results to the user
@@ -347,7 +348,9 @@ class Plugin:
                     # Display result on each page 
                     page.onsetValues(result.fitness, small_out,small_cov)
                     #Replot model
-                    self.plot_helper(currpage= page,qmin= qmin,qmax= qmax,ymin=ymin, ymax=ymax) 
+                    self.plot_helper(currpage= page,qmin= qmin,qmax= qmax,
+                                     xmin=xmin, xmax=xmax,
+                                     ymin=ymin, ymax=ymax) 
         except:
              wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
             
