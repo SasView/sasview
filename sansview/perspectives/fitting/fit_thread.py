@@ -2,7 +2,7 @@
 import sys, wx, logging
 import string, numpy, math
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
-from calcthread import CalcThread
+from sans.guiframe.calcthread import CalcThread
 import park
 from park.fitresult import FitHandler
 DEFAULT_BEAM = 0.005
