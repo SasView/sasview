@@ -378,7 +378,7 @@ class Plugin:
         #with the fit will be perform
         #current_pg=self.fit_panel.get_current_page() 
         #simul_pg=self.fit_panel.get_page(0)
-            
+        pars=[]   
         for page, value in self.page_finder.iteritems():
             if  value.get_scheduled() ==1 :
                 metadata = value.get_data()
@@ -387,7 +387,7 @@ class Plugin:
                 smearer= value.get_smearer()
                 print "single fit", model, smearer
                 #Create list of parameters for fitting used
-                pars=[]
+                
                 templist=[]
                 try:
                     #templist=current_pg.get_param_list()
@@ -403,11 +403,11 @@ class Plugin:
                     self.fitter.set_data(data=metadata,Uid=self.id,
                                          smearer=smearer,qmin= qmin,qmax=qmax,
                                          ymin=ymin,ymax=ymax)
-                    
+                    print "single---->value of problem",value.get_scheduled()
                     self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
                     page_fitted=page
                     self.id+=1
-                    self.schedule_for_fit( 0,value) 
+                    #self.schedule_for_fit( 0,value) 
                 except:
                     raise 
                     #wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
@@ -492,6 +492,7 @@ class Plugin:
                           
                     self.fitter.set_model(new_model, self.id, pars) 
                     self.fitter.set_data(metadata,self.id,qmin,qmax,ymin,ymax)
+                    print "sim---->value of problem",value.get_scheduled()
                     self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
                     self.id += 1 
             except:
