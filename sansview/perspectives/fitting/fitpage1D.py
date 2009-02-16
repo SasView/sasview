@@ -347,12 +347,12 @@ class FitPage1D(ModelPage):
                     else:
                         idx = (x>= self.qmin_x) & (x <=self.qmax_x)
                         fx = numpy.asarray([self.model.run(item)for item in x[idx ]])
-                        res= (y[idx] - fx)/dy[idx]  
+                        res= (y[idx] - fx)/dy[idx] 
                    
                     sum=0
                     for item in res:
                         if numpy.isfinite(item):
-                            sum +=item
+                            sum +=math.pow(item,2)
                     self.tcChi.SetLabel(format_number(math.fabs(sum/ len(res))))
             except:
                 wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
