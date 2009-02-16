@@ -343,16 +343,18 @@ class FitPage1D(ModelPage):
                     x,y,dy = [numpy.asarray(v) for v in (self.data.x,self.data.y,self.data.dy)]
                     if self.qmin_x==None and self.qmax_x==None: 
                         fx =numpy.asarray([self.model.run(v) for v in x])
-                        res=(y - fx)/dy
+                        temp=(y - fx)/dy
+                        res= temp*temp
                     else:
                         idx = (x>= self.qmin_x) & (x <=self.qmax_x)
                         fx = numpy.asarray([self.model.run(item)for item in x[idx ]])
-                        res= (y[idx] - fx)/dy[idx] 
+                        temp=(y[idx] - fx)/dy[idx]
+                        res= temp*temp
                    
                     sum=0
                     for item in res:
                         if numpy.isfinite(item):
-                            sum +=math.pow(item,2)
+                            sum +=item
                     self.tcChi.SetLabel(format_number(math.fabs(sum/ len(res))))
             except:
                 wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
