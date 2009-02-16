@@ -13,7 +13,7 @@ from fitproblem import FitProblem
 from fitpanel import FitPanel
 from fit_thread import FitThread
 import models,modelpage
-import fitpage1D,fitpage2D
+import fitpage1D
 import park
 DEFAULT_BEAM = 0.005
 DEFAULT_QMIN = 0.0
@@ -81,7 +81,7 @@ class Plugin:
         self.fit_panel.set_owner(owner)
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
         owner.Bind(fitpage1D.EVT_MODEL_BOX,self._on_model_panel)
-        owner.Bind(fitpage2D.EVT_MODEL_BOX,self._on_model_panel)
+        #owner.Bind(fitpage2D.EVT_MODEL_BOX,self._on_model_panel)
         #create  menubar items
         return [(id, self.menu1, "Fitting"),(id2, menu2, "Model")]
     
