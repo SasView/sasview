@@ -225,12 +225,14 @@ class ModelPanel1D(PlotPanel):
                 #print "panel scale before  ",self.xLabel, self.yLabel
                 #print "cyllinder before adding error", self.plots[self.graph.selected_plottable].x
                 wx.EVT_MENU(self, id, self._on_add_errors)
-            elif self.plots[self.graph.selected_plottable].__class__.__name__=="Data1D":
-                id = wx.NewId()
-                slicerpop.Append(id, '&Remove errors From data')
-                #print "panel scale before  ",self.xLabel, self.yLabel
-                #print "cyllinder before adding error", self.plots[self.graph.selected_plottable].x
-                wx.EVT_MENU(self, id, self._on_remove_errors)
+                """
+                elif self.plots[self.graph.selected_plottable].__class__.__name__=="Data1D":
+                    id = wx.NewId()
+                    slicerpop.Append(id, '&Remove errors From data')
+                    #print "panel scale before  ",self.xLabel, self.yLabel
+                    #print "cyllinder before adding error", self.plots[self.graph.selected_plottable].x
+                    wx.EVT_MENU(self, id, self._on_remove_errors)
+                """
             else:
                 id = wx.NewId()
                 slicerpop.Append(id, '&Linear fit')
@@ -284,7 +286,7 @@ class ModelPanel1D(PlotPanel):
             color=self.graph.plottables[self.plots[self.graph.selected_plottable]]
             self.graph.delete_plottable(self.plots[self.graph.selected_plottable])
             
-            self.graph.add_plottable(new_plot,color)
+            self.graph.add(new_plot,color)
             # transforming the view of the new data into the same of the previous data
             self._onEVT_FUNC_PROPERTY()
             #print "cyllinder", self.plots[self.graph.selected_plottable].x,self.plots[self.graph.selected_plottable].view.x, new_plot.x, new_plot.view.x
@@ -331,10 +333,10 @@ class ModelPanel1D(PlotPanel):
             label, unit = self.plots[self.graph.selected_plottable].get_yaxis()
             new_plot.yaxis(label, unit)
             #print "panel scale ",self.xLabel, self.yLabel
-            color=self.graph.plottables[self.plots[self.graph.selected_plottable]]
+            #color=self.graph.plottables[self.plots[self.graph.selected_plottable]]
             self.graph.delete_plottable(self.plots[self.graph.selected_plottable])
-            self.graph.add_plottable(new_plot, color)
-            #self.graph.add(new_plot)
+            #self.graph.add_plottable(new_plot, color)
+            self.graph.add(new_plot)
             # transforming the view of the new data into the same of the previous data
             self._onEVT_FUNC_PROPERTY()
             #print "cyllinder", self.plots[self.graph.selected_plottable].x,self.plots[self.graph.selected_plottable].view.x, new_plot.x, new_plot.view.x

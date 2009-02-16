@@ -124,7 +124,8 @@ class Calc2D(CalcThread):
     def update(self, output=None, time=None):
         
         wx.PostEvent(self.parent, StatusEvent(status="Plot \
-        updating ... %g sec" % time))
+        #updating ... %g sec" % time,curr_thread=self,type="update"))
+        
         
     def compute(self):
         import numpy
@@ -134,10 +135,11 @@ class Calc2D(CalcThread):
       
         center_x=0
         center_y=0
-       
+        
         self.starttime = time.time()
+        print "model_thread"
         wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Start Drawing model %g " % self.starttime))
+                    "Start Drawing model %g " % (self.starttime)))
         lx = len(self.x)
        
         for i_x in range(len(self.x)):

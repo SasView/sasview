@@ -263,8 +263,9 @@ class ViewerFrame(wx.Frame):
             Set up the layout
         """
         # Status bar
-        self.sb = self.CreateStatusBar()
-        self.SetStatusText("")
+        from statusbar import MyStatusBar
+        self.sb = MyStatusBar(self,wx.ID_ANY)
+        self.SetStatusBar(self.sb)
 
         # Add panel
         self._mgr = wx.aui.AuiManager(self)
@@ -614,7 +615,15 @@ class ViewerFrame(wx.Frame):
         """
             Display status message
         """
-        self.SetStatusText(str(evt.status))
+        self.sb.clear_gauge( msg="")
+        mythread=None
+        mytype= None
+        if hasattr(evt, "curr_thread"):
+            mythread= evt.curr_thread
+        if hasattr(evt, "type"):
+            mytype= evt.type
+        self.sb.set_status( type=mytype,msg=str(evt.status),thread=mythread)
+       
 
         
     def _on_view(self, evt):
