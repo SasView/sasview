@@ -355,10 +355,14 @@ class Plugin:
                             model_name,param_name = self.split_string(p.name)  
                             if model.name == model_name:
                                 small_out.append(p.value )
+                                if p.stderr==None:
+                                    p.stderr=numpy.nan
                                 small_cov.append(p.stderr)
                                 model.setParam(param_name,p.value)  
                         # Display result on each page 
+                        #print "mmmm",p.value,p.stderr
                         page.onsetValues(result.fitness, small_out,small_cov)
+                        #print "out,err",small_out,small_cov
                         #Replot model
                         self.plot_helper(currpage= page,qmin= qmin,qmax= qmax,
                                          xmin=xmin, xmax=xmax,
