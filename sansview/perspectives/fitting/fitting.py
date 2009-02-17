@@ -48,6 +48,7 @@ class Plugin:
         ## Fit engine
         self._fit_engine = 'scipy'
         self.enable_model2D=False
+        self.fit_id= 0
         # Log startup
         logging.info("Fitting plug-in started")   
         # model 2D view
@@ -370,77 +371,77 @@ class Plugin:
         from sans.fit.Fitting import Fit
         self.fitter= Fit(self._fit_engine)
         #Setting an id to store model and data in fit engine
-        if id==None:
-            self.id=0
-        else:
-            self.id = id
+        if id!=None:
+            self.fit_id= id
+        
         page_fitted=None
         fit_problem=None
         #Get information (model , data) related to the page on 
         #with the fit will be perform
-        #current_pg=self.fit_panel.get_current_page() 
-        #simul_pg=self.fit_panel.get_page(0)
+        current_pg=self.fit_panel.get_current_page() 
+        simul_pg=self.fit_panel.GetPage(1 )
         pars=[]   
-        for page, value in self.page_finder.iteritems():
-            if  value.get_scheduled() ==1 :
-                metadata = value.get_data()
-                list=value.get_model()
-                model=list[0]
-                smearer= value.get_smearer()
-                print "single fit", model, smearer
-                #Create list of parameters for fitting used
-                
-                templist=[]
-                try:
-                    #templist=current_pg.get_param_list()
-                    templist=page.get_param_list()
-                    for element in templist:
-                        pars.append(str(element[0].GetLabelText()))
-                    pars.sort()
-                    #print "single fit start pars:", pars
-                    #Do the single fit
-                    self.fitter.set_model(Model(model), self.id, pars) 
-                    #print "args...:",metadata,self.id,smearer,qmin,qmax,ymin,ymax
-                  
-                    self.fitter.set_data(data=metadata,Uid=self.id,
-                                         smearer=smearer,qmin= qmin,qmax=qmax,
-                                         ymin=ymin,ymax=ymax)
-                    print "single---->value of problem",value.get_scheduled()
-                    self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
-                    page_fitted=page
-                    self.id+=1
-                    #self.schedule_for_fit( 0,value) 
-                except:
-                    raise 
-                    #wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
-                    return
-                # make sure to keep an alphabetic order 
-                #of parameter names in the list      
-        try:
-            # If a thread is already started, stop it
-            if self.calc_thread != None and self.calc_thread.isrunning():
-                self.calc_thread.stop()
-                    
-            self.calc_thread =FitThread(parent =self.parent,
-                                        fn= self.fitter,
-                                        pars= pars,
-                                        cpage= page_fitted,
-                                       qmin=qmin,
-                                       qmax=qmax,
-                                      
-                                       completefn=self._single_fit_completed,
-                                       updatefn=None)
-            self.calc_thread.queue()
-            self.calc_thread.ready(2.5)
-            #while not self.done:
-                #print "when here"
-             #   time.sleep(1)
+        #for page, value in self.page_finder.iteritems():
+        if current_pg!= simul_pg:
+        #    if  value.get_scheduled() ==1 :
+            value = self.page_finder[current_pg]
+            metadata =  value.get_data()
+            list = value.get_model()
+            model = list[0]
+            smearer= value.get_smearer()
+            print "single fit", model, smearer
+            #Create list of parameters for fitting used
             
-           
-        except:
-            raise
-            wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
-            return
+            templist=[]
+            try:
+                #templist=current_pg.get_param_list()
+                templist=current_pg.get_param_list()
+                for element in templist:
+                    pars.append(str(element[0].GetLabelText()))
+                pars.sort()
+                print "single fit start pars:", pars
+                #Do the single fit
+                self.fitter.set_model(Model(model), self.fit_id, pars) 
+                #print "args...:",metadata,self.fit_id,smearer,qmin,qmax,ymin,ymax
+              
+                self.fitter.set_data(data=metadata,Uid=self.fit_id,
+                                     smearer=smearer,qmin= qmin,qmax=qmax,
+                                     ymin=ymin,ymax=ymax)
+                self.fitter.select_problem_for_fit(Uid=self.fit_id,value=value.get_scheduled())
+                page_fitted=current_pg
+                self.fit_id+=1
+                #self.schedule_for_fit( 0,value) 
+            except:
+                raise 
+                #wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+                return
+            # make sure to keep an alphabetic order 
+            #of parameter names in the list      
+            try:
+                # If a thread is already started, stop it
+                if self.calc_thread != None and self.calc_thread.isrunning():
+                    self.calc_thread.stop()
+                        
+                self.calc_thread =FitThread(parent =self.parent,
+                                            fn= self.fitter,
+                                            pars= pars,
+                                            cpage= page_fitted,
+                                           qmin=qmin,
+                                           qmax=qmax,
+                                          
+                                           completefn=self._single_fit_completed,
+                                           updatefn=None)
+                self.calc_thread.queue()
+                self.calc_thread.ready(2.5)
+                #while not self.done:
+                    #print "when here"
+                 #   time.sleep(1)
+                
+               
+            except:
+                raise
+                wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
+                return
          
     def _on_simul_fit(self, id=None,qmin=None,qmax=None, ymin=None, ymax=None):
         """ 
@@ -456,9 +457,9 @@ class Plugin:
         self.fitter= Fit(self._fit_engine)
         
         #Setting an id to store model and data
-        if id==None:
-             id = 0
-        self.id = id
+        if id!=None:
+             self.fit_id= id
+       
         
         for page, value in self.page_finder.iteritems():
             try:
@@ -492,11 +493,12 @@ class Plugin:
                             #new_model.set( exec "%s"%(param_nam) = param_value)
                             new_model.parameterset[ param_name].set( param_value )
                           
-                    self.fitter.set_model(new_model, self.id, pars) 
-                    self.fitter.set_data(metadata,self.id,qmin,qmax,ymin,ymax)
+                    self.fitter.set_model(new_model, self.fit_id, pars) 
+                    self.fitter.set_data(metadata,self.fit_id,qmin,qmax,ymin,ymax)
                     print "sim---->value of problem",value.get_scheduled()
-                    self.fitter.select_problem_for_fit(Uid=self.id,value=value.get_scheduled())
-                    self.id += 1 
+                    self.fitter.select_problem_for_fit(Uid=self.fit_id,value=value.get_scheduled())
+                    self.fit_id += 1 
+                    self.schedule_for_fit( 0,value) 
             except:
                 #raise
                 wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
