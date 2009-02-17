@@ -111,5 +111,8 @@ class FitProblem:
     def get_scheduled(self):
         """ return true or false if a problem as being schedule for fitting"""
         return self.schedule
-    
-    
+    def clear_model_param(self):
+        """
+        clear constraint info
+        """
+        self.list_param=[]

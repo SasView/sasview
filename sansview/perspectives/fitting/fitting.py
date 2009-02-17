@@ -254,7 +254,7 @@ class Plugin:
             if page != sim_page:
                 list=value.get_model()
                 model=list[0]
-                #print "fitting",model.name,modelname
+                print "fitting",model.name,modelname, values
                 if model.name== modelname:
                     value.set_model_param(names,values)
                     break
@@ -490,7 +490,7 @@ class Plugin:
                             wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fit error: %s" % sys.exc_value))
                             return
                     # need to check this print "new model "
-                    """
+                    
                     new_model=Model(model)
                     param=value.get_model_param()
                     
@@ -504,14 +504,15 @@ class Plugin:
                             #new_model.set( exec"%s=%s"%(param_name[0], param_value))
                             #new_model.set( exec "%s"%(param_nam) = param_value)
                             new_model.parameterset[ param_name].set( param_value )
-                    """      
-                    #self.fitter.set_model(new_model, self.fit_id, pars) 
+                        
+                    self.fitter.set_model(new_model, self.fit_id, pars) 
                     print "sim-->model",metadata,model,self.fit_id, pars
-                    self.fitter.set_model(Model(model), self.fit_id, pars) 
+                    #self.fitter.set_model(Model(model), self.fit_id, pars) 
                     self.fitter.set_data(metadata,self.fit_id,qmin,qmax,ymin,ymax)
                     print "sim---->value of problem",value.get_scheduled()
                     self.fitter.select_problem_for_fit(Uid=self.fit_id,value=value.get_scheduled())
                     self.fit_id += 1 
+                    value.clear_model_param()
                     #self.schedule_for_fit( 0,value) 
             except:
                 wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fit error: %s" % sys.exc_value))
