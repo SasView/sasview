@@ -48,7 +48,7 @@ class Plugin:
         ## Fit engine
         self._fit_engine = 'scipy'
         self.enable_model2D=False
-        self.fit_id= 0
+        
         # Log startup
         logging.info("Fitting plug-in started")   
         # model 2D view
@@ -275,7 +275,7 @@ class Plugin:
             return model_name,param_name
         
    
-    def _single_fit_completed(self,result,pars,cpage,qmin,qmax,elapsed,
+    def _single_fit_completed(self,result,pars,cpage,qmin,qmax,elapsed=None,
                               ymin=None, ymax=None, xmin=None, xmax=None):
         """
             Display fit result on one page of the notebook.
@@ -289,7 +289,7 @@ class Plugin:
         
         #print "single fit ", pars,result.pvec,result.stderr,result.fitness
         wx.PostEvent(self.parent, StatusEvent(status="Single fit \
-        complete in %g sec" % elapsed, type="stop"))
+        complete " , type="stop"))
         try:
             for page, value in self.page_finder.iteritems():
                 if page==cpage :
@@ -298,6 +298,7 @@ class Plugin:
                     model= list[0]
                     break
             i = 0
+            print "single-->result",pars,cpage,str(result),result.parameters,result.fitness,result.stderr
             #print "fitting: single fit pars ", pars
             for name in pars:
                 if result.pvec.__class__==numpy.float64:
@@ -329,34 +330,43 @@ class Plugin:
             @param alpha: estimated best alpha
             @param elapsed: computation time
         """
-        wx.PostEvent(self.parent, StatusEvent(status="Sinmultaneous fit \
-        complete in %g sec" % elapsed, type="stop"))
-        try:
-            for page, value in self.page_finder.iteritems():
-                if value.get_scheduled()==1:
-                    #fitdata = value.get_data()
-                    list = value.get_model()
-                    model= list[0]
-                   
-                    small_out = []
-                    small_cov = []
-                    i = 0
-                    #Separate result in to data corresponding to each page
-                    for p in result.parameters:
-                        model_name,param_name = self.split_string(p.name)  
-                        if model.name == model_name:
-                            small_out.append(p.value )
-                            small_cov.append(p.stderr)
-                            model.setParam(param_name,p.value)  
-                    # Display result on each page 
-                    page.onsetValues(result.fitness, small_out,small_cov)
-                    #Replot model
-                    self.plot_helper(currpage= page,qmin= qmin,qmax= qmax,
-                                     xmin=xmin, xmax=xmax,
-                                     ymin=ymin, ymax=ymax) 
-        except:
-             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+        if cpage!=None:
+            self._single_fit_completed(result=result,pars=pars,cpage=cpage,
+                                       qmin=qmin,qmax=qmax,
+                              ymin=ymin, ymax=ymax, xmin=xmin, xmax=xmax)
+            return
+        else:
+            wx.PostEvent(self.parent, StatusEvent(status="Simultaneous fit \
+            complete ", type="stop"))
+            print "result",cpage,str(result),result.parameters,result.fitness,result.stderr
             
+            try:
+                for page, value in self.page_finder.iteritems():
+                    if value.get_scheduled()==1:
+                        #fitdata = value.get_data()
+                        list = value.get_model()
+                        model= list[0]
+                       
+                        small_out = []
+                        small_cov = []
+                        i = 0
+                        #Separate result in to data corresponding to each page
+                        for p in result.parameters:
+                            model_name,param_name = self.split_string(p.name)  
+                            if model.name == model_name:
+                                small_out.append(p.value )
+                                small_cov.append(p.stderr)
+                                model.setParam(param_name,p.value)  
+                        # Display result on each page 
+                        page.onsetValues(result.fitness, small_out,small_cov)
+                        #Replot model
+                        self.plot_helper(currpage= page,qmin= qmin,qmax= qmax,
+                                         xmin=xmin, xmax=xmax,
+                                         ymin=ymin, ymax=ymax) 
+            except:
+                raise
+                wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fitting error: %s" % sys.exc_value))
+                
   
     def _on_single_fit(self,id=None,qmin=None, qmax=None,ymin=None, ymax=None,xmin=None,xmax=None):
         """ 
@@ -371,6 +381,7 @@ class Plugin:
         from sans.fit.Fitting import Fit
         self.fitter= Fit(self._fit_engine)
         #Setting an id to store model and data in fit engine
+        self.fit_id= 0
         if id!=None:
             self.fit_id= id
         
@@ -409,11 +420,10 @@ class Plugin:
                                      ymin=ymin,ymax=ymax)
                 self.fitter.select_problem_for_fit(Uid=self.fit_id,value=value.get_scheduled())
                 page_fitted=current_pg
-                self.fit_id+=1
+                #self.fit_id+=1
                 #self.schedule_for_fit( 0,value) 
             except:
-                raise 
-                #wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+                wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
                 return
             # make sure to keep an alphabetic order 
             #of parameter names in the list      
@@ -439,7 +449,6 @@ class Plugin:
                 
                
             except:
-                raise
                 wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
                 return
          
@@ -455,7 +464,7 @@ class Plugin:
         #set an engine to perform fit
         from sans.fit.Fitting import Fit
         self.fitter= Fit(self._fit_engine)
-        
+        self.fit_id= 0
         #Setting an id to store model and data
         if id!=None:
              self.fit_id= id
@@ -468,6 +477,8 @@ class Plugin:
                     list = value.get_model()
                     model= list[0]
                     #Create dictionary of parameters for fitting used
+                    cpage= page
+                    print ""
                     pars = []
                     templist = []
                     templist = page.get_param_list()
@@ -476,9 +487,10 @@ class Plugin:
                             name = str(element[0].GetLabelText())
                             pars.append(name)
                         except:
-                            wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+                            wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fit error: %s" % sys.exc_value))
                             return
                     # need to check this print "new model "
+                    """
                     new_model=Model(model)
                     param=value.get_model_param()
                     
@@ -492,24 +504,37 @@ class Plugin:
                             #new_model.set( exec"%s=%s"%(param_name[0], param_value))
                             #new_model.set( exec "%s"%(param_nam) = param_value)
                             new_model.parameterset[ param_name].set( param_value )
-                          
-                    self.fitter.set_model(new_model, self.fit_id, pars) 
+                    """      
+                    #self.fitter.set_model(new_model, self.fit_id, pars) 
+                    print "sim-->model",metadata,model,self.fit_id, pars
+                    self.fitter.set_model(Model(model), self.fit_id, pars) 
                     self.fitter.set_data(metadata,self.fit_id,qmin,qmax,ymin,ymax)
                     print "sim---->value of problem",value.get_scheduled()
                     self.fitter.select_problem_for_fit(Uid=self.fit_id,value=value.get_scheduled())
                     self.fit_id += 1 
-                    self.schedule_for_fit( 0,value) 
+                    #self.schedule_for_fit( 0,value) 
             except:
-                #raise
-                wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+                wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fit error: %s" % sys.exc_value))
                 return 
         #Do the simultaneous fit
         try:
             # If a thread is already started, stop it
             if self.calc_thread != None and self.calc_thread.isrunning():
                 self.calc_thread.stop()
-                    
-            self.calc_thread =FitThread(parent =self.parent,
+            if  self.fit_id==1:
+                self.calc_thread =FitThread(parent =self.parent,
+                                        fn= self.fitter,
+                                       qmin=qmin,
+                                       qmax=qmax,
+                                       ymin= ymin,
+                                       ymax= ymax,
+                                       cpage=cpage,
+                                       pars= pars,
+                                       completefn= self._simul_fit_completed,
+                                       updatefn=None)
+                      
+            else:
+                self.calc_thread =FitThread(parent =self.parent,
                                         fn= self.fitter,
                                        qmin=qmin,
                                        qmax=qmax,
@@ -521,8 +546,7 @@ class Plugin:
             self.calc_thread.ready(2.5)
             
         except:
-            #raise
-            wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fitting error: %s" % sys.exc_value))
+            wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fit error: %s" % sys.exc_value))
             return
         
         

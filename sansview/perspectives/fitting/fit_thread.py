@@ -153,7 +153,7 @@ class FitThread(CalcThread):
         try: 
             self.starttime = time.time()
             wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Setting the fit Engine ...",curr_thread=self,type="progress"))
+                       "Computing . ...",curr_thread=self,type="progress"))
             handler= ConsoleUpdate(parent= self.parent,improvement_delta=0.1)
             result = self.fitter.fit(handler= handler)
             print "result", result

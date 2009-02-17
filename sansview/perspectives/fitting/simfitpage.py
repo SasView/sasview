@@ -64,10 +64,10 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         for page in self.page_finder.iterkeys():
             page.set_model_parameter()
             
-        if len(self.model_toFit) ==1 :
-            self.manager._on_single_fit()
+        #if len(self.model_toFit) ==1 :
+        #    self.manager._on_single_fit()
            # print "simfitpage: when here"
-        elif len(self.model_toFit) > 1 :
+        if len(self.model_toFit) >= 1 :
             self._onTextEnter()
             self.set_model()
             self.manager._on_simul_fit()
@@ -111,7 +111,11 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             Receive a dictionary containing information to display model name
             @param page_finder: the dictionary containing models information
         """
-       
+        if len(self.model_list)>0:
+            for item in self.model_list:
+                #print "went here to clear"
+                item[0].SetValue(False) 
+                self.manager.schedule_for_fit( value=0,fitproblem =item[1])
         self.model_list=[]
         self.model_toFit=[]
         self.sizer1.Clear(True)
