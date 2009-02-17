@@ -3,12 +3,15 @@ class MyStatusBar(wx.StatusBar):
     def __init__(self,*args,**kargs):
          wx.StatusBar.__init__(self, *args,**kargs)
          #Layout of status bar
-         self.SetFieldsCount(3) 
+         self.SetFieldsCount(2) 
          width,height = self.GetSize()
-         self.gauge = wx.Gauge(self, size=(-1,height-4),style= wx.GA_PROGRESSBAR)
+         self.gauge = wx.Gauge(self, size=(-1,height-4),style= wx.GA_HORIZONTAL)
+         self.SetStatusWidths([-4, -1])
          rect = self.GetFieldRect(1)
          self.gauge.SetPosition((rect.x+ 10, rect.y-2))
+         
          self.gauge.Hide()
+         
          #Progess 
 
          self.progress = 0       # Current progress value of the bar 
