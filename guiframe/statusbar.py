@@ -8,7 +8,7 @@ class MyStatusBar(wx.StatusBar):
          self.gauge = wx.Gauge(self, size=(-1,height-4),style= wx.GA_HORIZONTAL)
          self.SetStatusWidths([-4, -1])
          rect = self.GetFieldRect(1)
-         self.gauge.SetPosition((rect.x+ 10, rect.y-2))
+         self.gauge.SetPosition((rect.x+5, rect.y-2))
          
          self.gauge.Hide()
          
@@ -62,32 +62,32 @@ class MyStatusBar(wx.StatusBar):
         
         else:
             self.thread= thread
-            if self.thread !=None:
-                self.gauge.Show(True)
-                if type.lower()=="start":
-                    self.timer.Stop()
-                    self.SetStatusText( str(msg), 0)
-                    self.progress +=10
+            #if self.thread !=None:
+            self.gauge.Show(True)
+            if type.lower()=="start":
+                self.timer.Stop()
+                self.SetStatusText( str(msg), 0)
+                self.progress +=10
+                self.gauge.SetValue(int(self.progress)) 
+                #self.timer.Start(1000)
+                #print "went here"
+                #self.set_progress()
+                self.progress +=10
+                if self.progress < self.gauge.GetRange()-20:
                     self.gauge.SetValue(int(self.progress)) 
-                    #self.timer.Start(1000)
-                    #print "went here"
-                    #self.set_progress()
-                    self.progress +=10
-                    if self.progress < self.gauge.GetRange()-20:
-                        self.gauge.SetValue(int(self.progress)) 
-                if type.lower()=="progress":
-                    self.timer.Start(100)
-                    self.SetStatusText( str(msg), 0)
-                    self.gauge.Pulse()
-                    print "in progress"
-                    
-                if  type.lower()=="update":
-                    
-                    self.timer.Stop()
-                    self.SetStatusText( str(msg), 0)
-                    self.progress +=10
-                    if self.progress < self.gauge.GetRange()-20:
-                        self.gauge.SetValue(int(self.progress)) 
+            if type.lower()=="progress":
+                self.timer.Start(100)
+                self.SetStatusText( str(msg), 0)
+                self.gauge.Pulse()
+                print "in progress"
+                
+            if  type.lower()=="update":
+                
+                self.timer.Stop()
+                self.SetStatusText( str(msg), 0)
+                self.progress +=10
+                if self.progress < self.gauge.GetRange()-20:
+                    self.gauge.SetValue(int(self.progress)) 
             if type.lower()=="stop":
                 print "it is complete"
                 self.gauge.Show(True)
