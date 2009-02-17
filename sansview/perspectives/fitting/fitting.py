@@ -635,7 +635,7 @@ class Plugin:
                            
                 for i in range(len(data.x)):
                     try:
-                        if data.x[i]> qmin and data.x[i]< qmax: # 1d fit range
+                        if data.x[i]> qmin and data.x[i]< qmax: 
                             tempx = data.x[i]
                             tempy = model.run(tempx)
                             theory.x.append(tempx) 
@@ -668,6 +668,7 @@ class Plugin:
                     theory.group_id= "Model"+data.name
                 theory.x_bins= data.x_bins
                 theory.y_bins= data.y_bins
+                    
                 tempy=[]
                 #print "max x,y",max(data.xmax,data.xmin),max(data.ymax,data.ymin)
                 if qmin==None:
@@ -682,8 +683,8 @@ class Plugin:
                 if xmin ==None:
                     xmin=data.xmin
                 if xmax==None:
-                    xmax=data.xmax                    
-                #print " q range =",    
+                    xmax=data.xmax      
+                                  
                 theory.data = numpy.zeros((len(data.y_bins),len(data.x_bins)))
                 for j in range(len(data.y_bins)):
                     for i in range(len(data.x_bins)):
@@ -692,7 +693,7 @@ class Plugin:
                             theory.data[j][i]=model.runXY([data.y_bins[j],data.x_bins[i]])
                         else:
                             theory.data[j][i]=0 #None # Later, We need to decide which of  0 and None is better.
-                #print "len(data.x_bins),len(data.y_bins);",len(data.x_bins),len(data.y_bins),i,j
+                #print "len(data.x_bins),len(data.y_bins);",len(data.x_bins),len(data.y_bins),qmax
                 #print "fitting : plot_helper:", theory.image
                 #print "fitting : plot_helper:",theory.image
                 theory.detector= data.detector
@@ -852,10 +853,10 @@ class Plugin:
         
        
         
-        theory.xmin= -qmax/math.sqrt(2)
-        theory.xmax= qmax/math.sqrt(2)
-        theory.ymin= -qmax/math.sqrt(2)
-        theory.ymax= qmax/math.sqrt(2)
+        theory.xmin= -qmax#/math.sqrt(2)#You can not do sqrt(2), that changes axis scale not data itself
+        theory.xmax= qmax#/math.sqrt(2)
+        theory.ymin= -qmax#/math.sqrt(2)
+        theory.ymax= qmax#/math.sqrt(2)
         
         print "model draw comptele xmax",theory.xmax,model.name
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
