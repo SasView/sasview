@@ -131,6 +131,8 @@ class FitThread(CalcThread):
         self.ymin = ymin
         self.ymax = ymax
         self.done= False
+        wx.PostEvent(self.parent, StatusEvent(status=\
+                       "Start the computation %g " % self.starttime,curr_thread=self,type="start"))
     def isquit(self):
         try:
             CalcThread.isquit(self)
@@ -143,15 +145,15 @@ class FitThread(CalcThread):
         
     def update(self):
         print "updatting"
-        timen= time.time()
+        elapsed = time.time()-self.starttime
         wx.PostEvent(self.parent, StatusEvent(status="Computing \
-        ... %g sec" % timen))
+        ... %g sec" %  elapsed ,curr_thread=self,type="update"))
             
     def compute(self):
         try: 
             self.starttime = time.time()
             wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Start the computation %g " % self.starttime))
+                       "Setting the fit Engine %g " % self.starttime,curr_thread=self,type="progress"))
             handler= ConsoleUpdate(parent= self.parent,improvement_delta=0.1)
             result = self.fitter.fit(handler= handler)
             print "result", result

@@ -285,9 +285,10 @@ class Plugin:
             @param qmax: the maximum value of x to replot model
           
         """
+        
         #print "single fit ", pars,result.pvec,result.stderr,result.fitness
-        #self.done = True
-        #wx.PostEvent(self.parent, StatusEvent(status="Fitting Completed: %g" % elapsed))
+        wx.PostEvent(self.parent, StatusEvent(status="Single fit \
+        complete in %g sec" % elapsed, type="stop"))
         try:
             for page, value in self.page_finder.iteritems():
                 if page==cpage :
@@ -327,7 +328,8 @@ class Plugin:
             @param alpha: estimated best alpha
             @param elapsed: computation time
         """
-        wx.PostEvent(self.parent, StatusEvent(status="Fitting Completed: %g" % elapsed))
+        wx.PostEvent(self.parent, StatusEvent(status="Sinmultaneous fit \
+        complete in %g sec" % elapsed, type="stop"))
         try:
             for page, value in self.page_finder.iteritems():
                 if value.get_scheduled()==1:
@@ -668,7 +670,6 @@ class Plugin:
                     theory.group_id= "Model"+data.name
                 theory.x_bins= data.x_bins
                 theory.y_bins= data.y_bins
-                    
                 tempy=[]
                 #print "max x,y",max(data.xmax,data.xmin),max(data.ymax,data.ymin)
                 if qmin==None:
@@ -796,7 +797,7 @@ class Plugin:
     def complete(self, output, elapsed, model, qmin, qmax,qstep=DEFAULT_NPTS):
        
         wx.PostEvent(self.parent, StatusEvent(status="Calc \
-        complete in %g sec" % elapsed))
+        complete in %g sec" % elapsed, type="stop"))
         #print "complete",output, model,qmin, qmax
         data = output
         temp= numpy.zeros(numpy.shape(data))
