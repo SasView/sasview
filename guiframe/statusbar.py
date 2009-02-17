@@ -14,7 +14,7 @@ class MyStatusBar(wx.StatusBar):
          self.progress = 0       # Current progress value of the bar 
          self.timer = wx.Timer(self,-1) 
          self.thread= None
-         #self.Bind(wx.EVT_TIMER,self.OnTimer, self.timer) 
+         self.Bind(wx.EVT_TIMER,self.OnTimer, self.timer) 
          
     def OnTimer(self, evt): 
         """Update the progress bar while the timer is running 
@@ -22,8 +22,7 @@ class MyStatusBar(wx.StatusBar):
   
         """ 
         # Check stop flag that can be set from non main thread 
-        if self.thread!=None and self.thread.isrunning():
-            self.set_progress()
+        self.gauge.Pulse()
        
     def set_progress(self):
         self.gauge.Show(True)
@@ -63,13 +62,22 @@ class MyStatusBar(wx.StatusBar):
             if self.thread !=None:
                 self.gauge.Show(True)
                 if type.lower()=="start":
+                    self.timer.Stop()
                     self.SetStatusText( str(msg), 0)
+                    self.progress +=10
+                    self.gauge.SetValue(int(self.progress)) 
                     #self.timer.Start(1000)
                     #print "went here"
                     #self.set_progress()
                     self.progress +=10
                     if self.progress < self.gauge.GetRange()-20:
                         self.gauge.SetValue(int(self.progress)) 
+                if type.lower()=="progress":
+                    self.timer.Start(100)
+                    self.SetStatusText( str(msg), 0)
+                    self.gauge.Pulse()
+                    print "in progress"
+                    
                 if  type.lower()=="update":
                     
                     self.timer.Stop()

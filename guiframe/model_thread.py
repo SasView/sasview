@@ -109,7 +109,8 @@ class Calc2D(CalcThread):
         self.y = y
         self.model = model
         self.starttime = 0
-       
+        wx.PostEvent(self.parent, StatusEvent(status=\
+                    "Start Drawing model  ",curr_thread=self,type="start"))
         
     def isquit(self):
         try:
@@ -121,10 +122,10 @@ class Calc2D(CalcThread):
            
             raise KeyboardInterrupt
         
-    def update(self, output=None, time=None):
+    def update(self, output=None):
         
         wx.PostEvent(self.parent, StatusEvent(status="Plot \
-        #updating ... %g sec" % time,curr_thread=self,type="update"))
+        #updating ... ",curr_thread=self,type="update"))
         
         
     def compute(self):
@@ -137,14 +138,14 @@ class Calc2D(CalcThread):
         center_y=0
         
         self.starttime = time.time()
-        print "model_thread"
-        wx.PostEvent(self.parent, StatusEvent(status=\
-                    "Start Drawing model %g " % (self.starttime)))
+        
+        
         lx = len(self.x)
-       
+        wx.PostEvent(self.parent, StatusEvent(status=\
+                       "Computing ",curr_thread=self,type="update"))
         for i_x in range(len(self.x)):
             # Check whether we need to bail out
-            self.update(output=output, time=time.time() )
+            self.update(output=output )
             self.isquit()
             
             for i_y in range(int(len(self.y))):
