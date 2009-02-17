@@ -320,7 +320,7 @@ class Plugin:
         except:
             #raise
             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
-            
+            return
        
     def _simul_fit_completed(self,result,qmin,qmax, elapsed,pars=None,cpage=None,
                              xmin=None, xmax=None, ymin=None, ymax=None):
@@ -368,9 +368,8 @@ class Plugin:
                                          xmin=xmin, xmax=xmax,
                                          ymin=ymin, ymax=ymax) 
             except:
-                raise
                 wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fitting error: %s" % sys.exc_value))
-                
+                return
   
     def _on_single_fit(self,id=None,qmin=None, qmax=None,ymin=None, ymax=None,xmin=None,xmax=None):
         """ 
