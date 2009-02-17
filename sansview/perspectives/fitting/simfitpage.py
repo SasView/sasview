@@ -58,7 +58,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.SetScrollbars(20,20,55,40)
         self.Centre()
         
-        
     def onFit(self,event):
         """ signal for fitting"""
         for page in self.page_finder.iterkeys():
@@ -72,8 +71,8 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             self.set_model()
             self.manager._on_simul_fit()
         else:
-            wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                            "Select at least on model to fit "))
+            wx.PostEvent(self.parent.Parent, StatusEvent(status=\
+                            "Select at least on model to fit... "))
             
             
     def set_manager(self, manager):
@@ -184,8 +183,10 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.model_toFit=[]
         for item in self.model_list:
             if item[0].GetValue()==True:
-                item[1].schedule_tofit('True')
+                #item[1].schedule_tofit('True')
+                #item[1].schedule_tofit(1)
                 self.model_toFit.append(item)
+                print "simultaneous fit ",item[1]
                 self.manager.schedule_for_fit( value=1,fitproblem =item[1]) 
             else:
                 #print"simfit: deselected one"
@@ -248,7 +249,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                     self.params.append(self.parser_helper(value))  
             except:
                 raise
-                wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Constraint Error: %s" % sys.exc_value))
+                wx.PostEvent(self.parent.Parent, StatusEvent(status="Constraint Error: %s" % sys.exc_value))
         #print "simfitpage: self.params",self.params
         
         
