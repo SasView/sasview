@@ -540,19 +540,24 @@ class FitPage1D(ModelPage):
         #out is a list : set parameters and errors in TextCtrl
         else:
             i=0
+            j=0
             #print  "fitpage: list param  model",list
             #for item in self.param_toFit:
-            #    print "fitpage: list display",item[0].GetLabelText()
+            #print "fitpage: list display",item[0].GetLabelText()
             for item in self.param_toFit:
                 if( out != None ) and len(out)<=len(self.param_toFit)and i < len(out):
                     #item[1].SetValue(format_number(out[i]))
                     item[1].SetValue(format_number(self.model.getParam(item[0].GetLabelText())))
-                    item[1].Refresh() 
-                if (cov !=None)and len(cov)<=len(self.param_toFit)and i < len(cov):
+                    item[1].Refresh()
+                if(cov !=None)and len(cov)<=len(self.param_toFit)and i < len(cov):
                     self.text2_3.Show() 
                     item[2].Show()
                     item[3].Clear()
-                    item[3].SetValue(format_number(cov[i]))
+                    for j in range(len(out)):
+                        if out[j]==self.model.getParam(item[0].GetLabelText()):#.SetValue(format_number(self.model.getParam(item[0].GetLabelText()))):
+                            #print "jjj", j,item[1],item[1].SetValue(format_number(self.model.getParam(item[0].GetLabelText())))
+                            break
+                    item[3].SetValue(format_number(cov[j]))
                     item[3].Show()   
                 i+=1
         
