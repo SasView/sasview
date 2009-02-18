@@ -62,11 +62,12 @@ class SectorInteractor(_BaseInteractor):
         self._post_data()
         
         # Bind to slice parameter events
-        self.base.parent.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
-
+        #self.base.parent.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
+        self.base.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
 
     def _onEVT_SLICER_PARS(self, event):
-        wx.PostEvent(self.base.parent, StatusEvent(status="SectorSlicer._onEVT_SLICER_PARS"))
+        #wx.PostEvent(self.base.parent, StatusEvent(status="SectorSlicer._onEVT_SLICER_PARS"))
+        wx.PostEvent(self.base, StatusEvent(status="SectorSlicer._onEVT_SLICER_PARS"))
         event.Skip()
         if event.type == self.__class__.__name__:
             self.set_params(event.params)
@@ -161,10 +162,11 @@ class SectorInteractor(_BaseInteractor):
         #phimax = max(self.right_line.theta+math.pi,self.left_line.theta+math.pi)
         #print "sector Q angles=",phimin*180/math.pi,phimax*180/math.pi,self.main_line.theta*180/math.pi
         #phi must be 0 to 2pi with cut-off line sts on the left.
-        sect = SectorQ(r_min=0.0, r_max= radius , phi_min=phimin+math.pi, phi_max=phimax+math.pi)
+        if nbins==None:
+            nbins = 20
+        sect = SectorQ(r_min=0.0, r_max= radius , phi_min=phimin+math.pi, phi_max=phimax+math.pi, nbins=nbins)
         #sect = SectorQ(r_min=-1*radius , r_max= radius , phi_min=phimin, phi_max=phimax)
-        if nbins!=None:
-            sect.nbins = nbins
+        
         
         sector = sect(self.base.data2D)
         

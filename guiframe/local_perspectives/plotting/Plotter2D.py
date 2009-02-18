@@ -189,6 +189,10 @@ class ModelPanel2D( ModelPanel1D):
         slicerpop.Append(id,'&Print image', 'Print image ')
         wx.EVT_MENU(self, id, self.onPrint)
         
+        id = wx.NewId()
+        slicerpop.Append(id,'&Image Preview', 'image preview for print')
+        wx.EVT_MENU(self, id, self.onPrinterPreview)
+        
         slicerpop.AppendSeparator()
         item_list = self.parent.get_context_menu(self.graph)
         if (not item_list==None) and (not len(item_list)==0):
@@ -247,9 +251,7 @@ class ModelPanel2D( ModelPanel1D):
         slicerpop.Append(id,'&Printer setup', 'Set image size')
         wx.EVT_MENU(self, id, self.onPrinterSetup)
         
-        id = wx.NewId()
-        slicerpop.Append(id,'&Printer Preview', 'Set image size')
-        wx.EVT_MENU(self, id, self.onPrinterPreview)
+       
         """
         id = wx.NewId()
         slicerpop.Append(id, '&Toggle Linear/Log scale')

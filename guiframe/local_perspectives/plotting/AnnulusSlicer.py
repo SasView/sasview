@@ -51,12 +51,12 @@ class AnnulusInteractor(_BaseInteractor):
         self._post_data()
         
         # Bind to slice parameter events
-        self.base.parent.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
+        self.base.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
         
         
 
     def _onEVT_SLICER_PARS(self, event):
-        wx.PostEvent(self.base.parent, StatusEvent(status="AnnulusSlicer._onEVT_SLICER_PARS"))
+        wx.PostEvent(self.base, StatusEvent(status="AnnulusSlicer._onEVT_SLICER_PARS"))
         event.Skip()
         if event.type == self.__class__.__name__:
             self.set_params(event.params)
@@ -122,10 +122,11 @@ class AnnulusInteractor(_BaseInteractor):
         rmax = max(math.fabs(self.inner_circle.get_radius()),
                    math.fabs(self.outer_circle.get_radius()))
         print "rmin, rmax", rmin, rmax
-       
-        sect = SectorPhi(r_min=rmin , r_max= rmax, phi_min=0, phi_max=2*math.pi)
-        if nbins!=None:
-            sect.nbins = nbins
+        if nbins==None:
+            nbins = 20
+        sect = SectorPhi(r_min=rmin , r_max= rmax,
+                          phi_min=0, phi_max=2*math.pi , nbins=nbins)
+        
         
         sector = sect(self.base.data2D)
         

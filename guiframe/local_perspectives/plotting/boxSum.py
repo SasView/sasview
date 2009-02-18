@@ -76,7 +76,7 @@ class BoxSum(_BaseInteractor):
     def set_panel_name(self, name):
         self.panel_name= name
     def _onEVT_SLICER_PARS(self, event):
-        #printEVT("AnnulusSlicer._onEVT_SLICER_PARS")
+        wx.PostEvent(self.base, StatusEvent(status="Boxsum._onEVT_SLICER_PARS"))
         event.Skip()
         if event.type == self.__class__.__name__:
             self.set_params(event.params)
@@ -107,7 +107,7 @@ class BoxSum(_BaseInteractor):
         self.center.clear()
         
         #self.base.connect.disconnect()
-        self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
+        #self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
         
     def update(self):
         """
