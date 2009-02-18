@@ -410,7 +410,8 @@ class ModelPanel2D( ModelPanel1D):
     def _onEditSlicer(self, event):
         if self.slicer !=None:
             from SlicerParameters import SlicerParameterPanel
-            dialog = SlicerParameterPanel(self.parent, -1, "Slicer Parameters")
+            dialog = SlicerParameterPanel(self, -1, "Slicer Parameters")
+            #dialog = SlicerParameterPanel(self.parent, -1, "Slicer Parameters")
             dialog.set_slicer(self.slicer.__class__.__name__,
                             self.slicer.get_params())
             if dialog.ShowModal() == wx.ID_OK:
