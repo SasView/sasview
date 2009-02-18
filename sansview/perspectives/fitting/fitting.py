@@ -64,12 +64,12 @@ class Plugin:
         self.parent.Bind(EVT_MODEL2D_PANEL, self._on_model2D_show)
         #Menu for fitting
         self.menu1 = wx.Menu()
-        id1 = wx.NewId()
-        self.menu1.Append(id1, '&Show fit panel')
-        wx.EVT_MENU(owner, id1, self.on_perspective)
+        #id1 = wx.NewId()
+        #self.menu1.Append(id1, '&fit panel')
+        #wx.EVT_MENU(owner, id1, self.on_perspective)
+        #Set park engine
         id3 = wx.NewId()
         self.menu1.AppendCheckItem(id3, "park") 
-    
         wx.EVT_MENU(owner, id3, self._onset_engine)
         
         #menu for model
