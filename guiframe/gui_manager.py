@@ -646,7 +646,8 @@ class ViewerFrame(wx.Frame):
                 self._mgr.GetPane(self.panels[ID].window_name).Show()
                 # Hide default panel
                 self._mgr.GetPane(self.panels["default"].window_name).Hide()
-                
+            else:
+                self.sb.set_status( msg=" Panel %s is displayed"%self.panels[ID].window_name) 
                 
             self._mgr.Update()
     def _onHistoryPanel(self, event):
