@@ -469,7 +469,7 @@ class Ring(object):
         
     """
     
-    def __init__(self, r_min=0, r_max=0, center_x=0, center_y=0):
+    def __init__(self, r_min=0, r_max=0, center_x=0, center_y=0,nbins=20 ):
         # Minimum radius
         self.r_min = r_min
         # Maximum radius
@@ -479,7 +479,7 @@ class Ring(object):
         # Center of the ring in y
         self.center_y = center_y
         # Number of angular bins
-        self.nbins_phi = 20
+        self.nbins_phi = nbins_phi
         
     def __call__(self, data2D):
         """
