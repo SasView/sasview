@@ -47,6 +47,7 @@ class ModelPage(wx.ScrolledWindow):
         self.data=None
         #panel interface
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
+        self.sizer11 = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer10 = wx.GridBagSizer(5,5)
         self.sizer9 = wx.GridBagSizer(5,5)
         self.sizer8 = wx.GridBagSizer(5,5)
@@ -58,6 +59,8 @@ class ModelPage(wx.ScrolledWindow):
         #model selection
         self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
         self.vbox.Add(self.sizer4)
+        #model description
+        self.vbox.Add(self.sizer11)
         #model paramaters layer
         self.vbox.Add(self.sizer5)
         #polydispersion selected
@@ -76,8 +79,7 @@ class ModelPage(wx.ScrolledWindow):
         
       
         #------------------ sizer 4  draw------------------------  
-        # model on which the fit would be performed
-        self.model=model 
+       
        
         # define combox box
         self.modelbox = wx.ComboBox(self, -1)
@@ -99,11 +101,17 @@ class ModelPage(wx.ScrolledWindow):
         self.model_view =wx.Button(self,id,'View 2D')
         self.model_view.Bind(wx.EVT_BUTTON, self.onModel2D,id=id)
         self.model_view.SetToolTipString("View model in 2D")
+        
         self.sizer4.Add(self.model_view,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        
         self.model_view.Enable()
         self.model_view.SetFocus()
         
+        ix = 0
+        iy += 1
+        self.sizer4.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+
         #----------sizer6-------------------------------------------------
         self.disable_disp = wx.RadioButton(self, -1, 'No', (10, 10), style=wx.RB_GROUP)
         self.enable_disp = wx.RadioButton(self, -1, 'Yes', (10, 30))
@@ -202,6 +210,7 @@ class ModelPage(wx.ScrolledWindow):
         #dictionary of model name and model class
         self.model_list_box={}
         #Draw initial panel
+         #-----sizer 11--------------------model description------
         if self.model!=None:
             self.set_panel(self.model)
         
@@ -215,6 +224,17 @@ class ModelPage(wx.ScrolledWindow):
         self.Centre()
         self.Layout()
         self.parent.GetSizer().Layout()
+    def set_model_description(self, model):
+        
+        if model !=None and str(model.description)!=""and self.data==None:
+            self.sizer11.Clear(True)
+            self.box_description= wx.StaticBox(self, -1, 'Model Description')
+            boxsizer1 = wx.StaticBoxSizer(self.box_description, wx.VERTICAL)
+            boxsizer1.SetMinSize((320,20))
+            self.description = wx.StaticText(self,-1,str(model.description))
+            boxsizer1.Add(self.description, 0, wx.EXPAND)  
+            self.sizer11.Add(boxsizer1,1, wx.EXPAND | wx.ALL, 2)
+      
         
     def set_owner(self,owner):
         """ 
@@ -470,6 +490,9 @@ class ModelPage(wx.ScrolledWindow):
         self.param_toFit=[]
         self.fixed_param=[]
         self.model = model
+        
+        self.set_model_description( self.model) 
+        
         keys = self.model.getParamList()
         #list of dispersion paramaters
         self.disp_list=self.model.getDispParamList()
