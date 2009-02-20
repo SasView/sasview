@@ -158,7 +158,7 @@ class SectorInteractor(_BaseInteractor):
             phimin=self.left_edge.get_angle()
             phimax=self.right_edge.get_angle()
             
-        print "phimin, phimax, rmin ,rmax",math.degrees(phimin), math.degrees(phimax), rmin ,rmax
+        #print "phimin, phimax, rmin ,rmax",math.degrees(phimin), math.degrees(phimax), rmin ,rmax
         #from DataLoader.manipulations import SectorQ
         
         sect = new_sector(r_min=rmin, r_max=rmax, phi_min=phimin, phi_max=phimax)
