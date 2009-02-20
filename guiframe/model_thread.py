@@ -142,7 +142,7 @@ class Calc2D(CalcThread):
         
         lx = len(self.x)
         wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Computing ",curr_thread=self,type="update"))
+                       "Computing ",curr_thread=self,type="progress"))
         for i_x in range(len(self.x)):
             # Check whether we need to bail out
             self.update(output=output )
