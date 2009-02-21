@@ -1,3 +1,13 @@
+#TODO: add comments to document this module
+#TODO: clean-up the exception handling.
+#TODO: clean-up existing comments/documentation. 
+#      For example, the _getModelList method advertises 
+#      an 'id' parameter that is not part of the method's signature.
+#      It also advertises an ID as return value but it always returns zero.
+#TODO: clean-up the FractalAbsModel and PowerLawAbsModel menu items. Those
+#      model definitions do not belong here. They belong with the rest of the
+#      models.
+
 import wx
 import imp
 import os,sys,math
@@ -5,17 +15,21 @@ import os.path
 
 (ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
 
+# Time is needed by the log method
+import time
 
-    
+# Explicitly import from the pluginmodel module so that py2exe
+# places it in the distribution. The Model1DPlugin class is used
+# as the base class of plug-in models.
+from sans.models.pluginmodel import Model1DPlugin
     
 def log(message):
-    print message
     out = open("plugins.log", 'a')
     out.write("%10g:  %s\n" % (time.clock(), message))
     out.close()
 
 def findModels():
-    print "looking for models"
+    log("looking for models in: %s/plugins" % os.getcwd())
     if os.path.isdir('plugins'):
         return _findModels('plugins')
     return []
@@ -48,6 +62,7 @@ def _findModels(dir):
                     if not file==None:
                         file.close()
     except:
+        # Don't deal with bad plug-in imports. Just skip.
         pass
     return plugins
 class ModelManager:
