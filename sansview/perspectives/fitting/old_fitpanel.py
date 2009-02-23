@@ -42,7 +42,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.sim_page = SimultaneousFitPage(self, id=-1)
         self.AddPage(self.sim_page,"Simultaneous Fit")
         
-        self._mgr = self.GetAuiManager()
+        self._mgr = wx.aui.AuiManager(self)
 
         
         #dictionary of miodel {model class name, model class}
@@ -59,8 +59,6 @@ class FitPanel(wx.aui.AuiNotebook):
         #updating the panel
         self.Update()
         self.Center()
-        
-        
     def onClosePage(self, event):
         self.ToggleWindowStyle(wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB)
         #print "went here",self.get_current_page(), self.GetPage(0)
@@ -103,7 +101,7 @@ class FitPanel(wx.aui.AuiNotebook):
             name = data.name # item in Data1D
         except:
             name = 'Fit'
-       
+        
         if self.fit_page_name != name:
             #self.about_page.Disable()
             from fitpage1D import FitPage1D

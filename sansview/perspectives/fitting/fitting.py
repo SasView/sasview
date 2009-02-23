@@ -6,7 +6,7 @@ from copy import deepcopy
 from danse.common.plottools.plottables import Data1D, Theory1D,Data2D
 from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
-from sans.guicomm.events import EVT_SLICER_PANEL,EVT_MODEL2D_PANEL
+from sans.guicomm.events import EVT_SLICER_PANEL,EVT_MODEL2D_PANEL,ERR_DATA
 
 from sans.fit.AbstractFitEngine import Model,Data,FitData1D,FitData2D
 from fitproblem import FitProblem
@@ -48,12 +48,17 @@ class Plugin:
         ## Fit engine
         self._fit_engine = 'scipy'
         self.enable_model2D=False
-        
+        # list of selcted data
+        self.selected_data_list=[]
         # Log startup
         logging.info("Fitting plug-in started")   
         # model 2D view
         self.model2D_id=None
-
+        self.err_dy={}
+        
+    def _on_data_error(self, event):
+        self.err_dy= event.err_dy
+        
     def populate_menu(self, id, owner):
         """
             Create a menu for the Fitting plug-in
@@ -116,8 +121,9 @@ class Plugin:
                 return [["Select data  for Fitting",\
                           "Dialog with fitting parameters ", self._onSelect]] 
             else:
-                if item.name==graph.selected_plottable and\
-                 item.__class__.__name__ is  "Data1D":
+                #if item.name==graph.selected_plottable and\
+                # item.__class__.__name__ is  "Data1D":
+                if item.name==graph.selected_plottable :
                     return [["Select data  for Fitting", \
                              "Dialog with fitting parameters ", self._onSelect]] 
         return []   
@@ -141,7 +147,7 @@ class Plugin:
         self.index_model = 0
         self.index_theory= 0
         self.parent.Bind(EVT_SLICER_PANEL, self._on_slicer_event)
-       
+        self.parent.Bind( ERR_DATA, self._on_data_error)
         
         #create the fitting panel
         #return [self.fit_panel]
@@ -201,12 +207,30 @@ class Plugin:
         """
         self.panel = event.GetEventObject()
         for item in self.panel.graph.plottables:
+            if item.name == self.panel.graph.selected_plottable:
+                if len(self.err_dy)>0:
+                    if item.name in  self.err_dy.iterkeys():
+                        dy= self.err_dy[item.name]
+                        data= Data1D(x=item.x, y=item.y, dy=dy)
+                        data.name=item.name
+                else:
+                    if item.dy==None:
+                        dy= numpy.zeros(len(item.y))
+                        dy[dy==0]=1
+                        print "dy", dy
+                        data= Data1D(x=item.x, y=item.y, dy=dy)
+                        data.name=item.name
+                    else:
+                        data= Data1D(x=item.x, y=item.y, dy=item.dy)
+                        data.name=item.name
             if item.name == self.panel.graph.selected_plottable or\
                  item.__class__.__name__ is "Data2D":
                 #find a name for the page created for notebook
+                print "fitting", self.panel
                 try:
                    
-                    page = self.fit_panel.add_fit_page(item)
+                    #page = self.fit_panel.add_fit_page(item)
+                    page = self.fit_panel.add_fit_page(data)
                     #page, model_name = self.fit_panel.add_fit_page(item)
                     # add data associated to the page created
                    
@@ -214,14 +238,19 @@ class Plugin:
                         #create a fitproblem storing all link to data,model,page creation
                         self.page_finder[page]= FitProblem()
                         #self.page_finder[page].save_model_name(model_name)  
-                        self.page_finder[page].add_data(item)
+                        self.page_finder[page].add_plotted_data(item)
+                        self.page_finder[page].add_fit_data(data)
+                       
+                            
                         wx.PostEvent(self.parent, StatusEvent(status="Page Created"))
                     else:
                         wx.PostEvent(self.parent, StatusEvent(status="Page was already Created"))
                 except:
-                    #raise
-                    wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
-                    %sys.exc_value))
+                    raise
+                    #wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
+                    #%sys.exc_value))
+                    
+                    
     def schedule_for_fit(self,value=0,fitproblem =None):  
         """
         
@@ -399,7 +428,7 @@ class Plugin:
         if current_pg!= simul_pg:
         #    if  value.get_scheduled() ==1 :
             value = self.page_finder[current_pg]
-            metadata =  value.get_data()
+            metadata =  value.get_fit_data()
             list = value.get_model()
             model = list[0]
             smearer= value.get_smearer()
@@ -476,7 +505,7 @@ class Plugin:
         for page, value in self.page_finder.iteritems():
             try:
                 if value.get_scheduled()==1:
-                    metadata = value.get_data()
+                    metadata = value.get_fit_data()
                     list = value.get_model()
                     model= list[0]
                     #Create dictionary of parameters for fitting used
@@ -628,7 +657,7 @@ class Plugin:
         if self.fit_panel.GetPageCount() >1:
             for page in self.page_finder.iterkeys():
                 if  page==currpage :  
-                    data=self.page_finder[page].get_data()
+                    data=self.page_finder[page].get_plotted_data()
                     list=self.page_finder[page].get_model()
                     model=list[0]
                     break 
@@ -765,13 +794,14 @@ class Plugin:
         if data !=None:
             self.redraw_model(qmin,qmax)
             return 
+        self._draw_model1D(model,name,model.description, enable1D,qmin,qmax, qstep)
         self._draw_model2D(model=model,
                            description=model.description,
                            enable2D= enable2D,
                            qmin=qmin,
                            qmax=qmax,
                            qstep=qstep)
-        self._draw_model1D(model,name,model.description, enable1D,qmin,qmax, qstep)
+        
               
     def _draw_model1D(self,model,name,description=None, enable1D=True,
                       qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
@@ -802,8 +832,7 @@ class Plugin:
                     #raise
             else:
                 for i in range(xlen):
-                    y[i] = model.run(x[i])
-                #print x, y   
+                    y[i] = model.run(x[i]) 
                 try:
                     new_plot = Theory1D(x, y)
                     print "draw model 1D", name
@@ -827,7 +856,7 @@ class Plugin:
     def complete(self, output, elapsed, model, qmin, qmax,qstep=DEFAULT_NPTS):
        
         wx.PostEvent(self.parent, StatusEvent(status="Calc \
-        complete in %g sec" % elapsed, type="stop"))
+        complete !" , type="stop"))
         #print "complete",output, model,qmin, qmax
         data = output
         temp= numpy.zeros(numpy.shape(data))
@@ -889,7 +918,7 @@ class Plugin:
         theory.ymin= -qmax#/math.sqrt(2)
         theory.ymax= qmax#/math.sqrt(2)
         
-        print "model draw comptele xmax",theory.xmax,model.name
+        #print "model draw comptele xmax",theory.xmax,model.name
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
                          title="Analytical model 2D ", reset=True ))
          
@@ -897,7 +926,7 @@ class Plugin:
          
     def _draw_model2D(self,model,description=None, enable2D=False,
                       qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
-       
+        
         x=  numpy.linspace(start= -1*qmax,
                                stop= qmax,
                                num= qstep,
@@ -909,19 +938,23 @@ class Plugin:
        
         lx = len(x)
         #print x
-        data=numpy.zeros([len(x),len(y)])
+        #data=numpy.zeros([len(x),len(y)])
         self.model= model
         if enable2D:
-            from sans.guiframe.model_thread import Calc2D
-            self.calc_thread = Calc2D(parent =self.parent,x=x,
-                                       y=y,model= self.model, 
-                                       qmin=qmin,
-                                       qmax=qmax,
-                                       qstep=qstep,
-                            completefn=self.complete,
-                            updatefn=None)
-            self.calc_thread.queue()
-            self.calc_thread.ready(2.5)
+            try:
+                from sans.guiframe.model_thread import Calc2D
+                print "in draw model 2d ",self.model
+                self.calc_thread = Calc2D(parent =self.parent,x=x,
+                                           y=y,model= self.model, 
+                                           qmin=qmin,
+                                           qmax=qmax,
+                                           qstep=qstep,
+                                completefn=self.complete,
+                                updatefn=None)
+                self.calc_thread.queue()
+                self.calc_thread.ready(2.5)
+            except:
+                raise
             
     def show_panel2D(self, id=None ):
         self.parent.show_panel(self.model2D_id)

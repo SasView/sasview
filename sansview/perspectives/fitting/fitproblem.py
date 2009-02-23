@@ -15,13 +15,14 @@ class FitProblem:
             @ self.model_list:  is a list containing a model as first element 
             and its name assign example [lineModel, M0]
         """
-        self.data=None
+        self.fit_data=None
         self.theory_name=None
         self.model_list=[]
         self.schedule=0
         self.list_param=[]
         self.name_per_page=None
         self.smearer= None
+        self.plotted_data=None
         
     def set_smearer(self, smearer):
         self.smearer= smearer
@@ -45,23 +46,33 @@ class FitProblem:
         self.model_list=[model,name]
 
   
-    def add_data(self,data):
+    def add_plotted_data(self,data):
         """ 
             save a copy of the data select to fit
             @param data: data selected
         """
-        self.data = data
+        self.plotted_data = data
+    def add_fit_data(self,data):
+        """ 
+            save a copy of the data select to fit
+            @param data: data selected
+        """
+        self.fit_data = data
             
     def get_model(self):
         """ @return: saved model """
         #print "fitproblem",self.model_list
         return self.model_list
      
-    def get_data(self):
+    def get_plotted_data(self):
         """ @return:  list of data dList"""
-        return self.data
-      
-      
+        return self.plotted_data
+    
+    
+    def get_fit_data(self):
+        return self.fit_data
+    
+    
     def get_theory(self):
         """ @return the name of theory for plotting purpose"""
         return self.theory_name
