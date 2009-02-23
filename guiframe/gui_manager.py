@@ -224,7 +224,7 @@ class ViewerFrame(wx.Frame):
         self.defaultPanel    = DefaultPanel(self, -1, style=wx.RAISED_BORDER)
         
         # History panel
-        self.histPanel     = history.HistoryPanel(self, style=wx.RAISED_BORDER)
+        #self.histPanel     = history.HistoryPanel(self, style=wx.RAISED_BORDER)
         # self.build_gui()
        
         # Register the close event so it calls our own method
@@ -368,7 +368,7 @@ class ViewerFrame(wx.Frame):
         # It also sets the size of the application windows
         self.panels["default"] = self.defaultPanel
          # History panel
-        self.panels["historyPanel"] = self.histPanel  
+        #self.panels["historyPanel"] = self.histPanel  
         
         self._mgr.AddPane(self.defaultPanel, wx.aui.AuiPaneInfo().
                               Name("default").
@@ -377,6 +377,7 @@ class ViewerFrame(wx.Frame):
                               BestSize(wx.Size(self._window_width, self._window_height)).
                               MinSize(wx.Size(self._window_width, self._window_height)).
                               Show())
+        """
         self._mgr.AddPane(self.histPanel, wx.aui.AuiPaneInfo().
                           Name("historyPanel").Caption("History").
                           #Float().
@@ -391,6 +392,7 @@ class ViewerFrame(wx.Frame):
                           #Show().
                           BestSize(wx.Size(500,600)).
                           MinSize(wx.Size(200,150)))
+        """
 
         # Add the panels to the AUI manager
         for panel_class in panels:
@@ -649,18 +651,20 @@ class ViewerFrame(wx.Frame):
             
                 
             self._mgr.Update()
+    """
     def _onHistoryPanel(self, event):
         print "on history"
         if not self._mgr.GetPane("historyPanel").IsShown():
             self._mgr.GetPane("historyPanel").Show()
         self._mgr.Update()
         return
-        
+    """   
     def _on_open(self, event):
    
         from data_loader import plot_data
         path = self.choose_file()
-            
+        if path ==None:
+            return
         if path and os.path.isfile(path):
             plot_data(self, path)
            

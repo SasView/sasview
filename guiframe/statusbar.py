@@ -28,9 +28,10 @@ class MyStatusBar(wx.StatusBar):
   
         """ 
         self.count +=1
-        if self.count ==20:
+        if self.count ==30:
             self.timer_stop.Stop() 
             self.gauge.Hide()
+            self.SetStatusText( "", 0)
             self.count=0
     def OnTimer(self, evt): 
         """Update the progress bar while the timer is running 
@@ -47,11 +48,6 @@ class MyStatusBar(wx.StatusBar):
         if self.timer.IsRunning(): 
             while(self.thread.isrunning()):
                 self.progress += 1
-                
-                # Update the Rqnge if it has changed 
-                #if self.range >= 0 and self.range != self.gauge.GetRange(): 
-                #    self.gauge.SetRange(self.range) 
-      
                 # Update the progress value if it is less than the range 
                 if self.progress < self.gauge.GetRange()-20: 
                     self.gauge.SetValue(int(self.progress)) 
@@ -77,7 +73,6 @@ class MyStatusBar(wx.StatusBar):
         
         else:
             self.thread= thread
-            #if self.thread !=None:
             self.gauge.Show(True)
             if type.lower()=="start":
                 self.timer.Stop()
@@ -94,7 +89,7 @@ class MyStatusBar(wx.StatusBar):
                 self.timer.Start(100)
                 self.SetStatusText( str(msg), 0)
                 self.gauge.Pulse()
-                print "in progress"
+                #print "in progress"
                 
             if  type.lower()=="update":
                 
@@ -103,8 +98,8 @@ class MyStatusBar(wx.StatusBar):
                 self.progress +=10
                 if self.progress < self.gauge.GetRange()-20:
                     self.gauge.SetValue(int(self.progress)) 
+                    
             if type.lower()=="stop":
-                print "it is complete"
                 self.gauge.Show(True)
                 self.timer.Stop()
                 self.SetStatusText( str(msg), 0)
