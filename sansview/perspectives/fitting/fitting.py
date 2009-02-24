@@ -232,7 +232,7 @@ class Plugin:
                         dy= self.err_dy[item.name]
                         data= self.copy_data(item, dy)
                     else:
-                        data= self.copy_data(item, dy)
+                        data= item
                 else:
                     if item.dy==None:
                         dy= numpy.zeros(len(item.y))
