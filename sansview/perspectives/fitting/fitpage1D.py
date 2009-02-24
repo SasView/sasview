@@ -406,12 +406,12 @@ class FitPage1D(ModelPage):
         self.qmin_x=float(self.qmin.GetValue())
         self.qmax_x =float( self.qmax.GetValue())
         if len(self.param_toFit) >0 and flag==True:
-            if self.data.name == self.model.__class__.__name__:
-                print "when here have the same name "
-                wx.PostEvent(self.parent.parent, StatusEvent(status=\
-                            "Attempt to fit model %s with itself. fit will\
-                            not be performed"%self.data.name))
-                return 
+            #if self.data.name == self.model.__class__.__name__:
+                #print "when here have the same name "
+                #wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            #"Attempt to fit model %s with itself. fit will\
+                            #not be performed"%self.data.name))
+                #return 
             self.manager.schedule_for_fit( value=1,fitproblem =None) 
             if hasattr(self.data, "data"):
                 self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x,
@@ -423,7 +423,7 @@ class FitPage1D(ModelPage):
                  self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x)
         else:
               wx.PostEvent(self.parent.parent, StatusEvent(status=\
-                            "Select at least on parameter to fit "))
+                            "Select at least one parameter to fit "))
   
    
     def _onTextEnter(self,event):
