@@ -124,7 +124,12 @@ def plot_data(parent, path, name="Loaded Data"):
         new_plot.yaxis(output._yaxis,output._yunit)
         new_plot.group_id = output.filename
         new_plot.id = output.filename
-        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))
+        try:
+            title=output.filename
+        except:
+            title= filename
+        print "dataloader title", title,output.filename
+        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
     else:
         i=1
         for item in output:
@@ -152,8 +157,11 @@ def plot_data(parent, path, name="Loaded Data"):
             new_plot.yaxis(item._yaxis,item._yunit)
             new_plot.group_id = str(item.run[0])
             new_plot.id = str(item.run[0])
-            
-            wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=filename))
+            if hasattr(item,"title"):
+                title= item.title
+            else:
+                title= str(item.run[0])
+            wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
             i+=1
            
             

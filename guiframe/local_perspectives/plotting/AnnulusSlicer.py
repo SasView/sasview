@@ -84,8 +84,8 @@ class AnnulusInteractor(_BaseInteractor):
         self.clear_markers()
         self.outer_circle.clear()
         self.inner_circle.clear()
-        #self.base.connect.disconnect()
-        #self.base.parent.Unbind(EVT_SLICER_PARS)
+        self.base.connect.clearall()
+      
         self.base.Unbind(EVT_SLICER_PARS)
         
     def update(self):

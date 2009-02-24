@@ -10,7 +10,7 @@
 #from config import printEVT
 from BaseInteractor import _BaseInteractor
 from copy import deepcopy
-import math
+import math, numpy
 
 from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,EVT_SLICER_PARS
 import SlicerParameters
@@ -21,64 +21,49 @@ class BoxInteractor(_BaseInteractor):
     """
          Select an annulus through a 2D plot
     """
-    def __init__(self,base,axes,color='black', zorder=3,
-                  x_min=0.0025, x_max=0.0025, y_min=0.0025, y_max=0.0025):
-        
+    def __init__(self,base,axes,color='black', zorder=3):
         _BaseInteractor.__init__(self, base, axes, color=color)
+        
         self.markers = []
         self.axes = axes
-        self.qmax = self.base.data2D.xmax
+        
         self.connect = self.base.connect
+        
         self.x= 0.5*min(math.fabs(self.base.data2D.xmax),math.fabs( self.base.data2D.xmin))
         self.y= 0.5*min(math.fabs(self.base.data2D.xmax),math.fabs( self.base.data2D.xmin))        
-         
-        self.theta2= math.pi/3
+        
+        self.qmax = max(self.base.data2D.xmax,self.base.data2D.xmin,
+                        self.base.data2D.ymax,self.base.data2D.ymin )   
+        
         ## Number of points on the plot
         self.nbins = 30
         self.count=0
         self.error=0
         self.averager=None
-        self.left_line = VerticalLine(self, self.base.subplot,color='blue', 
-                                      zorder=zorder,
-                                        ymin= -self.y , 
-                                        ymax= self.y ,
-                                        xmin= -self.x,
-                                        xmax= -self.x)
-        self.left_line.qmax = self.qmax
         
-        self.right_line= VerticalLine(self, self.base.subplot,color='black', 
+        self.vertical_lines = VerticalLines(self, self.base.subplot,color='blue', 
                                       zorder=zorder,
-                                     ymin= -self.y , 
-                                     ymax= self.y,
-                                     xmin= self.x,
-                                     xmax= self.x)
-        self.right_line.qmax = self.qmax
+                                        y= self.y ,
+                                        x= self.x)
+        self.vertical_lines.qmax = self.qmax
+       
+        self.horizontal_lines= HorizontalLines(self, self.base.subplot,color='green', 
+                                      zorder=zorder,
+                                      x= self.x,
+                                      y= self.y)
+        self.horizontal_lines.qmax= self.qmax
         
-        self.top_line= HorizontalLine(self, self.base.subplot,color='green', 
-                                      zorder=zorder,
-                                      xmin= -self.x,
-                                      xmax= self.x,
-                                      ymin= self.y,
-                                      ymax= self.y)
-        self.top_line.qmax= self.qmax
-        
-        self.bottom_line= HorizontalLine(self, self.base.subplot,color='gray', 
-                                      zorder=zorder,
-                                      xmin= -self.x,
-                                      xmax= self.x,
-                                      ymin= -self.y,
-                                      ymax= -self.y)
-        self.bottom_line.qmax= self.qmax
+      
         
         self.update()
         self._post_data()
         
         # Bind to slice parameter events
-        self.base.parent.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
+        self.base.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
 
 
     def _onEVT_SLICER_PARS(self, event):
-        #printEVT("AnnulusSlicer._onEVT_SLICER_PARS")
+        wx.PostEvent(self.base.parent, StatusEvent(status="BoxSlicer._onEVT_SLICER_PARS"))
         event.Skip()
         if event.type == self.__class__.__name__:
             self.set_params(event.params)
@@ -105,60 +90,26 @@ class BoxInteractor(_BaseInteractor):
     def clear(self):
         self.averager=None
         self.clear_markers()
-        self.left_line.clear()
-        self.right_line.clear()
-        self.top_line.clear()
-        self.bottom_line.clear()
-        #self.base.connect.disconnect()
-        self.base.parent.Unbind(EVT_SLICER_PARS)
+        self.horizontal_lines.clear()
+        self.vertical_lines.clear()
+        self.base.connect.clearall()
+        
+        self.base.Unbind(EVT_SLICER_PARS)
         
     def update(self):
         """
         Respond to changes in the model by recalculating the profiles and
         resetting the widgets.
         """
-        
-        if self.top_line.has_move:
-            #print"top has moved"
-            self.top_line.update()
-            self.bottom_line.update(ymin= -self.top_line.y1,
-                                    ymax= -self.top_line.y2)
-            self.left_line.update(ymin= -self.top_line.y1,
-                                    ymax= -self.top_line.y2)
-            self.right_line.update(ymin= -self.top_line.y1,
-                                    ymax= -self.top_line.y2)
-           
-        if self.bottom_line.has_move:
-            #print "bottom has move"
-            self.bottom_line.update()
-            self.top_line.update(ymin= -self.bottom_line.y1,
-                                    ymax= -self.bottom_line.y2)
-            self.left_line.update(ymin= self.bottom_line.y1,
-                                    ymax= self.top_line.y1)
-            self.right_line.update(ymin= self.bottom_line.y1,
-                                    ymax=self.top_line.y1)
-           
-        if self.left_line.has_move:
-           
-            self.left_line.update()
-            self.right_line.update(xmin = - self.left_line.x1,
-                                   xmax = - self.left_line.x1)
-            self.bottom_line.update(xmin=  self.left_line.x1,
-                                     xmax= self.right_line.x1)
-            self.top_line.update(xmin= self.left_line.x1,
-                                    xmax= self.right_line.x1)
-           
-        if self.right_line.has_move:
-           
-            self.right_line.update()
-            self.left_line.update(xmin = -self.right_line.x1,
-                                   xmax = -self.right_line.x1)
+        if self.horizontal_lines.has_move:
+            #print "top has moved"
+            self.horizontal_lines.update()
+            self.vertical_lines.update(y=self.horizontal_lines.y)
+        if self.vertical_lines.has_move:
+            #print "right has moved"
+            self.vertical_lines.update()
+            self.horizontal_lines.update(x=self.vertical_lines.x)
             
-            self.bottom_line.update(xmin= self.left_line.x1,
-                                 xmax= self.right_line.x1)
-            
-            self.top_line.update(xmin= self.left_line.x1,
-                                    xmax= self.right_line.x1)
                
             
     def save(self, ev):
@@ -167,21 +118,20 @@ class BoxInteractor(_BaseInteractor):
         can restore on Esc.
         """
         self.base.freeze_axes()
-        self.left_line.save(ev)
-        self.right_line.save(ev)
-        self.top_line.save(ev)
-        self.bottom_line.save(ev)
+        self.vertical_lines.save(ev)
+        self.horizontal_lines.save(ev)
+    
     def _post_data(self):
         pass
         
     
     def post_data(self,new_slab=None , nbins=None):
         """ post data averaging in Q"""
-        x_min= min(self.left_line.x1, self.right_line.x1)
-        x_max= max(self.left_line.x1, self.right_line.x1)
+        x_min= -1*math.fabs(self.vertical_lines.x)
+        x_max= math.fabs(self.vertical_lines.x)
         
-        y_min= min(self.top_line.y1, self.bottom_line.y1)
-        y_max= max(self.top_line.y1, self.bottom_line.y1)  
+        y_min= -1*math.fabs(self.horizontal_lines.y)
+        y_max= math.fabs(self.horizontal_lines.y)
         
         if nbins !=None:
             self.nbins
@@ -222,21 +172,7 @@ class BoxInteractor(_BaseInteractor):
         new_plot.id = str(self.averager.__name__)
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
                                                  title=str(self.averager.__name__) ))
-        
-        
-    def _post_data(self):
-        # Compute data
-        data = self.base.data2D
-        from DataLoader.manipulations import  Boxavg
-        radius = math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
-        self.x= math.fabs(self.right_line.x1)
-        self.y= math.fabs(self.top_line.y1 )
-       
-        box =  Boxavg (x_min=-self.x, x_max=self.x, y_min=-self.y, y_max=self.y)
-       
-        self.count, self.error= box(self.base.data2D)
-        
-        #print "post data"
+    
               
                                        
     def moveend(self, ev):
@@ -254,10 +190,9 @@ class BoxInteractor(_BaseInteractor):
         """
         Restore the roughness for this layer.
         """
-        self.left_line.restore()
-        self.right_line.restore()
-        self.top_line.restore()
-        self.bottom_line.restore()
+        self.horizontal_lines.restore()
+        self.vertical_lines.restore()
+       
 
     def move(self, x, y, ev):
         """
@@ -270,11 +205,10 @@ class BoxInteractor(_BaseInteractor):
         
     def get_params(self):
         params = {}
-        params["x_max"]= math.fabs(self.right_line.x1)
-        params["y_max"]= math.fabs(self.top_line.y1)
+        params["x_max"]= math.fabs(self.vertical_lines.x)
+        params["y_max"]= math.fabs(self.horizontal_lines.y)
         params["nbins"]= self.nbins
-        params["errors"] = self.error
-        params["count"]= self.count
+      
         return params
     
     def set_params(self, params):
@@ -282,26 +216,12 @@ class BoxInteractor(_BaseInteractor):
         self.x = float(math.fabs(params["x_max"]))
         self.y = float(math.fabs(params["y_max"] ))
         self.nbins=params["nbins"]
-        self.left_line.update(xmin= -1*self.x,
-                              xmax = -1*self.x,
-                              ymin= -self.y,
-                              ymax=  self.y, 
-                              )
-        self.right_line.update(xmin= self.x,
-                              xmax = self.x,
-                              ymin= -self.y,
-                              ymax=  self.y, 
-                              )
-        self.top_line.update(xmin= -1*self.x,
-                             xmax= self.x,
-                             ymin= self.y,
-                             ymax= self.y)
-        self.bottom_line.update(xmin= -1*self.x,
-                                 xmax= self.x,
-                                 ymin= -1*self.y,
-                                 ymax= -1*self.y)
-       
+        
+        self.horizontal_lines.update(x= self.x, y=  self.y)
+        self.vertical_lines.update(x= self.x, y=  self.y)
         self.post_data( nbins=None)
+        
+        
     def freeze_axes(self):
         self.base.freeze_axes()
         
@@ -311,37 +231,51 @@ class BoxInteractor(_BaseInteractor):
     def draw(self):
         self.base.draw()
 
-class HorizontalLine(_BaseInteractor):
+class HorizontalLines(_BaseInteractor):
     """
          Select an annulus through a 2D plot
     """
-    def __init__(self,base,axes,color='black', zorder=5,mline=None,ymin=None, ymax=None, y=0.5,
-                 xmin=0.0,xmax=0.5):
+    def __init__(self,base,axes,color='black', zorder=5,x=0.5, y=0.5):
         
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.x1= xmax
-        self.save_x1= xmax
+        self.x= x
+        self.save_x= x
         
-        self.x2= xmin
-        self.save_x2= xmin
-        
-        self.y1= ymax
-        self.save_y1= ymax
-        
-        self.y2= ymin
-        self.save_y2= ymin
-        self.mline= mline
-        self.line = self.axes.plot([self.x1,-self.x1],
-                                   [self.y1,self.y2],
+        self.y= y
+        self.save_y= y
+       
+        try:
+            # Inner circle marker
+            self.inner_marker = self.axes.plot([0],[self.y], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          pickradius=5, label="pick", 
+                                          zorder=zorder, # Prefer this to other lines
+                                          visible=True)[0]
+        except:
+            self.inner_marker = self.axes.plot([0],[self.y], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          label="pick", 
+                                          visible=True)[0]
+            message  = "\nTHIS PROTOTYPE NEEDS THE LATEST VERSION OF MATPLOTLIB\n"
+            message += "Get the SVN version that is at least as recent as June 1, 2007"
+            
+        self.top_line = self.axes.plot([self.x,-self.x],
+                                   [self.y,self.y],
+                                      linestyle='-', marker='',
+                                      color=self.color,
+                                      visible=True)[0]
+        self.bottom_line = self.axes.plot([self.x,-self.x],
+                                   [-self.y,-self.y],
                                       linestyle='-', marker='',
                                       color=self.color,
                                       visible=True)[0]
         
-        self.npts = 20
         self.has_move=False
-        self.connect_markers([self.line])
+        self.connect_markers([self.top_line, self.inner_marker])
         self.update()
 
     def set_layer(self, n):
@@ -351,28 +285,29 @@ class HorizontalLine(_BaseInteractor):
     def clear(self):
         self.clear_markers()
         try:
-            
-            self.line.remove()
+            self.inner_marker.remove()
+            self.top_line.remove() 
+            self.bottom_line.remove()
         except:
             # Old version of matplotlib
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
    
-    def get_radius(self):
-        
-        return 0
    
-    def update(self,xmin=None, xmax=None,ymin=None,ymax=None, mline=None,translation=False):
+    def update(self,x=None,y=None):
         """
         Draw the new roughness on the graph.
         """
-        if xmin !=None:
-            self.x1 = xmin
-        if ymin !=None:
-            self.y1 = ymin
-        self.line.set(xdata=[self.x1,-self.x1],
-                       ydata=[self.y1,self.y1])
-    
+        if x!=None:
+            self.x = numpy.sign(self.x)*math.fabs(x)
+        if y !=None:
+            self.y = numpy.sign(self.y)*math.fabs(y)
+        self.inner_marker.set(xdata=[0],ydata=[self.y])
+        
+        self.top_line.set(xdata=[self.x,-self.x],
+                       ydata=[self.y,self.y])
+        self.bottom_line.set(xdata=[self.x,-self.x],
+                       ydata=[-self.y, -self.y])
         
         
     def save(self, ev):
@@ -380,12 +315,8 @@ class HorizontalLine(_BaseInteractor):
         Remember the roughness for this layer and the next so that we
         can restore on Esc.
         """
-        self.save_x1= self.x1
-        self.save_x2= self.x2
-       
-        self.save_y1= self.y1
-        self.save_y2= self.y2
-    
+        self.save_x= self.x
+        self.save_y= self.y
         
         self.base.freeze_axes()
 
@@ -398,10 +329,8 @@ class HorizontalLine(_BaseInteractor):
         """
         Restore the roughness for this layer.
         """
-        self.x1 = self.save_x1
-        self.x2 = self.save_x2
-        self.y1 = self.save_y1
-        self.y2 = self.save_y2
+        self.x = self.save_x
+        self.y = self.save_y
         
 
     def move(self, x, y, ev):
@@ -409,52 +338,57 @@ class HorizontalLine(_BaseInteractor):
         Process move to a new position, making sure that the move is allowed.
         """
         #print "horizontal move x y "
-        self.y1= y
+        self.y= y
         self.has_move=True
         self.base.base.update()
         
-    def set_cursor(self, x, y):
-        self.move(x, y, None)
-        self.update()
+  
         
-        
-    def get_params(self):
-        params = {}
-        params["radius"] = self.x1
-        #params["theta"] = self.xmax
-        return params
+  
     
-    def set_params(self, params):
-
-        x = params["radius"] 
-        self.set_cursor(x, self._inner_mouse_y)
-        
-
-
-
-class VerticalLine(_BaseInteractor):
+class VerticalLines(_BaseInteractor):
     """
          Select an annulus through a 2D plot
     """
-    def __init__(self,base,axes,color='black', zorder=5, mline=None, ymin=0.0, 
-                 ymax=0.5,xmin=-0.5,xmax=0.5
-                 ):
+    def __init__(self,base,axes,color='black',zorder=5,x=0.5, y=0.5):
         
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
         
-        self.x1= xmax
-        self.x2= xmin
-        self.y1= ymax
-        self.y2= ymin
-        self.line = self.axes.plot([self.x1,self.x2],[self.y1,self.y2],
+        self.x= math.fabs(x)
+        self.save_x= self.x
+        self.y= math.fabs(y)
+        self.save_y= y
+        
+        try:
+            # Inner circle marker
+            self.inner_marker = self.axes.plot([self.x],[0], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          pickradius=5, label="pick", 
+                                          zorder=zorder, # Prefer this to other lines
+                                          visible=True)[0]
+        except:
+            self.inner_marker = self.axes.plot([self.x],[0], linestyle='',
+                                          marker='s', markersize=10,
+                                          color=self.color, alpha=0.6,
+                                          label="pick", 
+                                          visible=True)[0]
+            message  = "\nTHIS PROTOTYPE NEEDS THE LATEST VERSION OF MATPLOTLIB\n"
+            message += "Get the SVN version that is at least as recent as June 1, 2007"
+            
+        self.right_line = self.axes.plot([self.x,self.x],[self.y,-self.y],
+                                      linestyle='-', marker='',
+                                      color=self.color,
+                                      visible=True)[0]
+        self.left_line = self.axes.plot([-self.x,-self.x],[self.y,-self.y],
                                       linestyle='-', marker='',
                                       color=self.color,
                                       visible=True)[0]
       
         self.has_move=False
-        self.connect_markers([self.line])
+        self.connect_markers([self.right_line, self.inner_marker])
         self.update()
 
     def set_layer(self, n):
@@ -464,30 +398,29 @@ class VerticalLine(_BaseInteractor):
     def clear(self):
         self.clear_markers()
         try:
-            
-            self.line.remove()
+            self.inner_marker.remove()
+            self.left_line.remove()
+            self.right_line.remove()
         except:
             # Old version of matplotlib
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
-   
-    
-    def get_radius(self):
-        return 0
-    
-    def update(self,xmin=None,xmax=None,ymin=None, ymax=None, opline=None,translation=False):
+
+    def update(self,x=None,y=None):
         """
         Draw the new roughness on the graph.
         """
 
-   
-        if xmin!=None:
-            self.x1=xmin
-        if ymin!=None:
-            self.y1=ymin
-        self.line.set(xdata=[self.x1,self.x1],
-                       ydata=[self.y1,-self.y1]) 
-        
+        if x!=None:
+            self.x = numpy.sign(self.x)*math.fabs(x)
+        if y !=None:
+            self.y = numpy.sign(self.y)*math.fabs(y)
+            
+        self.inner_marker.set(xdata=[self.x],ydata=[0]) 
+        self.left_line.set(xdata=[-self.x,-self.x],
+                       ydata=[self.y,-self.y]) 
+        self.right_line.set(xdata=[self.x,self.x],
+                       ydata=[self.y,-self.y]) 
     
         
     def save(self, ev):
@@ -495,10 +428,8 @@ class VerticalLine(_BaseInteractor):
         Remember the roughness for this layer and the next so that we
         can restore on Esc.
         """
-        self.save_x1= self.x1
-        self.save_x2= self.x2
-        self.save_y1= self.y1
-        self.save_y2= self.y2
+        self.save_x= self.x
+        self.save_y= self.y
         
         self.base.freeze_axes()
 
@@ -511,10 +442,8 @@ class VerticalLine(_BaseInteractor):
         """
         Restore the roughness for this layer.
         """
-        self.x1 = self.save_x1
-        self.x2 = self.save_x2
-        self.y1 = self.save_y1
-        self.y2= self.save_y2
+        self.x = self.save_x
+        self.y = self.save_y
       
         
     def move(self, x, y, ev):
@@ -522,37 +451,10 @@ class VerticalLine(_BaseInteractor):
         Process move to a new position, making sure that the move is allowed.
         """
         self.has_move=True
-        
-        # compute the b intercept of the vertical line
-        self.x1= x
-        
-        
+        self.x= x
         self.base.base.update()
         
-        
-    def set_cursor(self, x, y):
-        self.move(x, y, None)
-        self.update()
-        
-        
-    def get_params(self):
-        params = {}
-        params["x"] = self.xmin
-        params["ymin"] = self.ymin
-        params["ymax"] = self.ymax
-        return params
-    
-    def set_params(self, params):
-        """
-            Draw a vertical line given some value of params
-            @param params: a dictionary containing value for x, ymin , ymax to draw 
-            a vertical line
-        """
-        x = params["x"] 
-        ymin = params["ymin"] 
-        ymax = params["ymax"] 
-        #self.set_cursor(x, self._inner_mouse_y)
-        self.update(self,x =x,ymin =ymin, ymax =ymax)
+   
         
 
 class BoxInteractorX(BoxInteractor):

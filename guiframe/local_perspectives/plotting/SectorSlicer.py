@@ -62,12 +62,11 @@ class SectorInteractor(_BaseInteractor):
         self._post_data()
         
         # Bind to slice parameter events
-        #self.base.parent.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
         self.base.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
 
     def _onEVT_SLICER_PARS(self, event):
-        #wx.PostEvent(self.base.parent, StatusEvent(status="SectorSlicer._onEVT_SLICER_PARS"))
-        wx.PostEvent(self.base, StatusEvent(status="SectorSlicer._onEVT_SLICER_PARS"))
+       
+        wx.PostEvent(self.base.parent, StatusEvent(status="SectorSlicer._onEVT_SLICER_PARS"))
         event.Skip()
         if event.type == self.__class__.__name__:
             self.set_params(event.params)
@@ -96,8 +95,8 @@ class SectorInteractor(_BaseInteractor):
         self.main_line.clear()
         self.left_line.clear()
         self.right_line.clear()
-        #self.base.connect.disconnect()
-        #self.base.parent.Unbind(EVT_SLICER_PARS)
+        self.base.connect.clearall()
+        
         self.base.Unbind(EVT_SLICER_PARS)
         
     def update(self):

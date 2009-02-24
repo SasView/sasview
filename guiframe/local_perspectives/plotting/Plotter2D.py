@@ -190,7 +190,7 @@ class ModelPanel2D( ModelPanel1D):
         wx.EVT_MENU(self, id, self.onPrint)
         
         id = wx.NewId()
-        slicerpop.Append(id,'&Image Preview', 'image preview for print')
+        slicerpop.Append(id,'&Print Preview', 'image preview for print')
         wx.EVT_MENU(self, id, self.onPrinterPreview)
         
         slicerpop.AppendSeparator()

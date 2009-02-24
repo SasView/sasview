@@ -15,8 +15,8 @@ import math
 #from Plotter1D import AddPlotEvent
 import SlicerParameters
 import wx
-#(SlicerParamUpdateEvent, EVT_SLICER_PARS_UPDATE)   = wx.lib.newevent.NewEvent()
-from sans.guicomm.events import SlicerParamUpdateEvent
+
+from sans.guicomm.events import SlicerParamUpdateEvent,EVT_SLICER_PARS,StatusEvent
 class BoxSum(_BaseInteractor):
     """
          Select an annulus through a 2D plot
@@ -72,11 +72,12 @@ class BoxSum(_BaseInteractor):
         
         # Bind to slice parameter events
         #print "box sum  self.base.parent",self.base.parent
-        #self.base.parent.Bind(SlicerParameters.EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
+        self.base.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
     def set_panel_name(self, name):
         self.panel_name= name
     def _onEVT_SLICER_PARS(self, event):
-        wx.PostEvent(self.base, StatusEvent(status="Boxsum._onEVT_SLICER_PARS"))
+        wx.PostEvent(self.base.parent, StatusEvent(status="Boxsum._onEVT_SLICER_PARS"))
+        print "receiving value ",event.params
         event.Skip()
         if event.type == self.__class__.__name__:
             self.set_params(event.params)
@@ -105,9 +106,9 @@ class BoxSum(_BaseInteractor):
         self.horizontal_lines.clear()
         self.vertical_lines.clear()
         self.center.clear()
-        
+        self.base.connect.clearall()
         #self.base.connect.disconnect()
-        #self.base.parent.Unbind(SlicerParameters.EVT_SLICER_PARS)
+        self.base.Unbind(EVT_SLICER_PARS)
         
     def update(self):
         """
@@ -219,7 +220,7 @@ class BoxSum(_BaseInteractor):
         
         self.center_x=params["center_x"] 
         self.center_y=params["center_y"]
-        """
+       
         self.center.update(center_x=self.center_x,center_y=self.center_y)
        
         self.horizontal_lines.update(center= self.center,
@@ -231,7 +232,7 @@ class BoxSum(_BaseInteractor):
         
         self._post_data()
         
-        """
+       
         
     def freeze_axes(self):
         self.base.freeze_axes()
