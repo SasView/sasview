@@ -104,7 +104,7 @@ class FitPanel(wx.aui.AuiNotebook):
         except:
             name = 'Fit'
        
-        if self.fit_page_name != name:
+        if self.fit_page_name != name and self.draw_model_name !=name:
             #self.about_page.Disable()
             from fitpage1D import FitPage1D
             panel = FitPage1D(self,data, -1)
