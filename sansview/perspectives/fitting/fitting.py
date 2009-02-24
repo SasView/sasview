@@ -8,7 +8,7 @@ from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
 from sans.guicomm.events import EVT_SLICER_PANEL,EVT_MODEL2D_PANEL,ERR_DATA
 
-from sans.fit.AbstractFitEngine import Model,Data,FitData1D,FitData2D
+from sans.fit.AbstractFitEngine import Model,FitData1D,FitData2D#,Data,
 from fitproblem import FitProblem
 from fitpanel import FitPanel
 from fit_thread import FitThread
@@ -348,8 +348,7 @@ class Plugin:
                     model= list[0]
                     break
             i = 0
-            print "single-->result",pars,cpage,str(result),result.parameters,result.fitness,result.stderr
-            #print "fitting: single fit pars ", pars
+          
             for name in pars:
                 if result.pvec.__class__==numpy.float64:
                     model.setParam(name,result.pvec)
@@ -360,8 +359,7 @@ class Plugin:
             print "fitting result : chisqr",result.fitness
             print "fitting result : pvec",result.pvec
             print "fitting result : stderr",result.stderr
-            print "qmin qmax xmin xmax ymin , ymax",qmin, qmax,xmin, xmax ,ymin, ymax
-            
+           
             cpage.onsetValues(result.fitness, result.pvec,result.stderr)
             #title="Fitted model 2D "
             self.plot_helper(currpage=cpage,qmin=qmin,qmax=qmax,
@@ -453,7 +451,8 @@ class Plugin:
             list = value.get_model()
             model = list[0]
             smearer= value.get_smearer()
-            print "single fit", model, smearer
+           
+    
             #Create list of parameters for fitting used
             
             templist=[]
@@ -463,11 +462,24 @@ class Plugin:
                 for element in templist:
                     pars.append(str(element[0].GetLabelText()))
                 pars.sort()
-                print "single fit start pars:", pars
                 #Do the single fit
                 self.fitter.set_model(Model(model), self.fit_id, pars) 
                 #print "args...:",metadata,self.fit_id,smearer,qmin,qmax,ymin,ymax
-              
+                dy=[]
+                x=[]
+                y=[]
+                for i in range(len(metadata.dy)):
+                    if metadata.dy[i] !=0:
+                        dy.append(metadata.dy[i])
+                        x.append(metadata.x[i])
+                        y.append(metadata.y[i])
+                if len(dy)>0:        
+                    metadata.dy=numpy.zeros(len(dy))
+                    metadata.dy=dy
+                    metadata.y=numpy.zeros(len(y))
+                    metadata.y=y
+                    metadata.x=numpy.zeros(len(x))
+                    metadata.x=x
                 self.fitter.set_data(data=metadata,Uid=self.fit_id,
                                      smearer=smearer,qmin= qmin,qmax=qmax,
                                      ymin=ymin,ymax=ymax)
