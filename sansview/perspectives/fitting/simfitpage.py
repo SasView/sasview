@@ -73,7 +73,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             self.manager._on_simul_fit()
         else:
             wx.PostEvent(self.parent.Parent, StatusEvent(status=\
-                            "Select at least on model to fit "))
+                            "Select at least one model to fit "))
            
             
             
