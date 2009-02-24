@@ -240,6 +240,8 @@ class Plugin:
                         data= self.copy_data(item, dy)
                     else:
                         data= self.copy_data(item, dy)
+            else:
+                data= item
                         
                         
             if item.name == self.panel.graph.selected_plottable or\
