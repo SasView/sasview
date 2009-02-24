@@ -48,7 +48,7 @@ class FitPanel(wx.aui.AuiNotebook):
         #dictionary of miodel {model class name, model class}
         self.model_list_box={}
         # save the title of the last page tab added
-        self.fit_page_name=None
+        self.fit_page_name=[]
         self.draw_model_name=None
         #model page info
         self.model_page_number=None
@@ -104,9 +104,10 @@ class FitPanel(wx.aui.AuiNotebook):
         except:
             name = 'Fit'
         flag2=self.draw_model_name !=name
-        flag= ((self.draw_model_name ==name) and (data.__class__.__name__ is "Data2D"))
+        flag= ((self.draw_model_name ==name) and (data.__class__.__name__ is "Data2D"))or\
+        (self.draw_model_name !=name)
         #if self.fit_page_name != name and self.draw_model_name !=name:
-        if self.fit_page_name != name and flag :
+        if not name in self.fit_page_name  and flag :
             #self.about_page.Disable()
             from fitpage1D import FitPage1D
             panel = FitPage1D(self,data, -1)
@@ -117,8 +118,8 @@ class FitPanel(wx.aui.AuiNotebook):
             
             self.AddPage(page=panel,caption=name,select=True)
             panel.populate_box( self.model_list_box)
-            self.fit_page_name = name
-            EVT_FIT_PAGE
+            self.fit_page_name.append(name)
+    
             return panel #,m_name
         else:
             return None #, None
@@ -204,9 +205,9 @@ class FitPanel(wx.aui.AuiNotebook):
         try:
             sim_page = self.GetPage(1)
             selected_page = self.GetPage(self.GetSelection())
-            print "sim_page ",sim_page ,selected_page
+            #print "sim_page ",sim_page ,selected_page
             if sim_page != selected_page:
-                print "sim_page ",sim_page ,selected_page
+                #print "sim_page ",sim_page ,selected_page
                 # remove the check box link to the model name of this page (selected_page)
                 sim_page.remove_model(selected_page)
                 #remove that page from page_finder of fitting module
@@ -217,9 +218,13 @@ class FitPanel(wx.aui.AuiNotebook):
                         break
                 #Delete the page from notebook
                 page_number = self.GetSelection()
-                print "on close",selected_page.name,self.GetPageText(page_number),self.draw_model_name
+                #print "on close",selected_page.name,self.GetPageText(page_number),self.draw_model_name
+                
+                if selected_page.name in self.fit_page_name:
+                    self.fit_page_name.remove(selected_page.name)
+                    
                 if selected_page.name== self.draw_model_name:
-                    print "went here"
+                    #print "went here"
                     self.draw_model_name=None
                     self.model_page=None
                 if  page_number == 1:
@@ -229,7 +234,7 @@ class FitPanel(wx.aui.AuiNotebook):
                 #self.RemovePage(page_number)
                 i=self.DeletePage(page_number)
                 #self.count =self.count -1 
-                self.fit_page_name=None
+                
         except:
             raise
         #print "fitpanel", self.draw_model_name 
