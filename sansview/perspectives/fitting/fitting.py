@@ -239,7 +239,7 @@ class Plugin:
                         dy[dy==0]=1
                         data= self.copy_data(item, dy)
                     else:
-                        data= self.copy_data(item, dy)
+                        data= item
             else:
                 data= item
                         
