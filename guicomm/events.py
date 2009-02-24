@@ -13,3 +13,5 @@ import wx.lib
 (SlicerParameterEvent, EVT_SLICER_PARS)   = wx.lib.newevent.NewEvent()
 #slicer event
 (SlicerEvent, EVT_SLICER)   = wx.lib.newevent.NewEvent()
+# event containinG A DICTIONARY OF NAME and errors of selected data
+(ErrorDataEvent, ERR_DATA) = wx.lib.newevent.NewEvent()
