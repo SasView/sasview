@@ -198,8 +198,27 @@ class Plugin:
             [Somehow openGL needs this call]
         """
         self.parent.set_perspective(self.perspective)
-        
-        
+
+    def copy_data(self, item, dy):
+        detector=None
+        source=None
+        dxl=None
+        dxw=None
+        if hasattr(item, "dxl"):
+            dxl = item.dxl
+        if hasattr(item, "dxw"):
+            dxw = item.dxw
+        if hasattr(item, "detector"):
+            detector =item.detector
+        if hasattr(item, "source"):
+            source =item.source
+        from sans.guiframe import dataFitting 
+        data= dataFitting.Data1D(x=item.x, y=item.y, dy=dy, dxl=dxl, dxw=dxw)
+        data.name=item.name
+        data.detector=detector
+        data.source= source
+        return data
+
     def _onSelect(self,event):
         """ 
             when Select data to fit a new page is created .Its reference is 
@@ -211,18 +230,18 @@ class Plugin:
                 if len(self.err_dy)>0:
                     if item.name in  self.err_dy.iterkeys():
                         dy= self.err_dy[item.name]
-                        data= Data1D(x=item.x, y=item.y, dy=dy)
-                        data.name=item.name
+                        data= self.copy_data(item, dy)
+                    else:
+                        data= self.copy_data(item, dy)
                 else:
                     if item.dy==None:
                         dy= numpy.zeros(len(item.y))
                         dy[dy==0]=1
-                        print "dy", dy
-                        data= Data1D(x=item.x, y=item.y, dy=dy)
-                        data.name=item.name
+                        data= self.copy_data(item, dy)
                     else:
-                        data= Data1D(x=item.x, y=item.y, dy=item.dy)
-                        data.name=item.name
+                        data= self.copy_data(item, dy)
+                        
+                        
             if item.name == self.panel.graph.selected_plottable or\
                  item.__class__.__name__ is "Data2D":
                 #find a name for the page created for notebook
