@@ -212,6 +212,11 @@ class ModelPanel1D(PlotPanel):
             slicerpop.Append(id, "&Save %s points" % name)
             self.action_ids[str(id)] = plot
             wx.EVT_MENU(self, id, self._onSave)
+            #save as cansas
+            id = wx.NewId()
+            slicerpop.Append(id, "&Save %s canSAS XML" % name)
+            self.action_ids[str(id)] = plot
+            wx.EVT_MENU(self, id, self._onSaveXML)
                 
             # Option to delete plottable
             id = wx.NewId()
@@ -363,8 +368,31 @@ class ModelPanel1D(PlotPanel):
             self.plots[self.graph.selected_plottable]=new_plot
             
             self.graph.render(self)
-            self.subplot.figure.canvas.draw_idle()    
-    
+            self.subplot.figure.canvas.draw_idle() 
+               
+    def _onSaveXML(self, evt):
+        import os
+        id = str(evt.GetId())
+        if id in self.action_ids:         
+            path = None
+            dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", "*.xml", wx.SAVE)
+            if dlg.ShowModal() == wx.ID_OK:
+                path = dlg.GetPath()
+                mypath = os.path.basename(path)
+                #print path
+            dlg.Destroy()
+            
+            if not path == None:
+                out = open(path, 'w')
+                from DataLoader.readers import cansas_reader
+                reader = cansas_reader.Reader()
+                datainfo= self.plots[self.graph.selected_plottable].info
+                reader.write( path, datainfo)
+            return 
+                
+                
+                
+                
     def _onSave(self, evt):
         """
             Save a data set to a text file

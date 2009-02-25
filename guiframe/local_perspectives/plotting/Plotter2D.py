@@ -208,6 +208,7 @@ class ModelPanel2D( ModelPanel1D):
                         #print RuntimeError, "View1DPanel2D.onContextMenu: bad menu item"
         
                 slicerpop.AppendSeparator()
+        
         id = wx.NewId()
         slicerpop.Append(id, '&Edit Detector Parameters')
         wx.EVT_MENU(self, id, self._onEditDetector) 
@@ -261,7 +262,7 @@ class ModelPanel2D( ModelPanel1D):
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
-        
+   
     def _onEditDetector(self, event):
         print "edit detortor param",self.zmin_2D, self.zmax_2D
         import detector_dialog

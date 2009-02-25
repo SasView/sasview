@@ -90,8 +90,8 @@ def plot_data(parent, path, name="Loaded Data"):
             temp = output.err_data
             temp[temp==0]=1
 
-            wx.PostEvent(parent, StatusEvent(status="Loading 2D error bars of 1 \
-            created for : %s"% str(temp[temp==0])))
+            wx.PostEvent(parent, StatusEvent(status="Loading 2D error bars of value 1 \
+            were added to : %s"% output.filename))
             new_plot = Data2D(image=output.data,err_image=temp,
                               xmin=output.xmin,xmax=output.xmax,
                               ymin=output.ymin,ymax=output.ymax)
@@ -100,13 +100,17 @@ def plot_data(parent, path, name="Loaded Data"):
             #print "data_loader",output
         else:
             #print "output.dx, output.dy",output.dx, output.dy
-            if output.dy ==None:
-                #print "went here theory1D"
+            if output.dy ==None :
                 new_plot = Theory1D(output.x,output.y, dxl, dxw)
+            elif len(output.dy[output.dy==0])==len(output.dy):
+                output.dy[output.dy==0]=1 
+                wx.PostEvent(parent, StatusEvent(status="Loading 1D error bars of value 1 \
+                    were added to : %s"%output.filename))
+                new_plot = Theory1D(output.x,output.y,output.dy, dxl, dxw)
             else:
-                new_plot = Data1D(x=output.x,y=output.y,dy=output.dy, dxl=dxl, dxw=dxw)
-        #print "dataloader",output[0],output[1]
-        
+                    
+                new_plot = Data1D(x=output.x,y=output.y,dx=output.dx,dy=output.dy, dxl=dxl, dxw=dxw)
+       
         new_plot.source=output.source
         new_plot.name = output.filename
         new_plot.interactive = True
@@ -128,7 +132,7 @@ def plot_data(parent, path, name="Loaded Data"):
             title=output.filename
         except:
             title= filename
-        print "dataloader title", title,output.filename
+        
         wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
     else:
         i=1
@@ -143,7 +147,7 @@ def plot_data(parent, path, name="Loaded Data"):
             if item.dy ==None:
                 new_plot = Theory1D(item.x,item.y,dxl,dxw)
             else:
-                new_plot = Data1D(x=item.x,y=item.y,dy=item.dy,dxl=dxl,dxw=dxw)
+                new_plot = Data1D(x=item.x,y=item.y,dx=item.dx,dy=item.dy,dxl=dxl,dxw=dxw)
            
             new_plot.source=item.source
             #new_plot.info=output
