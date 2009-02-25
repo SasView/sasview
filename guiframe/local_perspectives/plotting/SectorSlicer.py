@@ -230,18 +230,17 @@ class SectorInteractor(_BaseInteractor):
         
     def get_params(self):
         params = {}
-        params["main_phi"] = self.main_line.theta
+        params["Phi"] = self.main_line.theta
         if math.fabs(self.left_line.phi) != math.fabs(self.right_line.phi):
             raise ValueError,"Phi left and phi right are different %f, %f"%(self.left_line.phi, self.right_line.phi)
-        params["left_phi"] = math.fabs(self.left_line.phi)
-        params["right_phi"] = math.fabs(self.right_line.phi)
+        params["Delta_Phi"] = math.fabs(self.left_line.phi)
         params["nbins"] = self.nbins
         return params
     
     def set_params(self, params):
         
-        main = params["main_phi"] 
-        phi = math.fabs(params["left_phi"] )
+        main = params["Phi"] 
+        phi = math.fabs(params["Delta_Phi"] )
         self.nbins = int(params["nbins"])
         self.main_line.theta= main
         
