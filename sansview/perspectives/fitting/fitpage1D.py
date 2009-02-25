@@ -29,6 +29,7 @@ class FitPage1D(ModelPage):
     
     def __init__(self, parent,data, *args, **kwargs):
         wx.ScrolledWindow.__init__(self, parent, *args, **kwargs)
+        
         """ 
             Initialization of the Panel
         """

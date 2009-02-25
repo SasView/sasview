@@ -468,18 +468,19 @@ class Plugin:
                 dy=[]
                 x=[]
                 y=[]
-                for i in range(len(metadata.dy)):
-                    if metadata.dy[i] !=0:
-                        dy.append(metadata.dy[i])
-                        x.append(metadata.x[i])
-                        y.append(metadata.y[i])
-                if len(dy)>0:        
-                    metadata.dy=numpy.zeros(len(dy))
-                    metadata.dy=dy
-                    metadata.y=numpy.zeros(len(y))
-                    metadata.y=y
-                    metadata.x=numpy.zeros(len(x))
-                    metadata.x=x
+                if metadata.__class__ in  ["Data1D","Theory1D"]:
+                    for i in range(len(metadata.dy)):
+                        if metadata.dy[i] !=0:
+                            dy.append(metadata.dy[i])
+                            x.append(metadata.x[i])
+                            y.append(metadata.y[i])
+                    if len(dy)>0:        
+                        metadata.dy=numpy.zeros(len(dy))
+                        metadata.dy=dy
+                        metadata.y=numpy.zeros(len(y))
+                        metadata.y=y
+                        metadata.x=numpy.zeros(len(x))
+                        metadata.x=x
                 self.fitter.set_data(data=metadata,Uid=self.fit_id,
                                      smearer=smearer,qmin= qmin,qmax=qmax,
                                      ymin=ymin,ymax=ymax)
@@ -572,7 +573,22 @@ class Plugin:
                         
                     self.fitter.set_model(new_model, self.fit_id, pars) 
                     print "sim-->model",metadata,model,self.fit_id, pars
-                    #self.fitter.set_model(Model(model), self.fit_id, pars) 
+                    dy=[]
+                    x=[]
+                    y=[]
+                    if metadata.__class__ in  ["Data1D","Theory1D"]:
+                        for i in range(len(metadata.dy)):
+                            if metadata.dy[i] !=0:
+                                dy.append(metadata.dy[i])
+                                x.append(metadata.x[i])
+                                y.append(metadata.y[i])
+                            if len(dy)>0:        
+                                metadata.dy=numpy.zeros(len(dy))
+                                metadata.dy=dy
+                                metadata.y=numpy.zeros(len(y))
+                                metadata.y=y
+                                metadata.x=numpy.zeros(len(x))
+                                metadata.x=x
                     self.fitter.set_data(metadata,self.fit_id,qmin,qmax,ymin,ymax)
                     print "sim---->value of problem",value.get_scheduled()
                     self.fitter.select_problem_for_fit(Uid=self.fit_id,value=value.get_scheduled())
