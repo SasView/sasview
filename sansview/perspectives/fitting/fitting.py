@@ -54,6 +54,7 @@ class Plugin:
         logging.info("Fitting plug-in started")   
         # model 2D view
         self.model2D_id=None
+        self.sim_page=None
         self.err_dy={}
         
     def _on_data_error(self, event):
@@ -69,9 +70,9 @@ class Plugin:
         self.parent.Bind(EVT_MODEL2D_PANEL, self._on_model2D_show)
         #Menu for fitting
         self.menu1 = wx.Menu()
-        #id1 = wx.NewId()
-        #self.menu1.Append(id1, '&fit panel')
-        #wx.EVT_MENU(owner, id1, self.on_perspective)
+        id1 = wx.NewId()
+        self.menu1.Append(id1, '&Simultaneous')
+        wx.EVT_MENU(owner, id1, self.on_add_sim_page)
         #Set park engine
         id3 = wx.NewId()
         self.menu1.AppendCheckItem(id3, "park") 
@@ -83,15 +84,19 @@ class Plugin:
         self.menu_mng.populate_menu(menu2, owner)
         id2 = wx.NewId()
         owner.Bind(models.EVT_MODEL,self._on_model_menu)
-        #owner.Bind(modelpage.EVT_MODEL,self._on_model_menu)
+      
         self.fit_panel.set_owner(owner)
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
         owner.Bind(fitpage1D.EVT_MODEL_BOX,self._on_model_panel)
-        #owner.Bind(fitpage2D.EVT_MODEL_BOX,self._on_model_panel)
+        
         #create  menubar items
         return [(id, self.menu1, "Fitting"),(id2, menu2, "Model")]
     
-    
+    def on_add_sim_page(self, event):
+        self.sim_page= self.fit_panel.add_sim_page()
+        self.sim_page.add_model(self.page_finder)
+        
+        
     def help(self, evt):
         """
             Show a general help dialog. 
@@ -299,7 +304,8 @@ class Plugin:
              @param names: the paramter name
              @note: expecting park used for fit.
         """  
-        sim_page=self.fit_panel.GetPage(1) 
+        #sim_page=self.fit_panel.GetPage(1) 
+        sim_page= self.sim_page
         for page, value in self.page_finder.iteritems():
             if page != sim_page:
                 list=value.get_model()
@@ -418,7 +424,13 @@ class Plugin:
             except:
                 wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fitting error: %s" % sys.exc_value))
                 return
-  
+    def stop_fit(self):
+        if self.calc_thread != None and self.calc_thread.isrunning():
+                    
+                    self.calc_thread.interrupt()
+                    self.calc_thread.stop()
+                    wx.PostEvent(self.parent, StatusEvent(status="Fitting  \
+        is cancelled" , type="stop"))
     def _on_single_fit(self,id=None,qmin=None, qmax=None,ymin=None, ymax=None,xmin=None,xmax=None):
         """ 
             perform fit for the  current page  and return chisqr,out and cov
@@ -441,7 +453,8 @@ class Plugin:
         #Get information (model , data) related to the page on 
         #with the fit will be perform
         current_pg=self.fit_panel.get_current_page() 
-        simul_pg=self.fit_panel.GetPage(1 )
+        #simul_pg=self.fit_panel.GetPage(1 )
+        simul_pg=self.sim_page
         pars=[]   
         #for page, value in self.page_finder.iteritems():
         if current_pg!= simul_pg:
@@ -464,6 +477,9 @@ class Plugin:
                 pars.sort()
                 #Do the single fit
                 self.fitter.set_model(Model(model), self.fit_id, pars) 
+                if self._fit_engine=="scipy":
+                    wx.PostEvent(self.parent, StatusEvent(status="Parameters range will\
+                     be ignored for %s fitting engine"%str(self._fit_engine)))
                 #print "args...:",metadata,self.fit_id,smearer,qmin,qmax,ymin,ymax
                 dy=[]
                 x=[]
@@ -564,11 +580,7 @@ class Plugin:
                         for item in param:
                             param_value = item[1]
                             param_name = item[0]
-                            #print "fitting ", param,param_name, param_value
-                           
-                            #new_model.set( model.getParam(param_name[0])= param_value)
-                            #new_model.set( exec"%s=%s"%(param_name[0], param_value))
-                            #new_model.set( exec "%s"%(param_nam) = param_value)
+    
                             new_model.parameterset[ param_name].set( param_value )
                         
                     self.fitter.set_model(new_model, self.fit_id, pars) 
@@ -658,7 +670,8 @@ class Plugin:
         name = evt.name
         
         print "name fitting", name
-        sim_page=self.fit_panel.GetPage(1)
+        #sim_page=self.fit_panel.GetPage(1)
+        sim_page=self.sim_page
         current_pg = self.fit_panel.get_current_page() 
         if current_pg != sim_page:
             current_pg.set_panel(model)
@@ -678,7 +691,8 @@ class Plugin:
             # save the name containing the data name with the appropriate model
             self.page_finder[current_pg].set_model(model,M_name)
             self.plot_helper(currpage= current_pg,qmin= None,qmax= None)
-            sim_page.add_model(self.page_finder)
+            if self.sim_page!=None:
+                self.sim_page.add_model(self.page_finder)
         
     def  set_smearer(self,smearer):     
          current_pg=self.fit_panel.get_current_page()

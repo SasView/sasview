@@ -20,6 +20,8 @@ class SimultaneousFitPage(wx.ScrolledWindow):
              Simultaneous page display
         """
         self.parent = parent
+        #self.page_finder = page_finder
+        self.page_finder={}
         self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer1 = wx.GridBagSizer(5,5)
         #self.sizer2 = wx.GridBagSizer(5,5)
@@ -50,8 +52,8 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.params=[]
         self.model_list=[]
         self.model_toFit=[]
-        self.page_finder={}
-       
+        
+        #self.add_model(self.page_finder)
         self.vbox.Layout()
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)
@@ -63,10 +65,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """ signal for fitting"""
         for page in self.page_finder.iterkeys():
             page.set_model_parameter()
-            
-        #if len(self.model_toFit) ==1 :
-        #    self.manager._on_single_fit()
-           # print "simfitpage: when here"
         if len(self.model_toFit) >= 1 :
             self._onTextEnter()
             self.set_model()
@@ -83,7 +81,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             @param manager: instance of plugin fitting
         """
         self.manager = manager
-        
+        self.add_model( self.manager.page_finder)
         
     def select_all_model_name(self,event):
         """
@@ -124,6 +122,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         ix = 0
         iy = 1 
         list=[]
+       # if len(self.page_finder)>0:
         for page, value in page_finder.iteritems():
             try:
                 list = value.get_model()
@@ -253,11 +252,56 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 else:
                     self.params.append(self.parser_helper(value))  
             except:
-                raise
+                #raise
                 wx.PostEvent(self.parent.Parent, StatusEvent(status="Constraint Error: %s" % sys.exc_value))
         #print "simfitpage: self.params",self.params
-        
-        
+    def new_parser_helper(self,value):
+        """
+             @return  param:a list containing the name of a model ,its parameters 
+             value and name extracted from the constrainst controlbox
+        """
+        from sans.guiframe import utils
+        mylist=["=","<",">","<=", ">="]
+        for item in mylist:
+            if utils.look_for_tag( value,str(item))[0]:
+                print "went here"
+                model_param = utils.split_text(str(item), value,1)
+                param_name = model_param[0]
+                param_value = model_param[1]
+                print "simpage",utils.look_for_tag(param_name,"\.")[0]
+                if utils.look_for_tag(param_name,"\.")[0]:
+                    param_names = utils.split_text("\.",param_name,1)
+                    model_name = param_names[0]
+                    param_name = param_names[1]
+                    ##### just added
+                    print "simfitpage: param name",model_name,param_name
+                
+                    param=[str(model_name),param_name,str(param_value),"="]
+                    #print "simfitpage: param",param
+                    return param
+                else:
+                    #raise ValueError,"cannot evaluate this expression"
+                    wx.PostEvent(self.parent.Parent,
+                                  StatusEvent(status="cannot evaluate this expression"))
+                    return
+            elif utils.look_for_tag( value,"<")[0]:
+                model_param = utils.split_text("<", value,2)
+                if len(model_param)== 2:
+                    try:
+                        param_name = str(model_param[0])
+                        param_value = float(model_param[1])
+                        param=[str(model_name),param_name,param_value,"<"]
+                        #print "simfitpage: param",param
+                        return param
+                    except:
+                        wx.PostEvent(self.parent.Parent, StatusEvent(status="\
+                        could read this expression%s" % sys.exc_value))
+                        return
+            else:
+                #raise ValueError,"Missing '=' in expression"
+                wx.PostEvent(self.parent.Parent, StatusEvent(status="Missing '=' in expression"))
+                
+            
         
     def parser_helper(self,value):
         """
@@ -282,10 +326,13 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 #print "simfitpage: param",param
                 return param
             else:
-                raise ValueError,"cannot evaluate this expression"
+                #raise ValueError,"cannot evaluate this expression"
+                wx.PostEvent(self.parent.Parent,
+                              StatusEvent(status="cannot evaluate this expression"))
                 return
         else:
-            raise ValueError,"Missing '=' in expression"
+            #raise ValueError,"Missing '=' in expression"
+            wx.PostEvent(self.parent.Parent, StatusEvent(status="Missing '=' in expression"))
         
    
     

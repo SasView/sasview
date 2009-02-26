@@ -22,8 +22,8 @@ class FitPanel(wx.aui.AuiNotebook):
     CENTER_PANE = True
     def __init__(self, parent, *args, **kwargs):
         
-        wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_SCROLL_BUTTONS )
-        #wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_DEFAULT_STYLE  )
+        #wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_SCROLL_BUTTONS )
+        wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_DEFAULT_STYLE  )
         
         
         self.manager=None
@@ -33,14 +33,13 @@ class FitPanel(wx.aui.AuiNotebook):
         pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.onClosePage)
         #Creating the default page --welcomed page
+        self.about_page=None
         from sans.guiframe.welcome_panel import PanelAbout
         self.about_page = PanelAbout(self, -1)
         self.AddPage(self.about_page,"welcome!")
         #self.about_page.Disable()
         #Creating a page for simultaneous fitting
-        from simfitpage import SimultaneousFitPage
-        self.sim_page = SimultaneousFitPage(self, id=-1)
-        self.AddPage(self.sim_page,"Simultaneous Fit")
+       
         
         self._mgr = self.GetAuiManager()
 
@@ -54,6 +53,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.model_page_number=None
        
         self.model_page=None
+        self.sim_page=None
         # increment number for model name
         self.count=0
         #updating the panel
@@ -62,6 +62,7 @@ class FitPanel(wx.aui.AuiNotebook):
         
         
     def onClosePage(self, event):
+        """
         self.ToggleWindowStyle(wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB)
         #print "went here",self.get_current_page(), self.GetPage(0)
         #event.Skip()
@@ -70,8 +71,44 @@ class FitPanel(wx.aui.AuiNotebook):
             
             # Prevent last tab from being closed
             self.ToggleWindowStyle(~wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB)
+        """
+        selected_page = self.GetPage(self.GetSelection())
+        page_number = self.GetSelection()
+        if self.sim_page != selected_page and selected_page!=self.about_page:
+            print "sim_page ",sim_page ,selected_page
+            # remove the check box link to the model name of this page (selected_page)
+            self.sim_page.remove_model(selected_page)
+            #remove that page from page_finder of fitting module
+            page_finder=self.manager.get_page_finder() 
+            for page, value in page_finder.iteritems():
+                if page==selected_page:
+                    del page_finder[page]
+                    break
+            #Delete the page from notebook
+           
+            #print "on close",selected_page.name,self.GetPageText(page_number),self.draw_model_name
             
-
+            if selected_page.name in self.fit_page_name:
+                self.fit_page_name.remove(selected_page.name)
+                
+            if selected_page.name== self.draw_model_name:
+                print "went here"
+                self.draw_model_name=None
+                self.model_page=None
+            if  page_number == 1:
+                self.model_page=None
+                self.draw_model_name=None
+            #selected_page.Destroy()
+            #self.RemovePage(page_number)
+            #i=self.DeletePage(page_number)
+        elif selected_page==self.about_page:
+            #selected_page.Destroy()
+            #self.DeletePage(page_number)
+            self.about_page=None
+        else:
+            
+            self.manager.sim_page=None  
+            #self.DeletePage(page_number)
    
 
 
@@ -82,7 +119,7 @@ class FitPanel(wx.aui.AuiNotebook):
              @param manager: instance of plugin fitting
         """
         self.manager = manager
-        self.sim_page.set_manager(manager)
+        #self.sim_page.set_manager(manager)
         
     def set_owner(self,owner):
         """ 
@@ -90,7 +127,13 @@ class FitPanel(wx.aui.AuiNotebook):
             @param owner: the class responsible of plotting
         """
         self.event_owner=owner
-      
+        
+    def add_sim_page(self):
+        from simfitpage import SimultaneousFitPage
+        self.sim_page = SimultaneousFitPage(self, id=-1)
+        self.AddPage(self.sim_page,caption="Simultaneous Fit",select=True)
+        self.sim_page.set_manager(self.manager)
+        return self.sim_page
         
     def add_fit_page( self,data ):
         """ 

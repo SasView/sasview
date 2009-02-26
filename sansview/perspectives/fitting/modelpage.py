@@ -33,6 +33,7 @@ class ModelPage(wx.ScrolledWindow):
         """
         # model on which the fit would be performed
         self.model=model
+        self.back_up_model= model.clone()
         #list of dispersion paramaters
         self.disp_list=[]
         try:
@@ -48,7 +49,7 @@ class ModelPage(wx.ScrolledWindow):
         #panel interface
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
         self.sizer11 = wx.BoxSizer(wx.HORIZONTAL)
-        self.sizer10 = wx.GridBagSizer(5,5)
+        #self.sizer10 = wx.GridBagSizer(5,5)
         self.sizer9 = wx.GridBagSizer(5,5)
         self.sizer8 = wx.GridBagSizer(5,5)
         self.sizer7 = wx.GridBagSizer(5,5)
@@ -73,9 +74,8 @@ class ModelPage(wx.ScrolledWindow):
         # plotting range
         self.vbox.Add(self.sizer9)
         #close layer
-        self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
-        self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
-        self.vbox.Add(self.sizer10)
+        #self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+        #self.vbox.Add(self.sizer10)
         
       
         #------------------ sizer 4  draw------------------------  
@@ -185,6 +185,7 @@ class ModelPage(wx.ScrolledWindow):
         iy+=1 
         self.sizer9.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         #----------sizer 10 draw------------------------------------------------------
+        """
         id = wx.NewId()
         self.btClose =wx.Button(self,id,'Close')
         self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
@@ -198,7 +199,7 @@ class ModelPage(wx.ScrolledWindow):
         ix =0
         iy+=1
         self.sizer10.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-       
+        """
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         self.fixed_param=[]
@@ -213,7 +214,7 @@ class ModelPage(wx.ScrolledWindow):
          #-----sizer 11--------------------model description------
         if self.model!=None:
             self.set_panel(self.model)
-        
+        self.theta_cb=None
        
        
         self.vbox.Layout()
@@ -290,7 +291,8 @@ class ModelPage(wx.ScrolledWindow):
                 return 
             else:
                 if self.data !=None and self.model !=None: # allow to recognize data panel from model panel
-                #if self.data !=None and self.model !=None:
+                    
+                
                     self.cb1.SetValue(False)
                     self.select_all_param_helper()
                 
@@ -301,6 +303,17 @@ class ModelPage(wx.ScrolledWindow):
             if self.data !=None and self.model!=None:
                 if self.cb1.GetValue():
                     self.select_all_param_helper()
+            
+            if self.back_up_model!=None:
+                keys = self.back_up_model.getDispParamList()
+                keys.sort()
+                #disperse param into the initial state
+                for item in keys:
+                    value= self.back_up_model.getParam(item)
+                    self.model.setParam(item, value)
+                self._draw_model() 
+            
+                
             self.fittable_param=[]        
             self.fixed_param=[]
             self.sizer7.Clear(True)
@@ -325,7 +338,15 @@ class ModelPage(wx.ScrolledWindow):
             self.disp_box = wx.ComboBox(self, -1)
             self.disp_box.SetValue("GaussianModel")
             for k,v in self.polydisp.iteritems():
-                self.disp_box.Insert(str(v),id)  
+                """
+                if str(v)=="MyModel":
+                    self.disp_box.Insert("Select customized Model",id)  
+                else:
+                    self.disp_box.Insert(str(v),id)
+                """
+                if str(v)!="MyModel":
+                    self.disp_box.Insert(str(v),id)  
+                    
                 id+=1
             wx.EVT_COMBOBOX(self.disp_box,-1, self._on_select_Disp) 
             self.sizer7.Add(self.disp_box,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -408,19 +429,16 @@ class ModelPage(wx.ScrolledWindow):
         self.model = model
         self.parent.model_page.name = name
         self.parent.draw_model_name = name
-        self.model_view.Enable()
-        self.enable2D=False
-        print "select_model", self.name,model.__class__
+        
         self.set_panel(model)
         self._draw_model(name)
         
         # Select the model from the combo box
         items = self.modelbox.GetItems()
         for i in range(len(items)):
-            print "model name",items[i],model.name, model.__class__.__name__
             if items[i]==name:
                 self.modelbox.SetSelection(i)
-                
+                self.model_view.SetFocus()
                 
     def _on_select_Disp(self,event):
         """
@@ -451,12 +469,10 @@ class ModelPage(wx.ScrolledWindow):
                 self.model= model
                 self.set_panel(model)
                 self.name= name
-                
+                self.model_view.SetFocus()
                 self.parent.model_page.name=name
                 self.parent.draw_model_name=name
-                #self.manager.draw_model(model, name)
-                #self.enable2D=False
-                #self.model_view.Enable()
+               
                 self._draw_model(name)
             
             
@@ -523,6 +539,14 @@ class ModelPage(wx.ScrolledWindow):
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.text2_3.Hide() 
         ix +=1
+        self.text2_5 = wx.StaticText(self, -1, 'Min')
+        self.sizer5.Add(self.text2_5,(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+        ix +=1
+        self.text2_6 = wx.StaticText(self, -1, 'Max')
+        self.sizer5.Add(self.text2_6,(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+        ix +=1
         self.text2_4 = wx.StaticText(self, -1, 'Units')
         self.sizer5.Add(self.text2_4,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
@@ -558,6 +582,28 @@ class ModelPage(wx.ScrolledWindow):
                 ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
                 self.sizer5.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl2.Hide()
+                ix += 1
+                param_min= format_number(self.model.details[item][1])
+                ctl3 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
+                if float(param_min) ==0:
+                    ctl3.SetValue("-inf")
+                else:
+                    ctl3.SetValue(str (format_number(param_min)))
+                ctl3.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                ctl3.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                
+                self.sizer5.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                ix += 1
+                param_max= format_number(self.model.details[item][2])
+                ctl4 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
+                if float(param_max)==0:
+                    ctl4.SetValue("+inf")
+                else:
+                    ctl4.SetValue(str (format_number(param_max)))
+                ctl4.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                ctl4.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                self.sizer5.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                
                 ix +=1
                 # Units
                 try:
@@ -566,7 +612,7 @@ class ModelPage(wx.ScrolledWindow):
                     units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                 self.sizer5.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
            
-            self.parameters.append([cb,ctl1,text2,ctl2])
+            self.parameters.append([cb,ctl1,text2,ctl2, ctl3, ctl4])
                 
         iy+=1
         self.sizer5.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -578,19 +624,14 @@ class ModelPage(wx.ScrolledWindow):
                 break
             else:
                 self.text2_4.Hide()
-        #Disable or enable fit button
-        """
-        if not (len(self.param_toFit ) >0):
-            self.qmin.Disable()
-            self.qmax.Disable()
-        else:
-            self.qmin.Enable()
-            self.qmax.Enable()
-        """  
+        
         self.vbox.Layout()
         self.SetScrollbars(20,20,55,40)
         self.Layout()
         self.parent.GetSizer().Layout()
+        
+        
+        
     def _selectDlg(self):
         import os
         dlg = wx.FileDialog(self, "Choose a weight file", os.getcwd(), "", "*.*", wx.OPEN)
@@ -601,6 +642,10 @@ class ModelPage(wx.ScrolledWindow):
         return path
     def read_file(self, path):
         try:
+            if path==None:
+                wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            " Selected Distribution was not loaded: %s"%path))
+                return None, None
             input_f = open(path, 'r')
             buff = input_f.read()
             lines = buff.split('\n')
@@ -620,38 +665,184 @@ class ModelPage(wx.ScrolledWindow):
                     weights.append(weight)
             return numpy.array(angles), numpy.array(weights)
         except:
+            raise 
+        
+    def _draw_disp_theta(self): 
+        path = self._selectDlg()
+        dispersion=None
+       
+        for key, value in self.polydisp.iteritems():
+            if value =="MyModel":
+                disp_ph = key()
+                disp_th = key()
+                break
+        values,weights = self.read_file(path)
+        if values ==None and weights==None:
+            return 
+        import math
+        disp_ph.set_weights( values, weights)
+        disp_th.set_weights( values, weights)
+        
+        if self.theta_cb !=None:
+            angle= self.theta_cb.GetLabelText()
+        n=0
+        self.disp_list=self.model.getDispParamList()
+        if angle.lower().count("theta")>0:   
+            for param in self.model.getParamList():
+                if  not param in self.disp_list and  param.lower().count("theta")>0: 
+                    self.model.set_dispersion(param, disp_th)
+                    self.model.dispersion[param]['npts'] = len(values)
+                    n+=1
+           
+            if n ==0:
+              wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            " Model contains no theta distribution"))  
+            else:
+                self._draw_model() 
+    def _draw_disp_Phi(self): 
+        path = self._selectDlg()
+        dispersion=None
+       
+        for key, value in self.polydisp.iteritems():
+            if value =="MyModel":
+                disp_ph = key()
+                disp_th = key()
+                break
+        values,weights = self.read_file(path)
+        if values ==None and weights==None:
+            return 
+        import math
+        disp_ph.set_weights( values, weights)
+        disp_th.set_weights( values, weights)
+        
+        if self.theta_cb !=None:
+            angle= self.theta_cb.GetLabelText()
+        n=0
+        self.disp_list=self.model.getDispParamList()
+        if angle.lower().count("theta")>0:   
+            for param in self.model.getParamList():
+                if  not param in self.disp_list and  param.lower().count("theta")>0: 
+                    self.model.set_dispersion(param, disp_th)
+                    self.model.dispersion[param]['npts'] = len(values)
+                    n+=1
+           
+            if n ==0:
+              wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            " Model contains no theta distribution"))  
+            else:
+                self._draw_model() 
+          
+          
+    def select_disp_angle(self, event): 
+        if not self.phi_cb.GetValue():
+            return
+        path = self._selectDlg()
+        dispersion=None
+       
+        for key, value in self.polydisp.iteritems():
+            if value =="MyModel":
+                disp_ph = key()
+                disp_th = key()
+               
+                break
+        try:
+            values,weights = self.read_file(path)
+        except:
             raise
-                   
-    def  set_panel_dispers(self, disp_list, type="GaussianModel" ):
+        
+        if values ==None and weights==None:
+            return 
+        import math
+        wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            " Costumized Distribution: %s"% path))
+       
+        disp_ph.set_weights( values, weights)
+        disp_th.set_weights( values, weights)
+        
+       
+        
+        if self.theta_cb !=None:
+            angle= self.phi_cb.GetLabelText()
+        n=0
+        print "hello1",self.model.runXY([0.01,0.01]) 
+        self.disp_list=self.model.getDispParamList()
+        name= "phi"
+        if angle.lower().count(name)>0:   
+            for param in self.model.getParamList():
+                if  not param in self.disp_list and  param.lower().count(name)>0: 
+                    self.model.set_dispersion(param, disp_th)
+                    print "para, th",param, disp_th
+                    #self.model.dispersion[param]['npts'] = len(values)
+                    n+=1
+            print "model dispers list",self.model.getDispParamList()
+            if n ==0:
+              wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            " Model contains no %s distribution"%name))  
+            else:
+                print "hello2",self.model.runXY([0.01,0.01]) 
+                #self._draw_model()
+                qmin=self.qmin_x
+                qmax=self.qmax_x
+                qstep= self.num_points
+                x=  numpy.linspace(start= -1*qmax,
+                               stop= qmax,
+                               num= qstep,
+                               endpoint=True )  
+                y = numpy.linspace(start= -1*qmax,
+                               stop= qmax,
+                               num= qstep,
+                               endpoint=True )
+                output= numpy.zeros([len(x),len(y)])
+                for i_x in range(int(len(x))):
+                    for i_y in range(int(len(y))):
+                        if (x[i_x]*x[i_x]+y[i_y]*y[i_y]) \
+                        < qmin * qmin:
+                            output[i_x] [i_y]=0   
+                        else:
+                            value = self.model.runXY([x[i_x], y[i_y]])
+                            output[i_x] [i_y]=value 
+                print"modelpage", output
+                self.manager.complete( output=output, elapsed=None, model=self.model, qmin=qmin, qmax=qmax,qstep=qstep)
+                #self._draw_model()
+                      
+                      
+                      
+    def set_panel_dispers(self, disp_list, type="GaussianModel" ):
         
         self.fittable_param=[]
         self.fixed_param=[]
-                
+        
         ix=0
         iy=1
                 ### this will become a separate method
-        if type== "MyModel":
+        if type== "Select customized Model":
+            ix=0
+            iy=1
+            self.sizer8.Clear(True)        
+            disp1 = wx.StaticText(self, -1, 'Array Dispersion')
+            self.sizer8.Add(disp1,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
             
-            self.sizer8.Clear(True)
-            path = self._selectDlg()
-            dispersion=None
-            for key, value in self.polydisp.iteritems():
-                if value =="MyModel":
-                    dispersion= key()
-                    break
-            values,weights = self.read_file(path)
-            dispersion.set_weights( values, weights)
-            print "sipersion model", dispersion.value
-            for param in self.model.dispersion.keys():
-                print 
-                print "on MyModel disp",dispersion,param, self.model.set_dispersion(param, dispersion)
-
-            wx.PostEvent(self.parent.parent, StatusEvent(status=\
-                            " Selected Distribution: %s"%path))
-                
-        if type== "GaussianModel" :
-            print "went here"
+            ix+=1 
+            self.theta_cb = wx.CheckBox(self, -1,"Theta ", (10, 10))
+            wx.EVT_CHECKBOX(self, self.theta_cb.GetId(), self.select_disp_angle)
+            self.sizer8.Add(self.theta_cb,(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            ix+=1
+            self.phi_cb = wx.CheckBox(self, -1,"Phi", (10, 10))
+            wx.EVT_CHECKBOX(self, self.phi_cb.GetId(), self.select_disp_angle)
+            self.sizer8.Add(self.phi_cb,(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            
+            ix =0
+            iy +=1 
+            self.sizer8.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)        
+            self.vbox.Layout()
+            self.SetScrollbars(20,20,55,40)
+            self.Layout()
+            self.parent.GetSizer().Layout()  
            
+        if type== "GaussianModel" :
+
             self.sizer8.Clear(True)
             disp = wx.StaticText(self, -1, 'Dispersion')
             self.sizer8.Add(disp,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -737,7 +928,53 @@ class ModelPage(wx.ScrolledWindow):
             self.Layout()
             self.parent.GetSizer().Layout()  
           
-         
+    def checkFitValues(self,val_min, val_max):
+        """
+            Check the validity of input values
+        """
+        flag = True
+        min_value = val_min.GetValue()
+        max_value = val_max.GetValue()
+        # Check for possible values entered
+        if min_value.lstrip().rstrip() =="-inf":
+            min_value= -numpy.inf
+        if max_value.lstrip().rstrip() =="+inf":
+            max_value= numpy.inf
+        if  min_value==-numpy.inf and max_value== numpy.inf:
+            val_min.SetBackgroundColour(wx.WHITE)
+            val_min.Refresh()
+            val_max.SetBackgroundColour(wx.WHITE)
+            val_max.Refresh()
+            return flag
+        elif max_value== numpy.inf:
+            try:
+                float(min_value)
+                val_min.SetBackgroundColour(wx.WHITE)
+                val_min.Refresh()
+            except:
+                flag = False
+                val_min.SetBackgroundColour("pink")
+                val_min.Refresh()
+            return flag
+        elif min_value==-numpy.inf:
+            try:
+                float(max_value)
+                val_max.SetBackgroundColour(wx.WHITE)
+                val_max.Refresh()
+            except:
+                flag = False
+                val_max.SetBackgroundColour("pink")
+                val_max.Refresh()
+            return flag
+        else:    
+            if (float(min_value)< float(max_value)):
+                val_min.SetBackgroundColour(wx.WHITE)
+                val_min.Refresh()
+            else:
+                flag = False
+                val_min.SetBackgroundColour("pink")
+                val_min.Refresh()
+            return flag   
            
         
     def _onparamEnter(self,event):
@@ -754,6 +991,7 @@ class ModelPage(wx.ScrolledWindow):
                 try:
                      name=str(item[0].GetLabelText())
                      value= float(item[1].GetValue())
+                   
                      #print "model para", name,value
                      # If the value of the parameter has changed,
                      # update the model and set the is_modified flag
@@ -788,6 +1026,8 @@ class ModelPage(wx.ScrolledWindow):
                 try:
                      name=str(item[0].GetLabelText())
                      value= float(item[1].GetValue())
+                     param_min= item[4].GetValue()
+                     param_max= item[5].GetValue()
                      #print " fittable model para", name,value
                      # If the value of the parameter has changed,
                      # update the model and set the is_modified flag
@@ -795,9 +1035,27 @@ class ModelPage(wx.ScrolledWindow):
                          #print "went here", name,value
                          self.model.setParam(name,value)
                          is_modified = True
+                     if self.checkFitValues(item[4], item[5]):
+                         if param_min.lstrip().rstrip()== "-inf":
+                             param_min=None
+                         else:
+                             param_min=float(param_min)
+                         if param_max.lstrip().rstrip() =="+inf":
+                             param_max=None
+                         else:
+                             param_max=float(param_max)
+                         if  param_min !=  self.model.details[name][1]:
+                             self.model.details[name][1]= param_min
+                             is_modified = True
+                         if  param_max !=  self.model.details[name][2]:
+                             self.model.details[name][2]= param_max
+                             is_modified = True
+                         
                 except:
-                     wx.PostEvent(self.parent.parent, StatusEvent(status=\
-                            "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
+                    print item[4].GetValue(),item[5].GetValue()
+                    raise 
+                    #wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                    #       "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
             
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
@@ -846,7 +1104,7 @@ class ModelPage(wx.ScrolledWindow):
             if  self.cb1.GetValue()==True:
                 for item in self.parameters:
                     item[0].SetValue(True)
-                    list= [item[0],item[1],item[2],item[3]]
+                    list= [item[0],item[1],item[2],item[3],item[4],item[5]]
                     self.param_toFit.append(list )
                 if len(self.fittable_param)>0:
                     for item in self.fittable_param:

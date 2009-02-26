@@ -40,7 +40,7 @@ class FitPage1D(ModelPage):
         self.event_owner = None
         #panel interface
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
-        self.sizer10 = wx.GridBagSizer(5,5)
+        #self.sizer10 = wx.GridBagSizer(5,5)
         self.sizer9 = wx.GridBagSizer(5,5)
         self.sizer8 = wx.GridBagSizer(5,5)
         self.sizer7 = wx.GridBagSizer(5,5)
@@ -72,9 +72,7 @@ class FitPage1D(ModelPage):
         #fit info layer
         self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
         self.vbox.Add(self.sizer9)
-        #close layer
-        self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
-        self.vbox.Add(self.sizer10)
+       
         
         #---------sizer 1 draw--------------------------------
         self.DataSource  =wx.StaticText(self, -1,str(data.name))
@@ -242,10 +240,20 @@ class FitPage1D(ModelPage):
         
         ix += 1
         self.sizer9.Add(self.btFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
+        id = wx.NewId()
+        self.btStopFit =wx.Button(self,id,'Stop')
+        self.btStopFit.Bind(wx.EVT_BUTTON, self.onStopFit,id=id)
+        self.btStopFit.SetToolTipString("Stop the current fitting job.")
+        self.btStopFit.Hide()
+        ix += 1
+        self.sizer9.Add(self.btStopFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
         ix =0
         iy+=1 
         self.sizer9.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         #----------sizer 10 draw------------------------------------------------------
+        """
         id = wx.NewId()
         self.btClose =wx.Button(self,id,'Close')
         self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
@@ -259,7 +267,7 @@ class FitPage1D(ModelPage):
         ix =0
         iy+=1
         self.sizer10.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-       
+       """
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         self.fixed_param=[]
@@ -324,7 +332,14 @@ class FitPage1D(ModelPage):
                 wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
                             "Chisqr cannot be compute: %s"% sys.exc_value))
         
- 
+    def onStopFit(self, event):
+        
+        self.manager.stop_fit()
+        self.btStopFit.Hide()
+        self.vbox.Layout()
+        self.SetScrollbars(20,20,55,40)
+        self.Layout()
+        self.parent.GetSizer().Layout()
     def compute_chisqr(self):
         """ @param fn: function that return model value
             @return residuals
@@ -418,10 +433,14 @@ class FitPage1D(ModelPage):
                 self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x,
                                             ymin=self.data.ymin, ymax=self.data.ymax,
                                             xmin=self.data.xmin,xmax=self.data.xmax)
-                #self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x,
-                                            #ymin=self.data.ymin, ymax=self.data.ymax)
+                self.btStopFit.Show()
             else:
                  self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x)
+                 self.btStopFit.Show()
+            self.vbox.Layout()
+            self.SetScrollbars(20,20,55,40)
+            self.Layout()
+            self.parent.GetSizer().Layout()
         else:
               wx.PostEvent(self.parent.parent, StatusEvent(status=\
                             "Select at least one parameter to fit "))
