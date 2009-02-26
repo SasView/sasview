@@ -30,6 +30,10 @@ initc_models(void)
 	addCCoreShellModel(m);
 	addCEllipsoidModel(m);
 	addCSphereModel(m);
+	addCHardsphereStructure(m);
+	addCStickyHSStructure(m);
+	addCHayterMSAStructure(m);
+	addCSquareWellStructure(m);
 	addCEllipticalCylinderModel(m);
 	addDisperser(m);
 	addCGaussian(m);

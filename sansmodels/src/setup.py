@@ -24,7 +24,7 @@ def createODBcontent(class_name):
     content += "  This code was written as part of the DANSE project\n"
     content += "  http://danse.us/trac/sans/\n"
     content += "  @copyright 2007:"
-    content += "  Mathieu Doucet (University of Tennessee), for the DANSE project\n\n"
+    content += "  SANS/DANSE Group (University of Tennessee), for the DANSE project\n\n"
     content += "\"\"\"\n"
     content += "def model():\n"
     content += "    from ScatteringIntensityFactory import ScatteringIntensityFactory\n"
@@ -95,6 +95,18 @@ setup(
         #srcdir+"/CSphereModel.c",
         #srcdir+"/sphere.c",
         "sans/models/c_models/CSphereModel.cpp",
+        srcdir+"/SquareWell.c",
+        "sans/models/c_models/CSquareWellStructure.cpp",  
+        "sans/models/c_models/SquareWell.cpp", 
+        srcdir+"/StickyHS.c",         
+        "sans/models/c_models/CStickyHSStructure.cpp", 
+        "sans/models/c_models/StickyHS.cpp",      
+        srcdir+"/Hardsphere.c",         
+        "sans/models/c_models/CHardsphereStructure.cpp", 
+        "sans/models/c_models/Hardsphere.cpp",      
+        srcdir+"/HayterMSA.c",         
+        "sans/models/c_models/CHayterMSAStructure.cpp", 
+        "sans/models/c_models/HayterMSA.cpp",      
         "sans/models/c_models/sphere.cpp",
         #srcdir+"/CCylinderModel.c",
         "sans/models/c_models/CCylinderModel.cpp",
@@ -120,6 +132,7 @@ setup(
         srcdir+"/elliptical_cylinder.c",
         srcdir+"/disperser.c",
         igordir+"/libCylinder.c",
+        igordir+"/libStructureFactor.c",
         igordir+"/libSphere.c",
         srcdir+"/gaussian.c",
         srcdir+"/CGaussian.c",

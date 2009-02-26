@@ -6,7 +6,17 @@
  */
  //[PYTHONCLASS] = CoreShellModel
  //[DISP_PARAMS] = radius, thickness
- //[DESCRIPTION] =""
+ //[DESCRIPTION] =<text> Form factor for a monodisperse spherical
+ //                         particle with a core-shell structure:
+ //                       The form factor is normalized by the 
+ //                        total particle volume.
+ // 
+ //						radius: core radius
+ //                     thickness: shell thickness
+ //
+ //                     Ref: Guinier, A. and G. Fournet, 
+ //                          John Wiley and Sons, New York, 1955.
+ //				</text>
  //[FIXED]= <text> thickness.width;radius.width</text>
 typedef struct {
     /// Scale factor

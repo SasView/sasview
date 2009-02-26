@@ -9,6 +9,10 @@
 
 void addCCylinderModel(PyObject *module);
 void addCSphereModel(PyObject *module);
+void addCHardsphereStructure(PyObject *module);
+void addCStickyHSStructure(PyObject *module);
+void addCSquareWellStructure(PyObject *module);
+void addCHayterMSAStructure(PyObject *module);
 void addCCoreShellModel(PyObject *module);
 void addCCoreShellCylinderModel(PyObject *module);
 void addCEllipsoidModel(PyObject *module);
@@ -18,7 +22,6 @@ extern "C" {
 	//void addCCoreShellCylinderModel(PyObject *module);
 	//void addCCoreShellModel(PyObject *module);
 	//void addCEllipsoidModel(PyObject *module);
-	//void addCSphereModel(PyObject *module);
 	//void addCEllipticalCylinderModel(PyObject *module);
 	void addDisperser(PyObject *module);
 	void addCGaussian(PyObject *module);
@@ -146,6 +149,10 @@ initc_models(void)
 	addCCoreShellModel(m);
 	addCEllipsoidModel(m);
 	addCSphereModel(m);
+	addCHardsphereStructure(m);
+	addCStickyHSStructure(m);
+	addCSquareWellStructure(m);
+	addCHayterMSAStructure(m);
 	addCEllipticalCylinderModel(m);
 	addDisperser(m);
 	addCGaussian(m);

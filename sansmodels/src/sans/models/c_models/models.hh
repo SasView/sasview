@@ -59,6 +59,74 @@ public:
 	double evaluate_rphi(double q, double phi);
 };
 
+class HardsphereStructure{
+public:
+	// Model parameters
+	Parameter radius;
+	Parameter volfraction;
+
+	// Constructor
+	HardsphereStructure();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class StickyHSStructure{
+public:
+	// Model parameters
+	Parameter radius;
+	Parameter volfraction;
+	Parameter perturb;
+	Parameter stickiness;
+
+	// Constructor
+	StickyHSStructure();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class SquareWellStructure{
+public:
+	// Model parameters
+	Parameter radius;
+	Parameter volfraction;
+	Parameter welldepth;
+	Parameter wellwidth;
+
+	// Constructor
+	SquareWellStructure();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class HayterMSAStructure{
+public:
+	// Model parameters
+	Parameter radius;
+	Parameter charge;
+	Parameter volfraction;
+	Parameter temperature;
+	Parameter saltconc;
+	Parameter dielectconst;
+	
+	// Constructor
+	HayterMSAStructure();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
 class CoreShellModel{
 public:
 	// Model parameters
