@@ -107,6 +107,18 @@ class ModelManager:
         from sans.models.EllipsoidModel import EllipsoidModel
         self.model_list[str(wx.NewId())] = EllipsoidModel 
         
+        from sans.models.SquareWellStructure import SquareWellStructure
+        self.model_list[str(wx.NewId())] =  SquareWellStructure
+        
+        from sans.models.HardsphereStructure import HardsphereStructure
+        self.model_list[str(wx.NewId())] =  HardsphereStructure
+        
+        from sans.models.StickyHSStructure import StickyHSStructure
+        self.model_list[str(wx.NewId())] =  StickyHSStructure
+        
+        from sans.models.HayterMSAStructure import HayterMSAStructure
+        self.model_list[str(wx.NewId())] =  HayterMSAStructure
+        
         from sans.models.LineModel import LineModel
         self.model_list[str(wx.NewId())]  = LineModel
         
