@@ -46,7 +46,7 @@ class Plugin:
         #Flag to let the plug-in know that it is running standalone
         self.standalone=True
         ## Fit engine
-        self._fit_engine = 'park'
+        self._fit_engine = 'scipy'
         self.enable_model2D=False
         # list of selcted data
         self.selected_data_list=[]
@@ -75,7 +75,7 @@ class Plugin:
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
         #Set park engine
         id3 = wx.NewId()
-        self.menu1.AppendCheckItem(id3, "scipy") 
+        self.menu1.AppendCheckItem(id3, "park") 
         wx.EVT_MENU(owner, id3, self._onset_engine)
         
         #menu for model
@@ -359,12 +359,13 @@ class Plugin:
                 if result.pvec.__class__==numpy.float64:
                     model.setParam(name,result.pvec)
                 else:
-                    model.setParam(name,result.pvec[i])
-#                    print "fitting: single fit", name, result.pvec[i]
+                    print "fitting result : chisqr",result.fitness
+                    print "fitting result : pvec",result.pvec
+                    print "fitting result : stderr",result.stderr
+                    #model.setParam(name,result.pvec[i])
+#                   print "fitting: single fit", name, result.pvec[i]
                     i += 1
-            print "fitting result : chisqr",result.fitness
-            print "fitting result : pvec",result.pvec
-            print "fitting result : stderr",result.stderr
+           
            
             cpage.onsetValues(result.fitness, result.pvec,result.stderr)
             #title="Fitted model 2D "
@@ -372,9 +373,9 @@ class Plugin:
                              ymin=ymin, ymax=ymax,
                              xmin=xmin, xmax=xmax,title=None)
         except:
-            #raise
-            wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
-            return
+            raise
+            #wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+            #return
        
     def _simul_fit_completed(self,result,qmin,qmax, elapsed,pars=None,cpage=None,
                              xmin=None, xmax=None, ymin=None, ymax=None):

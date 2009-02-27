@@ -539,17 +539,7 @@ class ModelPage(wx.ScrolledWindow):
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.text2_3.Hide() 
         
-        ix +=1
-        self.text2_5 = wx.StaticText(self, -1, 'Min')
-        self.sizer5.Add(self.text2_5,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-        ix +=1
-        self.text2_6 = wx.StaticText(self, -1, 'Max')
-        self.sizer5.Add(self.text2_6,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-        if self.data ==None:
-            self.text2_5.Hide()
-            self.text2_6.Hide()
+       
         ix +=1
         self.text2_4 = wx.StaticText(self, -1, 'Units')
         self.sizer5.Add(self.text2_4,(iy, ix),(1,1),\
@@ -586,30 +576,7 @@ class ModelPage(wx.ScrolledWindow):
                 ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
                 self.sizer5.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl2.Hide()
-                ix += 1
-                param_min= format_number(self.model.details[item][1])
-                ctl3 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
-                if float(param_min) ==0:
-                    ctl3.SetValue("-inf")
-                else:
-                    ctl3.SetValue(str (format_number(param_min)))
-                ctl3.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                ctl3.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                
-                self.sizer5.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                ix += 1
-                param_max= format_number(self.model.details[item][2])
-                ctl4 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
-                if float(param_max)==0:
-                    ctl4.SetValue("+inf")
-                else:
-                    ctl4.SetValue(str (format_number(param_max)))
-                ctl4.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                ctl4.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                self.sizer5.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                if self.data==None:
-                    ctl4.Hide()
-                    ctl3.Hide()
+               
                 ix +=1
                 # Units
                 try:
@@ -618,7 +585,7 @@ class ModelPage(wx.ScrolledWindow):
                     units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                 self.sizer5.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
            
-            self.parameters.append([cb,ctl1,text2,ctl2, ctl3, ctl4])
+            self.parameters.append([cb,ctl1,text2,ctl2])
                 
         iy+=1
         self.sizer5.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -1110,7 +1077,7 @@ class ModelPage(wx.ScrolledWindow):
             if  self.cb1.GetValue()==True:
                 for item in self.parameters:
                     item[0].SetValue(True)
-                    list= [item[0],item[1],item[2],item[3],item[4],item[5]]
+                    list= [item[0],item[1],item[2],item[3]]
                     self.param_toFit.append(list )
                 if len(self.fittable_param)>0:
                     for item in self.fittable_param:
