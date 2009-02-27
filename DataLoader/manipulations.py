@@ -877,8 +877,8 @@ class _Sector:
                     if (tmp_min<math.pi and tmp_max>math.pi):
                         if((phi_value>tmp_max and phi_value<tmp_min+math.pi)or (phi_value>tmp_max-math.pi and phi_value<tmp_min)):
                             continue
-                #In case of one ROI (major only)(i.e.,for 'q' and 'phi')
-                else: 
+                #In case of one ROI (major only)(i.e.,for 'q')and do nothing for 'phi'.
+                elif run.lower()=='q': 
                     if (self.phi_max>=self.phi_min):
                         if (phi_value<self.phi_min  or phi_value>self.phi_max):
                             continue
@@ -902,7 +902,10 @@ class _Sector:
             self.phi_min=temp0
         else:
             qmax=temp
-                 
+        #Beam center is already corrected, but the calculation below assumed it was not.
+        # Thus Beam center shifted back to uncorrected value. ToDo: cleanup this codes.
+        center_x=center_x+0.5 
+        center_y=center_y+0.5         
         for i in range(numpy.size(data,1)):
             dx = pixel_width_x*(i+0.5 - center_x)
             
