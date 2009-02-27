@@ -240,7 +240,7 @@ class FitPage1D(ModelPage):
         
         ix += 1
         self.sizer9.Add(self.btFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        
+        """
         id = wx.NewId()
         self.btStopFit =wx.Button(self,id,'Stop')
         self.btStopFit.Bind(wx.EVT_BUTTON, self.onStopFit,id=id)
@@ -248,7 +248,7 @@ class FitPage1D(ModelPage):
         self.btStopFit.Hide()
         ix += 1
         self.sizer9.Add(self.btStopFit,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        
+        """
         ix =0
         iy+=1 
         self.sizer9.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -333,13 +333,14 @@ class FitPage1D(ModelPage):
                             "Chisqr cannot be compute: %s"% sys.exc_value))
         
     def onStopFit(self, event):
-        
         self.manager.stop_fit()
         self.btStopFit.Hide()
+        self.btFit.Show(True)
         self.vbox.Layout()
         self.SetScrollbars(20,20,55,40)
         self.Layout()
         self.parent.GetSizer().Layout()
+        
     def compute_chisqr(self):
         """ @param fn: function that return model value
             @return residuals
@@ -433,10 +434,12 @@ class FitPage1D(ModelPage):
                 self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x,
                                             ymin=self.data.ymin, ymax=self.data.ymax,
                                             xmin=self.data.xmin,xmax=self.data.xmax)
-                self.btStopFit.Show()
+                #self.btStopFit.Show()
+                #self.btFit.Hide()
             else:
                  self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x)
-                 self.btStopFit.Show()
+                 #self.btStopFit.Show()
+                 #self.btFit.Hide()
             self.vbox.Layout()
             self.SetScrollbars(20,20,55,40)
             self.Layout()

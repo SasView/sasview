@@ -538,6 +538,7 @@ class ModelPage(wx.ScrolledWindow):
         self.sizer5.Add(self.text2_3,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.text2_3.Hide() 
+        
         ix +=1
         self.text2_5 = wx.StaticText(self, -1, 'Min')
         self.sizer5.Add(self.text2_5,(iy, ix),(1,1),\
@@ -546,6 +547,9 @@ class ModelPage(wx.ScrolledWindow):
         self.text2_6 = wx.StaticText(self, -1, 'Max')
         self.sizer5.Add(self.text2_6,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+        if self.data ==None:
+            self.text2_5.Hide()
+            self.text2_6.Hide()
         ix +=1
         self.text2_4 = wx.StaticText(self, -1, 'Units')
         self.sizer5.Add(self.text2_4,(iy, ix),(1,1),\
@@ -603,7 +607,9 @@ class ModelPage(wx.ScrolledWindow):
                 ctl4.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl4.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 self.sizer5.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                
+                if self.data==None:
+                    ctl4.Hide()
+                    ctl3.Hide()
                 ix +=1
                 # Units
                 try:

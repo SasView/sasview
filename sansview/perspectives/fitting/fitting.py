@@ -1,4 +1,4 @@
-import os,os.path, re
+#import os,os.path, re
 import sys, wx, logging
 import string, numpy, math
 
@@ -12,9 +12,9 @@ from sans.fit.AbstractFitEngine import Model,FitData1D,FitData2D#,Data,
 from fitproblem import FitProblem
 from fitpanel import FitPanel
 from fit_thread import FitThread
-import models,modelpage
+import models#,modelpage
 import fitpage1D
-import park
+#import park
 DEFAULT_BEAM = 0.005
 DEFAULT_QMIN = 0.0
 DEFAULT_QMAX = 0.1
@@ -46,7 +46,7 @@ class Plugin:
         #Flag to let the plug-in know that it is running standalone
         self.standalone=True
         ## Fit engine
-        self._fit_engine = 'scipy'
+        self._fit_engine = 'park'
         self.enable_model2D=False
         # list of selcted data
         self.selected_data_list=[]
@@ -75,7 +75,7 @@ class Plugin:
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
         #Set park engine
         id3 = wx.NewId()
-        self.menu1.AppendCheckItem(id3, "park") 
+        self.menu1.AppendCheckItem(id3, "scipy") 
         wx.EVT_MENU(owner, id3, self._onset_engine)
         
         #menu for model
@@ -426,11 +426,10 @@ class Plugin:
                 return
     def stop_fit(self):
         if self.calc_thread != None and self.calc_thread.isrunning():
-                    
-                    self.calc_thread.interrupt()
-                    self.calc_thread.stop()
-                    wx.PostEvent(self.parent, StatusEvent(status="Fitting  \
-        is cancelled" , type="stop"))
+            #self.calc_thread.interrupt()
+            self.calc_thread.stop()
+            wx.PostEvent(self.parent, StatusEvent(status="Fitting  \
+is cancelled" , type="stop"))
     def _on_single_fit(self,id=None,qmin=None, qmax=None,ymin=None, ymax=None,xmin=None,xmax=None):
         """ 
             perform fit for the  current page  and return chisqr,out and cov
