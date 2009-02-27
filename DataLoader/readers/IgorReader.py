@@ -149,8 +149,8 @@ class Reader:
                 isCenter = False                
                 line_toks = line.split()
                 # Center in bin number
-                center_x = float(line_toks[0])-1
-                center_y = float(line_toks[1])-1
+                center_x = float(line_toks[0])
+                center_y = float(line_toks[1])
 
             if line.count("BCENT")>0:
                 isCenter = True
