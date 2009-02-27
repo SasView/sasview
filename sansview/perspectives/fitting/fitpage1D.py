@@ -278,6 +278,7 @@ class FitPage1D(ModelPage):
         self.param_toFit=[]
         # model on which the fit would be performed
         self.model=None
+        self.back_up_model= None
         #dictionary of model name and model class
         self.model_list_box={}    
                      
@@ -406,6 +407,7 @@ class FitPage1D(ModelPage):
             if name ==event.GetString():
                 try:
                     self.model=item()
+                    self.back_up_model= self.model.clone()
                     evt = ModelEventbox(model=self.model,name=name)
                     wx.PostEvent(self.event_owner, evt)
                     self.text1_1.Show()
