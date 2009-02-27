@@ -66,6 +66,7 @@ class DialogAbout(wx.Dialog):
         
         # Mac doesn't display images with transparent background so well, keep it for Windows
         image = file_dir+"/images/angles_flat.png"
+        
         if os.path.isfile(config._corner_image):
             image = config._corner_image
 
