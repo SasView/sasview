@@ -999,8 +999,8 @@ class ModelPage(wx.ScrolledWindow):
                 try:
                      name=str(item[0].GetLabelText())
                      value= float(item[1].GetValue())
-                     param_min= item[4].GetValue()
-                     param_max= item[5].GetValue()
+                     #param_min= item[4].GetValue()
+                     #param_max= item[5].GetValue()
                      #print " fittable model para", name,value
                      # If the value of the parameter has changed,
                      # update the model and set the is_modified flag
@@ -1008,8 +1008,9 @@ class ModelPage(wx.ScrolledWindow):
                          #print "went here", name,value
                          self.model.setParam(name,value)
                          is_modified = True
-                     if self.checkFitValues(item[4], item[5]):
-                         if param_min.lstrip().rstrip()== "-inf":
+                     """
+                     #if self.checkFitValues(item[4], item[5]):
+                     #    if param_min.lstrip().rstrip()== "-inf":
                              param_min=None
                          else:
                              param_min=float(param_min)
@@ -1023,9 +1024,9 @@ class ModelPage(wx.ScrolledWindow):
                          if  param_max !=  self.model.details[name][2]:
                              self.model.details[name][2]= param_max
                              is_modified = True
-                         
+                        """
                 except:
-                    print item[4].GetValue(),item[5].GetValue()
+                    #print item[4].GetValue(),item[5].GetValue()
                     raise 
                     #wx.PostEvent(self.parent.parent, StatusEvent(status=\
                     #       "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
