@@ -3,11 +3,12 @@ import sys, wx, logging
 import string, numpy, math
 
 from copy import deepcopy 
-from danse.common.plottools.plottables import  Theory1D,Data2D
+from danse.common.plottools.plottables import Data1D, Theory1D,Data2D
+from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
-from sans.guicomm.events import EVT_SLICER_PANEL,ERR_DATA
+from sans.guicomm.events import EVT_SLICER_PANEL,EVT_MODEL2D_PANEL,ERR_DATA
 
-from sans.fit.AbstractFitEngine import Model
+from sans.fit.AbstractFitEngine import Model,FitData1D,FitData2D#,Data,
 from fitproblem import FitProblem
 from fitpanel import FitPanel
 from fit_thread import FitThread
@@ -18,6 +19,8 @@ DEFAULT_BEAM = 0.005
 DEFAULT_QMIN = 0.0
 DEFAULT_QMAX = 0.1
 DEFAULT_NPTS = 50
+import time
+import thread
 
 class Plugin:
     """
