@@ -107,10 +107,9 @@ class Plugin:
                         and event.plot.group_id==panel.group_id:
                         is_available = True
                         
-                        
                         panel._onEVT_1DREPLOT(event)
                         self.parent.show_panel(panel.uid)
-                        print "went here for replottiing", event.plot.name
+                        #print "went here for replottiing", event.plot.name
                         
                 else:
                     # Check that the plot panel has no group ID
@@ -124,7 +123,7 @@ class Plugin:
             if not hasattr(event.plot,'data'):
                 from Plotter1D import ModelPanel1D
                 if hasattr(event.plot,"xtransform"):
-                    print "went here"
+                    #print "went here"
                     xtransform = event.plot.xtransform
                 else:
                    

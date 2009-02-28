@@ -92,7 +92,7 @@ class ModelPanel2D( ModelPanel1D):
         
         
     def _onEVT_SLICER_PARS(self, event):
-        print "paramaters entered on slicer panel", event.type, event.params
+        #print "paramaters entered on slicer panel", event.type, event.params
         self.slicer.set_params(event.params)
         #from sans.guicomm.events import SlicerPanelEvent
         #wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
@@ -246,14 +246,7 @@ class ModelPanel2D( ModelPanel1D):
             wx.EVT_MENU(self, id, self._onEditSlicer) 
         slicerpop.AppendSeparator() 
        
-        """
-        # Option to save the data displayed
-        id = wx.NewId()
-        slicerpop.Append(id,'&Printer setup', 'Set image size')
-        wx.EVT_MENU(self, id, self.onPrinterSetup)
-        
-       
-        """
+     
         id = wx.NewId()
         slicerpop.Append(id, '&Toggle Linear/Log scale')
         wx.EVT_MENU(self, id, self._onToggleScale) 
@@ -264,7 +257,9 @@ class ModelPanel2D( ModelPanel1D):
         self.PopupMenu(slicerpop, pos)
    
     def _onEditDetector(self, event):
-        print "edit detortor param",self.zmin_2D, self.zmax_2D
+        """
+        """
+        #print "edit detortor param",self.zmin_2D, self.zmax_2D
         import detector_dialog
         dialog = detector_dialog.DetectorDialog(self, -1,base=self.parent)
         xnpts = len(self.data2D.x_bins)
@@ -285,7 +280,7 @@ class ModelPanel2D( ModelPanel1D):
             self.zmax_2D = evt.zmax
        
         dialog.Destroy()
-        print "zmn ,zmax", self.zmin_2D, self.zmax_2D
+        #print "zmn ,zmax", self.zmin_2D, self.zmax_2D
         self.image(data= self.data2D.data,
                    xmin= self.data2D.xmin,
                    xmax= self.data2D.xmax,

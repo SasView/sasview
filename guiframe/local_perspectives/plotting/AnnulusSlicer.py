@@ -121,7 +121,7 @@ class AnnulusInteractor(_BaseInteractor):
                   math.fabs(self.outer_circle.get_radius()))
         rmax = max(math.fabs(self.inner_circle.get_radius()),
                    math.fabs(self.outer_circle.get_radius()))
-        print "rmin, rmax", rmin, rmax
+        #print "rmin, rmax", rmin, rmax
         if nbins==None:
             nbins = 20
         sect = SectorPhi(r_min=rmin , r_max= rmax,

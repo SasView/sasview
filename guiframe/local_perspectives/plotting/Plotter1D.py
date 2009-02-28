@@ -262,16 +262,7 @@ class ModelPanel1D(PlotPanel):
         id = wx.NewId()
         slicerpop.Append(id, '&Reset Graph')
         wx.EVT_MENU(self, id, self.onResetGraph)  
-        """
-        slicerpop.AppendSeparator() 
-        id = wx.NewId()
-        slicerpop.Append(id,'&Printer setup', 'Set image size')
-        wx.EVT_MENU(self, id, self.onPrinterSetup)
-        
-        id = wx.NewId()
-        slicerpop.Append(id,'&Printer Preview', 'Set image size')
-        wx.EVT_MENU(self, id, self.onPrinterPreview)
-        """
+       
         
 
         pos = event.GetPosition()

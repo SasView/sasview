@@ -162,7 +162,7 @@ class Calc2D(CalcThread):
                      wx.PostEvent(self.parent, StatusEvent(status=\
                        "Error computing %s at [%g,%g]" %(self.model.name, self.x[i_x],self.y[i_y])))
                      pass
-        print "model thread ouput",output       
+        #print "model thread ouput",output       
         elapsed = time.time()-self.starttime
         self.complete(
                       output=output, elapsed=elapsed,model= self.model,

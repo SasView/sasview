@@ -1,4 +1,4 @@
-import os, sys
+import os, sys,numpy
 import wx
 from dataFitting import Data1D, Theory1D
 from danse.common.plottools.plottables import Data2D
@@ -27,7 +27,6 @@ def load_ascii_1D(path):
     """
         Load a 1D ascii file, with errors
     """
-    import numpy
     if path and os.path.isfile(path):
     
         file_x = numpy.zeros(0)
@@ -62,11 +61,14 @@ def load_ascii_1D(path):
         return file_x, file_y, file_dy
     return None, None, None
 
-def plot_data(parent, path, name="Loaded Data"):
+def plot_data(parent, path):
+    """
+        Use the DataLoader loader to created data to plot.
+        @param path: the path of the data to load
+    """
     from sans.guicomm.events import NewPlotEvent, StatusEvent
-   
     from DataLoader.loader import  Loader
-    import numpy
+    
     #Instantiate a loader 
     L = Loader()
     
@@ -97,9 +99,8 @@ def plot_data(parent, path, name="Loaded Data"):
                               ymin=output.ymin,ymax=output.ymax)
             new_plot.x_bins=output.x_bins
             new_plot.y_bins=output.y_bins
-            #print "data_loader",output
         else:
-            #print "output.dx, output.dy",output.dx, output.dy
+           
             if output.dy ==None :
                 new_plot = Theory1D(output.x,output.y, dxl, dxw)
             elif len(output.dy[output.dy==0])==len(output.dy):
@@ -108,9 +109,9 @@ def plot_data(parent, path, name="Loaded Data"):
                     were added to : %s"%output.filename))
                 new_plot = Theory1D(output.x,output.y,output.dy, dxl, dxw)
             else:
-                    
                 new_plot = Data1D(x=output.x,y=output.y,dx=output.dx,dy=output.dy, dxl=dxl, dxw=dxw)
-       
+        if output.filename==None:
+            output.filename=str(filename)
         new_plot.source=output.source
         new_plot.name = output.filename
         new_plot.interactive = True
@@ -120,7 +121,6 @@ def plot_data(parent, path, name="Loaded Data"):
             new_plot.dxl = output.dxl
         if hasattr(output, "dxw"):
             new_plot.dxw = output.dxw
-        #print "loader output.detector",output.source
         new_plot.detector =output.detector
         
         # If the data file does not tell us what the axes are, just assume...
@@ -150,17 +150,16 @@ def plot_data(parent, path, name="Loaded Data"):
                 new_plot = Data1D(x=item.x,y=item.y,dx=item.dx,dy=item.dy,dxl=dxl,dxw=dxw)
            
             new_plot.source=item.source
-            #new_plot.info=output
             new_plot.name = str(item.run[0])
             new_plot.interactive = True
-           
-            #print "loader output.detector",output.source
             new_plot.detector =item.detector
             # If the data file does not tell us what the axes are, just assume...
             new_plot.xaxis(item._xaxis,item._xunit)
             new_plot.yaxis(item._yaxis,item._yunit)
             new_plot.group_id = str(item.run[0])
             new_plot.id = str(item.run[0])
+            new_plot.info= item
+            
             if hasattr(item,"title"):
                 title= item.title
             else:
