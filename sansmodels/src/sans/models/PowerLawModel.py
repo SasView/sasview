@@ -35,7 +35,7 @@ class PowerLawModel(BaseComponent):
         self.params['scale']        = 1.0
         self.params['background']   = 0.0
         self.description=""" The Power_Law model.
-        F(x) = scale* (x)^(-m) + bkd
+        F(x) = scale* (|x|)^(-m) + bkd
         The model has three parameters: 
         m     =  power
         scale  =  scale factor
@@ -49,13 +49,17 @@ class PowerLawModel(BaseComponent):
         self.fixed= []    
     def _PowerLaw(self, x):
         """
-            Evaluate  F(x) = scale* (x)^(-m) + bkd
+            Evaluate  F(x) = scale* (|x|)^(-m) + bkd
            
         """
-        if x<0 and self.params['m']>0:
-            raise ValueError, "negative number cannot be raised to a fractional power"
-        
-        return self.params['scale']*math.pow(x ,-1.0*self.params['m'])\
+        #if x!=0 and self.params['m']!=0:
+        #   raise ValueError, "negative number cannot be raised to a fractional power"
+        if self.params['m']>0  and x==0:
+            return 1e+32
+        elif self.params['m']==0  and x==0:
+            return 1
+        else:
+            return self.params['scale']*math.pow(x ,-1.0*self.params['m'])\
                 + self.params['background']
        
     def run(self, x = 0.0):
