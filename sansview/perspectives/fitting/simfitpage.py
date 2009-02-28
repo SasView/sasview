@@ -264,17 +264,17 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         mylist=["=","<",">","<=", ">="]
         for item in mylist:
             if utils.look_for_tag( value,str(item))[0]:
-                print "went here"
+                #print "went here"
                 model_param = utils.split_text(str(item), value,1)
                 param_name = model_param[0]
                 param_value = model_param[1]
-                print "simpage",utils.look_for_tag(param_name,"\.")[0]
+                #print "simpage",utils.look_for_tag(param_name,"\.")[0]
                 if utils.look_for_tag(param_name,"\.")[0]:
                     param_names = utils.split_text("\.",param_name,1)
                     model_name = param_names[0]
                     param_name = param_names[1]
                     ##### just added
-                    print "simfitpage: param name",model_name,param_name
+                    #print "simfitpage: param name",model_name,param_name
                 
                     param=[str(model_name),param_name,str(param_value),"="]
                     #print "simfitpage: param",param
@@ -300,7 +300,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             else:
                 #raise ValueError,"Missing '=' in expression"
                 wx.PostEvent(self.parent.Parent, StatusEvent(status="Missing '=' in expression"))
-                
+               
             
         
     def parser_helper(self,value):
@@ -333,6 +333,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         else:
             #raise ValueError,"Missing '=' in expression"
             wx.PostEvent(self.parent.Parent, StatusEvent(status="Missing '=' in expression"))
-        
+            
    
     

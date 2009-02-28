@@ -63,14 +63,6 @@ class FitPanel(wx.aui.AuiNotebook):
         
     def onClosePage(self, event):
         """
-        self.ToggleWindowStyle(wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB)
-        #print "went here",self.get_current_page(), self.GetPage(0)
-        #event.Skip()
-        if self.GetPageCount() <= 2:
-            #print "wente here"
-            
-            # Prevent last tab from being closed
-            self.ToggleWindowStyle(~wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB)
         """
         selected_page = self.GetPage(self.GetSelection())
         page_number = self.GetSelection()
@@ -92,7 +84,7 @@ class FitPanel(wx.aui.AuiNotebook):
                 self.fit_page_name.remove(selected_page.name)
                 
             if selected_page.name== self.draw_model_name:
-                print "went here"
+                #print "went here"
                 self.draw_model_name=None
                 self.model_page=None
             if  page_number == 1:
@@ -233,7 +225,7 @@ class FitPanel(wx.aui.AuiNotebook):
              close the current page except the simpage. remove each check box link to the model
              selected on that page. remove its reference into page_finder (fitting module)
         """
-        print "model page", page_number, page, self.draw_model_name
+        #print "model page", page_number, page, self.draw_model_name
         if page!=None and page_number!=None:
             i=self.DeletePage(page_number)
             #self.nb.RemovePage(page_number)
@@ -241,7 +233,7 @@ class FitPanel(wx.aui.AuiNotebook):
             self.model_page_number=None
             self.model_page=None
             self.draw_model_name=None
-            print"self.draw_model_name",self.draw_model_name
+            #print"self.draw_model_name",self.draw_model_name
             return 
         try:
             sim_page = self.GetPage(1)

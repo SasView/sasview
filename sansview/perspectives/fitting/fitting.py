@@ -3,25 +3,21 @@ import sys, wx, logging
 import string, numpy, math
 
 from copy import deepcopy 
-from danse.common.plottools.plottables import Data1D, Theory1D,Data2D
-from danse.common.plottools.PlotPanel import PlotPanel
+from danse.common.plottools.plottables import  Theory1D,Data2D
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
-from sans.guicomm.events import EVT_SLICER_PANEL,EVT_MODEL2D_PANEL,ERR_DATA
+from sans.guicomm.events import EVT_SLICER_PANEL,ERR_DATA
 
-from sans.fit.AbstractFitEngine import Model,FitData1D,FitData2D#,Data,
+from sans.fit.AbstractFitEngine import Model
 from fitproblem import FitProblem
 from fitpanel import FitPanel
 from fit_thread import FitThread
-import models#,modelpage
+import models
 import fitpage1D
-#import park
+
 DEFAULT_BEAM = 0.005
 DEFAULT_QMIN = 0.0
 DEFAULT_QMAX = 0.1
 DEFAULT_NPTS = 50
-import time
-import thread
-print "main",thread.get_ident()
 
 class Plugin:
     """
@@ -33,31 +29,38 @@ class Plugin:
         
         ## Reference to the parent window
         self.parent = None
+        #Provide list of models existing in the application
         self.menu_mng = models.ModelManager()
         ## List of panels for the simulation perspective (names)
         self.perspective = []
+        #list of panel to send to guiframe
         self.mypanels=[]
+        # reference to the current running thread
         self.calc_thread = None
-        self.done = False
         # Start with a good default
         self.elapsed = 0.022
+        # the type of optimizer selected, park or scipy
         self.fitter  = None
-       
-        #Flag to let the plug-in know that it is running standalone
+        #Flag to let the plug-in know that it is running stand alone
         self.standalone=True
         ## Fit engine
         self._fit_engine = 'scipy'
-        self.enable_model2D=False
-        # list of selcted data
+        #List of selected data
         self.selected_data_list=[]
         # Log startup
         logging.info("Fitting plug-in started")   
         # model 2D view
         self.model2D_id=None
+        #keep reference of the simultaneous fit page
         self.sim_page=None
+        #dictionary containing data name and error on dy of that data 
         self.err_dy={}
         
     def _on_data_error(self, event):
+        """
+            receives and event from plotting plu-gins to store the data name and 
+            their errors of y coordinates for 1Data hide and show error
+        """
         self.err_dy= event.err_dy
         
     def populate_menu(self, id, owner):
@@ -67,7 +70,6 @@ class Plugin:
             @param owner: owner of menu
             @ return : list of information to populate the main menu
         """
-        self.parent.Bind(EVT_MODEL2D_PANEL, self._on_model2D_show)
         #Menu for fitting
         self.menu1 = wx.Menu()
         id1 = wx.NewId()
@@ -93,6 +95,8 @@ class Plugin:
         return [(id, self.menu1, "Fitting"),(id2, menu2, "Model")]
     
     def on_add_sim_page(self, event):
+        """
+        """
         self.sim_page= self.fit_panel.add_sim_page()
         self.sim_page.add_model(self.page_finder)
         
@@ -112,8 +116,6 @@ class Plugin:
         frame.Show(True)
         
         
-        
-    
     def get_context_menu(self, graph=None):
         """
             Get the context menu items available for P(r)
@@ -159,14 +161,12 @@ class Plugin:
         
         self.mypanels.append(self.fit_panel)
         return self.mypanels
-    
-    
-    def _on_model2D_show(self, event ):
-        print "model2D get the id ", event.id
-        
+
         
     def _on_slicer_event(self, event):
-        print "fitting:slicer event ", event.panel
+        """
+        """
+        #print "fitting:slicer event ", event.panel
         if event.panel!=None:
             new_panel = event.panel
             # Set group ID if available
@@ -177,9 +177,12 @@ class Plugin:
             new_panel.uid = event_id
             new_panel
             self.mypanels.append(new_panel) 
-        return        
+        return    
+    
+        
     def _on_show_panel(self, event):
         print "_on_show_panel: fitting"
+      
       
     def get_perspective(self):
         """
@@ -204,7 +207,10 @@ class Plugin:
         """
         self.parent.set_perspective(self.perspective)
 
+
     def copy_data(self, item, dy):
+        """
+        """
         detector=None
         source=None
         dxl=None
@@ -223,6 +229,7 @@ class Plugin:
         data.detector=detector
         data.source= source
         return data
+
 
     def _onSelect(self,event):
         """ 
@@ -252,7 +259,7 @@ class Plugin:
             if item.name == self.panel.graph.selected_plottable or\
                  item.__class__.__name__ is "Data2D":
                 #find a name for the page created for notebook
-                print "fitting", self.panel
+                #print "fitting", self.panel
                 try:
                    
                     #page = self.fit_panel.add_fit_page(item)
@@ -272,9 +279,10 @@ class Plugin:
                     else:
                         wx.PostEvent(self.parent, StatusEvent(status="Page was already Created"))
                 except:
-                    raise
-                    #wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
-                    #%sys.exc_value))
+                    #raise
+                    wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
+                    %sys.exc_value))
+                    return
                     
                     
     def schedule_for_fit(self,value=0,fitproblem =None):  
@@ -310,7 +318,7 @@ class Plugin:
             if page != sim_page:
                 list=value.get_model()
                 model=list[0]
-                print "fitting",model.name,modelname, values
+                #print "fitting",model.name,modelname, values
                 if model.name== modelname:
                     value.set_model_param(names,values)
                     break
@@ -359,9 +367,9 @@ class Plugin:
                 if result.pvec.__class__==numpy.float64:
                     model.setParam(name,result.pvec)
                 else:
-                    print "fitting result : chisqr",result.fitness
-                    print "fitting result : pvec",result.pvec
-                    print "fitting result : stderr",result.stderr
+                    #print "fitting result : chisqr",result.fitness
+                    #print "fitting result : pvec",result.pvec
+                    #print "fitting result : stderr",result.stderr
                     #model.setParam(name,result.pvec[i])
 #                   print "fitting: single fit", name, result.pvec[i]
                     i += 1
@@ -373,9 +381,10 @@ class Plugin:
                              ymin=ymin, ymax=ymax,
                              xmin=xmin, xmax=xmax,title=None)
         except:
-            raise
-            #wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
-            #return
+            #raise
+            wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+            return
+       
        
     def _simul_fit_completed(self,result,qmin,qmax, elapsed,pars=None,cpage=None,
                              xmin=None, xmax=None, ymin=None, ymax=None):
@@ -393,7 +402,7 @@ class Plugin:
         else:
             wx.PostEvent(self.parent, StatusEvent(status="Simultaneous fit \
             complete ", type="stop"))
-            print "result",cpage,str(result),result.parameters,result.fitness,result.stderr
+            #print "result",cpage,str(result),result.parameters,result.fitness,result.stderr
             
             try:
                 for page, value in self.page_finder.iteritems():
@@ -425,12 +434,18 @@ class Plugin:
             except:
                 wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fitting error: %s" % sys.exc_value))
                 return
+            
+            
     def stop_fit(self):
+        """
+        """
         if self.calc_thread != None and self.calc_thread.isrunning():
             #self.calc_thread.interrupt()
             self.calc_thread.stop()
             wx.PostEvent(self.parent, StatusEvent(status="Fitting  \
-is cancelled" , type="stop"))
+                is cancelled" , type="stop"))
+            
+            
     def _on_single_fit(self,id=None,qmin=None, qmax=None,ymin=None, ymax=None,xmin=None,xmax=None):
         """ 
             perform fit for the  current page  and return chisqr,out and cov
@@ -525,11 +540,7 @@ is cancelled" , type="stop"))
                                            updatefn=None)
                 self.calc_thread.queue()
                 self.calc_thread.ready(2.5)
-                #while not self.done:
-                    #print "when here"
-                 #   time.sleep(1)
-                
-               
+             
             except:
                 wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
                 return
@@ -584,7 +595,7 @@ is cancelled" , type="stop"))
                             new_model.parameterset[ param_name].set( param_value )
                         
                     self.fitter.set_model(new_model, self.fit_id, pars) 
-                    print "sim-->model",metadata,model,self.fit_id, pars
+                    #print "sim-->model",metadata,model,self.fit_id, pars
                     dy=[]
                     x=[]
                     y=[]
@@ -602,7 +613,7 @@ is cancelled" , type="stop"))
                                 metadata.x=numpy.zeros(len(x))
                                 metadata.x=x
                     self.fitter.set_data(metadata,self.fit_id,qmin,qmax,ymin,ymax)
-                    print "sim---->value of problem",value.get_scheduled()
+                    #print "sim---->value of problem",value.get_scheduled()
                     self.fitter.select_problem_for_fit(Uid=self.fit_id,value=value.get_scheduled())
                     self.fit_id += 1 
                     value.clear_model_param()
@@ -645,7 +656,9 @@ is cancelled" , type="stop"))
         
         
     def _onset_engine(self,event):
-        """ set engine to scipy"""
+        """ 
+            set engine to scipy
+        """
         if self._fit_engine== 'park':
             self._on_change_engine('scipy')
         else:
@@ -669,7 +682,7 @@ is cancelled" , type="stop"))
         model = evt.model
         name = evt.name
         
-        print "name fitting", name
+        #print "name fitting", name
         #sim_page=self.fit_panel.GetPage(1)
         sim_page=self.sim_page
         current_pg = self.fit_panel.get_current_page() 
@@ -694,9 +707,12 @@ is cancelled" , type="stop"))
             if self.sim_page!=None:
                 self.sim_page.add_model(self.page_finder)
         
-    def  set_smearer(self,smearer):     
-         current_pg=self.fit_panel.get_current_page()
-         self.page_finder[current_pg].set_smearer(smearer)
+    def  set_smearer(self,smearer):
+        """
+        
+        """   
+        current_pg=self.fit_panel.get_current_page()
+        self.page_finder[current_pg].set_smearer(smearer)
          
     def redraw_model(self,qmin= None,qmax= None):
         """
@@ -724,20 +740,11 @@ is cancelled" , type="stop"))
                     list=self.page_finder[page].get_model()
                     model=list[0]
                     break 
-            print "model in fitting",model
+            #print "model in fitting",model
             if data!=None and data.__class__.__name__ != 'Data2D':
                 theory = Theory1D(x=[], y=[])
                 theory.name = model.name
                 theory.group_id = data.group_id
-                """
-                if hasattr(data, "id"):
-                    import string
-                    if string.find("Model",data.id )!=None:
-                        #allow plotting on the same panel 
-                        theory.id =str(data.id )+" "+str(self.index_theory)
-                        self.index_theory +=1
-                    else:
-                    """
                 theory.id = "Model"
                    
                 x_name, x_units = data.get_xaxis() 
@@ -776,6 +783,7 @@ is cancelled" , type="stop"))
                 except:
                     wx.PostEvent(self.parent, StatusEvent(status="fitting \
                         skipping point x %g %s" %(qmin, sys.exc_value)) )
+                    
                 wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
                                                 title=str(data.name)))
             else:
@@ -840,7 +848,7 @@ is cancelled" , type="stop"))
         name = evt.model.__name__
         if hasattr(evt.model, "name"):
             name = evt.model.name
-        print "on model menu", name
+        #print "on model menu", name
         model=evt.model()
         description=model.description
         
@@ -868,6 +876,9 @@ is cancelled" , type="stop"))
               
     def _draw_model1D(self,model,name,description=None, enable1D=True,
                       qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
+        """
+        
+        """
         
         if enable1D:
             x=  numpy.linspace(start= qmin,
@@ -893,12 +904,13 @@ is cancelled" , type="stop"))
                 except:
                     wx.PostEvent(self.parent, StatusEvent(status="Draw model 1D error: %s" % sys.exc_value))
                     #raise
+                    return
             else:
                 for i in range(xlen):
                     y[i] = model.run(x[i]) 
                 try:
                     new_plot = Theory1D(x, y)
-                    print "draw model 1D", name
+                    #print "draw model 1D", name
                     new_plot.name = name
                     new_plot.xaxis("\\rm{Q}", 'A^{-1}')
                     new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
@@ -913,11 +925,18 @@ is cancelled" , type="stop"))
                 except:
                     #raise
                     wx.PostEvent(self.parent, StatusEvent(status="Draw model 1D error: %s" % sys.exc_value))
+                    return
+    
+    
+    
     def update(self, output,time):
+        """
+        """
         pass
     
     def complete(self, output, elapsed, model, qmin, qmax,qstep=DEFAULT_NPTS):
-       
+        """
+        """
         wx.PostEvent(self.parent, StatusEvent(status="Calc \
         complete !" , type="stop"))
         #print "complete",output, model,qmin, qmax
@@ -1006,7 +1025,7 @@ is cancelled" , type="stop"))
         if enable2D:
             try:
                 from sans.guiframe.model_thread import Calc2D
-                print "in draw model 2d ",self.model
+               # print "in draw model 2d ",self.model
                 self.calc_thread = Calc2D(parent =self.parent,x=x,
                                            y=y,model= self.model, 
                                            qmin=qmin,

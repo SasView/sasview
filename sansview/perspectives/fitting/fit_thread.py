@@ -7,10 +7,6 @@ import park
 from park.fitresult import FitHandler
 DEFAULT_BEAM = 0.005
 import time
-
-import thread
-print "main",thread.get_ident()
-
  
 class ConsoleUpdate(FitHandler):
     """
@@ -52,7 +48,7 @@ class ConsoleUpdate(FitHandler):
             self.improvement_time = t
             
             wx.PostEvent(self.parent, StatusEvent(status=\
-             "%d%% complete ..."%(p)))
+             "%d%% complete ..."%(p),type="update"))
        
         # Update percent complete
         dp = p-self.progress_percent
@@ -60,27 +56,23 @@ class ConsoleUpdate(FitHandler):
         dt = t - self.progress_time
         if dt > self.progress_delta:
             if 1 <= dp <= 2:
-                print "%d%% complete"%p
                 self.progress_percent = p
                 self.progress_time = t
                 wx.PostEvent(self.parent, StatusEvent(status=\
-                                                      "%d%% complete ..."%(p)))
+                                                      "%d%% complete ..."%(p),type="update"))
        
             elif 2 < dp <= 5:
                 if p//5 != self.progress_percent//5:
-                    print "%d%% complete"%(5*(p//5))
                     wx.PostEvent(self.parent, StatusEvent(status=\
-                       "%d%% complete ..."%(5*(p//5))))
+                       "%d%% complete ..."%(5*(p//5)),type="update"))
                     self.progress_percent = p
                     self.progress_time = t
             else:
                 if p//10 != self.progress_percent//10:
-                    print "%d%% complete"%(10*(p//10))
-                    
                     self.progress_percent = p
                     self.progress_time = t
                     wx.PostEvent(self.parent, StatusEvent(status=\
-                   "%d%% complete ..."%(10*(p//10))))
+                   "%d%% complete ..."%(10*(p//10)),type="update"))
         
     def improvement(self):
         """
@@ -106,7 +98,7 @@ class ConsoleUpdate(FitHandler):
             self.result.print_summary()
 
 class FitThread(CalcThread):
-    """Compute 2D data"""
+    """Thread performing the fit """
     
     def __init__(self,parent, fn,pars=None,cpage=None, qmin=None,qmax=None,ymin=None, ymax=None,
                  xmin=None,xmax=None,
@@ -134,31 +126,37 @@ class FitThread(CalcThread):
         wx.PostEvent(self.parent, StatusEvent(status=\
                        "Start the computation  ",curr_thread=self,type="start"))
     def isquit(self):
+        """
+             @raise KeyboardInterrupt: when the thread is interrupted
+        """
         try:
             CalcThread.isquit(self)
         except KeyboardInterrupt:
-            #printEVT("Calc %s interrupted" % self.model.name)
             wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Calc %g interrupted" % time.time()))
-           
+                       "Calc %g interrupted"))
             raise KeyboardInterrupt
         
     def update(self):
-        print "updatting"
-        elapsed = time.time()-self.starttime
+        """
+            Is called when values of result are available
+        """
         wx.PostEvent(self.parent, StatusEvent(status="Computing \
         ... " ,curr_thread=self,type="update"))
             
     def compute(self):
+        """
+            Perform a fit 
+        """
         try: 
             self.starttime = time.time()
+            #Sending a progess message to the status bar
             wx.PostEvent(self.parent, StatusEvent(status=\
                        "Computing . ...",curr_thread=self,type="progress"))
+            #Handler used for park engine displayed message
             handler= ConsoleUpdate(parent= self.parent,improvement_delta=0.1)
+            #Result from the fit
             result = self.fitter.fit(handler= handler)
-            print "result", result
-           
-            print "in my compute function"
+        
             elapsed = time.time()-self.starttime
             self.complete(result= result,
                           pars = self.pars,
@@ -173,7 +171,6 @@ class FitThread(CalcThread):
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
-            print "Thread stopped. "
             raise
         except:
             wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))

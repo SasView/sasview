@@ -40,7 +40,7 @@ class FitPage1D(ModelPage):
         self.event_owner = None
         #panel interface
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
-        #self.sizer10 = wx.GridBagSizer(5,5)
+    
         self.sizer9 = wx.GridBagSizer(5,5)
         self.sizer8 = wx.GridBagSizer(5,5)
         self.sizer7 = wx.GridBagSizer(5,5)
@@ -252,22 +252,7 @@ class FitPage1D(ModelPage):
         ix =0
         iy+=1 
         self.sizer9.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        #----------sizer 10 draw------------------------------------------------------
-        """
-        id = wx.NewId()
-        self.btClose =wx.Button(self,id,'Close')
-        self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
-        self.btClose.SetToolTipString("Close page.")
         
-        ix= 3
-        iy= 1
-        self.sizer10.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix +=1
-        self.sizer10.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix =0
-        iy+=1
-        self.sizer10.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-       """
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         self.fixed_param=[]
@@ -348,7 +333,7 @@ class FitPage1D(ModelPage):
         """
         
         flag=self.checkFitRange()
-        print "flag", flag
+        #print "flag", flag
         if flag== True:
             try:
                 if hasattr(self.data,"data"):
