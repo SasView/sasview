@@ -194,11 +194,11 @@ class ViewerFrame(wx.Frame):
                     filemode='w')        
         
         path = os.path.dirname(__file__)
-        ico_file = os.path.join(path,'images/ball.ico')
+        ico_file = os.path.join(path,'images\ball.ico')
         if os.path.isfile(ico_file):
             self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         else:
-            ico_file = os.path.join(os.getcwd(),'images/ball.ico')
+            ico_file = os.path.join(os.getcwd(),'images\ball.ico')
             if os.path.isfile(ico_file):
                 self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         
