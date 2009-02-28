@@ -292,7 +292,7 @@ class FitPage1D(ModelPage):
         res=[]
         if flag== True:
             try:
-                print "compute",self.data.err_data
+                #print "compute",self.data.err_data
                 self.qmin_x = float(self.qmin.GetValue())
                 self.qmax_x = float(self.qmax.GetValue())
                 for i in range(len(self.data.x_bins)):

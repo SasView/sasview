@@ -200,10 +200,10 @@ class FitPanel(wx.aui.AuiNotebook):
             @param qmax: maximum Q
             @param npts: number of Q points
         """
-        print "self.draw_model_name none",self.draw_model_name
+        #print "self.draw_model_name none",self.draw_model_name
         if topmenu==True:
             if  self.draw_model_name ==None:
-                print "self.draw_model_name none"
+                #print "self.draw_model_name none"
                 self._help_add_model_page(model,description,page_title, qmin=qmin, qmax=qmax, npts=npts)
             else:
                 #self.model_page.name=page_title

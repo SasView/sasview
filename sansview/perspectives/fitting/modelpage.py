@@ -499,8 +499,7 @@ class ModelPage(wx.ScrolledWindow):
             Build the panel from the model content
             @param model: the model selected in combo box for fitting purpose
         """
-        print "set_panel", model
-        
+       
         self.sizer5.Clear(True)
         self.parameters = []
         self.param_toFit=[]
@@ -744,7 +743,7 @@ class ModelPage(wx.ScrolledWindow):
             for param in self.model.getParamList():
                 if  not param in self.disp_list and  param.lower().count(name)>0: 
                     self.model.set_dispersion(param, disp_th)
-                    print "para, th",param, disp_th
+                    #print "para, th",param, disp_th
                     #self.model.dispersion[param]['npts'] = len(values)
                     n+=1
             #print "model dispers list",self.model.getDispParamList()
@@ -838,7 +837,7 @@ class ModelPage(wx.ScrolledWindow):
             self.sizer8.Add(nsigmas,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             
             disp_list.sort()
-            print disp_list,self.model.dispersion
+            #print disp_list,self.model.dispersion
             for item in self.model.dispersion.keys():
                 name1=item+".width"
                 name2=item+".npts"
