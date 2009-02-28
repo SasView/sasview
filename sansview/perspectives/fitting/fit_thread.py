@@ -7,6 +7,7 @@ import park
 from park.fitresult import FitHandler
 DEFAULT_BEAM = 0.005
 import time
+import thread
  
 class ConsoleUpdate(FitHandler):
     """
