@@ -3,7 +3,8 @@ import wx
 import wx.lib
 import numpy
 import copy
-
+import math
+from sans.models.dispersion_models import ArrayDispersion, GaussianDispersion
 
 from sans.guicomm.events import StatusEvent   
 from sans.guiframe.utils import format_number
@@ -33,6 +34,8 @@ class ModelPage(wx.ScrolledWindow):
         """
         # model on which the fit would be performed
         self.model=model
+        # Data member to store the dispersion object created
+        self._disp_obj_dict = {}
         self.back_up_model= model.clone()
         #list of dispersion paramaters
         self.disp_list=[]
@@ -338,13 +341,9 @@ class ModelPage(wx.ScrolledWindow):
             self.disp_box = wx.ComboBox(self, -1)
             self.disp_box.SetValue("GaussianModel")
             for k,v in self.polydisp.iteritems():
-                """
                 if str(v)=="MyModel":
                     self.disp_box.Insert("Select customized Model",id)  
                 else:
-                    self.disp_box.Insert(str(v),id)
-                """
-                if str(v)!="MyModel":
                     self.disp_box.Insert(str(v),id)  
                     
                 id+=1
@@ -584,7 +583,7 @@ class ModelPage(wx.ScrolledWindow):
                     units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                 self.sizer5.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
            
-            self.parameters.append([cb,ctl1,text2,ctl2])
+                self.parameters.append([cb,ctl1,text2,ctl2])
                 
         iy+=1
         self.sizer5.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -639,143 +638,76 @@ class ModelPage(wx.ScrolledWindow):
         except:
             raise 
         
-    def _draw_disp_theta(self): 
-        path = self._selectDlg()
-        dispersion=None
-       
-        for key, value in self.polydisp.iteritems():
-            if value =="MyModel":
-                disp_ph = key()
-                disp_th = key()
-                break
-        values,weights = self.read_file(path)
-        if values ==None and weights==None:
-            return 
-        import math
-        disp_ph.set_weights( values, weights)
-        disp_th.set_weights( values, weights)
-        
-        if self.theta_cb !=None:
-            angle= self.theta_cb.GetLabelText()
-        n=0
-        self.disp_list=self.model.getDispParamList()
-        if angle.lower().count("theta")>0:   
-            for param in self.model.getParamList():
-                if  not param in self.disp_list and  param.lower().count("theta")>0: 
-                    self.model.set_dispersion(param, disp_th)
-                    self.model.dispersion[param]['npts'] = len(values)
-                    n+=1
-           
-            if n ==0:
-              wx.PostEvent(self.parent.parent, StatusEvent(status=\
-                            " Model contains no theta distribution"))  
-            else:
-                self._draw_model() 
-    def _draw_disp_Phi(self): 
-        path = self._selectDlg()
-        dispersion=None
-       
-        for key, value in self.polydisp.iteritems():
-            if value =="MyModel":
-                disp_ph = key()
-                disp_th = key()
-                break
-        values,weights = self.read_file(path)
-        if values ==None and weights==None:
-            return 
-        import math
-        disp_ph.set_weights( values, weights)
-        disp_th.set_weights( values, weights)
-        
-        if self.theta_cb !=None:
-            angle= self.theta_cb.GetLabelText()
-        n=0
-        self.disp_list=self.model.getDispParamList()
-        if angle.lower().count("theta")>0:   
-            for param in self.model.getParamList():
-                if  not param in self.disp_list and  param.lower().count("theta")>0: 
-                    self.model.set_dispersion(param, disp_th)
-                    self.model.dispersion[param]['npts'] = len(values)
-                    n+=1
-           
-            if n ==0:
-              wx.PostEvent(self.parent.parent, StatusEvent(status=\
-                            " Model contains no theta distribution"))  
-            else:
-                self._draw_model() 
-          
           
     def select_disp_angle(self, event): 
-        if not self.phi_cb.GetValue():
-            return
-        path = self._selectDlg()
-        dispersion=None
-       
-        for key, value in self.polydisp.iteritems():
-            if value =="MyModel":
-                disp_ph = key()
-                disp_th = key()
-               
-                break
-        try:
-            values,weights = self.read_file(path)
-        except:
-            raise
+        """
+            Event for when a user select a parameter to average over.
+            @param event: check box event
+        """
         
-        if values ==None and weights==None:
-            return 
-        import math
-        wx.PostEvent(self.parent.parent, StatusEvent(status=\
-                            " Costumized Distribution: %s"% path))
-       
-        disp_ph.set_weights( values, weights)
-        disp_th.set_weights( values, weights)
         
-       
-        
-        if self.theta_cb !=None:
-            angle= self.phi_cb.GetLabelText()
-        n=0
-        #print "hello1",self.model.runXY([0.01,0.01]) 
-        self.disp_list=self.model.getDispParamList()
-        name= "phi"
-        if angle.lower().count(name)>0:   
-            for param in self.model.getParamList():
-                if  not param in self.disp_list and  param.lower().count(name)>0: 
-                    self.model.set_dispersion(param, disp_th)
-                    #print "para, th",param, disp_th
-                    #self.model.dispersion[param]['npts'] = len(values)
-                    n+=1
-            #print "model dispers list",self.model.getDispParamList()
-            if n ==0:
-              wx.PostEvent(self.parent.parent, StatusEvent(status=\
-                            " Model contains no %s distribution"%name))  
-            else:
-                #print "hello2",self.model.runXY([0.01,0.01]) 
-                #self._draw_model()
-                qmin=self.qmin_x
-                qmax=self.qmax_x
-                qstep= self.num_points
-                x=  numpy.linspace(start= -1*qmax,
-                               stop= qmax,
-                               num= qstep,
-                               endpoint=True )  
-                y = numpy.linspace(start= -1*qmax,
-                               stop= qmax,
-                               num= qstep,
-                               endpoint=True )
-                output= numpy.zeros([len(x),len(y)])
-                for i_x in range(int(len(x))):
-                    for i_y in range(int(len(y))):
-                        if (x[i_x]*x[i_x]+y[i_y]*y[i_y]) \
-                        < qmin * qmin:
-                            output[i_x] [i_y]=0   
-                        else:
-                            value = self.model.runXY([x[i_x], y[i_y]])
-                            output[i_x] [i_y]=value 
-                #print"modelpage", output
-                self.manager.complete( output=output, elapsed=None, model=self.model, qmin=qmin, qmax=qmax,qstep=qstep)
-                #self._draw_model()
+        # Go through the list of dispersion check boxes to identify which one has changed 
+        for p in self.disp_cb_dict:
+            # Catch which one of the box was just checked or unchecked.
+            if event.GetEventObject() == self.disp_cb_dict[p]:              
+
+                
+                if self.disp_cb_dict[p].GetValue() == True:
+                    # The user wants this parameter to be averaged. 
+                    # Pop up the file selection dialog.
+                    path = self._selectDlg()
+                    
+                    # If nothing was selected, just return
+                    if path is None:
+                        self.disp_cb_dict[p].SetValue(False)
+                        return
+                    
+                    try:
+                        values,weights = self.read_file(path)
+                    except:
+                        wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            "Could not read input file"))
+                        return
+                    
+                    # If any of the two arrays is empty, notify the user that we won't
+                    # proceed 
+                    if values is None or weights is None:
+                        wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            "The loaded %s distrubtion is corrupted or empty" % p))
+                        return
+                        
+                    # Tell the user that we are about to apply the distribution
+                    wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            "Applying loaded %s distribution: %s" % (p, path)))  
+                    
+                    # Create the dispersion objects
+                    disp_model = ArrayDispersion()
+                    disp_model.set_weights(values, weights)
+                    # Store the object to make it persist outside the scope of this method
+                    #TODO: refactor model to clean this up?
+                    self._disp_obj_dict[p] = disp_model
+                    
+                    # Set the new model as the dispersion object for the selected parameter
+                    self.model.set_dispersion(p, disp_model)
+                    
+                    
+                    # Redraw the model
+                    self._draw_model()
+                         
+                else:
+                    # The parameter was un-selected. Go back to Gaussian model (with 0 pts)
+                    disp_model = GaussianDispersion()
+                    # Store the object to make it persist outside the scope of this method
+                    #TODO: refactor model to clean this up?
+                    self._disp_obj_dict[p] = disp_model
+                    
+                    # Set the new model as the dispersion object for the selected parameter
+                    self.model.set_dispersion(p, disp_model)
+                    
+                    # Redraw the model
+                    self._draw_model()
+        return
+
                       
                       
                       
@@ -796,16 +728,15 @@ class ModelPage(wx.ScrolledWindow):
             disp1 = wx.StaticText(self, -1, 'Array Dispersion')
             self.sizer8.Add(disp1,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
             
-            ix+=1 
-            self.theta_cb = wx.CheckBox(self, -1,"Theta ", (10, 10))
-            wx.EVT_CHECKBOX(self, self.theta_cb.GetId(), self.select_disp_angle)
-            self.sizer8.Add(self.theta_cb,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-            ix+=1
-            self.phi_cb = wx.CheckBox(self, -1,"Phi", (10, 10))
-            wx.EVT_CHECKBOX(self, self.phi_cb.GetId(), self.select_disp_angle)
-            self.sizer8.Add(self.phi_cb,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            # Look for model parameters to which we can apply an ArrayDispersion model
+            # Add a check box for each parameter.
+            self.disp_cb_dict = {}
+            for p in self.model.dispersion.keys():
+                ix+=1 
+                self.disp_cb_dict[p] = wx.CheckBox(self, -1, p, (10, 10))
+                
+                wx.EVT_CHECKBOX(self, self.disp_cb_dict[p].GetId(), self.select_disp_angle)
+                self.sizer8.Add(self.disp_cb_dict[p], (iy, ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             
             ix =0
             iy +=1 
@@ -967,12 +898,9 @@ class ModelPage(wx.ScrolledWindow):
                 try:
                      name=str(item[0].GetLabelText())
                      value= float(item[1].GetValue())
-                   
-                     #print "model para", name,value
                      # If the value of the parameter has changed,
                      # update the model and set the is_modified flag
                      if value != self.model.getParam(name):
-                         #print "went hereee"
                          self.model.setParam(name,value)
                          is_modified = True
                          
@@ -987,11 +915,9 @@ class ModelPage(wx.ScrolledWindow):
                 try:
                      name=str(item[0])
                      value= float(item[1].GetValue())
-                     #print "model para", name,value,self.model.getParam(name)
                      # If the value of the parameter has changed,
                      # update the model and set the is_modified flag
                      if value != self.model.getParam(name):
-                         #print "went hereee"
                          self.model.setParam(name,value)
                          is_modified = True
                          
@@ -1004,13 +930,9 @@ class ModelPage(wx.ScrolledWindow):
                 try:
                      name=str(item[0].GetLabelText())
                      value= float(item[1].GetValue())
-                     #param_min= item[4].GetValue()
-                     #param_max= item[5].GetValue()
-                     #print " fittable model para", name,value
                      # If the value of the parameter has changed,
                      # update the model and set the is_modified flag
                      if value != self.model.getParam(name):
-                         #print "went here", name,value
                          self.model.setParam(name,value)
                          is_modified = True
                    
@@ -1046,7 +968,6 @@ class ModelPage(wx.ScrolledWindow):
             
             [Note to coder: This way future changes will be done in only one place.] 
         """
-        #print "_draw_model",self.model
         if name==None:
             name= self.model.name
        
