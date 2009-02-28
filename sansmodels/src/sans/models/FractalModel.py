@@ -74,23 +74,56 @@ class FractalModel(BaseComponent):
             Evaluate  
             F(x) = p(x) * s(x) + bkd  
         """
-        if x<0 and self.params['fractal_dim']>0:
-            raise ValueError, "negative number cannot be raised to a fractional power"
-
+        #if x<0 and self.params['fractal_dim']>0:
+         #   raise ValueError, "negative number cannot be raised to a fractional power"
+        #if x==0 and self.params['fractal_dim']==0:
+         #   return 1+self.params['background']
+        #elif x<0 and self.params['fractal_dim']==0:
+        #    return 1e+32
+        #else:
         return self.params['background']+ self._scatterRanDom(x)* self._Block(x)
 
     
     def _Block(self,x):
-        return 1.0 + (math.sin((self.params['fractal_dim']-1.0) * math.atan(x * self.params['corr_length']))\
-             * self.params['fractal_dim'] * gamma(self.params['fractal_dim']-1.0))\
-           /( math.pow( (x*self.params['radius']), self.params['fractal_dim'])*\
-           math.pow( 1.0 + 1.0/((x**2)*(self.params['corr_length']**2)),(self.params['fractal_dim']-1.0)/2.0))   
-           
+        #if self.params['fractal_dim']<0:
+        #    self.params['fractal_dim']=-self.params['fractal_dim']
+        try:
+            if x<0:
+                x=-x
+            if self.params['radius']<0:
+                self.params['radius']=-self.params['radius']
+                
+            if x==0 or self.params['radius']==0 :
+                 return 1e+32
+            elif self.params['fractal_dim']==0:
+                return 1.0 + (math.sin((self.params['fractal_dim']-1.0) * math.atan(x * self.params['corr_length']))\
+                              * self.params['fractal_dim'] * gamma(self.params['fractal_dim']-1.0))\
+                              *( math.pow( 1.0 + 1.0/((x**2)*(self.params['corr_length']**2)),1/2.0)) 
+            elif self.params['corr_length']==0 or self.params['fractal_dim']==1:
+                return 1.0 + (math.sin((self.params['fractal_dim']-1.0) * math.atan(x * self.params['corr_length']))\
+                              * self.params['fractal_dim'] * gamma(self.params['fractal_dim']-1.0))\
+                              /( math.pow( (x*self.params['radius']), self.params['fractal_dim']))   
+                
+            elif self.params['fractal_dim']<1:
+                return 1.0 + (math.sin((self.params['fractal_dim']-1.0) * math.atan(x * self.params['corr_length']))\
+                              * self.params['fractal_dim'] * gamma(self.params['fractal_dim']-1.0))\
+                              /( math.pow( (x*self.params['radius']), self.params['fractal_dim']))*\
+                                 math.pow( 1.0 + 1.0/((x**2)*(self.params['corr_length']**2)),(1-self.params['fractal_dim'])/2.0)   
+            else:
+                return 1.0 + (math.sin((self.params['fractal_dim']-1.0) * math.atan(x * self.params['corr_length']))\
+                              * self.params['fractal_dim'] * gamma(self.params['fractal_dim']-1.0))\
+                              / math.pow( (x*self.params['radius']), self.params['fractal_dim'])\
+                                 /math.pow( 1.0 + 1.0/((x**2)*(self.params['corr_length']**2)),(self.params['fractal_dim']-1.0)/2.0)   
+        except:
+            return 1 # Need a real fix. 
     def _Spherical(self,x):
         """
             F(x) = 3*[sin(x)-xcos(x)]/x**3
         """
-        return 3.0*(math.sin(x)-x*math.cos(x))/(math.pow(x,3.0))
+        if x==0:
+            return 0
+        else:
+            return 3.0*(math.sin(x)-x*math.cos(x))/(math.pow(x,3.0))
         
     def _scatterRanDom(self,x):
         """
