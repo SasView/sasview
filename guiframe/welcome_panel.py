@@ -68,6 +68,9 @@ class PanelAbout(wx.Panel):
         # Mac doesn't display images with transparent background so well, keep it for Windows
         image = file_dir+"\images\SVwelcome.png"
         
+        if os.path.isfile(config._welcome_image):
+            image = config._welcome_image     
+               
         if os.name == 'nt':
             self.bitmap_logo = wx.StaticBitmap(self, -1, wx.Bitmap(image))
         else:
