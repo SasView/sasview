@@ -373,8 +373,8 @@ class Plugin:
                     #print "fitting result : chisqr",result.fitness
                     #print "fitting result : pvec",result.pvec
                     #print "fitting result : stderr",result.stderr
-                    #model.setParam(name,result.pvec[i])
-#                   print "fitting: single fit", name, result.pvec[i]
+                    model.setParam(name,result.pvec[i])
+                    #print "fitting: single fit", name, result.pvec[i]
                     i += 1
            
            
