@@ -342,11 +342,13 @@ class ModelPage(wx.ScrolledWindow):
             self.disp_box.SetValue("GaussianModel")
             for k,v in self.polydisp.iteritems():
                 if str(v)=="MyModel":
-                    self.disp_box.Insert("Select customized Model",id)  
+    				# Remove the option until the rest of the code is ready for it
+                    #self.disp_box.Insert("Select customized Model",id)
+                    pass  
                 else:
-                    self.disp_box.Insert(str(v),id)  
-                    
+                    self.disp_box.Insert(str(v),id)         
                 id+=1
+            
             wx.EVT_COMBOBOX(self.disp_box,-1, self._on_select_Disp) 
             self.sizer7.Add(self.disp_box,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
             self.vbox.Layout()
