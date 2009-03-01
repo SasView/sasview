@@ -41,6 +41,7 @@ _nsf_url = "http://www.nsf.gov"
 _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = "images/angles_flat.png"
+_welcome_image = "images/SVwelcome.png"
 _copyright = "(c) 2008, University of Tennessee"
 
 import wx.lib.newevent
