@@ -6,7 +6,7 @@ from copy import deepcopy
 from danse.common.plottools.plottables import Data1D, Theory1D,Data2D
 from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
-from sans.guicomm.events import EVT_SLICER_PANEL,EVT_MODEL2D_PANEL,ERR_DATA
+from sans.guicomm.events import EVT_SLICER_PANEL,ERR_DATA
 
 from sans.fit.AbstractFitEngine import Model,FitData1D,FitData2D#,Data,
 from fitproblem import FitProblem
