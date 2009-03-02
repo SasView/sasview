@@ -455,6 +455,10 @@ class FitPage1D(ModelPage):
             pass
         
     def set_model(self): 
+        """
+            Hide panel object related to the previous fit and set
+            values entered by the used inside the model
+        """
         if len(self.parameters) !=0 and self.model !=None:
             # Flag to register when a parameter has changed.
             for item in self.parameters:
@@ -464,7 +468,6 @@ class FitPage1D(ModelPage):
                     item[3].Clear()
                     item[3].Hide()
                 except:
-                    #enter dispersion value 
                     pass
         self.set_model_parameter()
         
@@ -483,24 +486,26 @@ class FitPage1D(ModelPage):
         """
         self.param_toFit=[]
         for item in self.parameters:
+            #Select parameters to fit for list of primary parameters
             if item[0].GetValue()==True:
                 list= [item[0],item[1],item[2],item[3]]
                 if not (list  in self.param_toFit):
                     self.param_toFit.append(list )  
             else:
+                #remove parameters from the fitting list
                 if item in self.param_toFit:
                     self.param_toFit.remove(item)
-                    
+        #Select parameters to fit for list of fittable parameters with dispersion          
         for item in self.fittable_param:
             if item[0].GetValue()==True:
                 list= [item[0],item[1],item[2],item[3]]
                 if not (list  in self.param_toFit):
                     self.param_toFit.append(list )  
             else:
+                #remove parameters from the fitting list
                 if item in self.param_toFit:
                     self.param_toFit.remove(item)           
-                    
-                    
+        #Set the value of checkbox that selected every checkbox or not            
         if len(self.parameters)+len(self.fittable_param) ==len(self.param_toFit):
             self.cb1.SetValue(True)
         else:
@@ -519,6 +524,7 @@ class FitPage1D(ModelPage):
         params = {}
         is_modified = False
         has_error = False
+        #set the panel when fit result are float not list
         if out.__class__==numpy.float64:
             self.param_toFit[0][1].SetValue(format_number(out))
             self.param_toFit[0][1].Refresh()
@@ -528,16 +534,12 @@ class FitPage1D(ModelPage):
                 self.param_toFit[0][3].Clear()
                 self.param_toFit[0][3].SetValue(format_number(cov[0]))
                 self.param_toFit[0][3].Show()
-        #out is a list : set parameters and errors in TextCtrl
         else:
             i=0
             j=0
-            #print  "fitpage: list param  model",list
-            #for item in self.param_toFit:
-            #print "fitpage: list display",item[0].GetLabelText()
+            #Set the panel when fit result are list
             for item in self.param_toFit:
                 if( out != None ) and len(out)<=len(self.param_toFit)and i < len(out):
-                    #item[1].SetValue(format_number(out[i]))
                     item[1].SetValue(format_number(self.model.getParam(item[0].GetLabelText())))
                     item[1].Refresh()
                 if(cov !=None)and len(cov)<=len(self.param_toFit)and i < len(cov):
@@ -545,8 +547,7 @@ class FitPage1D(ModelPage):
                     item[2].Show()
                     item[3].Clear()
                     for j in range(len(out)):
-                        if out[j]==self.model.getParam(item[0].GetLabelText()):#.SetValue(format_number(self.model.getParam(item[0].GetLabelText()))):
-                            #print "jjj", j,item[1],item[1].SetValue(format_number(self.model.getParam(item[0].GetLabelText())))
+                        if out[j]==self.model.getParam(item[0].GetLabelText()):
                             break
                     item[3].SetValue(format_number(cov[j]))
                     item[3].Show()   
@@ -559,7 +560,10 @@ class FitPage1D(ModelPage):
         
         
     def onSmear(self, event):
-        #print "in smearer",self.enable_smearer.GetValue()
+        """
+            Create a smear object that will change the way residuals
+            are compute when fitting
+        """
         smear =None
         msg=""
         if self.enable_smearer.GetValue():
