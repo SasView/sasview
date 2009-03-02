@@ -186,8 +186,11 @@ class Reader:
                 
                 # Det 640 x 640 mm
                 # Q = 4pi/lambda sin(theta/2)
-                # Bin size is 0.5 cm
-                theta = (i_x-center_x+1)*0.5 / distance / 100.0
+                # Bin size is 0.5 cm 
+                #REmoved +1 from theta = (i_x-center_x+1)*0.5 / distance / 100.0 and 
+                #REmoved +1 from theta = (i_y-center_y+1)*0.5 / distance / 100.0
+                #ToDo: Need  complete check if the following covert process is consistent with fitting.py.
+                theta = (i_x-center_x)*0.5 / distance / 100.0
                 qx = 4.0*math.pi/wavelength * math.sin(theta/2.0)
 
                 if has_converter == True and output.Q_unit != '1/A':
@@ -198,7 +201,7 @@ class Reader:
                 if xmax==None or qx>xmax:
                     xmax = qx
                 
-                theta = (i_y-center_y+1)*0.5 / distance / 100.0
+                theta = (i_y-center_y)*0.5 / distance / 100.0
                 qy = 4.0*math.pi/wavelength * math.sin(theta/2.0)
 
                 if has_converter == True and output.Q_unit != '1/A':
