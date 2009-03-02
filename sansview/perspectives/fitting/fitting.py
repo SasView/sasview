@@ -961,8 +961,8 @@ class Plugin:
         theory.y_bins =[]
         #Now qmax is xmax.
         xmax=2*theory.detector[0].distance*math.atan(qmax/(4*math.pi/theory.source.wavelength))
-        theory.detector[0].pixel_size.x= xmax/(qstep/2)#-0.5)#5.0
-        theory.detector[0].pixel_size.y= xmax/(qstep/2)#-0.5)#5.0
+        theory.detector[0].pixel_size.x= xmax/(qstep/2-0.5)#5.0
+        theory.detector[0].pixel_size.y= xmax/(qstep/2-0.5)#5.0
         theory.detector[0].beam_center.x= qmax
         theory.detector[0].beam_center.y= qmax
         #print "xmax,qmax",xmax,qmax
