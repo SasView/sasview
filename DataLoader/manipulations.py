@@ -104,7 +104,7 @@ class _Slab(object):
         y  = numpy.zeros(nbins)
         err_y = numpy.zeros(nbins)
         y_counts = numpy.zeros(nbins)
-                                                
+
         for i in range(numpy.size(data2D.data,1)):
             # Min and max x-value for the pixel
             minx = pixel_width_x*(i - center_x)
@@ -904,8 +904,8 @@ class _Sector:
             qmax=temp
         #Beam center is already corrected, but the calculation below assumed it was not.
         # Thus Beam center shifted back to uncorrected value. ToDo: cleanup this codes.
-        center_x=center_x+0.5 
-        center_y=center_y+0.5         
+        #center_x=center_x+0.5 
+        #center_y=center_y+0.5         
         for i in range(numpy.size(data,1)):
             dx = pixel_width_x*(i+0.5 - center_x)
             
