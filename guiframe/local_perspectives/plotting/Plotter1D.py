@@ -129,7 +129,7 @@ class ModelPanel1D(PlotPanel):
         # Check axis labels
         #TODO: Should re-factor this
         #if event.plot._xunit != self.graph.prop["xunit"]:
-       
+        self.errors_hide=0
         self.graph.xaxis(event.plot._xaxis, event.plot._xunit)
             
         #if event.plot._yunit != self.graph.prop["yunit"]:
