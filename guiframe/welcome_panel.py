@@ -66,7 +66,7 @@ class PanelAbout(wx.Panel):
         file_dir = os.path.dirname(__file__)
         
         # Mac doesn't display images with transparent background so well, keep it for Windows
-        image = file_dir+"/images/SVwelcome.png"
+        image = file_dir+"\images\SVwelcome.png"
         
         if os.path.isfile(config._welcome_image):
             image = config._welcome_image     
