@@ -15,7 +15,10 @@ from BaseInteractor import _BaseInteractor
 
 class AnnulusInteractor(_BaseInteractor):
     """
-         Select an annulus through a 2D plot
+         Select an annulus through a 2D plot.
+         This interactor is used to average 2D data  with the region 
+         defined by 2 radius.
+         this class is defined by 2 Ringinterators.
     """
     def __init__(self,base,axes,color='black', zorder=3):
         
@@ -25,8 +28,7 @@ class AnnulusInteractor(_BaseInteractor):
         self.base= base
         self.qmax = min(math.fabs(self.base.data2D.xmax),math.fabs(self.base.data2D.xmin))  #must be positive
         self.connect = self.base.connect
-        
-
+    
         ## Number of points on the plot
         self.nbins = 20
         
@@ -34,8 +36,6 @@ class AnnulusInteractor(_BaseInteractor):
         self.xmaxd=self.base.data2D.xmax
         self.xmind=self.base.data2D.xmin
 
-        #self.sign=1
-        
         if (self.xmaxd+self.xmind)>0:
             self.sign=1
         else:
@@ -56,78 +56,81 @@ class AnnulusInteractor(_BaseInteractor):
         
 
     def _onEVT_SLICER_PARS(self, event):
+        """
+            receive an event containing parameters values to reset the slicer
+            @param event: event of type SlicerParameterEvent with params as 
+            attribute
+        """
         wx.PostEvent(self.base, StatusEvent(status="AnnulusSlicer._onEVT_SLICER_PARS"))
         event.Skip()
         if event.type == self.__class__.__name__:
             self.set_params(event.params)
             self.base.update()
 
-    def update_and_post(self):
-        self.update()
-        self._post_data()
-
-    def save_data(self, path, image, x, y):
-        output = open(path, 'w')
-        
-        data_x, data_y = self.get_data(image, x, y)
-        
-        output.write("<phi>  <average>\n")
-        for i in range(len(data_x)):
-            output.write("%g  %g\n" % (data_x[i], data_y[i]))
-        output.close()
-
     def set_layer(self, n):
+        """
+             Allow adding plot to the same panel
+             @param n: the number of layer
+        """
         self.layernum = n
         self.update()
         
     def clear(self):
+        """
+            Clear the slicer and all connected events related to this slicer
+        """
         self.clear_markers()
         self.outer_circle.clear()
         self.inner_circle.clear()
         self.base.connect.clearall()
-      
         self.base.Unbind(EVT_SLICER_PARS)
+        
         
     def update(self):
         """
-        Respond to changes in the model by recalculating the profiles and
-        resetting the widgets.
+            Respond to changes in the model by recalculating the profiles and
+            resetting the widgets.
         """
         # Update locations        
         self.inner_circle.update()
         self.outer_circle.update()
         
-  
 
     def save(self, ev):
         """
-        Remember the roughness for this layer and the next so that we
-        can restore on Esc.
+            Remember the roughness for this layer and the next so that we
+            can restore on Esc.
         """
         self.base.freeze_axes()
         self.inner_circle.save(ev)
         self.outer_circle.save(ev)
 
     def _post_data(self,nbins=None):
-         # Compute data
+        """
+            Uses annulus parameters to plot averaged data into 1D data.
+            @param nbins: the number of points to plot 
+        """
+        #Data to average
         data = self.base.data2D
         # If we have no data, just return
         if data == None:
             return
         
         from DataLoader.manipulations import SectorPhi
-        #radius = self.qmax#math.sqrt(math.pow(self.qmax,2)+math.pow(self.qmax,2))
+    
         rmin= min(math.fabs(self.inner_circle.get_radius()),
                   math.fabs(self.outer_circle.get_radius()))
         rmax = max(math.fabs(self.inner_circle.get_radius()),
                    math.fabs(self.outer_circle.get_radius()))
-        #print "rmin, rmax", rmin, rmax
+        #if the user does not specify the numbers of points to plot 
+        # the default number will be nbins= 20
         if nbins==None:
-            nbins = 20
+            self.nbins= 20
+        else:
+            self.nbins = nbins
+        ## create the data1D Q average of data2D    
         sect = SectorPhi(r_min=rmin , r_max= rmax,
-                          phi_min=0, phi_max=2*math.pi , nbins=nbins)
-        
-        
+                          phi_min=0, phi_max=2*math.pi , nbins=self.nbins)
         sector = sect(self.base.data2D)
         
         from sans.guiframe.dataFitting import Data1D
@@ -143,12 +146,10 @@ class AnnulusInteractor(_BaseInteractor):
         new_plot = Data1D(x=sector.x,y=sector.y,dy=sector.dy,dxl=dxl,dxw=dxw)
         new_plot.name = "SectorPhi" +"("+ self.base.data2D.name+")"
         
-       
-        
         new_plot.source=self.base.data2D.source
         #new_plot.info=self.base.data2D.info
+        
         new_plot.interactive = True
-        #print "loader output.detector",output.source
         new_plot.detector =self.base.data2D.detector
         # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{\phi}", 'degrees')
@@ -161,17 +162,20 @@ class AnnulusInteractor(_BaseInteractor):
                                                  title="SectorPhi" ))
         
          
-        
-        
     def moveend(self, ev):
+        """
+            Called when any dragging motion ends.
+            Post an event (type =SlicerParameterEvent)
+            to plotter 2D with a copy  slicer parameters
+            Call  _post_data method
+        """
         self.base.thaw_axes()
-        
-        # Post paramters
+        # Post parameters to plotter 2D
         event = SlicerParameterEvent()
         event.type = self.__class__.__name__
         event.params = self.get_params()
-        #wx.PostEvent(self.base.parent, event)
         wx.PostEvent(self.base, event)
+        # create a 1D data plot
         self._post_data()
             
     def restore(self):
@@ -191,6 +195,10 @@ class AnnulusInteractor(_BaseInteractor):
         pass
         
     def get_params(self):
+        """
+            Store a copy of values of parameters of the slicer into a dictionary.
+            @return params: the dictionary created
+        """
         params = {}
         params["inner_radius"] = math.fabs(self.inner_circle._inner_mouse_x)
         params["outer_radius"] = math.fabs(self.outer_circle._inner_mouse_x)
@@ -198,12 +206,19 @@ class AnnulusInteractor(_BaseInteractor):
         return params
     
     def set_params(self, params):
-        
+        """
+            Receive a dictionary and reset the slicer with values contained 
+            in the values of the dictionary.
+            @param params: a dictionary containing name of slicer parameters and 
+            values the user assigned to the slicer.
+        """
         inner = math.fabs(params["inner_radius"] )
         outer = math.fabs(params["outer_radius"] )
         self.nbins = int(params["nbins"])
+        ## Update the picture
         self.inner_circle.set_cursor(inner, self.inner_circle._inner_mouse_y)
         self.outer_circle.set_cursor(outer, self.outer_circle._inner_mouse_y)
+        ## Post the data given the nbins entered by the user 
         self._post_data(self.nbins)
         
     def freeze_axes(self):
@@ -218,24 +233,29 @@ class AnnulusInteractor(_BaseInteractor):
         
 class RingInteractor(_BaseInteractor):
     """
-         Select an annulus through a 2D plot
+         Draw a ring Given a radius 
+         @param: the color of the line that defined the ring
+         @param r: the radius of the ring
+         @param sign: the direction of motion the the marker 
     """
     def __init__(self,base,axes,color='black', zorder=5, r=1.0,sign=1):
         
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
+        # Current radius of the ring
         self._inner_mouse_x = r
+        #Value of the center of the ring
         self._inner_mouse_y = 0
+        # previous value of that radius
         self._inner_save_x  = r
+        #Save value of the center of the ring
         self._inner_save_y  = 0
-        self.scale = 10.0
+        #Class instantiating RingIterator class
         self.base= base
+        #the direction of the motion of the marker
         self.sign=sign
-         
-        
-        #print "sign",self.sign,self.sign*math.fabs(self._inner_mouse_x)
-                                                    
+        ## Create a marker 
         try:
             # Inner circle marker
             self.inner_marker = self.axes.plot([self.sign*math.fabs(self._inner_mouse_x)],[0], linestyle='',
@@ -253,24 +273,31 @@ class RingInteractor(_BaseInteractor):
             message  = "\nTHIS PROTOTYPE NEEDS THE LATEST VERSION OF MATPLOTLIB\n"
             message += "Get the SVN version that is at least as recent as June 1, 2007"
             
-            #raise "Version error", message
+            owner=self.base.base.parent
+            wx.PostEvent(owner, StatusEvent(status="AnnulusSlicer: %s"%message))
             
-        # Inner circle
-
-           
+        # Draw a circle 
         [self.inner_circle] = self.axes.plot([],[],
                                       linestyle='-', marker='',
                                       color=self.color)
+        # the number of points that make the ring line
         self.npts = 40
             
         self.connect_markers([self.inner_marker])
         self.update()
 
     def set_layer(self, n):
+        """
+             Allow adding plot to the same panel
+             @param n: the number of layer
+        """
         self.layernum = n
         self.update()
         
     def clear(self):
+        """
+            Clear the slicer and all connected events related to this slicer
+        """
         self.clear_markers()
         try:
             self.inner_marker.remove()
@@ -283,11 +310,14 @@ class RingInteractor(_BaseInteractor):
         
         
     def get_radius(self):
+        """
+            @return self._inner_mouse_x: the current radius of the ring
+        """
         return self._inner_mouse_x
         
     def update(self):
         """
-        Draw the new roughness on the graph.
+            Draw the new roughness on the graph.
         """
         # Plot inner circle
         x = []
@@ -314,6 +344,9 @@ class RingInteractor(_BaseInteractor):
         self.base.freeze_axes()
 
     def moveend(self, ev):
+        """
+            Called after a dragging motion
+        """
         self.base.moveend(ev)
             
     def restore(self):
@@ -332,17 +365,29 @@ class RingInteractor(_BaseInteractor):
         self.base.base.update()
         
     def set_cursor(self, x, y):
+        """
+            draw the ring given x, y value 
+        """
         self.move(x, y, None)
         self.update()
         
         
     def get_params(self):
+        """
+            Store a copy of values of parameters of the slicer into a dictionary.
+            @return params: the dictionary created
+        """
         params = {}
         params["radius"] = math.fabs(self._inner_mouse_x)
         return params
     
     def set_params(self, params):
-
+        """
+            Receive a dictionary and reset the slicer with values contained 
+            in the values of the dictionary.
+            @param params: a dictionary containing name of slicer parameters and 
+            values the user assigned to the slicer.
+        """
         x = params["radius"] 
         self.set_cursor(x, self._inner_mouse_y)
         

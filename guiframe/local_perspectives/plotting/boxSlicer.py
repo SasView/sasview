@@ -19,7 +19,8 @@ import wx
 
 class BoxInteractor(_BaseInteractor):
     """
-         Select an annulus through a 2D plot
+         BoxInteractor define a rectangle that return data1D average of Data2D
+         in a rectangle area defined by -x, x ,y, -y
     """
     def __init__(self,base,axes,color='black', zorder=3):
         _BaseInteractor.__init__(self, base, axes, color=color)
@@ -37,8 +38,7 @@ class BoxInteractor(_BaseInteractor):
         
         ## Number of points on the plot
         self.nbins = 30
-        self.count=0
-        self.error=0
+       
         self.averager=None
         
         self.vertical_lines = VerticalLines(self, self.base.subplot,color='blue', 
@@ -52,8 +52,6 @@ class BoxInteractor(_BaseInteractor):
                                       x= self.x,
                                       y= self.y)
         self.horizontal_lines.qmax= self.qmax
-        
-      
         
         self.update()
         self._post_data()
@@ -458,6 +456,9 @@ class VerticalLines(_BaseInteractor):
         
 
 class BoxInteractorX(BoxInteractor):
+    """
+        Average in Qx direction
+    """
     def __init__(self,base,axes,color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, color=color)
         self.base=base
@@ -468,6 +469,9 @@ class BoxInteractorX(BoxInteractor):
         
 
 class BoxInteractorY(BoxInteractor):
+    """
+         Average in Qy direction
+    """
     def __init__(self,base,axes,color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, color=color)
         self.base=base

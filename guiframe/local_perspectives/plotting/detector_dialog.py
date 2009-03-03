@@ -7,6 +7,8 @@ __revision__ = "$Revision: 1193 $"
 import wx
 from sans.guiframe.utils import format_number
 from sans.guicomm.events import StatusEvent ,NewPlotEvent,SlicerEvent
+
+
 class DetectorDialog(wx.Dialog):
     """
         Dialog box to let the user edit detector settings
@@ -16,6 +18,7 @@ class DetectorDialog(wx.Dialog):
 
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self,parent,id=1, *args, **kwds)
+    
         self.parent=base
         self.label_xnpts = wx.StaticText(self, -1, "Detector width in pixels")
         self.label_ynpts = wx.StaticText(self, -1, "Detector Height in pixels")
@@ -23,12 +26,7 @@ class DetectorDialog(wx.Dialog):
         self.label_zmin = wx.StaticText(self, -1, "Min amplitude for color map (optional)")
         self.label_zmax = wx.StaticText(self, -1, "Max amplitude for color map (optional)")
         self.label_beam = wx.StaticText(self, -1, "Beam stop radius in units of q")
-        #self.label_sym  = wx.StaticText(self, -1, 'Use 4-fold symmetry')
         
-        # Npts, q max
-        #self.npts_ctl = wx.TextCtrl(self, -1, size=(60,20))
-        #self.qmax_ctl = wx.TextCtrl(self, -1, size=(60,20))
-        #self.beam_ctl = wx.TextCtrl(self, -1, size=(60,20))
         self.xnpts_ctl = wx.StaticText(self, -1, "")
         self.ynpts_ctl = wx.StaticText(self, -1, "")
         self.qmax_ctl = wx.StaticText(self, -1, "")
@@ -36,8 +34,7 @@ class DetectorDialog(wx.Dialog):
         
         self.zmin_ctl = wx.TextCtrl(self, -1, size=(60,20))
         self.zmax_ctl = wx.TextCtrl(self, -1, size=(60,20))
-        #self.chk_sym  = wx.CheckBox(self, -1, '')
-
+    
         self.static_line_3 = wx.StaticLine(self, -1)
         
         
@@ -60,6 +57,10 @@ class DetectorDialog(wx.Dialog):
         sym4 = False
         
     def checkValues(self, event):
+        """
+            Check the valitidity of zmin and zmax value
+            zmax should be a float and zmin less than zmax
+        """
         flag = True
         try:
             value=self.zmin_ctl.GetValue()
@@ -96,23 +97,32 @@ class DetectorDialog(wx.Dialog):
             event.Skip(True)
     
     def setContent(self, xnpts,ynpts, qmax, beam,zmin=None,zmax=None, sym=False):
+        """
+            received value and displayed them
+            @param xnpts: the number of point of the x_bins of data
+            @param ynpts: the number of point of the y_bins of data
+            @param qmax: the maxmimum value of data pixel
+            @param beam : the radius of the beam
+            @param zmin:  the value to get the minimum color
+            @param zmax:  the value to get the maximum color
+            @param sym:
+        """
         self.xnpts_ctl.SetLabel(str(format_number(xnpts)))
         self.ynpts_ctl.SetLabel(str(format_number(ynpts)))
         self.qmax_ctl.SetLabel(str(format_number(qmax)))
         self.beam_ctl.SetLabel(str(format_number(beam)))
-        #self.chk_sym.SetValue(sym)
+       
         if zmin !=None:
             self.zmin_ctl.SetValue(str(format_number(zmin)))
         if zmax !=None:
             self.zmax_ctl.SetValue(str(format_number(zmax)))
 
     def getContent(self):
+        """
+            @return event containing value to reset the detector of a given data
+        """
         event = self.Event()
-        #event.npts = int(self.npts_ctl.GetValue())
-        #event.qmax = float(self.qmax_ctl.GetValue())
-        #event.beam = float(self.beam_ctl.GetValue())
-        #event.sym4 = self.chk_sym.GetValue()
-        
+       
         t_min = self.zmin_ctl.GetValue()
         t_max = self.zmax_ctl.GetValue()
         v_min = None
@@ -136,10 +146,17 @@ class DetectorDialog(wx.Dialog):
         return event
 
     def __set_properties(self):
+        """
+            set proprieties of the dialog window
+        """
         self.SetTitle("Detector parameters")
         self.SetSize((600, 595))
 
+
     def __do_layout(self):
+        """
+            fill the dialog window .
+        """
         sizer_main = wx.BoxSizer(wx.VERTICAL)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_params = wx.GridBagSizer(5,5)
@@ -163,9 +180,7 @@ class DetectorDialog(wx.Dialog):
         sizer_params.Add(self.label_zmax, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         sizer_params.Add(self.zmax_ctl,   (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
-        #sizer_params.Add(self.label_sym,  (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        #sizer_params.Add(self.chk_sym,    (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-
+       
         sizer_main.Add(sizer_params, 0, wx.EXPAND|wx.ALL, 10)
         sizer_main.Add(self.static_line_3, 0, wx.EXPAND, 0)
         

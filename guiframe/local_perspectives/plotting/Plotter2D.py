@@ -236,22 +236,20 @@ class ModelPanel2D( ModelPanel1D):
         id = wx.NewId()
         slicerpop.Append(id, '&Box averaging in Qy')
         wx.EVT_MENU(self, id, self.onBoxavgY) 
-        if self.slicer !=None:
+        if self.slicer !=None :
             id = wx.NewId()
             slicerpop.Append(id, '&Clear slicer')
             wx.EVT_MENU(self, id,  self.onClearSlicer) 
-        
-            id = wx.NewId()
-            slicerpop.Append(id, '&Edit Slicer Parameters')
-            wx.EVT_MENU(self, id, self._onEditSlicer) 
+            if self.slicer.__class__.__name__ !="BoxSum":
+                id = wx.NewId()
+                slicerpop.Append(id, '&Edit Slicer Parameters')
+                wx.EVT_MENU(self, id, self._onEditSlicer) 
         slicerpop.AppendSeparator() 
        
-     
         id = wx.NewId()
         slicerpop.Append(id, '&Toggle Linear/Log scale')
         wx.EVT_MENU(self, id, self._onToggleScale) 
                  
-      
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
