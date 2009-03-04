@@ -106,11 +106,13 @@ class _BaseSmearer(object):
             counts = 0.0    
             
             for i in range(self.nbins):
-                sum += iq[i] * self._weights[q_i][i]
-                counts += self._weights[q_i][i]
-                
+                if iq[i]!=0 and self._weights[q_i][i]!=0:
+                    sum += iq[i] * self._weights[q_i][i] 
+                    counts += self._weights[q_i][i]
+                    #print "i,iq[i],self._weights[q_i][i] ",i,iq[i],self._weights[q_i][i]
             iq_smeared[q_i] = sum/counts 
-                
+            #print "q_i,iq_smeared[q_i]",q_i,iq[i],iq_smeared[q_i]
+            #print "iq[i],iq_smeared[q_i],sum,counts,self.nbins",iq[i], iq_smeared[q_i],sum,counts,self.nbins
         return iq_smeared    
     
 class _SlitSmearer(_BaseSmearer):
@@ -155,8 +157,8 @@ class _SlitSmearer(_BaseSmearer):
             
             # For each q-value, compute the weight of each other q-bin
             # in the I(q) array
-            npts_h = self.npts if self.height>0 else 1
-            npts_w = self.npts if self.width>0 else 1
+            npts_h = self.nbins if self.height>0 else 1 #changed self.npts=>self.nbins
+            npts_w = self.nbins if self.width>0 else 1 #changed self.npts=>self.nbins
             
             # If both height and width are great than zero,
             # modify the number of points in each direction so 
@@ -183,7 +185,7 @@ class _SlitSmearer(_BaseSmearer):
                     #TODO: be careful with edge effect
                     if q_i<self.nbins:
                         weights[i][q_i] = weights[i][q_i]+1.0
-                                
+
         self._weights = weights
         return self._weights
 
@@ -263,15 +265,15 @@ class _QSmearer(_BaseSmearer):
             q = self.min + i*step
             q_min = q - 0.5*step
             q_max = q + 0.5*step
-            
             for j in range(self.nbins):
                 q_j = self.min + j*step
                 
                 # Compute the fraction of the Gaussian contributing
                 # to the q bin between q_min and q_max
+                #value =  math.exp(-math.pow((q_max-q_j),2)/(2*math.pow(self.width[j],2) ))
+                #value +=  math.exp(-math.pow((q_max-q_j),2)/(2*math.pow(self.width[j],2) )) 
                 value =  scipy.special.erf( (q_max-q_j)/(math.sqrt(2.0)*self.width[j]) ) 
                 value -=scipy.special.erf( (q_min-q_j)/(math.sqrt(2.0)*self.width[j]) ) 
-
                 weights[i][j] += value
                                 
         self._weights = weights
@@ -320,7 +322,7 @@ if __name__ == '__main__':
     
     if True:
         for i in range(10):
-            print x[i], sy[i]
+            print x[i],y[i], sy[i]
             #print q, ' : ', s.weight(q), s._compute_iq(q) 
             #print q, ' : ', s(q), s._compute_iq(q) 
             #s._compute_iq(q) 
