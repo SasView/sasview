@@ -57,19 +57,19 @@ class ModelPanel1D(PlotPanel):
         self.plots = {}
         ## save errors dy  for each data plotted
         self.err_dy={}
+        ## flag to determine if the hide or show context menu item should
+        ## be displayed
         self.errors_hide=0
-        
         ## Unique ID (from gui_manager)
         self.uid = None
-        
         ## Action IDs for internal call-backs
         self.action_ids = {}
-        
         ## Graph        
         self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
         self.graph.render(self)
+   
    
     def _reset(self):
         """
@@ -79,6 +79,7 @@ class ModelPanel1D(PlotPanel):
         self.plots      = {}
         self.action_ids = {}
     
+    
     def _onEVT_1DREPLOT(self, event):
         """
             Data is ready to be displayed
@@ -86,7 +87,6 @@ class ModelPanel1D(PlotPanel):
         """
        
         #TODO: Check for existence of plot attribute
-
         # Check whether this is a replot. If we ask for a replot
         # and the plottable no longer exists, ignore the event.
         if hasattr(event, "update") and event.update==True \
@@ -106,8 +106,6 @@ class ModelPanel1D(PlotPanel):
                 # plottable is already draw on the panel
                 is_new = False
         
-            
-           
         if is_new:
             # a new plottable overwrites a plotted one  using the same id
             for plottable in self.plots.itervalues():
@@ -125,38 +123,38 @@ class ModelPanel1D(PlotPanel):
             if hasattr(event.plot, 'dx') and hasattr(self.plots[event.plot.name], 'dx'):
                 self.plots[event.plot.name].dx = event.plot.dx    
  
-        
-        # Check axis labels
         #TODO: Should re-factor this
-        #if event.plot._xunit != self.graph.prop["xunit"]:
-        self.errors_hide=0
+        ## for all added plot the option to hide error show be displayed first
+        self.errors_hide = 0
+        ## Set axis labels
         self.graph.xaxis(event.plot._xaxis, event.plot._xunit)
-            
-        #if event.plot._yunit != self.graph.prop["yunit"]:
         self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
-      
-        # Set the view scale for all plots
-       
+        ## Set the view scale for all plots
         self._onEVT_FUNC_PROPERTY()
-        
+        ## render the graph
         self.graph.render(self)
-       
         self.subplot.figure.canvas.draw_idle()
         
+        
     def onLeftDown(self,event): 
-        """ left button down and ready to drag"""
-           
+        """ 
+            left button down and ready to drag
+            Display the position of the mouse on the statusbar
+        """
         PlotPanel.onLeftDown(self, event)
         ax = event.inaxes
         if ax != None:
             position = "x: %8.3g    y: %8.3g" % (event.xdata, event.ydata)
             wx.PostEvent(self.parent, StatusEvent(status=position))
 
+
     def _onRemove(self, event):
         """
+            Remove a plottable from the graph and render the graph 
+            @param event: Menu event
         """
+        ## Check if there is a selected graph to remove
         if not self.graph.selected_plottable == None:
-            #print self.graph.selected_plottable
             self.graph.delete(self.plots[self.graph.selected_plottable])
             del self.plots[self.graph.selected_plottable]
             self.graph.render(self)
@@ -168,14 +166,9 @@ class ModelPanel1D(PlotPanel):
             1D plot context menu
             @param event: wx context event
         """
-        #slicerpop = wx.Menu()
         slicerpop = PanelMenu()
         slicerpop.set_plots(self.plots)
         slicerpop.set_graph(self.graph)
-                
-        # Option to save the data displayed
-        
-      
                 
         # Various plot options
         id = wx.NewId()
@@ -192,7 +185,7 @@ class ModelPanel1D(PlotPanel):
            
         slicerpop.AppendSeparator()
         item_list = self.parent.get_context_menu(self.graph)
-        #print "item_list",item_list
+       
         if (not item_list==None) and (not len(item_list)==0):
             for item in item_list:
                 try:
@@ -200,25 +193,25 @@ class ModelPanel1D(PlotPanel):
                     slicerpop.Append(id, item[0], item[1])
                     wx.EVT_MENU(self, id, item[2])
                 except:
+                    wx.PostEvent(self.parent, StatusEvent(status=\
+                        "ModelPanel1D.onContextMenu: bad menu item  %s"%sys.exc_value))
                     pass
-                    #print sys.exc_value
-                    #print RuntimeError, "View1DPanel.onContextMenu: bad menu item"
             slicerpop.AppendSeparator()
-        #for plot in self.graph.plottables:
+        
         if self.graph.selected_plottable in self.plots:
             plot = self.plots[self.graph.selected_plottable]
             id = wx.NewId()
             name = plot.name
+           
             slicerpop.Append(id, "&Save %s points" % name)
             self.action_ids[str(id)] = plot
             wx.EVT_MENU(self, id, self._onSave)
-            #save as cansas
+            
             id = wx.NewId()
             slicerpop.Append(id, "&Save %s canSAS XML" % name)
             self.action_ids[str(id)] = plot
             wx.EVT_MENU(self, id, self._onSaveXML)
-                
-            # Option to delete plottable
+           
             id = wx.NewId()
             slicerpop.Append(id, "Remove %s curve" % name)
             self.action_ids[str(id)] = plot
@@ -226,62 +219,63 @@ class ModelPanel1D(PlotPanel):
             slicerpop.AppendSeparator()
             # Option to hide
             #TODO: implement functionality to hide a plottable (legend click)
-            
        
         if self.graph.selected_plottable in self.plots:
             if self.plots[self.graph.selected_plottable].name in self.err_dy.iterkeys()\
                 and self.errors_hide==1:
-                 
-                #if self.plots[self.graph.selected_plottable].__class__.__name__=="Theory1D":
+                
                 id = wx.NewId()
                 slicerpop.Append(id, '&Show errors to data')
-                #print "panel scale before  ",self.xLabel, self.yLabel
-                #print "cyllinder before adding error", self.plots[self.graph.selected_plottable].x
                 wx.EVT_MENU(self, id, self._on_add_errors)
                 
-               
             elif self.plots[self.graph.selected_plottable].__class__.__name__=="Data1D"\
                 and self.errors_hide==0:
+                   
                     id = wx.NewId()
                     slicerpop.Append(id, '&Hide Error bars')
-                    #print "panel scale before  ",self.xLabel, self.yLabel
-                    #print "cyllinder before adding error", self.plots[self.graph.selected_plottable].x
                     wx.EVT_MENU(self, id, self._on_remove_errors)
-                    
-             
             else:
                 id = wx.NewId()
                 slicerpop.Append(id, '&Linear fit')
                 wx.EVT_MENU(self, id, self.onFitting)
                 
             slicerpop.AppendSeparator()
+        
         id = wx.NewId()
         slicerpop.Append(id, '&Change scale')
         wx.EVT_MENU(self, id, self._onProperties)
-        
+       
         id = wx.NewId()
         slicerpop.Append(id, '&Reset Graph')
         wx.EVT_MENU(self, id, self.onResetGraph)  
        
-        
-
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
         
         
     def _on_remove_errors(self, evt):
+        """
+            Save name and dy of data in dictionary self.err_dy
+            Create a new data1D with the same x, y
+            vector and dy with zeros.
+            post self.err_dy as event (ErrorDataEvent) for any object
+            which wants to reconstruct the initial data.
+            @param evt: Menu event
+        """
         if not self.graph.selected_plottable == None:
+            ## store existing dy
             name =self.plots[self.graph.selected_plottable].name
             dy = self.plots[self.graph.selected_plottable].dy
             self.err_dy[name]= dy
+            ## Create a new dy for a new plottable
             import numpy
             dy= numpy.zeros(len(self.plots[self.graph.selected_plottable].y))
             new_plot = Data1D(self.plots[self.graph.selected_plottable].x,
                               self.plots[self.graph.selected_plottable].y,
                               dy=dy)
             new_plot.interactive = True
-            self.errors_hide=1
+            self.errors_hide = 1
             new_plot.name = self.plots[self.graph.selected_plottable].name 
             if hasattr(self.plots[self.graph.selected_plottable], "group_id"):
                 new_plot.group_id = self.plots[self.graph.selected_plottable].group_id
@@ -293,33 +287,39 @@ class ModelPanel1D(PlotPanel):
             new_plot.xaxis(label, unit)
             label, unit = self.plots[self.graph.selected_plottable].get_yaxis()
             new_plot.yaxis(label, unit)
-            #print "panel scale ",self.xLabel, self.yLabel
-            #print "color",self.graph.plottables[self.plots[self.graph.selected_plottable]]
+            ## save the color of the selected plottable before it is deleted
             color=self.graph.plottables[self.plots[self.graph.selected_plottable]]
             self.graph.delete(self.plots[self.graph.selected_plottable])
-            
+            ## add newly created plottable to the graph with the save color
             self.graph.add(new_plot,color)
-            # transforming the view of the new data into the same of the previous data
+            ## transforming the view of the new data into the same of the previous data
             self._onEVT_FUNC_PROPERTY()
-            #print "cyllinder", self.plots[self.graph.selected_plottable].x,self.plots[self.graph.selected_plottable].view.x, new_plot.x, new_plot.view.x
+            ## save the plot 
             self.plots[self.graph.selected_plottable]=new_plot
-           
+            ## Render the graph
             self.graph.render(self)
             self.subplot.figure.canvas.draw_idle() 
             
             event = ErrorDataEvent(err_dy=self.err_dy)
             wx.PostEvent(self.parent, event)
     
+    
     def _on_add_errors(self, evt):
         """
+            create a new data1D witht the errors saved in self.err_dy
+            to show errors of the plot.
             Compute reasonable errors for a data set without 
             errors and transorm the plottable to a Data1D
+            @param evt: Menu event
         """
         import math
         import numpy
         import time
         
         if not self.graph.selected_plottable == None:
+            ##Reset the flag to display the hide option on the context menu
+            self.errors_hide = 0
+            ## restore dy 
             length = len(self.plots[self.graph.selected_plottable].x)
             dy = numpy.zeros(length)
             selected_plot= self.plots[self.graph.selected_plottable]
@@ -328,14 +328,12 @@ class ModelPanel1D(PlotPanel):
             except:
                 for i in range(length):
                     dy[i] = math.sqrt(self.plots[self.graph.selected_plottable].y[i])      
-            #for i in range(length):
-            #    dy[i] = math.sqrt(self.plots[self.graph.selected_plottable].y[i])
-                
+            ## Create a new plottable data1D
             new_plot = Data1D(self.plots[self.graph.selected_plottable].x,
                               self.plots[self.graph.selected_plottable].y,
                               dy=dy)
             new_plot.interactive = True
-            self.errors_hide=0
+           
             new_plot.name = self.plots[self.graph.selected_plottable].name 
             if hasattr(self.plots[self.graph.selected_plottable], "group_id"):
                 new_plot.group_id = self.plots[self.graph.selected_plottable].group_id
@@ -348,20 +346,25 @@ class ModelPanel1D(PlotPanel):
             new_plot.xaxis(label, unit)
             label, unit = self.plots[self.graph.selected_plottable].get_yaxis()
             new_plot.yaxis(label, unit)
-            #print "panel scale ",self.xLabel, self.yLabel
+            ## save the color of the selected plottable before it is deleted
             color=self.graph.plottables[self.plots[self.graph.selected_plottable]]
             self.graph.delete(self.plots[self.graph.selected_plottable])
+            ## add newly created plottable to the graph with the save color
             self.graph.add(new_plot, color)
-            
-            # transforming the view of the new data into the same of the previous data
+            ## transforming the view of the new data into the same of the previous data
             self._onEVT_FUNC_PROPERTY()
-            #print "cyllinder", self.plots[self.graph.selected_plottable].x,self.plots[self.graph.selected_plottable].view.x, new_plot.x, new_plot.view.x
+            ## save the plot 
             self.plots[self.graph.selected_plottable]=new_plot
-            
+            ## render the graph with its new content
             self.graph.render(self)
             self.subplot.figure.canvas.draw_idle() 
                
+               
     def _onSaveXML(self, evt):
+        """
+            Save 1D  Data to  XML file
+            @param evt: Menu event
+        """
         import os
         id = str(evt.GetId())
         if id in self.action_ids:         
@@ -370,7 +373,6 @@ class ModelPanel1D(PlotPanel):
             if dlg.ShowModal() == wx.ID_OK:
                 path = dlg.GetPath()
                 mypath = os.path.basename(path)
-                #print path
             dlg.Destroy()
             
             if not path == None:
@@ -380,8 +382,7 @@ class ModelPanel1D(PlotPanel):
                 datainfo= self.plots[self.graph.selected_plottable].info
                 reader.write( path, datainfo)
             return 
-                
-                
+                      
                 
                 
     def _onSave(self, evt):
@@ -398,7 +399,7 @@ class ModelPanel1D(PlotPanel):
             if dlg.ShowModal() == wx.ID_OK:
                 path = dlg.GetPath()
                 mypath = os.path.basename(path)
-                #print path
+                
             dlg.Destroy()
             
             if not path == None:
@@ -411,7 +412,7 @@ class ModelPanel1D(PlotPanel):
                 if has_errors:
                     try:
                         if len(self.action_ids[id].y) != len(self.action_ids[id].dy):
-                            #print "Y and dY have different lengths"
+    
                             has_errors = False
                     except:
                         has_errors = False
@@ -432,12 +433,5 @@ class ModelPanel1D(PlotPanel):
                         
                 out.close()
     
- 
-
-    def _onToggleScale(self, event):
-        if self.get_yscale() == 'log':
-            self.set_yscale('linear')
-        else:
-            self.set_yscale('log')
-        self.subplot.figure.canvas.draw_idle()    
+    
        

@@ -496,7 +496,7 @@ class VerticalDoubleLine(_BaseInteractor):
         
     def clear(self):
         """
-            Clear this figure and its markers
+            Clear this slicer  and its markers
         """
         self.clear_markers()
         try:

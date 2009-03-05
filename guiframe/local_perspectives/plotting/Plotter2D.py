@@ -59,43 +59,34 @@ class ModelPanel2D( ModelPanel1D):
         
         ## Reference to the parent window
         self.parent = parent
-        ## Plottables
+        ## Dictionary containing Plottables
         self.plots = {}
-        self.data2D= data2d
-        self.data =data2d.data
+        ## Save reference of the current plotted 
+        self.data2D = data2d
         ## Unique ID (from gui_manager)
         self.uid = None
-        
         ## Action IDs for internal call-backs
         self.action_ids = {}
+        ## Create Artist and bind it
         self.connect = BindArtist(self.subplot.figure)
-        
-        # Beam stop
+        ## Beam stop
         self.beamstop_radius = DEFAULT_BEAM
-       
+        ## to set the order of lines drawn first.
         self.slicer_z = 5
+        ## Reference to the current slicer
         self.slicer = None
-        #self.parent.Bind(EVT_INTERNAL, self._onEVT_INTERNAL)
+        ## event to send slicer info 
         self.Bind(EVT_INTERNAL, self._onEVT_INTERNAL)
-        self.axes_frozen = False
         
+        self.axes_frozen = False
+        ## panel that contains result from slicer motion (ex: Boxsum info)
         self.panel_slicer=None
-        #self.parent.Bind(EVT_SLICER_PARS, self.onParamChange)
         ## Graph        
         self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
         self.graph.render(self)
-        #self.Bind(boxSum.EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PARS)
-        #self.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
-       
         
-        
-    def _onEVT_SLICER_PARS(self, event):
-        #print "paramaters entered on slicer panel", event.type, event.params
-        self.slicer.set_params(event.params)
-        #from sans.guicomm.events import SlicerPanelEvent
-        #wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
         
     def _onEVT_1DREPLOT(self, event):
         """
@@ -107,11 +98,10 @@ class ModelPanel2D( ModelPanel1D):
              
             @param event: data event
         """
-              
-        self.data2D= event.plot
-        self.data =event.plot.data
+        ## Update self.data2d with the current plot
+        self.data2D = event.plot
         #TODO: Check for existence of plot attribute
-
+        
         # Check whether this is a replot. If we ask for a replot
         # and the plottable no longer exists, ignore the event.
         if hasattr(event, "update") and event.update==True \
@@ -156,13 +146,10 @@ class ModelPanel2D( ModelPanel1D):
             self.qmax= event.plot.xmax
             
         self.slicer= None
-       
         # Check axis labels
         #TODO: Should re-factor this
-        #if event.plot._xunit != self.graph.prop["xunit"]:
+        ## render the graph with its new content
         self.graph.xaxis(event.plot._xaxis, event.plot._xunit)
-            
-        #if event.plot._yunit != self.graph.prop["yunit"]:
         self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
         self.graph.title(self.data2D.name)
         self.graph.render(self)
@@ -174,8 +161,6 @@ class ModelPanel2D( ModelPanel1D):
             2D plot context menu
             @param event: wx context event
         """
-        
-        #slicerpop = wx.Menu()
         slicerpop = PanelMenu()
         slicerpop.set_plots(self.plots)
         slicerpop.set_graph(self.graph)
@@ -203,10 +188,9 @@ class ModelPanel2D( ModelPanel1D):
                         slicerpop.Append(id, item[0], item[1])
                         wx.EVT_MENU(self, id, item[2])
                     except:
+                        wx.PostEvent(self.parent, StatusEvent(status=\
+                        "ModelPanel1D.onContextMenu: bad menu item  %s"%sys.exc_value))
                         pass
-                        #print sys.exc_value
-                        #print RuntimeError, "View1DPanel2D.onContextMenu: bad menu item"
-        
                 slicerpop.AppendSeparator()
         
         id = wx.NewId()
@@ -236,14 +220,17 @@ class ModelPanel2D( ModelPanel1D):
         id = wx.NewId()
         slicerpop.Append(id, '&Box averaging in Qy')
         wx.EVT_MENU(self, id, self.onBoxavgY) 
+        
         if self.slicer !=None :
             id = wx.NewId()
             slicerpop.Append(id, '&Clear slicer')
             wx.EVT_MENU(self, id,  self.onClearSlicer) 
+            
             if self.slicer.__class__.__name__ !="BoxSum":
                 id = wx.NewId()
                 slicerpop.Append(id, '&Edit Slicer Parameters')
                 wx.EVT_MENU(self, id, self._onEditSlicer) 
+                
         slicerpop.AppendSeparator() 
        
         id = wx.NewId()
@@ -254,12 +241,16 @@ class ModelPanel2D( ModelPanel1D):
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
    
+   
     def _onEditDetector(self, event):
         """
+            Allow to view and edits  detector parameters
+            @param event: wx.menu event
         """
-        #print "edit detortor param",self.zmin_2D, self.zmax_2D
+        
         import detector_dialog
         dialog = detector_dialog.DetectorDialog(self, -1,base=self.parent)
+        ## info of current detector and data2D
         xnpts = len(self.data2D.x_bins)
         ynpts = len(self.data2D.y_bins)
         xmax = max(self.data2D.xmin, self.data2D.xmax)
@@ -268,6 +259,7 @@ class ModelPanel2D( ModelPanel1D):
         beam = self.data2D.xmin
         zmin = self.zmin_2D
         zmax = self.zmax_2D
+        ## set dialog window content
         dialog.setContent(xnpts=xnpts,ynpts=ynpts,qmax=qmax,
                            beam=self.data2D.xmin,
                            zmin = self.zmin_2D,
@@ -278,7 +270,7 @@ class ModelPanel2D( ModelPanel1D):
             self.zmax_2D = evt.zmax
        
         dialog.Destroy()
-        #print "zmn ,zmax", self.zmin_2D, self.zmax_2D
+        ## Redraw the current image
         self.image(data= self.data2D.data,
                    xmin= self.data2D.xmin,
                    xmax= self.data2D.xmax,
@@ -287,16 +279,10 @@ class ModelPanel2D( ModelPanel1D):
                    zmin= self.zmin_2D,
                    zmax= self.zmax_2D,
                    color=0,symbol=0,label='data2D')
-        #self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
         
-    def get_corrected_data(self):
-        # Protect against empty data set
-        if self.data == None:
-            return None
-        import copy
-        output = copy.deepcopy(self.data)
-        return output
+        
+  
     def freeze_axes(self):
         self.axes_frozen = True
         
@@ -306,74 +292,77 @@ class ModelPanel2D( ModelPanel1D):
     def onMouseMotion(self,event):
         pass
     def onWheel(self, event):
-        pass    
+        pass  
+      
     def update(self, draw=True):
         """
             Respond to changes in the model by recalculating the 
             profiles and resetting the widgets.
         """
-        #self.slicer.update()
         self.draw()
         
         
     def _getEmptySlicerEvent(self):
+        """
+            create an empty slicervent 
+        """
         return SlicerEvent(type=None,
                            params=None,
                            obj_class=None)
     def _onEVT_INTERNAL(self, event):
         """
-            I don't understand why Unbind followed by a Bind
-            using a modified self.slicer doesn't work.
-            For now, I post a clear event followed by
-            a new slicer event...
+            Draw the slicer
+            @param event: wx.lib.newevent (SlicerEvent) containing slicer
+            parameter
         """
         self._setSlicer(event.slicer)
             
     def _setSlicer(self, slicer):
-        # Clear current slicer
-        #printEVT("Plotter2D._setSlicer %s" % slicer)
+        """
+            Clear the previous slicer and create a new one.Post an internal
+            event.
+            @param slicer: slicer class to create
+        """
         
+        ## Clear current slicer
         if not self.slicer == None:  
             self.slicer.clear()            
-            
+        ## Create a new slicer    
         self.slicer_z += 1
         self.slicer = slicer(self, self.subplot, zorder=self.slicer_z)
-        #print "come here"
         self.subplot.set_ylim(self.data2D.ymin, self.data2D.ymax)
         self.subplot.set_xlim(self.data2D.xmin, self.data2D.xmax)
-       
+        ## Draw slicer
         self.update()
         self.slicer.update()
-        
+        wx.PostEvent(self.parent, StatusEvent(status=\
+                        "Plotter2D._setSlicer  %s"%self.slicer.__class__.__name__))
         # Post slicer event
         event = self._getEmptySlicerEvent()
         event.type = self.slicer.__class__.__name__
         
         event.obj_class = self.slicer.__class__
         event.params = self.slicer.get_params()
-        #print "Plotter2D: event.type",event.type,event.params, self.parent
-        
-        #wx.PostEvent(self.parent, event)
         wx.PostEvent(self, event)
+
 
     def onCircular(self, event):
         """
             perform circular averaging on Data2D
+            @param event: wx.menu event
         """
         
         from DataLoader.manipulations import CircularAverage
-        import math
+        ## compute the maximum radius of data2D
         self.qmax= max(math.fabs(self.data2D.xmax),math.fabs(self.data2D.xmin))
         self.ymax=max(math.fabs(self.data2D.ymax),math.fabs(self.data2D.ymin))
         self.radius= math.sqrt( math.pow(self.qmax,2)+math.pow(self.ymax,2)) 
-        #print "radius?",self.radius
-        # bin_width = self.qmax -self.qmin/nbins 
-        #nbins= 30
+        ##Compute beam width
         bin_width = (self.qmax +self.qmax)/100
-        
+        ## Create data1D circular average of data2D
         Circle = CircularAverage( r_min=0, r_max=self.radius, bin_width=bin_width)
-       
         circ = Circle(self.data2D)
+        
         from sans.guiframe.dataFitting import Data1D
         if hasattr(circ,"dxl"):
             dxl= circ.dxl
@@ -389,96 +378,101 @@ class ModelPanel2D( ModelPanel1D):
         new_plot.source=self.data2D.source
         #new_plot.info=self.data2D.info
         new_plot.interactive = True
-        #print "loader output.detector",output.source
         new_plot.detector =self.data2D.detector
-        
-        # If the data file does not tell us what the axes are, just assume...
+        ## If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}","A^{-1}")
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = "Circ avg "+ self.data2D.name
         new_plot.id = "Circ avg "+ self.data2D.name
-        self.scale = 'log'
-       
+        
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=new_plot.name))
        
+       
     def _onEditSlicer(self, event):
+        """
+            Is available only when a slicer is drawn.Create a dialog 
+            window where the user can enter value to reset slicer
+            parameters.
+            @param event: wx.menu event
+        """
         if self.slicer !=None:
             from SlicerParameters import SlicerParameterPanel
             dialog = SlicerParameterPanel(self, -1, "Slicer Parameters")
-            #dialog = SlicerParameterPanel(self.parent, -1, "Slicer Parameters")
             dialog.set_slicer(self.slicer.__class__.__name__,
                             self.slicer.get_params())
             if dialog.ShowModal() == wx.ID_OK:
                 dialog.Destroy() 
         
+        
     def onSectorQ(self, event):
         """
-            Perform sector averaging on Q
+            Perform sector averaging on Q and draw sector slicer
         """
-        #print "onsector self.data2Dxmax",self.data2D.xmax, self.parent
         from SectorSlicer import SectorInteractor
         self.onClearSlicer(event)
-        #wx.PostEvent(self.parent, InternalEvent(slicer= SectorInteractor))
         wx.PostEvent(self, InternalEvent(slicer= SectorInteractor))
         
     def onSectorPhi(self, event):
         """
-            Perform sector averaging on Phi
+            Perform sector averaging on Phi and draw annulus slicer
         """
         from AnnulusSlicer import AnnulusInteractor
         self.onClearSlicer(event)
-        #wx.PostEvent(self.parent, InternalEvent(slicer= AnnulusInteractor))
         wx.PostEvent(self, InternalEvent(slicer= AnnulusInteractor))
         
     def onBoxSum(self,event):
         from boxSum import BoxSum
         self.onClearSlicer(event)
-        #wx.PostEvent(self.parent, InternalEvent(slicer= BoxSum))
-        if not self.slicer == None:  
-            self.slicer.clear()             
+                    
         self.slicer_z += 1
         self.slicer =  BoxSum(self, self.subplot, zorder=self.slicer_z)
-        #print "come here"
+       
         self.subplot.set_ylim(self.data2D.ymin, self.data2D.ymax)
         self.subplot.set_xlim(self.data2D.xmin, self.data2D.xmax)
        
         self.update()
         self.slicer.update()
-        
-        # Post slicer event
-        event = self._getEmptySlicerEvent()
-        event.type = self.slicer.__class__.__name__
-        
-        
-        event.obj_class = self.slicer.__class__
-        event.params = self.slicer.get_params()
-        #print "Plotter2D: event.type",event.type,event.params, self.parent
-        
+        ## Value used to initially set the slicer panel
+        type = self.slicer.__class__.__name__
+        params = self.slicer.get_params()
+        ## Create a new panel to display results of summation of Data2D
         from slicerpanel import SlicerPanel
-        new_panel = SlicerPanel(parent= self.parent,id= -1,base= self,type=event.type,
-                                 params=event.params, style=wx.RAISED_BORDER)
-        #new_panel.set_slicer(self.slicer.__class__.__name__,
-        new_panel.window_caption=str(self.slicer_z)+self.slicer.__class__.__name__+" "+ str(self.data2D.name)
-        new_panel.window_name = str(self.slicer_z)+self.slicer.__class__.__name__+" "+ str(self.data2D.name)
+        new_panel = SlicerPanel(parent= self.parent, id= -1,
+                                    base= self, type= type,
+                                    params= params, style= wx.RAISED_BORDER)
+        
+        new_panel.window_caption=self.slicer.__class__.__name__+" "+ str(self.data2D.name)
+        new_panel.window_name = self.slicer.__class__.__name__+" "+ str(self.data2D.name)
+        ## Store a reference of the new created panel
         self.panel_slicer= new_panel
+        ## save the window_caption of the new panel in the current slicer
         self.slicer.set_panel_name( name= new_panel.window_caption)
-        #wx.PostEvent(self.panel_slicer, event)
+        ## post slicer panel to guiframe to display it 
         from sans.guicomm.events import SlicerPanelEvent
         wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
-        #print "finish box sum"
+
         
     def onBoxavgX(self,event):
+        """
+            Perform 2D data averaging on Qx
+            Create a new slicer .
+            @param event: wx.menu event
+        """
         from boxSlicer import BoxInteractorX
         self.onClearSlicer(event)
-        #wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractorX))
         wx.PostEvent(self, InternalEvent(slicer= BoxInteractorX))
        
        
     def onBoxavgY(self,event):
+        """
+            Perform 2D data averaging on Qy
+            Create a new slicer .
+            @param event: wx.menu event
+        """
         from boxSlicer import BoxInteractorY
         self.onClearSlicer(event)
         wx.PostEvent(self, InternalEvent(slicer= BoxInteractorY))
-        #wx.PostEvent(self.parent, InternalEvent(slicer= BoxInteractorY))
+        
         
     def onClearSlicer(self, event):
         """
@@ -491,11 +485,9 @@ class ModelPanel2D( ModelPanel1D):
         
             # Post slicer None event
             event = self._getEmptySlicerEvent()
-            #wx.PostEvent(self.parent, event)
             wx.PostEvent(self, event)
           
-  
-        
+    
     def _onToggleScale(self, event):
         """
             toggle pixel scale and replot image
@@ -504,7 +496,7 @@ class ModelPanel2D( ModelPanel1D):
             self.scale = 'linear'
         else:
             self.scale = 'log'
-        self.image(self.data,self.xmin_2D,self.xmax_2D,self.ymin_2D,
+        self.image(self.data2D.data,self.xmin_2D,self.xmax_2D,self.ymin_2D,
                    self.ymax_2D,self.zmin_2D ,self.zmax_2D )
         wx.PostEvent(self.parent, StatusEvent(status="Image is in %s scale"%self.scale))
         
