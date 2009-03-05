@@ -31,7 +31,6 @@ class Calc2D_all(CalcThread):
         try:
             CalcThread.isquit(self)
         except KeyboardInterrupt:
-            #printEVT("Calc %s interrupted" % self.model.name)
             wx.PostEvent(self.parent, StatusEvent(status=\
                        "Calc %s interrupted" % self.model.name))
             raise KeyboardInterrupt
@@ -107,28 +106,35 @@ class Calc2D(CalcThread):
         self.qstep= qstep
         self.x = x
         self.y = y
+        ## the model on to calculate
         self.model = model
         self.starttime = 0
         wx.PostEvent(self.parent, StatusEvent(status=\
                     "Start Drawing model  ",curr_thread=self,type="start"))
         
+        
     def isquit(self):
         try:
             CalcThread.isquit(self)
         except KeyboardInterrupt:
-            #printEVT("Calc %s interrupted" % self.model.name)
             wx.PostEvent(self.parent, StatusEvent(status=\
                        "Calc %s interrupted" % self.model.name))
            
             raise KeyboardInterrupt
         
-    def update(self, output=None):
         
+    def update(self, output=None):
+        """
+            Post a message if update available
+        """
         wx.PostEvent(self.parent, StatusEvent(status="Plot \
         #updating ... ",curr_thread=self,type="update"))
         
         
     def compute(self):
+        """
+            Compute the data given a model function
+        """
         import numpy
         x = self.x
         y = self.y
@@ -162,7 +168,7 @@ class Calc2D(CalcThread):
                      wx.PostEvent(self.parent, StatusEvent(status=\
                        "Error computing %s at [%g,%g]" %(self.model.name, self.x[i_x],self.y[i_y])))
                      pass
-        #print "model thread ouput",output       
+        
         elapsed = time.time()-self.starttime
         self.complete(
                       output=output, elapsed=elapsed,model= self.model,

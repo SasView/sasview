@@ -145,8 +145,6 @@ class DialogAbout(wx.Dialog):
             size = [self.GetBestFittingSize()[0], self.GetSize()[1]]
 
         self.Fit()
-#        self.SetSize(size)
-#       self.FitInside()
         
 
     def __set_properties(self):
@@ -155,10 +153,9 @@ class DialogAbout(wx.Dialog):
         self.SetSize((600, 595))
         self.label_title.SetFont(wx.Font(26, wx.DEFAULT, wx.NORMAL, wx.BOLD, 0, ""))
         self.label_version.SetFont(wx.Font(26, wx.DEFAULT, wx.NORMAL, wx.NORMAL, 0, ""))
-        #self.hyperlink_license.Enable(False)
-        #self.hyperlink_license.Hide()
+      
         self.hyperlink_paper.Enable(True)
-        #self.hyperlink_paper.Hide()
+        
         self.bitmap_button_nsf.SetSize(self.bitmap_button_nsf.GetBestSize())
         self.bitmap_button_danse.SetSize(self.bitmap_button_danse.GetBestSize())
         self.bitmap_button_msu.SetSize(self.bitmap_button_msu.GetBestSize())

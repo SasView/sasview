@@ -2,6 +2,9 @@ import wx
 class MyStatusBar(wx.StatusBar):
     def __init__(self,*args,**kargs):
          wx.StatusBar.__init__(self, *args,**kargs)
+         """
+             Implement statusbar functionalities 
+         """
          #Layout of status bar
          self.SetFieldsCount(2) 
          width,height = self.GetSize()
@@ -11,19 +14,18 @@ class MyStatusBar(wx.StatusBar):
          self.gauge.SetPosition((rect.x+5, rect.y-2))
          
          self.gauge.Hide()
-         
-         #Progess 
-
-         self.progress = 0       # Current progress value of the bar 
+         ## Current progress value of the bar 
+         self.progress = 0      
          self.timer = wx.Timer(self,-1) 
          self.timer_stop = wx.Timer(self,-1) 
          self.thread= None
          self.Bind(wx.EVT_TIMER,self.OnTimer, self.timer) 
          self.Bind(wx.EVT_TIMER,self.OnTimer_stop, self.timer_stop) 
          self.count=0
+        
          
     def OnTimer_stop(self, evt): 
-        """Update the progress bar while the timer is running 
+        """Clear the progress bar
         @param evt: wx.EVT_TIMER 
   
         """ 
@@ -33,6 +35,8 @@ class MyStatusBar(wx.StatusBar):
             self.gauge.Hide()
             self.SetStatusText( "", 0)
             self.count=0
+            
+            
     def OnTimer(self, evt): 
         """Update the progress bar while the timer is running 
         @param evt: wx.EVT_TIMER 
@@ -44,6 +48,9 @@ class MyStatusBar(wx.StatusBar):
        
        
     def set_progress(self):
+        """    
+            Set the gauge value given the status of a thread
+        """
         self.gauge.Show(True)
         if self.timer.IsRunning(): 
             while(self.thread.isrunning()):
@@ -55,12 +62,16 @@ class MyStatusBar(wx.StatusBar):
                     self.gauge.SetValue(70) 
                     self.progress =0
                     self.timer.Stop()
-                    #self.gauge.Hide()
+                    
             self.timer.Stop()
             self.gauge.SetValue(90) 
             self.progress =0
             
+            
     def clear_gauge(self, msg=""):
+        """
+            Hide the gauge
+        """
         self.timer.Stop()
         self.SetStatusText( str(msg), 0)
         self.progress =0
@@ -68,6 +79,13 @@ class MyStatusBar(wx.StatusBar):
         self.gauge.Hide() 
          
     def set_status(self, type=None,msg="", thread=None):
+        """
+            Update the status bar .
+            @param type: type of message send.
+            type  must be in ["start","progress","update","stop"]
+            @param msg: the message itself  as string
+            @param thread: if updatting using a thread status 
+        """
         if type==None:
             self.SetStatusText(str(msg),0)
         
@@ -79,17 +97,15 @@ class MyStatusBar(wx.StatusBar):
                 self.SetStatusText( str(msg), 0)
                 self.progress +=10
                 self.gauge.SetValue(int(self.progress)) 
-                #self.timer.Start(1000)
-                #print "went here"
-                #self.set_progress()
+              
                 self.progress +=10
                 if self.progress < self.gauge.GetRange()-20:
                     self.gauge.SetValue(int(self.progress)) 
+                    
             if type.lower()=="progress":
                 self.timer.Start(100)
                 self.SetStatusText( str(msg), 0)
                 self.gauge.Pulse()
-                #print "in progress"
                 
             if  type.lower()=="update":
                 

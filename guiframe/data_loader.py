@@ -82,68 +82,76 @@ def plot_data(parent, path):
     filename = os.path.basename(path)
     
     if not  output.__class__.__name__=="list":
+        ## smearing info
         try:
-            dxl=output.dxl
-            dxw=output.dxw
+            dxl = output.dxl
+            dxw = output.dxw
         except:
-            dxl=None
-            dxw=None
+            dxl = None
+            dxw = None
+        ## data 's name
+        if output.filename==None:
+            output.filename=str(filename)
+        ## Creating a Data2D with output
         if hasattr(output,'data'):
             temp = output.err_data
             temp[temp==0]=1
-
-            wx.PostEvent(parent, StatusEvent(status="Loading 2D error bars of value 1 \
-            were added to : %s"% output.filename))
+            msg= "Loading 2D error bars of value 1 were added to"
+            wx.PostEvent(parent, StatusEvent(status=" %s %s"% (msg,output.filename)))
             new_plot = Data2D(image=output.data,err_image=temp,
                               xmin=output.xmin,xmax=output.xmax,
                               ymin=output.ymin,ymax=output.ymax)
             new_plot.x_bins=output.x_bins
             new_plot.y_bins=output.y_bins
+        ##Creating Data1D with output
         else:
-           
+            ##dy values checked
             if output.dy ==None :
                 new_plot = Theory1D(output.x,output.y, dxl, dxw)
+                
             elif len(output.dy[output.dy==0])==len(output.dy):
                 output.dy[output.dy==0]=1 
-                wx.PostEvent(parent, StatusEvent(status="Loading 1D error bars of value 1 \
-                    were added to : %s"%output.filename))
+                msg="Loading 1D error bars of value 1 were added to "
+                wx.PostEvent(parent, StatusEvent(status= "%s %s"%(msg, output.filename)))
                 new_plot = Theory1D(output.x,output.y,output.dy, dxl, dxw)
             else:
-                new_plot = Data1D(x=output.x,y=output.y,dx=output.dx,dy=output.dy, dxl=dxl, dxw=dxw)
-        if output.filename==None:
-            output.filename=str(filename)
+                msg="Loading 1D data: "
+                wx.PostEvent(parent, StatusEvent(status= "%s %s"%(msg, output.filename)))
+                new_plot = Data1D(x=output.x, y=output.y, dx=output.dx,
+                                  dy=output.dy, dxl=dxl, dxw=dxw)
+                
+        ## source will request in dataLoader .manipulation module
         new_plot.source=output.source
+        ## name of the data allow to differentiate data when plotted
         new_plot.name = output.filename
+        ## allow to highlight data when plotted
         new_plot.interactive = True
-        new_plot.id = True
+        ## when 2 data have the same id override the 1 st plotted
+        new_plot.id = output.filename
+        ## info is a reference to output of dataloader that can be used
+        ## to save  data 1D as cansas xml file
         new_plot.info= output
-        if hasattr(output, "dxl"):
-            new_plot.dxl = output.dxl
-        if hasattr(output, "dxw"):
-            new_plot.dxw = output.dxw
+        ## detector used by dataLoader.manipulation module
         new_plot.detector =output.detector
-        
-        # If the data file does not tell us what the axes are, just assume...
+        ## If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis(output._xaxis,output._xunit)
         new_plot.yaxis(output._yaxis,output._yunit)
+        ##group_id specify on which panel to plot this data
         new_plot.group_id = output.filename
-        new_plot.id = output.filename
-        try:
-            title=output.filename
-        except:
-            title= filename
+        ##post data to plot
+        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(output.filename)))
         
-        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
+    ## the output of the loader is a list , some xml files contain more than one data
     else:
         i=1
         for item in output:
-            
             try:
                 dxl=item.dxl
                 dxw=item.dxw
             except:
                 dxl=None
                 dxw=None
+                
             if item.dy ==None:
                 new_plot = Theory1D(item.x,item.y,dxl,dxw)
             else:

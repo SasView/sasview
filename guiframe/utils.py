@@ -1,5 +1,5 @@
 """
-     Contains common classes
+     Contains common classes and functions
 """
 import wx,re
 

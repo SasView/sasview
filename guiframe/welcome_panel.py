@@ -50,11 +50,11 @@ def launchBrowser(url):
 
 
 class PanelAbout(wx.Panel):
-    '''"About" Dialog
-    
+    """
+    Panel created like about box  as a welcome page
     Shows product name, current version, authors, and link to the product page.
     Current version is taken from version.py
-    '''
+    """
     
     def __init__(self, *args, **kwds):
 
