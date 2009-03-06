@@ -27,6 +27,10 @@ class ModelPage(wx.ScrolledWindow):
     ## Title to appear on top of the window
     window_caption = "Fit Page"
     name=""
+    
+    ## Data member to store the dispersion object created
+    _disp_obj_dict = {}
+    
     def __init__(self, parent,model,name, *args, **kwargs):
         wx.ScrolledWindow.__init__(self, parent, *args, **kwargs)
         """ 
@@ -34,8 +38,7 @@ class ModelPage(wx.ScrolledWindow):
         """
         # model on which the fit would be performed
         self.model=model
-        # Data member to store the dispersion object created
-        self._disp_obj_dict = {}
+        
         #list of dispersion paramaters
         self.disp_list=[]
         try:
@@ -347,7 +350,7 @@ class ModelPage(wx.ScrolledWindow):
             for k,v in self.polydisp.iteritems():
                 if str(v)=="MyModel":
     				# Remove the option until the rest of the code is ready for it
-                    #self.disp_box.Insert("Select customized Model",id)
+                    self.disp_box.Insert("Select customized Model",id)
                     pass  
                 else:
                     self.disp_box.Insert(str(v),id)         

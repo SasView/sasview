@@ -14,6 +14,7 @@ _BOX_WIDTH = 80
 
 #TODO: FitPage1D inherits from ModelPage but doesn't call its __init__ method!
 #TODO: refactor this class to have an __init__ that deals with data only, then calls a UI builder method.
+
 class FitPage1D(ModelPage):
     """
         FitPanel class contains fields allowing to display results when
@@ -40,14 +41,6 @@ class FitPage1D(ModelPage):
         self.enable2D=False
         #fit page manager 
         self.manager = None
-        
-        
-        # Should not have to write the following line if the inheritance
-        # was coded properly...
-        #TODO: get rid of this line once the class is refactored
-        self._disp_obj_dict = {}
-        
-        
         #Store the parent of this panel parent
         # For this application fitpanel is the parent
         self.parent  = parent
