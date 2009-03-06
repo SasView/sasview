@@ -28,9 +28,6 @@ class ModelPage(wx.ScrolledWindow):
     window_caption = "Fit Page"
     name=""
     
-    ## Data member to store the dispersion object created
-    _disp_obj_dict = {}
-    
     def __init__(self, parent,model,name, *args, **kwargs):
         wx.ScrolledWindow.__init__(self, parent, *args, **kwargs)
         """ 
@@ -39,6 +36,9 @@ class ModelPage(wx.ScrolledWindow):
         # model on which the fit would be performed
         self.model=model
         
+        ## Data member to store the dispersion object created
+        self._disp_obj_dict = {}
+
         #list of dispersion paramaters
         self.disp_list=[]
         try:

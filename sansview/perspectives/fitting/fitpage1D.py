@@ -35,6 +35,10 @@ class FitPage1D(ModelPage):
         """ 
             Initialization of the Panel
         """
+        #TODO: remove this once the inheritence is cleaned up
+        ## Data member to store the dispersion object created
+        self._disp_obj_dict = {}
+
         #Data used for fitting 
         self.data = data
         # flag to allow data2D plot
