@@ -37,10 +37,15 @@ class SansParameter(park.Parameter):
             Override _getrange of park parameter
             return the range of parameter
         """
-        lo,hi = self._model.details[self.name][1:]
-        if lo is None: lo = -numpy.inf
-        if hi is None: hi = numpy.inf
+        if not  self.name in self._model.getDispParamList():
+            lo,hi = self._model.details[self.name][1:]
+            if lo is None: lo = -numpy.inf
+            if hi is None: hi = numpy.inf
+        else:
+            lo= -numpy.inf
+            hi= numpy.inf
         return lo,hi
+        
     
     def _setrange(self,r):
         """
@@ -151,6 +156,7 @@ class Data(object):
         """ @param fn: function that return model value
             @return residuals
         """
+        
         x,y,dy = [numpy.asarray(v) for v in (self.x,self.y,self.dy)]
         if self.qmin==None and self.qmax==None: 
             fx =numpy.asarray([fn(v) for v in x])
@@ -243,7 +249,6 @@ class FitData1D(object):
         # Smear theory data
         if self.smearer is not None:
             fx = self.smearer(fx)
-            
         # Sanity check
         if numpy.size(dy) < numpy.size(x):
             raise RuntimeError, "FitData1D: invalid error array"
@@ -340,6 +345,7 @@ class sansAssembly:
     """
          Sans Assembly class a class wrapper to be call in optimizer.leastsq method
     """
+    
     def __init__(self,paramlist,Model=None , Data=None):
         """
             @param Model: the model wrapper fro sans -model
