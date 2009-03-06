@@ -107,9 +107,9 @@ class SectorInteractor(_BaseInteractor):
         ## Check if the middle line was dragged and update the picture accordingly     
         if self.main_line.has_move:
             self.main_line.update()
-            self.right_line.update( delta= -self.left_line.phi/2+math.pi ,
+            self.right_line.update( delta= -self.left_line.phi/2,
                                     mline= self.main_line.theta )
-            self.left_line.update( delta = self.left_line.phi/2+math.pi ,
+            self.left_line.update( delta = self.left_line.phi/2,
                                    mline= self.main_line.theta )
         ## Check if the left side has moved and update the slicer accordingly  
         if self.left_line.has_move:
@@ -358,7 +358,7 @@ class SideInteractor(_BaseInteractor):
         """
             Draw oblique line
             @param phi: the phase between the middle line and the current line
-            @param delta: 
+            @param delta: phi/2 applied only when the mline was moved
         """
         #print "update left or right ", self.has_move
         self.left_moving=left
