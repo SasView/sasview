@@ -11,7 +11,7 @@ copyright 2008, University of Tennessee
 
 import wx
 import sys
-import pylab
+import pylab, time
 
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
