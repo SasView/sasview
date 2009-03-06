@@ -15,27 +15,35 @@ class FitProblem:
             @ self.model_list:  is a list containing a model as first element 
             and its name assign example [lineModel, M0]
         """
+        ## data used for fitting
         self.fit_data=None
-        self.theory_name=None
+        ## list containing couple of model and its name
         self.model_list=[]
+        ## if 1 this fit problem will be selected to fit , if 0 
+        ## it will not be selected for fit
         self.schedule=0
+        ##list containing parameter name and value
         self.list_param=[]
-        self.name_per_page=None
+        ## smear object to smear or not data1D
         self.smearer= None
+        ## same as fit_data but with more info for plotting
+        ## axis unit info and so on see plottables definition
         self.plotted_data=None
         
+        
     def set_smearer(self, smearer):
+        """
+          save reference of  smear object on fitdata
+          @param smear : smear object from DataLoader
+        """
         self.smearer= smearer
-        #print "smeaerer in fitproblem",self.smearer
+       
     def get_smearer(self):
+        """
+            return smear object
+        """
         return self.smearer
     
-    def save_model_name(self, name):  
-        self.name_per_page= name
-        
-        
-    def get_name(self):
-        return self.name_per_page
     
     def set_model(self,model,name):
         """ 
@@ -52,6 +60,8 @@ class FitProblem:
             @param data: data selected
         """
         self.plotted_data = data
+        
+        
     def add_fit_data(self,data):
         """ 
             save a copy of the data select to fit
@@ -61,7 +71,6 @@ class FitProblem:
             
     def get_model(self):
         """ @return: saved model """
-        #print "fitproblem",self.model_list
         return self.model_list
      
     def get_plotted_data(self):
@@ -88,30 +97,27 @@ class FitProblem:
         
     def set_model_param(self,name,value):
         """ 
-            set the value of a given parameter of this model
+            Store the name and value of a parameter of this fitproblem's model
             @param name: name of the given parameter
             @param value: value of that parameter
         """
-        #print "fitproblem",name,value
-        #self.model_list[0].setParam(name,value)
         self.list_param.append([name,value])
+        
+        
     def get_model_param(self):
         """ 
-            set the value of a given parameter of this model
-            @param name: name of the given parameter
-            @param value: value of that parameter
+            @return list of couple of parameter name and value
         """
-        #print self.param_name, self.param_value
-        #self.model_list[0].setParam(name,value)
         return self.list_param
+        
         
     def reset_model(self,model):
         """ 
             reset a model when parameter has changed
             @param value: new model
         """
-        #print "fitproblem : reset model"
         self.model_list[0]=model
+        
         
     def schedule_tofit(self, schedule=0):
         """
@@ -122,8 +128,12 @@ class FitProblem:
     def get_scheduled(self):
         """ return true or false if a problem as being schedule for fitting"""
         return self.schedule
+    
+    
     def clear_model_param(self):
         """
         clear constraint info
         """
         self.list_param=[]
+        
+        

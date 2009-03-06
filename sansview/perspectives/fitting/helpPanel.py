@@ -45,12 +45,10 @@ class HelpDialog(wx.Dialog):
         vbox.Add(static_line, 0, wx.EXPAND, 0)
         
         button_OK = wx.Button(self, wx.ID_OK, "OK")
-        #button_Cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
-        
+
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        sizer_button.Add(button_OK, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        #sizer_button.Add(button_Cancel, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)        
+        sizer_button.Add(button_OK, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)       
         vbox.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
 
         self.SetSizer(vbox)
@@ -62,7 +60,9 @@ class HelpDialog(wx.Dialog):
 class HelpWindow(wx.Frame):
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(600, 450))
-        
+        """
+             contains help info
+        """
         vbox1  = wx.BoxSizer(wx.HORIZONTAL)
         
         lpanel = wx.Panel(self, -1, style=wx.BORDER_SUNKEN)
@@ -126,9 +126,10 @@ class HelpWindow(wx.Frame):
         lpanel.SetFocus()
         
         self.SetSizer(vbox1)
-        
         self.Centre()
         self.Show(True)
+        
+        
     def OnLinkClicked(self, event):
         """
             Function to diplay html page related to the hyperlinktext selected

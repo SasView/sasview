@@ -8,7 +8,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         All that needs to be defined are the
         two data members window_name and window_caption
     """
-      ## Internal name for the AUI manager
+    ## Internal name for the AUI manager
     window_name = "simultaneous Fit page"
     ## Title to appear on top of the window
     window_caption = "Simultaneous Fit Page"
@@ -20,11 +20,9 @@ class SimultaneousFitPage(wx.ScrolledWindow):
              Simultaneous page display
         """
         self.parent = parent
-        #self.page_finder = page_finder
         self.page_finder={}
         self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer1 = wx.GridBagSizer(5,5)
-        #self.sizer2 = wx.GridBagSizer(5,5)
         self.sizer2  = wx.BoxSizer(wx.HORIZONTAL)
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
         self.vbox.Add(self.sizer3)
@@ -53,7 +51,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.model_list=[]
         self.model_toFit=[]
         
-        #self.add_model(self.page_finder)
         self.vbox.Layout()
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)
@@ -83,6 +80,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.manager = manager
         self.add_model( self.manager.page_finder)
         
+        
     def select_all_model_name(self,event):
         """
             check all models names
@@ -91,12 +89,9 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         if self.cb1.GetValue()==True:
             for item in self.model_list:
                 item[0].SetValue(True)
-                #item[1].schedule_tofit(1)
                 self.manager.schedule_for_fit( value=1,fitproblem =item[1]) 
                 self.model_toFit.append(item)
         else:
-            #print"simfit: deselected all"
-            
             for item in self.model_list:
                 item[0].SetValue(False) 
                 self.manager.schedule_for_fit( value=0,fitproblem =item[1]) 
@@ -111,7 +106,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
         if len(self.model_list)>0:
             for item in self.model_list:
-                #print "went here to clear"
                 item[0].SetValue(False) 
                 self.manager.schedule_for_fit( value=0,fitproblem =item[1])
         self.model_list=[]
@@ -122,7 +116,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         ix = 0
         iy = 1 
         list=[]
-       # if len(self.page_finder)>0:
         for page, value in page_finder.iteritems():
             try:
                 list = value.get_model()
@@ -136,21 +129,18 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 wx.EVT_CHECKBOX(self, cb.GetId(), self.select_model_name)
                 self.model_list.append([cb,value,page,modelname])
             except:
-                #wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Simultaneous fit: %s doesn't have a model selected yet %s" % \
-                #(value.get_data().group_id,sys.exc_value)))
                 pass
         iy +=1
         self.sizer1.Add((20,20),( iy,ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         self.sizer1.Layout()        
         self.vbox.Layout()
         
+        
     def remove_model(self,delpage):
         """
              Remove  a checkbox and the name related to a model selected on page delpage
              @param delpage: the page removed
         """
-        #print "self.model_list",self.model_list
-       
         self.model_list=[]
         self.model_toFit=[]
         self.sizer1.Clear(True)
@@ -173,13 +163,12 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                     wx.EVT_CHECKBOX(self, cb.GetId(), self.select_model_name)
                     self.model_list.append([cb,value,page,modelname])
             except:
-                #wx.PostEvent(self.parent.GrandParent, StatusEvent(status="Simultaneous fit: %s doesn't have a model selected yet %s" % \
-                #(value.get_data().group_id,sys.exc_value)))
                 pass
         iy +=1
         self.sizer1.Add((20,20),( iy,ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         self.sizer1.Layout()        
         self.vbox.Layout()
+        
         
     def select_model_name(self,event):
         """
@@ -188,12 +177,9 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.model_toFit=[]
         for item in self.model_list:
             if item[0].GetValue()==True:
-                #item[1].schedule_tofit('True')
-                #item[1].schedule_tofit(1)
                 self.model_toFit.append(item)
                 self.manager.schedule_for_fit( value=1,fitproblem =item[1]) 
             else:
-                #print"simfit: deselected one"
                 self.manager.schedule_for_fit( value=0,fitproblem =item[1]) 
                 if item in self.model_toFit:
                     self.model_toFit.remove(item)
@@ -208,130 +194,67 @@ class SimultaneousFitPage(wx.ScrolledWindow):
    
     def set_model(self):
         """
-            set_model take values in self.params which are the values enters by the user
-            and try to assign them into the model concerned in self.manager. page.finder
+            set_model take values in self.params which are the values
+            entered by the user and try to assign them into the model 
+            concerned in self.manager. page.finder
         """
         if len(self.params) >0:
             for item in self.model_toFit:
-                #print"simfitpage: self.model_toFit",item[1]
                 list=item[1].get_model()
-                #print "simfitpage: list fitpanel2",list,list[0]
                 model=list[0]
                 param_list=model.getParamList()
-                #print "simfitpage: on set_model self.params ",self.params
                 if self.params !=[]:
                     for element in self.params:
                         if model.name == str(element[0]):
                             for item in param_list:
                                 if item==str(element[1]):
-                                    #print "simfitpage: on set_model page 1",param_list
-                                    #print "simfitpage: model name",element[0], model.name
-                                    #print "simfitpage: param name ,param value",element[1],element[2]
-                                    self.manager.set_page_finder(model.name,element[1],\
+                                    self.manager.set_page_finder(model.name,element[1],
                                                                  str(element[2]))
-                            #print "simfitpage:on set_model page 2",model.params['A'],self.params[2]
+                           
     
     def _onTextEnter(self):
         """
             get values from the constrainst textcrtl ,parses them into model name
             parameter name and parameters values.
-            store them in a list self.params .when when params is not empty set_model uses it
-            to reset the appropriate model and its appropriates parameters
+            store them in a list self.params .when when params is not empty set_model 
+            uses it to reset the appropriate model and its appropriates parameters
         """
         value= self.ctl2.GetValue()
         if value:
             self.params=[]
-            #print "simfitpage: value",value
             try:
                 expression='[\s,;]'
                 if re.search(expression,value) !=None:
                     word=re.split(expression,value)
-                    #print "simfitpage: when herre",word
                     for item in word:
                         self.params.append(self.parser_helper(item))
                 else:
                     self.params.append(self.parser_helper(value))  
             except:
-                #raise
                 wx.PostEvent(self.parent.Parent, StatusEvent(status="Constraint Error: %s" % sys.exc_value))
-        #print "simfitpage: self.params",self.params
-    def new_parser_helper(self,value):
-        """
-             @return  param:a list containing the name of a model ,its parameters 
-             value and name extracted from the constrainst controlbox
-        """
-        from sans.guiframe import utils
-        mylist=["=","<",">","<=", ">="]
-        for item in mylist:
-            if utils.look_for_tag( value,str(item))[0]:
-                #print "went here"
-                model_param = utils.split_text(str(item), value,1)
-                param_name = model_param[0]
-                param_value = model_param[1]
-                #print "simpage",utils.look_for_tag(param_name,"\.")[0]
-                if utils.look_for_tag(param_name,"\.")[0]:
-                    param_names = utils.split_text("\.",param_name,1)
-                    model_name = param_names[0]
-                    param_name = param_names[1]
-                    ##### just added
-                    #print "simfitpage: param name",model_name,param_name
-                
-                    param=[str(model_name),param_name,str(param_value),"="]
-                    #print "simfitpage: param",param
-                    return param
-                else:
-                    #raise ValueError,"cannot evaluate this expression"
-                    wx.PostEvent(self.parent.Parent,
-                                  StatusEvent(status="cannot evaluate this expression"))
-                    return
-            elif utils.look_for_tag( value,"<")[0]:
-                model_param = utils.split_text("<", value,2)
-                if len(model_param)== 2:
-                    try:
-                        param_name = str(model_param[0])
-                        param_value = float(model_param[1])
-                        param=[str(model_name),param_name,param_value,"<"]
-                        #print "simfitpage: param",param
-                        return param
-                    except:
-                        wx.PostEvent(self.parent.Parent, StatusEvent(status="\
-                        could read this expression%s" % sys.exc_value))
-                        return
-            else:
-                #raise ValueError,"Missing '=' in expression"
-                wx.PostEvent(self.parent.Parent, StatusEvent(status="Missing '=' in expression"))
-               
-            
+      
         
     def parser_helper(self,value):
         """
              @return  param:a list containing the name of a model ,its parameters 
              value and name extracted from the constrainst controlbox
         """
-        #print "simfitpage: value",value
         if string.find(value, "=") !=-1:
             model_param= re.split("=",value)
             param_name=model_param[0]
             param_value=model_param[1]
-            #print"simfitpage: ", param_name
-            #print "simfitpage: ",param_value
+            
             if string.find(param_name,".")!=-1:
                 param_names= re.split("\.",param_name)
                 model_name=param_names[0]
                 param_name=param_names[1]
-                ##### just added
-                #print "simfitpage: param name",model_name,param_name
-            
                 param=[str(model_name),param_name,str(param_value)]
-                #print "simfitpage: param",param
                 return param
             else:
-                #raise ValueError,"cannot evaluate this expression"
                 wx.PostEvent(self.parent.Parent,
                               StatusEvent(status="cannot evaluate this expression"))
                 return
         else:
-            #raise ValueError,"Missing '=' in expression"
             wx.PostEvent(self.parent.Parent, StatusEvent(status="Missing '=' in expression"))
             
    
