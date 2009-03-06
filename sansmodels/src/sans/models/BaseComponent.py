@@ -71,7 +71,6 @@ class BaseComponent:
         """
         # Look for dispersion parameters
         toks = name.split('.')
-        #print "dispersion",self.dispersion
         if len(toks)==2:
             for item in self.dispersion.keys():
                 if item.lower()==toks[0].lower():
@@ -84,8 +83,6 @@ class BaseComponent:
             for item in self.params.keys():
                 if item.lower()==name.lower():
                     self.params[item] = value
-                    #self.params[item] = Parameter(name= item,value=value, is_fixed=False)
-                    #print "setparam,self.param",self.params.values()
                     return
             
         raise ValueError, "Model does not contain parameter %s" % name
@@ -108,8 +105,6 @@ class BaseComponent:
             # Look for standard parameter
             for item in self.params.keys():
                 if item.lower()==name.lower():
-                    #print "getparam", self.params
-                    #return self.params[item].value
                     return self.params[item]
             
         raise ValueError, "Model does not contain parameter %s" % name
