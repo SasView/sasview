@@ -36,7 +36,6 @@ class ModelPage(wx.ScrolledWindow):
         self.model=model
         # Data member to store the dispersion object created
         self._disp_obj_dict = {}
-        self.back_up_model= model.clone()
         #list of dispersion paramaters
         self.disp_list=[]
         try:
@@ -278,8 +277,16 @@ class ModelPage(wx.ScrolledWindow):
     
 
     def Set_DipersParam(self, event):
+        """
+            This method is called when the user changes the state 
+            of the "dispersity" radio buttons.
+            
+            #TODO: correct the spelling mistake in the name of this method, start name with lowercase.
+        """
         if self.enable_disp.GetValue():
+            # The user selected to use dispersion/averaging
             if len(self.disp_list)==0:
+                # This model contains no parameter to which we can apply dispersion/averaging
                 ix=0
                 iy=1
                 self.fittable_param=[]
@@ -293,29 +300,26 @@ class ModelPage(wx.ScrolledWindow):
                 self.parent.GetSizer().Layout()
                 return 
             else:
-                if self.data !=None and self.model !=None: # allow to recognize data panel from model panel
-                    
-                
-                    self.cb1.SetValue(False)
-                    self.select_all_param_helper()
-                
+                # Show the default dispersion/averaging sub-panel
                 self.populate_disp_box()
                 self.set_panel_dispers(self.disp_list)
                 
         else:
-            if self.data !=None and self.model!=None:
-                if self.cb1.GetValue():
-                    self.select_all_param_helper()
-            
-            if self.back_up_model!=None:
-                keys = self.back_up_model.getDispParamList()
-                keys.sort()
-                #disperse param into the initial state
-                for item in keys:
-                    value= self.back_up_model.getParam(item)
-                    self.model.setParam(item, value)
-                self._draw_model() 
-            
+            # The user selected not to use dispersion/averaging            
+            # Make sure all parameters have the default Gaussian
+            # dispersion object with only a single point (no dispersion).
+            for p in self.model.dispersion.keys():
+                disp_model = GaussianDispersion()
+                
+                # Store the object to make it persist outside the scope of this method
+                #TODO: refactor model to clean this up?
+                self._disp_obj_dict[p] = disp_model
+                    
+                # Set the new model as the dispersion object for the selected parameter
+                self.model.set_dispersion(p, disp_model)
+                    
+            # Redraw the model
+            self._draw_model()
                 
             self.fittable_param=[]        
             self.fixed_param=[]
