@@ -13,31 +13,31 @@ _BOX_WIDTH = 80
 
 
 
+
 class ModelPage(wx.ScrolledWindow):
     """
-        ModelPage is a panel that allows the user to view information related to a 
-        model. 
+        FitPanel class contains fields allowing to display results when
+        fitting  a model and one data
+        @note: For Fit to be performed the user should check at least one parameter
+        on fit Panel window.
   
     """
     ## Internal name for the AUI manager
     window_name = "Fit page"
     ## Title to appear on top of the window
     window_caption = "Fit Page"
-    # name of the panel directly related to the model name selected
-    name =" "
-
-    def __init__(self, parent,model=None,name=None,data=None, *args, **kwargs):
+    name=""
+    def __init__(self, parent,model,name, *args, **kwargs):
         wx.ScrolledWindow.__init__(self, parent, *args, **kwargs)
         """ 
             Initialization of the Panel
         """
         # model on which the fit would be performed
         self.model=model
-        
-        ## Data member to store the dispersion object created
+        # Data member to store the dispersion object created
         self._disp_obj_dict = {}
-        
-        #list of dispersion parameters
+        self.back_up_model= model.clone()
+        #list of dispersion paramaters
         self.disp_list=[]
         try:
             self.disp_list=self.model.getDispParamList()
@@ -48,37 +48,7 @@ class ModelPage(wx.ScrolledWindow):
         self.event_owner = None
         # this panel does contain data .existing data allow a different drawing
         #on set_model parameters
-        self.data=data
-        
-        
-        # contains link between  model ,all its parameters, and panel organization
-        self.parameters=[]
-        #list of parameters that cannot be fitted and panel object related to this parameters
-        #values
-        self.fixed_param=[]
-        #
-        self.fittable_param=[]
-        self.polydisp= {}
-        #contains link between a model and selected parameters to fit 
-        self.param_toFit=[]
-        
-        self.prevmodel_name=name
-        self.draw_panel()
-        #dictionary of model name and model class
-        self.model_list_box={}
-        #Draw initial panel
-        if self.model!=None:
-            self.set_panel(self.model)
-        self.theta_cb=None
-        # flag to allow data2D plot
-        self.enable2D=False
-        
-    
-        self.Centre()
-        self.Layout()
-        self.parent.GetSizer().Layout()
-        
-    def draw_panel(self):   
+        self.data=None
         #panel interface
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
         self.sizer11 = wx.BoxSizer(wx.HORIZONTAL)
@@ -89,6 +59,7 @@ class ModelPage(wx.ScrolledWindow):
         self.sizer6 = wx.GridBagSizer(5,5)
         self.sizer5 = wx.GridBagSizer(5,5)
         self.sizer4 = wx.GridBagSizer(5,5)
+       
         #model selection
         self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
         self.vbox.Add(self.sizer4)
@@ -105,12 +76,18 @@ class ModelPage(wx.ScrolledWindow):
         self.vbox.Add(self.sizer8)
         # plotting range
         self.vbox.Add(self.sizer9)
-    
+        #close layer
+        #self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+        #self.vbox.Add(self.sizer10)
+        
+      
         #------------------ sizer 4  draw------------------------  
+       
+       
         # define combox box
         self.modelbox = wx.ComboBox(self, -1)
          # preview selected model name
-        
+        self.prevmodel_name=name
         #print "model view prev_model",name
         self.modelbox.SetValue(self.prevmodel_name)
         #enable model 2D draw
@@ -141,8 +118,8 @@ class ModelPage(wx.ScrolledWindow):
         #----------sizer6-------------------------------------------------
         self.disable_disp = wx.RadioButton(self, -1, 'No', (10, 10), style=wx.RB_GROUP)
         self.enable_disp = wx.RadioButton(self, -1, 'Yes', (10, 30))
-        self.Bind(wx.EVT_RADIOBUTTON, self.set_Dispers_Param, id=self.disable_disp.GetId())
-        self.Bind(wx.EVT_RADIOBUTTON, self.set_Dispers_Param, id=self.enable_disp.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self.Set_DipersParam, id=self.disable_disp.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self.Set_DipersParam, id=self.enable_disp.GetId())
         ix= 0
         iy=1
         self.sizer6.Add(wx.StaticText(self,-1,'Polydispersity: '),(iy,ix),(1,1)\
@@ -154,8 +131,11 @@ class ModelPage(wx.ScrolledWindow):
         ix =0
         iy+=1
         self.sizer6.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
+
+        
         #---------sizer 9 draw----------------------------------------
-        ## Q range
+       
+         ## Q range
         self.qmin_x= 0.001
         self.qmax_x= 0.1
         self.num_points= 100
@@ -207,17 +187,49 @@ class ModelPage(wx.ScrolledWindow):
         ix =0
         iy+=1 
         self.sizer9.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        #----------sizer 10 draw------------------------------------------------------
+        """
+        id = wx.NewId()
+        self.btClose =wx.Button(self,id,'Close')
+        self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
+        self.btClose.SetToolTipString("Close page.")
+        
+        ix= 3
+        iy= 1
+        self.sizer10.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix +=1
+        self.sizer10.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix =0
+        iy+=1
+        self.sizer10.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        """
+        # contains link between  model ,all its parameters, and panel organization
+        self.parameters=[]
+        self.fixed_param=[]
+        self.fittable_param=[]
+        self.polydisp= {}
+        #contains link between a model and selected parameters to fit 
+        self.param_toFit=[]
+        
+        #dictionary of model name and model class
+        self.model_list_box={}
+        #Draw initial panel
+         #-----sizer 11--------------------model description------
+        if self.model!=None:
+            self.set_panel(self.model)
+        self.theta_cb=None
+       
+       
         self.vbox.Layout()
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)
         self.SetScrollbars(20,20,55,40)
         
-        
+        self.Centre()
+        self.Layout()
+        self.parent.GetSizer().Layout()
     def set_model_description(self, model):
-        """
-            Set a sizer with model description field
-            @param model: the model select that provides the description
-        """
+        
         if model !=None and str(model.description)!=""and self.data==None:
             self.sizer11.Clear(True)
             self.box_description= wx.StaticBox(self, -1, 'Model Description')
@@ -265,14 +277,9 @@ class ModelPage(wx.ScrolledWindow):
         return 0
     
 
-    def set_Dispers_Param(self, event):
-        """
-             set a sizer with dispersion parameters 
-        """
+    def Set_DipersParam(self, event):
         if self.enable_disp.GetValue():
-            # The user selected to use dispersion/averaging
             if len(self.disp_list)==0:
-                # This model contains no parameter to which we can apply dispersion/averaging
                 ix=0
                 iy=1
                 self.fittable_param=[]
@@ -286,9 +293,9 @@ class ModelPage(wx.ScrolledWindow):
                 self.parent.GetSizer().Layout()
                 return 
             else:
-                # allow to recognize data panel from model panel
-                if self.data !=None and self.model !=None: 
+                if self.data !=None and self.model !=None: # allow to recognize data panel from model panel
                     
+                
                     self.cb1.SetValue(False)
                     self.select_all_param_helper()
                 
@@ -296,21 +303,19 @@ class ModelPage(wx.ScrolledWindow):
                 self.set_panel_dispers(self.disp_list)
                 
         else:
-            # The user selected not to use dispersion/averaging            
-            # Make sure all parameters have the default Gaussian
-            # dispersion object with only a single point (no dispersion).
-            for p in self.model.dispersion.keys():
-                disp_model = GaussianDispersion()
-                
-                # Store the object to make it persist outside the scope of this method
-                #TODO: refactor model to clean this up?
-                self._disp_obj_dict[p] = disp_model
-                    
-                # Set the new model as the dispersion object for the selected parameter
-                self.model.set_dispersion(p, disp_model)
-                    
-            # Redraw the model
-            self._draw_model()
+            if self.data !=None and self.model!=None:
+                if self.cb1.GetValue():
+                    self.select_all_param_helper()
+            
+            if self.back_up_model!=None:
+                keys = self.back_up_model.getDispParamList()
+                keys.sort()
+                #disperse param into the initial state
+                for item in keys:
+                    value= self.back_up_model.getParam(item)
+                    self.model.setParam(item, value)
+                self._draw_model() 
+            
                 
             self.fittable_param=[]        
             self.fixed_param=[]
@@ -322,9 +327,6 @@ class ModelPage(wx.ScrolledWindow):
             self.parent.GetSizer().Layout()
             
     def populate_disp_box(self):
-        """
-            populate polydispersion combo box 
-        """
         self.sizer7.Clear(True)
         if len(self.disp_list)>0:
             ix=0
@@ -371,18 +373,18 @@ class ModelPage(wx.ScrolledWindow):
         self.qmin.SetValue(format_number(self.qmin_x))
         self.qmax.SetValue(format_number(self.qmax_x))
         self.npts.SetValue(format_number(self.num_points))
-        
-        
     def checkFitRange(self):
         """
             Check the validity of fitting range
             @note: qmin should always be less than qmax or else each control box
             background is colored in pink.
         """
+       
         flag = True
         valueMin = self.qmin.GetValue()
         valueMax = self.qmax.GetValue()
         # Check for possible values entered
+        #print "fitpage: checkfitrange:",valueMin,valueMax
         try:
             if (float(valueMax)> float(valueMin)):
                 self.qmax.SetBackgroundColour(wx.WHITE)
@@ -400,6 +402,13 @@ class ModelPage(wx.ScrolledWindow):
         self.qmax.Refresh()
         return flag
     
+
+        
+    def onClose(self,event):
+        """ close the page associated with this panel"""
+        self.parent.onClose()
+        
+  
         
     def onModel2D(self, event):
         """
@@ -439,8 +448,7 @@ class ModelPage(wx.ScrolledWindow):
         """
         type =event.GetString()
         self.set_panel_dispers( self.disp_list,type )
-          
-     
+                
     def _on_select_model(self,event):
         """
             react when a model is selected from page's combo box
@@ -531,13 +539,13 @@ class ModelPage(wx.ScrolledWindow):
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.text2_3.Hide() 
         
+       
         ix +=1
         self.text2_4 = wx.StaticText(self, -1, 'Units')
         self.sizer5.Add(self.text2_4,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_4.Hide()
         disp_list=self.model.getDispParamList()
-        # 
         for item in keys:
             if not item in disp_list:
                 iy += 1
@@ -598,9 +606,6 @@ class ModelPage(wx.ScrolledWindow):
         
         
     def _selectDlg(self):
-        """
-            Create a dialog to select files
-        """
         import os
         dlg = wx.FileDialog(self, "Choose a weight file", os.getcwd(), "", "*.*", wx.OPEN)
         path = None
@@ -608,14 +613,7 @@ class ModelPage(wx.ScrolledWindow):
             path = dlg.GetPath()
         dlg.Destroy()
         return path
-    
-    
     def read_file(self, path):
-        """
-            Read a file  of 2 colons
-            @param path: the path to the file
-            @return 2 numpy arrays containing numbers
-        """
         try:
             if path==None:
                 wx.PostEvent(self.parent.parent, StatusEvent(status=\
@@ -640,10 +638,7 @@ class ModelPage(wx.ScrolledWindow):
                     weights.append(weight)
             return numpy.array(angles), numpy.array(weights)
         except:
-             msg= "Simultaneous Fit completed but Following error occurred: "
-             msg+= "%s"%sys.exc_value
-             wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
-             return  
+            raise 
         
           
     def select_disp_angle(self, event): 
@@ -651,6 +646,8 @@ class ModelPage(wx.ScrolledWindow):
             Event for when a user select a parameter to average over.
             @param event: check box event
         """
+        
+        
         # Go through the list of dispersion check boxes to identify which one has changed 
         for p in self.disp_cb_dict:
             # Catch which one of the box was just checked or unchecked.
@@ -712,11 +709,12 @@ class ModelPage(wx.ScrolledWindow):
                     # Redraw the model
                     self._draw_model()
         return
-       
+
+                      
+                      
                       
     def set_panel_dispers(self, disp_list, type="GaussianModel" ):
         """
-            Fill sizer with disperstion info
         """
         
         self.fittable_param=[]
@@ -837,7 +835,6 @@ class ModelPage(wx.ScrolledWindow):
             self.Layout()
             self.parent.GetSizer().Layout()  
           
-          
     def checkFitValues(self,val_min, val_max):
         """
             Check the validity of input values
@@ -893,12 +890,8 @@ class ModelPage(wx.ScrolledWindow):
         """
         self.set_model_parameter()
         
-        
-        
     def set_model_parameter(self):
         """
-            Value Enter by the user on the parameter fields are used to reset the model
-            and model will be drawn again if the user enters different values
         """
         if len(self.parameters) !=0 and self.model !=None:
             # Flag to register when a parameter has changed.
@@ -914,6 +907,7 @@ class ModelPage(wx.ScrolledWindow):
                          is_modified = True
                          
                 except:
+                    #raise
                     wx.PostEvent(self.parent.parent, StatusEvent(status=\
                             "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
                     return 
@@ -930,8 +924,9 @@ class ModelPage(wx.ScrolledWindow):
                          is_modified = True
                          
                 except:
+                    raise
                     wx.PostEvent(self.parent.parent, StatusEvent(status=\
-                            "Model Drawing Error:wrong value entered : %s"% sys.exc_value))
+                            "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
                 
             for item in self.parameters:
                 try:
@@ -946,7 +941,7 @@ class ModelPage(wx.ScrolledWindow):
                 except:
                     #raise 
                     wx.PostEvent(self.parent.parent, StatusEvent(status=\
-                           "Model Drawing Error:wrong value entered : %s"% sys.exc_value))
+                           "Model Drawing  Error:wrong value entered : %s"% sys.exc_value))
                     return
                 
                 
@@ -967,7 +962,6 @@ class ModelPage(wx.ScrolledWindow):
             if is_modified:
                 self._draw_model()            
             
-            
     def _draw_model(self, name=None):
         """
             Method to draw or refresh a plotted model.
@@ -984,24 +978,19 @@ class ModelPage(wx.ScrolledWindow):
                                 qstep= self.num_points,
                                 enable2D=self.enable2D)
        
-       
     def select_param(self,event):
         """
-            Select_parameter is implemented in fitpage.py 
+        
         """
         pass
-    
-    
     def select_all_param(self,event): 
         """
-            Implemented in fitpage.py
+        
         """
         pass
-    
-    
     def select_all_param_helper(self):
         """
-             Allows selecting or unselecting  checkbutton
+             Allows selecting or delecting button
         """
         self.param_toFit=[]
         if  self.parameters !=[]:

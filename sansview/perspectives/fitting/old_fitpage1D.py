@@ -17,9 +17,8 @@ _BOX_WIDTH = 80
 
 class FitPage1D(ModelPage):
     """
-        FitPage1D class contains fields allowing to display results when
-        fitting  a model and one data.
-        This class used most of the methods of ModelPage class.
+        FitPanel class contains fields allowing to display results when
+        fitting  a model and one data
         @note: For Fit to be performed the user should check at least one parameter
         on fit Panel window.
     """
@@ -30,18 +29,27 @@ class FitPage1D(ModelPage):
     
     name=None
     
-    def __init__(self, parent,data,model=None, name=None, *args, **kwargs):
+    def __init__(self, parent,data, *args, **kwargs):
+        wx.ScrolledWindow.__init__(self, parent, *args, **kwargs)
+        
         """ 
             Initialization of the Panel
         """
-        ModelPage.__init__(self, parent,model,name,data,*args, **kwargs)
-       
         #TODO: remove this once the inheritence is cleaned up
         ## Data member to store the dispersion object created
-        
-    
-        
-    def draw_panel(self):
+        self._disp_obj_dict = {}
+
+        #Data used for fitting 
+        self.data = data
+        # flag to allow data2D plot
+        self.enable2D=False
+        #fit page manager 
+        self.manager = None
+        #Store the parent of this panel parent
+        # For this application fitpanel is the parent
+        self.parent  = parent
+        # Event_owner is the owner of model event
+        self.event_owner = None
         #panel interface
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
     
@@ -78,7 +86,7 @@ class FitPage1D(ModelPage):
         self.vbox.Add(self.sizer9)
         #---------sizer 1 draw--------------------------------
         #Filling the sizer containing data related fields
-        self.DataSource  =wx.StaticText(self, -1,str(self.data.name))
+        self.DataSource  =wx.StaticText(self, -1,str(data.name))
         ix = 0
         iy = 1
         self.sizer1.Add(wx.StaticText(self, -1, 'Data Source Name : '),(iy,ix),\
@@ -92,9 +100,9 @@ class FitPage1D(ModelPage):
             ix = 0
             iy = 1
             # Minimum value of data   
-            self.data_min = wx.StaticText(self, -1,str(format_number(numpy.min(self.data.x))))
+            self.data_min    = wx.StaticText(self, -1,str(format_number(numpy.min(data.x))))
             # Maximum value of data  
-            self.data_max =  wx.StaticText(self, -1,str(format_number(numpy.max(self.data.x))))   
+            self.data_max    =  wx.StaticText(self, -1,str(format_number(numpy.max(data.x))))   
             self.text4_3 = wx.StaticText(self, -1, 'Maximum Data Range(Linear)', style=wx.ALIGN_LEFT)
             self.sizer2.Add(self.text4_3,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -151,8 +159,8 @@ class FitPage1D(ModelPage):
         #Sizer containing info on polydispersity
         self.disable_disp = wx.RadioButton(self, -1, 'No', (10, 10), style=wx.RB_GROUP)
         self.enable_disp = wx.RadioButton(self, -1, 'Yes', (10, 30))
-        self.Bind(wx.EVT_RADIOBUTTON, self.set_Dispers_Param, id=self.disable_disp.GetId())
-        self.Bind(wx.EVT_RADIOBUTTON, self.set_Dispers_Param, id=self.enable_disp.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self.Set_DipersParam, id=self.disable_disp.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self.Set_DipersParam, id=self.enable_disp.GetId())
         ix= 0
         iy=1
         self.sizer6.Add(wx.StaticText(self,-1,'Polydispersity: '),(iy,ix),(1,1)\
@@ -238,13 +246,43 @@ class FitPage1D(ModelPage):
         ix =0
         iy+=1 
         self.sizer9.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-       
+        
+        # Contains link between  model ,all its parameters, and panel organization
+        self.parameters=[]
+        # Contains list of parameters that cannot be fitted and reference to 
+        #panel objects 
+        self.fixed_param=[]
+        # Contains list of parameters with dispersity and reference to 
+        #panel objects 
+        self.fittable_param=[]
+        #list of dispersion paramaters
+        self.disp_list=[]
+        #contains link between a model and selected parameters to fit 
+        self.param_toFit=[]
+        # model on which the fit would be performed
+        self.model=None
+        
+        self.back_up_model= None
+        #dictionary of model name and model class
+        self.model_list_box={}    
+                     
+        if self.model == None:
+            self.qmin.Disable()
+            self.qmax.Disable() 
+        else:
+            self.qmin.Enable()
+            self.qmax.Enable() 
+
     
         self.vbox.Layout()
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)
         self.SetScrollbars(20,20,55,40)
         
+        self.Centre()
+        self.Layout()
+        self.GrandParent.GetSizer().Layout()
+   
     def compute_chisqr2D(self):
         """ 
             compute chi square given a model and data 2D and set the value
@@ -259,13 +297,11 @@ class FitPage1D(ModelPage):
                 for i in range(len(self.data.x_bins)):
                     for j in range(len(self.data.y_bins)):
                         #Check the range containing data between self.qmin_x and self.qmax_x
-                        radius = math.pow(self.data.x_bins[i],2)\
-                            + math.pow(self.data.y_bins[j],2)
-                            
-                        if radius >= math.pow(self.qmin_x,2):
-                            if radius <=math.pow(self.qmax_x,2):
-                                temp= self.model.runXY( [self.data.y_bins[j],self.data.x_bins[i]] )
-                                chisqrji=(self.data.data[j][i]- temp)/self.data.err_data[j][i]
+                        if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)>=math.pow(self.qmin_x,2):
+                            if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)<=math.pow(self.qmax_x,2):
+                                chisqrji=(self.data.data[j][i]- self.model.runXY(\
+                                                                                    [self.data.y_bins[j],self.data.x_bins[i]]))\
+                                                                                    /self.data.err_data[j][i]
                                 #Vector containing residuals
                                 res.append( math.pow(chisqrji,2) )
                 # compute sum of residual
@@ -275,8 +311,8 @@ class FitPage1D(ModelPage):
                         sum +=item
                 self.tcChi.SetLabel(format_number(math.fabs(sum/ len(res))))
             except:
-                msg= "Chisqr cannot be compute: %s"% sys.exc_value
-                wx.PostEvent(self.parent.GrandParent, StatusEvent(status= msg ))
+                wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+                            "Chisqr cannot be compute: %s"% sys.exc_value))
                 return
     
         
@@ -294,7 +330,7 @@ class FitPage1D(ModelPage):
                 else:
                     self.qmin_x = float(self.qmin.GetValue())
                     self.qmax_x = float(self.qmax.GetValue())
-                    # Compute residuals within self.qmin_x and self.qmax_x
+                    # return residuals within self.qmin_x and self.qmax_x
                     x,y,dy = [numpy.asarray(v) for v in (self.data.x,self.data.y,self.data.dy)]
                     if self.qmin_x==None and self.qmax_x==None: 
                         fx =numpy.asarray([self.model.run(v) for v in x])
@@ -312,10 +348,9 @@ class FitPage1D(ModelPage):
                             sum +=item
                     self.tcChi.SetLabel(format_number(math.fabs(sum/ len(res))))
             except:
-                msg=  "Chisqr cannot be compute: %s"% sys.exc_value
-                wx.PostEvent(self.parent.GrandParent, StatusEvent(status= msg))
+                wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+                            "Chisqr cannot be compute: %s"% sys.exc_value))
                 return 
-            
             
     def _on_select_model(self,event):
         """
@@ -344,19 +379,18 @@ class FitPage1D(ModelPage):
                 self.qmax.Enable() 
             
             if name ==event.GetString():
-                self.model=item()
-                self.back_up_model= self.model.clone()
-                evt = ModelEventbox(model=self.model,name=name)
-                wx.PostEvent(self.event_owner, evt)
                 try:
+                    self.model=item()
+                    self.back_up_model= self.model.clone()
+                    evt = ModelEventbox(model=self.model,name=name)
+                    wx.PostEvent(self.event_owner, evt)
+                    self.text1_1.Show()
                     self.compute_chisqr()
                     self.tcChi.Show()
-                    self.text1_1.Show()
                 except:
-                    self.text1_1.Hide()
-                    pass
+                    raise #ValueError,"model.name is not equal to model class name"
                 break  
-                 
+            
                  
     def onFit(self,event):
         """ signal for fitting"""
@@ -382,9 +416,26 @@ class FitPage1D(ModelPage):
             self.Layout()
             self.parent.GetSizer().Layout()
         else:
-            msg= "Select at least one parameter to fit "
-            wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
+            wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            "Select at least one parameter to fit "))
   
+   
+    def _onTextEnter(self,event):
+        """
+            set a flag to determine if the fitting range entered by the user is valid
+        """
+      
+        try:
+            flag=self.checkFitRange()
+            if flag==True and self.model!=None:
+                self.manager.redraw_model(float(self.xmin.GetValue())\
+                                               ,float(self.xmax.GetValue()))
+        except:
+
+            wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+                            "Drawing  Error:wrong value entered %s"% sys.exc_value))
+        
+   
     
     def get_param_list(self):
         """
@@ -407,7 +458,6 @@ class FitPage1D(ModelPage):
         try:
             self.compute_chisqr()
         except:
-            self.text1_1.Hide()
             pass
         
     def set_model(self): 
@@ -461,7 +511,7 @@ class FitPage1D(ModelPage):
                 #remove parameters from the fitting list
                 if item in self.param_toFit:
                     self.param_toFit.remove(item)           
-        #Set the value of checkbox that selected all checkboxes or not to true or false           
+        #Set the value of checkbox that selected every checkbox or not            
         if len(self.parameters)+len(self.fittable_param) ==len(self.param_toFit):
             self.cb1.SetValue(True)
         else:

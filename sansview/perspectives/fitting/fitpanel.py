@@ -125,7 +125,7 @@ class FitPanel(wx.aui.AuiNotebook):
         
         if not name in self.fit_page_name :
             from fitpage1D import FitPage1D
-            panel = FitPage1D(self,data, -1)
+            panel = FitPage1D(parent=self,data=data, id=-1)
             panel.name=name
             
             panel.set_manager(self.manager)
