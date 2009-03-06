@@ -350,7 +350,7 @@ class ModelPage(wx.ScrolledWindow):
             for k,v in self.polydisp.iteritems():
                 if str(v)=="MyModel":
     				# Remove the option until the rest of the code is ready for it
-                    self.disp_box.Insert("Select customized Model",id)
+                    #self.disp_box.Insert("Select customized Model",id)
                     pass  
                 else:
                     self.disp_box.Insert(str(v),id)         
