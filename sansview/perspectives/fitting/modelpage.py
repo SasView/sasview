@@ -699,6 +699,10 @@ class ModelPage(wx.ScrolledWindow):
                             "Applying loaded %s distribution: %s" % (p, path)))  
                     
                     # Create the dispersion objects
+                    # Store the objects to make them persist outside the scope of this method
+			        #TODO: refactor model to clean this up?
+                    self._disp_obj_dict[p+'values']  = values
+                    self._disp_obj_dict[p+'weights'] = weights
                     disp_model = ArrayDispersion()
                     disp_model.set_weights(values, weights)
                     self._set_dispersion(p, disp_model)
