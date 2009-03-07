@@ -230,6 +230,21 @@ class ModelPage(wx.ScrolledWindow):
         self.Centre()
         self.Layout()
         self.parent.GetSizer().Layout()
+        
+    def _set_dispersion(self, par, disp_model):
+        """
+            Utility method to set a dispersion model while making
+            sure that the dispersion model object doesn't go out
+            of scope. The models should be cleaned up so we don't
+            have to do this.
+        """
+        # Store the object to make it persist outside the scope of this method
+        #TODO: refactor model to clean this up?
+        self._disp_obj_dict[par] = disp_model
+                    
+        # Set the new model as the dispersion object for the selected parameter
+        self.model.set_dispersion(par, disp_model)
+        
     def set_model_description(self, model):
         
         if model !=None and str(model.description)!=""and self.data==None:
@@ -313,13 +328,7 @@ class ModelPage(wx.ScrolledWindow):
             # dispersion object with only a single point (no dispersion).
             for p in self.model.dispersion.keys():
                 disp_model = GaussianDispersion()
-                
-                # Store the object to make it persist outside the scope of this method
-                #TODO: refactor model to clean this up?
-                self._disp_obj_dict[p] = disp_model
-                    
-                # Set the new model as the dispersion object for the selected parameter
-                self.model.set_dispersion(p, disp_model)
+                self._set_dispersion(p, disp_model)
                     
             # Redraw the model
             self._draw_model()
@@ -692,13 +701,7 @@ class ModelPage(wx.ScrolledWindow):
                     # Create the dispersion objects
                     disp_model = ArrayDispersion()
                     disp_model.set_weights(values, weights)
-                    # Store the object to make it persist outside the scope of this method
-                    #TODO: refactor model to clean this up?
-                    self._disp_obj_dict[p] = disp_model
-                    
-                    # Set the new model as the dispersion object for the selected parameter
-                    self.model.set_dispersion(p, disp_model)
-                    
+                    self._set_dispersion(p, disp_model)
                     
                     # Redraw the model
                     self._draw_model()
@@ -706,12 +709,7 @@ class ModelPage(wx.ScrolledWindow):
                 else:
                     # The parameter was un-selected. Go back to Gaussian model (with 0 pts)
                     disp_model = GaussianDispersion()
-                    # Store the object to make it persist outside the scope of this method
-                    #TODO: refactor model to clean this up?
-                    self._disp_obj_dict[p] = disp_model
-                    
-                    # Set the new model as the dispersion object for the selected parameter
-                    self.model.set_dispersion(p, disp_model)
+                    self._set_dispersion(p, disp_model)
                     
                     # Redraw the model
                     self._draw_model()
@@ -730,6 +728,7 @@ class ModelPage(wx.ScrolledWindow):
         ix=0
         iy=1
                 ### this will become a separate method
+        #TODO: don't hard code text values to be shown on the interface
         if type== "Select customized Model":
             ix=0
             iy=1
@@ -783,6 +782,13 @@ class ModelPage(wx.ScrolledWindow):
                 name2=item+".npts"
                 name3=item+".nsigmas"
                 iy += 1
+                
+                # Make sure the dispersion model is Gaussian
+                if not self.model.dispersion[item]['type'] == 'gaussian': 
+                    disp_model = GaussianDispersion()
+                    self._set_dispersion(item, disp_model)
+                
+                # Create the interface
                 for p in self.model.dispersion[item].keys():
                     #print "name 1 2 3", name1, name2, name3
                     if p=="width":
