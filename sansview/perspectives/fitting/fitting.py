@@ -718,8 +718,9 @@ class Plugin:
         current_pg=self.fit_panel.get_current_page()
         for page, value in self.page_finder.iteritems():
             if page ==current_pg :
+                self.plot_helper(currpage=page,qmin= qmin,qmax= qmax)
                 break 
-        self.plot_helper(currpage=page,qmin= qmin,qmax= qmax)
+        
         
         
         
