@@ -32,8 +32,10 @@ def smear_selection(data1D):
     """
     # Sanity check. If we are not dealing with a SANS Data1D
     # object, just return None
-    if data1D.__class__.__name__ != 'Data1D' \
-        or not hasattr(data1D, "dxl") or not hasattr(data1D, "dxw"):
+    if  data1D.__class__.__name__ != 'Data1D':
+        return None
+    
+    if  not hasattr(data1D, "dx") and not hasattr(data1D, "dxl") and not hasattr(data1D, "dxw"):
         return None
     
     # Look for resolution smearing data
@@ -43,7 +45,7 @@ def smear_selection(data1D):
         # Check that we have non-zero data
         if data1D.dx[0]>0.0:
             _found_resolution = True
-        
+            print "_found_resolution",_found_resolution
     # If we found resolution smearing data, return a QSmearer
     if _found_resolution == True:
         return QSmearer(data1D)
