@@ -575,10 +575,12 @@ class FitPage1D(ModelPage):
         if self.enable_smearer.GetValue():
             from DataLoader.qsmearing import smear_selection
             smear =smear_selection( self.data )
-            if hasattr(self.data,"dxl"):
+            if hasattr(self.data,"dx"):
                 msg= ": Resolution smearing parameters"
+            if hasattr(self.data,"dxl"):
+                msg= ": Slit_l smearing parameters"
             if hasattr(self.data,"dxw"):
-                msg= ": Slit smearing parameters"
+                msg= ": Slit_w smearing parameters"
             if smear ==None:
                 wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Data contains no smearing information"))
