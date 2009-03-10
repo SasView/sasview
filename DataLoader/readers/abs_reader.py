@@ -49,7 +49,8 @@ class Reader:
                 x  = numpy.zeros(0)
                 y  = numpy.zeros(0)
                 dy = numpy.zeros(0)
-                output = Data1D(x, y, dy=dy)
+                dx = numpy.zeros(0)
+                output = Data1D(x, y, dy=dy, dx=dx)
                 detector = Detector()
                 output.detector.append(detector)
                 output.filename = basename
@@ -57,6 +58,9 @@ class Reader:
                 is_info = False
                 is_center = False
                 is_data_started = False
+                right_line_is = -2
+                line_n = 0
+                col = 0
                 
                 data_conv_q = None
                 data_conv_i = None
@@ -72,7 +76,7 @@ class Reader:
                     data_conv_i(1.0, output.y_unit)
                 
                 for line in lines:
-                    
+                    #print "line",line
                     # Information line 1
                     if is_info==True:
                         is_info = False
@@ -87,7 +91,8 @@ class Reader:
                             else:
                                 output.source.wavelength = value
                         except:
-                            raise ValueError,"IgorReader: can't read this file, missing wavelength"
+                            pass
+                            #raise ValueError,"IgorReader: can't read this file, missing wavelength"
                         
                         # Distance in meters
                         try:
@@ -98,7 +103,8 @@ class Reader:
                             else:
                                 detector.distance = value
                         except:
-                            raise ValueError,"IgorReader: can't read this file, missing distance"
+                            pass
+                            #raise ValueError,"IgorReader: can't read this file, missing distance"
                         
                         # Transmission 
                         try:
@@ -118,80 +124,119 @@ class Reader:
                         except:
                             # Thickness is not a mandatory entry
                             pass
-                    
-                    #MON CNT   LAMBDA   DET ANG   DET DIST   TRANS   THICK   AVE   STEP
-                    if line.count("LAMBDA")>0:
-                        is_info = True
                         
-                    # Find center info line
-                    if is_center==True:
-                        is_center = False                
-                        line_toks = line.split()
-                        # Center in bin number
-                        center_x = float(line_toks[0])
-                        center_y = float(line_toks[1])
-                        
-                        # Bin size
-                        if has_converter==True and detector.pixel_size_unit != 'mm':
-                            conv = Converter('mm')
-                            detector.pixel_size.x = conv(5.0, units=detector.pixel_size_unit)
-                            detector.pixel_size.y = conv(5.0, units=detector.pixel_size_unit)
-                        else:
-                            detector.pixel_size.x = 5.0
-                            detector.pixel_size.y = 5.0
-                        
-                        # Store beam center in distance units
-                        # Det 640 x 640 mm
-                        if has_converter==True and detector.beam_center_unit != 'mm':
-                            conv = Converter('mm')
-                            detector.beam_center.x = conv(center_x*5.0, units=detector.beam_center_unit)
-                            detector.beam_center.y = conv(center_y*5.0, units=detector.beam_center_unit)
-                        else:
-                            detector.beam_center.x = center_x*5.0
-                            detector.beam_center.y = center_y*5.0
-                        
-                        # Detector type
-                        try:
-                            detector.name = line_toks[7]
-                        except:
-                            # Detector name is not a mandatory entry
-                            pass
-                    
-                    #BCENT(X,Y)   A1(mm)   A2(mm)   A1A2DIST(m)   DL/L   BSTOP(mm)   DET_TYP 
-                    if line.count("BCENT")>0:
-                        is_center = True
-                        
-                    # Parse the data
-                    if is_data_started==True:
-                        toks = line.split()
-                        try:  
-                            _x  = float(toks[0])
-                            _y  = float(toks[1]) 
-                            _dy = float(toks[2])
+                        #MON CNT   LAMBDA   DET ANG   DET DIST   TRANS   THICK   AVE   STEP
+                        if line.count("LAMBDA")>0:
+                            is_info = True
                             
-                            if data_conv_q is not None:
-                                _x = data_conv_q(_x, units=output.x_unit)
-                                
-                            if data_conv_i is not None:
-                                _y = data_conv_i(_y, units=output.y_unit)
-                                _dy = data_conv_i(_dy, units=output.y_unit)
-                           
-                            x  = numpy.append(x,   _x) 
-                            y  = numpy.append(y,   _y)
-                            dy = numpy.append(dy, _dy)
-                        except:
-                            # Could not read this data line. If we are here
-                            # it is because we are in the data section. Just
-                            # skip it.
-                            pass
+                        # Find center info line
+                        if is_center==True:
+                            is_center = False                
+                            line_toks = line.split()
+                            # Center in bin number
+                            center_x = float(line_toks[0])
+                            center_y = float(line_toks[1])
+                            
+                            # Bin size
+                            if has_converter==True and detector.pixel_size_unit != 'mm':
+                                conv = Converter('mm')
+                                detector.pixel_size.x = conv(5.0, units=detector.pixel_size_unit)
+                                detector.pixel_size.y = conv(5.0, units=detector.pixel_size_unit)
+                            else:
+                                detector.pixel_size.x = 5.0
+                                detector.pixel_size.y = 5.0
+                            
+                            # Store beam center in distance units
+                            # Det 640 x 640 mm
+                            if has_converter==True and detector.beam_center_unit != 'mm':
+                                conv = Converter('mm')
+                                detector.beam_center.x = conv(center_x*5.0, units=detector.beam_center_unit)
+                                detector.beam_center.y = conv(center_y*5.0, units=detector.beam_center_unit)
+                            else:
+                                detector.beam_center.x = center_x*5.0
+                                detector.beam_center.y = center_y*5.0
+                            
+                            # Detector type
+                            try:
+                                detector.name = line_toks[7]
+                            except:
+                                # Detector name is not a mandatory entry
+                                pass
                         
-                    #The 6 columns are | Q (1/A) | I(Q) (1/cm) | std. dev. I(Q) (1/cm) | sigmaQ | meanQ | ShadowFactor|
-                    if line.count("The 6 columns")>0:
-                        is_data_started = True
-            
+                        #BCENT(X,Y)   A1(mm)   A2(mm)   A1A2DIST(m)   DL/L   BSTOP(mm)   DET_TYP 
+                        if line.count("BCENT")>0:
+                            is_center = True
+                        
+                    # Parse the data                    
+                    # Specify one line of data
+                    if len(lines)<2:
+                        colnum = 6
+                    else:
+                        colnum = len(line.split())
+                        
+                    #If # of row = # of data points
+                    if colnum == 0:
+                        rangeiter = 0
+                    #If # of row = 1
+                    else:
+                        rangeiter=numpy.ceil(len(line.split())/colnum)
+                        
+                    #If all data is in one line, chop the line by every 6 columns and read x, y, dy, dx data                         
+                    for col in range(0,rangeiter):
+                        #The 6 columns are | Q (1/A) | I(Q) (1/cm) | std. dev. I(Q) (1/cm) | sigmaQ | meanQ | ShadowFactor|
+                        #Check the file format whether or not  it read all header lines and if it has a header
+                        if line.count("The 6 columns")>0 or (output.source.wavelength==None):
+                            #if  it has a full header
+                            if line.count("The 6 columns")>0:
+                                right_line_is = line_n 
+                            #If no header in the file
+                            else:
+                                right_line_is = 0 
+                            is_data_started = True
+                            
+                        
+                        # If on the of data, not header, read data
+                        if is_data_started==True and right_line_is >= 0: #and line_n > right_line_is
+                            #print "col",col
+                            toks = line.split()
+                            try:  
+                                
+                                if float(toks[col*6+0]) > 1:
+                                     continue
+                                else:
+                                    not_data_line = False
+                                    
+                                _x  = float(toks[col*6+0])
+                                _y  = float(toks[col*6+1]) 
+                                _dy = float(toks[col*6+2])
+                                _dx = float(toks[col*6+3])
+                                
+                                
+                                if data_conv_q is not None:
+                                    _x = data_conv_q(_x, units=output.x_unit)
+                                    _dx = data_conv_i(_dx, units=output.x_unit)
+                                    
+                                if data_conv_i is not None:
+                                    _y = data_conv_i(_y, units=output.y_unit)
+                                    _dy = data_conv_i(_dy, units=output.y_unit)
+
+                                x  =numpy.append(x,   _x) 
+                                y  = numpy.append(y,   _y)
+                                dy  = numpy.append(dy, _dy)
+                                dx  = numpy.append(dx, _dx)
+
+                            except:
+                                # Could not read this data line. If we are here
+                                # it is because we are in the data section. Just
+                                # skip it.
+                                pass
+                            
+                        line_n = line_n +1
                 # Sanity check
                 if not len(y) == len(dy):
                     raise ValueError, "abs_reader: y and dy have different length"
+                if not len(x) == len(dx):
+                    raise ValueError, "abs_reader: x and dx have different length"
 
                 # If the data length is zero, consider this as
                 # though we were not able to read the file.
@@ -201,6 +246,7 @@ class Reader:
                 output.x = x
                 output.y = y
                 output.dy = dy
+                output.dx = dx
                 if data_conv_q is not None:
                     output.xaxis("\\rm{Q}", output.x_unit)
                 else:
@@ -209,7 +255,7 @@ class Reader:
                     output.yaxis("\\{I(Q)}", output.y_unit)
                 else:
                     output.yaxis("\\rm{I(Q)}","cm^{-1}")
-                
+                #print " x,y,dx,dy", output.x,output.y,output.dy,output.dx
                 return output
         else:
             raise RuntimeError, "%s is not a file" % path
@@ -217,7 +263,7 @@ class Reader:
     
 if __name__ == "__main__": 
     reader = Reader()
-    print reader.read("../test/jan08002.ABS")
+    #print reader.read("../test/jan08002.ABS")
     
     
             
