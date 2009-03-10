@@ -412,6 +412,7 @@ class FitEngine:
             xtemp=[]
             ytemp=[]
             dytemp=[]
+            dxtemp=[]
             self.mini=None
             self.maxi=None
                
@@ -435,7 +436,11 @@ class FitEngine:
                         dytemp.append(data.dy[i])
                     else:
                         raise RuntimeError, "Fit._concatenateData: y-errors missing"
-            data= Data(x=xtemp,y=ytemp,dy=dytemp)
+                    if data.dx is not None and len(data.dx)==len(data.x):   
+                        dxtemp.append(data.dx[i])
+                    else:
+                        raise RuntimeError, "Fit._concatenateData: dQ-errors missing"
+            data= Data(x=xtemp,y=ytemp,dy=dytemp, dx=dxtemp)
             data.setFitRange(self.mini, self.maxi)
             return data
         
@@ -481,7 +486,6 @@ class FitEngine:
             fitdata=FitData2D(data)
         else:
             fitdata=FitData1D(data, smearer)
-       
         fitdata.setFitRange(qmin=qmin,qmax=qmax, ymin=ymin,ymax=ymax)
         #A fitArrange is already created but contains model only at Uid
         if self.fitArrangeDict.has_key(Uid):
@@ -491,7 +495,7 @@ class FitEngine:
             fitproblem= FitArrange()
             fitproblem.add_data(fitdata)
             self.fitArrangeDict[Uid]=fitproblem    
-   
+
     def get_model(self,Uid):
         """ 
             @param Uid: Uid is key in the dictionary containing the model to return
