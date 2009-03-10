@@ -110,7 +110,10 @@ class _BaseSmearer(object):
                     sum += iq[i] * self._weights[q_i][i] 
                     counts += self._weights[q_i][i]
                     #print "i,iq[i],self._weights[q_i][i] ",i,iq[i],self._weights[q_i][i]
-            iq_smeared[q_i] = sum/counts 
+            if counts == 0:
+                iq_smeared[q_i] = 0
+            else:
+                iq_smeared[q_i] = sum/counts 
             #print "q_i,iq_smeared[q_i]",q_i,iq[i],iq_smeared[q_i]
             #print "iq[i],iq_smeared[q_i],sum,counts,self.nbins",iq[i], iq_smeared[q_i],sum,counts,self.nbins
         return iq_smeared    
