@@ -32,12 +32,14 @@ def load_ascii_1D(path):
         file_x = numpy.zeros(0)
         file_y = numpy.zeros(0)
         file_dy = numpy.zeros(0)
+        file_dx = numpy.zeros(0)
         
         input_f = open(path,'r')
         buff = input_f.read()
         lines = buff.split('\n')
         
         has_dy = False
+        has_dx = False
         
         for line in lines:
             try:
@@ -46,19 +48,27 @@ def load_ascii_1D(path):
                 y = float(toks[1])
                 if len(toks)==3:
                     has_dy = True
-                    err = float(toks[2])
+                    errdy = float(toks[2])
                 else:
-                    err = 0.0
+                    errdy = 0.0
+                if len(toks)==4:
+                    has_dx = True
+                    errdx = float(toks[3])
+                else:
+                    errdx = 0.0
                 file_x  = numpy.append(file_x, x)
                 file_y  = numpy.append(file_y, y)
-                file_dy = numpy.append(file_dy, err)
+                file_dy = numpy.append(file_dy, dyerr)
+                file_dx = numpy.append(file_dx, dxerr)
             except:
                 print "READ ERROR", line
     
         if has_dy==False:
             file_dy = None
+        if has_dx==False:
+            file_dx = None
             
-        return file_x, file_y, file_dy
+        return file_x, file_y, file_dy, file_dx
     return None, None, None
 
 def plot_data(parent, path):
@@ -146,16 +156,18 @@ def plot_data(parent, path):
         i=1
         for item in output:
             try:
+                dx=item.dx
                 dxl=item.dxl
                 dxw=item.dxw
             except:
+                dx=None
                 dxl=None
                 dxw=None
                 
             if item.dy ==None:
                 new_plot = Theory1D(item.x,item.y,dxl,dxw)
             else:
-                new_plot = Data1D(x=item.x,y=item.y,dx=item.dx,dy=item.dy,dxl=dxl,dxw=dxw)
+                new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy,dxl=dxl,dxw=dxw)
            
             new_plot.source=item.source
             new_plot.name = str(item.run[0])
