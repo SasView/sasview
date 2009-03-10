@@ -26,7 +26,7 @@ class NoStructure(BaseComponent):
         self.fixed= []
     def clone(self):
         """ Return a identical copy of self """
-        return Sin()
+        return 1
    
     def run(self, x = 0.0):
         """ Evaluate the model
