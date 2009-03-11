@@ -11,13 +11,25 @@ class MultiplicationModel(BaseComponent):
     def __init__(self, model1, model2 ):
         BaseComponent.__init__(self)
 
-        
+       
         ## Name of the model
-        self.name = model1.name +" * "+ model2.name
+        self.name=""
         ## model description
-        self.description= model1.name +" * "+ model2.name
-        self.description +="see %s description and %s description"%(model1.name,
-                                                                     model2.name)
+        self.description=""
+        if  model1.name != "NoStructure"and  model2.name != "NoStructure":
+             self.name = model1.name +" * "+ model2.name
+             self.description= self.name+"\n"
+             self.description +="see %s description and %s description"%( model1.name,
+                                                                         model2.name )
+        elif  model2.name != "NoStructure":
+            self.name = model2.name
+            self.description= model2.description
+        else :
+            self.name = model1.name
+            self.description= model1.description
+  
+        
+        
         self.model1= model1
         self.model2= model2
         ## dispersion

@@ -3,11 +3,11 @@ import math
 
 class Model1DPlugin(BaseComponent):
     ## Name of the model
-    name = "Plugin Model"
-
-    def __init__(self):
+   
+    def __init__(self , name="Plugin Model" ):
         """ Initialization """
         BaseComponent.__init__(self)
+        self.name = name
         self.details = {}
         self.params  = {}
         self.description=''
