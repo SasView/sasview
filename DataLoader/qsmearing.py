@@ -190,6 +190,7 @@ class _SlitSmearer(_BaseSmearer):
                     #TODO: be careful with edge effect
                     if q_i<self.nbins:
                         weights[i][q_i] = weights[i][q_i]+1.0
+        print "nbin,npts",self.nbins,self.npts
 
         self._weights = weights
         return self._weights
