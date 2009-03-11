@@ -16,7 +16,7 @@ class Model(Model1DPlugin):
     
     def __init__(self):
         """ Initialization """
-        Model1DPlugin.__init__(self)
+        Model1DPlugin.__init__(self, name= self.name)
         
         ## Parameters definition and defaults
         self.params = {}
