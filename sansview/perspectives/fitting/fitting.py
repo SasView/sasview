@@ -864,10 +864,10 @@ class Plugin:
             Plot a theory from a model selected from the menu
             @param evt: wx.menu event
         """
-        name = evt.model.__name__
+        name = evt.model.__class__.__name__
         if hasattr(evt.model, "name"):
             name = evt.model.name
-        model=evt.model()
+        model=evt.model
         description=model.description
         
         # Create a model page. If a new page is created, the model
