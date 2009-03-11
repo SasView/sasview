@@ -30,7 +30,7 @@ class BaseComponent:
         # string containing information about the model such as the equation
         #of the given model, exception or possible use
         self.description=''
-        #list of parameter that cannot be fitted
+        #list of parameter that can be fitted
         self.fixed= []
            
     def __str__(self):
@@ -40,7 +40,11 @@ class BaseComponent:
         return self.name
    
     def is_fittable(self, par_name):
-        return par_name.lower() not in self.fixed
+        """
+            Check if a given parameter is fittable or not
+            @param par_name: the parameter name to check 
+        """
+        return par_name.lower() in self.fixed
         #For the future
         #return self.params[str(par_name)].is_fittable()
    
