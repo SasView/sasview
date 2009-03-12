@@ -234,10 +234,10 @@ class ModelPanel1D(PlotPanel):
                     id = wx.NewId()
                     slicerpop.Append(id, '&Hide Error bars')
                     wx.EVT_MENU(self, id, self._on_remove_errors)
-            else:
-                id = wx.NewId()
-                slicerpop.Append(id, '&Linear fit')
-                wx.EVT_MENU(self, id, self.onFitting)
+            
+            id = wx.NewId()
+            slicerpop.Append(id, '&Linear fit')
+            wx.EVT_MENU(self, id, self.onFitting)
                 
             slicerpop.AppendSeparator()
         
