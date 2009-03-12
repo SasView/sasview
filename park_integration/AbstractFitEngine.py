@@ -328,8 +328,8 @@ class FitData2D(object):
                  if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)>=math.pow(self.xmin,2):
                      if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)<=math.pow(self.xmax,2):
                          #if self.x_bins[j]>= self.xmin and self.x_bins[j]<= self.xmax:                
-                        res.append( (self.image[j][i]- fn([self.x_bins[i],self.y_bins[j]]))\
-                            /self.err_image[j][i] )
+                        res.append( (self.image[i][j]- fn([self.x_bins[i],self.y_bins[j]]))\
+                            /self.err_image[i][j] )
         
         return numpy.array(res)
        
