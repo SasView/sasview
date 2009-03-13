@@ -36,7 +36,7 @@ except:
     
 from sans.guicomm.events import EVT_STATUS
 from sans.guicomm.events import EVT_NEW_PLOT,EVT_SLICER_PARS_UPDATE
-import history
+
 import warnings
 warnings.simplefilter("ignore")
 

@@ -10,13 +10,15 @@ def format_number(value, high=False):
     try: 
         value = float(value)
     except:
-        print "returning 0"
-        return "0"
+        output="0"
+        return output.lstrip().rstrip()
     
     if high:
-        return "%-6.4g" % value
+        output= "%-6.4g" % value
+        
     else:
-        return "%-5.3g" % value
+        output= "%-5.3g" % value
+    return output.lstrip().rstrip()
     
 class PanelMenu(wx.Menu):
     plots = None
