@@ -223,11 +223,14 @@ class ViewerFrame(wx.Frame):
         ## Default welcome panel
         self.defaultPanel    = DefaultPanel(self, -1, style=wx.RAISED_BORDER)
         
+        # Check for update
+        self._check_update(None)
        
         # Register the close event so it calls our own method
         wx.EVT_CLOSE(self, self._onClose)
         # Register to status events
         self.Bind(EVT_STATUS, self._on_status_event)
+        #TODO: The following does not belong in gui_manager, it belong in the application code. 
         self.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PANEL)
         
         
