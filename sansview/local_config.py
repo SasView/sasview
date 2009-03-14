@@ -8,6 +8,7 @@ import time
 __appname__ = "SansView"
 __version__ = '0.1.1'
 __download_page__ = 'http://danse.chem.utk.edu'
+__update_URL__ = 'http://danse.chem.utk.edu/sansview_version.php'
 
 
 # Debug message flag
