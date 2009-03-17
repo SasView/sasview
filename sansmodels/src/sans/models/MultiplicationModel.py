@@ -12,9 +12,7 @@ class MultiplicationModel(BaseComponent):
         BaseComponent.__init__(self)
 
        
-        ## Name of the model
-        self.name=""
-        ## model description
+        ## Setting  model name model description
         self.description=""
         if  model1.name != "NoStructure"and  model2.name != "NoStructure":
              self.name = model1.name +" * "+ model2.name
@@ -33,16 +31,12 @@ class MultiplicationModel(BaseComponent):
         self.model1= model1
         self.model2= model2
         ## dispersion
-        self.dispersion = {}
         self._set_dispersion()
         ## Define parameters
-        self.params = {}
         self._set_params()
         ## Parameter details [units, min, max]
-        self.details = {}
         self._set_details()
         #list of parameter that can be fitted
-        self.fixed= []  
         self._set_fixed_params()  
         
           
@@ -82,6 +76,47 @@ class MultiplicationModel(BaseComponent):
             if not name in self.details.keys():
                 self.details[name]= detail
                 
+    def setParam(self, name, value):
+        """ 
+            Set the value of a model parameter
+        
+            @param name: name of the parameter
+            @param value: value of the parameter
+        """
+        self._setParamHelper( name, value)
+        if name in self.model1.getParamList():
+            self.model1.setParam( name, value)
+            
+        if name in self.model2.getParamList():
+            self.model2.setParam( name, value) 
+        
+        
+    def _setParamHelper(self, name, value):
+        """
+            Helper function to setparam
+        """
+        # Look for dispersion parameters
+        toks = name.split('.')
+        if len(toks)==2:
+            for item in self.dispersion.keys():
+                if item.lower()==toks[0].lower():
+                    for par in self.dispersion[item]:
+                        if par.lower() == toks[1].lower():
+                            self.dispersion[item][par] = value
+                            return
+        else:
+            # Look for standard parameter
+            for item in self.params.keys():
+                if item.lower()==name.lower():
+                    self.params[item] = value
+                    return
+            
+        raise ValueError, "Model does not contain parameter %s" % name
+    
+        
+   
+             
+   
     def _set_fixed_params(self):
         """
              fill the self.fixed list with the two models fixed list

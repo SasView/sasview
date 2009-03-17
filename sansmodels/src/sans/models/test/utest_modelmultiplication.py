@@ -26,6 +26,29 @@ class TestDisperser(unittest.TestCase):
     ## fittable parameters
     fixed=[]
     fixed=['radius.width']
+    
+    
+    def test_multiplication(self):
+        """ test multiplication model"""
+        from sans.models.MultiplicationModel import MultiplicationModel
+        from sans.models.SphereModel import SphereModel
+        from sans.models.NoStructure import NoStructure
+        model1  =  MultiplicationModel(SphereModel(),NoStructure())
+        model2 = SphereModel()
+        x= 2
+        a = model1.run(x)
+        
+        b=  model2.run(x)
+        self.assertEqual(a, b)
+        model2.setParam("scale", 10)
+        c=  model2.run(x)
+        self.assertEqual(c, 10*b)
+        model1.setParam("scale", 10)
+        d=  model1.run(x)
+        self.assertEqual(d, 10*a)
+        self.assertEqual(model1.getParam("scale"), 10)
+        
+        
     def testMultiplicationModel(self):
         """ Test Multiplication  sphere with SquareWellStructure"""
         ## test details dictionary
