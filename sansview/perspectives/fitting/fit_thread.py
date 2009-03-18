@@ -174,7 +174,6 @@ class FitThread(CalcThread):
             # Real code should not print, but this is an example...
             raise
         except:
-            raise
-            #wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
-            #return 
+            wx.PostEvent(self.parent, StatusEvent(status="Fitting error: %s" % sys.exc_value))
+            return 
     

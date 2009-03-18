@@ -1,6 +1,6 @@
 import sys
 import wx
-import wx.lib
+import wx.lib.newevent
 import numpy
 import copy
 import math
@@ -27,7 +27,6 @@ class ModelPage(wx.ScrolledWindow):
     ## Title to appear on top of the window
     window_caption = "Fit Page"
     name=""
-    
     def __init__(self, parent,model,name, *args, **kwargs):
         wx.ScrolledWindow.__init__(self, parent, *args, **kwargs)
         """ 
@@ -35,10 +34,9 @@ class ModelPage(wx.ScrolledWindow):
         """
         # model on which the fit would be performed
         self.model=model
-        
-        ## Data member to store the dispersion object created
+        # Data member to store the dispersion object created
         self._disp_obj_dict = {}
-
+        self.back_up_model= model.clone()
         #list of dispersion paramaters
         self.disp_list=[]
         try:
@@ -85,15 +83,14 @@ class ModelPage(wx.ScrolledWindow):
       
         #------------------ sizer 4  draw------------------------  
        
-       
+        ## structure combox box
+        self.structbox = wx.ComboBox(self, -1)
         # define combox box
         self.modelbox = wx.ComboBox(self, -1)
-         # preview selected model name
-        self.prevmodel_name=name
-        #print "model view prev_model",name
-        self.modelbox.SetValue(self.prevmodel_name)
+        
         #enable model 2D draw
         self.enable2D= False
+        self.fitrange= True
         #filling sizer2
         ix = 0
         iy = 1
@@ -101,6 +98,23 @@ class ModelPage(wx.ScrolledWindow):
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.sizer4.Add(self.modelbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix +=1
+        self.text_mult= wx.StaticText(self,-1,' x ')
+        self.sizer4.Add(self.text_mult,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer4.Add(self.structbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
+        if hasattr(model ,"model2"):
+            name= model.model2.name
+
+            self.structbox.SetValue(name)          
+        if hasattr(model ,"model1"):
+            name= model.model1.name
+            items = self.modelbox.GetItems()
+            self.modelbox.SetValue(name)
+        else:
+            #print "model view prev_model",name
+            self.modelbox.SetValue( name )
         ix += 1
         id = wx.NewId()
         self.model_view =wx.Button(self,id,'View 2D')
@@ -189,22 +203,7 @@ class ModelPage(wx.ScrolledWindow):
         ix =0
         iy+=1 
         self.sizer9.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        #----------sizer 10 draw------------------------------------------------------
-        """
-        id = wx.NewId()
-        self.btClose =wx.Button(self,id,'Close')
-        self.btClose.Bind(wx.EVT_BUTTON, self.onClose,id=id)
-        self.btClose.SetToolTipString("Close page.")
         
-        ix= 3
-        iy= 1
-        self.sizer10.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix +=1
-        self.sizer10.Add( self.btClose,(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix =0
-        iy+=1
-        self.sizer10.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        """
         # contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         self.fixed_param=[]
@@ -220,7 +219,7 @@ class ModelPage(wx.ScrolledWindow):
         if self.model!=None:
             self.set_panel(self.model)
         self.theta_cb=None
-       
+        
        
         self.vbox.Layout()
         self.vbox.Fit(self) 
@@ -230,31 +229,20 @@ class ModelPage(wx.ScrolledWindow):
         self.Centre()
         self.Layout()
         self.parent.GetSizer().Layout()
+    def set_model_description(self, model=None):
         
-    def _set_dispersion(self, par, disp_model):
-        """
-            Utility method to set a dispersion model while making
-            sure that the dispersion model object doesn't go out
-            of scope. The models should be cleaned up so we don't
-            have to do this.
-        """
-        # Store the object to make it persist outside the scope of this method
-        #TODO: refactor model to clean this up?
-        self._disp_obj_dict[par] = disp_model
-                    
-        # Set the new model as the dispersion object for the selected parameter
-        self.model.set_dispersion(par, disp_model)
-        
-    def set_model_description(self, model):
-        
-        if model !=None and str(model.description)!=""and self.data==None:
-            self.sizer11.Clear(True)
-            self.box_description= wx.StaticBox(self, -1, 'Model Description')
-            boxsizer1 = wx.StaticBoxSizer(self.box_description, wx.VERTICAL)
-            boxsizer1.SetMinSize((320,20))
-            self.description = wx.StaticText(self,-1,str(model.description))
-            boxsizer1.Add(self.description, 0, wx.EXPAND)  
-            self.sizer11.Add(boxsizer1,1, wx.EXPAND | wx.ALL, 2)
+        if model !=None:
+            description="description"
+        else:
+            description=""
+            if hasattr(model,description.lower())and self.data==None:
+                self.sizer11.Clear(True)
+                self.box_description= wx.StaticBox(self, -1, 'Model Description')
+                boxsizer1 = wx.StaticBoxSizer(self.box_description, wx.VERTICAL)
+                boxsizer1.SetMinSize((320,20))
+                self.description = wx.StaticText(self,-1,str(model.description))
+                boxsizer1.Add(self.description, 0, wx.EXPAND)  
+                self.sizer11.Add(boxsizer1,1, wx.EXPAND | wx.ALL, 2)
       
         
     def set_owner(self,owner):
@@ -277,34 +265,40 @@ class ModelPage(wx.ScrolledWindow):
             Populate each combox box of each page
             @param page: the page to populate
         """
-        id=0
-        self.model_list_box=dict
-        list_name=[]
-        for item in  self.model_list_box.itervalues():
-            name = item.__name__
-            if hasattr(item, "name"):
-                name = item.name
-            list_name.append(name)
-        list_name.sort() 
-         
-        for name in list_name:
-            self.modelbox.Insert(name,int(id))
-            id+=1
-        wx.EVT_COMBOBOX(self.modelbox,-1, self._on_select_model) 
+        
+        self.model_list_box = dict.get_list()
+       
+        for item , mylist in self.model_list_box.iteritems():
+            separator= "---%s---"%item
+            self.modelbox.Append(separator,"separator")
+            
+            for models in mylist:
+                model= models()
+                name = model.__class__.__name__
+                if hasattr(model, "name"):
+                    name = model.name
+                self.modelbox.Append(name,models)
+            wx.EVT_COMBOBOX(self.modelbox,-1, self._on_select_model)
+            if item == "Structure Factors" :
+                for structs in mylist:
+                    struct= structs()
+                    name = struct.__class__.__name__
+                    if hasattr(struct, "name"):
+                        name = struct.name
+                    self.structbox.Append(name,structs)
+                wx.EVT_COMBOBOX(self.structbox,-1, self._on_select_model)
+        
+        
         return 0
     
 
     def Set_DipersParam(self, event):
-        """
-            This method is called when the user changes the state 
-            of the "dispersity" radio buttons.
-            
-            #TODO: correct the spelling mistake in the name of this method, start name with lowercase.
-        """
+        if self.model ==None:
+            msg= " Select non - model value:%s !"%self.model
+            wx.PostEvent(self.parent.parent, StatusEvent(status= msg))
+            return 
         if self.enable_disp.GetValue():
-            # The user selected to use dispersion/averaging
             if len(self.disp_list)==0:
-                # This model contains no parameter to which we can apply dispersion/averaging
                 ix=0
                 iy=1
                 self.fittable_param=[]
@@ -318,20 +312,29 @@ class ModelPage(wx.ScrolledWindow):
                 self.parent.GetSizer().Layout()
                 return 
             else:
-                # Show the default dispersion/averaging sub-panel
+                if self.data !=None and self.model !=None: # allow to recognize data panel from model panel
+                    
+                
+                    self.cb1.SetValue(False)
+                    self.select_all_param_helper()
+                
                 self.populate_disp_box()
                 self.set_panel_dispers(self.disp_list)
                 
         else:
-            # The user selected not to use dispersion/averaging            
-            # Make sure all parameters have the default Gaussian
-            # dispersion object with only a single point (no dispersion).
-            for p in self.model.dispersion.keys():
-                disp_model = GaussianDispersion()
-                self._set_dispersion(p, disp_model)
-                    
-            # Redraw the model
-            self._draw_model()
+            if self.data !=None and self.model!=None:
+                if self.cb1.GetValue():
+                    self.select_all_param_helper()
+            
+            if self.back_up_model!=None:
+                keys = self.back_up_model.getDispParamList()
+                keys.sort()
+                #disperse param into the initial state
+                for item in keys:
+                    value= self.back_up_model.getParam(item)
+                    self.model.setParam(item, value)
+                self._draw_model() 
+            
                 
             self.fittable_param=[]        
             self.fixed_param=[]
@@ -358,7 +361,7 @@ class ModelPage(wx.ScrolledWindow):
             self.disp_box.SetValue("GaussianModel")
             for k,v in self.polydisp.iteritems():
                 if str(v)=="MyModel":
-                    # Remove the option until the rest of the code is ready for it
+    				# Remove the option until the rest of the code is ready for it
                     #self.disp_box.Insert("Select customized Model",id)
                     pass  
                 else:
@@ -432,10 +435,13 @@ class ModelPage(wx.ScrolledWindow):
         """
         # If the 2D display is not currently enabled, plot the model in 2D 
         # and set the enable2D flag.
-        if self.enable2D==False:
-            self.enable2D=True
+        if self.fitrange:
+            self.enable2D = True
+            
+        if self.enable2D:
             self._draw_model()
             self.model_view.Disable()
+       
             
     
     def select_model(self, model, name):
@@ -448,14 +454,30 @@ class ModelPage(wx.ScrolledWindow):
         self.parent.draw_model_name = name
         
         self.set_panel(model)
-        self._draw_model(name)
-        
-        # Select the model from the combo box
-        items = self.modelbox.GetItems()
-        for i in range(len(items)):
-            if items[i]==name:
-                self.modelbox.SetSelection(i)
-                self.model_view.SetFocus()
+        self._draw_model()
+       
+        if hasattr(model ,"model2"):
+            name= model.model2.name
+            items = self.structbox.GetItems()
+            for i in range(len(items)):
+                if items[i]==name:
+                    self.structbox.SetSelection(i)
+                    
+        if hasattr(model ,"model1"):
+            name= model.model1.name
+            items = self.modelbox.GetItems()
+            for i in range(len(items)):
+                if items[i]==name:
+                    self.modelbox.SetSelection(i)
+        else:
+            # Select the model from the combo box
+            items = self.modelbox.GetItems()
+            for i in range(len(items)):
+                if items[i]==name:
+                    self.modelbox.SetSelection(i)
+            self.structbox.SetValue("No Structure")
+                    
+        self.model_view.SetFocus()
                 
     def _on_select_Disp(self,event):
         """
@@ -477,21 +499,27 @@ class ModelPage(wx.ScrolledWindow):
         self.SetScrollbars(20,20,55,40)
         self.Layout()
         self.parent.GetSizer().Layout()
-        for item in self.model_list_box.itervalues():
-            name = item.__name__
-            if hasattr(item, "name"):
-                name = item.name
-            if name ==event.GetString():
-                model=item()
-                self.model= model
-                self.set_panel(model)
-                self.name= name
-                self.model_view.SetFocus()
-                self.parent.model_page.name=name
-                self.parent.draw_model_name=name
+        form_factor =self.modelbox.GetClientData(self.modelbox.GetCurrentSelection())
+        struct_factor =self.structbox.GetClientData(self.structbox.GetCurrentSelection())
+       
+        if form_factor!="separator":
+            if struct_factor != None and struct_factor.__name__ != "NoStructure":
+                from sans.models.MultiplicationModel import MultiplicationModel
+                self.model= MultiplicationModel(form_factor(),struct_factor())
+            else:
+                 self.model= form_factor()
+        else:
+            self.model=None 
+            msg= " Select non - model value:%s !Please select another model"%name 
+            wx.PostEvent(self.parent.parent, StatusEvent(status= msg))
                
-                self._draw_model(name)
-            
+        self.set_model_description(self.model)
+        self.set_panel(self.model)
+        self.name= self.model.name
+        self.model_view.SetFocus()
+        self.parent.model_page.name= self.name
+        self.parent.draw_model_name= self.name
+        self._draw_model()
             
     def get_model_box(self): 
         """ return reference to combox box self.model"""
@@ -521,99 +549,100 @@ class ModelPage(wx.ScrolledWindow):
         self.parameters = []
         self.param_toFit=[]
         self.fixed_param=[]
-        self.model = model
-        
-        self.set_model_description( self.model) 
-        
-        keys = self.model.getParamList()
-        #list of dispersion paramaters
-        self.disp_list=self.model.getDispParamList()
-       
-        keys.sort()
-        ik=0
-        im=1
-        
-        iy = 1
-        ix = 0
-        self.cb1 = wx.CheckBox(self, -1,"Select all", (10, 10))
-        if self.data!=None:
-            wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_param)
-            self.cb1.SetValue(False)
-        else:
-            self.cb1.Disable()
-            self.cb1.Hide()
-       
-        self.sizer5.Add(self.cb1,(iy, ix),(1,1),\
-                          wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix +=1
-        self.text2_2 = wx.StaticText(self, -1, 'Values')
-        self.sizer5.Add(self.text2_2,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-        ix +=2
-        self.text2_3 = wx.StaticText(self, -1, 'Errors')
-        self.sizer5.Add(self.text2_3,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        self.text2_3.Hide() 
-        
-       
-        ix +=1
-        self.text2_4 = wx.StaticText(self, -1, 'Units')
-        self.sizer5.Add(self.text2_4,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-        self.text2_4.Hide()
-        disp_list=self.model.getDispParamList()
-        for item in keys:
-            if not item in disp_list:
-                iy += 1
-                ix = 0
-    
-                cb = wx.CheckBox(self, -1, item, (10, 10))
-                if self.data!=None:
-                    cb.SetValue(False)
-                    wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
-                else:
-                    cb.Disable()
-                self.sizer5.Add( cb,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-               
-                ix += 1
-                value= self.model.getParam(item)
-                ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
-                ctl1.SetValue(str (format_number(value)))
-                ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                self.sizer5.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
-                
-                ix += 1
-                text2=wx.StaticText(self, -1, '+/-')
-                self.sizer5.Add(text2,(iy, ix),(1,1),\
-                                wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-                text2.Hide()  
-                ix += 1
-                ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
-                self.sizer5.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                ctl2.Hide()
-               
-                ix +=1
-                # Units
-                try:
-                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
-                except:
-                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
-                self.sizer5.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        if model !=None:
+            self.model = model
+            
+            self.set_model_description( self.model) 
+            
+            keys = self.model.getParamList()
+            #list of dispersion paramaters
+            self.disp_list=self.model.getDispParamList()
            
-                self.parameters.append([cb,ctl1,text2,ctl2])
-                
-        iy+=1
-        self.sizer5.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        
-        #Display units text on panel
-        for item in keys:   
-            if self.model.details[item][0]!='':
-                self.text2_4.Show()
-                break
+            keys.sort()
+            ik=0
+            im=1
+            
+            iy = 1
+            ix = 0
+            self.cb1 = wx.CheckBox(self, -1,"Select all", (10, 10))
+            if self.data!=None:
+                wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_param)
+                self.cb1.SetValue(False)
             else:
-                self.text2_4.Hide()
+                self.cb1.Disable()
+                self.cb1.Hide()
+           
+            self.sizer5.Add(self.cb1,(iy, ix),(1,1),\
+                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+            ix +=1
+            self.text2_2 = wx.StaticText(self, -1, 'Values')
+            self.sizer5.Add(self.text2_2,(iy, ix),(1,1),\
+                                wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+            ix +=2
+            self.text2_3 = wx.StaticText(self, -1, 'Errors')
+            self.sizer5.Add(self.text2_3,(iy, ix),(1,1),\
+                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            self.text2_3.Hide() 
+            
+           
+            ix +=1
+            self.text2_4 = wx.StaticText(self, -1, 'Units')
+            self.sizer5.Add(self.text2_4,(iy, ix),(1,1),\
+                                wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+            self.text2_4.Hide()
+            disp_list=self.model.getDispParamList()
+            for item in keys:
+                if not item in disp_list:
+                    iy += 1
+                    ix = 0
         
+                    cb = wx.CheckBox(self, -1, item, (10, 10))
+                    if self.data!=None:
+                        cb.SetValue(False)
+                        wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
+                    else:
+                        cb.Disable()
+                    self.sizer5.Add( cb,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                   
+                    ix += 1
+                    value= self.model.getParam(item)
+                    ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                    ctl1.SetValue(str (format_number(value)))
+                    ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                    ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                    self.sizer5.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
+                    
+                    ix += 1
+                    text2=wx.StaticText(self, -1, '+/-')
+                    self.sizer5.Add(text2,(iy, ix),(1,1),\
+                                    wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+                    text2.Hide()  
+                    ix += 1
+                    ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                    self.sizer5.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    ctl2.Hide()
+                   
+                    ix +=1
+                    # Units
+                    try:
+                        units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
+                    except:
+                        units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
+                    self.sizer5.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+               
+                    self.parameters.append([cb,ctl1,text2,ctl2])
+                    
+            iy+=1
+            self.sizer5.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+            
+            #Display units text on panel
+            for item in keys:   
+                if self.model.details[item][0]!='':
+                    self.text2_4.Show()
+                    break
+                else:
+                    self.text2_4.Hide()
+            
         self.vbox.Layout()
         self.SetScrollbars(20,20,55,40)
         self.Layout()
@@ -699,13 +728,15 @@ class ModelPage(wx.ScrolledWindow):
                             "Applying loaded %s distribution: %s" % (p, path)))  
                     
                     # Create the dispersion objects
-                    # Store the objects to make them persist outside the scope of this method
-			        #TODO: refactor model to clean this up?
-                    self._disp_obj_dict[p+'values']  = values
-                    self._disp_obj_dict[p+'weights'] = weights
                     disp_model = ArrayDispersion()
                     disp_model.set_weights(values, weights)
-                    self._set_dispersion(p, disp_model)
+                    # Store the object to make it persist outside the scope of this method
+                    #TODO: refactor model to clean this up?
+                    self._disp_obj_dict[p] = disp_model
+                    
+                    # Set the new model as the dispersion object for the selected parameter
+                    self.model.set_dispersion(p, disp_model)
+                    
                     
                     # Redraw the model
                     self._draw_model()
@@ -713,7 +744,12 @@ class ModelPage(wx.ScrolledWindow):
                 else:
                     # The parameter was un-selected. Go back to Gaussian model (with 0 pts)
                     disp_model = GaussianDispersion()
-                    self._set_dispersion(p, disp_model)
+                    # Store the object to make it persist outside the scope of this method
+                    #TODO: refactor model to clean this up?
+                    self._disp_obj_dict[p] = disp_model
+                    
+                    # Set the new model as the dispersion object for the selected parameter
+                    self.model.set_dispersion(p, disp_model)
                     
                     # Redraw the model
                     self._draw_model()
@@ -732,7 +768,6 @@ class ModelPage(wx.ScrolledWindow):
         ix=0
         iy=1
                 ### this will become a separate method
-        #TODO: don't hard code text values to be shown on the interface
         if type== "Select customized Model":
             ix=0
             iy=1
@@ -786,13 +821,6 @@ class ModelPage(wx.ScrolledWindow):
                 name2=item+".npts"
                 name3=item+".nsigmas"
                 iy += 1
-                
-                # Make sure the dispersion model is Gaussian
-                if not self.model.dispersion[item]['type'] == 'gaussian': 
-                    disp_model = GaussianDispersion()
-                    self._set_dispersion(item, disp_model)
-                
-                # Create the interface
                 for p in self.model.dispersion[item].keys():
                     #print "name 1 2 3", name1, name2, name3
                     if p=="width":
@@ -965,13 +993,17 @@ class ModelPage(wx.ScrolledWindow):
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
-            if float(self.qmin.GetValue()) != self.qmin_x:
-                self.qmin_x = float(self.qmin.GetValue())
-                is_modified = True
-            if float(self.qmax.GetValue()) != self.qmax_x:
-                self.qmax_x = float(self.qmax.GetValue())
-                is_modified = True
-            
+            from sans.guiframe.utils import check_value
+            if check_value( self.qmin, self.qmax):
+                if float(self.qmin.GetValue()) != self.qmin_x:
+                    self.qmin_x = float(self.qmin.GetValue())
+                    is_modified = True
+                if float(self.qmax.GetValue()) != self.qmax_x:
+                    self.qmax_x = float(self.qmax.GetValue())
+                    is_modified = True
+                self.fitrange = True
+            else:
+                self.fitrange = False
             if float(self.npts.GetValue()) !=  self.num_points:
                 self.num_points = float(self.npts.GetValue())
                 is_modified = True
@@ -979,7 +1011,7 @@ class ModelPage(wx.ScrolledWindow):
             if is_modified:
                 self._draw_model()            
             
-    def _draw_model(self, name=None):
+    def _draw_model(self):
         """
             Method to draw or refresh a plotted model.
             The method will use the data member from the model page
@@ -987,13 +1019,11 @@ class ModelPage(wx.ScrolledWindow):
             
             [Note to coder: This way future changes will be done in only one place.] 
         """
-        if name==None:
-            name= self.model.name
-       
-        self.manager.draw_model(self.model, name, data=self.data,
-                                qmin=self.qmin_x, qmax=self.qmax_x,
-                                qstep= self.num_points,
-                                enable2D=self.enable2D)
+        if self.model !=None:
+            self.manager.draw_model(self.model, self.model.name, data=self.data,
+                                    qmin=self.qmin_x, qmax=self.qmax_x,
+                                    qstep= self.num_points,
+                                    enable2D=self.enable2D)
        
     def select_param(self,event):
         """

@@ -80,22 +80,28 @@ class Plugin:
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
         #Set park engine
         id3 = wx.NewId()
-        self.menu1.AppendCheckItem(id3, "park") 
-        wx.EVT_MENU(owner, id3, self._onset_engine)
+        scipy_help= "Scipy Engine: Perform Simple fit. More in Help window...."
+        self.menu1.Append(id3, "Scipy",scipy_help) 
+        wx.EVT_MENU(owner, id3,  self._onset_engine_scipy)
+        
+        id3 = wx.NewId()
+        park_help = "Park Engine: Perform Complex fit. More in Help window...."
+        self.menu1.Append(id3, "park",park_help) 
+        wx.EVT_MENU(owner, id3,  self._onset_engine_park)
         
         #menu for model
         menu2 = wx.Menu()
+    
         self.menu_mng.populate_menu(menu2, owner)
         id2 = wx.NewId()
         owner.Bind(models.EVT_MODEL,self._on_model_menu)
-        ## Allow fitpanel to access list of models
+      
         self.fit_panel.set_owner(owner)
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
         owner.Bind(fitpage1D.EVT_MODEL_BOX,self._on_model_panel)
         
         #create  menubar items
         return [(id, self.menu1, "Fitting"),(id2, menu2, "Model")]
-    
     
     def on_add_sim_page(self, event):
         """
@@ -129,6 +135,8 @@ class Plugin:
             else:
                
                 if item.name==graph.selected_plottable :
+                    if not hasattr(item, "group_id"):
+                        return []
                     return [["Select data  for Fitting", \
                              "Dialog with fitting parameters ", self._onSelect]] 
         return []   
@@ -239,7 +247,6 @@ class Plugin:
         self.panel = event.GetEventObject()
         for item in self.panel.graph.plottables:
             if item.name == self.panel.graph.selected_plottable:
-                ## reset the error back to data
                 if len(self.err_dy)>0:
                     if item.name in  self.err_dy.iterkeys():
                         dy= self.err_dy[item.name]
@@ -353,7 +360,6 @@ class Plugin:
                     list = value.get_model()
                     model= list[0]
                     break
-            ## reset the current model with new fitted parameters    
             i = 0
             for name in pars:
                 if result.pvec.__class__==numpy.float64:
@@ -382,8 +388,6 @@ class Plugin:
             @param elapsed: computation time
         """
         if cpage!=None:
-            ## the fit perform was a single fit but selected  from the 
-            ## simultaneous fit page
             self._single_fit_completed(result=result,pars=pars,cpage=cpage,
                                        qmin=qmin,qmax=qmax,
                               ymin=ymin, ymax=ymax, xmin=xmin, xmax=xmax)
@@ -539,14 +543,23 @@ class Plugin:
             @param model: model to fit
             
         """
-        #set an engine to perform fit
-        from sans.fit.Fitting import Fit
-        self.fitter= Fit(self._fit_engine)
+        ##Setting an id to store model and data
         self.fit_id= 0
         #Setting an id to store model and data
         if id!=None:
              self.fit_id= id
-       
+        ##  count the number of fitproblem schedule to fit 
+        fitproblem_count= 0
+        for value in self.page_finder.itervalues():
+            if value.get_scheduled()==1:
+                fitproblem_count += 1
+        ## if simultaneous fit change automatically the engine to park
+        if fitproblem_count >1:
+            self._on_change_engine(engine='park')
+        from sans.fit.Fitting import Fit
+        self.fitter= Fit(self._fit_engine)
+        
+        
         for page, value in self.page_finder.iteritems():
             try:
                 if value.get_scheduled()==1:
@@ -575,6 +588,7 @@ class Plugin:
                         for item in param:
                             param_value = item[1]
                             param_name = item[0]
+    
                             new_model.parameterset[ param_name].set( param_value )
                         
                     self.fitter.set_model(new_model, self.fit_id, pars) 
@@ -612,8 +626,8 @@ class Plugin:
             ## If a thread is already started, stop it
             if self.calc_thread != None and self.calc_thread.isrunning():
                 self.calc_thread.stop()
-            ## Perform a single fit , then need to page 
-            if  self.fit_id==1:
+			## perform single fit
+            if  fitproblem_count==1:
                 self.calc_thread =FitThread(parent =self.parent,
                                         fn= self.fitter,
                                        qmin=qmin,
@@ -643,20 +657,19 @@ class Plugin:
             wx.PostEvent(self.parent, StatusEvent(status= msg ))
             return
         
-        
-    def _onset_engine(self,event):
+    def _onset_engine_park(self,event):
         """ 
-            Toggle engine name from "park" to "scipy" or reverse if event received
-            @param event: wx.menu item checked
+            set engine to park
         """
-        if self._fit_engine== 'park':
-            self._on_change_engine('scipy')
-        else:
-            self._on_change_engine('park')
-            
-        msg= "Engine set to: %s" % self._fit_engine
-        wx.PostEvent(self.parent, StatusEvent(status= msg ))
-  
+        self._on_change_engine('park')
+       
+       
+    def _onset_engine_scipy(self,event):
+        """ 
+            set engine to scipy
+        """
+        self._on_change_engine('scipy')
+       
     
     def _on_change_engine(self, engine='park'):
         """
@@ -664,6 +677,7 @@ class Plugin:
             @param engine: the key work of the engine
         """
         self._fit_engine = engine
+        wx.PostEvent(self.parent, StatusEvent(status="Engine set to: %s" % self._fit_engine))
    
    
     def _on_model_panel(self, evt):
@@ -680,21 +694,25 @@ class Plugin:
         ## make sure nothing is done on self.sim_page
         ## example trying to call set_panel on self.sim_page
         if current_pg != sim_page:
-            current_pg.set_panel(model)
            
-            model.name="M"+str(self.index_model)
+            if len(self.page_finder[current_pg].get_model())==0:
+                
+                model.name="M"+str(self.index_model)
+                self.index_model += 1  
+            else:
+                model.name= self.page_finder[current_pg].get_model()[0].name
+                
             try:
-                metadata=self.page_finder[current_pg].get_data()
-                M_name=model.name+"= "+name+"("+metadata.group_id+")"
+                metadata=self.page_finder[current_pg].get_plotted_data()
+                M_name = model.name+"= "+name+"("+metadata.name+")"
             except:
-                M_name=model.name+"= "+name
-            self.index_model += 1  
-            
-            # save model name
+                M_name = model.name+"= "+name
             # save the name containing the data name with the appropriate model
             self.page_finder[current_pg].set_model(model,M_name)
+            
+                
+            # save model name
             self.plot_helper(currpage= current_pg,qmin= None,qmax= None)
-            ## draw  self.sim_page and store information on the selected model
             if self.sim_page!=None:
                 self.sim_page.add_model(self.page_finder)
         
@@ -718,9 +736,8 @@ class Plugin:
         current_pg=self.fit_panel.get_current_page()
         for page, value in self.page_finder.iteritems():
             if page ==current_pg :
-                self.plot_helper(currpage=page,qmin= qmin,qmax= qmax)
                 break 
-        
+        self.plot_helper(currpage=page,qmin= qmin,qmax= qmax)
         
         
         
@@ -733,32 +750,32 @@ class Plugin:
         """
         if self.fit_panel.GetPageCount() >1:
             for page in self.page_finder.iterkeys():
-                if  page==currpage :  
+                if  page == currpage :  
                     data= self.page_finder[page].get_plotted_data()
                     list= self.page_finder[page].get_model()
-                    smearer= self.page_finder[page].get_smearer()
-                    model=list[0]
+                    smearer = self.page_finder[page].get_smearer()
+                    model = list[0]
                     break 
             ## create Model 1D
-            if data!=None and data.__class__.__name__ != 'Data2D':
+            if data != None and data.__class__.__name__ != 'Data2D':
                 x= numpy.zeros(len(data.x))  
-                y= numpy.zeros(len(data.x)) 
+                y= numpy.zeros(len(data.y)) 
                 
                 theory = Theory1D(x=x, y=y)
                 theory.name = model.name
-                theory.group_id = data.group_id
+                if hasattr(data ,"group_id"):
+                    theory.group_id = data.group_id
                 theory.id = "Model"
-                
-                 
                 
                 x_name, x_units = data.get_xaxis() 
                 y_name, y_units = data.get_yaxis() 
                 theory.xaxis(x_name, x_units)
                 theory.yaxis(y_name, y_units)
                 if qmin == None :
-                   qmin = min(data.x)
+                    qmin = min(data.x)
                 if qmax == None :
-                   qmax = max(data.x)
+                    qmax = max(data.x)
+                
                 j=0
                 try:
                     tempx = qmin
@@ -864,18 +881,71 @@ class Plugin:
             Plot a theory from a model selected from the menu
             @param evt: wx.menu event
         """
-        name = evt.model.__name__
+        name = evt.model.__class__.__name__
         if hasattr(evt.model, "name"):
             name = evt.model.name
-        model=evt.model()
+        model=evt.model
         description=model.description
         
         # Create a model page. If a new page is created, the model
         # will be plotted automatically. If a page already exists,
         # the content will be updated and the plot refreshed
         self.fit_panel.add_model_page(model,description,name,topmenu=True)
+    
+    def complete1D_from_data(self, output,model, data, x, elapsed, name):
+        """
+             plot model 1D with data info 
+        """
+        y= output
+        x= data.x
+        theory = Theory1D(x=x, y=y)
+        theory.name = model.name
+        theory.group_id = data.group_id
+        theory.id = "Model"
         
+        x_name, x_units = data.get_xaxis() 
+        y_name, y_units = data.get_yaxis() 
+        theory.xaxis(x_name, x_units)
+        theory.yaxis(y_name, y_units)
+        wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
+                                                title=str(data.name)))
         
+    def draw_model1D_from_Data(self, data, model,name=None,
+                                qmin=None, qmax=None, smearer= None):
+        """
+            Draw model 1D from loaded data1D
+            @param data: loaded data
+            @param model: the model to plot
+        """
+        x = data.x
+        self.model= model
+        if qmin == None :
+           qmin = min(data.x)
+        if qmax == None :
+           qmax = max(data.x)
+        if name ==None:
+            name=model.name
+        try:
+            from model_thread import Calc1D
+            ## If a thread is already started, stop it
+            if self.calc_thread != None and self.calc_thread.isrunning():
+                self.calc_thread.stop()
+            self.calc_thread = Calc1D( x= x,
+                                      model= self.model, 
+                                       qmin= qmin,
+                                       qmax= qmax,
+                                       name= name,
+                                       smearer= smearer,
+                            completefn= self.complete1D_from_data,
+                            updatefn= self.update1D)
+            self.calc_thread.queue()
+            
+        except:
+            msg= " Error occurred when drawing %s Model 1D: "%self.model.name
+            msg+= " %s"%sys.exc_value
+            wx.PostEvent( self.parent, StatusEvent(status= msg ))
+            return  
+            
     def draw_model(self, model, name, data= None, description= None,
                    enable1D= True, enable2D= False,
                    qmin= DEFAULT_QMIN, qmax= DEFAULT_QMAX, qstep= DEFAULT_NPTS):
@@ -906,7 +976,37 @@ class Plugin:
                            qmax=qmax,
                            qstep=qstep)
         
-              
+    
+    def update1D(self,x, output):
+        """
+            Update the output of plotting model 1D
+        """
+        self.calc_thread.ready(1)
+    
+    def complete1D(self, x,output, elapsed, name,data=None):
+        """
+            Complete plotting 1D data
+        """ 
+        try:
+            y = output
+            new_plot = Theory1D(x, y)
+            new_plot.name = name
+            new_plot.xaxis("\\rm{Q}", 'A^{-1}')
+            new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+            new_plot.id ="Model"
+            new_plot.group_id ="Model"
+            # Pass the reset flag to let the plotting event handler
+            # know that we are replacing the whole plot
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
+                             title="Analytical model 1D ", reset=True ))
+            
+        except:
+            msg= " Error occurred when drawing %s Model 1D: "%new_plot.name
+            msg+= " %s"%sys.exc_value
+            wx.PostEvent( self.parent, StatusEvent(status= msg ))
+            return  
+        
+                 
     def _draw_model1D(self, model, name, description= None, enable1D= True,
                       qmin= DEFAULT_QMIN, qmax= DEFAULT_QMAX, qstep= DEFAULT_NPTS):
         """
@@ -924,39 +1024,43 @@ class Plugin:
                            num= qstep,
                            endpoint=True
                            )      
-        xlen= len(x)
-        y = numpy.zeros(xlen)
-        
-        if  enable1D:
-            for i in range(xlen):
-                y[i] = model.run(x[i]) 
+        self.model= model
+        if enable1D:
             try:
-                new_plot = Theory1D(x, y)
-                new_plot.name = name
-                new_plot.xaxis("\\rm{Q}", 'A^{-1}')
-                new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-                new_plot.id ="Model"
-                new_plot.group_id ="Model"
-                # Pass the reset flag to let the plotting event handler
-                # know that we are replacing the whole plot
-                wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                                 title="Analytical model 1D ", reset=True ))
+                from model_thread import Calc1D
+                ## If a thread is already started, stop it
+                if self.calc_thread != None and self.calc_thread.isrunning():
+                    self.calc_thread.stop()
+                self.calc_thread = Calc1D( x= x,
+                                          model= self.model, 
+                                           qmin= qmin,
+                                           qmax= qmax,
+                                           name= name,
+                                           data=None,
+                                        smearer=None,
+                                completefn= self.complete1D,
+                                updatefn= self.update1D)
+                self.calc_thread.queue()
                 
             except:
-                msg= " Error occurred when drawing %s Model 1D: "%new_plot.name
+                msg= " Error occurred when drawing %s Model 1D: "%self.model.name
                 msg+= " %s"%sys.exc_value
                 wx.PostEvent( self.parent, StatusEvent(status= msg ))
-                return
+                return  
+                
 
 
-    
-    def update(self, output,time):
+        
+    def update2D(self, output,time=None):
         """
             Update the output of plotting model
         """
-        pass
-    
-    def complete(self, output, elapsed, model, qmin, qmax,qstep=DEFAULT_NPTS):
+        wx.PostEvent(self.parent, StatusEvent(status="Plot \
+        #updating ... ",type="update"))
+        self.calc_thread.ready(0.01)
+        
+        
+    def complete2D(self, output, elapsed, model, qmin, qmax,qstep=DEFAULT_NPTS):
         """
             Complete get the result of modelthread and create model 2D
             that can be plot.
@@ -970,6 +1074,7 @@ class Plugin:
         theory= Data2D(image=data, err_image=temp)
     
         from DataLoader.data_info import Detector, Source
+        
         detector = Detector()
         theory.detector=[]
         theory.detector.append(detector) 
@@ -1046,23 +1151,22 @@ class Plugin:
         self.model= model
         if enable2D:
             try:
-                from sans.guiframe.model_thread import Calc2D
-                self.calc_thread = Calc2D(parent =self.parent,x=x,
-                                           y=y,model= self.model, 
-                                           qmin=qmin,
-                                           qmax=qmax,
-                                           qstep=qstep,
-                                completefn=self.complete,
-                                updatefn=None)
+                from model_thread import Calc2D
+                ## If a thread is already started, stop it
+                if self.calc_thread != None and self.calc_thread.isrunning():
+                    self.calc_thread.stop()
+                self.calc_thread = Calc2D( x= x,
+                                           y= y, model= self.model, 
+                                           qmin= qmin,
+                                           qmax= qmax,
+                                           qstep= qstep,
+                                completefn= self.complete2D,
+                                updatefn= self.update2D )
                 self.calc_thread.queue()
-                self.calc_thread.ready(2.5)
+                
             except:
-                msg= "Draw model 2D error: "
-                wx.PostEvent(self.parent, StatusEvent(status="%s %s" % sys.exc_value))
-                return
-            
-  
-           
+                raise
+    
    
 if __name__ == "__main__":
     i = Plugin()

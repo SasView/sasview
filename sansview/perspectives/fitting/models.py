@@ -9,6 +9,7 @@
 #      models.
 
 import wx
+import wx.lib.newevent
 import imp
 import os,sys,math
 import os.path
@@ -65,16 +66,45 @@ def _findModels(dir):
         # Don't deal with bad plug-in imports. Just skip.
         pass
     return plugins
+
+class ModelList(object):
+    """
+        Contains dictionary of model and their type
+    """
+    def __init__(self):
+        self.mydict={}
+        
+    def set_list(self, name, mylist):
+        """
+            @param name: the type of the list
+            @param mylist: the list to add
+        """
+        if name not in self.mydict.keys():
+            self.mydict[name] = mylist
+            
+            
+    def get_list(self):
+        """
+         return all the list stored in a dictionary object
+        """
+        return self.mydict
+        
 class ModelManager:
-    
-    ## Dictionary of models
-    model_list = {}
-    indep_model_list = {}
-    model_list_box = {}
-    custom_models={}
+    ## external dict for models
+    model_combobox = ModelList()
+    ## Dictionary of form models
+    form_factor_dict = {}
+    ## dictionary of other
+    struct_factor_dict = {}
+    ##list of form factors
+    shape_list =[]
+    ## independent shape model list
+    shape_indep_list = []
+    ##list of structure factors 
+    struct_list= []
+    ## list of added models
     plugins=[]
-    indep_model=[]
-    ## Event owner
+    ## Event owner (guiframe)
     event_owner = None
     
     def _getModelList(self):
@@ -85,66 +115,69 @@ class ModelManager:
             @param id: first event ID to register the menu events with
             @return: the next free event ID following the new menu events
         """
-        self.model_list = {}
-        self.model_list_box = {}
-       
-        
+        ## form factor
         from sans.models.SphereModel import SphereModel
-        self.model_list[str(wx.NewId())] =  SphereModel
+        self.shape_list.append(SphereModel)
         
         from sans.models.CylinderModel import CylinderModel
-        self.model_list[str(wx.NewId())] =CylinderModel
+        self.shape_list.append(CylinderModel)
       
         from sans.models.CoreShellModel import CoreShellModel
-        self.model_list[str(wx.NewId())] = CoreShellModel 
+        self.shape_list.append(CoreShellModel)
         
         from sans.models.CoreShellCylinderModel import CoreShellCylinderModel
-        self.model_list[str(wx.NewId())] =CoreShellCylinderModel
+        self.shape_list.append(CoreShellCylinderModel)
         
         from sans.models.EllipticalCylinderModel import EllipticalCylinderModel
-        self.model_list[str(wx.NewId())] =EllipticalCylinderModel
+        self.shape_list.append(EllipticalCylinderModel)
         
         from sans.models.EllipsoidModel import EllipsoidModel
-        self.model_list[str(wx.NewId())] = EllipsoidModel 
+        self.shape_list.append(EllipsoidModel)
+         
+        from sans.models.LineModel import LineModel
+        self.shape_list.append(LineModel)
+        
+        ## Structure factor 
+        from sans.models.NoStructure import NoStructure
+        self.struct_list.append(NoStructure)
         
         from sans.models.SquareWellStructure import SquareWellStructure
-        self.model_list[str(wx.NewId())] =  SquareWellStructure
+        self.struct_list.append(SquareWellStructure)
         
         from sans.models.HardsphereStructure import HardsphereStructure
-        self.model_list[str(wx.NewId())] =  HardsphereStructure
-        
+        self.struct_list.append(HardsphereStructure)
+         
         from sans.models.StickyHSStructure import StickyHSStructure
-        self.model_list[str(wx.NewId())] =  StickyHSStructure
+        self.struct_list.append(StickyHSStructure)
         
         from sans.models.HayterMSAStructure import HayterMSAStructure
-        self.model_list[str(wx.NewId())] =  HayterMSAStructure
-        
-        from sans.models.LineModel import LineModel
-        self.model_list[str(wx.NewId())]  = LineModel
+        self.struct_list.append(HayterMSAStructure)
         
         
-        model_info="shape-independent models"
-        
+        ##shape-independent models
         from sans.models.BEPolyelectrolyte import BEPolyelectrolyte
-        self.indep_model.append(BEPolyelectrolyte )
-        
+        self.shape_indep_list.append(BEPolyelectrolyte )
+        self.form_factor_dict[str(wx.NewId())] =  [SphereModel]
         from sans.models.DABModel import DABModel
-        self.indep_model.append(DABModel )
+        self.shape_indep_list.append(DABModel )
         
         from sans.models.GuinierModel import GuinierModel
-        self.indep_model.append(GuinierModel )
+        self.shape_indep_list.append(GuinierModel )
         
         from sans.models.DebyeModel import DebyeModel
-        self.indep_model.append(DebyeModel )
+        self.shape_indep_list.append(DebyeModel )
+        
+        from sans.models.PorodModel import PorodModel
+        self.shape_indep_list.append(PorodModel )
         
         from sans.models.FractalModel import FractalModel
         class FractalAbsModel(FractalModel):
             def _Fractal(self, x):
                 return FractalModel._Fractal(self, math.fabs(x))
-        self.indep_model.append(FractalAbsModel)
+        self.shape_indep_list.append(FractalAbsModel)
         
         from sans.models.LorentzModel import LorentzModel
-        self.indep_model.append( LorentzModel) 
+        self.shape_indep_list.append( LorentzModel) 
             
         from sans.models.PowerLawModel import PowerLawModel
         class PowerLawAbsModel(PowerLawModel):
@@ -153,9 +186,9 @@ class ModelManager:
                     return PowerLawModel._PowerLaw(self, math.fabs(x))
                 except:
                     print sys.exc_value  
-        self.indep_model.append( PowerLawAbsModel )
+        self.shape_indep_list.append( PowerLawAbsModel )
         from sans.models.TeubnerStreyModel import TeubnerStreyModel
-        self.indep_model.append(TeubnerStreyModel )
+        self.shape_indep_list.append(TeubnerStreyModel )
     
         #Looking for plugins
         self.plugins = findModels()
@@ -172,71 +205,129 @@ class ModelManager:
             @param event_owner: wx object to bind the menu events to
             @return: the next free event ID following the new menu events
         """
+        ## Fill model lists
         self._getModelList()
+        ## store reference to model menu of guiframe
+        self.modelmenu = modelmenu
+        ## guiframe reference
         self.event_owner = event_owner
-        shape_submenu= wx.Menu() 
-        indep_submenu = wx.Menu()
+        
+        
+        shape_submenu = wx.Menu()
+        shape_indep_submenu = wx.Menu()
+        structure_factor = wx.Menu()
         added_models = wx.Menu()
-        for id_str,value in self.model_list.iteritems():
-            item = self.model_list[id_str]()
-            name = item.__class__.__name__
-            if hasattr(item, "name"):
-                name = item.name
-            self.model_list_box[name] =value
-            shape_submenu.Append(int(id_str), name, name)
-            wx.EVT_MENU(event_owner, int(id_str), self._on_model)
-        modelmenu.AppendMenu(wx.NewId(), "Shapes...", shape_submenu, "List of shape-based models")
-        id = wx.NewId()
-        if len(self.indep_model_list) == 0:
-            for items in self.indep_model:
-                #if item not in self.indep_model_list.values():
-                    #self.indep_model_list[str(id)] = item
-                self.model_list[str(id)]=items
-                item=items()
-                name = item.__class__.__name__
-                if hasattr(item, "name"):
-                    name = item.name
-                indep_submenu.Append(id,name, name)
-                self.model_list_box[name] =items
-                wx.EVT_MENU(event_owner, int(id), self._on_model)
-                id = wx.NewId()         
-        modelmenu.AppendMenu(wx.NewId(), "Shape-independent...", indep_submenu, "List of shape-independent models")
-        id = wx.NewId()
-        if len(self.custom_models) == 0:
-            for items in self.plugins:
-                #if item not in self.custom_models.values():
-                    #self.custom_models[str(id)] = item
-                self.model_list[str(id)]=items
-                name = items.__name__
-                if hasattr(items, "name"):
-                    name = items.name
-                added_models.Append(id, name, name)
-                self.model_list_box[name] =items
-                wx.EVT_MENU(event_owner, int(id), self._on_model)
-                id = wx.NewId()
-        modelmenu.AppendMenu(wx.NewId(),"Added models...", added_models, "List of additional models")
+        ## create menu with shape
+        self._fill_menu( menuinfo = ["shapes",shape_submenu," simple shape"],
+                         list1 = self.shape_list,
+                         list2 = self.struct_list )
+        self._fill_menu( menuinfo = ["Shape-independent",shape_indep_submenu,
+                                    "List of shape-independent models"],
+                         list1 = self.shape_indep_list,
+                         list2 = self.struct_list )
+        
+        self._fill_simple_menu( menuinfo= ["Structure Factors",structure_factor,
+                                          "List of Structure factors models" ],
+                                list1= self.struct_list )
+        
+        self._fill_simple_menu( menuinfo = ["Added models", added_models,
+                                            "List of additional models"],
+                                 list1= self.plugins)
         return 0
     
+    def _fill_simple_menu(self,menuinfo, list1):
+        """
+            Fill the menu with list item
+            @param modelmenu: the menu to fill
+            @param menuinfo: submenu item for the first column of this modelmenu
+                             with info.Should be a list :
+                             [name(string) , menu(wx.menu), help(string)]
+            @param list1: contains item (form factor )to fill modelmenu second column
+        """
+        if len(list1)>0:
+            self.model_combobox.set_list(menuinfo[0],list1)
+              
+            for item in list1:
+                id = wx.NewId() 
+                struct_factor=item()
+                struct_name = struct_factor.__class__.__name__
+                if hasattr(struct_factor, "name"):
+                    struct_name = struct_factor.name
+                    
+                menuinfo[1].Append(int(id),struct_name,struct_name)
+                if not  item in self.struct_factor_dict.itervalues():
+                    self.struct_factor_dict[str(id)]= item
+                wx.EVT_MENU(self.event_owner, int(id), self._on_model)
+                
+        id = wx.NewId()         
+        self.modelmenu.AppendMenu(id, menuinfo[0],menuinfo[1],menuinfo[2])
+        
+        
+        
+    def _fill_menu(self,menuinfo, list1,list2  ):
+        """
+            Fill the menu with list item
+            @param menuinfo: submenu item for the first column of this modelmenu
+                             with info.Should be a list :
+                             [name(string) , menu(wx.menu), help(string)]
+            @param list1: contains item (form factor )to fill modelmenu second column
+            @param list2: contains item (Structure factor )to fill modelmenu third column
+        """
+        if len(list1)>0:
+            self.model_combobox.set_list(menuinfo[0],list1)
+            
+            for item in list1:   
+                form_factor= item()
+                form_name = form_factor.__class__.__name__
+                if hasattr(form_factor, "name"):
+                    form_name = form_factor.name
+                ### store form factor to return to other users   
+                newmenu= wx.Menu()
+                if len(list2)>0:
+                    for model  in list2:
+                        id = wx.NewId()
+                        struct_factor = model()
+                        name = struct_factor.__class__.__name__
+                        if hasattr(struct_factor, "name"):
+                            name = struct_factor.name
+                        newmenu.Append(id,name, name)
+                        wx.EVT_MENU(self.event_owner, int(id), self._on_model)
+                        ## save form_fact and struct_fact
+                        self.form_factor_dict[int(id)] = [form_factor,struct_factor]
+                        
+                form_id= wx.NewId()    
+                menuinfo[1].AppendMenu(int(form_id), form_name,newmenu,menuinfo[2])
+        id=wx.NewId()
+        self.modelmenu.AppendMenu(id,menuinfo[0],menuinfo[1], menuinfo[2])
+        
+        
+        
+        
     def _on_model(self, evt):
         """
             React to a model menu event
             @param event: wx menu event
         """
-        if str(evt.GetId()) in self.model_list.keys():
-            # Notify the application manager that a new model has been set
-            #self.app_manager.set_model(self.model_list[str(evt.GetId())]())
+        if int(evt.GetId()) in self.form_factor_dict.keys():
+            from sans.models.MultiplicationModel import MultiplicationModel
+            model1, model2 = self.form_factor_dict[int(evt.GetId())]
+            model = MultiplicationModel(model1, model2)
+               
+        else:
+            model= self.struct_factor_dict[str(evt.GetId())]()
             
-            #TODO: post a model event to update all panels that need
-            #evt = ModelEvent(model=self.model_list[str(evt.GetId())]())
-           
-            model = self.model_list[str(evt.GetId())]
-            evt = ModelEvent(model= model )
-            wx.PostEvent(self.event_owner, evt)
+        evt = ModelEvent( model= model )
+        wx.PostEvent(self.event_owner, evt)
         
     def get_model_list(self):    
         """ @ return dictionary of models for fitpanel use """
-        return self.model_list_box
+        return self.model_combobox
     
     
+    def get_form_struct(self):
+        """ retunr list of form structures"""
+        return self.struct_list
+        
     
- 
+    
+  

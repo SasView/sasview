@@ -44,6 +44,12 @@ class FitProblem:
         """
         return self.smearer
     
+    def save_model_name(self, name):  
+        self.name_per_page= name
+        
+        
+    def get_name(self):
+        return self.name_per_page
     
     def set_model(self,model,name):
         """ 
@@ -51,7 +57,11 @@ class FitProblem:
              @param model: model selected
              @param name: name created for model
         """
-        self.model_list=[model,name]
+        
+        if len(self.model_list)>0 and name==None:
+            self.model_list=[model,self.model_list[1]]
+        else:
+            self.model_list=[model,name]
 
   
     def add_plotted_data(self,data):
