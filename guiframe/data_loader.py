@@ -78,11 +78,7 @@ def plot_data(parent, path):
     """
     from sans.guicomm.events import NewPlotEvent, StatusEvent
     from DataLoader.loader import  Loader
-    ## dictionary of loaded data
-    ##{data.name, number of copy}
-    data_name_list={}
-    ## number of copies of the same loaded data
-    data_n= 1
+   
     #Instantiate a loader 
     L = Loader()
     
@@ -138,15 +134,7 @@ def plot_data(parent, path):
         new_plot.source=output.source
         ## name of the data allow to differentiate data when plotted
         name= output.filename
-        if output.filename in data_name_list.iterkeys():
-            indice = " copy"+ str(data_n)
-            
-            name += indice
-            data_n += 1
-            #print "load data",name
-        else:
-            data_name_list[output.filename]=[]
-        data_name_list[output.filename].append(data_n)
+        
             
         #print "data_name_list",data_name_list
         new_plot.name = name
