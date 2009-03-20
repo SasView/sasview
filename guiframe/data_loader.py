@@ -78,7 +78,11 @@ def plot_data(parent, path):
     """
     from sans.guicomm.events import NewPlotEvent, StatusEvent
     from DataLoader.loader import  Loader
-    
+    ## dictionary of loaded data
+    ##{data.name, number of copy}
+    data_name_list={}
+    ## number of copies of the same loaded data
+    data_n= 1
     #Instantiate a loader 
     L = Loader()
     
@@ -133,11 +137,23 @@ def plot_data(parent, path):
         ## source will request in dataLoader .manipulation module
         new_plot.source=output.source
         ## name of the data allow to differentiate data when plotted
-        new_plot.name = output.filename
+        name= output.filename
+        if output.filename in data_name_list.iterkeys():
+            indice = " copy"+ str(data_n)
+            
+            name += indice
+            data_n += 1
+            #print "load data",name
+        else:
+            data_name_list[output.filename]=[]
+        data_name_list[output.filename].append(data_n)
+            
+        #print "data_name_list",data_name_list
+        new_plot.name = name
         ## allow to highlight data when plotted
         new_plot.interactive = True
         ## when 2 data have the same id override the 1 st plotted
-        new_plot.id = output.filename
+        new_plot.id = name
         ## info is a reference to output of dataloader that can be used
         ## to save  data 1D as cansas xml file
         new_plot.info= output
@@ -147,9 +163,9 @@ def plot_data(parent, path):
         new_plot.xaxis(output._xaxis,output._xunit)
         new_plot.yaxis(output._yaxis,output._yunit)
         ##group_id specify on which panel to plot this data
-        new_plot.group_id = output.filename
+        new_plot.group_id = name
         ##post data to plot
-        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(output.filename)))
+        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(name)))
         
     ## the output of the loader is a list , some xml files contain more than one data
     else:
@@ -170,20 +186,23 @@ def plot_data(parent, path):
                 new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy,dxl=dxl,dxw=dxw)
            
             new_plot.source=item.source
-            new_plot.name = str(item.run[0])
+            
+            name= str(item.run[0])
+            
+            new_plot.name = name
             new_plot.interactive = True
             new_plot.detector =item.detector
             # If the data file does not tell us what the axes are, just assume...
             new_plot.xaxis(item._xaxis,item._xunit)
             new_plot.yaxis(item._yaxis,item._yunit)
-            new_plot.group_id = str(item.run[0])
-            new_plot.id = str(item.run[0])
+            new_plot.group_id = name
+            new_plot.id = name
             new_plot.info= item
             
             if hasattr(item,"title"):
                 title= item.title
             else:
-                title= str(item.run[0])
+                title= name
             wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
             i+=1
            
