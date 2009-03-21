@@ -45,7 +45,6 @@ class SansParameter(park.Parameter):
             lo= -numpy.inf
             hi= numpy.inf
         return lo,hi
-        
     
     def _setrange(self,r):
         """
@@ -156,7 +155,6 @@ class Data(object):
         """ @param fn: function that return model value
             @return residuals
         """
-        
         x,y,dy = [numpy.asarray(v) for v in (self.x,self.y,self.dy)]
         if self.qmin==None and self.qmax==None: 
             fx =numpy.asarray([fn(v) for v in x])
@@ -206,15 +204,15 @@ class FitData1D(object):
         self.dy= sans_data1d.dy
         
         ## Min Q-value
-        self.qmin=None
+        self.qmin= min (self.data.x)
         ## Max Q-value
-        self.qmax=None
+        self.qmax= max (self.data.x)
        
        
-    def setFitRange(self,qmin=None,qmax=None,ymin=None,ymax=None,):
+    def setFitRange(self,qmin=None,qmax=None):
         """ to set the fit range"""
-        self.qmin=qmin
-        self.qmax=qmax
+        self.qmin = qmin
+        self.qmax = qmax
         
         
     def getFitRange(self):
@@ -237,11 +235,13 @@ class FitData1D(object):
         x,y,dy = [numpy.asarray(v) for v in (self.x,self.y,self.dy)]
            
         # Find entries to consider
-        if self.qmin==None and self.qmax==None:
-            idx = Ellipsis
-        else:
-            idx = (x>=self.qmin) & (x <= self.qmax)
-                        
+        if self.qmin==None:
+            self.qmin= min(self.data.x)
+        if  self.qmax==None:
+            self.qmin= max(self.data.x)
+        
+        idx = (x>=self.qmin) & (x <= self.qmax)
+  
         # Compute theory data f(x)
         fx = numpy.zeros(len(x))
         fx[idx] = numpy.asarray([fn(v) for v in x[idx]])
@@ -249,24 +249,14 @@ class FitData1D(object):
         # Smear theory data
         if self.smearer is not None:
             fx = self.smearer(fx)
+       
         # Sanity check
         if numpy.size(dy) < numpy.size(x):
             raise RuntimeError, "FitData1D: invalid error array"
                             
         return (y[idx] - fx[idx])/dy[idx]
      
-    def residuals_old(self, fn):
-        """ @param fn: function that return model value
-            @return residuals
-        """
-        x,y,dy = [numpy.asarray(v) for v in (self.x,self.y,self.dy)]
-        if self.qmin==None and self.qmax==None: 
-            fx =numpy.asarray([fn(v) for v in x])
-            return (y - fx)/dy
-        else:
-            idx = (x>=self.qmin) & (x <= self.qmax)
-            fx = numpy.asarray([fn(item)for item in x[idx ]])
-            return (y[idx] - fx)/dy[idx]
+  
         
     def residuals_deriv(self, model, pars=[]):
         """ 
@@ -289,24 +279,26 @@ class FitData2D(object):
         self.x_bins= sans_data2d.x_bins
         self.y_bins= sans_data2d.y_bins
        
-        self.xmin= self.data.xmin
-        self.xmax= self.data.xmax
-        self.ymin= self.data.ymin
-        self.ymax= self.data.ymax
+        x = max(self.data.xmin, self.data.xmax)
+        y = max(self.data.ymin, self.data.ymax)
+        
+        ## fitting range
+        self.qmin = 0
+        self.qmax = math.sqrt(x*x +y*y)
        
        
-    def setFitRange(self,qmin=None,qmax=None,ymin=None,ymax=None):
+       
+    def setFitRange(self,qmin=None,qmax=None):
         """ to set the fit range"""
-        self.xmin= qmin
-        self.xmax= qmax
-        self.ymin= ymin
-        self.ymax= ymax
+        self.qmin= qmin
+        self.qmax= qmax
+      
         
     def getFitRange(self):
         """
             @return the range of data.x to fit
         """
-        return self.xmin, self.xmax,self.ymin, self.ymax
+        return self.qmin, self.qmax
      
      
     def residuals(self, fn):
@@ -314,22 +306,23 @@ class FitData2D(object):
             @return residuals
         """
         res=[]
-        if self.xmin==None:        #Here we define that xmin = qmin >=0 and xmax=qmax>=qmain
-            self.xmin= 0 #self.data.xmin
-        if self.xmax==None:
-            self.xmax= self.data.xmax
-        if self.ymin==None:
-            self.ymin= self.data.ymin
-        if self.ymax==None:
-            self.ymax= self.data.ymax
+        #Here we define that  qmin >=0 and qmax>=qmain
+        x = max(self.data.xmin, self.data.xmax)
+        y = max(self.data.ymin, self.data.ymax)
+        
+        ## fitting range
+        if self.qmin == None:
+            self.qmin = 0
+        if self.qmax == None:
+            self.qmax = math.sqrt(x*x +y*y)
+        
+        
         for i in range(len(self.y_bins)):
-            #if self.y_bins[i]>= self.ymin and self.y_bins[i]<= self.ymax:
             for j in range(len(self.x_bins)):
-                 if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)>=math.pow(self.xmin,2):
-                     if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)<=math.pow(self.xmax,2):
-                         #if self.x_bins[j]>= self.xmin and self.x_bins[j]<= self.xmax:                
-                        res.append( (self.image[i][j]- fn([self.x_bins[i],self.y_bins[j]]))\
-                            /self.err_image[i][j] )
+                radius = math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)
+                if self.qmin <= radius and radius <= self.qmax:
+                    res.append( (self.image[j][i]- fn([self.x_bins[i],self.y_bins[j]]))\
+                            /self.err_image[j][i] )
         
         return numpy.array(res)
        
@@ -345,7 +338,6 @@ class sansAssembly:
     """
          Sans Assembly class a class wrapper to be call in optimizer.leastsq method
     """
-    
     def __init__(self,paramlist,Model=None , Data=None):
         """
             @param Model: the model wrapper fro sans -model
@@ -364,8 +356,9 @@ class sansAssembly:
         sum = 0
         for item in self.res:
             sum += item*item
-        #print "length of data =",len(self.res)
+       
         return sum/ len(self.res)
+    
     def __call__(self,params):
         """
             Compute residuals
@@ -412,7 +405,6 @@ class FitEngine:
             xtemp=[]
             ytemp=[]
             dytemp=[]
-            dxtemp=[]
             self.mini=None
             self.maxi=None
                
@@ -436,11 +428,7 @@ class FitEngine:
                         dytemp.append(data.dy[i])
                     else:
                         raise RuntimeError, "Fit._concatenateData: y-errors missing"
-                    if data.dx is not None and len(data.dx)==len(data.x):   
-                        dxtemp.append(data.dx[i])
-                    else:
-                        raise RuntimeError, "Fit._concatenateData: dQ-errors missing"
-            data= Data(x=xtemp,y=ytemp,dy=dytemp, dx=dxtemp)
+            data= Data(x=xtemp,y=ytemp,dy=dytemp)
             data.setFitRange(self.mini, self.maxi)
             return data
         
@@ -475,7 +463,7 @@ class FitEngine:
         else:
             raise ValueError, "park_integration:missing parameters"
     
-    def set_data(self,data,Uid,smearer=None,qmin=None,qmax=None,ymin=None,ymax=None):
+    def set_data(self,data,Uid,smearer=None,qmin=None,qmax=None):
         """ Receives plottable, creates a list of data to fit,set data
             in a FitArrange object and adds that object in a dictionary 
             with key Uid.
@@ -486,7 +474,8 @@ class FitEngine:
             fitdata=FitData2D(data)
         else:
             fitdata=FitData1D(data, smearer)
-        fitdata.setFitRange(qmin=qmin,qmax=qmax, ymin=ymin,ymax=ymax)
+       
+        fitdata.setFitRange(qmin=qmin,qmax=qmax)
         #A fitArrange is already created but contains model only at Uid
         if self.fitArrangeDict.has_key(Uid):
             self.fitArrangeDict[Uid].add_data(fitdata)
@@ -495,7 +484,7 @@ class FitEngine:
             fitproblem= FitArrange()
             fitproblem.add_data(fitdata)
             self.fitArrangeDict[Uid]=fitproblem    
-
+   
     def get_model(self,Uid):
         """ 
             @param Uid: Uid is key in the dictionary containing the model to return

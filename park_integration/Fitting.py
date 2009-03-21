@@ -30,8 +30,9 @@ class Fit:
         """
             self._engine will contain an instance of ScipyFit or ParkFit
         """
-        self._engine=None
+        self._engine = None
         self.set_engine(engine)
+          
           
     def set_engine(self,word):
         """
@@ -47,28 +48,41 @@ class Fit:
         else:
             raise ValueError, "enter the keyword scipy or park"
         
-    def returnEngine(self):
-        """ @return self._engine""" 
-        return self._engine
+   
     
     def fit(self,handler=None):
         """Perform the fit """
     
         return self._engine.fit(handler)
     
+    
     def set_model(self,model,Uid,pars=[]):
-         self._engine.set_model(model,Uid,pars)
+        """
+        store a model model to fit at the position Uid of the fit engine
+        """
+        self._engine.set_model(model,Uid,pars)
    
-    def set_data(self,data,Uid,smearer=None,qmin=None, qmax=None,ymin=None, ymax=None):
-        self._engine.set_data(data,Uid,smearer,qmin,qmax,ymin,ymax)
+   
+    def set_data(self,data,Uid,smearer=None,qmin=None, qmax=None):
+        """
+            Store data to fit at the psotion Uid of the fit engine
+            @param data: data to fit
+            @param smearer: smearerobject to smear data
+            @param qmin: the minimum q range to fit 
+            @param qmax: the minimum q range to fit
+        """
+        self._engine.set_data(data,Uid,smearer,qmin, qmax)
+        
         
     def get_model(self,Uid):
         """ return list of data"""
         self._engine.get_model(Uid)
 
+
     def remove_Fit_Problem(self,Uid):
         """remove   fitarrange in Uid"""
         self._engine.remove_Fit_Problem(Uid)
+        
         
     def select_problem_for_fit(self,Uid,value):
         """
@@ -77,6 +91,7 @@ class Fit:
             @param value: the value to allow fitting. can only have the value one or zero
         """
         self._engine.select_problem_for_fit(Uid,value)
+        
         
     def get_problem_to_fit(self,Uid):
         """

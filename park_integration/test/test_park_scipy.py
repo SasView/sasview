@@ -1,0 +1,49 @@
+"""
+    Unit tests for fitting module 
+"""
+import unittest
+
+from sans.guiframe.dataFitting import Data1D 
+from sans.fit.AbstractFitEngine import Data, Model,FitData1D
+import math
+from sans.fit.Fitting import Fit
+from DataLoader.loader import Loader
+
+class testFitModule(unittest.TestCase):
+    """ test fitting """
+   
+        
+    def test_scipy(self):
+        """ Simple cylinder model fit (scipy)  """
+        
+        out=Loader().load("cyl_testdata1.txt")
+        data1 = Data1D(x=out.x, y=out.y, dx=out.dx, dy=out.y)
+        
+        fitter = Fit('scipy')
+        # Receives the type of model for the fitting
+        from sans.models.MultiplicationModel import MultiplicationModel
+        from sans.models.CylinderModel import CylinderModel
+        from sans.models.SquareWellStructure import SquareWellStructure
+        model1  =  MultiplicationModel(CylinderModel(),SquareWellStructure())
+        model1.setParam('contrast', 1)
+        #data = Data(sans_data=data1)
+        data = FitData1D(data1)
+        model = Model(model1)
+        
+        pars1 =['length','radius','scale']
+        fitter.set_data(data,1)
+        model.set(scale=1e-10)
+        fitter.set_model(model,1,pars1)
+        fitter.select_problem_for_fit(Uid=1,value=1)
+        result1 = fitter.fit()
+        print "result ",result1.fitness,result1.pvec,result1.stderr
+        self.assert_(result1)
+        self.assertTrue(len(result1.pvec)>0 or len(result1.pvec)==0 )
+        self.assertTrue(len(result1.stderr)> 0 or len(result1.stderr)==0)
+        
+        self.assertTrue( math.fabs(result1.pvec[0]-400.0)/3.0 < result1.stderr[0] )
+        self.assertTrue( math.fabs(result1.pvec[1]-20.0)/3.0  < result1.stderr[1] )
+        self.assertTrue( math.fabs(result1.pvec[2]-9.0e-12)/3.0   < result1.stderr[2] )
+        self.assertTrue( result1.fitness < 1.0 )
+        
+   
