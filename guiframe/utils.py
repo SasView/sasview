@@ -19,6 +19,27 @@ def format_number(value, high=False):
     else:
         output= "%-5.3g" % value
     return output.lstrip().rstrip()
+def check_value( item1, item2):
+    """
+        Check 2 txtcrtl value 
+        @param item1: txtcrtl containing the minimum value
+        @param item2: txtcrtl containing the maximum value
+    """
+    mini = float(format_number(item1.GetValue()))
+    maxi = float(format_number(item2.GetValue()))
+    flag= True
+    if mini <  maxi: 
+      item1.SetBackgroundColour(wx.WHITE)
+      item1.Refresh()
+    else:
+        flag = False
+        item1.SetBackgroundColour("pink")
+        item1.Refresh()
+      
+    return flag
+   
+    
+    
     
 class PanelMenu(wx.Menu):
     plots = None
