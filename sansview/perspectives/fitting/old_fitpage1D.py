@@ -139,7 +139,11 @@ class FitPage1D(ModelPage):
         #------------------ sizer 4  draw------------------------   
         # This sizer contains model list and chisqr value 
         #filling sizer4
+        ## structure combox box
+        self.structbox = wx.ComboBox(self, -1)
+        # define combox box
         self.modelbox = wx.ComboBox(self, -1)
+        
         self.tcChi    =  wx.StaticText(self, -1, str(0), style=wx.ALIGN_LEFT)
         self.tcChi.Hide()
         self.text1_1 = wx.StaticText(self, -1, 'Chi2/dof', style=wx.ALIGN_LEFT)
@@ -148,8 +152,17 @@ class FitPage1D(ModelPage):
         iy = 1
         self.sizer4.Add(wx.StaticText(self,-1,'Model'),(iy,ix),(1,1)\
                   , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        
         ix += 1
         self.sizer4.Add(self.modelbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix +=1
+        self.text_mult= wx.StaticText(self,-1,' x ')
+        self.sizer4.Add(self.text_mult,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.sizer4.Add(self.structbox,(iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
+        
+        
         ix += 1
         self.sizer4.Add(self.text1_1,(iy,ix),(1,1),\
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -261,7 +274,7 @@ class FitPage1D(ModelPage):
         self.param_toFit=[]
         # model on which the fit would be performed
         self.model=None
-        
+       
         self.back_up_model= None
         #dictionary of model name and model class
         self.model_list_box={}    
@@ -281,14 +294,17 @@ class FitPage1D(ModelPage):
         
         self.Centre()
         self.Layout()
-        self.GrandParent.GetSizer().Layout()
+        
+        self.parent.GetSizer().Layout()
    
     def compute_chisqr2D(self):
         """ 
             compute chi square given a model and data 2D and set the value
             to the tcChi txtcrl
         """
-        flag=self.checkFitRange()
+        from sans.guiframe.utils import check_value
+        flag = check_value( self.qmin, self.qmax)
+        #flag=self.checkFitRange()
         res=[]
         if flag== True:
             try:
@@ -321,7 +337,9 @@ class FitPage1D(ModelPage):
             compute chi square given a model and data 1D and set the value
             to the tcChi txtcrl
         """
-        flag=self.checkFitRange()
+        from sans.guiframe.utils import check_value
+        flag = check_value( self.qmin, self.qmax)
+        #flag=self.checkFitRange()
         if flag== True:
             try:
                 if hasattr(self.data,"data"):
@@ -366,75 +384,78 @@ class FitPage1D(ModelPage):
         self.Layout()
         self.parent.GetSizer().Layout()
 
-        for item in self.model_list_box.itervalues():
-            name = item.__name__
-            if hasattr(item, "name"):
-                name = item.name
-            
+       
+        name= self.modelbox.GetString(self.modelbox.GetCurrentSelection())
+        form_factor =self.modelbox.GetClientData(self.modelbox.GetCurrentSelection())
+        struct_factor =self.structbox.GetClientData(self.structbox.GetCurrentSelection())
+       
+      
+        if form_factor!="separator":
+            if struct_factor != None and struct_factor.__name__ != "NoStructure":
+                from sans.models.MultiplicationModel import MultiplicationModel
+                self.model= MultiplicationModel(form_factor(),struct_factor())
+            else:
+                 self.model= form_factor() 
+            self.back_up_model= self.model.clone()
+            name= self.model.name
             if name == None:
                 self.qmin.Disable()
                 self.qmax.Disable() 
             else:
                 self.qmin.Enable()
                 self.qmax.Enable() 
+            evt = ModelEventbox(model=self.model,name=name)
+            wx.PostEvent(self.event_owner, evt)   
+            self.text1_1.Show()
+            self.tcChi.Show()
+            self.compute_chisqr()
+        
             
-            if name ==event.GetString():
-                try:
-                    self.model=item()
-                    self.back_up_model= self.model.clone()
-                    evt = ModelEventbox(model=self.model,name=name)
-                    wx.PostEvent(self.event_owner, evt)
-                    self.text1_1.Show()
-                    self.compute_chisqr()
-                    self.tcChi.Show()
-                except:
-                    raise #ValueError,"model.name is not equal to model class name"
-                break  
+        else:
+            self.model=None 
+            msg= " Select non - model value:%s ! Previous Model reloaded "%name 
+            wx.PostEvent(self.parent.parent, StatusEvent(status= msg))
+            
+        self.set_panel(self.model)
             
                  
     def onFit(self,event):
-        """ signal for fitting"""
-         
-        flag=self.checkFitRange()
-        self.set_manager(self.manager)
-     
+        """ 
+            signal for fitting .Perform single fit only
+        """
+        from sans.guiframe.utils import check_value
+        flag = check_value( self.qmin, self.qmax) 
+        
+        if not flag:
+            msg= "Fitting range invalid"
+            wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
+            return 
+        
+        if len(self.param_toFit) <= 0:
+            msg= "Select at least one parameter to fit"
+            wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
+            return 
+        
         self.qmin_x=float(self.qmin.GetValue())
         self.qmax_x =float( self.qmax.GetValue())
-        if len(self.param_toFit) >0 and flag==True:
-            self.manager.schedule_for_fit( value=1,fitproblem =None) 
-            if hasattr(self.data, "data"):
-                #single fit for Data2D
-                self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x,
-                                            ymin=self.data.ymin, ymax=self.data.ymax,
-                                            xmin=self.data.xmin,xmax=self.data.xmax)
-            else:
-                #single fit for Data1D
-                self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x)
+        
+        self.manager.schedule_for_fit( value=1,fitproblem =None) 
+        if hasattr(self.data, "data"):
+            #single fit for Data2D
+            self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x,
+                                        ymin=self.data.ymin, ymax=self.data.ymax,
+                                        xmin=self.data.xmin,xmax=self.data.xmax)
+        else:
+            #single fit for Data1D
+            self.manager._on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x)
                 
             self.vbox.Layout()
             self.SetScrollbars(20,20,55,40)
             self.Layout()
             self.parent.GetSizer().Layout()
-        else:
-            wx.PostEvent(self.parent.parent, StatusEvent(status=\
-                            "Select at least one parameter to fit "))
-  
-   
-    def _onTextEnter(self,event):
-        """
-            set a flag to determine if the fitting range entered by the user is valid
-        """
-      
-        try:
-            flag=self.checkFitRange()
-            if flag==True and self.model!=None:
-                self.manager.redraw_model(float(self.xmin.GetValue())\
-                                               ,float(self.xmax.GetValue()))
-        except:
-
-            wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                            "Drawing  Error:wrong value entered %s"% sys.exc_value))
         
+            
+  
    
     
     def get_param_list(self):

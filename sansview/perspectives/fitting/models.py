@@ -225,14 +225,16 @@ class ModelManager:
                                     "List of shape-independent models"],
                          list1 = self.shape_indep_list,
                          list2 = self.struct_list )
+        self._fill_menu( menuinfo = ["Added models", added_models,
+                                            "List of additional models"],
+                                 list1= self.plugins,
+                                 list2 = self.struct_list)
         
         self._fill_simple_menu( menuinfo= ["Structure Factors",structure_factor,
                                           "List of Structure factors models" ],
                                 list1= self.struct_list )
         
-        self._fill_simple_menu( menuinfo = ["Added models", added_models,
-                                            "List of additional models"],
-                                 list1= self.plugins)
+        
         return 0
     
     def _fill_simple_menu(self,menuinfo, list1):

@@ -89,7 +89,7 @@ class Calc2D(CalcThread):
         and I(qx, qy) = I(-qx, -qy) is assumed.
     """
     
-    def __init__(self, x, y, model,qmin, qmax,qstep,
+    def __init__(self, x, y, data,model,qmin, qmax,qstep,
                  completefn = None,
                  updatefn   = None,
                  yieldtime  = 0.01,
@@ -100,10 +100,11 @@ class Calc2D(CalcThread):
                  yieldtime,
                  worktime)
         self.qmin= qmin
-        self.qmax=qmax
+        self.qmax= qmax
         self.qstep= qstep
         self.x = x
         self.y = y
+        self.data= data
         ## the model on to calculate
         self.model = model
         self.starttime = 0
@@ -127,36 +128,41 @@ class Calc2D(CalcThread):
         x = self.x
         y = self.y
         output = numpy.zeros((len(x),len(y)))
-      
-        center_x=0
-        center_y=0
+        
+        if self.qmin==None:
+            self.qmin = 0
+        if self.qmax== None:
+            if data ==None:
+                return
+            newx= math.pow(max(math.fabs(data.xmax),math.fabs(data.xmin)),2)
+            newy= math.pow(max(math.fabs(data.ymax),math.fabs(data.ymin)),2)
+            self.qmax=math.sqrt( newx + newy )
         
         self.starttime = time.time()
         
-        
         lx = len(self.x)
-       
         for i_x in range(len(self.x)):
             # Check whether we need to bail out
             self.update(output=output )
             self.isquit()
        
             for i_y in range(int(len(self.y))):
-           
-                if (self.x[i_x]*self.x[i_x]+self.y[i_y]*self.y[i_y]) \
-                    < self.qmin * self.qmin:
-                    
-                    output[i_x] [i_y]=0   
-                else:
-                    value = self.model.runXY([self.x[i_x]-center_x, self.y[i_y]-center_y])
+                radius = self.x[i_x]*self.x[i_x]+self.y[i_y]*self.y[i_y]
+                
+                if  self.qmin <= radius or radius<= self.qmax:
+                    value = self.model.runXY( [self.x[i_x], self.y[i_y]] )
                     output[i_x] [i_y]=value   
+                else:
+                     output[i_x] [i_y]=0   
             
         elapsed = time.time()-self.starttime
-        self.complete(
-                      output=output, elapsed=elapsed,model= self.model,
-                      qmin= self.qmin,
-                      qmax=self.qmax,
-                      qstep=self.qstep)
+        self.complete( image = output,
+                       data = self.data , 
+                       model = self.model,
+                       elapsed = elapsed,
+                       qmin = self.qmin,
+                       qmax =self.qmax,
+                       qstep = self.qstep )
 
 
 class Calc2D_4fold(CalcThread):
@@ -255,7 +261,6 @@ class Calc1D(CalcThread):
                  data=None,
                  qmin=None,
                  qmax=None,
-                 name=None,
                  smearer=None,
                  completefn = None,
                  updatefn   = None,
@@ -271,19 +276,17 @@ class Calc1D(CalcThread):
         self.qmin= qmin
         self.qmax= qmax
         self.model = model
-        self.name= name
         self.smearer= smearer
         self.starttime = 0
         
     def compute(self):
+        """
+            Compute model 1d value given qmin , qmax , x value 
+        """
         import numpy
         
         output = numpy.zeros(len(self.x))
-        if self.qmin==None:
-            self.qmin= min(self.x)
-        if self.qmax==None:
-            self.qmax= max(self.x) 
-               
+       
         self.starttime = time.time()
         
         for i_x in range(len(self.x)):
@@ -293,12 +296,14 @@ class Calc1D(CalcThread):
             if self.qmin <= self.x[i_x] and self.x[i_x] <= self.qmax:
                 value = self.model.run(self.x[i_x])
                 output[i_x] = value
+                
         if self.smearer!=None:
             output = self.smearer(output)
-                    
+            
+                      
         elapsed = time.time()-self.starttime
-        self.complete(x= self.x, output=output, 
-                      elapsed=elapsed, name=self.name, data=self.data)
+        self.complete(x= self.x, y= output, 
+                      elapsed=elapsed, model= self.model, data=self.data)
         
         
 

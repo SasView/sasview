@@ -39,7 +39,8 @@ class FitPanel(wx.aui.AuiNotebook):
        
         #dictionary of miodel {model class name, model class}
         self.model_list_box={}
-       
+        ## list of structure factor
+        self.struct_list_box=[]
         # save the title of the last page tab added
         self.fit_page_name=[]
         self.draw_model_name=None
@@ -101,23 +102,8 @@ class FitPanel(wx.aui.AuiNotebook):
             set and owner for fitpanel
             @param owner: the class responsible of plotting
         """
-        self.event_owner = owner
-    
-    def set_model_list(self,dict):
-         """ 
-             copy a dictionary of model into its own dictionary
-             @param dict: dictionnary made of model name as key and model class
-             as value
-         """
-         self.model_list_box = dict
+        self.event_owner=owner
         
-  
-    def get_current_page(self):
-        """
-            @return the current page selected
-        """
-        return self.GetPage(self.GetSelection() )
-    
     def add_sim_page(self):
         """
             Add the simultaneous fit page
@@ -138,21 +124,17 @@ class FitPanel(wx.aui.AuiNotebook):
             name = data.name 
         except:
             name = 'Fit'
-        from pageInfo import  PageInfo
-        myinfo = PageInfo( self, data=data )
-        myinfo.model_list_box = self.model_list_box.get_list()
-        myinfo.event_owner =self.event_owner 
         
         if not name in self.fit_page_name :
-            from fitpage import FitPage
-            panel = FitPage(parent= self, page_info=myinfo, name=name )
+            from fitpage1D import FitPage1D
+            panel = FitPage1D(self,data, -1)
             panel.name=name
             
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
             
             self.AddPage(page=panel,caption=name,select=True)
-            #panel.populate_box( self.model_list_box)
+            panel.populate_box( self.model_list_box)
             self.fit_page_name.append(name)
     
             return panel 
@@ -167,20 +149,48 @@ class FitPanel(wx.aui.AuiNotebook):
             @param qmax: maximum Q
             @param npts: number of Q points
         """
+        from modelpage import ModelPage
+        #print "fitpanel model", model
+        panel = ModelPage(self,model,page_title, -1)
+        panel.set_manager(self.manager)
+        panel.set_owner(self.event_owner)
+        self.AddPage(page=panel,caption="Model",select=True)
+        panel.populate_box( self.model_list_box)
+        panel.name = page_title
+        self.draw_model_name=page_title
+        self.model_page_number=self.GetSelection()
+        self.model_page=self.GetPage(self.GetSelection())
+        
+        
+        # Set the range used to plot models
+        self.model_page.set_range(qmin, qmax, npts)
+        
+        # We just created a model page, we are ready to plot the model
+        #self.manager.draw_model(model, model.name)
+        #FOR PLUGIN  for somereason model.name is = BASEcomponent
+        self.manager.draw_model(model, page_title)
+        
+    def new_help_add_model_page(self,model,description,page_title, qmin=0, qmax=0.1, npts=50):
+        """
+            #TODO: fill in description
+            
+            @param qmin: mimimum Q
+            @param qmax: maximum Q
+            @param npts: number of Q points
+        """
         ## storing page info
         from pageInfo import  PageInfo
         myinfo = PageInfo( self, model )
-        myinfo.model_list_box = self.model_list_box.get_list()
-        myinfo.event_owner =self.event_owner
-        
+        myinfo.model_list_box = self.model_list_box
         from modelpage import ModelPage
+        
         panel = ModelPage(self,myinfo,page_title)
         panel.set_manager(self.manager)
         panel.set_owner(self.event_owner)
         
         
         self.AddPage(page=panel,caption="Model",select=True)
-        #panel.populate_box( self.model_list_box)
+        panel.populate_box( self.model_list_box)
         panel.name = page_title
         self.draw_model_name=page_title
         self.model_page_number=self.GetSelection()
@@ -193,7 +203,7 @@ class FitPanel(wx.aui.AuiNotebook):
         # We just created a model page, we are ready to plot the model
         #self.manager.draw_model(model, model.name)
         #FOR PLUGIN  for some reason model.name is = BASEcomponent
-        self.manager.draw_model(model)
+        self.manager.draw_model(model, page_title)
      
         
     def add_model_page(self,model,description,page_title, qmin=0, qmax=0.1, npts=50, topmenu=False):
@@ -215,7 +225,20 @@ class FitPanel(wx.aui.AuiNotebook):
             else:
                 self.model_page.select_model(model, page_title)
           
-   
+    def get_current_page(self):
+        """
+            @return the current page selected
+        """
+        #return self.nb.GetCurrentPage()
+        return self.GetPage(self.GetSelection() )
   
-   
- 
+    
+     
+    def set_model_list(self,dict):
+         """ 
+             copy a dictionary of model into its own dictionary
+             @param dict: dictionnary made of model name as key and model class
+             as value
+         """
+         self.model_list_box = dict
+  
