@@ -516,7 +516,7 @@ class Plugin:
             wx.PostEvent(self.parent, StatusEvent(status= msg ))
             return
       
-    def  set_smearer(self,smearer, qmin=None, qmax=None):
+    def set_smearer(self,smearer, qmin=None, qmax=None):
         """
             Get a smear object and store it to a fit problem
             @param smearer: smear object to allow smearing data
@@ -527,7 +527,7 @@ class Plugin:
         data =  self.page_finder[current_pg].get_plotted_data()
         list = self.page_finder[current_pg].get_model()
         model = list[0]
-        smearer = value.get_smearer()
+        smearer =self.page_finder[current_pg].get_smearer()
         self.draw_model( model=model, data= data, smearer= smearer,
                 qmin= qmin, qmax= qmax)
     
