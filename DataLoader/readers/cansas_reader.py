@@ -152,8 +152,12 @@ def _store_float(location, node, variable, storage):
                         conv = Converter(attr['unit'])
                         exec "storage.%s = %g" % (variable, conv(value, units=local_unit))
                     except:
-                        raise ValueError, "CanSAS reader: could not convert %s unit [%s]; expecting [%s]\n  %s" \
-                        % (variable, attr['unit'], local_unit, sys.exc_value)
+                        #Below three lines were added for the unit = 1/A. local unit is defined in 'mm'. Need to check!!!
+                        if variable == 'slit_length' and attr['unit'] !=local_unit:
+                            pass
+                        else:
+                            raise ValueError, "CanSAS reader: could not convert %s unit [%s]; expecting [%s]\n  %s" \
+                            % (variable, attr['unit'], local_unit, sys.exc_value)
                 else:
                     raise ValueError, "CanSAS reader: unrecognized %s unit [%s]; expecting [%s]" \
                         % (variable, attr['unit'], local_unit)
