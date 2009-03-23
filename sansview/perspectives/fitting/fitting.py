@@ -574,6 +574,8 @@ class Plugin:
         self.panel = event.GetEventObject()
         for item in self.panel.graph.plottables:
             if item.name == self.panel.graph.selected_plottable:
+                ## put the errors values back to the model if the errors were hiden
+                ## before sending them to the fit engine
                 if len(self.err_dy)>0:
                     if item.name in  self.err_dy.iterkeys():
                         dy= self.err_dy[item.name]
