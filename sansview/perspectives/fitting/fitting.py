@@ -528,7 +528,8 @@ class Plugin:
         list = self.page_finder[current_pg].get_model()
         model = list[0]
         smearer =self.page_finder[current_pg].get_smearer()
-        self.draw_model( model=model, data= data, smearer= smearer,
+        if smearer != None:
+            self.draw_model( model=model, data= data, smearer= smearer,
                 qmin= qmin, qmax= qmax)
     
     
