@@ -120,7 +120,7 @@ class Plugin:
             Create a page to access simultaneous fit option
         """
         self.sim_page= self.fit_panel.add_sim_page()
-        self.sim_page.add_model(self.page_finder)
+        self.sim_page.draw_page(self.page_finder)
         
         
     def help(self, evt):
@@ -754,33 +754,32 @@ class Plugin:
         model = evt.model
         if model ==None:
             return
-        name = model.name
+       
         sim_page=self.sim_page
         current_pg = self.fit_panel.get_current_page() 
         ## make sure nothing is done on self.sim_page
         ## example trying to call set_panel on self.sim_page
         if current_pg != sim_page:
            
-            if len(self.page_finder[current_pg].get_model())==0:
+            if self.page_finder[current_pg].get_model()== None :
                 
                 model.name="M"+str(self.index_model)
                 self.index_model += 1  
             else:
-                model.name= self.page_finder[current_pg].get_model()[0].name
                 
-            try:
-                metadata=self.page_finder[current_pg].get_plotted_data()
-                M_name = model.name+"= "+name+"("+metadata.name+")"
-            except:
-                M_name = model.name+"= "+name
-            # save the name containing the data name with the appropriate model
-            self.page_finder[current_pg].set_model(model,M_name)
+                model.name= self.page_finder[current_pg].get_model().name
+                
+           
+            metadata = self.page_finder[current_pg].get_plotted_data()
             
+            # save the name containing the data name with the appropriate model
+            self.page_finder[current_pg].set_model(model)
+            print "wwent hete",model.name
             # save model name
             self.draw_model( model=model, data= metadata)
             
             if self.sim_page!=None:
-                self.sim_page.add_model(self.page_finder)
+                self.sim_page.draw_page(self.page_finder)
         
         
   
@@ -939,12 +938,12 @@ class Plugin:
         err_image = numpy.zeros(numpy.shape(image))
         err_image[err_image==0]= 1
         theory= Data2D(image= image , err_image= err_image)
+        theory.name= model.name
         
         if data ==None:
             self._fill_default_model2D(theory= theory, qmax=qmax,qstep=qstep, qmin= qmin)
-            theory.name= model.name
+        
         else:
-            theory.name= data.name
             theory.id= "Model"
             theory.group_id= "Model"+data.name
             theory.x_bins= data.x_bins
