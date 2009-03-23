@@ -304,7 +304,7 @@ class ModelPage(BasicPage):
    
    
    
-    def set_range(self, qmin, qmax, npts):
+    def set_range(self, qmin_x, qmax_x, npts):
         """
             Set the range for the plotted models
             @param qmin: minimum Q
