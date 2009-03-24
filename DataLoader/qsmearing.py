@@ -45,7 +45,8 @@ def smear_selection(data1D):
         # Check that we have non-zero data
         if data1D.dx[0]>0.0:
             _found_resolution = True
-            print "_found_resolution",_found_resolution
+            #print "_found_resolution",_found_resolution
+            #print "data1D.dx[0]",data1D.dx[0],data1D.dxl[0]
     # If we found resolution smearing data, return a QSmearer
     if _found_resolution == True:
         return QSmearer(data1D)
@@ -69,7 +70,8 @@ def smear_selection(data1D):
             if data1D.dxw[0] != item:
                 _found_resolution = False
                 break
-            
+    #print "_found_slit",_found_slit 
+    #print "data1D.dx[0]",data1D.dx[0],data1D.dxl[0]       
     # If we found slit smearing data, return a slit smearer
     if _found_slit == True:
         return SlitSmearer(data1D)
@@ -103,12 +105,16 @@ class _BaseSmearer(object):
             
         iq_smeared = numpy.zeros(self.nbins)
         # Loop over q-values
+        idwb=[]
+        
         for q_i in range(self.nbins):
             sum = 0.0
-            counts = 0.0    
-            
+            counts = 0.0  
+
             for i in range(self.nbins):
-                if iq[i]!=0 and self._weights[q_i][i]!=0:
+                if iq[i]==0 or self._weights[q_i][i]==0:
+                    continue
+                else:
                     sum += iq[i] * self._weights[q_i][i] 
                     counts += self._weights[q_i][i]
                     #print "i,iq[i],self._weights[q_i][i] ",i,iq[i],self._weights[q_i][i]
@@ -146,7 +152,7 @@ class _SlitSmearer(_BaseSmearer):
         ## Number of Q bins 
         self.nbins  = nbins
         ## Number of points used in the smearing computation
-        self.npts   = 1000
+        self.npts   = 10000
         ## Smearing matrix
         self._weights = None
         
@@ -162,8 +168,8 @@ class _SlitSmearer(_BaseSmearer):
             
             # For each q-value, compute the weight of each other q-bin
             # in the I(q) array
-            npts_h = self.nbins if self.height>0 else 1 #changed self.npts=>self.nbins
-            npts_w = self.nbins if self.width>0 else 1 #changed self.npts=>self.nbins
+            npts_h = self.npts if self.height>0 else 1 
+            npts_w = self.npts if self.width>0 else 1 
             
             # If both height and width are great than zero,
             # modify the number of points in each direction so 
@@ -190,7 +196,6 @@ class _SlitSmearer(_BaseSmearer):
                     #TODO: be careful with edge effect
                     if q_i<self.nbins:
                         weights[i][q_i] = weights[i][q_i]+1.0
-        print "nbin,npts",self.nbins,self.npts
 
         self._weights = weights
         return self._weights
@@ -233,6 +238,7 @@ class SlitSmearer(_SlitSmearer):
         ## Maximum
         self.max = data1D.x[len(data1D.x)-1]        
 
+        #print "nbin,npts",self.nbins,self.npts
 
 class _QSmearer(_BaseSmearer):
     """
