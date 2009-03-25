@@ -62,15 +62,16 @@ class FitPanel(wx.aui.AuiNotebook):
         selected_page = self.GetPage(self.GetSelection())
         page_number = self.GetSelection()
         if self.sim_page != selected_page and selected_page!=self.about_page:
-            # remove the check box link to the model name of this page (selected_page)
-            if self.sim_page !=None :
-                self.sim_page.remove_model(selected_page)
             #remove that page from page_finder of fitting module
             page_finder=self.manager.get_page_finder() 
             for page, value in page_finder.iteritems():
                 if page==selected_page:
                     del page_finder[page]
                     break
+            # remove the check box link to the model name of this page (selected_page)
+            if self.sim_page !=None :
+                self.sim_page.draw_page(page_finder)
+            
             #Delete the page from notebook
             if selected_page.name in self.fit_page_name:
                 self.fit_page_name.remove(selected_page.name)

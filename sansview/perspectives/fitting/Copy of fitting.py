@@ -119,11 +119,6 @@ class Plugin:
         """
             Create a page to access simultaneous fit option
         """
-        if self.sim_page !=None:
-            msg= "Simultaneous Fit page already opened"
-            wx.PostEvent(self.parent, StatusEvent(status= msg))
-            return 
-        
         self.sim_page= self.fit_panel.add_sim_page()
         self.sim_page.draw_page(self.page_finder)
         
@@ -303,7 +298,7 @@ class Plugin:
                 is cancelled" , type="stop"))
             
       
-    def on_single_fit(self,id=0,qmin=None, qmax=None):
+    def on_single_fit(self,id=None,qmin=None, qmax=None):
         """ 
             perform fit for the  current page  and return chisqr,out and cov
             @param engineName: type of fit to be performed
@@ -315,10 +310,12 @@ class Plugin:
         from sans.fit.Fitting import Fit
         self.fitter = Fit(self._fit_engine)
         #Setting an id to store model and data in fit engine
-        self.fit_id = id
-       
-        page_fitted = None
+        self.fit_id = 0
+        if id!=None:
+            self.fit_id = id
         
+        page_fitted = None
+        fit_problem = None
         #Get information (model , data) related to the page on 
         #with the fit will be perform
         current_pg= self.fit_panel.get_current_page() 
@@ -328,7 +325,8 @@ class Plugin:
         if current_pg != simul_pg:
             value = self.page_finder[current_pg]
             metadata =  value.get_fit_data()
-            model = value.get_model()
+            list = value.get_model()
+            model = list[0]
             smearer = value.get_smearer()
            
             #Create list of parameters for fitting used
@@ -395,7 +393,7 @@ class Plugin:
                 wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
                 return
          
-    def on_simul_fit(self, id=0,qmin=None,qmax=None):
+    def on_simul_fit(self, id=None,qmin=None,qmax=None):
         """ 
             perform fit for all the pages selected on simpage and return chisqr,out and cov
             @param engineName: type of fit to be performed
@@ -405,14 +403,15 @@ class Plugin:
             
         """
         ##Setting an id to store model and data
-        self.fit_id= id
-        
+        self.fit_id= 0
+        #Setting an id to store model and data
+        if id!=None:
+             self.fit_id= id
         ##  count the number of fitproblem schedule to fit 
         fitproblem_count= 0
         for value in self.page_finder.itervalues():
             if value.get_scheduled()==1:
                 fitproblem_count += 1
-                
         ## if simultaneous fit change automatically the engine to park
         if fitproblem_count >1:
             self._on_change_engine(engine='park')
@@ -424,9 +423,8 @@ class Plugin:
             try:
                 if value.get_scheduled()==1:
                     metadata = value.get_fit_data()
-                    model = value.get_model()
-                    smearer = value.get_smearer()
-                    qmin , qmax = value.get_range()
+                    list = value.get_model()
+                    model= list[0]
                     ## store page
                     cpage= page
                     #Get list of parameters name to fit
@@ -442,17 +440,17 @@ class Plugin:
                             return
                     ## create a park model and reset parameter value if constraint
                     ## is given
-                    new_model = Model(model)
-                    param = value.get_model_param()
+                    new_model=Model(model)
+                    param=value.get_model_param()
+                    
                     if len(param)>0:
                         for item in param:
                             param_value = item[1]
                             param_name = item[0]
-                            ## check if constraint
-                            if param_value !=None:
-                                new_model.parameterset[ param_name].set( param_value )
-                
-                    self.fitter.set_model(model= new_model, Uid=self.fit_id, pars=pars) 
+    
+                            new_model.parameterset[ param_name].set( param_value )
+                        
+                    self.fitter.set_model(new_model, self.fit_id, pars) 
                     ## check that non -zero value are send as dy in the fit engine
                     dy=[]
                     x=[]
@@ -470,9 +468,8 @@ class Plugin:
                                 metadata.y=y
                                 metadata.x=numpy.zeros(len(x))
                                 metadata.x=x
-                              
-                    self.fitter.set_data( data= metadata, smearer=smearer,
-                                         Uid=self.fit_id, qmin=qmin, qmax=qmax)
+                                
+                    self.fitter.set_data(metadata,self.fit_id,qmin,qmax)
                     self.fitter.select_problem_for_fit(Uid= self.fit_id,
                                                        value= value.get_scheduled())
                     self.fit_id += 1 
@@ -494,6 +491,8 @@ class Plugin:
                                         fn= self.fitter,
                                        qmin=qmin,
                                        qmax=qmax,
+                                       ymin= ymin,
+                                       ymax= ymax,
                                        cpage=cpage,
                                        pars= pars,
                                        completefn= self._simul_fit_completed,
@@ -505,6 +504,8 @@ class Plugin:
                                         fn= self.fitter,
                                        qmin=qmin,
                                        qmax=qmax,
+                                       ymin= ymin,
+                                       ymax= ymax,
                                        completefn= self._simul_fit_completed,
                                        updatefn=None)
             self.calc_fit.queue()
@@ -563,19 +564,8 @@ class Plugin:
                            qmax=qmax,
                            qstep=qstep)
           
-    def _fit_helper(self, page, id ):
-        """
-            helper for fitting
-        """
-        #set an engine to perform fit
-        from sans.fit.Fitting import Fit
-        self.fitter = Fit(self._fit_engine)
-        #Setting an id to store model and data in fit engine
-        self.fit_id = id
-        page_fitted = None
-        
-        
-       
+  
+  
     def _onSelect(self,event):
         """ 
             when Select data to fit a new page is created .Its reference is 
@@ -638,7 +628,8 @@ class Plugin:
         try:
             for page, value in self.page_finder.iteritems():
                 if page==cpage :
-                    model= value.get_model()
+                    list = value.get_model()
+                    model= list[0]
                     break
             i = 0
             for name in pars:
@@ -651,11 +642,8 @@ class Plugin:
             cpage.onsetValues(result.fitness, result.pvec,result.stderr)
             ## plot the current model with new param
             metadata =  self.page_finder[cpage].get_fit_data()
-            model = self.page_finder[cpage].get_model()
-           
-            #Replot models
-            msg= "Single Fit completed. plotting... %s:"%model.name
-            wx.PostEvent(self.parent, StatusEvent(status="%s " % msg))
+            list = self.page_finder[cpage].get_model()
+            model = list[0]
             self.draw_model( model=model, data= metadata,qmin= qmin, qmax= qmax)
             
         except:
@@ -664,7 +652,8 @@ class Plugin:
             return
        
        
-    def _simul_fit_completed(self,result,qmin,qmax, elapsed=None,pars=None,cpage=None):
+    def _simul_fit_completed(self,result,qmin,qmax, elapsed,pars=None,cpage=None,
+                             xmin=None, xmax=None, ymin=None, ymax=None):
         """
             Parameter estimation completed, 
             display the results to the user
@@ -672,8 +661,9 @@ class Plugin:
             @param elapsed: computation time
         """
         if cpage!=None:
-            self._single_fit_completed(result=result, pars=pars, cpage=cpage,
-                                       qmin=qmin, qmax=qmax)
+            self._single_fit_completed(result=result,pars=pars,cpage=cpage,
+                                       qmin=qmin,qmax=qmax,
+                              ymin=ymin, ymax=ymax, xmin=xmin, xmax=xmax)
             return
         else:
             wx.PostEvent(self.parent, StatusEvent(status="Simultaneous fit \
@@ -682,8 +672,9 @@ class Plugin:
             try:
                 for page, value in self.page_finder.iteritems():
                     if value.get_scheduled()==1:
-                        model = value.get_model()
-                        metadata =  value.get_plotted_data()
+                        list = value.get_model()
+                        model= list[0]
+                       
                         small_out = []
                         small_cov = []
                         i = 0
@@ -700,10 +691,11 @@ class Plugin:
                         # Display result on each page 
                         page.onsetValues(result.fitness, small_out,small_cov)
                         #Replot models
-                        msg= "Simultaneous Fit completed. plotting... %s:"%model.name
+                        msg= "Single Fit completed plotting %s:"%model.name
                         wx.PostEvent(self.parent, StatusEvent(status="%s " % msg))
-                        self.draw_model( model=model, data= metadata,qmin= qmin, qmax= qmax)
-                        
+                        self.plot_helper(currpage= page,qmin= qmin,qmax= qmax,
+                                         xmin=xmin, xmax=xmax,
+                                         ymin=ymin, ymax=ymax) 
             except:
                  msg= "Simultaneous Fit completed but Following error occurred: "
                  wx.PostEvent(self.parent, StatusEvent(status="%s%s" %(msg,sys.exc_value)))
@@ -782,6 +774,7 @@ class Plugin:
             
             # save the name containing the data name with the appropriate model
             self.page_finder[current_pg].set_model(model)
+            print "wwent hete",model.name
             # save model name
             self.draw_model( model=model, data= metadata)
             

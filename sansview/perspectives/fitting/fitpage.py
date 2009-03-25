@@ -353,8 +353,11 @@ class FitPage(BasicPage):
         except:
             ## error occured on chisqr computation
             pass
-        
-        
+    def get_range(self):
+        """
+            return the fitting range
+        """
+        return self.qmin_x , self.qmax_x
         
     def get_param_list(self):
         """
@@ -431,7 +434,7 @@ class FitPage(BasicPage):
         msg=""
         if self.enable_smearer.GetValue():
             from DataLoader.qsmearing import smear_selection
-            smear =smear_selection( self.data )
+            smear = smear_selection( self.data )
             if hasattr(self.data,"dxl"):
                 msg= ": Resolution smearing parameters"
             if hasattr(self.data,"dxw"):
@@ -442,7 +445,7 @@ class FitPage(BasicPage):
             else:
                 wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Data contains smearing information %s"%msg))
-        self.manager.set_smearer(smear, qmin= self.qmin_x, qmax= self.qmax_x)   
+            self.manager.set_smearer(smear, qmin= self.qmin_x, qmax= self.qmax_x)   
               
         
         

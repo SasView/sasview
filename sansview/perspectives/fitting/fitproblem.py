@@ -1,4 +1,3 @@
-from sans.fit.AbstractFitEngine import Model
 
 class FitProblem:
     """  
@@ -10,15 +9,12 @@ class FitProblem:
     def __init__(self):
         
         """
-            @ self.data :is the data selected to perform the fit
-            @ self.theory_name: the name of the theory created with self.model
-            @ self.model_list:  is a list containing a model as first element 
-            and its name assign example [lineModel, M0]
+           contains information about data and model to fit
         """
         ## data used for fitting
         self.fit_data=None
-        ## list containing couple of model and its name
-        self.model_list=[]
+        ## the current model
+        self.model = None
         ## if 1 this fit problem will be selected to fit , if 0 
         ## it will not be selected for fit
         self.schedule=0
@@ -29,6 +25,9 @@ class FitProblem:
         ## same as fit_data but with more info for plotting
         ## axis unit info and so on see plottables definition
         self.plotted_data=None
+        ## fitting range
+        self.qmin = None
+        self.qmax = None
         
         
     def set_smearer(self, smearer):
@@ -51,18 +50,19 @@ class FitProblem:
     def get_name(self):
         return self.name_per_page
     
-    def set_model(self,model,name):
+    def set_model(self,model):
         """ 
              associates each model with its new created name
              @param model: model selected
              @param name: name created for model
         """
+        self.model= model
         
-        if len(self.model_list)>0 and name==None:
-            self.model_list=[model,self.model_list[1]]
-        else:
-            self.model_list=[model,name]
-
+        
+    def get_model(self):
+        """ @return: saved model """
+        return self.model
+  
   
     def add_plotted_data(self,data):
         """ 
@@ -71,7 +71,12 @@ class FitProblem:
         """
         self.plotted_data = data
         
-        
+
+    def get_plotted_data(self):
+        """ @return:  list of data dList"""
+        return self.plotted_data
+    
+    
     def add_fit_data(self,data):
         """ 
             save a copy of the data select to fit
@@ -79,33 +84,12 @@ class FitProblem:
         """
         self.fit_data = data
             
-    def get_model(self):
-        """ @return: saved model """
-        return self.model_list
-     
-    def get_plotted_data(self):
-        """ @return:  list of data dList"""
-        return self.plotted_data
-    
-    
+   
     def get_fit_data(self):
         return self.fit_data
     
-    
-    def get_theory(self):
-        """ @return the name of theory for plotting purpose"""
-        return self.theory_name
-    
-    
-    def set_theory(self,name):
-        """
-            Set theory name
-            @param name: name of the theory
-        """
-        self.theory_name = name
-
         
-    def set_model_param(self,name,value):
+    def set_model_param(self,name,value=None):
         """ 
             Store the name and value of a parameter of this fitproblem's model
             @param name: name of the given parameter
@@ -121,24 +105,31 @@ class FitProblem:
         return self.list_param
         
         
-    def reset_model(self,model):
-        """ 
-            reset a model when parameter has changed
-            @param value: new model
-        """
-        self.model_list[0]=model
-        
-        
     def schedule_tofit(self, schedule=0):
         """
              set schedule to true to decide if this fit  must be performed
         """
         self.schedule=schedule
         
+        
     def get_scheduled(self):
         """ return true or false if a problem as being schedule for fitting"""
         return self.schedule
     
+
+    def set_range(self, qmin=None, qmax=None):
+        """
+            set fitting range 
+        """
+        self.qmin = qmin
+        self.qmax = qmax
+        
+        
+    def get_range(self):
+        """
+            @return fitting range:
+        """
+        return self.qmin, self.qmax
     
     def clear_model_param(self):
         """
@@ -146,4 +137,6 @@ class FitProblem:
         """
         self.list_param=[]
         
+    
+    
         
