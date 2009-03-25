@@ -15,7 +15,6 @@ class FitConstraint:
         self.model= model
         self.page = page
         self.fittable_param =[]
-        self.selected_params=[]
         self._set_fittableParam()
         
     def _set_fittableParam(self):
@@ -50,7 +49,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         ## store page_finder
         self.page_finder=page_finder
         ## list contaning info to set constraint 
-        ## look like self.constraint_dict[page]=[ model_name, parameter_name, constraint(string)]
+        ## look like self.constraint_dict[page]=FitConstraint(model, page)
         self.constraint_dict={}
         ## item list  self.constraints_list=[combobox1, combobox2,=,textcrtl, button ]
         self.constraints_list=[]
@@ -58,8 +57,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.model_list=[]
         ## selected mdoel to fit
         self.model_toFit=[]
-        
-        
         ## draw
         self.define_page_structure()
         self.draw_page(self.page_finder)
@@ -98,7 +95,8 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """ signal for fitting"""
         ## making sure all parameters content a constraint
         ## validity of the constraint expression is own by fit engine
-        self._set_constraint()
+        if self.show_constraint.GetValue():
+            self._set_constraint()
         ## get the fit range of very fit problem        
         for page, value in self.page_finder.iteritems():
             qmin, qmax= page.get_range()
@@ -261,7 +259,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             self._hide_constraint()
             return
         if self.show_constraint.GetValue():
-            self.sizer_couples.Clear(True) 
+            self._hide_constraint()
             self._show_constraint()
             return
         else:
@@ -273,15 +271,21 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
             Show constraint fields
         """
-        flag = False
         if len(self.constraints_list)!= 0:
             nb_fit_param = 0
             for value in self.constraint_dict.values():
                 nb_fit_param += len(value.fittable_param)
             ##Don't add anymore
             if len(self.constraints_list) == nb_fit_param:
-                flag = True
-        if len(self.model_toFit) < 2 or flag:
+                msg= "Cannot add another constraint .Maximum of number "
+                msg += "Parameters name reached %s"%str(nb_fit_param)
+                wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
+                self.sizer_couples.Layout()
+                self.sizer2.Layout()
+                self.SetScrollbars(20,20,200,100)
+                return
+            
+        if len(self.model_toFit) < 2 :
             msg= "Select at least 2 model to add constraint "
             wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
             self.sizer_couples.Layout()
@@ -299,7 +303,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         param_cbox.Hide()
         
         ctl2 = wx.TextCtrl(self, -1)
-        ctl2.Bind(wx.EVT_TEXT_ENTER,self._onTextEnter)
         ctl2.Hide()
         
         egal_txt= wx.StaticText(self,-1," = ")
@@ -309,9 +312,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         for model, value in self.constraint_dict.iteritems():
             ## check if all parameters have been selected for constraint
             ## then do not allow add constraint on parameters
-            if len(value.fittable_param)!= len(value.selected_params):
-                    ## the user can apply constraint only on model select to fit
-                    model_cbox.Append( str(model.name), model)
+            model_cbox.Append( str(model.name), model)
             
            
         wx.EVT_COMBOBOX(model_cbox,-1, self._on_select_model)
@@ -336,15 +337,16 @@ class SimultaneousFitPage(wx.ScrolledWindow):
     def _hide_constraint(self): 
         """
             hide buttons related constraint 
-        """
+        """  
         if len(self.constraint_dict)>0:
-            for value in self.constraint_dict.itervalues():
-                value.selected_params=[]
-                param = value.fittable_param## list of parameter name
-                ## reset the constraint to None on fitproblem
-                for item in param:
-                    self.page_finder[value.page].set_model_param(item,None)
-                   
+            for item in self.constraints_list:
+                model = item[0].GetClientData(0)
+                if model  in self.constraint_dict.keys():
+                    page = self.constraint_dict[model].page
+                    self.page_finder[page].clear_model_param()
+                    
+        self.constraint_dict={}
+        self._store_model()
         self.btAdd.Hide()
         self.constraints_list=[]         
         self.sizer_couples.Clear(True) 
@@ -353,7 +355,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.SetScrollbars(20,20,200,100)
         self.AdjustScrollbars()    
                 
-        
+    
         
     def _on_select_model(self, event):
         """
@@ -369,8 +371,8 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         param_cbox.Clear()
         ## insert only fittable paramaters
         for param in param_list:
-            if not param in self.constraint_dict[model].selected_params:
-                param_cbox.Append( str(param), model)
+            param_cbox.Append( str(param), model)
+            
         param_cbox.Show(True)
        
        
@@ -384,8 +386,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
         model = event.GetClientData()
         param = event.GetString()
-        self.constraint_dict[model].selected_params.append(param)
-        
+      
         length = len(self.constraints_list)
         if length < 1:
             return 
@@ -422,7 +423,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 return 
             ctl2 = item[3]
             if ctl2.GetValue().lstrip().rstrip()=="":
-                 msg= " Enter a constraint for %s.%s! "%(model_cbox.GetString(0),
+                 msg= " Enter a constraint for %s.%s! "%(param_cbox.GetClientData(0).name,
                                               param_cbox.GetString(0))           
                  wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
                  return 
@@ -458,9 +459,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.Bind(  wx.EVT_RADIOBUTTON, self._display_constraint,
                          id= self.show_constraint.GetId()    )
         
-          
-       
-        
         sizer_title.Add( wx.StaticText(self,-1," Model") )
         sizer_title.Add(( 10,10) )
         sizer_title.Add( wx.StaticText(self,-1," Parameter") )
@@ -470,12 +468,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         sizer_title.Add( self.show_constraint )
         sizer_title.Add( self.hide_constraint )
         sizer_title.Add(( 10,10) )
-       
-        
-        
-        ## Draw combobox box related to model name and model parameters
-        if self.show_constraint.GetValue():
-            self._fill_sizer_constraint_helper(self.sizer_couples)
        
         self.btAdd =wx.Button(self,wx.NewId(),'Add')
         self.btAdd.Bind(wx.EVT_BUTTON, self._onAdd_constraint,id= self.btAdd.GetId())
@@ -503,15 +495,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         
         
         
-    def _onTextEnter(self, event):
-        """
-            callback function for textcrtl
-        """
-        self.btAdd.Show(True)
-        self.sizer2.Layout()
-        self.SetScrollbars(20,20,200,100)
-        self._set_constraint()
-        
     def _set_constraint(self):
         """
             get values from the constrainst textcrtl ,parses them into model name
@@ -520,13 +503,16 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             uses it to reset the appropriate model and its appropriates parameters
         """
         for item in self.constraints_list:
-            model = item[0].GetClientData(0)
-            param = item[1].GetString(0)
+            
+            model = item[0].GetClientData(item[0].GetCurrentSelection())
+            param = item[1].GetString(item[1].GetCurrentSelection())
             constraint = item[3].GetValue().lstrip().rstrip()
             if model  in self.constraint_dict.keys():
                 page = self.constraint_dict[model].page
-                if constraint != "":
-                    self.page_finder[page].set_model_param(param,constraint)
+                if constraint == "":
+                    constraint = None
+               
+                self.page_finder[page].set_model_param(param,constraint)
         
    
               
