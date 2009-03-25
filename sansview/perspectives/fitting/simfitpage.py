@@ -306,13 +306,11 @@ class SimultaneousFitPage(wx.ScrolledWindow):
 
         param_cbox = wx.ComboBox(self, -1)
         wx.EVT_COMBOBOX(param_cbox,-1, self._on_select_param)
-        param_cbox.Hide()
         
         ctl2 = wx.TextCtrl(self, -1)
-        ctl2.Hide()
-        
+       
         egal_txt= wx.StaticText(self,-1," = ")
-        egal_txt.Hide()
+      
        
         
         for model, value in self.constraint_dict.iteritems():
