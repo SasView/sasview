@@ -134,7 +134,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             self._store_model()
             ## display constraint fields
             if self.show_constraint.GetValue():
-                self.sizer_couples.Clear(True) 
+                self._hide_constraint()
                 self._show_constraint()
                 return
         else:
@@ -162,9 +162,10 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                     self.model_toFit.remove(item)
                     self.cb1.SetValue(False)
         ## display constraint fields
-        if len(self.model_toFit)>=2:
+        if len(self.model_toFit)>=2 and len(self.model_list)==len(self.model_toFit):
             self._store_model()
             if self.show_constraint.GetValue():
+                self._hide_constraint()
                 self._show_constraint()
                           
        
@@ -175,11 +176,16 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             self._store_model()
             ## display constraint fields
             if self.show_constraint.GetValue():
-                self.sizer_couples.Clear(True) 
+                self._hide_constraint()
                 self._show_constraint()
                 return
         else:
             self.cb1.SetValue(False)
+            if len(self.model_toFit)>=2:
+                self._store_model()
+                if self.show_constraint.GetValue():
+                    self._show_constraint()
+                    return
             ##constraint info
             self._hide_constraint()
         
