@@ -98,8 +98,9 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             length= len(item)
             if event.GetId()==item[length-2].GetId():
                 sizer= item[length-1]
+                sizer.Clear(True)
                 self.sizer_constraints.Remove(sizer)
-                self.sizer_constraints.Layout()
+                #self.sizer_constraints.Layout()
                 self.sizer2.Layout()
                 self.SetScrollbars(20,20,200,100)
                 self.constraints_list.remove(item)
@@ -536,9 +537,18 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             model = item[0].GetClientData(item[0].GetCurrentSelection())
             param = item[1].GetString(item[1].GetCurrentSelection())
             constraint = item[3].GetValue().lstrip().rstrip()
+            if param.lstrip().rstrip()=="":
+                param= None
+                msg= " Constraint will be ignored!. missing parameters in combobox"
+                msg+= " to set constraint! "
+                wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
+                
             if model  in self.constraint_dict.keys():
                 page = self.constraint_dict[model]
                 if constraint == "":
+                    msg= " Constraint will be ignored!. missing value in textcrtl"
+                    msg+= " to set constraint! "
+                    wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
                     constraint = None
                
                 self.page_finder[page].set_model_param(param,constraint)

@@ -449,7 +449,7 @@ class Plugin:
                             param_value = item[1]
                             param_name = item[0]
                             ## check if constraint
-                            if param_value !=None:
+                            if param_value !=None and param_name != None:
                                 new_model.parameterset[ param_name].set( param_value )
                 
                     self.fitter.set_model(model= new_model, Uid=self.fit_id, pars=pars) 
