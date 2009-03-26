@@ -412,9 +412,7 @@ class ModelPage(BasicPage):
         self.sizer3.Layout()
         self.SetScrollbars(20,20,200,100)
     
-    def _onHighlight(self, event ):
-        print" hightlignt"
-    
+ 
             
         
 class HelpWindow(wx.Frame):
