@@ -124,7 +124,9 @@ class FitPanel(wx.aui.AuiNotebook):
             Add the simultaneous fit page
         """
         from simfitpage import SimultaneousFitPage
-        self.sim_page = SimultaneousFitPage(self, id=-1)
+        page_finder= self.manager.get_page_finder()
+        self.sim_page = SimultaneousFitPage(self,page_finder=page_finder, id=-1)
+        
         self.AddPage(self.sim_page,caption="Simultaneous Fit",select=True)
         self.sim_page.set_manager(self.manager)
         return self.sim_page

@@ -125,7 +125,7 @@ class Plugin:
             return 
         
         self.sim_page= self.fit_panel.add_sim_page()
-        self.sim_page.draw_page(self.page_finder)
+        
         
         
     def help(self, evt):
@@ -786,7 +786,7 @@ class Plugin:
             self.draw_model( model=model, data= metadata)
             
             if self.sim_page!=None:
-                self.sim_page.draw_page(self.page_finder)
+                self.sim_page.draw_page()
         
         
   

@@ -47,7 +47,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
         self.parent = parent
         ## store page_finder
-        self.page_finder=page_finder
+        self.page_finder = page_finder
         ## list contaning info to set constraint 
         ## look like self.constraint_dict[page]=FitConstraint(model, page)
         self.constraint_dict={}
@@ -57,10 +57,11 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.model_list=[]
         ## selected mdoel to fit
         self.model_toFit=[]
-        ## draw
+        ## number of constraint
+        self.nb_constraint= 0
+        ## draw page
         self.define_page_structure()
-        self.draw_page(self.page_finder)
-        
+        self.draw_page()
         self.set_layout()
         
        
@@ -116,8 +117,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             @param manager: instance of plugin fitting
         """
         self.manager = manager
-        self.draw_page( self.manager.page_finder)
-        
+       
         
     def check_all_model_name(self,event):
         """
@@ -134,7 +134,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             self._store_model()
             ## display constraint fields
             if self.show_constraint.GetValue():
-                self._hide_constraint()
                 self._show_constraint()
                 return
         else:
@@ -161,42 +160,30 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 if item in self.model_toFit:
                     self.model_toFit.remove(item)
                     self.cb1.SetValue(False)
+        
         ## display constraint fields
-        if len(self.model_toFit)>=2 and len(self.model_list)==len(self.model_toFit):
+        if len(self.model_toFit)==2:
             self._store_model()
-            if self.show_constraint.GetValue():
-                self._hide_constraint()
+            if self.show_constraint.GetValue() and len(self.constraints_list)==0:
                 self._show_constraint()
-                          
+        elif len(self.model_toFit)< 2:
+            ##constraint info
+            self._hide_constraint()              
        
         ## set the value of the main check button          
         if len(self.model_list)==len(self.model_toFit):
             self.cb1.SetValue(True)
-            ## constraint info
-            self._store_model()
-            ## display constraint fields
-            if self.show_constraint.GetValue():
-                self._hide_constraint()
-                self._show_constraint()
-                return
+            return
         else:
             self.cb1.SetValue(False)
-            if len(self.model_toFit)>=2:
-                self._store_model()
-                if self.show_constraint.GetValue():
-                    self._show_constraint()
-                    return
-            ##constraint info
-            self._hide_constraint()
+           
         
   
-    def draw_page(self, page_finder={}):      
+    def draw_page(self):      
         """
             Draw a sizer containing couples of data and model 
-        """   
-        ## receive a new page_finder  
-        self.page_finder = page_finder  
-       
+        """ 
+      
         self.model_list=[]
         self.model_toFit=[]
         if len(self.model_list)>0:
@@ -265,7 +252,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             self._hide_constraint()
             return
         if self.show_constraint.GetValue():
-            self._hide_constraint()
             self._show_constraint()
             return
         else:
@@ -286,7 +272,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 msg= "Cannot add another constraint .Maximum of number "
                 msg += "Parameters name reached %s"%str(nb_fit_param)
                 wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
-                self.sizer_couples.Layout()
+                self.sizer_constraints.Layout()
                 self.sizer2.Layout()
                 self.SetScrollbars(20,20,200,100)
                 return
@@ -294,7 +280,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         if len(self.model_toFit) < 2 :
             msg= "Select at least 2 model to add constraint "
             wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
-            self.sizer_couples.Layout()
+            self.sizer_constraints.Layout()
             self.sizer2.Layout()
             self.SetScrollbars(20,20,200,100)
             return
@@ -305,6 +291,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         model_cbox.Clear()
 
         param_cbox = wx.ComboBox(self, -1)
+        param_cbox.Hide()
         wx.EVT_COMBOBOX(param_cbox,-1, self._on_select_param)
         
         ctl2 = wx.TextCtrl(self, -1)
@@ -324,17 +311,17 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         ##[combobox1, combobox2,=,textcrtl ]
         self.constraints_list.append([model_cbox, param_cbox, egal_txt, ctl2])
         
-        sizer_constraint.Add(model_cbox)
-        sizer_constraint.Add((10,10))
-        sizer_constraint.Add(param_cbox)
-        sizer_constraint.Add(egal_txt)
-        sizer_constraint.Add(ctl2)
-        sizer_constraint.Add((10,10))
-        
-        
-        self.sizer_couples.Add(sizer_constraint)
-        self.sizer_couples.Add((10,10))
-        self.sizer_couples.Layout()
+        sizer_constraint.Add(model_cbox, flag= wx.RIGHT|wx.EXPAND,border=10)
+        sizer_constraint.Add(param_cbox, flag= wx.RIGHT|wx.EXPAND,border=5)
+        sizer_constraint.Add(egal_txt, flag= wx.RIGHT|wx.EXPAND,border=5)
+        sizer_constraint.Add(ctl2, flag= wx.RIGHT|wx.EXPAND,border=10)
+      
+        self.sizer_constraints.Insert(before=self.nb_constraint,
+                                      item=sizer_constraint, flag= wx.TOP|wx.BOTTOM|wx.EXPAND,
+                                   border=5, userData=0)
+       
+        self.nb_constraint += 1
+        self.sizer_constraints.Layout()
         self.sizer2.Layout()
         self.SetScrollbars(20,20,200,100)
         
@@ -344,17 +331,18 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """  
         if len(self.constraint_dict)>0:
             for item in self.constraints_list:
-                model = item[0].GetClientData(0)
+                model = item[0].GetClientData(item[0].GetCurrentSelection())
                 if model  in self.constraint_dict.keys():
                     page = self.constraint_dict[model].page
                     self.page_finder[page].clear_model_param()
-                    
+               
+        self.nb_constraint =0     
         self.constraint_dict={}
         self._store_model()
-        self.btAdd.Hide()
+      
         self.constraints_list=[]         
-        self.sizer_couples.Clear(True) 
-        self.sizer_couples.Layout()    
+        self.sizer_constraints.Clear(True) 
+        self.sizer_constraints.Layout()    
         self.sizer2.Layout()
         self.SetScrollbars(20,20,200,100)
         self.AdjustScrollbars()    
@@ -400,7 +388,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         ctl2 = self.constraints_list[length-1][3]
         ctl2.Show(True)
         
-        self.btAdd.Show(True)
+        
         self.sizer2.Layout()
         self.SetScrollbars(20,20,200,100)
         
@@ -427,10 +415,10 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 return 
             ctl2 = item[3]
             if ctl2.GetValue().lstrip().rstrip()=="":
-                 msg= " Enter a constraint for %s.%s! "%(param_cbox.GetClientData(0).name,
-                                              param_cbox.GetString(0))           
-                 wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
-                 return 
+                model= param_cbox.GetClientData(param_cbox.GetCurrentSelection())
+                msg= " Enter a constraint for %s.%s! "%(model.name,param_cbox.GetString(0))           
+                wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
+                return 
        
         ## some model or parameters can be constrained
         self._show_constraint()
@@ -451,7 +439,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         box_description= wx.StaticBox(self, -1,"Fit Constraints")
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         sizer_title = wx.BoxSizer(wx.HORIZONTAL)
-        self.sizer_couples = wx.BoxSizer(wx.VERTICAL)
+        self.sizer_constraints = wx.BoxSizer(wx.VERTICAL)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         
         self.hide_constraint = wx.RadioButton(self, -1, 'No', (10, 10), style=wx.RB_GROUP)
@@ -476,7 +464,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.btAdd =wx.Button(self,wx.NewId(),'Add')
         self.btAdd.Bind(wx.EVT_BUTTON, self._onAdd_constraint,id= self.btAdd.GetId())
         self.btAdd.SetToolTipString("Add another constraint?")
-        self.btAdd.Hide()
+       
         
         self.btFit = wx.Button(self,wx.NewId(),'Fit')
         self.btFit.Bind(wx.EVT_BUTTON, self.onFit,id= self.btFit.GetId())
@@ -489,7 +477,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
        
         boxsizer1.Add(sizer_title)
         boxsizer1.Add((10,10))
-        boxsizer1.Add(self.sizer_couples)
+        boxsizer1.Add(self.sizer_constraints)
         boxsizer1.Add((10,10))
         boxsizer1.Add(sizer_button)
         
