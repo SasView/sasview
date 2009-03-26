@@ -376,7 +376,7 @@ class ModelPage(BasicPage):
                 ix += 1
                 value= self.model.getParam(item)
                 ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
-                                    style=wx.TE_PROCESS_ENTER)
+                    style=wx.TE_PROCESS_ENTER)
                 
                 ctl1.SetValue(str (format_number(value)))
                 ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
@@ -411,7 +411,9 @@ class ModelPage(BasicPage):
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer3.Layout()
         self.SetScrollbars(20,20,200,100)
-        
+    
+    def _onHighlight(self, event ):
+        print" hightlignt"
     
             
         

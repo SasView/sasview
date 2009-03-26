@@ -84,9 +84,15 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer1 = wx.BoxSizer(wx.VERTICAL)
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
         self.sizer3 = wx.BoxSizer(wx.VERTICAL)
-       
         self.sizer4 = wx.BoxSizer(wx.VERTICAL)
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
+        
+        self.sizer0.SetMinSize((375,-1))
+        self.sizer1.SetMinSize((375,-1))
+        self.sizer2.SetMinSize((375,-1))
+        self.sizer3.SetMinSize((375,-1))
+        self.sizer4.SetMinSize((375,-1))
+        self.sizer5.SetMinSize((375,-1))
         
         self.vbox.Add(self.sizer0)
         self.vbox.Add(self.sizer1)
@@ -164,7 +170,7 @@ class BasicPage(wx.ScrolledWindow):
             
         import sans.models.dispersion_models 
         self.polydisp= sans.models.dispersion_models.models
-        self.disp_box = wx.ComboBox(self, -1)
+        self.disp_box = wx.ComboBox(self, -1,style=wx.CB_READONLY)
         self.disp_box.SetValue("GaussianModel")
         
         for key in self.polydisp.iterkeys():
@@ -473,11 +479,11 @@ class BasicPage(wx.ScrolledWindow):
         
         self.text2.Hide()
         
-        self.formfactorbox = wx.ComboBox(self, -1)
+        self.formfactorbox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
         if self.model!=None:
             self.formfactorbox.SetValue(self.model.name)
         
-        self.structurebox = wx.ComboBox(self, -1)
+        self.structurebox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
         wx.EVT_COMBOBOX(self.formfactorbox,-1, self._on_select_model)
         wx.EVT_COMBOBOX(self.structurebox,-1, self._on_select_model)
         self.structurebox.Hide()
