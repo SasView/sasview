@@ -355,7 +355,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
             hide buttons related constraint 
         """  
-        for page  in  self.page_finder.iterkeys():
+        for page in  self.page_finder.iterkeys():
             self.page_finder[page].clear_model_param()
                
         self.nb_constraint =0     
@@ -544,16 +544,15 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 msg= " Constraint will be ignored!. missing parameters in combobox"
                 msg+= " to set constraint! "
                 wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
-                
-            if model  in self.constraint_dict.keys():
-                page = self.constraint_dict[model]
-                if constraint == "":
-                    msg= " Constraint will be ignored!. missing value in textcrtl"
-                    msg+= " to set constraint! "
-                    wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
-                    constraint = None
-               
-                self.page_finder[page].set_model_param(param,constraint)
+            for page , value in self.constraint_dict.iteritems():
+                if model == value:
+                    if constraint == "":
+                        msg= " Constraint will be ignored!. missing value in textcrtl"
+                        msg+= " to set constraint! "
+                        wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
+                        constraint = None
+                    self.page_finder[page].set_model_param(param,constraint)
+                    break
         
    
               
