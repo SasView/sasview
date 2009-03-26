@@ -207,6 +207,9 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.model_list=[]
         self.model_toFit=[]
         self.constraints_list=[]
+        self.constraint_dict={}
+        self.nb_constraint= 0
+        
         if len(self.model_list)>0:
             for item in self.model_list:
                 item[0].SetValue(False) 
@@ -258,11 +261,10 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
         if len(self.model_toFit) < 2:
             return
-        for page, value in self.page_finder.iteritems():
-            model = value.get_model()
-            for item in self.model_toFit:
-                if model in item and not model in self.constraint_dict.keys():
-                    self.constraint_dict[model] = page 
+        for item in self.model_toFit:
+            model = item[3]
+            page= item[2]
+            self.constraint_dict[page] = model
                    
         
     def _display_constraint(self, event):
@@ -289,7 +291,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
         if len(self.constraints_list)!= 0:
             nb_fit_param = 0
-            for model in self.constraint_dict.keys():
+            for model in self.constraint_dict.values():
                 nb_fit_param += len(get_fittableParam(model))
             ##Don't add anymore
             if len(self.constraints_list) == nb_fit_param:
@@ -322,7 +324,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         btRemove.SetToolTipString("Remove constraint.")
        
         
-        for model, value in self.constraint_dict.iteritems():
+        for page,model in self.constraint_dict.iteritems():
             ## check if all parameters have been selected for constraint
             ## then do not allow add constraint on parameters
             model_cbox.Append( str(model.name), model)
@@ -353,12 +355,8 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
             hide buttons related constraint 
         """  
-        if len(self.constraints_list)>0:
-            for item in self.constraints_list:
-                model = item[0].GetClientData(item[0].GetCurrentSelection())
-                if model  in self.constraint_dict.keys():
-                    page = self.constraint_dict[model]
-                    self.page_finder[page].clear_model_param()
+        for page  in  self.page_finder.iterkeys():
+            self.page_finder[page].clear_model_param()
                
         self.nb_constraint =0     
         self.constraint_dict={}

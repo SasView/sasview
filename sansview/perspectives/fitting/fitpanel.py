@@ -70,7 +70,7 @@ class FitPanel(wx.aui.AuiNotebook):
                     break
             # remove the check box link to the model name of this page (selected_page)
             if self.sim_page !=None :
-                self.sim_page.draw_page(page_finder)
+                self.sim_page.draw_page()
             
             #Delete the page from notebook
             if selected_page.name in self.fit_page_name:
