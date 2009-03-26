@@ -92,7 +92,11 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
             Remove constraint fields
         """
-        if len(self.constraints_list)<=1:
+        if len(self.constraints_list)==1:
+            self.hide_constraint.SetValue(True)
+            self._hide_constraint()
+            return 
+        if len(self.constraints_list)==0:
             return 
         for item in self.constraints_list:
             length= len(item)
