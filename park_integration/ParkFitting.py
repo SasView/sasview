@@ -68,10 +68,15 @@ class ParkFit(FitEngine):
         for item in fitproblems:
             parkmodel = item.get_model()
             for p in parkmodel.parameterset:
-                if p._getname()in self.paramList and not p.iscomputed():
-                    p.status = 'fitted' # make it a fitted parameter
-                            #iscomputed  paramter with string inside
-               
+                
+                if p.status!= 'computed':
+                    if p._getname()in item.pars:
+                        
+                        p.status = 'fitted' # make it a fitted parameter
+                                #iscomputed  paramter with string inside
+                    else:
+                        p.status= 'fixed'
+             
             i+=1
             Ldata=item.get_data()
             #parkdata=self._concatenateData(Ldata)
@@ -106,10 +111,8 @@ class ParkFit(FitEngine):
         # See `park.fitresult.FitHandler` for details.
         fitter = FitMC(localfit=localfit, start_points=1)
         if handler == None:
-            #print "no handler"
             handler= fitresult.ConsoleUpdate(improvement_delta=0.1)
-        #print "park handler", handler
-       
+      
             
         result = fit.fit(self.problem,
                          fitter=fitter,

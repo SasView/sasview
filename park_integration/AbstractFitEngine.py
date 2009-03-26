@@ -247,6 +247,7 @@ class FitData1D(object):
         fx[idx] = numpy.asarray([fn(v) for v in x[idx]])
         
         # Smear theory data
+     
         if self.smearer is not None:
             fx = self.smearer(fx)
        
@@ -445,8 +446,10 @@ class FitEngine:
             if model==None:
                 raise ValueError, "AbstractFitEngine: Specify parameters to fit"
             else:
+                temp=[]
                 for item in pars:
                     if item in model.model.getParamList():
+                        temp.append(item)
                         self.paramList.append(item)
                     else:
                         raise ValueError,"wrong paramter %s used to set model %s. Choose\
@@ -455,11 +458,14 @@ class FitEngine:
             #A fitArrange is already created but contains dList only at Uid
             if self.fitArrangeDict.has_key(Uid):
                 self.fitArrangeDict[Uid].set_model(model)
+                self.fitArrangeDict[Uid].pars= pars
             else:
             #no fitArrange object has been create with this Uid
                 fitproblem = FitArrange()
                 fitproblem.set_model(model)
+                fitproblem.pars= pars
                 self.fitArrangeDict[Uid] = fitproblem
+                
         else:
             raise ValueError, "park_integration:missing parameters"
     
@@ -529,6 +535,7 @@ class FitArrange:
         """
         self.model = None
         self.dList =[]
+        self.pars=[]
         #self.selected  is zero when this fit problem is not schedule to fit 
         #self.selected is 1 when schedule to fit 
         self.selected = 0
