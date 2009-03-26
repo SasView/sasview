@@ -419,7 +419,7 @@ class FitPage(BasicPage):
                 i+=1
         
         self.sizer3.Layout()
-        self.sizer4_4.Layout()
+        #self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.SetScrollbars(20,20,200,100)
         

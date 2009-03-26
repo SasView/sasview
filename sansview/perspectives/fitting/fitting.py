@@ -451,7 +451,6 @@ class Plugin:
                             ## check if constraint
                             if param_value !=None and param_name != None:
                                 new_model.parameterset[ param_name].set( param_value )
-                
                     self.fitter.set_model(model= new_model, Uid=self.fit_id, pars=pars) 
                     ## check that non -zero value are send as dy in the fit engine
                     dy=[]
@@ -563,7 +562,7 @@ class Plugin:
                            qmax=qmax,
                            qstep=qstep)
           
-    def _fit_helper(self, page, id ):
+    def _fit_helper(self,current_pg, id ):
         """
             helper for fitting
         """
@@ -573,8 +572,65 @@ class Plugin:
         #Setting an id to store model and data in fit engine
         self.fit_id = id
         page_fitted = None
+        pars=[]   
+        value = self.page_finder[current_pg]
+        metadata =  value.get_fit_data()
+        model = value.get_model()
+        smearer = value.get_smearer()
+       
+        #Create list of parameters for fitting used
+        templist=[]
+        try:
+            ## get the list of parameter names to fit
+            templist = current_pg.get_param_list()
         
+            for element in templist:
+                pars.append(str(element[1]))
+
+            pars.sort()
+            ## create a park model and reset parameter value if constraint
+            ## is given
+            new_model = Model(model)
+            param = value.get_model_param()
+            if len(param)>0:
+                for item in param:
+                    param_value = item[1]
+                    param_name = item[0]
+                    ## check if constraint
+                    if param_value !=None and param_name != None:
+                        new_model.parameterset[ param_name].set( param_value )
         
+            #Do the single fit
+            self.fitter.set_model(new_model, self.fit_id, pars)
+            dy=[]
+            x=[]
+            y=[]
+            ## checking the validity of error
+            if metadata.__class__ in  ["Data1D","Theory1D"]:
+                for i in range(len(metadata.dy)):
+                    if metadata.dy[i] !=0:
+                        dy.append(metadata.dy[i])
+                        x.append(metadata.x[i])
+                        y.append(metadata.y[i])
+                if len(dy)>0:        
+                    metadata.dy=numpy.zeros(len(dy))
+                    metadata.dy=dy
+                    metadata.y=numpy.zeros(len(y))
+                    metadata.y=y
+                    metadata.x=numpy.zeros(len(x))
+                    metadata.x=x
+           
+            self.fitter.set_data(data=metadata,Uid=self.fit_id,
+                                 smearer=smearer,qmin= qmin,qmax=qmax )
+            
+            self.fitter.select_problem_for_fit(Uid= self.fit_id,
+                                               value= value.get_scheduled())
+            page_fitted=current_pg
+           
+        except:
+            msg= "Single Fit error: %s" % sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status= msg ))
+            return
        
     def _onSelect(self,event):
         """ 
@@ -678,6 +734,7 @@ class Plugin:
         else:
             wx.PostEvent(self.parent, StatusEvent(status="Simultaneous fit \
             complete ", type="stop"))
+           
             ## fit more than 1 model at the same time 
             try:
                 for page, value in self.page_finder.iteritems():
@@ -691,11 +748,20 @@ class Plugin:
                         for p in result.parameters:
                             model_name,param_name = self.split_string(p.name)  
                             if model.name == model_name:
-                                small_out.append(p.value )
-                                if p.stderr==None:
-                                    p.stderr=numpy.nan
-                                small_cov.append(p.stderr)
-                                model.setParam(param_name,p.value)  
+                                p_name= model.name+"."+param_name
+                                if p.name == p_name:
+                                    small_out.append(p.value )
+                                    model.setParam(param_name,p.value) 
+                                    if p.stderr==None:
+                                        p.stderr=numpy.nan
+                                        small_cov.append(p.stderr)
+                                       
+                                    else:
+                                        small_cov.append(p.stderr)
+                                else:
+                                    value= model.getParam(param_name)
+                                    small_out.append(value )
+                                    small_cov.append(numpy.nan)
                                 
                         # Display result on each page 
                         page.onsetValues(result.fitness, small_out,small_cov)
