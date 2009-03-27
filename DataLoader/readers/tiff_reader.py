@@ -15,7 +15,7 @@ copyright 2008, University of Tennessee
 
 import math, logging, os
 import numpy
-from DataLoader.data_info import Image2D#Data2D
+from DataLoader.data_info import Image2D
     
 class Reader:
     """
@@ -53,8 +53,7 @@ class Reader:
         except :
             raise  RuntimeError,"cannot open %s"%(filename)
         data = im.load()
-        print im.mode
-        im.show()
+
         x_range = im.size[0]
         y_range = im.size[1]
         
@@ -64,8 +63,6 @@ class Reader:
         # Initialize 
         x_vals = []
         y_vals = [] 
-        if im.mode == "P":
-            data=im.split()
 
         # x and y vectors
         for i_x in range(x_range):
@@ -84,15 +81,15 @@ class Reader:
                         if len(data[i_x,i_y]) == 3:   
                             R,G,B= data[i_x,i_y]
                             #Converting to L Mode: uses the ITU-R 601-2 luma transform.
-                            value = 255-float(R * 299/1000 + G * 587/1000 + B * 114/1000) 
+                            value = float(R * 299/1000 + G * 587/1000 + B * 114/1000) 
                          
                         elif len(data[i_x,i_y]) == 4:   
                             R,G,B,I = data[i_x,i_y]
                             #Take only I 
-                            value = 255-float(R * 299/1000 + G * 587/1000 + B * 114/1000)-float(I)
+                            value = float(R * 299/1000 + G * 587/1000 + B * 114/1000)+float(I)
                     else:
                         #Take it as Intensity
-                        #value = 255-float(data[i_x,i_y])
+                        value = float(data[i_x,i_y])
                 except:
                     logging.error("tiff_reader: had to skip a non-float point")
                     continue
