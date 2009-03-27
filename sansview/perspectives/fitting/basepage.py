@@ -435,8 +435,8 @@ class BasicPage(wx.ScrolledWindow):
         """
         if self.model !=None:
             self.manager.draw_model(self.model, data=self.data,
-                                    qmin=self.qmin_x, qmax=self.qmax_x,
-                                    qstep= self.num_points,
+                                    qmin=float(self.qmin_x), qmax=float(self.qmax_x),
+                                    qstep= float(self.num_points),
                                     enable2D=self.enable2D) 
         
     def _set_model_sizer(self, sizer, title="", object=None):
