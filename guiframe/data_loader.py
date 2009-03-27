@@ -2,7 +2,6 @@ import os, sys,numpy
 import wx
 from dataFitting import Data1D, Theory1D
 from danse.common.plottools.plottables import Data2D
-
 from DataLoader.loader import Loader
 
 def choose_data_file(parent, location=None):
@@ -102,6 +101,7 @@ def plot_data(parent, path):
         ## data 's name
         if output.filename==None:
             output.filename=str(filename)
+            
         ## Creating a Data2D with output
         if hasattr(output,'data'):
             temp = output.err_data
@@ -113,6 +113,17 @@ def plot_data(parent, path):
                               ymin=output.ymin,ymax=output.ymax)
             new_plot.x_bins=output.x_bins
             new_plot.y_bins=output.y_bins
+            
+        ## Creating a pic image2D with output    
+        elif hasattr(output,'image'):
+            msg= "Transformed an image to plot from"
+            wx.PostEvent(parent, StatusEvent(status=" %s %s"% (msg,output.filename)))
+            new_plot = Data2D(image=output.image,
+                              xmin=output.xmin,xmax=output.xmax,
+                              ymin=output.ymin,ymax=output.ymax, pictype = 'image')
+            new_plot.x_bins=output.x_bins
+            new_plot.y_bins=output.y_bins
+            
         ##Creating Data1D with output
         else:
             ##dy values checked
