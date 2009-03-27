@@ -523,16 +523,15 @@ class Plugin:
         self.page_finder[current_pg].set_smearer(smearer)
         ## draw model 1D with smeared data
         data =  self.page_finder[current_pg].get_plotted_data()
-        list = self.page_finder[current_pg].get_model()
+        model = self.page_finder[current_pg].get_model()
         ## if user has already selected a model to plot
         ## redraw the model with data smeared
-        if len(list)>0:
-            model = list[0]
-            smearer =self.page_finder[current_pg].get_smearer()
-            if smearer != None:
-                self.draw_model( model=model, data= data, smearer= smearer,
-                    qmin= qmin, qmax= qmax)
-    
+        
+        smearer =self.page_finder[current_pg].get_smearer()
+        if smearer != None:
+            self.draw_model( model=model, data= data, smearer= smearer,
+                qmin= qmin, qmax= qmax)
+
     
     
     def draw_model(self, model, data= None,smearer= None,

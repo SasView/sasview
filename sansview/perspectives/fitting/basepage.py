@@ -86,6 +86,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer3 = wx.BoxSizer(wx.VERTICAL)
         self.sizer4 = wx.BoxSizer(wx.VERTICAL)
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
+        self.sizer6 = wx.BoxSizer(wx.VERTICAL)
         
         self.sizer0.SetMinSize((375,-1))
         self.sizer1.SetMinSize((375,-1))
@@ -93,6 +94,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer3.SetMinSize((375,-1))
         self.sizer4.SetMinSize((375,-1))
         self.sizer5.SetMinSize((375,-1))
+        self.sizer6.SetMinSize((375,-1))
         
         self.vbox.Add(self.sizer0)
         self.vbox.Add(self.sizer1)
@@ -100,6 +102,7 @@ class BasicPage(wx.ScrolledWindow):
         self.vbox.Add(self.sizer3)
         self.vbox.Add(self.sizer4)
         self.vbox.Add(self.sizer5)
+        self.vbox.Add(self.sizer6)
         
     def set_layout(self):
         """
@@ -115,6 +118,7 @@ class BasicPage(wx.ScrolledWindow):
     def set_scroll(self):
         self.SetScrollbars(20,20,200,100)
         self.Layout()   
+        self.SetAutoLayout(True)
          
     def set_owner(self,owner):
         """ 
@@ -170,7 +174,7 @@ class BasicPage(wx.ScrolledWindow):
             
         import sans.models.dispersion_models 
         self.polydisp= sans.models.dispersion_models.models
-        self.disp_box = wx.ComboBox(self, -1,style=wx.CB_READONLY)
+        self.disp_box = wx.ComboBox(self, -1)
         self.disp_box.SetValue("GaussianModel")
         
         for key in self.polydisp.iterkeys():
@@ -198,7 +202,9 @@ class BasicPage(wx.ScrolledWindow):
         #-----------------------------------------------------
         self.sizer4.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer4.Layout()
+       
         self.SetScrollbars(20,20,200,100)
+        
     
     def select_disp_angle(self, event): 
         """
@@ -321,6 +327,7 @@ class BasicPage(wx.ScrolledWindow):
             is_modified =self._check_value_enter( self.fixed_param ,is_modified)
             is_modified =self._check_value_enter( self.parameters ,is_modified)        
            
+            self.Layout()
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
@@ -573,7 +580,15 @@ class BasicPage(wx.ScrolledWindow):
             ##fill the comboxbox with form factor list
             self.structurebox.Show(True)
             self.text2.Show(True)
-       
+            ## draw empty model
+            from sans.models.NullModel import NullModel
+            self.model = NullModel()
+            self.model.name = "Select P(Q) and S(Q)"
+            self.set_model_param_sizer(self.model)
+            self.sizer4_4.Clear()
+            self.sizer4.Layout()
+            self._draw_model()
+            
         self.set_scroll()
         
         
@@ -588,9 +603,10 @@ class BasicPage(wx.ScrolledWindow):
         for models in list:
             model= models()
             name = model.__class__.__name__
-            if hasattr(model, "name"):
-                name = model.name
-            combobox.Append(name,models)
+            if models.__name__!="NoStructure":
+                if hasattr(model, "name"):
+                    name = model.name
+                combobox.Append(name,models)
             
         wx.EVT_COMBOBOX(combobox,-1, self._on_select_model) 
         return 0
@@ -606,12 +622,15 @@ class BasicPage(wx.ScrolledWindow):
         struct_factor = self.structurebox.GetClientData( s_id )
        
         if self.multip_cb.GetValue():
-            if struct_factor != None and struct_factor.__name__ != "NoStructure":
+            if struct_factor != None and form_factor != None:
                 from sans.models.MultiplicationModel import MultiplicationModel
-                if form_factor != None:
-                    self.model= MultiplicationModel(form_factor(),struct_factor())
-            msg= "select one P(Q) and one S(Q) to plot"
-            wx.PostEvent(self.parent.parent, StatusEvent(status= msg))
+                self.model= MultiplicationModel(form_factor(),struct_factor())
+            else:
+                from sans.models.NullModel import NullModel
+                self.model = NullModel()
+                self.model.name = "Select P(Q) and S(Q)"
+                msg= "select one P(Q) and one S(Q) to plot"
+                wx.PostEvent(self.parent.parent, StatusEvent(status= msg))
         else:
             if form_factor != None:
                 self.model= form_factor()
@@ -635,17 +654,25 @@ class BasicPage(wx.ScrolledWindow):
             return is_modified
         for item in list:
             try:
-                 name = str(item[1])
-                 value= float(item[2].GetValue())
-                 # If the value of the parameter has changed,
-                 # update the model and set the is_modified flag
-                 if value != self.model.getParam(name):
-                     self.model.setParam(name,value)
-                     is_modified = True    
+                if hasattr(self,"text2_3"):
+                    self.text2_3.Hide()
+                if item[3]!=None:
+                    item[3].Hide()
+                if item[4]!=None:
+                    item[4].Clear()
+                    item[4].Hide()
+                name = str(item[1])
+                value= float(item[2].GetValue())
+                # If the value of the parameter has changed,
+                # update the model and set the is_modified flag
+                if value != self.model.getParam(name):
+                    self.model.setParam(name,value)
+                    is_modified = True    
             except:
                 msg= "Model Drawing  Error:wrong value entered : %s"% sys.exc_value
                 wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
                 return 
+        
         return is_modified 
         
         
@@ -675,9 +702,10 @@ class BasicPage(wx.ScrolledWindow):
                 self._reset_dispersity()
                 self._draw_model()
             
-            self.sizer4_4.Layout()
             self.sizer4.Layout()
+            self.Layout()
             self.SetScrollbars(20,20,200,100)
+            
         
         
     def _layout_sizer_noDipers(self):
@@ -693,7 +721,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Clear(True)
         model_disp = wx.StaticText(self, -1, 'No PolyDispersity for this model')
         self.sizer4_4.Add(model_disp,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        self.sizer4_4.Layout()
+        #self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.SetScrollbars(20,20,200,100)
         return 

@@ -306,6 +306,7 @@ class FitPage(BasicPage):
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.SetScrollbars(20,20,200,100)
+     
         
     def _onFit(self, event):     
         """
@@ -383,13 +384,19 @@ class FitPage(BasicPage):
         params = {}
         is_modified = False
         has_error = False
+        self.text2_3.Hide()
+        if self.text_disp_1 !=None:
+            self.text_disp_1.Hide()
         #set the panel when fit result are float not list
         if out.__class__==numpy.float64:
             self.param_toFit[0][2].SetValue(format_number(out))
             self.param_toFit[0][2].Refresh()
+            
+            self.param_toFit[0][4].Clear()
+            self.param_toFit[0][4].Hide()
             if cov !=None :
                 self.text2_3.Show(True)
-                if self.text_disp_1!=None:
+                if self.text_disp_1 !=None:
                     self.text_disp_1.Show(True)
                     
                 self.param_toFit[0][3].Show(True)
@@ -401,6 +408,10 @@ class FitPage(BasicPage):
             j=0
             #Set the panel when fit result are list
             for item in self.param_toFit:
+                ## reset error value to initial state
+                item[4].Clear()
+                item[4].Hide()
+                item[4].Refresh()
                 if( out != None ) and len(out)<=len(self.param_toFit)and i < len(out):
                     item[2].SetValue(format_number(self.model.getParam(item[1])))
                     item[2].Refresh()
@@ -419,7 +430,6 @@ class FitPage(BasicPage):
                 i+=1
         
         self.sizer3.Layout()
-        #self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.SetScrollbars(20,20,200,100)
         
