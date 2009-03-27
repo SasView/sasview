@@ -15,7 +15,7 @@ copyright 2008, University of Tennessee
 
 import math, logging, os
 import numpy
-from DataLoader.data_info import Data2D
+from DataLoader.data_info import Image2D#Data2D
     
 class Reader:
     """
@@ -44,7 +44,7 @@ class Reader:
             raise RuntimeError, "tiff_reader: could not load file. Missing Image module."
         
         # Instantiate data object
-        output = Data2D()
+        output = Image2D()
         output.filename = os.path.basename(filename)
             
         # Read in the image
@@ -52,49 +52,62 @@ class Reader:
             im = Image.open(filename)
         except :
             raise  RuntimeError,"cannot open %s"%(filename)
-        data = im.getdata()
+        data = im.load()
+        print im.mode
+        im.show()
+        x_range = im.size[0]
+        y_range = im.size[1]
         
         # Initiazed the output data object
-        output.data = numpy.zeros([im.size[0],im.size[1]])
-        
+        output.image = numpy.zeros([y_range,x_range])
+
         # Initialize 
         x_vals = []
         y_vals = [] 
+        if im.mode == "P":
+            data=im.split()
 
         # x and y vectors
-        for i_x in range(im.size[0]):
+        for i_x in range(x_range):
             x_vals.append(i_x)
             
-        itot = 0
-        for i_y in range(im.size[1]):
+        
+        for i_y in range(y_range):
             y_vals.append(i_y)
-
-        for val in data:
-            try:
-                value = float(val)
-            except:
-                logging.error("tiff_reader: had to skip a non-float point")
-                continue
+        
+        for i_x in range(x_range):
+            for i_y in range(y_range):
             
-            # Get bin number
-            if math.fmod(itot, im.size[0])==0:
-                i_x = 0
-                i_y += 1
-            else:
-                i_x += 1
+                try:
+                    if data[i_x,i_y].__class__.__name__=="tuple":                     
+                        
+                        if len(data[i_x,i_y]) == 3:   
+                            R,G,B= data[i_x,i_y]
+                            #Converting to L Mode: uses the ITU-R 601-2 luma transform.
+                            value = 255-float(R * 299/1000 + G * 587/1000 + B * 114/1000) 
+                         
+                        elif len(data[i_x,i_y]) == 4:   
+                            R,G,B,I = data[i_x,i_y]
+                            #Take only I 
+                            value = 255-float(R * 299/1000 + G * 587/1000 + B * 114/1000)-float(I)
+                    else:
+                        #Take it as Intensity
+                        #value = 255-float(data[i_x,i_y])
+                except:
+                    logging.error("tiff_reader: had to skip a non-float point")
+                    continue
                 
-            output.data[im.size[1]-1-i_y][i_x] = value
-            
-            itot += 1
-                
-        output.xbins      = im.size[0]
-        output.ybins      = im.size[1]
+                  
+                output.image[y_range-i_y-1,i_x] = value
+        
+        output.xbins      = x_range
+        output.ybins      = y_range
         output.x_bins     = x_vals
         output.y_bins     = y_vals
         output.xmin       = 0
-        output.xmax       = im.size[0]-1
+        output.xmax       = x_range
         output.ymin       = 0
-        output.ymax       = im.size[0]-1
+        output.ymax       = y_range
         
         return output
         
