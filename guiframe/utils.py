@@ -10,7 +10,7 @@ def format_number(value, high=False):
     try: 
         value = float(value)
     except:
-        output="0"
+        output="NaN"
         return output.lstrip().rstrip()
     
     if high:
@@ -19,6 +19,8 @@ def format_number(value, high=False):
     else:
         output= "%-5.3g" % value
     return output.lstrip().rstrip()
+
+
 def check_value( item1, item2):
     """
         Check 2 txtcrtl value 
