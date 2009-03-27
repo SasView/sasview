@@ -234,10 +234,15 @@ class Plugin:
         data.source= source
         return data
 
-
-   
+    def set_fit_range(self, page, qmin, qmax):
+        """
+            Set the fitting range of a given page
+        """
+        if page in self.page_finder.iterkeys():
+            fitproblem= self.page_finder[page]
+            fitproblem.set_range(qmin= qmin, qmax= qmax)
                     
-    def schedule_for_fit(self,value=0,fitproblem =None):  
+    def schedule_for_fit(self,value=0,page=None,fitproblem =None):  
         """
             Set the fit problem field to 0 or 1 to schedule that problem to fit.
             Schedule the specified fitproblem or get the fit problem related to 
@@ -248,11 +253,10 @@ class Plugin:
         if fitproblem !=None:
             fitproblem.schedule_tofit(value)
         else:
-            current_pg=self.fit_panel.get_current_page() 
-            for page, val in self.page_finder.iteritems():
-                if page ==current_pg :
-                    val.schedule_tofit(value)
-                    break
+            if page in self.page_finder.iterkeys():
+                fitproblem= self.page_finder[page]
+                fitproblem.schedule_tofit(value)
+          
                       
                     
     def get_page_finder(self):
@@ -302,217 +306,7 @@ class Plugin:
             wx.PostEvent(self.parent, StatusEvent(status="Fitting  \
                 is cancelled" , type="stop"))
             
-      
-    def on_single_fit(self,id=0,qmin=None, qmax=None):
-        """ 
-            perform fit for the  current page  and return chisqr,out and cov
-            @param engineName: type of fit to be performed
-            @param id: unique id corresponding to a fit problem(model, set of data)
-            @param model: model to fit
-            
-        """
-        #set an engine to perform fit
-        from sans.fit.Fitting import Fit
-        self.fitter = Fit(self._fit_engine)
-        #Setting an id to store model and data in fit engine
-        self.fit_id = id
-       
-        page_fitted = None
-        
-        #Get information (model , data) related to the page on 
-        #with the fit will be perform
-        current_pg= self.fit_panel.get_current_page() 
-        simul_pg= self.sim_page
-        pars=[]   
-        ## Check that the current page is different from self.sim_page
-        if current_pg != simul_pg:
-            value = self.page_finder[current_pg]
-            metadata =  value.get_fit_data()
-            model = value.get_model()
-            smearer = value.get_smearer()
-           
-            #Create list of parameters for fitting used
-            templist=[]
-            try:
-                ## get the list of parameter names to fit
-                templist = current_pg.get_param_list()
-            
-                for element in templist:
-                    pars.append(str(element[1]))
     
-                pars.sort()
-                #Do the single fit
-                self.fitter.set_model(Model(model), self.fit_id, pars)
-                dy=[]
-                x=[]
-                y=[]
-                ## checking the validity of error
-                if metadata.__class__ in  ["Data1D","Theory1D"]:
-                    for i in range(len(metadata.dy)):
-                        if metadata.dy[i] !=0:
-                            dy.append(metadata.dy[i])
-                            x.append(metadata.x[i])
-                            y.append(metadata.y[i])
-                    if len(dy)>0:        
-                        metadata.dy=numpy.zeros(len(dy))
-                        metadata.dy=dy
-                        metadata.y=numpy.zeros(len(y))
-                        metadata.y=y
-                        metadata.x=numpy.zeros(len(x))
-                        metadata.x=x
-               
-                self.fitter.set_data(data=metadata,Uid=self.fit_id,
-                                     smearer=smearer,qmin= qmin,qmax=qmax )
-                
-                self.fitter.select_problem_for_fit(Uid= self.fit_id,
-                                                   value= value.get_scheduled())
-                page_fitted=current_pg
-               
-            except:
-                msg= "Single Fit error: %s" % sys.exc_value
-                wx.PostEvent(self.parent, StatusEvent(status= msg ))
-                return
-            # make sure to keep an alphabetic order 
-            #of parameter names in the list      
-            try:
-                ## If a thread is already started, stop it
-                if self.calc_fit!= None and self.calc_fit.isrunning():
-                    self.calc_fit.stop()
-                        
-                self.calc_fit=FitThread(parent =self.parent,
-                                            fn= self.fitter,
-                                            pars= pars,
-                                            cpage= page_fitted,
-                                           qmin=qmin,
-                                           qmax=qmax,
-                                          
-                                           completefn=self._single_fit_completed,
-                                           updatefn=None)
-                self.calc_fit.queue()
-                self.calc_fit.ready(2.5)
-             
-            except:
-                wx.PostEvent(self.parent, StatusEvent(status="Single Fit error: %s" % sys.exc_value))
-                return
-         
-    def on_simul_fit(self, id=0,qmin=None,qmax=None):
-        """ 
-            perform fit for all the pages selected on simpage and return chisqr,out and cov
-            @param engineName: type of fit to be performed
-            @param id: unique id corresponding to a fit problem(model, set of data)
-             in park_integration
-            @param model: model to fit
-            
-        """
-        ##Setting an id to store model and data
-        self.fit_id= id
-        
-        ##  count the number of fitproblem schedule to fit 
-        fitproblem_count= 0
-        for value in self.page_finder.itervalues():
-            if value.get_scheduled()==1:
-                fitproblem_count += 1
-                
-        ## if simultaneous fit change automatically the engine to park
-        if fitproblem_count >1:
-            self._on_change_engine(engine='park')
-        from sans.fit.Fitting import Fit
-        self.fitter= Fit(self._fit_engine)
-        
-        
-        for page, value in self.page_finder.iteritems():
-            try:
-                if value.get_scheduled()==1:
-                    metadata = value.get_fit_data()
-                    model = value.get_model()
-                    smearer = value.get_smearer()
-                    qmin , qmax = value.get_range()
-                    ## store page
-                    cpage= page
-                    #Get list of parameters name to fit
-                    pars = []
-                    templist = []
-                    templist = page.get_param_list()
-                    for element in templist:
-                        try:
-                            name = str(element[0].GetLabelText())
-                            pars.append(name)
-                        except:
-                            wx.PostEvent(self.parent, StatusEvent(status="Simultaneous Fit error: %s" % sys.exc_value))
-                            return
-                    ## create a park model and reset parameter value if constraint
-                    ## is given
-                    new_model = Model(model)
-                    param = value.get_model_param()
-                    if len(param)>0:
-                        for item in param:
-                            param_value = item[1]
-                            param_name = item[0]
-                            ## check if constraint
-                            if param_value !=None and param_name != None:
-                                new_model.parameterset[ param_name].set( param_value )
-                    self.fitter.set_model(model= new_model, Uid=self.fit_id, pars=pars) 
-                    ## check that non -zero value are send as dy in the fit engine
-                    dy=[]
-                    x=[]
-                    y=[]
-                    if metadata.__class__ in  ["Data1D","Theory1D"]:
-                        for i in range(len(metadata.dy)):
-                            if metadata.dy[i] !=0:
-                                dy.append(metadata.dy[i])
-                                x.append(metadata.x[i])
-                                y.append(metadata.y[i])
-                            if len(dy)>0:        
-                                metadata.dy=numpy.zeros(len(dy))
-                                metadata.dy=dy
-                                metadata.y=numpy.zeros(len(y))
-                                metadata.y=y
-                                metadata.x=numpy.zeros(len(x))
-                                metadata.x=x
-                              
-                    self.fitter.set_data( data= metadata, smearer=smearer,
-                                         Uid=self.fit_id, qmin=qmin, qmax=qmax)
-                    self.fitter.select_problem_for_fit(Uid= self.fit_id,
-                                                       value= value.get_scheduled())
-                    self.fit_id += 1 
-                    value.clear_model_param()
-                   
-            except:
-                msg= "Simultaneous Fit error: %s" % sys.exc_value
-                wx.PostEvent(self.parent, StatusEvent(status= msg ))
-                return 
-            
-        #Do the simultaneous fit
-        try:
-            ## If a thread is already started, stop it
-            if self.calc_fit!= None and self.calc_fit.isrunning():
-                self.calc_fit.stop()
-			## perform single fit
-            if  fitproblem_count==1:
-                self.calc_fit=FitThread(parent =self.parent,
-                                        fn= self.fitter,
-                                       qmin=qmin,
-                                       qmax=qmax,
-                                       cpage=cpage,
-                                       pars= pars,
-                                       completefn= self._simul_fit_completed,
-                                       updatefn=None)
-                      
-            else:
-                ## Perform more than 1 fit at the time
-                self.calc_fit=FitThread(parent =self.parent,
-                                        fn= self.fitter,
-                                       qmin=qmin,
-                                       qmax=qmax,
-                                       completefn= self._simul_fit_completed,
-                                       updatefn=None)
-            self.calc_fit.queue()
-            self.calc_fit.ready(2.5)
-            
-        except:
-            msg= "Simultaneous Fit error: %s" % sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status= msg ))
-            return
       
     def set_smearer(self,smearer, qmin=None, qmax=None):
         """
@@ -560,33 +354,96 @@ class Plugin:
                            qmin=qmin,
                            qmax=qmax,
                            qstep=qstep)
-          
-    def _fit_helper(self,current_pg, id ):
+        
+    def onFit(self):
+        """
+            perform fit 
+        """
+        ##  count the number of fitproblem schedule to fit 
+        fitproblem_count= 0
+        for value in self.page_finder.itervalues():
+            if value.get_scheduled()==1:
+                fitproblem_count += 1
+                
+        ## if simultaneous fit change automatically the engine to park
+        if fitproblem_count >1:
+            self._on_change_engine(engine='park')
+        from sans.fit.Fitting import Fit
+        self.fitter= Fit(self._fit_engine)
+        
+        if self._fit_engine=="park":
+            engineType="Simutaneous Fit"
+        else:
+            engineType="Single Fit"
+            
+        fproblemId = 0
+        current_pg=None
+        for page, value in self.page_finder.iteritems():
+            try:
+                if value.get_scheduled()==1:
+                    #Get list of parameters name to fit
+                    pars = []
+                    templist = []
+                    templist = page.get_param_list()
+                    for element in templist:
+                        name = str(element[0].GetLabelText())
+                        pars.append(name)
+                    #Set Engine  (model , data) related to the page on 
+                    self._fit_helper( current_pg=page, value=value,pars=pars,
+                                      id=fproblemId, title= engineType ) 
+                    fproblemId += 1 
+                    current_pg= page
+            except:
+                msg= "%s error: %s" % (engineType,sys.exc_value)
+                wx.PostEvent(self.parent, StatusEvent(status= msg ))
+                return 
+        #Do the simultaneous fit
+        try:
+            ## If a thread is already started, stop it
+            if self.calc_fit!= None and self.calc_fit.isrunning():
+                self.calc_fit.stop()
+            ## perform single fit
+            if self._fit_engine=="scipy":
+                qmin, qmax= current_pg.get_range()
+                self.calc_fit=FitThread(parent =self.parent,
+                                        fn= self.fitter,
+                                       cpage=current_pg,
+                                       pars= pars,
+                                       completefn= self._single_fit_completed,
+                                       updatefn=None)
+                      
+            else:
+                ## Perform more than 1 fit at the time
+                self.calc_fit=FitThread(parent =self.parent,
+                                        fn= self.fitter,
+                                       completefn= self._simul_fit_completed,
+                                       updatefn=None)
+            self.calc_fit.queue()
+            self.calc_fit.ready(2.5)
+            
+        except:
+            msg= "%s error: %s" % (engineType,sys.exc_value)
+            wx.PostEvent(self.parent, StatusEvent(status= msg ))
+            return 
+              
+       
+        
+        
+        
+        
+    def _fit_helper(self,current_pg,pars,value, id, title="Single Fit " ):
         """
             helper for fitting
         """
-        #set an engine to perform fit
-        from sans.fit.Fitting import Fit
-        self.fitter = Fit(self._fit_engine)
-        #Setting an id to store model and data in fit engine
-        self.fit_id = id
-        page_fitted = None
-        pars=[]   
-        value = self.page_finder[current_pg]
-        metadata =  value.get_fit_data()
+        metadata = value.get_fit_data()
         model = value.get_model()
         smearer = value.get_smearer()
-       
+        qmin , qmax = value.get_range()
+        self.fit_id =id
         #Create list of parameters for fitting used
         templist=[]
+        pars=pars
         try:
-            ## get the list of parameter names to fit
-            templist = current_pg.get_param_list()
-        
-            for element in templist:
-                pars.append(str(element[1]))
-
-            pars.sort()
             ## create a park model and reset parameter value if constraint
             ## is given
             new_model = Model(model)
@@ -598,7 +455,8 @@ class Plugin:
                     ## check if constraint
                     if param_value !=None and param_name != None:
                         new_model.parameterset[ param_name].set( param_value )
-        
+            
+            
             #Do the single fit
             self.fitter.set_model(new_model, self.fit_id, pars)
             dy=[]
@@ -621,13 +479,12 @@ class Plugin:
            
             self.fitter.set_data(data=metadata,Uid=self.fit_id,
                                  smearer=smearer,qmin= qmin,qmax=qmax )
-            
+           
             self.fitter.select_problem_for_fit(Uid= self.fit_id,
                                                value= value.get_scheduled())
-            page_fitted=current_pg
            
         except:
-            msg= "Single Fit error: %s" % sys.exc_value
+            msg= title +" error: %s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status= msg ))
             return
        
@@ -678,7 +535,7 @@ class Plugin:
                     %sys.exc_value))
                     return
     
-    def _single_fit_completed(self,result,pars,cpage,qmin,qmax,elapsed=None):
+    def _single_fit_completed(self,result,pars,cpage, elapsed=None):
         """
             Display fit result on one page of the notebook.
             @param result: result of fit 
@@ -688,8 +545,8 @@ class Plugin:
             @param qmax: the maximum value of x to replot model
           
         """
-        wx.PostEvent(self.parent, StatusEvent(status="Single fit \
-        complete! " , type="stop"))
+        #wx.PostEvent(self.parent, StatusEvent(status="Single fit \
+        #complete! " , type="stop"))
         try:
             for page, value in self.page_finder.iteritems():
                 if page==cpage :
@@ -707,7 +564,7 @@ class Plugin:
             ## plot the current model with new param
             metadata =  self.page_finder[cpage].get_fit_data()
             model = self.page_finder[cpage].get_model()
-           
+            qmin, qmax= self.page_finder[cpage].get_range()
             #Replot models
             msg= "Single Fit completed. plotting... %s:"%model.name
             wx.PostEvent(self.parent, StatusEvent(status="%s " % msg))
@@ -719,60 +576,55 @@ class Plugin:
             return
        
        
-    def _simul_fit_completed(self,result,qmin,qmax, elapsed=None,pars=None,cpage=None):
+    def _simul_fit_completed(self,result,pars=None,cpage=None, elapsed=None):
         """
             Parameter estimation completed, 
             display the results to the user
             @param alpha: estimated best alpha
             @param elapsed: computation time
         """
-        if cpage!=None:
-            self._single_fit_completed(result=result, pars=pars, cpage=cpage,
-                                       qmin=qmin, qmax=qmax)
-            return
-        else:
-            wx.PostEvent(self.parent, StatusEvent(status="Simultaneous fit \
-            complete ", type="stop"))
-           
-            ## fit more than 1 model at the same time 
-            try:
-                for page, value in self.page_finder.iteritems():
-                    if value.get_scheduled()==1:
-                        model = value.get_model()
-                        metadata =  value.get_plotted_data()
-                        small_out = []
-                        small_cov = []
-                        i = 0
-                        #Separate result in to data corresponding to each page
-                        for p in result.parameters:
-                            model_name,param_name = self.split_string(p.name)  
-                            if model.name == model_name:
-                                p_name= model.name+"."+param_name
-                                if p.name == p_name:
-                                    small_out.append(p.value )
-                                    model.setParam(param_name,p.value) 
-                                    if p.stderr==None:
-                                        p.stderr=numpy.nan
-                                        small_cov.append(p.stderr)
-                                       
-                                    else:
-                                        small_cov.append(p.stderr)
+        wx.PostEvent(self.parent, StatusEvent(status="Simultaneous fit \
+        complete ", type="stop"))
+       
+        ## fit more than 1 model at the same time 
+        try:
+            for page, value in self.page_finder.iteritems():
+                if value.get_scheduled()==1:
+                    model = value.get_model()
+                    metadata =  value.get_plotted_data()
+                    small_out = []
+                    small_cov = []
+                    i = 0
+                    #Separate result in to data corresponding to each page
+                    for p in result.parameters:
+                        model_name,param_name = self.split_string(p.name)  
+                        if model.name == model_name:
+                            p_name= model.name+"."+param_name
+                            if p.name == p_name:
+                                small_out.append(p.value )
+                                model.setParam(param_name,p.value) 
+                                if p.stderr==None:
+                                    p.stderr=numpy.nan
+                                    small_cov.append(p.stderr)
+                                   
                                 else:
-                                    value= model.getParam(param_name)
-                                    small_out.append(value )
-                                    small_cov.append(numpy.nan)
-                                
-                        # Display result on each page 
-                        page.onsetValues(result.fitness, small_out,small_cov)
-                        #Replot models
-                        msg= "Simultaneous Fit completed. plotting... %s:"%model.name
-                        wx.PostEvent(self.parent, StatusEvent(status="%s " % msg))
-                        self.draw_model( model=model, data= metadata,qmin= qmin, qmax= qmax)
-                        
-            except:
-                 msg= "Simultaneous Fit completed but Following error occurred: "
-                 wx.PostEvent(self.parent, StatusEvent(status="%s%s" %(msg,sys.exc_value)))
-                 return 
+                                    small_cov.append(p.stderr)
+                            else:
+                                value= model.getParam(param_name)
+                                small_out.append(value )
+                                small_cov.append(numpy.nan)
+                    # Display result on each page 
+                    page.onsetValues(result.fitness, small_out,small_cov)
+                    #Replot models
+                    msg= "Simultaneous Fit completed. plotting... %s:"%model.name
+                    wx.PostEvent(self.parent, StatusEvent(status="%s " % msg))
+                    qmin, qmax= page.get_range()
+                    self.draw_model( model=model, data= metadata,qmin= qmin, qmax= qmax)
+                    
+        except:
+             msg= "Simultaneous Fit completed but Following error occurred: "
+             wx.PostEvent(self.parent, StatusEvent(status="%s%s" %(msg,sys.exc_value)))
+             return 
              
                            
         

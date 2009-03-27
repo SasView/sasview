@@ -124,7 +124,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             value.set_range(qmin, qmax)
         ## model was actually selected from this page to be fit
         if len(self.model_toFit) >= 1 :
-            self.manager.on_simul_fit()
+            self.manager.onFit()
         else:
             msg= "Select at least one model to fit "
             wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))

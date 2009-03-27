@@ -328,10 +328,11 @@ class FitPage(BasicPage):
         self.qmin_x=float(self.qmin.GetValue())
         self.qmax_x =float( self.qmax.GetValue())
         
-        self.manager.schedule_for_fit( value=1,fitproblem =None) 
-       
+        self.manager.schedule_for_fit( value=1,page=self,fitproblem =None) 
+        self.manager.set_fit_range(page= self,qmin= self.qmin_x, qmax= self.qmax_x)
         #single fit 
-        self.manager.on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x)
+        #self.manager.on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x)
+        self.manager.onFit()
             
         self.sizer5.Layout()
         self.SetScrollbars(20,20,55,40)

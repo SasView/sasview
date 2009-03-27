@@ -101,7 +101,7 @@ class ConsoleUpdate(FitHandler):
 class FitThread(CalcThread):
     """Thread performing the fit """
     
-    def __init__(self,parent, fn,pars=None,cpage=None, qmin=None,qmax=None,
+    def __init__(self,parent, fn,pars=None,cpage=None,
                  completefn = None,
                  updatefn   = None,
                  yieldtime  = 0.01,
@@ -116,9 +116,6 @@ class FitThread(CalcThread):
         self.cpage= cpage
         self.pars = pars
         self.starttime = 0
-        
-        self.qmin = qmin
-        self.qmax = qmax
        
         self.done= False
         wx.PostEvent(self.parent, StatusEvent(status=\
@@ -159,10 +156,8 @@ class FitThread(CalcThread):
             self.complete(result= result,
                           pars = self.pars,
                           cpage= self.cpage,
-                          qmin = self.qmin,
-                          qmax = self.qmax,
-                          
                           elapsed=elapsed )
+            
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
