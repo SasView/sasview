@@ -120,6 +120,7 @@ class Plugin:
         
         # Create a new plot panel if none was available        
         if not is_available:
+            print"event.plot",hasattr(event.plot,'data')
             if not hasattr(event.plot,'data'):
                 from Plotter1D import ModelPanel1D
                 ## get the data representation label of the data to plot
@@ -136,10 +137,11 @@ class Plugin:
                 ## create a plotpanel for 1D Data
                 new_panel = ModelPanel1D(self.parent, -1,xtransform=xtransform,
                                          ytransform=ytransform, style=wx.RAISED_BORDER)
+
             else:
                 ##Create a new plotpanel for 2D data
                 from Plotter2D import ModelPanel2D
-                new_panel = ModelPanel2D(self.parent, -1, data2d=event.plot,style=wx.RAISED_BORDER)
+                new_panel = ModelPanel2D(self.parent, id = -1, data2d=event.plot,style=wx.RAISED_BORDER)
             
             ## Set group ID if available
             ## Assign data properties to the new create panel
