@@ -100,6 +100,7 @@ class ModelPanel2D( ModelPanel1D):
         """
         ## Update self.data2d with the current plot
         self.data2D = event.plot
+        
         #TODO: Check for existence of plot attribute
         
         # Check whether this is a replot. If we ask for a replot
@@ -161,10 +162,10 @@ class ModelPanel2D( ModelPanel1D):
             2D plot context menu
             @param event: wx context event
         """
+        
         slicerpop = PanelMenu()
         slicerpop.set_plots(self.plots)
         slicerpop.set_graph(self.graph)
-        
              
         id = wx.NewId()
         slicerpop.Append(id, '&Save image')
@@ -197,41 +198,42 @@ class ModelPanel2D( ModelPanel1D):
         slicerpop.Append(id, '&Edit Detector Parameters')
         wx.EVT_MENU(self, id, self._onEditDetector) 
         
-        id = wx.NewId()
-        slicerpop.Append(id, '&Perform circular average')
-        wx.EVT_MENU(self, id, self.onCircular) 
-        
-        id = wx.NewId()
-        slicerpop.Append(id, '&Sector [Q view]')
-        wx.EVT_MENU(self, id, self.onSectorQ) 
-        
-        id = wx.NewId()
-        slicerpop.Append(id, '&Annulus [Phi view ]')
-        wx.EVT_MENU(self, id, self.onSectorPhi) 
-       
-        id = wx.NewId()
-        slicerpop.Append(id, '&Box Sum')
-        wx.EVT_MENU(self, id, self.onBoxSum) 
-        
-        id = wx.NewId()
-        slicerpop.Append(id, '&Box averaging in Qx')
-        wx.EVT_MENU(self, id, self.onBoxavgX) 
-        
-        id = wx.NewId()
-        slicerpop.Append(id, '&Box averaging in Qy')
-        wx.EVT_MENU(self, id, self.onBoxavgY) 
-        
-        if self.slicer !=None :
+        if not hasattr(self.data2D,"pictype"):
             id = wx.NewId()
-            slicerpop.Append(id, '&Clear slicer')
-            wx.EVT_MENU(self, id,  self.onClearSlicer) 
+            slicerpop.Append(id, '&Perform circular average')
+            wx.EVT_MENU(self, id, self.onCircular) 
             
-            if self.slicer.__class__.__name__ !="BoxSum":
+            id = wx.NewId()
+            slicerpop.Append(id, '&Sector [Q view]')
+            wx.EVT_MENU(self, id, self.onSectorQ) 
+            
+            id = wx.NewId()
+            slicerpop.Append(id, '&Annulus [Phi view ]')
+            wx.EVT_MENU(self, id, self.onSectorPhi) 
+           
+            id = wx.NewId()
+            slicerpop.Append(id, '&Box Sum')
+            wx.EVT_MENU(self, id, self.onBoxSum) 
+            
+            id = wx.NewId()
+            slicerpop.Append(id, '&Box averaging in Qx')
+            wx.EVT_MENU(self, id, self.onBoxavgX) 
+            
+            id = wx.NewId()
+            slicerpop.Append(id, '&Box averaging in Qy')
+            wx.EVT_MENU(self, id, self.onBoxavgY) 
+            
+            if self.slicer !=None :
                 id = wx.NewId()
-                slicerpop.Append(id, '&Edit Slicer Parameters')
-                wx.EVT_MENU(self, id, self._onEditSlicer) 
+                slicerpop.Append(id, '&Clear slicer')
+                wx.EVT_MENU(self, id,  self.onClearSlicer) 
                 
-        slicerpop.AppendSeparator() 
+                if self.slicer.__class__.__name__ !="BoxSum":
+                    id = wx.NewId()
+                    slicerpop.Append(id, '&Edit Slicer Parameters')
+                    wx.EVT_MENU(self, id, self._onEditSlicer) 
+                    
+            slicerpop.AppendSeparator() 
        
         id = wx.NewId()
         slicerpop.Append(id, '&Toggle Linear/Log scale')
