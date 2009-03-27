@@ -5,8 +5,8 @@ import numpy
 import string ,re
 #import models
 _BOX_WIDTH = 80
-
 (FitPageEvent, EVT_FIT_PAGE)   = wx.lib.newevent.NewEvent()
+
 class FitPanel(wx.aui.AuiNotebook):    
 
     """
@@ -39,7 +39,8 @@ class FitPanel(wx.aui.AuiNotebook):
        
         #dictionary of miodel {model class name, model class}
         self.model_list_box={}
-       
+        ##dictionary of page info
+        self.page_info_dict={}
         # save the title of the last page tab added
         self.fit_page_name=[]
         self.draw_model_name=None

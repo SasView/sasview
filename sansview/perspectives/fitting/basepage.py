@@ -71,6 +71,7 @@ class BasicPage(wx.ScrolledWindow):
                 self.disp_list= self.model.getDispParamList()
         ## drawing Initial dispersion parameters sizer 
         self.set_dispers_sizer()
+        self._fill_save_sizer()
         ## layout
         self.set_layout()
        
@@ -266,8 +267,90 @@ class BasicPage(wx.ScrolledWindow):
                 self._draw_model()
         return
     
-         
-   
+    def onSave(self, event):
+        """
+            save history of the data and model
+        """
+        self.page_info.model= self.model
+        self.page_info.data = self.data
+        import os
+                 
+            
+        path = None
+        dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", "*.txt", wx.SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            mypath = os.path.basename(path)
+            
+        dlg.Destroy()
+            
+        if not path == None:
+            out = open(path, 'w')
+            has_data = self.data !=None
+            has_model = self.model!=None
+            import time
+            year, month, day,hour,minute,second,tda,ty,tm_isdst= time.gmtime()
+            import os.path
+            out.write("Title: State for %s\n"%os.path.basename(path))
+            out.write("Date: %g\%g\%g \n"%(year, month, day))
+            out.write("GMT Time: %g:%g:%g \n\n"%(hour,minute, second))
+            # Sanity check
+            if has_data:
+                out.write("Fit Data name: %s\n\n"%self.data.name)
+    
+            if has_model:
+                out.write("Model name: %s\n"%self.model.name)
+                if len(self.parameters)>0:  
+                    out.write("Parameters Info:\n")
+                    msg= "Name\t\tValues\t\t+\-\tErrors\t\tMin\t\tMax\t\tUnits\t\tstate\n"
+                    out.write(msg)
+                    ##self.parameters=
+                    ##[cb state, name, value, "+/-", error of fit, min, max , units]
+                    for item in self.parameters:
+                        if item[1]!=None:
+                            name= item[1]
+                        else:
+                            name=""
+                        if item[2]!=None:
+                            value= str(item[2].GetValue().rstrip().lstrip())
+                        else:
+                            value=""
+                        if item[3]!=None:
+                            sign= str(item[3].GetLabelText().rstrip().lstrip())
+                        else:
+                            sign=""
+                        if item[4]!=None:
+                            error= str(item[4].GetValue().rstrip().lstrip())
+                        else:
+                            error=""
+                        if item[5]!=None:
+                            min= str(item[5].GetValue().rstrip().lstrip())
+                        else:
+                            min=""
+                        if item[6]!=None:
+                            max= str(item[6].GetValue().rstrip().lstrip())
+                        else:
+                            max=""
+                        if item[7]!=None:
+                            unit= str(item[7].GetLabelText().rstrip().lstrip())
+                        else:
+                            unit=""
+                        if item[0]!=None:
+                            if item[0].GetValue():
+                                state= "Fitted"
+                            else:
+                                state= "Not Fitted"
+                        else:
+                            state="Not Fitted"
+    
+                        msg= "%s\t\t%s\t\t%s\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n"\
+                         %(name,value,sign,error,min,max,unit,state)
+                        out.write(msg)
+                        
+                
+            out.close()
+
+    
     
     def read_file(self, path):
         """
@@ -300,7 +383,7 @@ class BasicPage(wx.ScrolledWindow):
         except:
             raise 
      
-         
+    
     def _selectDlg(self):
         """
             open a dialog file to selected the customized dispersity 
@@ -859,5 +942,26 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer5.Layout()
         self.SetScrollbars(20,20,200,100)
     
+    def _fill_save_sizer(self):
+        """
+            Draw the layout for saving option
+        """
+        self.sizer6.Clear(True)
+        box_description= wx.StaticBox(self, -1,"Save Options")
+        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+        sizer_save = wx.BoxSizer(wx.HORIZONTAL)
+        
+        self.btSave = wx.Button(self,wx.NewId(),'Save')
+        self.btSave.Bind(wx.EVT_BUTTON, self.onSave,id= self.btSave.GetId())
+        self.btSave.SetToolTipString("Save current state")
+         
+        sizer_save.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,120)        
+        sizer_save.Add(self.btSave)     
+        
+        boxsizer1.Add(sizer_save)
+        self.sizer6.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
+        self.sizer6.Layout()
+        self.SetScrollbars(20,20,200,100)
+        
         
                 
