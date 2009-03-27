@@ -62,15 +62,9 @@ class ScipyFit(FitEngine):
     #    return profile(self._fit, *args, **kw)
 
     def fit(self ,handler=None):
-        # Protect against simultanous fitting attempts
-        #if len(self.fitArrangeDict)>1: 
-        #    raise RuntimeError, "Scipy can't fit more than a single fit problem at a time."
-        # fitproblem contains first fitArrange object(one model and a list of data)
-        #list of fitproblem
        
         fitproblem=[]
         for id ,fproblem in self.fitArrangeDict.iteritems():
-            #print "ScipyFitting:fproblem.get_to_fit() ",fproblem.get_to_fit()
             if fproblem.get_to_fit()==1:
                 fitproblem.append(fproblem)
         if len(fitproblem)>1 : 
@@ -82,15 +76,11 @@ class ScipyFit(FitEngine):
     
         listdata=[]
         model = fitproblem[0].get_model()
-        #print "data",fitproblem[0].dList
         listdata = fitproblem[0].get_data()
         # Concatenate dList set (contains one or more data)before fitting
         #data=self._concatenateData( listdata)
         data=listdata
-       
-       
         functor= sansAssembly(self.paramList,model,data)
-        
         
         out, cov_x, info, mesg, success = optimize.leastsq(functor,model.getParams(self.paramList), full_output=1, warning=True)
         chisqr = functor.chisq(out)

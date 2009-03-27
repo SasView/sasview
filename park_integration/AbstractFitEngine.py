@@ -211,8 +211,10 @@ class FitData1D(object):
        
     def setFitRange(self,qmin=None,qmax=None):
         """ to set the fit range"""
-        self.qmin = qmin
-        self.qmax = qmax
+        if qmin!=None:
+            self.qmin = qmin
+        if qmax !=None:
+            self.qmax = qmax
         
         
     def getFitRange(self):
@@ -234,12 +236,6 @@ class FitData1D(object):
         """
         x,y,dy = [numpy.asarray(v) for v in (self.x,self.y,self.dy)]
            
-        # Find entries to consider
-        if self.qmin==None:
-            self.qmin= min(self.data.x)
-        if  self.qmax==None:
-            self.qmin= max(self.data.x)
-        
         idx = (x>=self.qmin) & (x <= self.qmax)
   
         # Compute theory data f(x)
@@ -291,8 +287,10 @@ class FitData2D(object):
        
     def setFitRange(self,qmin=None,qmax=None):
         """ to set the fit range"""
-        self.qmin= qmin
-        self.qmax= qmax
+        if qmin!=None:
+            self.qmin= qmin
+        if qmax!=None:
+            self.qmax= qmax
       
         
     def getFitRange(self):
@@ -307,16 +305,6 @@ class FitData2D(object):
             @return residuals
         """
         res=[]
-        #Here we define that  qmin >=0 and qmax>=qmain
-        x = max(self.data.xmin, self.data.xmax)
-        y = max(self.data.ymin, self.data.ymax)
-        
-        ## fitting range
-        if self.qmin == None:
-            self.qmin = 0
-        if self.qmax == None:
-            self.qmax = math.sqrt(x*x +y*y)
-        
         
         for i in range(len(self.y_bins)):
             for j in range(len(self.x_bins)):
@@ -515,6 +503,8 @@ class FitEngine:
         """
         if self.fitArrangeDict.has_key(Uid):
              self.fitArrangeDict[Uid].set_to_fit( value)
+             
+             
     def get_problem_to_fit(self,Uid):
         """
             return the self.selected value of the fit problem of Uid
