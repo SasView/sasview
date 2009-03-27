@@ -77,21 +77,20 @@ class FitPage(BasicPage):
             Fill the sizer containing the plotting range
             add  access to npts
         """
-        sizer_fit = wx.GridSizer(2, 2,0, 0)
+        sizer_fit = wx.GridSizer(1, 1,0, 0)
     
         self.btFit = wx.Button(self,wx.NewId(),'Fit')
         self.btFit.Bind(wx.EVT_BUTTON, self._onFit,id= self.btFit.GetId())
         self.btFit.SetToolTipString("Perform fit.")
         
-        self.btStopFit = wx.Button(self,wx.NewId(),'Stop Fit')
+        #self.btStopFit = wx.Button(self,wx.NewId(),'Stop Fit')
         #self.btStopFit.Bind(wx.EVT_BUTTON, self.onStopFit,id= self.btStopFit.GetId())
-        self.btStopFit.SetToolTipString("Stop Current fit job.")
+        #self.btStopFit.SetToolTipString("Stop Current fit job.")
         #self.btStopFit.Hide()
         
         sizer_fit.Add((5,5),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)        
-        sizer_fit.Add((5,5))
-        sizer_fit.Add(self.btFit,1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5) 
-        sizer_fit.Add(self.btStopFit,1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5) 
+        sizer_fit.Add(self.btFit,0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5) 
+        #sizer_fit.Add(self.btStopFit,1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5) 
         
         sizer_smearer = wx.BoxSizer(wx.HORIZONTAL)
         #Filling the sizer containing instruments smearing info.
@@ -312,6 +311,7 @@ class FitPage(BasicPage):
         """
             Allow to fit
         """
+        #self.btFit.SetLabel("Stop")
         from sans.guiframe.utils import check_value
         flag = check_value( self.qmin, self.qmax) 
         
