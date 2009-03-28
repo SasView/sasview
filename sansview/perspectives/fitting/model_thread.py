@@ -1,6 +1,7 @@
 import time
 from calcthread import CalcThread
 import sys
+import numpy
 
 class Calc2D_all(CalcThread):
     """
@@ -26,16 +27,7 @@ class Calc2D_all(CalcThread):
         self.model = model
         self.starttime = 0
         
-    def isquit(self):
-        try:
-            CalcThread.isquit(self)
-        except KeyboardInterrupt:
-            wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Calc %s interrupted" % self.model.name))
-            raise KeyboardInterrupt
-        
     def compute(self):
-        import numpy
         x = self.x
         y = self.y
         output = numpy.zeros((len(x),len(y)))
@@ -107,24 +99,12 @@ class Calc2D(CalcThread):
         self.data= data
         ## the model on to calculate
         self.model = model
-        self.starttime = 0
-      
-      
-    def isquit(self):
-        try:
-            CalcThread.isquit(self)
-        except KeyboardInterrupt:
-            wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Calc %s interrupted" % self.model.name))
-           
-            raise KeyboardInterrupt
-        
+        self.starttime = 0  
         
     def compute(self):
         """
             Compute the data given a model function
         """
-        import numpy
         x = self.x
         y = self.y
         output = numpy.zeros((len(x),len(y)))
@@ -132,10 +112,10 @@ class Calc2D(CalcThread):
         if self.qmin==None:
             self.qmin = 0
         if self.qmax== None:
-            if data ==None:
+            if self.data ==None:
                 return
-            newx= math.pow(max(math.fabs(data.xmax),math.fabs(data.xmin)),2)
-            newy= math.pow(max(math.fabs(data.ymax),math.fabs(data.ymin)),2)
+            newx= math.pow(max(math.fabs(self.data.xmax),math.fabs(self.data.xmin)),2)
+            newy= math.pow(max(math.fabs(self.data.ymax),math.fabs(self.data.ymin)),2)
             self.qmax=math.sqrt( newx + newy )
         
         self.starttime = time.time()
@@ -188,18 +168,7 @@ class Calc2D_4fold(CalcThread):
         self.model = model
         self.starttime = 0
         
-    def isquit(self):
-        try:
-            CalcThread.isquit(self)
-        except KeyboardInterrupt:
-            #printEVT("Calc %s interrupted" % self.model.name)
-            wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Calc %s interrupted" % self.model.name))
-           
-            raise KeyboardInterrupt
-        
     def compute(self):
-        import numpy
         x = self.x
         y = self.y
         output = numpy.zeros((len(x),len(y)))
@@ -283,8 +252,6 @@ class Calc1D(CalcThread):
         """
             Compute model 1d value given qmin , qmax , x value 
         """
-        import numpy
-        
         output = numpy.zeros(len(self.x))
        
         self.starttime = time.time()
@@ -311,14 +278,9 @@ class CalcCommandline:
     def __init__(self, n=20000):
         #print thread.get_ident()
         from sans.models.CylinderModel import CylinderModel
-        from sans.models.DisperseModel import DisperseModel
-        import pylab
         
-        submodel = CylinderModel()
+        model = CylinderModel()
         
-        model = DisperseModel(submodel, ['cyl_phi', 'cyl_theta', 'length'],
-                                        [0.2, 0.2, 10.0])
-        model.setParam('n_pts', 10)
          
         print model.runXY([0.01, 0.02])
         
@@ -326,10 +288,11 @@ class CalcCommandline:
         qstep = 0.0001
         self.done = False
         
-        x = pylab.arange(-qmax, qmax+qstep*0.01, qstep)
-        y = pylab.arange(-qmax, qmax+qstep*0.01, qstep)
+        x = numpy.arange(-qmax, qmax+qstep*0.01, qstep)
+        y = numpy.arange(-qmax, qmax+qstep*0.01, qstep)
     
-        calc_thread_2D = Calc2D(x, y, model.clone(),-qmax, qmax,qstep,
+    
+        calc_thread_2D = Calc2D(x, y, None, model.clone(),-qmax, qmax,qstep,
                                         completefn=self.complete,
                                         updatefn=self.update ,
                                         yieldtime=0.0)
@@ -343,7 +306,7 @@ class CalcCommandline:
     def update(self,output):
         print "update"
 
-    def complete(self, output, model, elapsed, qmin, qmax, qstep ):
+    def complete(self, image, data, model, elapsed, qmin, qmax, qstep ):
         print "complete"
         self.done = True
 
