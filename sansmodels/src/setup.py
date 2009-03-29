@@ -11,6 +11,9 @@
 """
 import sys
 
+if len(sys.argv) == 1:
+    sys.argv.append('install')
+
 def createODBcontent(class_name):
     """
         Return the content of the Pyre odb file for a given class
