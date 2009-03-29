@@ -3,6 +3,10 @@
      Since guitools is currently in a state of flux,
      we will merge those to module later
 """
+import sys
+
+if len(sys.argv) == 1:
+    sys.argv.append('install')
 
 # Then build and install the modules
 from distutils.core import setup, Extension
