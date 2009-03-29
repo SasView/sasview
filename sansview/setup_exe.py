@@ -19,6 +19,9 @@ from distutils.filelist import findall
 import matplotlib
 import py2exe
 
+if len(sys.argv) == 1:
+    sys.argv.append('py2exe')
+
 manifest = """
    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
    <assembly xmlns="urn:schemas-microsoft-com:asm.v1"
