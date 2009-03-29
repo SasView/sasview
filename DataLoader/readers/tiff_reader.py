@@ -31,7 +31,13 @@ class Reader:
             "GIF files (*.gif)|*.gif",
             ]
     ## Extension
-    ext  = ['.tif', '.jpg', '.png', '.jpeg', '.tiff', '.gif', '.bmp']    
+    ext  = ['.tif','.TIF',
+             '.jpg','.JPG',
+              '.png','.PNG',
+               '.jpeg','.JPEG',
+                '.tiff','.TIFF',
+                 '.gif','.GIF',
+                  '.bmp', '.BMP']    
         
     def read(self, filename=None):
         """
