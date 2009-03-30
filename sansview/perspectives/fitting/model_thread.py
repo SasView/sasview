@@ -1,7 +1,7 @@
 import time
 from calcthread import CalcThread
 import sys
-import numpy
+import numpy,math
 
 class Calc2D_all(CalcThread):
     """
@@ -118,7 +118,6 @@ class Calc2D(CalcThread):
             self.qmax=math.sqrt( newx + newy )
         
         self.starttime = time.time()
-        
         lx = len(self.x)
         for i_x in range(len(self.x)):
             # Check whether we need to bail out
@@ -126,7 +125,7 @@ class Calc2D(CalcThread):
             self.isquit()
        
             for i_y in range(int(len(self.y))):
-                radius = self.x[i_x]*self.x[i_x]+self.y[i_y]*self.y[i_y]
+                radius = math.sqrt(self.x[i_x]*self.x[i_x]+self.y[i_y]*self.y[i_y])
                 
                 if  self.qmin <= radius and radius<= self.qmax:
                     value = self.model.runXY( [self.x[i_x], self.y[i_y]] )
