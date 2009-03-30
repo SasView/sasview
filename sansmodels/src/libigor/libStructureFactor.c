@@ -187,7 +187,7 @@ HayterPenfoldMSA(double dp[], double q)
 	pi = 4.0*atan(1.);
 	QQ= q;
 	
-	diam=dp[0];		//in Å 
+	diam=dp[0]*2;		//in Å  dp[0] coming from python is radius : cahnged on Mar. 30, 2009
 	zz = dp[1];		//# of charges
 	VolFrac=dp[2];	
 	Temp=dp[3];		//in degrees Kelvin
