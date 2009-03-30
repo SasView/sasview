@@ -131,9 +131,9 @@ class Calc2D(CalcThread):
                 
                 if  self.qmin <= radius or radius<= self.qmax:
                     value = self.model.runXY( [self.x[i_x], self.y[i_y]] )
-                    output[i_x] [i_y]=value   
+                    output[i_y][i_x] =value   
                 else:
-                     output[i_x] [i_y]=0   
+                    output[i_y][i_x] =0   
             
         elapsed = time.time()-self.starttime
         self.complete( image = output,
