@@ -28,7 +28,7 @@ class ModelPage(BasicPage):
         """ 
             Initialization of the Panel
         """
-        
+        self.name ="Model"
         self._fill_model_sizer( self.sizer1)  
         self._fill_range_sizer() 
         if hasattr(self.page_info,"model"):

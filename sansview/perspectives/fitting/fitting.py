@@ -2,7 +2,7 @@ import  re
 import sys, wx, logging
 import string, numpy, math
 
-from copy import deepcopy 
+#import copy,deepcopy 
 from danse.common.plottools.plottables import Data1D, Theory1D,Data2D
 from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
@@ -21,6 +21,8 @@ DEFAULT_QMAX = 0.1
 DEFAULT_NPTS = 50
 import time
 import thread
+
+(PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
 class PlotInfo:
     """
         store some plotting field
@@ -62,6 +64,8 @@ class Plugin:
         self.fitter  = None
         #Flag to let the plug-in know that it is running stand alone
         self.standalone=True
+        ## dictionary of page closed and id 
+        self.closed_page_dict ={}
         ## Fit engine
         self._fit_engine = 'scipy'
         #List of selected data
@@ -86,21 +90,25 @@ class Plugin:
         """
         #Menu for fitting
         self.menu1 = wx.Menu()
-        id1 = wx.NewId()
-        self.menu1.Append(id1, '&Simultaneous')
-        wx.EVT_MENU(owner, id1, self.on_add_sim_page)
-        self.menu1.AppendSeparator()
+        
         #Set park engine
         id3 = wx.NewId()
         scipy_help= "Scipy Engine: Perform Simple fit. More in Help window...."
-        self.menu1.Append(id3, "Scipy",scipy_help) 
+        #self.menu1.Append(id3, "Scipy",scipy_help) 
+        self.menu1.AppendCheckItem(id3, "Scipy",scipy_help) 
         wx.EVT_MENU(owner, id3,  self._onset_engine_scipy)
-        self.menu1.AppendSeparator()
+        
         id3 = wx.NewId()
         park_help = "Park Engine: Perform Complex fit. More in Help window...."
-        self.menu1.Append(id3, "park",park_help) 
+        self.menu1.AppendCheckItem(id3, "Park",park_help) 
         wx.EVT_MENU(owner, id3,  self._onset_engine_park)
+        self.menu1.AppendSeparator()
         
+        id1 = wx.NewId()
+        simul_help = "Allow to edit fit engine with multiple model and data"
+        self.menu1.Append(id1, '&Simultaneous page',simul_help)
+        wx.EVT_MENU(owner, id1, self.on_add_sim_page)
+    
         #menu for model
         menu2 = wx.Menu()
     
@@ -112,8 +120,13 @@ class Plugin:
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
         owner.Bind(fitpage.EVT_MODEL_BOX,self._on_model_panel)
         
+        self.menu3= wx.Menu()
+        id4 = wx.NewId()
+        
         #create  menubar items
-        return [(id, self.menu1, "Fitting"),(id2, menu2, "Model")]
+        return [(id, self.menu1, "Fitting"),
+                (id4,self.menu3,"Averagers"),
+                (id2, menu2, "Model")]
     
     def on_add_sim_page(self, event):
         """
@@ -355,6 +368,8 @@ class Plugin:
                            qmax=qmax,
                            qstep=qstep)
         
+  
+                        
     def onFit(self):
         """
             perform fit 
@@ -426,11 +441,32 @@ class Plugin:
             wx.PostEvent(self.parent, StatusEvent(status= msg ))
             return 
               
-       
+              
+    def _add_page_onmenu(self, name, page_info):
+        """
+            Add name of a closed page of fitpanel in a menu 
+        """
+        # Post paramters
+        event_id = wx.NewId()
+        self.menu1.Append(event_id, name, 
+             "Show %s fit panel" % name)
+        self.closed_page_dict[event_id ]= page_info
+        wx.EVT_MENU(self.parent,event_id,  self._open_closed_page)
         
         
+    def _open_closed_page(self, event):    
+        """
+            reopen a closed page
+        """
+        print "reopen"
         
-        
+    def _reset_schedule_problem(self, value=0):
+        """
+             unschedule or schedule all fitproblem to be fit
+        """
+        for page, fitproblem in self.page_finder.iteritems():
+            fitproblem.schedule_tofit(value)
+            
     def _fit_helper(self,current_pg,pars,value, id, title="Single Fit " ):
         """
             helper for fitting
@@ -636,6 +672,8 @@ class Plugin:
         """ 
             set engine to park
         """
+        if event.IsChecked():
+            self.menu1.FindItemByPosition(0).Check(False)
         self._on_change_engine('park')
        
        
@@ -643,6 +681,8 @@ class Plugin:
         """ 
             set engine to scipy
         """
+        if event.IsChecked():
+            self.menu1.FindItemByPosition(1).Check(False)
         self._on_change_engine('scipy')
        
     def _on_slicer_event(self, event):
@@ -654,14 +694,14 @@ class Plugin:
             new_panel = event.panel
             # Set group ID if available
             event_id = self.parent.popup_panel(new_panel)
-            self.menu1.Append(event_id, new_panel.window_caption, 
+            self.menu3.Append(event_id, new_panel.window_caption, 
                              "Show %s plot panel" % new_panel.window_caption)
             # Set UID to allow us to reference the panel later
             new_panel.uid = event_id
             new_panel
             self.mypanels.append(new_panel) 
         return    
-    
+   
     def _on_change_engine(self, engine='park'):
         """
             Allow to select the type of engine to perform fit 

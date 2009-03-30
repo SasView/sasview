@@ -1,6 +1,7 @@
 
 
 import wx
+import copy
 
 class PageInfo(object):
     """
@@ -68,6 +69,14 @@ class PageInfo(object):
         state = object.GetValue()
         self.list_of_radiobox[label]=[label, id, state]    
     
-
+    def clone(self):
+        model=None
+        if self.model !=None:
+            model = self.model.clone()
+        
+        obj          = PageInfo( self.parent,model= model )
+        obj.data = copy.deepcopy(self.data)
+        
+        return obj
 
        

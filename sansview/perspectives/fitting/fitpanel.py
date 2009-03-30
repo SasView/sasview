@@ -5,7 +5,7 @@ import numpy
 import string ,re
 #import models
 _BOX_WIDTH = 80
-(FitPageEvent, EVT_FIT_PAGE)   = wx.lib.newevent.NewEvent()
+(PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
 
 class FitPanel(wx.aui.AuiNotebook):    
 
@@ -60,6 +60,9 @@ class FitPanel(wx.aui.AuiNotebook):
         """
              close page and remove all references to the closed page
         """
+        page_info=self.get_current_page().page_info.clone()
+        self.manager._add_page_onmenu("Model", page_info)
+        
         selected_page = self.GetPage(self.GetSelection())
         page_number = self.GetSelection()
         if self.sim_page != selected_page and selected_page!=self.about_page:
@@ -151,14 +154,14 @@ class FitPanel(wx.aui.AuiNotebook):
             from fitpage import FitPage
             panel = FitPage(parent= self, page_info=myinfo, name=name )
             panel.name=name
-            
+            panel.window_name= "fitpage"
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
             
             self.AddPage(page=panel,caption=name,select=True)
             #panel.populate_box( self.model_list_box)
             self.fit_page_name.append(name)
-    
+            
             return panel 
         else:
             return None 
@@ -198,6 +201,7 @@ class FitPanel(wx.aui.AuiNotebook):
         #self.manager.draw_model(model, model.name)
         #FOR PLUGIN  for some reason model.name is = BASEcomponent
         self.manager.draw_model(model)
+        
      
         
     def add_model_page(self,model,description,page_title, qmin=0, qmax=0.1, npts=50, topmenu=False):

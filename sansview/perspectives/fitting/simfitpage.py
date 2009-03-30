@@ -124,6 +124,10 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             value.set_range(qmin, qmax)
         ## model was actually selected from this page to be fit
         if len(self.model_toFit) >= 1 :
+            self.manager._reset_schedule_problem( value=0)
+            for item in self.model_list:
+                if item[0].GetValue():
+                    self.manager.schedule_for_fit( value=1,fitproblem =item[1]) 
             self.manager.onFit()
         else:
             msg= "Select at least one model to fit "
@@ -147,7 +151,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         if self.cb1.GetValue()==True:
             for item in self.model_list:
                 item[0].SetValue(True)
-                self.manager.schedule_for_fit( value=1,fitproblem =item[1]) 
                 self.model_toFit.append(item)
                 
             ## constraint info
@@ -159,7 +162,6 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         else:
             for item in self.model_list:
                 item[0].SetValue(False) 
-                self.manager.schedule_for_fit( value=0,fitproblem =item[1]) 
                 
             self.model_toFit=[]
             ##constraint info
@@ -174,9 +176,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         for item in self.model_list:
             if item[0].GetValue()==True:
                 self.model_toFit.append(item)
-                self.manager.schedule_for_fit( value=1,fitproblem =item[1]) 
             else:
-                self.manager.schedule_for_fit( value=0,fitproblem =item[1]) 
                 if item in self.model_toFit:
                     self.model_toFit.remove(item)
                     self.cb1.SetValue(False)

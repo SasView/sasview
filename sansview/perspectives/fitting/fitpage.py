@@ -28,6 +28,7 @@ class FitPage(BasicPage):
         """ 
             Initialization of the Panel
         """
+        self.name= self.data.name
         ## fit page does not content npts txtcrtl
         self.npts=None
         ## if no dispersity parameters is avaible 
@@ -327,7 +328,7 @@ class FitPage(BasicPage):
         
         self.qmin_x=float(self.qmin.GetValue())
         self.qmax_x =float( self.qmax.GetValue())
-        
+        self.manager._reset_schedule_problem( value=0)
         self.manager.schedule_for_fit( value=1,page=self,fitproblem =None) 
         self.manager.set_fit_range(page= self,qmin= self.qmin_x, qmax= self.qmax_x)
         #single fit 
