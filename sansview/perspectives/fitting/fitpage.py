@@ -480,7 +480,7 @@ class FitPage(BasicPage):
                         if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)>=math.pow(self.qmin_x,2):
                             if math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)<=math.pow(self.qmax_x,2):
                                 chisqrji=(self.data.data[j][i]- self.model.runXY(\
-                                                                                    [self.data.y_bins[j],self.data.x_bins[i]]))\
+                                                                                    [self.data.x_bins[i],self.data.y_bins[j]]))\
                                                                                     /self.data.err_data[j][i]
                                 #Vector containing residuals
                                 res.append( math.pow(chisqrji,2) )
