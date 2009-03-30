@@ -29,6 +29,7 @@ class FitPage(BasicPage):
             Initialization of the Panel
         """
         self.name= self.data.name
+        page_info.page_name= self.data.name
         ## fit page does not content npts txtcrtl
         self.npts=None
         ## if no dispersity parameters is avaible 
@@ -356,6 +357,15 @@ class FitPage(BasicPage):
         except:
             ## error occured on chisqr computation
             pass
+        
+    def _onparamEnter(self,event):
+        """ 
+            when enter value on panel redraw model according to changed
+        """
+        
+        self._onparamEnter_helper()
+        self.compute_chisqr()
+        
     def get_range(self):
         """
             return the fitting range
@@ -459,8 +469,7 @@ class FitPage(BasicPage):
                             "Data contains smearing information %s"%msg))
             self.manager.set_smearer(smear, qmin= self.qmin_x, qmax= self.qmax_x)   
               
-        
-        
+  
     def compute_chisqr2D(self):
         """ 
             compute chi square given a model and data 2D and set the value
