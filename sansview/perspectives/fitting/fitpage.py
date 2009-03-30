@@ -370,7 +370,7 @@ class FitPage(BasicPage):
         """
             return the fitting range
         """
-        return self.qmin_x , self.qmax_x
+        return float(self.qmin_x) , float(self.qmax_x)
         
     def get_param_list(self):
         """

@@ -29,7 +29,8 @@ class PageInfo(object):
         self.parent  = parent
         # Event_owner is the owner of model event
         self.event_owner = None
-      
+        ##page name
+        self.page_name=""
         # Contains link between  model ,all its parameters, and panel organization
         self.parameters=[]
         # Contains list of parameters that cannot be fitted and reference to 
@@ -53,8 +54,7 @@ class PageInfo(object):
         self.qmin=None
         self.qmax=None
         self.npts=None
-        ##page name
-        self.page_name=""
+       
         
                   
     def save_radiobox_state(self, object ):

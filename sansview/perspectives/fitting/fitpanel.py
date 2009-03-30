@@ -61,7 +61,9 @@ class FitPanel(wx.aui.AuiNotebook):
              close page and remove all references to the closed page
         """
         page_info=self.get_current_page().page_info.clone()
-        self.manager._add_page_onmenu("Model", page_info)
+        page_info.page_name= self.get_current_page().page_info.page_name
+       
+        self.manager._add_page_onmenu(page_info.page_name, page_info)
         
         selected_page = self.GetPage(self.GetSelection())
         page_number = self.GetSelection()
@@ -151,9 +153,10 @@ class FitPanel(wx.aui.AuiNotebook):
         myinfo.event_owner =self.event_owner 
         
         if not name in self.fit_page_name :
+            
             from fitpage import FitPage
             panel = FitPage(parent= self, page_info=myinfo, name=name )
-            panel.name=name
+            panel.name = name
             panel.window_name= "fitpage"
             panel.set_manager(self.manager)
             panel.set_owner(self.event_owner)
@@ -166,7 +169,7 @@ class FitPanel(wx.aui.AuiNotebook):
         else:
             return None 
         
-    def _help_add_model_page(self,model,description,page_title, qmin=0, qmax=0.1, npts=50):
+    def _help_add_model_page(self,model,page_title, qmin=0, qmax=0.1, npts=50):
         """
             #TODO: fill in description
             
@@ -204,14 +207,13 @@ class FitPanel(wx.aui.AuiNotebook):
         
      
         
-    def add_model_page(self,model,description,page_title, qmin=0, qmax=0.1, npts=50, topmenu=False):
+    def add_model_page(self,model,page_title, qmin=0, qmax=0.1, npts=50, topmenu=False):
         """
             Add a model page only one  to display any model selected from the menu or the page combo box.
             when this page is closed than the user will be able to open a new one
             
             @param model: the model for which paramters will be changed
             @param page_title: the name of the page
-            @param description: [Coder: fill your description!]
             @param page_title: [Coder: fill your description!]
             @param qmin: mimimum Q
             @param qmax: maximum Q
@@ -219,7 +221,7 @@ class FitPanel(wx.aui.AuiNotebook):
         """
         if topmenu==True:
             if  self.draw_model_name ==None:
-                self._help_add_model_page(model,description,page_title, qmin=qmin, qmax=qmax, npts=npts)
+                self._help_add_model_page(model,page_title, qmin=qmin, qmax=qmax, npts=npts)
             else:
                 self.model_page.select_model(model, page_title)
           

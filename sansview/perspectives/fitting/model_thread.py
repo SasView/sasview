@@ -108,7 +108,6 @@ class Calc2D(CalcThread):
         x = self.x
         y = self.y
         output = numpy.zeros((len(x),len(y)))
-        
         if self.qmin==None:
             self.qmin = 0
         if self.qmax== None:

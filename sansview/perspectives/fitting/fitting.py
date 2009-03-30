@@ -382,12 +382,15 @@ class Plugin:
                 
         ## if simultaneous fit change automatically the engine to park
         if fitproblem_count >1:
+            self.menu1.FindItemByPosition(1).Check(True)
+            self.menu1.FindItemByPosition(0).Check(False)
             self._on_change_engine(engine='park')
+            
         from sans.fit.Fitting import Fit
         self.fitter= Fit(self._fit_engine)
         
         if self._fit_engine=="park":
-            engineType="Simutaneous Fit"
+            engineType="Simultaneous Fit"
         else:
             engineType="Single Fit"
             
@@ -458,7 +461,13 @@ class Plugin:
         """
             reopen a closed page
         """
-        print "reopen"
+        if event.GetId() in self.closed_page_dict.keys():
+            page_info= self.closed_page_dict[ event.GetId() ]
+            if page_info.page_name !="Model Page":
+                page = self.fit_panel.add_fit_page(page_info.data)
+            else:
+                model= page_info.model
+                self.fit_panel.add_model_page(model,model.name,topmenu=True)
         
     def _reset_schedule_problem(self, value=0):
         """
@@ -739,8 +748,11 @@ class Plugin:
             
             # save the name containing the data name with the appropriate model
             self.page_finder[current_pg].set_model(model)
+            qmin, qmax= current_pg.get_range()
+            self.page_finder[current_pg].set_range(qmin=qmin, qmax=qmax)
+           
             # save model name
-            self.draw_model( model=model, data= metadata)
+            self.draw_model( model=model, data= metadata, qmin=qmin, qmax=qmax)
             
             if self.sim_page!=None:
                 self.sim_page.draw_page()
@@ -755,13 +767,12 @@ class Plugin:
         name = evt.model.__class__.__name__
         if hasattr(evt.model, "name"):
             name = evt.model.name
-        model=evt.model
-        description=model.description
-        
+        model = evt.model
+     
         # Create a model page. If a new page is created, the model
         # will be plotted automatically. If a page already exists,
         # the content will be updated and the plot refreshed
-        self.fit_panel.add_model_page(model,description,name,topmenu=True)
+        self.fit_panel.add_model_page(model,name,topmenu=True)
     
    
     
