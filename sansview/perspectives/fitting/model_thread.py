@@ -129,7 +129,7 @@ class Calc2D(CalcThread):
             for i_y in range(int(len(self.y))):
                 radius = self.x[i_x]*self.x[i_x]+self.y[i_y]*self.y[i_y]
                 
-                if  self.qmin <= radius or radius<= self.qmax:
+                if  self.qmin <= radius and radius<= self.qmax:
                     value = self.model.runXY( [self.x[i_x], self.y[i_y]] )
                     output[i_y][i_x] =value   
                 else:
