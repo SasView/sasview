@@ -173,11 +173,11 @@ class FitPage(BasicPage):
             fill sizer containing model info
         """
         sizer_tcChi = wx.GridSizer(2, 2,5, 5)
-        self.tcChi    =  wx.StaticText(self, -1, str(0), style=wx.ALIGN_LEFT)
-        #self.tcChi.Hide()
+        self.tcChi    =  wx.StaticText(self, -1, "-", style=wx.ALIGN_LEFT)
+        
         
         self.text1_1 = wx.StaticText(self, -1, 'Chi2/dof', style=wx.ALIGN_LEFT)
-        #self.text1_1.Hide()
+        
         
         self.btChi = wx.Button(self,wx.NewId(),'View Chi')
         self.btChi.Bind(wx.EVT_BUTTON, self._onFit,id= self.btChi.GetId())
