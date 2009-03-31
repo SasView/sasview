@@ -11,8 +11,6 @@
 """
 import sys
 
-if len(sys.argv) == 1:
-    sys.argv.append('install')
 
 def createODBcontent(class_name):
     """
@@ -107,9 +105,15 @@ setup(
         srcdir+"/Hardsphere.c",         
         "sans/models/c_models/CHardsphereStructure.cpp", 
         "sans/models/c_models/Hardsphere.cpp",      
+        srcdir+"/DiamCyl.c",         
+        "sans/models/c_models/CDiamCylFunc.cpp", 
+        "sans/models/c_models/DiamCyl.cpp",   
+        srcdir+"/DiamEllip.c",         
+        "sans/models/c_models/CDiamEllipFunc.cpp", 
+        "sans/models/c_models/DiamEllip.cpp",   
         srcdir+"/HayterMSA.c",         
         "sans/models/c_models/CHayterMSAStructure.cpp", 
-        "sans/models/c_models/HayterMSA.cpp",      
+        "sans/models/c_models/HayterMSA.cpp",             
         "sans/models/c_models/sphere.cpp",
         #srcdir+"/CCylinderModel.c",
         "sans/models/c_models/CCylinderModel.cpp",
