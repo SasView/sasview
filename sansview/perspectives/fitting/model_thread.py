@@ -126,12 +126,19 @@ class Calc2D(CalcThread):
        
             for i_y in range(int(len(self.y))):
                 radius = math.sqrt(self.x[i_x]*self.x[i_x]+self.y[i_y]*self.y[i_y])
-                
-                if  self.qmin <= radius and radius<= self.qmax:
-                    value = self.model.runXY( [self.x[i_x], self.y[i_y]] )
-                    output[i_y][i_x] =value   
-                else:
-                    output[i_y][i_x] =0   
+                ## for data ignore the qmax 
+                if self.data == None:
+                    if  self.qmin <= radius :
+                        value = self.model.runXY( [self.x[i_x], self.y[i_y]] )
+                        output[i_y][i_x] =value   
+                    else:
+                        output[i_y][i_x] =0   
+                else:  
+                    if  self.qmin <= radius and radius<= self.qmax:
+                        value = self.model.runXY( [self.x[i_x], self.y[i_y]] )
+                        output[i_y][i_x] =value   
+                    else:
+                        output[i_y][i_x] =0   
             
         elapsed = time.time()-self.starttime
         self.complete( image = output,
