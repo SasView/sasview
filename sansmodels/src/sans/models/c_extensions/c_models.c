@@ -34,6 +34,8 @@ initc_models(void)
 	addCStickyHSStructure(m);
 	addCHayterMSAStructure(m);
 	addCSquareWellStructure(m);
+	addCDiamEllipFunc(m);
+	addCDiamCylFunc(m);
 	addCEllipticalCylinderModel(m);
 	addDisperser(m);
 	addCGaussian(m);
