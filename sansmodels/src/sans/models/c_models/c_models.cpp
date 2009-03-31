@@ -13,6 +13,8 @@ void addCHardsphereStructure(PyObject *module);
 void addCStickyHSStructure(PyObject *module);
 void addCSquareWellStructure(PyObject *module);
 void addCHayterMSAStructure(PyObject *module);
+void addCDiamEllipFunc(PyObject *module);
+void addCDiamCylFunc(PyObject *module);
 void addCCoreShellModel(PyObject *module);
 void addCCoreShellCylinderModel(PyObject *module);
 void addCEllipsoidModel(PyObject *module);
@@ -153,6 +155,8 @@ initc_models(void)
 	addCStickyHSStructure(m);
 	addCSquareWellStructure(m);
 	addCHayterMSAStructure(m);
+	addCDiamEllipFunc(m);
+	addCDiamCylFunc(m);
 	addCEllipticalCylinderModel(m);
 	addDisperser(m);
 	addCGaussian(m);
