@@ -164,11 +164,15 @@ class MultiplicationModel(BaseComponent):
             @param parameter: name of the parameter [string]
             @dispersion: dispersion object of type DispersionModel
         """
-        if parameter in self.model1.getParamList():
-            return self.model1.set_dispersion(parameter, dispersion)
-        else:
-            return self.model2.set_dispersion(parameter, dispersion)
-
+        value= None
+        try:
+            if parameter in self.model1.getParamList():
+                value= self.model1.set_dispersion(parameter, dispersion)
+            elif parameter in self.model2.ParamList():
+                value= self.model2.set_dispersion(parameter, dispersion)
+            return value
+        except:
+            raise 
 
 
     
