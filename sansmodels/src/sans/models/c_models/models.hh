@@ -117,9 +117,39 @@ public:
 	Parameter temperature;
 	Parameter saltconc;
 	Parameter dielectconst;
-	
+
 	// Constructor
 	HayterMSAStructure();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class DiamEllipFunc{
+public:
+	// Model parameters
+	Parameter radius_a;
+	Parameter radius_b;
+
+	// Constructor
+	DiamEllipFunc();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class DiamCylFunc{
+public:
+	// Model parameters
+	Parameter radius;
+	Parameter length;
+
+	// Constructor
+	DiamCylFunc();
 
 	// Operators to get I(Q)
 	double operator()(double q);
