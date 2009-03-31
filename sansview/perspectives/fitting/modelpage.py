@@ -96,7 +96,7 @@ class ModelPage(BasicPage):
         """
              call back for model selection
         """    
-        self._on_select_model_helper(event) 
+        self._on_select_model_helper() 
         self.set_model_param_sizer(self.model)
         self._set_sizer_gaussian()
         self.name = self.model.name
@@ -149,7 +149,8 @@ class ModelPage(BasicPage):
         ix += 1 
         nsigmas = wx.StaticText(self, -1, 'Nsigmas')
         self.sizer4_4.Add(nsigmas,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-       
+        
+        
         for item in self.model.dispersion.keys():
             name1=item+".width"
             name2=item+".npts"
@@ -190,6 +191,7 @@ class ModelPage(BasicPage):
                                                   None, None,None])
                 
                 elif p=="nsigmas":
+                        
                         ix =3 
                         value= self.model.getParam(name3)
                         Tctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),

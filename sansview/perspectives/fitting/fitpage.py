@@ -30,6 +30,7 @@ class FitPage(BasicPage):
         """
         self.name= self.data.name
         page_info.page_name= self.data.name
+       
         ## fit page does not content npts txtcrtl
         self.npts=None
         ## if no dispersity parameters is avaible 
@@ -38,8 +39,9 @@ class FitPage(BasicPage):
         self._fill_datainfo_sizer()
         self._fill_model_sizer( self.sizer1)
         self._fill_range_sizer() 
-        if hasattr(self.page_info,"model"):
-            self.set_model_param_sizer(self.model)
+        self.model = self.formfactorbox.GetClientData(0)()
+        self.page_info.model= self.model
+        self._on_select_model(event=None)
             
         
     def _on_display_description(self, event):
@@ -344,7 +346,7 @@ class FitPage(BasicPage):
         """
              call back for model selection
         """    
-        self._on_select_model_helper(event) 
+        self._on_select_model_helper() 
         self.set_model_param_sizer(self.model)
         self._set_sizer_gaussian()
         
@@ -357,7 +359,7 @@ class FitPage(BasicPage):
         except:
             ## error occured on chisqr computation
             pass
-        
+    
     def _onparamEnter(self,event):
         """ 
             when enter value on panel redraw model according to changed

@@ -16,7 +16,9 @@ class BasicPage(wx.ScrolledWindow):
     window_name = "Fit page"
     ## Title to appear on top of the window
     window_caption = "Fit Page"
+    
     name=""
+    
     def __init__(self,parent, pageinfo, name):
         wx.ScrolledWindow.__init__(self, parent)
         ## store name
@@ -67,6 +69,7 @@ class BasicPage(wx.ScrolledWindow):
             self.model=self.page_info.model
             self.data = self.page_info.data
             self.event_owner = self.page_info.event_owner
+            
             if self.model !=None:
                 self.disp_list= self.model.getDispParamList()
         ## drawing Initial dispersion parameters sizer 
@@ -572,7 +575,8 @@ class BasicPage(wx.ScrolledWindow):
         self.formfactorbox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
         if self.model!=None:
             self.formfactorbox.SetValue(self.model.name)
-        
+           
+            
         self.structurebox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
         wx.EVT_COMBOBOX(self.formfactorbox,-1, self._on_select_model)
         wx.EVT_COMBOBOX(self.structurebox,-1, self._on_select_model)
@@ -586,7 +590,7 @@ class BasicPage(wx.ScrolledWindow):
             self._populate_box( self.structurebox,
                                 self.model_list_box["Structure Factors"])
         
-         ## check model type to show sizer
+        ## check model type to show sizer
         if self.model !=None:
             self._set_model_sizer_selection( self.model )
         
@@ -697,13 +701,14 @@ class BasicPage(wx.ScrolledWindow):
                 combobox.Append(name,models)
         try:
             combobox.SetSelection(0)
+            
         except:
             pass
         wx.EVT_COMBOBOX(combobox,-1, self._on_select_model) 
         return 0
    
    
-    def _on_select_model_helper(self,event): 
+    def _on_select_model_helper(self): 
         """
              call back for model selection
         """
@@ -816,14 +821,13 @@ class BasicPage(wx.ScrolledWindow):
             reset model paramaters to gaussian
             TO IMPLEMENT
         """
-    
         return
-        from sans.models.dispersion_models import GaussianDispersion
         if self.model==None:
             return
-        list= self.model.dispersion.keys()
+        from sans.models.dispersion_models import GaussianDispersion
+        list = self.model.dispersion.keys()
+        
         for key in list:
-           
             ## The parameter was un-selected. Go back to Gaussian model (with 0 pts)
             disp_model = GaussianDispersion()
             ## Set the new model as the dispersion object for the selected parameter
