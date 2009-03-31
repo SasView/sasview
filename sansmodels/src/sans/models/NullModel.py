@@ -23,7 +23,7 @@ class NullModel(BaseComponent):
        
     def clone(self):
         """ Return a identical copy of self """
-        return 0
+        return self._clone(NullModel())   
    
     def run(self, x = 0.0):
         """ Evaluate the model

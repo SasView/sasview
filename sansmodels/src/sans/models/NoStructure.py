@@ -23,7 +23,7 @@ class NoStructure(BaseComponent):
        
     def clone(self):
         """ Return a identical copy of self """
-        return 1
+        return self._clone(NoStructure())   
    
     def run(self, x = 0.0):
         """ Evaluate the model

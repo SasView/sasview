@@ -1,7 +1,7 @@
 
 from sans.models.BaseComponent import BaseComponent
 import numpy, math
-
+import copy
 class MultiplicationModel(BaseComponent):
     """
         Use for S(Q)*P(Q).
@@ -39,7 +39,21 @@ class MultiplicationModel(BaseComponent):
         #list of parameter that can be fitted
         self._set_fixed_params()  
         
-          
+    def _clone(self, obj):
+        """
+            Internal utility function to copy the internal
+            data members to a fresh copy.
+        """
+        obj.params     = copy.deepcopy(self.params)
+        obj.description     = copy.deepcopy(self.description)
+        obj.details    = copy.deepcopy(self.details)
+        obj.dispersion = copy.deepcopy(self.dispersion)
+        obj.model1  = self.model1.clone()
+        obj.model2  = self.model2.clone()
+        
+        return obj
+    
+    
     def _set_dispersion(self):
         """
            combined the two models dispersions
