@@ -29,6 +29,23 @@ class FitProblem:
         self.qmin = None
         self.qmax = None
         
+    def clone(self):
+        """
+            copy fitproblem
+        """
+        import copy 
+        obj          = FitProblem( self.parent,model= model )
+        obj.fit_data = copy.deepcopy(self.fit_data)
+        obj.model = copy.deepcopy(self.model)
+        obj.schedule = copy.deepcopy(self.schedule)
+        obj.list_param = copy.deepcopy(self.list_param)
+        obj.smearer = copy.deepcopy(self.smearer)
+        obj.plotted_data = copy.deepcopy(self.plotted_data)
+        obj.qmin = copy.deepcopy(self.qmin)
+        obj.qmax = copy.deepcopy(self.qmax)
+        
+        return obj
+        
         
     def set_smearer(self, smearer):
         """

@@ -652,9 +652,11 @@ class BasicPage(wx.ScrolledWindow):
             self.formfactorbox.Clear()
             self._populate_box( self.formfactorbox,
                                 self.model_list_box["Added models"])
+        if not self.multip_cb.GetValue(): 
+            model = self.formfactorbox.GetClientData(0)
+            self.model = model()
             
-            
-        if self.multip_cb.GetValue():
+        else:
             ## multplication not available for structure factor
             if self.struct_rbutton.GetValue():
                 self.multip_cb.SetValue(False)
@@ -663,15 +665,18 @@ class BasicPage(wx.ScrolledWindow):
             ##fill the comboxbox with form factor list
             self.structurebox.Show(True)
             self.text2.Show(True)
-            ## draw empty model
-            from sans.models.NullModel import NullModel
-            self.model = NullModel()
-            self.model.name = "Select P(Q) and S(Q)"
-            self.set_model_param_sizer(self.model)
-            self.sizer4_4.Clear()
-            self.sizer4.Layout()
-            self._draw_model()
+            ## draw multplication  model
+            form_factor = self.formfactorbox.GetClientData(0)
+            struct_factor = self.structurebox.GetClientData(0)
             
+            from sans.models.MultiplicationModel import MultiplicationModel
+            self.model= MultiplicationModel(form_factor(),struct_factor())
+
+        self.set_model_param_sizer(self.model)
+        self.sizer4_4.Clear()
+        self.sizer4.Layout()
+            
+        self._draw_model()
         self.set_scroll()
         
         
@@ -690,7 +695,10 @@ class BasicPage(wx.ScrolledWindow):
                 if hasattr(model, "name"):
                     name = model.name
                 combobox.Append(name,models)
-            
+        try:
+            combobox.SetSelection(0)
+        except:
+            pass
         wx.EVT_COMBOBOX(combobox,-1, self._on_select_model) 
         return 0
    
@@ -705,18 +713,11 @@ class BasicPage(wx.ScrolledWindow):
         struct_factor = self.structurebox.GetClientData( s_id )
        
         if self.multip_cb.GetValue():
-            if struct_factor != None and form_factor != None:
-                from sans.models.MultiplicationModel import MultiplicationModel
-                self.model= MultiplicationModel(form_factor(),struct_factor())
-            else:
-                from sans.models.NullModel import NullModel
-                self.model = NullModel()
-                self.model.name = "Select P(Q) and S(Q)"
-                msg= "select one P(Q) and one S(Q) to plot"
-                wx.PostEvent(self.parent.parent, StatusEvent(status= msg))
+            from sans.models.MultiplicationModel import MultiplicationModel
+            self.model= MultiplicationModel(form_factor(),struct_factor())
+            
         else:
-            if form_factor != None:
-                self.model= form_factor()
+            self.model= form_factor()
        
         
     def _onparamEnter(self,event):
@@ -752,9 +753,10 @@ class BasicPage(wx.ScrolledWindow):
                     self.model.setParam(name,value)
                     is_modified = True    
             except:
-                msg= "Model Drawing  Error:wrong value entered : %s"% sys.exc_value
-                wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-                return 
+                raise
+                #msg= "Model Drawing  Error:wrong value entered : %s"% sys.exc_value
+                #wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                #return 
         
         return is_modified 
         

@@ -445,7 +445,7 @@ class Plugin:
             return 
               
               
-    def _add_page_onmenu(self, name, page_info):
+    def _add_page_onmenu(self, name, page_info,fitproblem=None):
         """
             Add name of a closed page of fitpanel in a menu 
         """
@@ -453,7 +453,7 @@ class Plugin:
         event_id = wx.NewId()
         self.menu1.Append(event_id, name, 
              "Show %s fit panel" % name)
-        self.closed_page_dict[event_id ]= page_info
+        self.closed_page_dict[event_id ]= [page_info, fitproblem]
         wx.EVT_MENU(self.parent,event_id,  self._open_closed_page)
         
         
@@ -462,12 +462,14 @@ class Plugin:
             reopen a closed page
         """
         if event.GetId() in self.closed_page_dict.keys():
-            page_info= self.closed_page_dict[ event.GetId() ]
+            page_info,fitproblem = self.closed_page_dict[ event.GetId() ]
             if page_info.page_name !="Model Page":
                 page = self.fit_panel.add_fit_page(page_info.data)
+                if fitproblem != None:
+                    self.page_finder[page]=fitproblem
             else:
                 model= page_info.model
-                self.fit_panel.add_model_page(model,model.name,topmenu=True)
+                self.fit_panel.add_model_page(model,model.name,topmenu=False)
         
     def _reset_schedule_problem(self, value=0):
         """

@@ -60,20 +60,20 @@ class FitPanel(wx.aui.AuiNotebook):
         """
              close page and remove all references to the closed page
         """
-        page_info=self.get_current_page().page_info.clone()
-        page_info.page_name= self.get_current_page().page_info.page_name
-       
-        self.manager._add_page_onmenu(page_info.page_name, page_info)
+        page_info = self.get_current_page().page_info.clone()
+        page_info.page_name = self.get_current_page().page_info.page_name
+        page_finder = self.manager.get_page_finder() 
+        fitproblem = None
+        
+        if self.get_current_page() in page_finder:
+            fitproblem= page_finder[self.get_current_page()]
+            
+        self.manager._add_page_onmenu(page_info.page_name, page_info, fitproblem)
         
         selected_page = self.GetPage(self.GetSelection())
         page_number = self.GetSelection()
+        
         if self.sim_page != selected_page and selected_page!=self.about_page:
-            #remove that page from page_finder of fitting module
-            page_finder=self.manager.get_page_finder() 
-            for page, value in page_finder.iteritems():
-                if page==selected_page:
-                    del page_finder[page]
-                    break
             # remove the check box link to the model name of this page (selected_page)
             if self.sim_page !=None :
                 self.sim_page.draw_page()
@@ -85,6 +85,7 @@ class FitPanel(wx.aui.AuiNotebook):
             if selected_page.name== self.draw_model_name:
                 self.draw_model_name=None
                 self.model_page=None
+                
             if  page_number == 1:
                 self.model_page=None
                 self.draw_model_name=None
@@ -169,6 +170,27 @@ class FitPanel(wx.aui.AuiNotebook):
         else:
             return None 
         
+   
+    def add_model_page(self,model,page_title, qmin=0, qmax=0.1, npts=50, topmenu=False):
+        """
+            Add a model page only one  to display any model selected from the menu or the page combo box.
+            when this page is closed than the user will be able to open a new one
+            
+            @param model: the model for which paramters will be changed
+            @param page_title: the name of the page
+            @param page_title: [Coder: fill your description!]
+            @param qmin: mimimum Q
+            @param qmax: maximum Q
+            @param npts: number of Q points
+        """
+        if topmenu==True:
+            if  self.draw_model_name ==None:
+                self._help_add_model_page(model,page_title, qmin=qmin, qmax=qmax, npts=npts)
+            else:
+                self.model_page.select_model(model, page_title)
+        else:
+            self._create_model_page(model,page_title, qmin=qmin, qmax=qmax, npts=npts)
+          
     def _help_add_model_page(self,model,page_title, qmin=0, qmax=0.1, npts=50):
         """
             #TODO: fill in description
@@ -177,6 +199,17 @@ class FitPanel(wx.aui.AuiNotebook):
             @param qmax: maximum Q
             @param npts: number of Q points
         """
+        self._create_model_page(model,page_title,qmin=qmin, qmax=qmax, npts=npts)
+        # We just created a model page, we are ready to plot the model
+        #self.manager.draw_model(model, model.name)
+        #FOR PLUGIN  for some reason model.name is = BASEcomponent
+        self.manager.draw_model(model)
+    
+    def _create_model_page(self,model,page_title, qmin, qmax, npts):
+        """
+        adding model page occurs here
+        """
+       
         ## storing page info
         from pageInfo import  PageInfo
         myinfo = PageInfo( self, model )
@@ -200,32 +233,7 @@ class FitPanel(wx.aui.AuiNotebook):
         # Set the range used to plot models
         self.model_page.set_range(qmin, qmax, npts)
         
-        # We just created a model page, we are ready to plot the model
-        #self.manager.draw_model(model, model.name)
-        #FOR PLUGIN  for some reason model.name is = BASEcomponent
-        self.manager.draw_model(model)
         
-     
-        
-    def add_model_page(self,model,page_title, qmin=0, qmax=0.1, npts=50, topmenu=False):
-        """
-            Add a model page only one  to display any model selected from the menu or the page combo box.
-            when this page is closed than the user will be able to open a new one
-            
-            @param model: the model for which paramters will be changed
-            @param page_title: the name of the page
-            @param page_title: [Coder: fill your description!]
-            @param qmin: mimimum Q
-            @param qmax: maximum Q
-            @param npts: number of Q points
-        """
-        if topmenu==True:
-            if  self.draw_model_name ==None:
-                self._help_add_model_page(model,page_title, qmin=qmin, qmax=qmax, npts=npts)
-            else:
-                self.model_page.select_model(model, page_title)
-          
-   
   
    
  
