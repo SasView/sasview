@@ -111,11 +111,12 @@ class Calc2D(CalcThread):
         if self.qmin==None:
             self.qmin = 0
         if self.qmax== None:
-            if self.data ==None:
-                return
-            newx= math.pow(max(math.fabs(self.data.xmax),math.fabs(self.data.xmin)),2)
-            newy= math.pow(max(math.fabs(self.data.ymax),math.fabs(self.data.ymin)),2)
-            self.qmax=math.sqrt( newx + newy )
+            if self.data !=None:
+                newx= math.pow(max(math.fabs(self.data.xmax),math.fabs(self.data.xmin)),2)
+                newy= math.pow(max(math.fabs(self.data.ymax),math.fabs(self.data.ymin)),2)
+                self.qmax=math.sqrt( newx + newy )
+            else:
+                self.qmax= max(self.x)
         
         self.starttime = time.time()
         lx = len(self.x)
