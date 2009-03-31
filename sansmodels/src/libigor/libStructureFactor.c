@@ -6,8 +6,6 @@ The fitting function is a simple polynomial. It works but is of no practical use
 
 #include "StandardHeaders.h"			// Include ANSI headers, Mac headers, IgorXOP.h, XOP.h and XOPSupport.h
 #include "libStructureFactor.h"
-
-
 //Hard Sphere Structure Factor
 //
 double
@@ -649,16 +647,21 @@ sqfun(int ix, int ir)
 	return (ir);
 }
 
-// called as DiamCyl(hcyl,rcyl)
+// called as DiamCyl(hcyl,rcyl) 
+//modified from Igor NIST package XOP
 double
-DiamCyl(double hcyl, double rcyl)
+DiamCyl(double dp[], double q)
 {
-	
+	double hcyl, rcyl;
 	double diam,a,b,t1,t2,ddd;
 	double pi;
 	
+	rcyl = dp[0];
+	hcyl = dp[1];
 	pi = 4.0*atan(1.0);
-	
+	if (rcyl == 0 || hcyl == 0) {
+		return 0.0;
+	}
 	a = rcyl;
 	b = hcyl/2.0;
 	t1 = a*a*2.0*b/2.0;
@@ -666,7 +669,7 @@ DiamCyl(double hcyl, double rcyl)
 	ddd = 3.0*t1*t2;
 	diam = pow(ddd,(1.0/3.0));
 	
-	return(diam);
+	return(diam/2);  //return radius
 }
 
 //prolate OR oblate ellipsoids
@@ -676,12 +679,22 @@ DiamCyl(double hcyl, double rcyl)
 // A. Isihara, J. Chem. Phys. 18, 1446 (1950)
 //returns DIAMETER
 // called as DiamEllip(aa,bb)
+
+//modified from Igor NIST package XOP
 double
-DiamEllip(double aa, double bb)
+DiamEllip(double dp[], double q)
 {
-	
+	double aa, bb;
 	double ee,e1,bd,b1,bL,b2,del,ddd,diam;
 	
+	aa = dp[0];
+	bb = dp[1];
+	if (aa == 0 || bb == 0) {
+		return 0.0;
+	}
+	if (aa == bb) {
+		return aa;
+	}
 	if(aa>bb) {
 		ee = (aa*aa - bb*bb)/(aa*aa);
 	}else{
@@ -698,7 +711,7 @@ DiamEllip(double aa, double bb)
 	ddd = 2.0*(del+1.0)*aa*bb*bb;		//volume is always calculated correctly
 	diam = pow(ddd,(1.0/3.0));
 	
-	return(diam);
+	return(diam/2);      //return radius
 }
 
 double
