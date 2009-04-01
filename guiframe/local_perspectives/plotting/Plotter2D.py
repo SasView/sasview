@@ -180,7 +180,7 @@ class ModelPanel2D( ModelPanel1D):
         wx.EVT_MENU(self, id, self.onPrinterPreview)
         
         slicerpop.AppendSeparator()
-        if len(self.data2D.detector) == 1:        
+        if len(self.data2D.detector) >0 :        
             
             item_list = self.parent.get_context_menu(self.graph)
             if (not item_list==None) and (not len(item_list)==0):
