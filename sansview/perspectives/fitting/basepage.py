@@ -470,15 +470,24 @@ class BasicPage(wx.ScrolledWindow):
             self.formfactorbox.Clear()
             
             for k, list in self.model_list_box.iteritems():
-                if k == "shapes":
+                if k in["P(Q)*S(Q)","Shapes" ] and class_name in self.model_list_box["Shapes"]:
                     self.shape_rbutton.SetValue(True)
-                elif k == "Shape-independent":
+                    ## fill the form factor list with new model
+                    self._populate_box(self.formfactorbox,self.model_list_box["Shapes"])
+                    items = self.formfactorbox.GetItems()
+                    ## set comboxbox to the selected item
+                    for i in range(len(items)):
+                        if items[i]== str(name):
+                            self.formfactorbox.SetSelection(i)
+                            break
+                    return
+                elif k == "Shape-Independent":
                     self.shape_indep_rbutton.SetValue(True)
                 elif k == "Structure Factors":
                      self.struct_rbutton.SetValue(True)
                 else:
                     self.plugin_rbutton.SetValue(True)
-                    
+               
                 if class_name in list:
                     ## fill the form factor list with new model
                     self._populate_box(self.formfactorbox, list)
@@ -490,22 +499,32 @@ class BasicPage(wx.ScrolledWindow):
                             break
                     break
         else:
-            ## Select the model from the combo box
+            ## Select the model from the combobox
             class_name = model.__class__
             name = model.name
             self.formfactorbox.Clear()
             items = self.formfactorbox.GetItems()
+    
             for k, list in self.model_list_box.iteritems():
-                if k == "shapes":
+                if k in["P(Q)*S(Q)","Shapes" ] and class_name in self.model_list_box["Shapes"]:
                     self.shape_rbutton.SetValue(True)
-                elif k == "Shape-independent":
+                    ## fill the form factor list with new model
+                    self._populate_box(self.formfactorbox,self.model_list_box["Shapes"])
+                    items = self.formfactorbox.GetItems()
+                    ## set comboxbox to the selected item
+                    for i in range(len(items)):
+                        if items[i]== str(name):
+                            self.formfactorbox.SetSelection(i)
+                            break
+                    return
+                elif k == "Shape-Independent":
                     self.shape_indep_rbutton.SetValue(True)
                 elif k == "Structure Factors":
                      self.struct_rbutton.SetValue(True)
                 else:
                     self.plugin_rbutton.SetValue(True)
                 if class_name in list:
-                ## fill the form factor list with new model
+                    ## fill the form factor list with new model
                     self._populate_box(self.formfactorbox, list)
                     items = self.formfactorbox.GetItems()
                     ## set comboxbox to the selected item
@@ -540,10 +559,10 @@ class BasicPage(wx.ScrolledWindow):
         box_description= wx.StaticBox(self, -1,str(title))
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #--------------------------------------------------------
-        self.shape_rbutton = wx.RadioButton(self, -1, 'Shape', style=wx.RB_GROUP)
-        self.shape_indep_rbutton = wx.RadioButton(self, -1, "Shape Independent")
-        self.struct_rbutton = wx.RadioButton(self, -1, "Structure ")
-        self.plugin_rbutton = wx.RadioButton(self, -1, "customized Model")
+        self.shape_rbutton = wx.RadioButton(self, -1, 'Shapes', style=wx.RB_GROUP)
+        self.shape_indep_rbutton = wx.RadioButton(self, -1, "Shape-Independent")
+        self.struct_rbutton = wx.RadioButton(self, -1, "Structure Factor ")
+        self.plugin_rbutton = wx.RadioButton(self, -1, "Customized Models")
         self.multip_cb = wx.CheckBox(self, -1,"P(Q)*S(Q)")
         
        
@@ -590,7 +609,7 @@ class BasicPage(wx.ScrolledWindow):
         
         ## fill combox box
         if len(self.model_list_box)>0:
-            self._populate_box( self.formfactorbox,self.model_list_box["shapes"])
+            self._populate_box( self.formfactorbox,self.model_list_box["Shapes"])
        
         if len(self.model_list_box)>0:
             self._populate_box( self.structurebox,
@@ -630,54 +649,75 @@ class BasicPage(wx.ScrolledWindow):
         self.page_info.save_radiobox_state( self.struct_rbutton )
         self.page_info.save_radiobox_state( self.plugin_rbutton )
         
-        
-        
-        if self.shape_rbutton.GetValue():
-            ##fill the comboxbox with form factor list
+        ## Don't want to populate combo box again if the event comes from check box
+        if self.shape_rbutton.GetValue()and\
+             event.GetEventObject()==self.shape_rbutton:
+            ##fill the combobox with form factor list
             self.structurebox.Hide()
             self.text2.Hide()
             self.formfactorbox.Clear()
-            self._populate_box( self.formfactorbox,self.model_list_box["shapes"])
+            self._populate_box( self.formfactorbox,self.model_list_box["Shapes"])
             
-        if self.shape_indep_rbutton.GetValue():
-            ##fill the comboxbox with shape independent  factor list
+        if self.shape_indep_rbutton.GetValue()and\
+             event.GetEventObject()==self.shape_indep_rbutton:
+            ##fill the combobox with shape independent  factor list
             self.structurebox.Hide()
             self.text2.Hide()
             self.formfactorbox.Clear()
             self._populate_box( self.formfactorbox,
-                                self.model_list_box["Shape-independent"])
+                                self.model_list_box["Shape-Independent"])
             
-        if self.struct_rbutton.GetValue():
-            ##fill the comboxbox with structure factor list
+        if self.struct_rbutton.GetValue() and\
+             event.GetEventObject()==self.struct_rbutton:
+            ##fill the combobox with structure factor list
             self.structurebox.Hide()
             self.text2.Hide()
             self.formfactorbox.Clear()
             self._populate_box( self.formfactorbox,
                                 self.model_list_box["Structure Factors"])
            
-        if self.plugin_rbutton.GetValue():
-            ##fill the comboxbox with form factor list
+        if self.plugin_rbutton.GetValue()and\
+             event.GetEventObject()==self.plugin_rbutton:
+           
+            ##fill the combobox with form factor list
             self.structurebox.Hide()
             self.text2.Hide()
             self.formfactorbox.Clear()
             self._populate_box( self.formfactorbox,
-                                self.model_list_box["Added models"])
+                                self.model_list_box["Customized Models"])
+        
         if not self.multip_cb.GetValue(): 
-            model = self.formfactorbox.GetClientData(0)
+            self.structurebox.Hide()
+            self.text2.Hide()
+            n = self.formfactorbox.GetCurrentSelection()
+            model = self.formfactorbox.GetClientData(n)
             self.model = model()
-            
+        ## user check multiplication option        
         else:
-            ## multplication not available for structure factor
-            if self.struct_rbutton.GetValue():
+            ##for this release 
+            flag1= self.plugin_rbutton.GetValue()or self.struct_rbutton.GetValue()\
+                    or self.shape_indep_rbutton.GetValue()
+            flag2= False   
+             
+            n = self.formfactorbox.GetCurrentSelection()
+            form_factor = self.formfactorbox.GetClientData(n)   
+            ## selecting only multiplication model
+            if self.shape_rbutton.GetValue():
+               if not form_factor in  self.model_list_box["multiplication"]:
+                   flag2 = True
+            ## multiplication not available for structure factor
+            if flag1 or  flag2:
                 self.multip_cb.SetValue(False)
                 self.structurebox.Hide()
+                self.text2.Hide()
                 return
-            ##fill the comboxbox with form factor list
+            ## allow only some to have multiplication
+            
             self.structurebox.Show(True)
             self.text2.Show(True)
-            ## draw multplication  model
-            form_factor = self.formfactorbox.GetClientData(0)
-            struct_factor = self.structurebox.GetClientData(0)
+            ## draw multiplication  model
+            n = self.structurebox.GetCurrentSelection()
+            struct_factor = self.structurebox.GetClientData(n)
             
             from sans.models.MultiplicationModel import MultiplicationModel
             self.model= MultiplicationModel(form_factor(),struct_factor())
@@ -706,6 +746,7 @@ class BasicPage(wx.ScrolledWindow):
                     name = model.name
                 combobox.Append(name,models)
         try:
+
             combobox.SetSelection(0)
             
         except:
@@ -718,11 +759,22 @@ class BasicPage(wx.ScrolledWindow):
         """
              call back for model selection
         """
+        ## reset dictionary containing reference to dispersion
+        self._disp_obj_dict = {}
+        self.disp_cb_dict ={}
+        
         f_id = self.formfactorbox.GetCurrentSelection()
         s_id = self.structurebox.GetCurrentSelection()
         form_factor = self.formfactorbox.GetClientData( f_id )
         struct_factor = self.structurebox.GetClientData( s_id )
-       
+        
+        if not form_factor in  self.model_list_box["multiplication"]:
+            self.multip_cb.SetValue(False)
+            self.structurebox.Hide()
+            self.text2.Hide()
+            self.sizer4_4.Clear()
+            self.sizer4.Layout()
+            
         if self.multip_cb.GetValue():
             from sans.models.MultiplicationModel import MultiplicationModel
             self.model= MultiplicationModel(form_factor(),struct_factor())
@@ -795,7 +847,6 @@ class BasicPage(wx.ScrolledWindow):
                 self.disp_box.Hide()
                 self.sizer4_4.Clear(True)
                 self._reset_dispersity()
-                self._draw_model()
             
             self.sizer4.Layout()
             self.Layout()
@@ -816,29 +867,11 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Clear(True)
         model_disp = wx.StaticText(self, -1, 'No PolyDispersity for this model')
         self.sizer4_4.Add(model_disp,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        #self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.SetScrollbars(20,20,200,100)
         return 
     
-    def _reset_gaussian_dispers(self):
-        """
-            reset model paramaters to gaussian
-            TO IMPLEMENT
-        """
-        return
-        if self.model==None:
-            return
-        from sans.models.dispersion_models import GaussianDispersion
-        list = self.model.dispersion.keys()
-        
-        for key in list:
-            ## The parameter was un-selected. Go back to Gaussian model (with 0 pts)
-            disp_model = GaussianDispersion()
-            ## Set the new model as the dispersion object for the selected parameter
-            self.model.set_dispersion(key,disp_model)
-            self._draw_model()
-            
+ 
             
     def _reset_dispersity(self):
         """
@@ -846,6 +879,7 @@ class BasicPage(wx.ScrolledWindow):
         """
         self.fittable_param=[]
         self.fixed_param=[]
+        
         from sans.models.dispersion_models import GaussianDispersion
         if len(self.disp_cb_dict)==0:
             return 
@@ -856,12 +890,10 @@ class BasicPage(wx.ScrolledWindow):
             # Store the object to make it persist outside the scope of this method
             #TODO: refactor model to clean this up?
             self._disp_obj_dict[p] = disp_model
-            
             # Set the new model as the dispersion object for the selected parameter
             self.model.set_dispersion(p, disp_model)
-            
             # Redraw the model
-            
+            self._draw_model()
             
             
     def _on_select_Disp(self,event):
@@ -871,8 +903,7 @@ class BasicPage(wx.ScrolledWindow):
         """
         dispersity  =event.GetClientData()
         name= dispersity.__name__
-        
-        if name == "GaussianModel":
+        if name == "GaussianDispersion":
             self._set_sizer_gaussian()
             
         if  name=="ArrayDispersion":

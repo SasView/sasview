@@ -124,9 +124,7 @@ class ModelPage(BasicPage):
         """
         self.fittable_param=[]
         self.fixed_param=[]
-        ##reset model dispersity to gaussian
-        self._reset_gaussian_dispers()
-        
+       
         self.sizer4_4.Clear(True)
         if self.model==None:
             ##no model is selected
@@ -134,6 +132,14 @@ class ModelPage(BasicPage):
         if not self.enable_disp.GetValue():
             ## the user didn't select dispersity display
             return 
+        self._reset_dispersity()
+        # Create the dispersion objects
+        for item in self.model.dispersion.keys():
+            disp_model =  GaussianDispersion()
+            self._disp_obj_dict[item] = disp_model
+            self.model.set_dispersion(item, disp_model)
+
+        
         ix=0
         iy=1
         disp = wx.StaticText(self, -1, 'Names')
@@ -152,6 +158,8 @@ class ModelPage(BasicPage):
         
         
         for item in self.model.dispersion.keys():
+          
+            self.disp_cb_dict[item]= None
             name1=item+".width"
             name2=item+".npts"
             name3=item+".nsigmas"
@@ -242,13 +250,7 @@ class ModelPage(BasicPage):
         self.set_model_param_sizer(self.model)
         self._draw_model()
         ## keep the sizer view consistent with the model menu selecting
-        ##
-        self.structurebox.Hide()
-        self.text2.Hide()
-        self.multip_cb.SetValue(False)
-        
-        if hasattr( model,"model1"):
-            self._set_model_sizer_selection( model )
+        self._set_model_sizer_selection( self.model )
         
         self.model_view.SetFocus()
                          

@@ -170,6 +170,7 @@ class FitPage(BasicPage):
         self.qmin_x= data_min
         self.qmax_x= data_max
         
+        
     def _fill_model_sizer(self, sizer):
         """
             fill sizer containing model info
@@ -200,9 +201,7 @@ class FitPage(BasicPage):
         """
         self.fittable_param=[]
         self.fixed_param=[]
-        ##reset model dispersity to gaussian
-        self._reset_gaussian_dispers()
-        
+    
         self.sizer4_4.Clear(True)
        
         if self.model==None:
@@ -211,6 +210,14 @@ class FitPage(BasicPage):
         if not self.enable_disp.GetValue():
             ## the user didn't select dispersity display
             return 
+        
+        self._reset_dispersity()
+        # Create the dispersion objects
+        for item in self.model.dispersion.keys():
+            disp_model =  GaussianDispersion()
+            self._disp_obj_dict[item] = disp_model
+            self.model.set_dispersion(item, disp_model)
+
         ix=0
         iy=1
         disp = wx.StaticText(self, -1, 'Names')
@@ -232,6 +239,7 @@ class FitPage(BasicPage):
         self.sizer4_4.Add(nsigmas,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
        
         for item in self.model.dispersion.keys():
+            self.disp_cb_dict[item]= None
             name1=item+".width"
             name2=item+".npts"
             name3=item+".nsigmas"

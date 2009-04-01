@@ -102,6 +102,8 @@ class ModelManager:
     shape_indep_list = []
     ##list of structure factors 
     struct_list= []
+    ##list of model allowing multiplication
+    multiplication_factor=[]
     ## list of added models
     plugins=[]
     ## Event owner (guiframe)
@@ -118,10 +120,12 @@ class ModelManager:
         ## form factor
         from sans.models.SphereModel import SphereModel
         self.shape_list.append(SphereModel)
+        self.multiplication_factor.append(SphereModel)
         
         from sans.models.CylinderModel import CylinderModel
         self.shape_list.append(CylinderModel)
-      
+        self.multiplication_factor.append(CylinderModel)
+        
         from sans.models.CoreShellModel import CoreShellModel
         self.shape_list.append(CoreShellModel)
         
@@ -133,14 +137,12 @@ class ModelManager:
         
         from sans.models.EllipsoidModel import EllipsoidModel
         self.shape_list.append(EllipsoidModel)
+        self.multiplication_factor.append(EllipsoidModel)
          
-        from sans.models.LineModel import LineModel
-        self.shape_list.append(LineModel)
+        
         
         ## Structure factor 
-        from sans.models.NoStructure import NoStructure
-        self.struct_list.append(NoStructure)
-        
+      
         from sans.models.SquareWellStructure import SquareWellStructure
         self.struct_list.append(SquareWellStructure)
         
@@ -169,6 +171,9 @@ class ModelManager:
         
         from sans.models.PorodModel import PorodModel
         self.shape_indep_list.append(PorodModel )
+        
+        from sans.models.LineModel import LineModel
+        self.shape_indep_list.append(LineModel)
         
         from sans.models.FractalModel import FractalModel
         class FractalAbsModel(FractalModel):
@@ -217,22 +222,27 @@ class ModelManager:
         shape_indep_submenu = wx.Menu()
         structure_factor = wx.Menu()
         added_models = wx.Menu()
+        multip_models = wx.Menu()
         ## create menu with shape
-        self._fill_menu( menuinfo = ["shapes",shape_submenu," simple shape"],
-                         list1 = self.shape_list,
-                         list2 = self.struct_list )
-        self._fill_menu( menuinfo = ["Shape-independent",shape_indep_submenu,
+        self._fill_simple_menu( menuinfo = ["Shapes",shape_submenu," simple shape"],
+                         list1 = self.shape_list )
+        
+        self._fill_simple_menu( menuinfo = ["Shape-Independent",shape_indep_submenu,
                                     "List of shape-independent models"],
-                         list1 = self.shape_indep_list,
-                         list2 = self.struct_list )
-        self._fill_menu( menuinfo = ["Added models", added_models,
-                                            "List of additional models"],
-                                 list1= self.plugins,
-                                 list2 = self.struct_list)
+                         list1 = self.shape_indep_list )
         
         self._fill_simple_menu( menuinfo= ["Structure Factors",structure_factor,
                                           "List of Structure factors models" ],
                                 list1= self.struct_list )
+        
+        self._fill_simple_menu( menuinfo = ["Customized Models", added_models,
+                                            "List of additional models"],
+                                 list1= self.plugins )
+        
+        self._fill_menu(menuinfo=["P(Q)*S(Q)",multip_models,
+                                  "mulplication of 2 models"],
+                                   list1 = self.multiplication_factor ,
+                                   list2 =  self.struct_list)
         
         
         return 0
@@ -323,12 +333,10 @@ class ModelManager:
         
     def get_model_list(self):    
         """ @ return dictionary of models for fitpanel use """
+        self.model_combobox.set_list("multiplication", self.multiplication_factor)
         return self.model_combobox
     
-    
-    def get_form_struct(self):
-        """ retunr list of form structures"""
-        return self.struct_list
+  
         
     
     
