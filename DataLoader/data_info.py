@@ -101,40 +101,7 @@ class plottable_2D:
     def zaxis(self, label, unit):
         self._zaxis = label
         self._zunit = unit
-        
-class plottable_image:
-    """
-        Data2D is a place holder for 2D plottables.
-    """
-    xmin = None
-    xmax = None
-    ymin = None
-    ymax = None
-    image = None
-    
-    # Units
-    _xaxis = ''
-    _xunit = 'pixels'
-    _yaxis = ''
-    _yunit = 'pixels'
-    _zaxis = ''
-    _zunit = ''
-    
-    def __init__(self, image=None):
-        self.image = image#numpy.asarray(data)
-        
-    def xaxis(self, label, unit):
-        self._xaxis = label
-        self._xunit = unit
-        
-    def yaxis(self, label, unit):
-        self._yaxis = label
-        self._yunit = unit
-            
-    def zaxis(self, label, unit):
-        self._zaxis = label
-        self._zunit = unit
-            
+
             
 class Vector:
     """
@@ -820,25 +787,5 @@ class Data2D(plottable_2D, DataInfo):
                 result.err_data[i][j] = math.sqrt(math.fabs(output.variance))
         return result
     
-#Need more work to make it work    
-class Image2D(plottable_image, DataInfo):
-    """
-        2D image class
-    """
-    
-    
-    def __init__(self, image=None,xmin=None, xmax=None, ymin=None, ymax=None):
-        
-        DataInfo.__init__(self)
-        plottable_image.__init__(self, image)
-        self.pictype = 'image'
-    def __str__(self):
-        _str =  "%s\n" % DataInfo.__str__(self)
-        
-        _str += "Image:\n"
-       # _str += "   Type:         %s\n" % self.__class__.__name__
-        
-        return _str
-  
   
  
