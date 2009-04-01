@@ -353,7 +353,13 @@ class BasicPage(wx.ScrolledWindow):
                 
             out.close()
 
-    
+     
+    def onSetFocus(self, evt):
+        # Get a handle to the TextCtrl
+        widget = evt.GetEventObject()
+        # Select the whole control, after this event resolves
+        wx.CallAfter(widget.SetSelection, -1, -1)
+        return
     
     def read_file(self, path):
         """
@@ -753,15 +759,14 @@ class BasicPage(wx.ScrolledWindow):
                 name = str(item[1])
                 value= float(item[2].GetValue())
                 # If the value of the parameter has changed,
-                # update the model and set the is_modified flag
+                # +update the model and set the is_modified flag
                 if value != self.model.getParam(name):
                     self.model.setParam(name,value)
                     is_modified = True    
             except:
-                raise
-                #msg= "Model Drawing  Error:wrong value entered : %s"% sys.exc_value
-                #wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-                #return 
+                msg= "Model Drawing  Error:wrong value entered : %s"% sys.exc_value
+                wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                return 
         
         return is_modified 
         
@@ -796,7 +801,7 @@ class BasicPage(wx.ScrolledWindow):
             self.Layout()
             self.SetScrollbars(20,20,200,100)
             
-        
+   
         
     def _layout_sizer_noDipers(self):
         """
@@ -915,13 +920,13 @@ class BasicPage(wx.ScrolledWindow):
         self.qmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.qmin.SetValue(format_number(self.qmin_x))
         self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
-        self.qmin.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+        self.qmin.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
         self.qmin.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
      
         self.qmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.qmax.SetValue(format_number(self.qmax_x))
         self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
-        self.qmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+        self.qmax.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
         self.qmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
      
         sizer_horizontal=wx.BoxSizer(wx.HORIZONTAL)

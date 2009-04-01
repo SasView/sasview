@@ -251,7 +251,7 @@ class FitPage(BasicPage):
                                         style=wx.TE_PROCESS_ENTER)
                     
                     ctl1.SetValue(str (format_number(value)))
-                    ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                    ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                     ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                     self.sizer4_4.Add(ctl1, (iy,ix),(1,1),wx.EXPAND)
                     
@@ -276,7 +276,7 @@ class FitPage(BasicPage):
                                             style=wx.TE_PROCESS_ENTER)
                         
                         Tctl.SetValue(str (format_number(value)))
-                        Tctl.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                        Tctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                         Tctl.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                         self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
                                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -290,7 +290,7 @@ class FitPage(BasicPage):
                         Tctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                             style=wx.TE_PROCESS_ENTER)
                         Tctl.SetValue(str (format_number(value)))
-                        Tctl.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                        Tctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                         Tctl.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                         self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
                                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)

@@ -32,7 +32,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.onClosePage)
         #Creating the default page --welcomed page
         self.about_page=None
-        from sans.guiframe.welcome_panel import PanelAbout
+        from welcome_panel import PanelAbout
         self.about_page = PanelAbout(self, -1)
         self.AddPage(self.about_page,"welcome!")
       

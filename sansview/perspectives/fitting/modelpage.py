@@ -85,7 +85,7 @@ class ModelPage(BasicPage):
         self.npts    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.npts.SetValue(format_number(self.num_points))
         self.npts.SetToolTipString("Number of point to plot.")
-        self.npts.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+        self.npts.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
         self.npts.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
         
         sizer_npts.Add(wx.StaticText(self, -1, 'Npts'),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)        
@@ -168,7 +168,7 @@ class ModelPage(BasicPage):
                                         style=wx.TE_PROCESS_ENTER)
                     
                     ctl1.SetValue(str (format_number(value)))
-                    ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                    ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                     ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                     self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                     
@@ -182,7 +182,7 @@ class ModelPage(BasicPage):
                                             style=wx.TE_PROCESS_ENTER)
                         
                         Tctl1.SetValue(str (format_number(value)))
-                        Tctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                        Tctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                         Tctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                         self.sizer4_4.Add(Tctl1, (iy,ix),(1,1),
                                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -197,7 +197,7 @@ class ModelPage(BasicPage):
                         Tctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                             style=wx.TE_PROCESS_ENTER)
                         Tctl2.SetValue(str (format_number(value)))
-                        Tctl2.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                        Tctl2.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                         Tctl2.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                         self.sizer4_4.Add(Tctl2, (iy,ix),(1,1),
                                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -382,8 +382,9 @@ class ModelPage(BasicPage):
                     style=wx.TE_PROCESS_ENTER)
                 
                 ctl1.SetValue(str (format_number(value)))
-                ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                 ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                
                 sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
         
                 ix +=1

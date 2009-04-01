@@ -80,12 +80,12 @@ class PanelAbout(wx.Panel):
        
         self.static_line_1 = wx.StaticLine(self, -1)
         self.label_acknowledgement = wx.StaticText(self, -1, config._acknowledgement)
-      
-
-       
-
+        
+        self.hyperlink_license = wx.StaticText(self, -1, "Comments? Bugs? Requests?")
+        self.hyperlink_paper = wx.lib.hyperlink.HyperLinkCtrl(self, -1,
+                                         "Send us a ticket",URL=config._license)
         # end wxGlade
-    
+        
 #      
         # randomly shuffle authors' names
         random.shuffle(config._authors)
@@ -113,24 +113,20 @@ class PanelAbout(wx.Panel):
         # begin wxGlade: DialogAbout.__do_layout
         sizer_main = wx.BoxSizer(wx.VERTICAL)
         sizer_header = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_build = wx.GridBagSizer(0,0)
+        sizer_build = wx.BoxSizer(wx.VERTICAL)
        
        
         sizer_header.Add(self.bitmap_logo, 0, wx.EXPAND|wx.LEFT, 5)
         
-        ix = 0
-        iy = 0
-        sizer_build.Add((20,20),(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
-        iy +=1
-        sizer_build.Add(self.label_acknowledgement,(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
-        iy +=1
-        sizer_build.Add(self.label_title ,(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
-        ix = 0
-        iy +=1
-        sizer_build.Add(self.label_build,(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
-        ix = 0
-        iy +=1
-        sizer_build.Add( self.label_copyright,(iy,ix),(1,1),wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
+        
+        sizer_build.Add(self.label_acknowledgement,0,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
+        sizer_build.Add((5,5))
+        sizer_build.Add(self.label_title ,0,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
+        sizer_build.Add(self.label_build,0,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
+        sizer_build.Add( self.label_copyright,0,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
+        sizer_build.Add((5,5))
+        sizer_build.Add( self.hyperlink_license,0,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
+        sizer_build.Add( self.hyperlink_paper,0,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
         
         sizer_main.Add(sizer_header, 0, wx.TOP|wx.EXPAND, 3)
         sizer_main.Add(self.static_line_1, 0, wx.EXPAND, 0)
@@ -146,4 +142,20 @@ class PanelAbout(wx.Panel):
     
 
 # end of class DialogAbout
+class HelpWindow(wx.Frame):
+    def __init__(self, parent, id, title):
+        wx.Frame.__init__(self, parent, id, title, size=(570, 400))
+       
+        
+        self.page = PanelAbout(self)
+        
+        self.Centre()
+        self.Show(True)
 
+
+   
+if __name__=="__main__":
+    app = wx.App()
+    HelpWindow(None, -1, 'HelpWindow')
+    app.MainLoop()
+        
