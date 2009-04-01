@@ -95,18 +95,18 @@ class Plugin:
         id3 = wx.NewId()
         scipy_help= "Scipy Engine: Perform Simple fit. More in Help window...."
         #self.menu1.Append(id3, "Scipy",scipy_help) 
-        self.menu1.AppendCheckItem(id3, "Scipy",scipy_help) 
+        self.menu1.AppendCheckItem(id3, "Simple Fit  [Scipy]",scipy_help) 
         wx.EVT_MENU(owner, id3,  self._onset_engine_scipy)
         
         id3 = wx.NewId()
         park_help = "Park Engine: Perform Complex fit. More in Help window...."
-        self.menu1.AppendCheckItem(id3, "Park",park_help) 
+        self.menu1.AppendCheckItem(id3, "Complex Fit  [Park]",park_help) 
         wx.EVT_MENU(owner, id3,  self._onset_engine_park)
         self.menu1.AppendSeparator()
         
         id1 = wx.NewId()
         simul_help = "Allow to edit fit engine with multiple model and data"
-        self.menu1.Append(id1, '&Simultaneous page',simul_help)
+        self.menu1.Append(id1, '&Simultaneous Page',simul_help)
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
     
         #menu for model
