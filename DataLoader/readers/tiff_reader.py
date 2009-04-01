@@ -15,7 +15,7 @@ copyright 2008, University of Tennessee
 
 import math, logging, os
 import numpy
-from DataLoader.data_info import Image2D
+from DataLoader.data_info import Data2D
     
 class Reader:
     """
@@ -50,7 +50,7 @@ class Reader:
             raise RuntimeError, "tiff_reader: could not load file. Missing Image module."
         
         # Instantiate data object
-        output = Image2D()
+        output = Data2D()
         output.filename = os.path.basename(filename)
             
         # Read in the image
@@ -58,14 +58,14 @@ class Reader:
             im = Image.open(filename)
         except :
             raise  RuntimeError,"cannot open %s"%(filename)
-        data = im.load()
+        predata = im.load()
 
         x_range = im.size[0]
         y_range = im.size[1]
         
         # Initiazed the output data object
-        output.image = numpy.zeros([y_range,x_range])
-
+        output.data = numpy.zeros([y_range,x_range])
+        output.err_data = numpy.zeros([y_range,x_range])
         # Initialize 
         x_vals = []
         y_vals = [] 
@@ -82,37 +82,33 @@ class Reader:
             for i_y in range(y_range):
             
                 try:
-                    if data[i_x,i_y].__class__.__name__=="tuple":                     
+                    if predata[i_x,i_y].__class__.__name__=="tuple":                     
                         
-                        if len(data[i_x,i_y]) == 3:   
-                            R,G,B= data[i_x,i_y]
-                            #Converting to L Mode: uses the ITU-R 601-2 luma transform.
-                            value = float(R * 299/1000 + G * 587/1000 + B * 114/1000) 
+                        if len(predata[i_x,i_y]) == 3:   
+                            R,G,B= predata[i_x,i_y]
+                        elif len(predata[i_x,i_y]) == 4:   
+                            R,G,B,I = predata[i_x,i_y]
+                        #Converting to L Mode: uses the ITU-R 601-2 luma transform.
+                        value = float(R * 299/1000 + G * 587/1000 + B * 114/1000) 
                          
-                        elif len(data[i_x,i_y]) == 4:   
-                            R,G,B,I = data[i_x,i_y]
-                            #Take only I 
-                            value = float(R * 299/1000 + G * 587/1000 + B * 114/1000)+float(I)
                     else:
                         #Take it as Intensity
-                        value = float(data[i_x,i_y])
+                        value = float(predata[i_x,i_y])
                 except:
                     logging.error("tiff_reader: had to skip a non-float point")
                     continue
                 
                   
-                output.image[y_range-i_y-1,i_x] = value
+                output.data[y_range-i_y-1,i_x] = value
         
         output.xbins      = x_range
         output.ybins      = y_range
         output.x_bins     = x_vals
         output.y_bins     = y_vals
         output.xmin       = 0
-        output.xmax       = x_range
+        output.xmax       = x_range-1
         output.ymin       = 0
-        output.ymax       = y_range
+        output.ymax       = y_range-1
         
         return output
         
-
-
