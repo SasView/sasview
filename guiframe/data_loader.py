@@ -114,16 +114,6 @@ def plot_data(parent, path):
             new_plot.x_bins=output.x_bins
             new_plot.y_bins=output.y_bins
             
-        ## Creating a pic image2D with output    
-        elif hasattr(output,'image'):
-            msg= "Note that RGB was modified to fit the SansView plot platform..."
-            wx.PostEvent(parent, StatusEvent(status=" %s %s"% (msg,output.filename)))
-            new_plot = Data2D(image=output.image,
-                              xmin=output.xmin,xmax=output.xmax,
-                              ymin=output.ymin,ymax=output.ymax, pictype = 'image')
-            new_plot.x_bins=output.x_bins
-            new_plot.y_bins=output.y_bins
-            #new_plot.scale = 'linear'
         ##Creating Data1D with output
         else:
             ##dy values checked
