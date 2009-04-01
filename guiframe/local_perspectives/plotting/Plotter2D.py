@@ -180,25 +180,23 @@ class ModelPanel2D( ModelPanel1D):
         wx.EVT_MENU(self, id, self.onPrinterPreview)
         
         slicerpop.AppendSeparator()
-        item_list = self.parent.get_context_menu(self.graph)
-        if (not item_list==None) and (not len(item_list)==0):
-                
-                for item in item_list:
-                    try:
-                        id = wx.NewId()
-                        slicerpop.Append(id, item[0], item[1])
-                        wx.EVT_MENU(self, id, item[2])
-                    except:
-                        wx.PostEvent(self.parent, StatusEvent(status=\
-                        "ModelPanel1D.onContextMenu: bad menu item  %s"%sys.exc_value))
-                        pass
-                slicerpop.AppendSeparator()
-        
-        id = wx.NewId()
-        slicerpop.Append(id, '&Edit Detector Parameters')
-        wx.EVT_MENU(self, id, self._onEditDetector) 
-        
         if not hasattr(self.data2D,"pictype"):
+        
+            
+            item_list = self.parent.get_context_menu(self.graph)
+            if (not item_list==None) and (not len(item_list)==0):
+                    
+                    for item in item_list:
+                        try:
+                            id = wx.NewId()
+                            slicerpop.Append(id, item[0], item[1])
+                            wx.EVT_MENU(self, id, item[2])
+                        except:
+                            wx.PostEvent(self.parent, StatusEvent(status=\
+                            "ModelPanel1D.onContextMenu: bad menu item  %s"%sys.exc_value))
+                            pass
+                    slicerpop.AppendSeparator()
+            
             id = wx.NewId()
             slicerpop.Append(id, '&Perform circular average')
             wx.EVT_MENU(self, id, self.onCircular) 
@@ -234,6 +232,11 @@ class ModelPanel2D( ModelPanel1D):
                     wx.EVT_MENU(self, id, self._onEditSlicer) 
                     
             slicerpop.AppendSeparator() 
+            
+        id = wx.NewId()
+        slicerpop.Append(id, '&Detector Parameters')
+        wx.EVT_MENU(self, id, self._onEditDetector) 
+        
        
         id = wx.NewId()
         slicerpop.Append(id, '&Toggle Linear/Log scale')
