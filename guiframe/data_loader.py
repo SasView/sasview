@@ -68,7 +68,7 @@ def load_ascii_1D(path):
             file_dx = None
             
         return file_x, file_y, file_dy, file_dx
-    return None, None, None
+    return None, None, None, None
 
 def plot_data(parent, path):
     """
