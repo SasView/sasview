@@ -120,7 +120,7 @@ class Plugin:
         
         # Create a new plot panel if none was available        
         if not is_available:
-            print"event.plot",hasattr(event.plot,'data')
+            #print"event.plot",hasattr(event.plot,'data')
             if not hasattr(event.plot,'data'):
                 from Plotter1D import ModelPanel1D
                 ## get the data representation label of the data to plot

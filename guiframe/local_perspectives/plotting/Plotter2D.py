@@ -150,6 +150,15 @@ class ModelPanel2D( ModelPanel1D):
         # Check axis labels
         #TODO: Should re-factor this
         ## render the graph with its new content
+                
+        #data2D: put 'Pixel (Number)' for axis title and unit in case of having no detector info and none in _units
+        if len(self.data2D.detector) < 1: 
+            if len(event.plot._xunit)< 1 and len(event.plot._yunit) < 1:
+                event.plot._xaxis = 'Pixel'
+                event.plot._yaxis = 'Pixel'
+                event.plot._xunit = 'Number'
+                event.plot._yunit = 'Number'
+
         self.graph.xaxis(event.plot._xaxis, event.plot._xunit)
         self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
         self.graph.title(self.data2D.name)
@@ -180,7 +189,7 @@ class ModelPanel2D( ModelPanel1D):
         wx.EVT_MENU(self, id, self.onPrinterPreview)
         
         slicerpop.AppendSeparator()
-        if len(self.data2D.detector) >0 :        
+        if len(self.data2D.detector) == 1:        
             
             item_list = self.parent.get_context_menu(self.graph)
             if (not item_list==None) and (not len(item_list)==0):
