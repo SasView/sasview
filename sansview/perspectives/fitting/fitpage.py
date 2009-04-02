@@ -8,7 +8,9 @@ from sans.models.dispersion_models import ArrayDispersion, GaussianDispersion
 
 from sans.guicomm.events import StatusEvent   
 from sans.guiframe.utils import format_number
+
 (ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
+(FitterTypeEvent, EVT_FITTER_TYPE)   = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 80
 
 import basepage
@@ -42,8 +44,34 @@ class FitPage(BasicPage):
         self.model = self.formfactorbox.GetClientData(0)()
         self.page_info.model= self.model
         self._on_select_model(event=None)
+        self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
+    
+    
+    def _on_engine_change(self, event):
+        """
+            get an event containing the current name of the fit engine type
+            @param event: FitterTypeEvent containing  the name of the current engine
+        """
+        if len(self.parameters)==0:
+            return
+        for item in self.parameters:
+            if event.type =="scipy":
+                item[5].SetValue(format_number(""))
+                item[5].Hide()
+                item[6].SetValue(format_number(""))
+                item[6].Hide()
+                self.text2_min.Hide()
+                self.text2_max.Hide()
+            else:
+                item[5].Show(True)
+                item[6].Show(True)
+                self.text2_min.Show(True)
+                self.text2_max.Show(True)
+                
+        self.sizer3.Layout()
+        self.SetScrollbars(20,20,200,100)
             
-        
+            
     def _on_display_description(self, event):
         """
             Show or Hide description
@@ -260,6 +288,7 @@ class FitPage(BasicPage):
                     
                     ctl1.SetValue(str (format_number(value)))
                     ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                    ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                     ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                     self.sizer4_4.Add(ctl1, (iy,ix),(1,1),wx.EXPAND)
                     
@@ -285,6 +314,7 @@ class FitPage(BasicPage):
                         
                         Tctl.SetValue(str (format_number(value)))
                         Tctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                        Tctl.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                         Tctl.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                         self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
                                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -299,6 +329,7 @@ class FitPage(BasicPage):
                                             style=wx.TE_PROCESS_ENTER)
                         Tctl.SetValue(str (format_number(value)))
                         Tctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                        Tctl.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                         Tctl.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                         self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
                                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -343,7 +374,6 @@ class FitPage(BasicPage):
         self.manager.schedule_for_fit( value=1,page=self,fitproblem =None) 
         self.manager.set_fit_range(page= self,qmin= self.qmin_x, qmax= self.qmax_x)
         #single fit 
-        #self.manager.on_single_fit(qmin=self.qmin_x,qmax=self.qmax_x)
         self.manager.onFit()
             
         self.sizer5.Layout()
@@ -372,7 +402,6 @@ class FitPage(BasicPage):
         """ 
             when enter value on panel redraw model according to changed
         """
-        
         self._onparamEnter_helper()
         self.compute_chisqr()
         
@@ -659,7 +688,7 @@ class FitPage(BasicPage):
    
         
         
-    def set_model_param_sizer(self, model, engine_type="park"):
+    def set_model_param_sizer(self, model):
         """
             Build the panel from the model content
             @param model: the model selected in combo box for fitting purpose
@@ -718,9 +747,7 @@ class FitPage(BasicPage):
         sizer.Add(self.text2_4,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_4.Hide()
-        if  engine_type == "park":
-            self.text2_max.Show(True)
-            self.text2_min.Show(True)
+        
 
         for item in keys:
             if not item in self.disp_list:
@@ -738,7 +765,8 @@ class FitPage(BasicPage):
                 ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                     style=wx.TE_PROCESS_ENTER)
                 
-                ctl1.SetValue(str (format_number(value)))
+                ctl1.SetValue(format_number(value))
+                ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                 ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
@@ -754,23 +782,25 @@ class FitPage(BasicPage):
                 sizer.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl2.Hide()
                 
+                param_min, param_max= self.model.details[item][1:]
                 ix += 1
                 ctl3 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
+                ctl3.SetValue(format_number(param_min))
+                ctl3.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                 ctl3.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl3.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl3.Hide()
-                
+        
                 ix += 1
                 ctl4 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
+                ctl4.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                 ctl4.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl4.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                ctl4.SetValue(format_number(param_max))
                 ctl4.Hide()
-                if  engine_type == "park":
-                    ctl3.Show(True)
-                    ctl4.Show(True)
-                    
+              
                 ix +=1
                 # Units
                 try:

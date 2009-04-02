@@ -177,6 +177,7 @@ class ModelPage(BasicPage):
                     
                     ctl1.SetValue(str (format_number(value)))
                     ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                    ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                     ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                     self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                     
@@ -191,6 +192,7 @@ class ModelPage(BasicPage):
                         
                         Tctl1.SetValue(str (format_number(value)))
                         Tctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                        Tctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                         Tctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                         self.sizer4_4.Add(Tctl1, (iy,ix),(1,1),
                                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -206,6 +208,7 @@ class ModelPage(BasicPage):
                                             style=wx.TE_PROCESS_ENTER)
                         Tctl2.SetValue(str (format_number(value)))
                         Tctl2.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                        Tctl2.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                         Tctl2.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                         self.sizer4_4.Add(Tctl2, (iy,ix),(1,1),
                                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -385,6 +388,7 @@ class ModelPage(BasicPage):
                 
                 ctl1.SetValue(str (format_number(value)))
                 ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 
                 sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)

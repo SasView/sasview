@@ -289,6 +289,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
             Show constraint fields
         """
+        self.btAdd.Show(True)
         if len(self.constraints_list)!= 0:
             nb_fit_param = 0
             for model in self.constraint_dict.values():
@@ -510,6 +511,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.btAdd =wx.Button(self,wx.NewId(),'Add')
         self.btAdd.Bind(wx.EVT_BUTTON, self._onAdd_constraint,id= self.btAdd.GetId())
         self.btAdd.SetToolTipString("Add another constraint?")
+        self.btAdd.Hide()
      
         
         text_hint = wx.StaticText(self,-1,"Example: M0.paramter = M1.parameter") 

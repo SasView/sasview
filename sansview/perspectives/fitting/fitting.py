@@ -22,6 +22,7 @@ DEFAULT_NPTS = 50
 import time
 import thread
 
+
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
 class PlotInfo:
     """
@@ -449,11 +450,20 @@ class Plugin:
         """
             Add name of a closed page of fitpanel in a menu 
         """
-        # Post paramters
-        event_id = wx.NewId()
-        self.menu1.Append(event_id, name, 
-             "Show %s fit panel" % name)
-        self.closed_page_dict[event_id ]= [page_info, fitproblem]
+        if len(self.closed_page_dict)>0:
+            for k , value in self.closed_page_dict.iteritems():
+                if not name in value:
+                    # Post paramters
+                    event_id = wx.NewId()
+                    self.menu1.Append(event_id, name, "Show %s fit panel" % name)
+                    self.closed_page_dict[event_id ]= [page_info, fitproblem]
+                else:
+                    event_id= k
+                    self.closed_page_dict[k ]= [page_info, fitproblem]
+        else:
+            event_id = wx.NewId()
+            self.menu1.Append(event_id, name, "Show %s fit panel" % name)
+            self.closed_page_dict[event_id ]= [page_info, fitproblem]
         wx.EVT_MENU(self.parent,event_id,  self._open_closed_page)
         
         
@@ -718,9 +728,18 @@ class Plugin:
             Allow to select the type of engine to perform fit 
             @param engine: the key work of the engine
         """
+        ## saving fit engine name
         self._fit_engine = engine
+        ## post a message to status bar
         wx.PostEvent(self.parent, StatusEvent(status="Engine set to: %s" % self._fit_engine))
    
+        ## Bind every open fit page with a newevent to know the current fitting engine
+        import fitpage
+        event= fitpage.FitterTypeEvent()
+        event.type = self._fit_engine
+        for key in self.page_finder.keys():
+            wx.PostEvent(key, event)
+       
    
     def _on_model_panel(self, evt):
         """
@@ -728,24 +747,22 @@ class Plugin:
             @param evt: wx.combobox event
         """
         model = evt.model
+        
         if model ==None:
             return
        
-        sim_page=self.sim_page
         current_pg = self.fit_panel.get_current_page() 
         ## make sure nothing is done on self.sim_page
         ## example trying to call set_panel on self.sim_page
-        if current_pg != sim_page:
+        if current_pg != self.sim_page :
            
             if self.page_finder[current_pg].get_model()== None :
                 
                 model.name="M"+str(self.index_model)
                 self.index_model += 1  
             else:
-                
                 model.name= self.page_finder[current_pg].get_model().name
                 
-           
             metadata = self.page_finder[current_pg].get_plotted_data()
             
             # save the name containing the data name with the appropriate model

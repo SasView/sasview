@@ -28,6 +28,8 @@ class BasicPage(wx.ScrolledWindow):
         self.page_info.page_name = name
         ## parent of the page
         self.parent = parent
+        ## manager is the fitting plugin
+        self.manager=None
         ## owner of the page (fitting plugin)
         self.event_owner= None
         ## create the basic structure of the panel with empty sizer
@@ -69,6 +71,7 @@ class BasicPage(wx.ScrolledWindow):
             self.model=self.page_info.model
             self.data = self.page_info.data
             self.event_owner = self.page_info.event_owner
+            self.manager=self.page_info.manager
             
             if self.model !=None:
                 self.disp_list= self.model.getDispParamList()
@@ -355,10 +358,35 @@ class BasicPage(wx.ScrolledWindow):
 
      
     def onSetFocus(self, evt):
+        """
+            highlight the current textcrtl and hide the error text control shown 
+            after fitting
+        """
+        if hasattr(self,"text2_3"):
+            self.text2_3.Hide()
+        if len(self.parameters)>0:
+            for item in self.parameters:
+                ## hide statictext +/-    
+                if item[3]!=None:
+                    item[3].Hide()
+                ## hide textcrtl  for error after fit
+                if item[4]!=None:
+                    item[4].Clear()
+                    item[4].Hide()
+        if len(self.fittable_param)>0:
+            for item in self.fittable_param:
+                ## hide statictext +/-    
+                if item[3]!=None:
+                    item[3].Hide()
+                ## hide textcrtl  for error after fit
+                if item[4]!=None:
+                    item[4].Clear()
+                    item[4].Hide()
+        self.Layout()
         # Get a handle to the TextCtrl
         widget = evt.GetEventObject()
         # Select the whole control, after this event resolves
-        wx.CallAfter(widget.SetSelection, -1, -1)
+        wx.CallAfter(widget.SetSelection, -1,-1)
         return
     
     def read_file(self, path):
@@ -413,6 +441,7 @@ class BasicPage(wx.ScrolledWindow):
              use : _check_value_enter 
         """
         if self.model !=None:
+            
             # Flag to register when a parameter has changed.
             is_modified = False
             is_modified =self._check_value_enter( self.fittable_param ,is_modified)
@@ -722,11 +751,11 @@ class BasicPage(wx.ScrolledWindow):
             from sans.models.MultiplicationModel import MultiplicationModel
             self.model= MultiplicationModel(form_factor(),struct_factor())
 
-        self.set_model_param_sizer(self.model)
+        self._on_select_model(event=None)
         self.sizer4_4.Clear()
         self.sizer4.Layout()
             
-        self._draw_model()
+        
         self.set_scroll()
         
         
@@ -751,7 +780,7 @@ class BasicPage(wx.ScrolledWindow):
             
         except:
             pass
-        wx.EVT_COMBOBOX(combobox,-1, self._on_select_model) 
+        #wx.EVT_COMBOBOX(combobox,-1, self._on_select_model) 
         return 0
    
    
@@ -801,14 +830,39 @@ class BasicPage(wx.ScrolledWindow):
             return is_modified
         for item in list:
             try:
+                name = str(item[1])
                 if hasattr(self,"text2_3"):
                     self.text2_3.Hide()
+                ## check model parameters range
+                ## check minimun value
+                param_min= None
+                param_max= None
+                if item[5]!= None:
+                    if format_number(item[5].GetValue())!="NaN":
+                        param_min = float(item[5].GetValue())
+                    self.model.details[name][1]=param_min
+                ## check maximum value
+                if item[6]!= None:
+                    if format_number(item[6].GetValue())!="NaN":
+                        param_max = float(item[6].GetValue())
+                        
+                from sans.guiframe.utils import check_value
+                if param_min != None and param_max !=None:
+                    if check_value(item[5], item[6]):
+                        self.model.details[name][1:]=param_min,param_max
+                    else:
+                        msg= "Wrong Fit range entered for parameter "
+                        msg+= "name %s of model %s "%(name, self.model.name)
+                        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                        self.model.details[name][1:]=param_min,param_max
+                ## hide statictext +/-    
                 if item[3]!=None:
                     item[3].Hide()
+                ## hide textcrtl  for error after fit
                 if item[4]!=None:
                     item[4].Clear()
                     item[4].Hide()
-                name = str(item[1])
+                
                 value= float(item[2].GetValue())
                 # If the value of the parameter has changed,
                 # +update the model and set the is_modified flag

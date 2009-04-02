@@ -151,7 +151,8 @@ class FitPanel(wx.aui.AuiNotebook):
         from pageInfo import  PageInfo
         myinfo = PageInfo( self, data=data )
         myinfo.model_list_box = self.model_list_box.get_list()
-        myinfo.event_owner =self.event_owner 
+        myinfo.event_owner = self.event_owner 
+        myinfo.manager = self.manager
         
         if not name in self.fit_page_name :
             
@@ -159,9 +160,6 @@ class FitPanel(wx.aui.AuiNotebook):
             panel = FitPage(parent= self, page_info=myinfo, name=name )
             panel.name = name
             panel.window_name= "fitpage"
-            panel.set_manager(self.manager)
-            panel.set_owner(self.event_owner)
-            
             self.AddPage(page=panel,caption=name,select=True)
             #panel.populate_box( self.model_list_box)
             self.fit_page_name.append(name)
@@ -214,16 +212,14 @@ class FitPanel(wx.aui.AuiNotebook):
         from pageInfo import  PageInfo
         myinfo = PageInfo( self, model )
         myinfo.model_list_box = self.model_list_box.get_list()
-        myinfo.event_owner =self.event_owner
+        myinfo.event_owner = self.event_owner 
+        myinfo.manager = self.manager
         
         from modelpage import ModelPage
         panel = ModelPage(self,myinfo,page_title)
-        panel.set_manager(self.manager)
-        panel.set_owner(self.event_owner)
-        
-        
+       
         self.AddPage(page=panel,caption="Model",select=True)
-        #panel.populate_box( self.model_list_box)
+
         panel.name = page_title
         self.draw_model_name=page_title
         self.model_page_number=self.GetSelection()
