@@ -470,17 +470,17 @@ class Plugin:
         for value in self.closed_page_dict.values():
             if event.GetId() in value:
                 id, page_info,fitproblem = value
-                
-            if page_info.page_name !="Model Page":
-                page = self.fit_panel.add_fit_page(data= page_info.data,
-                                                    page_info=page_info)
-                if fitproblem != None:
-                    self.page_finder[page]=fitproblem
-            else:
-                model= page_info.model
-                self.fit_panel.add_model_page(model,model.name,topmenu=False,
-                                              page_info=page_info)
-            break
+        
+                if page_info.page_name !="Model Page":
+                    page = self.fit_panel.add_fit_page(data= page_info.data,
+                                                        page_info=page_info)
+                    if fitproblem != None:
+                        self.page_finder[page]=fitproblem
+                else:
+                    model= page_info.model
+                    self.fit_panel.add_model_page(model,model.name,topmenu=False,
+                                                  page_info=page_info)
+                    break
         
         
     def _reset_schedule_problem(self, value=0):
