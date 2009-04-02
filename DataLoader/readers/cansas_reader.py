@@ -587,9 +587,9 @@ class Reader:
         else:
             data_info.xaxis("\\rm{Q}", 'A^{-1}')
         if data_conv_i is not None:
-            data_info.yaxis("\\{I(Q)}", data_info.y_unit)
+            data_info.yaxis("\\rm{Intensity}", data_info.y_unit)
         else:
-            data_info.yaxis("\\rm{I(Q)}","cm^{-1}")
+            data_info.yaxis("\\rm{Intensity}","cm^{-1}")
         
         return data_info
 

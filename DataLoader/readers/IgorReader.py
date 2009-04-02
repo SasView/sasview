@@ -283,9 +283,9 @@ class Reader:
             output.yaxis("\\rm{Q_{y}}", 'A^{-1}')
             
         if data_conv_i is not None:
-            output.zaxis("\\{I(Q)}", output.I_unit)
+            output.zaxis("\\rm{Intensity}", output.I_unit)
         else:
-            output.zaxis("\\rm{I(Q)}","cm^{-1}")
+            output.zaxis("\\rm{Intensity}","cm^{-1}")
     
         
         return output
