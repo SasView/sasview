@@ -849,13 +849,13 @@ class BasicPage(wx.ScrolledWindow):
                         
                 from sans.guiframe.utils import check_value
                 if param_min != None and param_max !=None:
-                    if check_value(item[5], item[6]):
-                        self.model.details[name][1:]=param_min,param_max
-                    else:
+                    if not check_value(item[5], item[6]):
                         msg= "Wrong Fit range entered for parameter "
                         msg+= "name %s of model %s "%(name, self.model.name)
                         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-                        self.model.details[name][1:]=param_min,param_max
+                    
+                self.model.details[name][1:]= param_min,param_max
+                
                 ## hide statictext +/-    
                 if item[3]!=None:
                     item[3].Hide()
