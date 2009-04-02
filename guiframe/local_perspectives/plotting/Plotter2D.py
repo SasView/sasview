@@ -154,10 +154,10 @@ class ModelPanel2D( ModelPanel1D):
         #data2D: put 'Pixel (Number)' for axis title and unit in case of having no detector info and none in _units
         if len(self.data2D.detector) < 1: 
             if len(event.plot._xunit)< 1 and len(event.plot._yunit) < 1:
-                event.plot._xaxis = 'Pixel'
-                event.plot._yaxis = 'Pixel'
-                event.plot._xunit = 'Number'
-                event.plot._yunit = 'Number'
+                event.plot._xaxis = '\\rm{x}'
+                event.plot._yaxis = '\\rm{y}'
+                event.plot._xunit = 'pixel'
+                event.plot._yunit = 'pixel'
 
         self.graph.xaxis(event.plot._xaxis, event.plot._xunit)
         self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
