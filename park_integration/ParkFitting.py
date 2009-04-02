@@ -68,12 +68,12 @@ class ParkFit(FitEngine):
         for item in fitproblems:
             parkmodel = item.get_model()
             for p in parkmodel.parameterset:
-                
+                ## does not allow status change for constraint parameters
                 if p.status!= 'computed':
                     if p._getname()in item.pars:
-                        
-                        p.status = 'fitted' # make it a fitted parameter
-                                #iscomputed  paramter with string inside
+                        ## make parameters selected for fit will be between boundaries
+                        p.set( p.range )
+                                
                     else:
                         p.status= 'fixed'
              
