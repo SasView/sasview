@@ -37,6 +37,8 @@ class FitPage(BasicPage):
         self.npts=None
         ## if no dispersity parameters is avaible 
         self.text_disp_1=None
+        ## default fitengine type
+        self.engine_type = "scipy"
         
         self._fill_datainfo_sizer()
         self._fill_model_sizer( self.sizer1)
@@ -52,6 +54,8 @@ class FitPage(BasicPage):
             get an event containing the current name of the fit engine type
             @param event: FitterTypeEvent containing  the name of the current engine
         """
+        self.engine_type = event.type
+         
         if len(self.parameters)==0:
             return
         for item in self.parameters:
@@ -747,7 +751,9 @@ class FitPage(BasicPage):
         sizer.Add(self.text2_4,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_4.Hide()
-        
+        if self.engine_type=="park":
+            self.text2_max.Show(True)
+            self.text2_min.Show(True)
 
         for item in keys:
             if not item in self.disp_list:
@@ -800,7 +806,11 @@ class FitPage(BasicPage):
                 sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl4.SetValue(format_number(param_max))
                 ctl4.Hide()
-              
+                
+                if self.engine_type=="park":
+                    ctl3.Show(True)
+                    ctl4.Show(True)
+                    
                 ix +=1
                 # Units
                 try:

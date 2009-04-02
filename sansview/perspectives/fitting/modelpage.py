@@ -86,6 +86,7 @@ class ModelPage(BasicPage):
         self.npts.SetValue(format_number(self.num_points))
         self.npts.SetToolTipString("Number of point to plot.")
         self.npts.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+        self.npts.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         self.npts.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
         
         sizer_npts.Add(wx.StaticText(self, -1, 'Npts'),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)        

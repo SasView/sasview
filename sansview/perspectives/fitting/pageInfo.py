@@ -77,7 +77,9 @@ class PageInfo(object):
         
         obj          = PageInfo( self.parent,model= model )
         obj.data = copy.deepcopy(self.data)
-        
+        obj.model_list_box = copy.deepcopy(self.model_list_box)
+        obj.manager = self.manager
+        obj.event_owner = self.event_owner
         return obj
 
        

@@ -810,6 +810,7 @@ class BasicPage(wx.ScrolledWindow):
             
         else:
             self.model= form_factor()
+        self.page_info.model= self.model
        
         
     def _onparamEnter(self,event):
@@ -921,7 +922,9 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Clear(True)
         model_disp = wx.StaticText(self, -1, 'No PolyDispersity for this model')
         self.sizer4_4.Add(model_disp,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        self.sizer4_4.Layout()
         self.sizer4.Layout()
+       
         self.SetScrollbars(20,20,200,100)
         return 
     
@@ -1006,12 +1009,14 @@ class BasicPage(wx.ScrolledWindow):
         self.qmin.SetValue(format_number(self.qmin_x))
         self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
         self.qmin.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+        self.qmin.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         self.qmin.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
      
         self.qmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.qmax.SetValue(format_number(self.qmax_x))
         self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
         self.qmax.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+        self.qmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         self.qmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
      
         sizer_horizontal=wx.BoxSizer(wx.HORIZONTAL)
@@ -1036,6 +1041,7 @@ class BasicPage(wx.ScrolledWindow):
         #----------------------------------------------------------------
         self.sizer5.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer5.Layout()
+        self.Layout()
         self.SetScrollbars(20,20,200,100)
     
     def _fill_save_sizer(self):

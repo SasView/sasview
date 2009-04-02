@@ -450,36 +450,38 @@ class Plugin:
         """
             Add name of a closed page of fitpanel in a menu 
         """
-        if len(self.closed_page_dict)>0:
-            for k , value in self.closed_page_dict.iteritems():
-                if not name in value:
-                    # Post paramters
-                    event_id = wx.NewId()
-                    self.menu1.Append(event_id, name, "Show %s fit panel" % name)
-                    self.closed_page_dict[event_id ]= [page_info, fitproblem]
-                else:
-                    event_id= k
-                    self.closed_page_dict[k ]= [page_info, fitproblem]
-        else:
+        list = self.menu1.GetMenuItems()
+        for item in list:
+            if name == item.GetItemLabel():
+                self.closed_page_dict[name][1:] = page_info, fitproblem
+                
+        if not name in self.closed_page_dict.keys():    
+            # Post paramters
             event_id = wx.NewId()
             self.menu1.Append(event_id, name, "Show %s fit panel" % name)
-            self.closed_page_dict[event_id ]= [page_info, fitproblem]
-        wx.EVT_MENU(self.parent,event_id,  self._open_closed_page)
+            self.closed_page_dict[name]= [event_id,page_info, fitproblem]
+            wx.EVT_MENU(self.parent,event_id,  self._open_closed_page)
         
         
     def _open_closed_page(self, event):    
         """
             reopen a closed page
         """
-        if event.GetId() in self.closed_page_dict.keys():
-            page_info,fitproblem = self.closed_page_dict[ event.GetId() ]
+        for value in self.closed_page_dict.values():
+            if event.GetId() in value:
+                id, page_info,fitproblem = value
+                
             if page_info.page_name !="Model Page":
-                page = self.fit_panel.add_fit_page(page_info.data)
+                page = self.fit_panel.add_fit_page(data= page_info.data,
+                                                    page_info=page_info)
                 if fitproblem != None:
                     self.page_finder[page]=fitproblem
             else:
                 model= page_info.model
-                self.fit_panel.add_model_page(model,model.name,topmenu=False)
+                self.fit_panel.add_model_page(model,model.name,topmenu=False,
+                                              page_info=page_info)
+            break
+        
         
     def _reset_schedule_problem(self, value=0):
         """

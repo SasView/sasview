@@ -138,7 +138,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.sim_page.set_manager(self.manager)
         return self.sim_page
         
-    def add_fit_page( self,data ):
+    def add_fit_page( self,data, page_info=None ):
         """ 
             Add a fitting page on the notebook contained by fitpanel
             @param data: data to fit
@@ -148,20 +148,21 @@ class FitPanel(wx.aui.AuiNotebook):
             name = data.name 
         except:
             name = 'Fit'
-        from pageInfo import  PageInfo
-        myinfo = PageInfo( self, data=data )
-        myinfo.model_list_box = self.model_list_box.get_list()
-        myinfo.event_owner = self.event_owner 
-        myinfo.manager = self.manager
+        if page_info==None:
+            from pageInfo import  PageInfo
+            myinfo = PageInfo( self, data=data )
+            myinfo.model_list_box = self.model_list_box.get_list()
+            myinfo.event_owner = self.event_owner 
+            myinfo.manager = self.manager
+        else:
+            myinfo = page_info
         
         if not name in self.fit_page_name :
-            
             from fitpage import FitPage
             panel = FitPage(parent= self, page_info=myinfo, name=name )
             panel.name = name
             panel.window_name= "fitpage"
             self.AddPage(page=panel,caption=name,select=True)
-            #panel.populate_box( self.model_list_box)
             self.fit_page_name.append(name)
             
             return panel 
@@ -169,27 +170,33 @@ class FitPanel(wx.aui.AuiNotebook):
             return None 
         
    
-    def add_model_page(self,model,page_title, qmin=0, qmax=0.1, npts=50, topmenu=False):
+    def add_model_page(self,model,page_title, qmin=0, qmax=0.1,
+                        npts=50, topmenu=False,page_info=None):
         """
             Add a model page only one  to display any model selected from the menu or the page combo box.
             when this page is closed than the user will be able to open a new one
             
             @param model: the model for which paramters will be changed
             @param page_title: the name of the page
-            @param page_title: [Coder: fill your description!]
+            @param page_info: contains info about the state of the page
             @param qmin: mimimum Q
             @param qmax: maximum Q
             @param npts: number of Q points
         """
         if topmenu==True:
             if  self.draw_model_name ==None:
-                self._help_add_model_page(model,page_title, qmin=qmin, qmax=qmax, npts=npts)
+                self._help_add_model_page(model,page_title, 
+                                qmin=qmin, qmax=qmax, npts=npts, page_info=page_info)
             else:
                 self.model_page.select_model(model, page_title)
         else:
-            self._create_model_page(model,page_title, qmin=qmin, qmax=qmax, npts=npts)
-          
-    def _help_add_model_page(self,model,page_title, qmin=0, qmax=0.1, npts=50):
+            if  self.draw_model_name ==None:
+                self._create_model_page(model,page_title, qmin=qmin, qmax=qmax,
+                                         npts=npts, page_info=page_info)
+           
+                
+    def _help_add_model_page(self,model,page_title, qmin=0, 
+                             qmax=0.1, npts=50,page_info=None):
         """
             #TODO: fill in description
             
@@ -197,24 +204,27 @@ class FitPanel(wx.aui.AuiNotebook):
             @param qmax: maximum Q
             @param npts: number of Q points
         """
-        self._create_model_page(model,page_title,qmin=qmin, qmax=qmax, npts=npts)
+        self._create_model_page(model,page_title,qmin=qmin, qmax=qmax,
+                                 npts=npts,page_info= page_info)
         # We just created a model page, we are ready to plot the model
         #self.manager.draw_model(model, model.name)
         #FOR PLUGIN  for some reason model.name is = BASEcomponent
         self.manager.draw_model(model)
     
-    def _create_model_page(self,model,page_title, qmin, qmax, npts):
+    def _create_model_page(self,model,page_title, qmin, qmax, npts,page_info=None):
         """
         adding model page occurs here
         """
-       
-        ## storing page info
-        from pageInfo import  PageInfo
-        myinfo = PageInfo( self, model )
-        myinfo.model_list_box = self.model_list_box.get_list()
-        myinfo.event_owner = self.event_owner 
-        myinfo.manager = self.manager
-        
+        ## creating object that contaning info about model 
+        if page_info==None:
+            from pageInfo import  PageInfo
+            myinfo = PageInfo( self, model=model)
+            myinfo.model_list_box = self.model_list_box.get_list()
+            myinfo.event_owner = self.event_owner 
+            myinfo.manager = self.manager
+        else:
+            myinfo = page_info
+    
         from modelpage import ModelPage
         panel = ModelPage(self,myinfo,page_title)
        
