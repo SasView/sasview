@@ -125,9 +125,14 @@ class Registry(ExtensionRegistry):
                 for ext in loader.ext:
                     if ext not in self.loaders:
                         self.loaders[ext] = []
-                    self.loaders[ext].insert(0,loader.read)
+                    #The first reading will use the reader with only one ext.
+                    if len(self.loaders[ext])>0 and len(loader.ext)>2:
+                        self.loaders[ext].insert(1,loader.read)
+                    else:
+                        self.loaders[ext].insert(0,loader.read)
+
                     reader_found = True
-                        
+                    
                     # Keep track of wildcards
                     for wcard in loader.type:
                         if wcard not in self.wildcards:
@@ -139,6 +144,7 @@ class Registry(ExtensionRegistry):
                         if ext not in self.writers:
                             self.writers[ext] = []
                         self.writers[ext].insert(0,loader.write)
+                        
             except:
                 logging.error("Loader: Error accessing Reader in %s\n  %s" % (name, sys.exc_value))
         return reader_found
