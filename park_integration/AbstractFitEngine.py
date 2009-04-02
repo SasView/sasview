@@ -44,6 +44,9 @@ class SansParameter(park.Parameter):
         else:
             lo= -numpy.inf
             hi= numpy.inf
+        if lo >= hi:
+            raise ValueError,"wrong fit range for parameters"
+        
         return lo,hi
     
     def _setrange(self,r):
