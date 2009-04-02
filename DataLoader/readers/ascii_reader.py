@@ -25,9 +25,10 @@ class Reader:
     """
     ## File type
     type = ["ASCII files (*.txt)|*.txt",
-            "ASCII files (*.dat)|*.dat"]
+            "ASCII files (*.dat)|*.dat",
+            "ASCII files (*.abs)|*.abs"]
     ## List of allowed extensions
-    ext=['.txt', '.TXT', '.dat', '.DAT']  
+    ext=['.txt', '.TXT', '.dat', '.DAT', '.abs', '.ABS']  
     
     def read(self, path):
         """ 
@@ -48,6 +49,11 @@ class Reader:
                     raise  RuntimeError, "ascii_reader: cannot open %s" % path
                 buff = input_f.read()
                 lines = buff.split('\n')
+                
+                # some ascii data has \r line separator, try it when it has only one line
+                if len(lines) < 2 : 
+                    lines = buff.split('\r')
+                 
                 x  = numpy.zeros(0)
                 y  = numpy.zeros(0)
                 dy = numpy.zeros(0)
@@ -162,7 +168,7 @@ class Reader:
                 if len(x)==0:
                     raise RuntimeError, "ascii_reader: could not load file"
                 
-                #Let's reoder the data
+                #Let's re-order the data to make cal. curve look better some cases
                 ind = numpy.lexsort((ty,tx))
                 for i in ind:
                     x[i] = tx[ind[i]]
@@ -185,7 +191,7 @@ class Reader:
                     output.yaxis("\\{I(Q)}", output.y_unit)
                 else:
                     output.yaxis("\\rm{I(Q)}","cm^{-1}")
-                
+
                 return output
         else:
             raise RuntimeError, "%s is not a file" % path
