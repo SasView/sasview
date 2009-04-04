@@ -24,6 +24,8 @@ class Reader(object):
         Class to load HFIR 1D 4-column files
     """
     ## File type
+    type_name = "HFIR 1D"   
+    ## Wildcards
     type = ["HFIR 1D files (*.d1d)|*.d1d"]
     ## List of allowed extensions
     ext=['.d1d']  

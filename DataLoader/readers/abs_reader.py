@@ -23,6 +23,8 @@ class Reader:
         Class to load IGOR reduced .ABS files
     """
     ## File type
+    type_name = "IGOR 1D"   
+    ## Wildcards
     type = ["IGOR 1D files (*.abs)|*.abs"]
     ## List of allowed extensions
     ext=['.abs', '.ABS']  

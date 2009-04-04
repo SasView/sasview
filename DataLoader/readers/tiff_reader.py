@@ -22,22 +22,13 @@ class Reader:
         Example data manipulation
     """
     ## File type
+    type_name = "TIF"   
+    ## Wildcards
     type = ["TIF files (*.tif)|*.tif",
-            "JPG files (*.jpg)|*.jpg",
-            "JPEG files (*.jpeg)|*.jpeg",
-            "PNG files (*.png)|*.png",
             "TIFF files (*.tiff)|*.tiff",
-            "BMP files (*.bmp)|*.bmp",
-            "GIF files (*.gif)|*.gif",
             ]
     ## Extension
-    ext  = ['.tif','.TIF',
-             '.jpg','.JPG',
-              '.png','.PNG',
-               '.jpeg','.JPEG',
-                '.tiff','.TIFF',
-                 '.gif','.GIF',
-                  '.bmp', '.BMP']    
+    ext  = ['.tif', '.tiff']    
         
     def read(self, filename=None):
         """
@@ -58,57 +49,56 @@ class Reader:
             im = Image.open(filename)
         except :
             raise  RuntimeError,"cannot open %s"%(filename)
-        predata = im.load()
+        data = im.getdata()
 
-        x_range = im.size[0]
-        y_range = im.size[1]
-        
         # Initiazed the output data object
-        output.data = numpy.zeros([y_range,x_range])
-        output.err_data = numpy.zeros([y_range,x_range])
+        output.data = numpy.zeros([im.size[0],im.size[1]])
+        output.err_data = numpy.zeros([im.size[0],im.size[1]])
+        
         # Initialize 
         x_vals = []
         y_vals = [] 
 
         # x and y vectors
-        for i_x in range(x_range):
+        for i_x in range(im.size[0]):
             x_vals.append(i_x)
             
-        
-        for i_y in range(y_range):
+        itot = 0
+        for i_y in range(im.size[1]):
             y_vals.append(i_y)
-        
-        for i_x in range(x_range):
-            for i_y in range(y_range):
+
+        for val in data:
+            try:
+                value = float(val)
+            except:
+                logging.error("tiff_reader: had to skip a non-float point")
+                continue
             
-                try:
-                    if predata[i_x,i_y].__class__.__name__=="tuple":                     
-                        
-                        if len(predata[i_x,i_y]) == 3:   
-                            R,G,B= predata[i_x,i_y]
-                        elif len(predata[i_x,i_y]) == 4:   
-                            R,G,B,I = predata[i_x,i_y]
-                        #Converting to L Mode: uses the ITU-R 601-2 luma transform.
-                        value = float(R * 299/1000 + G * 587/1000 + B * 114/1000) 
-                         
-                    else:
-                        #Take it as Intensity
-                        value = float(predata[i_x,i_y])
-                except:
-                    logging.error("tiff_reader: had to skip a non-float point")
-                    continue
+            # Get bin number
+            if math.fmod(itot, im.size[0])==0:
+                i_x = 0
+                i_y += 1
+            else:
+                i_x += 1
                 
-                  
-                output.data[y_range-i_y-1,i_x] = value
-        
-        output.xbins      = x_range
-        output.ybins      = y_range
+            output.data[im.size[1]-1-i_y][i_x] = value
+            
+            itot += 1
+                
+        output.xbins      = im.size[0]
+        output.ybins      = im.size[1]
         output.x_bins     = x_vals
         output.y_bins     = y_vals
         output.xmin       = 0
-        output.xmax       = x_range-1
+        output.xmax       = im.size[0]-1
         output.ymin       = 0
-        output.ymax       = y_range-1
+        output.ymax       = im.size[0]-1
         
         return output
         
+
+if __name__ == "__main__": 
+    reader = Reader()
+    print reader.read("../test/MP_New.sans")
+    
+

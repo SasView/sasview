@@ -31,6 +31,8 @@ except:
 class Reader:
     """ Simple data reader for Igor data files """
     ## File type
+    type_name = "IGOR 2D"   
+    ## Wildcards
     type = ["IGOR 2D files (*.ASC)|*.ASC"]
     ## Extension
     ext=['.ASC', '.asc']

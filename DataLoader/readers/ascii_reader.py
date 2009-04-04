@@ -24,6 +24,9 @@ class Reader:
         Class to load ascii files (2 or 3 columns)
     """
     ## File type
+    type_name = "ASCII"
+    
+    ## Wildcards
     type = ["ASCII files (*.txt)|*.txt",
             "ASCII files (*.dat)|*.dat",
             "ASCII files (*.abs)|*.abs"]

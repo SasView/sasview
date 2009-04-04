@@ -195,6 +195,8 @@ class Reader:
     ## CanSAS version
     version = '1.0'
     ## File type
+    type_name = "CanSAS 1D"
+    ## Wildcards
     type = ["CanSAS 1D files (*.xml)|*.xml"]
     ## List of allowed extensions
     ext=['.xml', '.XML']  

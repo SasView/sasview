@@ -35,6 +35,8 @@ class Reader:
         Example data manipulation
     """
     ## File type
+    type_name = "DANSE"   
+    ## Wildcards
     type = ["DANSE files (*.sans)|*.sans"]
     ## Extension
     ext  = ['.sans', '.SANS']    
