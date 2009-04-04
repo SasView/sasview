@@ -52,7 +52,14 @@ class Registry(ExtensionRegistry):
         self._created = time.time()
         
         # Register default readers
-        readers.register_readers(self._identify_plugin)
+        readers.read_associations(self)
+        
+        #TODO: remove the following line when ready to switch to the new default readers
+        #readers.register_readers(self._identify_plugin)
+        
+        # Look for plug-in readers
+        self.find_plugins('plugins')
+
         
     def find_plugins(self, dir):
         """
@@ -109,6 +116,49 @@ class Registry(ExtensionRegistry):
                      
         return readers_found 
     
+    def associate_file_type(self, ext, module):
+        """
+            Look into a module to find whether it contains a 
+            Reader class. If so, APPEND it to readers and (potentially)
+            to the list of writers for the given extension
+            
+            @param ext: file extension [string]
+            @param module: module object
+        """
+        reader_found = False
+        
+        if hasattr(module, "Reader"):
+            try:
+                # Find supported extensions
+                loader = module.Reader()
+                if ext not in self.loaders:
+                    self.loaders[ext] = []
+                # Append the new reader to the list
+                self.loaders[ext].append(loader.read)
+
+                reader_found = True
+                
+                # Keep track of wildcards
+                type_name = module.__name__
+                if hasattr(loader, 'type_name'):
+                    type_name = loader.type_name
+                    
+                wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(), ext.lower())
+                if wcard not in self.wildcards:
+                    self.wildcards.append(wcard)
+                            
+                # Check whether writing is supported
+                if hasattr(loader, 'write'):
+                    if ext not in self.writers:
+                        self.writers[ext] = []
+                    # Append the new writer to the list
+                    self.writers[ext].append(loader.write)
+                        
+            except:
+                logging.error("Loader: Error accessing Reader in %s\n  %s" % (module.__name__, sys.exc_value))
+        return reader_found
+
+    
     def _identify_plugin(self, module):
         """
             Look into a module to find whether it contains a 
@@ -125,18 +175,19 @@ class Registry(ExtensionRegistry):
                 for ext in loader.ext:
                     if ext not in self.loaders:
                         self.loaders[ext] = []
-                    #The first reading will use the reader with only one ext.
-                    if len(self.loaders[ext])>0 and len(loader.ext)>2:
-                        self.loaders[ext].insert(1,loader.read)
-                    else:
-                        self.loaders[ext].insert(0,loader.read)
+                    # When finding a reader at run time, treat this reader as the new 
+                    # default
+                    self.loaders[ext].insert(0,loader.read)
 
                     reader_found = True
                     
                     # Keep track of wildcards
-                    for wcard in loader.type:
-                        if wcard not in self.wildcards:
-                            self.wildcards.append(wcard)
+                    type_name = module.__name__
+                    if hasattr(loader, 'type_name'):
+                        type_name = loader.type_name
+                    wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(), ext.lower())
+                    if wcard not in self.wildcards:
+                    	self.wildcards.append(wcard)
                             
                 # Check whether writing is supported
                 if hasattr(loader, 'write'):
@@ -146,7 +197,7 @@ class Registry(ExtensionRegistry):
                         self.writers[ext].insert(0,loader.write)
                         
             except:
-                logging.error("Loader: Error accessing Reader in %s\n  %s" % (name, sys.exc_value))
+                logging.error("Loader: Error accessing Reader in %s\n  %s" % (module.__name__, sys.exc_value))
         return reader_found
 
     def lookup_writers(self, path):
@@ -203,6 +254,17 @@ class Loader(object):
     ## Registry instance
     __registry = Registry()
     
+    def associate_file_type(self, ext, module):
+        """
+            Look into a module to find whether it contains a 
+            Reader class. If so, append it to readers and (potentially)
+            to the list of writers for the given extension
+            
+            @param ext: file extension [string]
+            @param module: module object
+        """
+        return self.__registry.associate_file_type(ext, module)
+
     def load(self, file, format=None):
         """
             Load a file
