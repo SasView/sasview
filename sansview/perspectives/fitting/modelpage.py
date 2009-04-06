@@ -24,7 +24,7 @@ class ModelPage(BasicPage):
   
     """
     def __init__(self,parent, page_info, name=""):
-        BasicPage.__init__(self, parent, page_info,name)
+        BasicPage.__init__(self, parent, page_info)
         """ 
             Initialization of the Panel
         """
@@ -32,11 +32,11 @@ class ModelPage(BasicPage):
         page_info.page_name= "Model Page"
         self._fill_model_sizer( self.sizer1)  
         self._fill_range_sizer() 
-        if hasattr(self.page_info,"model"):
-            model=self.page_info.model
-            description=""
-            if model!=None:
-                description = self.page_info.model.description
+       
+        description=""
+        if self.model!=None:
+            #description = self.page_info.model.description
+            description = self.model.description
             self.set_model_param_sizer(self.model)
             self.set_model_description(description,self.sizer2)
         
@@ -58,17 +58,18 @@ class ModelPage(BasicPage):
             @param event: wx.EVT_RADIOBUTTON
         """
         ## save state of radiobox
-        self.page_info. save_radiobox_state( self.description_hide )
-        self.page_info. save_radiobox_state( self.description_show )
+        #self.page_info. save_radiobox_state( self.description_hide )
+        #self.page_info. save_radiobox_state( self.description_show )
         ## Show description
         if not self.description_show.GetValue():
             self.sizer_description.Clear(True)
             
         else:
-            model=self.page_info.model
+            #model=self.page_info.model
             description=""
-            if model!=None:
-                description = self.page_info.model.description
+            if self.model!=None:
+                #description = self.page_info.model.description
+                description = self.model.description
             self.description = wx.StaticText( self,-1,str(description) )
             self.sizer_description.Add( self.description, 1, wx.EXPAND | wx.ALL, 10 )
            
@@ -92,6 +93,7 @@ class ModelPage(BasicPage):
         sizer_npts.Add(wx.StaticText(self, -1, 'Npts'),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)        
         sizer_npts.Add(self.npts,1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5) 
         self._set_range_sizer( title="Plotted Q Range", object= sizer_npts)
+       
        
     def _on_select_model(self, event): 
         """
@@ -290,8 +292,8 @@ class ModelPage(BasicPage):
         self.model_description = wx.Button(self, -1, "More Details")
         self.model_description.SetToolTipString("See more description in help menu.")
         
-        self.page_info.save_radiobox_state( self.description_hide )
-        self.page_info.save_radiobox_state( self.description_show )
+        #self.page_info.save_radiobox_state( self.description_hide )
+        #self.page_info.save_radiobox_state( self.description_show )
         
         sizer_selection.Add( self.description_show )
         sizer_selection.Add( (20,20)) 
@@ -434,7 +436,7 @@ class HelpWindow(wx.Frame):
         model = CylinderModel()
         #from sans.models.LineModel import LineModel
         #model = LineModel()
-        from pageInfo import PageInfo
+        from fitpanel import PageInfo
         myinfo = PageInfo(self,model)
         from models import ModelList
         mylist= ModelList()

@@ -25,14 +25,13 @@ class FitPage(BasicPage):
         on fit Panel window.
   
     """
-    def __init__(self,parent, page_info, name=""):
-        BasicPage.__init__(self, parent, page_info,name)
+    def __init__(self,parent, page_info):
+        BasicPage.__init__(self, parent, page_info)
         """ 
             Initialization of the Panel
         """
-        self.name= self.data.name
-        page_info.page_name= self.data.name
-       
+        self.name = self.data.name
+        
         ## fit page does not content npts txtcrtl
         self.npts=None
         ## if no dispersity parameters is avaible 
@@ -41,11 +40,13 @@ class FitPage(BasicPage):
         self.engine_type = "scipy"
         
         self._fill_datainfo_sizer()
+        
         self._fill_model_sizer( self.sizer1)
-        self._fill_range_sizer() 
-        self.model = self.formfactorbox.GetClientData(0)()
-        self.page_info.model= self.model
         self._on_select_model(event=None)
+        self._fill_range_sizer() 
+        
+       
+        ## to update the panel according to the fit engine type selected
         self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
     
     
@@ -91,17 +92,19 @@ class FitPage(BasicPage):
             @param event: wx.EVT_RADIOBUTTON
         """
         ## save state of radiobox
-        self.page_info. save_radiobox_state( self.description_hide )
-        self.page_info. save_radiobox_state( self.description_show )
+        #self.page_info. save_radiobox_state( self.description_hide )
+        #self.page_info. save_radiobox_state( self.description_show )
         ## Show description
         if not self.description_show.GetValue():
             self.sizer_description.Clear(True)
             
         else:
-            model=self.page_info.model
+            #model=self.page_info.model
+            
             description=""
-            if model!=None:
-                description = self.page_info.model.description
+            if self.model!=None:
+                description = self.model.description
+                #description = self.page_info.model.description
             self.description = wx.StaticText( self,-1,str(description) )
             self.sizer_description.Add( self.description, 1, wx.EXPAND | wx.ALL, 10 )
            
@@ -409,6 +412,7 @@ class FitPage(BasicPage):
         self._onparamEnter_helper()
         self.compute_chisqr()
         
+        
     def get_range(self):
         """
             return the fitting range
@@ -511,7 +515,8 @@ class FitPage(BasicPage):
                 wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Data contains smearing information %s"%msg))
             self.manager.set_smearer(smear, qmin= self.qmin_x, qmax= self.qmax_x)   
-              
+        ## save the state enable smearing
+        self.save_current_state()
   
     def compute_chisqr2D(self):
         """ 
@@ -592,6 +597,7 @@ class FitPage(BasicPage):
              set to true or false all checkBox given the main checkbox value cb1
         """
         self.param_toFit=[]
+        
         if  self.parameters !=[]:
             if  self.cb1.GetValue()==True:
                 for item in self.parameters:
@@ -607,7 +613,8 @@ class FitPage(BasicPage):
                 for item in self.fittable_param:
                     item[0].SetValue(False)
                 self.param_toFit=[]
-               
+        self.save_current_state()  
+        
                 
                 
     def select_param(self,event):
@@ -639,7 +646,9 @@ class FitPage(BasicPage):
             self.cb1.SetValue(True)
         else:
             self.cb1.SetValue(False)
-    
+        ## save current state of the page
+        self.save_current_state()
+        
     
     def set_model_description(self,description,sizer):
         """
@@ -668,8 +677,8 @@ class FitPage(BasicPage):
         self.model_description = wx.Button(self, -1, "More Details")
      
         
-        self.page_info.save_radiobox_state( self.description_hide )
-        self.page_info.save_radiobox_state( self.description_show )
+        #self.page_info.save_radiobox_state( self.description_hide )
+        #self.page_info.save_radiobox_state( self.description_show )
         
         sizer_selection.Add( self.description_show )
         sizer_selection.Add( (20,20)) 
@@ -699,6 +708,7 @@ class FitPage(BasicPage):
         """
         self.sizer3.Clear(True)
         self.parameters = []
+        #self.page_info.parameters=[]
         self.param_toFit=[]
         self.fittable_param=[]
         self.fixed_param=[]
@@ -822,6 +832,9 @@ class FitPage(BasicPage):
                 ##[cb state, name, value, "+/-", error of fit, min, max , units]
                 self.parameters.append([cb,item, ctl1,
                                         text2,ctl2, ctl3, ctl4,None])
+                #self.page_info.parameters.append([cb.GetValue(),item, ctl1.GetValue(),
+                #                        text2.IsShown(),[ctl2.IsShown(),ctl2.GetValue()],
+                #[ctl3.IsShown(),ctl3.GetValue()],[ ctl4.IsShown(),ctl4.GetValue()],None])
                 
         iy+=1
         sizer.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -854,7 +867,7 @@ class HelpWindow(wx.Frame):
         from danse.common.plottools.plottables import Data1D
         data= Data1D(x=[1,2], y=[3,4], dy=[0.1, 0,1])
     
-        from pageInfo import PageInfo
+        from fitpanel import PageInfo
         myinfo = PageInfo(self,  model, data=data )
         
         ## add data

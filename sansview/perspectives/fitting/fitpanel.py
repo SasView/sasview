@@ -5,8 +5,38 @@ import numpy
 import string ,re
 #import models
 _BOX_WIDTH = 80
-(PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
+import basepage
 
+class PageInfo(object):
+    """
+        this class contains the minimum numbers of data members
+        a fitpage or model page need to be initialized.
+    """
+    data = None
+    model= None
+    manager= None
+    event_owner= None
+    model_list_box = None
+    name=None
+     ## Internal name for the AUI manager
+    window_name = "Page"
+    ## Title to appear on top of the window
+    window_caption = "Page"
+    
+    def __init__(self, model=None,data=None, manager=None,
+                  event_owner=None,model_list_box=None , name=None):
+        """
+            Initialize data members
+        """
+        self.data = data
+        self.model= model
+        self.manager= manager
+        self.event_owner= event_owner
+        self.model_list_box = model_list_box
+        self.name=None
+        self.window_name = "Page"
+        self.window_caption = "Page"
+    
 class FitPanel(wx.aui.AuiNotebook):    
 
     """
@@ -41,14 +71,18 @@ class FitPanel(wx.aui.AuiNotebook):
         self.model_list_box={}
         ##dictionary of page info
         self.page_info_dict={}
-        # save the title of the last page tab added
-        self.fit_page_name=[]
+        ## save the title of the last page tab added
+        self.fit_page_name={}
+        ## list of existing fit page
+        self.list_fitpage_name=[]
         self.draw_model_name=None
         #model page info
         self.model_page_number=None
        
         self.model_page=None
         self.sim_page=None
+        ## get the state of a page
+        self.Bind(basepage.EVT_PAGE_INFO, self._onGetstate)
         # increment number for model name
         self.count=0
         #updating the panel
@@ -60,15 +94,15 @@ class FitPanel(wx.aui.AuiNotebook):
         """
              close page and remove all references to the closed page
         """
-        page_info = self.get_current_page().page_info.clone()
-        page_info.page_name = self.get_current_page().page_info.page_name
+        state = self.get_current_page().createMemento()
+        page_name = self.get_current_page().name
         page_finder = self.manager.get_page_finder() 
         fitproblem = None
         
         if self.get_current_page() in page_finder:
             fitproblem= page_finder[self.get_current_page()]
             
-        self.manager._add_page_onmenu(page_info.page_name, page_info, fitproblem)
+        self.manager._add_page_onmenu(page_name, fitproblem)
         
         selected_page = self.GetPage(self.GetSelection())
         page_number = self.GetSelection()
@@ -79,8 +113,8 @@ class FitPanel(wx.aui.AuiNotebook):
                 self.sim_page.draw_page()
             
             #Delete the page from notebook
-            if selected_page.name in self.fit_page_name:
-                self.fit_page_name.remove(selected_page.name)
+            if selected_page.name in self.list_fitpage_name:
+                self.list_fitpage_name.remove(selected_page.name)
                 
             if selected_page.name== self.draw_model_name:
                 self.draw_model_name=None
@@ -138,7 +172,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.sim_page.set_manager(self.manager)
         return self.sim_page
         
-    def add_fit_page( self,data, page_info=None ):
+    def add_fit_page( self,data, reset=False ):
         """ 
             Add a fitting page on the notebook contained by fitpanel
             @param data: data to fit
@@ -148,23 +182,27 @@ class FitPanel(wx.aui.AuiNotebook):
             name = data.name 
         except:
             name = 'Fit'
-        if page_info==None:
-            from pageInfo import  PageInfo
-            myinfo = PageInfo( self, data=data )
+        if not name in self.list_fitpage_name:
+            myinfo = PageInfo( data=data, name=name )
             myinfo.model_list_box = self.model_list_box.get_list()
             myinfo.event_owner = self.event_owner 
             myinfo.manager = self.manager
-        else:
-            myinfo = page_info
+            myinfo.window_name = "Fit Page"
+            myinfo.window_caption = "Fit Page"
         
-        if not name in self.fit_page_name :
+            #if not name in self.fit_page_name :
             from fitpage import FitPage
-            panel = FitPage(parent= self, page_info=myinfo, name=name )
-            panel.name = name
-            panel.window_name= "fitpage"
+            panel = FitPage(parent= self, page_info=myinfo)
             self.AddPage(page=panel,caption=name,select=True)
-            self.fit_page_name.append(name)
-            
+            self.list_fitpage_name.append(name)
+            if reset:
+                if name in self.fit_page_name.keys():
+                    memento= self.fit_page_name[name][0]
+                    panel.reset_page(memento)
+            else:
+                self.fit_page_name[name]=[]
+                self.fit_page_name[name].insert(0,panel.createMemento())
+         
             return panel 
         else:
             return None 
@@ -194,6 +232,14 @@ class FitPanel(wx.aui.AuiNotebook):
                 self._create_model_page(model,page_title, qmin=qmin, qmax=qmax,
                                          npts=npts, page_info=page_info)
            
+    def  _onGetstate(self, event):
+        """
+            copy the state of a page
+        """
+        page= event.page
+        if page.name in self.fit_page_name:
+            self.fit_page_name[page.name].insert(0,page.createMemento()) 
+            
                 
     def _help_add_model_page(self,model,page_title, qmin=0, 
                              qmax=0.1, npts=50,page_info=None):
@@ -217,20 +263,21 @@ class FitPanel(wx.aui.AuiNotebook):
         """
         ## creating object that contaning info about model 
         if page_info==None:
-            from pageInfo import  PageInfo
-            myinfo = PageInfo( self, model=model)
+            
+            myinfo = PageInfo(model=model ,name=page_title)
             myinfo.model_list_box = self.model_list_box.get_list()
             myinfo.event_owner = self.event_owner 
             myinfo.manager = self.manager
+            myinfo.window_name = "Model Page"
+            myinfo.window_caption = "Model Page"
         else:
             myinfo = page_info
     
         from modelpage import ModelPage
-        panel = ModelPage(self,myinfo,page_title)
+        panel = ModelPage(self,myinfo)
        
         self.AddPage(page=panel,caption="Model",select=True)
 
-        panel.name = page_title
         self.draw_model_name=page_title
         self.model_page_number=self.GetSelection()
         self.model_page=self.GetPage(self.GetSelection())

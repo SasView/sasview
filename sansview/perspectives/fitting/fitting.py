@@ -446,20 +446,20 @@ class Plugin:
             return 
               
               
-    def _add_page_onmenu(self, name, page_info,fitproblem=None):
+    def _add_page_onmenu(self, name,fitproblem=None):
         """
             Add name of a closed page of fitpanel in a menu 
         """
         list = self.menu1.GetMenuItems()
         for item in list:
             if name == item.GetItemLabel():
-                self.closed_page_dict[name][1:] = page_info, fitproblem
+                self.closed_page_dict[name][1] = fitproblem
                 
         if not name in self.closed_page_dict.keys():    
             # Post paramters
             event_id = wx.NewId()
             self.menu1.Append(event_id, name, "Show %s fit panel" % name)
-            self.closed_page_dict[name]= [event_id,page_info, fitproblem]
+            self.closed_page_dict[name]= [event_id, fitproblem]
             wx.EVT_MENU(self.parent,event_id,  self._open_closed_page)
         
         
@@ -467,13 +467,13 @@ class Plugin:
         """
             reopen a closed page
         """
-        for value in self.closed_page_dict.values():
+        for name, value in self.closed_page_dict.iteritems():
             if event.GetId() in value:
-                id, page_info,fitproblem = value
-        
-                if page_info.page_name !="Model Page":
-                    page = self.fit_panel.add_fit_page(data= page_info.data,
-                                                        page_info=page_info)
+                id,fitproblem = value
+                
+                if name !="Model Page":
+                    data= fitproblem.get_fit_data()
+                    page = self.fit_panel.add_fit_page(data= data,reset=True)
                     if fitproblem != None:
                         self.page_finder[page]=fitproblem
                 else:
@@ -590,9 +590,10 @@ class Plugin:
                     else:
                         wx.PostEvent(self.parent, StatusEvent(status="Page was already Created"))
                 except:
-                    wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
-                    %sys.exc_value))
-                    return
+                    raise
+                    #wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
+                    #%sys.exc_value))
+                    #return
     
     def _single_fit_completed(self,result,pars,cpage, elapsed=None):
         """
@@ -604,8 +605,8 @@ class Plugin:
             @param qmax: the maximum value of x to replot model
           
         """
-        #wx.PostEvent(self.parent, StatusEvent(status="Single fit \
-        #complete! " , type="stop"))
+        wx.PostEvent(self.parent, StatusEvent(status="Single fit \
+        complete! " , type="stop"))
         try:
             for page, value in self.page_finder.iteritems():
                 if page==cpage :

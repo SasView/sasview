@@ -3,7 +3,7 @@
 import wx
 import copy
 
-class PageInfo(object):
+class PageState(object):
     """
         Contains info to reconstruct a page
     """
@@ -15,11 +15,12 @@ class PageInfo(object):
         #TODO: remove this once the inheritence is cleaned up
         ## Data member to store the dispersion object created
         self._disp_obj_dict = {}
-
+        ## reset True change the state of exsiting button
+        self.reset = False
         #Data used for fitting 
         self.data = data
         # flag to allow data2D plot
-        self.enable2D=False
+        self.enable2D = False
         # model on which the fit would be performed
         self.model = model
         #fit page manager 
@@ -30,56 +31,87 @@ class PageInfo(object):
         # Event_owner is the owner of model event
         self.event_owner = None
         ##page name
-        self.page_name=""
+        self.page_name = ""
         # Contains link between  model ,all its parameters, and panel organization
-        self.parameters=[]
+        self.parameters =[]
         # Contains list of parameters that cannot be fitted and reference to 
         #panel objects 
-        self.fixed_param=[]
+        self.fixed_param =[]
         # Contains list of parameters with dispersity and reference to 
         #panel objects 
-        self.fittable_param=[]
+        self.fittable_param =[]
         #list of dispersion paramaters
-        self.disp_list=[]
+        self.disp_list =[]
         #contains link between a model and selected parameters to fit 
-        self.param_toFit=[]
+        self.param_toFit =[]
         #dictionary of model type and model class
-        self.model_list_box =None
-        ## list of check box   
-        self.list_of_radiobox={} 
+        self.model_list_box = None
+       
         ## save  current value of combobox
         self.formfactorcombobox = ""
         self.structurecombobox  = ""
+        self.disp_box=""
         ## Qrange
-        self.qmin=None
-        self.qmax=None
-        self.npts=None
+        ## Q range
+        self.qmin= 0.001
+        self.qmax= 0.1
+        self.npts = None
+        ## enable smearering state
+        self.enable_smearer = False
+        ## disperity selection
+        self.enable_disp= False
+        ## state of selected all check button
+        self.cb1 = False
        
+   
+    def save_data(self, data):
+        """
+            Save data
+        """
+        self.data = copy.deepcopy(data)
+    
+    
         
-                  
-    def save_radiobox_state(self, object ):
-        """
-            save  radiobox state 
-            @param object: radiobox
-            self.list_of_check= ["label", id, state]
-           
-        """
-        label = object.GetLabel()
-        id = object.GetId()
-        state = object.GetValue()
-        self.list_of_radiobox[label]=[label, id, state]    
-    
-    
     def clone(self):
         model=None
         if self.model !=None:
             model = self.model.clone()
         
-        obj          = PageInfo( self.parent,model= model )
+        obj          = PageState( self.parent,model= model )
         obj.data = copy.deepcopy(self.data)
         obj.model_list_box = copy.deepcopy(self.model_list_box)
         obj.manager = self.manager
         obj.event_owner = self.event_owner
+        obj.parameters = copy.deepcopy(self.parameters)
+        obj.fixed_param = copy.deepcopy(self.fixed_param)
+        obj.fittable_param = copy.deepcopy(self.fittable_param)
+        obj.enable_disp= self.enable_disp
+        obj.enable_smearer = self.enable_smearer
+        obj.disp_box= copy.deepcopy(self.disp_box)
+        obj.cb1 = self.cb1
         return obj
 
+class PageMemento(object):
+    """
+        Store the state of a fitpage or model page of fitpanel
+    """
+    def __init__(self, state):
+        """ Initialization"""
+        self.state = state
+       
+    def setState(self,state):
+        """
+            set current state
+            @param state: new state
+        """
+        self.state = state
+        
+    def getState(self):
+        """
+            @return state
+        """
+        return self.state
+       
+       
+       
        
