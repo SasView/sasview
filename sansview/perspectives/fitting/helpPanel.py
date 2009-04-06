@@ -113,6 +113,7 @@ class HelpWindow(wx.Frame):
             <li><a href ="doc/single_fit_help.html" target ="showframe">Single Fit</a><br></li>
             <li><a href ="doc/model_use_help.html" target ="showframe">Visualize Model</a><br></li>
             <li><a href ="doc/averaging_help.html" target ="showframe">Data Averaging</a><br></li>
+            <li><a href ="doc/model_functions.html" target ="showframe">Model Functions</a><br></li>
             </ul>
             </body>
             </html>"""
