@@ -315,15 +315,10 @@ class ModelPage(BasicPage):
         sizer.Layout()
    
     def on_button_clicked(self,event):
-        #message_text = "You typed"
         """
-        msg_box = wx.MessageDialog(self
-                                   , message_text
-                                   , "Hello!"
-                                   , wx.OK | wx.CENTRE | wx.ICON_EXCLAMATION)
-        #Show the Dialog
-        msg_box.ShowModal() 
-        """  
+        #On 'More details' button
+        """
+        
         from helpPanel import  HelpWindow
         frame = HelpWindow(None, -1, 'HelpWindow')    
         frame.Show(True)
