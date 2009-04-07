@@ -289,8 +289,9 @@ class ModelPage(BasicPage):
         self.Bind( wx.EVT_RADIOBUTTON, self._on_display_description,
                    id=self.description_show.GetId() )
         
-        self.model_description = wx.Button(self, -1, "More Details")
-        self.model_description.SetToolTipString("See more description in help menu.")
+        self.model_description = wx.Button(self,-1, label="More Details")
+        self.model_description.Bind(wx.EVT_BUTTON,self.on_button_clicked)
+        self.model_description.SetToolTipString("Click Model Functions in HelpWindow...")
         
         #self.page_info.save_radiobox_state( self.description_hide )
         #self.page_info.save_radiobox_state( self.description_show )
@@ -313,8 +314,20 @@ class ModelPage(BasicPage):
         sizer.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         sizer.Layout()
    
-   
-   
+    def on_button_clicked(self,event):
+        #message_text = "You typed"
+        """
+        msg_box = wx.MessageDialog(self
+                                   , message_text
+                                   , "Hello!"
+                                   , wx.OK | wx.CENTRE | wx.ICON_EXCLAMATION)
+        #Show the Dialog
+        msg_box.ShowModal() 
+        """  
+        from helpPanel import  HelpWindow
+        frame = HelpWindow(None, -1, 'HelpWindow')    
+        frame.Show(True)
+
     def set_range(self, qmin_x, qmax_x, npts):
         """
             Set the range for the plotted models
