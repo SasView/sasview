@@ -23,13 +23,11 @@ class ModelPage(BasicPage):
         on fit Panel window.
   
     """
-    def __init__(self,parent, page_info, name=""):
+    def __init__(self,parent, page_info):
         BasicPage.__init__(self, parent, page_info)
         """ 
             Initialization of the Panel
         """
-        self.name ="Model"
-        page_info.page_name= "Model Page"
         self._fill_model_sizer( self.sizer1)  
         self._fill_range_sizer() 
        
@@ -250,9 +248,6 @@ class ModelPage(BasicPage):
             @param model: model object 
         """
         self.model = model
-        self.parent.model_page.name = name
-        self.parent.draw_model_name = name
-        
         self.set_model_param_sizer(self.model)
         self._draw_model()
         ## keep the sizer view consistent with the model menu selecting

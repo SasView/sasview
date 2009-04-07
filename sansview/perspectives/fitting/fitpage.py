@@ -9,12 +9,16 @@ from sans.models.dispersion_models import ArrayDispersion, GaussianDispersion
 from sans.guicomm.events import StatusEvent   
 from sans.guiframe.utils import format_number
 
+## event to post model to fit to fitting plugins
 (ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
+
+## event to know the selected fit engine
 (FitterTypeEvent, EVT_FITTER_TYPE)   = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 80
 
 import basepage
 from basepage import BasicPage
+from basepage import PageInfoEvent
 
 
 class FitPage(BasicPage):
@@ -30,22 +34,18 @@ class FitPage(BasicPage):
         """ 
             Initialization of the Panel
         """
-        self.name = self.data.name
-        
         ## fit page does not content npts txtcrtl
         self.npts=None
         ## if no dispersity parameters is avaible 
         self.text_disp_1=None
         ## default fitengine type
         self.engine_type = "scipy"
-        
+        ## draw sizer
         self._fill_datainfo_sizer()
-        
         self._fill_model_sizer( self.sizer1)
         self._on_select_model(event=None)
         self._fill_range_sizer() 
-        
-       
+    
         ## to update the panel according to the fit engine type selected
         self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
     
@@ -514,9 +514,11 @@ class FitPage(BasicPage):
             else:
                 wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Data contains smearing information %s"%msg))
-            self.manager.set_smearer(smear, qmin= self.qmin_x, qmax= self.qmax_x)   
+            self.manager.set_smearer(smear, qmin= float(self.qmin_x),
+                                      qmax= float(self.qmax_x))   
         ## save the state enable smearing
         self.save_current_state()
+        
   
     def compute_chisqr2D(self):
         """ 

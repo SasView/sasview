@@ -50,7 +50,8 @@ class PageState(object):
         ## save  current value of combobox
         self.formfactorcombobox = ""
         self.structurecombobox  = ""
-        self.disp_box=""
+        ## the indice of the current selection
+        self.disp_box = 0
         ## Qrange
         ## Q range
         self.qmin= 0.001
@@ -69,8 +70,7 @@ class PageState(object):
             Save data
         """
         self.data = copy.deepcopy(data)
-    
-    
+
         
     def clone(self):
         model=None
@@ -85,10 +85,14 @@ class PageState(object):
         obj.parameters = copy.deepcopy(self.parameters)
         obj.fixed_param = copy.deepcopy(self.fixed_param)
         obj.fittable_param = copy.deepcopy(self.fittable_param)
-        obj.enable_disp= self.enable_disp
-        obj.enable_smearer = self.enable_smearer
-        obj.disp_box= copy.deepcopy(self.disp_box)
-        obj.cb1 = self.cb1
+        obj.enable_disp = copy.deepcopy(self.enable_disp)
+        obj.enable_smearer = copy.deepcopy(self.enable_smearer)
+        obj.disp_box = copy.deepcopy(self.disp_box)
+        obj.qmin = copy.deepcopy(self.qmin)
+        obj.qmax = copy.deepcopy(self.qmax)
+        obj.npts = copy.deepcopy(self.npts )
+        obj.cb1 = copy.deepcopy(self.cb1)
+        
         return obj
 
 class PageMemento(object):

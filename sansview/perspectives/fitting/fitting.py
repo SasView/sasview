@@ -470,16 +470,15 @@ class Plugin:
         for name, value in self.closed_page_dict.iteritems():
             if event.GetId() in value:
                 id,fitproblem = value
-                
-                if name !="Model Page":
+                if name !="Model":
                     data= fitproblem.get_fit_data()
                     page = self.fit_panel.add_fit_page(data= data,reset=True)
                     if fitproblem != None:
                         self.page_finder[page]=fitproblem
                 else:
-                    model= page_info.model
-                    self.fit_panel.add_model_page(model,model.name,topmenu=False,
-                                                  page_info=page_info)
+                    model = fitproblem
+                    self.fit_panel.add_model_page(model=model, topmenu=True,
+                                                  reset= True)
                     break
         
         
@@ -786,15 +785,12 @@ class Plugin:
             Plot a theory from a model selected from the menu
             @param evt: wx.menu event
         """
-        name = evt.model.__class__.__name__
-        if hasattr(evt.model, "name"):
-            name = evt.model.name
         model = evt.model
      
         # Create a model page. If a new page is created, the model
         # will be plotted automatically. If a page already exists,
         # the content will be updated and the plot refreshed
-        self.fit_panel.add_model_page(model,name,topmenu=True)
+        self.fit_panel.add_model_page(model,topmenu=True)
     
    
     

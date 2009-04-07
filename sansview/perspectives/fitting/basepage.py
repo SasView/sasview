@@ -14,11 +14,13 @@ class BasicPage(wx.ScrolledWindow):
     """
         This class provide general structure of  fitpanel page
     """
+     ## Internal name for the AUI manager
+    window_name = "Basic Page"
+    ## Title to appear on top of the window
+    window_caption = "Basic page "
     
     def __init__(self,parent, page_info):
         wx.ScrolledWindow.__init__(self, parent)
-        ## store name
-        self.name = page_info.name
         ##window_name
         self.window_name = page_info.window_name
         ##window_caption
@@ -176,16 +178,17 @@ class BasicPage(wx.ScrolledWindow):
         import sans.models.dispersion_models 
         self.polydisp= sans.models.dispersion_models.models
         self.disp_box = wx.ComboBox(self, -1)
-        self.disp_box.SetValue("GaussianModel")
-        
+       
         for key in self.polydisp.iterkeys():
             name = str(key.__name__)
             if name=="ArrayDispersion":
                 # Remove the option until the rest of the code is ready for it
                 self.disp_box.Append("Select customized Model",key)
-                pass  
+                
             else:
-                self.disp_box.Append(name,key) 
+                self.disp_box.Append(name,key)
+        self.disp_box.SetSelection(0) 
+        
         wx.EVT_COMBOBOX(self.disp_box,-1, self._on_select_Disp) 
              
         sizer_select_dispers.Add((10,10)) 
@@ -438,6 +441,10 @@ class BasicPage(wx.ScrolledWindow):
             
         if hasattr(self,"enable_smearer"):
             self.state.enable_smearer = self.enable_smearer.GetValue()   
+            
+        if hasattr(self,"disp_box"):
+            self.state.disp_box = self.disp_box.GetCurrentSelection()
+        self._save_plotting_range()
       
         ## save checkbutton state and txtcrtl values
         self.state.parameters=[]
@@ -453,25 +460,37 @@ class BasicPage(wx.ScrolledWindow):
     
     def reset_page(self, state):
         """
-            Use page_info and change the state of existing button
+            Use page_state and change the state of existing page
         """
         self.state = state.clone()
         self.model= self.state.model
         self.data = self.state.data
+       
+        ##model parameter values restore
         self._set_model_sizer_selection( self.model )
         self.set_model_param_sizer(self.model)
+        
+        ## display dispersion info layer
+        self.enable_disp.SetValue(self.state.enable_disp)
+        if hasattr(self, "disp_box"):
+            self.disp_box.SetSelection(self.state.disp_box)  
+        self._set_dipers_Param(event=None)
+       
+        ## smearing info  restore
+        if hasattr(self,"enable_smearer"):
+            self.enable_smearer.SetValue(state.enable_smearer)
+        
+        ##plotting range restore    
         self._reset_plotting_range()
         
-        self.enable_disp.SetValue(self.state.enable_disp)
-        self._set_dipers_Param(event=None)
-        
-        if hasattr(self,"enable_smearer"):
-            self.enable_smearer= self.state.enable_smearer
+        ## reset state of checkbox,textcrtl  and parameters value
         if hasattr(self, "cb1"):    
             self.cb1.SetValue(self.state.cb1)
         self._reset_parameters_state(self.parameters,state.parameters)
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
         self._reset_parameters_state(self.fixed_param,state.fixed_param)
+        
+        ## draw the model with previous parameters value
         self._draw_model()
         
         
@@ -496,7 +515,8 @@ class BasicPage(wx.ScrolledWindow):
         self.qmin.SetValue(format_number(self.state.qmin))
         self.qmax.SetValue(format_number(self.state.qmax)) 
         if self.state.npts!=None:
-            self.npts= self.state.npts
+            self.npts.SetValue(format_number(self.state.npts)) 
+            self.num_points = float(self.state.npts)
             
         self.qmin_x = float(self.qmin.GetValue())
         self.qmax_x = float(self.qmax.GetValue())
@@ -506,10 +526,10 @@ class BasicPage(wx.ScrolledWindow):
         """
             save the state of plotting range 
         """
-        self.state.qmin = self.qmin.GetValue()   
-        self.state.qmax = self.qmax.GetValue()   
+        self.state.qmin = self.qmin_x
+        self.state.qmax = self.qmax_x 
         if self.npts!=None:
-            self.state.npts= self.npts.GetValue()
+            self.state.npts= self.num_points
             
             
     def _onparamEnter_helper(self):
@@ -519,7 +539,7 @@ class BasicPage(wx.ScrolledWindow):
              use : _check_value_enter 
         """
         if self.model !=None:
-            self.save_current_state()
+            
             # Flag to register when a parameter has changed.
             is_modified = False
             is_modified =self._check_value_enter( self.fittable_param ,is_modified)
@@ -546,6 +566,9 @@ class BasicPage(wx.ScrolledWindow):
                 if float(self.npts.GetValue()) !=  self.num_points:
                     self.num_points = float(self.npts.GetValue())
                     is_modified = True
+            ## save current state
+            self.save_current_state()
+            
             ## if any value is modify draw model with new value
             if is_modified:
                 self._draw_model() 
@@ -595,6 +618,7 @@ class BasicPage(wx.ScrolledWindow):
                     item_page[6].SetValue(item_page_info[6][1])
                 else:
                     item_page[6].Hide()
+                            
                             
     def _copy_parameters_state(self, listtocopy, statelist):
         """
@@ -1052,7 +1076,8 @@ class BasicPage(wx.ScrolledWindow):
                     self._layout_sizer_noDipers()  
                 else:
                     ## set gaussian sizer 
-                    self._set_sizer_gaussian()  
+                    #self._set_sizer_gaussian()  
+                    self._on_select_Disp(event=None)
             else:
                 self.model_disp.Hide()
                 self.disp_box.Hide()
@@ -1116,7 +1141,9 @@ class BasicPage(wx.ScrolledWindow):
              allow selecting different dispersion
              self.disp_list should change type later .now only gaussian
         """
-        dispersity  =event.GetClientData()
+        
+        n = self.disp_box.GetCurrentSelection()
+        dispersity= self.disp_box.GetClientData(n)
         name= dispersity.__name__
         if name == "GaussianDispersion":
             self._set_sizer_gaussian()
@@ -1124,8 +1151,12 @@ class BasicPage(wx.ScrolledWindow):
         if  name=="ArrayDispersion":
             self._set_sizer_arraydispersion()
         
-            
-    
+        self.state.disp_box= n
+        ## post state to fit panel
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event)
+        
+        
     def _set_sizer_arraydispersion(self):
         """
             draw sizer with array dispersity  parameters
