@@ -580,7 +580,9 @@ class BasicPage(wx.ScrolledWindow):
         """
             Reset the parameters at the given state
         """
-        if len(self.state.parameters)!=  len(listtorestore) :
+        if len(statelist)==0 or  len(listtorestore)==0 :
+            return
+        if len(statelist)!=  len(listtorestore) :
             return
         for j in range(len(listtorestore)):
             item_page = listtorestore[j]

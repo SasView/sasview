@@ -75,7 +75,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.fit_page_name={}
         ## list of existing fit page
         self.list_fitpage_name=[]
-        self.draw_model_name=None
+    
         #model page info
         self.model_page_number=None
        
@@ -117,12 +117,11 @@ class FitPanel(wx.aui.AuiNotebook):
            
             if selected_page.window_name== "Model":
                 fitproblem = self.get_current_page().model.clone()
-                self.draw_model_name=None
                 self.model_page=None
                 
             if  page_number == 1:
                 self.model_page=None
-                self.draw_model_name=None
+                
             
         elif selected_page==self.about_page:
             self.about_page=None
@@ -212,7 +211,7 @@ class FitPanel(wx.aui.AuiNotebook):
             return None 
         
    
-    def add_model_page(self,model, qmin=0, qmax=0.1,
+    def add_model_page(self,model,page_title="Model", qmin=0, qmax=0.1,
                         npts=50, topmenu=False, reset=False):
         """
             Add a model page only one  to display any model selected from the menu or the page combo box.
@@ -226,12 +225,12 @@ class FitPanel(wx.aui.AuiNotebook):
             @param npts: number of Q points
         """
         if topmenu==True:
-            if  self.draw_model_name ==None:
-                self._help_add_model_page(model=model,
+            if not page_title in self.fit_page_name.keys()or reset==True:
+                self._help_add_model_page(model=model, page_title=page_title,
                                 qmin=qmin, qmax=qmax, npts=npts, reset=reset)
             else:
-                self.model_page.select_model(model, "Model")
-       
+                self.model_page.select_model(model, page_title)
+                self.fit_page_name[page_title].insert(0,self.model_page.createMemento())
       
            
     def  _onGetstate(self, event):
