@@ -205,9 +205,11 @@ class BasicPage(wx.ScrolledWindow):
         boxsizer1.Add( self.sizer4_4  )
         #-----------------------------------------------------
         self.sizer4.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
+        self.sizer4_4.Layout()
         self.sizer4.Layout()
-       
+        self.Layout()
         self.SetScrollbars(20,20,200,100)
+        self.Refresh()
         
     
     def select_disp_angle(self, event): 
@@ -674,9 +676,7 @@ class BasicPage(wx.ScrolledWindow):
             name= model.model2.name
             flag= name != "NoStructure"
             if flag and (class_name in self.model_list_box["Structure Factors"]):
-                self.structurebox.Show(True)
-                self.text2.Show(True)
-                self.multip_cb.SetValue(True)
+                self.structurebox.Enable()
                 items = self.structurebox.GetItems()
                 self.sizer1.Layout()
                 self.SetScrollbars(20,20,200,100)
@@ -728,6 +728,13 @@ class BasicPage(wx.ScrolledWindow):
     
             for k, list in self.model_list_box.iteritems():
                 if k in["P(Q)*S(Q)","Shapes" ] and class_name in self.model_list_box["Shapes"]:
+                    
+                    if class_name in self.model_list_box["P(Q)*S(Q)"]:
+                        self.structurebox.Enable()
+                    else:
+                        self.structurebox.Disable()
+                        self.structurebox.SetSelection(0)
+                        
                     self.shape_rbutton.SetValue(True)
                     ## fill the form factor list with new model
                     self._populate_box(self.formfactorbox,self.model_list_box["Shapes"])
@@ -745,6 +752,8 @@ class BasicPage(wx.ScrolledWindow):
                 else:
                     self.plugin_rbutton.SetValue(True)
                 if class_name in list:
+                    self.structurebox.SetSelection(0)
+                    self.structurebox.Disable()
                     ## fill the form factor list with new model
                     self._populate_box(self.formfactorbox, list)
                     items = self.formfactorbox.GetItems()
@@ -783,9 +792,6 @@ class BasicPage(wx.ScrolledWindow):
         self.shape_indep_rbutton = wx.RadioButton(self, -1, "Shape-Independent")
         self.struct_rbutton = wx.RadioButton(self, -1, "Structure Factor ")
         self.plugin_rbutton = wx.RadioButton(self, -1, "Customized Models")
-        self.multip_cb = wx.CheckBox(self, -1,"P(Q)*S(Q)")
-        
-       
         
         self.Bind( wx.EVT_RADIOBUTTON, self._show_combox,
                             id= self.shape_rbutton.GetId() ) 
@@ -795,12 +801,11 @@ class BasicPage(wx.ScrolledWindow):
                             id= self.struct_rbutton.GetId() ) 
         self.Bind( wx.EVT_RADIOBUTTON, self._show_combox,
                             id= self.plugin_rbutton.GetId() )  
-        wx.EVT_CHECKBOX(self, self.multip_cb.GetId() , self._show_combox )              
+       
       
-        sizer_radiobutton = wx.GridSizer(3, 3,5, 5)
+        sizer_radiobutton = wx.GridSizer(2, 2,5, 5)
         sizer_radiobutton.Add(self.shape_rbutton)
         sizer_radiobutton.Add(self.shape_indep_rbutton)
-        sizer_radiobutton.Add(self.multip_cb)
         sizer_radiobutton.Add(self.plugin_rbutton)
         sizer_radiobutton.Add(self.struct_rbutton)
         
@@ -809,7 +814,6 @@ class BasicPage(wx.ScrolledWindow):
         self.text1 = wx.StaticText( self,-1,"P(Q)" )
         self.text2 = wx.StaticText( self,-1,"* S(Q)" )
         
-        self.text2.Hide()
         
         self.formfactorbox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
         if self.model!=None:
@@ -819,7 +823,8 @@ class BasicPage(wx.ScrolledWindow):
         self.structurebox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
         wx.EVT_COMBOBOX(self.formfactorbox,-1, self._on_select_model)
         wx.EVT_COMBOBOX(self.structurebox,-1, self._on_select_model)
-        self.structurebox.Hide()
+        
+        
         
         ## fill combox box
         if len(self.model_list_box)>0:
@@ -828,6 +833,13 @@ class BasicPage(wx.ScrolledWindow):
         if len(self.model_list_box)>0:
             self._populate_box( self.structurebox,
                                 self.model_list_box["Structure Factors"])
+            self.structurebox.Insert("None", 0,None)
+            self.structurebox.SetSelection(0)
+            self.structurebox.Disable()
+ 
+            if self.model.__class__ in self.model_list_box["P(Q)*S(Q)"]:
+                self.structurebox.Enable()
+            
         
         ## check model type to show sizer
         if self.model !=None:
@@ -862,16 +874,16 @@ class BasicPage(wx.ScrolledWindow):
         if self.shape_rbutton.GetValue()and\
              event.GetEventObject()==self.shape_rbutton:
             ##fill the combobox with form factor list
-            self.structurebox.Hide()
-            self.text2.Hide()
+            self.structurebox.SetSelection(0)
+            self.structurebox.Disable()
             self.formfactorbox.Clear()
             self._populate_box( self.formfactorbox,self.model_list_box["Shapes"])
             
         if self.shape_indep_rbutton.GetValue()and\
              event.GetEventObject()==self.shape_indep_rbutton:
             ##fill the combobox with shape independent  factor list
-            self.structurebox.Hide()
-            self.text2.Hide()
+            self.structurebox.SetSelection(0)
+            self.structurebox.Disable()
             self.formfactorbox.Clear()
             self._populate_box( self.formfactorbox,
                                 self.model_list_box["Shape-Independent"])
@@ -879,8 +891,8 @@ class BasicPage(wx.ScrolledWindow):
         if self.struct_rbutton.GetValue() and\
              event.GetEventObject()==self.struct_rbutton:
             ##fill the combobox with structure factor list
-            self.structurebox.Hide()
-            self.text2.Hide()
+            self.structurebox.SetSelection(0)
+            self.structurebox.Disable()
             self.formfactorbox.Clear()
             self._populate_box( self.formfactorbox,
                                 self.model_list_box["Structure Factors"])
@@ -889,55 +901,17 @@ class BasicPage(wx.ScrolledWindow):
              event.GetEventObject()==self.plugin_rbutton:
            
             ##fill the combobox with form factor list
-            self.structurebox.Hide()
-            self.text2.Hide()
+            self.structurebox.Disable()
             self.formfactorbox.Clear()
             self._populate_box( self.formfactorbox,
                                 self.model_list_box["Customized Models"])
         
-        if not self.multip_cb.GetValue(): 
-            self.structurebox.Hide()
-            self.text2.Hide()
-            n = self.formfactorbox.GetCurrentSelection()
-            model = self.formfactorbox.GetClientData(n)
-            self.model = model()
-        ## user check multiplication option        
-        else:
-            ##for this release 
-            flag1= self.plugin_rbutton.GetValue()or self.struct_rbutton.GetValue()\
-                    or self.shape_indep_rbutton.GetValue()
-            flag2= False   
-             
-            n = self.formfactorbox.GetCurrentSelection()
-            form_factor = self.formfactorbox.GetClientData(n)   
-            ## selecting only multiplication model
-            if self.shape_rbutton.GetValue():
-               if not form_factor in  self.model_list_box["multiplication"]:
-                   flag2 = True
-            ## multiplication not available for structure factor
-            if flag1 or  flag2:
-                self.multip_cb.SetValue(False)
-                self.structurebox.Hide()
-                self.text2.Hide()
-                return
-            ## allow only some to have multiplication
-            
-            self.structurebox.Show(True)
-            self.text2.Show(True)
-            ## draw multiplication  model
-            n = self.structurebox.GetCurrentSelection()
-            struct_factor = self.structurebox.GetClientData(n)
-            
-            from sans.models.MultiplicationModel import MultiplicationModel
-            self.model= MultiplicationModel(form_factor(),struct_factor())
-
         self._on_select_model(event=None)
-        self.sizer4_4.Clear()
+        self.sizer4_4.Layout()
         self.sizer4.Layout()
-            
-        
-        self.set_scroll()
-   
+        self.Layout()
+        self.Refresh()
+        self.SetScrollbars(20,20,200,100)
             
     def _populate_box(self, combobox, list):
         """
@@ -969,28 +943,30 @@ class BasicPage(wx.ScrolledWindow):
         ## reset dictionary containing reference to dispersion
         self._disp_obj_dict = {}
         self.disp_cb_dict ={}
-        
         f_id = self.formfactorbox.GetCurrentSelection()
-        s_id = self.structurebox.GetCurrentSelection()
         form_factor = self.formfactorbox.GetClientData( f_id )
-        struct_factor = self.structurebox.GetClientData( s_id )
-        
         if not form_factor in  self.model_list_box["multiplication"]:
-            self.multip_cb.SetValue(False)
-            self.structurebox.Hide()
-            self.text2.Hide()
-            self.sizer4_4.Clear()
-            self.sizer4.Layout()
+            self.structurebox.Disable()
+            self.structurebox.SetSelection(0)
             
-        if self.multip_cb.GetValue():
+          
+        s_id = self.structurebox.GetCurrentSelection()
+        struct_factor = self.structurebox.GetClientData( s_id )
+            
+        if  struct_factor !=None:
             from sans.models.MultiplicationModel import MultiplicationModel
             self.model= MultiplicationModel(form_factor(),struct_factor())
-            
         else:
             self.model= form_factor()
        
         ## post state to fit panel
         self.save_current_state()
+        self.sizer4_4.Layout()
+        self.sizer4.Layout()
+        self.Layout()
+        self.SetScrollbars(20,20,200,100)
+        self.Refresh()
+        
        
         
     def _onparamEnter(self,event):
@@ -1076,7 +1052,6 @@ class BasicPage(wx.ScrolledWindow):
                     self._layout_sizer_noDipers()  
                 else:
                     ## set gaussian sizer 
-                    #self._set_sizer_gaussian()  
                     self._on_select_Disp(event=None)
             else:
                 self.model_disp.Hide()
@@ -1088,9 +1063,7 @@ class BasicPage(wx.ScrolledWindow):
             ## post state to fit panel
             self.save_current_state()
             
-            self.sizer4.Layout()
-            self.Layout()
-            self.SetScrollbars(20,20,200,100)
+          
             
         
     def _layout_sizer_noDipers(self):
@@ -1108,10 +1081,8 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Add(model_disp,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         self.sizer4_4.Layout()
         self.sizer4.Layout()
-       
         self.SetScrollbars(20,20,200,100)
-        return 
-    
+      
             
     def _reset_dispersity(self):
         """
@@ -1122,6 +1093,12 @@ class BasicPage(wx.ScrolledWindow):
         
         from sans.models.dispersion_models import GaussianDispersion
         if len(self.disp_cb_dict)==0:
+            self.sizer4_4.Clear(True)
+            self.sizer4_4.Layout()
+            self.sizer4.Layout()
+            self.Layout()
+            self.Refresh()
+            self.SetScrollbars(20,20,200,100)   
             return 
         
         for p in self.disp_cb_dict:
@@ -1134,6 +1111,13 @@ class BasicPage(wx.ScrolledWindow):
             self.model.set_dispersion(p, disp_model)
             # Redraw the model
             self._draw_model()
+            
+        self.sizer4_4.Layout()
+        self.sizer4.Layout()
+        self.Layout()
+        self.SetScrollbars(20,20,200,100)    
+        self.Refresh()
+        
             
             
     def _on_select_Disp(self,event):
@@ -1150,12 +1134,20 @@ class BasicPage(wx.ScrolledWindow):
             
         if  name=="ArrayDispersion":
             self._set_sizer_arraydispersion()
-        
+            
         self.state.disp_box= n
         ## post state to fit panel
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
         
+        self.sizer4_4.Layout()
+        self.sizer4.Layout()
+        self.Layout()
+        self.SetScrollbars(20,20,200,100)
+        self.Refresh()
+        
+       
+       
         
     def _set_sizer_arraydispersion(self):
         """

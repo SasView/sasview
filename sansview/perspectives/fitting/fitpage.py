@@ -393,17 +393,18 @@ class FitPage(BasicPage):
         """    
         self._on_select_model_helper() 
         self.set_model_param_sizer(self.model)
-        self._set_sizer_gaussian()
-        
-        evt = ModelEventbox(model=self.model)
-        wx.PostEvent(self.event_owner, evt)   
         try:
             self.compute_chisqr()
-            self.text1_1.Show()
-            self.tcChi.Show()
         except:
             ## error occured on chisqr computation
             pass
+        self.enable_disp.SetValue(False)
+        self.disable_disp.SetValue(True)
+        self._set_dipers_Param(event=None)
+        
+        evt = ModelEventbox(model=self.model)
+        wx.PostEvent(self.event_owner, evt)   
+        
     
     def _onparamEnter(self,event):
         """ 

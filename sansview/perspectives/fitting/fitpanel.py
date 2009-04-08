@@ -230,7 +230,7 @@ class FitPanel(wx.aui.AuiNotebook):
                 self._help_add_model_page(model=model,
                                 qmin=qmin, qmax=qmax, npts=npts, reset=reset)
             else:
-                self.model_page.select_model(model, page_title)
+                self.model_page.select_model(model, "Model")
        
       
            

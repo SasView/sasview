@@ -98,13 +98,8 @@ class ModelPage(BasicPage):
              call back for model selection
         """    
         self._on_select_model_helper() 
-        self.set_model_param_sizer(self.model)
-        self._set_sizer_gaussian()
-        self.name = self.model.name
-        self.model_view.SetFocus()
-        self.parent.model_page.name = self.name
-        self.parent.draw_model_name = self.name
-        self._draw_model()  
+        self.select_model(self.model, self.model.name)
+        
        
     def _fill_model_sizer(self, sizer):
         """
@@ -252,7 +247,9 @@ class ModelPage(BasicPage):
         self._draw_model()
         ## keep the sizer view consistent with the model menu selecting
         self._set_model_sizer_selection( self.model )
-        
+        self.enable_disp.SetValue(False)
+        self.disable_disp.SetValue(True)
+        self._set_dipers_Param(event=None)
         self.model_view.SetFocus()
                          
     
