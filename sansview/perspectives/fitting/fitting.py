@@ -475,6 +475,9 @@ class Plugin:
                     page = self.fit_panel.add_fit_page(data= data,reset=True)
                     if fitproblem != None:
                         self.page_finder[page]=fitproblem
+                        if self.sim_page != None:
+                            self.sim_page.draw_page()
+                            
                 else:
                     model = fitproblem
                     self.fit_panel.add_model_page(model=model, topmenu=True,

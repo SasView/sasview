@@ -405,7 +405,15 @@ class FitPage(BasicPage):
         evt = ModelEventbox(model=self.model)
         wx.PostEvent(self.event_owner, evt)   
         
-    
+    def reset_page(self, state):
+        """
+            reset the state
+        """
+        self.reset_page_helper(state)
+        evt = ModelEventbox(model=self.model)
+        wx.PostEvent(self.event_owner, evt)   
+        
+        
     def _onparamEnter(self,event):
         """ 
             when enter value on panel redraw model according to changed

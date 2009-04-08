@@ -34,7 +34,11 @@ class FitProblem:
             copy fitproblem
         """
         import copy 
-        obj          = FitProblem( self.parent,model= model )
+        obj          = FitProblem()
+        model= None
+        if self.model!=None:
+            model = self.model.clone()
+        obj.model = model
         obj.fit_data = copy.deepcopy(self.fit_data)
         obj.model = copy.deepcopy(self.model)
         obj.schedule = copy.deepcopy(self.schedule)

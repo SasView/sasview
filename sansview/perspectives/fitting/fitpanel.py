@@ -94,41 +94,47 @@ class FitPanel(wx.aui.AuiNotebook):
         """
              close page and remove all references to the closed page
         """
-        state = self.get_current_page().createMemento()
-        page_name = self.get_current_page().window_name
+        selected_page = self.GetPage(self.GetSelection())
+        ## removing about page
+        if selected_page==self.about_page:
+            self.about_page=None
+            return 
+        ## removing sim_page
+        if selected_page == self.sim_page:
+            self.manager.sim_page=None 
+            return
+        
+        ## closing other pages
+        state = selected_page.createMemento()
+        page_name = selected_page.window_name
         page_finder = self.manager.get_page_finder() 
         fitproblem = None
-        
-        if self.get_current_page() in page_finder:
-            fitproblem= page_finder[self.get_current_page()]
-            
-        
-        selected_page = self.GetPage(self.GetSelection())
-        page_number = self.GetSelection()
-        
-        if self.sim_page != selected_page and selected_page!=self.about_page:
-            # remove the check box link to the model name of this page (selected_page)
-            if self.sim_page !=None :
-                self.sim_page.draw_page()
-            
-            #Delete the page from notebook
-            if selected_page.window_name in self.list_fitpage_name:
-                self.list_fitpage_name.remove(selected_page.window_name)
-           
-            if selected_page.window_name== "Model":
-                fitproblem = self.get_current_page().model.clone()
-                self.model_page=None
-                
-            if  page_number == 1:
-                self.model_page=None
-                
-            
-        elif selected_page==self.about_page:
-            self.about_page=None
+        ## removing model page
+        if selected_page == self.model_page:
+            fitproblem = selected_page.model.clone()
+            self.model_page = None
+            ## page on menu
+            self.manager._add_page_onmenu(page_name, fitproblem)
         else:
-            self.manager.sim_page=None 
-        ## page on menu
-        self.manager._add_page_onmenu(page_name, fitproblem)
+            if selected_page in page_finder:
+       
+                fitproblem= page_finder[selected_page].clone()
+                ## page on menu
+                self.manager._add_page_onmenu(page_name, fitproblem)
+                del page_finder[selected_page]
+            ##remove the check box link to the model name of this page (selected_page)
+            try:
+                self.sim_page.draw_page()
+            except:
+                ## that page is already deleted no need to remove check box on
+                ##non existing page
+                pass
+                
+        #Delete the name of the page into the list of open page
+        if selected_page.window_name in self.list_fitpage_name:
+            self.list_fitpage_name.remove(selected_page.window_name)
+    
+        
         
         
         

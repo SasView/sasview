@@ -460,7 +460,7 @@ class BasicPage(wx.ScrolledWindow):
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
     
-    def reset_page(self, state):
+    def reset_page_helper(self, state):
         """
             Use page_state and change the state of existing page
         """
