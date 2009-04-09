@@ -120,6 +120,11 @@ class HelpWindow(wx.Frame):
         self.rhelp.SetPage(page1)
         self.lhelp.SetPage(page)
         self.lhelp.Bind(wx.html.EVT_HTML_LINK_CLICKED,self.OnLinkClicked )
+        
+        #'HelpWindow' from menu bar, title=model name from 'More Details' button in model penal
+        if title != 'HelpWindow':
+            self.rhelp.LoadPage("doc/model_functions.html")
+            
         vbox.Add(self.rhelp, 1, wx.EXPAND)
         vboxl.Add(self.lhelp, 1, wx.EXPAND)
         rpanel.SetSizer(vbox)
@@ -130,6 +135,12 @@ class HelpWindow(wx.Frame):
         self.Centre()
         self.Show(True)
         
+    def OnButtonClicked(self, event):
+        """
+            Function to diplay html page related to the hyperlinktext selected
+        """
+        #link= "doc/modelfunction.html"
+        self.rhelp.LoadPage("doc/modelfunction.html")
         
     def OnLinkClicked(self, event):
         """
