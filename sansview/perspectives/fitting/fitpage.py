@@ -87,15 +87,10 @@ class FitPage(BasicPage):
         self.btFit = wx.Button(self,wx.NewId(),'Fit')
         self.btFit.Bind(wx.EVT_BUTTON, self._onFit,id= self.btFit.GetId())
         self.btFit.SetToolTipString("Perform fit.")
-        
-        #self.btStopFit = wx.Button(self,wx.NewId(),'Stop Fit')
-        #self.btStopFit.Bind(wx.EVT_BUTTON, self.onStopFit,id= self.btStopFit.GetId())
-        #self.btStopFit.SetToolTipString("Stop Current fit job.")
-        #self.btStopFit.Hide()
+      
         
         sizer_fit.Add((5,5),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)        
         sizer_fit.Add(self.btFit,0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5) 
-        #sizer_fit.Add(self.btStopFit,1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5) 
         
         sizer_smearer = wx.BoxSizer(wx.HORIZONTAL)
         #Filling the sizer containing instruments smearing info.
@@ -760,10 +755,7 @@ class FitPage(BasicPage):
                 ##[cb state, name, value, "+/-", error of fit, min, max , units]
                 self.parameters.append([cb,item, ctl1,
                                         text2,ctl2, ctl3, ctl4,None])
-                #self.page_info.parameters.append([cb.GetValue(),item, ctl1.GetValue(),
-                #                        text2.IsShown(),[ctl2.IsShown(),ctl2.GetValue()],
-                #[ctl3.IsShown(),ctl3.GetValue()],[ ctl4.IsShown(),ctl4.GetValue()],None])
-                
+              
         iy+=1
         sizer.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
@@ -790,8 +782,7 @@ class HelpWindow(wx.Frame):
        
         from sans.models.CylinderModel import CylinderModel
         model = CylinderModel()
-        #from sans.models.LineModel import LineModel
-        #model = LineModel()
+       
         from danse.common.plottools.plottables import Data1D
         data= Data1D(x=[1,2], y=[3,4], dy=[0.1, 0,1])
     
