@@ -320,9 +320,9 @@ class BasicPage(wx.ScrolledWindow):
         if self.model==None:
             return 
         if hasattr(self,"enable_disp"):
-            self.state.enable_disp=self.enable_disp.GetValue()
+            self.state.enable_disp = self.enable_disp.GetValue()
         if hasattr(self, "disp_box"):
-            self.state.disp_box=SetSelection(self.disp_box.GetSelection()) 
+            self.state.disp_box = self.disp_box.GetSelection()
         
         self.state.model = self.model.clone()
         new_state = self.state.clone()
