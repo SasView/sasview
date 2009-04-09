@@ -32,6 +32,7 @@ from zipfile import ZipFile
 
 # Default readers are defined in the readers sub-module
 import readers
+from readers import ascii_reader
 
 class Registry(ExtensionRegistry):
     """
@@ -60,6 +61,24 @@ class Registry(ExtensionRegistry):
         # Look for plug-in readers
         self.find_plugins('plugins')
 
+        
+    def load(self, path, format=None):
+        """
+            Call the loader for the file type of path.
+    
+            @param path: file path
+            @param format: explicit extension, to force the use of a particular reader
+    
+            Defaults to the ascii (multi-column) reader
+            if no reader was registered for the file's
+            extension.   
+        """
+        try:
+            return super(Registry, self).load(path, format=format)
+        except:
+            # No reader was found. Default to the ascii reader.
+            ascii_loader = ascii_reader.Reader()
+            return ascii_loader.read(path)
         
     def find_plugins(self, dir):
         """
