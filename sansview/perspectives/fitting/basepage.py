@@ -73,7 +73,7 @@ class BasicPage(wx.ScrolledWindow):
         ## dictionary of saved state
         self.saved_states={}
         self.slicerpop = wx.Menu()
-        self.slicerpop.SetTitle("Model Saved States")
+        
         ## save initial state on context menu
         self.onSave(event=None)
         self.Bind(wx.EVT_CONTEXT_MENU, self.onContextMenu)
