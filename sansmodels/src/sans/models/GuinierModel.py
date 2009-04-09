@@ -12,7 +12,7 @@ class GuinierModel(BaseComponent):
         Class that evaluates a Guinier model.
     
         I(q) = I_0 exp ( - R_g^2 q^2 / 3.0 )
-     
+        
         List of default parameters:
          I_0 = Scale
          R_g = Radius of gyration
@@ -34,7 +34,7 @@ class GuinierModel(BaseComponent):
         ## Define parameters
         self.params = {}
         self.params['scale']  = 1.0
-        self.params['rg']     = 0.1
+        self.params['rg']     = 60
 
         ## Parameter details [units, min, max]
         self.details = {}
