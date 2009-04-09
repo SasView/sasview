@@ -53,6 +53,7 @@ class Reader:
                 buff = input_f.read()
                 lines = buff.split('\n')
                 
+                #Jae could not find python universal line spliter: keep the below for now
                 # some ascii data has \r line separator, try it when it has only one line
                 if len(lines) < 2 : 
                     lines = buff.split('\r')
@@ -90,12 +91,31 @@ class Reader:
                 has_error_dx = None
                 has_error_dy = None
                 
+                #Initialize counters for data lines and header lines.
+                is_data = False #Has more than 3 lines
+                mum_data_lines = 3 # More than "3" lines of data is considered as actual data unless there is only less lines of data
+
+                i=-1  # To count # of current data candidate lines
+                i1=-1 # To count total # of previous data candidate lines
+                j=-1  # To count # of header lines
+                j1=-1 # Helps to count # of header lines
+                
                 for line in lines:
                     toks = line.split()
+                    
                     try:
+                        
                         _x = float(toks[0])
                         _y = float(toks[1])
                         
+                        #Reset the header line counters
+                        if j == j1:
+                            j = 0
+                            j1 = 0
+                            
+                        if i > 1:
+                            is_data = True
+                            
                         if data_conv_q is not None:
                             _x = data_conv_q(_x, units=output.x_unit)
                             
@@ -139,26 +159,89 @@ class Reader:
                         # flag, set it now.
                         if has_error_dx == None:
                             has_error_dx = False if _dx == None else True
-
+                        
+                        #Delete the previously stored lines of data candidates if is not data.
+                        if i < 0 and -1< i1 < mum_data_lines and is_data == False:
+                            try:
+                                x= numpy.zeros(0)
+                                y= numpy.zeros(0)
+                                
+                            except:
+                                pass
+                            
                         x  = numpy.append(x,   _x) 
                         y  = numpy.append(y,   _y)
+                        
                         if has_error_dy == True:
+                            #Delete the previously stored lines of data candidates if is not data.
+                            if i < 0 and -1< i1 < mum_data_lines and is_data== False:
+                                try:
+                                    dy = numpy.zeros(0)  
+                                except:
+                                    pass                                                               
                             dy = numpy.append(dy, _dy)
+                            
                         if has_error_dx == True:
+                            #Delete the previously stored lines of data candidates if is not data.
+                            if i < 0 and -1< i1 < mum_data_lines and is_data== False:
+                                try:
+                                    dx = numpy.zeros(0)                            
+                                except:
+                                    pass                                                               
                             dx = numpy.append(dx, _dx)
                             
                         #Same for temp.
+                        #Delete the previously stored lines of data candidates if is not data.
+                        if i < 0 and -1< i1 < mum_data_lines and is_data== False:
+                            try:
+                                tx = numpy.zeros(0)
+                                ty = numpy.zeros(0)
+                            except:
+                                pass                                                               
+
                         tx  = numpy.append(tx,   _x) 
                         ty  = numpy.append(ty,   _y)
+                        
                         if has_error_dy == True:
+                            #Delete the previously stored lines of data candidates if is not data.
+                            if i < 0 and -1<i1 < mum_data_lines and is_data== False:
+                                try:
+                                    tdy = numpy.zeros(0)
+                                except:
+                                    pass                                                                                                                
                             tdy = numpy.append(tdy, _dy)
                         if has_error_dx == True:
+                            #Delete the previously stored lines of data candidates if is not data.
+                            if i < 0 and -1< i1 < mum_data_lines and is_data== False:
+                                try:
+                                    tdx = numpy.zeros(0)
+                                except:
+                                    pass                                                                                                             
                             tdx = numpy.append(tdx, _dx)
                         
+                        #Reset # of header lines and counts # of data candidate lines    
+                        if j == 0 and j1 ==0:
+                            i1 = i + 1                            
+                        i+=1
+                        
                     except:
+
+                        # It is data and meet non - number, then stop reading
+                        if is_data == True:
+                            break    
+                        #Counting # of header lines                    
+                        j+=1
+                        if j == j1+1:
+                            j1 = j                            
+                        else:                            
+                            j = -1
+                        #Reset # of lines of data candidates
+                        i = -1
+                        
                         # Couldn't parse this line, skip it 
                         pass
-                         
+                    
+    
                      
                 # Sanity check
                 if has_error_dy == True and not len(y) == len(dy):
@@ -180,7 +263,8 @@ class Reader:
                         dy[i] = tdy[ind[i]]
                     if has_error_dx == True:
                         dx[i] = tdx[ind[i]]
-                    
+                
+                #Data    
                 output.x = x
                 output.y = y
                 output.dy = dy if has_error_dy == True else None
@@ -196,6 +280,7 @@ class Reader:
                     output.yaxis("\\rm{Intensity}","cm^{-1}")
 
                 return output
+            
         else:
             raise RuntimeError, "%s is not a file" % path
         return None
