@@ -43,8 +43,8 @@ class FitPage(BasicPage):
         ## draw sizer
         self._fill_datainfo_sizer()
         self._fill_model_sizer( self.sizer1)
-        self._on_select_model(event=None)
         self._fill_range_sizer() 
+        self._on_select_model(event=None)
     
         ## to update the panel according to the fit engine type selected
         self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
@@ -171,24 +171,16 @@ class FitPage(BasicPage):
         """
             fill sizer containing model info
         """
-        sizer_tcChi = wx.GridSizer(2, 2,5, 5)
+       
+        box_description= wx.StaticBox(self, -1,'Chi2/dof')
+        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+        boxsizer1.SetMinSize((50,-1))
         self.tcChi    =  wx.StaticText(self, -1, "-", style=wx.ALIGN_LEFT)
+        boxsizer1.Add( self.tcChi )
         
-        
-        self.text1_1 = wx.StaticText(self, -1, 'Chi2/dof', style=wx.ALIGN_LEFT)
-        
-        
-        self.btChi = wx.Button(self,wx.NewId(),'View Chi')
-        self.btChi.Bind(wx.EVT_BUTTON, self._onFit,id= self.btChi.GetId())
-        self.btChi.SetToolTipString("View data - model.")
-        
-        sizer_tcChi.Add(self.text1_1,1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
-        sizer_tcChi.Add(self.btChi,1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)        
-        sizer_tcChi.Add(self.tcChi,1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)        
-        sizer_tcChi.Add((5,5),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
             
         ## class base method  to add view 2d button    
-        self._set_model_sizer(sizer=sizer, title="Model",object=  sizer_tcChi )    
+        self._set_model_sizer(sizer=sizer, title="Model",object= boxsizer1 )    
     
     
     def _set_sizer_gaussian(self):

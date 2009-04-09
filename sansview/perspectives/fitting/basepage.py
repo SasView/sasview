@@ -176,7 +176,8 @@ class BasicPage(wx.ScrolledWindow):
             fill sizer containing dispersity info
         """
         self.sizer4.Clear(True)
-        box_description= wx.StaticBox(self, -1,"PolyDispersity")
+        name="Polydispersity and Orientational Distribution"
+        box_description= wx.StaticBox(self, -1,name)
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #----------------------------------------------------
         self.disable_disp = wx.RadioButton(self, -1, 'No', (10, 10), style=wx.RB_GROUP)
@@ -189,7 +190,7 @@ class BasicPage(wx.ScrolledWindow):
         
         sizer_dispersion = wx.BoxSizer(wx.HORIZONTAL)
         sizer_dispersion.Add((20,20))
-        name="Polydispersity and \nOrientation average "
+        name="Polydispersity and \nOrientational Distribution "
         sizer_dispersion.Add(wx.StaticText(self,-1,name))
         sizer_dispersion.Add(self.enable_disp )
         sizer_dispersion.Add((20,20))
@@ -421,7 +422,8 @@ class BasicPage(wx.ScrolledWindow):
         """
             Store current state
         """
-        self.state.model = self.model.clone()
+        if self.model!= None:
+            self.state.model = self.model.clone()
         self.state.save_data(self.data)
     
         if hasattr(self,"cb1"):
@@ -955,7 +957,8 @@ class BasicPage(wx.ScrolledWindow):
         if not form_factor in  self.model_list_box["multiplication"]:
             self.structurebox.Disable()
             self.structurebox.SetSelection(0)
-            
+        else:
+            self.structurebox.Enable()
            
         s_id = self.structurebox.GetCurrentSelection()
         struct_factor = self.structurebox.GetClientData( s_id )
