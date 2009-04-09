@@ -2,6 +2,7 @@
 import sys
 import wx
 import numpy
+import time
 
 from sans.guiframe.utils import format_number
 from sans.guicomm.events import StatusEvent   
@@ -66,15 +67,35 @@ class BasicPage(wx.ScrolledWindow):
         ## Create memento to save the current state
         
         self.state= PageState(parent= self.parent,model=self.model, data=self.data)
+        
+        ## retrieve saved state
+        self.number_saved_state= 0
+        ## dictionary of saved state
+        self.saved_states={}
+        self.slicerpop = wx.Menu()
+        self.slicerpop.SetTitle("Model Saved States")
+        ## save initial state on context menu
+        self.onSave(event=None)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.onContextMenu)
+        
         ## create the basic structure of the panel with empty sizer
         self.define_page_structure()
         ## drawing Initial dispersion parameters sizer 
         self.set_dispers_sizer()
         self._fill_save_sizer()
-        
         ## layout
         self.set_layout()
        
+       
+    def onContextMenu(self, event): 
+        """
+            Retrieve the state selected state
+        """
+        pos = event.GetPosition()
+        pos = self.ScreenToClient(pos)
+        self.PopupMenu(self.slicerpop, pos) 
+        
+        
         
     def define_page_structure(self):
         """
@@ -105,6 +126,7 @@ class BasicPage(wx.ScrolledWindow):
         self.vbox.Add(self.sizer5)
         self.vbox.Add(self.sizer6)
         
+        
     def set_layout(self):
         """
              layout
@@ -116,10 +138,12 @@ class BasicPage(wx.ScrolledWindow):
         self.set_scroll()
         self.Centre()
         
+        
     def set_scroll(self):
         self.SetScrollbars(20,20,200,100)
         self.Layout()   
         self.SetAutoLayout(True)
+         
          
     def set_owner(self,owner):
         """ 
@@ -165,7 +189,8 @@ class BasicPage(wx.ScrolledWindow):
         
         sizer_dispersion = wx.BoxSizer(wx.HORIZONTAL)
         sizer_dispersion.Add((20,20))
-        sizer_dispersion.Add(wx.StaticText(self,-1,'Polydispersity: '))
+        name="Polydispersity and \nOrientation average "
+        sizer_dispersion.Add(wx.StaticText(self,-1,name))
         sizer_dispersion.Add(self.enable_disp )
         sizer_dispersion.Add((20,20))
         sizer_dispersion.Add(self.disable_disp )
@@ -272,90 +297,54 @@ class BasicPage(wx.ScrolledWindow):
                 self._draw_model()
         return
     
+    
+    def onResetModel(self, event):
+        """
+            Reset model state
+        """
+        ## post help message for the selected model 
+        msg = self.slicerpop.GetHelpString(event.GetId())
+        msg +=" reloaded"
+        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        
+        name= self.slicerpop.GetLabel(event.GetId())
+        if name in self.saved_states.keys():
+            previous_state = self.saved_states[name]
+            self.reset_page(previous_state)
+            
+   
     def onSave(self, event):
         """
             save history of the data and model
         """
-        self.state.model= self.model
-        self.state.data = self.data
-        import os
-                 
-            
-        path = None
-        dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", "*.txt", wx.SAVE)
-        if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
-            mypath = os.path.basename(path)
-            
-        dlg.Destroy()
-            
-        if not path == None:
-            out = open(path, 'w')
-            has_data = self.data !=None
-            has_model = self.model!=None
-            import time
-            year, month, day,hour,minute,second,tda,ty,tm_isdst= time.gmtime()
-            import os.path
-            out.write("Title: State for %s\n"%os.path.basename(path))
-            out.write("Date: %g\%g\%g \n"%(year, month, day))
-            out.write("GMT Time: %g:%g:%g \n\n"%(hour,minute, second))
-            # Sanity check
-            if has_data:
-                out.write("Fit Data name: %s\n\n"%self.data.name)
-    
-            if has_model:
-                out.write("Model name: %s\n"%self.model.name)
-                if len(self.parameters)>0:  
-                    out.write("Parameters Info:\n")
-                    msg= "Name\t\tValues\t\t+\-\tErrors\t\tMin\t\tMax\t\tUnits\t\tstate\n"
-                    out.write(msg)
-                    ##self.parameters=
-                    ##[cb state, name, value, "+/-", error of fit, min, max , units]
-                    for item in self.parameters:
-                        if item[1]!=None:
-                            name= item[1]
-                        else:
-                            name=""
-                        if item[2]!=None:
-                            value= str(item[2].GetValue().rstrip().lstrip())
-                        else:
-                            value=""
-                        if item[3]!=None:
-                            sign= str(item[3].GetLabelText().rstrip().lstrip())
-                        else:
-                            sign=""
-                        if item[4]!=None:
-                            error= str(item[4].GetValue().rstrip().lstrip())
-                        else:
-                            error=""
-                        if item[5]!=None:
-                            min= str(item[5].GetValue().rstrip().lstrip())
-                        else:
-                            min=""
-                        if item[6]!=None:
-                            max= str(item[6].GetValue().rstrip().lstrip())
-                        else:
-                            max=""
-                        if item[7]!=None:
-                            unit= str(item[7].GetLabelText().rstrip().lstrip())
-                        else:
-                            unit=""
-                        if item[0]!=None:
-                            if item[0].GetValue():
-                                state= "Fitted"
-                            else:
-                                state= "Not Fitted"
-                        else:
-                            state="Not Fitted"
-    
-                        msg= "%s\t\t%s\t\t%s\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n"\
-                         %(name,value,sign,error,min,max,unit,state)
-                        out.write(msg)
-                        
-                
-            out.close()
-
-     
+        if self.model==None:
+            return 
+        if hasattr(self,"enable_disp"):
+            self.state.enable_disp=self.enable_disp.GetValue()
+        if hasattr(self, "disp_box"):
+            self.state.disp_box=SetSelection(self.disp_box.GetSelection()) 
+        
+        self.state.model = self.model.clone()
+        new_state = self.state.clone()
+        
+        ##Add model state on context menu
+        self.number_saved_state += 1
+        name= self.model.name+"[%g]"%self.number_saved_state 
+        self.saved_states[name]= new_state
+        
+        ## Add item in the context menu
+        year, month, day,hour,minute,second,tda,ty,tm_isdst= time.gmtime()
+        my_time= str(hour)+"hrs "+str(minute)+"min "+str(second)+"s"
+        date= str( month)+"|"+str(day)+"|"+str(year)
+        msg=  "Model saved at %s on %s"%(my_time, date)
+         ## post help message for the selected model 
+        msg +=" Saved! right click on this page to retrieve this model"
+        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        
+        id = wx.NewId()
+        self.slicerpop.Append(id,name,str(msg))
+        wx.EVT_MENU(self, id, self.onResetModel)
+        
     def onSetFocus(self, evt):
         """
             highlight the current textcrtl and hide the error text control shown 
@@ -460,6 +449,7 @@ class BasicPage(wx.ScrolledWindow):
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
     
+    
     def reset_page_helper(self, state):
         """
             Use page_state and change the state of existing page
@@ -484,7 +474,8 @@ class BasicPage(wx.ScrolledWindow):
         
         ##plotting range restore    
         self._reset_plotting_range()
-        
+        ## reset context menu items
+        self._reset_context_menu()
         ## reset state of checkbox,textcrtl  and parameters value
         if hasattr(self, "cb1"):    
             self.cb1.SetValue(self.state.cb1)
@@ -495,6 +486,9 @@ class BasicPage(wx.ScrolledWindow):
         ## draw the model with previous parameters value
         self._draw_model()
         
+   
+   
+         
         
     def _selectDlg(self):
         """
@@ -508,6 +502,17 @@ class BasicPage(wx.ScrolledWindow):
         dlg.Destroy()
         return path
     
+    
+    def _reset_context_menu(self):
+        """
+            reset the context menu
+        """
+        for name, state in self.state.saved_states.iteritems():
+            self.number_saved_state += 1
+            ## Add item in the context menu
+            id = wx.NewId()
+            self.slicerpop.Append(id,name, 'Save model and state %g'%self.number_saved_state)
+            wx.EVT_MENU(self, id, self.onResetModel)
     
     def _reset_plotting_range(self):
         """
@@ -541,7 +546,8 @@ class BasicPage(wx.ScrolledWindow):
              use : _check_value_enter 
         """
         if self.model !=None:
-            
+            ## save current state
+            self.save_current_state()
             # Flag to register when a parameter has changed.
             is_modified = False
             is_modified =self._check_value_enter( self.fittable_param ,is_modified)
@@ -568,8 +574,7 @@ class BasicPage(wx.ScrolledWindow):
                 if float(self.npts.GetValue()) !=  self.num_points:
                     self.num_points = float(self.npts.GetValue())
                     is_modified = True
-            ## save current state
-            self.save_current_state()
+           
             
             ## if any value is modify draw model with new value
             if is_modified:
@@ -951,16 +956,16 @@ class BasicPage(wx.ScrolledWindow):
             self.structurebox.Disable()
             self.structurebox.SetSelection(0)
             
-          
+           
         s_id = self.structurebox.GetCurrentSelection()
         struct_factor = self.structurebox.GetClientData( s_id )
-            
+       
         if  struct_factor !=None:
             from sans.models.MultiplicationModel import MultiplicationModel
             self.model= MultiplicationModel(form_factor(),struct_factor())
         else:
             self.model= form_factor()
-       
+        
         ## post state to fit panel
         self.save_current_state()
         self.sizer4_4.Layout()

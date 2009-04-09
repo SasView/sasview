@@ -75,41 +75,7 @@ class FitPage(BasicPage):
                 
         self.sizer3.Layout()
         self.SetScrollbars(20,20,200,100)
-            
-            
-    def _on_display_description(self, event):
-        """
-            Show or Hide description
-            @param event: wx.EVT_RADIOBUTTON
-        """
-        self._on_display_description_helper()
         
-        
-        
-    def _on_display_description_helper(self):
-        """
-            Show or Hide description
-            @param event: wx.EVT_RADIOBUTTON
-        """
-        ## save state of radiobox
-        #self.page_info. save_radiobox_state( self.description_hide )
-        #self.page_info. save_radiobox_state( self.description_show )
-        ## Show description
-        if not self.description_show.GetValue():
-            self.sizer_description.Clear(True)
-            
-        else:
-            #model=self.page_info.model
-            
-            description=""
-            if self.model!=None:
-                description = self.model.description
-                #description = self.page_info.model.description
-            self.description = wx.StaticText( self,-1,str(description) )
-            self.sizer_description.Add( self.description, 1, wx.EXPAND | wx.ALL, 10 )
-           
-        self.Layout()
-    
     
     def _fill_range_sizer(self):
         """
@@ -405,15 +371,7 @@ class FitPage(BasicPage):
         evt = ModelEventbox(model=self.model)
         wx.PostEvent(self.event_owner, evt)   
         
-    def reset_page(self, state):
-        """
-            reset the state
-        """
-        self.reset_page_helper(state)
-        evt = ModelEventbox(model=self.model)
-        wx.PostEvent(self.event_owner, evt)   
-        
-        
+
     def _onparamEnter(self,event):
         """ 
             when enter value on panel redraw model according to changed
@@ -422,6 +380,15 @@ class FitPage(BasicPage):
         self.compute_chisqr()
         
         
+    def reset_page(self, state):
+        """
+            reset the state
+        """
+        self.reset_page_helper(state)
+        evt = ModelEventbox(model=self.model)
+        wx.PostEvent(self.event_owner, evt)   
+            
+            
     def get_range(self):
         """
             return the fitting range
@@ -661,56 +628,6 @@ class FitPage(BasicPage):
         self.save_current_state()
         
     
-    def set_model_description(self,description,sizer):
-        """
-            fill a sizer with description
-            @param description: of type string
-            @param sizer: wx.BoxSizer()
-        """
-    
-        sizer.Clear(True)
-        box_description= wx.StaticBox(self, -1, 'Model Description')
-        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-                
-        self.description = wx.StaticText( self,-1,str(description) )
-        sizer_selection=wx.BoxSizer(wx.HORIZONTAL)
-        
-        
-        self.description_show = wx.RadioButton(self, -1, 'Show', style=wx.RB_GROUP)
-        self.description_hide = wx.RadioButton(self, -1, 'Hide')
-        
-        self.Bind( wx.EVT_RADIOBUTTON, self._on_display_description,
-                   id=self.description_hide.GetId() )
-        
-        self.Bind( wx.EVT_RADIOBUTTON, self._on_display_description,
-                   id=self.description_show.GetId() )
-        
-        self.model_description = wx.Button(self, -1, "More Details")
-     
-        
-        #self.page_info.save_radiobox_state( self.description_hide )
-        #self.page_info.save_radiobox_state( self.description_show )
-        
-        sizer_selection.Add( self.description_show )
-        sizer_selection.Add( (20,20)) 
-        sizer_selection.Add( self.description_hide )
-        sizer_selection.Add( (20,20)) 
-        sizer_selection.Add( self.model_description )
-        
-         
-        self.sizer_description=wx.BoxSizer(wx.HORIZONTAL)
-        self.sizer_description.Add( self.description, 1, wx.EXPAND | wx.ALL, 10 )
-       
-        boxsizer1.Add( sizer_selection) 
-        boxsizer1.Add( (20,20)) 
-        boxsizer1.Add( self.sizer_description) 
-    
-
-        sizer.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
-        sizer.Layout()
-   
-   
-        
         
     def set_model_param_sizer(self, model):
         """

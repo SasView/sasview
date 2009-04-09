@@ -1,6 +1,5 @@
 
 
-import wx
 import copy
 
 class PageState(object):
@@ -44,9 +43,10 @@ class PageState(object):
         self.disp_list =[]
         #contains link between a model and selected parameters to fit 
         self.param_toFit =[]
-        #dictionary of model type and model class
+        ##dictionary of model type and model class
         self.model_list_box = None
-       
+        ## save the state of the context menu
+        self.saved_states={}
         ## save  current value of combobox
         self.formfactorcombobox = ""
         self.structurecombobox  = ""
@@ -92,6 +92,12 @@ class PageState(object):
         obj.qmax = copy.deepcopy(self.qmax)
         obj.npts = copy.deepcopy(self.npts )
         obj.cb1 = copy.deepcopy(self.cb1)
+        for name, state in self.saved_states.iteritems():
+            copy_name = copy.deepcopy(name)
+            copy_state = state.clone()
+            obj.saved_states[copy_name]= copy_state
+                                           
+       
         
         return obj
 

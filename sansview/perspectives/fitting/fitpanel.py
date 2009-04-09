@@ -133,10 +133,7 @@ class FitPanel(wx.aui.AuiNotebook):
         #Delete the name of the page into the list of open page
         if selected_page.window_name in self.list_fitpage_name:
             self.list_fitpage_name.remove(selected_page.window_name)
-    
-        
-        
-        
+            
         
     def set_manager(self, manager):
         """

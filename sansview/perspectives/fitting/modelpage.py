@@ -33,13 +33,13 @@ class ModelPage(BasicPage):
        
         description=""
         if self.model!=None:
-            #description = self.page_info.model.description
             description = self.model.description
-            self.set_model_param_sizer(self.model)
+            
+            self.select_model(self.model, self.model.name)
             self.set_model_description(description,self.sizer2)
+            
+     
         
-    
-
         
     def _on_display_description(self, event):
         """
@@ -55,19 +55,16 @@ class ModelPage(BasicPage):
             Show or Hide description
             @param event: wx.EVT_RADIOBUTTON
         """
-        ## save state of radiobox
-        #self.page_info. save_radiobox_state( self.description_hide )
-        #self.page_info. save_radiobox_state( self.description_show )
+        
         ## Show description
         if not self.description_show.GetValue():
             self.sizer_description.Clear(True)
             
         else:
-            #model=self.page_info.model
             description=""
             if self.model!=None:
-                #description = self.page_info.model.description
                 description = self.model.description
+                
             self.description = wx.StaticText( self,-1,str(description) )
             self.sizer_description.Add( self.description, 1, wx.EXPAND | wx.ALL, 10 )
            
@@ -292,10 +289,7 @@ class ModelPage(BasicPage):
         self.model_description = wx.Button(self,-1, label="More Details")
         self.model_description.Bind(wx.EVT_BUTTON,self.on_button_clicked)
         self.model_description.SetToolTipString("Click Model Functions in HelpWindow...")
-        
-        #self.page_info.save_radiobox_state( self.description_hide )
-        #self.page_info.save_radiobox_state( self.description_show )
-        
+      
         sizer_selection.Add( self.description_show )
         sizer_selection.Add( (20,20)) 
         sizer_selection.Add( self.description_hide )
