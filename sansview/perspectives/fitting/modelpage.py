@@ -312,9 +312,12 @@ class ModelPage(BasicPage):
         """
         #On 'More details' button
         """
-        
         from helpPanel import  HelpWindow
-        frame = HelpWindow(None, -1, 'HelpWindow')    
+        
+        name = self.model.name
+        if name == None:
+            name = 'FuncHelp'
+        frame = HelpWindow(None, -1, name)    
         frame.Show(True)
 
     def set_range(self, qmin_x, qmax_x, npts):
