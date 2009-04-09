@@ -73,6 +73,8 @@ class MultiplicationModel(BaseComponent):
         """
         for name , value in self.model1.params.iteritems():
             self.params[name]= value
+            if name in self.model2.getParamList():
+                self.model2.setParam(name, value)
             
         for name , value in self.model2.params.iteritems():
             if not name in self.params.keys():
@@ -97,13 +99,14 @@ class MultiplicationModel(BaseComponent):
             @param name: name of the parameter
             @param value: value of the parameter
         """
-        self._setParamHelper( name, value)
+        
         if name in self.model1.getParamList():
             self.model1.setParam( name, value)
             
         if name in self.model2.getParamList():
             self.model2.setParam( name, value) 
-        
+       
+        self._setParamHelper( name, value)
         
     def _setParamHelper(self, name, value):
         """
@@ -149,6 +152,7 @@ class MultiplicationModel(BaseComponent):
             @param x: input q-value (float or [float, float] as [r, theta])
             @return: (DAB value)
         """
+       
         return self.model1.run(x)* self.model2.run(x)
    
     def runXY(self, x = 0.0):

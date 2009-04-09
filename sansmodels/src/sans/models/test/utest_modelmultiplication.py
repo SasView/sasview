@@ -27,7 +27,35 @@ class TestDisperser(unittest.TestCase):
     fixed=[]
     fixed=['radius.width']
     
-    
+    def test_multiplication_radius(self):
+        """ test multiplication model"""
+        from sans.models.MultiplicationModel import MultiplicationModel
+        from sans.models.SphereModel import SphereModel
+        from sans.models.HayterMSAStructure import HayterMSAStructure
+        my_sphere = SphereModel()
+        my_struct = HayterMSAStructure()
+        model1  =  MultiplicationModel(my_sphere,my_struct)
+        self.assertEquals(model1.getParam("radius"),
+                          my_struct.getParam("radius"),
+                          my_sphere.getParam("radius"))
+        model2 = SphereModel()
+        x= 2
+
+        model1.setParam("radius", 60)
+        self.assertEqual(model1.getParam("radius"), 60)
+        a = model1.run(x)
+        self.assertEqual(a, 2.5723183020756634e-006)
+        model1.setParam("radius", 70)
+        b = model1.run(x)
+        self.assertNotEqual(a, b)
+        model1.setParam("radius", 60)
+        c =  model1.run(x)
+        self.assertEqual(c, 2.5723183020756634e-006)
+        self.assertEqual(a, c)
+        
+        
+        
+        
     def test_multiplication(self):
         """ test multiplication model"""
         from sans.models.MultiplicationModel import MultiplicationModel
