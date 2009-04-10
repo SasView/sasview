@@ -48,6 +48,17 @@ class abs_reader(unittest.TestCase):
         # The length of the data is 10
         self.assertEqual(len(f.x), 5)
         
+    def test_truncated_3(self):
+        """
+            Test a 6-col ascii file with complex header and 
+            many lines with 2 or 2 columns in the middle of the data section.
+            The business rule says that we should stop
+            reading at the last line of header.
+        """
+        # Test .ABS file loaded as ascii
+        f = self.loader.load("ascii_test_4.abs")
+        # The length of the data is 10
+        self.assertEqual(len(f.x), 5)
         
         
 if __name__ == '__main__':
