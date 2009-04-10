@@ -52,7 +52,7 @@ class Target:
         # for the versioninfo resources
         self.version = "0.1"
         self.company_name = "U Tennessee"
-        self.copyright = "copyright 2008"
+        self.copyright = "copyright 2009"
         self.name = "SansView"
         
 #
