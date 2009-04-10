@@ -311,7 +311,6 @@ class Reader:
                     output.yaxis("\\rm{Intensity}", output.y_unit)
                 else:
                     output.yaxis("\\rm{Intensity}","cm^{-1}")
-                print "output",output
                 return output
             
         else:

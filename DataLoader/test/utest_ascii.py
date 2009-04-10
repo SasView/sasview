@@ -45,7 +45,7 @@ class abs_reader(unittest.TestCase):
         """
         # Test .ABS file loaded as ascii
         f = self.loader.load("ascii_test_3.txt")
-        # The length of the data is 10
+        # The length of the data is 5
         self.assertEqual(len(f.x), 5)
         
     def test_truncated_3(self):
@@ -57,8 +57,20 @@ class abs_reader(unittest.TestCase):
         """
         # Test .ABS file loaded as ascii
         f = self.loader.load("ascii_test_4.abs")
-        # The length of the data is 10
+        # The length of the data is 5
         self.assertEqual(len(f.x), 5)
+        
+    def test_truncated_4(self):
+        """
+            Test mix of 6-col and 2-col.
+            Only the last 5 2-col lines should be read.
+        """
+        # Test .ABS file loaded as ascii
+        f = self.loader.load("ascii_test_5.txt")
+        # The length of the data is 5
+        self.assertEqual(len(f.x), 5)
+        self.assertEqual(f.x[0],0.02879)
+        self.assertEqual(f.x[4],0.0497)
         
         
 if __name__ == '__main__':
