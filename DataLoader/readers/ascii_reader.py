@@ -93,12 +93,13 @@ class Reader:
                 
                 #Initialize counters for data lines and header lines.
                 is_data = False #Has more than 3 lines
-                mum_data_lines = 3 # More than "3" lines of data is considered as actual data unless there is only less lines of data
+                mum_data_lines = 3 # More than "3" lines of data is considered as actual data unless that is the only data
 
-                i=-1  # To count # of current data candidate lines
-                i1=-1 # To count total # of previous data candidate lines
-                j=-1  # To count # of header lines
-                j1=-1 # Helps to count # of header lines
+                i=-1            # To count # of current data candidate lines
+                i1=-1           # To count total # of previous data candidate lines
+                j=-1            # To count # of header lines
+                j1=-1           # Helps to count # of header lines
+                lentoks = 2     # minimum required number of columns of data; ( <= 4).
                 
                 for line in lines:
                     toks = line.split()
@@ -108,6 +109,12 @@ class Reader:
                         _x = float(toks[0])
                         _y = float(toks[1])
                         
+                        #To reject the line when reader meets less columns of data
+                        if lentoks == 3:
+                            _dy = float(toks[2])
+                        elif lentoks == 4:
+                            _dx = float(toks[3])
+                        
                         #Reset the header line counters
                         if j == j1:
                             j = 0
@@ -115,7 +122,7 @@ class Reader:
                             
                         if i > 1:
                             is_data = True
-                            
+                        
                         if data_conv_q is not None:
                             _x = data_conv_q(_x, units=output.x_unit)
                             
@@ -160,6 +167,21 @@ class Reader:
                         if has_error_dx == None:
                             has_error_dx = False if _dx == None else True
                         
+                        #After talked with PB, we decided to take care of only 4 columns of data for now.
+                        #number of columns in the current line
+                        if len(toks)>= 4:
+                            new_lentoks = 4
+                        else:
+                            new_lentoks = len(toks)
+                        
+                        #If the previous columns are less than the current, mark the previous as non-data and reset the dependents.  
+                        if lentoks < new_lentoks :
+                            if is_data == False:
+                                i = -1
+                                i1 = 0
+                                j = -1
+                                j1 = -1
+                            
                         #Delete the previously stored lines of data candidates if is not data.
                         if i < 0 and -1< i1 < mum_data_lines and is_data == False:
                             try:
@@ -218,6 +240,15 @@ class Reader:
                                 except:
                                     pass                                                                                                             
                             tdx = numpy.append(tdx, _dx)
+
+                        #reset i1 and flag lentoks for the next
+                        if lentoks < new_lentoks :
+                            if is_data == False:
+                                i1 = -1                            
+                        if len(toks)>= 4:
+                            lentoks = 4
+                        else:
+                            lentoks = len(toks)
                         
                         #Reset # of header lines and counts # of data candidate lines    
                         if j == 0 and j1 ==0:
@@ -229,6 +260,7 @@ class Reader:
                         # It is data and meet non - number, then stop reading
                         if is_data == True:
                             break    
+                        lentoks = 2
                         #Counting # of header lines                    
                         j+=1
                         if j == j1+1:
@@ -264,6 +296,7 @@ class Reader:
                     if has_error_dx == True:
                         dx[i] = tdx[ind[i]]
                 
+                
                 #Data    
                 output.x = x
                 output.y = y
@@ -278,7 +311,7 @@ class Reader:
                     output.yaxis("\\rm{Intensity}", output.y_unit)
                 else:
                     output.yaxis("\\rm{Intensity}","cm^{-1}")
-
+                print "output",output
                 return output
             
         else:
