@@ -2,6 +2,9 @@
 from sans.models.BaseComponent import BaseComponent
 import numpy, math
 import copy
+from sans.models.pluginmodel import Model1DPlugin
+from sans.models.DiamCylFunc import  DiamCylFunc
+from sans.models.DiamEllipFunc import  DiamEllipFunc
 class MultiplicationModel(BaseComponent):
     """
         Use for S(Q)*P(Q).
@@ -25,11 +28,38 @@ class MultiplicationModel(BaseComponent):
         else :
             self.name = model1.name
             self.description= model1.description
-  
+                        
+        #For virial coefficients for only two P(Q) models,"CylinderModel","EllipsoidModel". SphereModel works w/o it.
+        modelDiam = None
+        if model1.__class__.__name__ == "CylinderModel":
+            Model1DPlugin("DiamCylFunc")
+            modelDiam = DiamCylFunc()
+            para1 = 'radius'
+            para2 = 'length'
+            
+        elif model1.__class__.__name__  == "EllipsoidModel":
+            Model1DPlugin("DiamEllipFunc")
+            modelDiam = DiamEllipFunc()
+            para1 = 'radius_a'
+            para2 = 'radius_b'
+            
+        self.modelD = modelDiam
         
+        if model1.__class__.__name__ == "CylinderModel" \
+            or model1.__class__.__name__  == "EllipsoidModel":
+          
+            self.para1 = para1
+            self.para2 = para2
+
         
         self.model1= model1
         self.model2= model2
+        
+        #if modelDiam != None:
+           #self.model2.params["radius"]= DiamEllipFunc()
+        
+           #print "self.modelD",self.modelD.params,self.model1.params,self.model2.params    
+
         ## dispersion
         self._set_dispersion()
         ## Define parameters
@@ -62,8 +92,10 @@ class MultiplicationModel(BaseComponent):
             self.dispersion[name]= value
             
         for name , value in self.model2.dispersion.iteritems():
-            if not name in self.dispersion.keys():
+            if not name in self.dispersion.keys()and name !='radius':
                 self.dispersion[name]= value
+
+                    
                 
                 
     def _set_params(self):
@@ -71,13 +103,23 @@ class MultiplicationModel(BaseComponent):
             Concatenate the parameters of the two models to create
             this model parameters 
         """
+        
         for name , value in self.model1.params.iteritems():
             self.params[name]= value
-            if name in self.model2.getParamList():
+            
+            if self.modelD !=None:
+                if name == self.para1 or name == self.para2:
+                    self.modelD.params[name]= value
+                elif name in self.model2.getParamList() and name !='radius':
+                    self.model2.setParam( name, value)
+
+            elif name in self.model2.getParamList():
                 self.model2.setParam(name, value)
+        if self.modelD !=None:
+            self.model2.setParam('radius', self.modelD.run())
             
         for name , value in self.model2.params.iteritems():
-            if not name in self.params.keys():
+            if not name in self.params.keys()and name != 'radius':
                 self.params[name]= value
             
     def _set_details(self):
@@ -89,7 +131,7 @@ class MultiplicationModel(BaseComponent):
             self.details[name]= detail
             
         for name , detail in self.model2.details.iteritems():
-            if not name in self.details.keys():
+            if not name in self.details.keys()and name != 'radius':
                 self.details[name]= detail
                 
     def setParam(self, name, value):
@@ -99,12 +141,21 @@ class MultiplicationModel(BaseComponent):
             @param name: name of the parameter
             @param value: value of the parameter
         """
-        
+
+        self._setParamHelper( name, value)
+
         if name in self.model1.getParamList():
             self.model1.setParam( name, value)
-            
-        if name in self.model2.getParamList():
+
+        
+        if self.modelD !=None:
+            if name == self.para1 or name == self.para2:
+                self.modelD.params[name]= value
+            elif name in self.model2.getParamList() and name != 'radius':
+                self.model2.setParam( name, value)
+        elif name in self.model2.getParamList()and name != 'radius':
             self.model2.setParam( name, value) 
+            
        
         self._setParamHelper( name, value)
         
@@ -152,8 +203,14 @@ class MultiplicationModel(BaseComponent):
             @param x: input q-value (float or [float, float] as [r, theta])
             @return: (DAB value)
         """
-       
-        return self.model1.run(x)* self.model2.run(x)
+        #MultiplicationModel(self.model1, self.model2 )      
+           
+        if self.modelD!=None:
+            value = self.modelD.run(x)
+            self.model2.setParam( "radius", value)        
+                        
+            print "self.model2.setParam( radius, value)",value 
+        return self.model1.run(x)*self.model2.run(x)
    
     def runXY(self, x = 0.0):
         """ Evaluate the model
