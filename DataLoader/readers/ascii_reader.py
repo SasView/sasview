@@ -110,10 +110,10 @@ class Reader:
                         _y = float(toks[1])
                         
                         #To reject the line when reader meets less columns of data
-                        if lentoks == 3:
-                            _dy = float(toks[2])
-                        elif lentoks == 4:
-                            _dx = float(toks[3])
+                        #if lentoks == 3:
+                        #    _dy = float(toks[2])
+                        #elif lentoks == 4:
+                        #    _dx = float(toks[3])
                         
                         #Reset the header line counters
                         if j == j1:
@@ -175,12 +175,15 @@ class Reader:
                             new_lentoks = len(toks)
                         
                         #If the previous columns are less than the current, mark the previous as non-data and reset the dependents.  
-                        if lentoks < new_lentoks :
-                            if is_data == False:
+                        if lentoks != new_lentoks :
+                            if is_data == True:
+                                break
+                            else:
                                 i = -1
                                 i1 = 0
                                 j = -1
                                 j1 = -1
+                            
                             
                         #Delete the previously stored lines of data candidates if is not data.
                         if i < 0 and -1< i1 < mum_data_lines and is_data == False:
