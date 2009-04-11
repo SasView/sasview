@@ -21,6 +21,8 @@ class abs_reader(unittest.TestCase):
         f = self.loader.load("ascii_test_1.txt")
         # The length of the data is 10
         self.assertEqual(len(f.x), 10)
+        self.assertEqual(f.x[0],0.002618)
+        self.assertEqual(f.x[9],0.0497)
         
     def test_truncated_1(self):
         """
@@ -35,6 +37,8 @@ class abs_reader(unittest.TestCase):
         f = self.loader.load("ascii_test_2.txt")
         # The length of the data is 10
         self.assertEqual(len(f.x), 5)
+        self.assertEqual(f.x[0],0.002618)
+        self.assertEqual(f.x[4],0.02356)
         
     def test_truncated_2(self):
         """
@@ -47,6 +51,8 @@ class abs_reader(unittest.TestCase):
         f = self.loader.load("ascii_test_3.txt")
         # The length of the data is 5
         self.assertEqual(len(f.x), 5)
+        self.assertEqual(f.x[0],0.002618)
+        self.assertEqual(f.x[4],0.02356)
         
     def test_truncated_3(self):
         """
@@ -59,6 +65,8 @@ class abs_reader(unittest.TestCase):
         f = self.loader.load("ascii_test_4.abs")
         # The length of the data is 5
         self.assertEqual(len(f.x), 5)
+        self.assertEqual(f.x[0],0.02654)
+        self.assertEqual(f.x[4],0.022254)
         
     def test_truncated_4(self):
         """
