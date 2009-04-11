@@ -5,6 +5,9 @@
     >
 	
 	<FileType extension='.xml' reader='cansas_reader'/>
+	<FileType extension='.asc' reader='IgorReader'/>
+	<FileType extension='.tif' reader='tiff_reader'/>
+	<FileType extension='.tiff' reader='tiff_reader'/>
     
 </SansLoader>
 
