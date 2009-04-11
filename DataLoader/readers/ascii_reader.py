@@ -109,12 +109,6 @@ class Reader:
                         _x = float(toks[0])
                         _y = float(toks[1])
                         
-                        #To reject the line when reader meets less columns of data
-                        #if lentoks == 3:
-                        #    _dy = float(toks[2])
-                        #elif lentoks == 4:
-                        #    _dx = float(toks[3])
-                        
                         #Reset the header line counters
                         if j == j1:
                             j = 0
@@ -174,7 +168,7 @@ class Reader:
                         else:
                             new_lentoks = len(toks)
                         
-                        #If the previous columns are less than the current, mark the previous as non-data and reset the dependents.  
+                        #If the previous columns not equal to the current, mark the previous as non-data and reset the dependents.  
                         if lentoks != new_lentoks :
                             if is_data == True:
                                 break
