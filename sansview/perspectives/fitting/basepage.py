@@ -180,8 +180,8 @@ class BasicPage(wx.ScrolledWindow):
         box_description= wx.StaticBox(self, -1,name)
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #----------------------------------------------------
-        self.disable_disp = wx.RadioButton(self, -1, 'No', (10, 10), style=wx.RB_GROUP)
-        self.enable_disp = wx.RadioButton(self, -1, 'Yes', (10, 30))
+        self.disable_disp = wx.RadioButton(self, -1, 'Off', (10, 10), style=wx.RB_GROUP)
+        self.enable_disp = wx.RadioButton(self, -1, 'On', (10, 30))
         ## saving the state of enable dispersity button
         self.state.enable_disp= self.enable_disp.GetValue()
         
@@ -190,7 +190,7 @@ class BasicPage(wx.ScrolledWindow):
         
         sizer_dispersion = wx.BoxSizer(wx.HORIZONTAL)
         sizer_dispersion.Add((20,20))
-        name="Polydispersity and \nOrientational Distribution "
+        name=""#Polydispersity and \nOrientational Distribution "
         sizer_dispersion.Add(wx.StaticText(self,-1,name))
         sizer_dispersion.Add(self.enable_disp )
         sizer_dispersion.Add((20,20))
@@ -199,7 +199,7 @@ class BasicPage(wx.ScrolledWindow):
         
         ## fill a sizer with the combobox to select dispersion type
         sizer_select_dispers = wx.BoxSizer(wx.HORIZONTAL)  
-        self.model_disp = wx.StaticText(self, -1, 'Model Disp')
+        self.model_disp = wx.StaticText(self, -1, 'Distribution Function ')
             
         import sans.models.dispersion_models 
         self.polydisp= sans.models.dispersion_models.models
@@ -820,8 +820,8 @@ class BasicPage(wx.ScrolledWindow):
         
         sizer_selection = wx.BoxSizer(wx.HORIZONTAL)
         
-        self.text1 = wx.StaticText( self,-1,"P(Q)" )
-        self.text2 = wx.StaticText( self,-1,"* S(Q)" )
+        self.text1 = wx.StaticText( self,-1,"" )
+        self.text2 = wx.StaticText( self,-1,"P(Q)*S(Q)" )
         
         
         self.formfactorbox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
@@ -1247,7 +1247,7 @@ class BasicPage(wx.ScrolledWindow):
         
         self.btSave = wx.Button(self,wx.NewId(),'Save')
         self.btSave.Bind(wx.EVT_BUTTON, self.onSave,id= self.btSave.GetId())
-        self.btSave.SetToolTipString("Save current state")
+        self.btSave.SetToolTipString("Save current panel state")
          
         sizer_save.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,120)        
         sizer_save.Add(self.btSave)     

@@ -23,6 +23,7 @@ class ModelPage(BasicPage):
         on fit Panel window.
   
     """
+
     def __init__(self,parent, page_info):
         BasicPage.__init__(self, parent, page_info)
         """ 
@@ -30,7 +31,7 @@ class ModelPage(BasicPage):
         """
         self._fill_model_sizer( self.sizer1)  
         self._fill_range_sizer() 
-       
+         
         description=""
         if self.model!=None:
             description = self.model.description
@@ -107,7 +108,7 @@ class ModelPage(BasicPage):
         self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D,id=id)
         self.model_view.SetToolTipString("View model in 2D")
         
-        ## class base method  to add view 2d button    
+        ## class base method  to add view 2d button   
         self._set_model_sizer(sizer=sizer, title="Model",object= self.model_view )    
     
   
@@ -286,20 +287,20 @@ class ModelPage(BasicPage):
         self.Bind( wx.EVT_RADIOBUTTON, self._on_display_description,
                    id=self.description_show.GetId() )
         
-        self.model_description = wx.Button(self,-1, label="More Details")
+        self.model_description = wx.Button(self,-1, label="Details")
         self.model_description.Bind(wx.EVT_BUTTON,self.on_button_clicked)
         self.model_description.SetToolTipString("Click Model Functions in HelpWindow...")
       
         sizer_selection.Add( self.description_show )
         sizer_selection.Add( (20,20)) 
         sizer_selection.Add( self.description_hide )
-        sizer_selection.Add( (20,20)) 
+        #sizer_selection.Add( (20,20)) 
+        sizer_selection.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,67)
         sizer_selection.Add( self.model_description )
-        
+                     
          
         self.sizer_description=wx.BoxSizer(wx.HORIZONTAL)
         self.sizer_description.Add( self.description, 1, wx.EXPAND | wx.ALL, 10 )
-       
         boxsizer1.Add( sizer_selection) 
         boxsizer1.Add( (20,20)) 
         boxsizer1.Add( self.sizer_description) 

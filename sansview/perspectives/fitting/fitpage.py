@@ -119,14 +119,14 @@ class FitPage(BasicPage):
             self.sizer0.Layout()
             return
         
-        box_description= wx.StaticBox(self, -1, 'Loaded Data')
+        box_description= wx.StaticBox(self, -1, 'Data')
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #----------------------------------------------------------
         sizer_data = wx.GridSizer(3, 3,5, 5)
         #Filling the sizer containing data related fields
         DataSource  =wx.StaticText(self, -1,str(self.data.name))
 
-        sizer_data.Add(wx.StaticText(self, -1, 'Data Source Name : '))
+        sizer_data.Add(wx.StaticText(self, -1, 'Source Name : '))
         sizer_data.Add(DataSource )
         sizer_data.Add( (5,5) )
         
@@ -137,7 +137,7 @@ class FitPage(BasicPage):
             data_min = str(format_number(numpy.min(self.data.x)))
             # Maximum value of data  
             data_max = str(format_number(numpy.max(self.data.x)))
-            text4_3 = wx.StaticText(self, -1, 'Maximum Q Range(Linear)',
+            text4_3 = wx.StaticText(self, -1, 'Total Q Range(1/A)',
                                      style=wx.ALIGN_LEFT)
             sizer_data.Add( text4_3 )
             sizer_data.Add(wx.StaticText(self, -1, "Min : %s"%data_min))
@@ -152,7 +152,7 @@ class FitPage(BasicPage):
             data_min = str(format_number(radius_min))
             # Maximum value of data  
             data_max = str(format_number(radius_max))
-            text4_3 = wx.StaticText(self, -1, 'Maximum Q Range',
+            text4_3 = wx.StaticText(self, -1, 'Total Q Range',
                                      style=wx.ALIGN_LEFT)
             sizer_data.Add( text4_3 )
             sizer_data.Add(wx.StaticText(self, -1, "Min : %s"%data_min))
