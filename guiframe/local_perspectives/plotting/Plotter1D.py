@@ -203,14 +203,10 @@ class ModelPanel1D(PlotPanel):
             id = wx.NewId()
             name = plot.name
            
-            slicerpop.Append(id, "&Save %s points" % name)
+            slicerpop.Append(id, "&Save points" )
             self.action_ids[str(id)] = plot
             wx.EVT_MENU(self, id, self._onSave)
-            
-            id = wx.NewId()
-            slicerpop.Append(id, "&Save %s canSAS XML" % name)
-            self.action_ids[str(id)] = plot
-            wx.EVT_MENU(self, id, self._onSaveXML)
+            #wx.EVT_MENU(self, id, self._onSaveXML)
            
             id = wx.NewId()
             slicerpop.Append(id, "Remove %s curve" % name)
@@ -360,29 +356,56 @@ class ModelPanel1D(PlotPanel):
             self.subplot.figure.canvas.draw_idle() 
                
                
-    def _onSaveXML(self, evt):
+    def _onSaveXML(self, path):
         """
             Save 1D  Data to  XML file
             @param evt: Menu event
         """
-        import os
-        id = str(evt.GetId())
-        if id in self.action_ids:         
-            path = None
-            dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", "*.xml", wx.SAVE)
-            if dlg.ShowModal() == wx.ID_OK:
-                path = dlg.GetPath()
-                mypath = os.path.basename(path)
-            dlg.Destroy()
+        if not path == None:
+            out = open(path, 'w')
+            from DataLoader.readers import cansas_reader
+            reader = cansas_reader.Reader()
+            datainfo= self.plots[self.graph.selected_plottable].info
+            reader.write( path, datainfo)
+        return 
+    
+    
+    def _onsaveTXT(self, path):
+        """
+            Save file as txt
+        """
+        data = self.plots[self.graph.selected_plottable]
+       
+        if not path == None:
+            out = open(path, 'w')
+            has_errors = True
+            if data.dy==None or data.dy==[]:
+                has_errors = False
+                
+            # Sanity check
+            if has_errors:
+                try:
+                    if len(data.y) != len(data.dy):
+
+                        has_errors = False
+                except:
+                    has_errors = False
             
-            if not path == None:
-                out = open(path, 'w')
-                from DataLoader.readers import cansas_reader
-                reader = cansas_reader.Reader()
-                datainfo= self.plots[self.graph.selected_plottable].info
-                reader.write( path, datainfo)
-            return 
-                      
+            if has_errors:
+                out.write("<X>   <Y>   <dY>\n")
+            else:
+                out.write("<X>   <Y>\n")
+                
+            for i in range(len(data.x)):
+                if has_errors:
+                    out.write("%g  %g  %g\n" % (data.x[i], 
+                                                data.y[i],
+                                               data.dy[i]))
+                else:
+                    out.write("%g  %g\n" % (data.x[i], 
+                                            data.y[i]))
+                    
+            out.close()                 
                 
                 
     def _onSave(self, evt):
@@ -395,43 +418,21 @@ class ModelPanel1D(PlotPanel):
         if id in self.action_ids:         
             
             path = None
-            dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", "*.txt", wx.SAVE)
+            wildcard = "Text files (*.txt)|*.txt|CanSAS 1D files (*.xml)|*.xml|" 
+        
+            dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "",wildcard , wx.SAVE)
+           
             if dlg.ShowModal() == wx.ID_OK:
                 path = dlg.GetPath()
                 mypath = os.path.basename(path)
                 
             dlg.Destroy()
-            
-            if not path == None:
-                out = open(path, 'w')
-                has_errors = True
-                if self.action_ids[id].dy==None or self.action_ids[id].dy==[]:
-                    has_errors = False
-                    
-                # Sanity check
-                if has_errors:
-                    try:
-                        if len(self.action_ids[id].y) != len(self.action_ids[id].dy):
+            if os.path.splitext(mypath)[1].lower() ==".txt":
+                self._onsaveTXT(path)
+            if os.path.splitext(mypath)[1].lower() ==".xml":
+                 self._onSaveXML(path)
+        return
     
-                            has_errors = False
-                    except:
-                        has_errors = False
-                
-                if has_errors:
-                    out.write("<X>   <Y>   <dY>\n")
-                else:
-                    out.write("<X>   <Y>\n")
-                    
-                for i in range(len(self.action_ids[id].x)):
-                    if has_errors:
-                        out.write("%g  %g  %g\n" % (self.action_ids[id].x[i], 
-                                                    self.action_ids[id].y[i],
-                                                    self.action_ids[id].dy[i]))
-                    else:
-                        out.write("%g  %g\n" % (self.action_ids[id].x[i], 
-                                                self.action_ids[id].y[i]))
-                        
-                out.close()
     
     
        
