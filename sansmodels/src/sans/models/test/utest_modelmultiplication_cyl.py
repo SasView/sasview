@@ -26,25 +26,43 @@ class TestDisperser(unittest.TestCase):
     ## fittable parameters
     fixed=[]
     fixed=['radius.width']
-    """
+    
     #Radius of two models should not be equal..
     def test_multplication_radius(self):
-        "" test multiplication model""
+        "" "test multiplication model"""
         from sans.models.MultiplicationModel import MultiplicationModel
         from sans.models.CylinderModel import CylinderModel
         from sans.models.HardsphereStructure import HardsphereStructure
         model1 = CylinderModel()
-        model1.setParam("radius", 3)
+        model1.setParam("radius", 20)
+        model1.setParam("length", 400)
         model2 = HardsphereStructure()
         model  =  MultiplicationModel(model1,model2 )
-        model.setParam("radius", 1)
-        self.assertEqual(model.getParam("radius"), 1)
+        model.setParam("radius", 20)
+        self.assertEqual(model.getParam("radius"), 20)
         #self.assertEqual(model.model1.getParam("radius"),3)
         from sans.models.DiamCylFunc import DiamCylFunc
         model4= DiamCylFunc()
         radius= model4.run(0.0)
-        self.assertEqual(model.model2.getParam("radius"),radius)
-    """    
+        self.assertEqual(model.model2.getParam("radius"),74.400330888433245)
+        
+    def test_multplication_radius1(self):
+        "" "test multiplication model"""
+        from sans.models.MultiplicationModel import MultiplicationModel
+        from sans.models.EllipsoidModel import EllipsoidModel
+        from sans.models.HardsphereStructure import HardsphereStructure
+        model1 = EllipsoidModel()
+        model1.setParam("radius_a", 20)
+        model1.setParam("radius_b", 400)
+        model2 = HardsphereStructure()
+        model  =  MultiplicationModel(model1,model2 )
+        model.setParam("radius_a", 20)
+        self.assertEqual(model.getParam("radius_a"), 20)
+        #self.assertEqual(model.model1.getParam("radius"),3)
+        from sans.models.DiamEllipFunc import DiamEllipFunc
+        model4= DiamEllipFunc()
+        radius= model4.run(0.0)
+        self.assertEqual(model.model2.getParam("radius"),270.74504487588121)
     
     def test_multiplication(self):
         """ test multiplication model"""
