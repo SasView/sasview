@@ -535,7 +535,13 @@ class FitPage(BasicPage):
                     self.qmin_x = float(self.qmin.GetValue())
                     self.qmax_x = float(self.qmax.GetValue())
                     # return residuals within self.qmin_x and self.qmax_x
-                    x,y,dy = [numpy.asarray(v) for v in (self.data.x,self.data.y,self.data.dy)]
+                    x,y = [numpy.asarray(v) for v in (self.data.x,self.data.y)]
+                    
+                    if self.data.dy==None:
+                        dy= numpy.zeros(len(y))
+                    else:
+                        dy= numpy.asarray(self.data.dy)
+                    dy[dy==0]=1
                     if self.qmin_x==None and self.qmax_x==None: 
                         fx =numpy.asarray([self.model.run(v) for v in x])
                         temp=(y - fx)/dy

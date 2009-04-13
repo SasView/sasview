@@ -379,6 +379,7 @@ class BasicPage(wx.ScrolledWindow):
         wx.CallAfter(widget.SetSelection, -1,-1)
         return
     
+    
     def read_file(self, path):
         """
             Read two columns file

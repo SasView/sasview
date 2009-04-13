@@ -231,6 +231,8 @@ class Plugin:
         """
         detector=None
         source=None
+        info = None
+        id=None
         dxl=None
         dxw=None
         if hasattr(item, "dxl"):
@@ -241,11 +243,30 @@ class Plugin:
             detector =item.detector
         if hasattr(item, "source"):
             source =item.source
+        if hasattr(item ,"info"):
+            info= item.info
+        if hasattr(item,"id"):
+            id = item.id
         from sans.guiframe import dataFitting 
-        data= dataFitting.Data1D(x=item.x, y=item.y, dy=dy, dxl=dxl, dxw=dxw)
-        data.name=item.name
-        data.detector=detector
-        data.source= source
+        if item.__class__.__name__=="Data1D":
+            data= dataFitting.Data1D(x=item.x, y=item.y, dy=dy, dxl=dxl, dxw=dxw)
+        else:
+            data= dataFitting.Theory1D(x=item.x, y=item.y, dxl=dxl, dxw=dxw)
+        data.name = item.name
+        data.detector = detector
+        data.source = source
+        ## allow to highlight data when plotted
+        data.interactive = item.interactive
+        ## when 2 data have the same id override the 1 st plotted
+        data.id = id
+        ## info is a reference to output of dataloader that can be used
+        ## to save  data 1D as cansas xml file
+        data.info= info
+        ## If the data file does not tell us what the axes are, just assume...
+        data.xaxis(item._xaxis,item._xunit)
+        data.yaxis(item._yaxis,item._yunit)
+        ##group_id specify on which panel to plot this data
+        data.group_id = item.group_id
         return data
 
     def set_fit_range(self, page, qmin, qmax):
@@ -517,33 +538,15 @@ class Plugin:
                     if param_value !=None and param_name != None:
                         new_model.parameterset[ param_name].set( param_value )
             
-            
             #Do the single fit
             self.fitter.set_model(new_model, self.fit_id, pars)
-            dy=[]
-            x=[]
-            y=[]
-            ## checking the validity of error
-            if metadata.__class__ in  ["Data1D","Theory1D"]:
-                for i in range(len(metadata.dy)):
-                    if metadata.dy[i] !=0:
-                        dy.append(metadata.dy[i])
-                        x.append(metadata.x[i])
-                        y.append(metadata.y[i])
-                if len(dy)>0:        
-                    metadata.dy=numpy.zeros(len(dy))
-                    metadata.dy=dy
-                    metadata.y=numpy.zeros(len(y))
-                    metadata.y=y
-                    metadata.x=numpy.zeros(len(x))
-                    metadata.x=x
-           
+            
             self.fitter.set_data(data=metadata,Uid=self.fit_id,
                                  smearer=smearer,qmin= qmin,qmax=qmax )
            
             self.fitter.select_problem_for_fit(Uid= self.fit_id,
                                                value= value.get_scheduled())
-           
+            value.clear_model_param()
         except:
             msg= title +" error: %s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status= msg ))
@@ -877,7 +880,7 @@ class Plugin:
                 my_info.info= data.info
             if hasattr(data, "group_id"):
                 my_info.group_id= data.group_id
-            
+        
         return my_info
                 
     def _complete1D(self, x,y, elapsed,model,data=None):
@@ -885,6 +888,7 @@ class Plugin:
             Complete plotting 1D data
         """ 
         try:
+            
             new_plot = Theory1D(x=x, y=y)
             my_info = self._get_plotting_info( data)
             new_plot.name = model.name
@@ -893,7 +897,10 @@ class Plugin:
             
             new_plot.xaxis( my_info._xaxis,  my_info._xunit)
             new_plot.yaxis( my_info._yaxis, my_info._yunit)
-            
+            if data!=None:
+                if new_plot.id == data.id:
+                    new_plot.id += "Model"
+         
             # Pass the reset flag to let the plotting event handler
             # know that we are replacing the whole plot
             title= my_info.title
