@@ -62,7 +62,7 @@ class BasicPage(wx.ScrolledWindow):
         self.fitrange= True
         ## Q range
         self.qmin_x= 0.001
-        self.qmax_x= 0.1
+        self.qmax_x= 0.13
         self.num_points= 100
         ## Create memento to save the current state
         
@@ -1241,15 +1241,18 @@ class BasicPage(wx.ScrolledWindow):
             Draw the layout for saving option
         """
         self.sizer6.Clear(True)
-        box_description= wx.StaticBox(self, -1,"Save Options")
+        box_description= wx.StaticBox(self, -1,"Save Status")
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         sizer_save = wx.BoxSizer(wx.HORIZONTAL)
         
+        self.btSave_title = wx.StaticText(self, -1, 'Save the current panel status')
         self.btSave = wx.Button(self,wx.NewId(),'Save')
         self.btSave.Bind(wx.EVT_BUTTON, self.onSave,id= self.btSave.GetId())
-        self.btSave.SetToolTipString("Save current panel state")
-         
-        sizer_save.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,120)        
+        self.btSave.SetToolTipString("Save current panel status")
+        
+        sizer_save.Add(self.btSave_title)  
+        sizer_save.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,45)  
+             
         sizer_save.Add(self.btSave)     
         
         boxsizer1.Add(sizer_save)
