@@ -84,7 +84,9 @@ class SlicerPanel(wx.Panel):
                     ctl.SetValue(str(format_number(params[item])))
 
                     self.Bind(wx.EVT_TEXT_ENTER, self.onTextEnter)
+                    ctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                     ctl.Bind(wx.EVT_KILL_FOCUS, self.onTextEnter)
+                    
                     self.parameters.append([item, ctl])
                     self.bck.Add(ctl, (n-1,1), flag=wx.TOP|wx.BOTTOM, border = 0)
             for item in keys:
@@ -100,7 +102,17 @@ class SlicerPanel(wx.Panel):
         self.bck.Fit(self)
         self.parent.GetSizer().Layout()
         
-        
+    def onSetFocus(self, evt):
+        """
+            Hightlight the textcrtl
+        """
+        # Get a handle to the TextCtrl
+        widget = evt.GetEventObject()
+        # Select the whole control, after this event resolves
+        wx.CallAfter(widget.SetSelection, -1,-1)
+        return
+    
+    
     def onParamChange(self, evt):
         """
             Receive and event and reset the text field contained in self.parameters
