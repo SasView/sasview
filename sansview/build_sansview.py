@@ -38,6 +38,7 @@ SANSVIEW   = "0.1.0"
 PLOTTOOLS  = "0.1.3"
 UTIL       = "0.1"
 PARK       = "1.2.x"
+PARK_INTEG = "0.1.0"
 
 SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
 DATALOADER_URL = "svn://danse.us/sans/releases/DataLoader-%s" % DATALOADER
@@ -46,6 +47,7 @@ GUIFRAME_URL = "svn://danse.us/sans/releases/guiframe-%s" % GUIFRAME
 PLOTTOOLS_URL = "svn://danse.us/common/releases/plottools-%s/trunk" % PLOTTOOLS
 UTIL_URL = "svn://danse.us/common/releases/util-%s" % UTIL
 SANSVIEW_URL = "svn://danse.us/sans/releases/sansview-%s" % SANSVIEW
+PARK_INTEG_URL = "svn://danse.us/sans/releases/park_integration-%s" % PARK_INTEG
 #TODO: need to use the release branch of PARK once it is created
 PARK_URL = "svn://danse.us/park/branches/park-1.2"
 
@@ -140,6 +142,12 @@ def checkout(release=False):
     else:
         install_pkg(".", "util", "svn://danse.us/common/util")
     
+    os.chdir(wd)
+    if release:
+        install_pkg(".", "park_integration-%s" % PARK_INTEG, PARK_INTEG_URL)
+    else:
+        install_pkg(".", "park_integration", "svn://danse.us/sans/trunk/park_integration")
+    
     #TODO: need a release version of PARK
     os.chdir(wd)
     if release:
@@ -180,14 +188,15 @@ if __name__ == "__main__":
             print "    -t: Builds SansView from the trunk"
             print "    -i: Builds an installer from the release version"        
             print "    -n: Print out the dependencies for the release notes"
-        if sys.argv[1]=="-n":
+        elif sys.argv[1]=="-n":
             print SANSMODELS_URL 
             print DATALOADER_URL 
             print GUICOMM_URL 
             print GUIFRAME_URL 
             print PLOTTOOLS_URL 
             print UTIL_URL 
-            print SANSVIEW_URL 
+            print SANSVIEW_URL
+            print PARK_INTEG 
             print PARK_URL 
         else:
             # Prepare installation folder
