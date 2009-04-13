@@ -105,7 +105,7 @@ class FitPage(BasicPage):
         sizer_smearer.Add((10,10))
         sizer_smearer.Add( self.disable_smearer )
         
-        self._set_range_sizer( title="Fitted Q Range",
+        self._set_range_sizer( title="Fitting",
                                object1=sizer_smearer, object= sizer_fit)
        
        
