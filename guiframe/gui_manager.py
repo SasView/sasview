@@ -193,12 +193,13 @@ class ViewerFrame(wx.Frame):
                     filename='sans_app.log',
                     filemode='w')        
         
-        path = os.path.dirname(__file__)
-        ico_file = os.path.join(path,'images/ball.ico')
+        path_up = os.path.dirname(__file__)
+        path = ico_file = os.path.join(path_up,'images')
+        ico_file = os.path.join(path,'ball.ico')
         if os.path.isfile(ico_file):
             self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         else:
-            ico_file = os.path.join(os.getcwd(),'images/ball.ico')
+            ico_file = os.path.join(os.getcwd(),'ball.ico')
             if os.path.isfile(ico_file):
                 self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         
@@ -390,7 +391,7 @@ class ViewerFrame(wx.Frame):
                     self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                                           Name(p.window_name).Caption(p.window_caption).
                                           CenterPane().
-                                          BestSize(wx.Size(600,600)).
+                                          BestSize(wx.Size(550,600)).
                                           MinSize(wx.Size(500,500)).
                                           Hide())
                 
@@ -406,7 +407,7 @@ class ViewerFrame(wx.Frame):
                                   RightDockable().
                                   MinimizeButton().
                                   Hide().
-                                  BestSize(wx.Size(600,600)).
+                                  BestSize(wx.Size(550,600)).
                                   MinSize(wx.Size(500,500)))
                                
 
@@ -463,7 +464,7 @@ class ViewerFrame(wx.Frame):
                           MinimizeButton().
                           #Hide().
                           #Show().
-                          BestSize(wx.Size(600,600)).
+                          BestSize(wx.Size(550,600)).
                           MinSize(wx.Size(500,500)))
                           #BestSize(wx.Size(400,400)).
                           #MinSize(wx.Size(350,350)))
