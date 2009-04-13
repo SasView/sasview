@@ -418,20 +418,22 @@ class ModelPanel1D(PlotPanel):
         if id in self.action_ids:         
             
             path = None
-            wildcard = "Text files (*.txt)|*.txt|CanSAS 1D files (*.xml)|*.xml|" 
-        
+            wildcard = "Text files (*.txt)|*.txt|"\
+            "CanSAS 1D files(*.xml)|*.xml|" 
+           
             dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "",wildcard , wx.SAVE)
            
             if dlg.ShowModal() == wx.ID_OK:
                 path = dlg.GetPath()
                 mypath = os.path.basename(path)
-                
+                if os.path.splitext(mypath)[1].lower() ==".txt":
+                    self._onsaveTXT(path)
+                if os.path.splitext(mypath)[1].lower() ==".xml":
+                    self._onSaveXML(path)
+                 
             dlg.Destroy()
-            if os.path.splitext(mypath)[1].lower() ==".txt":
-                self._onsaveTXT(path)
-            if os.path.splitext(mypath)[1].lower() ==".xml":
-                 self._onSaveXML(path)
-        return
+            
+           
     
     
     
