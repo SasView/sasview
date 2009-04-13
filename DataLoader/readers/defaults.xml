@@ -8,6 +8,7 @@
 	<FileType extension='.asc' reader='IgorReader'/>
 	<FileType extension='.tif' reader='tiff_reader'/>
 	<FileType extension='.tiff' reader='tiff_reader'/>
+	<FileType extension='.sans' reader='danse_reader'/>
     
 </SansLoader>
 
