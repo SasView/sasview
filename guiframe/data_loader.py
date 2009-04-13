@@ -104,11 +104,8 @@ def plot_data(parent, path):
             
         ## Creating a Data2D with output
         if hasattr(output,'data'):
-            temp = output.err_data
-            temp[temp==0]=1
-            msg= "Loading 2D error bars of value 1 were added to"
-            wx.PostEvent(parent, StatusEvent(status=" %s %s"% (msg,output.filename)))
-            new_plot = Data2D(image=output.data,err_image=temp,
+            
+            new_plot = Data2D(image=output.data,err_image=output.err_data,
                               xmin=output.xmin,xmax=output.xmax,
                               ymin=output.ymin,ymax=output.ymax)
             new_plot.x_bins=output.x_bins
@@ -119,12 +116,7 @@ def plot_data(parent, path):
             ##dy values checked
             if output.dy ==None :
                 new_plot = Theory1D(output.x,output.y, dxl, dxw)
-                
-            elif len(output.dy[output.dy==0])==len(output.dy):
-                output.dy[output.dy==0]=1 
-                msg="Loading 1D error bars of value 1 were added to "
-                wx.PostEvent(parent, StatusEvent(status= "%s %s"%(msg, output.filename)))
-                new_plot = Theory1D(output.x,output.y,output.dy, dxl, dxw)
+        
             else:
                 msg="Loading 1D data: "
                 wx.PostEvent(parent, StatusEvent(status= "%s %s"%(msg, output.filename)))
