@@ -174,14 +174,14 @@ class ViewerFrame(wx.Frame):
     """
         Main application frame
     """
-    def __init__(self, parent, id, title, window_height=700, window_width=900):
+    def __init__(self, parent, id, title, window_height=700, window_width=1000):
     #def __init__(self, parent, id, title, window_height=800, window_width=800):
         """
             Initialize the Frame object
         """
         from local_perspectives.plotting import plotting
         #wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(800, 700))
-        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(900, 600))
+        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(1000, 600))
         
         # Preferred window size
         self._window_height = window_height
@@ -391,7 +391,7 @@ class ViewerFrame(wx.Frame):
                                           Name(p.window_name).Caption(p.window_caption).
                                           CenterPane().
                                           BestSize(wx.Size(600,600)).
-                                          MinSize(wx.Size(400,400)).
+                                          MinSize(wx.Size(500,500)).
                                           Hide())
                 
             else:
