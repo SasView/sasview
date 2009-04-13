@@ -25,7 +25,7 @@
 import os
 import shutil
 
-PYTHON = "python"
+PYTHON = "c:\python25\python"
 SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 
