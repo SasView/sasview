@@ -419,7 +419,7 @@ class ModelPanel1D(PlotPanel):
             
             path = None
             wildcard = "Text files (*.txt)|*.txt|"\
-            "CanSAS 1D files(*.xml)|*.xml|" 
+            "CanSAS 1D files(*.xml)|*.xml" 
            
             dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "",wildcard , wx.SAVE)
            
