@@ -173,6 +173,8 @@ class Data(object):
             @note: in this case just return empty array
         """
         return []
+    
+    
 class FitData1D(object):
     """ Wrapper class  for SANS data """
     def __init__(self,sans_data1d, smearer=None):
@@ -237,8 +239,12 @@ class FitData1D(object):
             @param fn: function that return model value
             @return residuals
         """
-        x,y,dy = [numpy.asarray(v) for v in (self.x,self.y,self.dy)]
-           
+        x,y = [numpy.asarray(v) for v in (self.x,self.y)]
+        if self.dy ==None or self.dy==[]:
+            dy= numpy.zeros(len(y))  
+        else:
+            dy= numpy.asarray(self.dy)
+        dy[dy==0]=1
         idx = (x>=self.qmin) & (x <= self.qmax)
   
         # Compute theory data f(x)
@@ -308,6 +314,9 @@ class FitData2D(object):
             @return residuals
         """
         res=[]
+        if self.err_image== None or self.err_image ==[]:
+            self.err_image= numpy.zeros(len(self.x_bins),len(self.y_bins))
+        self.err_image[self.err_image==0]=1
         
         for i in range(len(self.y_bins)):
             for j in range(len(self.x_bins)):
