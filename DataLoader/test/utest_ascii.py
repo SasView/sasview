@@ -65,8 +65,8 @@ class abs_reader(unittest.TestCase):
         f = self.loader.load("ascii_test_4.abs")
         # The length of the data is 5
         self.assertEqual(len(f.x), 5)
-        self.assertEqual(f.x[0],0.02654)
-        self.assertEqual(f.x[4],0.022254)
+        self.assertEqual(f.x[0],0.012654)
+        self.assertEqual(f.x[4],0.02654)
         
     def test_truncated_4(self):
         """
