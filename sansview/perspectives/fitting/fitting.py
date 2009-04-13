@@ -95,7 +95,6 @@ class Plugin:
         #Set park engine
         id3 = wx.NewId()
         scipy_help= "Scipy Engine: Perform Simple fit. More in Help window...."
-        #self.menu1.Append(id3, "Scipy",scipy_help) 
         self.menu1.AppendCheckItem(id3, "Simple Fit  [Scipy]",scipy_help) 
         wx.EVT_MENU(owner, id3,  self._onset_engine_scipy)
         
@@ -103,6 +102,10 @@ class Plugin:
         park_help = "Park Engine: Perform Complex fit. More in Help window...."
         self.menu1.AppendCheckItem(id3, "Complex Fit  [Park]",park_help) 
         wx.EVT_MENU(owner, id3,  self._onset_engine_park)
+        
+        self.menu1.FindItemByPosition(0).Check(True)
+        self.menu1.FindItemByPosition(1).Check(False)
+            
         self.menu1.AppendSeparator()
         
         id1 = wx.NewId()
@@ -404,8 +407,6 @@ class Plugin:
                 
         ## if simultaneous fit change automatically the engine to park
         if fitproblem_count >1:
-            self.menu1.FindItemByPosition(1).Check(True)
-            self.menu1.FindItemByPosition(0).Check(False)
             self._on_change_engine(engine='park')
             
         from sans.fit.Fitting import Fit
@@ -701,8 +702,6 @@ class Plugin:
         """ 
             set engine to park
         """
-        if event.IsChecked():
-            self.menu1.FindItemByPosition(0).Check(False)
         self._on_change_engine('park')
        
        
@@ -710,8 +709,6 @@ class Plugin:
         """ 
             set engine to scipy
         """
-        if event.IsChecked():
-            self.menu1.FindItemByPosition(1).Check(False)
         self._on_change_engine('scipy')
        
     def _on_slicer_event(self, event):
@@ -729,8 +726,16 @@ class Plugin:
             new_panel.uid = event_id
             new_panel
             self.mypanels.append(new_panel) 
-        return    
-   
+        return  
+    
+      
+    def _return_engine_type(self):
+        """
+            return the current type of engine
+        """
+        return self._fit_engine
+     
+     
     def _on_change_engine(self, engine='park'):
         """
             Allow to select the type of engine to perform fit 
@@ -738,6 +743,14 @@ class Plugin:
         """
         ## saving fit engine name
         self._fit_engine = engine
+        ## change menu item state
+        if engine=="park":
+            self.menu1.FindItemByPosition(0).Check(False)
+            self.menu1.FindItemByPosition(1).Check(True)
+        else:
+            self.menu1.FindItemByPosition(0).Check(True)
+            self.menu1.FindItemByPosition(1).Check(False)
+            
         ## post a message to status bar
         wx.PostEvent(self.parent, StatusEvent(status="Engine set to: %s" % self._fit_engine))
    

@@ -39,7 +39,7 @@ class FitPage(BasicPage):
         ## if no dispersity parameters is avaible 
         self.text_disp_1=None
         ## default fitengine type
-        self.engine_type = "scipy"
+        self.engine_type = None
         ## draw sizer
         self._fill_datainfo_sizer()
         self._fill_model_sizer( self.sizer1)
@@ -629,7 +629,6 @@ class FitPage(BasicPage):
         """
         self.sizer3.Clear(True)
         self.parameters = []
-        #self.page_info.parameters=[]
         self.param_toFit=[]
         self.fittable_param=[]
         self.fixed_param=[]
@@ -638,6 +637,10 @@ class FitPage(BasicPage):
             self.sizer3.Layout()
             self.SetScrollbars(20,20,200,100)
             return
+        ## the panel is drawn using the current value of the fit engine
+        if self.engine_type==None and self.manager !=None:
+            self.engine_type= self.manager._return_engine_type()
+            
         box_description= wx.StaticBox(self, -1,str("Model Parameters"))
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         sizer = wx.GridBagSizer(5,5)
