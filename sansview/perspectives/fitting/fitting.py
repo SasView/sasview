@@ -2,13 +2,12 @@ import  re
 import sys, wx, logging
 import string, numpy, math
 
-#import copy,deepcopy 
 from danse.common.plottools.plottables import Data1D, Theory1D,Data2D
 from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
 from sans.guicomm.events import EVT_SLICER_PANEL,ERR_DATA
 
-from sans.fit.AbstractFitEngine import Model,FitData1D,FitData2D#,Data,
+from sans.fit.AbstractFitEngine import Model,FitData1D,FitData2D
 from fitproblem import FitProblem
 from fitpanel import FitPanel
 from fit_thread import FitThread

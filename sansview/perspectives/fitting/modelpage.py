@@ -58,7 +58,7 @@ class ModelPage(BasicPage):
         """
         
         ## Show description
-        if not self.description_show.GetValue():
+        if self.description_hide.GetValue():
             self.sizer_description.Clear(True)
             
         else:
@@ -271,9 +271,10 @@ class ModelPage(BasicPage):
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
             
         sizer_selection=wx.BoxSizer(wx.HORIZONTAL)
-      
-        self.description_show = wx.RadioButton(self, -1, 'Show')
+        
         self.description_hide = wx.RadioButton(self, -1, 'Hide', style=wx.RB_GROUP)
+        self.description_show = wx.RadioButton(self, -1, 'Show')
+       
         
         if description=="":
             self.description_hide.SetValue(True)
