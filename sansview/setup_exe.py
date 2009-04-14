@@ -67,6 +67,12 @@ for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
     data_files.append((os.path.split(dirname)[0], [f]))
 
+# Copy the settings file for the DataLoader file extension associations
+import DataLoader.readers
+f = os.path.join(DataLoader.readers.get_data_path(),'defaults.xml')
+if os.path.isfile(f):
+    data_files.append(('.', [f]))
+
 # Copying the images directory to the distribution directory.
 for f in findall('images'):
     if os.path.split(f)[0].count('.svn')==0:
