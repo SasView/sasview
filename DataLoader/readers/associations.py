@@ -46,16 +46,21 @@ def get_node_text(node):
 
     return content, attr
 
-def read_associations(loader, path='defaults.xml'):
+def read_associations(loader, settings='defaults.xml'):
     """
         Read the specified settings file to associate
         default readers to file extension.
         
         @param loader: Loader object
-        @param path: path to the XML settings file
+        @param settings: path to the XML settings file [string]
     """
     reader_dir = os.path.dirname(__file__)
-    path = os.path.join(reader_dir, path)
+    path = os.path.join(reader_dir, settings)
+    
+    # If we can't find the file in the installation
+    # directory, look into the execution directory.
+    if not os.path.isfile(path):
+        path = os.path.join(os.getcwd(), settings)
     
     if os.path.isfile(path):
         dom = parse(path)
