@@ -494,11 +494,12 @@ class FitPage(BasicPage):
         """
         from sans.guiframe.utils import check_value
         flag = check_value( self.qmin, self.qmax)
-        err_image = self.data.err_image
+        err_image = self.data.err_data
         if err_image==[] or err_image==None:
             err_image= numpy.zeros(len(self.data.x_bins),len(self.data.y_bins))
                        
         err_image[err_image==0]=1
+       
         res=[]
         if flag== True:
             try:
@@ -510,7 +511,7 @@ class FitPage(BasicPage):
                         value =  math.pow(self.data.x_bins[i],2)+ math.pow(self.data.y_bins[j],2)
                         if value >= math.pow(self.qmin_x,2) and value <= math.pow(self.qmax_x,2):
                             temp = [self.data.x_bins[i],self.data.y_bins[j]]
-                            error= self.data.err_data[j][i]
+                            error= err_image[j][i]
                             chisqrji = (self.data.data[j][i]- self.model.runXY(temp ))/error
                             #Vector containing residuals
                             res.append( math.pow(chisqrji,2) )
