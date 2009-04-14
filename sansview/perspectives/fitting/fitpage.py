@@ -105,9 +105,19 @@ class FitPage(BasicPage):
         sizer_smearer.Add((10,10))
         sizer_smearer.Add( self.disable_smearer )
         
+        #Display Chi^2/dof
+        sizer_smearer.Add((70,10))
+        box_description= wx.StaticBox(self, -1,'Chi2/dof')
+        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+        boxsizer1.SetMinSize((55,-1))
+        self.tcChi    =  wx.StaticText(self, -1, "-", style=wx.ALIGN_LEFT)        
+        boxsizer1.Add( self.tcChi )   
+        sizer_smearer.Add( boxsizer1 )
+               
+        #Set sizer for Fitting section
         self._set_range_sizer( title="Fitting",
                                object1=sizer_smearer, object= sizer_fit)
-       
+  
        
     def _fill_datainfo_sizer(self):
         """
@@ -137,7 +147,7 @@ class FitPage(BasicPage):
             data_min = str(format_number(numpy.min(self.data.x)))
             # Maximum value of data  
             data_max = str(format_number(numpy.max(self.data.x)))
-            text4_3 = wx.StaticText(self, -1, 'Total Q Range(1/A)',
+            text4_3 = wx.StaticText(self, -1, 'Total Q Range (1/A)',
                                      style=wx.ALIGN_LEFT)
             sizer_data.Add( text4_3 )
             sizer_data.Add(wx.StaticText(self, -1, "Min : %s"%data_min))
@@ -152,7 +162,7 @@ class FitPage(BasicPage):
             data_min = str(format_number(radius_min))
             # Maximum value of data  
             data_max = str(format_number(radius_max))
-            text4_3 = wx.StaticText(self, -1, 'Total Q Range',
+            text4_3 = wx.StaticText(self, -1, 'Total Q Range (1/A)',
                                      style=wx.ALIGN_LEFT)
             sizer_data.Add( text4_3 )
             sizer_data.Add(wx.StaticText(self, -1, "Min : %s"%data_min))
@@ -166,22 +176,15 @@ class FitPage(BasicPage):
         self.qmin_x= data_min
         self.qmax_x= data_max
         
-        
+       
     def _fill_model_sizer(self, sizer):
         """
             fill sizer containing model info
         """
        
-        box_description= wx.StaticBox(self, -1,'Chi2/dof')
-        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-        boxsizer1.SetMinSize((50,-1))
-        self.tcChi    =  wx.StaticText(self, -1, "-", style=wx.ALIGN_LEFT)
-        boxsizer1.Add( self.tcChi )
-        
-            
         ## class base method  to add view 2d button    
-        self._set_model_sizer(sizer=sizer, title="Model",object= boxsizer1 )    
-    
+        self._set_model_sizer(sizer=sizer, title="Model",object=None )    
+        
     
     def _set_sizer_gaussian(self):
         """
