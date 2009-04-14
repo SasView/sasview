@@ -113,6 +113,7 @@ class FitPanel(wx.aui.AuiNotebook):
         if selected_page == self.model_page:
             fitproblem = selected_page.model.clone()
             self.model_page = None
+            self.count =0
             ## page on menu
             self.manager._add_page_onmenu(page_name, fitproblem)
         else:
@@ -228,9 +229,12 @@ class FitPanel(wx.aui.AuiNotebook):
             @param npts: number of Q points
         """
         if topmenu==True:
-            if not page_title in self.fit_page_name.keys()or reset==True:
+            ##first time to open model page
+            if self.count==0 :
+                #if not page_title in self.list_fitpage_name :
                 self._help_add_model_page(model=model, page_title=page_title,
                                 qmin=qmin, qmax=qmax, npts=npts, reset=reset)
+                self.count +=1
             else:
                 self.model_page.select_model(model, page_title)
                 self.fit_page_name[page_title].insert(0,self.model_page.createMemento())
