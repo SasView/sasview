@@ -272,8 +272,8 @@ class ModelPage(BasicPage):
             
         sizer_selection=wx.BoxSizer(wx.HORIZONTAL)
       
-        self.description_show = wx.RadioButton(self, -1, 'Show', style=wx.RB_GROUP)
-        self.description_hide = wx.RadioButton(self, -1, 'Hide')
+        self.description_show = wx.RadioButton(self, -1, 'Show')
+        self.description_hide = wx.RadioButton(self, -1, 'Hide', style=wx.RB_GROUP)
         
         if description=="":
             self.description_hide.SetValue(True)
@@ -305,7 +305,7 @@ class ModelPage(BasicPage):
         boxsizer1.Add( (20,20)) 
         boxsizer1.Add( self.sizer_description) 
     
-
+        self._on_display_description(event=None)
         sizer.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         sizer.Layout()
    
