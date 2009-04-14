@@ -178,7 +178,14 @@ def prepare():
 if __name__ == "__main__": 
     import sys
     
+    print "Build script for SansView %s" % SANSVIEW
+    
+    if len(sys.argv)==1:
+        # If there is no argument, build the installer
+        sys.argv.append("-i")
+        
     if len(sys.argv)>1:
+        # Help
         if sys.argv[1]=="-h":
             print "Usage:"
             print "    python build_sansview [command]\n"
@@ -189,6 +196,7 @@ if __name__ == "__main__":
             print "    -i: Builds an installer from the release version"        
             print "    -n: Print out the dependencies for the release notes"
         elif sys.argv[1]=="-n":
+            # Print out release URLs
             print SANSMODELS_URL 
             print DATALOADER_URL 
             print GUICOMM_URL 
