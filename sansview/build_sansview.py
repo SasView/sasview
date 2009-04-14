@@ -24,7 +24,19 @@
 
 import os
 import shutil
+import logging
 
+# Installation folder
+import time
+timestamp = int(time.time())
+INSTALL_FOLDER = "install_%s" % str(timestamp)
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    filename='build_%s.log' % str(timestamp),
+                    filemode='w')
+
+CWD    = os.getcwd()
 PYTHON = "c:\python25\python"
 SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
@@ -40,6 +52,7 @@ UTIL       = "0.1"
 PARK       = "1.2.x"
 PARK_INTEG = "0.1.0"
 
+# URLs for SVN repos
 SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
 DATALOADER_URL = "svn://danse.us/sans/releases/DataLoader-%s" % DATALOADER
 GUICOMM_URL = "svn://danse.us/sans/releases/guicomm-%s" % GUICOMM
@@ -51,11 +64,6 @@ PARK_INTEG_URL = "svn://danse.us/sans/releases/park_integration-%s" % PARK_INTEG
 #TODO: need to use the release branch of PARK once it is created
 PARK_URL = "svn://danse.us/park/branches/park-1.2"
 
-# Installation folder
-import time
-timestamp = int(time.time())
-INSTALL_FOLDER = "install_%s" % str(timestamp)
-
 
 def check_system():
     """
@@ -64,25 +72,25 @@ def check_system():
     try:
         import wx
     except:
-        print "wxpython missing"
+        logging.error("wxpython missing")
     
     try:
         import matplotlib
     except:
-        print "matplotlib missing"
+        logging.error("matplotlib missing")
         
     try:
         import numpy
     except:
-        print "numpy missing"
+        logging.error("numpy missing")
         
     try:
         import scipy
     except:
-        print "scipy missing"
+        logging.error("scipy missing")
         
     if os.system("gcc -dumpversion")==1:
-         print "missing mingw"
+        logging.error("missing mingw")
 
 def install_pkg(install_dir, setup_dir, url):
     """
@@ -97,8 +105,8 @@ def install_pkg(install_dir, setup_dir, url):
     os.chdir(install_dir)   
     os.system("%s checkout -q %s" % (SVN, url))        
     os.chdir(setup_dir)
-    os.system("%s setup.py build -cmingw32" % PYTHON)
-    os.system("%s setup.py install" % PYTHON)
+    os.system("%s setup.py -q build -cmingw32" % PYTHON)
+    os.system("%s setup.py -q install" % PYTHON)
     
 def checkout(release=False):
     """
@@ -157,13 +165,29 @@ def checkout(release=False):
     
     os.chdir(wd)
     if release:
-        os.system("%s checkout %s" % (SVN, SANSVIEW_URL))
+        os.system("%s checkout -q %s" % (SVN, SANSVIEW_URL))
     else:
-        os.system("%s checkout svn://danse.us/sans/trunk/sansview" % SVN)
+        os.system("%s checkout -q svn://danse.us/sans/trunk/sansview" % SVN)
     
 def prepare():
-    # Create a fresh installation folder
+    """
+        Prepare the build
+    """
+    # Remove existing libraries
+    from distutils.sysconfig import get_python_lib
+    libdir = get_python_lib()
+    old_dirs = [os.path.join(libdir, 'danse'),
+                os.path.join(libdir, 'data_util'),
+                os.path.join(libdir, 'DataLoader'),
+                os.path.join(libdir, 'park'),
+                os.path.join(libdir, 'sans'),
+                os.path.join(libdir, 'sans_extension'),
+                ]
+    for d in old_dirs:
+        if os.path.isdir(d):
+            shutil.rmtree(d)
     
+    # Create a fresh installation folder
     if os.path.isdir(INSTALL_FOLDER):
         shutil.rmtree(INSTALL_FOLDER)
 
@@ -207,21 +231,25 @@ if __name__ == "__main__":
             print PARK_INTEG 
             print PARK_URL 
         else:
+            logging.info("Build script for SansView %s" % SANSVIEW)
             # Prepare installation folder
             prepare()
             
             # Check the command line argument
             if sys.argv[1]=="-t":
-                print "Building trunk version"
+                logging.info("Building trunk version")
                 checkout()
             elif sys.argv[1]=="-r":
-                print "Building release version"
+                logging.info("Building release version")
                 checkout(True)
             elif sys.argv[1]=="-i":
-                print "Building release version"
+                logging.info("Building release version")
                 checkout(True)
-                print "Building installer from release version"
+                logging.info("Building installer from release version")
                 os.chdir("sansview-%s" % (SANSVIEW))
-                os.system("%s setup_exe.py py2exe" % PYTHON)
-                os.system("%s installer.iss" % INNO)
+                os.system("%s setup_exe.py -q py2exe" % PYTHON)
+                os.system("%s/Q installer.iss" % INNO)
+                shutil.copy2(os.path.join("Output","setupSansView.exe"), 
+                             os.path.join(CWD, "setupSansView_%s.exe" % str(timestamp)))
+                
     
