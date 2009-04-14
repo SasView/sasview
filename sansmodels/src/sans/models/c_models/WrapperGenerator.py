@@ -3,56 +3,7 @@
 """
 
 import os, sys,re
-def split_list(separator, mylist, n=0):
-    """
-        @return a list of string without white space of separator
-        @param separator: the string to remove
-    """
-    list=[]
-    for item in mylist:
-        if re.search( separator,item)!=None:
-            if n >0:
-                word =re.split(separator,item,int(n))
-            else:
-                word =re.split( separator,item)
-            for new_item in word: 
-                if new_item.lstrip().rstrip() !='':
-                    list.append(new_item.lstrip().rstrip())
-    return list
-def split_text(separator, string1, n=0):
-    """
-        @return a list of string without white space of separator
-        @param separator: the string to remove
-    """
-    list=[]
-    if re.search( separator,string1)!=None:
-        if n >0:
-            word =re.split(separator,string1,int(n))
-        else:
-            word =re.split(separator,string1)
-        for item in word: 
-            if item.lstrip().rstrip() !='':
-                list.append(item.lstrip().rstrip())
-    return list
-def look_for_tag( string1,begin, end=None ):
-    """
-        @note: this method  remove the begin and end tags given by the user
-        from the string .
-        @param begin: the initial tag
-        @param end: the final tag
-        @param string: the string to check
-        @return: begin_flag==True if begin was found,
-         end_flag==if end was found else return false, false
-         
-    """
-    begin_flag= False
-    end_flag= False
-    if  re.search( begin,string1)!=None:
-        begin_flag= True
-    if end !=None:
-        if  re.search(end,string1)!=None:
-            end_flag= True
-    return begin_flag, end_flag
+import lineparser
 
 class WrapperGenerator:
     """ Python wrapper generator for C models
@@ -132,15 +83,19 @@ class WrapperGenerator:
         self.description=''
         # paramaters for fittable
         self.fixed= []
+        ## parameters with orientation
+        self.orientation_params =[]
+        
         
     def __repr__(self):
         """ Simple output for printing """
         
-        rep  = "Python class: %s\n" % self.pythonClass
-        rep += "  struc name: %s\n" % self.structName
-        rep += "  params:     %s\n" % self.params
-        rep += "  description:     %s\n" % self.description
-        rep += "  fittable paramaters list %s\n"% self.fixed
+        rep  = "\n Python class: %s\n\n" % self.pythonClass
+        rep += "  struc name: %s\n\n" % self.structName
+        rep += "  params:     %s\n\n" % self.params
+        rep += "  description:    %s\n\n" % self.description
+        rep += "  Fittable parameters:     %s\n\n"% self.fixed
+        rep += "  Orientation parameters:  %s\n\n"% self.orientation_params
         return rep
         
     def read(self):
@@ -159,141 +114,44 @@ class WrapperGenerator:
         lines = buf.split('\n')
         self.details  = "## Parameter details [units, min, max]\n"
         self.details += "        self.details = {}\n"
-         # Catch Description
-        key = "[FIXED]"
+        
         #open item in this case Fixed
         text='text'
         key2="<%s>"%text.lower()
         # close an item in this case fixed
         text='TexT'
         key3="</%s>"%text.lower()
-        temp=""
-        # flag to found key
-        find_fixed= False
-        find_key2=False
-        find_key3=False
         
-        for line in lines:
-            if line.count(key)>0 :#[FIXED]= .....
-                try:
-                    find_fixed= True
-                    index = line.index(key)
-                    toks  = line[index:].split("=",1 )
-                    temp  = toks[1].lstrip().rstrip()
-                    find_key2, find_key3=look_for_tag( string1=temp,begin=key2, end=key3 )
-                    if find_key2 and find_key3:
-                        #print"Found both:find_key2, find_key3", find_key2, find_key3
-                        temp1=[]
-                        temp2=[]
-                        temp3=[]
-                        temp4=[]
-                        temp1=split_text(separator=key2, string1=temp)
-                        temp2=split_list(separator=key3, mylist=temp1)
-                        temp3=split_list(separator=';', mylist=temp2)
-                        temp4=split_list(separator=',', mylist=temp3)
-                        self.fixed= temp3 + temp4
-                        break
-                        
-                    elif find_key2 and not find_key3:
-                        #print"Find  find_key2 not find_key3", find_key2, find_key3
-                        temp1=[]
-                        temp2=[]
-                        temp3=[]
-                        temp4=[]
-                        temp1=split_text(separator=key2, string1=temp)
-                        temp3=split_list(separator=';', mylist=temp1)
-                        temp4=split_list(separator=',', mylist=temp3)
-                        #print "found only key2 , temp4", temp3,temp4
-                        if len(temp3+ temp4)==0:# [FIXED]=  only one param
-                            self.fixed+= temp1
-                        self.fixed+=temp3+temp4 #
-                    elif not (find_key2 and find_key3) :
-                        #print"Find nothing find_key2 not find_key3", find_key2, find_key3
-                        temp3=[]
-                        temp4=[]
-                        if look_for_tag( string1=temp,begin=";")[0]:# split ";" first
-                            temp3=split_text(separator=';',string1=temp)
-                            temp4=split_list(separator=',', mylist=temp3)
-                        else:
-                            temp3=split_text(separator=',',string1=temp)# slip "," first
-                            temp4=split_list(separator=';', mylist=temp3)
-                        if len(temp3+ temp4)==0:# [FIXED]=  only one param
-                            self.fixed= [temp]
-                        self.fixed+=temp3+temp4 #
-                        break
-                except:
-                    raise ValueError, "Could not parse file %s" % self.file
-            
-            elif find_fixed:
-                #looking only for key3
-                if not find_key2:
-                    raise ValueError, "Could not parse file %s" % self.file
-                find_key3=look_for_tag( string1=line,begin=key3)[0]# split "</text>" first
-                #print "find_key3",find_key3,line,key3
-                if find_key3:
-                    temp1=[]
-                    temp2=[]
-                    temp3=[]
-                    temp4=[]
-                    temp5=[]
-                   
-                    temp1=split_text(separator=key3, string1=line)
-                    temp2=split_list(separator='//',mylist=temp1)
-                    temp5=split_list(separator="\*",mylist=temp1)
-                    
-                    if len(temp5)>0:
-                        temp3=split_list(separator=';',mylist=temp5)
-                        temp4=split_list(separator=',', mylist=temp5)
-                    elif len(temp2)>0:
-                        temp3=split_list(separator=';',mylist=temp2)
-                        temp4=split_list(separator=',', mylist=temp2)
-                    else:
-                        temp3=split_list(separator=';',mylist=temp1)
-                        temp4=split_list(separator=',', mylist=temp1)
-                    
-                    if len(temp3+ temp4)==0:# [FIXED]=  only one param
-                        self.fixed+= temp1
-                    self.fixed+=temp3+temp4 #   
-                    break 
-                else:
-                    temp2=split_text(separator='//',string1=line)
-                    temp5=split_text(separator="\*",string1=line)
-                    if len(temp5)>0:
-                        temp3=split_list(separator=';',mylist=temp5)
-                        temp4=split_list(separator=',', mylist=temp5)
-                    elif len(temp2)>0:
-                        temp3=split_list(separator=';',mylist=temp2)
-                        temp4=split_list(separator=',', mylist=temp2)
-                    else:
-                        if look_for_tag( string1=line,begin=";")[0]:# split ";" first
-                            temp3=split_text(separator=';',string1=line)
-                            temp4=split_list(separator=',', mylist=temp3)
-                        else:
-                            temp3=split_text(separator=',',string1=line)# slip "," first
-                            temp4=split_list(separator=';', mylist=temp3)
-                    if len(temp3+ temp4)==0:# [FIXED]=  only one param
-                        self.fixed= [line.lstrip().rstrip()]
-                    self.fixed+=temp3+temp4 #
-                    
-                
-                    
-        # Catch Description
+        ## Catch fixed parameters
+        key = "[FIXED]"
+        try:
+            self.fixed= lineparser.readhelper(lines,key, key2,key3, file= self.file)
+        except:
+           raise   
+        ## Catch parameters with orientation
+        key = "[ORIENTATION_PARAMS]"    
+        try:
+            self.orientation_params = lineparser.readhelper( lines,key, 
+                                                    key2,key3, file= self.file)
+        except:
+           raise 
+        ## Catch Description
         key = "[DESCRIPTION]"
-        find_description= 0
+        
+        find_description = False
         temp=""
         for line in lines:
             if line.count(key)>0 :
                 
                 try:
-                    find_description= 1
+                    find_description= True
                     index = line.index(key)
                     toks = line[index:].split("=",1 )
                     temp=toks[1].lstrip().rstrip()
                     text='text'
                     key2="<%s>"%text.lower()
                     if re.match(key2,temp)!=None:
-                        #index2 = line.index(key2)
-                        #temp = temp[index2:]
+    
                         toks2=temp.split(key2,1)
                         self.description=toks2[1]
                         text='text'
@@ -302,26 +160,21 @@ class WrapperGenerator:
                             temp=toks2[1].split(key2,1)
                             self.description=temp[0]
                             break
-                        #print self.description
+                      
                     else:
                         self.description=temp
                         break
                 except:
-                     raise
                      raise ValueError, "Could not parse file %s" % self.file
-            elif find_description==1:
+            elif find_description:
                 text='text'
                 key2="</%s>"%text.lower()
-                #print "second line",line,key2,re.search(key2,line)
                 if re.search(key2,line)!=None:
                     tok=line.split(key2,1)
                     temp=tok[0].split("//",1)
                     self.description+=tok[1].lstrip().rstrip()
                     break
                 else:
-                    #if re.search("*",line)!=None:
-                    #    temp=line.split("*",1)
-                    #    self.description+='\n'+temp[1].lstrip().rstrip()
                     if re.search("//",line)!=None:
                         temp=line.split("//",1)
                         self.description+='\n\t\t'+temp[1].lstrip().rstrip()
@@ -566,6 +419,10 @@ class WrapperGenerator:
             # fixed list  details
             newline = self.replaceToken(newline, 
                                         "[FIXED]",str(self.fixed))
+            ## parameters with orientation
+       
+            newline = self.replaceToken(newline, 
+                               "[ORIENTATION_PARAMS]",str(self.orientation_params))
            
             # Write new line to the wrapper .c file
             file.write(newline+'\n')

@@ -26,6 +26,8 @@
  // 					phi: the axis_phi of the cylinder
  //					</text>
  //[FIXED]= <text> axis_phi.width; axis_theta.width; length.width;radius.width; thickness_width</text>
+ //[ORIENTATION_PARAMS]= axis_phi; axis_theta;axis_phi.width; axis_theta.width 
+
 
 typedef struct {
     /// Scale factor

@@ -14,10 +14,10 @@
 						for 1D:the ouput is P(q)=scale/V*integral from pi/2 to zero of f(q)^(2)*
 						sin(alpha)*dalpha+ bkg
 					</text>
-	[FIXED]= <text>
-				cyl_phi.width; cyl_theta.width; length.width;radius.width
-			</text>
+	[FIXED]= <text>cyl_phi.width; cyl_theta.width; length.width;radius.width</text>
+	[ORIENTATION_PARAMS]= <text>cyl_phi; cyl_theta; cyl_phi.width; cyl_theta.width</text>
 	
+
  **/
 typedef struct {
     /// Scale factor

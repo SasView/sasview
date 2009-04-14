@@ -7,7 +7,10 @@
  * [DESCRIPTION] = ""
  * [FIXED]= <text> cyl_phi.width;
  * cyl_theta.width; cyl_psi.width; length.width; r_minor.width; r_ratio.width </text>
+ * [ORIENTATION_PARAMS]= cyl_phi; cyl_theta; cyl_psi;  cyl_phi.width; cyl_theta.width; cyl_psi.width 
  * */
+
+
 typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0

@@ -48,6 +48,9 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
 		[PAR_DETAILS]
 		## fittable parameters
         self.fixed=[FIXED]
+        
+        ## parameters with orientation
+        self.orientation_params =[ORIENTATION_PARAMS]
    
     def clone(self):
         """ Return a identical copy of self """

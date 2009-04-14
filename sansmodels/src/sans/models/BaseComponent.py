@@ -32,6 +32,8 @@ class BaseComponent:
         self.description=''
         #list of parameter that can be fitted
         self.fixed= []
+        ## parameters with orientation
+        self.orientation_params =[]
            
     def __str__(self):
         """ 

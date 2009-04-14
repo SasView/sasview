@@ -68,7 +68,10 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
         self.details['cyl_psi'] = ['rad', None, None]
 
 		## fittable parameters
-        self.fixed=['cyl_phi.width', 'cyl_theta.width', 'cyl_psi.width', 'length.width', 'r_minor.width', 'r_ratio.width']
+        self.fixed=['cyl_phi.width', 'cyl_theta.width', 'cyl_psi.width', 'length.width', 'r_minor.width', 'r_ratio.width </text>']
+        
+        ## parameters with orientation
+        self.orientation_params =['cyl_phi', 'cyl_theta', 'cyl_psi', 'cyl_phi.width', 'cyl_theta.width', 'cyl_psi.width']
    
     def clone(self):
         """ Return a identical copy of self """

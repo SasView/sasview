@@ -18,6 +18,8 @@
  //                          John Wiley and Sons, New York, 1955.
  //				</text>
  //[FIXED]= <text> thickness.width;radius.width</text>
+
+
 typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0

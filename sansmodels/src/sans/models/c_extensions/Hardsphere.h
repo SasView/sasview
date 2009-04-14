@@ -20,6 +20,8 @@
  //    1958, 110, 1.
  //	 </text>
  //[FIXED]= radius.width  
+
+
 typedef struct {
     /// Radius of hardsphere [A]
     //  [DEFAULT]=radius=50.0 A

@@ -21,6 +21,9 @@
  //[FIXED]= <text> axis_phi.width; axis_theta.width;radius_a.width;
  //radius_b.width; length.width; r_minor.width
  //, r_ratio.width</text>
+ //[ORIENTATION_PARAMS]=  axis_phi.width; axis_theta.width;axis_phi; axis_theta
+
+
 typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0

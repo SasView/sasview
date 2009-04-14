@@ -21,6 +21,7 @@
 //            1977, 89A, 213.
 //   			</text>
 //   [FIXED]= radius.width 
+//[ORIENTATION_PARAMS]= <text> </text>
 
 
 typedef struct {

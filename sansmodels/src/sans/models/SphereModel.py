@@ -65,6 +65,9 @@ class SphereModel(CSphereModel, BaseComponent):
 
 		## fittable parameters
         self.fixed=['radius.width']
+        
+        ## parameters with orientation
+        self.orientation_params =[]
    
     def clone(self):
         """ Return a identical copy of self """

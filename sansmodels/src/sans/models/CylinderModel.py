@@ -74,6 +74,9 @@ class CylinderModel(CCylinderModel, BaseComponent):
 
 		## fittable parameters
         self.fixed=['cyl_phi.width', 'cyl_theta.width', 'length.width', 'radius.width']
+        
+        ## parameters with orientation
+        self.orientation_params =['cyl_phi', 'cyl_theta', 'cyl_phi.width', 'cyl_theta.width']
    
     def clone(self):
         """ Return a identical copy of self """

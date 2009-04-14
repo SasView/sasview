@@ -88,6 +88,9 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
 
 		## fittable parameters
         self.fixed=['axis_phi.width', 'axis_theta.width', 'length.width', 'radius.width', 'thickness_width']
+        
+        ## parameters with orientation
+        self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
    
     def clone(self):
         """ Return a identical copy of self """
