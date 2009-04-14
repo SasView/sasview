@@ -27,12 +27,32 @@ def check_value( item1, item2):
         @param item1: txtcrtl containing the minimum value
         @param item2: txtcrtl containing the maximum value
     """
-    mini = float(format_number(item1.GetValue()))
-    maxi = float(format_number(item2.GetValue()))
-    flag= True
+    flag= False
+    try:
+        mini = float(format_number(item1.GetValue()))
+        item1.SetBackgroundColour(wx.WHITE)
+        item1.Refresh()
+    except:
+        flag = False
+        item1.SetBackgroundColour("pink")
+        item1.Refresh()
+        return flag
+    try:    
+        maxi = float(format_number(item2.GetValue()))
+        item2.SetBackgroundColour("pink")
+        item2.Refresh()
+    except:
+        flag = False
+        item2.SetBackgroundColour("pink")
+        item2.Refresh()
+        return flag
+    
     if mini <  maxi: 
       item1.SetBackgroundColour(wx.WHITE)
       item1.Refresh()
+      item2.SetBackgroundColour(wx.WHITE)
+      item2.Refresh()
+      flag = True
     else:
         flag = False
         item1.SetBackgroundColour("pink")
