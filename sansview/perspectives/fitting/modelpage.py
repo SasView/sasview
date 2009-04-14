@@ -49,6 +49,9 @@ class ModelPage(BasicPage):
         """
         self._on_display_description_helper()
         
+        self.SetScrollbars(20,20,200,100)
+        self.Refresh()
+
         
         
     def _on_display_description_helper(self):
