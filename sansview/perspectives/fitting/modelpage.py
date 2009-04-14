@@ -222,14 +222,7 @@ class ModelPage(BasicPage):
         self.sizer4.Layout()
         self.SetScrollbars(20,20,200,100)
              
-             
-    def reset_page(self, state):
-        """
-            reset the state
-        """
-        self.reset_page_helper(state)
-        
-        
+ 
     def _onModel2D(self, event):
         """
          call manager to plot model in 2D
@@ -242,7 +235,15 @@ class ModelPage(BasicPage):
         if self.enable2D:
             self._draw_model()
             self.model_view.Disable()
-   
+                
+                
+    def reset_page(self, state):
+        """
+            reset the state
+        """
+        self.reset_page_helper(state)
+        
+        
     def select_model(self, model, name):
         """
             Select a new model
