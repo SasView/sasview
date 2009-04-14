@@ -315,12 +315,13 @@ class FitData2D(object):
         """
         res=[]
         if self.err_image== None or self.err_image ==[]:
-            self.err_image= numpy.zeros(len(self.x_bins),len(self.y_bins))
+            self.err_image= numpy.zeros(len(self.y_bins),len(self.x_bins))
         self.err_image[self.err_image==0]=1
         
-        for i in range(len(self.y_bins)):
-            for j in range(len(self.x_bins)):
-                radius = math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)
+        for i in range(len(self.x_bins)):
+            for j in range(len(self.y_bins)):
+                temp = math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)
+                radius= math.sqrt(temp)
                 if self.qmin <= radius and radius <= self.qmax:
                     res.append( (self.image[j][i]- fn([self.x_bins[i],self.y_bins[j]]))\
                             /self.err_image[j][i] )
