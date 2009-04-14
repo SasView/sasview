@@ -868,8 +868,9 @@ class BasicPage(wx.ScrolledWindow):
         boxsizer1.Add( (20,20))
         boxsizer1.Add( sizer_selection )
         if object !=None:
-            boxsizer1.Add( (20,20))
-            boxsizer1.Add( object )
+            boxsizer1.Add( (-72,-72))
+            boxsizer1.Add( object,  0, wx.ALIGN_RIGHT| wx.RIGHT, 10)
+            boxsizer1.Add( (60,60))
         #--------------------------------------------------------
         sizer.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         sizer.Layout()
