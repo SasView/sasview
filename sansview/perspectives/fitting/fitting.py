@@ -669,16 +669,19 @@ class Plugin:
                             if p.name == p_name:
                                 small_out.append(p.value )
                                 model.setParam(param_name,p.value) 
+                                """
                                 if p.stderr==None:
                                     p.stderr=numpy.nan
                                     small_cov.append(p.stderr)
-                                   
                                 else:
                                     small_cov.append(p.stderr)
+                                """
+                                small_cov.append(p.stderr)
                             else:
                                 value= model.getParam(param_name)
                                 small_out.append(value )
-                                small_cov.append(numpy.nan)
+                                #small_cov.append(numpy.nan)
+                                small_cov.append(None)
                     # Display result on each page 
                     page.onsetValues(result.fitness, small_out,small_cov)
                     #Replot models

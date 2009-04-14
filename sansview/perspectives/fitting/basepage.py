@@ -4,7 +4,7 @@ import wx
 import numpy
 import time
 
-from sans.guiframe.utils import format_number
+from sans.guiframe.utils import format_number,check_float
 from sans.guicomm.events import StatusEvent   
 import pagestate
 from pagestate import PageState
@@ -564,7 +564,7 @@ class BasicPage(wx.ScrolledWindow):
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
-            from sans.guiframe.utils import check_value
+            from sans.guiframe.utils import check_value 
             if check_value( self.qmin, self.qmax):
                 if float(self.qmin.GetValue()) != self.qmin_x:
                     self.qmin_x = float(self.qmin.GetValue())
@@ -576,10 +576,14 @@ class BasicPage(wx.ScrolledWindow):
             else:
                 self.fitrange = False
             if self.npts != None:
-                if float(self.npts.GetValue()) !=  self.num_points:
-                    self.num_points = float(self.npts.GetValue())
-                    is_modified = True
-           
+                if check_float(self.npts):
+                    if float(self.npts.GetValue()) !=  self.num_points:
+                        self.num_points = float(self.npts.GetValue())
+                        is_modified = True
+                else:
+                    msg= "Cannot Plot :Must enter a number!!!  "
+                    wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                    
             
             ## if any value is modify draw model with new value
             if is_modified:
@@ -987,7 +991,13 @@ class BasicPage(wx.ScrolledWindow):
         """ 
             when enter value on panel redraw model according to changed
         """
-        self._onparamEnter_helper()
+        tcrtl= event.GetEventObject()
+        if check_float(tcrtl):
+            self._onparamEnter_helper()
+        else:
+            msg= "Cannot Plot :Must enter a number!!!  "
+            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+            return 
         
         
     def _check_value_enter(self, list, modified):
@@ -1033,13 +1043,16 @@ class BasicPage(wx.ScrolledWindow):
                 if item[4]!=None:
                     item[4].Clear()
                     item[4].Hide()
-                
+                    
+           
                 value= float(item[2].GetValue())
+                
                 # If the value of the parameter has changed,
                 # +update the model and set the is_modified flag
                 if value != self.model.getParam(name):
                     self.model.setParam(name,value)
-                    is_modified = True    
+                    is_modified = True   
+            
             except:
                 msg= "Model Drawing  Error:wrong value entered : %s"% sys.exc_value
                 wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))

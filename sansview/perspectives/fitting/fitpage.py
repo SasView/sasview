@@ -7,7 +7,7 @@ import math
 from sans.models.dispersion_models import ArrayDispersion, GaussianDispersion
 
 from sans.guicomm.events import StatusEvent   
-from sans.guiframe.utils import format_number
+from sans.guiframe.utils import format_number,check_float
 
 ## event to post model to fit to fitting plugins
 (ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
@@ -458,9 +458,14 @@ class FitPage(BasicPage):
         """ 
             when enter value on panel redraw model according to changed
         """
-        self._onparamEnter_helper()
-        self.compute_chisqr()
-        
+        tcrtl= event.GetEventObject()
+        if check_float(tcrtl):
+            self._onparamEnter_helper()
+            self.compute_chisqr()
+        else:
+            msg= "Cannot Plot :Must enter a number!!!  "
+            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+            return 
         
     def reset_page(self, state):
         """
@@ -515,11 +520,17 @@ class FitPage(BasicPage):
                 self.text2_3.Show(True)
                 if self.text_disp_1 !=None:
                     self.text_disp_1.Show(True)
-                    
-                self.param_toFit[0][3].Show(True)
-                self.param_toFit[0][4].Clear()
-                self.param_toFit[0][4].SetValue(format_number(cov[0]))
-                self.param_toFit[0][4].Show(True)
+                if cov[0]==None:  
+                    self.param_toFit[0][3].Hide()
+                    self.param_toFit[0][4].Clear()
+                    self.param_toFit[0][4].Hide()
+                    self.param_toFit[0][4].Refresh()
+                else:
+                    self.param_toFit[0][3].Show(True)
+                    self.param_toFit[0][4].Clear()
+                    self.param_toFit[0][4].SetValue(format_number(cov[0]))
+                    self.param_toFit[0][4].Show(True)
+                    self.param_toFit[0][4].Refresh()
         else:
             i=0
             j=0
@@ -541,9 +552,16 @@ class FitPage(BasicPage):
                     for j in range(len(out)):
                         if out[j]==self.model.getParam(item[1]):
                             break
-                    item[4].SetValue(format_number(cov[j]))
-                    item[4].Refresh()
-                    item[4].Show(True)   
+                    ## unable to compare cov[j]==numpy.nan so switch to None
+                    if cov[j]==None:
+                        item[3].Hide()
+                        item[4].Refresh()
+                        item[4].Clear()
+                        item[4].Hide()
+                    else:
+                        item[4].SetValue(format_number(cov[j]))
+                        item[4].Refresh()
+                        item[4].Show(True)   
                 i+=1
         
         self.sizer3.Layout()

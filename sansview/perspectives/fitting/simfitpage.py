@@ -361,6 +361,8 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                
         self.nb_constraint =0     
         self.constraint_dict={}
+        if hasattr(self,"btAdd"):
+            self.btAdd.Hide()
         self._store_model()
       
         self.constraints_list=[]         
