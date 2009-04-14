@@ -54,6 +54,8 @@ class BasicPage(wx.ScrolledWindow):
         self.fittable_param=[]
         ##list of dispersion parameters
         self.disp_list=[]
+        ## list of orientation parameters
+        self.orientation_params=[]
         if self.model !=None:
             self.disp_list= self.model.getDispParamList()
         ##enable model 2D draw

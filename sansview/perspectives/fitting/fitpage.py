@@ -193,7 +193,7 @@ class FitPage(BasicPage):
         """
         self.fittable_param=[]
         self.fixed_param=[]
-    
+        self.orientation_params=[]
         self.sizer4_4.Clear(True)
        
         if self.model==None:
@@ -231,79 +231,170 @@ class FitPage(BasicPage):
         self.sizer4_4.Add(nsigmas,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
        
         for item in self.model.dispersion.keys():
-            self.disp_cb_dict[item]= None
-            name1=item+".width"
-            name2=item+".npts"
-            name3=item+".nsigmas"
-            iy += 1
-            for p in self.model.dispersion[item].keys():
-    
-                if p=="width":
-                    ix = 0
-                    cb = wx.CheckBox(self, -1, name1, (10, 10))
-                    wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
-                    
-                    self.sizer4_4.Add( cb,( iy, ix),(1,1),  
-                                       wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-                    ix = 1
-                    value= self.model.getParam(name1)
-                    ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
-                                        style=wx.TE_PROCESS_ENTER)
-                    
-                    ctl1.SetValue(str (format_number(value)))
-                    ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                    ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                    ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                    self.sizer4_4.Add(ctl1, (iy,ix),(1,1),wx.EXPAND)
-                    
-                    ## text to show error sign
-                    ix = 2
-                    text2=wx.StaticText(self, -1, '+/-')
-                    self.sizer4_4.Add(text2,(iy, ix),(1,1),
-                                      wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                    text2.Hide() 
-                    ## txtcrtl to add error from fit
-                    ix = 3
-                    ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
-                    self.sizer4_4.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                    ctl2.Hide()
-                    
-                    self.fittable_param.append([cb,name1,ctl1,text2,
-                                                ctl2, None, None,None])
-                elif p=="npts":
-                        ix = 4
-                        value= self.model.getParam(name2)
-                        Tctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+            if not item in self.model.orientation_params:
+                self.disp_cb_dict[item]= None
+                name1=item+".width"
+                name2=item+".npts"
+                name3=item+".nsigmas"
+                iy += 1
+                for p in self.model.dispersion[item].keys(): 
+        
+                    if p=="width":
+                        ix = 0
+                        cb = wx.CheckBox(self, -1, name1, (10, 10))
+                        wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
+                        self.sizer4_4.Add( cb,( iy, ix),(1,1),  
+                                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                        ix = 1
+                        value= self.model.getParam(name1)
+                        ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
-                        
-                        Tctl.SetValue(str (format_number(value)))
-                        Tctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                        Tctl.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                        Tctl.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                        self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
-                                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        
-                        self.fixed_param.append([None,name2, Tctl,None,None,
-                                                  None, None,None])
-                
-                elif p=="nsigmas":
-                        ix = 5
-                        value= self.model.getParam(name3)
-                        Tctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                        ctl1.SetValue(str (format_number(value)))
+                        ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                        ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                        ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                        self.sizer4_4.Add(ctl1, (iy,ix),(1,1),wx.EXPAND)
+                        ## text to show error sign
+                        ix = 2
+                        text2=wx.StaticText(self, -1, '+/-')
+                        self.sizer4_4.Add(text2,(iy, ix),(1,1),
+                                          wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                        text2.Hide() 
+                        ## txtcrtl to add error from fit
+                        ix = 3
+                        ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                        self.sizer4_4.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                        ctl2.Hide()
+                        self.fittable_param.append([cb,name1,ctl1,text2,
+                                                    ctl2, None, None,None])
+                    elif p=="npts":
+                            ix = 4
+                            value= self.model.getParam(name2)
+                            Tctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                                                style=wx.TE_PROCESS_ENTER)
+                            
+                            Tctl.SetValue(str (format_number(value)))
+                            Tctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                            Tctl.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                            Tctl.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                            self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
+                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            self.fixed_param.append([None,name2, Tctl,None,None,
+                                                      None, None,None])
+                    elif p=="nsigmas":
+                            ix = 5
+                            value= self.model.getParam(name3)
+                            Tctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                                                style=wx.TE_PROCESS_ENTER)
+                            Tctl.SetValue(str (format_number(value)))
+                            Tctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                            Tctl.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                            Tctl.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                            self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
+                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            ix +=1
+                            self.sizer4_4.Add((20,20), (iy,ix),(1,1),
+                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            
+                            self.fixed_param.append([None,name3, Tctl
+                                                     ,None,None, None, None,None])
+        ix =0
+        iy +=1 
+        self.sizer4_4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
+        for item in self.model.dispersion.keys():
+            if  item in self.model.orientation_params:
+                self.disp_cb_dict[item]= None
+                name1=item+".width"
+                name2=item+".npts"
+                name3=item+".nsigmas"
+                iy += 1
+                for p in self.model.dispersion[item].keys(): 
+        
+                    if p=="width":
+                        ix = 0
+                        cb = wx.CheckBox(self, -1, name1, (10, 10))
+                        wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
+                        self.sizer4_4.Add( cb,( iy, ix),(1,1),  
+                                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                        if self.data.__class__.__name__ =="Data2D":
+                            cb.Enable()
+                        else:
+                            cb.Disable()
+                        ix = 1
+                        value= self.model.getParam(name1)
+                        ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
-                        Tctl.SetValue(str (format_number(value)))
-                        Tctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                        Tctl.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                        Tctl.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                        self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
-                                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        ix +=1
-                        self.sizer4_4.Add((20,20), (iy,ix),(1,1),
-                                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        
-                        self.fixed_param.append([None,name3, Tctl
-                                                 ,None,None, None, None,None])
-                
+                        ctl1.SetValue(str (format_number(value)))
+                        if self.data.__class__.__name__ =="Data2D":
+                            ctl1.Enable()
+                        else:
+                            ctl1.Disable()
+                        ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                        ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                        ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                        self.sizer4_4.Add(ctl1, (iy,ix),(1,1),wx.EXPAND)
+                        ## text to show error sign
+                        ix = 2
+                        text2=wx.StaticText(self, -1, '+/-')
+                        self.sizer4_4.Add(text2,(iy, ix),(1,1),
+                                          wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                        text2.Hide() 
+                        ## txtcrtl to add error from fit
+                        ix = 3
+                        ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                        self.sizer4_4.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                        ctl2.Hide()
+                        if self.data.__class__.__name__ =="Data2D":
+                            ctl2.Enable()
+                        else:
+                            ctl2.Disable()
+                        self.fittable_param.append([cb,name1,ctl1,text2,
+                                                    ctl2, None, None,None])
+                        self.orientation_params.append([cb,name1,ctl1,text2,
+                                                    ctl2, None, None,None])
+                    elif p=="npts":
+                            ix = 4
+                            value= self.model.getParam(name2)
+                            Tctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                                                style=wx.TE_PROCESS_ENTER)
+                            
+                            Tctl.SetValue(str (format_number(value)))
+                            if self.data.__class__.__name__ =="Data2D":
+                                Tctl.Enable()
+                            else:
+                                Tctl.Disable()
+                            Tctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                            Tctl.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                            Tctl.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                            self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
+                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            self.fixed_param.append([None,name2, Tctl,None,None,
+                                                      None, None,None])
+                            self.orientation_params.append([None,name2, Tctl,None,None,
+                                                      None, None,None])
+                    elif p=="nsigmas":
+                            ix = 5
+                            value= self.model.getParam(name3)
+                            Tctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                                                style=wx.TE_PROCESS_ENTER)
+                            Tctl.SetValue(str (format_number(value)))
+                            if self.data.__class__.__name__ =="Data2D":
+                                Tctl.Enable()
+                            else:
+                                Tctl.Disable()
+                            Tctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                            Tctl.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                            Tctl.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                            self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
+                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            ix +=1
+                            self.sizer4_4.Add((20,20), (iy,ix),(1,1),
+                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            self.fixed_param.append([None,name3, Tctl
+                                                     ,None,None, None, None,None])    
+                            self.orientation_params.append([None,name3, Tctl
+                                                     ,None,None, None, None,None]) 
+                                  
         wx.PostEvent(self.parent, StatusEvent(status=\
                         " Selected Distribution: Gaussian"))   
         ix =0
@@ -643,6 +734,7 @@ class FitPage(BasicPage):
         self.param_toFit=[]
         self.fittable_param=[]
         self.fixed_param=[]
+        self.orientation_params=[]
         
         if model ==None:
             self.sizer3.Layout()
@@ -701,7 +793,7 @@ class FitPage(BasicPage):
             self.text2_min.Show(True)
 
         for item in keys:
-            if not item in self.disp_list:
+            if not item in self.disp_list and not item in self.model.orientation_params:
                 iy += 1
                 ix = 0
                 ## add parameters name with checkbox for selecting to fit
@@ -766,6 +858,96 @@ class FitPage(BasicPage):
                 
                 ##[cb state, name, value, "+/-", error of fit, min, max , units]
                 self.parameters.append([cb,item, ctl1,
+                                        text2,ctl2, ctl3, ctl4,None])
+              
+        iy+=1
+        sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        for item in self.model.orientation_params:
+            if not item in self.disp_list :
+                iy += 1
+                ix = 0
+                ## add parameters name with checkbox for selecting to fit
+                cb = wx.CheckBox(self, -1, item )
+                cb.SetValue(False)
+                wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
+                if self.data.__class__.__name__ =="Data2D":
+                    cb.Enable()
+                else:
+                    cb.Disable()
+                sizer.Add( cb,( iy, ix),(1,1),
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                ## add parameter value
+                ix += 1
+                value= self.model.getParam(item)
+                ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                                    style=wx.TE_PROCESS_ENTER)
+                
+                ctl1.SetValue(format_number(value))
+                if self.data.__class__.__name__ =="Data2D":
+                    ctl1.Enable()
+                else:
+                    ctl1.Disable()
+                ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
+                ## text to show error sign
+                ix += 1
+                text2=wx.StaticText(self, -1, '+/-')
+                sizer.Add(text2,(iy, ix),(1,1),\
+                                wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+                text2.Hide() 
+                ## txtcrtl to add error from fit
+                ix += 1
+                ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                sizer.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                ctl2.Hide()
+                if self.data.__class__.__name__ =="Data2D":
+                    ctl1.Enable()
+                else:
+                    ctl1.Disable()
+                param_min, param_max= self.model.details[item][1:]
+                ix += 1
+                ctl3 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
+                ctl3.SetValue(format_number(param_min))
+                ctl3.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                ctl3.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                ctl3.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                ctl3.Hide()
+                if self.data.__class__.__name__ =="Data2D":
+                    ctl3.Enable()
+                else:
+                    ctl3.Disable()
+        
+                ix += 1
+                ctl4 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
+                ctl4.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                ctl4.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                ctl4.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                ctl4.SetValue(format_number(param_max))
+                ctl4.Hide()
+                if self.data.__class__.__name__ =="Data2D":
+                    ctl4.Enable()
+                else:
+                    ctl4.Disable()
+                if self.engine_type=="park":
+                    ctl3.Show(True)
+                    ctl4.Show(True)
+                    
+                ix +=1
+                # Units
+                try:
+                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
+                except:
+                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
+                sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                
+                ##[cb state, name, value, "+/-", error of fit, min, max , units]
+                self.parameters.append([cb,item, ctl1,
+                                        text2,ctl2, ctl3, ctl4,None])
+                self.orientation_params.append([cb,item, ctl1,
                                         text2,ctl2, ctl3, ctl4,None])
               
         iy+=1

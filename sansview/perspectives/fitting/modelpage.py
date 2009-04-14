@@ -121,6 +121,7 @@ class ModelPage(BasicPage):
         """
         self.fittable_param=[]
         self.fixed_param=[]
+        self.orientation_params=[]
        
         self.sizer4_4.Clear(True)
         if self.model==None:
@@ -135,8 +136,6 @@ class ModelPage(BasicPage):
             disp_model =  GaussianDispersion()
             self._disp_obj_dict[item] = disp_model
             self.model.set_dispersion(item, disp_model)
-
-        
         ix=0
         iy=1
         disp = wx.StaticText(self, -1, 'Names')
@@ -153,69 +152,122 @@ class ModelPage(BasicPage):
         nsigmas = wx.StaticText(self, -1, 'Nsigmas')
         self.sizer4_4.Add(nsigmas,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
-        
         for item in self.model.dispersion.keys():
-          
-            self.disp_cb_dict[item]= None
-            name1=item+".width"
-            name2=item+".npts"
-            name3=item+".nsigmas"
-            iy += 1
-            for p in self.model.dispersion[item].keys():
-                if p=="width":
-                    ix = 0
-                    name = wx.StaticText(self, -1,  name1)
-                    self.sizer4_4.Add( name,( iy, ix),(1,1),  
-                                       wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-                    ix = 1
-                    value= self.model.getParam(name1)
-                    ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
-                                        style=wx.TE_PROCESS_ENTER)
-                    
-                    ctl1.SetValue(str (format_number(value)))
-                    ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                    ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                    ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                    self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
-                    
-                    self.fittable_param.append([None,name1,ctl1,None,
-                                                None, None, None,None])
-                    
-                elif p=="npts":
-                        ix =2
-                        value= self.model.getParam(name2)
-                        Tctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+            if not item in self.model.orientation_params:
+                self.disp_cb_dict[item]= None
+                name1=item+".width"
+                name2=item+".npts"
+                name3=item+".nsigmas"
+                iy += 1
+                for p in self.model.dispersion[item].keys():
+                    if p=="width":
+                        ix = 0
+                        name = wx.StaticText(self, -1,  name1)
+                        self.sizer4_4.Add( name,( iy, ix),(1,1),  
+                                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                        ix = 1
+                        value= self.model.getParam(name1)
+                        ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
-                        
-                        Tctl1.SetValue(str (format_number(value)))
-                        Tctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                        Tctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                        Tctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                        self.sizer4_4.Add(Tctl1, (iy,ix),(1,1),
-                                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        
-                        self.fixed_param.append([None,name2, Tctl1,None,None,
-                                                  None, None,None])
-                
-                elif p=="nsigmas":
-                        
-                        ix =3 
-                        value= self.model.getParam(name3)
-                        Tctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                        ctl1.SetValue(str (format_number(value)))
+                        ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                        ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                        ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                        self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
+                        self.fittable_param.append([None,name1,ctl1,None,
+                                                    None, None, None,None])
+                    elif p=="npts":
+                            ix =2
+                            value= self.model.getParam(name2)
+                            Tctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                                                style=wx.TE_PROCESS_ENTER)
+                            Tctl1.SetValue(str (format_number(value)))
+                            Tctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                            Tctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                            Tctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                            self.sizer4_4.Add(Tctl1, (iy,ix),(1,1),
+                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            self.fixed_param.append([None,name2, Tctl1,None,None,
+                                                      None, None,None])
+                    elif p=="nsigmas":
+                            ix =3 
+                            value= self.model.getParam(name3)
+                            Tctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                                                style=wx.TE_PROCESS_ENTER)
+                            Tctl2.SetValue(str (format_number(value)))
+                            Tctl2.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                            Tctl2.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                            Tctl2.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                            self.sizer4_4.Add(Tctl2, (iy,ix),(1,1),
+                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            ix +=1
+                            self.sizer4_4.Add((20,20), (iy,ix),(1,1),
+                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            self.fixed_param.append([None,name3, Tctl2,
+                                                     None,None, None, None,None])
+        for item in self.model.dispersion.keys():
+            if item in self.model.orientation_params:
+                self.disp_cb_dict[item]= None
+                name1=item+".width"
+                name2=item+".npts"
+                name3=item+".nsigmas"
+                iy += 1
+                for p in self.model.dispersion[item].keys():
+                    if p=="width":
+                        ix = 0
+                        name = wx.StaticText(self, -1,  name1)
+                        self.sizer4_4.Add( name,( iy, ix),(1,1),  
+                                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                        ix = 1
+                        value= self.model.getParam(name1)
+                        ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
-                        Tctl2.SetValue(str (format_number(value)))
-                        Tctl2.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                        Tctl2.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                        Tctl2.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                        self.sizer4_4.Add(Tctl2, (iy,ix),(1,1),
-                                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        ix +=1
-                        self.sizer4_4.Add((20,20), (iy,ix),(1,1),
-                                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        
-                        self.fixed_param.append([None,name3, Tctl2,
-                                                 None,None, None, None,None])
-        
+                        ctl1.SetValue(str (format_number(value)))
+                        ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                        ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                        ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                        ctl1.Disable()
+                        self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
+                        self.fittable_param.append([None,name1,ctl1,None,
+                                                    None, None, None,None])
+                        self.orientation_params.append([None,name1,ctl1,None,
+                                                    None, None, None,None])
+                    elif p=="npts":
+                            ix =2
+                            value= self.model.getParam(name2)
+                            Tctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                                                style=wx.TE_PROCESS_ENTER)
+                            Tctl1.SetValue(str (format_number(value)))
+                            Tctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                            Tctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                            Tctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                            Tctl1.Disable()
+                            self.sizer4_4.Add(Tctl1, (iy,ix),(1,1),
+                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            self.fixed_param.append([None,name2, Tctl1,None,None,
+                                                      None, None,None])
+                            self.orientation_params.append([None,name2, Tctl1,None,None,
+                                                      None, None,None])
+                    elif p=="nsigmas":
+                            ix =3 
+                            value= self.model.getParam(name3)
+                            Tctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                                                style=wx.TE_PROCESS_ENTER)
+                            Tctl2.SetValue(str (format_number(value)))
+                            Tctl2.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                            Tctl2.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                            Tctl2.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                            Tctl2.Disable()
+                            self.sizer4_4.Add(Tctl2, (iy,ix),(1,1),
+                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            ix +=1
+                            self.sizer4_4.Add((20,20), (iy,ix),(1,1),
+                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            self.fixed_param.append([None,name3, Tctl2,
+                                                     None,None, None, None,None])
+                            self.orientation_params.append([None,name3, Tctl2,
+                                                     None,None, None, None,None])
+            
         msg = " Selected Distribution: Gaussian"        
         wx.PostEvent(self.parent.parent, StatusEvent( status= msg ))   
         ix =0
@@ -238,7 +290,11 @@ class ModelPage(BasicPage):
         if self.enable2D:
             self._draw_model()
             self.model_view.Disable()
+            for item in self.orientation_params:
+                if item[2]!=None:
+                    item[2].Enable()
                 
+    
                 
     def reset_page(self, state):
         """
@@ -353,6 +409,7 @@ class ModelPage(BasicPage):
         self.parameters = []
         self.param_toFit=[]
         self.fixed_param=[]
+        self.orientation_params=[]
         
         if model ==None:
             ##no model avaiable to draw sizer 
@@ -365,7 +422,7 @@ class ModelPage(BasicPage):
         self.set_model_description(self.model.description,self.sizer2)
        
         keys = self.model.getParamList()
-        #list of dispersion paramaters
+        ##list of dispersion parameters
         self.disp_list=self.model.getDispParamList()
        
         keys.sort()
@@ -385,16 +442,13 @@ class ModelPage(BasicPage):
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_4.Hide()
         
-
         for item in keys:
-            if not item in self.disp_list:
+            if not item in self.disp_list and not item in self.model.orientation_params:
                 iy += 1
                 ix = 0
-    
                 name = wx.StaticText(self, -1,item)
                 sizer.Add( name,( iy, ix),(1,1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-               
                 ix += 1
                 value= self.model.getParam(item)
                 ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
@@ -406,7 +460,6 @@ class ModelPage(BasicPage):
                 ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 
                 sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
-        
                 ix +=1
                 # Units
                 try:
@@ -414,9 +467,41 @@ class ModelPage(BasicPage):
                 except:
                     units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                 sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                
                 ##[cb state, name, value, "+/-", error of fit, min, max , units]
                 self.parameters.append([None,item, ctl1,
+                                        None,None, None, None,None])
+        iy+=1
+        sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        for item  in self.model.orientation_params:
+            if not item in self.disp_list :
+                iy += 1
+                ix = 0
+                name = wx.StaticText(self, -1,item)
+                sizer.Add( name,( iy, ix),(1,1),
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                ix += 1
+                value= self.model.getParam(item)
+                ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                    style=wx.TE_PROCESS_ENTER)
+                
+                ctl1.SetValue(str (format_number(value)))
+                ctl1.Disable()
+                ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
+                ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
+                ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                
+                sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
+                ix +=1
+                # Units
+                try:
+                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
+                except:
+                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
+                sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                ##[cb state, name, value, "+/-", error of fit, min, max , units]
+                self.parameters.append([None,item, ctl1,
+                                        None,None, None, None,None])
+                self.orientation_params.append([None,item, ctl1,
                                         None,None, None, None,None])
                 
         iy+=1
@@ -429,9 +514,8 @@ class ModelPage(BasicPage):
                 break
             else:
                 self.text2_4.Hide()
-        
+    
         boxsizer1.Add(sizer)
-        
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer3.Layout()
         self.SetScrollbars(20,20,200,100)
