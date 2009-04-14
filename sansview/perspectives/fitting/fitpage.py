@@ -477,7 +477,8 @@ class FitPage(BasicPage):
             else:
                 wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Data contains smearing information %s"%msg))
-            self.manager.set_smearer(smear, qmin= float(self.qmin_x),
+        ## set smearing value whether or not the data contain the smearing info
+        self.manager.set_smearer(smear, qmin= float(self.qmin_x),
                                       qmax= float(self.qmax_x))   
         ## save the state enable smearing
         self.save_current_state()

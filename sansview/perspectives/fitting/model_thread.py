@@ -269,10 +269,9 @@ class Calc1D(CalcThread):
             if self.qmin <= self.x[i_x] and self.x[i_x] <= self.qmax:
                 value = self.model.run(self.x[i_x])
                 output[i_x] = value
-                
+        ##smearer the ouput of the plot    
         if self.smearer!=None:
             output = self.smearer(output)
-            
                       
         elapsed = time.time()-self.starttime
         self.complete(x= self.x, y= output, 

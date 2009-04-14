@@ -360,8 +360,7 @@ class Plugin:
         ## redraw the model with data smeared
         
         smearer =self.page_finder[current_pg].get_smearer()
-        if smearer != None:
-            self.draw_model( model=model, data= data, smearer= smearer,
+        self.draw_model( model=model, data= data, smearer= smearer,
                 qmin= qmin, qmax= qmax)
 
     
@@ -631,10 +630,12 @@ class Plugin:
             metadata =  self.page_finder[cpage].get_fit_data()
             model = self.page_finder[cpage].get_model()
             qmin, qmax= self.page_finder[cpage].get_range()
+            smearer =self.page_finder[cpage].get_smearer()
             #Replot models
             msg= "Single Fit completed. plotting... %s:"%model.name
             wx.PostEvent(self.parent, StatusEvent(status="%s " % msg))
-            self.draw_model( model=model, data= metadata,qmin= qmin, qmax= qmax)
+            self.draw_model( model=model, data= metadata, smearer= smearer,
+                             qmin= qmin, qmax= qmax)
             
         except:
             msg= "Single Fit completed but Following error occurred:"
@@ -685,7 +686,9 @@ class Plugin:
                     msg= "Simultaneous Fit completed. plotting... %s:"%model.name
                     wx.PostEvent(self.parent, StatusEvent(status="%s " % msg))
                     qmin, qmax= page.get_range()
-                    self.draw_model( model=model, data= metadata,qmin= qmin, qmax= qmax)
+                    smearer =self.page_finder[page].get_smearer()
+                    self.draw_model( model=model, data= metadata, smearer=smearer,
+                                     qmin= qmin, qmax= qmax)
                     
         except:
              msg= "Simultaneous Fit completed but Following error occurred: "
