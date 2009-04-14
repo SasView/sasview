@@ -420,7 +420,7 @@ class ModelPage(BasicPage):
                                         None,None, None, None,None])
                 
         iy+=1
-        sizer.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
         #Display units text on panel
         for item in keys:   

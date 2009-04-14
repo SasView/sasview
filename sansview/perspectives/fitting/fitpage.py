@@ -109,7 +109,7 @@ class FitPage(BasicPage):
         sizer_smearer.Add((70,10))
         box_description= wx.StaticBox(self, -1,'Chi2/dof')
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-        boxsizer1.SetMinSize((55,-1))
+        boxsizer1.SetMinSize((60,-1))
         self.tcChi    =  wx.StaticText(self, -1, "-", style=wx.ALIGN_LEFT)        
         boxsizer1.Add( self.tcChi )   
         sizer_smearer.Add( boxsizer1 )
@@ -138,7 +138,7 @@ class FitPage(BasicPage):
 
         sizer_data.Add(wx.StaticText(self, -1, 'Source Name : '))
         sizer_data.Add(DataSource )
-        sizer_data.Add( (5,5) )
+        sizer_data.Add( (0,5) )
         
         #---------sizer 2 draw--------------------------------
         #set maximum range for x in linear scale
@@ -151,6 +151,7 @@ class FitPage(BasicPage):
                                      style=wx.ALIGN_LEFT)
             sizer_data.Add( text4_3 )
             sizer_data.Add(wx.StaticText(self, -1, "Min : %s"%data_min))
+            
             sizer_data.Add(wx.StaticText(self, -1, "Max : %s"%data_max))
             
         else:
@@ -499,7 +500,6 @@ class FitPage(BasicPage):
             err_image= numpy.zeros(len(self.data.x_bins),len(self.data.y_bins))
                        
         err_image[err_image==0]=1
-       
         res=[]
         if flag== True:
             try:
@@ -510,11 +510,13 @@ class FitPage(BasicPage):
                         #Check the range containing data between self.qmin_x and self.qmax_x
                         value =  math.pow(self.data.x_bins[i],2)+ math.pow(self.data.y_bins[j],2)
                         if value >= math.pow(self.qmin_x,2) and value <= math.pow(self.qmax_x,2):
+                            
                             temp = [self.data.x_bins[i],self.data.y_bins[j]]
                             error= err_image[j][i]
                             chisqrji = (self.data.data[j][i]- self.model.runXY(temp ))/error
                             #Vector containing residuals
                             res.append( math.pow(chisqrji,2) )
+
                 # compute sum of residual
                 sum=0
                 for item in res:
@@ -767,7 +769,7 @@ class FitPage(BasicPage):
                                         text2,ctl2, ctl3, ctl4,None])
               
         iy+=1
-        sizer.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
         #Display units text on panel
         for item in keys:   
