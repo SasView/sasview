@@ -395,8 +395,14 @@ class ModelPage(BasicPage):
         self.num_points = npts
         
         # Set the controls
+        #For qmin and qmax, do not use format_number.(If do, qmin and max could be different from what is in the data.)
+        """
         self.qmin.SetValue(format_number(self.qmin_x))
         self.qmax.SetValue(format_number(self.qmax_x))
+        self.npts.SetValue(format_number(self.num_points))
+        """
+        self.qmin.SetValue((self.qmin_x))
+        self.qmax.SetValue((self.qmax_x))
         self.npts.SetValue(format_number(self.num_points))
         
         

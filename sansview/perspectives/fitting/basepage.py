@@ -524,8 +524,10 @@ class BasicPage(wx.ScrolledWindow):
             Reset the plotting range to a given state
         """
         
-        self.qmin.SetValue(format_number(self.state.qmin))
-        self.qmax.SetValue(format_number(self.state.qmax)) 
+        #self.qmin.SetValue(format_number(self.state.qmin))
+        #self.qmax.SetValue(format_number(self.state.qmax)) 
+        self.qmin.SetValue(str(self.state.qmin))
+        self.qmax.SetValue(str(self.state.qmax)) 
         if self.state.npts!=None:
             self.npts.SetValue(format_number(self.state.npts)) 
             self.num_points = float(self.state.npts)
@@ -1213,14 +1215,18 @@ class BasicPage(wx.ScrolledWindow):
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #--------------------------------------------------------------
         self.qmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        self.qmin.SetValue(format_number(self.qmin_x))
+        #For qmin and qmax, do not use format_number.(If do, qmin and max could be different from what is in the data.)
+        #self.qmin.SetValue(format_number(self.qmin_x))
+        self.qmin.SetValue(str(self.qmin_x))
         self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
         self.qmin.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
         self.qmin.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         self.qmin.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
      
         self.qmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        self.qmax.SetValue(format_number(self.qmax_x))
+        #For qmin and qmax, do not use format_number.(If do, qmin and max could be different from what is in the data.)
+        #self.qmax.SetValue(format_number(self.qmax_x))
+        self.qmax.SetValue(str(self.qmax_x))
         self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
         self.qmax.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
         self.qmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)

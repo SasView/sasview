@@ -144,9 +144,11 @@ class FitPage(BasicPage):
         #set maximum range for x in linear scale
         if not hasattr(self.data,"data"): #Display only for 1D data fit
             # Minimum value of data   
-            data_min = str(format_number(numpy.min(self.data.x)))
+            #data_min = str(format_number(numpy.min(self.data.x)))
+            data_min = str((numpy.min(self.data.x)))
             # Maximum value of data  
-            data_max = str(format_number(numpy.max(self.data.x)))
+#            data_max = str(format_number(numpy.max(self.data.x)))
+            data_max = str((numpy.max(self.data.x)))
             text4_3 = wx.StaticText(self, -1, 'Total Q Range (1/A)',
                                      style=wx.ALIGN_LEFT)
             sizer_data.Add( text4_3 )
@@ -159,10 +161,14 @@ class FitPage(BasicPage):
             x= numpy.max(self.data.xmin, self.data.xmax)
             y= numpy.max(self.data.ymin, self.data.ymax)
             radius_max = math.sqrt(x*x + y*y)
+            
+            #For qmin and qmax, do not use format_number.(If do, qmin and max could be different from what is in the data.)
             # Minimum value of data   
-            data_min = str(format_number(radius_min))
+            #data_min = str(format_number(radius_min))
+            data_min = str((radius_min))
             # Maximum value of data  
-            data_max = str(format_number(radius_max))
+            #data_max = str(format_number(radius_max))
+            data_max = str((radius_max))
             text4_3 = wx.StaticText(self, -1, 'Total Q Range (1/A)',
                                      style=wx.ALIGN_LEFT)
             sizer_data.Add( text4_3 )
