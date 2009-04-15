@@ -599,7 +599,9 @@ class FitPage(BasicPage):
                             "Data contains smearing information %s"%msg))
         ## set smearing value whether or not the data contain the smearing info
         self.manager.set_smearer(smear, qmin= float(self.qmin_x),
-                                      qmax= float(self.qmax_x))   
+                                      qmax= float(self.qmax_x)) 
+        ##Calculate chi2
+        self.compute_chisqr()  
         ## save the state enable smearing
         self.save_current_state()
         
@@ -936,7 +938,7 @@ class FitPage(BasicPage):
                 param_min, param_max= self.model.details[item][1:]
                 ix += 1
                 ctl3 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
-                ctl3.SetValue(param_min)
+                ctl3.SetValue(str(param_min))
                 ctl3.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                 ctl3.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl3.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
@@ -953,7 +955,7 @@ class FitPage(BasicPage):
                 ctl4.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl4.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                ctl4.SetValue(param_max)
+                ctl4.SetValue(str(param_max))
                 ctl4.Hide()
                 if self.data.__class__.__name__ =="Data2D":
                     ctl4.Enable()
