@@ -460,7 +460,25 @@ class FitPage(BasicPage):
         evt = ModelEventbox(model=self.model)
         wx.PostEvent(self.event_owner, evt)   
         
-
+   
+    def _onparamRangeEnter(self, event):
+        """
+            Check validity of value enter in the parameters range field
+        """
+        tcrtl= event.GetEventObject()
+        if tcrtl.GetValue().lstrip().rstrip()!="":
+            try:
+                value = float(tcrtl.GetValue())
+                tcrtl.SetBackgroundColour(wx.WHITE)
+                tcrtl.Refresh()
+            except:
+                tcrtl.SetBackgroundColour("pink")
+                tcrtl.Refresh()
+        else:
+           tcrtl.SetBackgroundColour(wx.WHITE)
+           tcrtl.Refresh()  
+        self._onparamEnter_helper()    
+        
     def _onparamEnter(self,event):
         """ 
             when enter value on panel redraw model according to changed
@@ -857,20 +875,26 @@ class FitPage(BasicPage):
                 param_min, param_max= self.model.details[item][1:]
                 ix += 1
                 ctl3 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
-                ctl3.SetValue(str(param_min))
+                if param_min ==None:
+                    ctl3.SetValue("")
+                else:
+                    ctl3.SetValue(str(param_min))
                 ctl3.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                ctl3.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                ctl3.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                ctl3.Bind(wx.EVT_KILL_FOCUS, self._onparamRangeEnter)
+                ctl3.Bind(wx.EVT_TEXT_ENTER,self._onparamRangeEnter)
                 sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl3.Hide()
         
                 ix += 1
                 ctl4 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
                 ctl4.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                ctl4.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                ctl4.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                ctl4.Bind(wx.EVT_KILL_FOCUS, self._onparamRangeEnter)
+                ctl4.Bind(wx.EVT_TEXT_ENTER,self._onparamRangeEnter)
                 sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                ctl4.SetValue(str(param_max))
+                if param_max==None:
+                    ctl4.SetValue("")
+                else:
+                    ctl4.SetValue(str(param_max))
                 ctl4.Hide()
                 
                 if self.engine_type=="park":
@@ -938,22 +962,24 @@ class FitPage(BasicPage):
                 param_min, param_max= self.model.details[item][1:]
                 ix += 1
                 ctl3 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
-                ctl3.SetValue(str(param_min))
+                if param_min ==None:
+                    ctl3.SetValue("")
+                else:
+                    ctl3.SetValue(str(param_min))
                 ctl3.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                ctl3.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                ctl3.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                ctl3.Bind(wx.EVT_KILL_FOCUS, self._onparamRangeEnter)
+                ctl3.Bind(wx.EVT_TEXT_ENTER,self._onparamRangeEnter)
                 sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl3.Hide()
                 if self.data.__class__.__name__ =="Data2D":
                     ctl3.Enable()
                 else:
                     ctl3.Disable()
-        
                 ix += 1
                 ctl4 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
                 ctl4.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                ctl4.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                ctl4.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
+                ctl4.Bind(wx.EVT_KILL_FOCUS, self._onparamRangeEnter)
+                ctl4.Bind(wx.EVT_TEXT_ENTER,self._onparamRangeEnter)
                 sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl4.SetValue(str(param_max))
                 ctl4.Hide()

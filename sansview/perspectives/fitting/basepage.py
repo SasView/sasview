@@ -1028,12 +1028,12 @@ class BasicPage(wx.ScrolledWindow):
                 param_min= None
                 param_max= None
                 if item[5]!= None:
-                    if format_number(item[5].GetValue())!="NaN":
+                    if item[5].GetValue().lstrip().rstrip()!="":
                         param_min = float(item[5].GetValue())
                     
                 ## check maximum value
                 if item[6]!= None:
-                    if format_number(item[6].GetValue())!="NaN":
+                    if item[6].GetValue().lstrip().rstrip()!="":
                         param_max = float(item[6].GetValue())
                         
                 from sans.guiframe.utils import check_value
