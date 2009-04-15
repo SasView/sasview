@@ -10,7 +10,7 @@ copyright 2008, University of Tennessee
 
 
 import wx
-import sys
+import sys, os
 import pylab, time
 
 import danse.common.plottools
@@ -64,6 +64,8 @@ class ModelPanel1D(PlotPanel):
         self.uid = None
         ## Action IDs for internal call-backs
         self.action_ids = {}
+        ## Default locations
+        self._default_save_location = os.getcwd()        
         ## Graph        
         self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
@@ -367,6 +369,12 @@ class ModelPanel1D(PlotPanel):
             reader = cansas_reader.Reader()
             datainfo= self.plots[self.graph.selected_plottable].info
             reader.write( path, datainfo)
+           
+            try:
+                self._default_save_location = os.path.dirname(path)
+            except:
+                pass
+        
         return 
     
     
@@ -406,7 +414,10 @@ class ModelPanel1D(PlotPanel):
                                             data.y[i]))
                     
             out.close()                 
-                
+            try:
+                self._default_save_location = os.path.dirname(path)
+            except:
+                pass    
                 
     def _onSave(self, evt):
         """
@@ -420,8 +431,8 @@ class ModelPanel1D(PlotPanel):
             path = None
             wildcard = "Text files (*.txt)|*.txt|"\
             "CanSAS 1D files(*.xml)|*.xml" 
-           
-            dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "",wildcard , wx.SAVE)
+            dlg = wx.FileDialog(self, "Choose a file",
+                                self._default_save_location, "",wildcard , wx.SAVE)
            
             if dlg.ShowModal() == wx.ID_OK:
                 path = dlg.GetPath()
@@ -430,7 +441,7 @@ class ModelPanel1D(PlotPanel):
                     self._onsaveTXT(path)
                 if os.path.splitext(mypath)[1].lower() ==".xml":
                     self._onSaveXML(path)
-                 
+            
             dlg.Destroy()
             
            
