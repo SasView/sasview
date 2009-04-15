@@ -20,7 +20,20 @@ def format_number(value, high=False):
         output= "%-5.3g" % value
     return output.lstrip().rstrip()
 
-
+def check_float(item):
+    """
+       @param item2: txtcrtl containing the maximum value
+    """
+    flag= True
+    try:
+        mini = float(item.GetValue())
+        item.SetBackgroundColour(wx.WHITE)
+        item.Refresh()
+    except:
+        flag = False
+        item.SetBackgroundColour("pink")
+        item.Refresh()
+    return flag
 def check_value( item1, item2):
     """
         Check 2 txtcrtl value 
