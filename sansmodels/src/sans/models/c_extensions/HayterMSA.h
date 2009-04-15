@@ -6,25 +6,25 @@
  */
  //[PYTHONCLASS] = HayterMSAStructure
  //[DISP_PARAMS] = radius
- //[DESCRIPTION] =<text>To calculate the structure factor (the Fourier transform   
- //                     of the pair correlation function g(r)) for 
- //                     a system of charged, spheroidal objects in    
- //                     a dielectric medium. When combined with an 
- //                     appropriate form factor, this allows 
- //                     for inclusion of the interparticle 
- //                     interference effects due to screened coulomb 
+ //[DESCRIPTION] =<text>To calculate the structure factor (the Fourier transform
+ //                     of the pair correlation function g(r)) for
+ //                     a system of charged, spheroidal objects in
+ //                     a dielectric medium. When combined with an
+ //                     appropriate form factor, this allows
+ //                     for inclusion of the interparticle
+ //                     interference effects due to screened coulomb
  //                     repulsion between charged particles.
  //                     (note: charge > 0 required.)
  //
- //                     Ref: JP Hansen and JB Hayter, Molecular 
+ //                     Ref: JP Hansen and JB Hayter, Molecular
  //                           Physics 46, 651-656 (1982).
  //
  //				</text>
- //[FIXED]= radius.width  
- 
+ //[FIXED]= radius.width
+
 typedef struct {
-    ///	Radius of particle [A]
-    //  [DEFAULT]=radius=20.75 A
+    ///	Radius of particle [Å]
+    //  [DEFAULT]=radius=20.75 [Å]
     double radius;
 
     /// charge
@@ -36,15 +36,15 @@ typedef struct {
     double volfraction;
 
 	///	Temperature [K]
-    //  [DEFAULT]=temperature= 318.16 K 
+    //  [DEFAULT]=temperature= 318.16 [K]
     double temperature;
 
-	///	Monovalent salt concentration [M] 
-    //  [DEFAULT]=saltconc= 0 
+	///	Monovalent salt concentration [M]
+    //  [DEFAULT]=saltconc= 0 [M]
     double saltconc;
 
-    ///	Dielectric constant of solvent 
-    //  [DEFAULT]=dielectconst= 71.08 
+    ///	Dielectric constant of solvent
+    //  [DEFAULT]=dielectconst= 71.08
     double dielectconst;
 } HayterMSAParameters;
 

@@ -4,10 +4,10 @@
 /** Structure definition for cylinder parameters
  * [PYTHONCLASS] = EllipticalCylinderModel
  * [DISP_PARAMS] = r_minor, r_ratio, length, cyl_theta, cyl_phi, cyl_psi
- * [DESCRIPTION] = ""
+ * [DESCRIPTION] = Please see details...
  * [FIXED]= <text> cyl_phi.width;
  * cyl_theta.width; cyl_psi.width; length.width; r_minor.width; r_ratio.width </text>
- * [ORIENTATION_PARAMS]= cyl_phi; cyl_theta; cyl_psi;  cyl_phi.width; cyl_theta.width; cyl_psi.width 
+ * [ORIENTATION_PARAMS]= cyl_phi; cyl_theta; cyl_psi;  cyl_phi.width; cyl_theta.width; cyl_psi.width
  * */
 
 
@@ -15,29 +15,29 @@ typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0
     double scale;
-    /// Minor radius [A]
-    //  [DEFAULT]=r_minor=20.0 A
+    /// Minor radius [Å]
+    //  [DEFAULT]=r_minor=20.0 [Å]
     double r_minor;
     /// Ratio of major/minor radii
-    //  [DEFAULT]=r_ratio=1.5 A
+    //  [DEFAULT]=r_ratio=1.5
     double r_ratio;
-    /// Length of the cylinder [A]
-    //  [DEFAULT]=length=400.0 A
+    /// Length of the cylinder [Å]
+    //  [DEFAULT]=length=400.0 [Å]
     double length;
-    /// Contrast [A-2]
-    //  [DEFAULT]=contrast=3.0e-6 A-2
+    /// Contrast [1/Å²]
+    //  [DEFAULT]=contrast=3.0e-6 [1/Å²]
     double contrast;
-	/// Incoherent Background (cm-1) 0.000
-	//  [DEFAULT]=background=0 cm-1
+	/// Incoherent Background [1/cm] 0.000
+	//  [DEFAULT]=background=0 [1/cm]
 	double background;
     /// Orientation of the cylinder axis w/respect incoming beam [rad]
-    //  [DEFAULT]=cyl_theta=1.57 rad
+    //  [DEFAULT]=cyl_theta=1.57 [rad]
     double cyl_theta;
     /// Orientation of the cylinder in the plane of the detector [rad]
-    //  [DEFAULT]=cyl_phi=0.0 rad
+    //  [DEFAULT]=cyl_phi=0.0 [rad]
     double cyl_phi;
     /// Orientation of major radius of the cross-section w/respect vector q [rad]
-    //  [DEFAULT]=cyl_psi=0.0 rad
+    //  [DEFAULT]=cyl_psi=0.0 [rad]
     double cyl_psi;
 } EllipticalCylinderParameters;
 

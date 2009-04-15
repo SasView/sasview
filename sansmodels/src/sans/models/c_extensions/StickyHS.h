@@ -14,19 +14,19 @@
  //                         = -Uo  , 2R < r < 2R + w
  //                         = 0   , r >= 2R +w
  //
- //						R: radius of the hardsphere 
+ //						R: radius of the hardsphere
  //                     stickiness = [exp(Uo/kT)]/(12*perturb)
  //                     perturb = w/(w+ 2R) , 0.01 =< w <= 0.1
  //                     w: The width of the square well ,w > 0
  //						v: The volume fraction , v > 0
  //
- //                     Ref: Menon, S. V. G.,et.al., J. Chem. Phys., 
+ //                     Ref: Menon, S. V. G.,et.al., J. Chem. Phys.,
  //                          1991, 95(12), 9186-9190.
  //				</text>
- //[FIXED]= radius.width  
+ //[FIXED]= radius.width
 typedef struct {
-    /// Radius of hardsphere [A]
-    //  [DEFAULT]=radius=50.0 A
+    /// Radius of hardsphere [Å]
+    //  [DEFAULT]=radius=50.0 [Å]
     double radius;
 
     ///	Volume fraction

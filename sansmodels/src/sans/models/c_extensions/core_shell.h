@@ -6,16 +6,16 @@
  */
  //[PYTHONCLASS] = CoreShellModel
  //[DISP_PARAMS] = radius, thickness
- //[DESCRIPTION] =<text> Form factor for a monodisperse spherical
- //                         particle with a core-shell structure:
- //                       The form factor is normalized by the 
- //                        total particle volume.
- // 
- //						radius: core radius
- //                     thickness: shell thickness
+ //[DESCRIPTION] =<text> Form factor for a monodisperse spherical particle with
+ //    particle with a core-shell structure:
+ //    The form factor is normalized by the
+ //    total particle volume.
  //
- //                     Ref: Guinier, A. and G. Fournet, 
- //                          John Wiley and Sons, New York, 1955.
+ //		radius: core radius
+ //     thickness: shell thickness
+ //
+ //     Ref: Guinier, A. and G. Fournet,
+ //     John Wiley and Sons, New York, 1955.
  //				</text>
  //[FIXED]= <text> thickness.width;radius.width</text>
 
@@ -24,23 +24,23 @@ typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0
     double scale;
-    ///	Core Radius (A) 60.0
-    //  [DEFAULT]=radius=60.0 A
+    ///	Core Radius [Å] 60.0
+    //  [DEFAULT]=radius=60.0 [Å]
     double radius;
-    /// Shell Thickness (A) 10.0
-    //  [DEFAULT]=thickness=10 A
+    /// Shell Thickness [Å] 10.0
+    //  [DEFAULT]=thickness=10 [Å]
     double thickness;
-    ///	Core SLD (Å-2) 1.0e-6
-    //  [DEFAULT]=core_sld=1.0e-6 A-2
+    ///	Core SLD [1/Å²] 1.0e-6
+    //  [DEFAULT]=core_sld=1.0e-6 [1/Å²]
     double core_sld;
-	/// Shell SLD (Å-2) 2.0e-6
-	//  [DEFAULT]=shell_sld=2.0e-6 A-2
+	/// Shell SLD [1/Å²] 2.0e-6
+	//  [DEFAULT]=shell_sld=2.0e-6 [1/Å²]
 	double shell_sld;
-	/// Solvent SLD (Å-2) 3.0e-6
-	//  [DEFAULT]=solvent_sld=3.0e-6 A-2
+	/// Solvent SLD [1/Å²] 3.0e-6
+	//  [DEFAULT]=solvent_sld=3.0e-6 [1/Å²]
 	double solvent_sld;
-	/// Incoherent Background (cm-1) 0.000
-	//  [DEFAULT]=background=0 cm-1
+	/// Incoherent Background [1/cm] 0.000
+	//  [DEFAULT]=background=0 [1/cm]
 	double background;
 } CoreShellParameters;
 

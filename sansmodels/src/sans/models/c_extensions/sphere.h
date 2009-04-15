@@ -6,7 +6,8 @@
  */
  //[PYTHONCLASS] = SphereModel
  //[DISP_PARAMS] = radius
- //[DESCRIPTION] =<text>P(q)=(scale/V)*[3V(scatter_sld-solvent_sld)*(sin(qR)-qRcos(qR))/(qR)^3]^(2)
+ //[DESCRIPTION] =<text>P(q)=(scale/V)
+ //						*[3V(scatter_sld-solvent_sld)*(sin(qR)-qRcos(qR))/(qR)^3]^(2)
  //						+bkg
  //						bkg: background level
  //						R: radius of the sphere
@@ -16,22 +17,22 @@
  //				</text>
  //[FIXED]=  radius.width
  //[ORIENTATION_PARAMS]= <text> </text>
- 
+
 typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale= 1.0
     double scale;
 
-    ///	Radius of sphere [A]
-    //  [DEFAULT]=radius=60.0 A
+    ///	Radius of sphere [Å]
+    //  [DEFAULT]=radius=60.0 [Å]
     double radius;
 
-    ///	Contrast [Å-2]
-    //  [DEFAULT]=contrast= 1.0e-6 A-2
+    ///	Contrast [1/Å²]
+    //  [DEFAULT]=contrast= 1.0e-6 [1/Å²]
     double contrast;
 
-	/// Incoherent Background [cm-1]
-	//  [DEFAULT]=background=0 cm-1
+	/// Incoherent Background [1/cm]
+	//  [DEFAULT]=background=0 [1/cm]
 	double background;
 } SphereParameters;
 

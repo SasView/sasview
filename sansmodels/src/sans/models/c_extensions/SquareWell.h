@@ -17,16 +17,16 @@
 //		d: well depth
 //		w: well width; multiples of the particle diameter
 //
-//		Ref: Sharma, R. V.; Sharma, K. C., Physica, 
+//		Ref: Sharma, R. V.; Sharma, K. C., Physica,
 //            1977, 89A, 213.
 //   			</text>
-//   [FIXED]= radius.width 
+//   [FIXED]= radius.width
 //[ORIENTATION_PARAMS]= <text> </text>
 
 
 typedef struct {
-    ///	Radius of particle [A]
-    //  [DEFAULT]=radius=50.0 A
+    ///	Radius of particle [Å]
+    //  [DEFAULT]=radius=50.0 [Å]
     double radius;
 
     /// Volume fraction
@@ -34,11 +34,11 @@ typedef struct {
     double volfraction;
 
     ///	Well depth [kT]
-    //  [DEFAULT]=welldepth= 1.50 kT
+    //  [DEFAULT]=welldepth= 1.50 [kT]
     double welldepth;
 
-    ///	Well width 
-    //  [DEFAULT]=wellwidth= 1.20 
+    ///	Well width
+    //  [DEFAULT]=wellwidth= 1.20
     double wellwidth;
 
 } SquareWellParameters;

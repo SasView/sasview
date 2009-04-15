@@ -14,17 +14,17 @@
  //                         = 0     , r >= 2R
  //
  //						R: radius of the Hardsphere particle
- //						V:The volume fraction 
+ //						V:The volume fraction
  //
- //    Ref: Percus., J. K.,etc., J. Phy. Rev. 
+ //    Ref: Percus., J. K.,etc., J. Phy. Rev.
  //    1958, 110, 1.
  //	 </text>
- //[FIXED]= radius.width  
+ //[FIXED]= radius.width
 
 
 typedef struct {
-    /// Radius of hardsphere [A]
-    //  [DEFAULT]=radius=50.0 A
+    /// Radius of hardsphere [Å]
+    //  [DEFAULT]=radius=50.0 [Å]
     double radius;
 
     ///	Volume fraction
