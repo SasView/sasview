@@ -462,7 +462,7 @@ class Plugin:
             
         except:
             msg= "%s error: %s" % (engineType,sys.exc_value)
-            wx.PostEvent(self.parent, StatusEvent(status= msg ))
+            wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
             return 
               
               
@@ -548,7 +548,7 @@ class Plugin:
             value.clear_model_param()
         except:
             msg= title +" error: %s" % sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status= msg ))
+            wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
             return
        
     def _onSelect(self,event):
@@ -594,10 +594,9 @@ class Plugin:
                     else:
                         wx.PostEvent(self.parent, StatusEvent(status="Page was already Created"))
                 except:
-                    raise
-                    #wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
-                    #%sys.exc_value))
-                    #return
+                    wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
+                    %sys.exc_value))
+                    return
     
     def _single_fit_completed(self,result,pars,cpage, elapsed=None):
         """
@@ -637,8 +636,8 @@ class Plugin:
                              qmin= qmin, qmax= qmax)
             
         except:
-            msg= "Single Fit completed but Following error occurred:"
-            wx.PostEvent(self.parent, StatusEvent(status="%s %s" % (msg, sys.exc_value)))
+            msg= "Single Fit completed but Following error occurred:%s"% sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
             return
        
        
@@ -693,8 +692,9 @@ class Plugin:
                                      qmin= qmin, qmax= qmax)
                     
         except:
-             msg= "Simultaneous Fit completed but Following error occurred: "
-             wx.PostEvent(self.parent, StatusEvent(status="%s%s" %(msg,sys.exc_value)))
+             msg= "Simultaneous Fit completed"
+             msg +=" but Following error occurred:%s"%sys.exc_value
+             wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
              return 
              
                            
