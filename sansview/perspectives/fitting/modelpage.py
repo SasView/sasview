@@ -121,7 +121,7 @@ class ModelPage(BasicPage):
         """
         self.fittable_param=[]
         self.fixed_param=[]
-        self.orientation_params=[]
+        self.orientation_params_disp=[]
        
         self.sizer4_4.Clear(True)
         if self.model==None:
@@ -230,7 +230,7 @@ class ModelPage(BasicPage):
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                         self.fittable_param.append([None,name1,ctl1,None,
                                                     None, None, None,None])
-                        self.orientation_params.append([None,name1,ctl1,None,
+                        self.orientation_params_disp.append([None,name1,ctl1,None,
                                                     None, None, None,None])
                     elif p=="npts":
                             ix =2
@@ -246,7 +246,7 @@ class ModelPage(BasicPage):
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             self.fixed_param.append([None,name2, Tctl1,None,None,
                                                       None, None,None])
-                            self.orientation_params.append([None,name2, Tctl1,None,None,
+                            self.orientation_params_disp.append([None,name2, Tctl1,None,None,
                                                       None, None,None])
                     elif p=="nsigmas":
                             ix =3 
@@ -265,7 +265,7 @@ class ModelPage(BasicPage):
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             self.fixed_param.append([None,name3, Tctl2,
                                                      None,None, None, None,None])
-                            self.orientation_params.append([None,name3, Tctl2,
+                            self.orientation_params_disp.append([None,name3, Tctl2,
                                                      None,None, None, None,None])
             
         msg = " Selected Distribution: Gaussian"        
@@ -290,9 +290,15 @@ class ModelPage(BasicPage):
         if self.enable2D:
             self._draw_model()
             self.model_view.Disable()
-            for item in self.orientation_params:
-                if item[2]!=None:
-                    item[2].Enable()
+          
+            if len(self.orientation_params)>0:
+                for item in self.orientation_params:
+                    if item[2]!=None:
+                        item[2].Enable()
+            if len(self.orientation_params_disp)>0:
+                 for item in self.orientation_params_disp:
+                    if item[2]!=None:
+                        item[2].Enable()
                 
     
                 
@@ -416,7 +422,7 @@ class ModelPage(BasicPage):
         self.param_toFit=[]
         self.fixed_param=[]
         self.orientation_params=[]
-        
+        self.orientation_params_disp=[]
         if model ==None:
             ##no model avaiable to draw sizer 
             return

@@ -61,9 +61,9 @@ class FitPage(BasicPage):
             return
         for item in self.parameters:
             if event.type =="scipy":
-                item[5].SetValue(format_number(""))
+                item[5].SetValue("")
                 item[5].Hide()
-                item[6].SetValue(format_number(""))
+                item[6].SetValue("")
                 item[6].Hide()
                 self.text2_min.Hide()
                 self.text2_max.Hide()
@@ -199,7 +199,8 @@ class FitPage(BasicPage):
         """
         self.fittable_param=[]
         self.fixed_param=[]
-        self.orientation_params=[]
+        self.orientation_params_disp=[]
+       
         self.sizer4_4.Clear(True)
        
         if self.model==None:
@@ -356,7 +357,7 @@ class FitPage(BasicPage):
                             ctl2.Disable()
                         self.fittable_param.append([cb,name1,ctl1,text2,
                                                     ctl2, None, None,None])
-                        self.orientation_params.append([cb,name1,ctl1,text2,
+                        self.orientation_params_disp.append([cb,name1,ctl1,text2,
                                                     ctl2, None, None,None])
                     elif p=="npts":
                             ix = 4
@@ -376,7 +377,7 @@ class FitPage(BasicPage):
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             self.fixed_param.append([None,name2, Tctl,None,None,
                                                       None, None,None])
-                            self.orientation_params.append([None,name2, Tctl,None,None,
+                            self.orientation_params_disp.append([None,name2, Tctl,None,None,
                                                       None, None,None])
                     elif p=="nsigmas":
                             ix = 5
@@ -398,7 +399,7 @@ class FitPage(BasicPage):
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             self.fixed_param.append([None,name3, Tctl
                                                      ,None,None, None, None,None])    
-                            self.orientation_params.append([None,name3, Tctl
+                            self.orientation_params_disp.append([None,name3, Tctl
                                                      ,None,None, None, None,None]) 
                                   
         wx.PostEvent(self.parent, StatusEvent(status=\
@@ -710,6 +711,7 @@ class FitPage(BasicPage):
                 for item in self.fittable_param:
                     item[0].SetValue(False)
                 self.param_toFit=[]
+                
         self.save_current_state()  
         
                 
@@ -759,6 +761,7 @@ class FitPage(BasicPage):
         self.fittable_param=[]
         self.fixed_param=[]
         self.orientation_params=[]
+        self.orientation_params_disp=[]
         
         if model ==None:
             self.sizer3.Layout()
@@ -852,7 +855,7 @@ class FitPage(BasicPage):
                 param_min, param_max= self.model.details[item][1:]
                 ix += 1
                 ctl3 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
-                ctl3.SetValue(format_number(param_min))
+                ctl3.SetValue(str(param_min))
                 ctl3.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                 ctl3.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl3.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
@@ -865,7 +868,7 @@ class FitPage(BasicPage):
                 ctl4.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl4.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                ctl4.SetValue(format_number(param_max))
+                ctl4.SetValue(str(param_max))
                 ctl4.Hide()
                 
                 if self.engine_type=="park":
@@ -933,7 +936,7 @@ class FitPage(BasicPage):
                 param_min, param_max= self.model.details[item][1:]
                 ix += 1
                 ctl3 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER)
-                ctl3.SetValue(format_number(param_min))
+                ctl3.SetValue(param_min)
                 ctl3.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                 ctl3.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl3.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
@@ -950,7 +953,7 @@ class FitPage(BasicPage):
                 ctl4.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl4.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                ctl4.SetValue(format_number(param_max))
+                ctl4.SetValue(param_max)
                 ctl4.Hide()
                 if self.data.__class__.__name__ =="Data2D":
                     ctl4.Enable()

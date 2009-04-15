@@ -1,5 +1,5 @@
 
-import sys
+import sys, os
 import wx
 import numpy
 import time
@@ -56,6 +56,7 @@ class BasicPage(wx.ScrolledWindow):
         self.disp_list=[]
         ## list of orientation parameters
         self.orientation_params=[]
+        self.orientation_params_disp=[]
         if self.model !=None:
             self.disp_list= self.model.getDispParamList()
         ##enable model 2D draw
@@ -75,7 +76,8 @@ class BasicPage(wx.ScrolledWindow):
         ## dictionary of saved state
         self.saved_states={}
         self.slicerpop = wx.Menu()
-        
+        ## Default locations
+        self._default_save_location = os.getcwd()     
         ## save initial state on context menu
         self.onSave(event=None)
         self.Bind(wx.EVT_CONTEXT_MENU, self.onContextMenu)
@@ -262,7 +264,10 @@ class BasicPage(wx.ScrolledWindow):
                     if path is None:
                         self.disp_cb_dict[p].SetValue(False)
                         return
-                    
+                    try:
+                        self._default_save_location = os.path.dirname(path)
+                    except:
+                        pass 
                     try:
                         values,weights = self.read_file(path)
                     except:
@@ -288,7 +293,7 @@ class BasicPage(wx.ScrolledWindow):
                     # Store the object to make it persist outside the scope of this method
                     #TODO: refactor model to clean this up?
                     self._disp_obj_dict[p] = disp_model
-                    
+                    print "dispersity------>",p
                     # Set the new model as the dispersion object for the selected parameter
                     self.model.set_dispersion(p, disp_model)
                           
@@ -431,7 +436,7 @@ class BasicPage(wx.ScrolledWindow):
     
         if hasattr(self,"cb1"):
             self.state.cb1= self.cb1.GetValue()
-            print "save current state ",self.state.cb1
+           
         if hasattr(self,"enable_disp"):
             self.state.enable_disp= self.enable_disp.GetValue()
             
@@ -446,6 +451,7 @@ class BasicPage(wx.ScrolledWindow):
         self.state.parameters=[]
         self.state.fittable_param=[]
         self.state.fixed_param=[]
+       
         self._copy_parameters_state(self.parameters, self.state.parameters)
         self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
@@ -500,7 +506,8 @@ class BasicPage(wx.ScrolledWindow):
             open a dialog file to selected the customized dispersity 
         """
         import os
-        dlg = wx.FileDialog(self, "Choose a weight file", os.getcwd(), "", "*.*", wx.OPEN)
+        dlg = wx.FileDialog(self, "Choose a weight file",
+                                self._default_save_location , "", "*.*", wx.OPEN)
         path = None
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
@@ -1182,6 +1189,7 @@ class BasicPage(wx.ScrolledWindow):
         """
             draw sizer with array dispersity  parameters
         """
+        self.orientation_params_disp=[]
         self.sizer4_4.Clear(True) 
         ix=0
         iy=1     

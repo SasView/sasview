@@ -39,6 +39,8 @@ class PageState(object):
         # Contains list of parameters with dispersity and reference to 
         #panel objects 
         self.fittable_param =[]
+        ## orientation parameters
+        self.orientation_params=[]
         #list of dispersion paramaters
         self.disp_list =[]
         #contains link between a model and selected parameters to fit 
@@ -85,6 +87,7 @@ class PageState(object):
         obj.parameters = copy.deepcopy(self.parameters)
         obj.fixed_param = copy.deepcopy(self.fixed_param)
         obj.fittable_param = copy.deepcopy(self.fittable_param)
+        obj.orientation_params =  copy.deepcopy(self.orientation_params)
         obj.enable_disp = copy.deepcopy(self.enable_disp)
         obj.enable_smearer = copy.deepcopy(self.enable_smearer)
         obj.disp_box = copy.deepcopy(self.disp_box)
