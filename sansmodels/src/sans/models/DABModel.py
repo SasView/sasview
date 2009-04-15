@@ -42,9 +42,9 @@ class DABModel(BaseComponent):
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['length']            = ['', None, None]
+        self.details['length']            = ['[Å]', None, None]
         self.details['scale']             = ['', None, None]
-        self.details['background']        = ['', None, None]
+        self.details['background']        = ['[1/cm]', None, None]
         #list of parameter that cannot be fitted
         self.fixed= []      
     def _DAB(self, x):

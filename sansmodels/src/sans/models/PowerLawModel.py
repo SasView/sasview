@@ -44,7 +44,7 @@ class PowerLawModel(BaseComponent):
         self.details = {}
         self.details['m']           = ['', 0,    None]
         self.details['scale']       = ['', None, None]
-        self.details['background']  = ['', None, None]
+        self.details['background']  = ['[1/cm]', None, None]
         #list of parameter that cannot be fitted
         self.fixed= []    
     def _PowerLaw(self, x):

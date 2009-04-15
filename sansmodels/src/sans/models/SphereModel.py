@@ -32,9 +32,9 @@ class SphereModel(CSphereModel, BaseComponent):
     	for details of the model.
     	List of default parameters:
          scale           = 1.0 
-         radius          = 60.0 A
-         contrast        = 1e-006 A-2
-         background      = 0.0 cm-1
+         radius          = 60.0 [Å]
+         contrast        = 1e-006 [1/Å²]
+         background      = 0.0 [1/cm]
 
     """
         
@@ -48,7 +48,8 @@ class SphereModel(CSphereModel, BaseComponent):
         ## Name of the model
         self.name = "SphereModel"
         ## Model description
-        self.description ="""P(q)=(scale/V)*[3V(scatter_sld-solvent_sld)*(sin(qR)-qRcos(qR))/(qR)^3]^(2)
+        self.description ="""P(q)=(scale/V)
+		*[3V(scatter_sld-solvent_sld)*(sin(qR)-qRcos(qR))/(qR)^3]^(2)
 		+bkg
 		bkg: background level
 		R: radius of the sphere
@@ -59,9 +60,9 @@ class SphereModel(CSphereModel, BaseComponent):
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
-        self.details['radius'] = ['A', None, None]
-        self.details['contrast'] = ['A-2', None, None]
-        self.details['background'] = ['cm-1', None, None]
+        self.details['radius'] = ['[Å]', None, None]
+        self.details['contrast'] = ['[1/Å²]', None, None]
+        self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters
         self.fixed=['radius.width']

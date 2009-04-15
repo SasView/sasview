@@ -61,12 +61,12 @@ class FractalModel(BaseComponent):
         ## Parameter details [units, min, max]
         self.details = {}
         self.details['scale']       = ['',     None, None]
-        self.details['radius']      = ['A',    None, None]
+        self.details['radius']      = ['[Å]',    None, None]
         self.details['fractal_dim'] = ['',       0,  None]
-        self.details['corr_length'] = ['A',    None, None]
-        self.details['block_sld']   = ['A-2',  None, None]
-        self.details['solvent_sld'] = ['A-2',  None, None]
-        self.details['background']  = ['cm-1', None, None]
+        self.details['corr_length'] = ['[Å]',    None, None]
+        self.details['block_sld']   = ['[1/Å²]',  None, None]
+        self.details['solvent_sld'] = ['[1/Å²]',  None, None]
+        self.details['background']  = ['[1/cm]', None, None]
        
                
     def _Fractal(self, x):

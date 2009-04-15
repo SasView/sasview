@@ -32,15 +32,15 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
     	for details of the model.
     	List of default parameters:
          scale           = 1.0 
-         radius          = 20.0 A
-         thickness       = 10.0 A
-         length          = 400.0 A
-         core_sld        = 1e-006 A-2
-         shell_sld       = 4e-006 A-2
-         solvent_sld     = 1e-006 A-2
-         background      = 0.0 cm-1
-         axis_theta      = 1.57 rad
-         axis_phi        = 0.0 rad
+         radius          = 20.0 [Å]
+         thickness       = 10.0 [Å]
+         length          = 400.0 [Å]
+         core_sld        = 1e-006 [1/Å²]
+         shell_sld       = 4e-006 [1/Å²]
+         solvent_sld     = 1e-006 [1/Å²]
+         background      = 0.0 [1/cm]
+         axis_theta      = 1.57 [rad]
+         axis_phi        = 0.0 [rad]
 
     """
         
@@ -56,10 +56,12 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
         ## Model description
         self.description ="""P(q,alpha)= scale/Vs*f(q)^(2) + bkg  Where:\n\
 		f(q)= 2(core_sld- solvant_sld)* Vc*sin[qLcos(alpha/2)]/\n\
-		[qLcos(alpha/2)]*J1(qRsin(alpha))/[qRsin(alpha)] +\n 2(shell_sld-solvent_sld)*Vs
+		[qLcos(alpha/2)]*J1(qRsin(alpha))/[qRsin(alpha)] +\n
+		2(shell_sld-solvent_sld)*Vs
 		*sin[q(L+T)cos(alpha/2)]/[[q(L+T)cos(alpha/2)]
 		*J1(q(R+T)sin(alpha))/q(R+T)sin(alpha)]
-		alpha:is the angle between the axis of the cylinder and the q-vector
+		alpha:is the angle between the axis of the cylinder
+		and the q-vector
 		Vs: the volume of the outer shell
 		Vc: the volume of the core
 		L: the length of the core
@@ -76,15 +78,15 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
-        self.details['radius'] = ['A', None, None]
-        self.details['thickness'] = ['A', None, None]
-        self.details['length'] = ['A', None, None]
-        self.details['core_sld'] = ['A-2', None, None]
-        self.details['shell_sld'] = ['A-2', None, None]
-        self.details['solvent_sld'] = ['A-2', None, None]
-        self.details['background'] = ['cm-1', None, None]
-        self.details['axis_theta'] = ['rad', None, None]
-        self.details['axis_phi'] = ['rad', None, None]
+        self.details['radius'] = ['[Å]', None, None]
+        self.details['thickness'] = ['[Å]', None, None]
+        self.details['length'] = ['[Å]', None, None]
+        self.details['core_sld'] = ['[1/Å²]', None, None]
+        self.details['shell_sld'] = ['[1/Å²]', None, None]
+        self.details['solvent_sld'] = ['[1/Å²]', None, None]
+        self.details['background'] = ['[1/cm]', None, None]
+        self.details['axis_theta'] = ['[rad]', None, None]
+        self.details['axis_phi'] = ['[rad]', None, None]
 
 		## fittable parameters
         self.fixed=['axis_phi.width', 'axis_theta.width', 'length.width', 'radius.width', 'thickness_width']

@@ -32,14 +32,14 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
     	for details of the model.
     	List of default parameters:
          scale           = 1.0 
-         r_minor         = 20.0 A
-         r_ratio         = 1.5 A
-         length          = 400.0 A
-         contrast        = 3e-006 A-2
-         background      = 0.0 cm-1
-         cyl_theta       = 1.57 rad
-         cyl_phi         = 0.0 rad
-         cyl_psi         = 0.0 rad
+         r_minor         = 20.0 [Å]
+         r_ratio         = 1.5 
+         length          = 400.0 [Å]
+         contrast        = 3e-006 [1/Å²]
+         background      = 0.0 [1/cm]
+         cyl_theta       = 1.57 [rad]
+         cyl_phi         = 0.0 [rad]
+         cyl_psi         = 0.0 [rad]
 
     """
         
@@ -53,19 +53,19 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
         ## Name of the model
         self.name = "EllipticalCylinderModel"
         ## Model description
-        self.description =""""""""
+        self.description ="""Please see details..."""
        
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
-        self.details['r_minor'] = ['A', None, None]
-        self.details['r_ratio'] = ['A', None, None]
-        self.details['length'] = ['A', None, None]
-        self.details['contrast'] = ['A-2', None, None]
-        self.details['background'] = ['cm-1', None, None]
-        self.details['cyl_theta'] = ['rad', None, None]
-        self.details['cyl_phi'] = ['rad', None, None]
-        self.details['cyl_psi'] = ['rad', None, None]
+        self.details['r_minor'] = ['[Å]', None, None]
+        self.details['r_ratio'] = ['', None, None]
+        self.details['length'] = ['[Å]', None, None]
+        self.details['contrast'] = ['[1/Å²]', None, None]
+        self.details['background'] = ['[1/cm]', None, None]
+        self.details['cyl_theta'] = ['[rad]', None, None]
+        self.details['cyl_phi'] = ['[rad]', None, None]
+        self.details['cyl_psi'] = ['[rad]', None, None]
 
 		## fittable parameters
         self.fixed=['cyl_phi.width', 'cyl_theta.width', 'cyl_psi.width', 'length.width', 'r_minor.width', 'r_ratio.width </text>']

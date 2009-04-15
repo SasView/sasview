@@ -37,8 +37,8 @@ class BEPolyelectrolyte(BaseComponent):
         ## Name of the model
         self.name = "BEPolyelectrolyte"
         self.description="""
-        F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k2)/(1+(r02)^(2))*(q^(2)+k2)\
-                       *(q^(2)-(12*h*C/b^(2)))
+        F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k^(2))/(1+(r02)^(2))
+            *(q^(2)+k^(2))*(q^(2)-(12*h*C/b^(2)))+bkd
         The model has Eight parameters: 
         K        =  Constrast factor of the polymer
         Lb       =  Bjerrum length
@@ -63,22 +63,22 @@ class BEPolyelectrolyte(BaseComponent):
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['k']    = ['barns', None, None]
-        self.details['lb'] = ['A', None, None]
-        self.details['h']   = ['A-3', None, None]
-        self.details['b']    = ['A', None, None]
-        self.details['cs'] = ['mol/L', None, None]
+        self.details['k']    = ['[barns]', None, None]
+        self.details['lb'] = ['[Å]', None, None]
+        self.details['h']   = ['[1/Å³]', None, None]
+        self.details['b']    = ['[Å]', None, None]
+        self.details['cs'] = ['[mol/L]', None, None]
         self.details['alpha']   = ['', None, None]
-        self.details['c']    = ['mol/L', None, None]
-        self.details['background'] = ['cm-1', None, None]
+        self.details['c']    = ['[mol/L]', None, None]
+        self.details['background'] = ['[1/cm]', None, None]
         #list of parameter that cannot be fitted
         self.fixed= []
                
     def _BEPoly(self, x):
         """
             Evaluate  
-            F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k2)/(1+(r02)^(2))*(q^(2)+k2)\
-                       *(q^(2)-(12*h*C/b^(2)))
+            F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k2)/(1+(r02)^(2))
+                *(q^(2)+k2)*(q^(2)-(12*h*C/b^(2)))
         
             has 3 internal parameters :
                    The inverse Debye Length: K2 = 4*pi*Lb*(2*Cs+alpha*C)

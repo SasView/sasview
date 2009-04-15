@@ -47,9 +47,9 @@ class DebyeModel(BaseComponent):
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['rg']         = ['', None, None]
+        self.details['rg']         = ['[Å]', None, None]
         self.details['scale']      = ['', None, None]
-        self.details['background'] = ['', None, None]
+        self.details['background'] = ['[1/cm]', None, None]
         #list of parameter that cannot be fitted
         self.fixed= []      
     def _debye(self, x):

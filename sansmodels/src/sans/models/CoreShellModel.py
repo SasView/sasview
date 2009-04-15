@@ -32,12 +32,12 @@ class CoreShellModel(CCoreShellModel, BaseComponent):
     	for details of the model.
     	List of default parameters:
          scale           = 1.0 
-         radius          = 60.0 A
-         thickness       = 10.0 A
-         core_sld        = 1e-006 A-2
-         shell_sld       = 2e-006 A-2
-         solvent_sld     = 3e-006 A-2
-         background      = 0.0 cm-1
+         radius          = 60.0 [Å]
+         thickness       = 10.0 [Å]
+         core_sld        = 1e-006 [1/Å²]
+         shell_sld       = 2e-006 [1/Å²]
+         solvent_sld     = 3e-006 [1/Å²]
+         background      = 0.0 [1/cm]
 
     """
         
@@ -51,7 +51,7 @@ class CoreShellModel(CCoreShellModel, BaseComponent):
         ## Name of the model
         self.name = "CoreShellModel"
         ## Model description
-        self.description =""" Form factor for a monodisperse spherical
+        self.description =""" Form factor for a monodisperse spherical particle with
 		particle with a core-shell structure:
 		The form factor is normalized by the
 		total particle volume.
@@ -65,12 +65,12 @@ class CoreShellModel(CCoreShellModel, BaseComponent):
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
-        self.details['radius'] = ['A', None, None]
-        self.details['thickness'] = ['A', None, None]
-        self.details['core_sld'] = ['A-2', None, None]
-        self.details['shell_sld'] = ['A-2', None, None]
-        self.details['solvent_sld'] = ['A-2', None, None]
-        self.details['background'] = ['cm-1', None, None]
+        self.details['radius'] = ['[Å]', None, None]
+        self.details['thickness'] = ['[Å]', None, None]
+        self.details['core_sld'] = ['[1/Å²]', None, None]
+        self.details['shell_sld'] = ['[1/Å²]', None, None]
+        self.details['solvent_sld'] = ['[1/Å²]', None, None]
+        self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters
         self.fixed=['thickness.width', 'radius.width']

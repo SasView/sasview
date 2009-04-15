@@ -32,8 +32,8 @@ class PorodModel(BaseComponent):
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['scale']      = ['', None, None]
-        self.details['background'] = ['', None, None]
+        self.details['scale']      = ['[1/Å^4]', None, None]
+        self.details['background'] = ['[1/cm]', None, None]
         #list of parameter that cannot be fitted
         self.fixed= []
                

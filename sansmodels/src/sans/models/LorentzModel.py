@@ -41,9 +41,9 @@ class LorentzModel(BaseComponent):
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['length']     = ['A', None, None]
+        self.details['length']     = ['[Å]', None, None]
         self.details['scale']      = ['', None, None]
-        self.details['background'] = ['cm-1', None, None]
+        self.details['background'] = ['[1/cm]', None, None]
         #list of parameter that cannot be fitted
         self.fixed= []      
     def _lorentz(self, x):

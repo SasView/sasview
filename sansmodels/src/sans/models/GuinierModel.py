@@ -38,8 +38,8 @@ class GuinierModel(BaseComponent):
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['scale'] = ['cm-1', None, None]
-        self.details['rg']    = ['A', None, None]
+        self.details['scale'] = ['[1/cm]', None, None]
+        self.details['rg']    = ['[Å]', None, None]
         #list of parameter that cannot be fitted
         self.fixed= []  
     def _guinier(self, x):
