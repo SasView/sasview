@@ -26,36 +26,24 @@ class TestDisperser(unittest.TestCase):
     ## fittable parameters
     fixed=[]
     fixed=['radius.width']
-    
-    def test_multiplication_radius(self):
+    def test_multplication_radius(self):
         """ test multiplication model"""
         from sans.models.MultiplicationModel import MultiplicationModel
-        from sans.models.SphereModel import SphereModel
-        from sans.models.HayterMSAStructure import HayterMSAStructure
-        my_sphere = SphereModel()
-        my_struct = HayterMSAStructure()
-        model1  =  MultiplicationModel(my_sphere,my_struct)
-        self.assertEquals(model1.getParam("radius"),
-                          my_struct.getParam("radius"),
-                          my_sphere.getParam("radius"))
-        model2 = SphereModel()
-        x= 2
-
-        model1.setParam("radius", 60)
-        self.assertEqual(model1.getParam("radius"), 60)
-        a = model1.run(x)
-        self.assertEqual(a, 2.5723183020756634e-006)
-        model1.setParam("radius", 70)
-        b = model1.run(x)
-        self.assertNotEqual(a, b)
-        model1.setParam("radius", 60)
-        c =  model1.run(x)
-        self.assertEqual(c, 2.5723183020756634e-006)
-        self.assertEqual(a, c)
+        from sans.models.CylinderModel import CylinderModel
+        from sans.models.HardsphereStructure import HardsphereStructure
+        model1 = CylinderModel()
+        model1.setParam("radius", 3)
+        model2 = HardsphereStructure()
+        model  =  MultiplicationModel(model1,model2 )
+        model.setParam("radius", 1)
+        self.assertEqual(model.getParam("radius"), 1)
+        self.assertEqual(model.model1.getParam("radius"),3)
+        from sans.models.DiamCylFunc import DiamCylFunc
+        model4= DiamCylFunc()
+        radius= model4.run(0.0)
+        self.assertEqual(model.model2.getParam("radius"),radius)
         
-        
-        
-        
+    
     def test_multiplication(self):
         """ test multiplication model"""
         from sans.models.MultiplicationModel import MultiplicationModel
