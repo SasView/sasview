@@ -401,8 +401,8 @@ class ModelPage(BasicPage):
         self.qmax.SetValue(format_number(self.qmax_x))
         self.npts.SetValue(format_number(self.num_points))
         """
-        self.qmin.SetValue((self.qmin_x))
-        self.qmax.SetValue((self.qmax_x))
+        self.qmin.SetValue(str(self.qmin_x))
+        self.qmax.SetValue(str(self.qmax_x))
         self.npts.SetValue(format_number(self.num_points))
         
         
