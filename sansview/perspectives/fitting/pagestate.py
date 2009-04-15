@@ -96,9 +96,6 @@ class PageState(object):
             copy_name = copy.deepcopy(name)
             copy_state = state.clone()
             obj.saved_states[copy_name]= copy_state
-                                           
-       
-        
         return obj
 
 class PageMemento(object):

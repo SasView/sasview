@@ -696,7 +696,7 @@ class FitPage(BasicPage):
         self.param_toFit=[]
         
         if  self.parameters !=[]:
-            if  self.cb1.GetValue()==True:
+            if  self.cb1.GetValue():
                 for item in self.parameters:
                     item[0].SetValue(True)
                     self.param_toFit.append(item )
@@ -722,7 +722,7 @@ class FitPage(BasicPage):
         self.param_toFit=[]
         for item in self.parameters:
             #Select parameters to fit for list of primary parameters
-            if item[0].GetValue()==True:
+            if item[0].GetValue():
                 if not (item in self.param_toFit):
                     self.param_toFit.append(item )  
             else:
@@ -731,7 +731,7 @@ class FitPage(BasicPage):
                     self.param_toFit.remove(item)
         #Select parameters to fit for list of fittable parameters with dispersion          
         for item in self.fittable_param:
-            if item[0].GetValue()==True:
+            if item[0].GetValue():
                 if not (item in self.param_toFit):
                     self.param_toFit.append(item)  
             else:

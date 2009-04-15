@@ -431,7 +431,7 @@ class BasicPage(wx.ScrolledWindow):
     
         if hasattr(self,"cb1"):
             self.state.cb1= self.cb1.GetValue()
-            
+            print "save current state ",self.state.cb1
         if hasattr(self,"enable_disp"):
             self.state.enable_disp= self.enable_disp.GetValue()
             
@@ -466,7 +466,8 @@ class BasicPage(wx.ScrolledWindow):
         ##model parameter values restore
         self._set_model_sizer_selection( self.model )
         self.set_model_param_sizer(self.model)
-        
+        if hasattr(self, "cb1"):   
+            self.cb1.SetValue(self.state.cb1)
         ## display dispersion info layer
         self.enable_disp.SetValue(self.state.enable_disp)
         if hasattr(self, "disp_box"):
@@ -476,14 +477,13 @@ class BasicPage(wx.ScrolledWindow):
         ## smearing info  restore
         if hasattr(self,"enable_smearer"):
             self.enable_smearer.SetValue(state.enable_smearer)
-        
+         ## reset state of checkbox,textcrtl  and parameters value
+       
         ##plotting range restore    
         self._reset_plotting_range()
         ## reset context menu items
         self._reset_context_menu()
-        ## reset state of checkbox,textcrtl  and parameters value
-        if hasattr(self, "cb1"):    
-            self.cb1.SetValue(self.state.cb1)
+       
         self._reset_parameters_state(self.parameters,state.parameters)
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
         self._reset_parameters_state(self.fixed_param,state.fixed_param)

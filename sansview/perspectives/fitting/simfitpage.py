@@ -104,7 +104,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 sizer= item[length-1]
                 sizer.Clear(True)
                 self.sizer_constraints.Remove(sizer)
-                #self.sizer_constraints.Layout()
+              
                 self.sizer2.Layout()
                 self.SetScrollbars(20,20,200,100)
                 self.constraints_list.remove(item)
