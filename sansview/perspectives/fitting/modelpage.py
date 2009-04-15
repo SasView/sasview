@@ -437,7 +437,7 @@ class ModelPage(BasicPage):
         sizer.Add(self.text2_2,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix +=1
-        self.text2_4 = wx.StaticText(self, -1, 'Units')
+        self.text2_4 = wx.StaticText(self, -1, '[Units]')
         sizer.Add(self.text2_4,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_4.Hide()
