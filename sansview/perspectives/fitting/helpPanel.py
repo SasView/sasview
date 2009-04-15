@@ -59,13 +59,13 @@ class HelpDialog(wx.Dialog):
 
 class HelpWindow(wx.Frame):
     def __init__(self, parent, id, title):
-        wx.Frame.__init__(self, parent, id, title, size=(600, 450))
+        wx.Frame.__init__(self, parent, id, title, size=(700, 450))
         """
              contains help info
         """
         vbox1  = wx.BoxSizer(wx.HORIZONTAL)
         
-        lpanel = wx.Panel(self, -1, style=wx.BORDER_SUNKEN)
+        lpanel = wx.Panel(self, -1,style=wx.BORDER_SUNKEN)
         rpanel = wx.Panel(self, -1)
         vbox1.Add(lpanel, -1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         vbox1.Add(rpanel, -1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -125,7 +125,7 @@ class HelpWindow(wx.Frame):
         if title != 'HelpWindow':
             self.rhelp.LoadPage("doc/model_functions.html")
             
-        vbox.Add(self.rhelp, 1, wx.EXPAND)
+        vbox.Add(self.rhelp,1, wx.EXPAND)
         vboxl.Add(self.lhelp, 1, wx.EXPAND)
         rpanel.SetSizer(vbox)
         lpanel.SetSizer(vboxl)
