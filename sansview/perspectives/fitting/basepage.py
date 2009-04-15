@@ -293,7 +293,6 @@ class BasicPage(wx.ScrolledWindow):
                     # Store the object to make it persist outside the scope of this method
                     #TODO: refactor model to clean this up?
                     self._disp_obj_dict[p] = disp_model
-                    print "dispersity------>",p
                     # Set the new model as the dispersion object for the selected parameter
                     self.model.set_dispersion(p, disp_model)
                           
