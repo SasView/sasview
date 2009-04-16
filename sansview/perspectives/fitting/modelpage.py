@@ -445,14 +445,14 @@ class ModelPage(BasicPage):
         sizer.Add(self.text1_2,(iy, ix),(1,1),\
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix +=1
-        self.text2_2 = wx.StaticText(self, -1, 'Values')
-        sizer.Add(self.text2_2,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-        ix +=1
         self.text2_4 = wx.StaticText(self, -1, '[Units]')
         sizer.Add(self.text2_4,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-        self.text2_4.Hide()
+        #self.text2_4.Hide()
+        ix +=1
+        self.text2_2 = wx.StaticText(self, -1, 'Values')
+        sizer.Add(self.text2_2,(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         
         for item in keys:
             if not item in self.disp_list and not item in self.model.orientation_params:
@@ -461,6 +461,14 @@ class ModelPage(BasicPage):
                 name = wx.StaticText(self, -1,item)
                 sizer.Add( name,( iy, ix),(1,1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                ix +=1
+                # Units
+                try:
+                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
+                except:
+                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
+                sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+
                 ix += 1
                 value= self.model.getParam(item)
                 ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
@@ -472,13 +480,6 @@ class ModelPage(BasicPage):
                 ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 
                 sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
-                ix +=1
-                # Units
-                try:
-                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
-                except:
-                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
-                sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ##[cb state, name, value, "+/-", error of fit, min, max , units]
                 self.parameters.append([None,item, ctl1,
                                         None,None, None, None,None])
@@ -491,6 +492,14 @@ class ModelPage(BasicPage):
                 name = wx.StaticText(self, -1,item)
                 sizer.Add( name,( iy, ix),(1,1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                ix +=1
+                # Units
+                try:
+                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
+                except:
+                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
+                sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+
                 ix += 1
                 value= self.model.getParam(item)
                 ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
@@ -503,13 +512,7 @@ class ModelPage(BasicPage):
                 ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 
                 sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
-                ix +=1
-                # Units
-                try:
-                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
-                except:
-                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
-                sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                
                 ##[cb state, name, value, "+/-", error of fit, min, max , units]
                 self.parameters.append([None,item, ctl1,
                                         None,None, None, None,None])

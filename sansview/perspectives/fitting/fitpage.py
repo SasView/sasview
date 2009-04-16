@@ -1,3 +1,5 @@
+
+
 import sys
 import wx
 import wx.lib.newevent
@@ -106,7 +108,7 @@ class FitPage(BasicPage):
         sizer_smearer.Add( self.disable_smearer )
         
         #Display Chi^2/dof
-        sizer_smearer.Add((70,10))
+        sizer_smearer.Add((68,10))
         box_description= wx.StaticBox(self, -1,'Chi2/dof')
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         boxsizer1.SetMinSize((60,-1))
@@ -169,7 +171,7 @@ class FitPage(BasicPage):
             # Maximum value of data  
             #data_max = str(format_number(radius_max))
             data_max = str((radius_max))
-            text4_3 = wx.StaticText(self, -1, 'Total Q Range (1/A)',
+            text4_3 = wx.StaticText(self, -1, "Total Q Range (1/A)",
                                      style=wx.ALIGN_LEFT)
             sizer_data.Add( text4_3 )
             sizer_data.Add(wx.StaticText(self, -1, "Min : %s"%data_min))
@@ -713,7 +715,8 @@ class FitPage(BasicPage):
     def select_all_param(self,event): 
         """
              set to true or false all checkBox given the main checkbox value cb1
-        """
+        """            
+
         self.param_toFit=[]
         
         if  self.parameters !=[]:
@@ -811,6 +814,11 @@ class FitPage(BasicPage):
         
         sizer.Add(self.cb1,(iy, ix),(1,1),\
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        self.text2_4 = wx.StaticText(self, -1, '[Units]')
+        sizer.Add(self.text2_4,(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+        #self.text2_4.Hide()
         ix +=1
         self.text2_2 = wx.StaticText(self, -1, 'Values')
         sizer.Add(self.text2_2,(iy, ix),(1,1),\
@@ -830,11 +838,6 @@ class FitPage(BasicPage):
         sizer.Add(self.text2_max,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_max.Hide()
-        ix += 1
-        self.text2_4 = wx.StaticText(self, -1, '[Units]')
-        sizer.Add(self.text2_4,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-        self.text2_4.Hide()
         if self.engine_type=="park":
             self.text2_max.Show(True)
             self.text2_min.Show(True)
@@ -849,6 +852,14 @@ class FitPage(BasicPage):
                 wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                 sizer.Add( cb,( iy, ix),(1,1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                ix +=1
+                # Units
+                try:
+                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
+                except:
+                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
+                sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                
                 ## add parameter value
                 ix += 1
                 value= self.model.getParam(item)
@@ -901,14 +912,6 @@ class FitPage(BasicPage):
                     ctl3.Show(True)
                     ctl4.Show(True)
                     
-                ix +=1
-                # Units
-                try:
-                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
-                except:
-                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
-                sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                
                 ##[cb state, name, value, "+/-", error of fit, min, max , units]
                 self.parameters.append([cb,item, ctl1,
                                         text2,ctl2, ctl3, ctl4,None])
@@ -929,6 +932,18 @@ class FitPage(BasicPage):
                     cb.Disable()
                 sizer.Add( cb,( iy, ix),(1,1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                ix +=1
+                # Units
+                try:
+                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
+                except:
+                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
+                if self.data.__class__.__name__ =="Data2D":
+                    units.Enable()
+                else:
+                    units.Disable()
+                sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+
                 ## add parameter value
                 ix += 1
                 value= self.model.getParam(item)
@@ -991,13 +1006,6 @@ class FitPage(BasicPage):
                     ctl3.Show(True)
                     ctl4.Show(True)
                     
-                ix +=1
-                # Units
-                try:
-                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
-                except:
-                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
-                sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 
                 ##[cb state, name, value, "+/-", error of fit, min, max , units]
                 self.parameters.append([cb,item, ctl1,
