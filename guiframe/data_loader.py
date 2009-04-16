@@ -88,6 +88,10 @@ def plot_data(parent, path):
     except:
         wx.PostEvent(parent, StatusEvent(status="Problem loading file: %s" % sys.exc_value))
         return
+    if output==None:
+        msg="Could not open this page"
+        wx.PostEvent(parent, StatusEvent(status=msg))
+        return
     filename = os.path.basename(path)
     
     if not  output.__class__.__name__=="list":
@@ -114,22 +118,20 @@ def plot_data(parent, path):
         ##Creating Data1D with output
         else:
             ##dy values checked
-            if output.dy ==None :
-                new_plot = Theory1D(output.x,output.y, dxl, dxw)
-        
-            else:
-                msg="Loading 1D data: "
-                wx.PostEvent(parent, StatusEvent(status= "%s %s"%(msg, output.filename)))
-                new_plot = Data1D(x=output.x, y=output.y, dx=output.dx,
-                                  dy=output.dy, dxl=dxl, dxw=dxw)
+            dy= output.dy
+            if dy ==None:
+                dy= numpy.zeros(len(output.y))
+            
+            msg="Loading 1D data: "
+            wx.PostEvent(parent, StatusEvent(status= "%s %s"%(msg, output.filename)))
+            new_plot = Data1D(x=output.x, y=output.y, dx=output.dx,
+                              dy= dy, dxl=dxl, dxw=dxw)
                 
         ## source will request in dataLoader .manipulation module
         new_plot.source=output.source
         ## name of the data allow to differentiate data when plotted
         name= output.filename
         
-            
-        #print "data_name_list",data_name_list
         new_plot.name = name
         ## allow to highlight data when plotted
         new_plot.interactive = True
@@ -160,12 +162,11 @@ def plot_data(parent, path):
                 dx=None
                 dxl=None
                 dxw=None
-                
-            if item.dy ==None:
-                new_plot = Theory1D(item.x,item.y,dxl,dxw)
-            else:
-                new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy,dxl=dxl,dxw=dxw)
-           
+            dy = item.dy  
+            if dy ==None:
+                dy= numpy.zeros(len(item.y))
+               
+            new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy,dxl=dxl,dxw=dxw)
             new_plot.source=item.source
             
             name= str(item.run[0])
