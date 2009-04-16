@@ -49,7 +49,10 @@ class FitPage(BasicPage):
         self._on_select_model(event=None)
         if self.data !=None:
             self.smearer = smear_selection( self.data )
-            
+            if self.smearer ==None:
+                self.enable_smearer.Disable()
+                self.disable_smearer.Disable()
+                
         ## to update the panel according to the fit engine type selected
         self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
     
@@ -601,7 +604,6 @@ class FitPage(BasicPage):
         self.SetScrollbars(20,20,200,100)
         
         
-      
     def onSmear(self, event):
         """
             Create a smear object that will change the way residuals
@@ -630,6 +632,8 @@ class FitPage(BasicPage):
         self.compute_chisqr(smearer= temp_smearer)  
         ## save the state enable smearing
         self.save_current_state()
+         
+   
         
   
     def compute_chisqr2D(self):

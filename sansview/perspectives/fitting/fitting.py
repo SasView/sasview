@@ -824,7 +824,9 @@ class Plugin:
         """
             Update the output of plotting model 1D
         """
-        self.calc_thread.ready(1)
+        wx.PostEvent(self.parent, StatusEvent(status="Plot \
+        #updating ... ",type="update"))
+        self.calc_thread.ready(0.01)
     
     def _fill_default_model2D(self, theory, qmax,qstep, qmin=None):
         """
@@ -906,6 +908,7 @@ class Plugin:
         """
             Complete plotting 1D data
         """ 
+       
         try:
             
             new_plot = Theory1D(x=x, y=y)
@@ -930,11 +933,12 @@ class Plugin:
             else:
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                              title= str(title)))
-            
+            msg = "Plot 1D  complete !"
+            wx.PostEvent( self.parent, StatusEvent( status= msg , type="stop" ))
         except:
             msg= " Error occurred when drawing %s Model 1D: "%new_plot.name
             msg+= " %s"%sys.exc_value
-            wx.PostEvent( self.parent, StatusEvent(status= msg ))
+            wx.PostEvent( self.parent, StatusEvent(status= msg, type="stop"  ))
             return  
         
                  
@@ -954,8 +958,7 @@ class Plugin:
             Complete get the result of modelthread and create model 2D
             that can be plot.
         """
-        msg = "Calc complete !"
-        wx.PostEvent( self.parent, StatusEvent( status= msg , type="stop" ))
+      
     
         err_image = numpy.zeros(numpy.shape(image))
         err_image[err_image==0]= 1
@@ -982,6 +985,8 @@ class Plugin:
         ## plot
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
                          title="Analytical model 2D ", reset=True ))
+        msg = "Plot 2D complete !"
+        wx.PostEvent( self.parent, StatusEvent( status= msg , type="stop" ))
          
     def _on_data_error(self, event):
         """
