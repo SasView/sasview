@@ -42,6 +42,8 @@ class BasicPage(wx.ScrolledWindow):
         self._disp_obj_dict = {}
         ## selected parameters to apply dispersion
         self.disp_cb_dict ={}
+        ## smearer object
+        self.smearer = None
         ##list of model parameters. each item must have same length
         ## each item related to a given parameters
         ##[cb state, name, value, "+/-", error of fit, min, max , units]
@@ -223,13 +225,15 @@ class BasicPage(wx.ScrolledWindow):
              
         sizer_select_dispers.Add((10,10)) 
         sizer_select_dispers.Add(self.model_disp) 
-        sizer_select_dispers.Add(self.disp_box) 
-        sizer_select_dispers.Add((10,10)) 
+        sizer_select_dispers.Add(self.disp_box,0,
+                wx.TOP|wx.BOTTOM|wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE,border=5)
+        #sizer_select_dispers.Add((10,10)) 
         self.model_disp.Hide()
         self.disp_box.Hide()
         
-        boxsizer1.Add( sizer_dispersion )
-        boxsizer1.Add( (10,10) )
+        boxsizer1.Add( sizer_dispersion,0,
+                wx.TOP|wx.BOTTOM|wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE,border=5)
+        #boxsizer1.Add( (10,10) )
         boxsizer1.Add( sizer_select_dispers )
         self.sizer4_4 = wx.GridBagSizer(5,5)
         boxsizer1.Add( self.sizer4_4  )

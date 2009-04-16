@@ -795,9 +795,10 @@ class Plugin:
             self.page_finder[current_pg].set_model(model)
             qmin, qmax= current_pg.get_range()
             self.page_finder[current_pg].set_range(qmin=qmin, qmax=qmax)
-           
+            smearer=  self.page_finder[current_pg].get_smearer()
             # save model name
-            self.draw_model( model=model, data= metadata, qmin=qmin, qmax=qmax)
+            self.draw_model( model=model,smearer=smearer, 
+                             data= metadata, qmin=qmin, qmax=qmax)
             
             if self.sim_page!=None:
                 self.sim_page.draw_page()

@@ -21,7 +21,7 @@ _BOX_WIDTH = 80
 import basepage
 from basepage import BasicPage
 from basepage import PageInfoEvent
-
+from DataLoader.qsmearing import smear_selection
 
 class FitPage(BasicPage):
     """
@@ -47,7 +47,9 @@ class FitPage(BasicPage):
         self._fill_model_sizer( self.sizer1)
         self._fill_range_sizer() 
         self._on_select_model(event=None)
-    
+        if self.data !=None:
+            self.smearer = smear_selection( self.data )
+            
         ## to update the panel according to the fit engine type selected
         self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
     
@@ -451,7 +453,10 @@ class FitPage(BasicPage):
         self._on_select_model_helper() 
         self.set_model_param_sizer(self.model)
         try:
-            self.compute_chisqr()
+            temp_smear= None
+            if self.enable_smearer.GetValue():
+                temp_smear= self.smearer
+            self.compute_chisqr(temp_smear)
         except:
             ## error occured on chisqr computation
             pass
@@ -602,26 +607,27 @@ class FitPage(BasicPage):
             Create a smear object that will change the way residuals
             are compute when fitting
         """
-        smear =None
-        msg=""
+        
         if self.enable_smearer.GetValue():
-            from DataLoader.qsmearing import smear_selection
-            smear = smear_selection( self.data )
+            msg=""
+            temp_smearer= self.smearer
             if hasattr(self.data,"dxl"):
                 msg= ": Resolution smearing parameters"
             if hasattr(self.data,"dxw"):
                 msg= ": Slit smearing parameters"
-            if smear ==None:
+            if self.smearer ==None:
                 wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Data contains no smearing information"))
             else:
                 wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Data contains smearing information %s"%msg))
+        else:
+            temp_smearer = None
         ## set smearing value whether or not the data contain the smearing info
-        self.manager.set_smearer(smear, qmin= float(self.qmin_x),
+        self.manager.set_smearer(temp_smearer, qmin= float(self.qmin_x),
                                       qmax= float(self.qmax_x)) 
         ##Calculate chi2
-        self.compute_chisqr()  
+        self.compute_chisqr(smearer= temp_smearer)  
         ## save the state enable smearing
         self.save_current_state()
         
@@ -667,7 +673,7 @@ class FitPage(BasicPage):
                 return
     
         
-    def compute_chisqr(self):
+    def compute_chisqr(self , smearer=None):
         """ 
             compute chi square given a model and data 1D and set the value
             to the tcChi txtcrl
@@ -691,13 +697,18 @@ class FitPage(BasicPage):
                     else:
                         dy= numpy.asarray(self.data.dy)
                     dy[dy==0]=1
+                    
                     if self.qmin_x==None and self.qmax_x==None: 
                         fx =numpy.asarray([self.model.run(v) for v in x])
+                        if smearer!=None:
+                            fx= smearer(fx)
                         temp=(y - fx)/dy
                         res= temp*temp
                     else:
                         idx = (x>= self.qmin_x) & (x <=self.qmax_x)
                         fx = numpy.asarray([self.model.run(item)for item in x[idx ]])
+                        if smearer!=None:
+                            fx= smearer(fx)
                         temp=(y[idx] - fx)/dy[idx]
                         res= temp*temp
                     #sum of residuals
@@ -707,9 +718,10 @@ class FitPage(BasicPage):
                             sum +=item
                     self.tcChi.SetLabel(format_number(math.fabs(sum/ len(res))))
             except:
-                wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                            "Chisqr cannot be compute: %s"% sys.exc_value))
-                return 
+                raise
+                #wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+                #            "Chisqr cannot be compute: %s"% sys.exc_value))
+                #return 
             
     
     def select_all_param(self,event): 
