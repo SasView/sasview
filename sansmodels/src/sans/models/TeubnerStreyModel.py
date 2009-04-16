@@ -32,6 +32,7 @@ class TeubnerStreyModel(BaseComponent):
         self.name = "Teubner Strey"
         self.description="""The TeubnerStrey model.
         F(x) = 1/( scale + c1*(x)^(2)+  c2*(x)^(4)) + bkd
+        
         The model has Four parameters: 
         scale  =  scale factor
         c1     =  constant

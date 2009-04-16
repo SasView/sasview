@@ -32,8 +32,8 @@ class SphereModel(CSphereModel, BaseComponent):
     	for details of the model.
     	List of default parameters:
          scale           = 1.0 
-         radius          = 60.0 [Å]
-         contrast        = 1e-006 [1/Å²]
+         radius          = 60.0 [A]
+         contrast        = 1e-006 [1/A²]
          background      = 0.0 [1/cm]
 
     """
@@ -48,20 +48,22 @@ class SphereModel(CSphereModel, BaseComponent):
         ## Name of the model
         self.name = "SphereModel"
         ## Model description
-        self.description ="""P(q)=(scale/V)
-		*[3V(scatter_sld-solvent_sld)*(sin(qR)-qRcos(qR))/(qR)^3]^(2)
-		+bkg
-		bkg: background level
-		R: radius of the sphere
+        self.description ="""P(q)=(scale/V)*[3V(scatter_sld-solvent_sld)*(sin(qR)-qRcos(qR))
+		/(qR)^3]^(2)+bkg
+		
+		bkg:background, R: radius of sphere
 		V:The volume of the scatter
-		scatter_sld: the scattering length density of the scatter
-		solvent_sld: the scattering length density of the solvent"""
+		contrast:SLD difference between
+		scatter and solvent
+		scatter_sld: the SLD of the scatter
+		solvent_sld: the SLD of the solvent
+		"""
        
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
-        self.details['radius'] = ['[Å]', None, None]
-        self.details['contrast'] = ['[1/Å²]', None, None]
+        self.details['radius'] = ['[A]', None, None]
+        self.details['contrast'] = ['[1/A²]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters

@@ -32,9 +32,9 @@ class CylinderModel(CCylinderModel, BaseComponent):
     	for details of the model.
     	List of default parameters:
          scale           = 1.0 
-         radius          = 20.0 [Å]
-         length          = 400.0 [Å]
-         contrast        = 3e-006 [1/Å²]
+         radius          = 20.0 [A]
+         length          = 400.0 [A]
+         contrast        = 3e-006 [1/A²]
          background      = 0.0 [1/cm]
          cyl_theta       = 1.0 [rad]
          cyl_phi         = 1.0 [rad]
@@ -51,25 +51,26 @@ class CylinderModel(CCylinderModel, BaseComponent):
         ## Name of the model
         self.name = "CylinderModel"
         ## Model description
-        self.description ="""P(q,alpha)= scale/V*f(q)^(2)+bkg
-		f(q)= 2*(scatter_sld - solvent_sld)*V
-		*sin(qLcos(alpha/2))/[qLcos(alpha/2)]
-		*J1(qRsin(alpha/2))/[qRsin(alpha)]
+        self.description =""" f(q)= 2*(scatter_sld - solvent_sld)*V*sin(qLcos(alpha/2))
+		/[qLcos(alpha/2)]*J1(qRsin(alpha/2))/[qRsin(alpha)]
+		
+		P(q,alpha)= scale/V*f(q)^(2)+bkg
 		V: Volume of the cylinder
 		R: Radius of the cylinder
 		L: Length of the cylinder
 		J1: The bessel function
-		alpha: angle betweenthe axis of the cylinder
-		and the q-vector for 1D:the ouput is
-		P(q)=scale/V*integral from pi/2 to zero of
+		alpha: angle betweenthe axis of the
+		cylinder and the q-vector for 1D
+		:the ouput is P(q)=scale/V*integral
+		from pi/2 to zero of...
 		f(q)^(2)*sin(alpha)*dalpha+ bkg"""
        
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
-        self.details['radius'] = ['[Å]', None, None]
-        self.details['length'] = ['[Å]', None, None]
-        self.details['contrast'] = ['[1/Å²]', None, None]
+        self.details['radius'] = ['[A]', None, None]
+        self.details['length'] = ['[A]', None, None]
+        self.details['contrast'] = ['[1/A²]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['cyl_theta'] = ['[rad]', None, None]
         self.details['cyl_phi'] = ['[rad]', None, None]

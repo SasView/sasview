@@ -6,7 +6,7 @@
  */
  //[PYTHONCLASS] = StickyHSStructure
  //[DISP_PARAMS] = radius
- //[DESCRIPTION] =<text> Structure Factor for interacting particles:
+ //[DESCRIPTION] =<text> Structure Factor for interacting particles:                               .
  //
  //  The interaction potential is
  //
@@ -20,13 +20,13 @@
  //                     w: The width of the square well ,w > 0
  //						v: The volume fraction , v > 0
  //
- //                     Ref: Menon, S. V. G.,et.al., J. Chem. Phys.,
- //                          1991, 95(12), 9186-9190.
+ //                     Ref: Menon, S. V. G.,et.al., J. Chem.
+ //                      Phys., 1991, 95(12), 9186-9190.
  //				</text>
  //[FIXED]= radius.width
 typedef struct {
-    /// Radius of hardsphere [Å]
-    //  [DEFAULT]=radius=50.0 [Å]
+    /// Radius of hardsphere [A]
+    //  [DEFAULT]=radius=50.0 [A]
     double radius;
 
     ///	Volume fraction

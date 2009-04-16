@@ -36,6 +36,7 @@ class PowerLawModel(BaseComponent):
         self.params['background']   = 0.0
         self.description=""" The Power_Law model.
         F(x) = scale* (|x|)^(-m) + bkd
+        
         The model has three parameters: 
         m     =  power
         scale  =  scale factor

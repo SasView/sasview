@@ -6,26 +6,30 @@
  */
  //[PYTHONCLASS] = CoreShellCylinderModel
  //[DISP_PARAMS] = radius, thickness, length, axis_theta, axis_phi
- //[DESCRIPTION] = <text>P(q,alpha)= scale/Vs*f(q)^(2) + bkg  Where:\n\
- //	 f(q)= 2(core_sld- solvant_sld)* Vc*sin[qLcos(alpha/2)]/\n\
- //	 [qLcos(alpha/2)]*J1(qRsin(alpha))/[qRsin(alpha)] +\n
- //  2(shell_sld-solvent_sld)*Vs
- //	 *sin[q(L+T)cos(alpha/2)]/[[q(L+T)cos(alpha/2)]
- //	 *J1(q(R+T)sin(alpha))/q(R+T)sin(alpha)]
- //			alpha:is the angle between the axis of the cylinder
- //          and the q-vector
+ //[DESCRIPTION] = <text>P(q,alpha)= scale/Vs*f(q)^(2) + bkg,  where: f(q)= 2(core_sld
+//			- solvant_sld)* Vc*sin[qLcos(alpha/2)]
+//			/[qLcos(alpha/2)]*J1(qRsin(alpha))
+ //			/[qRsin(alpha)]+2(shell_sld-solvent_sld)
+ //			*Vs*sin[q(L+T)cos(alpha/2)][[q(L+T)
+ //			*cos(alpha/2)]*J1(q(R+T)sin(alpha))
+ //			/q(R+T)sin(alpha)]
+ //
+ //			alpha:is the angle between the axis of
+ //          the cylinder and the q-vector
  //			Vs: the volume of the outer shell
  //			Vc: the volume of the core
  //			L: the length of the core
- //    		shell_sld: the scattering length density of the shell
- //			solvent_sld: the scattering length density of the solvent
+ //    		shell_sld: the scattering length density
+ //			of the shell
+ //			solvent_sld: the scattering length density
+ //			of the solvent
  //			bkg: the background
  //			T: the thickness
  //    		R+T: is the outer radius
  // 		L+2T: The total length of the outershell
  //			J1: the first order Bessel function
  // 		theta: axis_theta of the cylinder
- // 		phi: the axis_phi of the cylinder
+ // 		phi: the axis_phi of the cylinder...
  //		</text>
  //[FIXED]= <text> axis_phi.width; axis_theta.width; length.width;radius.width; thickness_width</text>
  //[ORIENTATION_PARAMS]= axis_phi; axis_theta;axis_phi.width; axis_theta.width
@@ -36,28 +40,28 @@ typedef struct {
     //  [DEFAULT]=scale=1.0
     double scale;
 
-    /// Core radius [Å]
-    //  [DEFAULT]=radius=20.0 [Å]
+    /// Core radius [A]
+    //  [DEFAULT]=radius=20.0 [A]
     double radius;
 
-    /// Shell thickness [Å]
-    //  [DEFAULT]=thickness=10.0 [Å]
+    /// Shell thickness [A]
+    //  [DEFAULT]=thickness=10.0 [A]
     double thickness;
 
-    /// Core length [Å]
-    //  [DEFAULT]=length=400.0 [Å]
+    /// Core length [A]
+    //  [DEFAULT]=length=400.0 [A]
     double length;
 
-    /// Core SLD [1/Å²]
-    //  [DEFAULT]=core_sld=1.0e-6 [1/Å²]
+    /// Core SLD [1/A²]
+    //  [DEFAULT]=core_sld=1.0e-6 [1/A²]
     double core_sld;
 
-    /// Shell SLD [1/Å²]
-    //  [DEFAULT]=shell_sld=4.0e-6 [1/Å²]
+    /// Shell SLD [1/A²]
+    //  [DEFAULT]=shell_sld=4.0e-6 [1/A²]
     double shell_sld;
 
-    /// Solvent SLD [1/Å²]
-    //  [DEFAULT]=solvent_sld=1.0e-6 [1/Å²]
+    /// Solvent SLD [1/A²]
+    //  [DEFAULT]=solvent_sld=1.0e-6 [1/A²]
     double solvent_sld;
 
 	/// Incoherent Background [1/cm]

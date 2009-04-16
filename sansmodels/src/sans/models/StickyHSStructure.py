@@ -31,7 +31,7 @@ class StickyHSStructure(CStickyHSStructure, BaseComponent):
     	Refer to that file and the structure it contains
     	for details of the model.
     	List of default parameters:
-         radius          = 50.0 [Å]
+         radius          = 50.0 [A]
          volfraction     = 0.1 
          perturb         = 0.05 
          stickiness      = 0.2 
@@ -48,7 +48,7 @@ class StickyHSStructure(CStickyHSStructure, BaseComponent):
         ## Name of the model
         self.name = "StickyHSStructure"
         ## Model description
-        self.description =""" Structure Factor for interacting particles:
+        self.description =""" Structure Factor for interacting particles:                               .
 		
 		The interaction potential is
 		
@@ -62,12 +62,12 @@ class StickyHSStructure(CStickyHSStructure, BaseComponent):
 		w: The width of the square well ,w > 0
 		v: The volume fraction , v > 0
 		
-		Ref: Menon, S. V. G.,et.al., J. Chem. Phys.,
-		1991, 95(12), 9186-9190."""
+		Ref: Menon, S. V. G.,et.al., J. Chem.
+		Phys., 1991, 95(12), 9186-9190."""
        
 		## Parameter details [units, min, max]
         self.details = {}
-        self.details['radius'] = ['[Å]', None, None]
+        self.details['radius'] = ['[A]', None, None]
         self.details['volfraction'] = ['', None, None]
         self.details['perturb'] = ['', None, None]
         self.details['stickiness'] = ['', None, None]

@@ -6,13 +6,13 @@
  */
  //[PYTHONCLASS] = CoreShellModel
  //[DISP_PARAMS] = radius, thickness
- //[DESCRIPTION] =<text> Form factor for a monodisperse spherical particle with
- //    particle with a core-shell structure:
+ //[DESCRIPTION] =<text>Form factor for a monodisperse spherical particle with particle
+ //    with a core-shell structure:
+ //
  //    The form factor is normalized by the
  //    total particle volume.
  //
- //		radius: core radius
- //     thickness: shell thickness
+ //		radius: core radius, thickness: shell thickness
  //
  //     Ref: Guinier, A. and G. Fournet,
  //     John Wiley and Sons, New York, 1955.
@@ -24,20 +24,20 @@ typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0
     double scale;
-    ///	Core Radius [Å] 60.0
-    //  [DEFAULT]=radius=60.0 [Å]
+    ///	Core Radius [A] 60.0
+    //  [DEFAULT]=radius=60.0 [A]
     double radius;
-    /// Shell Thickness [Å] 10.0
-    //  [DEFAULT]=thickness=10 [Å]
+    /// Shell Thickness [A] 10.0
+    //  [DEFAULT]=thickness=10 [A]
     double thickness;
-    ///	Core SLD [1/Å²] 1.0e-6
-    //  [DEFAULT]=core_sld=1.0e-6 [1/Å²]
+    ///	Core SLD [1/A²] 1.0e-6
+    //  [DEFAULT]=core_sld=1.0e-6 [1/A²]
     double core_sld;
-	/// Shell SLD [1/Å²] 2.0e-6
-	//  [DEFAULT]=shell_sld=2.0e-6 [1/Å²]
+	/// Shell SLD [1/A²] 2.0e-6
+	//  [DEFAULT]=shell_sld=2.0e-6 [1/A²]
 	double shell_sld;
-	/// Solvent SLD [1/Å²] 3.0e-6
-	//  [DEFAULT]=solvent_sld=3.0e-6 [1/Å²]
+	/// Solvent SLD [1/A²] 3.0e-6
+	//  [DEFAULT]=solvent_sld=3.0e-6 [1/A²]
 	double solvent_sld;
 	/// Incoherent Background [1/cm] 0.000
 	//  [DEFAULT]=background=0 [1/cm]

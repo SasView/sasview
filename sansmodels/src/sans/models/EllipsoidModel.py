@@ -32,9 +32,9 @@ class EllipsoidModel(CEllipsoidModel, BaseComponent):
     	for details of the model.
     	List of default parameters:
          scale           = 1.0 
-         radius_a        = 20.0 [Å]
-         radius_b        = 400.0 [Å]
-         contrast        = 3e-006 [1/Å²]
+         radius_a        = 20.0 [A]
+         radius_b        = 400.0 [A]
+         contrast        = 3e-006 [1/A²]
          background      = 0.0 [1/cm]
          axis_theta      = 1.57 [rad]
          axis_phi        = 0.0 [rad]
@@ -51,24 +51,30 @@ class EllipsoidModel(CEllipsoidModel, BaseComponent):
         ## Name of the model
         self.name = "EllipsoidModel"
         ## Model description
-        self.description =""""P(q.alpha)= scale*f(q)^(2)+ bkg
-		f(q)= 3*(scatter_sld- scatter_solvent)*V
-		*[sin(q*r(Ra,Rb,alpha))- q*r*cos(qr(Ra,Rb,alpha))]
+        self.description =""""P(q.alpha)= scale*f(q)^(2)+ bkg, where f(q)= 3*(scatter_sld
+		- scatter_solvent)*V*[sin(q*r(Ra,Rb,alpha))
+		-q*r*cos(qr(Ra,Rb,alpha))]
 		/[qr(Ra,Rb,alpha)]^(3)"
+		
 		r(Ra,Rb,alpha)= [Rb^(2)*(sin(alpha))^(2)
 		+ Ra^(2)*(cos(alpha))^(2)]^(1/2)
-		scatter_sld: scattering length density of the scatter
-		solvent_sld: scattering length density of the solvent
+		
+		scatter_sld: SLD of the scatter
+		solvent_sld: SLD of the solvent
+		contrast: SLD difference between scatter
+		and solvent
 		V: volune of the Eliipsoid
-		Ra: radius along the rotation axis of the Ellipsoid
-		Rb: radius perpendicular to the rotation axis of the ellipsoid"""
+		Ra: radius along the rotation axis
+		of the Ellipsoid
+		Rb: radius perpendicular to the
+		rotation axis of the ellipsoid"""
        
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
-        self.details['radius_a'] = ['[Å]', None, None]
-        self.details['radius_b'] = ['[Å]', None, None]
-        self.details['contrast'] = ['[1/Å²]', None, None]
+        self.details['radius_a'] = ['[A]', None, None]
+        self.details['radius_b'] = ['[A]', None, None]
+        self.details['contrast'] = ['[1/A²]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['axis_theta'] = ['[rad]', None, None]
         self.details['axis_phi'] = ['[rad]', None, None]

@@ -6,7 +6,7 @@
  */
  //[PYTHONCLASS] = HardsphereStructure
  //[DISP_PARAMS] = radius
- //[DESCRIPTION] =<text>Structure factor for interacting particles:
+ //[DESCRIPTION] =<text>Structure factor for interacting particles:                   .
  //
  //  The interparticle potential is
  //
@@ -16,15 +16,15 @@
  //						R: radius of the Hardsphere particle
  //						V:The volume fraction
  //
- //    Ref: Percus., J. K.,etc., J. Phy. Rev.
- //    1958, 110, 1.
+ //    Ref: Percus., J. K.,etc., J. Phy.
+ //     Rev. 1958, 110, 1.
  //	 </text>
  //[FIXED]= radius.width
 
 
 typedef struct {
-    /// Radius of hardsphere [Å]
-    //  [DEFAULT]=radius=50.0 [Å]
+    /// Radius of hardsphere [A]
+    //  [DEFAULT]=radius=50.0 [A]
     double radius;
 
     ///	Volume fraction

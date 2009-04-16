@@ -31,7 +31,7 @@ class SquareWellStructure(CSquareWellStructure, BaseComponent):
     	Refer to that file and the structure it contains
     	for details of the model.
     	List of default parameters:
-         radius          = 50.0 [Å]
+         radius          = 50.0 [A]
          volfraction     = 0.04 
          welldepth       = 1.5 [kT]
          wellwidth       = 1.2 
@@ -48,7 +48,7 @@ class SquareWellStructure(CSquareWellStructure, BaseComponent):
         ## Name of the model
         self.name = "SquareWellStructure"
         ## Model description
-        self.description =""" Structure Factor for interacting particles:
+        self.description =""" Structure Factor for interacting particles:             .
 		
 		The interaction potential is
 		
@@ -56,16 +56,18 @@ class SquareWellStructure(CSquareWellStructure, BaseComponent):
 		= -d    , 2R <= r <=2Rw
 		= 0     , r >= 2Rw
 		
-		R: radius (A)of the particle, v: volume fraction
+		R: radius (A)of the particle
+		v: volume fraction
 		d: well depth
-		w: well width; multiples of the particle diameter
+		w: well width; multiples of the
+		particle diameter
 		
-		Ref: Sharma, R. V.; Sharma, K. C., Physica,
-		1977, 89A, 213."""
+		Ref: Sharma, R. V.; Sharma,
+		K. C., Physica, 1977, 89A, 213."""
        
 		## Parameter details [units, min, max]
         self.details = {}
-        self.details['radius'] = ['[Å]', None, None]
+        self.details['radius'] = ['[A]', None, None]
         self.details['volfraction'] = ['', None, None]
         self.details['welldepth'] = ['[kT]', None, None]
         self.details['wellwidth'] = ['', None, None]

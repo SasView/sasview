@@ -31,7 +31,7 @@ class HayterMSAStructure(CHayterMSAStructure, BaseComponent):
     	Refer to that file and the structure it contains
     	for details of the model.
     	List of default parameters:
-         radius          = 20.75 [Å]
+         radius          = 20.75 [A]
          charge          = 19.0 
          volfraction     = 0.0192 
          temperature     = 318.16 [K]
@@ -50,15 +50,16 @@ class HayterMSAStructure(CHayterMSAStructure, BaseComponent):
         ## Name of the model
         self.name = "HayterMSAStructure"
         ## Model description
-        self.description ="""To calculate the structure factor (the Fourier transform
-		of the pair correlation function g(r)) for
-		a system of charged, spheroidal objects in
-		a dielectric medium. When combined with an
-		appropriate form factor, this allows
-		for inclusion of the interparticle
-		interference effects due to screened coulomb
-		repulsion between charged particles.
-		(note: charge > 0 required.)
+        self.description ="""To calculate the structure factor (the Fourier transform of the
+		pair correlation function g(r)) for a system of
+		charged, spheroidal objects in a dielectric
+		medium.
+		When combined with an appropriate form
+		factor, this allows for inclusion of
+		the interparticle interference effects
+		due to screened coulomb repulsion between
+		charged particles.
+		(Note: charge > 0 required.)
 		
 		Ref: JP Hansen and JB Hayter, Molecular
 		Physics 46, 651-656 (1982).
@@ -66,7 +67,7 @@ class HayterMSAStructure(CHayterMSAStructure, BaseComponent):
        
 		## Parameter details [units, min, max]
         self.details = {}
-        self.details['radius'] = ['[Å]', None, None]
+        self.details['radius'] = ['[A]', None, None]
         self.details['charge'] = ['', None, None]
         self.details['volfraction'] = ['', None, None]
         self.details['temperature'] = ['[K]', None, None]

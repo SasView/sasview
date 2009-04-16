@@ -5,7 +5,7 @@
 */
 //   [PYTHONCLASS] = SquareWellStructure
 //   [DISP_PARAMS] = radius
-//   [DESCRIPTION] = <text> Structure Factor for interacting particles:
+//   [DESCRIPTION] = <text> Structure Factor for interacting particles:             .
 //
 //  The interaction potential is
 //
@@ -13,20 +13,22 @@
 //			= -d    , 2R <= r <=2Rw
 //			= 0     , r >= 2Rw
 //
-//		R: radius (A)of the particle, v: volume fraction
+//		R: radius (A)of the particle
+//		v: volume fraction
 //		d: well depth
-//		w: well width; multiples of the particle diameter
+//		w: well width; multiples of the
+//		particle diameter
 //
-//		Ref: Sharma, R. V.; Sharma, K. C., Physica,
-//            1977, 89A, 213.
+//		Ref: Sharma, R. V.; Sharma,
+//      K. C., Physica, 1977, 89A, 213.
 //   			</text>
 //   [FIXED]= radius.width
 //[ORIENTATION_PARAMS]= <text> </text>
 
 
 typedef struct {
-    ///	Radius of particle [Å]
-    //  [DEFAULT]=radius=50.0 [Å]
+    ///	Radius of particle [A]
+    //  [DEFAULT]=radius=50.0 [A]
     double radius;
 
     /// Volume fraction

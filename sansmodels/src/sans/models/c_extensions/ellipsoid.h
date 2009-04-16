@@ -8,17 +8,23 @@
  */
  //[PYTHONCLASS] = EllipsoidModel
  //[DISP_PARAMS] = radius_a, radius_b, axis_theta, axis_phi
- //[DESCRIPTION] = <text>"P(q.alpha)= scale*f(q)^(2)+ bkg
- //		f(q)= 3*(scatter_sld- scatter_solvent)*V
- //			*[sin(q*r(Ra,Rb,alpha))- q*r*cos(qr(Ra,Rb,alpha))]
+ //[DESCRIPTION] = <text>"P(q.alpha)= scale*f(q)^(2)+ bkg, where f(q)= 3*(scatter_sld
+ //		- scatter_solvent)*V*[sin(q*r(Ra,Rb,alpha))
+ //		-q*r*cos(qr(Ra,Rb,alpha))]
  //		/[qr(Ra,Rb,alpha)]^(3)"
+ //
  //     r(Ra,Rb,alpha)= [Rb^(2)*(sin(alpha))^(2)
  //     + Ra^(2)*(cos(alpha))^(2)]^(1/2)
- //		scatter_sld: scattering length density of the scatter
- //		solvent_sld: scattering length density of the solvent
+ //
+ //		scatter_sld: SLD of the scatter
+ //		solvent_sld: SLD of the solvent
+ //     contrast: SLD difference between scatter
+ //		and solvent
  //		V: volune of the Eliipsoid
- //		Ra: radius along the rotation axis of the Ellipsoid
- //		Rb: radius perpendicular to the rotation axis of the ellipsoid
+ //		Ra: radius along the rotation axis
+ //		of the Ellipsoid
+ //		Rb: radius perpendicular to the
+ //		rotation axis of the ellipsoid
  //		</text>
  //[FIXED]= <text> axis_phi.width; axis_theta.width;radius_a.width;
  //radius_b.width; length.width; r_minor.width
@@ -31,16 +37,16 @@ typedef struct {
     //  [DEFAULT]=scale=1.0
     double scale;
 
-    ///	Rotation axis radius_a [Å]
-    //  [DEFAULT]=radius_a=20.0 [Å]
+    ///	Rotation axis radius_a [A]
+    //  [DEFAULT]=radius_a=20.0 [A]
     double radius_a;
 
-    /// Radius_b [Å]
-    //  [DEFAULT]=radius_b=400 [Å]
+    /// Radius_b [A]
+    //  [DEFAULT]=radius_b=400 [A]
     double radius_b;
 
-    ///	Contrast [1/Å²]
-    //  [DEFAULT]=contrast=3.0e-6 [1/Å²]
+    ///	Contrast [1/A²]
+    //  [DEFAULT]=contrast=3.0e-6 [1/A²]
     double contrast;
 
 	/// Incoherent Background [1/cm]

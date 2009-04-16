@@ -34,6 +34,7 @@ class DebyeModel(BaseComponent):
         self.description=""" 
         F(x) = 2( exp(-x) + x - 1 )/x**2
         with x = (q*R_g)**2
+        
         The model has three parameters: 
         Rg     =  radius of gyration
         scale  =  scale factor
@@ -47,7 +48,7 @@ class DebyeModel(BaseComponent):
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['rg']         = ['[Å]', None, None]
+        self.details['rg']         = ['[A]', None, None]
         self.details['scale']      = ['', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         #list of parameter that cannot be fitted

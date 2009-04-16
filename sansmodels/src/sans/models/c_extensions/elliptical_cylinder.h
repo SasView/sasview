@@ -15,17 +15,17 @@ typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0
     double scale;
-    /// Minor radius [Å]
-    //  [DEFAULT]=r_minor=20.0 [Å]
+    /// Minor radius [A]
+    //  [DEFAULT]=r_minor=20.0 [A]
     double r_minor;
     /// Ratio of major/minor radii
     //  [DEFAULT]=r_ratio=1.5
     double r_ratio;
-    /// Length of the cylinder [Å]
-    //  [DEFAULT]=length=400.0 [Å]
+    /// Length of the cylinder [A]
+    //  [DEFAULT]=length=400.0 [A]
     double length;
-    /// Contrast [1/Å²]
-    //  [DEFAULT]=contrast=3.0e-6 [1/Å²]
+    /// Contrast [1/A²]
+    //  [DEFAULT]=contrast=3.0e-6 [1/A²]
     double contrast;
 	/// Incoherent Background [1/cm] 0.000
 	//  [DEFAULT]=background=0 [1/cm]

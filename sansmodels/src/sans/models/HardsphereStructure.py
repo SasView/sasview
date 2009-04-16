@@ -31,7 +31,7 @@ class HardsphereStructure(CHardsphereStructure, BaseComponent):
     	Refer to that file and the structure it contains
     	for details of the model.
     	List of default parameters:
-         radius          = 50.0 [Å]
+         radius          = 50.0 [A]
          volfraction     = 0.2 
 
     """
@@ -46,7 +46,7 @@ class HardsphereStructure(CHardsphereStructure, BaseComponent):
         ## Name of the model
         self.name = "HardsphereStructure"
         ## Model description
-        self.description ="""Structure factor for interacting particles:
+        self.description ="""Structure factor for interacting particles:                   .
 		
 		The interparticle potential is
 		
@@ -56,12 +56,12 @@ class HardsphereStructure(CHardsphereStructure, BaseComponent):
 		R: radius of the Hardsphere particle
 		V:The volume fraction
 		
-		Ref: Percus., J. K.,etc., J. Phy. Rev.
-		1958, 110, 1."""
+		Ref: Percus., J. K.,etc., J. Phy.
+		Rev. 1958, 110, 1."""
        
 		## Parameter details [units, min, max]
         self.details = {}
-        self.details['radius'] = ['[Å]', None, None]
+        self.details['radius'] = ['[A]', None, None]
         self.details['volfraction'] = ['', None, None]
 
 		## fittable parameters

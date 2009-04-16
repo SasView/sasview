@@ -6,15 +6,16 @@
  */
  //[PYTHONCLASS] = HayterMSAStructure
  //[DISP_PARAMS] = radius
- //[DESCRIPTION] =<text>To calculate the structure factor (the Fourier transform
- //                     of the pair correlation function g(r)) for
- //                     a system of charged, spheroidal objects in
- //                     a dielectric medium. When combined with an
- //                     appropriate form factor, this allows
- //                     for inclusion of the interparticle
- //                     interference effects due to screened coulomb
- //                     repulsion between charged particles.
- //                     (note: charge > 0 required.)
+ //[DESCRIPTION] =<text>To calculate the structure factor (the Fourier transform of the
+ //                     pair correlation function g(r)) for a system of
+ //                     charged, spheroidal objects in a dielectric
+ //						medium.
+ //                     When combined with an appropriate form
+ //                     factor, this allows for inclusion of
+ //                     the interparticle interference effects
+ //                     due to screened coulomb repulsion between
+ //                     charged particles.
+ //						(Note: charge > 0 required.)
  //
  //                     Ref: JP Hansen and JB Hayter, Molecular
  //                           Physics 46, 651-656 (1982).
@@ -23,8 +24,8 @@
  //[FIXED]= radius.width
 
 typedef struct {
-    ///	Radius of particle [Å]
-    //  [DEFAULT]=radius=20.75 [Å]
+    ///	Radius of particle [A]
+    //  [DEFAULT]=radius=20.75 [A]
     double radius;
 
     /// charge
