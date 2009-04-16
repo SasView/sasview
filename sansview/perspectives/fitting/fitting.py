@@ -1,4 +1,4 @@
-import  re
+import  re,copy
 import sys, wx, logging
 import string, numpy, math
 
@@ -238,17 +238,18 @@ class Plugin:
         dxl=None
         dxw=None
         if hasattr(item, "dxl"):
-            dxl = item.dxl
+            dxl = copy.deepcopy(item.dxl)
         if hasattr(item, "dxw"):
-            dxw = item.dxw
+            dxw = copy.deepcopy(item.dxw)
         if hasattr(item, "detector"):
-            detector =item.detector
+            detector = copy.deepcopy(item.detector)
         if hasattr(item, "source"):
-            source =item.source
+            source = copy.deepcopy(item.source)
         if hasattr(item ,"info"):
-            info= item.info
+            info= copy.deepcopy(item.info)
         if hasattr(item,"id"):
-            id = item.id
+            id = copy.deepcopy(item.id)
+            
         from sans.guiframe import dataFitting 
         if item.__class__.__name__=="Data1D":
             data= dataFitting.Data1D(x=item.x, y=item.y, dy=dy, dxl=dxl, dxw=dxw)
@@ -258,17 +259,17 @@ class Plugin:
         data.detector = detector
         data.source = source
         ## allow to highlight data when plotted
-        data.interactive = item.interactive
+        data.interactive = copy.deepcopy(item.interactive)
         ## when 2 data have the same id override the 1 st plotted
         data.id = id
         ## info is a reference to output of dataloader that can be used
         ## to save  data 1D as cansas xml file
         data.info= info
         ## If the data file does not tell us what the axes are, just assume...
-        data.xaxis(item._xaxis,item._xunit)
-        data.yaxis(item._yaxis,item._yunit)
+        data.xaxis(copy.deepcopy(item._xaxis),copy.deepcopy(item._xunit))
+        data.yaxis(copy.deepcopy(item._yaxis),copy.deepcopy(item._yunit))
         ##group_id specify on which panel to plot this data
-        data.group_id = item.group_id
+        data.group_id = copy.deepcopy(item.group_id)
         return data
 
     def set_fit_range(self, page, qmin, qmax):
@@ -558,6 +559,7 @@ class Plugin:
         """
         self.panel = event.GetEventObject()
         for item in self.panel.graph.plottables:
+            
             if item.name == self.panel.graph.selected_plottable:
                 ## put the errors values back to the model if the errors were hiden
                 ## before sending them to the fit engine
@@ -566,16 +568,15 @@ class Plugin:
                         dy= self.err_dy[item.name]
                         data= self.copy_data(item, dy)
                     else:
-                        data= item
+                        data= copy.deepcopy(item)
                 else:
                     if item.dy==None:
                         dy= numpy.zeros(len(item.y))
-                        dy[dy==0]=1
                         data= self.copy_data(item, dy)
                     else:
-                        data= item
+                        data= copy.deepcopy(item)
             else:
-                data= item
+                data= copy.deepcopy(item)
             ## create anew page                   
             if item.name == self.panel.graph.selected_plottable or\
                  item.__class__.__name__ is "Data2D":
@@ -961,7 +962,7 @@ class Plugin:
       
     
         err_image = numpy.zeros(numpy.shape(image))
-        err_image[err_image==0]= 1
+       
         theory= Data2D(image= image , err_image= err_image)
         theory.name= model.name
         
@@ -981,7 +982,7 @@ class Plugin:
             theory.ymax= data.ymax
             theory.xmin= data.xmin
             theory.xmax= data.xmax
-        
+       
         ## plot
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
                          title="Analytical model 2D ", reset=True ))

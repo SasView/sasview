@@ -643,11 +643,13 @@ class FitPage(BasicPage):
         """
         from sans.guiframe.utils import check_value
         flag = check_value( self.qmin, self.qmax)
-        err_image = self.data.err_data
+        
+        err_image = copy.deepcopy(self.data.err_data)
         if err_image==[] or err_image==None:
             err_image= numpy.zeros(len(self.data.x_bins),len(self.data.y_bins))
                        
         err_image[err_image==0]=1
+       
         res=[]
         if flag== True:
             try:
@@ -699,9 +701,10 @@ class FitPage(BasicPage):
                     if self.data.dy==None:
                         dy= numpy.zeros(len(y))
                     else:
-                        dy= numpy.asarray(self.data.dy)
+                        dy= copy.deepcopy(self.data.dy)
+                        dy= numpy.asarray(dy)
                     dy[dy==0]=1
-                    
+                   
                     if self.qmin_x==None and self.qmax_x==None: 
                         fx =numpy.asarray([self.model.run(v) for v in x])
                         if smearer!=None:
@@ -722,10 +725,9 @@ class FitPage(BasicPage):
                             sum +=item
                     self.tcChi.SetLabel(format_number(math.fabs(sum/ len(res))))
             except:
-                raise
-                #wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                #            "Chisqr cannot be compute: %s"% sys.exc_value))
-                #return 
+                wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+                            "Chisqr cannot be compute: %s"% sys.exc_value))
+                return 
             
     
     def select_all_param(self,event): 
