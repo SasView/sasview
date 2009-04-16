@@ -358,8 +358,8 @@ class Plugin:
         ## if user has already selected a model to plot
         ## redraw the model with data smeared
         
-        smearer =self.page_finder[current_pg].get_smearer()
-        self.draw_model( model=model, data= data, smearer= smearer,
+        smear =self.page_finder[current_pg].get_smearer()
+        self.draw_model( model=model, data= data, smearer= smear,
                 qmin= qmin, qmax= qmax)
 
     
@@ -1069,7 +1069,8 @@ class Plugin:
             if qmin == DEFAULT_QMIN :
                 qmin = min(data.x)
             if qmax == DEFAULT_QMAX:
-                qmax = max(data.x)
+                qmax = max(data.x) 
+           
         
         if not enable1D:
             return

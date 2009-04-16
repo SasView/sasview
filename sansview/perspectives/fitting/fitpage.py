@@ -609,7 +609,7 @@ class FitPage(BasicPage):
             Create a smear object that will change the way residuals
             are compute when fitting
         """
-        
+        temp_smearer = None
         if self.enable_smearer.GetValue():
             msg=""
             temp_smearer= self.smearer
@@ -623,15 +623,15 @@ class FitPage(BasicPage):
             else:
                 wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Data contains smearing information %s"%msg))
-        else:
-            temp_smearer = None
+       
         ## set smearing value whether or not the data contain the smearing info
-        self.manager.set_smearer(temp_smearer, qmin= float(self.qmin_x),
+        self.manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
                                       qmax= float(self.qmax_x)) 
         ##Calculate chi2
         self.compute_chisqr(smearer= temp_smearer)  
         ## save the state enable smearing
         self.save_current_state()
+       
          
    
         

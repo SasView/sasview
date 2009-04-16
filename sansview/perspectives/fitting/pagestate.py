@@ -41,6 +41,8 @@ class PageState(object):
         self.fittable_param =[]
         ## orientation parameters
         self.orientation_params=[]
+        ## smearer info
+        self.smearer=None
         #list of dispersion paramaters
         self.disp_list =[]
         #contains link between a model and selected parameters to fit 
@@ -95,6 +97,8 @@ class PageState(object):
         obj.qmax = copy.deepcopy(self.qmax)
         obj.npts = copy.deepcopy(self.npts )
         obj.cb1 = copy.deepcopy(self.cb1)
+        obj.smearer = copy.deepcopy(self.smearer)
+        
         for name, state in self.saved_states.iteritems():
             copy_name = copy.deepcopy(name)
             copy_state = state.clone()

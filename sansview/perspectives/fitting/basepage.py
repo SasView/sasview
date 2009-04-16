@@ -3,7 +3,7 @@ import sys, os
 import wx
 import numpy
 import time
-
+import copy 
 from sans.guiframe.utils import format_number,check_float
 from sans.guicomm.events import StatusEvent   
 import pagestate
@@ -442,9 +442,10 @@ class BasicPage(wx.ScrolledWindow):
            
         if hasattr(self,"enable_disp"):
             self.state.enable_disp= self.enable_disp.GetValue()
-            
+        
+        self.state.smearer = copy.deepcopy(self.smearer)
         if hasattr(self,"enable_smearer"):
-            self.state.enable_smearer = self.enable_smearer.GetValue()   
+            self.state.enable_smearer = copy.deepcopy(self.enable_smearer.GetValue())
             
         if hasattr(self,"disp_box"):
             self.state.disp_box = self.disp_box.GetCurrentSelection()
@@ -471,6 +472,8 @@ class BasicPage(wx.ScrolledWindow):
         self.state = state.clone()
         self.model= self.state.model
         self.data = self.state.data
+        self.smearer= self.state.smearer
+        self.state.enable_smearer=state.enable_smearer
        
         ##model parameter values restore
         self._set_model_sizer_selection( self.model )
@@ -482,17 +485,17 @@ class BasicPage(wx.ScrolledWindow):
         if hasattr(self, "disp_box"):
             self.disp_box.SetSelection(self.state.disp_box)  
         self._set_dipers_Param(event=None)
-       
-        ## smearing info  restore
-        if hasattr(self,"enable_smearer"):
-            self.enable_smearer.SetValue(state.enable_smearer)
-         ## reset state of checkbox,textcrtl  and parameters value
-       
         ##plotting range restore    
         self._reset_plotting_range()
+        ## smearing info  restore
+        if hasattr(self,"enable_smearer"):
+            ## set smearing value whether or not the data contain the smearing info
+            self.enable_smearer.SetValue(state.enable_smearer)
+            self.compute_chisqr(smearer= self.smearer)  
+            
         ## reset context menu items
         self._reset_context_menu()
-       
+        ## reset state of checkbox,textcrtl  and parameters value
         self._reset_parameters_state(self.parameters,state.parameters)
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
         self._reset_parameters_state(self.fixed_param,state.fixed_param)
@@ -802,7 +805,9 @@ class BasicPage(wx.ScrolledWindow):
             [Note to coder: This way future changes will be done in only one place.] 
         """
         if self.model !=None:
+            
             self.manager.draw_model(self.model, data=self.data,
+                                    smearer= self.smearer,
                                     qmin=float(self.qmin_x), qmax=float(self.qmax_x),
                                     qstep= float(self.num_points),
                                     enable2D=self.enable2D) 
