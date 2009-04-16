@@ -79,6 +79,33 @@ class FitPage(BasicPage):
                 item[6].Show(True)
                 self.text2_min.Show(True)
                 self.text2_max.Show(True)
+        for item in self.orientation_params:
+            if event.type =="scipy":
+                item[5].SetValue("")
+                item[5].Hide()
+                item[6].SetValue("")
+                item[6].Hide()
+                self.text2_min.Hide()
+                self.text2_max.Hide()
+            else:
+                item[5].Show(True)
+                item[6].Show(True)
+                self.text2_min.Show(True)
+                self.text2_max.Show(True)
+            
+        for item in self.orientation_params_disp:
+            if event.type =="scipy":
+                item[5].SetValue("")
+                item[5].Hide()
+                item[6].SetValue("")
+                item[6].Hide()
+                self.text2_min.Hide()
+                self.text2_max.Hide()
+            else:
+                item[5].Show(True)
+                item[6].Show(True)
+                self.text2_min.Show(True)
+                self.text2_max.Show(True)
                 
         self.sizer3.Layout()
         self.SetScrollbars(20,20,200,100)
@@ -736,16 +763,28 @@ class FitPage(BasicPage):
         """            
 
         self.param_toFit=[]
-        
         if  self.parameters !=[]:
             if  self.cb1.GetValue():
                 for item in self.parameters:
-                    item[0].SetValue(True)
-                    self.param_toFit.append(item )
-                if len(self.fittable_param)>0:
-                    for item in self.fittable_param:
+                    ## for data2D select all to fit
+                    if self.data.__class__.__name__=="Data2D":
                         item[0].SetValue(True)
                         self.param_toFit.append(item )
+                    else:
+                        ## for 1D all parameters except orientation
+                        if not item in self.orientation_params:
+                            item[0].SetValue(True)
+                            self.param_toFit.append(item )
+                if len(self.fittable_param)>0:
+                    for item in self.fittable_param:
+                        if self.data.__class__.__name__=="Data2D":
+                            item[0].SetValue(True)
+                            self.param_toFit.append(item )
+                        else:
+                            ## for 1D all parameters except orientation
+                            if not item in self.orientation_params:
+                                item[0].SetValue(True)
+                                self.param_toFit.append(item )
             else:
                 for item in self.parameters:
                     item[0].SetValue(False)
@@ -1014,7 +1053,10 @@ class FitPage(BasicPage):
                 ctl4.Bind(wx.EVT_KILL_FOCUS, self._onparamRangeEnter)
                 ctl4.Bind(wx.EVT_TEXT_ENTER,self._onparamRangeEnter)
                 sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                ctl4.SetValue(str(param_max))
+                if param_max ==None:
+                    ctl4.SetValue("")
+                else:
+                    ctl4.SetValue(str(param_max))
                 ctl4.Hide()
                 if self.data.__class__.__name__ =="Data2D":
                     ctl4.Enable()

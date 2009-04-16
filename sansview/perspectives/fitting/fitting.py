@@ -123,13 +123,15 @@ class Plugin:
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
         owner.Bind(fitpage.EVT_MODEL_BOX,self._on_model_panel)
         
-        self.menu3= wx.Menu()
-        id4 = wx.NewId()
+        #self.menu3= wx.Menu()
+        #id4 = wx.NewId()
         
         #create  menubar items
         return [(id, self.menu1, "Fitting"),
-                (id4,self.menu3,"Averagers"),
                 (id2, menu2, "Model")]
+        #return [(id, self.menu1, "Fitting"),
+        #        (id4,self.menu3,"Averagers"),
+        #        (id2, menu2, "Model")]
     
     def on_add_sim_page(self, event):
         """
@@ -726,11 +728,10 @@ class Plugin:
             new_panel = event.panel
             # Set group ID if available
             event_id = self.parent.popup_panel(new_panel)
-            self.menu3.Append(event_id, new_panel.window_caption, 
-                             "Show %s plot panel" % new_panel.window_caption)
+            #self.menu3.Append(event_id, new_panel.window_caption, 
+            #                 "Show %s plot panel" % new_panel.window_caption)
             # Set UID to allow us to reference the panel later
             new_panel.uid = event_id
-            new_panel
             self.mypanels.append(new_panel) 
         return  
     
