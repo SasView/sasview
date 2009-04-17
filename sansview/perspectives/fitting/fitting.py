@@ -6,13 +6,15 @@ from danse.common.plottools.plottables import Data1D, Theory1D,Data2D
 from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
 from sans.guicomm.events import EVT_SLICER_PANEL,ERR_DATA
-
+from sans.guiframe import dataFitting
 from sans.fit.AbstractFitEngine import Model,FitData1D,FitData2D
+
 from fitproblem import FitProblem
 from fitpanel import FitPanel
 from fit_thread import FitThread
 import models
 import fitpage
+
 
 DEFAULT_BEAM = 0.005
 DEFAULT_QMIN = 0.0
@@ -253,10 +255,9 @@ class Plugin:
             id = copy.deepcopy(item.id)
             
         from sans.guiframe import dataFitting 
-        if item.__class__.__name__=="Data1D":
-            data= dataFitting.Data1D(x=item.x, y=item.y, dy=dy, dxl=dxl, dxw=dxw)
-        else:
-            data= dataFitting.Theory1D(x=item.x, y=item.y, dxl=dxl, dxw=dxw)
+        
+        data= dataFitting.Data1D(x=item.x, y=item.y, dy=dy, dxl=dxl, dxw=dxw)
+        
         data.name = item.name
         data.detector = detector
         data.source = source
@@ -267,6 +268,10 @@ class Plugin:
         ## info is a reference to output of dataloader that can be used
         ## to save  data 1D as cansas xml file
         data.info= info
+        is_data=False
+        if hasattr(item, "is_data"):
+            is_data= item.is_data
+        data.is_data = is_data
         ## If the data file does not tell us what the axes are, just assume...
         data.xaxis(copy.deepcopy(item._xaxis),copy.deepcopy(item._xunit))
         data.yaxis(copy.deepcopy(item._yaxis),copy.deepcopy(item._yunit))
@@ -560,9 +565,22 @@ class Plugin:
             added to self.page_finder
         """
         self.panel = event.GetEventObject()
-        for item in self.panel.graph.plottables:
+        for plottable in self.panel.graph.plottables:
             
-            if item.name == self.panel.graph.selected_plottable:
+            if plottable.name == self.panel.graph.selected_plottable:
+                if not hasattr(plottable, "is_data")or \
+                    plottable.__class__.__name__=="Theory1D":
+                    dy=numpy.zeros(len(plottable.y))
+                    if hasattr(plottable, "dy"):
+                        dy= copy.deepcopy(plottable.dy)
+                    item= self.copy_data(plottable, dy)
+                    item.group_id += "data1D"
+                    item.id +="data1D"
+                    item.is_data= False
+                    title = item.name
+                    wx.PostEvent(self.parent, NewPlotEvent(plot=item, title=str(title)))
+                else:
+                    item= copy.deepcopy(plottable)  
                 ## put the errors values back to the model if the errors were hiden
                 ## before sending them to the fit engine
                 if len(self.err_dy)>0:
@@ -578,7 +596,19 @@ class Plugin:
                     else:
                         data= copy.deepcopy(item)
             else:
-                data= copy.deepcopy(item)
+                ## Data2D case
+                if not hasattr(plottable, "is_data"):
+                    item= copy.deepcopy(plottable)
+                    item.group_id += "data2D"
+                    item.id +="data2D"
+                    item.is_data= False
+                    title = item.name
+                    title += " Fit"
+                    data = item
+                    wx.PostEvent(self.parent, NewPlotEvent(plot=item, title=str(title)))
+                else:
+                    item= copy.deepcopy(plottable )
+                    data= copy.deepcopy(plottable )
             ## create anew page                   
             if item.name == self.panel.graph.selected_plottable or\
                  item.__class__.__name__ is "Data2D":
@@ -587,7 +617,8 @@ class Plugin:
                     # add data associated to the page created
                     if page !=None:   
                         #create a fitproblem storing all link to data,model,page creation
-                        self.page_finder[page]= FitProblem()
+                        if not page in self.page_finder.keys():
+                            self.page_finder[page]= FitProblem()
                         ## item is almost the same as data but contains
                         ## axis info for plotting 
                         self.page_finder[page].add_plotted_data(item)
@@ -929,7 +960,7 @@ class Plugin:
             # know that we are replacing the whole plot
             title= my_info.title
             if title== None:
-                title="Analytical model 1D "
+                title = "Analytical model 1D "
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                              title= str(title), reset=True ))
             else:
@@ -983,6 +1014,7 @@ class Plugin:
             theory.ymax= data.ymax
             theory.xmin= data.xmin
             theory.xmax= data.xmax
+        print "model comptele plot",theory.xmin,theory.xmax,theory.ymin,theory.ymin
        
         ## plot
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
