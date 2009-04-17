@@ -805,9 +805,12 @@ class BasicPage(wx.ScrolledWindow):
             [Note to coder: This way future changes will be done in only one place.] 
         """
         if self.model !=None:
-            
+            temp_smear=None
+            if hasattr(self, "enable_smearer"):
+                if self.enable_smearer.GetValue():
+                    temp_smear= self.smearer
             self.manager.draw_model(self.model, data=self.data,
-                                    smearer= self.smearer,
+                                    smearer= temp_smearer,
                                     qmin=float(self.qmin_x), qmax=float(self.qmax_x),
                                     qstep= float(self.num_points),
                                     enable2D=self.enable2D) 
