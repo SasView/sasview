@@ -958,7 +958,13 @@ class Plugin:
          
             # Pass the reset flag to let the plotting event handler
             # know that we are replacing the whole plot
+            from DataLoader.data_info import Data1D
+            info= Data1D(x= new_plot.x, y=new_plot.y)
+            info.title= new_plot.name
             title= my_info.title
+            info.xaxis(new_plot._xaxis,  new_plot._xunit)
+            info.yaxis( new_plot._yaxis, new_plot._yunit)
+            new_plot.info = info
             if title== None:
                 title = "Analytical model 1D "
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
@@ -1008,7 +1014,7 @@ class Plugin:
             theory.y_bins= data.y_bins
             theory.detector= data.detector
             theory.source= data.source
-       
+            
             ## plot boundaries
             theory.ymin= data.ymin
             theory.ymax= data.ymax
