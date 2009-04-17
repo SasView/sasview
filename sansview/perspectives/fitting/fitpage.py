@@ -529,6 +529,19 @@ class FitPage(BasicPage):
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
             return 
         
+        
+    def set_data(self, data ):
+        """
+            reset the current data 
+        """
+        if data ==None:
+            return 
+        self.data =data
+        self.state.data= data 
+        self._fill_datainfo_sizer()
+        self.SetScrollbars(20,20,200,100)
+        self.Layout()   
+        
     def reset_page(self, state):
         """
             reset the state

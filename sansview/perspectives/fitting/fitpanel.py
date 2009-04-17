@@ -78,7 +78,9 @@ class FitPanel(wx.aui.AuiNotebook):
     
         #model page info
         self.model_page_number=None
-       
+        ## fit page number for model plot
+        self.fit_page1D_number=None
+        self.fit_page2D_number=None
         self.model_page=None
         self.sim_page=None
         ## get the state of a page
@@ -120,6 +122,10 @@ class FitPanel(wx.aui.AuiNotebook):
             if selected_page in page_finder:
        
                 fitproblem= page_finder[selected_page].clone()
+                if self.GetPageIndex(selected_page)==self.fit_page1D_number:
+                    self.fit_page1D_number=None
+                if self.GetPageIndex(selected_page)==self.fit_page2D_number:
+                    self.fit_page2D_number=None
                 ## page on menu
                 self.manager._add_page_onmenu(page_name, fitproblem)
                 del page_finder[selected_page]
@@ -184,10 +190,13 @@ class FitPanel(wx.aui.AuiNotebook):
             @param data: data to fit
             @return panel : page just added for further used. is used by fitting module
         """     
-        try:
+        if data.is_data:
             name = data.name 
-        except:
-            name = 'Fit'
+        else:
+            if data.__class__.__name__=="Data2D":
+                name = 'Model 2D Fit'
+            else:
+                name = 'Model 1D Fit'
         if not name in self.list_fitpage_name:
             myinfo = PageInfo( data=data, name=name )
             myinfo.model_list_box = self.model_list_box.get_list()
@@ -201,6 +210,11 @@ class FitPanel(wx.aui.AuiNotebook):
             panel = FitPage(parent= self, page_info=myinfo)
             
             self.AddPage(page=panel, caption=name, select=True)
+            if name == 'Model 1D Fit':
+                self.fit_page1D_number= self.GetPageIndex(panel)
+            if name =='Model 2D Fit':
+                self.fit_page2D_number= self.GetPageIndex(panel)
+                
             self.list_fitpage_name.append(name)
             if reset:
                 if name in self.fit_page_name.keys():
@@ -209,10 +223,23 @@ class FitPanel(wx.aui.AuiNotebook):
             else:
                 self.fit_page_name[name]=[]
                 self.fit_page_name[name].insert(0,panel.createMemento())
-         
+            #GetPage(self, page_idx) 
             return panel 
-        else:
-            return None 
+        elif name =='Model 1D Fit':
+            if self.fit_page1D_number!=None:
+                panel =self.GetPage(self.fit_page1D_number) 
+                self.fit_page_name[name]=[]
+                self.fit_page_name[name].insert(0,panel.createMemento())
+                return panel
+            return None
+        elif name =='Model 2D Fit':
+            if self.fit_page2D_number!=None:
+                panel =self.GetPage(self.fit_page2D_number) 
+                self.fit_page_name[name]=[]
+                self.fit_page_name[name].insert(0,panel.createMemento())
+                return panel
+            return None
+        return None
         
    
     def add_model_page(self,model,page_title="Model", qmin=0, qmax=0.1,
