@@ -331,9 +331,9 @@ class BasicPage(wx.ScrolledWindow):
         if self.model==None:
             return 
         if hasattr(self,"enable_disp"):
-            self.state.enable_disp = self.enable_disp.GetValue()
+            self.state.enable_disp = copy.deepcopy(self.enable_disp.GetValue())
         if hasattr(self, "disp_box"):
-            self.state.disp_box = self.disp_box.GetSelection()
+            self.state.disp_box = copy.deepcopy(self.disp_box.GetSelection())
         
         self.state.model = self.model.clone()
         new_state = self.state.clone()
@@ -344,8 +344,9 @@ class BasicPage(wx.ScrolledWindow):
         self.saved_states[name]= new_state
         
         ## Add item in the context menu
-        year, month, day,hour,minute,second,tda,ty,tm_isdst= time.gmtime()
-        my_time= str(hour)+"hrs "+str(minute)+"min "+str(second)+"s"
+        
+        year, month, day,hour,minute,second,tda,ty,tm_isdst= time.localtime()
+        my_time= str(hour)+" : "+str(minute)+" : "+str(second)+" "
         date= str( month)+"|"+str(day)+"|"+str(year)
         msg=  "Model saved at %s on %s"%(my_time, date)
          ## post help message for the selected model 
@@ -442,23 +443,27 @@ class BasicPage(wx.ScrolledWindow):
            
         if hasattr(self,"enable_disp"):
             self.state.enable_disp= self.enable_disp.GetValue()
-        
+            self.state.disable_disp = self.disable_disp.GetValue()
+            
         self.state.smearer = copy.deepcopy(self.smearer)
         if hasattr(self,"enable_smearer"):
             self.state.enable_smearer = copy.deepcopy(self.enable_smearer.GetValue())
+            self.state.disable_smearer = copy.deepcopy(self.disable_smearer.GetValue())
+            
             
         if hasattr(self,"disp_box"):
             self.state.disp_box = self.disp_box.GetCurrentSelection()
         self._save_plotting_range()
       
         ## save checkbutton state and txtcrtl values
-        self.state.parameters=[]
-        self.state.fittable_param=[]
-        self.state.fixed_param=[]
        
         self._copy_parameters_state(self.parameters, self.state.parameters)
         self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
+        self._copy_parameters_state(self.orientation_params,
+                                     self.state.orientation_params)
+        self._copy_parameters_state(self.orientation_params_disp,
+                                     self.state.orientation_params_disp)
         
         ## post state to fit panel
         event = PageInfoEvent(page = self)
@@ -482,6 +487,7 @@ class BasicPage(wx.ScrolledWindow):
             self.cb1.SetValue(self.state.cb1)
         ## display dispersion info layer
         self.enable_disp.SetValue(self.state.enable_disp)
+        self.disable_disp.SetValue(self.state.disable_disp)
         if hasattr(self, "disp_box"):
             self.disp_box.SetSelection(self.state.disp_box)  
         self._set_dipers_Param(event=None)
@@ -491,6 +497,7 @@ class BasicPage(wx.ScrolledWindow):
         if hasattr(self,"enable_smearer"):
             ## set smearing value whether or not the data contain the smearing info
             self.enable_smearer.SetValue(state.enable_smearer)
+            self.disable_smearer.SetValue(state.disable_smearer)
             self.compute_chisqr(smearer= self.smearer)  
             
         ## reset context menu items
@@ -499,6 +506,10 @@ class BasicPage(wx.ScrolledWindow):
         self._reset_parameters_state(self.parameters,state.parameters)
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
         self._reset_parameters_state(self.fixed_param,state.fixed_param)
+        self._reset_parameters_state(self.orientation_params_disp,
+                                     state.orientation_params_disp)
+        self._reset_parameters_state(self.orientation_params,
+                                     state.orientation_params)
         
         ## draw the model with previous parameters value
         self._draw_model()
@@ -998,7 +1009,11 @@ class BasicPage(wx.ScrolledWindow):
             self.model= form_factor()
         
         ## post state to fit panel
-        self.save_current_state()
+        self.state.model =self.model
+        ## post state to fit panel
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event)
+        
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()

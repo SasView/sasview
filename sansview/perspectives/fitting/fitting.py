@@ -1008,7 +1008,7 @@ class Plugin:
             theory.y_bins= data.y_bins
             theory.detector= data.detector
             theory.source= data.source
-            
+       
             ## plot boundaries
             theory.ymin= data.ymin
             theory.ymax= data.ymax

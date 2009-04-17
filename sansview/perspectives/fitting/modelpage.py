@@ -226,7 +226,10 @@ class ModelPage(BasicPage):
                         ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                         ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                         ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                        ctl1.Disable()
+                        if not self.enable2D:
+                            ctl1.Disable()
+                        else:
+                            ctl1.Enable()
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                         self.fittable_param.append([None,name1,ctl1,None,
                                                     None, None, None,None])
@@ -241,7 +244,10 @@ class ModelPage(BasicPage):
                             Tctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                             Tctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                             Tctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                            Tctl1.Disable()
+                            if not self.enable2D:
+                                Tctl1.Disable()
+                            else:
+                                Tctl1.Enable()
                             self.sizer4_4.Add(Tctl1, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             self.fixed_param.append([None,name2, Tctl1,None,None,
@@ -257,7 +263,10 @@ class ModelPage(BasicPage):
                             Tctl2.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                             Tctl2.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                             Tctl2.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
-                            Tctl2.Disable()
+                            if not self.enable2D:
+                                Tctl2.Disable()
+                            else:
+                                Tctl2.Enable()
                             self.sizer4_4.Add(Tctl2, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             ix +=1
