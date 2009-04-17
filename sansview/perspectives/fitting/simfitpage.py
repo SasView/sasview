@@ -516,7 +516,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.btAdd.Hide()
      
         
-        text_hint = wx.StaticText(self,-1,"Example: M0.paramter = M1.parameter") 
+        text_hint = wx.StaticText(self,-1,"Example: [M0][paramter] = M1.parameter") 
         sizer_button.Add(text_hint, 0 , wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
         sizer_button.Add(self.btAdd, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
        
