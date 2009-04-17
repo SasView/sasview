@@ -1014,7 +1014,7 @@ class Plugin:
             theory.ymax= data.ymax
             theory.xmin= data.xmin
             theory.xmax= data.xmax
-        print "model comptele plot",theory.xmin,theory.xmax,theory.ymin,theory.ymin
+      
        
         ## plot
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
