@@ -166,7 +166,7 @@ class _Slab(object):
                 else:
                     err_y[i_q] += frac * frac * data2D.err_data[j][i] * data2D.err_data[j][i]
                 y_counts[i_q]  += frac
-
+                
         # Average the sums
         for i in range(nbins):
             if y_counts[i]>0:
@@ -377,16 +377,16 @@ class CircularAverage(object):
         pixel_width_y = data2D.detector[0].pixel_size.y
         det_dist    = data2D.detector[0].distance
         wavelength  = data2D.source.wavelength
-        center_x    = data2D.detector[0].beam_center.x/pixel_width_x
-        center_y    = data2D.detector[0].beam_center.y/pixel_width_y
+        center_x    = data2D.detector[0].beam_center.x/pixel_width_x+0.5
+        center_y    = data2D.detector[0].beam_center.y/pixel_width_y+0.5
         
         # Find out the maximum Q range
-        xwidth = numpy.size(data2D.data,1)*pixel_width_x
+        xwidth = (numpy.size(data2D.data,1))*pixel_width_x
         dx_max = xwidth - data2D.detector[0].beam_center.x
         if xwidth-dx_max>dx_max:
             dx_max = xwidth-dx_max
             
-        ywidth = numpy.size(data2D.data,0)*pixel_width_y
+        ywidth = (numpy.size(data2D.data,0))*pixel_width_y
         dy_max = ywidth - data2D.detector[0].beam_center.y
         if ywidth-dy_max>dy_max:
             dy_max = ywidth-dy_max
@@ -440,7 +440,9 @@ class CircularAverage(object):
                 frac = frac_max - frac_min
 
                 i_q = int(math.ceil((q_value-self.r_min)/self.bin_width)) - 1
-            
+                if q_value > qmax or q_value < self.r_min:
+                    continue
+                    
                 x[i_q]          = q_value
                 y[i_q]         += frac * data2D.data[j][i]
                 if data2D.err_data == None or data2D.err_data[j][i]==0.0:
@@ -448,14 +450,28 @@ class CircularAverage(object):
                 else:
                     err_y[i_q] += frac * frac * data2D.err_data[j][i] * data2D.err_data[j][i]
                 y_counts[i_q]  += frac
-        
+                
         # Average the sums
+        nzero = 0
         for i in range(nbins):
             if y_counts[i]>0:
                 err_y[i] = math.sqrt(err_y[i])/y_counts[i]
                 y[i]     = y[i]/y_counts[i]
-        
-        return Data1D(x=x, y=y, dy=err_y)
+            else:
+                nzero += 1
+        ## Get rid of NULL points        
+        tx  = numpy.zeros(nbins-nzero)
+        ty  = numpy.zeros(nbins-nzero)
+        terr_y = numpy.zeros(nbins-nzero)
+        j=0
+        for i in range(nbins):
+            if err_y[i] != 0 :
+                tx[j]  = x[i]
+                ty[j]  = y[i]
+                terr_y[j] = err_y[i]
+                j+=1
+                
+        return Data1D(x=tx, y=ty, dy=terr_y)
     
 
 class Ring(object):
@@ -479,7 +495,7 @@ class Ring(object):
         # Center of the ring in y
         self.center_y = center_y
         # Number of angular bins
-        self.nbins_phi = nbins_phi
+        self.nbins_phi = nbins
         
     def __call__(self, data2D):
         """
@@ -855,7 +871,7 @@ class _Sector:
                 if self.phi_min<0:
                     self.phi_max=self.phi_max+2*math.pi
                 
-                #In case of two ROI (symmetric major and minor regions)(for 'q2')
+                #In case of two ROI (symmetric major and minor wings)(for 'q2')
                 if run.lower()=='q2':
                     if ((self.phi_max>=0 and self.phi_max<math.pi)and (self.phi_min>=0 and self.phi_min<math.pi)):
                         temp_max=self.phi_max+math.pi
@@ -903,7 +919,7 @@ class _Sector:
         else:
             qmax=temp
         #Beam center is already corrected, but the calculation below assumed it was not.
-        # Thus Beam center shifted back to uncorrected value. ToDo: cleanup this codes.
+        # Thus Beam center shifted back to uncorrected value. ToDo: cleanup the mess.
         center_x=center_x+0.5 
         center_y=center_y+0.5         
         for i in range(numpy.size(data,1)):
