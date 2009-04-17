@@ -147,6 +147,7 @@ def plot_data(parent, path):
         new_plot.yaxis(output._yaxis,output._yunit)
         ##group_id specify on which panel to plot this data
         new_plot.group_id = name
+        new_plot.is_data =True
         ##post data to plot
         wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(name)))
         
@@ -180,7 +181,7 @@ def plot_data(parent, path):
             new_plot.group_id = name
             new_plot.id = name
             new_plot.info= item
-            
+            new_plot.is_data =True
             if hasattr(item,"title"):
                 title= item.title
             else:
