@@ -810,7 +810,7 @@ class BasicPage(wx.ScrolledWindow):
                 if self.enable_smearer.GetValue():
                     temp_smear= self.smearer
             self.manager.draw_model(self.model, data=self.data,
-                                    smearer= temp_smearer,
+                                    smearer= temp_smear,
                                     qmin=float(self.qmin_x), qmax=float(self.qmax_x),
                                     qstep= float(self.num_points),
                                     enable2D=self.enable2D) 
