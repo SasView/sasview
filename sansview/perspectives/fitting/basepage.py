@@ -1152,7 +1152,7 @@ class BasicPage(wx.ScrolledWindow):
         """
         self.fittable_param=[]
         self.fixed_param=[]
-        
+        self.orientation_params_disp=[]
         from sans.models.dispersion_models import GaussianDispersion
         if len(self.disp_cb_dict)==0:
             self.sizer4_4.Clear(True)
