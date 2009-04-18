@@ -16,7 +16,7 @@ from sans.guiframe.utils import format_number,check_float
 
 ## event to know the selected fit engine
 (FitterTypeEvent, EVT_FITTER_TYPE)   = wx.lib.newevent.NewEvent()
-_BOX_WIDTH = 80
+_BOX_WIDTH = 76
 
 import basepage
 from basepage import BasicPage
@@ -883,7 +883,7 @@ class FitPage(BasicPage):
         self.cb1.SetValue(False)
         
         sizer.Add(self.cb1,(iy, ix),(1,1),\
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
         ix += 1
         self.text2_4 = wx.StaticText(self, -1, '[Units]')
         sizer.Add(self.text2_4,(iy, ix),(1,1),\
@@ -921,7 +921,7 @@ class FitPage(BasicPage):
                 cb.SetValue(False)
                 wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                 sizer.Add( cb,( iy, ix),(1,1),
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
                 ix +=1
                 # Units
                 try:
