@@ -299,7 +299,12 @@ class BasicPage(wx.ScrolledWindow):
                     self._disp_obj_dict[p] = disp_model
                     # Set the new model as the dispersion object for the selected parameter
                     self.model.set_dispersion(p, disp_model)
-                          
+                    # Store a reference to the weights in the model object so that
+                    # it's not lost when we use the model within another thread.
+                    #TODO: total hack - fix this
+                    if not hasattr(self.model, "_persistency_dict"):
+                        self.model._persistency_dict = {}
+                    self.model._persistency_dict[p] = [values, weights]
                 else:
                     # The parameter was un-selected. Go back to Gaussian model (with 0 pts)
                     self._reset_dispersity()
