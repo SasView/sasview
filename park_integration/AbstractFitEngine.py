@@ -143,7 +143,8 @@ class Data(object):
        
     def setFitRange(self,mini=None,maxi=None):
         """ to set the fit range"""
-        self.qmin=mini
+        
+        self.qmin=mini           
         self.qmax=maxi
         
         
@@ -209,15 +210,25 @@ class FitData1D(object):
         self.dy= sans_data1d.dy
         
         ## Min Q-value
-        self.qmin= min (self.data.x)
+        #Skip the Q=0 point, especially when y(q=0)=None at x[0].
+        if min (self.data.x) ==0.0 and self.data.x[0]==0 and not numpy.isfinite(self.data.y[0]):
+            self.qmin = min(self.data.x[self.data.x!=0])
+        else:                              
+            self.qmin= min (self.data.x)
         ## Max Q-value
         self.qmax= max (self.data.x)
        
        
     def setFitRange(self,qmin=None,qmax=None):
         """ to set the fit range"""
-        if qmin!=None:
-            self.qmin = qmin
+        
+        # Remove or do not allow fitting on the Q=0 point, especially when y(q=0)=None at x[0].
+        #ToDo: Fix this.
+        if qmin==0.0 and self.data.x[0]==0 and not numpy.isfinite(self.data.y[0]):
+            self.qmin = min(self.data.x[self.data.x!=0])
+        elif qmin!=None:                       
+            self.qmin = qmin            
+
         if qmax !=None:
             self.qmax = qmax
         
@@ -260,7 +271,6 @@ class FitData1D(object):
         # Sanity check
         if numpy.size(dy) < numpy.size(x):
             raise RuntimeError, "FitData1D: invalid error array"
-                            
         return (y[idx] - fx[idx])/dy[idx]
      
   
@@ -290,15 +300,17 @@ class FitData2D(object):
         y = max(self.data.ymin, self.data.ymax)
         
         ## fitting range
-        self.qmin = 0
+        self.qmin = 1e-16
         self.qmax = math.sqrt(x*x +y*y)
        
        
        
     def setFitRange(self,qmin=None,qmax=None):
         """ to set the fit range"""
-        if qmin!=None:
-            self.qmin= qmin
+        if qmin==0.0:
+            self.qmin = 1e-16
+        elif qmin!=None:                       
+            self.qmin = qmin            
         if qmax!=None:
             self.qmax= qmax
       
