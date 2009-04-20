@@ -813,7 +813,7 @@ class FitPage(BasicPage):
                             self.param_toFit.append(item )
                         else:
                             ## for 1D all parameters except orientation
-                            if not item in self.orientation_params:
+                            if not item in self.orientation_params_disp:
                                 item[0].SetValue(True)
                                 self.param_toFit.append(item )
             else:

@@ -1156,12 +1156,12 @@ class BasicPage(wx.ScrolledWindow):
         """
         if len(self.param_toFit)>0:
             for item in self.fittable_param:
-                if item in self.para_toFit:
+                if item in self.param_toFit:
                     self.param_toFit.remove(item)
             for item in self.orientation_params_disp:
-                if item in self.para_toFit:
+                if item in self.param_toFit:
                     self.param_toFit.remove(item)
-                
+         
         self.fittable_param=[]
         self.fixed_param=[]
         self.orientation_params_disp=[]
@@ -1228,6 +1228,13 @@ class BasicPage(wx.ScrolledWindow):
         """
             draw sizer with array dispersity  parameters
         """
+        if len(self.param_toFit)>0:
+            for item in self.fittable_param:
+                if item in self.param_toFit:
+                    self.param_toFit.remove(item)
+            for item in self.orientation_params_disp:
+                if item in self.param_toFit:
+                    self.param_toFit.remove(item)
         self.fittable_param=[]
         self.fixed_param=[]
         self.orientation_params_disp=[]

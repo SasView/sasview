@@ -166,6 +166,10 @@ class Plugin:
         """
         self.graph=graph
         for item in graph.plottables:
+            if hasattr(item,"is_data"):
+                if item.is_data== False:
+                    return []
+           
             if item.__class__.__name__ is "Data2D":
                 return [["Select data  for Fitting",\
                           "Dialog with fitting parameters ", self._onSelect]] 
@@ -433,7 +437,7 @@ class Plugin:
                     templist = []
                     templist = page.get_param_list()
                     for element in templist:
-                        name = str(element[0].GetLabelText())
+                        name = str(element[1])
                         pars.append(name)
                     #Set Engine  (model , data) related to the page on 
                     self._fit_helper( current_pg=page, value=value,pars=pars,
@@ -966,7 +970,7 @@ class Plugin:
             if data!=None:
                 if new_plot.id == data.id:
                     new_plot.id += "Model"
-         
+                new_plot.is_data =False 
             # Pass the reset flag to let the plotting event handler
             # know that we are replacing the whole plot
             from DataLoader.data_info import Data1D
@@ -1019,13 +1023,13 @@ class Plugin:
             self._fill_default_model2D(theory= theory, qmax=qmax,qstep=qstep, qmin= qmin)
         
         else:
-            theory.id= "Model"
-            theory.group_id= "Model"+data.name
+            theory.id= data.id+"Model"
+            theory.group_id= data.name+"Model"
             theory.x_bins= data.x_bins
             theory.y_bins= data.y_bins
             theory.detector= data.detector
             theory.source= data.source
-            
+            theory.is_data =False 
             ## plot boundaries
             theory.ymin= data.ymin
             theory.ymax= data.ymax
