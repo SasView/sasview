@@ -463,8 +463,14 @@ class FitPage(BasicPage):
             msg= "Select at least one parameter to fit"
             wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
             return 
+
+        # Remove or do not allow fitting on the Q=0 point, especially when y(q=0)=None at x[0].
+        #ToDo: Fix this.
+        if float(self.qmin.GetValue())==0.0 and self.data.x[0]==0 and not numpy.isfinite(self.data.y[0]):
+            self.qmin_x = min(self.data.x[self.data.x!=0])
+        else:                       
+            self.qmin_x = float(self.qmin.GetValue())
         
-        self.qmin_x=float(self.qmin.GetValue())
         self.qmax_x =float( self.qmax.GetValue())
         self.manager._reset_schedule_problem( value=0)
         self.manager.schedule_for_fit( value=1,page=self,fitproblem =None) 
@@ -726,7 +732,6 @@ class FitPage(BasicPage):
         """
         from sans.guiframe.utils import check_value
         flag = check_value( self.qmin, self.qmax)
-       
         if flag== True:
             try:
                 if hasattr(self.data,"data"):
