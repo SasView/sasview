@@ -590,9 +590,13 @@ class FitPage(BasicPage):
         is_modified = False
         has_error = False
         self.text2_3.Hide()
-        if hasattr(self,"text_disp_1" ):
-            if self.text_disp_1 !=None:
-                self.text_disp_1.Hide()
+        n = self.disp_box.GetCurrentSelection()
+        dispersity= self.disp_box.GetClientData(n)
+        name= dispersity.__name__
+        if name == "GaussianDispersion":
+            if hasattr(self,"text_disp_1" ):
+                if self.text_disp_1 !=None:
+                    self.text_disp_1.Hide()
         #set the panel when fit result are float not list
         if out.__class__==numpy.float64:
             self.param_toFit[0][2].SetValue(format_number(out))
@@ -602,9 +606,11 @@ class FitPage(BasicPage):
             self.param_toFit[0][4].Hide()
             if cov !=None :
                 self.text2_3.Show(True)
-                if hasattr(self,"text_disp_1" ):
-                    if self.text_disp_1 !=None:
-                        self.text_disp_1.Show(True)
+                name= dispersity.__name__
+                if name == "GaussianDispersion":
+                    if hasattr(self,"text_disp_1" ):
+                        if self.text_disp_1 !=None:
+                            self.text_disp_1.Show(True)
                 if cov[0]==None:  
                     self.param_toFit[0][3].Hide()
                     self.param_toFit[0][4].Clear()
@@ -630,9 +636,11 @@ class FitPage(BasicPage):
                     item[2].Refresh()
                 if(cov !=None)and len(cov)<=len(self.param_toFit)and i < len(cov):
                     self.text2_3.Show(True) 
-                    if hasattr(self,"text_disp_1" ):
-                        if self.text_disp_1!=None:
-                            self.text_disp_1.Show(True)
+                    name= dispersity.__name__
+                    if name == "GaussianDispersion":
+                        if hasattr(self,"text_disp_1" ):
+                            if self.text_disp_1!=None:
+                                self.text_disp_1.Show(True)
                     item[3].Show(True)
                     item[4].Clear()
                     for j in range(len(out)):
