@@ -154,15 +154,13 @@ void ArrayDispersion :: operator() (void *param, vector<WeightPoint> &weights) {
 	Parameter* par = (Parameter*)param;
 	double value = (*par)();
 
-	if (npts<2) {
-		weights.insert(weights.end(), WeightPoint(value, 1.0));
-	} else {
 		for(int i=0; i<npts; i++) {
-			if ( ((*par).has_min==false || _values[i]>(*par).min)
-			  && ((*par).has_max==false || _values[i]<(*par).max)  )
-				weights.insert(weights.end(), WeightPoint(_values[i], _weights[i]));
+			double val = value + _values[i];
+			if ( ((*par).has_min==false || val>(*par).min)
+			  && ((*par).has_max==false || val<(*par).max)  )
+				weights.insert(weights.end(), WeightPoint(val, _weights[i]));
 		}
-	}
+
 }
 
 
