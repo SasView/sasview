@@ -39,7 +39,7 @@ class FitPage(BasicPage):
         ## fit page does not content npts txtcrtl
         self.npts=None
         ## if no dispersity parameters is avaible 
-        self.text_disp_1=None
+        #self.text_disp_1=None
         ## default fitengine type
         self.engine_type = None
         ## draw sizer
@@ -434,7 +434,9 @@ class FitPage(BasicPage):
                             self.fixed_param.append([None,name3, Tctl
                                                      ,None,None, None, None,None])    
                             self.orientation_params_disp.append([None,name3, Tctl
-                                                     ,None,None, None, None,None]) 
+                                                     ,None,None, None, None,None])
+        self._copy_parameters_state(self.orientation_params_disp,
+                                     self.state.orientation_params_disp) 
                                   
         wx.PostEvent(self.parent, StatusEvent(status=\
                         " Selected Distribution: Gaussian"))   
@@ -466,10 +468,10 @@ class FitPage(BasicPage):
 
         # Remove or do not allow fitting on the Q=0 point, especially when y(q=0)=None at x[0].
         #ToDo: Fix this.
-        if float(self.qmin.GetValue())==0.0 and self.data.x[0]==0 and not numpy.isfinite(self.data.y[0]):
-            self.qmin_x = min(self.data.x[self.data.x!=0])
-        else:                       
-            self.qmin_x = float(self.qmin.GetValue())
+        #if float(self.qmin.GetValue())==0.0 and self.data.x[0]==0 and not numpy.isfinite(self.data.y[0]):
+        #    self.qmin_x = min(self.data.x[self.data.x!=0])
+        #else:                       
+        self.qmin_x = float(self.qmin.GetValue())
         
         self.qmax_x =float( self.qmax.GetValue())
         self.manager._reset_schedule_problem( value=0)
@@ -477,7 +479,7 @@ class FitPage(BasicPage):
         self.manager.set_fit_range(page= self,qmin= self.qmin_x, qmax= self.qmax_x)
         #single fit 
         self.manager.onFit()
-            
+        self.btFit.SetFocus()    
         self.sizer5.Layout()
         self.SetScrollbars(20,20,55,40)
         
@@ -498,7 +500,7 @@ class FitPage(BasicPage):
             pass
         self.enable_disp.SetValue(False)
         self.disable_disp.SetValue(True)
-        self._set_dipers_Param(event=None)
+        self.set_dispers_sizer()
         
         evt = ModelEventbox(model=self.model)
         wx.PostEvent(self.event_owner, evt)   
@@ -588,8 +590,9 @@ class FitPage(BasicPage):
         is_modified = False
         has_error = False
         self.text2_3.Hide()
-        if self.text_disp_1 !=None:
-            self.text_disp_1.Hide()
+        if hasattr(self,"text_disp_1" ):
+            if self.text_disp_1 !=None:
+                self.text_disp_1.Hide()
         #set the panel when fit result are float not list
         if out.__class__==numpy.float64:
             self.param_toFit[0][2].SetValue(format_number(out))
@@ -599,8 +602,9 @@ class FitPage(BasicPage):
             self.param_toFit[0][4].Hide()
             if cov !=None :
                 self.text2_3.Show(True)
-                if self.text_disp_1 !=None:
-                    self.text_disp_1.Show(True)
+                if hasattr(self,"text_disp_1" ):
+                    if self.text_disp_1 !=None:
+                        self.text_disp_1.Show(True)
                 if cov[0]==None:  
                     self.param_toFit[0][3].Hide()
                     self.param_toFit[0][4].Clear()
@@ -626,8 +630,9 @@ class FitPage(BasicPage):
                     item[2].Refresh()
                 if(cov !=None)and len(cov)<=len(self.param_toFit)and i < len(cov):
                     self.text2_3.Show(True) 
-                    if self.text_disp_1!=None:
-                        self.text_disp_1.Show(True)
+                    if hasattr(self,"text_disp_1" ):
+                        if self.text_disp_1!=None:
+                            self.text_disp_1.Show(True)
                     item[3].Show(True)
                     item[4].Clear()
                     for j in range(len(out)):

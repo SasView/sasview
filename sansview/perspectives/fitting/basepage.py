@@ -470,6 +470,7 @@ class BasicPage(wx.ScrolledWindow):
         self._copy_parameters_state(self.orientation_params_disp,
                                      self.state.orientation_params_disp)
         
+        
         ## post state to fit panel
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
@@ -677,7 +678,7 @@ class BasicPage(wx.ScrolledWindow):
         """
         if len(listtocopy)==0:
             return
-        
+       
         for item in listtocopy:
             checkbox_state = None
             if item[0]!= None:
@@ -1105,30 +1106,26 @@ class BasicPage(wx.ScrolledWindow):
         """
             Add more item to select user dispersity
         """
-        if self.model == None:
-            msg= " Select non - model value:%s !"%self.model
-            wx.PostEvent(self.parent.parent, StatusEvent(status= msg))
-            return 
-        else:
-           
-            if self.enable_disp.GetValue():
-                self.model_disp.Show(True)
-                self.disp_box.Show(True)
-                ## layout for model containing no dispersity parameters
-                if len(self.disp_list)==0:
-                    self._layout_sizer_noDipers()  
-                else:
-                    ## set gaussian sizer 
-                    self._on_select_Disp(event=None)
+        self._reset_dispersity()
+       
+        if self.enable_disp.GetValue():
+            self.model_disp.Show(True)
+            self.disp_box.Show(True)
+            ## layout for model containing no dispersity parameters
+            if len(self.disp_list)==0:
+                self._layout_sizer_noDipers()  
             else:
-                self.model_disp.Hide()
-                self.disp_box.Hide()
-                self.sizer4_4.Clear(True)
-                self._reset_dispersity()
-                
-          
-            ## post state to fit panel
-            self.save_current_state()
+                ## set gaussian sizer 
+                self._on_select_Disp(event=None)
+        else:
+            self.model_disp.Hide()
+            self.disp_box.Hide()
+            self.sizer4_4.Clear(True)
+            self._reset_dispersity()
+            
+      
+        ## post state to fit panel
+        self.save_current_state()
             
           
             
@@ -1141,6 +1138,8 @@ class BasicPage(wx.ScrolledWindow):
         iy=1
         self.fittable_param=[]
         self.fixed_param=[]
+        self.orientation_params_disp=[]
+        
         self.model_disp.Hide()
         self.disp_box.Hide()
         self.sizer4_4.Clear(True)
@@ -1155,9 +1154,18 @@ class BasicPage(wx.ScrolledWindow):
         """
              put gaussian dispersity into current model
         """
+        if len(self.param_toFit)>0:
+            for item in self.fittable_param:
+                if item in self.para_toFit:
+                    self.param_toFit.remove(item)
+            for item in self.orientation_params_disp:
+                if item in self.para_toFit:
+                    self.param_toFit.remove(item)
+                
         self.fittable_param=[]
         self.fixed_param=[]
         self.orientation_params_disp=[]
+       
         from sans.models.dispersion_models import GaussianDispersion
         if len(self.disp_cb_dict)==0:
             self.sizer4_4.Clear(True)
@@ -1220,6 +1228,8 @@ class BasicPage(wx.ScrolledWindow):
         """
             draw sizer with array dispersity  parameters
         """
+        self.fittable_param=[]
+        self.fixed_param=[]
         self.orientation_params_disp=[]
         self.sizer4_4.Clear(True) 
         ix=0

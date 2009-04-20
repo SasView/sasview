@@ -441,14 +441,21 @@ class Plugin:
                     fproblemId += 1 
                     current_pg= page
             except:
-                msg= "%s error: %s" % (engineType,sys.exc_value)
-                wx.PostEvent(self.parent, StatusEvent(status= msg ))
-                return 
+                raise
+                return
+                #msg= "%s error: %s" % (engineType,sys.exc_value)
+                #wx.PostEvent(self.parent, StatusEvent(status= msg ))
+                #return 
         #Do the simultaneous fit
         try:
             ## If a thread is already started, stop it
             if self.calc_fit!= None and self.calc_fit.isrunning():
                 self.calc_fit.stop()
+            
+            wx.PostEvent(self.parent, StatusEvent(status="Start the computation",
+                                        curr_thread=self.calc_fit,type="start"))
+            wx.PostEvent(self.parent, StatusEvent(status="Computing...",
+                                        curr_thread=self.calc_fit,type="progress"))
             ## perform single fit
             if self._fit_engine=="scipy":
                 qmin, qmax= current_pg.get_range()
@@ -457,21 +464,22 @@ class Plugin:
                                        cpage=current_pg,
                                        pars= pars,
                                        completefn= self._single_fit_completed,
-                                       updatefn=None)
+                                       updatefn=self._updateFit)
                       
             else:
                 ## Perform more than 1 fit at the time
                 self.calc_fit=FitThread(parent =self.parent,
                                         fn= self.fitter,
                                        completefn= self._simul_fit_completed,
-                                       updatefn=None)
+                                       updatefn=self._updateFit)
             self.calc_fit.queue()
             self.calc_fit.ready(2.5)
             
         except:
-            msg= "%s error: %s" % (engineType,sys.exc_value)
-            wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
-            return 
+            raise
+            #msg= "%s error: %s" % (engineType,sys.exc_value)
+            #wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
+            #return 
               
               
     def _add_page_onmenu(self, name,fitproblem=None):
@@ -555,9 +563,11 @@ class Plugin:
                                                value= value.get_scheduled())
             value.clear_model_param()
         except:
-            msg= title +" error: %s" % sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+            raise
             return
+            #msg= title +" error: %s" % sys.exc_value
+            #wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+            #return
        
     def _onSelect(self,event):
         """ 
@@ -631,7 +641,13 @@ class Plugin:
                     wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
                     %sys.exc_value))
                     return
-    
+    def _updateFit(self):
+        """
+            Is called when values of result are available
+        """
+        ##Sending a progess message to the status bar
+        wx.PostEvent(self.parent, StatusEvent(status="Computing..."))
+            
     def _single_fit_completed(self,result,pars,cpage, elapsed=None):
         """
             Display fit result on one page of the notebook.
@@ -643,7 +659,8 @@ class Plugin:
           
         """
         wx.PostEvent(self.parent, StatusEvent(status="Single fit \
-        complete! " , type="stop"))
+        complete! " ))
+      
         try:
             for page, value in self.page_finder.iteritems():
                 if page==cpage :
@@ -668,11 +685,12 @@ class Plugin:
             wx.PostEvent(self.parent, StatusEvent(status="%s " % msg))
             self.draw_model( model=model, data= metadata, smearer= smearer,
                              qmin= qmin, qmax= qmax)
-            
+            wx.PostEvent(self.parent, StatusEvent(status=" " , type="stop")) 
         except:
-            msg= "Single Fit completed but Following error occurred:%s"% sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
-            return
+            raise
+            #msg= "Single Fit completed but Following error occurred:%s"% sys.exc_value
+            #wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+            #return
        
        
     def _simul_fit_completed(self,result,pars=None,cpage=None, elapsed=None):
@@ -683,7 +701,7 @@ class Plugin:
             @param elapsed: computation time
         """
         wx.PostEvent(self.parent, StatusEvent(status="Simultaneous fit \
-        complete ", type="stop"))
+        complete "))
        
         ## fit more than 1 model at the same time 
         try:
@@ -702,18 +720,11 @@ class Plugin:
                             if p.name == p_name:
                                 small_out.append(p.value )
                                 model.setParam(param_name,p.value) 
-                                """
-                                if p.stderr==None:
-                                    p.stderr=numpy.nan
-                                    small_cov.append(p.stderr)
-                                else:
-                                    small_cov.append(p.stderr)
-                                """
+                              
                                 small_cov.append(p.stderr)
                             else:
                                 value= model.getParam(param_name)
                                 small_out.append(value )
-                                #small_cov.append(numpy.nan)
                                 small_cov.append(None)
                     # Display result on each page 
                     page.onsetValues(result.fitness, small_out,small_cov)
@@ -724,7 +735,7 @@ class Plugin:
                     smearer =self.page_finder[page].get_smearer()
                     self.draw_model( model=model, data= metadata, smearer=smearer,
                                      qmin= qmin, qmax= qmax)
-                    
+            wx.PostEvent(self.parent, StatusEvent(status="", type="stop"))
         except:
              msg= "Simultaneous Fit completed"
              msg +=" but Following error occurred:%s"%sys.exc_value

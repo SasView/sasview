@@ -118,8 +118,7 @@ class FitThread(CalcThread):
         self.starttime = 0
        
         self.done= False
-        wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Start the computation  ",curr_thread=self,type="start"))
+       
     def isquit(self):
         """
              @raise KeyboardInterrupt: when the thread is interrupted
@@ -127,26 +126,15 @@ class FitThread(CalcThread):
         try:
             CalcThread.isquit(self)
         except KeyboardInterrupt:
-            wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Calc %g interrupted"))
             raise KeyboardInterrupt
         
-    def update(self):
-        """
-            Is called when values of result are available
-        """
-        wx.PostEvent(self.parent, StatusEvent(status="Computing \
-        ... " ,curr_thread=self,type="update"))
-            
     def compute(self):
         """
             Perform a fit 
         """
         try: 
             self.starttime = time.time()
-            #Sending a progess message to the status bar
-            wx.PostEvent(self.parent, StatusEvent(status=\
-                       "Computing . ...",curr_thread=self,type="progress"))
+        
             #Handler used for park engine displayed message
             handler= ConsoleUpdate(parent= self.parent,improvement_delta=0.1)
             #Result from the fit
@@ -162,8 +150,5 @@ class FitThread(CalcThread):
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
             raise
-        except:
-            msg= "Fitting error: %s" % sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
-            return 
+      
     

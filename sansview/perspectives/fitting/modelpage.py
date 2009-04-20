@@ -325,13 +325,14 @@ class ModelPage(BasicPage):
         """
         self.model = model
         self.set_model_param_sizer(self.model)
-        self._draw_model()
+       
         ## keep the sizer view consistent with the model menu selecting
         self._set_model_sizer_selection( self.model )
         self.enable_disp.SetValue(False)
         self.disable_disp.SetValue(True)
-        self._set_dipers_Param(event=None)
+        self.set_dispers_sizer()
         self.model_view.SetFocus()
+        self._draw_model()
                          
     
     def set_model_description(self,description,sizer):
