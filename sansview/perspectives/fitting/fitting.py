@@ -166,20 +166,27 @@ class Plugin:
         """
         self.graph=graph
         for item in graph.plottables:
-            if hasattr(item,"is_data"):
-                if item.is_data== False:
-                    return []
-           
             if item.__class__.__name__ is "Data2D":
+                if hasattr(item,"is_data"):
+                    if item.is_data:
+                        return [["Select data  for Fitting", \
+                         "Dialog with fitting parameters ", self._onSelect]]
+                    else:
+                        return [] 
                 return [["Select data  for Fitting",\
                           "Dialog with fitting parameters ", self._onSelect]] 
             else:
-               
                 if item.name==graph.selected_plottable :
-                    if not hasattr(item, "group_id"):
-                        return []
-                    return [["Select data  for Fitting", \
-                             "Dialog with fitting parameters ", self._onSelect]] 
+                    if hasattr(item, "group_id"):
+                        if hasattr(item,"is_data"):
+                            if item.is_data:
+                                return [["Select data  for Fitting", \
+                                 "Dialog with fitting parameters ", self._onSelect]]
+                            else:
+                                return [] 
+                        else:
+                            return [["Select data  for Fitting", \
+                                 "Dialog with fitting parameters ", self._onSelect]] 
         return []   
 
 
@@ -233,7 +240,7 @@ class Plugin:
         self.parent.set_perspective(self.perspective)
 
 
-    def copy_data(self, item, dy):
+    def copy_data(self, item, dy=None):
         """
             receive a data 1D and the list of errors on dy
             and create a new data1D data
@@ -259,7 +266,6 @@ class Plugin:
             id = copy.deepcopy(item.id)
             
         from sans.guiframe import dataFitting 
-        
         data= dataFitting.Data1D(x=item.x, y=item.y, dy=dy, dxl=dxl, dxw=dxw)
         
         data.name = item.name
@@ -272,10 +278,6 @@ class Plugin:
         ## info is a reference to output of dataloader that can be used
         ## to save  data 1D as cansas xml file
         data.info= info
-        is_data=False
-        if hasattr(item, "is_data"):
-            is_data= item.is_data
-        data.is_data = is_data
         ## If the data file does not tell us what the axes are, just assume...
         data.xaxis(copy.deepcopy(item._xaxis),copy.deepcopy(item._xunit))
         data.yaxis(copy.deepcopy(item._yaxis),copy.deepcopy(item._yunit))
@@ -582,11 +584,13 @@ class Plugin:
         for plottable in self.panel.graph.plottables:
             
             if plottable.name == self.panel.graph.selected_plottable:
-                if not hasattr(plottable, "is_data")or \
-                    plottable.__class__.__name__=="Theory1D":
+                #if not hasattr(plottable, "is_data"):
+                    
+                if  plottable.__class__.__name__=="Theory1D":
                     dy=numpy.zeros(len(plottable.y))
                     if hasattr(plottable, "dy"):
                         dy= copy.deepcopy(plottable.dy)
+                        
                     item= self.copy_data(plottable, dy)
                     item.group_id += "data1D"
                     item.id +="data1D"
@@ -594,21 +598,30 @@ class Plugin:
                     title = item.name
                     wx.PostEvent(self.parent, NewPlotEvent(plot=item, title=str(title)))
                 else:
-                    item= copy.deepcopy(plottable)  
+                    item= self.copy_data(plottable, plottable.dy)  
+                    item.is_data=True
+                    
                 ## put the errors values back to the model if the errors were hiden
                 ## before sending them to the fit engine
                 if len(self.err_dy)>0:
                     if item.name in  self.err_dy.iterkeys():
                         dy= self.err_dy[item.name]
                         data= self.copy_data(item, dy)
+                        data.is_data= item.is_data
                     else:
-                        data= copy.deepcopy(item)
+                        data= self.copy_data(item)
+                        data.is_data= item.is_data
+                        
+                       
                 else:
                     if item.dy==None:
                         dy= numpy.zeros(len(item.y))
                         data= self.copy_data(item, dy)
+                        data.is_data=item.is_data
                     else:
-                        data= copy.deepcopy(item)
+                        data= self.copy_data(item)
+                        data.is_data=item.is_data
+                       
             else:
                 ## Data2D case
                 if not hasattr(plottable, "is_data"):
@@ -623,6 +636,8 @@ class Plugin:
                 else:
                     item= copy.deepcopy(plottable )
                     data= copy.deepcopy(plottable )
+                    item.is_data=True
+                    data.is_data=True
             ## create anew page                   
             if item.name == self.panel.graph.selected_plottable or\
                  item.__class__.__name__ is "Data2D":
@@ -642,9 +657,10 @@ class Plugin:
                     else:
                         wx.PostEvent(self.parent, StatusEvent(status="Page was already Created"))
                 except:
-                    wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
-                    %sys.exc_value))
-                    return
+                    raise
+                    #wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
+                    #%sys.exc_value))
+                    #return
     def _updateFit(self):
         """
             Is called when values of result are available
@@ -666,6 +682,10 @@ class Plugin:
         complete! " ))
       
         try:
+            if numpy.any(result.pvec ==None )or not numpy.all(numpy.isfinite(result.pvec) ):
+                msg= "Fitting did not converge!!!"
+                wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+                return
             for page, value in self.page_finder.iteritems():
                 if page==cpage :
                     model= value.get_model()
@@ -971,8 +991,7 @@ class Plugin:
                 if new_plot.id == data.id:
                     new_plot.id += "Model"
                 new_plot.is_data =False 
-            # Pass the reset flag to let the plotting event handler
-            # know that we are replacing the whole plot
+           
             from DataLoader.data_info import Data1D
             info= Data1D(x= new_plot.x, y=new_plot.y)
             info.title= new_plot.name
@@ -980,6 +999,8 @@ class Plugin:
             info.xaxis(new_plot._xaxis,  new_plot._xunit)
             info.yaxis( new_plot._yaxis, new_plot._yunit)
             new_plot.info = info
+            # Pass the reset flag to let the plotting event handler
+            # know that we are replacing the whole plot
             if title== None:
                 title = "Analytical model 1D "
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
