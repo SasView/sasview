@@ -414,15 +414,14 @@ class BasicPage(wx.ScrolledWindow):
             weights=[]
             for line in lines:
                 toks = line.split()
-                if len(toks)==2:
-                    try:
-                        angle = float(toks[0])
-                        weight = float(toks[1])
-                    except:
-                        # Skip non-data lines
-                        pass
-                    angles.append(angle)
-                    weights.append(weight)
+                try:
+                    angle = float(toks[0])
+                    weight = float(toks[1])
+                except:
+                    # Skip non-data lines
+                    pass
+                angles.append(angle)
+                weights.append(weight)
             return numpy.array(angles), numpy.array(weights)
         except:
             raise 
