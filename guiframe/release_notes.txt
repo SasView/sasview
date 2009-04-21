@@ -5,16 +5,16 @@ of their main application when using this framework.
 
 Documentation to come...
 
-1- Version 0.1.1
+1- Version 0.1.5
 
-	- Release date: 5/28/2008
+	- Release date: 4/21/2009
 
 	- Changes:
 		* the Plugin.get_context_menu(graph) now takes a Graph object
 
 Dependencies:
-	- Needs sans.guitools version 0.1.1
-	- Needs sans.guicomm
+	- svn://danse.us/common/releases/plottools-0.1.4 
+	- svn://danse.us/sans/releases/guicomm-0.1.2
 	
 To-do list:
 	- Clean up about box
