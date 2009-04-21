@@ -6,7 +6,7 @@ import time
 # Version of the application
 #__appname__ = "PrView"
 __appname__ = "SansView"
-__version__ = '0.1.1'
+__version__ = '0.9.0'
 __download_page__ = 'http://danse.chem.utk.edu'
 __update_URL__ = 'http://danse.chem.utk.edu/sansview_version.php'
 
@@ -43,7 +43,7 @@ _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = "images/angles_flat.png"
 _welcome_image = "images/SVwelcome.png"
-_copyright = "(c) 2008, University of Tennessee"
+_copyright = "(c) 2009, University of Tennessee"
 
 import wx.lib.newevent
 (StatusBarEvent, EVT_STATUS) = wx.lib.newevent.NewEvent()
