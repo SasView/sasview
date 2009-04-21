@@ -65,10 +65,11 @@ class ModelPage(BasicPage):
             self.sizer_description.Clear(True)
             
         else:
-            description=""
+            description="Model contains no description"
             if self.model!=None:
                 description = self.model.description
-                
+            if description.lstrip().rstrip() =="": 
+                description="Model contains no description"
             self.description = wx.StaticText( self,-1,str(description) )
             self.sizer_description.Add( self.description, 1, wx.EXPAND | wx.ALL, 10 )
            
@@ -402,6 +403,11 @@ class ModelPage(BasicPage):
         frame.Show(True)
         if frame.rhelp.HasAnchor(name):
             frame.rhelp.ScrollToAnchor(name)
+        else:
+           msg= "Model does not contains an available description "
+           msg +="Please.Search in the Help window"
+           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                     
             
             
     def set_range(self, qmin_x, qmax_x, npts):

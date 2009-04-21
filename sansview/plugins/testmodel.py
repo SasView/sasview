@@ -29,6 +29,7 @@ class Model(Model1DPlugin):
         self.details['A'] = ['', -1e16, 1e16]
         self.details['B'] = ['', -1e16, 1e16]
         self.details['C'] = ['', -1e16, 1e16]
+        self.description = "F(x)=A+Bcos(2x)+Csin(2x) "
    
     def function(self, x = 0.0):
         """ Evaluate the model

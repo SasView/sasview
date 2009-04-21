@@ -124,16 +124,11 @@ class Plugin:
         self.fit_panel.set_owner(owner)
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
         owner.Bind(fitpage.EVT_MODEL_BOX,self._on_model_panel)
-        
-        #self.menu3= wx.Menu()
-        #id4 = wx.NewId()
-        
+      
         #create  menubar items
         return [(id, self.menu1, "Fitting"),
                 (id2, menu2, "Model")]
-        #return [(id, self.menu1, "Fitting"),
-        #        (id4,self.menu3,"Averagers"),
-        #        (id2, menu2, "Model")]
+       
     
     def on_add_sim_page(self, event):
         """
@@ -447,11 +442,9 @@ class Plugin:
                     fproblemId += 1 
                     current_pg= page
             except:
-                raise
-                return
-                #msg= "%s error: %s" % (engineType,sys.exc_value)
-                #wx.PostEvent(self.parent, StatusEvent(status= msg ))
-                #return 
+                msg= "%s error: %s" % (engineType,sys.exc_value)
+                wx.PostEvent(self.parent, StatusEvent(status= msg ))
+                return 
         #Do the simultaneous fit
         try:
             ## If a thread is already started, stop it
@@ -482,10 +475,9 @@ class Plugin:
             self.calc_fit.ready(2.5)
             
         except:
-            raise
-            #msg= "%s error: %s" % (engineType,sys.exc_value)
-            #wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
-            #return 
+            msg= "%s error: %s" % (engineType,sys.exc_value)
+            wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
+            return 
               
               
     def _add_page_onmenu(self, name,fitproblem=None):
@@ -569,11 +561,9 @@ class Plugin:
                                                value= value.get_scheduled())
             value.clear_model_param()
         except:
-            raise
+            msg= title +" error: %s" % sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
             return
-            #msg= title +" error: %s" % sys.exc_value
-            #wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
-            #return
        
     def _onSelect(self,event):
         """ 
@@ -657,10 +647,11 @@ class Plugin:
                     else:
                         wx.PostEvent(self.parent, StatusEvent(status="Page was already Created"))
                 except:
-                    raise
-                    #wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
-                    #%sys.exc_value))
-                    #return
+                    wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
+                    %sys.exc_value))
+                    return
+                
+                
     def _updateFit(self):
         """
             Is called when values of result are available
@@ -711,10 +702,9 @@ class Plugin:
                              qmin= qmin, qmax= qmax)
             wx.PostEvent(self.parent, StatusEvent(status=" " , type="stop")) 
         except:
-            raise
-            #msg= "Single Fit completed but Following error occurred:%s"% sys.exc_value
-            #wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
-            #return
+            msg= "Single Fit completed but Following error occurred:%s"% sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+            return
        
        
     def _simul_fit_completed(self,result,pars=None,cpage=None, elapsed=None):
