@@ -20,9 +20,9 @@ class Model(Model1DPlugin):
         
         ## Parameters definition and defaults
         self.params = {}
-        self.params['A'] = 0.0
+        self.params['A'] = 1.0
         self.params['B'] = 1.0
-        self.params['C'] = 0.0
+        self.params['C'] = 10.0
 
         ## Parameter details [units, min, max]
         self.details = {}
