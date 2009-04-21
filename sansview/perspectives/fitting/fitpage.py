@@ -1019,7 +1019,7 @@ class FitPage(BasicPage):
                 else:
                     cb.Disable()
                 sizer.Add( cb,( iy, ix),(1,1),
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
                 ix +=1
                 # Units
                 try:
