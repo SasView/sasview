@@ -249,6 +249,7 @@ class FitPage(BasicPage):
             disp_model =  GaussianDispersion()
             self._disp_obj_dict[item] = disp_model
             self.model.set_dispersion(item, disp_model)
+            self.state._disp_obj_dict[item]= disp_model
 
         ix=0
         iy=1
@@ -435,7 +436,7 @@ class FitPage(BasicPage):
                             self.orientation_params_disp.append([None,name3, Tctl
                                                      ,None,None, None, None,None])
    
-                                  
+        self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)                         
         wx.PostEvent(self.parent, StatusEvent(status=\
                         " Selected Distribution: Gaussian"))   
         ix =0

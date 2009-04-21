@@ -342,16 +342,7 @@ class BasicPage(wx.ScrolledWindow):
         
         self.state.model = self.model.clone()
         new_state = self.state.clone()
-        ## save checkbutton state and txtcrtl values
-        self._copy_parameters_state(self.orientation_params,
-                                     self.state.orientation_params)
-        self._copy_parameters_state(self.orientation_params_disp,
-                                     self.state.orientation_params_disp)
-        self._copy_parameters_state(self.parameters, self.state.parameters)
-       
-        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
-        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
-        
+        new_state.enable2D = copy.deepcopy(self.enable2D)
         ##Add model state on context menu
         self.number_saved_state += 1
         name= self.model.name+"[%g]"%self.number_saved_state 
@@ -450,7 +441,9 @@ class BasicPage(wx.ScrolledWindow):
         if self.model!= None:
             self.state.model = self.model.clone()
         self.state.save_data(self.data)
-    
+        
+        self.state.enable2D = copy.deepcopy(self.enable2D)
+        
         if hasattr(self,"cb1"):
             self.state.cb1= self.cb1.GetValue()
            
@@ -466,6 +459,20 @@ class BasicPage(wx.ScrolledWindow):
             
         if hasattr(self,"disp_box"):
             self.state.disp_box = self.disp_box.GetCurrentSelection()
+            if len(self.disp_cb_dict)>0:
+                for k , v in self.disp_cb_dict.iteritems():
+                    if v ==None :
+                        self.state.disp_cb_dict[k]= v
+                    else:
+                        try:
+                            self.state.disp_cb_dict[k]=v.GetValue()
+                        except:
+                            self.state.disp_cb_dict[k]= None
+           
+            if len(self._disp_obj_dict)>0:
+                for k , v in self._disp_obj_dict.iteritems():
+                    self.state._disp_obj_dict[k]= v
+           
         self._save_plotting_range()
         
         self.state.orientation_params =[]
@@ -502,6 +509,16 @@ class BasicPage(wx.ScrolledWindow):
         ##model parameter values restore
         self._set_model_sizer_selection( self.model )
         self.set_model_param_sizer(self.model)
+      
+        self.enable2D= state.enable2D
+        self.state.enable2D= state.enable2D
+       
+        if hasattr(self,"model_view"):
+            if not self.enable2D:
+                self.model_view.Enable()
+            else:
+                self.model_view.Disable()
+            
         if hasattr(self, "cb1"):   
             self.cb1.SetValue(self.state.cb1)
         ## display dispersion info layer
@@ -509,6 +526,16 @@ class BasicPage(wx.ScrolledWindow):
         self.disable_disp.SetValue(self.state.disable_disp)
         if hasattr(self, "disp_box"):
             self.disp_box.SetSelection(self.state.disp_box)  
+            
+            self.disp_cb_dict = {}
+            for k,v in self.state.disp_cb_dict.iteritems():
+                self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
+                self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
+                
+            self._disp_obj_dict={}
+            for k , v in self.state._disp_obj_dict.iteritems():
+                self._disp_obj_dict[k]=v
+      
         self._set_dipers_Param(event=None)
         ##plotting range restore    
         self._reset_plotting_range()
@@ -528,11 +555,11 @@ class BasicPage(wx.ScrolledWindow):
         self._reset_parameters_state(self.parameters,state.parameters)
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
         self._reset_parameters_state(self.fixed_param,state.fixed_param)
-     
+        self._onparamEnter_helper()
         ## reset context menu items
         self._reset_context_menu()
         ## draw the model with previous parameters value
-        self._draw_model()
+        #self._draw_model()
         
    
    
@@ -633,6 +660,7 @@ class BasicPage(wx.ScrolledWindow):
             ## if any value is modify draw model with new value
             if is_modified:
                 self._draw_model() 
+                self.save_current_state()
                 
                 
     def _reset_parameters_state(self, listtorestore,statelist):

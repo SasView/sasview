@@ -136,6 +136,9 @@ class ModelPage(BasicPage):
             disp_model =  GaussianDispersion()
             self._disp_obj_dict[item] = disp_model
             self.model.set_dispersion(item, disp_model)
+            self.state._disp_obj_dict[item]= disp_model
+            
+            
         ix=0
         iy=1
         disp = wx.StaticText(self, -1, 'Names')
@@ -308,7 +311,7 @@ class ModelPage(BasicPage):
                  for item in self.orientation_params_disp:
                     if item[2]!=None:
                         item[2].Enable()
-                
+        self.state.enable2D =  copy.deepcopy(self.enable2D)
     
                 
     def reset_page(self, state):
@@ -545,7 +548,7 @@ class ModelPage(BasicPage):
                 break
             else:
                 self.text2_4.Hide()
-    
+        self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict) 
         boxsizer1.Add(sizer)
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer3.Layout()

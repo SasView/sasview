@@ -47,6 +47,8 @@ class PageState(object):
         self.smearer=None
         #list of dispersion paramaters
         self.disp_list =[]
+        self._disp_obj_dict={}
+        self.disp_cb_dict={}
         #contains link between a model and selected parameters to fit 
         self.param_toFit =[]
         ##dictionary of model type and model class
@@ -69,6 +71,8 @@ class PageState(object):
         ## disperity selection
         self.enable_disp= False
         self.disable_disp= True
+        ## plot 2D data
+        self.enable2D= False
         ## state of selected all check button
         self.cb1 = False
        
@@ -91,6 +95,7 @@ class PageState(object):
         obj.manager = self.manager
         obj.event_owner = self.event_owner
         
+        obj.enable2D = copy.deepcopy(self.enable2D)
         obj.parameters = copy.deepcopy(self.parameters)
         obj.fixed_param = copy.deepcopy(self.fixed_param)
         obj.fittable_param = copy.deepcopy(self.fittable_param)
@@ -100,6 +105,10 @@ class PageState(object):
         obj.enable_disp = copy.deepcopy(self.enable_disp)
         obj.disable_disp = copy.deepcopy(self.disable_disp)
         
+        if len(self._disp_obj_dict)>0:
+            for k , v in self._disp_obj_dict.iteritems():
+                obj._disp_obj_dict[k]= v
+        obj.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)
         obj.enable_smearer = copy.deepcopy(self.enable_smearer)
         obj.disable_smearer = copy.deepcopy(self.disable_smearer)
         
