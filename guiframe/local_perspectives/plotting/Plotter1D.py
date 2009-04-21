@@ -291,6 +291,7 @@ class ModelPanel1D(PlotPanel):
             color=self.graph.plottables[self.plots[self.graph.selected_plottable]]
             self.graph.delete(self.plots[self.graph.selected_plottable])
             ## add newly created plottable to the graph with the save color
+            self.graph.color = color
             self.graph.add(new_plot,color)
             ## transforming the view of the new data into the same of the previous data
             self._onEVT_FUNC_PROPERTY()
@@ -349,6 +350,7 @@ class ModelPanel1D(PlotPanel):
             ## save the color of the selected plottable before it is deleted
             color=self.graph.plottables[self.plots[self.graph.selected_plottable]]
             self.graph.delete(self.plots[self.graph.selected_plottable])
+            self.graph.color = color
             ## add newly created plottable to the graph with the save color
             self.graph.add(new_plot, color)
             ## transforming the view of the new data into the same of the previous data
