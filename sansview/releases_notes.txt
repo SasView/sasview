@@ -1,30 +1,27 @@
 Release Notes
 =============
 
-SansView 0.1
+SansView 0.9
 
 Package name: None
 
-1- Version 0.1.0
-	- Removed zooming and dragging for 2D plot, which caused interference with
-	  interactors.
+1- Version 0.9.0
 
-   Version 0.1.0
-
-	- Release date: 03/02/2009
+	- Release date: 04/21/2009
 	- Simultaneous fit of a number of different sets of data with/without the constraints. 
-	- 1D and 2D data loading and display. 
-	- 1D and 2D data fitting using Scipy or Park (a MC fitting optimizer) fitting engine. 
-	- 2D data manipulation and models. 
-	- A number of standard fit functions as well as Sans Model functions. 
-	- Form factors, structure factors and shape-independent models. 
+	- Loading and displaying 1D and 2D data of various formats.
+	- 1D and 2D data fitting using Scipy or Park (a MC fitting optimizer) fit engine. 
+	- 2D data manipulation and modeling. 
+	- Supporting a number of standard model and model-independent functions including form factor and structure factor functions and their multiplications.  
 	- Plug-in mechanism for data readers. 
-	- Zooming for plots. 
+	- Easy pop-up menu by mouse clicking on a given plot. 
 	- Users arrange the various windows. 
-	- Circular, sectorslicer, annulus, boxsum, boxQx and boxQy averaging of 2D data. 
-	- The user can select Qmin and Qmax for both 1D and 2D data fitting or modeling. 
-	- The user can toggle between a number of different scales on all plots. 
-	And much more. 
+	- Supporting varius 2D averaging methods : Circular, sectorslicer, annulus, boxsum, boxQx and boxQy.  
+	- User defined Qrange (Qmin and Qmax) for both 1D and 2D data for fitting and modeling.  
+	- The user can toggle between a number of different scales on all plots.
+	- Save the fit panel or model panel status.
+	- Support saving data in the formats of ASCII and xml.
+	And many more. 
 
 
 2- Downloading and Installing
@@ -33,20 +30,25 @@ Package name: None
 		- Python version >= 2.5 should be running on the system
 
 	2.2- Installing:
-		- Get the code from svn://danse.us/sans/other/sansview 0.1.0
+		- Get the code from svn://danse.us/sans/releases/sansview-0.9.0 
+			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview 0.9.0' folder)
 		- This application is also dependent on the following DANSE code:
-			svn://danse.us/sans/releases/guiframe-0.1.4
-			svn://danse.us/sans/releases/guicomm-0.1.1
-			svn://danse.us/sans/releases/DataLoader-0.2.1
-			svn://danse.us/sans/releases/park_integration -0.1.0
-			svn://danse.us/sans/releases/park-1.2.0
-			svn://danse.us/sans/releases/sansmodels-0.4.2 (run 'python setup.py install' in src)
-	        svn://danse.us/sans/releases/danse/common/plottools-0.1.3 (run 'python setup.py install')
+			svn://danse.us/sans/releases/guiframe-0.1.5 (run 'python setup.py install' under the 'guiframe-0.1.5' folder)
+			svn://danse.us/sans/releases/guicomm-0.1.2 (run 'python setup.py install' under the 'guicomm-0.1.2' folder)
+			svn://danse.us/sans/releases/DataLoader-0.2.3 (run 'python setup.py install' under the 'DataLoader-0.2.3' folder)
+			svn://danse.us/sans/releases/park_integration-0.1.1 (run 'python setup.py install' under the 'park_integration-0.1.1' folder)
+			svn://danse.us/sans/releases/sansmodels-0.4.3 (run 'python setup.py install' under the 'sansmodels-0.4.3\src\' folder)
+			svn://danse.us/park/releases/park-1.2 (run 'python setup.py install' under the 'park-1.2' folder)
+	        svn://danse.us/common/releases/plottools-0.1.4 (run 'python setup.py install'under the 'plottools\trunk\' folder)
+	        svn://danse.us/common/releases/util-0.1.0 (run 'python setup.py install'under the 'util' folder)
 		- The following modules are required:
-			* matplotlib >=0.98.3
+			* matplotlib >= 0.98.3
 			* numpy
 			* scipy
 			* wxpython 2.8 unicode
+			* pyxml >= 0.8.4 (for python 2.5)
+			* PIL (Python Image Library)
+			* MinGW (for windows) or other GNU compiler (gcc)
 
 3- Known Issues
 
