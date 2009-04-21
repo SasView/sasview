@@ -1,12 +1,12 @@
 Release Notes
 =============
 
-SANS Models version 0.4.1
+SANS Models version 0.4.3
 
 Package name: sans.models 
 
-1- What's New in Version 0.?
-    - Release date: ?
+1- What's New in Version 0.4.3
+    - Release date: April 21, 2009
     - C extension models now use new C++ classes that incorporate dispersity and averaging
       functionality. See utest_dispersity.py for examples of how to use the new dispersion
       classes.
@@ -24,6 +24,13 @@ Package name: sans.models
       model.dispersion['radius']['width'] = 5.0
       model.dispersion['radius']['npts'] = 100
 
+
+    Version 0.4.3
+    -P(Q)*S(Q) added for P(Q)=cylinder, sphere, ellipsoid
+    -Array dispersion (user defined) added
+
+    Version 0.4.2
+    -4 Structure factors added
     
     Version 0.4.1
     - Release date: 6/9/2008
@@ -44,7 +51,7 @@ Package name: sans.models
 		- Python version >= 2.4 should be running on the system
 
 	2.2- Installing:
-		- Get the code from svn://danse.us/sans/releases/sansmodels-0.4.0
+		- Get the code from svn://danse.us/sans/releases/sansmodels-0.4.3
 		- Execute the following: 
 			python setup.py install
 
@@ -54,7 +61,7 @@ Package name: sans.models
 		- Q range validity of I(q) calculations.
 			Our 1D models of I(q) use the function of the NCNR library 
 			for their IGOR package (Klein, 2006). That library uses a
-			fsat integration technique in some of its models (cylinders
+			fast integration technique in some of its models (cylinders
 			and ellipsoids). Integration is done using 76 points in the
 			angle between the axis of the object and the q-vector, which
 			translates in a larger inaccuracy at high q. Integratiing
