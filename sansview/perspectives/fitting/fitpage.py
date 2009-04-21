@@ -196,12 +196,11 @@ class FitPage(BasicPage):
             y= numpy.max(self.data.ymin, self.data.ymax)
             radius_max = math.sqrt(x*x + y*y)
             
-            #For qmin and qmax, do not use format_number.(If do, qmin and max could be different from what is in the data.)
+            #For qmin and qmax, do not use format_number
+            #.(If do, qmin and max could be different from what is in the data.)
             # Minimum value of data   
-            #data_min = str(format_number(radius_min))
             data_min = str((radius_min))
             # Maximum value of data  
-            #data_max = str(format_number(radius_max))
             data_max = str((radius_max))
             text4_3 = wx.StaticText(self, -1, "Total Q Range (1/A)",
                                      style=wx.ALIGN_LEFT)
@@ -435,8 +434,7 @@ class FitPage(BasicPage):
                                                      ,None,None, None, None,None])    
                             self.orientation_params_disp.append([None,name3, Tctl
                                                      ,None,None, None, None,None])
-        self._copy_parameters_state(self.orientation_params_disp,
-                                     self.state.orientation_params_disp) 
+   
                                   
         wx.PostEvent(self.parent, StatusEvent(status=\
                         " Selected Distribution: Gaussian"))   

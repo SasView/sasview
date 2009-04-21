@@ -342,6 +342,15 @@ class BasicPage(wx.ScrolledWindow):
         
         self.state.model = self.model.clone()
         new_state = self.state.clone()
+        ## save checkbutton state and txtcrtl values
+        self._copy_parameters_state(self.orientation_params,
+                                     self.state.orientation_params)
+        self._copy_parameters_state(self.orientation_params_disp,
+                                     self.state.orientation_params_disp)
+        self._copy_parameters_state(self.parameters, self.state.parameters)
+       
+        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
         
         ##Add model state on context menu
         self.number_saved_state += 1
@@ -458,17 +467,22 @@ class BasicPage(wx.ScrolledWindow):
         if hasattr(self,"disp_box"):
             self.state.disp_box = self.disp_box.GetCurrentSelection()
         self._save_plotting_range()
-      
+        
+        self.state.orientation_params =[]
+        self.state.orientation_params_disp =[]
+        self.state.parameters =[]
+        self.state.fittable_param =[]
+        self.state.fixed_param =[]
+        
         ## save checkbutton state and txtcrtl values
-       
-        self._copy_parameters_state(self.parameters, self.state.parameters)
-        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
-        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
         self._copy_parameters_state(self.orientation_params,
                                      self.state.orientation_params)
         self._copy_parameters_state(self.orientation_params_disp,
                                      self.state.orientation_params_disp)
-        
+        self._copy_parameters_state(self.parameters, self.state.parameters)
+       
+        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
         
         ## post state to fit panel
         event = PageInfoEvent(page = self)
@@ -505,17 +519,18 @@ class BasicPage(wx.ScrolledWindow):
             self.disable_smearer.SetValue(state.disable_smearer)
             self.compute_chisqr(smearer= self.smearer)  
             
-        ## reset context menu items
-        self._reset_context_menu()
+       
         ## reset state of checkbox,textcrtl  and parameters value
-        self._reset_parameters_state(self.parameters,state.parameters)
-        self._reset_parameters_state(self.fittable_param,state.fittable_param)
-        self._reset_parameters_state(self.fixed_param,state.fixed_param)
         self._reset_parameters_state(self.orientation_params_disp,
                                      state.orientation_params_disp)
         self._reset_parameters_state(self.orientation_params,
                                      state.orientation_params)
-        
+        self._reset_parameters_state(self.parameters,state.parameters)
+        self._reset_parameters_state(self.fittable_param,state.fittable_param)
+        self._reset_parameters_state(self.fixed_param,state.fixed_param)
+     
+        ## reset context menu items
+        self._reset_context_menu()
         ## draw the model with previous parameters value
         self._draw_model()
         
@@ -590,7 +605,6 @@ class BasicPage(wx.ScrolledWindow):
             is_modified =self._check_value_enter( self.fixed_param ,is_modified)
             is_modified =self._check_value_enter( self.parameters ,is_modified)        
            
-            
             self.Layout()
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
@@ -675,6 +689,7 @@ class BasicPage(wx.ScrolledWindow):
             @param listtocopy: the list of check button to copy
             @param statelist: list of state object to store the current state
         """
+        
         if len(listtocopy)==0:
             return
        
