@@ -31,14 +31,14 @@ Package name: None
 
 	2.2- Installing:
 		- Get the code from svn://danse.us/sans/releases/sansview-0.9.0 
-			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview 0.9.0' folder)
+			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview-0.9.0' folder)
 		- This application is also dependent on the following DANSE code:
 			svn://danse.us/sans/releases/guiframe-0.1.5 (run 'python setup.py install' under the 'guiframe-0.1.5' folder)
 			svn://danse.us/sans/releases/guicomm-0.1.2 (run 'python setup.py install' under the 'guicomm-0.1.2' folder)
 			svn://danse.us/sans/releases/DataLoader-0.2.3 (run 'python setup.py install' under the 'DataLoader-0.2.3' folder)
 			svn://danse.us/sans/releases/park_integration-0.1.1 (run 'python setup.py install' under the 'park_integration-0.1.1' folder)
 			svn://danse.us/sans/releases/sansmodels-0.4.3 (run 'python setup.py install' under the 'sansmodels-0.4.3\src\' folder)
-			svn://danse.us/park/releases/park-1.2 (run 'python setup.py install' under the 'park-1.2' folder)
+			svn://danse.us/park/releases/park-1.2 (or danse.us/park/branches/park-1.2 if is not released yet)(run 'python setup.py install' under the 'park-1.2' folder)
 	        svn://danse.us/common/releases/plottools-0.1.4 (run 'python setup.py install'under the 'plottools\trunk\' folder)
 	        svn://danse.us/common/releases/util-0.1.1 (run 'python setup.py install'under the 'util' folder)
 		- The following modules are required:
