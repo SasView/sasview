@@ -55,11 +55,7 @@ class MultiplicationModel(BaseComponent):
         self.model1= model1
         self.model2= model2
         
-        #if modelDiam != None:
-           #self.model2.params["radius"]= DiamEllipFunc()
-        
-           #print "self.modelD",self.modelD.params,self.model1.params,self.model2.params    
-
+       
         ## dispersion
         self._set_dispersion()
         ## Define parameters
@@ -68,6 +64,14 @@ class MultiplicationModel(BaseComponent):
         self._set_details()
         #list of parameter that can be fitted
         self._set_fixed_params()  
+        ## parameters with orientation
+        for item in self.model1.orientation_params:
+            self.orientation_params.append(item)
+            
+        for item in self.model2.orientation_params:
+            if not item in self.orientation_params:
+                self.orientation_params.append(item)
+                
         
     def _clone(self, obj):
         """
