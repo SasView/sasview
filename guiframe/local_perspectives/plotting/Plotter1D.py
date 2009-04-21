@@ -11,7 +11,7 @@ copyright 2008, University of Tennessee
 
 import wx
 import sys, os
-import pylab, time
+import pylab, time,numpy
 
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
@@ -59,7 +59,7 @@ class ModelPanel1D(PlotPanel):
         self.err_dy={}
         ## flag to determine if the hide or show context menu item should
         ## be displayed
-        self.errors_hide=0
+        self.errors_hide=False
         ## Unique ID (from gui_manager)
         self.uid = None
         ## Action IDs for internal call-backs
@@ -124,10 +124,10 @@ class ModelPanel1D(PlotPanel):
             self.plots[event.plot.name].dy = event.plot.dy  
             if hasattr(event.plot, 'dx') and hasattr(self.plots[event.plot.name], 'dx'):
                 self.plots[event.plot.name].dx = event.plot.dx    
- 
+          
         #TODO: Should re-factor this
         ## for all added plot the option to hide error show be displayed first
-        self.errors_hide = 0
+        #self.errors_hide = 0
         ## Set axis labels
         self.graph.xaxis(event.plot._xaxis, event.plot._xunit)
         self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
@@ -136,8 +136,12 @@ class ModelPanel1D(PlotPanel):
         ## render the graph
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
-        
-        
+        if self.errors_hide:
+            self._on_remove_errors(evt=None)
+        else:
+            self._on_add_errors( evt=None)
+        return
+    
     def onLeftDown(self,event): 
         """ 
             left button down and ready to drag
@@ -208,8 +212,7 @@ class ModelPanel1D(PlotPanel):
             slicerpop.Append(id, "&Save points" )
             self.action_ids[str(id)] = plot
             wx.EVT_MENU(self, id, self._onSave)
-            #wx.EVT_MENU(self, id, self._onSaveXML)
-           
+          
             id = wx.NewId()
             slicerpop.Append(id, "Remove %s curve" % name)
             self.action_ids[str(id)] = plot
@@ -220,15 +223,14 @@ class ModelPanel1D(PlotPanel):
        
         if self.graph.selected_plottable in self.plots:
             if self.plots[self.graph.selected_plottable].name in self.err_dy.iterkeys()\
-                and self.errors_hide==1:
+                and self.errors_hide:
                 
                 id = wx.NewId()
                 slicerpop.Append(id, '&Show errors to data')
                 wx.EVT_MENU(self, id, self._on_add_errors)
                 
             elif self.plots[self.graph.selected_plottable].__class__.__name__=="Data1D"\
-                and self.errors_hide==0:
-                   
+                and not self.errors_hide:
                     id = wx.NewId()
                     slicerpop.Append(id, '&Hide Error bars')
                     wx.EVT_MENU(self, id, self._on_remove_errors)
@@ -273,7 +275,7 @@ class ModelPanel1D(PlotPanel):
                               self.plots[self.graph.selected_plottable].y,
                               dy=dy)
             new_plot.interactive = True
-            self.errors_hide = 1
+            self.errors_hide = True
             new_plot.name = self.plots[self.graph.selected_plottable].name 
             if hasattr(self.plots[self.graph.selected_plottable], "group_id"):
                 new_plot.group_id = self.plots[self.graph.selected_plottable].group_id
@@ -316,7 +318,7 @@ class ModelPanel1D(PlotPanel):
         
         if not self.graph.selected_plottable == None:
             ##Reset the flag to display the hide option on the context menu
-            self.errors_hide = 0
+            self.errors_hide = False
             ## restore dy 
             length = len(self.plots[self.graph.selected_plottable].x)
             dy = numpy.zeros(length)

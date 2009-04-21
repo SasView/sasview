@@ -113,6 +113,7 @@ class Plugin:
                 else:
                     # Check that the plot panel has no group ID
                     ## Use a panel with group_id ==None to plot
+                    
                     if panel.group_id==None:
                         is_available = True
                         panel._onEVT_1DREPLOT(event)
