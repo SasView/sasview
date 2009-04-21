@@ -397,7 +397,10 @@ class ModelPage(BasicPage):
             name = 'FuncHelp'
         frame = HelpWindow(None, -1, name)    
         frame.Show(True)
-
+        if frame.rhelp.HasAnchor(name):
+            frame.rhelp.ScrollToAnchor(name)
+            
+            
     def set_range(self, qmin_x, qmax_x, npts):
         """
             Set the range for the plotted models

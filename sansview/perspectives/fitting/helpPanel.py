@@ -63,15 +63,19 @@ class HelpWindow(wx.Frame):
         """
              contains help info
         """
-        vbox1  = wx.BoxSizer(wx.HORIZONTAL)
-        
+        vbox1  =wx.FlexGridSizer(1, 2,0,0)
+
         lpanel = wx.Panel(self, -1,style=wx.BORDER_SUNKEN)
         rpanel = wx.Panel(self, -1)
-        vbox1.Add(lpanel, -1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        vbox1.Add(rpanel, -1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
+        vbox1.AddMany([ (lpanel,-1,wx.EXPAND,0), 
+            (rpanel, -1,wx.EXPAND,0)])
+        vbox1.AddGrowableRow(0, 0)
+        vbox1.AddGrowableCol(0, 1)
+       
+
         vbox = wx.BoxSizer(wx.VERTICAL)
-        header = wx.Panel(rpanel, -1, size=(-1, 20))
+        header = wx.Panel(rpanel, -1)
         header.SetBackgroundColour('#6666FF')
         header.SetForegroundColour('WHITE')
         hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -97,7 +101,7 @@ class HelpWindow(wx.Frame):
         headerl.SetSizer(hboxl)
         vboxl.Add(headerl, 0, wx.EXPAND)
         self.lhelp = html.HtmlWindow(lpanel, -1, style=wx.NO_BORDER)
-        self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER)
+        self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER, size=(500,-1))
         page1="""<html>
             <body>
              <p>Select topic on Menu</p>
@@ -132,6 +136,7 @@ class HelpWindow(wx.Frame):
         lpanel.SetFocus()
         
         self.SetSizer(vbox1)
+       
         self.Centre()
         self.Show(True)
         
