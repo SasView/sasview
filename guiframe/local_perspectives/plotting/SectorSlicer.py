@@ -184,6 +184,7 @@ class SectorInteractor(_BaseInteractor):
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = "SectorQ"+self.base.data2D.name
         new_plot.id = "SectorQ"+self.base.data2D.name
+        new_plot.is_data= True
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
                                                  title="SectorQ"+self.base.data2D.name ))
         

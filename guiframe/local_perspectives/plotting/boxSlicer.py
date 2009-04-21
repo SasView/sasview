@@ -176,6 +176,8 @@ class BoxInteractor(_BaseInteractor):
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = str(self.averager.__name__)+self.base.data2D.name
         new_plot.id = str(self.averager.__name__)
+        #new_plot.is_data= True
+        
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
                                                  title=str(self.averager.__name__) ))
     

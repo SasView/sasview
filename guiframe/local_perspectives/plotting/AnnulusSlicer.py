@@ -156,6 +156,8 @@ class AnnulusInteractor(_BaseInteractor):
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = "SectorPhi"+self.base.data2D.name
         new_plot.id= "SectorPhi"+self.base.data2D.name
+        #new_plot.is_data= True
+        
         new_plot.xtransform="x"
         new_plot.ytransform="y"
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
