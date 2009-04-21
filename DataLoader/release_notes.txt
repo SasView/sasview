@@ -1,9 +1,13 @@
 Release Notes
 =============
 
-Package name: DataLoader 0.2
+Package name: DataLoader 0.2.3
 
-1- 	Version 0.2
+1- 	Version 0.2.3
+	- Release date: 4/21/2009
+	- use ASCII reader for 1D data
+
+	Version 0.2
 	- Release date: 10/22/2008
 	- Added slit smearing and resolution smearing
 	- First version of CanSAS reader/writer
@@ -24,7 +28,7 @@ Package name: DataLoader 0.2
 		- Python version >= 2.4 should be running on the system
 
 	2.2- Installing:
-		- Get the code from svn://danse.us/sans/trunk/DataLoader
+		- Get the code from svn://danse.us/sans/releases/DataLoader-0.2.3
 		- The following modules are required:
 			* numpy
 			* data_util from svn://danse.us/common/util
