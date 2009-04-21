@@ -519,7 +519,10 @@ class ModelPage(BasicPage):
                     style=wx.TE_PROCESS_ENTER)
                 
                 ctl1.SetValue(str (format_number(value)))
-                ctl1.Disable()
+                if not self.enable2D:
+                    ctl1.Disable()
+                else:
+                    ctl1.Enable()
                 ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                 ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
                 ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
