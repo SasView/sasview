@@ -210,8 +210,8 @@ class FitData1D(object):
         self.dy= sans_data1d.dy
         
         ## Min Q-value
-        #Skip the Q=0 point, especially when y(q=0)=None at x[0].
-        if min (self.data.x) ==0.0 and self.data.x[0]==0 and not numpy.isfinite(self.data.y[0]):
+        #Skip the Q=0 point.
+        if min (self.data.x) ==0.0:
             self.qmin = min(self.data.x[self.data.x!=0])
         else:                              
             self.qmin= min (self.data.x)
@@ -222,9 +222,9 @@ class FitData1D(object):
     def setFitRange(self,qmin=None,qmax=None):
         """ to set the fit range"""
         
-        # Remove or do not allow fitting on the Q=0 point, especially when y(q=0)=None at x[0].
+        # Skip Q=0 point, (especially for y(q=0)=None at x[0]).
         #ToDo: Fix this.
-        if qmin==0.0 and self.data.x[0]==0 and not numpy.isfinite(self.data.y[0]):
+        if qmin==0.0:
             self.qmin = min(self.data.x[self.data.x!=0])
         elif qmin!=None:                       
             self.qmin = qmin            
