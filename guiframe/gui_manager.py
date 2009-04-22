@@ -192,14 +192,14 @@ class ViewerFrame(wx.Frame):
                     format='%(asctime)s %(levelname)s %(message)s',
                     filename='sans_app.log',
                     filemode='w')        
-        
-        path_up = os.path.dirname(__file__)
-        path = ico_file = os.path.join(path_up,'images')
-        ico_file = os.path.join(path,'ball.ico')
+        path = os.path.dirname(__file__)
+        temp_path= os.path.join(path,'images')
+        ico_file = os.path.join(temp_path,'ball.ico')
         if os.path.isfile(ico_file):
             self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         else:
-            ico_file = os.path.join(os.getcwd(),'ball.ico')
+            temp_path= os.path.join(os.getcwd(),'images')
+            ico_file = os.path.join(temp_path,'ball.ico')
             if os.path.isfile(ico_file):
                 self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         
