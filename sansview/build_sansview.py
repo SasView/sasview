@@ -227,7 +227,7 @@ if __name__ == "__main__":
             print PLOTTOOLS_URL 
             print UTIL_URL 
             print SANSVIEW_URL
-            print PARK_INTEG 
+            print PARK_INTEG_URL 
             print PARK_URL 
         else:
             logging.info("Build script for SansView %s" % SANSVIEW)
