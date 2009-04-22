@@ -151,16 +151,15 @@ class MultiplicationModel(BaseComponent):
         if name in self.model1.getParamList():
             self.model1.setParam( name, value)
 
-        
-        if self.modelD !=None:
-            if name == self.para1 or name == self.para2:
+        if name==self.para1 or name == self.para2 and  self.modelD !=None:
                 self.modelD.params[name]= value
-            elif name in self.model2.getParamList() and name != 'radius':
+                self.model2.setParam('radius', self.modelD.run())
+        else:
+            if name in self.model2.getParamList():
                 self.model2.setParam( name, value)
-        elif name in self.model2.getParamList()and name != 'radius':
-            self.model2.setParam( name, value) 
             
-       
+        
+            
         self._setParamHelper( name, value)
         
     def _setParamHelper(self, name, value):
@@ -209,9 +208,9 @@ class MultiplicationModel(BaseComponent):
         """
         #MultiplicationModel(self.model1, self.model2 )      
            
-        if self.modelD!=None:
-            value = self.modelD.run(x)
-            self.model2.setParam( "radius", value)        
+        #if self.modelD!=None:
+        #    value = self.modelD.run(x)
+        #    self.model2.setParam( "radius", value)        
                         
             #print "self.model2.setParam( radius, value)",value 
         return self.model1.run(x)*self.model2.run(x)
