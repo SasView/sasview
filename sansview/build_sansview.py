@@ -42,15 +42,15 @@ SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 
 # Release version 0.1.0
-SANSMODELS = "0.4.2"
-DATALOADER = "0.2.1"
-GUICOMM    = "0.1.1"
-GUIFRAME   = "0.1.4"
-SANSVIEW   = "0.1.0"
-PLOTTOOLS  = "0.1.3"
-UTIL       = "0.1"
-PARK       = "1.2.x"
-PARK_INTEG = "0.1.0"
+SANSMODELS = "0.4.3"
+DATALOADER = "0.2.3"
+GUICOMM    = "0.1.2"
+GUIFRAME   = "0.1.5"
+SANSVIEW   = "0.9.0"
+PLOTTOOLS  = "0.1.4"
+UTIL       = "0.1.1"
+PARK       = "1.2"
+PARK_INTEG = "0.1.1"
 
 # URLs for SVN repos
 SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
@@ -61,8 +61,7 @@ PLOTTOOLS_URL = "svn://danse.us/common/releases/plottools-%s/trunk" % PLOTTOOLS
 UTIL_URL = "svn://danse.us/common/releases/util-%s" % UTIL
 SANSVIEW_URL = "svn://danse.us/sans/releases/sansview-%s" % SANSVIEW
 PARK_INTEG_URL = "svn://danse.us/sans/releases/park_integration-%s" % PARK_INTEG
-#TODO: need to use the release branch of PARK once it is created
-PARK_URL = "svn://danse.us/park/branches/park-1.2"
+PARK_URL = "svn://danse.us/park/releases/park-%s" % PARK
 
 
 def check_system():
