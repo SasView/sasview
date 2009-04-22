@@ -213,7 +213,7 @@ class MultiplicationModel(BaseComponent):
             value = self.modelD.run(x)
             self.model2.setParam( "radius", value)        
                         
-            print "self.model2.setParam( radius, value)",value 
+            #print "self.model2.setParam( radius, value)",value 
         return self.model1.run(x)*self.model2.run(x)
    
     def runXY(self, x = 0.0):
