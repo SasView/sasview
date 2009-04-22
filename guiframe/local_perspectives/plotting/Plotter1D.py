@@ -327,8 +327,9 @@ class ModelPanel1D(PlotPanel):
             try:
                 dy = self.err_dy[selected_plot.name]
             except:
-                for i in range(length):
-                    dy[i] = math.sqrt(self.plots[self.graph.selected_plottable].y[i])      
+                #for i in range(length):
+                #dy[i] = math.sqrt(self.plots[self.graph.selected_plottable].y[i])      
+                dy= selected_plot.dy
             ## Create a new plottable data1D
             new_plot = Data1D(self.plots[self.graph.selected_plottable].x,
                               self.plots[self.graph.selected_plottable].y,
