@@ -231,9 +231,10 @@ class MultiplicationModel(BaseComponent):
         """
         value= None
         try:
-            if parameter in self.model1.getParamList():
+            if parameter in self.model1.dispersion.keys():
                 value= self.model1.set_dispersion(parameter, dispersion)
-            elif parameter in self.model2.ParamList():
+              
+            elif parameter in self.model2.dispersion.keys():
                 value= self.model2.set_dispersion(parameter, dispersion)
             return value
         except:

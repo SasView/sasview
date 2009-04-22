@@ -34,6 +34,8 @@ class BaseComponent:
         self.fixed= []
         ## parameters with orientation
         self.orientation_params =[]
+        ## store dispersity reference
+        self._persistency_dict = {}
            
     def __str__(self):
         """ 
