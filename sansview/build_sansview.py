@@ -41,7 +41,7 @@ PYTHON = "c:\python25\python"
 SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 
-# Release version 0.1.0
+# Release version 0.9.0
 SANSMODELS = "0.4.3"
 DATALOADER = "0.2.3"
 GUICOMM    = "0.1.2"
