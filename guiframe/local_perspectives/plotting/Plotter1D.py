@@ -15,7 +15,8 @@ import pylab, time,numpy
 
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools.plottables import Graph,Data1D,Theory1D,Data1D
+from danse.common.plottools.plottables import Graph,Theory1D
+from sans.guiframe import dataFitting 
 from sans.guicomm.events import EVT_NEW_PLOT
 from sans.guicomm.events import StatusEvent ,NewPlotEvent,SlicerEvent,ErrorDataEvent
 from sans.guiframe.utils import PanelMenu
@@ -278,13 +279,16 @@ class ModelPanel1D(PlotPanel):
             selected_plot= self.plots[self.graph.selected_plottable]
             
             if selected_plot.__class__.__name__=="Data1D":
-                new_plot = Data1D(self.plots[self.graph.selected_plottable].x,
-                              self.plots[self.graph.selected_plottable].y,
-                              dy=dy)
+               
+                new_plot = dataFitting.Data1D( x=selected_plot.x,
+                              y= selected_plot.y,
+                               dx=selected_plot.dx,
+                              dy=dy,
+                              dxl=selected_plot.dxl,
+                              dxw=selected_plot.dxw)
+                            
             else:
-                 new_plot = Theory1D(self.plots[self.graph.selected_plottable].x,
-                          self.plots[self.graph.selected_plottable].y,
-                          dy=dy)
+                 new_plot = Theory1D(x=selected_plot.x,y=selected_plot.y,dy=dy)
             new_plot.interactive = True
             self.errors_hide = True
             new_plot.name = self.plots[self.graph.selected_plottable].name 
@@ -334,6 +338,7 @@ class ModelPanel1D(PlotPanel):
             ## restore dy 
             length = len(self.plots[self.graph.selected_plottable].x)
             dy = numpy.zeros(length)
+            
             selected_plot= self.plots[self.graph.selected_plottable]
             
             try:
@@ -349,16 +354,17 @@ class ModelPanel1D(PlotPanel):
                     
             ## Create a new plottable data1D
             if selected_plot.__class__.__name__=="Data1D":
-                new_plot = Data1D(self.plots[self.graph.selected_plottable].x,
-                          self.plots[self.graph.selected_plottable].y,
-                          dy=dy)
+                new_plot = dataFitting.Data1D( x=selected_plot.x,
+                                               y= selected_plot.y,
+                                               dx=selected_plot.dx,
+                                               dy=dy,
+                                               dxl=selected_plot.dxl,
+                                               dxw=selected_plot.dxw)
             else:
                 ## Create a new plottable Theory1D
-                new_plot = Theory1D(self.plots[self.graph.selected_plottable].x,
-                          self.plots[self.graph.selected_plottable].y,
-                          dy=dy)
+                new_plot = Theory1D(x=selected_plot.x,y=selected_plot.y,dy=dy)
+            
             new_plot.interactive = True
-           
             new_plot.name = self.plots[self.graph.selected_plottable].name 
             if hasattr(self.plots[self.graph.selected_plottable], "group_id"):
                 new_plot.group_id = self.plots[self.graph.selected_plottable].group_id
