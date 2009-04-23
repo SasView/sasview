@@ -634,6 +634,7 @@ class Plugin:
                     data= copy.deepcopy(plottable )
                     item.is_data=True
                     data.is_data=True
+                
             ## create anew page                   
             if item.name == self.panel.graph.selected_plottable or\
                  item.__class__.__name__ is "Data2D":
@@ -648,7 +649,7 @@ class Plugin:
                         ## axis info for plotting 
                         self.page_finder[page].add_plotted_data(item)
                         self.page_finder[page].add_fit_data(data)
-                        
+
                         wx.PostEvent(self.parent, StatusEvent(status="Page Created"))
                     else:
                         wx.PostEvent(self.parent, StatusEvent(status="Page was already Created"))

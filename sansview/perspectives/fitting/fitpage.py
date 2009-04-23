@@ -44,6 +44,7 @@ class FitPage(BasicPage):
         self.engine_type = None
         ## draw sizer
         self._fill_datainfo_sizer()
+        print "self.qmin, self.qmax====>",self.qmax_x,self.qmin_x
         self._fill_model_sizer( self.sizer1)
         self._fill_range_sizer() 
         self._on_select_model(event=None)
@@ -52,11 +53,7 @@ class FitPage(BasicPage):
             if self.smearer ==None:
                 self.enable_smearer.Disable()
                 self.disable_smearer.Disable()
-        #try:
-            ##Calculate chi2
-        #    self.compute_chisqr(smearer= temp_smearer)  
-        #except:
-        #    raise              
+       
         ## to update the panel according to the fit engine type selected
         self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
     
@@ -187,43 +184,39 @@ class FitPage(BasicPage):
         #set maximum range for x in linear scale
         if not hasattr(self.data,"data"): #Display only for 1D data fit
             # Minimum value of data   
-            #data_min = str(format_number(numpy.min(self.data.x)))
-            data_min = str((numpy.min(self.data.x)))
+            data_min = min(self.data.x)
             # Maximum value of data  
-#            data_max = str(format_number(numpy.max(self.data.x)))
-            data_max = str((numpy.max(self.data.x)))
+            data_max = max(self.data.x)
             text4_3 = wx.StaticText(self, -1, 'Total Q Range (1/A)',
                                      style=wx.ALIGN_LEFT)
             sizer_data.Add( text4_3 )
-            sizer_data.Add(wx.StaticText(self, -1, "Min : %s"%data_min))
-            
-            sizer_data.Add(wx.StaticText(self, -1, "Max : %s"%data_max))
+            sizer_data.Add(wx.StaticText(self, -1, "Min : %s"%str(data_min)))
+            sizer_data.Add(wx.StaticText(self, -1, "Max : %s"%str(data_max)))
             
         else:
-            radius_min= 0
-            x= numpy.max(self.data.xmin, self.data.xmax)
-            y= numpy.max(self.data.ymin, self.data.ymax)
-            radius_max = math.sqrt(x*x + y*y)
-            
+            ## Minimum value of data 
+            data_min= 0
+            x= max(math.fabs(self.data.xmin), math.fabs(self.data.xmax)) 
+            y= max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
+            ## Maximum value of data  
+            data_max = math.sqrt(x*x + y*y)
+          
             #For qmin and qmax, do not use format_number
             #.(If do, qmin and max could be different from what is in the data.)
-            # Minimum value of data   
-            data_min = str((radius_min))
-            # Maximum value of data  
-            data_max = str((radius_max))
             text4_3 = wx.StaticText(self, -1, "Total Q Range (1/A)",
                                      style=wx.ALIGN_LEFT)
             sizer_data.Add( text4_3 )
-            sizer_data.Add(wx.StaticText(self, -1, "Min : %s"%data_min))
-            sizer_data.Add(wx.StaticText(self, -1, "Max : %s"%data_max))
-            
+            sizer_data.Add(wx.StaticText(self, -1, "Min : %s"%str(data_min)))
+            sizer_data.Add(wx.StaticText(self, -1, "Max : %s"%str(data_max)))
+        ## set q range to plot
+        self.qmin_x= data_min
+        self.qmax_x= data_max
+
         boxsizer1.Add(sizer_data)
         #------------------------------------------------------------
         self.sizer0.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer0.Layout()
-        
-        self.qmin_x= data_min
-        self.qmax_x= data_max
+       
         
        
     def _fill_model_sizer(self, sizer):

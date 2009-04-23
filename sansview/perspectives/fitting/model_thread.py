@@ -105,9 +105,8 @@ class Calc2D(CalcThread):
         """
             Compute the data given a model function
         """
-        x = self.x
-        y = self.y
-        output = numpy.zeros((len(x),len(y)))
+     
+        output = numpy.zeros((len(self.x),len(self.y)))
         if self.qmin==None:
             self.qmin = 0
         if self.qmax== None:
@@ -115,9 +114,8 @@ class Calc2D(CalcThread):
                 newx= math.pow(max(math.fabs(self.data.xmax),math.fabs(self.data.xmin)),2)
                 newy= math.pow(max(math.fabs(self.data.ymax),math.fabs(self.data.ymin)),2)
                 self.qmax=math.sqrt( newx + newy )
-            else:
-                self.qmax= max(self.x)
-        
+      
+       
         self.starttime = time.time()
         lx = len(self.x)
         for i_x in range(len(self.x)):
