@@ -117,7 +117,7 @@ class FitPanel(wx.aui.AuiNotebook):
             self.model_page = None
             self.count =0
             ## page on menu
-            self.manager._add_page_onmenu(page_name, fitproblem)
+            #self.manager._add_page_onmenu(page_name, fitproblem)
         else:
             if selected_page in page_finder:
        
@@ -127,7 +127,7 @@ class FitPanel(wx.aui.AuiNotebook):
                 if self.GetPageIndex(selected_page)==self.fit_page2D_number:
                     self.fit_page2D_number=None
                 ## page on menu
-                self.manager._add_page_onmenu(page_name, fitproblem)
+                #self.manager._add_page_onmenu(page_name, fitproblem)
                 del page_finder[selected_page]
             ##remove the check box link to the model name of this page (selected_page)
             try:
