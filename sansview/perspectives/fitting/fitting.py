@@ -249,6 +249,7 @@ class Plugin:
         id=None
         dxl=None
         dxw=None
+        dx=None
         if hasattr(item, "dxl"):
             dxl = copy.deepcopy(item.dxl)
         if hasattr(item, "dxw"):
@@ -261,9 +262,11 @@ class Plugin:
             info= copy.deepcopy(item.info)
         if hasattr(item,"id"):
             id = copy.deepcopy(item.id)
+        if hasattr(item, "dx"):
+            dx= item.dx
             
         from sans.guiframe import dataFitting 
-        data= dataFitting.Data1D(x=item.x, y=item.y, dy=dy, dxl=dxl, dxw=dxw)
+        data= dataFitting.Data1D(x=item.x, y=item.y,dx=dx, dy=dy, dxl=dxl, dxw=dxw)
         
         data.name = item.name
         data.detector = detector
