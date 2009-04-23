@@ -64,7 +64,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.about_page=None
         from welcome_panel import PanelAbout
         self.about_page = PanelAbout(self, -1)
-        self.AddPage(self.about_page,"welcome!")
+        self.AddPage(self.about_page,"Welcome!")
       
        
         #dictionary of miodel {model class name, model class}

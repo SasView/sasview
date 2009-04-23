@@ -159,28 +159,30 @@ class Plugin:
             @param graph: the Graph object to which we attach the context menu
             @return: a list of menu items with call-back function
         """
+        #TODO: clean this up so that the string are not copied 
+        #      multiple times.
         self.graph=graph
         for item in graph.plottables:
             if item.__class__.__name__ is "Data2D":
                 if hasattr(item,"is_data"):
                     if item.is_data:
-                        return [["Select data  for Fitting", \
+                        return [["Select data for fitting", \
                          "Dialog with fitting parameters ", self._onSelect]]
                     else:
                         return [] 
-                return [["Select data  for Fitting",\
+                return [["Select data for fitting",\
                           "Dialog with fitting parameters ", self._onSelect]] 
             else:
                 if item.name==graph.selected_plottable :
                     if hasattr(item, "group_id"):
                         if hasattr(item,"is_data"):
                             if item.is_data:
-                                return [["Select data  for Fitting", \
+                                return [["Select data for fitting", \
                                  "Dialog with fitting parameters ", self._onSelect]]
                             else:
                                 return [] 
                         else:
-                            return [["Select data  for Fitting", \
+                            return [["Select data for fitting", \
                                  "Dialog with fitting parameters ", self._onSelect]] 
         return []   
 
