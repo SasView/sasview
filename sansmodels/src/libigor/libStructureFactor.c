@@ -665,7 +665,7 @@ DiamCyl(double dp[], double q)
 	a = rcyl;
 	b = hcyl/2.0;
 	t1 = a*a*2.0*b/2.0;
-	t2 = 1.0 + (b/a)*(1.0+a/b)*(1.0+pi*a/b/2.0);
+	t2 = 1.0 + (b/a)*(1.0+a/b/2)*(1.0+pi*a/b/2.0);
 	ddd = 3.0*t1*t2;
 	diam = pow(ddd,(1.0/3.0));
 	
