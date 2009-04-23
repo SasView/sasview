@@ -97,8 +97,12 @@ class BasicPage(wx.ScrolledWindow):
         """
             Retrieve the state selected state
         """
+        # Skipping the save state functionality for release 0.9.0
+        return
+    
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
+        #TODO: why is the state menu called "slicerpop"?
         self.PopupMenu(self.slicerpop, pos) 
         
         
@@ -333,6 +337,9 @@ class BasicPage(wx.ScrolledWindow):
         """
             save history of the data and model
         """
+        # Skipping the save state functionality for release 0.9.0
+        return
+    
         if self.model==None:
             return 
         if hasattr(self,"enable_disp"):
@@ -1361,6 +1368,9 @@ class BasicPage(wx.ScrolledWindow):
         """
             Draw the layout for saving option
         """
+        # Skipping save state functionality for release 0.9.0
+        return
+    
         self.sizer6.Clear(True)
         box_description= wx.StaticBox(self, -1,"Save Status")
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
