@@ -222,15 +222,19 @@ class ModelPanel1D(PlotPanel):
             #TODO: implement functionality to hide a plottable (legend click)
        
         if self.graph.selected_plottable in self.plots:
-            if self.plots[self.graph.selected_plottable].name in self.err_dy.iterkeys()\
-                and self.errors_hide:
-                
-                id = wx.NewId()
-                slicerpop.Append(id, '&Show errors to data')
-                wx.EVT_MENU(self, id, self._on_add_errors)
-                
-            elif self.plots[self.graph.selected_plottable].__class__.__name__=="Data1D"\
-                and not self.errors_hide:
+            selected_plot= self.plots[self.graph.selected_plottable]
+            #if self.plots[self.graph.selected_plottable].name in self.err_dy.iterkeys()\
+            #    and self.errors_hide:
+            if selected_plot.__class__.__name__=="Data1D":
+                if selected_plot.dy ==None or selected_plot.dy== []:
+                    id = wx.NewId()
+                    slicerpop.Append(id, '&Show errors to data')
+                    wx.EVT_MENU(self, id, self._on_add_errors)
+                elif numpy.all(selected_plot.dy==0):
+                    id = wx.NewId()
+                    slicerpop.Append(id, '&Show errors to data')
+                    wx.EVT_MENU(self, id, self._on_add_errors)
+                else:
                     id = wx.NewId()
                     slicerpop.Append(id, '&Hide Error bars')
                     wx.EVT_MENU(self, id, self._on_remove_errors)
@@ -271,9 +275,16 @@ class ModelPanel1D(PlotPanel):
             ## Create a new dy for a new plottable
             import numpy
             dy= numpy.zeros(len(self.plots[self.graph.selected_plottable].y))
-            new_plot = Data1D(self.plots[self.graph.selected_plottable].x,
+            selected_plot= self.plots[self.graph.selected_plottable]
+            
+            if selected_plot.__class__.__name__=="Data1D":
+                new_plot = Data1D(self.plots[self.graph.selected_plottable].x,
                               self.plots[self.graph.selected_plottable].y,
                               dy=dy)
+            else:
+                 new_plot = Theory1D(self.plots[self.graph.selected_plottable].x,
+                          self.plots[self.graph.selected_plottable].y,
+                          dy=dy)
             new_plot.interactive = True
             self.errors_hide = True
             new_plot.name = self.plots[self.graph.selected_plottable].name 
@@ -291,7 +302,7 @@ class ModelPanel1D(PlotPanel):
             color=self.graph.plottables[self.plots[self.graph.selected_plottable]]
             self.graph.delete(self.plots[self.graph.selected_plottable])
             ## add newly created plottable to the graph with the save color
-            self.graph.color = color
+            self.graph.color += color
             self.graph.add(new_plot,color)
             ## transforming the view of the new data into the same of the previous data
             self._onEVT_FUNC_PROPERTY()
@@ -324,16 +335,28 @@ class ModelPanel1D(PlotPanel):
             length = len(self.plots[self.graph.selected_plottable].x)
             dy = numpy.zeros(length)
             selected_plot= self.plots[self.graph.selected_plottable]
+            
             try:
                 dy = self.err_dy[selected_plot.name]
+               
             except:
                 #for i in range(length):
                 #dy[i] = math.sqrt(self.plots[self.graph.selected_plottable].y[i])      
-                dy= selected_plot.dy
+                if hasattr(selected_plot,"dy"):
+                    dy= selected_plot.dy
+                else:
+                    dy = numpy.zeros(selected_plot.dy)
+                    
             ## Create a new plottable data1D
-            new_plot = Data1D(self.plots[self.graph.selected_plottable].x,
-                              self.plots[self.graph.selected_plottable].y,
-                              dy=dy)
+            if selected_plot.__class__.__name__=="Data1D":
+                new_plot = Data1D(self.plots[self.graph.selected_plottable].x,
+                          self.plots[self.graph.selected_plottable].y,
+                          dy=dy)
+            else:
+                ## Create a new plottable Theory1D
+                new_plot = Theory1D(self.plots[self.graph.selected_plottable].x,
+                          self.plots[self.graph.selected_plottable].y,
+                          dy=dy)
             new_plot.interactive = True
            
             new_plot.name = self.plots[self.graph.selected_plottable].name 
@@ -351,7 +374,7 @@ class ModelPanel1D(PlotPanel):
             ## save the color of the selected plottable before it is deleted
             color=self.graph.plottables[self.plots[self.graph.selected_plottable]]
             self.graph.delete(self.plots[self.graph.selected_plottable])
-            self.graph.color = color
+            self.graph.color += color
             ## add newly created plottable to the graph with the save color
             self.graph.add(new_plot, color)
             ## transforming the view of the new data into the same of the previous data
