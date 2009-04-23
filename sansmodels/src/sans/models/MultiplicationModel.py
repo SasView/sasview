@@ -150,10 +150,12 @@ class MultiplicationModel(BaseComponent):
 
         if name in self.model1.getParamList():
             self.model1.setParam( name, value)
-
-        if name==self.para1 or name == self.para2 and  self.modelD !=None:
-                self.modelD.params[name]= value
-                self.model2.setParam('radius', self.modelD.run())
+        if self.modelD !=None:
+            if name==self.para1 or name == self.para2:
+                    self.modelD.params[name]= value
+                    self.model2.setParam('radius', self.modelD.run())
+            elif name in self.model2.getParamList():
+                        self.model2.setParam( name, value)        
         else:
             if name in self.model2.getParamList():
                 self.model2.setParam( name, value)
