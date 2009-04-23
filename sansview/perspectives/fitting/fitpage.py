@@ -38,8 +38,8 @@ class FitPage(BasicPage):
         """
         ## fit page does not content npts txtcrtl
         self.npts=None
-        ## if no dispersity parameters is avaible 
-        #self.text_disp_1=None
+        ## thread for compute Chisqr
+        self.calc_Chisqr=None
         ## default fitengine type
         self.engine_type = None
         ## draw sizer
@@ -52,7 +52,11 @@ class FitPage(BasicPage):
             if self.smearer ==None:
                 self.enable_smearer.Disable()
                 self.disable_smearer.Disable()
-                
+        #try:
+            ##Calculate chi2
+        #    self.compute_chisqr(smearer= temp_smearer)  
+        #except:
+        #    raise              
         ## to update the panel according to the fit engine type selected
         self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
     
@@ -144,7 +148,12 @@ class FitPage(BasicPage):
         box_description= wx.StaticBox(self, -1,'Chi2/dof')
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         boxsizer1.SetMinSize((60,-1))
-        self.tcChi    =  wx.StaticText(self, -1, "-", style=wx.ALIGN_LEFT)        
+        temp_smearer = None
+        if self.enable_smearer.GetValue():
+            temp_smearer= self.smearer
+        
+        self.tcChi    =  wx.StaticText(self, -1, "-", style=wx.ALIGN_LEFT)
+         
         boxsizer1.Add( self.tcChi )   
         sizer_smearer.Add( boxsizer1 )
                
@@ -684,16 +693,60 @@ class FitPage(BasicPage):
        
         ## set smearing value whether or not the data contain the smearing info
         self.manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
-                                      qmax= float(self.qmax_x)) 
+                                     qmax= float(self.qmax_x)) 
         ##Calculate chi2
         self.compute_chisqr(smearer= temp_smearer)  
         ## save the state enable smearing
-        self.save_current_state()
-       
-         
+        self.save_current_state() 
+   
+    def complete_chisqr(self, output, elapsed=None):  
+        """
+            print result chisqr
+        """
+        try:
+            self.tcChi.SetLabel(format_number(output))
+        except:
+            raise
+        
+        
+    def compute_chisqr1D(self, smearer=None):
+        """
+            Compute chisqr for 1D
+        """
+        from sans.guiframe.utils import check_value
+        flag = check_value( self.qmin, self.qmax)
+        
+        if not flag:
+            return 
+        
+        try:
+            self.qmin_x = float(self.qmin.GetValue())
+            self.qmax_x = float(self.qmax.GetValue())
+            ##return residuals within self.qmin_x and self.qmax_x
+            from gui_thread import CalcChisqr1D
+            ## If a thread is already started, stop it
+            if self.calc_Chisqr!= None and self.calc_Chisqr.isrunning():
+                self.calc_Chisqr.stop()
+                
+            self.calc_Chisqr= CalcChisqr1D( x= self.data.x,
+                                            y= self.data.y,
+                                            dy= self.data.dy,
+                                            model= self.model,
+                                            smearer=smearer,
+                                            qmin=self.qmin_x,
+                                            qmax=self.qmax_x,
+                                            completefn = self.complete_chisqr,
+                                            updatefn   = None)
+    
+            self.calc_Chisqr.queue()
+            
+        except:
+            raise ValueError," Could not compute Chisqr for %s Model 2D: "%self.model.name
+           
+            
    
         
-  
+        
     def compute_chisqr2D(self):
         """ 
             compute chi square given a model and data 2D and set the value
@@ -701,41 +754,35 @@ class FitPage(BasicPage):
         """
         from sans.guiframe.utils import check_value
         flag = check_value( self.qmin, self.qmax)
-        
-        err_image = copy.deepcopy(self.data.err_data)
-        if err_image==[] or err_image==None:
-            err_image= numpy.zeros(len(self.data.x_bins),len(self.data.y_bins))
-                       
-        err_image[err_image==0]=1
-       
-        res=[]
-        if flag== True:
-            try:
-                self.qmin_x = float(self.qmin.GetValue())
-                self.qmax_x = float(self.qmax.GetValue())
-                for i in range(len(self.data.x_bins)):
-                    for j in range(len(self.data.y_bins)):
-                        #Check the range containing data between self.qmin_x and self.qmax_x
-                        value =  math.pow(self.data.x_bins[i],2)+ math.pow(self.data.y_bins[j],2)
-                        if value >= math.pow(self.qmin_x,2) and value <= math.pow(self.qmax_x,2):
-                            
-                            temp = [self.data.x_bins[i],self.data.y_bins[j]]
-                            error= err_image[j][i]
-                            chisqrji = (self.data.data[j][i]- self.model.runXY(temp ))/error
-                            #Vector containing residuals
-                            res.append( math.pow(chisqrji,2) )
-
-                # compute sum of residual
-                sum=0
-                for item in res:
-                    if numpy.isfinite(item):
-                        sum +=item
-                self.tcChi.SetLabel(format_number(math.fabs(sum/ len(res))))
-            except:
-                wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                            "Chisqr cannot be compute: %s"% sys.exc_value))
-                return
+        if not flag:
+            return 
+      
+        try:
+            self.qmin_x = float(self.qmin.GetValue())
+            self.qmax_x = float(self.qmax.GetValue())
+           
+            ##return residuals within self.qmin_x and self.qmax_x
+            from gui_thread import CalcChisqr2D
+            ## If a thread is already started, stop it
+            if self.calc_Chisqr!= None and self.calc_Chisqr.isrunning():
+                self.calc_Chisqr.stop()
+                
+            self.calc_Chisqr= CalcChisqr2D( x_bins= self.data.x_bins,
+                                            y_bins= self.data.y_bins,
+                                            data= self.data.data,
+                                            err_data = self.data.err_data,
+                                            model= self.model,
+                                            qmin= self.qmin_x,
+                                            qmax = self.qmax_x,
+                                            completefn = self.complete_chisqr,
+                                            updatefn   = None)
     
+            self.calc_Chisqr.queue()
+          
+        except:
+            raise ValueError," Could not compute Chisqr for %s Model 2D: "%self.model.name
+           
+
         
     def compute_chisqr(self , smearer=None):
         """ 
@@ -750,40 +797,11 @@ class FitPage(BasicPage):
                     self.compute_chisqr2D()
                     return
                 else:
-                    self.qmin_x = float(self.qmin.GetValue())
-                    self.qmax_x = float(self.qmax.GetValue())
-                    # return residuals within self.qmin_x and self.qmax_x
-                    x,y = [numpy.asarray(v) for v in (self.data.x,self.data.y)]
-                    
-                    if self.data.dy==None:
-                        dy= numpy.zeros(len(y))
-                    else:
-                        dy= copy.deepcopy(self.data.dy)
-                        dy= numpy.asarray(dy)
-                    dy[dy==0]=1
-                   
-                    if self.qmin_x==None and self.qmax_x==None: 
-                        fx =numpy.asarray([self.model.run(v) for v in x])
-                        if smearer!=None:
-                            fx= smearer(fx)
-                        temp=(y - fx)/dy
-                        res= temp*temp
-                    else:
-                        idx = (x>= self.qmin_x) & (x <=self.qmax_x)
-                        fx = numpy.asarray([self.model.run(item)for item in x[idx ]])
-                        if smearer!=None:
-                            fx= smearer(fx)
-                        temp=(y[idx] - fx)/dy[idx]
-                        res= temp*temp
-                    #sum of residuals
-                    sum=0
-                    for item in res:
-                        if numpy.isfinite(item):
-                            sum +=item
-                    self.tcChi.SetLabel(format_number(math.fabs(sum/ len(res))))
+                    self.compute_chisqr1D(smearer=smearer)
+                    return
             except:
                 wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
-                            "Chisqr cannot be compute: %s"% sys.exc_value))
+                            "Chisqr Error: %s"% sys.exc_value))
                 return 
             
     

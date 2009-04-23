@@ -2,12 +2,13 @@ import  re,copy
 import sys, wx, logging
 import string, numpy, math
 
-from danse.common.plottools.plottables import Data1D, Theory1D,Data2D
+from danse.common.plottools.plottables import Data2D,Theory1D
+from sans.guiframe import dataFitting 
 from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
 from sans.guicomm.events import EVT_SLICER_PANEL,ERR_DATA
 from sans.guiframe import dataFitting
-from sans.fit.AbstractFitEngine import Model,FitData1D,FitData2D
+from sans.fit.AbstractFitEngine import Model
 
 from fitproblem import FitProblem
 from fitpanel import FitPanel
@@ -265,7 +266,7 @@ class Plugin:
         if hasattr(item, "dx"):
             dx= item.dx
             
-        from sans.guiframe import dataFitting 
+        
         data= dataFitting.Data1D(x=item.x, y=item.y,dx=dx, dy=dy, dxl=dxl, dxw=dxw)
         
         data.name = item.name
@@ -987,8 +988,8 @@ class Plugin:
                     new_plot.id += "Model"
                 new_plot.is_data =False 
            
-            from DataLoader.data_info import Data1D
-            info= Data1D(x= new_plot.x, y=new_plot.y)
+            from DataLoader import data_info
+            info= data_info.Data1D(x= new_plot.x, y=new_plot.y)
             info.title= new_plot.name
             title= my_info.title
             info.xaxis(new_plot._xaxis,  new_plot._xunit)
