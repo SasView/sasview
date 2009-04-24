@@ -210,8 +210,8 @@ class FitData1D(object):
         self.dy= sans_data1d.dy
         
         ## Min Q-value
-        #Skip the Q=0 point.
-        if min (self.data.x) ==0.0:
+        #Skip the Q=0 point, especially when y(q=0)=None at x[0].
+        if min (self.data.x) ==0.0 and self.data.x[0]==0 and not numpy.isfinite(self.data.y[0]):
             self.qmin = min(self.data.x[self.data.x!=0])
         else:                              
             self.qmin= min (self.data.x)
@@ -351,11 +351,18 @@ class FitData2D(object):
         """
         return []
     
+class FitAbort(Exception):
+    """
+        Exception raise to stop the fit
+    """
+    print"Creating fit abort Exception"
+
+
 class sansAssembly:
     """
          Sans Assembly class a class wrapper to be call in optimizer.leastsq method
     """
-    def __init__(self,paramlist,Model=None , Data=None):
+    def __init__(self,paramlist,Model=None , Data=None, curr_thread= None):
         """
             @param Model: the model wrapper fro sans -model
             @param Data: the data wrapper for sans data
@@ -363,7 +370,9 @@ class sansAssembly:
         self.model = Model
         self.data  = Data
         self.paramlist=paramlist
+        self.curr_thread= curr_thread
         self.res=[]
+        self.func_name="Functor"
     def chisq(self, params):
         """
             Calculates chi^2
@@ -373,7 +382,8 @@ class sansAssembly:
         sum = 0
         for item in self.res:
             sum += item*item
-       
+        if len(self.res)==0:
+            return None
         return sum/ len(self.res)
     
     def __call__(self,params):
@@ -384,7 +394,12 @@ class sansAssembly:
         #import thread
         self.model.setParams(self.paramlist,params)
         self.res= self.data.residuals(self.model.eval)
-        #print "residuals",thread.get_ident()
+        if self.curr_thread != None :
+            try:
+                 self.curr_thread.isquit()
+            except:
+                raise FitAbort,"stop leastsqr optimizer"
+                
         return self.res
     
 class FitEngine:

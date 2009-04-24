@@ -9,7 +9,8 @@ import numpy
 from Loader import Load
 from scipy import optimize
 
-from AbstractFitEngine import FitEngine, sansAssembly
+from AbstractFitEngine import FitEngine, sansAssembly,FitAbort
+print "in ScipyFitting fitabort",id(FitAbort),FitAbort.__class__.__module__
 
 class fitresult:
     """
@@ -26,6 +27,10 @@ class fitresult:
     stderr    = None
     parameters= None
     
+class old_FitAbort(Exception):
+    """
+        Exception raise to stop the fit
+    """
 class ScipyFit(FitEngine):
     """ 
         ScipyFit performs the Fit.This class can be used as follow:
@@ -61,7 +66,7 @@ class ScipyFit(FitEngine):
     #def fit(self, *args, **kw):
     #    return profile(self._fit, *args, **kw)
 
-    def fit(self ,handler=None):
+    def fit(self ,handler=None,curr_thread= None):
        
         fitproblem=[]
         for id ,fproblem in self.fitArrangeDict.iteritems():
@@ -80,26 +85,34 @@ class ScipyFit(FitEngine):
         # Concatenate dList set (contains one or more data)before fitting
         #data=self._concatenateData( listdata)
         data=listdata
-        functor= sansAssembly(self.paramList,model,data)
+        self.curr_thread= curr_thread
         
-        out, cov_x, info, mesg, success = optimize.leastsq(functor,model.getParams(self.paramList), full_output=1, warning=True)
-        chisqr = functor.chisq(out)
+        try:
+            functor= sansAssembly(self.paramList,model,data, curr_thread= self.curr_thread)
+            out, cov_x, info, mesg, success = optimize.leastsq(functor,model.getParams(self.paramList), full_output=1, warning=True)
+            
+            chisqr = functor.chisq(out)
+            
+            if cov_x is not None and numpy.isfinite(cov_x).all():
+                stderr = numpy.sqrt(numpy.diag(cov_x))
+            else:
+                stderr=None
+            if not (numpy.isnan(out).any()) or ( cov_x !=None) :
+                    result = fitresult()
+                    result.fitness = chisqr
+                    result.stderr  = stderr
+                    result.pvec = out
+                    result.success =success
+                    return result
+            else:  
+                raise ValueError, "SVD did not converge"+str(success)
+        except FitAbort:
+            ## fit engine is stop
+            print "fitabort====>"
+            return None
         
-        if cov_x is not None and numpy.isfinite(cov_x).all():
-            stderr = numpy.sqrt(numpy.diag(cov_x))
-        else:
-            stderr=None
-        if not (numpy.isnan(out).any()) or ( cov_x !=None) :
-                result = fitresult()
-                result.fitness = chisqr
-                result.stderr  = stderr
-                result.pvec = out
-                result.success =success
-               
-                return result
-        else:  
-            raise ValueError, "SVD did not converge"+str(success)
-        
+        except:
+            return Fitresult()
        
 def profile(fn, *args, **kw):
     import cProfile, pstats, os

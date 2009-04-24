@@ -50,10 +50,10 @@ class Fit:
         
    
     
-    def fit(self,handler=None):
+    def fit(self,handler=None, curr_thread=None):
         """Perform the fit """
     
-        return self._engine.fit(handler)
+        return self._engine.fit(handler, curr_thread= curr_thread)
     
     
     def set_model(self,model,Uid,pars=[]):

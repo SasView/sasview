@@ -87,7 +87,7 @@ class ParkFit(FitEngine):
         self.problem =  park.Assembly(mylist)
         
     
-    def fit(self,handler=None):
+    def fit(self,handler=None, curr_thread= None):
         """
             Performs fit with park.fit module.It can  perform fit with one model
             and a set of data, more than two fit of  one model and sets of data or 
