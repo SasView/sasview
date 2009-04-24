@@ -353,8 +353,8 @@ class Plugin:
         """
             Stop the fit engine
         """
-        if self.calc_fit!= None and self.calc_thread.isrunning():
-            self.calc_thread.stop()
+        if self.calc_fit!= None and self.calc_fit.isrunning():
+            self.calc_fit.stop()
             wx.PostEvent(self.parent, StatusEvent(status="Fitting  \
                 is cancelled" , type="stop"))
             
@@ -680,8 +680,12 @@ class Plugin:
         complete! " ))
       
         try:
+            if result ==None:
+                msg= "Simple Fitting Stop !!!"
+                wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+                return
             if numpy.any(result.pvec ==None )or not numpy.all(numpy.isfinite(result.pvec) ):
-                msg= "Fitting did not converge!!!"
+                msg= "Single Fitting did not converge!!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
                 return
             for page, value in self.page_finder.iteritems():
@@ -726,6 +730,14 @@ class Plugin:
        
         ## fit more than 1 model at the same time 
         try:
+            if result ==None:
+                msg= "Complex Fitting Stop !!!"
+                wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+                return
+            if numpy.any(result.pvec ==None )or not numpy.all(numpy.isfinite(result.pvec) ):
+                msg= "Single Fitting did not converge!!!"
+                wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+                return
             for page, value in self.page_finder.iteritems():
                 if value.get_scheduled()==1:
                     model = value.get_model()

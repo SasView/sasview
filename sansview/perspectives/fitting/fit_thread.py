@@ -138,7 +138,7 @@ class FitThread(CalcThread):
             #Handler used for park engine displayed message
             handler= ConsoleUpdate(parent= self.parent,improvement_delta=0.1)
             #Result from the fit
-            result = self.fitter.fit(handler= handler)
+            result = self.fitter.fit(handler= handler, curr_thread=self)
         
             elapsed = time.time()-self.starttime
             self.complete(result= result,
@@ -149,6 +149,10 @@ class FitThread(CalcThread):
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
+            #print "keyboard exception"
             raise
-      
+        
+        except :
+            #print "uncaught exception"
+            raise
     

@@ -67,6 +67,8 @@ class FitPage(BasicPage):
          
         if len(self.parameters)==0:
             return
+        if event.type =="park":
+            self.btFit.SetLabel("Fit")
         for item in self.parameters:
             if event.type =="scipy":
                 item[5].SetValue("")
@@ -453,7 +455,6 @@ class FitPage(BasicPage):
         """
             Allow to fit
         """
-        #self.btFit.SetLabel("Stop")
         from sans.guiframe.utils import check_value
         flag = check_value( self.qmin, self.qmax) 
         
@@ -468,23 +469,43 @@ class FitPage(BasicPage):
             return 
 
         # Remove or do not allow fitting on the Q=0 point, especially when y(q=0)=None at x[0].
-        #ToDo: Fix this.
-        #if float(self.qmin.GetValue())==0.0 and self.data.x[0]==0 and not numpy.isfinite(self.data.y[0]):
-        #    self.qmin_x = min(self.data.x[self.data.x!=0])
-        #else:                       
+        #ToDo: Fix this.                
         self.qmin_x = float(self.qmin.GetValue())
-        
         self.qmax_x =float( self.qmax.GetValue())
         self.manager._reset_schedule_problem( value=0)
         self.manager.schedule_for_fit( value=1,page=self,fitproblem =None) 
         self.manager.set_fit_range(page= self,qmin= self.qmin_x, qmax= self.qmax_x)
+        
         #single fit 
         self.manager.onFit()
+        ## allow stopping the fit 
+        if self.engine_type=="scipy":
+            self.btFit.SetLabel("Stop")
+            self.btFit.Unbind(event=wx.EVT_BUTTON, id= self.btFit.GetId())
+            self.btFit.Bind(event= wx.EVT_BUTTON, handler=self._StopFit, id=self.btFit.GetId())
+        else:
+            self.btFit.SetLabel("Fit")
+            self.btFit.Bind(event= wx.EVT_BUTTON, handler=self._onFit, id=self.btFit.GetId())
         self.btFit.SetFocus()    
         self.sizer5.Layout()
         self.SetScrollbars(20,20,55,40)
         
-        
+    def _StopFit(self, event):
+        """
+            Stop fit 
+        """
+        self.btFit.SetLabel("Fit")
+        if self.engine_type=="scipy":
+            self.manager.stop_fit()
+            self.btFit.Unbind(event=wx.EVT_BUTTON, id=self.btFit.GetId())
+            self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit,id=self.btFit.GetId())
+        else:
+            self.btFit.Unbind(event=wx.EVT_BUTTON, id=self.btFit.GetId())
+            self.btFit.Bind(event= wx.EVT_BUTTON, handler=self._onFit, id=self.btFit.GetId())
+        self.btFit.SetFocus()    
+        self.sizer5.Layout()
+        self.SetScrollbars(20,20,55,40)    
+            
     def _on_select_model(self, event): 
         """
              call back for model selection
@@ -618,7 +639,7 @@ class FitPage(BasicPage):
                                 self.text_disp_1.Show(True)
                 except:
                     pass
-                if cov[0]==None:  
+                if cov[0]==None or  not numpy.isfinite(cov[0]): 
                     self.param_toFit[0][3].Hide()
                     self.param_toFit[0][4].Clear()
                     self.param_toFit[0][4].Hide()
@@ -657,7 +678,7 @@ class FitPage(BasicPage):
                         if out[j]==self.model.getParam(item[1]):
                             break
                     ## unable to compare cov[j]==numpy.nan so switch to None
-                    if cov[j]==None:
+                    if cov[j]==None or not numpy.isfinite(cov[j]):
                         item[3].Hide()
                         item[4].Refresh()
                         item[4].Clear()
