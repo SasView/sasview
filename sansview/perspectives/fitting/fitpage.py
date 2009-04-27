@@ -16,6 +16,7 @@ from sans.guiframe.utils import format_number,check_float
 
 ## event to know the selected fit engine
 (FitterTypeEvent, EVT_FITTER_TYPE)   = wx.lib.newevent.NewEvent()
+(FitStopEvent, EVT_FIT_STOP)   = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 76
 
 import basepage
@@ -56,8 +57,18 @@ class FitPage(BasicPage):
        
         ## to update the panel according to the fit engine type selected
         self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
+        self.Bind(EVT_FIT_STOP,self._on_fit_complete)
     
-    
+    def _on_fit_complete(self, event):
+        """
+            When fit is complete ,reset the fit button label.
+        """
+        #self.btFit.SetLabel("Fit")
+        #self.btFit.Unbind(event=wx.EVT_BUTTON, id=self.btFit.GetId())
+        #self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit,id=self.btFit.GetId())
+        pass
+        
+        
     def _on_engine_change(self, event):
         """
             get an event containing the current name of the fit engine type
@@ -479,13 +490,13 @@ class FitPage(BasicPage):
         #single fit 
         self.manager.onFit()
         ## allow stopping the fit 
-        if self.engine_type=="scipy":
-            self.btFit.SetLabel("Stop")
-            self.btFit.Unbind(event=wx.EVT_BUTTON, id= self.btFit.GetId())
-            self.btFit.Bind(event= wx.EVT_BUTTON, handler=self._StopFit, id=self.btFit.GetId())
-        else:
-            self.btFit.SetLabel("Fit")
-            self.btFit.Bind(event= wx.EVT_BUTTON, handler=self._onFit, id=self.btFit.GetId())
+        #if self.engine_type=="scipy":
+        #    self.btFit.SetLabel("Stop")
+        #    self.btFit.Unbind(event=wx.EVT_BUTTON, id= self.btFit.GetId())
+        #    self.btFit.Bind(event= wx.EVT_BUTTON, handler=self._StopFit, id=self.btFit.GetId())
+        #else:
+        #    self.btFit.SetLabel("Fit")
+        #    self.btFit.Bind(event= wx.EVT_BUTTON, handler=self._onFit, id=self.btFit.GetId())
         self.btFit.SetFocus()    
         self.sizer5.Layout()
         self.SetScrollbars(20,20,55,40)
@@ -497,11 +508,10 @@ class FitPage(BasicPage):
         self.btFit.SetLabel("Fit")
         if self.engine_type=="scipy":
             self.manager.stop_fit()
-            self.btFit.Unbind(event=wx.EVT_BUTTON, id=self.btFit.GetId())
-            self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit,id=self.btFit.GetId())
-        else:
-            self.btFit.Unbind(event=wx.EVT_BUTTON, id=self.btFit.GetId())
-            self.btFit.Bind(event= wx.EVT_BUTTON, handler=self._onFit, id=self.btFit.GetId())
+        self.btFit.Unbind(event=wx.EVT_BUTTON, id=self.btFit.GetId())
+        self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit,id=self.btFit.GetId())
+       
+            
         self.btFit.SetFocus()    
         self.sizer5.Layout()
         self.SetScrollbars(20,20,55,40)    
