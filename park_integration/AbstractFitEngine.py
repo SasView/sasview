@@ -394,12 +394,11 @@ class sansAssembly:
         #import thread
         self.model.setParams(self.paramlist,params)
         self.res= self.data.residuals(self.model.eval)
-        if self.curr_thread != None :
-            try:
-                self.curr_thread.isquit()
-            except:
-                raise FitAbort,"stop leastsqr optimizer"
-                
+        #if self.curr_thread != None :
+        #    try:
+        #        self.curr_thread.isquit()
+        #    except:
+        #        raise FitAbort,"stop leastsqr optimizer" 
         return self.res
     
 class FitEngine:

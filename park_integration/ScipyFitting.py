@@ -102,9 +102,7 @@ class ScipyFit(FitEngine):
                 raise ValueError, "SVD did not converge"+str(success)
         except FitAbort:
             ## fit engine is stop
-            print "fitabort====>"
-            #raise
-            return
+            return None
         
         except:
             raise
