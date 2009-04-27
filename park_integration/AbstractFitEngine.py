@@ -396,7 +396,7 @@ class sansAssembly:
         self.res= self.data.residuals(self.model.eval)
         if self.curr_thread != None :
             try:
-                 self.curr_thread.isquit()
+                self.curr_thread.isquit()
             except:
                 raise FitAbort,"stop leastsqr optimizer"
                 

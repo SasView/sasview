@@ -3,14 +3,11 @@
     Parameter classes.All listed classes work together to perform a 
     simple fit with scipy optimizer.
 """
-#import scipy.linalg
-import numpy 
 
-from Loader import Load
+import numpy 
 from scipy import optimize
 
 from AbstractFitEngine import FitEngine, sansAssembly,FitAbort
-print "in ScipyFitting fitabort",id(FitAbort),FitAbort.__class__.__module__
 
 class fitresult:
     """
@@ -27,10 +24,7 @@ class fitresult:
     stderr    = None
     parameters= None
     
-class old_FitAbort(Exception):
-    """
-        Exception raise to stop the fit
-    """
+
 class ScipyFit(FitEngine):
     """ 
         ScipyFit performs the Fit.This class can be used as follow:
@@ -102,17 +96,18 @@ class ScipyFit(FitEngine):
                     result.fitness = chisqr
                     result.stderr  = stderr
                     result.pvec = out
-                    result.success =success
+                    result.success = success
                     return result
             else:  
                 raise ValueError, "SVD did not converge"+str(success)
         except FitAbort:
             ## fit engine is stop
             print "fitabort====>"
-            return None
+            #raise
+            return
         
         except:
-            return Fitresult()
+            raise
        
 def profile(fn, *args, **kw):
     import cProfile, pstats, os
