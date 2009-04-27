@@ -55,7 +55,6 @@ class CalcChisqr1D(CalcThread):
         if self.dy==None or self.dy==[]:
             self.dy= numpy.zeros(len(self.y))
         self.dy[self.dy==0]=1
-        
         if self.qmin==None:
             self.qmin= min(self.x)
         
@@ -72,7 +71,7 @@ class CalcChisqr1D(CalcThread):
                
                 # Check whether we need to bail out
                 self.isquit()   
-                fx[i_x]=self.model.run(i_x)
+                fx[i_x]=self.model.run(self.x[i_x])
                 
             if self.smearer!=None:
                 fx= self.smearer(fx)
@@ -81,6 +80,8 @@ class CalcChisqr1D(CalcThread):
                 self.isquit()   
                 temp=(self.y[i_y] - fx[i_y])/self.dy[i_y]
                 res.append(temp*temp)
+            
+            
             #sum of residuals
             sum=0
             for item in res:
