@@ -224,7 +224,7 @@ class FitData1D(object):
         
         # Skip Q=0 point, (especially for y(q=0)=None at x[0]).
         #ToDo: Fix this.
-        if qmin==0.0:
+        if qmin==0.0 and not numpy.isfinite(self.data.y[qmin]):
             self.qmin = min(self.data.x[self.data.x!=0])
         elif qmin!=None:                       
             self.qmin = qmin            
