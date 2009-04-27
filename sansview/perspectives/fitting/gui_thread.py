@@ -51,12 +51,17 @@ class CalcChisqr1D(CalcThread):
             Compute the data given a model function
         """
         self.starttime = time.time()
+       
         x,y = [numpy.asarray(v) for v in (self.x,self.y)]
         if self.dy==None or self.dy==[]:
             self.dy= numpy.zeros(len(self.y))
         self.dy[self.dy==0]=1
+       
         if self.qmin==None:
-            self.qmin= min(self.x)
+            if min (self.x) ==0.0 and self.x[0]==0 and not numpy.isfinite(self.y[0]):
+                self.qmin = min(self.x[sel.x!=0])
+            else:
+                self.qmin= min(self.x)
         
         if self.qmax==None:
             self.qmax= max(self.x)
@@ -70,18 +75,19 @@ class CalcChisqr1D(CalcThread):
             for i_x in range(len(self.x)):
                
                 # Check whether we need to bail out
-                self.isquit()   
+                self.isquit()  
+               
                 fx[i_x]=self.model.run(self.x[i_x])
                 
             if self.smearer!=None:
                 fx= self.smearer(fx)
+                
             for i_y in range(len(fx)):
                 # Check whether we need to bail out
                 self.isquit()   
+               
                 temp=(self.y[i_y] - fx[i_y])/self.dy[i_y]
                 res.append(temp*temp)
-            
-            
             #sum of residuals
             sum=0
             for item in res:
