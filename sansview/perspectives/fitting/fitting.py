@@ -23,7 +23,7 @@ DEFAULT_QMAX = 0.1
 DEFAULT_NPTS = 50
 import time
 import thread
-
+from sans.fit.AbstractFitEngine import FitAbort
 
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
 class PlotInfo:
@@ -479,7 +479,9 @@ class Plugin:
                                        updatefn=self._updateFit)
             self.calc_fit.queue()
             self.calc_fit.ready(2.5)
-            
+        
+        except FitAbort:
+            print "in pluging"
         except:
             msg= "%s error: %s" % (engineType,sys.exc_value)
             wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
@@ -578,7 +580,6 @@ class Plugin:
         """
         self.panel = event.GetEventObject()
         for plottable in self.panel.graph.plottables:
-            
             if plottable.name == self.panel.graph.selected_plottable:
                 #if not hasattr(plottable, "is_data"):
                     
@@ -605,7 +606,7 @@ class Plugin:
                         data= self.copy_data(item, dy)
                         data.is_data= item.is_data
                     else:
-                        data= self.copy_data(item)
+                        data= self.copy_data(item, item.dy)
                         data.is_data= item.is_data
                         
                        
@@ -615,7 +616,7 @@ class Plugin:
                         data= self.copy_data(item, dy)
                         data.is_data=item.is_data
                     else:
-                        data= self.copy_data(item)
+                        data= self.copy_data(item,item.dy)
                         data.is_data=item.is_data
                        
             else:

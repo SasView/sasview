@@ -44,7 +44,7 @@ class FitPage(BasicPage):
         self.engine_type = None
         ## draw sizer
         self._fill_datainfo_sizer()
-        print "self.qmin, self.qmax====>",self.qmax_x,self.qmin_x
+       
         self._fill_model_sizer( self.sizer1)
         self._fill_range_sizer() 
         self._on_select_model(event=None)
@@ -553,7 +553,10 @@ class FitPage(BasicPage):
         tcrtl= event.GetEventObject()
         if check_float(tcrtl):
             self._onparamEnter_helper()
-            self.compute_chisqr()
+            temp_smearer = None
+            if self.enable_smearer.GetValue():
+                temp_smearer= self.smearer
+            self.compute_chisqr(smearer= temp_smearer)
         else:
             msg= "Cannot Plot :Must enter a number!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
