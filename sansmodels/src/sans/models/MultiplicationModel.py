@@ -7,7 +7,7 @@ from sans.models.DiamCylFunc import  DiamCylFunc
 from sans.models.DiamEllipFunc import  DiamEllipFunc
 class MultiplicationModel(BaseComponent):
     """
-        Use for S(Q)*P(Q).
+        Use for P(Q)*S(Q); function call maut be in order of P(Q) and then S(Q).
         Perform multplication of two models.
         Contains the models parameters combined.
     """
@@ -96,7 +96,8 @@ class MultiplicationModel(BaseComponent):
             self.dispersion[name]= value
             
         for name , value in self.model2.dispersion.iteritems():
-            if not name in self.dispersion.keys()and name !='radius':
+            # S(Q) has only 'radius' for dispersion.
+            if not name in self.dispersion.keys()and name !='radius': 
                 self.dispersion[name]= value
 
                     
@@ -234,9 +235,11 @@ class MultiplicationModel(BaseComponent):
         try:
             if parameter in self.model1.dispersion.keys():
                 value= self.model1.set_dispersion(parameter, dispersion)
-              
-            elif parameter in self.model2.dispersion.keys():
+            #There is no dispersion for the structure factors(S(Q)). 
+            #ToDo: need to decide whether or not the dispersion for S(Q) has to be considered for P*S.  
+            elif parameter in self.model2.dispersion.keys()and name !='radius':
                 value= self.model2.set_dispersion(parameter, dispersion)
+            self._set_dispersion()
             return value
         except:
             raise 
