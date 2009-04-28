@@ -242,7 +242,7 @@ class FitPanel(wx.aui.AuiNotebook):
         return None
         
    
-    def add_model_page(self,model,page_title="Model", qmin=0, qmax=0.1,
+    def add_model_page(self,model,page_title="Model", qmin=0.0001, qmax=0.13,
                         npts=50, topmenu=False, reset=False):
         """
             Add a model page only one  to display any model selected from the menu or the page combo box.
@@ -276,8 +276,8 @@ class FitPanel(wx.aui.AuiNotebook):
             self.fit_page_name[page.window_name].insert(0,page.createMemento()) 
             
                 
-    def _help_add_model_page(self,model,page_title="Model", qmin=0, 
-                             qmax=0.1, npts=50,reset= False):
+    def _help_add_model_page(self,model,page_title="Model", qmin=0.0001, 
+                             qmax=0.13, npts=50,reset= False):
         """
             #TODO: fill in description
             
@@ -315,6 +315,6 @@ class FitPanel(wx.aui.AuiNotebook):
         # We just created a model page, we are ready to plot the model
         #self.manager.draw_model(model, model.name)
         #FOR PLUGIN  for some reason model.name is = BASEcomponent
-        self.manager.draw_model(model)
+        self.manager.draw_model(model, qmin=qmin, qmax=qmax)
   
   
