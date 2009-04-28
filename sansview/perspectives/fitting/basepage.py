@@ -817,17 +817,18 @@ class BasicPage(wx.ScrolledWindow):
                             break
                     break
         else:
-            ## Select the model from the combobox
+
+            ## Select the model from the menu
             class_name = model.__class__
             name = model.name
             self.formfactorbox.Clear()
             items = self.formfactorbox.GetItems()
     
-            for k, list in self.model_list_box.iteritems():
+            for k, list in self.model_list_box.iteritems():          
                 if k in["P(Q)*S(Q)","Shapes" ] and class_name in self.model_list_box["Shapes"]:
-                    
                     if class_name in self.model_list_box["P(Q)*S(Q)"]:
                         self.structurebox.Enable()
+                        self.structurebox.SetSelection(0)
                     else:
                         self.structurebox.Disable()
                         self.structurebox.SetSelection(0)
@@ -845,7 +846,7 @@ class BasicPage(wx.ScrolledWindow):
                 elif k == "Shape-Independent":
                     self.shape_indep_rbutton.SetValue(True)
                 elif k == "Structure Factors":
-                     self.struct_rbutton.SetValue(True)
+                    self.struct_rbutton.SetValue(True)
                 else:
                     self.plugin_rbutton.SetValue(True)
                 if class_name in list:
