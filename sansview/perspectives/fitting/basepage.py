@@ -66,7 +66,7 @@ class BasicPage(wx.ScrolledWindow):
         ## check that the fit range is correct to plot the model again
         self.fitrange= True
         ## Q range
-        self.qmin_x= 0.001
+        self.qmin_x= 0.0001
         self.qmax_x= 0.13
         self.num_points= 100
         ## Create memento to save the current state
