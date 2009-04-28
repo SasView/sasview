@@ -18,8 +18,8 @@ import fitpage
 
 
 DEFAULT_BEAM = 0.005
-DEFAULT_QMIN = 0.0
-DEFAULT_QMAX = 0.1
+DEFAULT_QMIN = 0.0001
+DEFAULT_QMAX = 0.13
 DEFAULT_NPTS = 50
 import time
 import thread
