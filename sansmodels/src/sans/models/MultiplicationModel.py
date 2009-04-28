@@ -209,13 +209,6 @@ class MultiplicationModel(BaseComponent):
             @param x: input q-value (float or [float, float] as [r, theta])
             @return: (DAB value)
         """
-        #MultiplicationModel(self.model1, self.model2 )      
-           
-        #if self.modelD!=None:
-        #    value = self.modelD.run(x)
-        #    self.model2.setParam( "radius", value)        
-                        
-            #print "self.model2.setParam( radius, value)",value 
         return self.model1.run(x)*self.model2.run(x)
    
     def runXY(self, x = 0.0):
