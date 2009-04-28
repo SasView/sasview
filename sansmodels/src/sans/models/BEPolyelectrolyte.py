@@ -87,19 +87,23 @@ class BEPolyelectrolyte(BaseComponent):
                    Ca = C*6.022136e-4
         """
         Ca = self.params['c'] * 6.022136e-4
-        
-        K2 = 4.0 * math.pi * self.params['lb'] * (2*self.params['cs'] + \
-                 self.params['alpha'] * Ca)
-        
-        r02 = 1.0/self.params['alpha']/math.sqrt(Ca) * \
-                (self.params['b']/math.sqrt((48.0*math.pi *self.params['lb'])))
-        
-        return self.params['k']/( 4.0 * math.pi * self.params['lb'] * self.params['alpha']**2 ) \
-               * ( x**2 + K2 ) / ( 1.0 + r02**2 * ( x**2 + K2 ) \
-                    * (x**2 - ( 12.0 * self.params['h'] \
-                    * Ca/(self.params['b']**2) ))) \
-                    + self.params['background']
-        
+        #remove singulars
+        if self.params['alpha']<=0 or self.params['c']<=0 or self.params['b']==0 or self.params['lb']<=0:
+            return 0
+        else:
+            
+            K2 = 4.0 * math.pi * self.params['lb'] * (2*self.params['cs'] + \
+                     self.params['alpha'] * Ca)
+            
+            r02 = 1.0/self.params['alpha']/math.sqrt(Ca) * \
+                    (self.params['b']/math.sqrt((48.0*math.pi *self.params['lb'])))
+            
+            return self.params['k']/( 4.0 * math.pi * self.params['lb'] * self.params['alpha']**2 ) \
+                   * ( x**2 + K2 ) / ( 1.0 + r02**2 * ( x**2 + K2 ) \
+                        * (x**2 - ( 12.0 * self.params['h'] \
+                        * Ca/(self.params['b']**2) ))) \
+                        + self.params['background']
+            
    
     def run(self, x = 0.0):
         """ Evaluate the model
