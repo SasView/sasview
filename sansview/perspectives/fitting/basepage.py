@@ -774,6 +774,7 @@ class BasicPage(wx.ScrolledWindow):
             flag= name != "NoStructure"
             if flag and (class_name in self.model_list_box["Structure Factors"]):
                 self.structurebox.Enable()
+                self.text2.Enable()
                 items = self.structurebox.GetItems()
                 self.sizer1.Layout()
                 self.SetScrollbars(20,20,200,100)
@@ -829,9 +830,11 @@ class BasicPage(wx.ScrolledWindow):
                     if class_name in self.model_list_box["P(Q)*S(Q)"]:
                         self.structurebox.Enable()
                         self.structurebox.SetSelection(0)
+                        self.text2.Enable()
                     else:
                         self.structurebox.Disable()
                         self.structurebox.SetSelection(0)
+                        self.text2.Disable()
                         
                     self.shape_rbutton.SetValue(True)
                     ## fill the form factor list with new model
@@ -852,6 +855,7 @@ class BasicPage(wx.ScrolledWindow):
                 if class_name in list:
                     self.structurebox.SetSelection(0)
                     self.structurebox.Disable()
+                    self.text2.Disable()                    
                     ## fill the form factor list with new model
                     self._populate_box(self.formfactorbox, list)
                     items = self.formfactorbox.GetItems()
@@ -939,10 +943,11 @@ class BasicPage(wx.ScrolledWindow):
             self.structurebox.Insert("None", 0,None)
             self.structurebox.SetSelection(0)
             self.structurebox.Disable()
- 
+            self.text2.Disable()
+             
             if self.model.__class__ in self.model_list_box["P(Q)*S(Q)"]:
                 self.structurebox.Enable()
-            
+                self.text2.Enable()            
         
         ## check model type to show sizer
         if self.model !=None:
