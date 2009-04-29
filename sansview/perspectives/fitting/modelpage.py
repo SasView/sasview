@@ -329,9 +329,8 @@ class ModelPage(BasicPage):
             @param model: model object 
         """
         self.model = model
-        if self.model ==None:
-            self.set_model_param_sizer(self.model)
-            return 
+        
+        self.set_model_param_sizer(self.model)
         self.set_model_param_sizer(self.model)  
         ## keep the sizer view consistent with the model menu selecting
         self._set_model_sizer_selection( self.model )
@@ -339,7 +338,8 @@ class ModelPage(BasicPage):
         self.disable_disp.SetValue(True)
         self.set_dispers_sizer()
         self.model_view.SetFocus()
-        self._draw_model()
+        if self.model !=None:
+            self._draw_model()
                          
     
     def set_model_description(self,description,sizer):

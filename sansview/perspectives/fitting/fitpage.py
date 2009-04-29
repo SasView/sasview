@@ -521,25 +521,22 @@ class FitPage(BasicPage):
              call back for model selection
         """    
         self._on_select_model_helper() 
-        if self.model == None:    
-            self.set_model_param_sizer(self.model)                   
-            return
-        else:
-            self.set_model_param_sizer(self.model)
-        try:
-            temp_smear= None
-            if self.enable_smearer.GetValue():
-                temp_smear= self.smearer
-            self.compute_chisqr(temp_smear)
-        except:
-            ## error occured on chisqr computation
-            pass
+        self.set_model_param_sizer(self.model)                   
+       
         self.enable_disp.SetValue(False)
         self.disable_disp.SetValue(True)
         self.set_dispers_sizer()
-        
-        evt = ModelEventbox(model=self.model)
-        wx.PostEvent(self.event_owner, evt)   
+        if self.model !=None:
+            try:
+                temp_smear= None
+                if self.enable_smearer.GetValue():
+                    temp_smear= self.smearer
+                self.compute_chisqr(temp_smear)
+            except:
+                ## error occured on chisqr computation
+                pass
+            evt = ModelEventbox(model=self.model)
+            wx.PostEvent(self.event_owner, evt)   
         
    
     def _onparamRangeEnter(self, event):

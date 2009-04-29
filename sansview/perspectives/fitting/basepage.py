@@ -61,6 +61,7 @@ class BasicPage(wx.ScrolledWindow):
         self.orientation_params_disp=[]
         if self.model !=None:
             self.disp_list= self.model.getDispParamList()
+        
         ##enable model 2D draw
         self.enable2D= False
         ## check that the fit range is correct to plot the model again
@@ -450,10 +451,17 @@ class BasicPage(wx.ScrolledWindow):
         self.state.save_data(self.data)
         
         self.state.enable2D = copy.deepcopy(self.enable2D)
-        
-        if hasattr(self,"cb1"):
-            self.state.cb1= self.cb1.GetValue()
+        try:
+            n = self.disp_box.GetCurrentSelection()
+            dispersity= self.disp_box.GetClientData(n)
+            name= dispersity.__name__
+            if name == "GaussianDispersion":
+               if hasattr(self,"cb1"):
+                   self.state.cb1= self.cb1.GetValue()
            
+        except:
+            pass
+        
         if hasattr(self,"enable_disp"):
             self.state.enable_disp= self.enable_disp.GetValue()
             self.state.disable_disp = self.disable_disp.GetValue()
@@ -767,6 +775,8 @@ class BasicPage(wx.ScrolledWindow):
         """
             Display the sizer according to the type of the current model
         """
+        if model ==None:
+            return
         if hasattr(model ,"model2"):
             
             class_name= model.model2.__class__
@@ -1168,7 +1178,15 @@ class BasicPage(wx.ScrolledWindow):
             Add more item to select user dispersity
         """
         self._reset_dispersity()
-       
+        if self.model ==None:
+            self.model_disp.Hide()
+            self.disp_box.Hide()
+            self.sizer4_4.Clear(True)
+            self._reset_dispersity()
+            ## post state to fit panel
+            self.save_current_state()
+            return
+            
         if self.enable_disp.GetValue():
             self.model_disp.Show(True)
             self.disp_box.Show(True)
@@ -1321,8 +1339,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.SetScrollbars(20,20,200,100)
-        
-        
+
     def _set_range_sizer(self, title, object1=None,object=None):
         """
             Fill the 
