@@ -399,9 +399,10 @@ class ModelPage(BasicPage):
         """
         from helpPanel import  HelpWindow
         
-        name = self.model.name
-        if name == None:
+        if self.model == None:
             name = 'FuncHelp'
+        else:
+            name = self.model.name
         frame = HelpWindow(None, -1, name)    
         frame.Show(True)
         if frame.rhelp.HasAnchor(name):
