@@ -36,7 +36,7 @@ class ModelPage(BasicPage):
         if self.model!=None:
             description = self.model.description
             
-            self.select_model(self.model, self.model.name)
+            self.select_model(self.model)
             self.set_model_description(description,self.sizer2)
             
      
@@ -100,7 +100,8 @@ class ModelPage(BasicPage):
              call back for model selection
         """    
         self._on_select_model_helper() 
-        self.select_model(self.model, self.model.name)
+
+        self.select_model(self.model)
         
        
     def _fill_model_sizer(self, sizer):
@@ -322,14 +323,16 @@ class ModelPage(BasicPage):
         self.reset_page_helper(state)
         
         
-    def select_model(self, model, name):
+    def select_model(self, model):
         """
             Select a new model
             @param model: model object 
         """
         self.model = model
-        self.set_model_param_sizer(self.model)
-       
+        if self.model ==None:
+            self.set_model_param_sizer(self.model)
+            return 
+        self.set_model_param_sizer(self.model)  
         ## keep the sizer view consistent with the model menu selecting
         self._set_model_sizer_selection( self.model )
         self.enable_disp.SetValue(False)
@@ -447,6 +450,8 @@ class ModelPage(BasicPage):
         self.orientation_params_disp=[]
         if model ==None:
             ##no model avaiable to draw sizer 
+            self.sizer3.Layout()
+            self.SetScrollbars(20,20,200,100)
             return
         box_description= wx.StaticBox(self, -1,str("Model Parameters"))
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)

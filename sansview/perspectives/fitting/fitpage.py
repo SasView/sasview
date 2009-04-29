@@ -48,7 +48,7 @@ class FitPage(BasicPage):
        
         self._fill_model_sizer( self.sizer1)
         self._fill_range_sizer() 
-        self._on_select_model(event=None)
+        #self._on_select_model(event=None)
         if self.data !=None:
             self.smearer = smear_selection( self.data )
             if self.smearer ==None:
@@ -521,7 +521,11 @@ class FitPage(BasicPage):
              call back for model selection
         """    
         self._on_select_model_helper() 
-        self.set_model_param_sizer(self.model)
+        if self.model == None:    
+            self.set_model_param_sizer(self.model)                   
+            return
+        else:
+            self.set_model_param_sizer(self.model)
         try:
             temp_smear= None
             if self.enable_smearer.GetValue():

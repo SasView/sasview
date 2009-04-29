@@ -1035,12 +1035,12 @@ class BasicPage(wx.ScrolledWindow):
                 if hasattr(model, "name"):
                     name = model.name
                 combobox.Append(name,models)
-        try:
+        #try:
 
-            combobox.SetSelection(0)
+            #combobox.SetSelection(0)
             
-        except:
-            pass
+        #except:
+            #pass
     
         return 0
    
@@ -1069,7 +1069,11 @@ class BasicPage(wx.ScrolledWindow):
             from sans.models.MultiplicationModel import MultiplicationModel
             self.model= MultiplicationModel(form_factor(),struct_factor())
         else:
-            self.model= form_factor()
+            if form_factor != None:
+                self.model= form_factor()
+            else:
+                self.model = None
+                return self.model
         
         ## post state to fit panel
         self.state.model =self.model

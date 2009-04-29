@@ -263,7 +263,7 @@ class FitPanel(wx.aui.AuiNotebook):
                                 qmin=qmin, qmax=qmax, npts=npts, reset=reset)
                 self.count +=1
             else:
-                self.model_page.select_model(model, page_title)
+                self.model_page.select_model(model)
                 self.fit_page_name[page_title].insert(0,self.model_page.createMemento())
       
            
