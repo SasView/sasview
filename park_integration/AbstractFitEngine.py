@@ -256,22 +256,41 @@ class FitData1D(object):
         else:
             dy= copy.deepcopy(self.dy)
             dy= numpy.asarray(dy)
+     
         dy[dy==0]=1
-        idx = (x>=self.qmin) & (x <= self.qmax)
+        #idx = (x>=self.qmin) & (x <= self.qmax)
   
         # Compute theory data f(x)
-        fx = numpy.zeros(len(x))
-        fx[idx] = numpy.asarray([fn(v) for v in x[idx]])
-        
-        # Smear theory data
-     
+        #fx = numpy.zeros(len(x))
+        tempy=[]
+        tempfx=[]
+        tempdy=[]
+        #fx[idx] = numpy.asarray([fn(v) for v in x[idx]])
+        for i_x in  range(len(x)):
+            try:
+                if self.qmin <=x[i_x] and x[i_x]<=self.qmax:
+                    value= fn(x[i_x])
+                    tempfx.append( value)
+                    tempy.append(y[i_x])
+                    tempdy.append(dy[i_x])
+            except:
+                ## skip error for model.run(x)
+                pass
+                 
+        ## Smear theory data
         if self.smearer is not None:
-            fx = self.smearer(fx)
+            tempfx = self.smearer(tempfx)
+        newy= numpy.asarray(tempy)
+        newfx= numpy.asarray(tempfx)
+        newdy= numpy.asarray(tempdy)
        
-        # Sanity check
-        if numpy.size(dy) < numpy.size(x):
+       
+        ## Sanity check
+        if numpy.size(newdy)!= numpy.size(newfx):
             raise RuntimeError, "FitData1D: invalid error array"
-        return (y[idx] - fx[idx])/dy[idx]
+        #return (y[idx] - fx[idx])/dy[idx]
+       
+        return (newy- newfx)/newdy
      
   
         
@@ -394,11 +413,12 @@ class sansAssembly:
         #import thread
         self.model.setParams(self.paramlist,params)
         self.res= self.data.residuals(self.model.eval)
-        #if self.curr_thread != None :
-        #    try:
-        #        self.curr_thread.isquit()
-        #    except:
-        #        raise FitAbort,"stop leastsqr optimizer" 
+        if self.curr_thread != None :
+            try:
+                self.curr_thread.isquit()
+            except:
+                raise FitAbort,"stop leastsqr optimizer" 
+                
         return self.res
     
 class FitEngine:
