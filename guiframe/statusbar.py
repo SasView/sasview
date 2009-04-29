@@ -30,7 +30,7 @@ class MyStatusBar(wx.StatusBar):
   
         """ 
         self.count +=1
-        if self.count ==60:
+        if self.count ==10:
             self.timer_stop.Stop() 
             self.gauge.Hide()
             self.SetStatusText( "", 0)
