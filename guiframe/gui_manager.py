@@ -591,7 +591,7 @@ class ViewerFrame(wx.Frame):
         """
             Display status message
         """
-        self.sb.clear_gauge( msg="")
+        #self.sb.clear_gauge( msg="")
         mythread=None
         mytype= None
         if hasattr(evt, "curr_thread"):
