@@ -56,12 +56,11 @@ class CalcChisqr1D(CalcThread):
         if self.dy==None or self.dy==[]:
             self.dy= numpy.zeros(len(self.y))
         self.dy[self.dy==0]=1
-       
-        if self.qmin==None:
-            if min (self.x) ==0.0 and self.x[0]==0 and not numpy.isfinite(self.y[0]):
-                self.qmin = min(self.x[sel.x!=0])
-            else:
-                self.qmin= min(self.x)
+        
+        if self.qmin==0.0 and not numpy.isfinite(self.y[self.qmin]):
+            self.qmin = min(self.x[sel.x!=0])      
+        elif self.qmin==None:
+            self.qmin= min(self.x)
         
         if self.qmax==None:
             self.qmax= max(self.x)
