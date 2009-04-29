@@ -1,13 +1,13 @@
 Release Notes
 =============
 
-SansView 0.9
+SansView 0.9.1
 
 Package name: None
 
-1- Version 0.9.0
+1- Version 0.9.1
 
-	- Release date: 04/21/2009
+	- Release date: 05/xx/2009
 	- Simultaneous fit of a number of different sets of data with/without the constraints. 
 	- Loading and displaying 1D and 2D data of various formats.
 	- 1D and 2D data fitting using Scipy or Park (a MC fitting optimizer) fit engine. 
