@@ -50,7 +50,7 @@ class Target:
     def __init__(self, **kw):
         self.__dict__.update(kw)
         # for the versioninfo resources
-        self.version = "0.9"
+        self.version = "0.9.1"
         self.company_name = "U Tennessee"
         self.copyright = "copyright 2009"
         self.name = "SansView"
@@ -92,7 +92,7 @@ for f in findall('test'):
 #
 # packages
 #
-packages = ['matplotlib', 'pytz']
+packages = ['matplotlib', 'pytz','encodings']
 includes = []
 excludes = [] 
 
