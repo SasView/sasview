@@ -620,6 +620,8 @@ class Plugin:
                         data.is_data=item.is_data
                        
             else:
+                if plottable.__class__.__name__ !="Data2D":
+                    return
                 ## Data2D case
                 if not hasattr(plottable, "is_data"):
                     item= copy.deepcopy(plottable)
