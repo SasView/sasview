@@ -87,6 +87,11 @@ for f in findall('doc'):
 for f in findall('test'):
     if os.path.split(f)[0].count('.svn')==0:
         data_files.append((os.path.split(f)[0], [f]))
+        
+# Copying the sample data user data
+for f in findall('plugins'):
+    if os.path.split(f)[0].count('.svn')==0:
+        data_files.append((os.path.split(f)[0], [f]))
 
     
 #
