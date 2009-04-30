@@ -7,7 +7,7 @@ Package name: None
 
 1- Version 0.9.1
 
-	- Release date: 05/xx/2009
+	- Release date: 05/01/2009
 	- Simultaneous fit of a number of different sets of data with/without the constraints. 
 	- Loading and displaying 1D and 2D data of various formats.
 	- 1D and 2D data fitting using Scipy or Park (a MC fitting optimizer) fit engine. 
@@ -27,19 +27,19 @@ Package name: None
 2- Downloading and Installing
 
 	2.1- System Requirements:
-		- Python version >= 2.5 should be running on the system
+		- Python version >= 2.5 and < 3.0 should be running on the system
 
 	2.2- Installing:
-		- Get the code from svn://danse.us/sans/releases/sansview-0.9.0 
-			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview-0.9.0' folder)
+		- Get the code from svn://danse.us/sans/releases/sansview-0.9.1 
+			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview-0.9.1' folder)
 		- This application is also dependent on the following DANSE code:
-			svn://danse.us/sans/releases/guiframe-0.1.5 (run 'python setup.py install' under the 'guiframe-0.1.5' folder)
-			svn://danse.us/sans/releases/guicomm-0.1.1 (run 'python setup.py install' under the 'guicomm-0.1.1' folder)
+			svn://danse.us/sans/releases/guiframe-0.1.6 (run 'python setup.py install' under the 'guiframe-0.1.6' folder)
+			svn://danse.us/sans/releases/guicomm-0.1.2 (run 'python setup.py install' under the 'guicomm-0.1.2' folder)
 			svn://danse.us/sans/releases/DataLoader-0.2.3 (run 'python setup.py install' under the 'DataLoader-0.2.3' folder)
-			svn://danse.us/sans/releases/park_integration-0.1.1 (run 'python setup.py install' under the 'park_integration-0.1.1' folder)
-			svn://danse.us/sans/releases/sansmodels-0.4.3 (run 'python setup.py install' under the 'sansmodels-0.4.3\src\' folder)
+			svn://danse.us/sans/releases/park_integration-0.1.2 (run 'python setup.py install' under the 'park_integration-0.1.2' folder)
+			svn://danse.us/sans/releases/sansmodels-0.4.4 (run 'python setup.py install' under the 'sansmodels-0.4.4\src\' folder)
 			svn://danse.us/park/releases/park-1.2 (run 'python setup.py install' under the 'park-1.2' folder)
-	        svn://danse.us/common/releases/plottools-0.1.4 (run 'python setup.py install'under the 'plottools-0.1.4\trunk\' folder)
+	        svn://danse.us/common/releases/plottools-0.1.5 (run 'python setup.py install'under the 'plottools-0.1.5\trunk\' folder)
 	        svn://danse.us/common/releases/util-0.1.1 (run 'python setup.py install'under the 'util-0.1.1' folder)
 		- The following modules are required:
 			* matplotlib >= 0.98.3
@@ -56,8 +56,7 @@ Package name: None
 		- None
 
 	3.2- Windows:
-		- None
-
+		- Fixed a bug in the version 0.9.0 that consists of always taking the fitting weights evenly for all data points even though the data set has dI in it.
 	3.3- Linux:
 		- None
 
