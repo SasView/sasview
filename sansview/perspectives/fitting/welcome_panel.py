@@ -95,7 +95,7 @@ class PanelAbout(wx.Panel):
         verwords = config.__version__.split('.')
         version = '.'.join(verwords[:-1])
         revision = verwords[-1]
-        self.label_title = wx.StaticText(self, -1, config.__appname__+ " "+str(version))
+        self.label_title = wx.StaticText(self, -1, config.__appname__+ " "+str(config.__version__))#(version))
         self.label_build = wx.StaticText(self, -1, "Build: "+str(config.__version__))
       
      
