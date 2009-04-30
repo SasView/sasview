@@ -42,15 +42,15 @@ SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 
 # Release version 0.9.0
-SANSMODELS = "0.4.3"
+SANSMODELS = "0.4.4"
 DATALOADER = "0.2.3"
 GUICOMM    = "0.1.2"
-GUIFRAME   = "0.1.5"
-SANSVIEW   = "0.9.0"
-PLOTTOOLS  = "0.1.4"
+GUIFRAME   = "0.1.6"
+SANSVIEW   = "0.9.1"
+PLOTTOOLS  = "0.1.5"
 UTIL       = "0.1.1"
 PARK       = "1.2"
-PARK_INTEG = "0.1.1"
+PARK_INTEG = "0.1.2"
 
 # URLs for SVN repos
 SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
