@@ -116,7 +116,7 @@ class DialogAbout(wx.Dialog):
         revision = verwords[-1]
         
         self.label_author.SetLabel(strLabel)
-        self.label_version.SetLabel(version)
+        self.label_version.SetLabel(config.__version__)#(version)
         self.label_svnrevision.SetLabel(config.__version__)
         
         # set bitmaps for logo buttons
