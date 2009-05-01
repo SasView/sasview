@@ -21,7 +21,8 @@ class BasicPage(wx.ScrolledWindow):
     window_caption = "Basic page "
     
     def __init__(self,parent, page_info):
-        wx.ScrolledWindow.__init__(self, parent)
+        wx.ScrolledWindow.__init__(self, parent,
+                 style= wx.FULL_REPAINT_ON_RESIZE )
         ##window_name
         self.window_name = page_info.window_name
         ##window_caption

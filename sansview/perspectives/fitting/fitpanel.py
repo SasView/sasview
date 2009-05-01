@@ -51,8 +51,11 @@ class FitPanel(wx.aui.AuiNotebook):
     window_caption = "Fit Panel "
     CENTER_PANE = True
     def __init__(self, parent, *args, **kwargs):
-        wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_DEFAULT_STYLE  )
-        
+        #wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_DEFAULT_STYLE  )
+        wx.aui.AuiNotebook.__init__(self,parent,-1,
+                    style= wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_DEFAULT_STYLE \
+                    |wx.CLIP_CHILDREN  )
+       
         
         self.manager=None
         self.parent=parent
@@ -60,7 +63,7 @@ class FitPanel(wx.aui.AuiNotebook):
         
         pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.onClosePage)
-        #Creating the default page --welcomed page
+        ##Creating the default page --welcomed page
         self.about_page=None
         from welcome_panel import PanelAbout
         self.about_page = PanelAbout(self, -1)

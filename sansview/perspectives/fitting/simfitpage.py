@@ -33,7 +33,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
     
     
     def __init__(self, parent,page_finder ={}, *args, **kwargs):
-        wx.ScrolledWindow.__init__(self, parent, *args, **kwargs)
+        wx.ScrolledWindow.__init__(self, parent,style= wx.FULL_REPAINT_ON_RESIZE )
         """
              Simultaneous page display
         """
