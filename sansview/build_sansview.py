@@ -41,7 +41,7 @@ PYTHON = "c:\python25\python"
 SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 
-# Release version 0.9.0
+# Release version 0.9.1
 SANSMODELS = "0.4.4"
 DATALOADER = "0.2.3"
 GUICOMM    = "0.1.2"
@@ -198,10 +198,33 @@ def prepare():
     # Move to the installation folder
     os.chdir(INSTALL_FOLDER)    
 
+def warning():
+    """
+        The build script will wipe out part of the site-packages.
+        Ask the user whether he wants to proceed.
+    """
+    print "WARNING!n"
+    print "In order to build a clean version of SansView, this script"
+    print "deletes anything found under site-packages for the following"
+    print "modules:"
+    print "   - danse"
+    print "   - data_util"
+    print "   - DataLoader"
+    print "   - park"
+    print "   - sans"
+    print "   - sans_extension\n"
+    answer = raw_input("Are you sure you want to proceed? [Y|N]")
+    return answer.upper()=="Y"
+        
 if __name__ == "__main__": 
     import sys
     
     print "Build script for SansView %s" % SANSVIEW
+    
+    # Make sure the user really wants to proceed
+    if not warning():
+        print "Execution canceled" 
+        sys.exit()
     
     if len(sys.argv)==1:
         # If there is no argument, build the installer
