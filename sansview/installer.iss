@@ -2,14 +2,14 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 [Setup]
-AppName=SansView-0.9.1
-AppVerName=SansView 0.9.1
+AppName=SansView-0.9
+AppVerName=SansView 0.9
 AppPublisher=University of Tennessee
 AppPublisherURL=http://danse.chem.utk.edu/
 AppSupportURL=http://danse.chem.utk.edu/
 AppUpdatesURL=http://danse.chem.utk.edu/
-DefaultDirName={pf}\SansView-0.9.1
-DefaultGroupName=DANSE\SansView-0.9.1
+DefaultDirName={pf}\SansView-0.9
+DefaultGroupName=DANSE\SansView-0.9
 DisableProgramGroupPage=yes
 LicenseFile=license.txt
 OutputBaseFilename=setupSansView
@@ -34,7 +34,7 @@ Source: "test\*"; DestDir: "{app}\test"; Flags: ignoreversion recursesubdirs cre
 [Icons]
 Name: "{group}\SansView"; Filename: "{app}\SansView.exe"; WorkingDir: "{app}"
 Name: "{group}\{cm:UninstallProgram,SansView}"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\SansView 0.9.1"; Filename: "{app}\SansView.exe"; Tasks: desktopicon; WorkingDir: "{app}"
+Name: "{commondesktop}\SansView 0.9"; Filename: "{app}\SansView.exe"; Tasks: desktopicon; WorkingDir: "{app}"
 
 [Run]
 Filename: "{app}\SansView.exe"; Description: "{cm:LaunchProgram,SansView}"; Flags: nowait postinstall skipifsilent
