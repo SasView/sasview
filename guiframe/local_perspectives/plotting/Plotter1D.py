@@ -19,6 +19,7 @@ from danse.common.plottools.plottables import Graph,Theory1D
 from sans.guiframe import dataFitting 
 from sans.guicomm.events import EVT_NEW_PLOT
 from sans.guicomm.events import StatusEvent ,NewPlotEvent,SlicerEvent,ErrorDataEvent
+from sans.guicomm.events import RemoveDataEvent
 from sans.guiframe.utils import PanelMenu
 
 from binder import BindArtist
@@ -161,11 +162,19 @@ class ModelPanel1D(PlotPanel):
             @param event: Menu event
         """
         ## Check if there is a selected graph to remove
-        if not self.graph.selected_plottable == None:
+        if not self.graph.selected_plottable == None and\
+            self.graph.selected_plottable in self.plots.keys():
+            color=self.graph.plottables[self.plots[self.graph.selected_plottable]]
+           
+            event = RemoveDataEvent(data =self.plots[self.graph.selected_plottable])
+            wx.PostEvent(self.parent, event)
             self.graph.delete(self.plots[self.graph.selected_plottable])
             del self.plots[self.graph.selected_plottable]
+            ## increment graph color
+            self.graph.color += color
             self.graph.render(self)
             self.subplot.figure.canvas.draw_idle()    
+           
             
 
     def onContextMenu(self, event):
@@ -332,7 +341,8 @@ class ModelPanel1D(PlotPanel):
         import numpy
         import time
         
-        if not self.graph.selected_plottable == None:
+        if not self.graph.selected_plottable == None \
+            and self.graph.selected_plottable in self.plots.keys():
             ##Reset the flag to display the hide option on the context menu
             self.errors_hide = False
             ## restore dy 

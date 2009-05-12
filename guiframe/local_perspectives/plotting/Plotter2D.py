@@ -463,7 +463,8 @@ class ModelPanel2D( ModelPanel1D):
         self.slicer.set_panel_name( name= new_panel.window_caption)
         ## post slicer panel to guiframe to display it 
         from sans.guicomm.events import SlicerPanelEvent
-        wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer))
+        wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer,
+                                                    main_panel =self))
 
         
     def onBoxavgX(self,event):
