@@ -73,7 +73,7 @@ class SlicerPanel(wx.Panel):
             self.parameters = []
             keys = params.keys()
             keys.sort()
-            
+           
             for item in keys:
                 if not  item.lower() in ["errors", "count"]:
                     n += 1
@@ -86,7 +86,7 @@ class SlicerPanel(wx.Panel):
                     self.Bind(wx.EVT_TEXT_ENTER, self.onTextEnter)
                     ctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
                     ctl.Bind(wx.EVT_KILL_FOCUS, self.onTextEnter)
-                    
+                   
                     self.parameters.append([item, ctl])
                     self.bck.Add(ctl, (n-1,1), flag=wx.TOP|wx.BOTTOM, border = 0)
             for item in keys:
@@ -97,9 +97,10 @@ class SlicerPanel(wx.Panel):
                     ctl = wx.StaticText(self, -1, str(format_number(params[item])), style=wx.ALIGN_LEFT)
                     ctl.SetToolTipString("Result %s" % item)
                     self.bck.Add(ctl, (n-1,1), flag=wx.TOP|wx.BOTTOM, border = 0)
-                
+                    
         self.bck.Layout()
-        self.bck.Fit(self)
+        #self.bck.Fit(self)
+        self.Layout()
         self.parent.GetSizer().Layout()
         
     def onSetFocus(self, evt):
