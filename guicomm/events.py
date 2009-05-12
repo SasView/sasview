@@ -13,3 +13,5 @@ import wx.lib
 (SlicerEvent, EVT_SLICER)   = wx.lib.newevent.NewEvent()
 # event containinG A DICTIONARY OF NAME and errors of selected data
 (ErrorDataEvent, ERR_DATA) = wx.lib.newevent.NewEvent()
+## event that that destroy a page associate with Data1D removed from the graph
+(RemoveDataEvent, EVT_REMOVE_DATA)   = wx.lib.newevent.NewEvent()
