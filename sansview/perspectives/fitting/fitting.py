@@ -6,9 +6,11 @@ from danse.common.plottools.plottables import Data2D,Theory1D
 from sans.guiframe import dataFitting 
 from danse.common.plottools.PlotPanel import PlotPanel
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
-from sans.guicomm.events import EVT_SLICER_PANEL,ERR_DATA
+from sans.guicomm.events import EVT_SLICER_PANEL,ERR_DATA,EVT_REMOVE_DATA
+from sans.guicomm.events import EVT_SLICER_PARS_UPDATE
 from sans.guiframe import dataFitting
 from sans.fit.AbstractFitEngine import Model
+
 
 from fitproblem import FitProblem
 from fitpanel import FitPanel
@@ -207,6 +209,8 @@ class Plugin:
         self.index_theory= 0
         self.parent.Bind(EVT_SLICER_PANEL, self._on_slicer_event)
         self.parent.Bind( ERR_DATA, self._on_data_error)
+        self.parent.Bind(EVT_REMOVE_DATA, self._closed_fitpage)
+        self.parent.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PANEL)
         
         #Send the fitting panel to guiframe
         self.mypanels.append(self.fit_panel)
@@ -486,8 +490,31 @@ class Plugin:
             msg= "%s error: %s" % (engineType,sys.exc_value)
             wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
             return 
-              
-              
+           
+           
+           
+    def _onEVT_SLICER_PANEL(self, event):
+        """
+            receive and event telling to update a panel with a name starting with 
+            event.panel_name. this method update slicer panel for a given interactor.
+            @param event: contains type of slicer , paramaters for updating the panel
+            and panel_name to find the slicer 's panel concerned.
+        """
+        for item in self.parent.panels:
+            if self.parent.panels[item].window_caption.startswith(event.panel_name): 
+                self.parent.panels[item].set_slicer(event.type, event.params)
+                self.parent._mgr.Update()
+                break   
+            
+            
+    def _closed_fitpage(self, event):   
+        """
+            request fitpanel to close a given page when its unique data is removed 
+            from the plot
+        """    
+        self.fit_panel._close_fitpage(event.data) 
+        
+        
     def _add_page_onmenu(self, name,fitproblem=None):
         """
             Add name of a closed page of fitpanel in a menu 
@@ -728,8 +755,7 @@ class Plugin:
             @param alpha: estimated best alpha
             @param elapsed: computation time
         """
-        wx.PostEvent(self.parent, StatusEvent(status="Simultaneous fit \
-        complete "))
+        wx.PostEvent(self.parent, StatusEvent(status="Simultaneous fit complete "))
        
         ## fit more than 1 model at the same time 
         try:
@@ -804,16 +830,28 @@ class Plugin:
         """
         if event.panel!=None:
             new_panel = event.panel
+            self.main_panel= event.main_panel
             # Set group ID if available
             event_id = self.parent.popup_panel(new_panel)
             #self.menu3.Append(event_id, new_panel.window_caption, 
             #                 "Show %s plot panel" % new_panel.window_caption)
             # Set UID to allow us to reference the panel later
+            self.parent._mgr.Bind(wx.aui.EVT_AUI_PANE_CLOSE,
+ 
+                 self._onclearslicer)    
+
             new_panel.uid = event_id
             self.mypanels.append(new_panel) 
         return  
     
-      
+    def _onclearslicer(self, event):
+        """
+            Clear the boxslicer when close the panel associate with this slicer
+        """
+        self.main_panel.onClearSlicer(event)
+        
+        
+        
     def _return_engine_type(self):
         """
             return the current type of engine

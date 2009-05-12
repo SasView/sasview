@@ -329,14 +329,13 @@ class ModelPage(BasicPage):
             @param model: model object 
         """
         self.model = model
-        
         self.set_model_param_sizer(self.model)
-        self.set_model_param_sizer(self.model)  
         ## keep the sizer view consistent with the model menu selecting
         self._set_model_sizer_selection( self.model )
         self.enable_disp.SetValue(False)
         self.disable_disp.SetValue(True)
         self.set_dispers_sizer()
+        
         self.model_view.SetFocus()
         if self.model !=None:
             self._draw_model()
@@ -352,9 +351,8 @@ class ModelPage(BasicPage):
         sizer.Clear(True)
         box_description= wx.StaticBox(self, -1, 'Model Description')
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-            
+
         sizer_selection=wx.BoxSizer(wx.HORIZONTAL)
-        
         self.description_hide = wx.RadioButton(self, -1, 'Hide', style=wx.RB_GROUP)
         self.description_show = wx.RadioButton(self, -1, 'Show')
        
@@ -378,7 +376,6 @@ class ModelPage(BasicPage):
         sizer_selection.Add( self.description_show )
         sizer_selection.Add( (20,20)) 
         sizer_selection.Add( self.description_hide )
-        #sizer_selection.Add( (20,20)) 
         sizer_selection.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,67)
         sizer_selection.Add( self.model_description )
                      

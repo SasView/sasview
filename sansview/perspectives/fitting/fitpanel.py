@@ -51,12 +51,9 @@ class FitPanel(wx.aui.AuiNotebook):
     window_caption = "Fit Panel "
     CENTER_PANE = True
     def __init__(self, parent, *args, **kwargs):
-        #wx.aui.AuiNotebook.__init__(self,parent,-1, style=wx.aui.AUI_NB_DEFAULT_STYLE  )
         wx.aui.AuiNotebook.__init__(self,parent,-1,
-                    style= wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_DEFAULT_STYLE \
-                    |wx.CLIP_CHILDREN  )
-       
-        
+                    style= wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_DEFAULT_STYLE|wx.CLIP_CHILDREN  )
+    
         self.manager=None
         self.parent=parent
         self.event_owner=None
@@ -120,7 +117,7 @@ class FitPanel(wx.aui.AuiNotebook):
             self.model_page = None
             self.count =0
             ## page on menu
-            #self.manager._add_page_onmenu(page_name, fitproblem)
+            self.manager._add_page_onmenu(page_name, fitproblem)
         else:
             if selected_page in page_finder:
        
@@ -130,7 +127,7 @@ class FitPanel(wx.aui.AuiNotebook):
                 if self.GetPageIndex(selected_page)==self.fit_page2D_number:
                     self.fit_page2D_number=None
                 ## page on menu
-                #self.manager._add_page_onmenu(page_name, fitproblem)
+                self.manager._add_page_onmenu(page_name, fitproblem)
                 del page_finder[selected_page]
             ##remove the check box link to the model name of this page (selected_page)
             try:
@@ -269,7 +266,38 @@ class FitPanel(wx.aui.AuiNotebook):
                 self.model_page.select_model(model)
                 self.fit_page_name[page_title].insert(0,self.model_page.createMemento())
       
-           
+      
+      
+    def _close_fitpage(self,data):
+        """
+            close a fit page when its data is completely remove from the graph
+        """
+        name = data.name
+        for index in range(self.GetPageCount()):
+            if self.GetPageText(index)== name:
+                selected_page = self.GetPage(index) 
+    
+                if index ==self.fit_page1D_number:
+                    self.fit_page1D_number=None
+                if index ==self.fit_page2D_number:
+                    self.fit_page2D_number=None
+                if selected_page in self.manager.page_finder:
+                    del self.manager.page_finder[selected_page]
+                ##remove the check box link to the model name of this page (selected_page)
+                try:
+                    self.sim_page.draw_page()
+                except:
+                    ## that page is already deleted no need to remove check box on
+                    ##non existing page
+                    pass
+                
+                #Delete the name of the page into the list of open page
+                if selected_page.window_name in self.list_fitpage_name:
+                    self.list_fitpage_name.remove(selected_page.window_name)
+                self.DeletePage(index)
+                break
+        
+        
     def  _onGetstate(self, event):
         """
             copy the state of a page
@@ -299,7 +327,7 @@ class FitPanel(wx.aui.AuiNotebook):
         from modelpage import ModelPage
         panel = ModelPage(self,myinfo)
         
-        self.AddPage(page=panel,caption=page_title,select=True)
+        self.AddPage(page=panel, caption=page_title, select=True)
 
         self.model_page_number=self.GetSelection()
         self.model_page=self.GetPage(self.GetSelection())
@@ -308,8 +336,9 @@ class FitPanel(wx.aui.AuiNotebook):
         ##  resetting page
         if reset:
             if page_title in self.fit_page_name.keys():
-                
+
                 memento= self.fit_page_name[page_title][0]
+                print ""
                 panel.reset_page(memento)
         else:
             self.fit_page_name[page_title]=[]

@@ -537,7 +537,7 @@ class FitPage(BasicPage):
                 pass
             evt = ModelEventbox(model=self.model)
             wx.PostEvent(self.event_owner, evt)   
-        
+        self.btFit.SetFocus() 
    
     def _onparamRangeEnter(self, event):
         """
