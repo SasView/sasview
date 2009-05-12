@@ -338,7 +338,6 @@ class FitPanel(wx.aui.AuiNotebook):
             if page_title in self.fit_page_name.keys():
 
                 memento= self.fit_page_name[page_title][0]
-                print ""
                 panel.reset_page(memento)
         else:
             self.fit_page_name[page_title]=[]
