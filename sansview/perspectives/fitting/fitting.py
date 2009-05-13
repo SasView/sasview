@@ -962,6 +962,7 @@ class Plugin:
         #updating ... ",type="update"))
         self.calc_thread.ready(0.01)
     
+    
     def _fill_default_model2D(self, theory, qmax,qstep, qmin=None):
         """
             fill Data2D with default value 
@@ -1038,6 +1039,7 @@ class Plugin:
         
         return my_info
                 
+                
     def _complete1D(self, x,y, elapsed,model,data=None):
         """
             Complete plotting 1D data
@@ -1081,8 +1083,7 @@ class Plugin:
             msg+= " %s"%sys.exc_value
             wx.PostEvent( self.parent, StatusEvent(status= msg, type="stop"  ))
             return  
-        
-                 
+                  
     
         
     def _update2D(self, output,time=None):
@@ -1136,6 +1137,7 @@ class Plugin:
             their errors of y coordinates for 1Data hide and show error
         """
         self.err_dy= event.err_dy
+        
          
     def _draw_model2D(self,model,data=None,description=None, enable2D=False,
                       qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
@@ -1149,7 +1151,6 @@ class Plugin:
             @param qstep: the number of division of Qx and Qy of the model to draw
             
         """
-        
         x=  numpy.linspace(start= -1*qmax,
                                stop= qmax,
                                num= qstep,
@@ -1238,9 +1239,6 @@ class Plugin:
             wx.PostEvent( self.parent, StatusEvent(status= msg ))
             return  
             
-   
-
-
    
 if __name__ == "__main__":
     i = Plugin()

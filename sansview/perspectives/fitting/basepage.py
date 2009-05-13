@@ -100,7 +100,7 @@ class BasicPage(wx.ScrolledWindow):
             Retrieve the state selected state
         """
         # Skipping the save state functionality for release 0.9.0
-        return
+        #return
     
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
@@ -257,14 +257,12 @@ class BasicPage(wx.ScrolledWindow):
             Event for when a user select a parameter to average over.
             @param event: check box event
         """
-        
-        
         # Go through the list of dispersion check boxes to identify which one has changed 
         for p in self.disp_cb_dict:
             # Catch which one of the box was just checked or unchecked.
             if event.GetEventObject() == self.disp_cb_dict[p]:              
 
-                
+                self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
                 if self.disp_cb_dict[p].GetValue() == True:
                     # The user wants this parameter to be averaged. 
                     # Pop up the file selection dialog.
@@ -303,6 +301,11 @@ class BasicPage(wx.ScrolledWindow):
                     # Store the object to make it persist outside the scope of this method
                     #TODO: refactor model to clean this up?
                     self._disp_obj_dict[p] = disp_model
+                    self.state._disp_obj_dict [p]= disp_model
+                    self.state.values=[]
+                    self.state.weights=[]
+                    self.state.values = values
+                    self.state.weights = weights
                     # Set the new model as the dispersion object for the selected parameter
                     self.model.set_dispersion(p, disp_model)
                     # Store a reference to the weights in the model object so that
@@ -314,9 +317,12 @@ class BasicPage(wx.ScrolledWindow):
                 else:
                     # The parameter was un-selected. Go back to Gaussian model (with 0 pts)
                     self._reset_dispersity()
-                    
+              
                 ## Redraw the model
                 self._draw_model()
+                ## post state to fit panel
+                event = PageInfoEvent(page = self)
+                wx.PostEvent(self.parent, event)
         return
     
     
@@ -459,7 +465,6 @@ class BasicPage(wx.ScrolledWindow):
             if name == "GaussianDispersion":
                if hasattr(self,"cb1"):
                    self.state.cb1= self.cb1.GetValue()
-           
         except:
             pass
         
@@ -471,7 +476,6 @@ class BasicPage(wx.ScrolledWindow):
         if hasattr(self,"enable_smearer"):
             self.state.enable_smearer = copy.deepcopy(self.enable_smearer.GetValue())
             self.state.disable_smearer = copy.deepcopy(self.disable_smearer.GetValue())
-            
             
         if hasattr(self,"disp_box"):
             self.state.disp_box = self.disp_box.GetCurrentSelection()
@@ -503,7 +507,6 @@ class BasicPage(wx.ScrolledWindow):
         self._copy_parameters_state(self.orientation_params_disp,
                                      self.state.orientation_params_disp)
         self._copy_parameters_state(self.parameters, self.state.parameters)
-       
         self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
         
@@ -525,10 +528,10 @@ class BasicPage(wx.ScrolledWindow):
         ##model parameter values restore
         self._set_model_sizer_selection( self.model )
         self.set_model_param_sizer(self.model)
-      
+       
         self.enable2D= state.enable2D
         self.state.enable2D= state.enable2D
-       
+        
         if hasattr(self,"model_view"):
             if not self.enable2D:
                 self.model_view.Enable()
@@ -542,17 +545,47 @@ class BasicPage(wx.ScrolledWindow):
         self.disable_disp.SetValue(self.state.disable_disp)
         if hasattr(self, "disp_box"):
             self.disp_box.SetSelection(self.state.disp_box)  
-            
-            self.disp_cb_dict = {}
-            for k,v in self.state.disp_cb_dict.iteritems():
+          
+            self._set_dipers_Param(event=None)
+          
+            n = self.disp_box.GetCurrentSelection()
+            dispersity= self.disp_box.GetClientData(n)
+            name= dispersity.__name__
+            if name == "GaussianDispersion":
+                self.disp_cb_dict = {}
                 self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
                 self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
-                
-            self._disp_obj_dict={}
-            for k , v in self.state._disp_obj_dict.iteritems():
-                self._disp_obj_dict[k]=v
-      
-        self._set_dipers_Param(event=None)
+                    
+                self._disp_obj_dict={}
+                for k , v in self.state._disp_obj_dict.iteritems():
+                    self._disp_obj_dict[k]=v
+            
+            if  name=="ArrayDispersion":
+               
+                for k,v in state.disp_cb_dict.iteritems():
+                    self.disp_cb_dict[k].SetValue(v) 
+                    
+                self._disp_obj_dict={}    
+                for k , v in state._disp_obj_dict.iteritems():
+                    # Create the dispersion objects
+                    from sans.models.dispersion_models import ArrayDispersion
+                    disp_model = ArrayDispersion()
+                    self.state.values = copy.deepcopy(state.values)
+                    self.state.weights = copy.deepcopy(state.weights)
+                    
+                    disp_model.set_weights(self.state.values, self.state.weights)
+                    
+                    self._disp_obj_dict[k] = disp_model
+                    self.state._disp_obj_dict[k]= disp_model
+                    self.state.values=[]
+                    self.state.weights=[]
+                    
+                    if not hasattr(self.model, "_persistency_dict"):
+                        self.model._persistency_dict = {}
+                    self.model._persistency_dict[k] = [self.state.values, self.state.weights]
+                    # Set the new model as the dispersion object for the selected parameter
+                    self.model.set_dispersion(k, disp_model)
+                   
         ##plotting range restore    
         self._reset_plotting_range()
         ## smearing info  restore
@@ -562,7 +595,6 @@ class BasicPage(wx.ScrolledWindow):
             self.disable_smearer.SetValue(state.disable_smearer)
             self.compute_chisqr(smearer= self.smearer)  
             
-       
         ## reset state of checkbox,textcrtl  and parameters value
         self._reset_parameters_state(self.orientation_params_disp,
                                      state.orientation_params_disp)
@@ -571,14 +603,11 @@ class BasicPage(wx.ScrolledWindow):
         self._reset_parameters_state(self.parameters,state.parameters)
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
         self._reset_parameters_state(self.fixed_param,state.fixed_param)
+        ## draw the model with previous parameters value
         self._onparamEnter_helper()
         ## reset context menu items
         self._reset_context_menu()
-        ## draw the model with previous parameters value
-        #self._draw_model()
-        
-   
-   
+       
          
         
     def _selectDlg(self):
@@ -610,9 +639,7 @@ class BasicPage(wx.ScrolledWindow):
         """
             Reset the plotting range to a given state
         """
-        
-        #self.qmin.SetValue(format_number(self.state.qmin))
-        #self.qmax.SetValue(format_number(self.state.qmax)) 
+       
         self.qmin.SetValue(str(self.state.qmin))
         self.qmax.SetValue(str(self.state.qmax)) 
         if self.state.npts!=None:
@@ -1340,6 +1367,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.SetScrollbars(20,20,200,100)
+      
 
     def _set_range_sizer(self, title, object1=None,object=None):
         """
@@ -1399,7 +1427,7 @@ class BasicPage(wx.ScrolledWindow):
             Draw the layout for saving option
         """
         # Skipping save state functionality for release 0.9.0
-        return
+        #return
     
         self.sizer6.Clear(True)
         box_description= wx.StaticBox(self, -1,"Save Status")

@@ -22,6 +22,8 @@ class PageState(object):
         self.enable2D = False
         # model on which the fit would be performed
         self.model = model
+        if not hasattr(self.model, "_persistency_dict"):
+            self.model._persistency_dict = {}
         #fit page manager 
         self.manager = None
         #Store the parent of this panel parent
@@ -49,6 +51,9 @@ class PageState(object):
         self.disp_list =[]
         self._disp_obj_dict={}
         self.disp_cb_dict={}
+        self.values=[]
+        self.weights=[]
+                    
         #contains link between a model and selected parameters to fit 
         self.param_toFit =[]
         ##dictionary of model type and model class
@@ -104,11 +109,17 @@ class PageState(object):
         
         obj.enable_disp = copy.deepcopy(self.enable_disp)
         obj.disable_disp = copy.deepcopy(self.disable_disp)
-        
+        if len(self.model._persistency_dict)>0:
+            for k, v in self.model._persistency_dict.iteritems():
+                obj.model._persistency_dict[k] = copy.deepcopy(v)
         if len(self._disp_obj_dict)>0:
             for k , v in self._disp_obj_dict.iteritems():
                 obj._disp_obj_dict[k]= v
-        obj.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)
+        if len(self.disp_cb_dict)>0:
+            for k , v in self.disp_cb_dict.iteritems():
+                obj.disp_cb_dict[k]= v
+        obj.values = copy.deepcopy(self.values)
+        obj.weights = copy.deepcopy(self.weights)
         obj.enable_smearer = copy.deepcopy(self.enable_smearer)
         obj.disable_smearer = copy.deepcopy(self.disable_smearer)
         

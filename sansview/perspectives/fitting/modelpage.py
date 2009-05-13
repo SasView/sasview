@@ -13,7 +13,7 @@ _BOX_WIDTH = 80
 
 import basepage
 from basepage import BasicPage
-
+from basepage import PageInfoEvent
 
 class ModelPage(BasicPage):
     """
@@ -314,7 +314,11 @@ class ModelPage(BasicPage):
                     if item[2]!=None:
                         item[2].Enable()
         self.state.enable2D =  copy.deepcopy(self.enable2D)
-    
+        ## post state to fit panel
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event)
+        
+        
                 
     def reset_page(self, state):
         """
