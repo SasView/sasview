@@ -75,8 +75,8 @@ class Plugin:
         self._fit_engine = 'scipy'
         #List of selected data
         self.selected_data_list=[]
-        ## list of panel with slicer
-        self.main_panel=[]
+        ## list of slicer panel created to display slicer parameters and results
+        self.slicer_panels=[]
         # Log startup
         logging.info("Fitting plug-in started")   
         # model 2D view
@@ -834,9 +834,10 @@ class Plugin:
             Receive a panel as event and send it to guiframe 
             @param event: event containing a panel
         """
+       
         if event.panel!=None:
             new_panel = event.panel
-            #self.main_panel.append(event.main_panel)
+            self.slicer_panels.append(event.panel)
             # Set group ID if available
             event_id = self.parent.popup_panel(new_panel)
             #self.menu3.Append(event_id, new_panel.window_caption, 
@@ -852,25 +853,17 @@ class Plugin:
             Clear the boxslicer when close the panel associate with this slicer
         """
         name =event.GetPane().caption
-        key="boxsum"
-        try:
-            if name.lower().count(key)>0:
-                toks=[]
-                toks= name.lower().split(key)    
-                temp= toks[1].split()
-                panel_name= temp[0].lstrip().rstrip()
+    
+        for panel in self.slicer_panels:
+            if panel.window_caption==name:
+                
                 for item in self.parent.panels:
-                    if self.parent.panels[item].window_caption.lower().startswith(panel_name): 
-                        if hasattr(self.parent.panels[item],"slicer"):
+                    if hasattr(self.parent.panels[item],"uid"):
+                        if self.parent.panels[item].uid ==panel.base.uid:
                             self.parent.panels[item].onClearSlicer(event)
                             self.parent._mgr.Update()
                             break 
-               
-            else:
-                return 
-        except:
-            raise 
-            return 
+                break
        
        
         
