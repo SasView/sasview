@@ -23,6 +23,7 @@
 #   -n: Print out the dependencies for the release notes
 
 import os
+import sys
 import shutil
 import logging
 
@@ -37,7 +38,14 @@ logging.basicConfig(level=logging.INFO,
                     filemode='w')
 
 CWD    = os.getcwd()
-PYTHON = "c:\python25\python"
+
+# On Windows, the python executable is not always on the path.
+# Use its most frequent location as the default.
+if sys.platform == 'win32':
+    PYTHON = "c:\python25\python"
+else:
+    PYTHON = 'python'
+
 SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 
@@ -217,8 +225,6 @@ def warning():
     return answer.upper()=="Y"
         
 if __name__ == "__main__": 
-    import sys
-    
     print "Build script for SansView %s" % SANSVIEW
     
     # Make sure the user really wants to proceed
@@ -239,7 +245,7 @@ if __name__ == "__main__":
             print "    -h: lists the command line options"
             print "    -r: Builds a SansView using the released modules"
             print "    -t: Builds SansView from the trunk"
-            print "    -i: Builds an installer from the release version"        
+            print "    -i: Builds an installer from the release version [Windows only]"        
             print "    -n: Print out the dependencies for the release notes"
         elif sys.argv[1]=="-n":
             # Print out release URLs
@@ -267,11 +273,12 @@ if __name__ == "__main__":
             elif sys.argv[1]=="-i":
                 logging.info("Building release version")
                 checkout(True)
-                logging.info("Building installer from release version")
-                os.chdir("sansview-%s" % (SANSVIEW))
-                os.system("%s setup_exe.py -q py2exe" % PYTHON)
-                os.system("%s/Q installer.iss" % INNO)
-                shutil.copy2(os.path.join("Output","setupSansView.exe"), 
-                             os.path.join(CWD, "setupSansView_%s.exe" % str(timestamp)))
-                
+                if sys.platform=='win32':
+                    logging.info("Building installer from release version")
+                    os.chdir("sansview-%s" % (SANSVIEW))
+                    os.system("%s setup_exe.py -q py2exe" % PYTHON)
+                    os.system("%s/Q installer.iss" % INNO)
+                    shutil.copy2(os.path.join("Output","setupSansView.exe"), 
+                                 os.path.join(CWD, "setupSansView_%s.exe" % str(timestamp)))
+                    
     
