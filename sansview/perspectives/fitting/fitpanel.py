@@ -338,14 +338,12 @@ class FitPanel(wx.aui.AuiNotebook):
             if page_title in self.fit_page_name.keys():
 
                 memento= self.fit_page_name[page_title][0]
+                
                 panel.reset_page(memento)
         else:
             self.fit_page_name[page_title]=[]
             self.fit_page_name[page_title].insert(0,panel.createMemento())
-         
-        # We just created a model page, we are ready to plot the model
-        #self.manager.draw_model(model, model.name)
-        #FOR PLUGIN  for some reason model.name is = BASEcomponent
-        self.manager.draw_model(model, qmin=qmin, qmax=qmax)
+            ## We just created a model page, we are ready to plot the model
+            self.manager.draw_model(model, qmin=qmin, qmax=qmax)
   
   

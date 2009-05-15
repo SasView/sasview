@@ -283,7 +283,8 @@ class ModelPage(BasicPage):
                                                      None,None, None, None,None])
             
         msg = " Selected Distribution: Gaussian"        
-        wx.PostEvent(self.parent.parent, StatusEvent( status= msg ))   
+        wx.PostEvent(self.parent.parent, StatusEvent( status= msg )) 
+        self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)   
         ix =0
         iy +=1 
         self.sizer4_4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)   
@@ -333,6 +334,8 @@ class ModelPage(BasicPage):
             @param model: model object 
         """
         self.model = model
+        if self.model !=None:
+            self.disp_list= self.model.getDispParamList()
         self.set_model_param_sizer(self.model)
         ## keep the sizer view consistent with the model menu selecting
         self._set_model_sizer_selection( self.model )
@@ -561,7 +564,7 @@ class ModelPage(BasicPage):
                 break
             else:
                 self.text2_4.Hide()
-        self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict) 
+      
         boxsizer1.Add(sizer)
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer3.Layout()

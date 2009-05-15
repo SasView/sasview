@@ -451,7 +451,9 @@ class FitPage(BasicPage):
                             self.orientation_params_disp.append([None,name3, Tctl
                                                      ,None,None, None, None,None])
    
-        self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)                         
+        self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)      
+        self.state.model = self.model.clone()  
+                         
         wx.PostEvent(self.parent, StatusEvent(status=\
                         " Selected Distribution: Gaussian"))   
         ix =0
@@ -459,7 +461,9 @@ class FitPage(BasicPage):
         self.sizer4_4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)        
         self.sizer4_4.Layout()
         self.sizer4.Layout()
+        self.Layout()
         self.SetScrollbars(20,20,200,100)
+        self.Refresh()
      
         
     def _onFit(self, event):     

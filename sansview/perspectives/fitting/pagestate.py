@@ -24,6 +24,7 @@ class PageState(object):
         self.model = model
         if not hasattr(self.model, "_persistency_dict"):
             self.model._persistency_dict = {}
+        self.model._persistency_dict = copy.deepcopy(model._persistency_dict)
         #fit page manager 
         self.manager = None
         #Store the parent of this panel parent
@@ -49,6 +50,8 @@ class PageState(object):
         self.smearer=None
         #list of dispersion paramaters
         self.disp_list =[]
+        if self.model !=None:
+            self.disp_list = self.model.getDispParamList()
         self._disp_obj_dict={}
         self.disp_cb_dict={}
         self.values=[]
@@ -97,8 +100,10 @@ class PageState(object):
         obj          = PageState( self.parent,model= model )
         obj.data = copy.deepcopy(self.data)
         obj.model_list_box = copy.deepcopy(self.model_list_box)
+      
         obj.manager = self.manager
         obj.event_owner = self.event_owner
+        obj.disp_list = copy.deepcopy(self.disp_list)
         
         obj.enable2D = copy.deepcopy(self.enable2D)
         obj.parameters = copy.deepcopy(self.parameters)
@@ -109,7 +114,7 @@ class PageState(object):
         
         obj.enable_disp = copy.deepcopy(self.enable_disp)
         obj.disable_disp = copy.deepcopy(self.disable_disp)
-        if len(self.model._persistency_dict)>0:
+        if self.model !=None and len(self.model._persistency_dict)>0:
             for k, v in self.model._persistency_dict.iteritems():
                 obj.model._persistency_dict[k] = copy.deepcopy(v)
         if len(self._disp_obj_dict)>0:
@@ -135,6 +140,7 @@ class PageState(object):
             copy_state = state.clone()
             obj.saved_states[copy_name]= copy_state
         return obj
+
 
 class PageMemento(object):
     """
