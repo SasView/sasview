@@ -325,6 +325,8 @@ class Plugin:
         new_plot.name = PR_FIT_LABEL
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
+        new_plot.xtransform="x"
+        new_plot.ytransform="y"        
             
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="P(r) fit"))
         
@@ -519,7 +521,10 @@ class Plugin:
                 #       ["Change number of P(r) points", "Change the number of points on the P(r) output", self._on_pr_npts]]
 
             elif item.name==graph.selected_plottable:
-                return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion]]      
+                if  item.name=="$I_{obs}(q)$":
+                    return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion]]     
+
+                    
                 
         return []
 
@@ -1099,7 +1104,6 @@ class Plugin:
         
         self.perspective = []
         self.perspective.append(self.control_panel.window_name)
-        
         self.parent.Bind(EVT_PR_FILE, self._on_new_file)
         
         return [self.control_panel]

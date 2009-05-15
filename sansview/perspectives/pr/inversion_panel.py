@@ -982,6 +982,7 @@ class ParsDialog(wx.Panel):
         import os
         path = None
         dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", "*.txt", wx.OPEN)
+
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             mypath = os.path.basename(path)

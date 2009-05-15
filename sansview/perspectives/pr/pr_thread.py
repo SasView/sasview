@@ -1,5 +1,5 @@
 import sys, time
-from calcthread import CalcThread
+from perspectives.fitting.calcthread import CalcThread
 
 class CalcPr(CalcThread):
     """
