@@ -139,6 +139,7 @@ class Plugin:
         """
             Create a page to access simultaneous fit option
         """
+        Plugin.on_perspective(self,event=event)
         if self.sim_page !=None:
             msg= "Simultaneous Fit page already opened"
             wx.PostEvent(self.parent, StatusEvent(status= msg))
@@ -179,16 +180,17 @@ class Plugin:
                           "Dialog with fitting parameters ", self._onSelect]] 
             else:
                 if item.name==graph.selected_plottable :
-                    if hasattr(item, "group_id"):
-                        if hasattr(item,"is_data"):
-                            if item.is_data:
-                                return [["Select data for fitting", \
-                                 "Dialog with fitting parameters ", self._onSelect]]
+                    if item.name !="$I_{obs}(q)$" and item.name !="$P_{fit}(r)$":
+                        if hasattr(item, "group_id"):
+                            if hasattr(item,"is_data"):
+                                if item.is_data:
+                                    return [["Select data for fitting", \
+                                     "Dialog with fitting parameters ", self._onSelect]]
+                                else:
+                                    return [] 
                             else:
-                                return [] 
-                        else:
-                            return [["Select data for fitting", \
-                                 "Dialog with fitting parameters ", self._onSelect]] 
+                                return [["Select data for fitting", \
+                                     "Dialog with fitting parameters ", self._onSelect]] 
         return []   
 
 
@@ -612,6 +614,7 @@ class Plugin:
             added to self.page_finder
         """
         self.panel = event.GetEventObject()
+        Plugin.on_perspective(self,event=event)
         for plottable in self.panel.graph.plottables:
             if plottable.name == self.panel.graph.selected_plottable:
                 #if not hasattr(plottable, "is_data"):
@@ -945,7 +948,7 @@ class Plugin:
             @param evt: wx.menu event
         """
         model = evt.model
-     
+        Plugin.on_perspective(self,event=evt)
         # Create a model page. If a new page is created, the model
         # will be plotted automatically. If a page already exists,
         # the content will be updated and the plot refreshed
