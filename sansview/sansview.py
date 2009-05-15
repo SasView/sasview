@@ -21,10 +21,12 @@ class SansView():
         # Note: py2exe can't find dynamically loaded
         # modules. We load the fitting module here
         # to ensure a complete Windows executable build.
+        import perspectives.pr as module    
+        fitting_plug = module.Plugin()
+        self.gui.add_perspective(fitting_plug)            
         import perspectives.fitting as module    
         fitting_plug = module.Plugin()
         self.gui.add_perspective(fitting_plug)
-            
         # Build the GUI
         self.gui.build_gui()
         
