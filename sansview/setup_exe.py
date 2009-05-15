@@ -108,7 +108,7 @@ dll_excludes = [
     ]
 
 target_wx_client = Target(
-    description = 'SanView',
+    description = 'SansView',
     script = 'sansview.py',
     icon_resources = [(1, "images/ball.ico")],
     other_resources = [(24,1,manifest)],
