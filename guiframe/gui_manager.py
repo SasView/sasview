@@ -296,7 +296,7 @@ class ViewerFrame(wx.Frame):
         # Go through files in panels directory
         try:
             list = os.listdir(dir)
-            for item in list:
+            for item in reversed(list):
                 toks = os.path.splitext(os.path.basename(item))
                 name = None
                 if not toks[0] == '__init__':
@@ -379,7 +379,6 @@ class ViewerFrame(wx.Frame):
                                           BestSize(wx.Size(550,600)).
                                           MinSize(wx.Size(500,500)).
                                           Hide())
-                
             else:
                 self.panels[str(id)] = p
                 self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
@@ -393,9 +392,7 @@ class ViewerFrame(wx.Frame):
                                   MinimizeButton().
                                   Hide().
                                   BestSize(wx.Size(550,600)).
-                                  MinSize(wx.Size(500,500)))
-                               
-
+                                  MinSize(wx.Size(500,500)))                 
                 
         
     def get_context_menu(self, graph=None):
@@ -492,14 +489,14 @@ class ViewerFrame(wx.Frame):
         # TODO: clean this up. We should just identify
         # plug-in panels and add them all.
         
-        # Only add the panel menu if there is more than one panel
+        # Only add the panel menu if there is more than two panels
         n_panels = 0
         for plug in self.plugins:
             pers = plug.get_perspective()
             if len(pers)>0:
                 n_panels += 1
        
-        if n_panels>1:
+        if n_panels>2:
             viewmenu = wx.Menu()
             for plug in self.plugins:
                 plugmenu = wx.Menu()
@@ -517,7 +514,6 @@ class ViewerFrame(wx.Frame):
                             wx.EVT_MENU(self, int(item), self._on_view)
                     
                     viewmenu.AppendMenu(wx.NewId(), plug.sub_menu, plugmenu, plug.sub_menu)
-                
             menubar.Append(viewmenu, '&Panel')
 
         # Perspective
@@ -615,6 +611,7 @@ class ViewerFrame(wx.Frame):
    
         from data_loader import plot_data
         path = self.choose_file()
+
         if path ==None:
             return
         if path and os.path.isfile(path):
