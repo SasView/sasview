@@ -68,6 +68,7 @@ class BaseComponent:
         obj.params     = copy.deepcopy(self.params)
         obj.details    = copy.deepcopy(self.details)
         obj.dispersion = copy.deepcopy(self.dispersion)
+        obj._persistency_dict = copy.deepcopy( self._persistency_dict)
         return obj
 
     def setParam(self, name, value):
