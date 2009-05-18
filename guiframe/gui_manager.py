@@ -19,6 +19,8 @@ How-to build an application using guiframe:
 import wx
 import wx.aui
 import os, sys
+import xml
+from xml import xpath
 try:
     # Try to find a local config
     import imp
@@ -226,7 +228,14 @@ class ViewerFrame(wx.Frame):
         
         # Check for update
         self._check_update(None)
-       
+        ## maximum number of opened files' paths to store
+        self.n_maxfileopen =  2
+        ## number of file open
+        self.n_fileOpen=0
+        ## list of path of open files 
+        self.filePathList=[]
+        ## list of open file with name form menu
+        #self._saveOpenData()
         # Register the close event so it calls our own method
         wx.EVT_CLOSE(self, self._onClose)
         # Register to status events
@@ -470,18 +479,19 @@ class ViewerFrame(wx.Frame):
         menubar = wx.MenuBar()
         
         # File menu
-        filemenu = wx.Menu()
+        self.filemenu = wx.Menu()
         
         id = wx.NewId()
-        filemenu.Append(id, '&Open', 'Open a file')
+        self.filemenu.Append(id, '&Open', 'Open a file')
         wx.EVT_MENU(self, id, self._on_open)
-    
+        #self.filemenu.AppendSeparator()
+        
         id = wx.NewId()
-        filemenu.Append(id,'&Quit', 'Exit') 
+        self.filemenu.Append(id,'&Quit', 'Exit') 
         wx.EVT_MENU(self, id, self.Close)
         
         # Add sub menus
-        menubar.Append(filemenu,  '&File')
+        menubar.Append(self.filemenu,  '&File')
         
         # Plot menu
         # Attach a menu item for each panel in our
@@ -620,9 +630,39 @@ class ViewerFrame(wx.Frame):
         
         
     def _onClose(self, event):
+        """
+            Store info to retrieve in xml before closing the application
+        """
+        try:
+            doc = xml.dom.minidom.Document()
+            main_node = doc.createElement("file Path")
+            
+            doc.appendChild(main_node)
+        
+            for item in self.filePathList:
+                id, menuitem_name , path, title = item
+                pt1 = doc.createElement("File")
+                pt1.setAttribute("name", menuitem_name)
+                pt2 = doc.createElement("path")
+                pt2.appendChild(doc.createTextNode(str(path)))
+                pt1.appendChild(pt2)
+                pt3 = doc.createElement("title")
+                pt3.appendChild(doc.createTextNode(str(title)))
+                pt1.appendChild(pt3)
+                
+                main_node.appendChild(pt1)
+                
+               
+            fd = open("fileOpened.xml",'w')
+            fd.write(doc.toprettyxml())
+            fd.close()
+        except:
+            pass
+        
         import sys
         wx.Exit()
         sys.exit()
+                   
                    
     def Close(self, event=None):
         """
@@ -678,6 +718,39 @@ class ViewerFrame(wx.Frame):
             dialog = aboutbox.DialogAbout(None, -1, "")
             dialog.ShowModal()
             
+            
+    def _saveOpenData(self):
+        """
+            Savename and path of n opened data  into as xml file
+        """
+        try:
+            fd = open("fileOpened.xml",'r')
+            from xml.dom.minidom import parse
+            dom = parse(fd)
+            ## Check the format version number
+            nodes = xpath.Evaluate('file Path\File', dom)
+            print "node",nodes
+            if nodes[0].hasAttributes():
+                print "--->"
+            fd.close()
+        except:
+            raise
+       
+       
+        
+    def _onreloaFile(self, event):  
+        """
+            load a data previously opened 
+        """
+        from data_loader import plot_data
+        for item in self.filePathList:
+            id, menuitem_name , path, title = item
+            if id == event.GetId():
+                if path and os.path.isfile(path):
+                    plot_data(self, path)
+                    break
+            
+        
     def set_manager(self, manager):
         """
             Sets the application manager for this frame
@@ -730,8 +803,39 @@ class ViewerFrame(wx.Frame):
         if not path==None:
             try:
                 self._default_save_location = os.path.dirname(path)
+               
+                self.n_fileOpen += 1
+                if self.n_fileOpen==1:
+                    pos= self.filemenu.GetMenuItemCount()-1
+                    #self.filemenu.InsertSeparator(pos )
+               
+                id = wx.NewId()
+                filename= os.path.basename(path)
+                dir= os.path.split(self._default_save_location)[1]
+                title= str(os.path.join(dir,filename )) 
+                menuitem_name = str(self.n_fileOpen)+". "+ title
+                position= self.filemenu.GetMenuItemCount()-2
+                #self.filemenu.Insert(id=id, pos= position,text=menuitem_name,help=str(path) ) 
+                #self.filePathList.append(( id, menuitem_name, path, title))
+                #wx.EVT_MENU(self, id, self._onreloaFile)
+                
+                ## construct menu item for open file
+                if self.n_fileOpen == self.n_maxfileopen +1:
+                    ## reach the maximun number of path to store
+                    self.n_fileOpen = 0
+                    id, menuitem_name , path, title = self.filePathList[0]
+                    self.filemenu.Delete(id)
+                    self.filePathList.pop(0)
+                    for item in self.filePathList:
+                        id, menuitem_name , path, title = item
+                        self.n_fileOpen += 1
+                        label = str(self.n_fileOpen)+". "+ title
+                        #self.filemenu.FindItemById(id).SetItemLabel(label)
+                        
+                          
             except:
-                pass
+                raise
+                #pass
         return path
     
     def load_ascii_1D(self, path):
