@@ -70,7 +70,7 @@ class BasicPage(wx.ScrolledWindow):
         ## Q range
         self.qmin_x= 0.0001
         self.qmax_x= 0.13
-        self.num_points= 100
+        self.num_points= 50
         ## Create memento to save the current state
         
         self.state= PageState(parent= self.parent,model=self.model, data=self.data)
@@ -320,8 +320,8 @@ class BasicPage(wx.ScrolledWindow):
                     # it's not lost when we use the model within another thread.
                     #TODO: total hack - fix this
                     self.state.model= self.model.clone()
-                    if not hasattr(self.model, "_persistency_dict"):
-                        self.model._persistency_dict = {}
+                    #if not hasattr(self.model, "_persistency_dict"):
+                    self.model._persistency_dict = {}
                     self.model._persistency_dict[p] = [self.values, self.weights]
                     self.state.model._persistency_dict[p] = [self.values, self.weights]
                 else:
@@ -329,7 +329,7 @@ class BasicPage(wx.ScrolledWindow):
                     self._reset_dispersity()
               
                 ## Redraw the model
-                print "select angle => draw"
+               
                 self._draw_model()
                 ## post state to fit panel
                 
@@ -367,8 +367,8 @@ class BasicPage(wx.ScrolledWindow):
             self.state.disp_box = copy.deepcopy(self.disp_box.GetSelection())
         
         self.state.model = self.model.clone()
-        if not hasattr(self.model, "_persistency_dict"):
-                            self.model._persistency_dict = {}
+        #if not hasattr(self.model, "_persistency_dict"):
+        self.model._persistency_dict = {}
         self.state.model._persistency_dict= copy.deepcopy(self.model._persistency_dict)
                         
         new_state = self.state.clone()
@@ -470,15 +470,18 @@ class BasicPage(wx.ScrolledWindow):
         """
             Store current state
         """
+        ## save model option
         if self.model!= None:
             self.disp_list= self.model.getDispParamList()
             self.state.disp_list= copy.deepcopy(self.disp_list)
             self.state.model = self.model.clone()
-        self.state.save_data(self.data)
-        self.state.disp_list = self.disp_list
+            
         self.state.enable2D = copy.deepcopy(self.enable2D)
         self.state.values= copy.deepcopy(self.values)
         self.state.weights = copy.deepcopy( self.weights)
+        ## save data    
+        self.state.save_data(self.data)
+       
         try:
             n = self.disp_box.GetCurrentSelection()
             dispersity= self.disp_box.GetClientData(n)
@@ -515,6 +518,7 @@ class BasicPage(wx.ScrolledWindow):
                     self.state._disp_obj_dict[k]= v
             self.state.values = copy.deepcopy(self.values)
             self.state.weights = copy.deepcopy(self.weights)
+        ## save plotting range
         self._save_plotting_range()
         
         self.state.orientation_params =[]
@@ -544,12 +548,9 @@ class BasicPage(wx.ScrolledWindow):
             @postcondition: the state of the underlying data change as well as the
             state of the graphic interface
         """
-        ## set the value of the current state to the state given as parameter
-        self.state = state.clone() 
-        
-        self.model= self.state.model
-        self.data = self.state.data
-        self.smearer= self.state.smearer
+        self.model= state.model
+        self.data = state.data
+        self.smearer= state.smearer
         self.enable2D= state.enable2D
         
         ##draw sizer containing model parameters value for the current model
@@ -572,11 +573,11 @@ class BasicPage(wx.ScrolledWindow):
         self._reset_parameters_state(self.parameters,state.parameters)    
             
         ## display dispersion info layer
-        self.enable_disp.SetValue(self.state.enable_disp)
-        self.disable_disp.SetValue(self.state.disable_disp)
+        self.enable_disp.SetValue(state.enable_disp)
+        self.disable_disp.SetValue(state.disable_disp)
         
         if hasattr(self, "disp_box"):
-            self.disp_box.SetSelection(self.state.disp_box)  
+            self.disp_box.SetSelection(state.disp_box)  
             n = self.disp_box.GetCurrentSelection()
             dispersity= self.disp_box.GetClientData(n)
            
@@ -585,10 +586,9 @@ class BasicPage(wx.ScrolledWindow):
             if name == "GaussianDispersion":
                 self.disp_cb_dict = {}
                 self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
-                self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
                
                 self._disp_obj_dict={}
-                for k , v in self.state._disp_obj_dict.iteritems():
+                for k , v in state._disp_obj_dict.iteritems():
                     self._disp_obj_dict[k]=v
           
             if  name=="ArrayDispersion":
@@ -598,7 +598,7 @@ class BasicPage(wx.ScrolledWindow):
                 
                 for k,v in state.disp_cb_dict.iteritems():
                     self.disp_cb_dict[k].SetValue(v) 
-                    self.state.disp_cb_dict[k]=v 
+                    
                     if self.disp_cb_dict[k].GetValue():
                         # Create the dispersion objects
                         from sans.models.dispersion_models import ArrayDispersion
@@ -609,30 +609,30 @@ class BasicPage(wx.ScrolledWindow):
                         # Store the object to make it persist outside the scope of this method
                         #TODO: refactor model to clean this up?
                         self._disp_obj_dict[k] = disp_model
-                        self.state._disp_obj_dict [k]= disp_model
-                        self.state.values=[]
-                        self.state.weights=[]
-                        self.state.values = self.values
-                        self.state.weights = self.weights
+                      
                         self.values=[]
                         self.weights = []
                         self.values= state.values
                         self.weights = state.weights
                     
                         # Set the new model as the dispersion object for the selected parameter
-                        if not hasattr(self.model, "_persistency_dict"):
-                            self.model._persistency_dict = {}
+                        #if not hasattr(self.model, "_persistency_dict"):
+                        self.model._persistency_dict = {}
                         self.model._persistency_dict[k] = [state.values, state.weights]
                         self.model.set_dispersion(k, disp_model)
                         
         ##plotting range restore    
-        self._reset_plotting_range()
+        self._reset_plotting_range(state)
         ## smearing info  restore
         if hasattr(self,"enable_smearer"):
             ## set smearing value whether or not the data contain the smearing info
-            self.enable_smearer.SetValue(self.state.enable_smearer)
-            self.disable_smearer.SetValue(self.state.disable_smearer)
-            self.compute_chisqr(smearer= self.smearer)  
+            self.enable_smearer.SetValue(state.enable_smearer)
+            self.disable_smearer.SetValue(state.disable_smearer)
+            self.tcChi.SetLabel(str( state.tcChi))
+            self.sizer5.Layout()
+            self.Layout()
+            self.Refresh()
+            #self.compute_chisqr(smearer= self.smearer)  
             
         ## reset state of checkbox,textcrtl  and dispersity parameters value
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
@@ -641,11 +641,14 @@ class BasicPage(wx.ScrolledWindow):
       
         ## draw the model with previous parameters value
         self._onparamEnter_helper()
-      
+       
         ## reset context menu items
         self._reset_context_menu()
-        
-
+        ## set the value of the current state to the state given as parameter
+        self.state = state.clone() 
+        ## post state to fit panel
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event)
         
     def _selectDlg(self):
         """
@@ -673,20 +676,15 @@ class BasicPage(wx.ScrolledWindow):
             wx.EVT_MENU(self, id, self.onResetModel)
     
     
-    def _reset_plotting_range(self):
+    def _reset_plotting_range(self, state):
         """
             Reset the plotting range to a given state
         """
-       
-        self.qmin.SetValue(str(self.state.qmin))
-        self.qmax.SetValue(str(self.state.qmax)) 
+        self.qmin.SetValue(str(state.qmin))
+        self.qmax.SetValue(str(state.qmax)) 
         if self.state.npts!=None:
-            self.npts.SetValue(format_number(self.state.npts)) 
-            self.num_points = float(self.state.npts)
+            self.npts.SetValue(str(state.npts)) 
             
-        self.qmin_x = float(self.qmin.GetValue())
-        self.qmax_x = float(self.qmax.GetValue())
-        
         
     def _save_plotting_range(self ):
         """
@@ -742,7 +740,7 @@ class BasicPage(wx.ScrolledWindow):
             
             ## if any value is modify draw model with new value
             if is_modified:
-                print "is_modified--->",is_modified
+               
                 self._draw_model() 
                 self.save_current_state()
                 
@@ -959,7 +957,7 @@ class BasicPage(wx.ScrolledWindow):
             if hasattr(self, "enable_smearer"):
                 if self.enable_smearer.GetValue():
                     temp_smear= self.smearer
-            print "self.model.dispersion",self.model.dispersion
+           
             self.manager.draw_model(self.model, data=self.data,
                                     smearer= temp_smear,
                                     qmin=float(self.qmin_x), qmax=float(self.qmax_x),
@@ -1142,6 +1140,7 @@ class BasicPage(wx.ScrolledWindow):
         if  struct_factor !=None:
             from sans.models.MultiplicationModel import MultiplicationModel
             self.model= MultiplicationModel(form_factor(),struct_factor())
+            
         else:
             if form_factor != None:
                 self.model= form_factor()
@@ -1338,7 +1337,7 @@ class BasicPage(wx.ScrolledWindow):
             # Set the new model as the dispersion object for the selected parameter
             self.model.set_dispersion(p, disp_model)
             # Redraw the model
-            print "reset dispersity=> draw"
+           
             self._draw_model()
             
         self.sizer4_4.Layout()

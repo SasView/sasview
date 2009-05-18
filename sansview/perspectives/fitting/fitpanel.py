@@ -331,19 +331,15 @@ class FitPanel(wx.aui.AuiNotebook):
 
         self.model_page_number=self.GetSelection()
         self.model_page=self.GetPage(self.GetSelection())
-        # Set the range used to plot models
-        self.model_page.set_range(qmin, qmax, npts)
+     
         ##  resetting page
         if reset:
             if page_title in self.fit_page_name.keys():
 
                 memento= self.fit_page_name[page_title][0]
-                
                 panel.reset_page(memento)
         else:
             self.fit_page_name[page_title]=[]
             self.fit_page_name[page_title].insert(0,panel.createMemento())
-            ## We just created a model page, we are ready to plot the model
-            self.manager.draw_model(model, qmin=qmin, qmax=qmax)
-  
+       
   

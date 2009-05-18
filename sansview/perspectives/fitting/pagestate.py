@@ -22,9 +22,9 @@ class PageState(object):
         self.enable2D = False
         # model on which the fit would be performed
         self.model = model
-        if not hasattr(self.model, "_persistency_dict"):
-            self.model._persistency_dict = {}
-        self.model._persistency_dict = copy.deepcopy(model._persistency_dict)
+        #if not hasattr(self.model, "_persistency_dict"):
+        #    self.model._persistency_dict = {}
+        #self.model._persistency_dict = copy.deepcopy(model._persistency_dict)
         #fit page manager 
         self.manager = None
         #Store the parent of this panel parent
@@ -83,6 +83,8 @@ class PageState(object):
         self.enable2D= False
         ## state of selected all check button
         self.cb1 = False
+        ## store value of chisqr
+        self.tcChi= None
        
    
     def save_data(self, data):
@@ -114,9 +116,8 @@ class PageState(object):
         
         obj.enable_disp = copy.deepcopy(self.enable_disp)
         obj.disable_disp = copy.deepcopy(self.disable_disp)
-        if self.model !=None and len(self.model._persistency_dict)>0:
-            for k, v in self.model._persistency_dict.iteritems():
-                obj.model._persistency_dict[k] = copy.deepcopy(v)
+        obj.tcChi = self.tcChi
+  
         if len(self._disp_obj_dict)>0:
             for k , v in self._disp_obj_dict.iteritems():
                 obj._disp_obj_dict[k]= v

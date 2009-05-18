@@ -148,6 +148,10 @@ class CalcChisqr2D(CalcThread):
             Compute the data given a model function
         """
         self.starttime = time.time()
+        if self.model ==None:
+            return
+        if self.data==None:
+            return
         if self.err_data==None or self.err_data==[]:
             self.err_data= numpy.zeros(len(self.x_bins),len(self.y_bins))
             

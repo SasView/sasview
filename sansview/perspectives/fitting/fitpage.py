@@ -556,10 +556,20 @@ class FitPage(BasicPage):
             except:
                 tcrtl.SetBackgroundColour("pink")
                 tcrtl.Refresh()
+                return
         else:
            tcrtl.SetBackgroundColour(wx.WHITE)
            tcrtl.Refresh()  
-        self._onparamEnter_helper()    
+        self._onparamEnter_helper() 
+        
+        ##compute chisqr for range change
+        temp_smearer = None
+        if self.enable_smearer.GetValue():
+            msg=""
+            temp_smearer= self.smearer   
+         ##Calculate chi2
+        self.compute_chisqr(smearer= temp_smearer)  
+        
         
     def _onparamEnter(self,event):
         """ 
@@ -746,9 +756,17 @@ class FitPage(BasicPage):
             print result chisqr
         """
         try:
-            self.tcChi.SetLabel(format_number(output))
+            self.tcChi.SetLabel(str(output))
+           
+            self.sizer5.Layout()
+            self.Layout()
+            self.Refresh
+            ## post state to fit panel
+            self.state.tcChi =output
+            event = PageInfoEvent(page = self)
+            wx.PostEvent(self.parent, event)
         except:
-            raise
+            pass
         
         
     def compute_chisqr1D(self, smearer=None):
@@ -808,7 +826,7 @@ class FitPage(BasicPage):
             ## If a thread is already started, stop it
             if self.calc_Chisqr!= None and self.calc_Chisqr.isrunning():
                 self.calc_Chisqr.stop()
-                
+           
             self.calc_Chisqr= CalcChisqr2D( x_bins= self.data.x_bins,
                                             y_bins= self.data.y_bins,
                                             data= self.data.data,
