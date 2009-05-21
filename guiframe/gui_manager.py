@@ -236,6 +236,9 @@ class ViewerFrame(wx.Frame):
         self.filePathList=[]
         ## list of open file with name form menu
         #self._saveOpenData()
+        ## Dictionary of open file where keys are filename  and values are number of copy of data plotted
+        ## using the same loaded file 
+        self.indice_load_data={}
         # Register the close event so it calls our own method
         wx.EVT_CLOSE(self, self._onClose)
         # Register to status events
@@ -804,7 +807,7 @@ class ViewerFrame(wx.Frame):
             try:
                 self._default_save_location = os.path.dirname(path)
                
-                self.n_fileOpen += 1
+                #self.n_fileOpen += 1
                 if self.n_fileOpen==1:
                     pos= self.filemenu.GetMenuItemCount()-1
                     #self.filemenu.InsertSeparator(pos )

@@ -102,9 +102,7 @@ def plot_data(parent, path):
         except:
             dxl = None
             dxw = None
-        ## data 's name
-        if output.filename==None:
-            output.filename=str(filename)
+       
             
         ## Creating a Data2D with output
         if hasattr(output,'data'):
@@ -129,9 +127,18 @@ def plot_data(parent, path):
                 
         ## source will request in dataLoader .manipulation module
         new_plot.source=output.source
+        ## data 's name
+        if output.filename==None:
+            output.filename=str(filename)
         ## name of the data allow to differentiate data when plotted
         name= output.filename
-        
+        if not name in parent.indice_load_data.keys():
+            parent.indice_load_data[name]=0
+        else:
+            ## create a copy of the loaded data
+            parent.indice_load_data[name]+=1
+            name = name +"(copy %i)"%parent.indice_load_data[name]
+            
         new_plot.name = name
         ## allow to highlight data when plotted
         new_plot.interactive = True
@@ -171,7 +178,13 @@ def plot_data(parent, path):
             new_plot.source=item.source
             
             name= str(item.run[0])
-            
+            if not name in parent.indice_load_data.keys():
+                parent.indice_load_data[name]=0
+            else:
+                ## create a copy of the loaded data
+                parent.indice_load_data[name]+=1
+                name = name +"(copy %i)"%parent.indice_load_data[name]
+                
             new_plot.name = name
             new_plot.interactive = True
             new_plot.detector =item.detector
