@@ -5,7 +5,9 @@ __id__ = "$Id: aboutdialog.py 1193 2007-05-03 17:29:59Z dmitriy $"
 __revision__ = "$Revision: 1193 $"
 
 import wx
+import os
 from sans.guicomm.events import StatusEvent    
+from inversion_state import InversionState
 
 class InversionDlg(wx.Dialog):
     def __init__(self, parent, id, title, plots, file=False, pars=True):
@@ -108,12 +110,6 @@ class InversionControl(wx.Panel):
     ## Oscillation parameters (sin function = 1.1)
     oscillation_max = 1.5
     
-    ## Fraction of P(r) that is positive 
-    positive = 1.0
-    
-    ## Fraction of P(r) that is greater than zero by more than 1 sigma
-    pos_err  = 1.0
-    
     def __init__(self, parent, id = -1, plots = None, standalone=False, **kwargs):
         wx.Panel.__init__(self, parent, id = id, **kwargs)
         
@@ -134,6 +130,8 @@ class InversionControl(wx.Panel):
         self.label_sugg = None
         self.qmin_ctl   = None
         self.qmax_ctl   = None
+        self.swidth_ctl = None
+        self.sheight_ctl = None
         
         self.rg_ctl     = None
         self.iq0_ctl    = None
@@ -156,6 +154,9 @@ class InversionControl(wx.Panel):
         ## Standalone flage
         self.standalone = standalone
         
+        ## Default file location for save
+        self._default_save_location = os.getcwd()
+        
         self._do_layout()
         
     def __setattr__(self, name, value):
@@ -163,7 +164,7 @@ class InversionControl(wx.Panel):
             Allow direct hooks to text boxes
         """
         if name=='nfunc':
-            self.nfunc_ctl.SetValue(str(value))
+            self.nfunc_ctl.SetValue(str(int(value)))
         elif name=='d_max':
             self.dmax_ctl.SetValue(str(value))
         elif name=='alpha':
@@ -184,6 +185,10 @@ class InversionControl(wx.Panel):
             self.iq0_ctl.SetValue("%-5.2g" % value)
         elif name=='oscillation':
             self.osc_ctl.SetValue("%-5.2g" % value)
+        elif name=='slit_width':
+            self.swidth_ctl.SetValue("%-5.2g" % value)
+        elif name=='slit_height':
+            self.sheight_ctl.SetValue("%-5.2g" % value)
         elif name=='positive':
             self.pos_ctl.SetValue("%-5.2g" % value)
         elif name=='pos_err':
@@ -233,12 +238,12 @@ class InversionControl(wx.Panel):
             try:
                 return float(self.chi2_ctl.GetValue())
             except:
-                return -1.0
+                return None
         elif name=='bck':
             try:
                 return float(self.bck_ctl.GetValue())
             except:
-                return -1.0
+                return None
         elif name=='q_min':
             try:
                 return float(self.qmin_ctl.GetValue())
@@ -253,33 +258,52 @@ class InversionControl(wx.Panel):
             try:
                 return float(self.time_ctl.GetValue())
             except:
-                return -1.0
+                return None
         elif name=='rg':
             try:
                 return float(self.rg_ctl.GetValue())
             except:
-                return -1.0
+                return None
         elif name=='iq0':
             try:
                 return float(self.iq0_ctl.GetValue())
             except:
-                return -1.0
+                return None
         elif name=='oscillation':
             try:
                 return float(self.osc_ctl.GetValue())
             except:
-                return -1.0
+                return None
+        elif name=='slit_width':
+            try:
+                return float(self.swidth_ctl.GetValue())
+            except:
+                return None
+        elif name=='slit_height':
+            try:
+                return float(self.sheight_ctl.GetValue())
+            except:
+                return None
         elif name=='pos':
             try:
                 return float(self.pos_ctl.GetValue())
             except:
-                return -1.0
+                return None
         elif name=='pos_err':
-            return self.pos_err_ctl.GetValue()
+            try:
+                return float(self.pos_err_ctl.GetValue())
+            except:
+                return None
         elif name=='alpha_estimate':
-            return self.alpha_estimate_ctl.GetLabel()
+            try:
+                return float(self.alpha_estimate_ctl.GetLabel())
+            except:
+                return None
         elif name=='nterms_estimate':
-            return self.nterms_estimate_ctl.GetLabel()
+            try:
+                return int(self.nterms_estimate_ctl.GetLabel())
+            except:
+                return None
         elif name=='plotname':
             if self.standalone==False:
                 return self.plot_data.GetValue()
@@ -287,6 +311,107 @@ class InversionControl(wx.Panel):
             return self.data_file.GetValue()
         else:
             wx.Panel.__getattr__(self, name)
+        
+    def _save_state(self, evt=None):
+        """
+            Method used to create a memento of the current state
+            
+            @return: state object 
+        """
+        # Ask the user the location of the file to write to.
+        path = None
+        dlg = wx.FileDialog(self, "Choose a file", self._default_save_location, "", "*.prv", wx.SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            self._default_save_location = os.path.dirname(path)
+        dlg.Destroy()
+                
+        # Construct the state object    
+        state = InversionState()
+        
+        # Read the panel's parameters
+        flag, alpha, dmax, nfunc, qmin, \
+        qmax, height, width = self._read_pars()
+        
+        state.nfunc = nfunc
+        state.d_max = dmax
+        state.alpha = alpha
+        state.qmin  = qmin
+        state.qmax  = qmax
+        state.width = width
+        state.height = height
+        
+        # Data file
+        state.file = self.data_file.GetValue()
+        
+        # Background evaluation checkbox
+        state.estimate_bck = self.bck_chk.IsChecked()
+        
+        # Estimates
+        state.nterms_estimate = self.nterms_estimate
+        state.alpha_estimate = self.alpha_estimate
+        
+        # Read the output values
+        state.chi2    = self.chi2
+        state.elapsed = self.elapsed
+        state.osc     = self.oscillation
+        state.pos     = self.pos
+        state.pos_err = self.pos_err
+        state.rg      = self.rg
+        state.iq0     = self.iq0
+        state.bck     = self.bck
+            
+        state.toXML(path)
+        return state
+    
+    def set_state(self, state):
+        """
+            Set the state of the panel and inversion problem to
+            the state passed as a parameter.
+            Execute the inversion immediately after filling the 
+            controls.
+            
+            @param state: InversionState object
+        """
+        self.nfunc = state.nfunc
+        self.d_max = state.d_max
+        self.alpha = state.alpha
+        self.q_min  = state.qmin
+        self.q_max  = state.qmax
+        self.slit_width = state.width
+        self.slit_height = state.height
+        
+        # Data file
+        self.data_file.SetValue(str(state.file))
+    
+        # Background evaluation checkbox
+        self.bck_chk.SetValue(state.estimate_bck)
+        
+        # Estimates
+        self.nterms_estimate = state.nterms_estimate 
+        self.alpha_estimate = state.alpha_estimate 
+    
+        
+        # Read the output values
+        self.chi2    = state.chi2
+        self.elapsed = state.elapsed
+        self.oscillation = state.osc
+        self.positive = state.pos
+        self.pos_err = state.pos_err
+        self.rg      = state.rg
+        self.iq0     = state.iq0
+        self.bck     = state.bck
+
+        # Check whether the file is accessible, if so,
+        # load it a recompute P(r) using the new parameters
+        if os.path.isfile(state.file):
+            self._change_file(filepath=state.file)
+            self._on_invert(None)    
+        else:
+            message = "Could not find [%s] on the file system." % state.file
+            wx.PostEvent(self.manager.parent, StatusEvent(status=message))
+    
+            
         
     def set_manager(self, manager):
         self.manager = manager
@@ -311,16 +436,12 @@ class InversionControl(wx.Panel):
             self.file_radio = wx.RadioButton(self, -1, "File data:")
         else:
             self.file_radio = wx.StaticText(self, -1, "Data file:")
-        self.data_file = wx.TextCtrl(self, -1, size=(100,20))
+        self.data_file = wx.TextCtrl(self, -1, size=(220,20))
         self.data_file.SetEditable(False)
         self.data_file.SetValue("")
         id = wx.NewId()
-        choose_button = wx.Button(self, id, "Choose file")
-        self.Bind(wx.EVT_BUTTON, self._change_file, id = id)   
         pars_sizer.Add(self.file_radio, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        #pars_sizer.Add(self.data_file, (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         pars_sizer.Add(self.data_file, (iy,1), (1,1), wx.ADJUST_MINSIZE, 15)
-        pars_sizer.Add(choose_button, (iy,3), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
         if self.standalone==False:
             iy += 1
@@ -582,8 +703,14 @@ class InversionControl(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self._on_reset, id = id)   
         #button_Cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
         
+        id = wx.NewId()
+        button_Save = wx.Button(self, id, "Save")
+        button_Save.SetToolTipString("Save the current P(r) work to file.")
+        self.Bind(wx.EVT_BUTTON, self._save_state, id = id)   
+        
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer_button.Add(button_Save, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
         sizer_button.Add(button_Reset, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
         sizer_button.Add(button_OK, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
         #sizer_button.Add(button_Cancel, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)        
@@ -824,13 +951,13 @@ class InversionControl(wx.Panel):
             message = "The P(r) form contains invalid values: please submit it again."
             wx.PostEvent(self.parent, StatusEvent(status=message))
         
-    def _change_file(self, evt):
+    def _change_file(self, evt=None, filepath=None):
         """
             Choose a new input file for I(q)
         """
         import os
         if not self.manager==None:
-            path = self.manager.choose_file()
+            path = self.manager.choose_file(path=filepath)
             
             if path and os.path.isfile(path):
                 self.data_file.SetValue(str(path))
