@@ -177,6 +177,36 @@ class Registry(ExtensionRegistry):
                 logging.error("Loader: Error accessing Reader in %s\n  %s" % (module.__name__, sys.exc_value))
         return reader_found
 
+    def associate_file_reader(self, ext, loader):
+        """
+            Append a reader object to readers
+            
+            @param ext: file extension [string]
+            @param module: reader object
+        """
+        reader_found = False
+        
+        try:
+            # Find supported extensions
+            if ext not in self.loaders:
+                self.loaders[ext] = []
+            # Append the new reader to the list
+            self.loaders[ext].append(loader.read)
+
+            reader_found = True
+            
+            # Keep track of wildcards
+            if hasattr(loader, 'type_name'):
+                type_name = loader.type_name
+                
+                wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(), ext.lower())
+                if wcard not in self.wildcards:
+                    self.wildcards.append(wcard)
+                 
+        except:
+            logging.error("Loader: Error accessing Reader in %s\n  %s" % (module.__name__, sys.exc_value))
+        return reader_found
+
     
     def _identify_plugin(self, module):
         """
@@ -283,6 +313,15 @@ class Loader(object):
             @param module: module object
         """
         return self.__registry.associate_file_type(ext, module)
+
+    def associate_file_reader(self, ext, loader):
+        """
+            Append a reader object to readers
+            
+            @param ext: file extension [string]
+            @param module: reader object
+        """
+        return self.__registry.associate_file_reader(ext, loader)
 
     def load(self, file, format=None):
         """
