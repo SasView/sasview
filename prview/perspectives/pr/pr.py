@@ -84,10 +84,26 @@ class Plugin:
         self._added_plots = {}
         self._default_Iq  = {}
         
+        # Associate the inversion state reader with .prv files
+        from DataLoader.loader import Loader
+        from inversion_state import Reader
+         
+        reader = Reader(self.set_state)
+        l = Loader()
+        l.associate_file_reader('.prv', reader)
+                
         # Log startup
         logging.info("Pr(r) plug-in started")
         
-        
+    def set_state(self, state):
+        """
+            Call-back method for the inversion state reader.
+            This method is called when a .prv file is loaded.
+            
+            @param state: InversionState object
+        """
+        self.control_panel.set_state(state)
+        #print state
 
     def populate_menu(self, id, owner):
         """
@@ -331,12 +347,12 @@ class Plugin:
         return x, pr.d_max
         
         
-    def choose_file(self):
+    def choose_file(self, path=None):
         """
         
         """
         #TODO: this should be in a common module
-        return self.parent.choose_file()
+        return self.parent.choose_file(path=path)
                 
                 
     def load(self, path):
@@ -373,6 +389,8 @@ class Plugin:
                 msg += "Only the first data set was loaded." 
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
             else:
+                if dataread is None:
+                    return x, y, err
                 raise RuntimeError, "This tool can only read 1D data"
         
         self._current_file_data.x = x
@@ -773,6 +791,11 @@ class Plugin:
         if path is not None:
             try:
                 pr = self._create_file_pr(path)
+                
+                # If the file contains nothing, just return
+                if pr is None:
+                    return
+                
                 self.pr = pr
             except:  
                 wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
@@ -929,6 +952,11 @@ class Plugin:
                 #TODO: refactor this into a proper status handling
                 wx.PostEvent(self.parent, StatusEvent(status=''))
                 x, y, err = self.load(path)
+                
+                # If the file contains no data, just return
+                #TODO: clean this up: we need a way to recognize that not all P(r) files are data
+                if x is None:
+                    return None
             
             # If we have not errors, add statistical errors
             if err==None and y is not None:
