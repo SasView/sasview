@@ -288,13 +288,19 @@ class ModelPanel1D(PlotPanel):
             selected_plot= self.plots[self.graph.selected_plottable]
             
             if selected_plot.__class__.__name__=="Data1D":
-               
+                # Make sure that we can pass a basic Data1D
+                dxl = None
+                dxw = None
+                if hasattr(selected_plot, "dxl"):
+                    dxl = selected_plot.dxl
+                if hasattr(selected_plot, "dxw"):
+                    dxw = selected_plot.dxw
                 new_plot = dataFitting.Data1D( x=selected_plot.x,
                               y= selected_plot.y,
                                dx=selected_plot.dx,
                               dy=dy,
-                              dxl=selected_plot.dxl,
-                              dxw=selected_plot.dxw)
+                              dxl=dxl,
+                              dxw=dxw)
                             
             else:
                  new_plot = Theory1D(x=selected_plot.x,y=selected_plot.y,dy=dy)
@@ -364,12 +370,19 @@ class ModelPanel1D(PlotPanel):
                     
             ## Create a new plottable data1D
             if selected_plot.__class__.__name__=="Data1D":
+                # Make sure that we can pass a basic Data1D
+                dxl = None
+                dxw = None
+                if hasattr(selected_plot, "dxl"):
+                    dxl = selected_plot.dxl
+                if hasattr(selected_plot, "dxw"):
+                    dxw = selected_plot.dxw
                 new_plot = dataFitting.Data1D( x=selected_plot.x,
                                                y= selected_plot.y,
                                                dx=selected_plot.dx,
                                                dy=dy,
-                                               dxl=selected_plot.dxl,
-                                               dxw=selected_plot.dxw)
+                                               dxl=dxl,
+                                               dxw=dxw)
             else:
                 ## Create a new plottable Theory1D
                 new_plot = Theory1D(x=selected_plot.x,y=selected_plot.y,dy=dy)

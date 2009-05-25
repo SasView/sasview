@@ -795,14 +795,18 @@ class ViewerFrame(wx.Frame):
                  
         self._mgr.Update()
         
-    def choose_file(self):
+    def choose_file(self, path=None):
         """ 
             Functionality that belongs elsewhere
             Should add a hook to specify the preferred file type/extension.
         """
         #TODO: clean this up
         from data_loader import choose_data_file
-        path = choose_data_file(self, self._default_save_location)
+        
+        # Choose a file path
+        if path==None:
+            path = choose_data_file(self, self._default_save_location)
+            
         if not path==None:
             try:
                 self._default_save_location = os.path.dirname(path)
