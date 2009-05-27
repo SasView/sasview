@@ -206,11 +206,9 @@ class InversionControl(wx.Panel):
         elif name=='plotname':
             if self.standalone==False:
                 self.plot_data.SetValue(str(value))
-                self.plot_radio.SetValue(True)
                 self._on_pars_changed(None)
         elif name=='datafile':
             self.data_file.SetValue(str(value))
-            self.file_radio.SetValue(True)
             self._on_pars_changed(None)
         else:
             wx.Panel.__setattr__(self, name, value)
@@ -432,23 +430,17 @@ class InversionControl(wx.Panel):
         pars_sizer = wx.GridBagSizer(5,5)
 
         iy = 0
-        if self.standalone==False:
-            self.file_radio = wx.RadioButton(self, -1, "File data:")
-        else:
-            self.file_radio = wx.StaticText(self, -1, "Data file:")
-        self.data_file = wx.TextCtrl(self, -1, size=(220,20))
-        self.data_file.SetEditable(False)
-        self.data_file.SetValue("")
-        id = wx.NewId()
+        self.file_radio = wx.StaticText(self, -1, "Data:")
         pars_sizer.Add(self.file_radio, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        pars_sizer.Add(self.data_file, (iy,1), (1,1), wx.ADJUST_MINSIZE, 15)
         
-        if self.standalone==False:
-            iy += 1
-            self.plot_radio = wx.RadioButton(self, -1, "Plot data:")
-            self.plot_data = wx.TextCtrl(self, -1, size=(100,20))
+        if self.standalone==True:
+            self.data_file = wx.TextCtrl(self, -1, size=(220,20))
+            self.data_file.SetEditable(False)
+            self.data_file.SetValue("")
+            pars_sizer.Add(self.data_file, (iy,1), (1,1), wx.ADJUST_MINSIZE, 15)
+        else:
+            self.plot_data = wx.TextCtrl(self, -1, size=(220,20))
             self.plot_data.SetEditable(False)
-            pars_sizer.Add(self.plot_radio, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
             pars_sizer.Add(self.plot_data, (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
         self.bck_chk = wx.CheckBox(self, -1, "Estimate background level")
@@ -787,7 +779,7 @@ class InversionControl(wx.Panel):
             self.nterms_estimate_ctl.Enable(False)
             self.alpha_estimate_ctl.Enable(False)
             
-            if self.standalone==False and self.plot_radio.GetValue():
+            if self.standalone==False:
                 dataset = self.plot_data.GetValue()
                 self.manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc, 
                                                      d_max=dmax,
@@ -922,7 +914,7 @@ class InversionControl(wx.Panel):
         has_bck = self.bck_chk.IsChecked()
         
         if flag:
-            if self.standalone==False and self.plot_radio.GetValue():
+            if self.standalone==False:
                 dataset = self.plot_data.GetValue()
                 if len(dataset.strip())==0:
                     message = "No data to invert. Select a data set before proceeding with P(r) inversion."
@@ -961,8 +953,6 @@ class InversionControl(wx.Panel):
             
             if path and os.path.isfile(path):
                 self.data_file.SetValue(str(path))
-                if self.standalone==False:
-                    self.file_radio.SetValue(True)
                 self.manager.show_data(path, reset=True)
                 self._on_pars_changed(None)
 

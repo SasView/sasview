@@ -28,7 +28,7 @@ class Plugin:
     DEFAULT_NFUNC = 10
     DEFAULT_DMAX  = 140.0
     
-    def __init__(self):
+    def __init__(self, standalone=True):
         ## Plug-in name
         self.sub_menu = "Pr inversion"
         
@@ -76,7 +76,7 @@ class Plugin:
         ## Number of P(r) points to display on the output plot
         self._pr_npts = 51
         ## Flag to let the plug-in know that it is running standalone
-        self.standalone = True
+        self.standalone = standalone
         self._normalize_output = False
         self._scale_output_unity = False
         
@@ -256,8 +256,14 @@ class Plugin:
         new_plot.name = IQ_FIT_LABEL
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-        #new_plot.group_id = "test group"
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="I(q)"))
+        
+        title = "I(q)"
+        # If we have a group ID, use it
+        if pr.info.has_key("plot_group_id"):
+            new_plot.group_id = pr.info["plot_group_id"]
+            title = pr.info["plot_group_id"]
+            
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
         
         # If we have used slit smearing, plot the smeared I(q) too
         if pr.slit_width>0 or pr.slit_height>0:
@@ -341,7 +347,9 @@ class Plugin:
         new_plot.name = PR_FIT_LABEL
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
-            
+        # Make sure that the plot is linear
+        new_plot.xtransform="x"
+        new_plot.ytransform="y"                 
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="P(r) fit"))
         
         return x, pr.d_max
@@ -537,6 +545,8 @@ class Plugin:
                 #       ["Change number of P(r) points", "Change the number of points on the P(r) output", self._on_pr_npts]]
 
             elif item.name==graph.selected_plottable:
+	            #TODO: we might want to check that the units are consistent with I(q)
+	            #      before allowing this menu item
                 return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion]]      
                 
         return []
@@ -875,17 +885,35 @@ class Plugin:
         pr.slit_height = self.slit_height
         pr.slit_width = self.slit_width
         
-        # Fill in errors if none were provided
-        if self.current_plottable.dy == None:
-            print "no error", self.current_plottable.name
-            y = numpy.zeros(len(pr.y))
-            for i in range(len(pr.y)):
-                y[i] = math.sqrt(pr.y[i])
-            pr.err = y
-        else:
-            pr.err = self.current_plottable.dy
+        # Keep track of the plot window title to ensure that
+        # we can overlay the plots
+        if hasattr(self.current_plottable, "group_id"):
+            pr.info["plot_group_id"] = self.current_plottable.group_id
         
-        #self.pr = pr
+        # Fill in errors if none were provided
+        err = self.current_plottable.dy
+        all_zeros = True
+        if err == None:
+            err = numpy.zeros(len(y)) 
+        else:    
+            for i in range(len(err)):
+                if err[i]>0:
+                    all_zeros = False
+        
+        if all_zeros:        
+            scale = None
+            min_err = 0.0
+            for i in range(len(pr.y)):
+                # Scale the error so that we can fit over several decades of Q
+                if scale==None:
+                    scale = 0.05*math.sqrt(pr.y[i])
+                    min_err = 0.01*pr.y[i]
+                err[i] = scale*math.sqrt( math.fabs(pr.y[i]) ) + min_err
+            message = "The loaded file had no error bars, statistical errors are assumed."
+            wx.PostEvent(self.parent, StatusEvent(status=message))
+
+        pr.err = err
+        
         return pr
 
           
@@ -1159,7 +1187,8 @@ class Plugin:
             Post initialization call back to close the loose ends
             [Somehow openGL needs this call]
         """
-        self.parent.set_perspective(self.perspective)
+        if self.standalone==True:
+            self.parent.set_perspective(self.perspective)
   
 if __name__ == "__main__":
     i = Plugin()
