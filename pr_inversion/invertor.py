@@ -78,6 +78,8 @@ class Invertor(Cinvertor):
     cov = None
     ## Background value
     background = 0
+    ## Information dictionary for application use
+    info = {}
     
     
     def __init__(self):
@@ -173,6 +175,8 @@ class Invertor(Cinvertor):
         """
             Return a clone of this instance
         """
+        import copy
+        
         invertor = Invertor()
         invertor.chi2    = self.chi2 
         invertor.elapsed = self.elapsed 
@@ -188,6 +192,8 @@ class Invertor(Cinvertor):
         invertor.has_bck = self.has_bck
         invertor.slit_height = self.slit_height
         invertor.slit_width  = self.slit_width
+        
+        invertor.info = copy.deepcopy(self.info)
         
         return invertor
     
