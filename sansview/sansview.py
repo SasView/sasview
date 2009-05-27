@@ -4,6 +4,7 @@ from sans.guiframe import gui_manager
 
 # For py2exe, import config here
 import local_config
+import logging
 
 
 class SansView():
@@ -21,12 +22,20 @@ class SansView():
         # Note: py2exe can't find dynamically loaded
         # modules. We load the fitting module here
         # to ensure a complete Windows executable build.
-        import perspectives.pr as module    
-        fitting_plug = module.Plugin()
-        self.gui.add_perspective(fitting_plug)            
+
+        # P(r) perspective
+        try:
+            import sans.perspectives.pr as module    
+            fitting_plug = module.Plugin(standalone=False)
+            self.gui.add_perspective(fitting_plug)
+        except:
+            logging.error("SansView: could not find P(r) plug-in module") 
+
+        # Fitting perspective
         import perspectives.fitting as module    
         fitting_plug = module.Plugin()
         self.gui.add_perspective(fitting_plug)
+        
         # Build the GUI
         self.gui.build_gui()
         
