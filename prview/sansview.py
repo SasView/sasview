@@ -43,7 +43,7 @@ class SansView():
         # Additional perspectives can still be loaded
         # dynamically
         import perspectives.pr as module
-        self.pr_plug = module.Plugin()
+        self.pr_plug = module.Plugin(standalone=True)
         self.gui.add_perspective(self.pr_plug)
             
         # Build the GUI
