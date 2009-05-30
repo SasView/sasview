@@ -595,11 +595,10 @@ class Reader:
         
         return data_info
 
-    def write(self, filename, datainfo):
+    def _to_xml_doc(self, datainfo):
         """
-            Write the content of a Data1D as a CanSAS XML file
+            Create an XML document to contain the content of a Data1D
             
-            @param filename: name of the file to write
             @param datainfo: Data1D object
         """
         
@@ -777,8 +776,20 @@ class Reader:
                 write_node(doc, node, "term", value, term)
             for note in item.notes:
                 write_node(doc, node, "SASprocessnote", note)
-            
         
+        # Return the document, and the SASentry node associated with
+        # the data we just wrote
+        return doc, entry_node
+            
+    def write(self, filename, datainfo):
+        """
+            Write the content of a Data1D as a CanSAS XML file
+            
+            @param filename: name of the file to write
+            @param datainfo: Data1D object
+        """
+        # Create XML document
+        doc, sasentry = self._to_xml_doc(datainfo)
         # Write the file
         fd = open(filename, 'w')
         fd.write(doc.toprettyxml())
