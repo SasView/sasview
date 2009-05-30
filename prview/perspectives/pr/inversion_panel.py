@@ -340,7 +340,11 @@ class InversionControl(wx.Panel):
         state.height = height
         
         # Data file
-        state.file = self.data_file.GetValue()
+        if self.manager.standalone==True:
+            state.file = self.data_file.GetValue()
+        else:
+            #TODO: save the data
+            pass
         
         # Background evaluation checkbox
         state.estimate_bck = self.bck_chk.IsChecked()
