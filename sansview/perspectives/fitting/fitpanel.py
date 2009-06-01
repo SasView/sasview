@@ -50,6 +50,7 @@ class FitPanel(wx.aui.AuiNotebook):
     ## Title to appear on top of the window
     window_caption = "Fit Panel "
     CENTER_PANE = True
+    
     def __init__(self, parent, *args, **kwargs):
         wx.aui.AuiNotebook.__init__(self,parent,-1,
                     style= wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_DEFAULT_STYLE|wx.CLIP_CHILDREN  )

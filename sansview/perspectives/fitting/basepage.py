@@ -712,8 +712,10 @@ class BasicPage(wx.ScrolledWindow):
             is_modified =self._check_value_enter( self.fittable_param ,is_modified)
             is_modified =self._check_value_enter( self.fixed_param ,is_modified)
             is_modified =self._check_value_enter( self.parameters ,is_modified)        
-           
+            
+            self.sizer3.Layout()
             self.Layout()
+            self.Refresh()
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
