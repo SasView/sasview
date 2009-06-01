@@ -210,9 +210,10 @@ class ViewerFrame(wx.Frame):
         
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
-        self.plugins = self._find_plugins()
+        self.plugins =[]
         self.plugins.append(plotting.Plugin())
-
+        self.plugins += self._find_plugins()
+      
         ## List of panels
         self.panels = {}
 
@@ -308,7 +309,8 @@ class ViewerFrame(wx.Frame):
         # Go through files in panels directory
         try:
             list = os.listdir(dir)
-            for item in reversed(list):
+            ## the default panel is the panel is the last plugin added
+            for item in list:
                 toks = os.path.splitext(os.path.basename(item))
                 name = None
                 if not toks[0] == '__init__':
