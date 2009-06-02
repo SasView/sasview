@@ -270,8 +270,7 @@ class ModelPanel2D( ModelPanel1D):
         ymax = max(self.data2D.ymin, self.data2D.ymax)
         qmax = math.sqrt(math.pow(xmax,2)+math.pow(ymax,2))
         beam = self.data2D.xmin
-        zmin = self.zmin_2D
-        zmax = self.zmax_2D
+     
         ## set dialog window content
         dialog.setContent(xnpts=xnpts,ynpts=ynpts,qmax=qmax,
                            beam=self.data2D.xmin,
@@ -291,7 +290,7 @@ class ModelPanel2D( ModelPanel1D):
                    ymax= self.data2D.ymax,
                    zmin= self.zmin_2D,
                    zmax= self.zmax_2D,
-                   color=0,symbol=0,label='data2D')
+                   color=0,symbol=0,label=self.data2D.name)#'data2D')
         self.subplot.figure.canvas.draw_idle()
         
         
