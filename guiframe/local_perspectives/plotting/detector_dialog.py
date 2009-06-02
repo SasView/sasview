@@ -79,7 +79,7 @@ class DetectorDialog(wx.Dialog):
             self.zmin_ctl.Refresh()
         try:
             value=self.zmax_ctl.GetValue()
-            if value and int(value)==0.0:
+            if value and float(value)==0.0:
                 flag = False
                 wx.PostEvent(self.parent, StatusEvent(status="Enter number greater than zero"))
                 self.zmax_ctl.SetBackgroundColour("pink")
