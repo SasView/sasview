@@ -81,12 +81,15 @@ class ModelPanel2D( ModelPanel1D):
         self.axes_frozen = False
         ## panel that contains result from slicer motion (ex: Boxsum info)
         self.panel_slicer=None
+        
         ## Graph        
         self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
         self.graph.render(self)
-        
+        ## store default value of zmin and zmax 
+        self.default_zmin_ctl = self.zmin_2D
+        self.default_zmax_ctl = self.zmax_2D
         
     def _onEVT_1DREPLOT(self, event):
         """
@@ -164,6 +167,9 @@ class ModelPanel2D( ModelPanel1D):
         self.graph.title(self.data2D.name)
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
+        ## store default value of zmin and zmax 
+        self.default_zmin_ctl = self.zmin_2D
+        self.default_zmax_ctl = self.zmax_2D
 
 
     def onContextMenu(self, event):
@@ -262,7 +268,10 @@ class ModelPanel2D( ModelPanel1D):
         """
         
         import detector_dialog
-        dialog = detector_dialog.DetectorDialog(self, -1,base=self.parent)
+       
+        dialog = detector_dialog.DetectorDialog(self, -1,base=self.parent,
+                       reset_zmin_ctl =self.default_zmin_ctl,
+                       reset_zmax_ctl = self.default_zmax_ctl,cmap=self.cmap)
         ## info of current detector and data2D
         xnpts = len(self.data2D.x_bins)
         ynpts = len(self.data2D.y_bins)
@@ -280,6 +289,7 @@ class ModelPanel2D( ModelPanel1D):
             evt = dialog.getContent()
             self.zmin_2D = evt.zmin
             self.zmax_2D = evt.zmax
+            self.cmap= evt.cmap
        
         dialog.Destroy()
         ## Redraw the current image
@@ -290,6 +300,7 @@ class ModelPanel2D( ModelPanel1D):
                    ymax= self.data2D.ymax,
                    zmin= self.zmin_2D,
                    zmax= self.zmax_2D,
+                   cmap= self.cmap,
                    color=0,symbol=0,label=self.data2D.name)#'data2D')
         self.subplot.figure.canvas.draw_idle()
         

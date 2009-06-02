@@ -5,21 +5,33 @@ __id__ = "$Id: aboutdialog.py 1193 2007-05-03 17:29:59Z dmitriy $"
 __revision__ = "$Revision: 1193 $"
 
 import wx
+import sys
 from sans.guiframe.utils import format_number
-from sans.guicomm.events import StatusEvent ,NewPlotEvent,SlicerEvent
+from sans.guicomm.events import StatusEvent ,NewPlotEvent
 
+import matplotlib 
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as Canvas
+from matplotlib import pyplot, mpl, pylab
 
+DEFAULT_CMAP= pylab.cm.jet
 class DetectorDialog(wx.Dialog):
     """
         Dialog box to let the user edit detector settings
     """
     
-    def __init__(self,parent,id=1,base=None, *args, **kwds):
+    def __init__(self,parent,id=1,base=None,dpi = None,cmap=DEFAULT_CMAP,
+                 reset_zmin_ctl = None,reset_zmax_ctl = None, *args, **kwds):
 
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self,parent,id=1, *args, **kwds)
     
         self.parent=base
+        self.dpi = dpi
+        self.cmap= cmap
+
+        self.reset_zmin_ctl= reset_zmin_ctl
+        self.reset_zmax_ctl= reset_zmax_ctl
+            
         self.label_xnpts = wx.StaticText(self, -1, "Detector width in pixels")
         self.label_ynpts = wx.StaticText(self, -1, "Detector Height in pixels")
         self.label_qmax = wx.StaticText(self, -1, "Q max")
@@ -33,13 +45,16 @@ class DetectorDialog(wx.Dialog):
         self.beam_ctl = wx.StaticText(self, -1, "")
         
         self.zmin_ctl = wx.TextCtrl(self, -1, size=(60,20))
+        self.zmin_ctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
         self.zmax_ctl = wx.TextCtrl(self, -1, size=(60,20))
+        self.zmax_ctl.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
     
         self.static_line_3 = wx.StaticLine(self, -1)
         
-        
-        self.button_OK = wx.Button(self, wx.ID_OK, "OK")
         self.button_Cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
+        self.button_reset = wx.Button(self, wx.NewId(),"Reset")
+        self.Bind(wx.EVT_BUTTON, self.resetValues, self.button_reset)
+        self.button_OK = wx.Button(self, wx.ID_OK, "OK")
         self.Bind(wx.EVT_BUTTON, self.checkValues, self.button_OK)
 
         self.__set_properties()
@@ -54,7 +69,35 @@ class DetectorDialog(wx.Dialog):
         beam = 0
         zmin = 0
         zmax = 0
+        cmap= None
         sym4 = False
+    
+    
+  
+    def onSetFocus(self, event):
+        """
+            Highlight the txtcrtl
+        """
+        # Get a handle to the TextCtrl
+        widget = event.GetEventObject()
+        # Select the whole control, after this event resolves
+        wx.CallAfter(widget.SetSelection, -1,-1)
+        return
+        
+    def resetValues(self, event):
+        """
+            reset detector info
+        """
+        try:
+            self.zmin_ctl.SetValue(str(float(self.reset_zmin_ctl)))
+            self.zmax_ctl.SetValue(str(float(self.reset_zmax_ctl)))
+            self.cmap = DEFAULT_CMAP
+            self.cmap_selector.SetValue(str(self.cmap.name))
+            self._on_select_cmap(event=None)
+        except:
+            msg ="error occurs while resetting Detector: %s"%sys.exc_value
+            wx.PostEvent(self.parent,StatusEvent(status= msg ))
+        
         
     def checkValues(self, event):
         """
@@ -107,15 +150,17 @@ class DetectorDialog(wx.Dialog):
             @param zmax:  the value to get the maximum color
             @param sym:
         """
-        self.xnpts_ctl.SetLabel(str(format_number(xnpts)))
-        self.ynpts_ctl.SetLabel(str(format_number(ynpts)))
-        self.qmax_ctl.SetLabel(str(format_number(qmax)))
-        self.beam_ctl.SetLabel(str(format_number(beam)))
+        self.xnpts_ctl.SetLabel(str(float(xnpts)))
+        self.ynpts_ctl.SetLabel(str(float(ynpts)))
+        self.qmax_ctl.SetLabel(str(float(qmax)))
+        self.beam_ctl.SetLabel(str(float(beam)))
+        
+    
        
         if zmin !=None:
-            self.zmin_ctl.SetValue(str(format_number(zmin)))
+            self.zmin_ctl.SetValue(str(float(zmin)))
         if zmax !=None:
-            self.zmax_ctl.SetValue(str(format_number(zmax)))
+            self.zmax_ctl.SetValue(str(float(zmax)))
 
     def getContent(self):
         """
@@ -142,6 +187,7 @@ class DetectorDialog(wx.Dialog):
         
         event.zmin = v_min
         event.zmax = v_max
+        event.cmap= self.cmap
         
         return event
 
@@ -160,6 +206,9 @@ class DetectorDialog(wx.Dialog):
         sizer_main = wx.BoxSizer(wx.VERTICAL)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_params = wx.GridBagSizer(5,5)
+        sizer_colormap = wx.BoxSizer(wx.VERTICAL)
+        sizer_selection= wx.BoxSizer(wx.HORIZONTAL)
+       
 
         iy = 0
         sizer_params.Add(self.label_xnpts, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -180,12 +229,42 @@ class DetectorDialog(wx.Dialog):
         sizer_params.Add(self.label_zmax, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         sizer_params.Add(self.zmax_ctl,   (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
+        
+        
        
+        self.fig = mpl.figure.Figure(dpi=self.dpi, figsize=(4,1))
+       
+        self.ax1 = self.fig.add_axes([0.05, 0.65, 0.9, 0.15])
+        
+        
+        self.norm = mpl.colors.Normalize(vmin=0, vmax=100)
+        self.cb1 = mpl.colorbar.ColorbarBase(self.ax1, cmap=self.cmap,
+                                           norm= self.norm,
+                                           orientation='horizontal')
+        self.cb1.set_label('Detector Colors')
+        self.canvas = Canvas(self, -1, self.fig)
+        sizer_colormap.Add(self.canvas,0, wx.LEFT | wx.EXPAND,5)
+      
+        self.cmap_selector = wx.ComboBox(self, -1)
+        self.cmap_selector.SetValue(str(self.cmap.name))
+        maps = sorted(m for m in pylab.cm.datad if not m.endswith("_r"))
+       
+        for i,m in enumerate(maps):
+            
+            self.cmap_selector.Append(str(m), pylab.get_cmap(m))
+        
+        wx.EVT_COMBOBOX(self.cmap_selector,-1, self._on_select_cmap)
+        sizer_selection.Add(wx.StaticText(self,-1,"Select Cmap: "),0, wx.LEFT|wx.ADJUST_MINSIZE,5) 
+        sizer_selection.Add(self.cmap_selector, 0, wx.EXPAND|wx.ALL, 10)
+        
         sizer_main.Add(sizer_params, 0, wx.EXPAND|wx.ALL, 10)
+        
+        sizer_main.Add(sizer_selection, 0, wx.EXPAND|wx.ALL, 10)
+        sizer_main.Add(sizer_colormap, 1, wx.EXPAND|wx.ALL, 10)
         sizer_main.Add(self.static_line_3, 0, wx.EXPAND, 0)
         
         
-        sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer_button.Add(self.button_reset,0, wx.LEFT|wx.ADJUST_MINSIZE, 100)
         sizer_button.Add(self.button_OK, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
         sizer_button.Add(self.button_Cancel, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         
@@ -196,6 +275,18 @@ class DetectorDialog(wx.Dialog):
         self.Layout()
         self.Centre()
         # end wxGlade
+        
+    def _on_select_cmap(self, event):
+        """
+             display a new cmap 
+        """
+        cmap_name= self.cmap_selector.GetCurrentSelection()
+        current_cmap= self.cmap_selector.GetClientData( cmap_name )
+        self.cmap= current_cmap
+        self.cb1 = mpl.colorbar.ColorbarBase(self.ax1, cmap=self.cmap,
+                                           norm= self.norm,
+                                           orientation='horizontal')
+        self.canvas.draw()
 
 
 # end of class DialogAbout
@@ -206,10 +297,14 @@ class MyApp(wx.App):
         wx.InitAllImageHandlers()
         dialog = DetectorDialog(None, -1, "")
         self.SetTopWindow(dialog)
-        dialog.setContent(128, 0.05)
+        dialog.setContent(xnpts=128,ynpts=128, qmax=20,
+                           beam=20,zmin=2,zmax=60, sym=False)
         print dialog.ShowModal()
         evt = dialog.getContent()
-        print evt.npts, evt.qmax
+        if hasattr(evt,"npts"):
+            print "number of point: ",evt.npts
+        if hasattr(evt,"qmax"): 
+            print "qmax: ",evt.qmax
         dialog.Destroy()
         return 1
 
