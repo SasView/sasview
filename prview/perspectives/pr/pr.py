@@ -894,7 +894,7 @@ class Plugin:
         err = self.current_plottable.dy
         all_zeros = True
         if err == None:
-            err = numpy.zeros(len(y)) 
+            err = numpy.zeros(len(pr.y)) 
         else:    
             for i in range(len(err)):
                 if err[i]>0:
