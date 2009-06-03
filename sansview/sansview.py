@@ -36,10 +36,7 @@ class SansView():
         fitting_plug = module.Plugin()
         self.gui.add_perspective(fitting_plug)
         
-        # Splash page  perspective
-        import perspectives.splashinfo as module    
-        fitting_plug = module.Plugin()
-        self.gui.add_perspective(fitting_plug)
+        
         
         # Build the GUI
         self.gui.build_gui()
