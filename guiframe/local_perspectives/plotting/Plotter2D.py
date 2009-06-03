@@ -513,7 +513,7 @@ class ModelPanel2D( ModelPanel1D):
             wx.PostEvent(self, event)
           
     
-    def _onToggleScale(self, event):
+    def old_onToggleScale(self, event):
         """
             toggle pixel scale and replot image
         """
