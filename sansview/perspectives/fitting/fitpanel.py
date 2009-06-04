@@ -7,6 +7,24 @@ import string ,re
 _BOX_WIDTH = 80
 import basepage
 
+class StateContainer(object):
+    """
+        Contains all saved state of a given page.
+        Provide position of the current state of a page, the first save state
+        and the last state for a given page. 
+        Allow easy unoding or redo for a given page  
+    """
+    def __init__(self, page=None):
+        """
+            Initialize variable
+        """
+        self.page = page
+        self.begin =0
+        self.current=0
+        self.end=0
+        
+        
+        
 class PageInfo(object):
     """
         this class contains the minimum numbers of data members

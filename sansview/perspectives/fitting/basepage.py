@@ -71,8 +71,8 @@ class BasicPage(wx.ScrolledWindow):
         self.qmin_x= 0.0001
         self.qmax_x= 0.13
         self.num_points= 50
-        ## Create memento to save the current state
         
+        ## Create memento to save the current state
         self.state= PageState(parent= self.parent,model=self.model, data=self.data)
         ## save customized array
         self.values=[]
@@ -81,11 +81,25 @@ class BasicPage(wx.ScrolledWindow):
         self.number_saved_state= 0
         ## dictionary of saved state
         self.saved_states={}
-        self.slicerpop = wx.Menu()
+        
+        ## Create context menu for page
+        self.popUpMenu = wx.Menu()
+        id = wx.NewId()
+        self._undo = wx.MenuItem(self.popUpMenu,id, "Undo","cancel the previous action")
+        self.popUpMenu.AppendItem(self._undo)
+        self._undo.Enable(False)
+        wx.EVT_MENU(self, id, self.onUndo)
+        
+        id = wx.NewId()
+        self._redo = wx.MenuItem(self.popUpMenu,id,"Redo"," Restore the previous action")
+        self.popUpMenu.AppendItem(self._redo)
+        self._redo.Enable(False)
+        wx.EVT_MENU(self, id, self.onRedo)
+        
         ## Default locations
         self._default_save_location = os.getcwd()     
         ## save initial state on context menu
-        self.onSave(event=None)
+        #self.onSave(event=None)
         self.Bind(wx.EVT_CONTEXT_MENU, self.onContextMenu)
         
         ## create the basic structure of the panel with empty sizer
@@ -106,10 +120,22 @@ class BasicPage(wx.ScrolledWindow):
     
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
-        #TODO: why is the state menu called "slicerpop"?
-        self.PopupMenu(self.slicerpop, pos) 
+       
+        self.PopupMenu(self.popUpMenu, pos) 
+      
         
         
+    def onUndo(self, event):
+        """
+            Cancel the previous action
+        """
+        print "enable undo"
+        
+    def onRedo(self, event):
+        """
+            Restore the previous action cancelled 
+        """
+        print "enable redo"
         
     def define_page_structure(self):
         """
@@ -344,11 +370,11 @@ class BasicPage(wx.ScrolledWindow):
             Reset model state
         """
         ## post help message for the selected model 
-        msg = self.slicerpop.GetHelpString(event.GetId())
+        msg = self.popUpMenu.GetHelpString(event.GetId())
         msg +=" reloaded"
         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         
-        name= self.slicerpop.GetLabel(event.GetId())
+        name= self.popUpMenu.GetLabel(event.GetId())
         if name in self.saved_states.keys():
             previous_state = self.saved_states[name]
             self.reset_page(previous_state)
@@ -389,7 +415,7 @@ class BasicPage(wx.ScrolledWindow):
         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         
         id = wx.NewId()
-        self.slicerpop.Append(id,name,str(msg))
+        self.popUpMenu.Append(id,name,str(msg))
         wx.EVT_MENU(self, id, self.onResetModel)
         
         
@@ -580,7 +606,7 @@ class BasicPage(wx.ScrolledWindow):
             self.disp_box.SetSelection(state.disp_box)  
             n = self.disp_box.GetCurrentSelection()
             dispersity= self.disp_box.GetClientData(n)
-           
+            
             self._set_dipers_Param(event=None)
             name= dispersity.__name__
             if name == "GaussianDispersion":
@@ -672,7 +698,7 @@ class BasicPage(wx.ScrolledWindow):
             self.number_saved_state += 1
             ## Add item in the context menu
             id = wx.NewId()
-            self.slicerpop.Append(id,name, 'Save model and state %g'%self.number_saved_state)
+            self.popUpMenu.Append(id,name, 'Save model and state %g'%self.number_saved_state)
             wx.EVT_MENU(self, id, self.onResetModel)
     
     
@@ -702,6 +728,7 @@ class BasicPage(wx.ScrolledWindow):
              model
              use : _check_value_enter 
         """
+        self._undo.Enable(True)
         if self.model !=None:
             
             ## save current state
@@ -1172,6 +1199,7 @@ class BasicPage(wx.ScrolledWindow):
             when enter value on panel redraw model according to changed
         """
         tcrtl= event.GetEventObject()
+        
         if check_float(tcrtl):
             self._onparamEnter_helper()
         else:
