@@ -201,6 +201,12 @@ def plot_data(parent, path):
                 parent.indice_load_data[name]=0
             else:
                 ## create a copy of the loaded data
+                
+                #TODO: this is a very annoying feature. We should make this
+                # an option. Excel doesn't do this. Why should we?
+                # What is the requirement for this feature, and are the
+                # counter arguments stronger? Is this feature developed
+                # to please at least 80% of the users or a special few?
                 parent.indice_load_data[name]+=1
                 name = name +"(copy %i)"%parent.indice_load_data[name]
                 
