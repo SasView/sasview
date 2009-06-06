@@ -208,8 +208,9 @@ class InversionControl(wx.Panel):
                 self.plot_data.SetValue(str(value))
                 self._on_pars_changed(None)
         elif name=='datafile':
-            self.data_file.SetValue(str(value))
-            self._on_pars_changed(None)
+            if self.standalone==True:
+                self.data_file.SetValue(str(value))
+                self._on_pars_changed(None)
         else:
             wx.Panel.__setattr__(self, name, value)
         
@@ -305,8 +306,13 @@ class InversionControl(wx.Panel):
         elif name=='plotname':
             if self.standalone==False:
                 return self.plot_data.GetValue()
+            else:
+                return None
         elif name=='datafile':
-            return self.data_file.GetValue()
+            if self.standalone==True:
+                return self.data_file.GetValue()
+            else:
+                return None
         else:
             wx.Panel.__getattr__(self, name)
         
@@ -342,9 +348,6 @@ class InversionControl(wx.Panel):
         # Data file
         if self.manager.standalone==True:
             state.file = self.data_file.GetValue()
-        else:
-            #TODO: save the data
-            pass
         
         # Background evaluation checkbox
         state.estimate_bck = self.bck_chk.IsChecked()
@@ -363,7 +366,11 @@ class InversionControl(wx.Panel):
         state.iq0     = self.iq0
         state.bck     = self.bck
             
-        state.toXML(path)
+        if self.manager.standalone==True:
+            state.toXML(path)
+        else:
+            self.manager.save_data(filepath=path, prstate=state)
+        
         return state
     
     def set_state(self, state):
@@ -375,45 +382,66 @@ class InversionControl(wx.Panel):
             
             @param state: InversionState object
         """
-        self.nfunc = state.nfunc
-        self.d_max = state.d_max
-        self.alpha = state.alpha
-        self.q_min  = state.qmin
-        self.q_max  = state.qmax
-        self.slit_width = state.width
-        self.slit_height = state.height
+        if state.nfunc is not None:
+            self.nfunc = state.nfunc
+        if state.d_max is not None:
+            self.d_max = state.d_max
+        if state.alpha is not None:
+            self.alpha = state.alpha
+        if state.qmin is not None:
+            self.q_min  = state.qmin
+        if state.qmax is not None:
+            self.q_max  = state.qmax
+        if state.width is not None:
+            self.slit_width = state.width
+        if state.height is not None:
+            self.slit_height = state.height
         
         # Data file
-        self.data_file.SetValue(str(state.file))
+        if self.standalone==True:
+            self.data_file.SetValue(str(state.file))
+        else:
+            self.plot_data.SetValue(str(state.file))
     
         # Background evaluation checkbox
         self.bck_chk.SetValue(state.estimate_bck)
         
         # Estimates
-        self.nterms_estimate = state.nterms_estimate 
-        self.alpha_estimate = state.alpha_estimate 
+        if state.nterms_estimate is not None:
+            self.nterms_estimate = state.nterms_estimate
+        if state.alpha_estimate is not None: 
+            self.alpha_estimate = state.alpha_estimate 
     
         
         # Read the output values
-        self.chi2    = state.chi2
-        self.elapsed = state.elapsed
-        self.oscillation = state.osc
-        self.positive = state.pos
-        self.pos_err = state.pos_err
-        self.rg      = state.rg
-        self.iq0     = state.iq0
-        self.bck     = state.bck
+        if state.chi2 is not None:
+            self.chi2    = state.chi2
+        if state.elapsed is not None:
+            self.elapsed = state.elapsed
+        if state.osc is not None:
+            self.oscillation = state.osc
+        if state.pos is not None:
+            self.positive = state.pos
+        if state.pos_err is not None:
+            self.pos_err = state.pos_err
+        if state.rg is not None:
+            self.rg      = state.rg
+        if state.iq0 is not None:
+            self.iq0     = state.iq0
+        if state.bck is not None:
+            self.bck     = state.bck
 
         # Check whether the file is accessible, if so,
         # load it a recompute P(r) using the new parameters
-        if os.path.isfile(state.file):
-            self._change_file(filepath=state.file)
-            self._on_invert(None)    
+        if self.standalone==True:
+            if os.path.isfile(state.file):
+                self._change_file(filepath=state.file)
+                self._on_invert(None)    
+            else:
+                message = "Could not find [%s] on the file system." % state.file
+                wx.PostEvent(self.manager.parent, StatusEvent(status=message))
         else:
-            message = "Could not find [%s] on the file system." % state.file
-            wx.PostEvent(self.manager.parent, StatusEvent(status=message))
-    
-            
+            self._on_invert(None)    
         
     def set_manager(self, manager):
         self.manager = manager
