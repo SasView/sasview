@@ -348,6 +348,8 @@ class InversionControl(wx.Panel):
         # Data file
         if self.manager.standalone==True:
             state.file = self.data_file.GetValue()
+        else:
+            state.file = self.plot_data.GetValue()
         
         # Background evaluation checkbox
         state.estimate_bck = self.bck_chk.IsChecked()

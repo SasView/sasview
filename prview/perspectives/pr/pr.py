@@ -5,6 +5,7 @@ import os
 import sys
 import wx
 import logging
+import time
 from danse.common.plottools import Data1D, Theory1D
 from sans.guicomm.events import NewPlotEvent, StatusEvent    
 import math, numpy
@@ -110,6 +111,12 @@ class Plugin:
             if self.standalone == False:
                 if datainfo is None:
                     raise RuntimeError, "Pr.set_state: datainfo parameter cannot be None in standalone mode"
+
+                # Ensuring that plots are coordinated correctly
+                t = time.localtime(datainfo.meta_data['prstate'].timestamp)
+                time_str = time.strftime("%b %d %H:%M", t)
+                datainfo.meta_data['prstate'].file = datainfo.meta_data['prstate'].file +' [' + time_str + ']'
+                datainfo.filename = datainfo.meta_data['prstate'].file
                     
                 self.current_plottable = datainfo
                 self.current_plottable.group_id = datainfo.meta_data['prstate'].file

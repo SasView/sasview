@@ -503,7 +503,7 @@ if __name__ == "__main__":
     l = Loader()
     datainfo = l.load("../../test/cansas1d.xml")
     
-    def call_back(state):
+    def call_back(state, datainfo=None):
         print state
         
     reader = Reader(call_back)
