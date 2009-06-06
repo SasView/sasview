@@ -602,7 +602,7 @@ class Reader:
             @param datainfo: Data1D object
         """
         
-        if not datainfo.__class__ == Data1D: 
+        if not issubclass(datainfo.__class__, Data1D):
             raise RuntimeError, "The cansas writer expects a Data1D instance"
         
         doc = xml.dom.minidom.Document()

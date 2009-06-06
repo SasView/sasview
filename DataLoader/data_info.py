@@ -564,22 +564,24 @@ class Data1D(plottable_1D, DataInfo):
 
         return _str
 
-    def clone_without_data(self, length=0):
+    def clone_without_data(self, length=0, clone=None):
         """
             Clone the current object, without copying the data (which
             will be filled out by a subsequent operation).
             The data arrays will be initialized to zero.
             
             @param length: length of the data array to be initialized
+            @param clone: if provided, the data will be copied to clone
         """
         from copy import deepcopy
         
-        x  = numpy.zeros(length) 
-        dx = numpy.zeros(length) 
-        y  = numpy.zeros(length) 
-        dy = numpy.zeros(length) 
+        if clone is None or not issubclass(clone.__class__, Data1D):
+            x  = numpy.zeros(length) 
+            dx = numpy.zeros(length) 
+            y  = numpy.zeros(length) 
+            dy = numpy.zeros(length) 
+            clone = Data1D(x, y, dx=dx, dy=dy)
         
-        clone = Data1D(x, y, dx=dx, dy=dy)
         clone.title       = self.title
         clone.run         = self.run
         clone.filename    = self.filename
@@ -693,20 +695,22 @@ class Data2D(plottable_2D, DataInfo):
         
         return _str
   
-    def clone_without_data(self, length=0):
+    def clone_without_data(self, length=0, clone=None):
         """
             Clone the current object, without copying the data (which
             will be filled out by a subsequent operation).
             The data arrays will be initialized to zero.
             
             @param length: length of the data array to be initialized
+            @param clone: if provided, the data will be copied to clone
         """
         from copy import deepcopy
         
-        data     = numpy.zeros(length) 
-        err_data = numpy.zeros(length) 
-        
-        clone = Data2D(data, err_data)
+        if clone is None or not issubclass(clone.__class__, Data2D):  
+            data     = numpy.zeros(length) 
+            err_data = numpy.zeros(length) 
+            clone = Data2D(data, err_data)
+            
         clone.title       = self.title
         clone.run         = self.run
         clone.filename    = self.filename
