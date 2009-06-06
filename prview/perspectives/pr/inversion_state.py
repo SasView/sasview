@@ -79,6 +79,10 @@ class InversionState(object):
         self.q       = None
         self.iq_obs  = None
         self.iq_calc = None
+        
+        # Coefficients
+        self.coefficients = None
+        self.covariance = None
     
     def __str__(self):
         """
@@ -151,10 +155,12 @@ class InversionState(object):
         top_element.setAttributeNode(attr)
         
         # File name
+        element = newdoc.createElement("filename")
         if self.file is not None:
-            element = newdoc.createElement("filename")
             element.appendChild(newdoc.createTextNode(str(self.file)))
-            top_element.appendChild(element)
+        else:
+            element.appendChild(newdoc.createTextNode(str(file)))
+        top_element.appendChild(element)
         
         element = newdoc.createElement("timestamp")
         element.appendChild(newdoc.createTextNode(time.ctime(self.timestamp)))
@@ -180,6 +186,14 @@ class InversionState(object):
             element = newdoc.createElement(item[0])
             exec "element.appendChild(newdoc.createTextNode(str(%s)))" % item[1]
             outputs.appendChild(element)
+                    
+        # Save output coefficients and its covariance matrix
+        element = newdoc.createElement("coefficients")
+        element.appendChild(newdoc.createTextNode(str(self.coefficients)))
+        outputs.appendChild(element)
+        element = newdoc.createElement("covariance")
+        element.appendChild(newdoc.createTextNode(str(self.covariance)))
+        outputs.appendChild(element)
                     
         # Save the file
         if doc is None:
@@ -243,12 +257,71 @@ class InversionState(object):
                         elif node.nodeName == 'outputs':
                             if node.hasChildNodes():
                                 for item in node.childNodes:
+                                    # Look for standard outputs
                                     for out in out_list:
                                         if item.nodeName == out[0]:
                                             try:
                                                 exec '%s = float(item.childNodes[0].nodeValue.strip())' % out[1]
                                             except:
                                                 exec '%s = None' % out[1]
+                                                
+                                    # Look for coefficients
+                                    # Format is [value, value, value, value]
+                                    if item.nodeName == 'coefficients':
+                                        # Remove brackets
+                                        c_values = item.childNodes[0].nodeValue.strip().replace('[','')
+                                        c_values = c_values.replace(']','')
+                                        toks = c_values.split()
+                                        self.coefficients = []
+                                        for c in toks:
+                                            try:
+                                                self.coefficients.append(float(c))
+                                            except:
+                                                # Bad data, skip. We will count the number of 
+                                                # coefficients at the very end and deal with 
+                                                # inconsistencies then.
+                                                pass
+                                        # Sanity check
+                                        if not len(self.coefficients) == self.nfunc:
+                                            # Inconsistent number of coefficients. Don't keep the data.
+                                            err_msg = "InversionState.fromXML: inconsistant number of coefficients: "
+                                            err_msg += "%d %d" % (len(self.coefficients), self.nfunc)
+                                            logging.error(err_msg)
+                                            self.coefficients = None
+                                            
+                                    # Look for covariance matrix
+                                    # Format is [ [value, value], [value, value] ]
+                                    elif item.nodeName == "covariance":
+                                        # Parse rows
+                                        rows = item.childNodes[0].nodeValue.strip().split('[')
+                                        self.covariance = []
+                                        for row in rows:
+                                            row = row.strip()
+                                            if len(row) == 0: continue
+                                            # Remove end bracket
+                                            row = row.replace(']','')
+                                            c_values = row.split()
+                                            cov_row = []
+                                            for c in c_values:
+                                                try:
+                                                    cov_row.append(float(c))
+                                                except:
+                                                    # Bad data, skip. We will count the number of 
+                                                    # coefficients at the very end and deal with 
+                                                    # inconsistencies then.
+                                                    pass
+                                            # Sanity check: check the number of entries in the row
+                                            if len(cov_row) == self.nfunc:
+                                                self.covariance.append(cov_row)
+                                        # Sanity check: check the number of rows in the covariance
+                                        # matrix
+                                        if not len(self.covariance) == self.nfunc:
+                                            # Inconsistent dimensions of the covariance matrix.
+                                            # Don't keep the data.
+                                            err_msg = "InversionState.fromXML: inconsistant dimensions of the covariance matrix: "
+                                            err_msg += "%d %d" % (len(self.covariance), self.nfunc)
+                                            logging.error(err_msg)
+                                            self.covariance = None
             else:
                 raise RuntimeError, "Unsupported P(r) file version"
         
@@ -348,6 +421,8 @@ class Reader(CansasReader):
         if os.path.isfile(path):
             basename  = os.path.basename(path)
             root, extension = os.path.splitext(basename)
+            #TODO: eventually remove the check for .xml once
+            # the P(r) writer/reader is truly complete.
             if  extension.lower() in self.ext or \
                 extension.lower() == '.xml':
                 
@@ -368,7 +443,7 @@ class Reader(CansasReader):
                     sas_entry = self._parse_entry(entry)
                     prstate = self._parse_prstate(entry)
                     sas_entry.meta_data['prstate'] = prstate
-                    sas_entry.filename = basename
+                    sas_entry.filename = prstate.file
                     output.append(sas_entry)
         else:
             raise RuntimeError, "%s is not a file" % path
@@ -377,6 +452,8 @@ class Reader(CansasReader):
         if len(output)==0:
             return None
         elif len(output)==1:
+            # Call back to post the new state
+            self.call_back(output[0].meta_data['prstate'], datainfo = output[0])
             return output[0]
         else:
             return output                
@@ -395,8 +472,8 @@ class Reader(CansasReader):
         if self.cansas == True:
             if datainfo is None:
                 datainfo = DataLoader.data_info.Data1D(x=[], y=[])    
-            elif not datainfo.__class__ == DataLoader.data_info.Data1D: 
-                raise RuntimeError, "The cansas writer expects a Data1D instance"
+            elif not issubclass(datainfo.__class__, DataLoader.data_info.Data1D):
+                raise RuntimeError, "The cansas writer expects a Data1D instance: %s" % str(datainfo.__class__.__name__)
         
             # Create basic XML document
             doc, sasentry = self._to_xml_doc(datainfo)

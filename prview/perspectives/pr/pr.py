@@ -1,4 +1,3 @@
-#TODO: Use simview to generate P(r) and I(q) pairs in sansview.
 # Make sure the option of saving each curve is available 
 # Use the I(q) curve as input and compare the output to P(r)
 
@@ -88,22 +87,41 @@ class Plugin:
         from DataLoader.loader import Loader
         from inversion_state import Reader
          
-        reader = Reader(self.set_state)
+        #TODO: get rid of the cansas flag 
+        self.state_reader = Reader(self.set_state, cansas = not self.standalone)
         l = Loader()
-        l.associate_file_reader('.prv', reader)
+        l.associate_file_reader('.prv', self.state_reader)
                 
         # Log startup
         logging.info("Pr(r) plug-in started")
         
-    def set_state(self, state):
+    def set_state(self, state, datainfo=None):
         """
             Call-back method for the inversion state reader.
             This method is called when a .prv file is loaded.
             
             @param state: InversionState object
+            @param datainfo: Data1D object [optional]
         """
-        self.control_panel.set_state(state)
-        #print state
+        try:
+            # If we are not in standalone mode, the panel will not
+            # load any data file and we need to keep track of the
+            # data here.
+            if self.standalone == False:
+                if datainfo is None:
+                    raise RuntimeError, "Pr.set_state: datainfo parameter cannot be None in standalone mode"
+                    
+                self.current_plottable = datainfo
+                self.current_plottable.group_id = datainfo.meta_data['prstate'].file
+                
+            # Load the P(r) results
+            self.control_panel.set_state(state)
+                        
+            # Make sure the user sees the P(r) panel after loading
+            self.parent.set_perspective(self.perspective)            
+
+        except:
+            logging.error("prview.set_state: %s" % sys.exc_value)
 
     def populate_menu(self, id, owner):
         """
@@ -827,7 +845,24 @@ class Plugin:
         self.control_panel.q_min = self.pr.x.min()
         self.control_panel.q_max = self.pr.x.max()
             
-
+    def save_data(self, filepath, prstate=None):
+        """
+            Save data in provided state object.
+            TODO: move the state code away from inversion_panel and move it here. 
+                    Then remove the "prstate" input and make this method private.
+                    
+            @param filepath: path of file to write to
+            @param prstate: P(r) inversion state 
+        """
+        #TODO: do we need this or can we use DataLoader.loader.save directly?
+        
+        # Add output data and coefficients to state
+        prstate.coefficients = self._last_out
+        prstate.covariance = self._last_cov
+        
+        # Write the output to file
+        self.state_reader.write(filepath, self.current_plottable, prstate)
+        
         
     def setup_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None, 
                              bck=False, height=0, width=0):
