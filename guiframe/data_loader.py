@@ -73,6 +73,15 @@ def load_ascii_1D(path):
 def plot_data(parent, path):
     """
         Use the DataLoader loader to created data to plot.
+        
+        TODO: this method needs a major cleanup. 
+        It's a complete mess. It needs:
+          - to be cleaned of code duplication
+          - to be cleaned of data duplication: we should not
+            need to reference all the Data1D data members.
+            It should be sufficient to use the Data1D class
+            defined in dataFitting (which btw needs a better name).
+        
         @param path: the path of the data to load
     """
     from sans.guicomm.events import NewPlotEvent, StatusEvent
@@ -124,6 +133,11 @@ def plot_data(parent, path):
             wx.PostEvent(parent, StatusEvent(status= "%s %s"%(msg, output.filename)))
             new_plot = Data1D(x=output.x, y=output.y, dx=output.dx,
                               dy= dy, dxl=dxl, dxw=dxw)
+            # Copy all the data to the new object so that the 
+            # new_plot object properly behaves as a data_info.Data1D.
+            # This also means that we should not have to copy all
+            # the data below...
+            output.clone_without_data(clone=new_plot)
                 
         ## source will request in dataLoader .manipulation module
         new_plot.source=output.source
@@ -159,6 +173,9 @@ def plot_data(parent, path):
         wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(name)))
         
     ## the output of the loader is a list , some xml files contain more than one data
+    #TODO: refactor this so that there is no duplication of code.
+    # There is no reason why the code above shouldn't be put in 
+    # a private method to be used within the loop below.
     else:
         i=1
         for item in output:
@@ -175,6 +192,8 @@ def plot_data(parent, path):
                 dy= numpy.zeros(len(item.y))
                
             new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy,dxl=dxl,dxw=dxw)
+            # Copy all the data to the new object
+            item.clone_without_data(clone=new_plot)
             new_plot.source=item.source
             
             name= str(item.run[0])

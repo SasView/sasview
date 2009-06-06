@@ -418,6 +418,9 @@ class ModelPanel1D(PlotPanel):
     def _onSaveXML(self, path):
         """
             Save 1D  Data to  XML file
+            
+            TODO: Refactor and remove this method. See TODO in _onSave.
+            
             @param evt: Menu event
         """
         if not path == None:
@@ -438,6 +441,8 @@ class ModelPanel1D(PlotPanel):
     def _onsaveTXT(self, path):
         """
             Save file as txt
+            
+            TODO: Refactor and remove this method. See TODO in _onSave.
         """
         data = self.plots[self.graph.selected_plottable]
        
@@ -494,6 +499,11 @@ class ModelPanel1D(PlotPanel):
             if dlg.ShowModal() == wx.ID_OK:
                 path = dlg.GetPath()
                 mypath = os.path.basename(path)
+                
+                #TODO: This is bad design. The DataLoader is designed to recognize extensions.
+                # It should be a simple matter of calling the .save(file, data, '.xml') method
+                # of the DataLoader.loader.Loader class. 
+                
                 if os.path.splitext(mypath)[1].lower() ==".txt":
                     self._onsaveTXT(path)
                 if os.path.splitext(mypath)[1].lower() ==".xml":
