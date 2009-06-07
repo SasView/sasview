@@ -7,7 +7,7 @@ import math
 import sys
 import wx
 
-from calcthread import CalcThread
+from data_util.calcthread import CalcThread
 
 class CalcChisqr1D(CalcThread):
     """
