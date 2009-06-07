@@ -1,5 +1,5 @@
 import sys, time
-from calcthread import CalcThread
+from data_util.calcthread import CalcThread
 
 class CalcPr(CalcThread):
     """
