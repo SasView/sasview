@@ -419,37 +419,6 @@ class ModelPanel1D(PlotPanel):
             self.subplot.figure.canvas.draw_idle() 
                
                
-    def _onSaveXML(self, path):
-        """
-            Save 1D  Data to  XML file
-            
-            TODO: Refactor and remove this method. See TODO in _onSave.
-            
-            @param evt: Menu event
-        """
-        if not path == None:
-            out = open(path, 'w')
-            from DataLoader.readers import cansas_reader
-            reader = cansas_reader.Reader()
-            data= self.plots[self.graph.selected_plottable]
-            if hasattr(data, "info"):
-                datainfo= data.info
-            else:
-                datainfo= data
-            try:
-                reader.write( path, datainfo)
-            except:
-                msg= "couldn't save point %s"%sys.exc_value
-                raise 
-           
-            try:
-                self._default_save_location = os.path.dirname(path)
-            except:
-                pass
-        
-        return 
-    
-    
     def _onsaveTXT(self, path):
         """
             Save file as txt
@@ -498,7 +467,7 @@ class ModelPanel1D(PlotPanel):
             Save a data set to a text file
             @param evt: Menu event
         """
-        import os
+       
         id = str(evt.GetId())
         if id in self.action_ids:         
             
@@ -514,14 +483,26 @@ class ModelPanel1D(PlotPanel):
                 
                 #TODO: This is bad design. The DataLoader is designed to recognize extensions.
                 # It should be a simple matter of calling the .save(file, data, '.xml') method
-                # of the DataLoader.loader.Loader class. 
-                
-                if os.path.splitext(mypath)[1].lower() ==".txt":
-                    self._onsaveTXT(path)
-                if os.path.splitext(mypath)[1].lower() ==".xml":
-                    self._onSaveXML(path)
-            
+                # of the DataLoader.loader.Loader class.
+                from DataLoader.loader import  Loader
+                #Instantiate a loader 
+                loader = Loader() 
+                data = self.plots[self.graph.selected_plottable]
+                format=".txt"
+                if os.path.splitext(mypath)[1].lower() == format:
+                     self._onsaveTXT( path)
+
+                format= ".xml"
+                if os.path.splitext(mypath)[1].lower() ==format:
+                    loader.save( path, data, format)
+                try:
+                    self._default_save_location = os.path.dirname(path)
+                except:
+                    pass    
             dlg.Destroy()
+            
+            
+    
             
            
     
