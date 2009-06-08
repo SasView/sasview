@@ -1,16 +1,21 @@
 import  re,copy
 import sys, wx, logging
 import string, numpy, math
-
-from danse.common.plottools.plottables import Data2D,Theory1D
-from sans.guiframe import dataFitting 
+import time
+import thread
+from danse.common.plottools.plottables import Theory1D
 from danse.common.plottools.PlotPanel import PlotPanel
+
+from sans.guiframe.dataFitting import Data2D
+from sans.guiframe.dataFitting import Data1D
+from sans.guiframe import dataFitting 
+
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
 from sans.guicomm.events import EVT_SLICER_PANEL,ERR_DATA,EVT_REMOVE_DATA
 from sans.guicomm.events import EVT_SLICER_PARS_UPDATE
-from sans.guiframe import dataFitting
-from sans.fit.AbstractFitEngine import Model
 
+from sans.fit.AbstractFitEngine import Model
+from sans.fit.AbstractFitEngine import FitAbort
 
 from fitproblem import FitProblem
 from fitpanel import FitPanel
@@ -18,16 +23,14 @@ from fit_thread import FitThread
 import models
 import fitpage
 
-
 DEFAULT_BEAM = 0.005
 DEFAULT_QMIN = 0.0001
 DEFAULT_QMAX = 0.13
 DEFAULT_NPTS = 50
-import time
-import thread
-from sans.fit.AbstractFitEngine import FitAbort
 
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
+
+
 class PlotInfo:
     """
         store some plotting field
@@ -168,8 +171,10 @@ class Plugin:
         #TODO: clean this up so that the string are not copied 
         #      multiple times.
         self.graph=graph
+       
         for item in graph.plottables:
             if item.__class__.__name__ is "Data2D":
+                
                 if hasattr(item,"is_data"):
                     if item.is_data:
                         return [["Select data for fitting", \
@@ -277,7 +282,9 @@ class Plugin:
             dx= item.dx
             
         
-        data= dataFitting.Data1D(x=item.x, y=item.y,dx=dx, dy=dy, dxl=dxl, dxw=dxw)
+        data= Data1D(x=item.x, y=item.y,dx=dx, dy=dy)
+        data.dxl = dxl
+        data.dxw = dxw
         
         data.name = item.name
         data.detector = detector
@@ -293,7 +300,7 @@ class Plugin:
         data.xaxis(copy.deepcopy(item._xaxis),copy.deepcopy(item._xunit))
         data.yaxis(copy.deepcopy(item._yaxis),copy.deepcopy(item._yunit))
         ##group_id specify on which panel to plot this data
-        data.group_id = copy.deepcopy(item.group_id)
+        data.group_id = item.group_id
         return data
 
     def set_fit_range(self, page, qmin, qmax):
@@ -674,6 +681,7 @@ class Plugin:
                     item.is_data=True
                     data.is_data=True
                 
+               
             ## create anew page                   
             if item.name == self.panel.graph.selected_plottable or\
                  item.__class__.__name__ is "Data2D":
@@ -1064,7 +1072,7 @@ class Plugin:
                 new_plot.is_data =False 
            
             from DataLoader import data_info
-            info= data_info.Data1D(x= new_plot.x, y=new_plot.y)
+            info= Data1D(x= new_plot.x, y=new_plot.y)
             info.title= new_plot.name
             title= my_info.title
             info.xaxis(new_plot._xaxis,  new_plot._xunit)
