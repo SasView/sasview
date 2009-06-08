@@ -1,7 +1,7 @@
 import os, sys,numpy
 import wx
-from dataFitting import Data1D, Theory1D
-from danse.common.plottools.plottables import Data2D
+from dataFitting import Data1D
+from dataFitting import Data2D
 from DataLoader.loader import Loader
 
 def choose_data_file(parent, location=None):
@@ -73,15 +73,6 @@ def load_ascii_1D(path):
 def plot_data(parent, path):
     """
         Use the DataLoader loader to created data to plot.
-        
-        TODO: this method needs a major cleanup. 
-        It's a complete mess. It needs:
-          - to be cleaned of code duplication
-          - to be cleaned of data duplication: we should not
-            need to reference all the Data1D data members.
-            It should be sufficient to use the Data1D class
-            defined in dataFitting (which btw needs a better name).
-        
         @param path: the path of the data to load
     """
     from sans.guicomm.events import NewPlotEvent, StatusEvent
@@ -93,57 +84,33 @@ def plot_data(parent, path):
     #Recieves data 
     try:
         output=L.load(path)
-        
+        if output==None:
+            msg="Could not open this page"
+            wx.PostEvent(parent, StatusEvent(status=msg))
+            return
     except:
         wx.PostEvent(parent, StatusEvent(status="Problem loading file: %s" % sys.exc_value))
         return
-    if output==None:
-        msg="Could not open this page"
-        wx.PostEvent(parent, StatusEvent(status=msg))
-        return
+    
+  
     filename = os.path.basename(path)
     
     if not  output.__class__.__name__=="list":
-        ## smearing info
-        try:
-            dxl = output.dxl
-            dxw = output.dxw
-        except:
-            dxl = None
-            dxw = None
-       
-            
         ## Creating a Data2D with output
         if hasattr(output,'data'):
-            
-            new_plot = Data2D(image=output.data,err_image=output.err_data,
-                              xmin=output.xmin,xmax=output.xmax,
-                              ymin=output.ymin,ymax=output.ymax)
-            new_plot.x_bins=output.x_bins
-            new_plot.y_bins=output.y_bins
-            
-        ##Creating Data1D with output
+            new_plot = Data2D(image=None,err_image=None)
+      
         else:
-            ##dy values checked
-            dy= output.dy
-            if dy ==None:
-                dy= numpy.zeros(len(output.y))
-            
             msg="Loading 1D data: "
             wx.PostEvent(parent, StatusEvent(status= "%s %s"%(msg, output.filename)))
-            new_plot = Data1D(x=output.x, y=output.y, dx=output.dx,
-                              dy= dy, dxl=dxl, dxw=dxw)
-            # Copy all the data to the new object so that the 
-            # new_plot object properly behaves as a data_info.Data1D.
-            # This also means that we should not have to copy all
-            # the data below...
-            output.clone_without_data(clone=new_plot)
-                
-        ## source will request in dataLoader .manipulation module
-        new_plot.source=output.source
+            new_plot = Data1D(x=[], y=[], dx=None,dy= None)
+            
+        new_plot.copy_from_datainfo(output) 
+        output.clone_without_data(clone=new_plot)      
+      
         ## data 's name
-        if output.filename==None:
-            output.filename=str(filename)
+        if output.filename==None or output.filename=="":
+            output.filename = str(filename)
         ## name of the data allow to differentiate data when plotted
         name= output.filename
         if not name in parent.indice_load_data.keys():
@@ -151,8 +118,8 @@ def plot_data(parent, path):
         else:
             ## create a copy of the loaded data
             parent.indice_load_data[name]+=1
-            name = name +"(copy %i)"%parent.indice_load_data[name]
-            
+            name = name +"[%i]"%parent.indice_load_data[name]
+       
         new_plot.name = name
         ## allow to highlight data when plotted
         new_plot.interactive = True
@@ -161,21 +128,17 @@ def plot_data(parent, path):
         ## info is a reference to output of dataloader that can be used
         ## to save  data 1D as cansas xml file
         new_plot.info= output
-        ## detector used by dataLoader.manipulation module
-        new_plot.detector =output.detector
-        ## If the data file does not tell us what the axes are, just assume...
-        new_plot.xaxis(output._xaxis,output._xunit)
-        new_plot.yaxis(output._yaxis,output._yunit)
         ##group_id specify on which panel to plot this data
         new_plot.group_id = name
         new_plot.is_data =True
         ##post data to plot
-        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(name)))
+        if hasattr(new_plot,"title"):
+            title= str(new_plot.title)
+        else:
+            title = str(name)
+        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title= title ))
         
     ## the output of the loader is a list , some xml files contain more than one data
-    #TODO: refactor this so that there is no duplication of code.
-    # There is no reason why the code above shouldn't be put in 
-    # a private method to be used within the loop below.
     else:
         i=1
         for item in output:
@@ -187,15 +150,13 @@ def plot_data(parent, path):
                 dx=None
                 dxl=None
                 dxw=None
-            dy = item.dy  
-            if dy ==None:
-                dy= numpy.zeros(len(item.y))
-               
-            new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy,dxl=dxl,dxw=dxw)
-            # Copy all the data to the new object
+
+            new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy)
+            new_plot.copy_from_datainfo(item)
             item.clone_without_data(clone=new_plot)
-            new_plot.source=item.source
-            
+            new_plot.dxl = dxl
+            new_plot.dxw = dxw
+           
             name= str(item.run[0])
             if not name in parent.indice_load_data.keys():
                 parent.indice_load_data[name]=0
@@ -212,10 +173,7 @@ def plot_data(parent, path):
                 
             new_plot.name = name
             new_plot.interactive = True
-            new_plot.detector =item.detector
-            # If the data file does not tell us what the axes are, just assume...
-            new_plot.xaxis(item._xaxis,item._xunit)
-            new_plot.yaxis(item._yaxis,item._yunit)
+         
             new_plot.group_id = name
             new_plot.id = name
             new_plot.info= item
