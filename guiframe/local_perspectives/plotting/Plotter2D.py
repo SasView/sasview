@@ -15,13 +15,15 @@ import pylab
 
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools.plottables import Graph,Data1D
+from danse.common.plottools.plottables import Graph
 from sans.guicomm.events import EVT_NEW_PLOT
 from sans.guicomm.events import EVT_SLICER_PARS
 from sans.guicomm.events import StatusEvent ,NewPlotEvent,SlicerEvent
 from sans.guiframe.utils import PanelMenu
 from binder import BindArtist
 from Plotter1D import ModelPanel1D
+ 
+from sans.guiframe.dataFitting import Data1D
 (InternalEvent, EVT_INTERNAL)   = wx.lib.newevent.NewEvent()
 
 
@@ -396,7 +398,9 @@ class ModelPanel2D( ModelPanel1D):
         else:
             dxw= None
         
-        new_plot = Data1D(x=circ.x,y=circ.y,dy=circ.dy,dxl=dxl,dxw=dxw)
+        new_plot = Data1D(x=circ.x,y=circ.y,dy=circ.dy)
+        new_plot.dxl=dxl
+        new_plot.dxw=dxw
         new_plot.name = "Circ avg "+ self.data2D.name
         new_plot.source=self.data2D.source
         #new_plot.info=self.data2D.info

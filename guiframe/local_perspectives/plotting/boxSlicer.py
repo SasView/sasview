@@ -8,13 +8,17 @@
 
 # Debug printout
 #from config import printEVT
-from BaseInteractor import _BaseInteractor
+import wx
+import copy
 from copy import deepcopy
-import math, numpy
+import math
+import numpy
 
 from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,EVT_SLICER_PARS
+from BaseInteractor import _BaseInteractor
+from sans.guiframe.dataFitting import Data1D
+
 import SlicerParameters
-import wx
 
 
 class BoxInteractor(_BaseInteractor):
@@ -155,7 +159,7 @@ class BoxInteractor(_BaseInteractor):
         
         boxavg = box(self.base.data2D)
         #3 Create Data1D to plot
-        from sans.guiframe.dataFitting import Data1D
+        
         if hasattr(boxavg,"dxl"):
             dxl= boxavg.dxl
         else:
@@ -165,7 +169,9 @@ class BoxInteractor(_BaseInteractor):
         else:
             dxw= None
        
-        new_plot = Data1D(x=boxavg.x,y=boxavg.y,dy=boxavg.dy,dxl=dxl,dxw=dxw)
+        new_plot = Data1D(x=boxavg.x,y=boxavg.y,dy=boxavg.dy)
+        new_plot.dxl  = dxl
+        new_plot.dxw  = dxw
         new_plot.name = str(self.averager.__name__) +"("+ self.base.data2D.name+")"
         
         new_plot.source=self.base.data2D.source

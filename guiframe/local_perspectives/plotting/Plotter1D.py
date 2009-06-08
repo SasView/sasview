@@ -10,8 +10,12 @@ copyright 2008, University of Tennessee
 
 
 import wx
-import sys, os
-import pylab, time,numpy
+import sys
+import os
+import pylab
+import math
+import numpy
+import time
 
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
@@ -21,6 +25,7 @@ from sans.guicomm.events import EVT_NEW_PLOT
 from sans.guicomm.events import StatusEvent ,NewPlotEvent,SlicerEvent,ErrorDataEvent
 from sans.guicomm.events import RemoveDataEvent
 from sans.guiframe.utils import PanelMenu
+from sans.guiframe.dataFitting import Data1D
 
 from binder import BindArtist
 
@@ -295,13 +300,13 @@ class ModelPanel1D(PlotPanel):
                     dxl = selected_plot.dxl
                 if hasattr(selected_plot, "dxw"):
                     dxw = selected_plot.dxw
-                new_plot = dataFitting.Data1D( x=selected_plot.x,
+                new_plot = Data1D( x=selected_plot.x,
                               y= selected_plot.y,
                                dx=selected_plot.dx,
-                              dy=dy,
-                              dxl=dxl,
-                              dxw=dxw)
-                            
+                              dy=dy)
+                new_plot.dxl  = dxl
+                new_plot.dxw = dxw
+                             
             else:
                  new_plot = Theory1D(x=selected_plot.x,y=selected_plot.y,dy=dy)
             new_plot.interactive = True
@@ -343,9 +348,7 @@ class ModelPanel1D(PlotPanel):
             errors and transorm the plottable to a Data1D
             @param evt: Menu event
         """
-        import math
-        import numpy
-        import time
+       
         
         if not self.graph.selected_plottable == None \
             and self.graph.selected_plottable in self.plots.keys():
@@ -377,12 +380,13 @@ class ModelPanel1D(PlotPanel):
                     dxl = selected_plot.dxl
                 if hasattr(selected_plot, "dxw"):
                     dxw = selected_plot.dxw
-                new_plot = dataFitting.Data1D( x=selected_plot.x,
+                new_plot = Data1D( x=selected_plot.x,
                                                y= selected_plot.y,
                                                dx=selected_plot.dx,
-                                               dy=dy,
-                                               dxl=dxl,
-                                               dxw=dxw)
+                                               dy=dy)
+                new_plot.dxl = dxl
+                new_plot.dxw = dxw
+                                      
             else:
                 ## Create a new plottable Theory1D
                 new_plot = Theory1D(x=selected_plot.x,y=selected_plot.y,dy=dy)
@@ -427,8 +431,16 @@ class ModelPanel1D(PlotPanel):
             out = open(path, 'w')
             from DataLoader.readers import cansas_reader
             reader = cansas_reader.Reader()
-            datainfo= self.plots[self.graph.selected_plottable].info
-            reader.write( path, datainfo)
+            data= self.plots[self.graph.selected_plottable]
+            if hasattr(data, "info"):
+                datainfo= data.info
+            else:
+                datainfo= data
+            try:
+                reader.write( path, datainfo)
+            except:
+                msg= "couldn't save point %s"%sys.exc_value
+                raise 
            
             try:
                 self._default_save_location = os.path.dirname(path)

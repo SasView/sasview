@@ -15,6 +15,7 @@ from BaseInteractor import _BaseInteractor
 from sans.guicomm.events import NewPlotEvent, StatusEvent
 from sans.guicomm.events import SlicerParameterEvent,EVT_SLICER_PARS
 
+from sans.guiframe.dataFitting import Data1D
 
 class SectorInteractor(_BaseInteractor):
     """
@@ -162,7 +163,7 @@ class SectorInteractor(_BaseInteractor):
      
         sector = sect(self.base.data2D)
         ##Create 1D data resulting from average
-        from sans.guiframe.dataFitting import Data1D
+       
         if hasattr(sector,"dxl"):
             dxl= sector.dxl
         else:
@@ -172,7 +173,9 @@ class SectorInteractor(_BaseInteractor):
         else:
             dxw= None
        
-        new_plot = Data1D(x=sector.x,y=sector.y,dy=sector.dy,dxl=dxl,dxw=dxw)
+        new_plot = Data1D(x=sector.x,y=sector.y,dy=sector.dy)
+        new_plot.dxl = dxl
+        new_plot.dxw = dxw
         new_plot.name = "SectorQ" +"("+ self.base.data2D.name+")"
         
         new_plot.source=self.base.data2D.source

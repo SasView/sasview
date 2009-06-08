@@ -11,7 +11,7 @@ from copy import deepcopy
 # Debug printout
 from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,EVT_SLICER_PARS
 from BaseInteractor import _BaseInteractor
-
+from sans.guiframe.dataFitting import Data1D
 
 class AnnulusInteractor(_BaseInteractor):
     """
@@ -133,7 +133,7 @@ class AnnulusInteractor(_BaseInteractor):
                           phi_min=0, phi_max=2*math.pi , nbins=self.nbins)
         sector = sect(self.base.data2D)
         
-        from sans.guiframe.dataFitting import Data1D
+        
         if hasattr(sector,"dxl"):
             dxl= sector.dxl
         else:
@@ -143,7 +143,9 @@ class AnnulusInteractor(_BaseInteractor):
         else:
             dxw= None
        
-        new_plot = Data1D(x=sector.x,y=sector.y,dy=sector.dy,dxl=dxl,dxw=dxw)
+        new_plot = Data1D(x=sector.x,y=sector.y,dy=sector.dy)
+        new_plot.dxl = dxl
+        new_plot.dxw = dxw
         new_plot.name = "SectorPhi" +"("+ self.base.data2D.name+")"
         
         new_plot.source=self.base.data2D.source
