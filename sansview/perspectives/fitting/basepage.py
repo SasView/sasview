@@ -141,7 +141,7 @@ class BasicPage(wx.ScrolledWindow):
             Restore the previous action cancelled 
         """
         print "enable redo"
-        event = NextStateEvent(page= sent)
+        event = NextStateEvent(page= self)
         wx.PostEvent(self.parent, event)
         
         
@@ -575,7 +575,7 @@ class BasicPage(wx.ScrolledWindow):
         #wx.PostEvent(self.parent, event)
     
     
-    def reset_page_helper(self, state):
+    def reset_page_helper(self, state, forward=False):
         """
             Use page_state and change the state of existing page
             @precondition: the page is already drawn or created

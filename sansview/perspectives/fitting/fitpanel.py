@@ -71,7 +71,7 @@ class ListOfState(list):
             return self[position]
         
     def getNextItem(self):
-        position = self.iterator.next()
+        position = self.iterator.next(max= len(self)-1)
         if position >= len(self):
             return None
         else:
@@ -171,7 +171,8 @@ class FitPanel(wx.aui.AuiNotebook):
         ## get the state of a page
         self.Bind(basepage.EVT_PAGE_INFO, self._onGetstate)
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
-        #(NextStateEvent, EVT_NEXT_STATE)   = wx.lib.neweve
+        self.Bind(basepage.EVT_NEXT_STATE, self._onRedo)
+       
         # increment number for model name
         self.count=0
         #updating the panel
@@ -405,9 +406,22 @@ class FitPanel(wx.aui.AuiNotebook):
                 state = None
             else:
                 state = self.fit_page_name[page.window_name].getPreviousItem()
+                page._redo.Enable(True)
             page.reset_page(state)
-                
-          
+        
+    def _onRedo(self, event ): 
+        """
+            return the next state available
+        """       
+        page = event.page 
+        if page.window_name in self.fit_page_name:
+            length= len(self.fit_page_name[page.window_name])
+            if self.fit_page_name[page.window_name].getCurrentPosition()== length -1:
+                state = None
+                page._redo.Enable(False)
+            else:
+                state = self.fit_page_name[page.window_name].getNextItem()
+            page.reset_page(state)  
                 
     def _help_add_model_page(self,model,page_title="Model", qmin=0.0001, 
                              qmax=0.13, npts=50,reset= False):
