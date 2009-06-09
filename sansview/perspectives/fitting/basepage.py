@@ -9,6 +9,8 @@ from sans.guicomm.events import StatusEvent
 import pagestate
 from pagestate import PageState
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
+(PreviousStateEvent, EVT_PREVIOUS_STATE)   = wx.lib.newevent.NewEvent()
+(NextStateEvent, EVT_NEXT_STATE)   = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 80
 
 class BasicPage(wx.ScrolledWindow):
@@ -45,6 +47,7 @@ class BasicPage(wx.ScrolledWindow):
         self.disp_cb_dict ={}
         ## smearer object
         self.smearer = None
+        
         ##list of model parameters. each item must have same length
         ## each item related to a given parameters
         ##[cb state, name, value, "+/-", error of fit, min, max , units]
@@ -80,7 +83,7 @@ class BasicPage(wx.ScrolledWindow):
         ## retrieve saved state
         self.number_saved_state= 0
         ## dictionary of saved state
-        self.saved_states={}
+        self.saved_states={} 
         
         ## Create context menu for page
         self.popUpMenu = wx.Menu()
@@ -124,18 +127,23 @@ class BasicPage(wx.ScrolledWindow):
         self.PopupMenu(self.popUpMenu, pos) 
       
         
-        
     def onUndo(self, event):
         """
             Cancel the previous action
         """
         print "enable undo"
+        event = PreviousStateEvent(page = self)
+        wx.PostEvent(self.parent, event)
+        
         
     def onRedo(self, event):
         """
             Restore the previous action cancelled 
         """
         print "enable redo"
+        event = NextStateEvent(page= sent)
+        wx.PostEvent(self.parent, event)
+        
         
     def define_page_structure(self):
         """
@@ -360,8 +368,8 @@ class BasicPage(wx.ScrolledWindow):
                 ## post state to fit panel
                 
                 self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
-                event = PageInfoEvent(page = self)
-                wx.PostEvent(self.parent, event)
+                #event = PageInfoEvent(page = self)
+                #wx.PostEvent(self.parent, event)
         return
     
     
@@ -563,8 +571,8 @@ class BasicPage(wx.ScrolledWindow):
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
         
         ## post state to fit panel
-        event = PageInfoEvent(page = self)
-        wx.PostEvent(self.parent, event)
+        #event = PageInfoEvent(page = self)
+        #wx.PostEvent(self.parent, event)
     
     
     def reset_page_helper(self, state):
@@ -574,6 +582,9 @@ class BasicPage(wx.ScrolledWindow):
             @postcondition: the state of the underlying data change as well as the
             state of the graphic interface
         """
+        if state ==None:
+            self._undo.Enable(False)
+            return 
         self.model= state.model
         self.data = state.data
         self.smearer= state.smearer
@@ -591,6 +602,7 @@ class BasicPage(wx.ScrolledWindow):
         ## set the select all check box to the a given state
         if hasattr(self, "cb1"):   
             self.cb1.SetValue(state.cb1)
+      
         ## reset state of checkbox,textcrtl  and  regular parameters value
         self._reset_parameters_state(self.orientation_params_disp,
                                      state.orientation_params_disp)
@@ -673,8 +685,8 @@ class BasicPage(wx.ScrolledWindow):
         ## set the value of the current state to the state given as parameter
         self.state = state.clone() 
         ## post state to fit panel
-        event = PageInfoEvent(page = self)
-        wx.PostEvent(self.parent, event)
+        #event = PageInfoEvent(page = self)
+        #wx.PostEvent(self.parent, event)
         
     def _selectDlg(self):
         """
@@ -731,9 +743,7 @@ class BasicPage(wx.ScrolledWindow):
         self._undo.Enable(True)
         if self.model !=None:
             
-            ## save current state
-            self.save_current_state()
-            
+           
             # Flag to register when a parameter has changed.
             is_modified = False
             is_modified =self._check_value_enter( self.fittable_param ,is_modified)
@@ -1182,10 +1192,6 @@ class BasicPage(wx.ScrolledWindow):
         self.disp_list =self.model.getDispParamList()
         self.state.disp_list = self.disp_list
         
-        ## post state to fit panel
-        event = PageInfoEvent(page = self)
-        wx.PostEvent(self.parent, event)
-        
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
@@ -1199,8 +1205,14 @@ class BasicPage(wx.ScrolledWindow):
             when enter value on panel redraw model according to changed
         """
         tcrtl= event.GetEventObject()
+        ## save current state
+        self.save_current_state()
         
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event)
+            
         if check_float(tcrtl):
+            
             self._onparamEnter_helper()
         else:
             msg= "Cannot Plot :Must enter a number!!!  "
@@ -1395,8 +1407,8 @@ class BasicPage(wx.ScrolledWindow):
             
         self.state.disp_box= n
         ## post state to fit panel
-        event = PageInfoEvent(page = self)
-        wx.PostEvent(self.parent, event)
+        #event = PageInfoEvent(page = self)
+        #wx.PostEvent(self.parent, event)
         
         self.sizer4_4.Layout()
         self.sizer4.Layout()

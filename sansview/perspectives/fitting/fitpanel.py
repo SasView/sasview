@@ -2,26 +2,92 @@ import wx
 import wx.aui
 import wx.lib
 import numpy
-import string ,re
-#import models
-_BOX_WIDTH = 80
+import string 
+
+
 import basepage
 
-class StateContainer(object):
+_BOX_WIDTH = 80
+
+
+class StateIterator(object):
     """
         Contains all saved state of a given page.
         Provide position of the current state of a page, the first save state
         and the last state for a given page. 
-        Allow easy unoding or redo for a given page  
+        Allow easy undo or redo for a given page  
     """
-    def __init__(self, page=None):
-        """
-            Initialize variable
-        """
-        self.page = page
-        self.begin =0
-        self.current=0
-        self.end=0
+    def __init__(self):
+        self._current=0
+       
+    
+    def __iter__(self):
+        return self
+    
+    
+    def first(self):
+        self._current =0
+        return self._current
+    
+    def next(self, max ):
+        if self._current < max:
+            self._current += 1
+        return self._current
+    
+    def previous(self):
+        if self._current > 0:
+            self._current = self._current -1
+        return self._current
+    
+    def currentPosition(self):
+        return self._current
+    
+    def setPosition(self, value):
+        if value >=0:
+            self._current = int(value)
+        
+        
+    
+  
+class ListOfState(list):     
+    def __init__(self, *args, **kw):
+        list.__init__(self, *args, **kw)
+        self.iterator = StateIterator()
+        
+    def appendItem(self, x):
+        self.append(x)
+        self.iterator.setPosition(value= len(self)-1)
+        
+    def removeItem(self, x):
+        self.iterator.previous()
+        self.remove(x)
+        
+    def getPreviousItem(self):
+        position = self.iterator.previous()
+        
+        if position < 0:
+            return None
+        else:
+            return self[position]
+        
+    def getNextItem(self):
+        position = self.iterator.next()
+        if position >= len(self):
+            return None
+        else:
+            return self[position]
+        
+    def getCurrentItem(self):
+        postion = self.iterator.currentPosition()
+        if postion >= 0 and position < len(self):
+            return self[postion]
+        else:
+            return None
+        
+    def getCurrentPosition(self):
+        return self.iterator.currentPosition()
+        
+
         
         
         
@@ -36,7 +102,7 @@ class PageInfo(object):
     event_owner= None
     model_list_box = None
     name=None
-     ## Internal name for the AUI manager
+    ## Internal name for the AUI manager
     window_name = "Page"
     ## Title to appear on top of the window
     window_caption = "Page"
@@ -104,6 +170,8 @@ class FitPanel(wx.aui.AuiNotebook):
         self.sim_page=None
         ## get the state of a page
         self.Bind(basepage.EVT_PAGE_INFO, self._onGetstate)
+        self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
+        #(NextStateEvent, EVT_NEXT_STATE)   = wx.lib.neweve
         # increment number for model name
         self.count=0
         #updating the panel
@@ -240,22 +308,24 @@ class FitPanel(wx.aui.AuiNotebook):
                     memento= self.fit_page_name[name][0]
                     panel.reset_page(memento)
             else:
-                self.fit_page_name[name]=[]
-                self.fit_page_name[name].insert(0,panel.createMemento())
+                self.fit_page_name[name]=ListOfState()
+                #self.fit_page_name[name].appendItem(panel.createMemento())
             #GetPage(self, page_idx) 
             return panel 
         elif name =='Model 1D Fit':
             if self.fit_page1D_number!=None:
                 panel =self.GetPage(self.fit_page1D_number) 
-                self.fit_page_name[name]=[]
-                self.fit_page_name[name].insert(0,panel.createMemento())
+                #self.fit_page_name[name]=[]
+                self.fit_page_name[name]= ListOfState()
+                #self.fit_page_name[name].insert(0,panel.createMemento())
+                #self.fit_page_name[name].append(panel.createMemento())
                 return panel
             return None
         elif name =='Model 2D Fit':
             if self.fit_page2D_number!=None:
                 panel =self.GetPage(self.fit_page2D_number) 
-                self.fit_page_name[name]=[]
-                self.fit_page_name[name].insert(0,panel.createMemento())
+                self.fit_page_name[name]=ListOfState()
+                #self.fit_page_name[name].append(panel.createMemento())
                 return panel
             return None
         return None
@@ -323,8 +393,21 @@ class FitPanel(wx.aui.AuiNotebook):
         """
         page= event.page
         if page.window_name in self.fit_page_name:
-            self.fit_page_name[page.window_name].insert(0,page.createMemento()) 
+            self.fit_page_name[page.window_name].appendItem(page.createMemento()) 
             
+    def _onUndo(self, event ):
+        """
+            return the previous state of a given page is available
+        """
+        page = event.page 
+        if page.window_name in self.fit_page_name:
+            if self.fit_page_name[page.window_name].getCurrentPosition()==0:
+                state = None
+            else:
+                state = self.fit_page_name[page.window_name].getPreviousItem()
+            page.reset_page(state)
+                
+          
                 
     def _help_add_model_page(self,model,page_title="Model", qmin=0.0001, 
                              qmax=0.13, npts=50,reset= False):

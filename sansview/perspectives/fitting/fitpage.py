@@ -168,8 +168,7 @@ class FitPage(BasicPage):
         sizer_smearer.Add( boxsizer1 )
                
         #Set sizer for Fitting section
-        self._set_range_sizer( title="Fitting",
-                               object1=sizer_smearer, object= sizer_fit)
+        self._set_range_sizer( title="Fitting",object1=sizer_smearer, object= sizer_fit)
   
        
     def _fill_datainfo_sizer(self):
@@ -542,6 +541,10 @@ class FitPage(BasicPage):
             evt = ModelEventbox(model=self.model)
             wx.PostEvent(self.event_owner, evt)   
         self.btFit.SetFocus() 
+        ## post state to fit panel
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event) 
+     
    
     def _onparamRangeEnter(self, event):
         """
@@ -576,6 +579,12 @@ class FitPage(BasicPage):
             when enter value on panel redraw model according to changed
         """
         tcrtl= event.GetEventObject()
+        ## save current state
+        self.save_current_state()
+        
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event)
+        
         if check_float(tcrtl):
             self._onparamEnter_helper()
             temp_smearer = None
@@ -750,7 +759,9 @@ class FitPage(BasicPage):
         ##Calculate chi2
         self.compute_chisqr(smearer= temp_smearer)  
         ## save the state enable smearing
-        self.save_current_state() 
+        self.state.smearer= temp_smearer
+        #self.save_current_state() 
+   
    
     def complete_chisqr(self, output, elapsed=None):  
         """
@@ -764,8 +775,8 @@ class FitPage(BasicPage):
             self.Refresh
             ## post state to fit panel
             self.state.tcChi =output
-            event = PageInfoEvent(page = self)
-            wx.PostEvent(self.parent, event)
+            #event = PageInfoEvent(page = self)
+            #wx.PostEvent(self.parent, event)
         except:
             pass
         
@@ -900,8 +911,15 @@ class FitPage(BasicPage):
                 for item in self.fittable_param:
                     item[0].SetValue(False)
                 self.param_toFit=[]
-                
-        self.save_current_state()  
+        self._copy_parameters_state(self.orientation_params,
+                                     self.state.orientation_params)
+        self._copy_parameters_state(self.orientation_params_disp,
+                                     self.state.orientation_params_disp)
+        self._copy_parameters_state(self.parameters, self.state.parameters)
+        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
+           
+        #self.save_current_state()  
         
                 
                 
@@ -935,7 +953,15 @@ class FitPage(BasicPage):
         else:
             self.cb1.SetValue(False)
         ## save current state of the page
-        self.save_current_state()
+        self._copy_parameters_state(self.orientation_params,
+                                     self.state.orientation_params)
+        self._copy_parameters_state(self.orientation_params_disp,
+                                     self.state.orientation_params_disp)
+        self._copy_parameters_state(self.parameters, self.state.parameters)
+        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
+        
+        #self.save_current_state()
         
     
         
@@ -1010,6 +1036,7 @@ class FitPage(BasicPage):
 
         for item in keys:
             if not item in self.disp_list and not item in self.model.orientation_params:
+               
                 iy += 1
                 ix = 0
                 ## add parameters name with checkbox for selecting to fit
@@ -1197,9 +1224,10 @@ class FitPage(BasicPage):
         
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer3.Layout()
+        self.Layout()
+        self.Refresh()
         self.SetScrollbars(20,20,200,100)
-        
-    
+       
             
         
 class HelpWindow(wx.Frame):

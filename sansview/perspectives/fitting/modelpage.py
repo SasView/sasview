@@ -346,7 +346,10 @@ class ModelPage(BasicPage):
         self.model_view.SetFocus()
         if self.model !=None:
             self._draw_model()
-                         
+        ## post state to fit panel
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event)               
+    
     
     def set_model_description(self,description,sizer):
         """
