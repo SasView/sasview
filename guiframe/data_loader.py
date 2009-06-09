@@ -134,6 +134,8 @@ def plot_data(parent, path):
         ##post data to plot
         if hasattr(new_plot,"title"):
             title= str(new_plot.title)
+            if title =="":
+                title=str(name)
         else:
             title = str(name)
         wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title= title ))
@@ -180,6 +182,8 @@ def plot_data(parent, path):
             new_plot.is_data =True
             if hasattr(item,"title"):
                 title= item.title
+                if title=="":
+                    title=str(name)
             else:
                 title= name
             wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
