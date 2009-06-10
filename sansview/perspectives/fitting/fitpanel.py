@@ -310,6 +310,7 @@ class FitPanel(wx.aui.AuiNotebook):
                     panel.reset_page(memento)
             else:
                 self.fit_page_name[name]=ListOfState()
+                
                 #self.fit_page_name[name].appendItem(panel.createMemento())
             #GetPage(self, page_idx) 
             return panel 
@@ -354,7 +355,8 @@ class FitPanel(wx.aui.AuiNotebook):
                 self.count +=1
             else:
                 self.model_page.select_model(model)
-                self.fit_page_name[page_title].insert(0,self.model_page.createMemento())
+                self.fit_page_name[name]=ListOfState()
+                #self.fit_page_name[page_title].insert(0,self.model_page.createMemento())
       
       
       
@@ -395,6 +397,8 @@ class FitPanel(wx.aui.AuiNotebook):
         page= event.page
         if page.window_name in self.fit_page_name:
             self.fit_page_name[page.window_name].appendItem(page.createMemento()) 
+            
+            print " current added state: ",len(self.fit_page_name[page.window_name])
             
     def _onUndo(self, event ):
         """
@@ -455,7 +459,8 @@ class FitPanel(wx.aui.AuiNotebook):
                 memento= self.fit_page_name[page_title][0]
                 panel.reset_page(memento)
         else:
-            self.fit_page_name[page_title]=[]
+            self.fit_page_name[page_title]=ListOfState()
+            #self.fit_page_name[page_title]=[]
             self.fit_page_name[page_title].insert(0,panel.createMemento())
        
   

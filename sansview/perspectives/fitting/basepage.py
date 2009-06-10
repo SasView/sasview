@@ -77,6 +77,8 @@ class BasicPage(wx.ScrolledWindow):
         
         ## Create memento to save the current state
         self.state= PageState(parent= self.parent,model=self.model, data=self.data)
+        ## flag to determine if state has change
+        self.state_change= False
         ## save customized array
         self.values=[]
         self.weights=[]
@@ -402,8 +404,8 @@ class BasicPage(wx.ScrolledWindow):
         
         self.state.model = self.model.clone()
         #if not hasattr(self.model, "_persistency_dict"):
-        self.model._persistency_dict = {}
-        self.state.model._persistency_dict= copy.deepcopy(self.model._persistency_dict)
+        #self.model._persistency_dict = {}
+        #self.state.model._persistency_dict= copy.deepcopy(self.model._persistency_dict)
                         
         new_state = self.state.clone()
         new_state.enable2D = copy.deepcopy(self.enable2D)
@@ -514,7 +516,7 @@ class BasicPage(wx.ScrolledWindow):
         self.state.values= copy.deepcopy(self.values)
         self.state.weights = copy.deepcopy( self.weights)
         ## save data    
-        self.state.save_data(self.data)
+        self.state.data= copy.deepcopy(self.data)
        
         try:
             n = self.disp_box.GetCurrentSelection()
@@ -569,13 +571,9 @@ class BasicPage(wx.ScrolledWindow):
         self._copy_parameters_state(self.parameters, self.state.parameters)
         self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
-        
-        ## post state to fit panel
-        #event = PageInfoEvent(page = self)
-        #wx.PostEvent(self.parent, event)
     
     
-    def reset_page_helper(self, state, forward=False):
+    def reset_page_helper(self, state):
         """
             Use page_state and change the state of existing page
             @precondition: the page is already drawn or created
@@ -589,10 +587,18 @@ class BasicPage(wx.ScrolledWindow):
         self.data = state.data
         self.smearer= state.smearer
         self.enable2D= state.enable2D
-        
+        ## set the state of the radio box
+        self.shape_rbutton.SetValue(state.shape_rbutton )
+        self.shape_indep_rbutton.SetValue(state.shape_indep_rbutton)
+        self.struct_rbutton.SetValue(state.struct_rbutton )
+        self.plugin_rbutton.SetValue(state.plugin_rbutton)
         ##draw sizer containing model parameters value for the current model
         self._set_model_sizer_selection( self.model )
         self.set_model_param_sizer(self.model)
+        
+        ## reset value of combox box
+        self.structurebox.SetSelection(state.structurecombobox )
+        self.formfactorbox.SetSelection(state.formfactorcombobox)
         ## enable the view 2d button if this is a modelpage type
         if hasattr(self,"model_view"):
             if not self.enable2D:
@@ -616,49 +622,17 @@ class BasicPage(wx.ScrolledWindow):
         
         if hasattr(self, "disp_box"):
             self.disp_box.SetSelection(state.disp_box)  
-            n = self.disp_box.GetCurrentSelection()
-            dispersity= self.disp_box.GetClientData(n)
-            
-            self._set_dipers_Param(event=None)
-            name= dispersity.__name__
-            if name == "GaussianDispersion":
-                self.disp_cb_dict = {}
+           
+            self.disp_cb_dict = {}
+            for k,v in self.state.disp_cb_dict.iteritems():
                 self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
-               
-                self._disp_obj_dict={}
-                for k , v in state._disp_obj_dict.iteritems():
-                    self._disp_obj_dict[k]=v
-          
-            if  name=="ArrayDispersion":
-                self.model_disp.Show(True)
-                self.disp_box.Show(True)
-                self._set_sizer_arraydispersion()
+                self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
                 
-                for k,v in state.disp_cb_dict.iteritems():
-                    self.disp_cb_dict[k].SetValue(v) 
-                    
-                    if self.disp_cb_dict[k].GetValue():
-                        # Create the dispersion objects
-                        from sans.models.dispersion_models import ArrayDispersion
-                        disp_model = ArrayDispersion()
-                        
-                        disp_model.set_weights(state.values, state.weights)
-                       
-                        # Store the object to make it persist outside the scope of this method
-                        #TODO: refactor model to clean this up?
-                        self._disp_obj_dict[k] = disp_model
-                      
-                        self.values=[]
-                        self.weights = []
-                        self.values= state.values
-                        self.weights = state.weights
-                    
-                        # Set the new model as the dispersion object for the selected parameter
-                        #if not hasattr(self.model, "_persistency_dict"):
-                        self.model._persistency_dict = {}
-                        self.model._persistency_dict[k] = [state.values, state.weights]
-                        self.model.set_dispersion(k, disp_model)
-                        
+            self._disp_obj_dict={}
+            for k , v in self.state._disp_obj_dict.iteritems():
+                self._disp_obj_dict[k]=v
+      
+        self._set_dipers_Param(event=None)
         ##plotting range restore    
         self._reset_plotting_range(state)
         ## smearing info  restore
@@ -676,17 +650,17 @@ class BasicPage(wx.ScrolledWindow):
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
         self._reset_parameters_state(self.fixed_param,state.fixed_param)
         
-      
+        
         ## draw the model with previous parameters value
         self._onparamEnter_helper()
-       
+        
         ## reset context menu items
         self._reset_context_menu()
+        
         ## set the value of the current state to the state given as parameter
         self.state = state.clone() 
-        ## post state to fit panel
-        #event = PageInfoEvent(page = self)
-        #wx.PostEvent(self.parent, event)
+       
+       
         
     def _selectDlg(self):
         """
@@ -723,6 +697,18 @@ class BasicPage(wx.ScrolledWindow):
         if self.state.npts!=None:
             self.npts.SetValue(str(state.npts)) 
             
+    def _save_typeOfmodel(self):
+        """
+            save radiobutton containing the type model that can be selected
+        """
+        self.state.shape_rbutton = self.shape_rbutton.GetValue()
+        self.state.shape_indep_rbutton = self.shape_indep_rbutton.GetValue()
+        self.state.struct_rbutton = self.struct_rbutton.GetValue()
+        self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
+        ## post state to fit panel
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event)
+        self._undo.Enable(True)
         
     def _save_plotting_range(self ):
         """
@@ -779,7 +765,7 @@ class BasicPage(wx.ScrolledWindow):
             
             ## if any value is modify draw model with new value
             if is_modified:
-               
+                self.state_change= True
                 self._draw_model() 
                 self.save_current_state()
                 
@@ -870,10 +856,13 @@ class BasicPage(wx.ScrolledWindow):
             if item[6]!= None:
                 max_value = item[6].GetValue()
                 max_state = item[6].IsShown()
+            unit=None
+            if item[7]!=None:
+                unit = item[7].GetLabel()
                
             statelist.append([checkbox_state, parameter_name, parameter_value,
                               static_text ,[error_state,error_value],
-                                [min_state,min_value],[max_state , max_value],None])
+                                [min_state,min_value],[max_state , max_value],unit])
            
         
    
@@ -981,6 +970,8 @@ class BasicPage(wx.ScrolledWindow):
                             self.formfactorbox.SetSelection(i)
                             break
                     break
+        ## save state and post
+        
                     
         
     def _draw_model(self):
@@ -1131,7 +1122,7 @@ class BasicPage(wx.ScrolledWindow):
             self.formfactorbox.Clear()
             self._populate_box( self.formfactorbox,
                                 self.model_list_box["Customized Models"])
-        
+        self._save_typeOfmodel()
         self._on_select_model(event=None)
         self.sizer4_4.Layout()
         self.sizer4.Layout()
@@ -1191,7 +1182,8 @@ class BasicPage(wx.ScrolledWindow):
         self.state.model =self.model
         self.disp_list =self.model.getDispParamList()
         self.state.disp_list = self.disp_list
-        
+        self.state.structurecombobox =self.structurebox.GetCurrentSelection()
+        self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
@@ -1289,8 +1281,8 @@ class BasicPage(wx.ScrolledWindow):
             self.model_disp.Hide()
             self.disp_box.Hide()
             self.sizer4_4.Clear(True)
-            ## post state to fit panel
-            self.save_current_state()
+            ## save the state of the dispersity
+            #self.save_current_state()
             return
             
         if self.enable_disp.GetValue():
@@ -1308,10 +1300,13 @@ class BasicPage(wx.ScrolledWindow):
             self.disp_box.Hide()
             self.disp_box.SetSelection(0) 
             self.sizer4_4.Clear(True)
-            #self._reset_dispersity()
-            
-        ## post state to fit panel
+        
+        ## post state to fit panel 
         self.save_current_state()
+        if event !=None:
+            event = PageInfoEvent(page = self)
+            wx.PostEvent(self.parent, event)
+        
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
@@ -1381,7 +1376,8 @@ class BasicPage(wx.ScrolledWindow):
             # Redraw the model
            
             self._draw_model()
-            
+        ## save state into
+        self.save_current_state()
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
@@ -1406,9 +1402,6 @@ class BasicPage(wx.ScrolledWindow):
             self._set_sizer_arraydispersion()
             
         self.state.disp_box= n
-        ## post state to fit panel
-        #event = PageInfoEvent(page = self)
-        #wx.PostEvent(self.parent, event)
         
         self.sizer4_4.Layout()
         self.sizer4.Layout()
@@ -1456,7 +1449,12 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.SetScrollbars(20,20,200,100)
-       
+        ## save state into
+        self._copy_parameters_state(self.orientation_params_disp,
+                                     self.state.orientation_params_disp)
+        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
+
 
     def _set_range_sizer(self, title, object1=None,object=None):
         """

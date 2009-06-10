@@ -63,9 +63,14 @@ class PageState(object):
         self.model_list_box = None
         ## save the state of the context menu
         self.saved_states={}
-        ## save  current value of combobox
+        ## save selection of combobox
         self.formfactorcombobox = ""
         self.structurecombobox  = ""
+        ## radio box to select type of model
+        self.shape_rbutton = False
+        self.shape_indep_rbutton = False
+        self.struct_rbutton = False
+        self.plugin_rbutton = False
         ## the indice of the current selection
         self.disp_box = 0
         ## Qrange
@@ -73,6 +78,7 @@ class PageState(object):
         self.qmin= 0.001
         self.qmax= 0.1
         self.npts = None
+        self.name=""
         ## enable smearering state
         self.enable_smearer = False
         self.disable_smearer = True
@@ -85,15 +91,7 @@ class PageState(object):
         self.cb1 = False
         ## store value of chisqr
         self.tcChi= None
-       
-   
-    def save_data(self, data):
-        """
-            Save data
-        """
-        self.data = copy.deepcopy(data)
-
-        
+    
     def clone(self):
         model=None
         if self.model !=None:
@@ -102,7 +100,15 @@ class PageState(object):
         obj          = PageState( self.parent,model= model )
         obj.data = copy.deepcopy(self.data)
         obj.model_list_box = copy.deepcopy(self.model_list_box)
-      
+        
+        obj.formfactorcombobox= self.formfactorcombobox
+        obj.structurecombobox  =self.structurecombobox  
+        
+        obj.shape_rbutton = self.shape_rbutton 
+        obj.shape_indep_rbutton = self.shape_indep_rbutton
+        obj.struct_rbutton = self.struct_rbutton
+        obj.plugin_rbutton = self.plugin_rbutton
+        
         obj.manager = self.manager
         obj.event_owner = self.event_owner
         obj.disp_list = copy.deepcopy(self.disp_list)
@@ -142,28 +148,55 @@ class PageState(object):
             obj.saved_states[copy_name]= copy_state
         return obj
 
-
-class PageMemento(object):
-    """
-        Store the state of a fitpage or model page of fitpanel
-    """
-    def __init__(self, state):
-        """ Initialization"""
-        self.state = state
-       
-    def setState(self,state):
-        """
-            set current state
-            @param state: new state
-        """
-        self.state = state
+      
+    def old__repr__(self):
+        """ output string for printing"""
+        rep = "\n\nState name: %s\n"%self.name
+        rep +="data : %s\n"% str(self.data)
+        rep += "Plotting Range: min: %s, max: %s, steps: %s\n"%(str(self.qmin),
+                                                str(self.qmax),str(self.npts))
+        rep +="model  : %s\n\n"% str(self.model)
+        rep +="number parameters(self.parameters): %s\n"%len(self.parameters)
+        for item in self.parameters:
+            rep += "parameter name: %s \n"%str(item[1])
+            rep += "value: %s\n"%str(item[2])
+            rep += "selected: %s\n"%str(item[0])
+            rep += "error displayed : %s \n"%str(item[4][0])
+            rep += "error value:%s \n"%str(item[4][1])
+            rep += "minimum displayed : %s \n"%str(item[5][0])
+            rep += "minimum value : %s \n"%str(item[5][1])
+            rep += "maximum displayed : %s \n"%str(item[6][0])
+            rep += "maximum value : %s \n"%str(item[6][1])
+            rep += "parameter unit: %s\n\n"%str(item[7])
+        rep +="number orientation parameters"
+        rep +="(self.orientation_params): %s\n"%len(self.orientation_params)
+        for item in self.orientation_params:
+            rep += "parameter name: %s \n"%str(item[1])
+            rep += "value: %s\n"%str(item[2])
+            rep += "selected: %s\n"%str(item[0])
+            rep += "error displayed : %s \n"%str(item[4][0])
+            rep += "error value:%s \n"%str(item[4][1])
+            rep += "minimum displayed : %s \n"%str(item[5][0])
+            rep += "minimum value : %s \n"%str(item[5][1])
+            rep += "maximum displayed : %s \n"%str(item[6][0])
+            rep += "maximum value : %s \n"%str(item[6][1])
+            rep += "parameter unit: %s\n\n"%str(item[7])
+        rep +="number dispersity parameters"
+        rep +="(self.orientation_params_disp): %s\n"%len(self.orientation_params_disp)
+        for item in self.orientation_params_disp:
+            rep += "parameter name: %s \n"%str(item[1])
+            rep += "value: %s\n"%str(item[2])
+            rep += "selected: %s\n"%str(item[0])
+            rep += "error displayed : %s \n"%str(item[4][0])
+            rep += "error value:%s \n"%str(item[4][1])
+            rep += "minimum displayed : %s \n"%str(item[5][0])
+            rep += "minimum value : %s \n"%str(item[5][1])
+            rep += "maximum displayed : %s \n"%str(item[6][0])
+            rep += "maximum value : %s \n"%str(item[6][1])
+            rep += "parameter unit: %s\n\n"%str(item[7])
         
-    def getState(self):
-        """
-            @return state
-        """
-        return self.state
-       
-       
+        return rep
+
+        
        
        

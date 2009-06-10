@@ -452,6 +452,11 @@ class FitPage(BasicPage):
    
         self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)      
         self.state.model = self.model.clone()  
+         ## save state into
+        self._copy_parameters_state(self.orientation_params_disp,
+                                     self.state.orientation_params_disp)
+        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
                          
         wx.PostEvent(self.parent, StatusEvent(status=\
                         " Selected Distribution: Gaussian"))   
@@ -541,6 +546,8 @@ class FitPage(BasicPage):
             evt = ModelEventbox(model=self.model)
             wx.PostEvent(self.event_owner, evt)   
         self.btFit.SetFocus() 
+        self.state.enable_disp = self.enable_disp.GetValue()
+        self.state.disable_disp = self.disable_disp.GetValue()
         ## post state to fit panel
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event) 
@@ -572,6 +579,11 @@ class FitPage(BasicPage):
             temp_smearer= self.smearer   
          ##Calculate chi2
         self.compute_chisqr(smearer= temp_smearer)  
+        ## new state posted
+        if self.state_change:
+            event = PageInfoEvent(page = self)
+            wx.PostEvent(self.parent, event)
+            self.state_change= False
         
         
     def _onparamEnter(self,event):
@@ -579,18 +591,18 @@ class FitPage(BasicPage):
             when enter value on panel redraw model according to changed
         """
         tcrtl= event.GetEventObject()
-        ## save current state
-        self.save_current_state()
-        
-        event = PageInfoEvent(page = self)
-        wx.PostEvent(self.parent, event)
-        
+       
         if check_float(tcrtl):
             self._onparamEnter_helper()
             temp_smearer = None
             if self.enable_smearer.GetValue():
                 temp_smearer= self.smearer
             self.compute_chisqr(smearer= temp_smearer)
+            ## new state posted
+            if self.state_change:
+                 event = PageInfoEvent(page = self)
+                 wx.PostEvent(self.parent, event)
+                 self.state_change= False
         else:
             msg= "Cannot Plot :Must enter a number!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
@@ -609,10 +621,13 @@ class FitPage(BasicPage):
         self.SetScrollbars(20,20,200,100)
         self.Layout()   
         
-    def reset_page(self, state):
+    def reset_page(self, state,first=False):
         """
             reset the state
         """
+        if first:
+            self._undo.Enable(False)
+           
         self.reset_page_helper(state)
         evt = ModelEventbox(model=self.model)
         wx.PostEvent(self.event_owner, evt)   
@@ -1107,7 +1122,7 @@ class FitPage(BasicPage):
                     
                 ##[cb state, name, value, "+/-", error of fit, min, max , units]
                 self.parameters.append([cb,item, ctl1,
-                                        text2,ctl2, ctl3, ctl4,None])
+                                        text2,ctl2, ctl3, ctl4,units])
               
         iy+=1
         sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -1205,9 +1220,9 @@ class FitPage(BasicPage):
                 
                 ##[cb state, name, value, "+/-", error of fit, min, max , units]
                 self.parameters.append([cb,item, ctl1,
-                                        text2,ctl2, ctl3, ctl4,None])
+                                        text2,ctl2, ctl3, ctl4,units])
                 self.orientation_params.append([cb,item, ctl1,
-                                        text2,ctl2, ctl3, ctl4,None])
+                                        text2,ctl2, ctl3, ctl4,units])
               
         iy+=1
         sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -1219,9 +1234,16 @@ class FitPage(BasicPage):
                 break
             else:
                 self.text2_4.Hide()
-    
-        boxsizer1.Add(sizer)
+                
+        self._copy_parameters_state(self.orientation_params,
+                                     self.state.orientation_params)
+        self._copy_parameters_state(self.orientation_params_disp,
+                                     self.state.orientation_params_disp)
+        self._copy_parameters_state(self.parameters, self.state.parameters)
+        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
         
+        boxsizer1.Add(sizer)
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer3.Layout()
         self.Layout()
