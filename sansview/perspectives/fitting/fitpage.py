@@ -548,9 +548,11 @@ class FitPage(BasicPage):
         self.btFit.SetFocus() 
         self.state.enable_disp = self.enable_disp.GetValue()
         self.state.disable_disp = self.disable_disp.GetValue()
-        ## post state to fit panel
-        event = PageInfoEvent(page = self)
-        wx.PostEvent(self.parent, event) 
+        if event !=None:
+            self._undo.Enable(True)
+            ## post state to fit panel
+            event = PageInfoEvent(page = self)
+            wx.PostEvent(self.parent, event) 
      
    
     def _onparamRangeEnter(self, event):
@@ -581,6 +583,7 @@ class FitPage(BasicPage):
         self.compute_chisqr(smearer= temp_smearer)  
         ## new state posted
         if self.state_change:
+            self._undo.Enable(True)
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event)
             self.state_change= False
@@ -600,9 +603,10 @@ class FitPage(BasicPage):
             self.compute_chisqr(smearer= temp_smearer)
             ## new state posted
             if self.state_change:
-                 event = PageInfoEvent(page = self)
-                 wx.PostEvent(self.parent, event)
-                 self.state_change= False
+                self._undo.Enable(True)
+                event = PageInfoEvent(page = self)
+                wx.PostEvent(self.parent, event)
+                self.state_change= False
         else:
             msg= "Cannot Plot :Must enter a number!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
@@ -935,7 +939,12 @@ class FitPage(BasicPage):
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
            
         #self.save_current_state()  
-        
+        if event !=None:
+            self._undo.Enable(True)
+            ## post state to fit panel
+            event = PageInfoEvent(page = self)
+            wx.PostEvent(self.parent, event) 
+     
                 
                 
     def select_param(self,event):
@@ -977,7 +986,12 @@ class FitPage(BasicPage):
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
         
         #self.save_current_state()
-        
+        if event !=None:
+            self._undo.Enable(True)
+            ## post state to fit panel
+            event = PageInfoEvent(page = self)
+            wx.PostEvent(self.parent, event) 
+     
     
         
     def set_model_param_sizer(self, model):

@@ -498,7 +498,6 @@ class BasicPage(wx.ScrolledWindow):
         """
             return the current state of the page
         """
-       
         return self.state.clone()
     
     
@@ -697,6 +696,7 @@ class BasicPage(wx.ScrolledWindow):
         if self.state.npts!=None:
             self.npts.SetValue(str(state.npts)) 
             
+            
     def _save_typeOfmodel(self):
         """
             save radiobutton containing the type model that can be selected
@@ -705,10 +705,14 @@ class BasicPage(wx.ScrolledWindow):
         self.state.shape_indep_rbutton = self.shape_indep_rbutton.GetValue()
         self.state.struct_rbutton = self.struct_rbutton.GetValue()
         self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
+        self.state.structurebox= self.structurebox.GetCurrentSelection()
+        self.state.formfactorbox = self.formfactorbox.GetCurrentSelection()
+        
+        self._undo.Enable(True)
         ## post state to fit panel
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
-        self._undo.Enable(True)
+        
         
     def _save_plotting_range(self ):
         """
@@ -1122,8 +1126,9 @@ class BasicPage(wx.ScrolledWindow):
             self.formfactorbox.Clear()
             self._populate_box( self.formfactorbox,
                                 self.model_list_box["Customized Models"])
-        self._save_typeOfmodel()
+        
         self._on_select_model(event=None)
+        self._save_typeOfmodel()
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
@@ -1199,9 +1204,10 @@ class BasicPage(wx.ScrolledWindow):
         tcrtl= event.GetEventObject()
         ## save current state
         self.save_current_state()
-        
-        event = PageInfoEvent(page = self)
-        wx.PostEvent(self.parent, event)
+        if event !=None:
+            self._undo.Enable(True)
+            event = PageInfoEvent(page = self)
+            wx.PostEvent(self.parent, event)
             
         if check_float(tcrtl):
             
@@ -1304,9 +1310,10 @@ class BasicPage(wx.ScrolledWindow):
         ## post state to fit panel 
         self.save_current_state()
         if event !=None:
+            self._undo.Enable(True)
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event)
-        
+       
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()

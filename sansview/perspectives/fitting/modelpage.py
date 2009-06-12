@@ -316,6 +316,7 @@ class ModelPage(BasicPage):
                         item[2].Enable()
         self.state.enable2D =  copy.deepcopy(self.enable2D)
         ## post state to fit panel
+        self._undo.Enable(True)
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
         
@@ -347,6 +348,7 @@ class ModelPage(BasicPage):
         if self.model !=None:
             self._draw_model()
         ## post state to fit panel
+        self._undo.Enable(True)
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)               
     

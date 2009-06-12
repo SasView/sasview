@@ -355,7 +355,7 @@ class FitPanel(wx.aui.AuiNotebook):
                 self.count +=1
             else:
                 self.model_page.select_model(model)
-                self.fit_page_name[name]=ListOfState()
+                self.fit_page_name[page_title]=ListOfState()
                 #self.fit_page_name[page_title].insert(0,self.model_page.createMemento())
       
       
@@ -452,7 +452,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.model_page_number=self.GetSelection()
         self.model_page=self.GetPage(self.GetSelection())
      
-        ##  resetting page
+        ##resetting page
         if reset:
             if page_title in self.fit_page_name.keys():
 
@@ -461,6 +461,6 @@ class FitPanel(wx.aui.AuiNotebook):
         else:
             self.fit_page_name[page_title]=ListOfState()
             #self.fit_page_name[page_title]=[]
-            self.fit_page_name[page_title].insert(0,panel.createMemento())
+            #self.fit_page_name[page_title].insert(0,panel.createMemento())
        
   
