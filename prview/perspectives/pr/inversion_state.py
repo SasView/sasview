@@ -338,13 +338,13 @@ class Reader(CansasReader):
     ## List of allowed extensions
     ext=['.prv', '.PRV']  
     
-    def __init__(self, call_back, cansas=False):
+    def __init__(self, call_back, cansas=True):
         """
             Initialize the call-back method to be called
             after we load a file
             @param call_back: call-back method
             @param cansas:  True = files will be written/read in CanSAS format
-                            False = standalone mode
+                            False = write CanSAS format
             
         """
         ## Call back method to be executed after a file is read

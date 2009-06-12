@@ -204,13 +204,11 @@ class InversionControl(wx.Panel):
             self.nterms_estimate_ctl.Enable(True)
             self.nterms_estimate_ctl.SetLabel("%-g" % value)
         elif name=='plotname':
-            if self.standalone==False:
-                self.plot_data.SetValue(str(value))
-                self._on_pars_changed(None)
+            self.plot_data.SetValue(str(value))
+            self._on_pars_changed(None)
         elif name=='datafile':
-            if self.standalone==True:
-                self.data_file.SetValue(str(value))
-                self._on_pars_changed(None)
+            self.plot_data.SetValue(str(value))
+            self._on_pars_changed(None)
         else:
             wx.Panel.__setattr__(self, name, value)
         
@@ -304,15 +302,9 @@ class InversionControl(wx.Panel):
             except:
                 return None
         elif name=='plotname':
-            if self.standalone==False:
-                return self.plot_data.GetValue()
-            else:
-                return None
+            return self.plot_data.GetValue()
         elif name=='datafile':
-            if self.standalone==True:
-                return self.data_file.GetValue()
-            else:
-                return None
+            return self.plot_data.GetValue()
         else:
             wx.Panel.__getattr__(self, name)
         
@@ -328,6 +320,9 @@ class InversionControl(wx.Panel):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
+        else:
+            return None
+        
         dlg.Destroy()
                 
         # Construct the state object    
@@ -346,10 +341,7 @@ class InversionControl(wx.Panel):
         state.height = height
         
         # Data file
-        if self.manager.standalone==True:
-            state.file = self.data_file.GetValue()
-        else:
-            state.file = self.plot_data.GetValue()
+        state.file = self.plot_data.GetValue()
         
         # Background evaluation checkbox
         state.estimate_bck = self.bck_chk.IsChecked()
@@ -368,10 +360,7 @@ class InversionControl(wx.Panel):
         state.iq0     = self.iq0
         state.bck     = self.bck
             
-        if self.manager.standalone==True:
-            state.toXML(path)
-        else:
-            self.manager.save_data(filepath=path, prstate=state)
+        self.manager.save_data(filepath=path, prstate=state)
         
         return state
     
@@ -400,10 +389,7 @@ class InversionControl(wx.Panel):
             self.slit_height = state.height
         
         # Data file
-        if self.standalone==True:
-            self.data_file.SetValue(str(state.file))
-        else:
-            self.plot_data.SetValue(str(state.file))
+        self.plot_data.SetValue(str(state.file))
     
         # Background evaluation checkbox
         self.bck_chk.SetValue(state.estimate_bck)
@@ -433,24 +419,12 @@ class InversionControl(wx.Panel):
         if state.bck is not None:
             self.bck     = state.bck
 
-        # Check whether the file is accessible, if so,
-        # load it a recompute P(r) using the new parameters
-        if self.standalone==True:
-            if os.path.isfile(state.file):
-                self._change_file(filepath=state.file)
-                self._on_invert(None)    
-            else:
-                message = "Could not find [%s] on the file system." % state.file
-                wx.PostEvent(self.manager.parent, StatusEvent(status=message))
-        else:
+        # Perform inversion
+        if self.standalone == False:
             self._on_invert(None)    
         
     def set_manager(self, manager):
         self.manager = manager
-        # Get data
-        
-        # Push data to form
-        
         
     def _do_layout(self):
         vbox = wx.GridBagSizer(0,0)
@@ -467,15 +441,9 @@ class InversionControl(wx.Panel):
         self.file_radio = wx.StaticText(self, -1, "Data:")
         pars_sizer.Add(self.file_radio, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
-        if self.standalone==True:
-            self.data_file = wx.TextCtrl(self, -1, size=(220,20))
-            self.data_file.SetEditable(False)
-            self.data_file.SetValue("")
-            pars_sizer.Add(self.data_file, (iy,1), (1,1), wx.ADJUST_MINSIZE, 15)
-        else:
-            self.plot_data = wx.TextCtrl(self, -1, size=(220,20))
-            self.plot_data.SetEditable(False)
-            pars_sizer.Add(self.plot_data, (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        self.plot_data = wx.TextCtrl(self, -1, size=(220,20))
+        self.plot_data.SetEditable(False)
+        pars_sizer.Add(self.plot_data, (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
         self.bck_chk = wx.CheckBox(self, -1, "Estimate background level")
         self.bck_chk.SetToolTipString("Check box to let the fit estimate the constant background level.")
@@ -813,23 +781,13 @@ class InversionControl(wx.Panel):
             self.nterms_estimate_ctl.Enable(False)
             self.alpha_estimate_ctl.Enable(False)
             
-            if self.standalone==False:
-                dataset = self.plot_data.GetValue()
-                self.manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc, 
-                                                     d_max=dmax,
-                                                     q_min=qmin, q_max=qmax,
-                                                     bck=has_bck, 
-                                                     height=height,
-                                                     width=width)
-            else:
-                path = self.data_file.GetValue()
-                self.manager.estimate_file_inversion(alpha=alpha, nfunc=nfunc, 
-                                                     d_max=dmax, path=path,
-                                                     q_min=qmin, q_max=qmax,
-                                                     bck=has_bck,
-                                                     height=height,
-                                                     width=width)
-        
+            dataset = self.plot_data.GetValue()
+            self.manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc, 
+                                                 d_max=dmax,
+                                                 q_min=qmin, q_max=qmax,
+                                                 bck=has_bck, 
+                                                 height=height,
+                                                 width=width)
         
     def _read_pars(self, evt=None):    
         alpha = 0
@@ -948,31 +906,17 @@ class InversionControl(wx.Panel):
         has_bck = self.bck_chk.IsChecked()
         
         if flag:
-            if self.standalone==False:
-                dataset = self.plot_data.GetValue()
-                if len(dataset.strip())==0:
-                    message = "No data to invert. Select a data set before proceeding with P(r) inversion."
-                    wx.PostEvent(self.manager.parent, StatusEvent(status=message))
-                else:
-                    self.manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc, 
-                                                      d_max=dmax,
-                                                      q_min=qmin, q_max=qmax,
-                                                      bck=has_bck,
-                                                      height=height,
-                                                      width=width)
+            dataset = self.plot_data.GetValue()
+            if len(dataset.strip())==0:
+                message = "No data to invert. Select a data set before proceeding with P(r) inversion."
+                wx.PostEvent(self.manager.parent, StatusEvent(status=message))
             else:
-                path = self.data_file.GetValue()
-                if len(path.strip())==0:
-                    message = "No data to invert. Select a data set before proceeding with P(r) inversion."
-                    wx.PostEvent(self.manager.parent, StatusEvent(status=message))
-                else:
-                    self.manager.setup_file_inversion(alpha=alpha, nfunc=nfunc, 
-                                                      d_max=dmax, path=path,
-                                                      q_min=qmin, q_max=qmax,
-                                                      bck=has_bck,
-                                                      height=height,
-                                                      width=width)
-                
+                self.manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc, 
+                                                  d_max=dmax,
+                                                  q_min=qmin, q_max=qmax,
+                                                  bck=has_bck,
+                                                  height=height,
+                                                  width=width)
         else:
             message = "The P(r) form contains invalid values: please submit it again."
             wx.PostEvent(self.parent, StatusEvent(status=message))
@@ -986,9 +930,13 @@ class InversionControl(wx.Panel):
             path = self.manager.choose_file(path=filepath)
             
             if path and os.path.isfile(path):
-                self.data_file.SetValue(str(path))
+                self.plot_data.SetValue(str(path))
                 self.manager.show_data(path, reset=True)
                 self._on_pars_changed(None)
+            
+                # Perform inversion
+                if self.standalone == True:
+                    self._on_invert(None)
 
 class HelpDialog(wx.Dialog):
     def __init__(self, parent, id):

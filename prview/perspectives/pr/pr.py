@@ -6,11 +6,14 @@ import sys
 import wx
 import logging
 import time
-from danse.common.plottools import Data1D, Theory1D
+from sans.guiframe.dataFitting import Data1D
+from danse.common.plottools import Theory1D
 from sans.guicomm.events import NewPlotEvent, StatusEvent    
 import math, numpy
 from sans.pr.invertor import Invertor
 from DataLoader.loader import Loader
+
+import copy
 
 PR_FIT_LABEL       = r"$P_{fit}(r)$"
 PR_LOADED_LABEL    = r"$P_{loaded}(r)$"
@@ -88,8 +91,8 @@ class Plugin:
         from DataLoader.loader import Loader
         from inversion_state import Reader
          
-        #TODO: get rid of the cansas flag 
-        self.state_reader = Reader(self.set_state, cansas = not self.standalone)
+        # Create a CanSAS/Pr reader
+        self.state_reader = Reader(self.set_state)
         l = Loader()
         l.associate_file_reader('.prv', self.state_reader)
                 
@@ -105,22 +108,24 @@ class Plugin:
             @param datainfo: Data1D object [optional]
         """
         try:
-            # If we are not in standalone mode, the panel will not
-            # load any data file and we need to keep track of the
-            # data here.
-            if self.standalone == False:
-                if datainfo is None:
-                    raise RuntimeError, "Pr.set_state: datainfo parameter cannot be None in standalone mode"
+            if datainfo is None:
+                raise RuntimeError, "Pr.set_state: datainfo parameter cannot be None in standalone mode"
 
-                # Ensuring that plots are coordinated correctly
-                t = time.localtime(datainfo.meta_data['prstate'].timestamp)
-                time_str = time.strftime("%b %d %H:%M", t)
-                datainfo.meta_data['prstate'].file = datainfo.meta_data['prstate'].file +' [' + time_str + ']'
-                datainfo.filename = datainfo.meta_data['prstate'].file
-                    
-                self.current_plottable = datainfo
-                self.current_plottable.group_id = datainfo.meta_data['prstate'].file
+            # Ensuring that plots are coordinated correctly
+            t = time.localtime(datainfo.meta_data['prstate'].timestamp)
+            time_str = time.strftime("%b %d %H:%M", t)
+            
+            # Check that no time stamp is already appended
+            max_char = datainfo.meta_data['prstate'].file.find("[")
+            if max_char < 0:
+                max_char = len(datainfo.meta_data['prstate'].file)
+            
+            datainfo.meta_data['prstate'].file = datainfo.meta_data['prstate'].file[0:max_char] +' [' + time_str + ']'
+            datainfo.filename = datainfo.meta_data['prstate'].file
                 
+            self.current_plottable = datainfo
+            self.current_plottable.group_id = datainfo.meta_data['prstate'].file
+            
             # Load the P(r) results
             self.control_panel.set_state(state)
                         
@@ -847,6 +852,10 @@ class Plugin:
         new_plot.interactive = True
         #new_plot.group_id = "test group"
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="I(q)", reset=reset))
+        
+        self.current_plottable = new_plot
+        self.current_plottable.group_id = IQ_DATA_LABEL
+        
         
         # Get Q range
         self.control_panel.q_min = self.pr.x.min()
