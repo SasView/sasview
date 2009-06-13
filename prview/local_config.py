@@ -5,7 +5,7 @@ import time
 
 # Version of the application
 __appname__ = "PrView"
-__version__ = '0.2.3'
+__version__ = '0.3.0'
 __download_page__ = 'http://danse.chem.utk.edu'
 __update_URL__ = 'http://danse.chem.utk.edu/prview_version.php'
 
