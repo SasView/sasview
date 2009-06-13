@@ -2,6 +2,10 @@ import wx
 #import gui_manager
 from sans.guiframe import gui_manager
 
+# Avoid warnings when transforming into an executable
+import warnings
+warnings.simplefilter("ignore")
+
 # For py2exe, import config here
 import local_config
 from perspectives.pr.pr import NewPrFileEvent
