@@ -50,9 +50,9 @@ class Target:
     def __init__(self, **kw):
         self.__dict__.update(kw)
         # for the versioninfo resources
-        self.version = "0.2"
+        self.version = "0.3"
         self.company_name = "U Tennessee"
-        self.copyright = "copyright 2008"
+        self.copyright = "copyright 2009"
         self.name = "PrView"
         
 #
@@ -69,6 +69,16 @@ for f in matplotlibdata:
 
 # Copying the images directory to the distribution directory.
 for f in findall('images'):
+    if os.path.split(f)[0].count('.svn')==0:
+        data_files.append((os.path.split(f)[0], [f]))
+
+# Copying the sample data user data
+for f in findall('test'):
+    if os.path.split(f)[0].count('.svn')==0:
+        data_files.append((os.path.split(f)[0], [f]))
+        
+# Copying the sample data user data
+for f in findall('plugins'):
     if os.path.split(f)[0].count('.svn')==0:
         data_files.append((os.path.split(f)[0], [f]))
     
