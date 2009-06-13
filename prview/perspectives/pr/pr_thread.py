@@ -3,10 +3,7 @@ from data_util.calcthread import CalcThread
 
 class CalcPr(CalcThread):
     """
-        Compute 2D model
-        This calculation assumes a 2-fold symmetry of the model
-        where points are computed for one half of the detector
-        and I(qx, qy) = I(-qx, -qy) is assumed.
+        Compute P(r)
     """
     
     def __init__(self, pr, nfunc=5, error_func=None,
@@ -44,10 +41,7 @@ class CalcPr(CalcThread):
 
 class EstimatePr(CalcThread):
     """
-        Compute 2D model
-        This calculation assumes a 2-fold symmetry of the model
-        where points are computed for one half of the detector
-        and I(qx, qy) = I(-qx, -qy) is assumed.
+        Estimate P(r)
     """
     
     def __init__(self, pr, nfunc=5, error_func=None,
@@ -123,5 +117,3 @@ class EstimateNT(CalcThread):
         except:
             if not self.error_func==None:
                 self.error_func("EstimatePr2.compute: %s" % sys.exc_value)
-
-    

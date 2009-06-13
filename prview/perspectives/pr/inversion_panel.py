@@ -148,6 +148,9 @@ class InversionControl(wx.Panel):
         self.alpha_estimate_ctl = None
         self.nterms_estimate_ctl = None
         
+        ## D_max distance explorator
+        self.distance_explorator_ctl = None
+        
         ## Data manager
         self.manager   = None
         
@@ -306,7 +309,8 @@ class InversionControl(wx.Panel):
         elif name=='datafile':
             return self.plot_data.GetValue()
         else:
-            wx.Panel.__getattr__(self, name)
+            return wx.Panel.__getattribute__(self, name)
+            #return wx.Panel.__getattr__(self, name)
         
     def _save_state(self, evt=None):
         """
@@ -568,6 +572,10 @@ class InversionControl(wx.Panel):
         self.alpha_ctl.Bind(wx.EVT_TEXT, self._read_pars)
         self.dmax_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
         
+        # Distance explorator
+        id = wx.NewId()
+        self.distance_explorator_ctl = wx.Button(self, id, "Explore")
+        self.Bind(wx.EVT_BUTTON, self._on_explore, id = id)           
         
         
         sizer_params = wx.GridBagSizer(5,5)
@@ -585,6 +593,7 @@ class InversionControl(wx.Panel):
         iy += 1
         sizer_params.Add(label_dmax, (iy,0), (1,1), wx.LEFT, 15)
         sizer_params.Add(self.dmax_ctl,   (iy,1), (1,1), wx.RIGHT, 0)
+        sizer_params.Add(self.distance_explorator_ctl,   (iy,2), (1,1), wx.LEFT, 15)
 
         boxsizer2.Add(sizer_params, 0)
         
@@ -711,6 +720,7 @@ class InversionControl(wx.Panel):
         iy_vb += 1
         vbox.Add(sizer_button, (iy_vb,0), (1,1), wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
 
+        self.Bind(wx.EVT_TEXT_ENTER, self._on_invert)
 
         self.SetSizer(vbox)
         
@@ -894,6 +904,19 @@ class InversionControl(wx.Panel):
         
         return flag, alpha, dmax, nfunc, qmin, qmax, height, width
     
+    def _on_explore(self, evt):
+        """
+            Invoke the d_max exploration dialog
+        """
+        from explore_dialog import ExploreDialog
+        if self.manager._last_pr is not None:
+            pr = self.manager._create_plot_pr()
+            dialog = ExploreDialog(pr, 10, None, -1, "")
+            dialog.ShowModal()
+        else:
+            message = "No data to analyze. Please load a data set to proceed."
+            wx.PostEvent(self.manager.parent, StatusEvent(status=message))
+            
     def _on_invert(self, evt):
         """
             Perform inversion
