@@ -166,7 +166,7 @@ class ExploreDialog(wx.Dialog):
         # Calculate exploration results
         self._recalc()
         # Graph the default output curve
-        self._on_output_selected(None)
+        self._plot_output()
         
     class Event:
         """
@@ -179,7 +179,7 @@ class ExploreDialog(wx.Dialog):
         ## Maximum value of D_max
         dmax   = 0
                 
-    def _get_values(self, event):
+    def _get_values(self, event=None):
         """
             Invoked when the user changes a value of the form.
             Check that the values are of the right type.
@@ -225,7 +225,8 @@ class ExploreDialog(wx.Dialog):
         # If the content of the form is valid, return the content,
         # otherwise return None
         if flag:
-            event.Skip(True)
+            if event is not None:
+                event.Skip(True)
             return content_event
         else:
             return None
@@ -276,7 +277,7 @@ class ExploreDialog(wx.Dialog):
         ix += 1
         sizer_params.Add(self.npts_ctl,   (iy,ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.npts_ctl.SetValue("%g" % DEFAULT_NPTS)
-        self.npts_ctl.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
+        self.npts_ctl.Bind(wx.EVT_KILL_FOCUS, self._recalc)
         
         ix += 1
         label_dmin   = wx.StaticText(self, -1, "Min Distance [A]")
@@ -284,7 +285,7 @@ class ExploreDialog(wx.Dialog):
         ix += 1
         sizer_params.Add(self.dmin_ctl,   (iy,ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.dmin_ctl.SetValue(str(self._default_min))
-        self.dmin_ctl.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
+        self.dmin_ctl.Bind(wx.EVT_KILL_FOCUS, self._recalc)
         
         ix += 1
         label_dmax = wx.StaticText(self, -1, "Max Distance [A]")
@@ -292,7 +293,7 @@ class ExploreDialog(wx.Dialog):
         ix += 1
         sizer_params.Add(self.dmax_ctl,   (iy,ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.dmax_ctl.SetValue(str(self._default_max))
-        self.dmax_ctl.Bind(wx.EVT_KILL_FOCUS, self._onTextEnter)
+        self.dmax_ctl.Bind(wx.EVT_KILL_FOCUS, self._recalc)
 
 
         # Ouput selection box
@@ -319,7 +320,6 @@ class ExploreDialog(wx.Dialog):
         # Bottom area with the close button
         sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         button_OK = wx.Button(self, wx.ID_OK, "Close")
-        self.Bind(wx.EVT_BUTTON, self.checkValues, button_OK)
         sizer_button.Add(button_OK, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         
         sizer_main.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
