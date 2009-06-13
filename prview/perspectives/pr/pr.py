@@ -411,6 +411,11 @@ class Plugin:
         
         # Use data loader to load file
         dataread = Loader().load(path)
+        
+        # Notify the user if we could not read the file
+        if dataread is None:
+            raise RuntimeError, "Invalid data"
+            
         x = None
         y = None
         err = None
@@ -826,20 +831,19 @@ class Plugin:
             @param path: file path
             @param reset: if True all other plottables will be cleared
         """
-        
-        
         if path is not None:
             try:
                 pr = self._create_file_pr(path)
+            except:
+                status="Problem reading data: %s" % sys.exc_value
+                wx.PostEvent(self.parent, StatusEvent(status=status))
+                raise RuntimeError, status
                 
-                # If the file contains nothing, just return
-                if pr is None:
-                    return
-                
-                self.pr = pr
-            except:  
-                wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
-                return
+            # If the file contains nothing, just return
+            if pr is None:
+                raise RuntimeError, "Loaded data is invalid"
+            
+            self.pr = pr
               
         # Make a plot of I(q) data
         if self.pr.err==None:
@@ -924,6 +928,12 @@ class Plugin:
             a plottable data set.
             @param path: path of the file to read in 
         """
+        # Sanity check
+        if self.current_plottable is None:
+            msg = "Please load a valid data set before proceeding."
+            wx.PostEvent(self.parent, StatusEvent(status=msg))  
+            return None   
+        
         # Get the data from the chosen data set and perform inversion
         pr = Invertor()
         pr.d_max = self.max_length
@@ -1030,11 +1040,17 @@ class Plugin:
                 # with old messages. 
                 #TODO: refactor this into a proper status handling
                 wx.PostEvent(self.parent, StatusEvent(status=''))
-                x, y, err = self.load(path)
+                try:
+                    x, y, err = self.load(path)
+                except:
+                    message = "Could not read the data file: %s" % path
+                    wx.PostEvent(self.parent, StatusEvent(status=message))
+                    return None
                 
                 # If the file contains no data, just return
-                #TODO: clean this up: we need a way to recognize that not all P(r) files are data
                 if x is None:
+                    message = "The loaded file contains no data"
+                    wx.PostEvent(self.parent, StatusEvent(status=message))
                     return None
             
             # If we have not errors, add statistical errors

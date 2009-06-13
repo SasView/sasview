@@ -6,6 +6,8 @@ __revision__ = "$Revision: 1193 $"
 
 import wx
 import os
+import sys
+import logging
 from sans.guicomm.events import StatusEvent    
 from inversion_state import InversionState
 
@@ -954,12 +956,16 @@ class InversionControl(wx.Panel):
             
             if path and os.path.isfile(path):
                 self.plot_data.SetValue(str(path))
-                self.manager.show_data(path, reset=True)
-                self._on_pars_changed(None)
-            
-                # Perform inversion
-                if self.standalone == True:
-                    self._on_invert(None)
+                try:
+                    self.manager.show_data(path, reset=True)
+                    self._on_pars_changed(None)
+                
+                    # Perform inversion
+                    if self.standalone == True:
+                        self._on_invert(None)
+                except:
+                    # Invalid data
+                    logging.error("InversionControl._change_file: %s" % sys.exc_value)                    
 
 class HelpDialog(wx.Dialog):
     def __init__(self, parent, id):
