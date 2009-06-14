@@ -117,6 +117,7 @@ class InversionControl(wx.Panel):
         
         self.plots = plots
         self.radio_buttons = {}
+        self.parent = parent
         
         ## Data file TextCtrl
         self.data_file  = None
@@ -312,7 +313,6 @@ class InversionControl(wx.Panel):
             return self.plot_data.GetValue()
         else:
             return wx.Panel.__getattribute__(self, name)
-            #return wx.Panel.__getattr__(self, name)
         
     def _save_state(self, evt=None):
         """
