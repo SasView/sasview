@@ -176,24 +176,26 @@ def checkout(release=False):
     else:
         os.system("%s checkout -q svn://danse.us/sans/trunk/sansview" % SVN)
     
-def prepare():
+def prepare(wipeout = False):
     """
         Prepare the build
     """
     # Remove existing libraries
-    from distutils.sysconfig import get_python_lib
-    libdir = get_python_lib()
-    old_dirs = [os.path.join(libdir, 'danse'),
-                os.path.join(libdir, 'data_util'),
-                os.path.join(libdir, 'DataLoader'),
-                os.path.join(libdir, 'park'),
-                os.path.join(libdir, 'sans'),
-                os.path.join(libdir, 'sans_extension'),
-                ]
-    for d in old_dirs:
-        if os.path.isdir(d):
-            shutil.rmtree(d)
-    
+    if wipeout == True:
+        print "Deleting old modules"
+        from distutils.sysconfig import get_python_lib
+        libdir = get_python_lib()
+        old_dirs = [os.path.join(libdir, 'danse'),
+                    os.path.join(libdir, 'data_util'),
+                    os.path.join(libdir, 'DataLoader'),
+                    os.path.join(libdir, 'park'),
+                    os.path.join(libdir, 'sans'),
+                    os.path.join(libdir, 'sans_extension'),
+                    ]
+        for d in old_dirs:
+            if os.path.isdir(d):
+                shutil.rmtree(d)
+        
     # Create a fresh installation folder
     if os.path.isdir(INSTALL_FOLDER):
         shutil.rmtree(INSTALL_FOLDER)
@@ -211,7 +213,7 @@ def warning():
         The build script will wipe out part of the site-packages.
         Ask the user whether he wants to proceed.
     """
-    print "WARNING!n"
+    print "WARNING!\n"
     print "In order to build a clean version of SansView, this script"
     print "deletes anything found under site-packages for the following"
     print "modules:"
@@ -221,16 +223,11 @@ def warning():
     print "   - park"
     print "   - sans"
     print "   - sans_extension\n"
-    answer = raw_input("Are you sure you want to proceed? [Y|N]")
+    answer = raw_input("Do you want to delete those modules [Y] or continue with a dirty installation [N]? [Y|N]")
     return answer.upper()=="Y"
         
 if __name__ == "__main__": 
     print "Build script for SansView %s" % SANSVIEW
-    
-    # Make sure the user really wants to proceed
-    if not warning():
-        print "Execution canceled" 
-        sys.exit()
     
     if len(sys.argv)==1:
         # If there is no argument, build the installer
@@ -260,8 +257,9 @@ if __name__ == "__main__":
             print PARK_URL 
         else:
             logging.info("Build script for SansView %s" % SANSVIEW)
+                    
             # Prepare installation folder
-            prepare()
+            prepare(warning())
             
             # Check the command line argument
             if sys.argv[1]=="-t":
