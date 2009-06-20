@@ -532,7 +532,7 @@ class Invertor(Cinvertor):
                 message=''
                 
                 if not found:
-                    message = "None"
+                    message = None
                 elif best_alpha>=0.5*pr.suggested_alpha:
                     # best alpha is too big, return a 
                     # reasonable value
