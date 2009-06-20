@@ -176,15 +176,12 @@ class ViewerFrame(wx.Frame):
     """
         Main application frame
     """
-    def __init__(self, parent, id, title, window_height=700, window_width=1000):
-    #def __init__(self, parent, id, title, window_height=800, window_width=800):
+    def __init__(self, parent, id, title, window_height=300, window_width=300):
         """
             Initialize the Frame object
         """
         from local_perspectives.plotting import plotting
-        #wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(800, 700))
-        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(1000, 600))
-        
+        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(window_width, window_height))
         # Preferred window size
         self._window_height = window_height
         self._window_width  = window_width
@@ -253,7 +250,7 @@ class ViewerFrame(wx.Frame):
         # Set up the menu
         self._setup_menus()
         
-        self.Fit()
+        #self.Fit()
         
         #self._check_update(None)
              
@@ -268,6 +265,7 @@ class ViewerFrame(wx.Frame):
 
         # Add panel
         self._mgr = wx.aui.AuiManager(self)
+        self._mgr.SetDockSizeConstraint(0.5, 0.5) 
         
         # Load panels
         self._load_panels()
@@ -366,6 +364,7 @@ class ViewerFrame(wx.Frame):
 
         # Show a default panel with some help information
         # It also sets the size of the application windows
+        #TODO: Use this for slpash screen
         self.panels["default"] = self.defaultPanel
         
         self._mgr.AddPane(self.defaultPanel, wx.aui.AuiPaneInfo().
@@ -373,7 +372,7 @@ class ViewerFrame(wx.Frame):
                               CenterPane().
                               # This is where we set the size of the application window
                               BestSize(wx.Size(self._window_width, self._window_height)).
-                              MinSize(wx.Size(self._window_width, self._window_height)).
+                              #MinSize(wx.Size(self._window_width, self._window_height)).
                               Show())
      
 
@@ -390,8 +389,8 @@ class ViewerFrame(wx.Frame):
                     self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                                           Name(p.window_name).Caption(p.window_caption).
                                           CenterPane().
-                                          BestSize(wx.Size(550,600)).
-                                          MinSize(wx.Size(500,500)).
+                                          #BestSize(wx.Size(550,600)).
+                                          #MinSize(wx.Size(500,500)).
                                           Hide())
             else:
                 self.panels[str(id)] = p
@@ -404,9 +403,9 @@ class ViewerFrame(wx.Frame):
                                   LeftDockable().
                                   RightDockable().
                                   MinimizeButton().
-                                  Hide().
-                                  BestSize(wx.Size(550,600)).
-                                  MinSize(wx.Size(500,500)))                 
+                                  Hide())
+                                  #BestSize(wx.Size(550,600)))
+                                  #MinSize(wx.Size(500,500)))                 
                 
         
     def get_context_menu(self, graph=None):
@@ -460,8 +459,11 @@ class ViewerFrame(wx.Frame):
                           MinimizeButton().
                           #Hide().
                           #Show().
-                          BestSize(wx.Size(550,600)).
-                          MinSize(wx.Size(500,500)))
+                          Resizable(True).
+                          # Use a large best size to make sure the AUI manager
+                          # takes all the available space
+                          BestSize(wx.Size(1300,1300)))
+                          #MinSize(wx.Size(500,500)))
                           #BestSize(wx.Size(400,400)).
                           #MinSize(wx.Size(350,350)))
         pane = self._mgr.GetPane(windowname)
@@ -872,7 +874,6 @@ class ViewApp(wx.App):
         self.frame.Show(True)
 
         if hasattr(self.frame, 'special'):
-            print "Special?", self.frame.special.__class__.__name__
             self.frame.special.SetCurrent()
         self.SetTopWindow(self.frame)
         return True
