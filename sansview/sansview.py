@@ -6,6 +6,21 @@ from sans.guiframe import gui_manager
 import local_config
 import logging
 
+# Application dimensions
+APP_HEIGHT = 800
+APP_WIDTH  = 1000
+
+class SansViewApp(gui_manager.ViewApp):
+    def OnInit(self):
+        #from gui_manager import ViewerFrame
+        self.frame = gui_manager.ViewerFrame(None, -1, local_config.__appname__, 
+                             window_height=APP_HEIGHT, window_width=APP_WIDTH)    
+        self.frame.Show(True)
+
+        if hasattr(self.frame, 'special'):
+            self.frame.special.SetCurrent()
+        self.SetTopWindow(self.frame)
+        return True
 
 class SansView():
     
@@ -14,7 +29,7 @@ class SansView():
         
         """
         #from gui_manager import ViewApp
-        self.gui = gui_manager.ViewApp(0) 
+        self.gui = SansViewApp(0) 
         
         # Add perspectives to the basic application
         # Additional perspectives can still be loaded
