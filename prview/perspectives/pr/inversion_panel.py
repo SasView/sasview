@@ -163,6 +163,9 @@ class InversionControl(wx.Panel):
         ## Default file location for save
         self._default_save_location = os.getcwd()
         
+        
+        # Default width
+        self._default_width = 350
         self._do_layout()
         
     def __setattr__(self, name, value):
@@ -440,7 +443,7 @@ class InversionControl(wx.Panel):
         databox = wx.StaticBox(self, -1, "I(q) data source")
         
         boxsizer1 = wx.StaticBoxSizer(databox, wx.VERTICAL)
-        boxsizer1.SetMinSize((320,50))
+        boxsizer1.SetMinSize((self._default_width,50))
         pars_sizer = wx.GridBagSizer(5,5)
 
         iy = 0
@@ -457,13 +460,13 @@ class InversionControl(wx.Panel):
         iy += 1
         pars_sizer.Add(self.bck_chk, (iy,0), (1,2), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         boxsizer1.Add(pars_sizer, 0, wx.EXPAND)  
-        vbox.Add(boxsizer1, (iy_vb,0), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        vbox.Add(boxsizer1, (iy_vb,0), (1,1), wx.LEFT|wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE|wx.TOP, 5)
         
         # ----- Add slit parameters -----
         if True:
             sbox = wx.StaticBox(self, -1, "Slit parameters")
             sboxsizer = wx.StaticBoxSizer(sbox, wx.VERTICAL)
-            sboxsizer.SetMinSize((320,20))
+            sboxsizer.SetMinSize((self._default_width,20))
             
             sizer_slit = wx.GridBagSizer(5,5)
     
@@ -488,13 +491,13 @@ class InversionControl(wx.Panel):
             
             sboxsizer.Add(sizer_slit, wx.TOP, 15)
             iy_vb += 1
-            vbox.Add(sboxsizer, (iy_vb,0), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            vbox.Add(sboxsizer, (iy_vb,0), (1,1), wx.LEFT|wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
         
         
         # ----- Q range -----
         qbox = wx.StaticBox(self, -1, "Q range")
         qboxsizer = wx.StaticBoxSizer(qbox, wx.VERTICAL)
-        qboxsizer.SetMinSize((320,20))
+        qboxsizer.SetMinSize((self._default_width,20))
         
         sizer_q = wx.GridBagSizer(5,5)
 
@@ -519,7 +522,7 @@ class InversionControl(wx.Panel):
         qboxsizer.Add(sizer_q, wx.TOP, 15)
 
         iy_vb += 1
-        vbox.Add(qboxsizer, (iy_vb,0), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        vbox.Add(qboxsizer, (iy_vb,0), (1,1), wx.LEFT|wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
         
         
         
@@ -527,14 +530,14 @@ class InversionControl(wx.Panel):
         # ----- Parameters -----
         parsbox = wx.StaticBox(self, -1, "Parameters")
         boxsizer2 = wx.StaticBoxSizer(parsbox, wx.VERTICAL)
-        boxsizer2.SetMinSize((320,50))
+        boxsizer2.SetMinSize((self._default_width,50))
         
         explanation  = "P(r) is found by fitting a set of base functions to I(Q). "
         explanation += "The minimization involves a regularization term to ensure "
         explanation += "a smooth P(r). The regularization constant gives the size of that "  
         explanation += "term. The suggested value is the value above which the "
         explanation += "output P(r) will have only one peak."
-        label_explain = wx.StaticText(self, -1, explanation, size=(280,80))
+        label_explain = wx.StaticText(self, -1, explanation, size=(280,120))
         boxsizer2.Add(label_explain,  wx.LEFT|wx.BOTTOM, 5)
         
         
@@ -600,13 +603,13 @@ class InversionControl(wx.Panel):
         boxsizer2.Add(sizer_params, 0)
         
         iy_vb += 1
-        vbox.Add(boxsizer2, (iy_vb,0), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        vbox.Add(boxsizer2, (iy_vb,0), (1,1), wx.LEFT|wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
 
 
         # ----- Results -----
         resbox = wx.StaticBox(self, -1, "Outputs")
         ressizer = wx.StaticBoxSizer(resbox, wx.VERTICAL)
-        ressizer.SetMinSize((320,50))
+        ressizer.SetMinSize((self._default_width,50))
         
         label_rg       = wx.StaticText(self, -1, "Rg")
         label_rg_unit  = wx.StaticText(self, -1, "[A]")
@@ -694,7 +697,7 @@ class InversionControl(wx.Panel):
 
         ressizer.Add(sizer_res, 0)
         iy_vb += 1
-        vbox.Add(ressizer, (iy_vb,0), (1,1), wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        vbox.Add(ressizer, (iy_vb,0), (1,1), wx.LEFT|wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
 
         # ----- Buttons -----
         id = wx.NewId()
@@ -720,7 +723,7 @@ class InversionControl(wx.Panel):
         sizer_button.Add(button_OK, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
         #sizer_button.Add(button_Cancel, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)        
         iy_vb += 1
-        vbox.Add(sizer_button, (iy_vb,0), (1,1), wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
+        vbox.Add(sizer_button, (iy_vb,0), (1,1), wx.EXPAND|wx.BOTTOM|wx.TOP|wx.RIGHT, 10)
 
         self.Bind(wx.EVT_TEXT_ENTER, self._on_invert)
 
