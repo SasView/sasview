@@ -4,14 +4,12 @@ from sans.guiframe import gui_manager
 
 # For py2exe, import config here
 import local_config
+import sys
 from perspectives.pr.pr import NewPrFileEvent
 
-# OS-dependent preferred height
-#TODO: refactor this
-_DEFAULT_HEIGHT=650
-import sys
-if sys.platform.count("darwin")>0:
-	_DEFAULT_HEIGHT=720
+# Application dimensions
+APP_HEIGHT = 780
+APP_WIDTH  = 850
 
 class PrFrame(gui_manager.ViewerFrame):
     def _on_open(self, event):
@@ -21,7 +19,7 @@ class PrApp(gui_manager.ViewApp):
     def OnInit(self):
         #from gui_manager import ViewerFrame
         self.frame = PrFrame(None, -1, local_config.__appname__, 
-                             window_height=_DEFAULT_HEIGHT, window_width=850)    
+                             window_height=APP_HEIGHT, window_width=APP_WIDTH)    
         self.frame.Show(True)
 
         if hasattr(self.frame, 'special'):
