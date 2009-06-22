@@ -301,6 +301,7 @@ class BasicPage(wx.ScrolledWindow):
         self.weights=[]
         # Go through the list of dispersion check boxes to identify which one has changed 
         for p in self.disp_cb_dict:
+            self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
             # Catch which one of the box was just checked or unchecked.
             if event.GetEventObject() == self.disp_cb_dict[p]:              
 
@@ -348,8 +349,8 @@ class BasicPage(wx.ScrolledWindow):
                     self.state._disp_obj_dict [p]= disp_model
                     self.state.values=[]
                     self.state.weights=[]
-                    self.state.values = self.values
-                    self.state.weights = self.weights
+                    self.state.values = copy.deepcopy(self.values)
+                    self.state.weights = copy.deepcopy(self.weights)
                     # Set the new model as the dispersion object for the selected parameter
                     self.model.set_dispersion(p, disp_model)
                     # Store a reference to the weights in the model object so that
@@ -365,15 +366,12 @@ class BasicPage(wx.ScrolledWindow):
                     self._reset_dispersity()
               
                 ## Redraw the model
-               
                 self._draw_model()
-                ## post state to fit panel
-                
-                self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
-                #event = PageInfoEvent(page = self)
-                #wx.PostEvent(self.parent, event)
-        return
-    
+        
+        ## post state to fit panel
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event)
+       
     
     def onResetModel(self, event):
         """
@@ -620,18 +618,38 @@ class BasicPage(wx.ScrolledWindow):
         self.disable_disp.SetValue(state.disable_disp)
         
         if hasattr(self, "disp_box"):
-            self.disp_box.SetSelection(state.disp_box)  
-           
-            self.disp_cb_dict = {}
-            for k,v in self.state.disp_cb_dict.iteritems():
-                self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
-                self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
+            self.disp_box.SetSelection(state.disp_box) 
+            n= self.disp_box.GetCurrentSelection()
+            dispersity= self.disp_box.GetClientData(n)
+            name= dispersity.__name__      
+            self._set_dipers_Param(event=None)
+            
+            #self.disp_cb_dict = {}
+            #for k,v in self.state.disp_cb_dict.iteritems():
+                #self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
+                #self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
                 
-            self._disp_obj_dict={}
-            for k , v in self.state._disp_obj_dict.iteritems():
-                self._disp_obj_dict[k]=v
-      
-        self._set_dipers_Param(event=None)
+            if name=="ArrayDispersion":
+                for item in self.disp_cb_dict.keys():
+                    print "array dispersion",state.values, state.weights
+                    self.disp_cb_dict[item].SetValue(state.disp_cb_dict[item])
+                    # Create the dispersion objects
+                    from sans.models.dispersion_models import ArrayDispersion
+                    disp_model = ArrayDispersion()
+                    disp_model.set_weights(state.values, state.weights)
+                   
+                    self._disp_obj_dict[item] = disp_model
+                    # Set the new model as the dispersion object for the selected parameter
+                    self.model.set_dispersion(item, disp_model)
+                   
+                    #self.model._persistency_dict = {}
+                    #self.model._persistency_dict[item] = [state.values, state.weights]
+                    
+            else:
+                self._disp_obj_dict={}
+                for k , v in self.state._disp_obj_dict.iteritems():
+                    self._disp_obj_dict[k]=v
+    
         ##plotting range restore    
         self._reset_plotting_range(state)
         ## smearing info  restore
@@ -648,8 +666,7 @@ class BasicPage(wx.ScrolledWindow):
         ## reset state of checkbox,textcrtl  and dispersity parameters value
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
         self._reset_parameters_state(self.fixed_param,state.fixed_param)
-        
-        
+    
         ## draw the model with previous parameters value
         self._onparamEnter_helper()
         
@@ -1186,9 +1203,7 @@ class BasicPage(wx.ScrolledWindow):
         ## post state to fit panel
         self.state.model =self.model
         self.disp_list =self.model.getDispParamList()
-        self.state.disp_list = self.disp_list
-        self.state.structurecombobox =self.structurebox.GetCurrentSelection()
-        self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
+        self.state.disp_list = self.disp_list,
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
@@ -1408,7 +1423,12 @@ class BasicPage(wx.ScrolledWindow):
         if name == "ArrayDispersion":
             self._set_sizer_arraydispersion()
             
+            
         self.state.disp_box= n
+        
+        self._undo.Enable(True)
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event)
         
         self.sizer4_4.Layout()
         self.sizer4.Layout()
@@ -1446,7 +1466,8 @@ class BasicPage(wx.ScrolledWindow):
         for p in self.model.dispersion.keys():
             ix+=1 
             self.disp_cb_dict[p] = wx.CheckBox(self, -1, p, (10, 10))
-            
+            self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
+            print "went here======>",self.disp_cb_dict
             wx.EVT_CHECKBOX(self, self.disp_cb_dict[p].GetId(), self.select_disp_angle)
             self.sizer4_4.Add(self.disp_cb_dict[p], (iy, ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
@@ -1461,7 +1482,11 @@ class BasicPage(wx.ScrolledWindow):
                                      self.state.orientation_params_disp)
         self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
-
+        
+        ## post state to fit panel
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event)
+        
 
     def _set_range_sizer(self, title, object1=None,object=None):
         """

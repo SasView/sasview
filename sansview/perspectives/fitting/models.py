@@ -126,6 +126,10 @@ class ModelManager:
         self.shape_list.append(CylinderModel)
         self.multiplication_factor.append(CylinderModel)
         
+        #from sans.models.ParallelepipedModel import ParallelepipedModel
+        #self.shape_list.append(ParallelepipedModel)
+        #self.multiplication_factor.append(ParallelepipedModel)
+        
         from sans.models.CoreShellModel import CoreShellModel
         self.shape_list.append(CoreShellModel)
         

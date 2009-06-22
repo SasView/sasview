@@ -423,6 +423,7 @@ class FitPanel(wx.aui.AuiNotebook):
             if self.fit_page_name[page.window_name].getCurrentPosition()== length -1:
                 state = None
                 page._redo.Enable(False)
+                page._redo.Enable(True)
             else:
                 state = self.fit_page_name[page.window_name].getNextItem()
             page.reset_page(state)  

@@ -64,8 +64,8 @@ class PageState(object):
         ## save the state of the context menu
         self.saved_states={}
         ## save selection of combobox
-        self.formfactorcombobox = ""
-        self.structurecombobox  = ""
+        self.formfactorcombobox = None
+        self.structurecombobox  = None
         ## radio box to select type of model
         self.shape_rbutton = False
         self.shape_indep_rbutton = False

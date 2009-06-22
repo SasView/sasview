@@ -548,6 +548,11 @@ class FitPage(BasicPage):
         self.btFit.SetFocus() 
         self.state.enable_disp = self.enable_disp.GetValue()
         self.state.disable_disp = self.disable_disp.GetValue()
+        
+        self.state.structurecombobox = self.structurebox.GetCurrentSelection()
+        self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
+        #print "_on_select_model",self.state.structurecombobox,self.state.formfactorcombobox 
+       
         if event !=None:
             self._undo.Enable(True)
             ## post state to fit panel
