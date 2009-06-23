@@ -18,6 +18,7 @@
 #include "parameters.hh"
 extern "C" {
 	#include "cylinder.h"
+	#include "parallelepiped.h"
 }
 
 using namespace std;
@@ -41,6 +42,29 @@ public:
 	double operator()(double qx, double qy);
 	double evaluate_rphi(double q, double phi);
 };
+
+class ParallelepipedModel{
+public:
+	// TODO: add 2D 
+	// Model parameters
+	Parameter scale;
+	Parameter short_edgeA;
+	Parameter longer_edgeB;
+	Parameter longuest_edgeC;
+	Parameter contrast;
+	Parameter background;
+	Parameter parallel_theta;
+	Parameter parallel_phi;
+
+	// Constructor
+	ParallelepipedModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
 
 class SphereModel{
 public:

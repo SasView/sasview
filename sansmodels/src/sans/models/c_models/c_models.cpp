@@ -8,6 +8,7 @@
 #include <parameters.hh>
 
 void addCCylinderModel(PyObject *module);
+void addCParallelepipedModel(PyObject *module);
 void addCSphereModel(PyObject *module);
 void addCHardsphereStructure(PyObject *module);
 void addCStickyHSStructure(PyObject *module);
@@ -147,6 +148,7 @@ initc_models(void)
                        "C extension module for SANS scattering models.");
 
 	addCCylinderModel(m);
+	addCParallelepipedModel(m);
 	addCCoreShellCylinderModel(m);
 	addCCoreShellModel(m);
 	addCEllipsoidModel(m);

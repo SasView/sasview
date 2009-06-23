@@ -26,6 +26,7 @@ initc_models(void)
                        "C extension module for SANS scattering models.");
 
 	addCCylinderModel(m);
+	addCParallelepipedModel(m);
 	addCCoreShellCylinderModel(m);
 	addCCoreShellModel(m);
 	addCEllipsoidModel(m);
