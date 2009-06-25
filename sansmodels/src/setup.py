@@ -14,6 +14,7 @@ import sys
 
 
 
+
 def createODBcontent(class_name):
     """
         Return the content of the Pyre odb file for a given class
@@ -123,6 +124,10 @@ setup(
         "sans/models/c_models/parameters.cpp",
         "sans/models/c_models/dispersion_visitor.cpp",
         srcdir+"/cylinder.c",
+        #srcdir+"/CParallelepiped.c",
+        "sans/models/c_models/CParallelepipedModel.cpp",
+        "sans/models/c_models/parallelepiped.cpp",
+        srcdir+"/parallelepiped.c",
         #srcdir+"/CCoreShellCylinderModel.c",
         "sans/models/c_models/CCoreShellCylinderModel.cpp",
         "sans/models/c_models/coreshellcylinder.cpp",
