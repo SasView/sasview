@@ -266,4 +266,70 @@ public:
 	double evaluate_rphi(double q, double phi);
 };
 
+class TriaxialEllipsoidModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter semi_axisA;
+	Parameter semi_axisB;
+	Parameter semi_axisC;
+	Parameter contrast;
+	Parameter background;
+	Parameter axis_theta;
+	Parameter axis_phi;
+	
+	// Constructor
+	TriaxialEllipsoidModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class FlexibleCylinderModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter length;
+	Parameter kuhn_length;
+	Parameter radius;
+	Parameter contrast;
+	Parameter background;
+	Parameter axis_theta;
+	Parameter axis_phi;
+	
+	// Constructor
+	FlexibleCylinderModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class StackedDisksModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter length;
+	Parameter radius;
+	Parameter thickness;
+	Parameter core_sld;
+	Parameter layer_sld;
+	Parameter solvent_sld;
+	Parameter nlayers;
+	Parameter spacing;
+	Parameter background;
+	Parameter axis_theta;
+	Parameter axis_phi;
+	
+	// Constructor
+	StackedDisksModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
 #endif

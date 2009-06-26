@@ -16,7 +16,7 @@
 		constrast: particle_sld - solvent_sld
 		background:Incoherent Background [1/cm] 
 		</text>
-	[FIXED]= <text>short_edgeA.width; longer_edgeB.width; longuest_edgeC.width</text>
+	[FIXED]= <text>short_edgeA.width; longer_edgeB.width; longuest_edgeC.width;parallel_phi.width; parallel_theta.width</text>
 	[ORIENTATION_PARAMS]= <text>parallel_phi; parallel_theta; parallel_phi.width; parallel_theta.width</text>
 
 

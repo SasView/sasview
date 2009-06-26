@@ -38,6 +38,9 @@ initc_models(void)
 	addCDiamEllipFunc(m);
 	addCDiamCylFunc(m);
 	addCEllipticalCylinderModel(m);
+	addCTriaxialEllipsoidModel(m);
+	addCFlexibleCylinderModel(m);
+	addCStackedDisksModel(m);
 	addDisperser(m);
 	addCGaussian(m);
 	addCLorentzian(m);

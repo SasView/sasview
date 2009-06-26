@@ -20,6 +20,9 @@ void addCCoreShellModel(PyObject *module);
 void addCCoreShellCylinderModel(PyObject *module);
 void addCEllipsoidModel(PyObject *module);
 void addCEllipticalCylinderModel(PyObject *module);
+void addCTriaxialEllipsoidModel(PyObject *module);
+void addCFlexibleCylinderModel(PyObject *module);
+void addCStackedDisksModel(PyObject *module);
 
 extern "C" {
 	//void addCCoreShellCylinderModel(PyObject *module);
@@ -160,6 +163,9 @@ initc_models(void)
 	addCDiamEllipFunc(m);
 	addCDiamCylFunc(m);
 	addCEllipticalCylinderModel(m);
+	addCTriaxialEllipsoidModel(m);
+	addCFlexibleCylinderModel(m);
+	addCStackedDisksModel(m);
 	addDisperser(m);
 	addCGaussian(m);
 	addCLorentzian(m);

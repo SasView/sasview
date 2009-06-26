@@ -15,6 +15,7 @@ import sys
 
 
 
+
 def createODBcontent(class_name):
     """
         Return the content of the Pyre odb file for a given class
@@ -144,6 +145,18 @@ setup(
         "sans/models/c_models/CEllipticalCylinderModel.cpp",
         "sans/models/c_models/ellipticalcylinder.cpp",                
         srcdir+"/elliptical_cylinder.c",
+        #srcdir+"/CTriaxialEllipsoidModel.c",
+        "sans/models/c_models/CTriaxialEllipsoidModel.cpp",
+        "sans/models/c_models/triaxialellipsoid.cpp",                
+        srcdir+"/triaxial_ellipsoid.c",
+        #srcdir+"/CFlexibleCylinderModel.c",
+        "sans/models/c_models/CFlexibleCylinderModel.cpp",
+        "sans/models/c_models/flexiblecylinder.cpp",                
+        srcdir+"/flexible_cylinder.c",
+        #srcdir+"/CStakedDisksModel.c",
+        "sans/models/c_models/CStackedDisksModel.cpp",
+        "sans/models/c_models/stackeddisks.cpp",                
+        srcdir+"/stacked_disks.c",
         srcdir+"/disperser.c",
         igordir+"/libCylinder.c",
         igordir+"/libStructureFactor.c",

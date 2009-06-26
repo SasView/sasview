@@ -3,7 +3,7 @@
  * TODO: Add 2D analysis
  */
 
-#include "parallelepiped.h"
+#include "flexible_cylinder.h"
 #include <math.h>
 #include "libCylinder.h"
 #include <stdio.h>
@@ -12,76 +12,75 @@
 
 /**
  * Function to evaluate 1D scattering function
- * @param pars: parameters of the parallelepiped
+ * @param pars: parameters of the flexible cylinder
  * @param q: q-value
  * @return: function value
  */
-double parallelepiped_analytical_1D(ParallelepipedParameters *pars, double q) {
+double flexible_cylinder_analytical_1D(FlexibleCylinderParameters *pars, double q) {
 	double dp[6];
 	
 	// Fill paramater array
 	dp[0] = pars->scale;
-	dp[1] = pars->short_edgeA;
-	dp[2] = pars->longer_edgeB;
-	dp[3] = pars->longuest_edgeC;
+	dp[1] = pars->length;
+	dp[2] = pars->kuhn_length;
+	dp[3] = pars->radius;
 	dp[4] = pars->contrast;
 	dp[5] = pars->background;
 
 	// Call library function to evaluate model
-	return Parallelepiped(dp, q);	
+	return FlexExclVolCyl(dp, q);	
 }
 /**
  * Function to evaluate 2D scattering function
- * @param pars: parameters of the parallelepiped
+ * @param pars: parameters of the flexible cylinder
  * @param q: q-value
  * @return: function value
  */
-double parallelepiped_analytical_2DXY(ParallelepipedParameters *pars, double qx, double qy) {
+double flexible_cylinder_analytical_2DXY(FlexibleCylinderParameters *pars, double qx, double qy) {
 	double q;
 	q = sqrt(qx*qx+qy*qy);
-    return parallelepiped_analytical_2D_scaled(pars, q, qx/q, qy/q);
+    return flexible_cylinder_analytical_2D_scaled(pars, q, qx/q, qy/q);
 } 
 
 
 /**
  * Function to evaluate 2D scattering function
- * @param pars: parameters of the Parallelepiped
+ * @param pars: parameters of the flexible cylinder
  * @param q: q-value
  * @param phi: angle phi
  * @return: function value
  */
-double parallelepiped_analytical_2D(ParallelepipedParameters *pars, double q, double phi) {
-    return parallelepiped_analytical_2D_scaled(pars, q, cos(phi), sin(phi));
+double flexible_cylinder_analytical_2D(FlexibleCylinderParameters *pars, double q, double phi) {
+    return flexible_cylinder_analytical_2D_scaled(pars, q, cos(phi), sin(phi));
 } 
         
 /**
  * Function to evaluate 2D scattering function
- * @param pars: parameters of the parallelepiped
+ * @param pars: parameters of the flexible cylinder
  * @param q: q-value
  * @param q_x: q_x / q
  * @param q_y: q_y / q
  * @return: function value
  */
-double parallelepiped_analytical_2D_scaled(ParallelepipedParameters *pars, double q, double q_x, double q_y) {
-	double parallel_x, parallel_y, parallel_z;
+double flexible_cylinder_analytical_2D_scaled(FlexibleCylinderParameters *pars, double q, double q_x, double q_y) {
+	double cyl_x, cyl_y, cyl_z;
 	double q_z;
 	double alpha, vol, cos_val;
-	double aa, mu, uu;
 	double answer;
 	
 	
 
     // parallelepiped orientation
-    parallel_x = sin(pars->parallel_theta) * cos(pars->parallel_phi);
-    parallel_y = sin(pars->parallel_theta) * sin(pars->parallel_phi);
-    parallel_z = cos(pars->parallel_theta);
+    cyl_x = sin(pars->axis_theta) * cos(pars->axis_phi);
+    cyl_y = sin(pars->axis_theta) * sin(pars->axis_phi);
+    cyl_z = cos(pars->axis_theta);
      
     // q vector
     q_z = 0;
         
     // Compute the angle btw vector q and the
     // axis of the parallelepiped
-    cos_val = parallel_x*q_x + parallel_y*q_y + parallel_z*q_z;
+    cos_val = cyl_x*q_x + cyl_y*q_y + cyl_z*q_z;
     
     // The following test should always pass
     if (fabs(cos_val)>1.0) {
@@ -93,19 +92,15 @@ double parallelepiped_analytical_2D_scaled(ParallelepipedParameters *pars, doubl
     // undefined value from PPKernel
 	alpha = acos( cos_val );
 
-	aa = pars->short_edgeA/pars->longer_edgeB;
-	mu = 1.0;
-	uu = 1.0;
-	
 	// Call the IGOR library function to get the kernel
-	answer = PPKernel( aa, mu, uu);
+	answer = CylKernel(q, pars->radius, pars->length/2.0, alpha) / sin(alpha);
 	
 	// Multiply by contrast^2
 	answer *= pars->contrast*pars->contrast;
 	
 	//normalize by cylinder volume
 	//NOTE that for this (Fournet) definition of the integral, one must MULTIPLY by Vparallel
-    vol = pars->short_edgeA* pars->longer_edgeB * pars->longuest_edgeC;
+    vol = acos(-1.0) * pars->radius * pars->radius * pars->length;
 	answer *= vol;
 	
 	//convert to [cm-1]
