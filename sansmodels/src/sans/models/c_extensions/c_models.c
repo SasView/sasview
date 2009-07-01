@@ -41,6 +41,10 @@ initc_models(void)
 	addCTriaxialEllipsoidModel(m);
 	addCFlexibleCylinderModel(m);
 	addCStackedDisksModel(m);
+	addCLamellarPSModel(m);
+	addCLamellarPSHGModel(m);
+	addCProlateModel(m);
+	addCOblateModel(m);
 	addDisperser(m);
 	addCGaussian(m);
 	addCLorentzian(m);

@@ -124,7 +124,8 @@ def readhelper(lines,key, key2,key3 , file):
                         temp4=split_list(separator=';', mylist=temp3)
                     if len(temp3+ temp4)==0:
                         ## [FIXED]=  only one param
-                        listtofill= [temp.lstrip().rstrip()]
+                        if temp.lstrip().rstrip()!="":
+                            listtofill= [temp.lstrip().rstrip()]
                         
                     listtofill += temp3+temp4
                     return listtofill
@@ -179,7 +180,8 @@ def readhelper(lines,key, key2,key3 , file):
                         temp3=split_text(separator=',',string1=line)# slip "," first
                         temp4=split_list(separator=';', mylist=temp3)
                 if len(temp3+ temp4)==0:# [FIXED]=  only one param
-                    listtofill= [line.lstrip().rstrip()]
+                    if line.lstrip().rstrip()!="":
+                        listtofill= [line.lstrip().rstrip()]
                 listtofill+=temp3+temp4 #
                 break
     return listtofill

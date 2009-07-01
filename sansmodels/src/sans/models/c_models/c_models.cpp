@@ -8,6 +8,7 @@
 #include <parameters.hh>
 
 void addCCylinderModel(PyObject *module);
+void addCTriaxialEllipsoidModel(PyObject *module);
 void addCParallelepipedModel(PyObject *module);
 void addCSphereModel(PyObject *module);
 void addCHardsphereStructure(PyObject *module);
@@ -23,6 +24,11 @@ void addCEllipticalCylinderModel(PyObject *module);
 void addCTriaxialEllipsoidModel(PyObject *module);
 void addCFlexibleCylinderModel(PyObject *module);
 void addCStackedDisksModel(PyObject *module);
+void addCLamellarPSModel(PyObject *module);
+void addCLamellarPSHGModel(PyObject *module);
+void addCOblateModel(PyObject *module);
+void addCProlateModel(PyObject *module);
+
 
 extern "C" {
 	//void addCCoreShellCylinderModel(PyObject *module);
@@ -166,6 +172,11 @@ initc_models(void)
 	addCTriaxialEllipsoidModel(m);
 	addCFlexibleCylinderModel(m);
 	addCStackedDisksModel(m);
+	addCLamellarPSModel(m);
+	addCLamellarPSHGModel(m);
+	addCOblateModel(m);
+	addCProlateModel(m);
+
 	addDisperser(m);
 	addCGaussian(m);
 	addCLorentzian(m);

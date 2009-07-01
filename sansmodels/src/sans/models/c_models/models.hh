@@ -265,7 +265,6 @@ public:
 	double operator()(double qx, double qy);
 	double evaluate_rphi(double q, double phi);
 };
-
 class TriaxialEllipsoidModel{
 public:
 	// Model parameters
@@ -332,4 +331,94 @@ public:
 	double operator()(double qx, double qy);
 	double evaluate_rphi(double q, double phi);
 };
+
+class LamellarPSModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter spacing;
+	Parameter delta;
+	Parameter sigma;
+	Parameter contrast;
+	Parameter n_plates;
+	Parameter caille;
+	Parameter background;
+	
+	// Constructor
+	LamellarPSModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class LamellarPSHGModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter spacing;
+	Parameter deltaT;
+	Parameter deltaH;
+	Parameter sld_tail;
+	Parameter sld_head;
+	Parameter sld_solvent;
+	Parameter n_plates;
+	Parameter caille;
+	Parameter background;
+	
+	// Constructor
+	LamellarPSHGModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class OblateModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter major_core;
+	Parameter minor_core;
+	Parameter major_shell;
+	Parameter minor_shell;
+	Parameter contrast;
+	Parameter sld_solvent;
+	Parameter background;
+	Parameter axis_theta;
+	Parameter axis_phi;
+	
+	// Constructor
+	OblateModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+class ProlateModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter major_core;
+	Parameter minor_core;
+	Parameter major_shell;
+	Parameter minor_shell;
+	Parameter contrast;
+	Parameter sld_solvent;
+	Parameter background;
+	Parameter axis_theta;
+	Parameter axis_phi;
+	
+	// Constructor
+	ProlateModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
 #endif
