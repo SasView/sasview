@@ -17,7 +17,7 @@
  * @return: function value
  */
 double triaxial_ellipsoid_analytical_1D(TriaxialEllipsoidParameters *pars, double q) {
-	double dp[5];
+	double dp[6];
 	
 	// Fill paramater array
 	dp[0] = pars->scale;

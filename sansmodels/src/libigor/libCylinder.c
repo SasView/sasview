@@ -880,7 +880,7 @@ LamellarFF(double dp[], double q)
 	sig = dp[2]*del;
 	contr = dp[3];
 	bkg = dp[4];
-	
+	qval = q;
 	
 	Pq = 2.0*contr*contr/qval/qval*(1.0-cos(qval*del)*exp(-0.5*qval*qval*sig*sig));
 	

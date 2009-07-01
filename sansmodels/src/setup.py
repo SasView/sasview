@@ -14,6 +14,8 @@ import sys
 
 
 
+if len(sys.argv) == 1:
+    sys.argv.append('install')
 
 
 def createODBcontent(class_name):
@@ -145,7 +147,7 @@ setup(
         "sans/models/c_models/CEllipticalCylinderModel.cpp",
         "sans/models/c_models/ellipticalcylinder.cpp",                
         srcdir+"/elliptical_cylinder.c",
-         #srcdir+"/CTriaxialEllipsoidModel.c",
+        #srcdir+"/CTriaxialEllipsoidModel.c",
         "sans/models/c_models/CTriaxialEllipsoidModel.cpp",
         "sans/models/c_models/triaxialellipsoid.cpp",                
         srcdir+"/triaxial_ellipsoid.c",
@@ -157,6 +159,14 @@ setup(
         "sans/models/c_models/CStackedDisksModel.cpp",
         "sans/models/c_models/stackeddisks.cpp",                
         srcdir+"/stacked_disks.c",
+        #srcdir+"/CLamellarModel.c",
+        "sans/models/c_models/CLamellarModel.cpp",
+        "sans/models/c_models/lamellar.cpp",                
+        srcdir+"/lamellar.c",
+        #srcdir+"/CLamellarFFHGModel.c",
+        "sans/models/c_models/CLamellarFFHGModel.cpp",
+        "sans/models/c_models/lamellarFF_HG.cpp",                
+        srcdir+"/lamellarFF_HG.c",
         #srcdir+"/CLamellarPSModel.c",
         "sans/models/c_models/CLamellarPSModel.cpp",
         "sans/models/c_models/lamellarPS.cpp",                

@@ -332,6 +332,48 @@ public:
 	double evaluate_rphi(double q, double phi);
 };
 
+class LamellarModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter delta;
+	Parameter sigma;
+	Parameter contrast;
+	Parameter background;
+	
+	// Constructor
+	LamellarModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+
+};
+
+class LamellarFFHGModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter t_length;
+	Parameter h_thickness;
+	Parameter sld_tail;
+	Parameter sld_head;
+	Parameter sld_solvent;
+	Parameter background;
+	
+	// Constructor
+	LamellarFFHGModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+
+};
+
+
+
 class LamellarPSModel{
 public:
 	// Model parameters

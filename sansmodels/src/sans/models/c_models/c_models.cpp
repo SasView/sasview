@@ -28,6 +28,8 @@ void addCLamellarPSModel(PyObject *module);
 void addCLamellarPSHGModel(PyObject *module);
 void addCOblateModel(PyObject *module);
 void addCProlateModel(PyObject *module);
+void addCLamellarModel(PyObject *module);
+void addCLamellarFFHGModel(PyObject *module);
 
 
 extern "C" {
@@ -176,7 +178,8 @@ initc_models(void)
 	addCLamellarPSHGModel(m);
 	addCOblateModel(m);
 	addCProlateModel(m);
-
+	addCLamellarModel(m);
+	addCLamellarFFHGModel(m);
 	addDisperser(m);
 	addCGaussian(m);
 	addCLorentzian(m);

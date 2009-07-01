@@ -45,6 +45,8 @@ initc_models(void)
 	addCLamellarPSHGModel(m);
 	addCProlateModel(m);
 	addCOblateModel(m);
+	addCLamellarModel(m);
+	addCLamellarFFHGModel(m);
 	addDisperser(m);
 	addCGaussian(m);
 	addCLorentzian(m);
