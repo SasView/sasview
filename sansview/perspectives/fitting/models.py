@@ -126,9 +126,9 @@ class ModelManager:
         self.shape_list.append(CylinderModel)
         self.multiplication_factor.append(CylinderModel)
         
-        #from sans.models.ParallelepipedModel import ParallelepipedModel
-        #self.shape_list.append(ParallelepipedModel)
-        #self.multiplication_factor.append(ParallelepipedModel)
+        from sans.models.ParallelepipedModel import ParallelepipedModel
+        self.shape_list.append(ParallelepipedModel)
+        self.multiplication_factor.append(ParallelepipedModel)
         
         from sans.models.CoreShellModel import CoreShellModel
         self.shape_list.append(CoreShellModel)
@@ -143,10 +143,43 @@ class ModelManager:
         self.shape_list.append(EllipsoidModel)
         self.multiplication_factor.append(EllipsoidModel)
          
+        from sans.models.TriaxialEllipsoidModel import TriaxialEllipsoidModel
+        self.shape_list.append(TriaxialEllipsoidModel)
+        self.multiplication_factor.append(TriaxialEllipsoidModel)
         
+        from sans.models.FlexibleCylinderModel import FlexibleCylinderModel
+        self.shape_list.append(FlexibleCylinderModel)
+        self.multiplication_factor.append(FlexibleCylinderModel)
+        
+        from sans.models.StackedDisksModel import StackedDisksModel
+        self.shape_list.append(StackedDisksModel)
+        self.multiplication_factor.append(StackedDisksModel)
+        
+        from sans.models.LamellarModel import LamellarModel
+        self.shape_list.append(LamellarModel)
+        self.multiplication_factor.append(LamellarModel)
+        
+        from sans.models.LamellarFFHGModel import LamellarFFHGModel
+        self.shape_list.append(LamellarFFHGModel)
+        self.multiplication_factor.append(LamellarFFHGModel)
+        
+        from sans.models.LamellarPSModel import LamellarPSModel
+        self.shape_list.append(LamellarPSModel)
+        self.multiplication_factor.append(LamellarPSModel)
+        
+        from sans.models.LamellarPSHGModel import LamellarPSHGModel
+        self.shape_list.append(LamellarPSHGModel)
+        self.multiplication_factor.append(LamellarPSHGModel)
+        
+        from sans.models.OblateModel import OblateModel
+        self.shape_list.append(OblateModel)
+        self.multiplication_factor.append(OblateModel)
+        
+        from sans.models.ProlateModel import ProlateModel
+        self.shape_list.append(ProlateModel)
+        self.multiplication_factor.append(ProlateModel)
         
         ## Structure factor 
-      
         from sans.models.SquareWellStructure import SquareWellStructure
         self.struct_list.append(SquareWellStructure)
         
