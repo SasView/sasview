@@ -14,11 +14,11 @@
 # mingw must be installed
 #
 # Usage:
-# python build_sansview [command]
+# python build_prview [command]
 # [command] can be any of the following:
 #   -h: lists the command line options
-#   -r: Builds a SansView using the released modules.
-#   -t: Builds SansView from the trunk.
+#   -r: Builds a PrView using the released modules.
+#   -t: Builds PrView from the trunk.
 #   -i: Builds an installer from the release version.
 #   -n: Print out the dependencies for the release notes
 
@@ -166,7 +166,7 @@ def checkout(release=False):
     else:
         os.system("%s checkout -q svn://danse.us/sans/trunk/prview" % SVN)
     
-def prepare(wipeout = False):
+def prepare(wipeout = False, install_folder=INSTALL_FOLDER):
     """
         Prepare the build
     """
@@ -186,16 +186,16 @@ def prepare(wipeout = False):
                 shutil.rmtree(d)
         
     # Create a fresh installation folder
-    if os.path.isdir(INSTALL_FOLDER):
-        shutil.rmtree(INSTALL_FOLDER)
+    if os.path.isdir(install_folder):
+        shutil.rmtree(install_folder)
 
-    os.mkdir(INSTALL_FOLDER)
+    os.mkdir(install_folder)
     
     # Check that the dependencies are properly installed
     check_system()    
     
     # Move to the installation folder
-    os.chdir(INSTALL_FOLDER)    
+    os.chdir(install_folder)    
 
 def warning():
     """
@@ -217,11 +217,15 @@ def warning():
 if __name__ == "__main__": 
     print "Build script for PrView %s" % PRVIEW
     
+    #TODO: add --prefix option
+    
     if len(sys.argv)==1:
-        # If there is no argument, build the installer
-        sys.argv.append("-i")
+        # By default, build release version in site-packages without cleanup
+        logging.info("Building release version")
+        prepare(install_folder="prview")
+        checkout(True)
         
-    if len(sys.argv)>1:
+    elif len(sys.argv)>1:
         # Help
         if sys.argv[1]=="-h":
             print "Usage:"
