@@ -3,7 +3,11 @@ Release Notes
 
 Package name: DataLoader 0.2.3
 
-1- 	Version 0.2.3
+1- 	Version 0.2.4
+	- Release date: 7/4/2009
+	- Improvements to CanSAS reader/writer
+
+ 	Version 0.2.3
 	- Release date: 4/21/2009
 	- use ASCII reader for 1D data
 
