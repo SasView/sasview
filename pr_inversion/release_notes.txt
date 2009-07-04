@@ -3,7 +3,11 @@ Release Notes
 
 Package name: pr_inversion 0.2
 
-1- 	Version 0.2.1
+1- 	Version 0.2.2
+	- Release date: 7/4/2009
+	- Minor fixes
+	  
+ 	Version 0.2.1
 	- Release date: 7/8/2008
 	- Minor change to clone method
 	  
