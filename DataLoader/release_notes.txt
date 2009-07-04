@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Package name: DataLoader 0.2.3
+Package name: DataLoader 0.2.4
 
 1- 	Version 0.2.4
 	- Release date: 7/4/2009
