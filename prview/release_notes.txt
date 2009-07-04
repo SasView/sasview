@@ -1,11 +1,17 @@
 Release Notes
 =============
 
-PrView 0.2
+PrView 0.3
 
 Package name: prview
 
-1- Version 0.2.3
+1- Version 0.3.0
+	- Release date: 7/4/2009
+	- Added installer for compatibility with guiframe/sansview
+	- Added functionality to save inversion results
+	- Added functionality to explore d_max range and see results plotted as a function of d_max
+    
+   Version 0.2.3
 	- Release date: 10/24/2008
 	- Protected against loading files with multiple data entries (like cansas XML).
 	- Added functionality to load various data formats.
@@ -40,14 +46,14 @@ Package name: prview
 		- Python version >= 2.4 should be running on the system
 
 	2.2- Installing:
-		- Get the code from svn://danse.us/sans/releases/prview-0.2.3
+		- Get the code from svn://danse.us/sans/releases/prview-0.2.4
 		- This application is also dependent on the following DANSE code:
-			svn://danse.us/common/releases/plottools-0.1.2-dev
-			svn://danse.us/common/releases/util-0.1
-			svn://danse.us/sans/releases/DataLoader-0.2.1
-			svn://danse.us/sans/releases/guicomm-0.1.0
-			svn://danse.us/sans/releases/guiframe-0.1.3-dev
-			svn://danse.us/sans/releases/pr_inversion-0.2.1
+			svn://danse.us/common/releases/plottools-0.1.6
+			svn://danse.us/common/releases/util-0.1.2 
+			svn://danse.us/sans/releases/DataLoader-0.2.4 
+			svn://danse.us/sans/releases/guicomm-0.1.3 
+			svn://danse.us/sans/releases/guiframe-0.1.7
+			svn://danse.us/sans/releases/pr_inversion-0.2.2 
 		- The following modules are required:
 			* matplotlib
 			* numpy
