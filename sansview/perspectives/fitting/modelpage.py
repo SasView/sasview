@@ -9,7 +9,7 @@ from sans.models.dispersion_models import ArrayDispersion, GaussianDispersion
 from sans.guicomm.events import StatusEvent   
 from sans.guiframe.utils import format_number
 (ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
-_BOX_WIDTH = 80
+_BOX_WIDTH = 76
 
 import basepage
 from basepage import BasicPage

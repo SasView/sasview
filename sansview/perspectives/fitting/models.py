@@ -1,9 +1,6 @@
 #TODO: add comments to document this module
 #TODO: clean-up the exception handling.
-#TODO: clean-up existing comments/documentation. 
-#      For example, the _getModelList method advertises 
-#      an 'id' parameter that is not part of the method's signature.
-#      It also advertises an ID as return value but it always returns zero.
+
 #TODO: clean-up the FractalAbsModel and PowerLawAbsModel menu items. Those
 #      model definitions do not belong here. They belong with the rest of the
 #      models.
@@ -15,7 +12,7 @@ import os,sys,math
 import os.path
 
 (ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
-
+from sans.guicomm.events import StatusEvent  
 # Time is needed by the log method
 import time
 
@@ -113,8 +110,7 @@ class ModelManager:
         """
             List of models we want to make available by default
             for this application
-            
-            @param id: first event ID to register the menu events with
+        
             @return: the next free event ID following the new menu events
         """
         ## form factor
@@ -286,18 +282,22 @@ class ModelManager:
         """
         if len(list1)>0:
             self.model_combobox.set_list(menuinfo[0],list1)
-              
+            
             for item in list1:
-                id = wx.NewId() 
-                struct_factor=item()
-                struct_name = struct_factor.__class__.__name__
-                if hasattr(struct_factor, "name"):
-                    struct_name = struct_factor.name
-                    
-                menuinfo[1].Append(int(id),struct_name,struct_name)
-                if not  item in self.struct_factor_dict.itervalues():
-                    self.struct_factor_dict[str(id)]= item
-                wx.EVT_MENU(self.event_owner, int(id), self._on_model)
+                try:
+                    id = wx.NewId() 
+                    struct_factor=item()
+                    struct_name = struct_factor.__class__.__name__
+                    if hasattr(struct_factor, "name"):
+                        struct_name = struct_factor.name
+                        
+                    menuinfo[1].Append(int(id),struct_name,struct_name)
+                    if not  item in self.struct_factor_dict.itervalues():
+                        self.struct_factor_dict[str(id)]= item
+                    wx.EVT_MENU(self.event_owner, int(id), self._on_model)
+                except:
+                    msg= "Error Occured: %s"%sys.exc_value
+                    wx.PostEvent(self.event_owner, StatusEvent(status=msg))
                 
         id = wx.NewId()         
         self.modelmenu.AppendMenu(id, menuinfo[0],menuinfo[1],menuinfo[2])

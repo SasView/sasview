@@ -11,7 +11,7 @@ from pagestate import PageState
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
 (PreviousStateEvent, EVT_PREVIOUS_STATE)   = wx.lib.newevent.NewEvent()
 (NextStateEvent, EVT_NEXT_STATE)   = wx.lib.newevent.NewEvent()
-_BOX_WIDTH = 80
+_BOX_WIDTH = 76
 
 class BasicPage(wx.ScrolledWindow):
     """
