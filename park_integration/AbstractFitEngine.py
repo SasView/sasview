@@ -258,37 +258,39 @@ class FitData1D(object):
             dy= numpy.asarray(dy)
      
         dy[dy==0]=1
-        #idx = (x>=self.qmin) & (x <= self.qmax)
-  
+       
         # Compute theory data f(x)
-        #fx = numpy.zeros(len(x))
         tempy=[]
-        tempfx=[]
+        fx=numpy.zeros(len(y))
         tempdy=[]
-        #fx[idx] = numpy.asarray([fn(v) for v in x[idx]])
+        index=[]
+        tempfx=[]
         for i_x in  range(len(x)):
             try:
                 if self.qmin <=x[i_x] and x[i_x]<=self.qmax:
                     value= fn(x[i_x])
-                    tempfx.append( value)
+                    fx[i_x] =value
                     tempy.append(y[i_x])
                     tempdy.append(dy[i_x])
+                    index.append(i_x)
             except:
                 ## skip error for model.run(x)
                 pass
                  
         ## Smear theory data
         if self.smearer is not None:
-            tempfx = self.smearer(tempfx)
+            fx = self.smearer(fx)
+            
+        for i in index:
+            tempfx.append(fx[i])
+      
         newy= numpy.asarray(tempy)
         newfx= numpy.asarray(tempfx)
         newdy= numpy.asarray(tempdy)
        
-       
         ## Sanity check
         if numpy.size(newdy)!= numpy.size(newfx):
             raise RuntimeError, "FitData1D: invalid error array"
-        #return (y[idx] - fx[idx])/dy[idx]
        
         return (newy- newfx)/newdy
      
