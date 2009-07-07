@@ -462,5 +462,24 @@ public:
 	double operator()(double qx, double qy);
 	double evaluate_rphi(double q, double phi);
 };
-
+class HollowCylinderModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter core_radius;
+	Parameter shell_radius;
+	Parameter length;
+	Parameter contrast;
+	Parameter background;
+	Parameter axis_theta;
+	Parameter axis_phi;
+	
+	//Constructor
+	HollowCylinderModel();
+	
+	//Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx , double qy);
+	double evaluate_rphi(double q, double phi);
+};
 #endif

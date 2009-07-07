@@ -30,6 +30,7 @@ class Model1DPlugin(BaseComponent):
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"
         else:
             return self.function(x)
+        
    
     def runXY(self, x = 0.0):
         """ Evaluate the model

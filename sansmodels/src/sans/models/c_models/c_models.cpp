@@ -30,6 +30,7 @@ void addCOblateModel(PyObject *module);
 void addCProlateModel(PyObject *module);
 void addCLamellarModel(PyObject *module);
 void addCLamellarFFHGModel(PyObject *module);
+void addCHollowCylinderModel(PyObject *module);
 
 
 extern "C" {
@@ -180,8 +181,10 @@ initc_models(void)
 	addCProlateModel(m);
 	addCLamellarModel(m);
 	addCLamellarFFHGModel(m);
+	addCHollowCylinderModel(m);
 	addDisperser(m);
 	addCGaussian(m);
 	addCLorentzian(m);
+
 
 }
