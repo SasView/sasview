@@ -50,5 +50,6 @@ initc_models(void)
 	addDisperser(m);
 	addCGaussian(m);
 	addCLorentzian(m);
+	addCHollowCylinderModel(m);
 
 }
