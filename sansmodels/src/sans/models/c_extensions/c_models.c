@@ -51,5 +51,8 @@ initc_models(void)
 	addCGaussian(m);
 	addCLorentzian(m);
 	addCHollowCylinderModel(m);
+	addCMultiShellModel(m);
+	addCVesicleModel(m);
+	addCBinaryHSModel(m);
 
 }

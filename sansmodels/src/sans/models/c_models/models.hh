@@ -482,4 +482,66 @@ public:
 	double operator()(double qx , double qy);
 	double evaluate_rphi(double q, double phi);
 };
+
+class MultiShellModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter core_radius;
+	Parameter s_thickness;
+	Parameter w_thickness;
+	Parameter core_sld;
+	Parameter shell_sld;
+	Parameter n_pairs;
+	Parameter background;
+	
+	//Constructor
+	MultiShellModel();
+	
+	//Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx , double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class VesicleModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter core_radius;
+	Parameter thickness;
+	Parameter core_sld;
+	Parameter shell_sld;
+	Parameter background;
+	
+	//Constructor
+	VesicleModel();
+	
+	//Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx , double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class BinaryHSModel{
+public:
+	// Model parameters
+	Parameter l_radius;
+	Parameter s_radius;
+	Parameter vol_frac_ls;
+	Parameter vol_frac_ss;
+	Parameter ls_sld;
+	Parameter ss_sld;
+	Parameter solvent_sld;
+	Parameter background;
+	
+	//Constructor
+	BinaryHSModel();
+	
+	//Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx , double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
 #endif

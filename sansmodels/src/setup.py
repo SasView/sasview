@@ -14,7 +14,6 @@ import sys
 
 
 
-
 def createODBcontent(class_name):
     """
         Return the content of the Pyre odb file for a given class
@@ -184,6 +183,18 @@ setup(
         "sans/models/c_models/CProlateModel.cpp",
         "sans/models/c_models/prolate.cpp",                
         srcdir+"/prolate.c",
+        #srcdir+"/CMultishellModel.c",
+        "sans/models/c_models/CMultishellModel.cpp",
+        "sans/models/c_models/multishell.cpp",                
+        srcdir+"/multishell.c",
+        #srcdir+"/CVesicleModel.c",
+        "sans/models/c_models/CVesicleModel.cpp",
+        "sans/models/c_models/vesicle.cpp",                
+        srcdir+"/vesicle.c",
+        #srcdir+"/CBinaryHSModel.c",
+        "sans/models/c_models/CBinaryHSModel.cpp",
+        "sans/models/c_models/binaryHS.cpp",                
+        srcdir+"/binaryHS.c",
         srcdir+"/disperser.c",
         igordir+"/libCylinder.c",
         igordir+"/libStructureFactor.c",

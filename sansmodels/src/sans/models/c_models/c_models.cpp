@@ -31,6 +31,9 @@ void addCProlateModel(PyObject *module);
 void addCLamellarModel(PyObject *module);
 void addCLamellarFFHGModel(PyObject *module);
 void addCHollowCylinderModel(PyObject *module);
+void addCMultiShellModel(PyObject *module);
+void addCVesicleModel(PyObject *module);
+void addCBinaryHSModel(PyObject *module);
 
 
 extern "C" {
@@ -182,9 +185,12 @@ initc_models(void)
 	addCLamellarModel(m);
 	addCLamellarFFHGModel(m);
 	addCHollowCylinderModel(m);
+	addCMultiShellModel(m);
+	addCBinaryHSModel(m);
 	addDisperser(m);
 	addCGaussian(m);
 	addCLorentzian(m);
+	addCVesicleModel(m);
 
 
 }
