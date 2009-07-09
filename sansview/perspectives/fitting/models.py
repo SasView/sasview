@@ -132,6 +132,18 @@ class ModelManager:
         from sans.models.CoreShellCylinderModel import CoreShellCylinderModel
         self.shape_list.append(CoreShellCylinderModel)
         
+        from sans.models.MultiShellModel import MultiShellModel
+        self.shape_list.append(MultiShellModel)
+        
+        from sans.models.BinaryHSModel import BinaryHSModel
+        self.shape_list.append(BinaryHSModel)
+        
+        from sans.models.VesicleModel import VesicleModel
+        self.shape_list.append(VesicleModel)
+        
+        from sans.models.HollowCylinderModel import HollowCylinderModel
+        self.shape_list.append(HollowCylinderModel)
+        
         from sans.models.EllipticalCylinderModel import EllipticalCylinderModel
         self.shape_list.append(EllipticalCylinderModel)
         
@@ -198,6 +210,12 @@ class ModelManager:
         
         from sans.models.LineModel import LineModel
         self.shape_indep_list.append(LineModel)
+        
+        from sans.models.PeakGaussModel import PeakGaussModel
+        self.shape_indep_list.append(PeakGaussModel)
+        
+        from sans.models.PeakLorentzModel import PeakLorentzModel
+        self.shape_indep_list.append(PeakLorentzModel)
         
         from sans.models.FractalModel import FractalModel
         class FractalAbsModel(FractalModel):
