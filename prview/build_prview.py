@@ -224,6 +224,17 @@ if __name__ == "__main__":
         logging.info("Building release version")
         prepare(install_folder="prview")
         checkout(True)
+        # Create run script
+        f = open("run_prview.py", 'w')
+        buff  = "import os, sys, site\n"
+        buff += "if __name__ == \"__main__\":\n"
+        buff += "    sys.path.append(os.path.join(os.getcwd(),\"prview-%s\"))\n" % PRVIEW
+        buff += "    site.addsitedir(os.path.join(os.getcwd(),\"prview-%s\"))\n" % PRVIEW
+        buff += "    os.chdir(\"prview-%s\")\n" % PRVIEW
+        buff += "    import sansview\n"
+        buff += "    sansview.SansView()\n"
+        f.write(buff)
+        f.close()
         
     elif len(sys.argv)>1:
         # Help
