@@ -7,7 +7,7 @@
 import numpy 
 from scipy import optimize
 
-from AbstractFitEngine import FitEngine, sansAssembly,FitAbort
+from AbstractFitEngine import FitEngine, SansAssembly,FitAbort
 
 class fitresult:
     """
