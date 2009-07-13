@@ -54,5 +54,6 @@ initc_models(void)
 	addCMultiShellModel(m);
 	addCVesicleModel(m);
 	addCBinaryHSModel(m);
+	addCBinaryHSPSF11Model(m);
 
 }

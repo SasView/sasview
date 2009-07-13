@@ -34,6 +34,7 @@ void addCHollowCylinderModel(PyObject *module);
 void addCMultiShellModel(PyObject *module);
 void addCVesicleModel(PyObject *module);
 void addCBinaryHSModel(PyObject *module);
+void addCBinaryHSPSF11Model(PyObject *module);
 
 
 extern "C" {
@@ -187,6 +188,7 @@ initc_models(void)
 	addCHollowCylinderModel(m);
 	addCMultiShellModel(m);
 	addCBinaryHSModel(m);
+	addCBinaryHSPSF11Model(m);
 	addDisperser(m);
 	addCGaussian(m);
 	addCLorentzian(m);
