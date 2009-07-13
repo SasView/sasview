@@ -551,7 +551,7 @@ class FitPage(BasicPage):
         
         self.state.structurecombobox = self.structurebox.GetCurrentSelection()
         self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
-        #print "_on_select_model",self.state.structurecombobox,self.state.formfactorcombobox 
+      
        
         if event !=None:
             self._undo.Enable(True)
@@ -585,6 +585,7 @@ class FitPage(BasicPage):
             msg=""
             temp_smearer= self.smearer   
          ##Calculate chi2
+       
         self.compute_chisqr(smearer= temp_smearer)  
         ## new state posted
         if self.state_change:
@@ -605,6 +606,7 @@ class FitPage(BasicPage):
             temp_smearer = None
             if self.enable_smearer.GetValue():
                 temp_smearer= self.smearer
+            
             self.compute_chisqr(smearer= temp_smearer)
             ## new state posted
             if self.state_change:
@@ -792,6 +794,8 @@ class FitPage(BasicPage):
             print result chisqr
         """
         try:
+            if output ==None:
+                output= "-"
             self.tcChi.SetLabel(str(output))
            
             self.sizer5.Layout()
@@ -824,9 +828,7 @@ class FitPage(BasicPage):
             if self.calc_Chisqr!= None and self.calc_Chisqr.isrunning():
                 self.calc_Chisqr.stop()
                 
-            self.calc_Chisqr= CalcChisqr1D( x= self.data.x,
-                                            y= self.data.y,
-                                            dy= self.data.dy,
+            self.calc_Chisqr= CalcChisqr1D( data1d= self.data,
                                             model= self.model,
                                             smearer=smearer,
                                             qmin=self.qmin_x,
@@ -863,10 +865,7 @@ class FitPage(BasicPage):
             if self.calc_Chisqr!= None and self.calc_Chisqr.isrunning():
                 self.calc_Chisqr.stop()
            
-            self.calc_Chisqr= CalcChisqr2D( x_bins= self.data.x_bins,
-                                            y_bins= self.data.y_bins,
-                                            data= self.data.data,
-                                            err_data = self.data.err_data,
+            self.calc_Chisqr= CalcChisqr2D( data2d= self.data,
                                             model= self.model,
                                             qmin= self.qmin_x,
                                             qmax = self.qmax_x,
@@ -876,8 +875,7 @@ class FitPage(BasicPage):
             self.calc_Chisqr.queue()
           
         except:
-            raise ValueError," Could not compute Chisqr for %s Model 2D: "%self.model.name
-           
+           raise
 
         
     def compute_chisqr(self , smearer=None):
@@ -896,7 +894,7 @@ class FitPage(BasicPage):
                     self.compute_chisqr1D(smearer=smearer)
                     return
             except:
-                wx.PostEvent(self.parent.GrandParent, StatusEvent(status=\
+                wx.PostEvent(self.parent.parent, StatusEvent(status=\
                             "Chisqr Error: %s"% sys.exc_value))
                 return 
             
