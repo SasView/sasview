@@ -323,7 +323,12 @@ class FitData2D(object):
         ## fitting range
         self.qmin = 1e-16
         self.qmax = math.sqrt(x*x +y*y)
-       
+        ## new error image for fitting purpose
+        if self.err_image== None or self.err_image ==[]:
+            self.res_err_image= numpy.zeros(len(self.y_bins),len(self.x_bins))
+        else:
+            self.res_err_image = copy.deepcopy(self.err_image)
+        self.res_err_image[self.err_image==0]=1
        
        
     def setFitRange(self,qmin=None,qmax=None):
@@ -348,19 +353,14 @@ class FitData2D(object):
             @return residuals
         """
         res=[]
-        if self.err_image== None or self.err_image ==[]:
-            err_image= numpy.zeros(len(self.y_bins),len(self.x_bins))
-        else:
-            err_image = copy.deepcopy(self.err_image)
-            
-        err_image[err_image==0]=1
+       
         for i in range(len(self.x_bins)):
             for j in range(len(self.y_bins)):
                 temp = math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)
                 radius= math.sqrt(temp)
                 if self.qmin <= radius and radius <= self.qmax:
                     res.append( (self.image[j][i]- fn([self.x_bins[i],self.y_bins[j]]))\
-                            /err_image[j][i] )
+                            /self.res_err_image[j][i] )
         
         return numpy.array(res)
        
@@ -379,7 +379,7 @@ class FitAbort(Exception):
     print"Creating fit abort Exception"
 
 
-class sansAssembly:
+class SansAssembly:
     """
          Sans Assembly class a class wrapper to be call in optimizer.leastsq method
     """

@@ -82,7 +82,7 @@ class ScipyFit(FitEngine):
         self.curr_thread= curr_thread
         
         try:
-            functor= sansAssembly(self.paramList,model,data, curr_thread= self.curr_thread)
+            functor= SansAssembly(self.paramList,model,data, curr_thread= self.curr_thread)
             out, cov_x, info, mesg, success = optimize.leastsq(functor,model.getParams(self.paramList), full_output=1, warning=True)
             
             chisqr = functor.chisq(out)
