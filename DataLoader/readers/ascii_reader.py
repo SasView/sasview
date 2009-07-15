@@ -21,7 +21,7 @@ except:
 
 class Reader:
     """
-        Class to load ascii files (2 or 3 columns)
+        Class to load ascii files (2, 3 or 4 columns)
     """
     ## File type
     type_name = "ASCII"
@@ -54,7 +54,7 @@ class Reader:
                 lines = buff.split('\n')
                 
                 #Jae could not find python universal line spliter: keep the below for now
-                # some ascii data has \r line separator, try it when it has only one line
+                # some ascii data has \r line separator, try it when the data is on only one long line
                 if len(lines) < 2 : 
                     lines = buff.split('\r')
                  
@@ -93,7 +93,7 @@ class Reader:
                 
                 #Initialize counters for data lines and header lines.
                 is_data = False #Has more than 3 lines
-                mum_data_lines = 3 # More than "3" lines of data is considered as actual data unless that is the only data
+                mum_data_lines = 10 # More than "3" lines of data is considered as actual data unless that is the only data
 
                 i=-1            # To count # of current data candidate lines
                 i1=-1           # To count total # of previous data candidate lines
