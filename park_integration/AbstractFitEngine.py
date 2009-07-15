@@ -204,11 +204,19 @@ class FitData1D(object):
       
         # Initialize from Data1D object
         self.data=sans_data1d
-        self.x= sans_data1d.x
-        self.y= sans_data1d.y
-        self.dx= sans_data1d.dx
-        self.dy= sans_data1d.dy
+        self.x= numpy.array(sans_data1d.x)
+        self.y= numpy.array(sans_data1d.y)
+        self.dx= numpy.array(sans_data1d.dx)
+        self.dy= numpy.array(sans_data1d.dy)
+          
         
+        if self.dy ==None or len(self.dy)==0:
+            self.res_dy= numpy.zeros(len(self.y))
+        else:
+            self.res_dy= copy.deepcopy(self.dy)
+        self.res_dy= numpy.asarray(self.res_dy)
+        
+        self.res_dy[self.res_dy==0]=1
         ## Min Q-value
         #Skip the Q=0 point, especially when y(q=0)=None at x[0].
         if min (self.data.x) ==0.0 and self.data.x[0]==0 and not numpy.isfinite(self.data.y[0]):
@@ -217,11 +225,10 @@ class FitData1D(object):
             self.qmin= min (self.data.x)
         ## Max Q-value
         self.qmax= max (self.data.x)
-       
-       
+        
+        
     def setFitRange(self,qmin=None,qmax=None):
         """ to set the fit range"""
-        
         # Skip Q=0 point, (especially for y(q=0)=None at x[0]).
         #ToDo: Fix this.
         if qmin==0.0 and not numpy.isfinite(self.data.y[qmin]):
@@ -231,7 +238,7 @@ class FitData1D(object):
 
         if qmax !=None:
             self.qmax = qmax
-        
+       
         
     def getFitRange(self):
         """
@@ -241,61 +248,45 @@ class FitData1D(object):
      
      
     def residuals(self, fn):
-        """ 
-            Compute residuals.
-            
-            If self.smearer has been set, use if to smear
-            the data before computing chi squared.
-            
-            @param fn: function that return model value
-            @return residuals
         """
-        x,y = [numpy.asarray(v) for v in (self.x,self.y)]
-        if self.dy ==None or self.dy==[]:
-            dy= numpy.zeros(len(y))  
-        else:
-            dy= copy.deepcopy(self.dy)
-            dy= numpy.asarray(dy)
-     
-        dy[dy==0]=1
-       
+        Compute residuals.
+        
+        If self.smearer has been set, use if to smear the data before computing chi squared.
+        
+        @param fn: function that return model value @return residuals """
+        # Get the indices of the selected range
+        idx = (self.x>=self.qmin) & (self.x <= self.qmax)
+        
         # Compute theory data f(x)
-        tempy=[]
-        fx=numpy.zeros(len(y))
-        tempdy=[]
-        index=[]
-        tempfx=[]
-        for i_x in  range(len(x)):
+        newy = numpy.zeros(len(self.x))
+        newfx= numpy.zeros(len(self.x))
+        newdy= numpy.zeros(len(self.x))
+       
+        for i_x in range(len(self.x)):
             try:
-                if self.qmin <=x[i_x] and x[i_x]<=self.qmax:
-                    value= fn(x[i_x])
-                    fx[i_x] =value
-                    tempy.append(y[i_x])
-                    tempdy.append(dy[i_x])
-                    index.append(i_x)
+                # Skip the selection here since we want all the contribution from the theory bins #if self.qmin <=x[i_x] and x[i_x]<=self.qmax:
+                value       = fn(self.x[i_x])
+                newfx[i_x]  = value
+                newy[i_x]   = self.y[i_x]
+                newdy[i_x]  = self.res_dy[i_x]
+                
             except:
                 ## skip error for model.run(x)
                 pass
-                 
+       
         ## Smear theory data
         if self.smearer is not None:
-            fx = self.smearer(fx)
             
-        for i in index:
-            tempfx.append(fx[i])
+            newfx = self.smearer(newfx)
       
-        newy= numpy.asarray(tempy)
-        newfx= numpy.asarray(tempfx)
-        newdy= numpy.asarray(tempdy)
-       
         ## Sanity check
         if numpy.size(newdy)!= numpy.size(newfx):
             raise RuntimeError, "FitData1D: invalid error array"
-       
-        return (newy- newfx)/newdy
-     
-  
         
+        # Sum over the selected range
+        return (newy[idx]- newfx[idx])/newdy[idx]
+        
+
     def residuals_deriv(self, model, pars=[]):
         """ 
             @return residuals derivatives .
@@ -636,7 +627,3 @@ class FitArrange:
             @return self.selected value
         """
         return self.selected
-    
-
-
-    
