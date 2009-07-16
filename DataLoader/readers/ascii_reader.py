@@ -92,8 +92,8 @@ class Reader:
                 has_error_dy = None
                 
                 #Initialize counters for data lines and header lines.
-                is_data = False #Has more than 3 lines
-                mum_data_lines = 10 # More than "3" lines of data is considered as actual data unless that is the only data
+                is_data = False #Has more than 5 lines
+                mum_data_lines = 5 # More than "5" lines of data is considered as actual data unless that is the only data
 
                 i=-1            # To count # of current data candidate lines
                 i1=-1           # To count total # of previous data candidate lines
@@ -163,10 +163,8 @@ class Reader:
                         
                         #After talked with PB, we decided to take care of only 4 columns of data for now.
                         #number of columns in the current line
-                        if len(toks)>= 4:
-                            new_lentoks = 4
-                        else:
-                            new_lentoks = len(toks)
+                        #To remember the # of columns in the current line of data
+                        new_lentoks = len(toks)
                         
                         #If the previous columns not equal to the current, mark the previous as non-data and reset the dependents.  
                         if lentoks != new_lentoks :
@@ -242,10 +240,8 @@ class Reader:
                         if lentoks < new_lentoks :
                             if is_data == False:
                                 i1 = -1                            
-                        if len(toks)>= 4:
-                            lentoks = 4
-                        else:
-                            lentoks = len(toks)
+                        #To remember the # of columns on the current line for the next line of data
+                        lentoks = len(toks)
                         
                         #Reset # of header lines and counts # of data candidate lines    
                         if j == 0 and j1 ==0:
