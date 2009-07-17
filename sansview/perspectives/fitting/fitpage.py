@@ -796,7 +796,7 @@ class FitPage(BasicPage):
         try:
             if output ==None:
                 output= "-"
-            self.tcChi.SetLabel(str(output))
+            self.tcChi.SetLabel(str(format_number(output)))
            
             self.sizer5.Layout()
             self.Layout()
