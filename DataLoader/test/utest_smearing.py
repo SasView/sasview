@@ -55,7 +55,7 @@ class smear_tests(unittest.TestCase):
         output = s(input)
         answer = [ 9.666,  9.056,  8.329,  7.494,  6.642,  5.721,  4.774,  3.824,  2.871, 2.   ]
         for i in range(len(input)):
-            self.assertAlmostEqual(answer[i], output[i], 5)
+            self.assertAlmostEqual(answer[i], output[i], 2)
         
     def test_q(self):
         """
@@ -67,7 +67,7 @@ class smear_tests(unittest.TestCase):
         input = 12.0-numpy.arange(1,11)
         output = s(input)
         for i in range(len(input)):
-            self.assertEquals(input[i], output[i])
+            self.assertAlmostEquals(input[i], output[i], 5)
 
     def test_q2(self):
         """

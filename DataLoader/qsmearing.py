@@ -5,10 +5,10 @@ project funded by the US National Science Foundation.
 
 See the license text in license.txt
 
-copyright 2008, University of Tennessee
+copyright 2009, University of Tennessee
 """
 
-
+import DataLoader.extensions.smearer as smearer
 import numpy
 import math
 import scipy.special
@@ -70,8 +70,6 @@ def smear_selection(data1D):
             if data1D.dxw[0] != item:
                 _found_resolution = False
                 break
-    #print "_found_slit",_found_slit 
-    #print "data1D.dx[0]",data1D.dx[0],data1D.dxl[0]       
     # If we found slit smearing data, return a slit smearer
     if _found_slit == True:
         return SlitSmearer(data1D)
@@ -84,47 +82,47 @@ class _BaseSmearer(object):
     def __init__(self):
         self.nbins = 0
         self._weights = None
+        ## Internal flag to keep track of C++ smearer initialization
+        self._init_complete = False
+        self._smearer = None
+        
+    def __deepcopy__(self, memo={}):
+        """
+            Return a valid copy of self.
+            Avoid copying the _smearer C object and force a matrix recompute
+            when the copy is used.  
+        """
+        result = _BaseSmearer()
+        result.nbins = self.nbins
+        return result
+
         
     def _compute_matrix(self): return NotImplemented
 
-    def __call__(self, iq):
+    def __call__(self, iq_in, first_bin=0, last_bin=None):
         """
-            Return the smeared I(q) value at the given q.
-            The smeared I(q) is computed using a predetermined 
-            smearing matrix for a particular binning.
-        
-            @param q: I(q) array
-            @return: smeared I(q)
+            Perform smearing
         """
-        # Sanity check
-        if len(iq) != self.nbins:
-            raise RuntimeError, "Invalid I(q) vector: inconsistent array length %s <> %s" % (len(iq), self.nbins)
-        
-        if self._weights == None:
-            self._compute_matrix()
+        # If this is the first time we call for smearing,
+        # initialize the C++ smearer object first
+        if not self._init_complete:
+            self._initialize_smearer()
+             
+        # Get the max value for the last bin
+        if last_bin is None or last_bin>=len(iq_in):
+            last_bin = len(iq_in)-1
+        # Check that the first bin is positive
+        if first_bin<0:
+            first_bin = 0
             
-        iq_smeared = numpy.zeros(self.nbins)
-        # Loop over q-values
-        idwb=[]
-        
-        for q_i in range(self.nbins):
-            sum = 0.0
-            counts = 0.0  
-
-            for i in range(self.nbins):
-                if iq[i]==0 or self._weights[q_i][i]==0:
-                    continue
-                else:
-                    sum += iq[i] * self._weights[q_i][i] 
-                    counts += self._weights[q_i][i]
-                    #print "i,iq[i],self._weights[q_i][i] ",i,iq[i],self._weights[q_i][i]
-            if counts == 0:
-                iq_smeared[q_i] = 0
-            else:
-                iq_smeared[q_i] = sum/counts 
-            #print "q_i,iq_smeared[q_i]",q_i,iq[i],iq_smeared[q_i]
-            #print "iq[i],iq_smeared[q_i],sum,counts,self.nbins",iq[i], iq_smeared[q_i],sum,counts,self.nbins
-        return iq_smeared    
+        # Sanity check
+        if len(iq_in) != self.nbins:
+            raise RuntimeError, "Invalid I(q) vector: inconsistent array length %d != %s" % (len(iq_in), str(self.nbins))
+             
+        # Storage for smeared I(q)   
+        iq_out = numpy.zeros(self.nbins)
+        smearer.smear(self._smearer, iq_in, iq_out, first_bin, last_bin)
+        return iq_out
     
 class _SlitSmearer(_BaseSmearer):
     """
@@ -141,6 +139,7 @@ class _SlitSmearer(_BaseSmearer):
             @param min: Q_min [A-1]
             @param max: Q_max [A-1]
         """
+        _BaseSmearer.__init__(self)
         ## Slit width in Q units
         self.width  = width
         ## Slit height in Q units
@@ -156,49 +155,14 @@ class _SlitSmearer(_BaseSmearer):
         ## Smearing matrix
         self._weights = None
         
-    def _compute_matrix(self):
+    def _initialize_smearer(self):
         """
-            Compute the smearing matrix for the current I(q) array
+            Initialize the C++ smearer object.
+            This method HAS to be called before smearing
         """
-        weights = numpy.zeros([self.nbins, self.nbins])
-        
-        # Loop over all q-values
-        for i in range(self.nbins):
-            q = self.min + i*(self.max-self.min)/float(self.nbins-1.0)
-            
-            # For each q-value, compute the weight of each other q-bin
-            # in the I(q) array
-            npts_h = self.npts if self.height>0 else 1 
-            npts_w = self.npts if self.width>0 else 1 
-            
-            # If both height and width are great than zero,
-            # modify the number of points in each direction so 
-            # that the total number of points is still what 
-            # the user would expect (downgrade resolution)
-            if npts_h>1 and npts_w>1:
-                npts_h = int(math.ceil(math.sqrt(self.npts)))
-                npts_w = npts_h
-                
-            for k in range(npts_h):
-                if npts_h==1:
-                    shift_h = 0
-                else:
-                    shift_h = self.height/(float(npts_h-1.0)) * k
-                for j in range(npts_w):
-                    if npts_w==1:
-                        shift_w = 0
-                    else:
-                        shift_w = self.width/(float(npts_w-1.0)) * j
-                    q_shifted = math.sqrt( ((q-shift_w)*(q-shift_w) + shift_h*shift_h) )
-                    q_i = int(math.floor( (q_shifted-self.min)/((self.max-self.min)/(self.nbins -1.0)) ))
-                    
-                    # Skip the entries outside our I(q) range
-                    #TODO: be careful with edge effect
-                    if q_i<self.nbins:
-                        weights[i][q_i] = weights[i][q_i]+1.0
+        self._smearer = smearer.new_slit_smearer(self.width, self.height, self.min, self.max, self.nbins)
+        self._init_complete = True
 
-        self._weights = weights
-        return self._weights
 
 class SlitSmearer(_SlitSmearer):
     """
@@ -254,6 +218,7 @@ class _QSmearer(_BaseSmearer):
             @param min: Q_min [A-1]
             @param max: Q_max [A-1]
         """
+        _BaseSmearer.__init__(self)
         ## Standard deviation in Q [A-1]
         self.width  = width
         ## Q_min (Min Q-value for I(q))
@@ -265,31 +230,13 @@ class _QSmearer(_BaseSmearer):
         ## Smearing matrix
         self._weights = None
         
-    def _compute_matrix(self):
+    def _initialize_smearer(self):
         """
-            Compute the smearing matrix for the current I(q) array
+            Initialize the C++ smearer object.
+            This method HAS to be called before smearing
         """
-        weights = numpy.zeros([self.nbins, self.nbins])
-        
-        # Loop over all q-values
-        step = (self.max-self.min)/float(self.nbins-1.0)
-        for i in range(self.nbins):
-            q = self.min + i*step
-            q_min = q - 0.5*step
-            q_max = q + 0.5*step
-            for j in range(self.nbins):
-                q_j = self.min + j*step
-                
-                # Compute the fraction of the Gaussian contributing
-                # to the q bin between q_min and q_max
-                #value =  math.exp(-math.pow((q_max-q_j),2)/(2*math.pow(self.width[j],2) ))
-                #value +=  math.exp(-math.pow((q_max-q_j),2)/(2*math.pow(self.width[j],2) )) 
-                value =  scipy.special.erf( (q_max-q_j)/(math.sqrt(2.0)*self.width[j]) ) 
-                value -=scipy.special.erf( (q_min-q_j)/(math.sqrt(2.0)*self.width[j]) ) 
-                weights[i][j] += value
-                                
-        self._weights = weights
-        return self._weights
+        self._smearer = smearer.new_q_smearer(numpy.asarray(self.width), self.min, self.max, self.nbins)
+        self._init_complete = True
         
 class QSmearer(_QSmearer):
     """
