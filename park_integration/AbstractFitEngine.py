@@ -1,4 +1,4 @@
-
+import logging, sys
 import park,numpy,math, copy
 
 class SansParameter(park.Parameter):
@@ -204,19 +204,11 @@ class FitData1D(object):
       
         # Initialize from Data1D object
         self.data=sans_data1d
-        self.x= numpy.array(sans_data1d.x)
-        self.y= numpy.array(sans_data1d.y)
-        self.dx= numpy.array(sans_data1d.dx)
-        self.dy= numpy.array(sans_data1d.dy)
-          
+        self.x= sans_data1d.x
+        self.y= sans_data1d.y
+        self.dx= sans_data1d.dx
+        self.dy= sans_data1d.dy
         
-        if self.dy ==None or len(self.dy)==0:
-            self.res_dy= numpy.zeros(len(self.y))
-        else:
-            self.res_dy= copy.deepcopy(self.dy)
-        self.res_dy= numpy.asarray(self.res_dy)
-        
-        self.res_dy[self.res_dy==0]=1
         ## Min Q-value
         #Skip the Q=0 point, especially when y(q=0)=None at x[0].
         if min (self.data.x) ==0.0 and self.data.x[0]==0 and not numpy.isfinite(self.data.y[0]):
@@ -226,7 +218,11 @@ class FitData1D(object):
         ## Max Q-value
         self.qmax= max (self.data.x)
         
-        
+        # Range used for input to smearing
+        self._qmin_unsmeared = self.qmin
+        self._qmax_unsmeared = self.qmax
+       
+       
     def setFitRange(self,qmin=None,qmax=None):
         """ to set the fit range"""
         # Skip Q=0 point, (especially for y(q=0)=None at x[0]).
@@ -238,55 +234,93 @@ class FitData1D(object):
 
         if qmax !=None:
             self.qmax = qmax
-       
+            
+        # Range used for input to smearing
+        self._qmin_unsmeared = self.qmin
+        self._qmax_unsmeared = self.qmax    
+        
+        # Determine the range needed in unsmeared-Q to cover
+        # the smeared Q range
+        #TODO: use the smearing matrix to determine which 
+        # bin range to use
+        if self.smearer.__class__.__name__ == 'SlitSmearer':
+            self._qmin_unsmeared = min(self.data.x)
+            self._qmax_unsmeared = max(self.data.x)
+        elif self.smearer.__class__.__name__ == 'QSmearer':
+            # Take 3 sigmas as the offset between smeared and unsmeared space
+            try:
+                offset = 3.0*max(self.smearer.width)
+                self._qmin_unsmeared = max([min(self.data.x), self.qmin-offset])
+                self._qmax_unsmeared = min([max(self.data.x), self.qmax+offset])
+            except:
+                logging.error("FitData1D.setFitRange: %s" % sys.exc_value)
+        
         
     def getFitRange(self):
         """
             @return the range of data.x to fit
         """
         return self.qmin, self.qmax
-     
-     
+        
     def residuals(self, fn):
+        """ 
+            Compute residuals.
+            
+            If self.smearer has been set, use if to smear
+            the data before computing chi squared.
+            
+            @param fn: function that return model value
+            @return residuals
         """
-        Compute residuals.
+        x,y = [numpy.asarray(v) for v in (self.x,self.y)]
+        if self.dy ==None or self.dy==[]:
+            dy= numpy.zeros(len(y))  
+        else:
+            dy= numpy.asarray(self.dy)
+     
+        # For fitting purposes, replace zero errors by 1
+        #TODO: check validity for the rare case where only
+        # a few points have zero errors 
+        dy[dy==0]=1
         
-        If self.smearer has been set, use if to smear the data before computing chi squared.
-        
-        @param fn: function that return model value @return residuals """
-        # Get the indices of the selected range
-        idx = (self.x>=self.qmin) & (self.x <= self.qmax)
-        
+        # Identify the bin range for the unsmeared and smeared spaces
+        idx = (x>=self.qmin) & (x <= self.qmax)
+        idx_unsmeared = (x>=self._qmin_unsmeared) & (x <= self._qmax_unsmeared)
+  
         # Compute theory data f(x)
-        newy = numpy.zeros(len(self.x))
-        newfx= numpy.zeros(len(self.x))
-        newdy= numpy.zeros(len(self.x))
-       
-        for i_x in range(len(self.x)):
+        fx= numpy.zeros(len(x))
+    
+        _first_bin = None
+        _last_bin  = None
+        for i_x in range(len(x)):
             try:
-                # Skip the selection here since we want all the contribution from the theory bins #if self.qmin <=x[i_x] and x[i_x]<=self.qmax:
-                value       = fn(self.x[i_x])
-                newfx[i_x]  = value
-                newy[i_x]   = self.y[i_x]
-                newdy[i_x]  = self.res_dy[i_x]
-                
+                if idx_unsmeared[i_x]==True:
+                    # Identify first and last bin
+                    #TODO: refactor this to pass q-values to the smearer
+                    # and let it figure out which bin range to use
+                    if _first_bin is None:
+                        _first_bin = i_x
+                    else:
+                        _last_bin  = i_x
+                    
+                    value = fn(x[i_x])
+                    fx[i_x] = value
             except:
                 ## skip error for model.run(x)
                 pass
-       
+                 
         ## Smear theory data
         if self.smearer is not None:
-            
-            newfx = self.smearer(newfx)
-      
+            fx = self.smearer(fx, _first_bin, _last_bin)
+       
         ## Sanity check
-        if numpy.size(newdy)!= numpy.size(newfx):
-            raise RuntimeError, "FitData1D: invalid error array"
-        
-        # Sum over the selected range
-        return (newy[idx]- newfx[idx])/newdy[idx]
-        
+        if numpy.size(dy)!= numpy.size(fx):
+            raise RuntimeError, "FitData1D: invalid error array %d <> %d" % (numpy.size(dy), numpy.size(fx))
 
+        return (y[idx]-fx[idx])/dy[idx]
+     
+  
+        
     def residuals_deriv(self, model, pars=[]):
         """ 
             @return residuals derivatives .
