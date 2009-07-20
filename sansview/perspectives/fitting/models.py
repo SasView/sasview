@@ -124,7 +124,7 @@ class ModelManager:
         
         from sans.models.ParallelepipedModel import ParallelepipedModel
         self.shape_list.append(ParallelepipedModel)
-        self.multiplication_factor.append(ParallelepipedModel)
+        #self.multiplication_factor.append(ParallelepipedModel)
         
         from sans.models.CoreShellModel import CoreShellModel
         self.shape_list.append(CoreShellModel)
