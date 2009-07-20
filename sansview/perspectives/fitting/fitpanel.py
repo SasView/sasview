@@ -398,7 +398,7 @@ class FitPanel(wx.aui.AuiNotebook):
         if page.window_name in self.fit_page_name:
             self.fit_page_name[page.window_name].appendItem(page.createMemento()) 
             
-            print " current added state: ",len(self.fit_page_name[page.window_name])
+            #print " current added state: ",len(self.fit_page_name[page.window_name])
             
     def _onUndo(self, event ):
         """
