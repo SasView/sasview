@@ -260,17 +260,29 @@ class Calc1D(CalcThread):
        
         self.starttime = time.time()
         
+        i_x_min=1e+16 #<--Any BIG # works.
+        i_x_max=0
         for i_x in range(len(self.x)):
             self.update(x= self.x, output=output )
             # Check whether we need to bail out
             self.isquit()
             if self.qmin <= self.x[i_x] and self.x[i_x] <= self.qmax:
+                #Determine the i_min and i_max (ie., min and max index of x)
+                if i_x_min == 1e+16:
+                    i_x_min=i_x
+                i_x_max=i_x
                 value = self.model.run(self.x[i_x])
                 output[i_x] = value
+                
         ##smearer the ouput of the plot    
         if self.smearer!=None:
-            output = self.smearer(output)
-                      
+            output = self.smearer(output) #Todo: Why always output[0]=0???
+        
+        ######Temp. FIX for Qrange w/ smear. Should not pass all the data to 'run' or 'smear'...
+        for i_x in range(len(self.x)):
+            if (i_x < i_x_min or i_x > i_x_max):
+                output[i_x] = 0
+                
         elapsed = time.time()-self.starttime
         self.complete(x= self.x, y= output, 
                       elapsed=elapsed, model= self.model, data=self.data)
