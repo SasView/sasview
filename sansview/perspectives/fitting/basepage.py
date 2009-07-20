@@ -1467,7 +1467,7 @@ class BasicPage(wx.ScrolledWindow):
             ix+=1 
             self.disp_cb_dict[p] = wx.CheckBox(self, -1, p, (10, 10))
             self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
-            print "went here======>",self.disp_cb_dict
+            #print "went here======>",self.disp_cb_dict
             wx.EVT_CHECKBOX(self, self.disp_cb_dict[p].GetId(), self.select_disp_angle)
             self.sizer4_4.Add(self.disp_cb_dict[p], (iy, ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
