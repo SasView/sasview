@@ -144,13 +144,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.event_owner=None
         
         pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
-        self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.onClosePage)
-        ##Creating the default page --welcomed page
-        self.about_page=None
-        from welcome_panel import PanelAbout
-        self.about_page = PanelAbout(self, -1)
-        self.AddPage(self.about_page,"Welcome!")
-      
+        self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.onClosePage)      
        
         #dictionary of miodel {model class name, model class}
         self.model_list_box={}

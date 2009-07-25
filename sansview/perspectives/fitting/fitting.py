@@ -1,3 +1,12 @@
+"""
+This software was developed by the University of Tennessee as part of the
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+project funded by the US National Science Foundation. 
+
+See the license text in license.txt
+
+copyright 2009, University of Tennessee
+"""
 import  re,copy
 import sys, wx, logging
 import string, numpy, math
@@ -248,9 +257,11 @@ class Plugin:
     def post_init(self):
         """
             Post initialization call back to close the loose ends
-            [Somehow openGL needs this call]
         """
-        self.parent.set_perspective(self.perspective)
+        # Do not show the fitting perspective immediately and 
+        # let the application show the Welcome Page.
+        #self.parent.set_perspective(self.perspective)
+        pass
 
 
     def copy_data(self, item, dy=None):
