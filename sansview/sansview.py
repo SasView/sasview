@@ -1,7 +1,15 @@
-import wx
-#import gui_manager
-from sans.guiframe import gui_manager
+"""
+This software was developed by the University of Tennessee as part of the
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+project funded by the US National Science Foundation. 
 
+See the license text in license.txt
+
+copyright 2009, University of Tennessee
+"""
+import wx
+from sans.guiframe import gui_manager
+from welcome_panel import WelcomePanel
 # For py2exe, import config here
 import local_config
 import logging
@@ -50,6 +58,9 @@ class SansView():
         import perspectives.fitting as module    
         fitting_plug = module.Plugin()
         self.gui.add_perspective(fitting_plug)
+      
+        # Add welcome page
+        self.gui.set_welcome_panel(WelcomePanel)
       
         # Build the GUI
         self.gui.build_gui()
