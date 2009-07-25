@@ -179,10 +179,6 @@ class FitPanel(wx.aui.AuiNotebook):
              close page and remove all references to the closed page
         """
         selected_page = self.GetPage(self.GetSelection())
-        ## removing about page
-        if selected_page==self.about_page:
-            self.about_page=None
-            return 
         ## removing sim_page
         if selected_page == self.sim_page:
             self.manager.sim_page=None 

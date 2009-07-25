@@ -115,6 +115,33 @@ class BasicPage(wx.ScrolledWindow):
         ## layout
         self.set_layout()
        
+    class ModelTextCtrl(wx.TextCtrl):
+        """
+            Text control for model and fit parameters.
+            Binds the appropriate events for user interactions.
+            Default callback methods can be overwritten on initialization
+            
+            @param kill_focus_callback: callback method for EVT_KILL_FOCUS event
+            @param set_focus_callback:  callback method for EVT_SET_FOCUS event
+            @param mouse_up_callback:   callback method for EVT_LEFT_UP event
+            @param text_enter_callback: callback method for EVT_TEXT_ENTER event
+        """
+        def __init__(self, parent, id=-1, value=wx.EmptyString, pos=wx.DefaultPosition, 
+                     size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.TextCtrlNameStr,
+                     kill_focus_callback = None, set_focus_callback  = None,
+                     mouse_up_callback   = None, text_enter_callback = None):
+            
+            wx.TextCtrl.__init__(self, parent, id, value, pos, size, style, validator, name)
+            
+            # Bind appropriate events
+            self.Bind(wx.EVT_SET_FOCUS,  parent.onSetFocus \
+                      if set_focus_callback is None else set_focus_callback)
+            self.Bind(wx.EVT_KILL_FOCUS, parent._onparamEnter \
+                      if kill_focus_callback is None else kill_focus_callback)
+            self.Bind(wx.EVT_TEXT_ENTER, parent._onparamEnter \
+                      if text_enter_callback is None else text_enter_callback)
+            self.Bind(wx.EVT_LEFT_UP,    parent._highlight_text \
+                      if mouse_up_callback is None else mouse_up_callback)
        
     def onContextMenu(self, event): 
         """
@@ -454,12 +481,25 @@ class BasicPage(wx.ScrolledWindow):
                     item[4].Clear()
                     item[4].Hide()
         self.Layout()
-        # Get a handle to the TextCtrl
-        widget = evt.GetEventObject()
-        # Select the whole control, after this event resolves
-        wx.CallAfter(widget.SetSelection, -1,-1)
         return
     
+    def _highlight_text(self, event):
+        """
+            Highlight text of a TextCtrl only of no text has be selected
+            @param event: mouse event
+        """
+        control  = event.GetEventObject()
+        # Check that we have a TextCtrl
+        if issubclass(control.__class__, wx.TextCtrl):
+            # Check whether text has been selected, 
+            # if not, select the whole string
+
+            (start, end) = control.GetSelection()
+            if start==end:
+                control.SetSelection(-1,-1)
+                
+        # Make sure the mouse event is available to other listeners
+        event.Skip()
     
     def read_file(self, path):
         """
@@ -1490,25 +1530,20 @@ class BasicPage(wx.ScrolledWindow):
 
     def _set_range_sizer(self, title, object1=None,object=None):
         """
-            Fill the 
+            TODO: object1 and object are NOT proper parameter names.
+            Please clean up your code.
         """
         self.sizer5.Clear(True)
         box_description= wx.StaticBox(self, -1,str(title))
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #--------------------------------------------------------------
-        self.qmin    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.qmin    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.qmin.SetValue(str(self.qmin_x))
         self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
-        self.qmin.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-        self.qmin.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-        self.qmin.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
      
-        self.qmax    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.qmax    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.qmax.SetValue(str(self.qmax_x))
         self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
-        self.qmax.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-        self.qmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-        self.qmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
      
         sizer_horizontal=wx.BoxSizer(wx.HORIZONTAL)
         sizer= wx.GridSizer(3, 3,5, 5)

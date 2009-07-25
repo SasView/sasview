@@ -83,12 +83,9 @@ class ModelPage(BasicPage):
         """
         sizer_npts= wx.GridSizer(1, 1,5, 5)
     
-        self.npts    = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.npts    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.npts.SetValue(format_number(self.num_points))
         self.npts.SetToolTipString("Number of point to plot.")
-        self.npts.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-        self.npts.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-        self.npts.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
         
         sizer_npts.Add(wx.StaticText(self, -1, 'Npts'),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)        
         sizer_npts.Add(self.npts,1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5) 
@@ -172,24 +169,18 @@ class ModelPage(BasicPage):
                                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                         ix = 1
                         value= self.model.getParam(name1)
-                        ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                        ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
                         ctl1.SetValue(str (format_number(value)))
-                        ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                        ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                        ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                         self.fittable_param.append([None,name1,ctl1,None,
                                                     None, None, None,None])
                     elif p=="npts":
                             ix =2
                             value= self.model.getParam(name2)
-                            Tctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
                             Tctl1.SetValue(str (format_number(value)))
-                            Tctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                            Tctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                            Tctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                             self.sizer4_4.Add(Tctl1, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             self.fixed_param.append([None,name2, Tctl1,None,None,
@@ -197,12 +188,9 @@ class ModelPage(BasicPage):
                     elif p=="nsigmas":
                             ix =3 
                             value= self.model.getParam(name3)
-                            Tctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tctl2 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
                             Tctl2.SetValue(str (format_number(value)))
-                            Tctl2.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                            Tctl2.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                            Tctl2.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                             self.sizer4_4.Add(Tctl2, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             ix +=1
@@ -225,12 +213,9 @@ class ModelPage(BasicPage):
                                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                         ix = 1
                         value= self.model.getParam(name1)
-                        ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                        ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
                         ctl1.SetValue(str (format_number(value)))
-                        ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                        ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                        ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                         if not self.enable2D:
                             ctl1.Disable()
                         else:
@@ -243,12 +228,9 @@ class ModelPage(BasicPage):
                     elif p=="npts":
                             ix =2
                             value= self.model.getParam(name2)
-                            Tctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
                             Tctl1.SetValue(str (format_number(value)))
-                            Tctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                            Tctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                            Tctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                             if not self.enable2D:
                                 Tctl1.Disable()
                             else:
@@ -262,12 +244,9 @@ class ModelPage(BasicPage):
                     elif p=="nsigmas":
                             ix =3 
                             value= self.model.getParam(name3)
-                            Tctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tctl2 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
                             Tctl2.SetValue(str (format_number(value)))
-                            Tctl2.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                            Tctl2.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                            Tctl2.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                             if not self.enable2D:
                                 Tctl2.Disable()
                             else:
@@ -505,13 +484,10 @@ class ModelPage(BasicPage):
 
                 ix += 1
                 value= self.model.getParam(item)
-                ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                     style=wx.TE_PROCESS_ENTER)
                 
                 ctl1.SetValue(str (format_number(value)))
-                ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 
                 sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                 ix +=1
@@ -536,7 +512,7 @@ class ModelPage(BasicPage):
 
                 ix += 1
                 value= self.model.getParam(item)
-                ctl1 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                     style=wx.TE_PROCESS_ENTER)
                 
                 ctl1.SetValue(str (format_number(value)))
@@ -544,9 +520,6 @@ class ModelPage(BasicPage):
                     ctl1.Disable()
                 else:
                     ctl1.Enable()
-                ctl1.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-                ctl1.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-                ctl1.Bind(wx.EVT_TEXT_ENTER,self._onparamEnter)
                 
                 sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                 ix +=1
