@@ -118,13 +118,13 @@ class Plugin:
         self.parent = parent
         
         # Define a panel
-        mypanel = DefaultPanel(self.parent, -1)
+        defaultpanel = DefaultPanel(self.parent, -1)
         
         # If needed, add its name to the perspective list
         self.perspective.append(self.control_panel.window_name)
 
         # Return the list of panels
-        return [mypanel]
+        return [defaultpanel]
     
     def get_context_menu(self, graph=None):
         """
@@ -221,9 +221,9 @@ class ViewerFrame(wx.Frame):
         # Default locations
         self._default_save_location = os.getcwd()        
 
-        ## Default welcome panel
-        self.defaultPanel    = DefaultPanel(self, -1, style=wx.RAISED_BORDER)
-        
+        # Welcome panel
+        self.defaultPanel = None
+
         # Check for update
         self._check_update(None)
         ## maximum number of opened files' paths to store
@@ -348,7 +348,12 @@ class ViewerFrame(wx.Frame):
         f.close()
         return plugins
     
-        
+    def set_welcome_panel(self, panel_class):
+        """
+           Sets the default panel as the given welcome panel 
+           @param panel_class: class of the welcome panel to be instantiated
+        """
+        self.defaultPanel    = panel_class(self, -1, style=wx.RAISED_BORDER)
       
     def _load_panels(self):
         """
@@ -365,6 +370,9 @@ class ViewerFrame(wx.Frame):
         # Show a default panel with some help information
         # It also sets the size of the application windows
         #TODO: Use this for slpash screen
+        if self.defaultPanel is None:
+            self.defaultPanel    = DefaultPanel(self, -1, style=wx.RAISED_BORDER)
+            
         self.panels["default"] = self.defaultPanel
         
         self._mgr.AddPane(self.defaultPanel, wx.aui.AuiPaneInfo().
@@ -891,6 +899,13 @@ class ViewApp(wx.App):
         """
         self.frame.build_gui()
         self.frame.post_init()
+        
+    def set_welcome_panel(self, panel_class):
+        """
+            Set the welcome panel
+            @param panel_class: class of the welcome panel to be instantiated
+        """
+        self.frame.set_welcome_panel(panel_class)
         
     def add_perspective(self, perspective):
         """
