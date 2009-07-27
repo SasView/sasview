@@ -22,12 +22,8 @@
  *
  */
  
-#define NO_IMPORT_ARRAY
-#define PY_ARRAY_UNIQUE_SYMBOL PyArray_API_sans
-
 extern "C" {
 #include <Python.h>
-#include <arrayobject.h>
 #include "structmember.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -133,112 +129,8 @@ double CSphereModel_readDouble(PyObject *p) {
         return 0.0;
     }
 }
-/**
- * Function to call to evaluate model
- * @param args: input numpy array q[] 
- * @return: numpy array object 
- */
- 
-static PyObject *evaluateOneDim(SphereModel* model, PyArrayObject *q){
-    PyArrayObject *result;
-   
-    // Check validity of array q , q must be of dimension 1, an array of double
-    if (q->nd != 1 || q->descr->type_num != PyArray_DOUBLE)
-    {
-        //const char * message= "Invalid array: q->nd=%d,type_num=%d\n",q->nd,q->descr->type_num;
-        //PyErr_SetString(PyExc_ValueError , message);
-        return NULL;
-    }
-    result = (PyArrayObject *)PyArray_FromDims(q->nd, (int *)(q->dimensions), 
-										  PyArray_DOUBLE);
-	if (result == NULL) {
-        const char * message= "Could not create result ";
-        PyErr_SetString(PyExc_RuntimeError , message);
-		return NULL;
-	}
-	 for (int i = 0; i < q->dimensions[0]; i++){
-      double q_value  = *(double *)(q->data + i*q->strides[0]);
-      double *result_value = (double *)(result->data + i*result->strides[0]);
-      *result_value =(*model)(q_value);
-	}
-    return PyArray_Return(result); 
- }
-/**
- * Function to call to evaluate model
- * @param args: input numpy array  [q[],phi[]]
- * @return: numpy array object 
- */
- static PyObject * evaluateTwoDim( SphereModel* model, 
-                              PyArrayObject *q, PyArrayObject *phi)
- {
-    PyArrayObject *result;
-    //check validity of input vectors
-    if (q->nd != 1 || q->descr->type_num != PyArray_DOUBLE
-        || phi->nd != 1 || phi->descr->type_num != PyArray_DOUBLE
-        || phi->dimensions[0] != q->dimensions[0]){
-        
-        //const char * message= "Invalid array: q->nd=%d,type_num=%d\n",q->nd,q->descr->type_num;
-        //PyErr_SetString(PyExc_ValueError , message); 
-        return NULL;
-    }
-	result= (PyArrayObject *)PyArray_FromDims(q->nd,(int*)(q->dimensions), PyArray_DOUBLE);
 
-	if (result == NULL){
-	    const char * message= "Could not create result ";
-        PyErr_SetString(PyExc_RuntimeError , message);
-	    return NULL;
-	}
-	
-    for (int i = 0; i < q->dimensions[0]; i++) {
-      double q_value = *(double *)(q->data + i*q->strides[0]);
-      double phi_value = *(double *)(phi->data + i*phi->strides[0]);
-      double *result_value = (double *)(result->data + i*result->strides[0]);
-      if (q_value == 0)
-          *result_value = 0.0;
-      else
-          *result_value = model->evaluate_rphi(q_value, phi_value);
-    }
-    return PyArray_Return(result); 
- }
- 
- /**
- * Function to call to evaluate model
- * @param args: input numpy array  [x[],y[]]
- * @return: numpy array object 
- */
- static PyObject * evaluateTwoDimXY( SphereModel* model, 
-                              PyArrayObject *x, PyArrayObject *y)
- {
-    PyArrayObject *result;
-    //check validity of input vectors
-    if (x->nd != 1 || x->descr->type_num != PyArray_DOUBLE
-        || y->nd != 1 || y->descr->type_num != PyArray_DOUBLE
-        || y->dimensions[0] != x->dimensions[0]){
-        
-        //const char * message= "Invalid array: x->nd=%d,type_num=%d\n",x->nd,x->descr->type_num;
-        //PyErr_SetString(PyExc_ValueError , message); 
-        return NULL;
-    }
-	result= (PyArrayObject *)PyArray_FromDims(x->nd,(int*)(x->dimensions), PyArray_DOUBLE);
 
-	if (result == NULL){
-	    const char * message= "Could not create result ";
-        PyErr_SetString(PyExc_RuntimeError , message);
-	    return NULL;
-	}
-	
-    for (int i = 0; i < x->dimensions[0]; i++) {
-      double x_value = *(double *)(x->data + i*x->strides[0]);
-      double y_value = *(double *)(y->data + i*y->strides[0]);
-      double *result_value = (double *)(result->data + i*result->strides[0]);
-      if (x_value == 0)
-          *result_value = 0.0;
-      else
-          *result_value = (*model)(x_value, y_value);
-    }
-    return PyArray_Return(result); 
- }
- 
 /**
  * Function to call to evaluate model
  * @param args: input q or [q,phi]
@@ -280,35 +172,23 @@ static PyObject * run(CSphereModel *self, PyObject *args) {
 	    		"CSphereModel.run expects a double or a list of dimension 2.");
 	    	return NULL;
 	    }
-	    
 	    // We have a vector q, get the q and phi values at which
 	    // to evaluate I(q,phi)
-	    PyObject *q, *phi;
-	    q = PyList_GET_ITEM(pars,0);
-	    phi = PyList_GET_ITEM(pars,1);
-	    
-	    if (PyArray_Check(q) && PyArray_Check(phi)) {
-		  return evaluateTwoDim(self->model, (PyArrayObject*)q, (PyArrayObject*)phi); 
-	    } else if (PyArray_Check(q) || PyArray_Check(phi)) {
-	        return NULL;
-	    } else {
-	        q_value = CSphereModel_readDouble(PyList_GET_ITEM(pars,0));
-	        phi_value = CSphereModel_readDouble(PyList_GET_ITEM(pars,1));
-	        // Skip zero
-	        if (q_value==0) {
-	    	    return Py_BuildValue("d",0.0);
-	        }
-		    return Py_BuildValue("d",(*(self->model)).evaluate_rphi(q_value,phi_value));
-        }
+	    q_value = CSphereModel_readDouble(PyList_GET_ITEM(pars,0));
+	    phi_value = CSphereModel_readDouble(PyList_GET_ITEM(pars,1));
+	    // Skip zero
+	    if (q_value==0) {
+	    	return Py_BuildValue("d",0.0);
+	    }
+		return Py_BuildValue("d",(*(self->model)).evaluate_rphi(q_value,phi_value));
+
 	} else {
-	if (PyArray_Check(pars)) {
-		return evaluateOneDim(self->model, (PyArrayObject*)pars); 
-    } else {
-	    // We have a scalar q, we will evaluate I(q)
+
+		// We have a scalar q, we will evaluate I(q)
 		q_value = CSphereModel_readDouble(pars);		
-	    return Py_BuildValue("d",(*(self->model))(q_value));
-	    }	
-	}
+		
+		return Py_BuildValue("d",(*(self->model))(q_value));
+	}	
 }
 
 /**
@@ -354,29 +234,16 @@ static PyObject * runXY(CSphereModel *self, PyObject *args) {
 	    }
 	    // We have a vector q, get the qx and qy values at which
 	    // to evaluate I(qx,qy)
-	    PyObject *x, *y;
-	    x = PyList_GET_ITEM(pars,0);
-	    y = PyList_GET_ITEM(pars,1);
-	    
-	    if (PyArray_Check(x) && PyArray_Check(y)) {
-		  return evaluateTwoDimXY(self->model, (PyArrayObject*)x, (PyArrayObject*)y); 
-	    } else if (PyArray_Check(x) || PyArray_Check(y)) {
-	        return NULL;
-	    } else {    
-	        qx_value = CSphereModel_readDouble(PyList_GET_ITEM(pars,0));
-	        qy_value = CSphereModel_readDouble(PyList_GET_ITEM(pars,1));
-	        return Py_BuildValue("d",(*(self->model))(qx_value,qy_value));
-	    }
+	    qx_value = CSphereModel_readDouble(PyList_GET_ITEM(pars,0));
+	    qy_value = CSphereModel_readDouble(PyList_GET_ITEM(pars,1));
+	    return Py_BuildValue("d",(*(self->model))(qx_value,qy_value));
 
 	} else {
-		if (PyArray_Check(pars)) {
-		    return evaluateOneDim(self->model, (PyArrayObject*)pars); 
-        } else {
-		    // We have a scalar q, we will evaluate I(q)
-		    qx_value = CSphereModel_readDouble(pars);		
+
+		// We have a scalar q, we will evaluate I(q)
+		qx_value = CSphereModel_readDouble(pars);		
 		
-		    return Py_BuildValue("d",(*(self->model))(qx_value));
-		}
+		return Py_BuildValue("d",(*(self->model))(qx_value));
 	}	
 }
 
@@ -471,6 +338,10 @@ static PyTypeObject CSphereModelType = {
     CSphereModel_new,                 /* tp_new */
 };
 
+
+static PyMethodDef module_methods[] = {
+    {NULL} 
+};
 
 /**
  * Function used to add the model class to a module
