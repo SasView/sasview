@@ -5,7 +5,8 @@
  * @author   M.Doucet / UTK
  */
 #include <Python.h>
-
+#define PY_ARRAY_UNIQUE_SYMBOL PyArray_API_sans
+#include "arrayobject.h"
 /**
  * Define empty module
  */
@@ -24,7 +25,8 @@ initc_models(void)
 
     m = Py_InitModule3("c_models", module_methods,
                        "C extension module for SANS scattering models.");
-
+	
+	import_array();
 	addCCylinderModel(m);
 	addCParallelepipedModel(m);
 	addCCoreShellCylinderModel(m);

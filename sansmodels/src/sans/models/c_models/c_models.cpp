@@ -6,6 +6,9 @@
  */
 #include <Python.h>
 #include <parameters.hh>
+#define PY_ARRAY_UNIQUE_SYMBOL PyArray_API_sans
+#include "arrayobject.h"
+
 
 void addCCylinderModel(PyObject *module);
 void addCTriaxialEllipsoidModel(PyObject *module);
@@ -116,7 +119,7 @@ PyObject * set_weights(PyObject *, PyObject *args) {
 	Py_ssize_t nwei;
 	double *values;
 	double *weights;
-    int i;
+    //int i;
 
 	if (!PyArg_ParseTuple(args, "OOO", &disp, &val_obj, &wei_obj)) return NULL;
 	INVECTOR(val_obj, values, nval);
@@ -161,6 +164,7 @@ initc_models(void)
 
     m = Py_InitModule3("c_models", module_methods,
                        "C extension module for SANS scattering models.");
+	import_array();
 
 	addCCylinderModel(m);
 	addCParallelepipedModel(m);

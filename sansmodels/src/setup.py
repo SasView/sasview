@@ -12,6 +12,8 @@
 import sys
 
 
+numpy_incl_path = os.path.join(sys.prefix, "Lib", "site-packages", "numpy", "core", "include", "numpy")
+
 
 
 def createODBcontent(class_name):
@@ -204,5 +206,5 @@ setup(
         srcdir+"/lorentzian.c",
         srcdir+"/CLorentzian.c"
             ],
-         include_dirs=[igordir,srcdir,"sans/models/c_models"])])
+         include_dirs=[igordir,srcdir,"sans/models/c_models",numpy_incl_path])])
         
