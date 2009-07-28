@@ -622,7 +622,7 @@ class FitPage(BasicPage):
             self._undo.Enable(False)
            
         self.reset_page_helper(state)
-        evt = ModelEventbox(model=self.model)
+        evt = ModelEventbox(model=state.model)
         wx.PostEvent(self.event_owner, evt)   
             
             
@@ -1120,98 +1120,104 @@ class FitPage(BasicPage):
               
         iy+=1
         sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        for item in self.model.orientation_params:
-            if not item in self.disp_list :
-                iy += 1
-                ix = 0
-                ## add parameters name with checkbox for selecting to fit
-                cb = wx.CheckBox(self, -1, item )
-                cb.SetValue(False)
-                wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
-                if self.data.__class__.__name__ =="Data2D":
-                    cb.Enable()
-                else:
-                    cb.Disable()
-                sizer.Add( cb,( iy, ix),(1,1),
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
-
-                ## add parameter value
-                ix += 1
-                value= self.model.getParam(item)
-                ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
-                                    style=wx.TE_PROCESS_ENTER)
-                
-                ctl1.SetValue(format_number(value))
-                if self.data.__class__.__name__ =="Data2D":
-                    ctl1.Enable()
-                else:
-                    ctl1.Disable()
-                sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
-                ## text to show error sign
-                ix += 1
-                text2=wx.StaticText(self, -1, '+/-')
-                sizer.Add(text2,(iy, ix),(1,1),\
-                                wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-                text2.Hide() 
-                ## txtcrtl to add error from fit
-                ix += 1
-                ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
-                sizer.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                ctl2.Hide()
-                if self.data.__class__.__name__ =="Data2D":
-                    ctl1.Enable()
-                else:
-                    ctl1.Disable()
-                param_min, param_max= self.model.details[item][1:]
-                ix += 1
-                ctl3 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
-                                               kill_focus_callback = self._onparamRangeEnter,
-                                               set_focus_callback  = self._onparamRangeEnter)
-                if param_min ==None:
-                    ctl3.SetValue("")
-                else:
-                    ctl3.SetValue(str(param_min))
-                sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                ctl3.Hide()
-                if self.data.__class__.__name__ =="Data2D":
-                    ctl3.Enable()
-                else:
-                    ctl3.Disable()
-                ix += 1
-                ctl4 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
-                                               kill_focus_callback = self._onparamRangeEnter,
-                                               set_focus_callback  = self._onparamRangeEnter)
-                sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                if param_max ==None:
-                    ctl4.SetValue("")
-                else:
-                    ctl4.SetValue(str(param_max))
-                ctl4.Hide()
-                if self.data.__class__.__name__ =="Data2D":
-                    ctl4.Enable()
-                else:
-                    ctl4.Disable()
-                if self.engine_type=="park":
-                    ctl3.Show(True)
-                    ctl4.Show(True)
-                ix +=1
-                # Units
-                try:
-                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
-                except:
-                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
-                if self.data.__class__.__name__ =="Data2D":
-                    units.Enable()
-                else:
-                    units.Disable()
-                sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
+        # type can be either Guassian or Array
+        type= self.model.dispersion.values()[1]["type"]
+       
+        #For Gaussian only
+        if type.lower() != "array":
+            for item in self.model.orientation_params:
+                if not item in self.disp_list:
+                    iy += 1
+                    ix = 0
+                    ## add parameters name with checkbox for selecting to fit
+                    cb = wx.CheckBox(self, -1, item )
+                    cb.SetValue(False)
+                    wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
+                    if self.data.__class__.__name__ =="Data2D":
+                        cb.Enable()
+                    else:
+                        cb.Disable()
+                    sizer.Add( cb,( iy, ix),(1,1),
+                                 wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
+    
+                    ## add parameter value
+                    ix += 1
+                    value= self.model.getParam(item)
+                    ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                                        style=wx.TE_PROCESS_ENTER)
                     
-                
-                ##[cb state, name, value, "+/-", error of fit, min, max , units]
-                self.parameters.append([cb,item, ctl1,
-                                        text2,ctl2, ctl3, ctl4,units])
-                self.orientation_params.append([cb,item, ctl1,
-                                        text2,ctl2, ctl3, ctl4,units])
+                    ctl1.SetValue(format_number(value))
+                    if self.data.__class__.__name__ =="Data2D":
+                        ctl1.Enable()
+                    else:
+                        ctl1.Disable()
+                    sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
+                    ## text to show error sign
+                    ix += 1
+                    text2=wx.StaticText(self, -1, '+/-')
+                    sizer.Add(text2,(iy, ix),(1,1),\
+                                    wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+                    text2.Hide() 
+                    ## txtcrtl to add error from fit
+                    ix += 1
+                    ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+                    sizer.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    ctl2.Hide()
+                    if self.data.__class__.__name__ =="Data2D":
+                        ctl1.Enable()
+                    else:
+                        ctl1.Disable()
+                    param_min, param_max= self.model.details[item][1:]
+                    ix += 1
+                    ctl3 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
+                                                   kill_focus_callback = self._onparamRangeEnter,
+                                                   set_focus_callback  = self._onparamRangeEnter)
+                    if param_min ==None:
+                        ctl3.SetValue("")
+                    else:
+                        ctl3.SetValue(str(param_min))
+                    sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    ctl3.Hide()
+                    if self.data.__class__.__name__ =="Data2D":
+                        ctl3.Enable()
+                    else:
+                        ctl3.Disable()
+                    ix += 1
+                    ctl4 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
+                                                   kill_focus_callback = self._onparamRangeEnter,
+                                                   set_focus_callback  = self._onparamRangeEnter)
+                    sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    if param_max ==None:
+                        ctl4.SetValue("")
+                    else:
+                        ctl4.SetValue(str(param_max))
+                    ctl4.Hide()
+                    if self.data.__class__.__name__ =="Data2D":
+                        ctl4.Enable()
+                    else:
+                        ctl4.Disable()
+                    if self.engine_type=="park":
+                        ctl3.Show(True)
+                        ctl4.Show(True)
+                    ix +=1
+                    # Units
+                    try:
+                        units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
+                    except:
+                        units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
+                    if self.data.__class__.__name__ =="Data2D":
+                        units.Enable()
+                    else:
+                        units.Disable()
+                    sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                        
+                    
+                    ##[cb state, name, value, "+/-", error of fit, min, max , units]
+                    self.parameters.append([cb,item, ctl1,
+                                            text2,ctl2, ctl3, ctl4,units])
+                    self.orientation_params.append([cb,item, ctl1,
+                                            text2,ctl2, ctl3, ctl4,units])
               
         iy+=1
         sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)

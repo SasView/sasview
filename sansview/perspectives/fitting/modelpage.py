@@ -34,6 +34,7 @@ class ModelPage(BasicPage):
          
         description=""
         if self.model!=None:
+            
             description = self.model.description
             
             self.select_model(self.model)
@@ -278,9 +279,10 @@ class ModelPage(BasicPage):
         """
         # If the 2D display is not currently enabled, plot the model in 2D 
         # and set the enable2D flag.
+
         if self.fitrange:
             self.enable2D = True
-            
+ 
         if self.enable2D:
             self._draw_model()
             self.model_view.Disable()
@@ -289,10 +291,13 @@ class ModelPage(BasicPage):
                 for item in self.orientation_params:
                     if item[2]!=None:
                         item[2].Enable()
-            if len(self.orientation_params_disp)>0:
-                 for item in self.orientation_params_disp:
-                    if item[2]!=None:
-                        item[2].Enable()
+            if  self.disp_name == "ArrayDispersion":                
+                self._set_sizer_arraydispersion()  
+            else:
+                if len(self.orientation_params_disp)>0:
+                     for item in self.orientation_params_disp:
+                        if item[2]!=None:
+                            item[2].Enable()
         self.state.enable2D =  copy.deepcopy(self.enable2D)
         ## post state to fit panel
         self._undo.Enable(True)
@@ -328,7 +333,6 @@ class ModelPage(BasicPage):
             self._draw_model()
         self.state.structurecombobox = self.structurebox.GetCurrentSelection()
         self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
-        #print "_on_select_model",self.state.structurecombobox,self.state.formfactorcombobox 
        
         ## post state to fit panel
         self._undo.Enable(True)
@@ -503,7 +507,7 @@ class ModelPage(BasicPage):
         iy+=1
         sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         for item  in self.model.orientation_params:
-            if not item in self.disp_list :
+            if not item in self.disp_list and item in keys:
                 iy += 1
                 ix = 0
                 name = wx.StaticText(self, -1,item)
@@ -535,7 +539,7 @@ class ModelPage(BasicPage):
                                         None,None, None, None,None])
                 self.orientation_params.append([None,item, ctl1,
                                         None,None, None, None,None])
-                
+                    
         iy+=1
         sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         

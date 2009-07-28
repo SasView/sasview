@@ -144,7 +144,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.event_owner=None
         
         pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
-        self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.onClosePage)      
+        self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.onClosePage)
        
         #dictionary of miodel {model class name, model class}
         self.model_list_box={}
@@ -387,8 +387,6 @@ class FitPanel(wx.aui.AuiNotebook):
         page= event.page
         if page.window_name in self.fit_page_name:
             self.fit_page_name[page.window_name].appendItem(page.createMemento()) 
-            
-            #print " current added state: ",len(self.fit_page_name[page.window_name])
             
     def _onUndo(self, event ):
         """
