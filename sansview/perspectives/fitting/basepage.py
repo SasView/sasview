@@ -492,10 +492,6 @@ class BasicPage(wx.ScrolledWindow):
                     item[4].Clear()
                     item[4].Hide()
         self.Layout()
-        # Get a handle to the TextCtrl
-        widget = evt.GetEventObject()
-        # Select the whole control, after this event resolves
-        wx.CallAfter(widget.SetSelection, -1,-1)
         return
     
     def _highlight_text(self, event):
