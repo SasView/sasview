@@ -1120,10 +1120,13 @@ class FitPage(BasicPage):
               
         iy+=1
         sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        
+        print self.model.dispersion
         # type can be either Guassian or Array
-        type= self.model.dispersion.values()[1]["type"]
-       
+        if len(self.model.dispersion.values())>0:
+            type= self.model.dispersion.values()[0]["type"]
+        else:
+            type = "Gaussian"
+      
         #For Gaussian only
         if type.lower() != "array":
             for item in self.model.orientation_params:
