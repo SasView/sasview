@@ -1120,7 +1120,7 @@ class FitPage(BasicPage):
               
         iy+=1
         sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        print self.model.dispersion
+        
         # type can be either Guassian or Array
         if len(self.model.dispersion.values())>0:
             type= self.model.dispersion.values()[0]["type"]
