@@ -9,8 +9,7 @@
       python setup.py odb
 
 """
-import sys
-
+import sys,os
 
 numpy_incl_path = os.path.join(sys.prefix, "Lib", "site-packages", "numpy", "core", "include", "numpy")
 
