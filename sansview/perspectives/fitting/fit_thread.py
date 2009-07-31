@@ -153,6 +153,7 @@ class FitThread(CalcThread):
             raise
         
         except :
-            #print "uncaught exception"
-            raise
+            #Stop on exception during fitting. Todo: need to put some mssg and reset progress bar.
+            wx.PostEvent(self.parent, StatusEvent(status=" Fit exception occurred..." ,type="update"))
+            #raise
     
