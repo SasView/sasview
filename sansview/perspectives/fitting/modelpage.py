@@ -212,14 +212,20 @@ class ModelPage(BasicPage):
                         name = wx.StaticText(self, -1,  name1)
                         self.sizer4_4.Add( name,( iy, ix),(1,1),  
                                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                        if not self.enable2D:
+                            name.Hide()
+                        else:
+                            name.Show(True)
                         ix = 1
                         value= self.model.getParam(name1)
                         ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
                         ctl1.SetValue(str (format_number(value)))
                         if not self.enable2D:
+                            ctl1.Hide()
                             ctl1.Disable()
                         else:
+                            ctl1.Show(True)
                             ctl1.Enable()
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                         self.fittable_param.append([None,name1,ctl1,None,
@@ -233,8 +239,10 @@ class ModelPage(BasicPage):
                                                 style=wx.TE_PROCESS_ENTER)
                             Tctl1.SetValue(str (format_number(value)))
                             if not self.enable2D:
+                                Tctl1.Hide()
                                 Tctl1.Disable()
                             else:
+                                Tctl1.Show(True)
                                 Tctl1.Enable()
                             self.sizer4_4.Add(Tctl1, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -249,8 +257,10 @@ class ModelPage(BasicPage):
                                                 style=wx.TE_PROCESS_ENTER)
                             Tctl2.SetValue(str (format_number(value)))
                             if not self.enable2D:
+                                Tctl2.Hide()
                                 Tctl2.Disable()
                             else:
+                                Tctl2.Show(True)
                                 Tctl2.Enable()
                             self.sizer4_4.Add(Tctl2, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -286,10 +296,13 @@ class ModelPage(BasicPage):
         if self.enable2D:
             self._draw_model()
             self.model_view.Disable()
-          
+            
+            self.set_model_param_sizer(self.model)
+            self._set_sizer_gaussian()
+            
             if len(self.orientation_params)>0:
                 for item in self.orientation_params:
-                    if item[2]!=None:
+                    if item[2]!=None:      
                         item[2].Enable()
             if  self.disp_name == "ArrayDispersion":                
                 self._set_sizer_arraydispersion()  
@@ -303,8 +316,7 @@ class ModelPage(BasicPage):
         self._undo.Enable(True)
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
-        
-        
+              
                 
     def reset_page(self, state):
         """
@@ -463,7 +475,7 @@ class ModelPage(BasicPage):
        
         keys.sort()
     
-        iy = 1
+        iy = 0
         ix = 0
         self.text1_2 = wx.StaticText(self, -1, 'Names')
         sizer.Add(self.text1_2,(iy, ix),(1,1),\
@@ -506,6 +518,20 @@ class ModelPage(BasicPage):
                                         None,None, None, None,None])
         iy+=1
         sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        iy += 1
+        ix = 0
+        
+        #Add tile for orientational angle parameters
+        for item in keys:
+            if item in self.model.orientation_params:        
+                orient_angle = wx.StaticText(self, -1, '[For 2D only]:')
+                sizer.Add(orient_angle,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
+                if not self.enable2D:
+                    orient_angle.Hide()
+                else:
+                    orient_angle.Show(True)
+                break
+                                          
         for item  in self.model.orientation_params:
             if not item in self.disp_list and item in keys:
                 iy += 1
@@ -513,6 +539,10 @@ class ModelPage(BasicPage):
                 name = wx.StaticText(self, -1,item)
                 sizer.Add( name,( iy, ix),(1,1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                if not self.enable2D:
+                    name.Hide()
+                else:
+                    name.Show(True)
 
                 ix += 1
                 value= self.model.getParam(item)
@@ -521,8 +551,10 @@ class ModelPage(BasicPage):
                 
                 ctl1.SetValue(str (format_number(value)))
                 if not self.enable2D:
+                    ctl1.Hide()
                     ctl1.Disable()
                 else:
+                    ctl1.Show(True)
                     ctl1.Enable()
                 
                 sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
@@ -532,6 +564,13 @@ class ModelPage(BasicPage):
                     units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
                 except:
                     units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
+                if not self.enable2D:
+                    units.Hide()
+                    units.Disable()
+                else:
+                    units.Show(True)
+                    units.Enable()
+
                 sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 
                 ##[cb state, name, value, "+/-", error of fit, min, max , units]

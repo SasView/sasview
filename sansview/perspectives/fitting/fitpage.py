@@ -284,7 +284,7 @@ class FitPage(BasicPage):
         ix += 1 
         nsigmas = wx.StaticText(self, -1, 'Nsigmas')
         self.sizer4_4.Add(nsigmas,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-       
+
         for item in self.model.dispersion.keys():
             if not item in self.model.orientation_params:
                 self.disp_cb_dict[item]= None
@@ -363,8 +363,10 @@ class FitPage(BasicPage):
                         self.sizer4_4.Add( cb,( iy, ix),(1,1),  
                                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                         if self.data.__class__.__name__ =="Data2D":
+                            cb.Show(True)
                             cb.Enable()
                         else:
+                            cb.Hide()
                             cb.Disable()
                         ix = 1
                         value= self.model.getParam(name1)
@@ -372,8 +374,10 @@ class FitPage(BasicPage):
                                             style=wx.TE_PROCESS_ENTER)
                         ctl1.SetValue(str (format_number(value)))
                         if self.data.__class__.__name__ =="Data2D":
+                            ctl1.Show(True)
                             ctl1.Enable()
                         else:
+                            ctl1.Hide()
                             ctl1.Disable()
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1),wx.EXPAND)
                         ## text to show error sign
@@ -388,8 +392,10 @@ class FitPage(BasicPage):
                         self.sizer4_4.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                         ctl2.Hide()
                         if self.data.__class__.__name__ =="Data2D":
+                            #ctl2.Show(True)
                             ctl2.Enable()
                         else:
+                            #ctl2.Hide()
                             ctl2.Disable()
                         self.fittable_param.append([cb,name1,ctl1,text2,
                                                     ctl2, None, None,None])
@@ -403,8 +409,10 @@ class FitPage(BasicPage):
                             
                             Tctl.SetValue(str (format_number(value)))
                             if self.data.__class__.__name__ =="Data2D":
+                                Tctl.Show(True)
                                 Tctl.Enable()
                             else:
+                                Tctl.Hide()
                                 Tctl.Disable()
                             self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -419,8 +427,10 @@ class FitPage(BasicPage):
                                                 style=wx.TE_PROCESS_ENTER)
                             Tctl.SetValue(str (format_number(value)))
                             if self.data.__class__.__name__ =="Data2D":
+                                Tctl.Show(True)
                                 Tctl.Enable()
                             else:
+                                Tctl.Hide()
                                 Tctl.Disable()
                             self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -1012,7 +1022,7 @@ class FitPage(BasicPage):
        
         keys.sort()
     
-        iy = 1
+        iy = 0
         ix = 0
         self.cb1 = wx.CheckBox(self, -1,"Select all", (10, 10))
         wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_param)
@@ -1126,6 +1136,19 @@ class FitPage(BasicPage):
             type= self.model.dispersion.values()[0]["type"]
         else:
             type = "Gaussian"
+            
+        iy += 1
+        ix = 0
+        #Add tile for orientational angle
+        for item in keys:
+            if item in self.model.orientation_params:       
+                orient_angle = wx.StaticText(self, -1, '[For 2D only]:')
+                sizer.Add(orient_angle,(iy, ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
+                if not self.data.__class__.__name__ =="Data2D":
+                    orient_angle.Hide()
+                else:
+                    orient_angle.Show(True)
+                break
       
         #For Gaussian only
         if type.lower() != "array":
@@ -1138,8 +1161,10 @@ class FitPage(BasicPage):
                     cb.SetValue(False)
                     wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                     if self.data.__class__.__name__ =="Data2D":
+                        cb.Show(True)
                         cb.Enable()
                     else:
+                        cb.Hide()
                         cb.Disable()
                     sizer.Add( cb,( iy, ix),(1,1),
                                  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
@@ -1152,8 +1177,10 @@ class FitPage(BasicPage):
                     
                     ctl1.SetValue(format_number(value))
                     if self.data.__class__.__name__ =="Data2D":
+                        #ctl1.Show(True)
                         ctl1.Enable()
                     else:
+                        #ctl1.Hide()
                         ctl1.Disable()
                     sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                     ## text to show error sign
@@ -1168,8 +1195,10 @@ class FitPage(BasicPage):
                     sizer.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                     ctl2.Hide()
                     if self.data.__class__.__name__ =="Data2D":
+                        ctl1.Show(True)
                         ctl1.Enable()
                     else:
+                        ctl1.Hide()
                         ctl1.Disable()
                     param_min, param_max= self.model.details[item][1:]
                     ix += 1
@@ -1183,8 +1212,10 @@ class FitPage(BasicPage):
                     sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                     ctl3.Hide()
                     if self.data.__class__.__name__ =="Data2D":
+                        #ctl3.Show(True)
                         ctl3.Enable()
                     else:
+                        #ctl3.Hide()
                         ctl3.Disable()
                     ix += 1
                     ctl4 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
@@ -1197,8 +1228,10 @@ class FitPage(BasicPage):
                         ctl4.SetValue(str(param_max))
                     ctl4.Hide()
                     if self.data.__class__.__name__ =="Data2D":
+                        #ctl4.Show(True)
                         ctl4.Enable()
                     else:
+                        #ctl4.Hide()
                         ctl4.Disable()
                     if self.engine_type=="park":
                         ctl3.Show(True)
@@ -1210,8 +1243,10 @@ class FitPage(BasicPage):
                     except:
                         units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                     if self.data.__class__.__name__ =="Data2D":
+                        units.Show(True)
                         units.Enable()
                     else:
+                        units.Hide()
                         units.Disable()
                     sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                         

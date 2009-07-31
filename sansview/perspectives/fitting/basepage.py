@@ -992,6 +992,8 @@ class BasicPage(wx.ScrolledWindow):
             name= model.model2.name
             flag= name != "NoStructure"
             if flag and (class_name in self.model_list_box["Structure Factors"]):
+                self.structurebox.Show()
+                self.text2.Show()                
                 self.structurebox.Enable()
                 self.text2.Enable()
                 items = self.structurebox.GetItems()
@@ -1047,10 +1049,14 @@ class BasicPage(wx.ScrolledWindow):
             for k, list in self.model_list_box.iteritems():          
                 if k in["P(Q)*S(Q)","Shapes" ] and class_name in self.model_list_box["Shapes"]:
                     if class_name in self.model_list_box["P(Q)*S(Q)"]:
+                        self.structurebox.Show()
+                        self.text2.Show()
                         self.structurebox.Enable()
                         self.structurebox.SetSelection(0)
                         self.text2.Enable()
                     else:
+                        self.structurebox.Hide()
+                        self.text2.Hide()
                         self.structurebox.Disable()
                         self.structurebox.SetSelection(0)
                         self.text2.Disable()
@@ -1164,10 +1170,14 @@ class BasicPage(wx.ScrolledWindow):
                                 self.model_list_box["Structure Factors"])
             self.structurebox.Insert("None", 0,None)
             self.structurebox.SetSelection(0)
+            self.structurebox.Hide()
+            self.text2.Hide()
             self.structurebox.Disable()
             self.text2.Disable()
              
             if self.model.__class__ in self.model_list_box["P(Q)*S(Q)"]:
+                self.structurebox.Show()
+                self.text2.Show()
                 self.structurebox.Enable()
                 self.text2.Enable()            
         
@@ -1272,10 +1282,14 @@ class BasicPage(wx.ScrolledWindow):
         f_id = self.formfactorbox.GetCurrentSelection()
         form_factor = self.formfactorbox.GetClientData( f_id )
         if not form_factor in  self.model_list_box["multiplication"]:
+            self.structurebox.Hide()
+            self.text2.Hide()           
             self.structurebox.Disable()
             self.structurebox.SetSelection(0)
             self.text2.Disable()
         else:
+            self.structurebox.Show()
+            self.text2.Show()
             self.structurebox.Enable()
             self.text2.Enable()
            
@@ -1575,9 +1589,12 @@ class BasicPage(wx.ScrolledWindow):
                 ix+=1 
                 self.disp_cb_dict[p] = wx.CheckBox(self, -1, p, (10, 10))
                 self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
-                if not self.enable2D:
+                print "self.enable2D",self.enable2D
+                if not (self.enable2D or self.data.__class__.__name__ =="Data2D"):
+                    self.disp_cb_dict[p].Hide()
                     self.disp_cb_dict[p].Disable()
                 else:
+                    self.disp_cb_dict[p].Show(True)
                     self.disp_cb_dict[p].Enable()
 
                 wx.EVT_CHECKBOX(self, self.disp_cb_dict[p].GetId(), self.select_disp_angle)
