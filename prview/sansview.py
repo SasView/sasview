@@ -17,9 +17,15 @@ class PrFrame(gui_manager.ViewerFrame):
 
 class PrApp(gui_manager.ViewApp):
     def OnInit(self):
-        #from gui_manager import ViewerFrame
+        
+        # Check the size of the screen
+        # Add some padding to make sure to clear any OS tool bar
+        screen_size = wx.GetDisplaySize()
+        app_height = APP_HEIGHT if screen_size[1]>APP_HEIGHT else screen_size[1]-50
+        app_width  = APP_WIDTH if screen_size[0]>APP_WIDTH else screen_size[0]-50
+        
         self.frame = PrFrame(None, -1, local_config.__appname__, 
-                             window_height=APP_HEIGHT, window_width=APP_WIDTH)    
+                             window_height=app_height, window_width=app_width)    
         self.frame.Show(True)
 
         if hasattr(self.frame, 'special'):
