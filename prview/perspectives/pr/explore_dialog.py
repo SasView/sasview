@@ -26,6 +26,8 @@ from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools import Theory1D as Model1D
 from danse.common.plottools.plottables import Graph
 
+from pr_widgets import PrTextCtrl
+
 # Default number of points on the output plot
 DEFAULT_NPTS = 10
 # Default output parameter to plot
@@ -147,11 +149,11 @@ class ExploreDialog(wx.Dialog):
         self.nfunc     = nfunc
         
         # Control for number of points
-        self.npts_ctl = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
+        self.npts_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
         # Control for the minimum value of D_max
-        self.dmin_ctl = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
+        self.dmin_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
         # Control for the maximum value of D_max
-        self.dmax_ctl = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
+        self.dmax_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
 
         # Output selection box for the y axis
         self.output_box = None

@@ -1,3 +1,13 @@
+"""
+This software was developed by the University of Tennessee as part of the
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+project funded by the US National Science Foundation. 
+
+See the license text in license.txt
+
+copyright 2009, University of Tennessee
+"""
+
 # Make sure the option of saving each curve is available 
 # Use the I(q) curve as input and compare the output to P(r)
 
@@ -1161,20 +1171,9 @@ class Plugin:
     def _on_context_inversion(self, event):
         panel = event.GetEventObject()
 
-        from inversion_panel import InversionDlg
-        
         # If we have more than one displayed plot, make the user choose
         if len(panel.plots)>1 and panel.graph.selected_plottable in panel.plots:
             dataset = panel.graph.selected_plottable
-            if False:
-                dialog = InversionDlg(None, -1, "P(r) Inversion", panel.plots, pars=False)
-                dialog.set_content(self.last_data, self.nfunc, self.alpha, self.max_length)
-                if dialog.ShowModal() == wx.ID_OK:
-                    dataset = dialog.get_content()
-                    dialog.Destroy()
-                else:
-                    dialog.Destroy()
-                    return
         elif len(panel.plots)==1:
             dataset = panel.plots.keys()[0]
         else:

@@ -8,101 +8,14 @@ import wx
 import os
 import sys
 import logging
+from wx.lib.scrolledpanel import ScrolledPanel
 from sans.guicomm.events import StatusEvent    
 from inversion_state import InversionState
+from pr_widgets import PrTextCtrl, DataFileTextCtrl, OutputTextCtrl
 
-class InversionDlg(wx.Dialog):
-    def __init__(self, parent, id, title, plots, file=False, pars=True):
-        
-        # Estimate size
-        nplots = len(plots)
-        # y size for data set only
-        ysize  = 110 + nplots*20
-        # y size including parameters
-        if pars:
-            ysize  += 90
-        
-        wx.Dialog.__init__(self, parent, id, title, size=(250, ysize))
-        self.SetTitle(title)
 
-        # Data set
-        self.datasets = InversionPanel(self, -1, plots)
-        vbox = wx.BoxSizer(wx.VERTICAL)
 
-        vbox.Add(self.datasets)
-
-        # Parameters
-        self.pars_flag = False
-        if pars==True:
-            self.pars_flag = True
-            self.pars = ParsDialog(self, -1, file=file)
-            vbox.Add(self.pars)
-
-        static_line = wx.StaticLine(self, -1)
-        vbox.Add(static_line, 0, wx.EXPAND, 0)
-        
-        button_OK = wx.Button(self, wx.ID_OK, "OK")
-        button_Cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
-        
-        sizer_button = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        sizer_button.Add(button_OK, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
-        sizer_button.Add(button_Cancel, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)        
-        vbox.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
-
-        self.SetSizer(vbox)
-        self.SetAutoLayout(True)
-        
-        self.Layout()
-        self.Centre()
-
-    def get_content(self):
-        dataset = self.datasets.get_selected()
-        if self.pars_flag:
-            nfunc, alpha, dmax, file = self.pars.getContent()
-            return dataset, nfunc, alpha, dmax
-        else:
-            return dataset
-    
-    def set_content(self, dataset, nfunc, alpha, dmax):
-        if not dataset==None and dataset in self.datasets.radio_buttons.keys():
-            self.datasets.radio_buttons[dataset].SetValue(True)
-        if self.pars_flag:
-            self.pars.setContent(nfunc, alpha, dmax, None)
-
-class InversionPanel(wx.Panel):
-    
-    def __init__(self, parent, id = -1, plots = None, **kwargs):
-        wx.Panel.__init__(self, parent, id = id, **kwargs)
-        
-        self.plots = plots
-        self.radio_buttons = {}
-        
-        self._do_layout()
-        
-    def _do_layout(self):
-        panel = wx.Panel(self, -1)
-        vbox = wx.BoxSizer(wx.VERTICAL)
-
-        ysize = 30+20*len(self.plots)
-        wx.StaticBox(panel, -1, 'Choose a data set', (5, 5), (230, ysize))
-        ypos = 30
-        self.radio_buttons = {}
-        for item in self.plots.keys():
-            self.radio_buttons[self.plots[item].name] = wx.RadioButton(panel, -1, self.plots[item].name, (15, ypos))
-            ypos += 20
-        
-        vbox.Add(panel)
-
-        self.SetSizer(vbox)
-        
-    def get_selected(self):
-        for item in self.radio_buttons:
-            if self.radio_buttons[item].GetValue():
-                return item
-        return None
-
-class InversionControl(wx.Panel):
+class InversionControl(ScrolledPanel):
     window_name = 'pr_control'
     window_caption = "P(r) control panel"
     CENTER_PANE = True
@@ -113,7 +26,8 @@ class InversionControl(wx.Panel):
     oscillation_max = 1.5
     
     def __init__(self, parent, id = -1, plots = None, standalone=False, **kwargs):
-        wx.Panel.__init__(self, parent, id = id, **kwargs)
+        ScrolledPanel.__init__(self, parent, id = id, **kwargs)
+        self.SetupScrolling()
         
         self.plots = plots
         self.radio_buttons = {}
@@ -450,9 +364,9 @@ class InversionControl(wx.Panel):
         self.file_radio = wx.StaticText(self, -1, "Data:")
         pars_sizer.Add(self.file_radio, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
-        self.plot_data = wx.TextCtrl(self, -1, size=(220,20))
-        self.plot_data.SetEditable(False)
-        pars_sizer.Add(self.plot_data, (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        self.plot_data = DataFileTextCtrl(self, -1, size=(260,20))
+        
+        pars_sizer.Add(self.plot_data, (iy,1), (1,1), wx.EXPAND|wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 15)
         
         self.bck_chk = wx.CheckBox(self, -1, "Estimate background level")
         self.bck_chk.SetToolTipString("Check box to let the fit estimate the constant background level.")
@@ -474,8 +388,8 @@ class InversionControl(wx.Panel):
             label_swidth = wx.StaticText(self, -1, "Width", size=(40,20))
             #label_sunits1 = wx.StaticText(self, -1, "[A^(-1)]")
             label_sunits2 = wx.StaticText(self, -1, "[A^(-1)]", size=(55,20))
-            self.sheight_ctl = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
-            self.swidth_ctl = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
+            self.sheight_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
+            self.swidth_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
             self.sheight_ctl.SetToolTipString("Enter slit height in units of Q or leave blank.")
             self.swidth_ctl.SetToolTipString("Enter slit width in units of Q or leave blank.")
             #self.sheight_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
@@ -505,8 +419,8 @@ class InversionControl(wx.Panel):
         label_qmax = wx.StaticText(self, -1, "Q max", size=(40,20))
         #label_qunits1 = wx.StaticText(self, -1, "[A^(-1)]")
         label_qunits2 = wx.StaticText(self, -1, "[A^(-1)]", size=(55,20))
-        self.qmin_ctl = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
-        self.qmax_ctl = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
+        self.qmin_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
+        self.qmax_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
         self.qmin_ctl.SetToolTipString("Select a lower bound for Q or leave blank.")
         self.qmax_ctl.SetToolTipString("Select an upper bound for Q or leave blank.")
         self.qmin_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
@@ -549,11 +463,11 @@ class InversionControl(wx.Panel):
         self.label_sugg  = wx.StaticText(self, -1, "Suggested value")
         #self.label_sugg.Hide()
         
-        self.nfunc_ctl = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
+        self.nfunc_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
         self.nfunc_ctl.SetToolTipString("Number of terms in the expansion.")
-        self.alpha_ctl = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
+        self.alpha_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
         self.alpha_ctl.SetToolTipString("Control parameter for the size of the regularization term.")
-        self.dmax_ctl  = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
+        self.dmax_ctl  = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
         self.dmax_ctl.SetToolTipString("Maximum distance between any two points in the system.")
         id = wx.NewId()
         self.alpha_estimate_ctl  = wx.Button(self, id, "")
@@ -617,14 +531,11 @@ class InversionControl(wx.Panel):
         label_iq0_unit = wx.StaticText(self, -1, "[A^(-1)]")
         label_bck      = wx.StaticText(self, -1, "Background")
         label_bck_unit = wx.StaticText(self, -1, "[A^(-1)]")
-        self.rg_ctl    = wx.TextCtrl(self, -1, size=(60,20))
-        self.rg_ctl.SetEditable(False)
+        self.rg_ctl    = OutputTextCtrl(self, -1, size=(60,20))
         self.rg_ctl.SetToolTipString("Radius of gyration for the computed P(r).")
-        self.iq0_ctl   = wx.TextCtrl(self, -1, size=(60,20))
-        self.iq0_ctl.SetEditable(False)
+        self.iq0_ctl   = OutputTextCtrl(self, -1, size=(60,20))
         self.iq0_ctl.SetToolTipString("Scattering intensity at Q=0 for the computed P(r).")
-        self.bck_ctl   = wx.TextCtrl(self, -1, size=(60,20))
-        self.bck_ctl.SetEditable(False)
+        self.bck_ctl   = OutputTextCtrl(self, -1, size=(60,20))
         self.bck_ctl.SetToolTipString("Value of estimated constant background.")
         
         label_time = wx.StaticText(self, -1, "Computation time")
@@ -635,27 +546,22 @@ class InversionControl(wx.Panel):
         label_pos = wx.StaticText(self, -1, "Positive fraction")
         label_pos_err = wx.StaticText(self, -1, "1-sigma positive fraction")
         
-        self.time_ctl = wx.TextCtrl(self, -1, size=(60,20))
-        self.time_ctl.SetEditable(False)
+        self.time_ctl = OutputTextCtrl(self, -1, size=(60,20))
         self.time_ctl.SetToolTipString("Computation time for the last inversion, in seconds.")
         
-        self.chi2_ctl = wx.TextCtrl(self, -1, size=(60,20))
-        self.chi2_ctl.SetEditable(False)
+        self.chi2_ctl = OutputTextCtrl(self, -1, size=(60,20))
         self.chi2_ctl.SetToolTipString("Chi^2 over degrees of freedom.")
         
         # Oscillation parameter
-        self.osc_ctl = wx.TextCtrl(self, -1, size=(60,20))
-        self.osc_ctl.SetEditable(False)
+        self.osc_ctl = OutputTextCtrl(self, -1, size=(60,20))
         self.osc_ctl.SetToolTipString("Oscillation parameter. P(r) for a sphere has an oscillation parameter of 1.1.")
         
         # Positive fraction figure of merit
-        self.pos_ctl = wx.TextCtrl(self, -1, size=(60,20))
-        self.pos_ctl.SetEditable(False)
+        self.pos_ctl = OutputTextCtrl(self, -1, size=(60,20))
         self.pos_ctl.SetToolTipString("Fraction of P(r) that is positive. Theoretically, P(r) is defined positive.")
         
         # 1-simga positive fraction figure of merit
-        self.pos_err_ctl = wx.TextCtrl(self, -1, size=(60,20))
-        self.pos_err_ctl.SetEditable(False)
+        self.pos_err_ctl = OutputTextCtrl(self, -1, size=(60,20))
         message  = "Fraction of P(r) that is at least 1 standard deviation greater than zero.\n"
         message += "This figure of merit tells you about the size of the P(r) errors.\n"
         message += "If it is close to 1 and the other figures of merit are bad, consider changing "
@@ -1018,7 +924,7 @@ class PrDistDialog(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
         
         label_npts = wx.StaticText(self, -1, "Number of points")
-        self.npts_ctl = wx.TextCtrl(self, -1, size=(100,20))
+        self.npts_ctl = PrTextCtrl(self, -1, size=(100,20))
                  
         pars_sizer = wx.GridBagSizer(5,5)
         iy = 0
@@ -1077,139 +983,6 @@ class PrDistDialog(wx.Dialog):
             Initialize the content of the dialog.
         """
         self.npts_ctl.SetValue("%i" % npts)
-
-
-class ParsDialog(wx.Panel):
-    """
-        Dialog box to let the user edit detector settings
-    """
-    
-    def __init__(self, parent, id = id, file=True, **kwargs):
-
-        wx.Panel.__init__(self, parent, id = id, **kwargs)
-        self.file = file
-        
-        self.label_nfunc = wx.StaticText(self, -1, "Number of terms")
-        self.label_alpha = wx.StaticText(self, -1, "Regularization constant")
-        self.label_dmax  = wx.StaticText(self, -1, "Max distance [A]")
-        
-        # Npts, q max
-        self.nfunc_ctl = wx.TextCtrl(self, -1, size=(60,20))
-        self.alpha_ctl = wx.TextCtrl(self, -1, size=(60,20))
-        self.dmax_ctl  = wx.TextCtrl(self, -1, size=(60,20))
-
-        self.label_file = None
-        self.file_ctl   = None
-
-        self.static_line_3 = wx.StaticLine(self, -1)
-        
-        
-
-        self.__do_layout()
-
-        self.Fit()
-        
-    def _load_file(self, evt):
-        import os
-        path = None
-        dlg = wx.FileDialog(self, "Choose a file", os.getcwd(), "", "*.txt", wx.OPEN)
-        if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
-            mypath = os.path.basename(path)
-        dlg.Destroy()
-        
-        if path and os.path.isfile(path):
-            self.file_ctl.SetValue(str(path))
-
-        
-    def checkValues(self, event):
-        flag = True
-        try:
-            float(self.alpha_ctl.GetValue())
-            self.alpha_ctl.SetBackgroundColour(wx.WHITE)
-            self.alpha_ctl.Refresh()
-        except:
-            flag = False
-            self.alpha_ctl.SetBackgroundColour("pink")
-            self.alpha_ctl.Refresh()
-            
-        try:
-            float(self.dmax_ctl.GetValue())
-            self.dmax_ctl.SetBackgroundColour(wx.WHITE)
-            self.dmax_ctl.Refresh()
-        except:
-            flag = False
-            self.dmax_ctl.SetBackgroundColour("pink")
-            self.dmax_ctl.Refresh()
-            
-        try:
-            int(self.nfunc_ctl.GetValue())
-            self.nfunc_ctl.SetBackgroundColour(wx.WHITE)
-            self.nfunc_ctl.Refresh()
-        except:
-            flag = False
-            self.nfunc_ctl.SetBackgroundColour("pink")
-            self.nfunc_ctl.Refresh()
-        
-        if flag:
-            event.Skip(True)
-    
-    def setContent(self, nfunc, alpha, dmax, file):
-        self.nfunc_ctl.SetValue(str(nfunc))
-        self.alpha_ctl.SetValue(str(alpha))
-        self.dmax_ctl.SetValue(str(dmax))
-        if self.file:
-            self.file_ctl.SetValue(str(file))
-
-    def getContent(self):
-        nfunc = int(self.nfunc_ctl.GetValue())
-        alpha = float(self.alpha_ctl.GetValue())
-        dmax = float(self.dmax_ctl.GetValue())
-        file = None
-        if self.file:
-            file = self.file_ctl.GetValue()
-        return nfunc, alpha, dmax, file
-
-
-    def __do_layout(self):
-        sizer_main = wx.BoxSizer(wx.VERTICAL)
-        sizer_params = wx.GridBagSizer(5,5)
-
-        iy = 0
-        sizer_params.Add(self.label_nfunc, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        sizer_params.Add(self.nfunc_ctl,   (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        iy += 1
-        sizer_params.Add(self.label_alpha, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        sizer_params.Add(self.alpha_ctl,   (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        iy += 1
-        sizer_params.Add(self.label_dmax, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        sizer_params.Add(self.dmax_ctl,   (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        iy += 1
-        if self.file:
-            self.label_file  = wx.StaticText(self, -1, "Input file")
-            self.file_ctl  = wx.TextCtrl(self, -1, size=(120,20))
-            sizer_params.Add(self.label_file, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-            sizer_params.Add(self.file_ctl,   (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-
-        sizer_main.Add(sizer_params, 0, wx.EXPAND|wx.ALL, 10)
-        
-        
-        if self.file:
-            sizer_button = wx.BoxSizer(wx.HORIZONTAL)
-            self.button_load = wx.Button(self, 1, "Choose file")
-            self.Bind(wx.EVT_BUTTON, self._load_file, id = 1)        
-            sizer_button.Add(self.button_load, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
-        
-        
-            sizer_main.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
-        self.SetAutoLayout(True)
-        self.SetSizer(sizer_main)
-        self.Layout()
-        self.Centre()
-        # end wxGlade
-
-
-# end of class DialogAbout
 
 ##### testing code ############################################################
 class TestPlot:
