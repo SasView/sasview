@@ -20,9 +20,12 @@ APP_WIDTH  = 1000
 
 class SansViewApp(gui_manager.ViewApp):
     def OnInit(self):
-        #from gui_manager import ViewerFrame
+        screen_size = wx.GetDisplaySize()
+        app_height = APP_HEIGHT if screen_size[1]>APP_HEIGHT else screen_size[1]-50
+        app_width  = APP_WIDTH if screen_size[0]>APP_WIDTH else screen_size[0]-50
+
         self.frame = gui_manager.ViewerFrame(None, -1, local_config.__appname__, 
-                             window_height=APP_HEIGHT, window_width=APP_WIDTH)    
+                             window_height=app_height, window_width=app_width)    
         self.frame.Show(True)
 
         if hasattr(self.frame, 'special'):
