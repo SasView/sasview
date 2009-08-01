@@ -22,6 +22,7 @@ from sans.guicomm.events import NewPlotEvent, StatusEvent
 import math, numpy
 from sans.pr.invertor import Invertor
 from DataLoader.loader import Loader
+from sans.guiframe.data_loader import load_error 
 
 import copy
 
@@ -1045,6 +1046,9 @@ class Plugin:
                 x = self._current_file_data.x
                 y = self._current_file_data.y
                 err = self._current_file_data.err
+                
+                message = "The data from this file has already been loaded."
+                wx.PostEvent(self.parent, StatusEvent(status=message))
             else:
                 # Reset the status bar so that we don't get mixed up
                 # with old messages. 
@@ -1053,14 +1057,12 @@ class Plugin:
                 try:
                     x, y, err = self.load(path)
                 except:
-                    message = "Could not read the data file: %s" % path
-                    wx.PostEvent(self.parent, StatusEvent(status=message))
+                    load_error(sys.exc_value)
                     return None
                 
                 # If the file contains no data, just return
-                if x is None:
-                    message = "The loaded file contains no data"
-                    wx.PostEvent(self.parent, StatusEvent(status=message))
+                if x is None or len(x)==0:
+                    load_error("The loaded file contains no data")
                     return None
             
             # If we have not errors, add statistical errors
@@ -1092,7 +1094,7 @@ class Plugin:
                 pr.slit_width = self.slit_width
                 return pr
             except:
-                wx.PostEvent(self.parent, StatusEvent(status="Problem reading data: %s" % sys.exc_value))
+                load_error(sys.exc_value)
         return None
         
     def perform_estimate(self):
