@@ -70,6 +70,22 @@ def load_ascii_1D(path):
         return file_x, file_y, file_dy, file_dx
     return None, None, None, None
 
+def load_error(error=None):
+    """
+        Pop up an error message.
+        
+        @param error: details error message to be displayed
+    """
+    message = "You had to try this, didn't you?\n\n"
+    message += "The data file you selected could not be loaded.\n"
+    message += "Make sure the content of your file is properly formatted.\n\n"
+    
+    if error is not None:
+        message += "When contacting the DANSE team, mention the following:\n%s" % str(error)
+    
+    dial = wx.MessageDialog(None, message, 'Error Loading File', wx.OK | wx.ICON_EXCLAMATION)
+    dial.ShowModal()    
+
 def plot_data(parent, path):
     """
         Use the DataLoader loader to created data to plot.
@@ -78,20 +94,20 @@ def plot_data(parent, path):
     from sans.guicomm.events import NewPlotEvent, StatusEvent
     from DataLoader.loader import  Loader
    
-    #Instantiate a loader 
+    # Instantiate a loader 
     L = Loader()
     
-    #Recieves data 
+    # Load data 
     try:
         output=L.load(path)
-        if output==None:
-            msg="Could not open this page"
-            wx.PostEvent(parent, StatusEvent(status=msg))
-            return
     except:
-        wx.PostEvent(parent, StatusEvent(status="Problem loading file: %s" % sys.exc_value))
+        load_error(sys.exc_value)
         return
     
+    # Notify user if the loader completed the load but no data came out
+    if output == None:
+        load_error("The data file appears to be empty.")
+        return
   
     filename = os.path.basename(path)
     
