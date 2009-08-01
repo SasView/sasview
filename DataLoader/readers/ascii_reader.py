@@ -33,6 +33,9 @@ class Reader:
     ## List of allowed extensions
     ext=['.txt', '.TXT', '.dat', '.DAT', '.abs', '.ABS']  
     
+    ## Flag to bypass extension check
+    allow_all = True
+    
     def read(self, path):
         """ 
             Load data file
@@ -45,7 +48,7 @@ class Reader:
         if os.path.isfile(path):
             basename  = os.path.basename(path)
             root, extension = os.path.splitext(basename)
-            if extension.lower() in self.ext:
+            if self.allow_all or extension.lower() in self.ext:
                 try:
                     input_f =  open(path,'r')
                 except :
