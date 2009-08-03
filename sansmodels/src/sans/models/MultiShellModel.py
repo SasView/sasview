@@ -52,8 +52,7 @@ class MultiShellModel(CMultiShellModel, BaseComponent):
         ## Name of the model
         self.name = "MultiShellModel"
         ## Model description
-        self.description ="""
-		Model parameters:
+        self.description ="""Model parameters:
 		scale : scale factor
 		core_radius : Core radius of the multishell
 		s_thickness: shell thickness
@@ -75,7 +74,7 @@ class MultiShellModel(CMultiShellModel, BaseComponent):
         self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters
-        self.fixed=['radius.width']
+        self.fixed=['core_radius.width', 's_thickness.width', 'w_thickness.width']
         
         ## parameters with orientation
         self.orientation_params =[]

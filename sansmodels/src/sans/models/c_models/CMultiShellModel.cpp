@@ -96,6 +96,12 @@ CMultiShellModel_init(CMultiShellModel *self, PyObject *args, PyObject *kwds)
         disp_dict = PyDict_New();
         self->model->core_radius.dispersion->accept_as_source(visitor, self->model->core_radius.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "core_radius", disp_dict);
+        disp_dict = PyDict_New();
+        self->model->s_thickness.dispersion->accept_as_source(visitor, self->model->s_thickness.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "s_thickness", disp_dict);
+        disp_dict = PyDict_New();
+        self->model->w_thickness.dispersion->accept_as_source(visitor, self->model->w_thickness.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "w_thickness", disp_dict);
 
 
          
@@ -161,6 +167,10 @@ static PyObject * run(CMultiShellModel *self, PyObject *args) {
     DispersionVisitor* visitor = new DispersionVisitor();
     disp_dict = PyDict_GetItemString(self->dispersion, "core_radius");
     self->model->core_radius.dispersion->accept_as_destination(visitor, self->model->core_radius.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "s_thickness");
+    self->model->s_thickness.dispersion->accept_as_destination(visitor, self->model->s_thickness.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "w_thickness");
+    self->model->w_thickness.dispersion->accept_as_destination(visitor, self->model->w_thickness.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -225,6 +235,10 @@ static PyObject * runXY(CMultiShellModel *self, PyObject *args) {
     DispersionVisitor* visitor = new DispersionVisitor();
     disp_dict = PyDict_GetItemString(self->dispersion, "core_radius");
     self->model->core_radius.dispersion->accept_as_destination(visitor, self->model->core_radius.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "s_thickness");
+    self->model->s_thickness.dispersion->accept_as_destination(visitor, self->model->s_thickness.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "w_thickness");
+    self->model->w_thickness.dispersion->accept_as_destination(visitor, self->model->w_thickness.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -282,6 +296,10 @@ static PyObject * set_dispersion(CMultiShellModel *self, PyObject *args) {
 	    // TODO: refactor this
     if (!strcmp(par_name, "core_radius")) {
         self->model->core_radius.dispersion = dispersion;
+    } else    if (!strcmp(par_name, "s_thickness")) {
+        self->model->s_thickness.dispersion = dispersion;
+    } else    if (!strcmp(par_name, "w_thickness")) {
+        self->model->w_thickness.dispersion = dispersion;
     } else {
 	    PyErr_SetString(CMultiShellModelError,
 	    	"CMultiShellModel.set_dispersion expects a valid parameter name.");

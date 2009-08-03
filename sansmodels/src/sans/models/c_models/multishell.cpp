@@ -65,6 +65,14 @@ double MultiShellModel :: operator()(double q) {
 	vector<WeightPoint> weights_core_radius;
 	core_radius.get_weights(weights_core_radius);
 
+	// Get the dispersion points for the s_thickness
+	vector<WeightPoint> weights_s_thickness;
+	s_thickness.get_weights(weights_s_thickness);
+
+	// Get the dispersion points for the w_thickness
+	vector<WeightPoint> weights_w_thickness;
+	w_thickness.get_weights(weights_w_thickness);
+
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
@@ -72,10 +80,17 @@ double MultiShellModel :: operator()(double q) {
 	// Loop over radius weight points
 	for(int i=0; i< (int)weights_core_radius.size(); i++) {
 		dp[1] = weights_core_radius[i].value;
+		for(int j=0; j< (int)weights_s_thickness.size(); j++){
+			dp[2] = weights_s_thickness[j].value;
+			for(int k=0; k< (int)weights_w_thickness.size(); k++){
+				dp[3] = weights_w_thickness[k].value;
 
-		sum += weights_core_radius[i].weight
-			* MultiShell(dp, q);
-		norm += weights_core_radius[i].weight;
+				sum += weights_core_radius[i].weight*weights_s_thickness[j].weight
+					*weights_w_thickness[k].weight* MultiShell(dp, q);
+				norm += weights_core_radius[i].weight*weights_s_thickness[j].weight
+					*weights_w_thickness[k].weight;
+			}
+		}
 	}
 	return sum/norm + background();
 }

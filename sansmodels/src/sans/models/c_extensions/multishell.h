@@ -5,19 +5,18 @@
  * Structure definition for sphere parameters
 
 	[PYTHONCLASS] = MultiShellModel
-	[DISP_PARAMS] = core_radius
-	[DESCRIPTION] =<text>
-						Model parameters:
-						scale : scale factor
-						core_radius : Core radius of the multishell 
-						s_thickness: shell thickness
-						w_thickness: water thickness
-						core_sld: core scattering length density
-						shell_sld: shell scattering length density
-						n_pairs:number of pairs of water/shell
-						background: incoherent background
+	[DISP_PARAMS] = core_radius, s_thickness, w_thickness
+	[DESCRIPTION] =<text>Model parameters:
+				scale : scale factor
+				core_radius : Core radius of the multishell
+				s_thickness: shell thickness
+				w_thickness: water thickness
+				core_sld: core scattering length density
+				shell_sld: shell scattering length density
+				n_pairs:number of pairs of water/shell
+				background: incoherent background
                </text>
-	[FIXED]=  core_radius.width
+	[FIXED]=  core_radius.width; s_thickness.width; w_thickness.width
 	[ORIENTATION_PARAMS]= <text> </text>
  */
 typedef struct {

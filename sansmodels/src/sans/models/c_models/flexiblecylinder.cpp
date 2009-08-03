@@ -51,7 +51,7 @@ FlexibleCylinderModel :: FlexibleCylinderModel() {
  * @return: function value
  */
 double FlexibleCylinderModel :: operator()(double q) {
-	double dp[5];
+	double dp[6];
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
@@ -63,37 +63,38 @@ double FlexibleCylinderModel :: operator()(double q) {
 	dp[5] = background();
 
 	// Get the dispersion points for the length
-	vector<WeightPoint> weights_length;
-	length.get_weights(weights_length);
+	vector<WeightPoint> weights_len;
+	length.get_weights(weights_len);
 
 	// Get the dispersion points for the kuhn_length
-	vector<WeightPoint> weights_kuhn_length;
-	kuhn_length.get_weights(weights_kuhn_length);
+	vector<WeightPoint> weights_kuhn;
+	kuhn_length.get_weights(weights_kuhn);
 
 	// Get the dispersion points for the radius
-	vector<WeightPoint> weights_radius;
-	radius.get_weights(weights_radius);
+	vector<WeightPoint> weights_rad;
+	radius.get_weights(weights_rad);
 
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
 
 	// Loop over semi axis A weight points
-	for(int i=0; i< (int)weights_length.size(); i++) {
-		dp[1] = weights_length[i].value;
+	for(int i=0; i< (int)weights_len.size(); i++) {
+		dp[1] = weights_len[i].value;
 
 		// Loop over semi axis B weight points
-		for(int j=0; j< (int)weights_kuhn_length.size(); j++) {
-			dp[2] = weights_kuhn_length[j].value;
+		for(int j=0; j< (int)weights_kuhn.size(); j++) {
+			dp[2] = weights_kuhn[j].value;
 
 			// Loop over semi axis C weight points
-			for(int k=0; k< (int)weights_radius.size(); k++) {
-				dp[3] = weights_radius[k].value;
+			for(int k=0; k< (int)weights_rad.size(); k++) {
+				dp[3] = weights_rad[k].value;
 
-				sum += weights_length[i].weight
-					* weights_kuhn_length[j].weight * weights_radius[k].weight * FlexExclVolCyl(dp, q);
-				norm += weights_length[i].weight
-					* weights_kuhn_length[j]*weights_radius[k].weight;
+				sum += weights_len[i].weight
+					* weights_kuhn[j].weight*weights_rad[k].weight * FlexExclVolCyl(dp, q);
+				norm += weights_len[i].weight
+					* weights_kuhn[j].weight*weights_rad[k].weight;
+			}
 		}
 	}
 	return sum/norm + background();
