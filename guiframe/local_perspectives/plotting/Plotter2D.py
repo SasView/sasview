@@ -517,9 +517,9 @@ class ModelPanel2D( ModelPanel1D):
             wx.PostEvent(self, event)
           
     
-    def old_onToggleScale(self, event):
+    def _onToggleScale(self, event):
         """
-            toggle pixel scale and replot image
+            toggle scale and replot image
         """
         if self.scale == 'log':
             self.scale = 'linear'
@@ -527,23 +527,5 @@ class ModelPanel2D( ModelPanel1D):
             self.scale = 'log'
         self.image(self.data2D.data,self.xmin_2D,self.xmax_2D,self.ymin_2D,
                    self.ymax_2D,self.zmin_2D ,self.zmax_2D )
-        wx.PostEvent(self.parent, StatusEvent(status="Image is in %s scale"%self.scale))
         
-        """     
-            #TODO: this name should be changed to something more appropriate
-            # Don't forget that changing this name will mean changing code
-            # in plotting.py
-             
-            # Update the plottable with the new data
-            
-            #TODO: we should have a method to do this, 
-            #      something along the lines of:
-            #      plottable1.update_data_from_plottable(plottable2)
-            
-            self.plots[event.plot.name].xmin = event.plot.xmin
-            self.plots[event.plot.name].xmax = event.plot.xmax
-            self.plots[event.plot.name].ymin = event.plot.ymin
-            self.plots[event.plot.name].ymax = event.plot.ymax
-            self.plots[event.plot.name].data = event.plot.data
-            self.plots[event.plot.name].err_data = event.plot.err_data
-        """
+        self.subplot.figure.canvas.draw_idle()
