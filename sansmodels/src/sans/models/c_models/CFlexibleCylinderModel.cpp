@@ -83,9 +83,7 @@ CFlexibleCylinderModel_init(CFlexibleCylinderModel *self, PyObject *args, PyObje
         
         // Initialize parameter dictionary
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
-        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.000000));
         PyDict_SetItemString(self->params,"length",Py_BuildValue("d",1000.000000));
-        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",1.000000));
         PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",20.000000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000100));
         PyDict_SetItemString(self->params,"kuhn_length",Py_BuildValue("d",100.000000));
@@ -97,14 +95,11 @@ CFlexibleCylinderModel_init(CFlexibleCylinderModel *self, PyObject *args, PyObje
         self->model->length.dispersion->accept_as_source(visitor, self->model->length.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "length", disp_dict);
         disp_dict = PyDict_New();
+        self->model->kuhn_length.dispersion->accept_as_source(visitor, self->model->kuhn_length.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "kuhn_length", disp_dict);
+        disp_dict = PyDict_New();
         self->model->radius.dispersion->accept_as_source(visitor, self->model->radius.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "radius", disp_dict);
-        disp_dict = PyDict_New();
-        self->model->axis_theta.dispersion->accept_as_source(visitor, self->model->axis_theta.dispersion, disp_dict);
-        PyDict_SetItemString(self->dispersion, "axis_theta", disp_dict);
-        disp_dict = PyDict_New();
-        self->model->axis_phi.dispersion->accept_as_source(visitor, self->model->axis_phi.dispersion, disp_dict);
-        PyDict_SetItemString(self->dispersion, "axis_phi", disp_dict);
 
 
          
@@ -158,9 +153,7 @@ static PyObject * run(CFlexibleCylinderModel *self, PyObject *args) {
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
-    self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
     self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
-    self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
     self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->kuhn_length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "kuhn_length") );
@@ -170,12 +163,10 @@ static PyObject * run(CFlexibleCylinderModel *self, PyObject *args) {
     DispersionVisitor* visitor = new DispersionVisitor();
     disp_dict = PyDict_GetItemString(self->dispersion, "length");
     self->model->length.dispersion->accept_as_destination(visitor, self->model->length.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "kuhn_length");
+    self->model->kuhn_length.dispersion->accept_as_destination(visitor, self->model->kuhn_length.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "radius");
     self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
-    self->model->axis_theta.dispersion->accept_as_destination(visitor, self->model->axis_theta.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "axis_phi");
-    self->model->axis_phi.dispersion->accept_as_destination(visitor, self->model->axis_phi.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -228,9 +219,7 @@ static PyObject * runXY(CFlexibleCylinderModel *self, PyObject *args) {
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
-    self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
     self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
-    self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
     self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->kuhn_length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "kuhn_length") );
@@ -240,12 +229,10 @@ static PyObject * runXY(CFlexibleCylinderModel *self, PyObject *args) {
     DispersionVisitor* visitor = new DispersionVisitor();
     disp_dict = PyDict_GetItemString(self->dispersion, "length");
     self->model->length.dispersion->accept_as_destination(visitor, self->model->length.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "kuhn_length");
+    self->model->kuhn_length.dispersion->accept_as_destination(visitor, self->model->kuhn_length.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "radius");
     self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
-    self->model->axis_theta.dispersion->accept_as_destination(visitor, self->model->axis_theta.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "axis_phi");
-    self->model->axis_phi.dispersion->accept_as_destination(visitor, self->model->axis_phi.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -303,12 +290,10 @@ static PyObject * set_dispersion(CFlexibleCylinderModel *self, PyObject *args) {
 	    // TODO: refactor this
     if (!strcmp(par_name, "length")) {
         self->model->length.dispersion = dispersion;
+    } else    if (!strcmp(par_name, "kuhn_length")) {
+        self->model->kuhn_length.dispersion = dispersion;
     } else    if (!strcmp(par_name, "radius")) {
         self->model->radius.dispersion = dispersion;
-    } else    if (!strcmp(par_name, "axis_theta")) {
-        self->model->axis_theta.dispersion = dispersion;
-    } else    if (!strcmp(par_name, "axis_phi")) {
-        self->model->axis_phi.dispersion = dispersion;
     } else {
 	    PyErr_SetString(CFlexibleCylinderModelError,
 	    	"CFlexibleCylinderModel.set_dispersion expects a valid parameter name.");

@@ -18,7 +18,7 @@
  *   sansmodels/src/libigor
  *
  *	TODO: refactor so that we pull in the old sansmodels.c_extensions
- *	TODO: add 2d 
+ *	TODO: add 2d
  */
 
 #include <math.h>
@@ -42,8 +42,6 @@ FlexibleCylinderModel :: FlexibleCylinderModel() {
 	radius.set_min(0.0);
 	contrast   = Parameter(5.3e-6);
 	background = Parameter(0.0001);
-	axis_theta  = Parameter(0.0, true);
-	axis_phi    = Parameter(0.0, true);
 }
 
 /**
@@ -100,76 +98,8 @@ double FlexibleCylinderModel :: operator()(double q) {
  * @return: function value
  */
 double FlexibleCylinderModel :: operator()(double qx, double qy) {
-	FlexibleCylinderParameters dp;
-	// Fill parameter array
-	dp.scale      = scale();
-	dp.length     = length();
-	dp.kuhn_length= kuhn_length();
-	dp.radius     = radius();
-	dp.contrast   = contrast();
-	dp.background = background();
-	dp.axis_theta  = axis_theta();
-	dp.axis_phi    = axis_phi();
-
-	// Get the dispersion points for the length
-	vector<WeightPoint> weights_length;
-	length.get_weights(weights_length);
-
-	// Get the dispersion points for the radius
-	vector<WeightPoint> weights_radius;
-	radius.get_weights(weights_radius);
-
-	// Get angular averaging for theta
-	vector<WeightPoint> weights_theta;
-	axis_theta.get_weights(weights_theta);
-
-	// Get angular averaging for phi
-	vector<WeightPoint> weights_phi;
-	axis_phi.get_weights(weights_phi);
-
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
-
-	// Loop over length weight points
-	for(int i=0; i< (int)weights_length.size(); i++) {
-		dp.length = weights_length[i].value;
-
-		// Loop over radius weight points
-		for(int j=0; j< (int)weights_radius.size(); j++) {
-			dp.radius = weights_radius[j].value;
-
-				// Average over theta distribution
-				for(int k=0; k< (int)weights_theta.size(); k++) {
-					dp.axis_theta = weights_theta[k].value;
-
-					// Average over phi distribution
-					for(int l=0; l <(int)weights_phi.size(); l++) {
-						dp.axis_phi = weights_phi[l].value;
-
-						double _ptvalue = weights_length[i].weight
-							* weights_radius[j].weight
-							* weights_theta[k].weight
-							* weights_phi[l].weight
-							* flexible_cylinder_analytical_2DXY(&dp, qx, qy);
-						if (weights_theta.size()>1) {
-							_ptvalue *= sin(weights_theta[k].value);
-						}
-						sum += _ptvalue;
-
-						norm += weights_length[i].weight
-							* weights_radius[j].weight
-							* weights_theta[k].weight
-							* weights_phi[l].weight;
-				}
-			}
-		}
-	}
-	// Averaging in theta needs an extra normalization
-	// factor to account for the sin(theta) term in the
-	// integration (see documentation).
-	if (weights_theta.size()>1) norm = norm / asin(1.0);
-	return sum/norm + background();
+	double q = sqrt(qx*qx + qy*qy);
+	return (*this).operator()(q);
 }
 
 /**
@@ -180,7 +110,7 @@ double FlexibleCylinderModel :: operator()(double qx, double qy) {
  * @return: function value
  */
 double FlexibleCylinderModel :: evaluate_rphi(double q, double phi) {
-	double qx = q*cos(phi);
-	double qy = q*sin(phi);
-	return (*this).operator()(qx, qy);
+	//double qx = q*cos(phi);
+	//double qy = q*sin(phi);
+	return (*this).operator()(q);
 }
