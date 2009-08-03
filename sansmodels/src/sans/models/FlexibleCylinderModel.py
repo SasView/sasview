@@ -37,8 +37,6 @@ class FlexibleCylinderModel(CFlexibleCylinderModel, BaseComponent):
          radius          = 20.0 [A]
          contrast        = 5.3e-006 [1/A²]
          background      = 0.0001 [1/cm]
-         axis_theta      = 1.0 [rad]
-         axis_phi        = 1.0 [rad]
 
     """
         
@@ -52,8 +50,10 @@ class FlexibleCylinderModel(CFlexibleCylinderModel, BaseComponent):
         ## Name of the model
         self.name = "FlexibleCylinderModel"
         ## Model description
-        self.description =""" Note : scale and contrast are both multiplicative factors in the model and are perfectly
-		correlated. One or both of these parameters must be held fixed during model fitting."""
+        self.description =""" Note : 'scale' and 'contrast' are both multiplicative factors in the
+		model and are perfectly correlated. One or
+		both of these parameters must be held fixed
+		during model fitting."""
        
 		## Parameter details [units, min, max]
         self.details = {}
@@ -63,14 +63,12 @@ class FlexibleCylinderModel(CFlexibleCylinderModel, BaseComponent):
         self.details['radius'] = ['[A]', None, None]
         self.details['contrast'] = ['[1/A²]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
-        self.details['axis_theta'] = ['[rad]', None, None]
-        self.details['axis_phi'] = ['[rad]', None, None]
 
 		## fittable parameters
-        self.fixed=['length.width', 'radius.width', 'axis_theta.width', 'axis_phi.width']
+        self.fixed=['length.width', 'kuhn_length.width', 'radius.width']
         
         ## parameters with orientation
-        self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
+        self.orientation_params =[]
    
     def clone(self):
         """ Return a identical copy of self """

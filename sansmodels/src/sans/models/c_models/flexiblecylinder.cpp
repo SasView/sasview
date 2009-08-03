@@ -66,6 +66,10 @@ double FlexibleCylinderModel :: operator()(double q) {
 	vector<WeightPoint> weights_length;
 	length.get_weights(weights_length);
 
+	// Get the dispersion points for the kuhn_length
+	vector<WeightPoint> weights_kuhn_length;
+	kuhn_length.get_weights(weights_kuhn_length);
+
 	// Get the dispersion points for the radius
 	vector<WeightPoint> weights_radius;
 	radius.get_weights(weights_radius);
@@ -79,13 +83,17 @@ double FlexibleCylinderModel :: operator()(double q) {
 		dp[1] = weights_length[i].value;
 
 		// Loop over semi axis B weight points
-		for(int j=0; j< (int)weights_radius.size(); j++) {
-			dp[2] = weights_radius[j].value;
+		for(int j=0; j< (int)weights_kuhn_length.size(); j++) {
+			dp[2] = weights_kuhn_length[j].value;
 
-			sum += weights_length[i].weight
-				* weights_radius[j].weight * FlexExclVolCyl(dp, q);
-			norm += weights_length[i].weight
-					* weights_radius[j].weight;
+			// Loop over semi axis C weight points
+			for(int k=0; k< (int)weights_radius.size(); k++) {
+				dp[3] = weights_radius[k].value;
+
+				sum += weights_length[i].weight
+					* weights_kuhn_length[j].weight * weights_radius[k].weight * FlexExclVolCyl(dp, q);
+				norm += weights_length[i].weight
+					* weights_kuhn_length[j]*weights_radius[k].weight;
 		}
 	}
 	return sum/norm + background();

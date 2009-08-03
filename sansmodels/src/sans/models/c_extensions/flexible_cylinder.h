@@ -12,7 +12,7 @@
 		both of these parameters must be held fixed
 		during model fitting.
 		</text>
-	[FIXED]= <text>length.width; radius.width; , kuhn_length.width</text>
+	[FIXED]= <text>length.width; kuhn_length.width; radius.width</text>
 	[ORIENTATION_PARAMS]= <text></text>
 
 
