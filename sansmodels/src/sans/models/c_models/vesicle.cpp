@@ -33,7 +33,8 @@ VesicleModel :: VesicleModel() {
 	scale      = Parameter(1.0);
 	core_radius     = Parameter(100.0, true);
 	core_radius.set_min(0.0);
-	thickness  = Parameter(30.0);
+	thickness  = Parameter(30.0, true);
+	thickness.set_min(0.0);
 	core_sld   = Parameter(6.36e-6);
 	shell_sld   = Parameter(5.0e-7);
 	background = Parameter(0.0);
@@ -56,11 +57,14 @@ double VesicleModel :: operator()(double q) {
 	dp[3] = core_sld();
 	dp[4] = shell_sld();
 	dp[5] = background();
-	
+
 
 	// Get the dispersion points for the core radius
 	vector<WeightPoint> weights_core_radius;
 	core_radius.get_weights(weights_core_radius);
+	// Get the dispersion points for the thickness
+	vector<WeightPoint> weights_thickness;
+	thickness.get_weights(weights_thickness);
 
 	// Perform the computation, with all weight points
 	double sum = 0.0;
@@ -69,10 +73,12 @@ double VesicleModel :: operator()(double q) {
 	// Loop over radius weight points
 	for(int i=0; i< (int)weights_core_radius.size(); i++) {
 		dp[1] = weights_core_radius[i].value;
-
-		sum += weights_core_radius[i].weight
-			* VesicleForm(dp, q);
-		norm += weights_core_radius[i].weight;
+		for(int j=0; j< (int)weights_core_radius.size(); j++) {
+			dp[2] = weights_thickness[j].value;
+			sum += weights_core_radius[i].weight
+				* weights_thickness[j].weight * VesicleForm(dp, q);
+			norm += weights_core_radius[i].weight * weights_thickness[j].weight;
+		}
 	}
 	return sum/norm + background();
 }

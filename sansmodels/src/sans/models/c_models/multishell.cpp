@@ -33,8 +33,10 @@ MultiShellModel :: MultiShellModel() {
 	scale      = Parameter(1.0);
 	core_radius     = Parameter(60.0, true);
 	core_radius.set_min(0.0);
-	s_thickness  = Parameter(10.0);
-	w_thickness   = Parameter(10.0);
+	s_thickness  = Parameter(10.0, true);
+	s_thickness.set_min(0.0);
+	w_thickness   = Parameter(10.0, true);
+	w_thickness.set_min(0.0);
 	core_sld   = Parameter(6.4e-6);
 	shell_sld   = Parameter(4.0e-7);
 	n_pairs   = Parameter(2);
@@ -59,7 +61,7 @@ double MultiShellModel :: operator()(double q) {
 	dp[4] = core_sld();
 	dp[5] = shell_sld();
 	dp[6] = n_pairs();
-	dp[7] = background();
+	dp[7] = 0.0;
 
 	// Get the dispersion points for the core radius
 	vector<WeightPoint> weights_core_radius;

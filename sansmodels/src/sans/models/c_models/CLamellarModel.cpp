@@ -90,9 +90,6 @@ CLamellarModel_init(CLamellarModel *self, PyObject *args, PyObject *kwds)
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
-        disp_dict = PyDict_New();
-        self->model->delta.dispersion->accept_as_source(visitor, self->model->delta.dispersion, disp_dict);
-        PyDict_SetItemString(self->dispersion, "delta", disp_dict);
 
 
          
@@ -153,8 +150,6 @@ static PyObject * run(CLamellarModel *self, PyObject *args) {
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "delta");
-    self->model->delta.dispersion->accept_as_destination(visitor, self->model->delta.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -214,8 +209,6 @@ static PyObject * runXY(CLamellarModel *self, PyObject *args) {
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "delta");
-    self->model->delta.dispersion->accept_as_destination(visitor, self->model->delta.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -271,9 +264,7 @@ static PyObject * set_dispersion(CLamellarModel *self, PyObject *args) {
 
 	// Ugliness necessary to go from python to C
 	    // TODO: refactor this
-    if (!strcmp(par_name, "delta")) {
-        self->model->delta.dispersion = dispersion;
-    } else {
+ {
 	    PyErr_SetString(CLamellarModelError,
 	    	"CLamellarModel.set_dispersion expects a valid parameter name.");
 		return NULL;

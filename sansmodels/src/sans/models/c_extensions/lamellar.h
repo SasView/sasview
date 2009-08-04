@@ -2,13 +2,16 @@
 #define lamellar_h
 /** Structure definition for lamellar parameters
  * [PYTHONCLASS] = LamellarModel
- * [DISP_PARAMS] =  delta
-   [DESCRIPTION] = <text> I(q)= 2*pi*P(q)/(delta *q^(2))
-						where:
-						P(q)=2*(contrast/q)^(2)*(1-cos(q*delta)*e^(1/2*(q*sigma)^(2))
-				   </text>
-	[FIXED]= delta.width 
-	[ORIENTATION_PARAMS]= 
+   [DESCRIPTION] = <text>[Dilute Lamellar Form Factor](from a lyotropic lamellar phase)
+	   I(q)= 2*pi*P(q)/(delta *q^(2)), where
+		P(q)=2*(contrast/q)^(2)*(1-cos(q*delta)
+		*e^(1/2*(q*sigma)^(2)).
+		delta = bilayer thickness
+		sigma = variation in bilayer thickness
+			= delta*polydispersity
+		contrast = SLD_solvent - SLD_bilayer
+	Note: the polydispersity in delta is included.
+ </text>
  **/
 typedef struct {
     /// Scale factor
@@ -17,7 +20,7 @@ typedef struct {
     /// delta bilayer thickness [A]
     //  [DEFAULT]=delta=50.0 [A]
     double delta;
-    /// variation in bilayer thickness 
+    /// variation in bilayer thickness
     //  [DEFAULT]=sigma=0.15
     double sigma;
     /// Contrast [1/A²]
@@ -26,7 +29,7 @@ typedef struct {
 	/// Incoherent Background [1/cm] 0.00
 	//  [DEFAULT]=background=0.0 [1/cm]
 	double background;
-   
+
 
 } LamellarParameters;
 

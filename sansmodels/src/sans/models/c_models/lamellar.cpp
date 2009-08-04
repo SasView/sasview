@@ -33,9 +33,10 @@ extern "C" {
 
 LamellarModel :: LamellarModel() {
 	scale      = Parameter(1.0);
-	delta     = Parameter(50.0, true);
+	delta     = Parameter(50.0);
 	delta.set_min(0.0);
-	sigma    = Parameter(0.15, true);
+	sigma    = Parameter(0.15);
+	sigma.set_min(0.0);
 	contrast   = Parameter(5.3e-6);
 	background = Parameter(0.0);
 
@@ -58,23 +59,7 @@ double LamellarModel :: operator()(double q) {
 	dp[3] = contrast();
 	dp[4] = background();
 
-
-	// Get the dispersion points for the bilayer thickness(delta)
-	vector<WeightPoint> weights_delta;
-	delta.get_weights(weights_delta);
-
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
-
-	// Loop over semi axis A weight points
-	for(int i=0; i< (int)weights_delta.size(); i++) {
-		dp[1] = weights_delta[i].value;
-		sum += weights_delta[i].weight* LamellarFF(dp, q);
-		norm += weights_delta[i].weight;
-				
-	}
-	return sum/norm + background();
+	return LamellarFF(dp, q);
 }
 
 /**
@@ -85,33 +70,8 @@ double LamellarModel :: operator()(double q) {
  */
 
 double LamellarModel :: operator()(double qx, double qy) {
-	LamellarParameters dp;
-
-	// Fill parameter array for IGOR library
-	// Add the background after averaging
-	dp.scale = scale();
-	dp.delta = delta();
-	dp.sigma = sigma();
-	dp.contrast = contrast();
-	dp.background = background();
-
-
-	// Get the dispersion points for the bilayer thickness(delta)
-	vector<WeightPoint> weights_delta;
-	delta.get_weights(weights_delta);
-
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
-
-	// Loop over detla  weight points
-	for(int i=0; i< (int)weights_delta.size(); i++) {
-		dp.delta = weights_delta[i].value;
-		sum += weights_delta[i].weight* lamellar_analytical_2DXY(&dp, qx, qy);
-		norm += weights_delta[i].weight;
-				
-	}
-	return sum/norm + background();
+	double q = sqrt(qx*qx + qy*qy);
+	return (*this).operator()(q);
 }
 
 /**
@@ -122,7 +82,5 @@ double LamellarModel :: operator()(double qx, double qy) {
  * @return: function value
  */
 double LamellarModel :: evaluate_rphi(double q, double phi) {
-	double qx = q*cos(phi);
-	double qy = q*sin(phi);
-	return (*this).operator()(qx, qy);
+	return (*this).operator()(q);
 }
