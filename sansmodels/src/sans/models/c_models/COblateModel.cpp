@@ -107,12 +107,6 @@ COblateModel_init(COblateModel *self, PyObject *args, PyObject *kwds)
         disp_dict = PyDict_New();
         self->model->minor_shell.dispersion->accept_as_source(visitor, self->model->minor_shell.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "minor_shell", disp_dict);
-        disp_dict = PyDict_New();
-        self->model->axis_theta.dispersion->accept_as_source(visitor, self->model->axis_theta.dispersion, disp_dict);
-        PyDict_SetItemString(self->dispersion, "axis_theta", disp_dict);
-        disp_dict = PyDict_New();
-        self->model->axis_phi.dispersion->accept_as_source(visitor, self->model->axis_phi.dispersion, disp_dict);
-        PyDict_SetItemString(self->dispersion, "axis_phi", disp_dict);
 
 
          
@@ -186,10 +180,6 @@ static PyObject * run(COblateModel *self, PyObject *args) {
     self->model->major_shell.dispersion->accept_as_destination(visitor, self->model->major_shell.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "minor_shell");
     self->model->minor_shell.dispersion->accept_as_destination(visitor, self->model->minor_shell.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
-    self->model->axis_theta.dispersion->accept_as_destination(visitor, self->model->axis_theta.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "axis_phi");
-    self->model->axis_phi.dispersion->accept_as_destination(visitor, self->model->axis_phi.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -262,10 +252,6 @@ static PyObject * runXY(COblateModel *self, PyObject *args) {
     self->model->major_shell.dispersion->accept_as_destination(visitor, self->model->major_shell.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "minor_shell");
     self->model->minor_shell.dispersion->accept_as_destination(visitor, self->model->minor_shell.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
-    self->model->axis_theta.dispersion->accept_as_destination(visitor, self->model->axis_theta.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "axis_phi");
-    self->model->axis_phi.dispersion->accept_as_destination(visitor, self->model->axis_phi.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -329,10 +315,6 @@ static PyObject * set_dispersion(COblateModel *self, PyObject *args) {
         self->model->major_shell.dispersion = dispersion;
     } else    if (!strcmp(par_name, "minor_shell")) {
         self->model->minor_shell.dispersion = dispersion;
-    } else    if (!strcmp(par_name, "axis_theta")) {
-        self->model->axis_theta.dispersion = dispersion;
-    } else    if (!strcmp(par_name, "axis_phi")) {
-        self->model->axis_phi.dispersion = dispersion;
     } else {
 	    PyErr_SetString(COblateModelError,
 	    	"COblateModel.set_dispersion expects a valid parameter name.");

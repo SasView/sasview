@@ -17,8 +17,8 @@
  * @return: function value
  */
 double prolate_analytical_1D(ProlateParameters *pars, double q) {
-	double dp[10];
-	
+	double dp[8];
+
 	// Fill paramater array
 	dp[0] = pars->scale;
 	dp[1] = pars->major_core;
@@ -28,11 +28,9 @@ double prolate_analytical_1D(ProlateParameters *pars, double q) {
 	dp[5] = pars->contrast;
 	dp[6] = pars->sld_solvent;
 	dp[7] = pars->background;
-	dp[8] = pars->axis_theta;
-	dp[9] = pars->axis_phi;
-	
+
 	// Call library function to evaluate model
-	return ProlateForm(dp, q);	
+	return ProlateForm(dp, q);
 }
 
 /**
@@ -44,8 +42,8 @@ double prolate_analytical_1D(ProlateParameters *pars, double q) {
 double prolate_analytical_2DXY(ProlateParameters *pars, double qx, double qy) {
 	double q;
 	q = sqrt(qx*qx+qy*qy);
-    return prolate_analytical_2D_scaled(pars, q, qx/q, qy/q);
-} 
+    return prolate_analytical_1D(pars, q);
+}
 
 
 /**
@@ -56,9 +54,9 @@ double prolate_analytical_2DXY(ProlateParameters *pars, double qx, double qy) {
  * @return: function value
  */
 double prolate_analytical_2D(ProlateParameters *pars, double q, double phi) {
-    return prolate_analytical_2D_scaled(pars, q, cos(phi), sin(phi));
-} 
-        
+    return prolate_analytical_1D(pars, q);
+}
+
 /**
  * Function to evaluate 2D scattering function
  * @param pars: parameters of the prolate
@@ -67,8 +65,8 @@ double prolate_analytical_2D(ProlateParameters *pars, double q, double phi) {
  * @param q_y: q_y / q
  * @return: function value
  */
-double prolate_analytical_2D_scaled(ProlateParameters *pars, double q, double q_x, double q_y) {
-	
-	return 1.0;
-}
-    
+//double prolate_analytical_2D_scaled(ProlateParameters *pars, double q, double q_x, double q_y) {
+//
+//	return 1.0;
+//}
+

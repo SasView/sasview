@@ -85,9 +85,7 @@ CProlateModel_init(CProlateModel *self, PyObject *args, PyObject *kwds)
         PyDict_SetItemString(self->params,"major_core",Py_BuildValue("d",100.000000));
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
         PyDict_SetItemString(self->params,"minor_core",Py_BuildValue("d",50.000000));
-        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.000000));
         PyDict_SetItemString(self->params,"sld_solvent",Py_BuildValue("d",0.000006));
-        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",1.000000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000));
         PyDict_SetItemString(self->params,"major_shell",Py_BuildValue("d",110.000000));
         PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000001));
@@ -107,12 +105,6 @@ CProlateModel_init(CProlateModel *self, PyObject *args, PyObject *kwds)
         disp_dict = PyDict_New();
         self->model->minor_shell.dispersion->accept_as_source(visitor, self->model->minor_shell.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "minor_shell", disp_dict);
-        disp_dict = PyDict_New();
-        self->model->axis_theta.dispersion->accept_as_source(visitor, self->model->axis_theta.dispersion, disp_dict);
-        PyDict_SetItemString(self->dispersion, "axis_theta", disp_dict);
-        disp_dict = PyDict_New();
-        self->model->axis_phi.dispersion->accept_as_source(visitor, self->model->axis_phi.dispersion, disp_dict);
-        PyDict_SetItemString(self->dispersion, "axis_phi", disp_dict);
 
 
          
@@ -168,9 +160,7 @@ static PyObject * run(CProlateModel *self, PyObject *args) {
     self->model->major_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "major_core") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
     self->model->minor_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "minor_core") );
-    self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
     self->model->sld_solvent = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_solvent") );
-    self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->major_shell = PyFloat_AsDouble( PyDict_GetItemString(self->params, "major_shell") );
     self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
@@ -186,10 +176,6 @@ static PyObject * run(CProlateModel *self, PyObject *args) {
     self->model->major_shell.dispersion->accept_as_destination(visitor, self->model->major_shell.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "minor_shell");
     self->model->minor_shell.dispersion->accept_as_destination(visitor, self->model->minor_shell.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
-    self->model->axis_theta.dispersion->accept_as_destination(visitor, self->model->axis_theta.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "axis_phi");
-    self->model->axis_phi.dispersion->accept_as_destination(visitor, self->model->axis_phi.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -244,9 +230,7 @@ static PyObject * runXY(CProlateModel *self, PyObject *args) {
     self->model->major_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "major_core") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
     self->model->minor_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "minor_core") );
-    self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
     self->model->sld_solvent = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_solvent") );
-    self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->major_shell = PyFloat_AsDouble( PyDict_GetItemString(self->params, "major_shell") );
     self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
@@ -262,10 +246,6 @@ static PyObject * runXY(CProlateModel *self, PyObject *args) {
     self->model->major_shell.dispersion->accept_as_destination(visitor, self->model->major_shell.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "minor_shell");
     self->model->minor_shell.dispersion->accept_as_destination(visitor, self->model->minor_shell.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
-    self->model->axis_theta.dispersion->accept_as_destination(visitor, self->model->axis_theta.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "axis_phi");
-    self->model->axis_phi.dispersion->accept_as_destination(visitor, self->model->axis_phi.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -329,10 +309,6 @@ static PyObject * set_dispersion(CProlateModel *self, PyObject *args) {
         self->model->major_shell.dispersion = dispersion;
     } else    if (!strcmp(par_name, "minor_shell")) {
         self->model->minor_shell.dispersion = dispersion;
-    } else    if (!strcmp(par_name, "axis_theta")) {
-        self->model->axis_theta.dispersion = dispersion;
-    } else    if (!strcmp(par_name, "axis_phi")) {
-        self->model->axis_phi.dispersion = dispersion;
     } else {
 	    PyErr_SetString(CProlateModelError,
 	    	"CProlateModel.set_dispersion expects a valid parameter name.");

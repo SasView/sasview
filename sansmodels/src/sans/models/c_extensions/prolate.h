@@ -2,14 +2,27 @@
 #define prolate_h
 /** Structure definition for prolate parameters
  * [PYTHONCLASS] = ProlateModel
- * [DISP_PARAMS] = major_core, minor_core, major_shell,minor_shell, axis_theta, axis_phi
-   [DESCRIPTION] = <text> Calculates the form factor for a monodisperse prolate ellipsoid particle with a
-						core/shell structure
-						Note:It is the users' responsibility to ensure that shell radii are larger than core radii, and
-					that major radii are larger than minor radii.</text>
-
-   [FIXED] = <text>axis_phi.width; axis_theta.width; major_core.width;minor_core.width; major_shell; minor_shell</text>
-   [ORIENTATION_PARAMS] = <text>axis_phi; axis_theta; axis_phi.width; axis_theta.width</text>
+ * [DISP_PARAMS] = major_core, minor_core, major_shell,minor_shell
+   [DESCRIPTION] = <text>[ProlateCoreShellModel] Calculates the form factor for a prolate
+			ellipsoid particle with a core_shell structure.
+			The form factor is averaged over all possible
+			orientations of the ellipsoid such that P(q)
+			= scale*<f^2>/Vol + bkg, where f is the
+			single particle scattering amplitude.
+			[Parameters]:
+			major_core = radius of major_core,
+			minor_core = radius of minor_core,
+			major_shell = radius of major_shell,
+			minor_shell = radius of minor_shell,
+			contrast = SLD_core - SLD_shell
+			sld_solvent = SLD_solvent
+			background = Incoherent bkg
+			scale = scale
+			Note:It is the users' responsibility to ensure
+			that shell radii are larger than core radii.
+			</text>
+   [FIXED] = <text>major_core.width;minor_core.width; major_shell.width; minor_shell.width</text>
+   [ORIENTATION_PARAMS] =
 
  **/
 typedef struct {
@@ -37,12 +50,6 @@ typedef struct {
 	/// Incoherent Background [1/cm] 0.001
 	//  [DEFAULT]=background=0.001 [1/cm]
 	double background;
-    /// Orientation of the prolate axis w/respect incoming beam [rad]
-    //  [DEFAULT]=axis_theta=1.0 [rad]
-    double axis_theta;
-    /// Orientation of the prolate in the plane of the detector [rad]
-    //  [DEFAULT]=axis_phi=1.0 [rad]
-    double axis_phi;
 
 } ProlateParameters;
 
@@ -54,6 +61,6 @@ double prolate_analytical_1D(ProlateParameters *pars, double q);
 /// 2D scattering function
 double prolate_analytical_2D(ProlateParameters *pars, double q, double phi);
 double prolate_analytical_2DXY(ProlateParameters *pars, double qx, double qy);
-double prolate_analytical_2D_scaled(ProlateParameters *pars, double q, double q_x, double q_y);
+//double prolate_analytical_2D_scaled(ProlateParameters *pars, double q, double q_x, double q_y);
 
 #endif
