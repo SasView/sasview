@@ -49,9 +49,15 @@ class LamellarModel(CLamellarModel, BaseComponent):
         ## Name of the model
         self.name = "LamellarModel"
         ## Model description
-        self.description =""" I(q)= 2*pi*P(q)/(delta *q^(2))
-		where:
-		P(q)=2*(contrast/q)^(2)*(1-cos(q*delta)*e^(1/2*(q*sigma)^(2))"""
+        self.description ="""[Dilute Lamellar Form Factor](from a lyotropic lamellar phase)
+		I(q)= 2*pi*P(q)/(delta *q^(2)), where
+		P(q)=2*(contrast/q)^(2)*(1-cos(q*delta)
+		*e^(1/2*(q*sigma)^(2)).
+		delta = bilayer thickness
+		sigma = variation in bilayer thickness
+		= delta*polydispersity
+		contrast = SLD_solvent - SLD_bilayer
+		Note: the polydispersity in delta is included."""
        
 		## Parameter details [units, min, max]
         self.details = {}
@@ -62,7 +68,7 @@ class LamellarModel(CLamellarModel, BaseComponent):
         self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters
-        self.fixed=['delta.width']
+        self.fixed=[]
         
         ## parameters with orientation
         self.orientation_params =[]

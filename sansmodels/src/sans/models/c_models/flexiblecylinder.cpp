@@ -60,7 +60,7 @@ double FlexibleCylinderModel :: operator()(double q) {
 	dp[2] = kuhn_length();
 	dp[3] = radius();
 	dp[4] = contrast();
-	dp[5] = background();
+	dp[5] = 0.0;
 
 	// Get the dispersion points for the length
 	vector<WeightPoint> weights_len;

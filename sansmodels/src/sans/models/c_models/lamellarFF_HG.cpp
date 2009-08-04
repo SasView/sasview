@@ -61,7 +61,7 @@ double LamellarFFHGModel :: operator()(double q) {
 	dp[3] = sld_tail();
 	dp[4] = sld_head();
 	dp[5] = sld_solvent();
-	dp[6] = background();
+	dp[6] = 0.0;
 
 	// Get the dispersion points for the tail length
 	vector<WeightPoint> weights_t_length;
@@ -85,7 +85,7 @@ double LamellarFFHGModel :: operator()(double q) {
 			sum += weights_t_length[i].weight* weights_h_thickness[j].weight*LamellarFF_HG(dp, q);
 			norm += weights_t_length[i].weight* weights_h_thickness[j].weight;
 		}
-				
+
 	}
 	return sum/norm + background();
 }
@@ -98,45 +98,8 @@ double LamellarFFHGModel :: operator()(double q) {
  */
 
 double LamellarFFHGModel :: operator()(double qx, double qy) {
-	LamellarFF_HGParameters dp;
-
-	// Fill parameter array for IGOR library
-	// Add the background after averaging
-	dp.scale = scale();
-	dp.t_length = t_length();
-	dp.h_thickness = h_thickness();
-	dp.sld_tail = sld_tail();
-	dp.sld_head = sld_head();
-	dp.sld_solvent = sld_solvent();
-	dp.background = background();
-
-
-	// Get the dispersion points for the tail length
-	vector<WeightPoint> weights_t_length;
-	t_length.get_weights(weights_t_length);
-
-	// Get the dispersion points for the head thickness
-	vector<WeightPoint> weights_h_thickness;
-	h_thickness.get_weights(weights_h_thickness);
-
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
-
-	// Loop over detla  weight points
-	for(int i=0; i< (int)weights_t_length.size(); i++) {
-		dp.t_length = weights_t_length[i].value;
-
-		for(int j=0; j< (int)weights_h_thickness.size(); j++) {
-			dp.h_thickness = weights_h_thickness[j].value;
-
-			sum += weights_t_length[i].weight* weights_h_thickness[j].weight
-				* lamellarFF_HG_analytical_2DXY(&dp, qx, qy);
-			norm += weights_t_length[i].weight* weights_h_thickness[j].weight;
-		}
-				
-	}
-	return sum/norm + background();
+	double q = sqrt(qx*qx + qy*qy);
+	return (*this).operator()(q);
 }
 
 /**
@@ -147,7 +110,5 @@ double LamellarFFHGModel :: operator()(double qx, double qy) {
  * @return: function value
  */
 double LamellarFFHGModel :: evaluate_rphi(double q, double phi) {
-	double qx = q*cos(phi);
-	double qy = q*sin(phi);
-	return (*this).operator()(qx, qy);
+	return (*this).operator()(q);
 }

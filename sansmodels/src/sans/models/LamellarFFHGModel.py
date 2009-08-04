@@ -51,11 +51,14 @@ class LamellarFFHGModel(CLamellarFFHGModel, BaseComponent):
         ## Name of the model
         self.name = "LamellarFFHGModel"
         ## Model description
-        self.description ="""
-		NOTE: The total bilayer thickness = 2(h_thickness + t_length)
-		The meaning of the multiplicative scale factor is not well-defined, but should be on the
-		order of the volume fraction of solution occupied by the lamellar crystallites. Please see
-		the original references for clarification."""
+        self.description =""" Parameters: t_length = tail length, h_thickness = head thickness,
+		scale = Scale factor,
+		background = incoherent Background
+		sld_tail = tail scattering length density ,
+		sld_solvent = solvent scattering length density.
+		NOTE: The total bilayer thickness
+		= 2(h_thickness+ t_length).
+		"""
        
 		## Parameter details [units, min, max]
         self.details = {}

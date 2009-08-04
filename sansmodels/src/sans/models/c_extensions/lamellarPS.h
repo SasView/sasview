@@ -6,10 +6,27 @@
 #define lamellarPS_h
 /** Structure definition for concentrated lamellar form factor parameters
  * [PYTHONCLASS] = LamellarPSModel
- * [DISP_PARAMS] = delta
-   [DESCRIPTION] = <text> Calculates the scattered intensity from a lyotropic lamellar phase</text>
-   [FIXED]= delta.with
-   [ORIENTATION_PARAMS]= 
+ * [DISP_PARAMS] = spacing
+   [DESCRIPTION] = <text>Calculates the scattered intensity from a lyotropic lamellar phase.
+	   The intensity (form factor and structure factor)
+		calculated is for lamellae of uniform scattering
+		length density that are randomly distributed in
+		solution (a powder average). The lamellae
+		thickness is polydisperse. The model can also
+		be applied to large, multi-lamellar vesicles.
+		No resolution smeared version is included
+		in the structure factor of this model.
+		*Parameters: spacing = repeat spacing,
+		delta = bilayer thickness,
+		sigma = variation in bilayer thickness
+		contrast = SLD_solvent - SLD_bilayer
+		n_plate = # of Lamellar plates
+		caille = Caille parameter (<0.8 or <1)
+		background = incoherent bgd
+		scale = scale factor
+</text>
+   [FIXED]= spacing.with
+   [ORIENTATION_PARAMS]=
 
  **/
 typedef struct {
@@ -34,10 +51,10 @@ typedef struct {
     /// caille parameters
     //  [DEFAULT]=caille=0.1
     double caille;
-	/// Incoherent Background [1/cm] 
+	/// Incoherent Background [1/cm]
 	//  [DEFAULT]=background=0.0 [1/cm]
 	double background;
-   
+
 } LamellarPSParameters;
 
 
@@ -48,6 +65,5 @@ double lamellarPS_analytical_1D(LamellarPSParameters *pars, double q);
 /// 2D scattering function
 double lamellarPS_analytical_2D(LamellarPSParameters *pars, double q, double phi);
 double lamellarPS_analytical_2DXY(LamellarPSParameters *pars, double qx, double qy);
-double lamellarPS_analytical_2D_scaled(LamellarPSParameters *pars, double q, double q_x, double q_y);
 
 #endif

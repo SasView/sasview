@@ -50,14 +50,12 @@ class VesicleModel(CVesicleModel, BaseComponent):
         ## Name of the model
         self.name = "VesicleModel"
         ## Model description
-        self.description ="""
-		Model parameters:
-		scale : scale factor
-		core_radius : Core radius of the vesicle
+        self.description ="""Model parameters:  core_radius : Core radius of the vesicle
 		thickness: shell thickness
 		core_sld: core scattering length density
 		shell_sld: shell scattering length density
-		background: incoherent background"""
+		background: incoherent background
+		scale : scale factor"""
        
 		## Parameter details [units, min, max]
         self.details = {}
@@ -69,7 +67,7 @@ class VesicleModel(CVesicleModel, BaseComponent):
         self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters
-        self.fixed=['core_radius.width']
+        self.fixed=['core_radius.width', 'thickness.width']
         
         ## parameters with orientation
         self.orientation_params =[]

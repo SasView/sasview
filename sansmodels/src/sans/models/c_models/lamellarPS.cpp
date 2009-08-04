@@ -34,10 +34,12 @@ extern "C" {
 
 LamellarPSModel :: LamellarPSModel() {
 	scale      = Parameter(1.0);
-	spacing    = Parameter(400.0);
-	delta     = Parameter(30.0, true);
+	spacing    = Parameter(400.0, true);
+	spacing.set_min(0.0);
+	delta     = Parameter(30.0);
 	delta.set_min(0.0);
-	sigma    = Parameter(0.15, true);
+	sigma    = Parameter(0.15);
+	sigma.set_min(0.0);
 	contrast   = Parameter(5.3e-6);
 	n_plates     = Parameter(20.0);
 	caille = Parameter(0.1);
@@ -63,24 +65,24 @@ double LamellarPSModel :: operator()(double q) {
 	dp[4] = contrast();
 	dp[5] = n_plates();
 	dp[6] = caille();
-	dp[7] = background();
-	
+	dp[7] = 0.0;
+
 
 	// Get the dispersion points for (delta) thickness
-	vector<WeightPoint> weights_delta;
-	delta.get_weights(weights_delta);
-	
+	vector<WeightPoint> weights_spacing;
+	spacing.get_weights(weights_spacing);
+
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
-	
-	// Loop over short_edgeA weight points
-	for(int i=0; i< (int)weights_delta.size(); i++) {
-		dp[2] = weights_delta[i].value;
 
-		sum += weights_delta[i].weight * LamellarPS(dp, q);
-		norm += weights_delta[i].weight;
-				
+	// Loop over short_edgeA weight points
+	for(int i=0; i< (int)weights_spacing.size(); i++) {
+		dp[1] = weights_spacing[i].value;
+
+		sum += weights_spacing[i].weight * LamellarPS(dp, q);
+		norm += weights_spacing[i].weight;
+
 	}
 	return sum/norm + background();
 }
@@ -91,37 +93,9 @@ double LamellarPSModel :: operator()(double q) {
  * @return: function value
  */
 double LamellarPSModel :: operator()(double qx, double qy) {
-	LamellarPSParameters dp;
-	// Fill parameter array
-	dp.scale      = scale();
-	dp.spacing   = spacing();
-	dp.delta  = delta();
-	dp.sigma = sigma();
-	dp.contrast   = contrast();
-	dp.n_plates = n_plates();
-	dp.caille = caille();
-	dp.background    = background();
-	
-
-	// Get the dispersion points for the delta
-	vector<WeightPoint> weights_delta;
-	delta.get_weights(weights_delta);
-
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
-
-	// Loop over radius weight points
-	for(int i=0; i< (int)weights_delta.size(); i++) {
-		dp.delta = weights_delta[i].value;
-
-		sum += weights_delta[i].weight *lamellarPS_analytical_2DXY(&dp, qx, qy);	
-		norm += weights_delta[i].weight;	
-	}
-	
-	return sum/norm + background();
+	double q = sqrt(qx*qx + qy*qy);
+	return (*this).operator()(q);
 }
-
 
 /**
  * Function to evaluate 2D scattering function
@@ -131,7 +105,5 @@ double LamellarPSModel :: operator()(double qx, double qy) {
  * @return: function value
  */
 double LamellarPSModel :: evaluate_rphi(double q, double phi) {
-	double qx = q*cos(phi);
-	double qy = q*sin(phi);
-	return (*this).operator()(qx, qy);
+	return (*this).operator()(q);
 }

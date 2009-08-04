@@ -18,7 +18,7 @@
  */
 double lamellarFF_HG_analytical_1D(LamellarFF_HGParameters *pars, double q) {
 	double dp[7];
-	
+
 	// Fill paramater array
 	dp[0] = pars->scale;
 	dp[1] = pars->t_length;
@@ -27,18 +27,14 @@ double lamellarFF_HG_analytical_1D(LamellarFF_HGParameters *pars, double q) {
 	dp[4] = pars->sld_head;
 	dp[5] = pars->sld_solvent;
 	dp[6] = pars->background;
-	
+
 	// Call library function to evaluate model
-	return LamellarFF_HG(dp, q);	
+	return LamellarFF_HG(dp, q);
 }
 
 double lamellarFF_HG_analytical_2D(LamellarFF_HGParameters *pars, double q, double phi){
-	return 1.0;
+	return lamellarFF_HG_analytical_1D(pars,q);
 }
 double lamellarFF_HG_analytical_2DXY(LamellarFF_HGParameters *pars, double qx, double qy){
-	return 1.0;
+	return lamellarFF_HG_analytical_1D(pars,sqrt(qx*qx+qy*qy));
 }
-double lamellarFF_HG_analytical_2D_scaled(LamellarFF_HGParameters *pars, double q, double q_x, double q_y){
-	return 1.0;
-}
-
