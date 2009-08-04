@@ -54,8 +54,23 @@ class OblateModel(COblateModel, BaseComponent):
         ## Name of the model
         self.name = "OblateModel"
         ## Model description
-        self.description =""" Calculates the form factor for an oblate ellipsoid particle with a core/shell structure.
-		Note:It is the users' responsibility to ensure that shell radii are larger than core radii, and"""
+        self.description ="""[OblateCoreShellModel] Calculates the form factor for an oblate
+		ellipsoid particle with a core_shell structure.
+		The form factor is averaged over all possible
+		orientations of the ellipsoid such that P(q)
+		= scale*<f^2>/Vol + bkg, where f is the
+		single particle scattering amplitude.
+		[Parameters]:
+		major_core = radius of major_core,
+		minor_core = radius of minor_core,
+		major_shell = radius of major_shell,
+		minor_shell = radius of minor_shell,
+		contrast = SLD_core - SLD_shell
+		sld_solvent = SLD_solvent
+		background = Incoherent bkg
+		scale =scale
+		Note:It is the users' responsibility to ensure
+		that shell radii are larger than core radii."""
        
 		## Parameter details [units, min, max]
         self.details = {}
@@ -71,10 +86,10 @@ class OblateModel(COblateModel, BaseComponent):
         self.details['axis_phi'] = ['[rad]', None, None]
 
 		## fittable parameters
-        self.fixed=['axis_phi.width', 'axis_theta.width', 'major_core.width', 'minor_core.width', 'major_shell', 'minor_shell']
+        self.fixed=['major_core.width', 'minor_core.width', 'major_shell.width', 'minor_shell.width']
         
         ## parameters with orientation
-        self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
+        self.orientation_params =[]
    
     def clone(self):
         """ Return a identical copy of self """

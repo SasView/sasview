@@ -59,7 +59,7 @@ double HollowCylinderModel :: operator()(double q) {
 	dp[2] = shell_radius();
 	dp[3] = length();
 	dp[4] = contrast();
-	dp[5] = background();
+	dp[5] = 0.0;
 
 	// Get the dispersion points for the core radius
 	vector<WeightPoint> weights_core_radius;
@@ -116,7 +116,7 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 	dp.shell_radius  = shell_radius();
 	dp.length     = length();
 	dp.contrast   = contrast();
-	dp.background = background();
+	dp.background = 0.0;
 	dp.axis_theta = axis_theta();
 	dp.axis_phi   = axis_phi();
 

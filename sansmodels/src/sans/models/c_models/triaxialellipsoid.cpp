@@ -61,7 +61,7 @@ double TriaxialEllipsoidModel :: operator()(double q) {
 	dp[2] = semi_axisB();
 	dp[3] = semi_axisC();
 	dp[4] = contrast();
-	dp[5] = background();
+	dp[5] = 0.0;
 
 	// Get the dispersion points for the semi axis A
 	vector<WeightPoint> weights_semi_axisA;

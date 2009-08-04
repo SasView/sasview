@@ -56,7 +56,7 @@ double VesicleModel :: operator()(double q) {
 	dp[2] = thickness();
 	dp[3] = core_sld();
 	dp[4] = shell_sld();
-	dp[5] = background();
+	dp[5] = 0.0;
 
 
 	// Get the dispersion points for the core radius

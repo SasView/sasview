@@ -30,7 +30,7 @@ extern "C" {
 }
 
 BinaryHSModel :: BinaryHSModel() {
-	
+
 	l_radius     = Parameter(160.0, true);
 	l_radius.set_min(0.0);
 	s_radius    = Parameter(25.0, true);
@@ -61,8 +61,8 @@ double BinaryHSModel :: operator()(double q) {
 	dp[4] = ls_sld();
 	dp[5] = ss_sld();
 	dp[6] = solvent_sld();
-	dp[7] = background();
-	
+	dp[7] = 0.0;
+
 
 	// Get the dispersion points for the large radius
 	vector<WeightPoint> weights_l_radius;
@@ -79,7 +79,7 @@ double BinaryHSModel :: operator()(double q) {
 	// Loop over larger radius weight points
 	for(int i=0; i< (int)weights_l_radius.size(); i++) {
 		dp[0] = weights_l_radius[i].value;
-		
+
 		// Loop over small radius weight points
 		for(int j=0; j< (int)weights_s_radius.size(); j++) {
 			dp[1] = weights_s_radius[j].value;

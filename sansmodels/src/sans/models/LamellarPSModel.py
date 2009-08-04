@@ -52,12 +52,14 @@ class LamellarPSModel(CLamellarPSModel, BaseComponent):
         ## Name of the model
         self.name = "LamellarPSModel"
         ## Model description
-        self.description ="""Calculates the scattered intensity from a lyotropic lamellar phase.
-		The intensity (form factor and structure factor)
-		calculated is for lamellae of uniform scattering
-		length density that are randomly distributed in
-		solution (a powder average). The lamellae
-		thickness is polydisperse. The model can also
+        self.description ="""[Concentrated Lamellar Form Factor] Calculates the scattered
+		intensity from a lyotropic lamellar phase.
+		The intensity (form factor and structure
+		factor)calculated is for lamellae of
+		uniform scattering length density that
+		are randomly distributed in solution
+		(a powder average). The lamellae thickness
+		is polydisperse. The model can also
 		be applied to large, multi-lamellar vesicles.
 		No resolution smeared version is included
 		in the structure factor of this model.
@@ -82,7 +84,7 @@ class LamellarPSModel(CLamellarPSModel, BaseComponent):
         self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters
-        self.fixed=['spacing.with']
+        self.fixed=['spacing.width']
         
         ## parameters with orientation
         self.orientation_params =[]

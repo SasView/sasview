@@ -39,8 +39,6 @@ class ProlateModel(CProlateModel, BaseComponent):
          contrast        = 1e-006 [1/A²]
          sld_solvent     = 6.3e-006 [1/A²]
          background      = 0.001 [1/cm]
-         axis_theta      = 1.0 [rad]
-         axis_phi        = 1.0 [rad]
 
     """
         
@@ -54,9 +52,23 @@ class ProlateModel(CProlateModel, BaseComponent):
         ## Name of the model
         self.name = "ProlateModel"
         ## Model description
-        self.description =""" Calculates the form factor for a monodisperse prolate ellipsoid particle with a
-		core/shell structure
-		Note:It is the users' responsibility to ensure that shell radii are larger than core radii, and"""
+        self.description ="""[ProlateCoreShellModel] Calculates the form factor for a prolate
+		ellipsoid particle with a core_shell structure.
+		The form factor is averaged over all possible
+		orientations of the ellipsoid such that P(q)
+		= scale*<f^2>/Vol + bkg, where f is the
+		single particle scattering amplitude.
+		[Parameters]:
+		major_core = radius of major_core,
+		minor_core = radius of minor_core,
+		major_shell = radius of major_shell,
+		minor_shell = radius of minor_shell,
+		contrast = SLD_core - SLD_shell
+		sld_solvent = SLD_solvent
+		background = Incoherent bkg
+		scale = scale
+		Note:It is the users' responsibility to ensure
+		that shell radii are larger than core radii."""
        
 		## Parameter details [units, min, max]
         self.details = {}
@@ -68,14 +80,12 @@ class ProlateModel(CProlateModel, BaseComponent):
         self.details['contrast'] = ['[1/A²]', None, None]
         self.details['sld_solvent'] = ['[1/A²]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
-        self.details['axis_theta'] = ['[rad]', None, None]
-        self.details['axis_phi'] = ['[rad]', None, None]
 
 		## fittable parameters
-        self.fixed=['axis_phi.width', 'axis_theta.width', 'major_core.width', 'minor_core.width', 'major_shell', 'minor_shell']
+        self.fixed=['major_core.width', 'minor_core.width', 'major_shell.width', 'minor_shell.width']
         
         ## parameters with orientation
-        self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
+        self.orientation_params =[]
    
     def clone(self):
         """ Return a identical copy of self """

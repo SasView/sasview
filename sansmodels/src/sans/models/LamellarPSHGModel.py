@@ -54,7 +54,25 @@ class LamellarPSHGModel(CLamellarPSHGModel, BaseComponent):
         ## Name of the model
         self.name = "LamellarPSHGModel"
         ## Model description
-        self.description =""" Calculates the scattered intensity from a concentrated lamellar phase"""
+        self.description ="""[Concentrated Lamellar (head+tail) Form Factor]: Calculates the
+		intensity from a lyotropic lamellar phase.
+		The intensity (form factor and structure factor)
+		calculated is for lamellae of two-layer scattering
+		length density that are randomly distributed in
+		solution (a powder average). The scattering
+		length density of the tail region, headgroup
+		region, and solvent are taken to be different.
+		The model can also be applied to large,
+		multi-lamellar vesicles.
+		No resolution smeared version is included
+		in the structure factor of this model.
+		*Parameters: spacing = repeat spacing,
+		deltaT = tail length,
+		deltaH = headgroup thickness,
+		n_plates = # of Lamellar plates
+		caille = Caille parameter (<0.8 or <1)
+		background = incoherent bgd
+		scale = scale factor ..."""
        
 		## Parameter details [units, min, max]
         self.details = {}
@@ -70,7 +88,7 @@ class LamellarPSHGModel(CLamellarPSHGModel, BaseComponent):
         self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters
-        self.fixed=['deltaT.with', 'deltaH.with']
+        self.fixed=['deltaT.width', 'deltaH.width', 'spacing.width']
         
         ## parameters with orientation
         self.orientation_params =[]

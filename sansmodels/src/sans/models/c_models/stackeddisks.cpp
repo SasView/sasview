@@ -18,7 +18,7 @@
  *   sansmodels/src/libigor
  *
  *	TODO: refactor so that we pull in the old sansmodels.c_extensions
- *	TODO: add 2d 
+ *	TODO: add 2d
  */
 
 #include <math.h>
@@ -70,7 +70,7 @@ double StackedDisksModel :: operator()(double q) {
 	dp[6] = solvent_sld();
 	dp[7] = nlayers();
 	dp[8] = spacing();
-	dp[9] = background();
+	dp[9] = 0.0;
 
 	// Get the dispersion points for the length
 	vector<WeightPoint> weights_length;
@@ -128,7 +128,7 @@ double StackedDisksModel :: operator()(double qx, double qy) {
 	dp.solvent_sld= solvent_sld();
 	dp.nlayers	  = nlayers();
 	dp.spacing    = spacing();
-	dp.background = background();
+	dp.background = 0.0;
 	dp.axis_theta = axis_theta();
 	dp.axis_phi   = axis_phi();
 
