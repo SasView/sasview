@@ -1,5 +1,5 @@
 /**
- * Scattering model for a oblate
+ * Scattering model for a oblate core shell
  * @author: Gervaise B Alina/ UTK
  */
 
@@ -17,8 +17,8 @@
  * @return: function value
  */
 double oblate_analytical_1D(OblateParameters *pars, double q) {
-	double dp[10];
-	
+	double dp[8];
+
 	// Fill paramater array
 	dp[0] = pars->scale;
 	dp[1] = pars->major_core;
@@ -28,11 +28,9 @@ double oblate_analytical_1D(OblateParameters *pars, double q) {
 	dp[5] = pars->contrast;
 	dp[6] = pars->sld_solvent;
 	dp[7] = pars->background;
-	dp[8] = pars->axis_theta;
-	dp[9] = pars->axis_phi;
-	
+
 	// Call library function to evaluate model
-	return OblateForm(dp, q);	
+	return OblateForm(dp, q);
 }
 
 /**
@@ -44,8 +42,8 @@ double oblate_analytical_1D(OblateParameters *pars, double q) {
 double oblate_analytical_2DXY(OblateParameters *pars, double qx, double qy) {
 	double q;
 	q = sqrt(qx*qx+qy*qy);
-    return oblate_analytical_2D_scaled(pars, q, qx/q, qy/q);
-} 
+    return oblate_analytical_1D(pars, q);
+}
 
 
 /**
@@ -56,9 +54,9 @@ double oblate_analytical_2DXY(OblateParameters *pars, double qx, double qy) {
  * @return: function value
  */
 double oblate_analytical_2D(OblateParameters *pars, double q, double phi) {
-    return oblate_analytical_2D_scaled(pars, q, cos(phi), sin(phi));
-} 
-        
+    return oblate_analytical_1D(pars, q);
+}
+
 /**
  * Function to evaluate 2D scattering function
  * @param pars: parameters of the oblate
@@ -67,8 +65,9 @@ double oblate_analytical_2D(OblateParameters *pars, double q, double phi) {
  * @param q_y: q_y / q
  * @return: function value
  */
+/*
 double oblate_analytical_2D_scaled(OblateParameters *pars, double q, double q_x, double q_y) {
-	
+
 	return 1.0;
 }
-    
+*/

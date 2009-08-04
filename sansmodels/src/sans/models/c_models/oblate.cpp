@@ -44,8 +44,6 @@ OblateModel :: OblateModel() {
 	contrast   = Parameter(1e-6);
 	sld_solvent = Parameter(6.3e-6);
 	background = Parameter(0.0);
-	axis_theta  = Parameter(0.0, true);
-	axis_phi    = Parameter(0.0, true);
 }
 
 /**
@@ -66,8 +64,8 @@ double OblateModel :: operator()(double q) {
 	dp[4] = minor_shell();
 	dp[5] = contrast();
 	dp[6] = sld_solvent();
-	dp[7] = background();
-	
+	dp[7] = 0.0;
+
 	// Get the dispersion points for the major core
 	vector<WeightPoint> weights_major_core;
 	major_core.get_weights(weights_major_core);
@@ -105,9 +103,9 @@ double OblateModel :: operator()(double q) {
 				for(int l=0; l<(int)weights_minor_shell.size(); l++) {
 					dp[4] = weights_minor_shell[l].value;
 
-					sum += weights_major_core[i].weight* weights_minor_core[j].weight * weights_major_shell[k].weight 
+					sum += weights_major_core[i].weight* weights_minor_core[j].weight * weights_major_shell[k].weight
 						* weights_minor_shell[l].weight * OblateForm(dp, q);
-					norm += weights_major_core[i].weight* weights_minor_core[j].weight * weights_major_shell[k].weight 
+					norm += weights_major_core[i].weight* weights_minor_core[j].weight * weights_major_shell[k].weight
 							* weights_minor_shell[l].weight;
 				}
 			}
@@ -122,7 +120,27 @@ double OblateModel :: operator()(double q) {
  * @param q_y: value of Q along y
  * @return: function value
  */
+
 double OblateModel :: operator()(double qx, double qy) {
+	double q = sqrt(qx*qx + qy*qy);
+
+	return (*this).operator()(q);
+}
+
+
+/**
+ * Function to evaluate 2D scattering function
+ * @param pars: parameters of the oblate
+ * @param q: q-value
+ * @param phi: angle phi
+ * @return: function value
+ */
+double OblateModel :: evaluate_rphi(double q, double phi) {
+	return (*this).operator()(q);
+}
+
+/* disable below for now
+double OblateShellModel :: operator()(double qx, double qy) {
 	OblateParameters dp;
 	// Fill parameter array
 	dp.scale      = scale();
@@ -214,16 +232,4 @@ double OblateModel :: operator()(double qx, double qy) {
 	if (weights_theta.size()>1) norm = norm / asin(1.0);
 	return sum/norm + background();
 }
-
-/**
- * Function to evaluate 2D scattering function
- * @param pars: parameters of the oblate
- * @param q: q-value
- * @param phi: angle phi
- * @return: function value
- */
-double OblateModel :: evaluate_rphi(double q, double phi) {
-	double qx = q*cos(phi);
-	double qy = q*sin(phi);
-	return (*this).operator()(qx, qy);
-}
+*///

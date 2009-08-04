@@ -18,7 +18,7 @@
  */
 double lamellarPS_HG_analytical_1D(LamellarPSHGParameters *pars, double q) {
 	double dp[10];
-	
+
 	// Fill paramater array
 	dp[0] = pars->scale;
 	dp[1] = pars->spacing;
@@ -32,7 +32,7 @@ double lamellarPS_HG_analytical_1D(LamellarPSHGParameters *pars, double q) {
 	dp[9] = pars->background;
 
 	// Call library function to evaluate model
-	return LamellarPS_HG(dp, q);	
+	return LamellarPS_HG(dp, q);
 }
 /**
  * Function to evaluate 2D scattering function
@@ -41,10 +41,8 @@ double lamellarPS_HG_analytical_1D(LamellarPSHGParameters *pars, double q) {
  * @return: function value
  */
 double lamellarPS_HG_analytical_2DXY(LamellarPSHGParameters *pars, double qx, double qy) {
-	double q;
-	q = sqrt(qx*qx+qy*qy);
-    return lamellarPS_HG_analytical_2D_scaled(pars, q, qx/q, qy/q);
-} 
+    return lamellarPS_HG_analytical_1D(pars, sqrt(qx*qx+qy*qy));
+}
 
 
 /**
@@ -55,19 +53,6 @@ double lamellarPS_HG_analytical_2DXY(LamellarPSHGParameters *pars, double qx, do
  * @return: function value
  */
 double lamellarPS_HG_analytical_2D(LamellarPSHGParameters *pars, double q, double phi) {
-    return lamellarPS_HG_analytical_2D_scaled(pars, q, cos(phi), sin(phi));
-} 
-        
-/**
- * Function to evaluate 2D scattering function
- * @param pars: parameters of the lamellar
- * @param q: q-value
- * @param q_x: q_x / q
- * @param q_y: q_y / q
- * @return: function value
- */
-double lamellarPS_HG_analytical_2D_scaled(LamellarPSHGParameters *pars, double q, double q_x, double q_y) {
-	return 1.0;
+    return lamellarPS_HG_analytical_1D(pars, q);
 }
-    
 

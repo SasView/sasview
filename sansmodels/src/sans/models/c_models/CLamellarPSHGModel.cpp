@@ -101,6 +101,9 @@ CLamellarPSHGModel_init(CLamellarPSHGModel *self, PyObject *args, PyObject *kwds
         disp_dict = PyDict_New();
         self->model->deltaH.dispersion->accept_as_source(visitor, self->model->deltaH.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "deltaH", disp_dict);
+        disp_dict = PyDict_New();
+        self->model->spacing.dispersion->accept_as_source(visitor, self->model->spacing.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "spacing", disp_dict);
 
 
          
@@ -170,6 +173,8 @@ static PyObject * run(CLamellarPSHGModel *self, PyObject *args) {
     self->model->deltaT.dispersion->accept_as_destination(visitor, self->model->deltaT.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "deltaH");
     self->model->deltaH.dispersion->accept_as_destination(visitor, self->model->deltaH.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "spacing");
+    self->model->spacing.dispersion->accept_as_destination(visitor, self->model->spacing.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -238,6 +243,8 @@ static PyObject * runXY(CLamellarPSHGModel *self, PyObject *args) {
     self->model->deltaT.dispersion->accept_as_destination(visitor, self->model->deltaT.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "deltaH");
     self->model->deltaH.dispersion->accept_as_destination(visitor, self->model->deltaH.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "spacing");
+    self->model->spacing.dispersion->accept_as_destination(visitor, self->model->spacing.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -297,6 +304,8 @@ static PyObject * set_dispersion(CLamellarPSHGModel *self, PyObject *args) {
         self->model->deltaT.dispersion = dispersion;
     } else    if (!strcmp(par_name, "deltaH")) {
         self->model->deltaH.dispersion = dispersion;
+    } else    if (!strcmp(par_name, "spacing")) {
+        self->model->spacing.dispersion = dispersion;
     } else {
 	    PyErr_SetString(CLamellarPSHGModelError,
 	    	"CLamellarPSHGModel.set_dispersion expects a valid parameter name.");

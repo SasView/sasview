@@ -34,7 +34,8 @@ extern "C" {
 
 LamellarPSHGModel :: LamellarPSHGModel() {
 	scale      = Parameter(1.0);
-	spacing    = Parameter(40.0);
+	spacing    = Parameter(40.0, true);
+	spacing.set_min(0.0);
 	deltaT     = Parameter(10.0, true);
 	deltaT.set_min(0.0);
 	deltaH     = Parameter(2.0, true);
@@ -68,21 +69,25 @@ double LamellarPSHGModel :: operator()(double q) {
 	dp[6] = sld_solvent();
 	dp[7] = n_plates();
 	dp[8] = caille();
-	dp[9] = background();
-	
+	dp[9] = 0.0;
+
 
 	// Get the dispersion points for (deltaT) thickness of the tail
 	vector<WeightPoint> weights_deltaT;
 	deltaT.get_weights(weights_deltaT);
-	
+
 	// Get the dispersion points for (deltaH) thickness of the head
 	vector<WeightPoint> weights_deltaH;
 	deltaH.get_weights(weights_deltaH);
 
+	// Get the dispersion points for spacing
+	vector<WeightPoint> weights_spacing;
+	spacing.get_weights(weights_spacing);
+
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
-	
+
 	// Loop over deltaT  weight points
 	for(int i=0; i< (int)weights_deltaT.size(); i++) {
 		dp[2] = weights_deltaT[i].value;
@@ -90,11 +95,15 @@ double LamellarPSHGModel :: operator()(double q) {
 		// Loop over deltaH weight points
 		for(int j=0; j< (int)weights_deltaH.size(); j++) {
 			dp[3] = weights_deltaH[j].value;
+			// Loop over spacing weight points
+			for(int k=0; k< (int)weights_spacing.size(); k++) {
+				dp[1] = weights_spacing[k].value;
 
-			sum += weights_deltaT[i].weight * weights_deltaH[j].weight *LamellarPS_HG(dp, q);
-			norm += weights_deltaT[i].weight * weights_deltaH[j].weight;
+				sum += weights_deltaT[i].weight * weights_deltaH[j].weight *weights_spacing[k].weight
+								*LamellarPS_HG(dp, q);
+				norm += weights_deltaT[i].weight * weights_deltaH[j].weight * weights_spacing[k].weight;
+			}
 		}
-				
 	}
 	return sum/norm + background();
 }
@@ -104,6 +113,23 @@ double LamellarPSHGModel :: operator()(double q) {
  * @param q_y: value of Q along y
  * @return: function value
  */
+double LamellarPSHGModel :: operator()(double qx, double qy) {
+	double q = sqrt(qx*qx + qy*qy);
+	return (*this).operator()(q);
+}
+
+/**
+ * Function to evaluate 2D scattering function
+ * @param pars: parameters of the lamellarPS_HG
+ * @param q: q-value
+ * @param phi: angle phi
+ * @return: function value
+ */
+double LamellarPSHGModel :: evaluate_rphi(double q, double phi) {
+	return (*this).operator()(q);
+}
+
+/*
 double LamellarPSHGModel :: operator()(double qx, double qy) {
 	LamellarPSHGParameters dp;
 	// Fill parameter array
@@ -117,7 +143,7 @@ double LamellarPSHGModel :: operator()(double qx, double qy) {
 	dp.n_plates = n_plates();
 	dp.caille = caille();
 	dp.background    = background();
-	
+
 	// Get the dispersion points for the deltaT
 	vector<WeightPoint> weights_deltaT;
 	deltaT.get_weights(weights_deltaT);
@@ -133,28 +159,17 @@ double LamellarPSHGModel :: operator()(double qx, double qy) {
 	// Loop over deltaT weight points
 	for(int i=0; i< (int)weights_deltaT.size(); i++) {
 		dp.deltaT = weights_deltaT[i].value;
-		
+
 		// Loop over deltaH weight points
 		for(int j=0; j< (int)weights_deltaH.size(); j++) {
 			dp.deltaH = weights_deltaH[j].value;
 
-			sum += weights_deltaT[i].weight *weights_deltaH[j].weight *lamellarPS_HG_analytical_2DXY(&dp, qx, qy);	
-			norm += weights_deltaT[i].weight * weights_deltaH[j].weight;	
+			sum += weights_deltaT[i].weight *weights_deltaH[j].weight *lamellarPS_HG_analytical_2DXY(&dp, qx, qy);
+			norm += weights_deltaT[i].weight * weights_deltaH[j].weight;
 		}
 	}
 	return sum/norm + background();
 }
+*/
 
 
-/**
- * Function to evaluate 2D scattering function
- * @param pars: parameters of the lamellar
- * @param q: q-value
- * @param phi: angle phi
- * @return: function value
- */
-double LamellarPSHGModel :: evaluate_rphi(double q, double phi) {
-	double qx = q*cos(phi);
-	double qy = q*sin(phi);
-	return (*this).operator()(qx, qy);
-}

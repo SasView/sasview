@@ -7,12 +7,14 @@
 /** Structure definition for concentrated lamellar form factor parameters
  * [PYTHONCLASS] = LamellarPSModel
  * [DISP_PARAMS] = spacing
-   [DESCRIPTION] = <text>Calculates the scattered intensity from a lyotropic lamellar phase.
-	   The intensity (form factor and structure factor)
-		calculated is for lamellae of uniform scattering
-		length density that are randomly distributed in
-		solution (a powder average). The lamellae
-		thickness is polydisperse. The model can also
+   [DESCRIPTION] = <text>[Concentrated Lamellar Form Factor] Calculates the scattered
+	   intensity from a lyotropic lamellar phase.
+	   The intensity (form factor and structure
+	   factor)calculated is for lamellae of
+	   uniform scattering length density that
+	   are randomly distributed in solution
+	   (a powder average). The lamellae thickness
+		is polydisperse. The model can also
 		be applied to large, multi-lamellar vesicles.
 		No resolution smeared version is included
 		in the structure factor of this model.
@@ -25,7 +27,7 @@
 		background = incoherent bgd
 		scale = scale factor
 </text>
-   [FIXED]= spacing.with
+   [FIXED]= spacing.width
    [ORIENTATION_PARAMS]=
 
  **/

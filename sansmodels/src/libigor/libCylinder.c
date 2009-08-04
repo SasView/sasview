@@ -971,7 +971,7 @@ LamellarPS_HG(double dp[], double q)
 
 
 	Euler = 0.5772156649;		// Euler's constant
-	dQDefault = 0.0025;		//[=] 1/A, q-resolution, default value
+	dQDefault = 0; //0.0025;		//[=] 1/A, q-resolution, default value
 	dQ = dQDefault;
 
 	Pi = 4.0*atan(1.0);
