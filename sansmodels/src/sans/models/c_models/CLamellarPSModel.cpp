@@ -94,8 +94,8 @@ CLamellarPSModel_init(CLamellarPSModel *self, PyObject *args, PyObject *kwds)
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
         disp_dict = PyDict_New();
-        self->model->delta.dispersion->accept_as_source(visitor, self->model->delta.dispersion, disp_dict);
-        PyDict_SetItemString(self->dispersion, "delta", disp_dict);
+        self->model->spacing.dispersion->accept_as_source(visitor, self->model->spacing.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "spacing", disp_dict);
 
 
          
@@ -159,8 +159,8 @@ static PyObject * run(CLamellarPSModel *self, PyObject *args) {
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "delta");
-    self->model->delta.dispersion->accept_as_destination(visitor, self->model->delta.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "spacing");
+    self->model->spacing.dispersion->accept_as_destination(visitor, self->model->spacing.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -223,8 +223,8 @@ static PyObject * runXY(CLamellarPSModel *self, PyObject *args) {
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "delta");
-    self->model->delta.dispersion->accept_as_destination(visitor, self->model->delta.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "spacing");
+    self->model->spacing.dispersion->accept_as_destination(visitor, self->model->spacing.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -280,8 +280,8 @@ static PyObject * set_dispersion(CLamellarPSModel *self, PyObject *args) {
 
 	// Ugliness necessary to go from python to C
 	    // TODO: refactor this
-    if (!strcmp(par_name, "delta")) {
-        self->model->delta.dispersion = dispersion;
+    if (!strcmp(par_name, "spacing")) {
+        self->model->spacing.dispersion = dispersion;
     } else {
 	    PyErr_SetString(CLamellarPSModelError,
 	    	"CLamellarPSModel.set_dispersion expects a valid parameter name.");
