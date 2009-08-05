@@ -9,7 +9,9 @@
       python setup.py odb
 
 """
-import sys,os
+import sys
+import os
+
 
 numpy_incl_path = os.path.join(sys.prefix, "Lib", "site-packages", "numpy", "core", "include", "numpy")
 
@@ -202,6 +204,10 @@ setup(
         igordir+"/libSphere.c",
         srcdir+"/gaussian.c",
         srcdir+"/CGaussian.c",
+        srcdir+"/logNormal.c",
+        srcdir+"/CLogNormal.c",
+        srcdir+"/schulz.c",
+        srcdir+"/CSchulz.c",
         srcdir+"/lorentzian.c",
         srcdir+"/CLorentzian.c"
             ],
