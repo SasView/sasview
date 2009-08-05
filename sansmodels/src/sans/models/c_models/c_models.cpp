@@ -47,6 +47,8 @@ extern "C" {
 	void addDisperser(PyObject *module);
 	void addCGaussian(PyObject *module);
 	void addCLorentzian(PyObject *module);
+	void addCLogNormal(PyObject *module);
+	void addCSchulz(PyObject *module);
 }
 
 /**
@@ -68,6 +70,23 @@ PyObject * new_dispersion_model(PyObject *, PyObject *args) {
 
 
 /**
+ * Delete a lognormal dispersion model object
+ */
+void del_lognormal_dispersion(void *ptr){
+	LogNormalDispersion * disp = static_cast<LogNormalDispersion *>(ptr);
+	delete disp;
+	return;
+}
+
+/**
+ * Create a lognormal dispersion model as a python object
+ */
+PyObject * new_lognormal_dispersion(PyObject *, PyObject *args) {
+	LogNormalDispersion *disp = new LogNormalDispersion();
+	return PyCObject_FromVoidPtr(disp, del_lognormal_dispersion);
+}
+
+/**
  * Delete a gaussian dispersion model object
  */
 void del_gaussian_dispersion(void *ptr){
@@ -83,6 +102,23 @@ PyObject * new_gaussian_dispersion(PyObject *, PyObject *args) {
 	GaussianDispersion *disp = new GaussianDispersion();
 	return PyCObject_FromVoidPtr(disp, del_gaussian_dispersion);
 }
+
+/**
+ * Delete a schulz dispersion model object
+ */
+void del_schulz_dispersion(void *ptr){
+	SchulzDispersion * disp = static_cast<SchulzDispersion *>(ptr);
+	delete disp;
+	return;
+}
+/**
+ * Create a schulz dispersion model as a python object
+ */
+PyObject * new_schulz_dispersion(PyObject *, PyObject *args) {
+	SchulzDispersion *disp = new SchulzDispersion();
+	return PyCObject_FromVoidPtr(disp, del_schulz_dispersion);
+}
+
 
 /**
  * Delete an array dispersion model object
@@ -146,6 +182,10 @@ static PyMethodDef module_methods[] = {
 		  "Create a new DispersionModel object"},
 	{"new_gaussian_model",   (PyCFunction)new_gaussian_dispersion, METH_VARARGS,
 		  "Create a new GaussianDispersion object"},
+    {"new_lognormal_model",   (PyCFunction)new_lognormal_dispersion, METH_VARARGS,
+		  "Create a new LogNormalDispersion object"},
+    {"new_schulz_model",   (PyCFunction)new_schulz_dispersion, METH_VARARGS,
+		  "Create a new SchulzDispersion object"},
 	{"new_array_model",      (PyCFunction)new_array_dispersion  , METH_VARARGS,
 		  "Create a new ArrayDispersion object"},
 	{"set_dispersion_weights",(PyCFunction)set_weights  , METH_VARARGS,
@@ -193,8 +233,9 @@ initc_models(void)
 	addCBinaryHSModel(m);
 	addDisperser(m);
 	addCGaussian(m);
+	addCSchulz(m);
+	addCLogNormal(m);
 	addCLorentzian(m);
 	addCVesicleModel(m);
-
 
 }

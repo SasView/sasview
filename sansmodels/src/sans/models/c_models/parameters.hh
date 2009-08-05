@@ -76,6 +76,35 @@ public:
 };
 
 /**
+ * Schulz dispersion model
+ */
+class SchulzDispersion: public DispersionModel {
+public:
+	/// Number of sigmas on each side of the mean
+	int nsigmas;
+
+	SchulzDispersion();
+	void operator()(void *, vector<WeightPoint>&);
+	void accept_as_source(DispersionVisitor*, void*, void*);
+	void accept_as_destination(DispersionVisitor*, void*, void*);
+};
+
+/**
+ * LogNormal dispersion model
+ */
+class LogNormalDispersion: public DispersionModel {
+public:
+	/// Number of sigmas on each side of the mean
+	int nsigmas;
+
+	LogNormalDispersion();
+	void operator()(void *, vector<WeightPoint>&);
+	void accept_as_source(DispersionVisitor*, void*, void*);
+	void accept_as_destination(DispersionVisitor*, void*, void*);
+};
+
+
+/**
  * Dispersion model based on arrays provided by the user
  */
 class ArrayDispersion: public DispersionModel {

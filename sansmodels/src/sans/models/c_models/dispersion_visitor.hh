@@ -18,10 +18,14 @@ class DispersionVisitor {
 public:
 	void dispersion_to_dict(void *, void *);
 	void gaussian_to_dict(void *, void *);
+	void lognormal_to_dict(void *, void *);
+	void schulz_to_dict(void*, void *);
 	void array_to_dict(void *, void *);
 
 	void dispersion_from_dict(void*, void *);
 	void gaussian_from_dict(void*, void *);
+	void lognormal_from_dict(void*, void *);
+	void schulz_from_dict(void*, void *);
 	void array_from_dict(void*, void *);
 
 };

@@ -51,6 +51,8 @@ initc_models(void)
 	addCLamellarFFHGModel(m);
 	addDisperser(m);
 	addCGaussian(m);
+	addCSchulz(m);
+	addCLogNormal(m);
 	addCLorentzian(m);
 	addCHollowCylinderModel(m);
 	addCMultiShellModel(m);

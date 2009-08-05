@@ -73,7 +73,39 @@ class GaussianDispersion(DispersionModel):
         """
             Set the weights of an array dispersion
         """
-        message = "set_weights is not available for GaussiantDispersion.\n"
+        message = "set_weights is not available for GaussianDispersion.\n"
+        message += "  Solution: Use an ArrayDispersion object"
+        raise "RuntimeError", message
+    
+class SchulzDispersion(DispersionModel):
+    """
+        Python bridge class for a dispersion model based 
+        on a Schulz distribution.
+    """
+    def __init__(self):
+        self.cdisp = c_models.new_schulz_model()
+        
+    def set_weights(self, values, weights):
+        """
+            Set the weights of an array dispersion
+        """
+        message = "set_weights is not available for SchulzDispersion.\n"
+        message += "  Solution: Use an ArrayDispersion object"
+        raise "RuntimeError", message
+    
+class LogNormalDispersion(DispersionModel):
+    """
+        Python bridge class for a dispersion model based 
+        on a Log Normal distribution.
+    """
+    def __init__(self):
+        self.cdisp = c_models.new_lognormal_model()
+        
+    def set_weights(self, values, weights):
+        """
+            Set the weights of an array dispersion
+        """
+        message = "set_weights is not available for LogNormalDispersion.\n"
         message += "  Solution: Use an ArrayDispersion object"
         raise "RuntimeError", message
         
@@ -99,5 +131,6 @@ class ArrayDispersion(DispersionModel):
         
         c_models.set_dispersion_weights(self.cdisp, values, weights)
  
-models = {GaussianDispersion:"GaussianModel", ArrayDispersion:"MyModel"}       
+models = {GaussianDispersion:"GaussianModel", ArrayDispersion:"MyModel",
+          SchulzDispersion: "Schulz", LogNormalDispersion: "LogNormal"}       
         

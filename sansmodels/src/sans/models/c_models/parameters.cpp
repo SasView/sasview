@@ -136,6 +136,129 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
 	}
 }
 
+
+/**
+ * LogNormal dispersion
+ */
+
+LogNormalDispersion :: LogNormalDispersion() {
+	npts  = 1;
+	width = 0.0;
+	nsigmas = 2;
+};
+
+void LogNormalDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
+	visitor->lognormal_to_dict(from, to);
+}
+void LogNormalDispersion :: accept_as_destination(DispersionVisitor* visitor, void* from, void* to) {
+	visitor->lognormal_from_dict(from, to);
+}
+
+double lognormal_weight(double mean, double sigma, double x) {
+	
+	double sigma2 = pow(sigma, 2);	
+	return 1/(x*sigma2) * exp( -pow((log(x) -mean), 2) / (2*sigma2));
+ 
+}
+
+/**
+ * Lognormal dispersion
+ * @param mean: mean value of the LogNormal
+ * @param sigma: standard deviation of the LogNormal
+ * @param x: value at which the LogNormal is evaluated
+ * @return: value of the LogNormal
+ */
+void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weights){
+	// Check against zero width
+	if (width<=0) {
+		width = 0.0;
+		npts  = 1;
+		nsigmas = 3;
+	}
+
+	Parameter* par = (Parameter*)param;
+	double value = (*par)();
+
+	if (npts<2) {
+		weights.insert(weights.end(), WeightPoint(value, 1.0));
+	} else {
+		for(int i=0; i<npts; i++) {
+			// We cover n(nsigmas) times sigmas on each side of the mean
+			double val = value + width * (2.0*nsigmas*i/float(npts-1) - nsigmas);
+
+			if ( ((*par).has_min==false || val>(*par).min)
+			  && ((*par).has_max==false || val<(*par).max)  ) {
+				double _w = lognormal_weight(value, width, val);
+				weights.insert(weights.end(), WeightPoint(val, _w));
+			}
+		}
+	}
+}
+
+
+
+/**
+ * Schulz dispersion
+ */
+
+SchulzDispersion :: SchulzDispersion() {
+	npts  = 1;
+	width = 0.0;
+	nsigmas = 2;
+};
+
+void SchulzDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
+	visitor->schulz_to_dict(from, to);
+}
+void SchulzDispersion :: accept_as_destination(DispersionVisitor* visitor, void* from, void* to) {
+	visitor->schulz_from_dict(from, to);
+}
+
+double schulz_weight(double mean, double sigma, double x) {
+	double vary, expo_value;
+    double z = pow(mean/ sigma, 2)-1;	
+	double R= x/mean;
+	double zz= z+1;
+	return  pow(zz,zz) * pow(R,z) * exp(-1*R*zz)/((mean) * tgamma(zz)) ;
+}
+
+/**
+ * Schulz dispersion
+ * @param mean: mean value of the Schulz
+ * @param sigma: standard deviation of the Schulz
+ * @param x: value at which the Schulz is evaluated
+ * @return: value of the Schulz
+ */
+void SchulzDispersion :: operator() (void *param, vector<WeightPoint> &weights){
+	// Check against zero width
+	if (width<=0) {
+		width = 0.0;
+		npts  = 1;
+		nsigmas = 3;
+	}
+
+	Parameter* par = (Parameter*)param;
+	double value = (*par)();
+
+	if (npts<2) {
+		weights.insert(weights.end(), WeightPoint(value, 1.0));
+	} else {
+		for(int i=0; i<npts; i++) {
+			// We cover n(nsigmas) times sigmas on each side of the mean
+			double val = value + width * (2.0*nsigmas*i/float(npts-1) - nsigmas);
+
+			if ( ((*par).has_min==false || val>(*par).min)
+			  && ((*par).has_max==false || val<(*par).max)  ) {
+				double _w = schulz_weight(value, width, val);
+				weights.insert(weights.end(), WeightPoint(val, _w));
+			}
+		}
+	}
+}
+
+
+
+
 /**
  * Array dispersion based on input arrays
  */
