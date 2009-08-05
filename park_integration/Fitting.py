@@ -3,9 +3,7 @@
     allows to create instance of type ScipyFit or ParkFit to perform either
     a park fit or a scipy fit.
 """
-#from sans.guitools.plottables import Data1D
-#from danse.common.plottools.plottables import Data1D
-#from Loader import Load
+
 from scipy import optimize
 from ScipyFitting import ScipyFit
 from ParkFitting import ParkFit
@@ -55,8 +53,8 @@ class Fit:
         try:
             return self._engine.fit(handler, curr_thread= curr_thread)
         except:
-            #Let fit_thread handle the fit error
             raise
+    
     
     def set_model(self,model,Uid,pars=[]):
         """

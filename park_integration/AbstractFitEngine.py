@@ -111,7 +111,10 @@ class Model(park.Model):
             override eval method of park model. 
             @param x: the x value used to compute a function
         """
-        return self.model.runXY(x)
+        try:
+            return self.model.evalDistribution(x)
+        except:
+            return self.model.runXY(x)
    
    
 
@@ -339,8 +342,14 @@ class FitData2D(object):
         self.data=sans_data2d
         self.image = sans_data2d.data
         self.err_image = sans_data2d.err_data
-        self.x_bins= sans_data2d.x_bins
-        self.y_bins= sans_data2d.y_bins
+        self.x_bins_array= numpy.reshape(sans_data2d.x_bins,
+                                         [1,len(sans_data2d.x_bins)])
+        self.y_bins_array = numpy.reshape(sans_data2d.y_bins,
+                                          [len(sans_data2d.y_bins),1])
+        
+        
+        self.x_bins = sans_data2d.x_bins
+        self.y_bins = sans_data2d.y_bins
        
         x = max(self.data.xmin, self.data.xmax)
         y = max(self.data.ymin, self.data.ymax)
@@ -354,6 +363,9 @@ class FitData2D(object):
         else:
             self.res_err_image = copy.deepcopy(self.err_image)
         self.res_err_image[self.err_image==0]=1
+        
+        self.radius= numpy.sqrt(self.x_bins_array**2 + self.y_bins_array**2)
+        self.index_model = (self.qmin <= self.radius)&(self.radius<= self.qmax)
        
        
     def setFitRange(self,qmin=None,qmax=None):
@@ -372,8 +384,17 @@ class FitData2D(object):
         """
         return self.qmin, self.qmax
      
-     
-    def residuals(self, fn):
+    def residuals(self, fn): 
+        try:
+            res=self.index_model*(self.image - fn([self.y_bins_array,
+                             self.x_bins_array]))/self.res_err_image
+            return res.ravel() 
+        except:
+            print "Using old residual method"
+            return self.old_residuals( fn)
+    
+    
+    def old_residuals(self, fn):
         """ @param fn: function that return model value
             @return residuals
         """
