@@ -169,7 +169,7 @@ class BasicPage(wx.ScrolledWindow):
         """
             Cancel the previous action
         """
-        print "enable undo"
+        #print "enable undo"
         event = PreviousStateEvent(page = self)
         wx.PostEvent(self.parent, event)
         
@@ -290,22 +290,18 @@ class BasicPage(wx.ScrolledWindow):
         self.polydisp= sans.models.dispersion_models.models
         self.disp_box = wx.ComboBox(self, -1)
 
-        for key in self.polydisp.iterkeys():
-            name = str(key.__name__)
-            if name=="ArrayDispersion":
-                # Remove the option until the rest of the code is ready for it
-                self.disp_box.Append("Select customized Model",key)
-            else:
-                self.disp_box.Append(name,key)
-        self.disp_box.SetSelection(0) 
+        for key, value in self.polydisp.iteritems():
+            name = str(key)
+            self.disp_box.Append(name,value)
         
+        self.disp_box.SetStringSelection("gaussian") 
         wx.EVT_COMBOBOX(self.disp_box,-1, self._on_select_Disp) 
              
         sizer_select_dispers.Add((10,10)) 
         sizer_select_dispers.Add(self.model_disp) 
         sizer_select_dispers.Add(self.disp_box,0,
                 wx.TOP|wx.BOTTOM|wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE,border=5)
-        #sizer_select_dispers.Add((10,10)) 
+      
         self.model_disp.Hide()
         self.disp_box.Hide()
         
@@ -1527,13 +1523,15 @@ class BasicPage(wx.ScrolledWindow):
         """
 
         n = self.disp_box.GetCurrentSelection()
+        name = self.disp_box.GetValue()
         dispersity= self.disp_box.GetClientData(n)
-        name= dispersity.__name__
+        
         self.disp_name = name
-        if name == "GaussianDispersion":
-            self._set_sizer_gaussian()
-        if name == "ArrayDispersion":
+        
+        if name.lower() == "array":
             self._set_sizer_arraydispersion()
+        else:
+            self._set_sizer_dispersion(dispersity= dispersity)
             
             
         self.state.disp_box= n
@@ -1589,7 +1587,7 @@ class BasicPage(wx.ScrolledWindow):
                 ix+=1 
                 self.disp_cb_dict[p] = wx.CheckBox(self, -1, p, (10, 10))
                 self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
-                print "self.enable2D",self.enable2D
+                #print "self.enable2D",self.enable2D
                 if not (self.enable2D or self.data.__class__.__name__ =="Data2D"):
                     self.disp_cb_dict[p].Hide()
                     self.disp_cb_dict[p].Disable()

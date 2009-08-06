@@ -240,7 +240,8 @@ class FitPage(BasicPage):
         self._set_model_sizer(sizer=sizer, title="Model",object=None )    
         
     
-    def _set_sizer_gaussian(self):
+    #def _set_sizer_gaussian(self):
+    def _set_sizer_dispersion(self, dispersity):
         """
             draw sizer with gaussian dispersity parameters
         """
@@ -260,7 +261,8 @@ class FitPage(BasicPage):
         self._reset_dispersity()
         # Create the dispersion objects
         for item in self.model.dispersion.keys():
-            disp_model =  GaussianDispersion()
+            #disp_model =  GaussianDispersion()
+            disp_model = dispersity()
             self._disp_obj_dict[item] = disp_model
             self.model.set_dispersion(item, disp_model)
             self.state._disp_obj_dict[item]= disp_model

@@ -115,9 +115,10 @@ class ModelPage(BasicPage):
         self._set_model_sizer(sizer=sizer, title="Model",object= self.model_view )    
     
   
-    def _set_sizer_gaussian(self):
+    #def _set_sizer_gaussian(self):
+    def _set_sizer_dispersion(self, dispersity):
         """
-            draw sizer with gaussian dispersity parameters
+            draw sizer with gaussian, log or schulz dispersity parameters
         """
         self.fittable_param=[]
         self.fixed_param=[]
@@ -133,7 +134,8 @@ class ModelPage(BasicPage):
         self._reset_dispersity()
         # Create the dispersion objects
         for item in self.model.dispersion.keys():
-            disp_model =  GaussianDispersion()
+            #disp_model =  GaussianDispersion()
+            disp_model = dispersity()
             self._disp_obj_dict[item] = disp_model
             self.model.set_dispersion(item, disp_model)
             self.state._disp_obj_dict[item]= disp_model
@@ -296,6 +298,7 @@ class ModelPage(BasicPage):
         if self.enable2D:
             self._draw_model()
             self.model_view.Disable()
+           
             
             self.set_model_param_sizer(self.model)
             self._set_sizer_gaussian()
@@ -303,8 +306,9 @@ class ModelPage(BasicPage):
             if len(self.orientation_params)>0:
                 for item in self.orientation_params:
                     if item[2]!=None:      
+    
                         item[2].Enable()
-            if  self.disp_name == "ArrayDispersion":                
+            if  self.disp_name.lower() == "array":                
                 self._set_sizer_arraydispersion()  
             else:
                 if len(self.orientation_params_disp)>0:
@@ -436,11 +440,7 @@ class ModelPage(BasicPage):
         
         # Set the controls
         #For qmin and qmax, do not use format_number.(If do, qmin and max could be different from what is in the data.)
-        """
-        self.qmin.SetValue(format_number(self.qmin_x))
-        self.qmax.SetValue(format_number(self.qmax_x))
-        self.npts.SetValue(format_number(self.num_points))
-        """
+       
         self.qmin.SetValue(str(self.qmin_x))
         self.qmax.SetValue(str(self.qmax_x))
         self.npts.SetValue(format_number(self.num_points))
