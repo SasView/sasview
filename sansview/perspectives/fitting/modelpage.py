@@ -299,9 +299,9 @@ class ModelPage(BasicPage):
             self._draw_model()
             self.model_view.Disable()
            
-            
-            self.set_model_param_sizer(self.model)
-            self._set_sizer_gaussian()
+            #ToDo:cleanup this mess.           
+            #self.set_model_param_sizer(self.model)
+            #self._set_sizer_gaussian()
             
             if len(self.orientation_params)>0:
                 for item in self.orientation_params:
