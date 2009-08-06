@@ -5,6 +5,7 @@
 
 # imports   
 import copy
+import numpy
 #TO DO: that about a way to make the parameter
 #is self return if it is fittable or not  
 
@@ -54,6 +55,26 @@ class BaseComponent:
    
     def run(self, x): return NotImplemented
     def runXY(self, x): return NotImplemented  
+    
+    def evalDistribution(self, qdist):
+        """
+            Evaluate a distribution of q-values.
+            A list of either scale q-values or [qx,qy] doublets
+            are assumed. The allowed data types for the doublets are 
+            the same as for run() and runXY().
+            
+            Since the difference between scale and vector q-values
+            are dealt with in runXY(), we pass along the values
+            as-is.
+            
+            @param qdist: list of scalar q-values or list of [qx,qy] doublets 
+        """
+        q_array = numpy.asarray(qdist)
+        iq_array = numpy.zeros(len(q_array))
+        for i in len(q_array):
+            iq_array[i] = self.runXY(q_array[i])
+            
+        return iq_array
     
     def clone(self):
         """ Returns a new object identical to the current object """
