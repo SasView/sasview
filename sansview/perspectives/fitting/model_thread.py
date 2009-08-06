@@ -145,7 +145,7 @@ class Calc1D(CalcThread):
             index= (self.qmin <= self.x)& (self.x <= self.qmax)
             output = self.model.evalDistribution(self.x[index])
         except:
-            output= compute_point()
+            output= self.compute_point()
 
         ##smearer the ouput of the plot    
         if self.smearer!=None:
