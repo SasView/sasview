@@ -3,76 +3,6 @@ from data_util.calcthread import CalcThread
 import sys
 import numpy,math
 
-class Calc2D_all(CalcThread):
-    """
-        Compute 2D model
-        This calculation assumes a 2-fold symmetry of the model
-        where points are computed for one half of the detector
-        and I(qx, qy) = I(-qx, -qy) is assumed.
-    """
-    
-    def __init__(self, x, y, model,
-                 completefn = None,
-                 updatefn   = None,
-                 yieldtime  = 0.01,
-                 worktime   = 0.01
-                 ):
-        CalcThread.__init__(self,completefn,
-                 updatefn,
-                 yieldtime,
-                 worktime)
-        
-        self.x = x
-        self.y = y
-        self.model = model
-        self.starttime = 0
-        
-    def compute(self):
-        x = self.x
-        y = self.y
-        output = numpy.zeros((len(x),len(y)))
-            
-        self.starttime = time.time()
-        lx = len(self.x)
-        
-        #for i_x in range(int(len(self.x)/2)):
-        for i_x in range(len(self.x)):
-            if i_x%2==1:
-                continue
-            
-            # Check whether we need to bail out
-            self.update(output=output)
-            self.isquit()
-                
-            for i_y in range(len(self.y)):
-                value = self.model.runXY([self.x[i_x], self.y[i_y]])
-                output[i_y][i_x] = value
-                #output[lx-i_y-1][lx-i_x-1] = value
-                
-        if lx%2==1:
-            i_x = int(len(self.x)/2)
-            for i_y in range(len(self.y)):
-                value = self.model.runXY([self.x[i_x], self.y[i_y]])
-                output[i_y][i_x] = value
-                
-        #for i_x in range(int(len(self.x)/2)):
-        for i_x in range(len(self.x)):
-            if not i_x%2==1:
-                continue
-
-            # Check whether we need to bail out
-            self.update(output=output)
-            self.isquit()
-            
-            for i_y in range(len(self.y)):
-                value = self.model.runXY([self.x[i_x], self.y[i_y]])
-                output[i_y][i_x] = value
-                #output[lx-i_y-1][lx-i_x-1] = value
-            
-        elapsed = time.time()-self.starttime
-        self.complete(output=output, elapsed=elapsed)
-
-
 class Calc2D(CalcThread):
     """
         Compute 2D model
@@ -94,10 +24,14 @@ class Calc2D(CalcThread):
         self.qmin= qmin
         self.qmax= qmax
         self.qstep= qstep
-        self.x = x
-        self.y = y
+        # Reshape dimensions of x and y to call evalDistribution
+        self.x_array = numpy.reshape(x,[1,len(x)])
+        self.y_array = numpy.reshape(y,[len(y),1])
+        # Numpy array of dimensions 1 used for model.run method
+        self.x= numpy.array(x)
+        self.y= numpy.array(y)
         self.data= data
-        ## the model on to calculate
+        # the model on to calculate
         self.model = model
         self.starttime = 0  
         
@@ -105,8 +39,8 @@ class Calc2D(CalcThread):
         """
             Compute the data given a model function
         """
-     
-        output = numpy.zeros((len(self.x),len(self.y)))
+        self.starttime = time.time()
+        # Determine appropriate q range
         if self.qmin==None:
             self.qmin = 0
         if self.qmax== None:
@@ -114,10 +48,43 @@ class Calc2D(CalcThread):
                 newx= math.pow(max(math.fabs(self.data.xmax),math.fabs(self.data.xmin)),2)
                 newy= math.pow(max(math.fabs(self.data.ymax),math.fabs(self.data.ymin)),2)
                 self.qmax=math.sqrt( newx + newy )
-      
+        # Define matrix where data will be plotted        
+        radius= numpy.sqrt(self.x_array**2 + self.y_array**2)
+        index_data= (self.qmin<= radius)
+        index_model = (self.qmin <= radius)&(radius<= self.qmax)
        
-        self.starttime = time.time()
-        lx = len(self.x)
+        try:
+            ## receive only list of 2 numpy array 
+            ## One must reshape to vertical and the other to horizontal
+            value = self.model.evalDistribution([self.y_array,self.x_array] )
+            ## for data ignore the qmax 
+            if self.data == None:
+                # Only qmin value will be consider for the detector
+                output = value *index_data  
+            else:
+                # The user can define qmin and qmax for the detector
+                output = value*index_model
+        except:
+            ## looping trough all x and y points
+            output= self.compute_point()  
+       
+        elapsed = time.time()-self.starttime
+        self.complete( image = output,
+                       data = self.data , 
+                       model = self.model,
+                       elapsed = elapsed,
+                       qmin = self.qmin,
+                       qmax =self.qmax,
+                       qstep = self.qstep )
+        
+    def compute_point(self):
+        """
+            Compute the data given a model function. Loop through each point
+            of x and y to compute the model
+            @return output : is a matrix of size x*y
+        """
+        output = numpy.zeros((len(self.x),len(self.y)))
+       
         for i_x in range(len(self.x)):
             # Check whether we need to bail out
             self.update(output=output )
@@ -137,95 +104,10 @@ class Calc2D(CalcThread):
                         value = self.model.runXY( [self.x[i_x], self.y[i_y]] )
                         output[i_y][i_x] =value   
                     else:
-                        output[i_y][i_x] =0   
-            
-        elapsed = time.time()-self.starttime
-        self.complete( image = output,
-                       data = self.data , 
-                       model = self.model,
-                       elapsed = elapsed,
-                       qmin = self.qmin,
-                       qmax =self.qmax,
-                       qstep = self.qstep )
-
-
-class Calc2D_4fold(CalcThread):
-    """
-        Compute 2D model
-        This calculation assumes a 4-fold symmetry of the model.
-        Really is the same calculation time since we have to 
-        calculate points for 0<phi<pi anyway.
-    """
+                        output[i_y][i_x] =0  
+        return output 
+     
     
-    def __init__(self, x, y, model,
-                 completefn = None,
-                 updatefn   = None,
-                 yieldtime  = 0.01,
-                 worktime   = 0.01
-                 ):
-        CalcThread.__init__(self,completefn,
-                 updatefn,
-                 yieldtime,
-                 worktime)
-        self.x = x
-        self.y = y
-        self.model = model
-        self.starttime = 0
-        
-    def compute(self):
-        x = self.x
-        y = self.y
-        output = numpy.zeros((len(x),len(y)))
-            
-        self.starttime = time.time()
-        lx = len(self.x)
-        
-        for i_x in range(int(len(self.x)/2)):
-            if i_x%2==1:
-                continue
-            
-            # Check whether we need to bail out
-            self.update(output=output)
-            self.isquit()
-                
-            for i_y in range(int(len(self.y)/2)):
-                value1 = self.model.runXY([self.x[i_x], self.y[i_y]])
-                value2 = self.model.runXY([self.x[i_x], self.y[lx-i_y-1]])
-                output[i_y][i_x] = value1 + value2
-                output[lx-i_y-1][lx-i_x-1] = value1 + value2
-                output[lx-i_y-1][i_x] = value1 + value2
-                output[i_y][lx-i_x-1] = value1 + value2
-                
-        if lx%2==1:
-            i_x = int(len(self.x)/2)
-            for i_y in range(int(len(self.y)/2)):
-                value1 = self.model.runXY([self.x[i_x], self.y[i_y]])
-                value2 = self.model.runXY([self.x[i_x], self.y[lx-i_y-1]])
-                output[i_y][i_x] = value1 + value2
-                output[lx-i_y-1][lx-i_x-1] = value1 + value2
-                output[lx-i_y-1][i_x] = value1 + value2
-                output[i_y][lx-i_x-1] = value1 + value2
-                
-        for i_x in range(int(len(self.x)/2)):
-            if not i_x%2==1:
-                continue
-
-            # Check whether we need to bail out
-            self.update(output=output)
-            self.isquit()
-            
-            for i_y in range(int(len(self.y)/2)):
-                value1 = self.model.runXY([self.x[i_x], self.y[i_y]])
-                value2 = self.model.runXY([self.x[i_x], self.y[lx-i_y-1]])
-                output[i_y][i_x] = value1 + value2
-                output[lx-i_y-1][lx-i_x-1] = value1 + value2
-                output[lx-i_y-1][i_x] = value1 + value2
-                output[i_y][lx-i_x-1] = value1 + value2
-            
-        elapsed = time.time()-self.starttime
-        self.complete(output=output, elapsed=elapsed)
-
-
 
 class Calc1D(CalcThread):
     """Compute 1D data"""
@@ -244,7 +126,7 @@ class Calc1D(CalcThread):
                  updatefn,
                  yieldtime,
                  worktime)
-        self.x = x
+        self.x = numpy.array(x)
         self.data= data
         self.qmin= qmin
         self.qmax= qmax
@@ -256,10 +138,36 @@ class Calc1D(CalcThread):
         """
             Compute model 1d value given qmin , qmax , x value 
         """
-        output = numpy.zeros(len(self.x))
-       
+        
         self.starttime = time.time()
         
+        try:
+            index= (self.qmin <= self.x)& (self.x <= self.qmax)
+            output = self.model.evalDistribution(self.x[index])
+        except:
+            output= compute_point()
+
+        ##smearer the ouput of the plot    
+        if self.smearer!=None:
+            output = self.smearer(output) #Todo: Why always output[0]=0???
+        
+        ######Temp. FIX for Qrange w/ smear. #ToDo: Should not pass all the data to 'run' or 'smear'...
+        new_index = (self.qmin > self.x) |(self.x > self.qmax)
+        output[new_index] = None
+                
+        elapsed = time.time()-self.starttime
+        
+        self.complete(x= self.x, y= output, 
+                      elapsed=elapsed, model= self.model, data=self.data)
+        
+    def compute_point(self):
+        """
+            Compute the data given a model function. Loop through each point
+            of x  compute the model
+            @return output : is a numpy vector of size x
+        """  
+        output = numpy.zeros(len(self.x))      
+        # Loop through each q of data.x
         for i_x in range(len(self.x)):
             self.update(x= self.x, output=output )
             # Check whether we need to bail out
@@ -267,22 +175,10 @@ class Calc1D(CalcThread):
             if self.qmin <= self.x[i_x] and self.x[i_x] <= self.qmax:
                 value = self.model.run(self.x[i_x])
                 output[i_x] = value
-
-        ##smearer the ouput of the plot    
-        if self.smearer!=None:
-            output = self.smearer(output) #Todo: Why always output[0]=0???
-        
-        ######Temp. FIX for Qrange w/ smear. #ToDo: Should not pass all the data to 'run' or 'smear'...
-        for i_x in range(len(self.x)):
-            if self.qmin > self.x[i_x] or self.x[i_x] > self.qmax:
-                output[i_x] = None
                 
-        elapsed = time.time()-self.starttime
-        self.complete(x= self.x, y= output, 
-                      elapsed=elapsed, model= self.model, data=self.data)
-        
-        
-
+        return output
+                
+                
 class CalcCommandline:
     def __init__(self, n=20000):
         #print thread.get_ident()

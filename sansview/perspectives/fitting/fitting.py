@@ -1208,10 +1208,11 @@ class Plugin:
             self.calc_2D.queue()
             
         except:
-            msg= " Error occurred when drawing %s Model 2D: "%model.name
-            msg+= " %s"%sys.exc_value
-            wx.PostEvent( self.parent, StatusEvent(status= msg ))
-            return  
+            raise
+            #msg= " Error occurred when drawing %s Model 2D: "%model.name
+            #msg+= " %s"%sys.exc_value
+            #wx.PostEvent( self.parent, StatusEvent(status= msg ))
+            #return  
    
     def _draw_model1D(self, model, data=None, smearer= None,
                 qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep= DEFAULT_NPTS,enable1D= True):
@@ -1261,7 +1262,20 @@ class Plugin:
             wx.PostEvent( self.parent, StatusEvent(status= msg ))
             return  
             
-   
+
+def profile(fn, *args, **kw):
+    import cProfile, pstats, os
+    global call_result
+    def call():
+        global call_result
+        call_result = fn(*args, **kw)
+    cProfile.runctx('call()', dict(call=call), {}, 'profile.out')
+    stats = pstats.Stats('profile.out')
+    stats.sort_stats('time')
+    #stats.sort_stats('calls')
+    stats.print_stats()
+    os.unlink('profile.out')
+    return call_result
 if __name__ == "__main__":
     i = Plugin()
     
