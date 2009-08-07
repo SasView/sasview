@@ -99,6 +99,13 @@ class StackedDisksModel(CStackedDisksModel, BaseComponent):
         
         return CStackedDisksModel.runXY(self, x)
         
+    def evalDistribition(self, x = []):
+        """ Evaluate the model in cartesian coordinates
+            @param x: input q[], or [qx[], qy[]]
+            @return: scattering function P(q[])
+        """
+        return CStackedDisksModel.evalDistribition(self, x)
+        
     def set_dispersion(self, parameter, dispersion):
         """
             Set the dispersion object for a model parameter

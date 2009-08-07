@@ -77,7 +77,7 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
 		L+2T: The total length of the outershell
 		J1: the first order Bessel function
 		theta: axis_theta of the cylinder
-		phi: the axis_phi of the cylinder"""
+		phi: the axis_phi of the cylinder..."""
        
 		## Parameter details [units, min, max]
         self.details = {}
@@ -93,7 +93,7 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
         self.details['axis_phi'] = ['[rad]', None, None]
 
 		## fittable parameters
-        self.fixed=['axis_phi.width', 'axis_theta.width', 'length.width', 'radius.width', 'thickness_width']
+        self.fixed=['axis_phi.width', 'axis_theta.width', 'length.width', 'radius.width', 'thickness.width']
         
         ## parameters with orientation
         self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
@@ -117,6 +117,13 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
         """
         
         return CCoreShellCylinderModel.runXY(self, x)
+        
+    def evalDistribition(self, x = []):
+        """ Evaluate the model in cartesian coordinates
+            @param x: input q[], or [qx[], qy[]]
+            @return: scattering function P(q[])
+        """
+        return CCoreShellCylinderModel.evalDistribition(self, x)
         
     def set_dispersion(self, parameter, dispersion):
         """

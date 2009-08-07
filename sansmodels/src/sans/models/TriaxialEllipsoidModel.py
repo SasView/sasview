@@ -93,6 +93,13 @@ class TriaxialEllipsoidModel(CTriaxialEllipsoidModel, BaseComponent):
         
         return CTriaxialEllipsoidModel.runXY(self, x)
         
+    def evalDistribition(self, x = []):
+        """ Evaluate the model in cartesian coordinates
+            @param x: input q[], or [qx[], qy[]]
+            @return: scattering function P(q[])
+        """
+        return CTriaxialEllipsoidModel.evalDistribition(self, x)
+        
     def set_dispersion(self, parameter, dispersion):
         """
             Set the dispersion object for a model parameter

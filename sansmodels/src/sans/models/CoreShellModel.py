@@ -98,6 +98,13 @@ class CoreShellModel(CCoreShellModel, BaseComponent):
         
         return CCoreShellModel.runXY(self, x)
         
+    def evalDistribition(self, x = []):
+        """ Evaluate the model in cartesian coordinates
+            @param x: input q[], or [qx[], qy[]]
+            @return: scattering function P(q[])
+        """
+        return CCoreShellModel.evalDistribition(self, x)
+        
     def set_dispersion(self, parameter, dispersion):
         """
             Set the dispersion object for a model parameter
