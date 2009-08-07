@@ -6,7 +6,8 @@
  * [DISP_PARAMS] = r_minor, r_ratio, length, cyl_theta, cyl_phi, cyl_psi
  * [DESCRIPTION] = Please see details...
  * [FIXED]= <text> cyl_phi.width;
- * cyl_theta.width; cyl_psi.width; length.width; r_minor.width; r_ratio.width </text>
+ * cyl_theta.width; cyl_psi.width; length.width; r_minor.width; r_ratio.width 
+ *</text>
  * [ORIENTATION_PARAMS]= cyl_phi; cyl_theta; cyl_psi;  cyl_phi.width; cyl_theta.width; cyl_psi.width
  * */
 

@@ -71,7 +71,7 @@ class BaseComponent:
         """
         q_array = numpy.asarray(qdist)
         iq_array = numpy.zeros(len(q_array))
-        for i in len(q_array):
+        for i in xrange(len(q_array)):
             iq_array[i] = self.runXY(q_array[i])
             
         return iq_array

@@ -63,11 +63,11 @@ class DebyeModel(BaseComponent):
         # Note that a zero denominator value will raise
         # an exception
         y = (x * self.params['rg'])**2.0
-        if y == 0:
-            return 1e+16
+        if x == 0:
+            D=1
         else:
-            D = 2.0*( math.exp(-y) + y -1.0 )/y**2.0
-            return self.params['scale']* D + self.params['background']
+           D = 2.0*( math.exp(-y) + y -1.0 )/y**2.0
+        return self.params['scale']* D + self.params['background']
    
     def run(self, x = 0.0):
         """ Evaluate the model
