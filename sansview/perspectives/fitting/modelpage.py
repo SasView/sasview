@@ -123,6 +123,7 @@ class ModelPage(BasicPage):
         self.fittable_param=[]
         self.fixed_param=[]
         self.orientation_params_disp=[]
+        #self.temp=[]
        
         self.sizer4_4.Clear(True)
         if self.model==None:
@@ -267,8 +268,8 @@ class ModelPage(BasicPage):
                             self.sizer4_4.Add(Tctl2, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             ix +=1
-                            self.sizer4_4.Add((20,20), (iy,ix),(1,1),
-                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            #self.sizer4_4.Add((20,20), (iy,ix),(1,1),
+                                               #wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             self.fixed_param.append([None,name3, Tctl2,
                                                      None,None, None, None,None])
                             self.orientation_params_disp.append([None,name3, Tctl2,
@@ -279,7 +280,7 @@ class ModelPage(BasicPage):
         self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)   
         ix =0
         iy +=1 
-        self.sizer4_4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)   
+        #self.sizer4_4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)   
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.SetScrollbars(20,20,200,100)
@@ -299,23 +300,39 @@ class ModelPage(BasicPage):
             self._draw_model()
             self.model_view.Disable()
            
-            #ToDo:cleanup this mess.           
-            #self.set_model_param_sizer(self.model)
-            #self._set_sizer_gaussian()
+            #ToDo:cleanup this mess.  resets orient param on 2D when polydis. is on.  
+            #broken since _set_sizer_gaussian() was removed from the code.  
+            n = self.disp_box.GetCurrentSelection()
+            dispersity= self.disp_box.GetClientData(n)
+ 
+            self.set_model_param_sizer(self.model)
+            self._set_sizer_dispersion(dispersity)
             
             if len(self.orientation_params)>0:
+                #recover hidden orient. param.s
+                #for item in self.temp:
+                #    for num in range(len(item)):
+                #        item[num].Show(True)
                 for item in self.orientation_params:
                     if item[2]!=None:      
-    
+                        #item[2].Show()
                         item[2].Enable()
+            
             if  self.disp_name.lower() == "array":                
                 self._set_sizer_arraydispersion()  
             else:
+
                 if len(self.orientation_params_disp)>0:
-                     for item in self.orientation_params_disp:
+                    #for item in self.temp:
+                    #    for num in range(len(item)):
+                    #        item[num].Show(True)
+                    
+                    for item in self.orientation_params_disp:
                         if item[2]!=None:
+                            #item[2].Show()
                             item[2].Enable()
         self.state.enable2D =  copy.deepcopy(self.enable2D)
+        self.Layout()
         ## post state to fit panel
         self._undo.Enable(True)
         event = PageInfoEvent(page = self)
@@ -457,6 +474,7 @@ class ModelPage(BasicPage):
         self.fixed_param=[]
         self.orientation_params=[]
         self.orientation_params_disp=[]
+        #self.temp=[]
         if model ==None:
             ##no model avaiable to draw sizer 
             self.sizer3.Layout()
@@ -566,13 +584,16 @@ class ModelPage(BasicPage):
                     units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                 if not self.enable2D:
                     units.Hide()
-                    units.Disable()
+                    #units.Disable()
                 else:
                     units.Show(True)
-                    units.Enable()
-
+                    #units.Enable()
+   
                 sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                #Save 2D orient. params
+                #self.temp.append([name,ctl1,units,orient_angle])
                 
+                               
                 ##[cb state, name, value, "+/-", error of fit, min, max , units]
                 self.parameters.append([None,item, ctl1,
                                         None,None, None, None,None])
@@ -580,7 +601,7 @@ class ModelPage(BasicPage):
                                         None,None, None, None,None])
                     
         iy+=1
-        sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        #sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
         #Display units text on panel
         for item in keys:   
@@ -596,7 +617,8 @@ class ModelPage(BasicPage):
         self.SetScrollbars(20,20,200,100)
     
  
-            
+
+                
         
 class HelpWindow(wx.Frame):
     def __init__(self, parent, id, title):

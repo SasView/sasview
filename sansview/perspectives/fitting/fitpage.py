@@ -437,8 +437,8 @@ class FitPage(BasicPage):
                             self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             ix +=1
-                            self.sizer4_4.Add((20,20), (iy,ix),(1,1),
-                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            #self.sizer4_4.Add((20,20), (iy,ix),(1,1),
+                                               #wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             self.fixed_param.append([None,name3, Tctl
                                                      ,None,None, None, None,None])    
                             self.orientation_params_disp.append([None,name3, Tctl
@@ -456,7 +456,7 @@ class FitPage(BasicPage):
                         " Selected Distribution: Gaussian"))   
         ix =0
         iy +=1 
-        self.sizer4_4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)        
+        #self.sizer4_4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)        
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
@@ -1260,7 +1260,7 @@ class FitPage(BasicPage):
                                             text2,ctl2, ctl3, ctl4,units])
               
         iy+=1
-        sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        #sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
         #Display units text on panel
         for item in keys:   
