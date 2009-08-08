@@ -59,22 +59,70 @@ class BaseComponent:
     def evalDistribution(self, qdist):
         """
             Evaluate a distribution of q-values.
-            A list of either scale q-values or [qx,qy] doublets
-            are assumed. The allowed data types for the doublets are 
-            the same as for run() and runXY().
             
-            Since the difference between scale and vector q-values
-            are dealt with in runXY(), we pass along the values
-            as-is.
+            * For 1D, a numpy array is expected as input:
             
-            @param qdist: list of scalar q-values or list of [qx,qy] doublets 
+                evalDistribution(q)
+                
+            where q is a numpy array.
+            
+            
+            * For 2D, a list of numpy arrays are expected: [qx_prime,qy_prime].
+            
+            For the following matrix of q_values [qx,qy], we will have:
+                      +--------+--------+--------+
+            qy[2]     |        |        |        | 
+                      +--------+--------+--------+
+            qy[1]     |        |        |        |
+                      +--------+--------+--------+            
+            qy[0]     |        |        |        | 
+                      +--------+--------+--------+
+                        qx[0]    qx[1]    qx[2]
+
+
+            The q-values must be stored in numpy arrays.
+            The qxprime and qyprime are 2D arrays. From the two lists of q-values 
+            above, numpy arrays must be created the following way:
+
+            qx_prime = numpy.reshape(qx, [3,1])
+            qy_prime = numpy.reshape(qy, [1,3])
+            
+            The method is then called the following way:
+            
+            evalDistribution([qx_prime, qy_prime])
+            
+            @param qdist: ndarray of scalar q-values or list [qx,qy] where qx,qy are 2D ndarrays 
         """
-        q_array = numpy.asarray(qdist)
-        iq_array = numpy.zeros(len(q_array))
-        for i in xrange(len(q_array)):
-            iq_array[i] = self.runXY(q_array[i])
+        if qdist.__class__.__name__ == 'list':
+            # Check whether we have a list of ndarrays [qx,qy]
+            if len(qdist)!=2 or \
+                qdist[0].__class__.__name__ != 'ndarray' or \
+                qdist[1].__class__.__name__ != 'ndarray':
+                    raise RuntimeError, "evalDistribution expects a list of 2 ndarrays"
+                
+            # Extract qx and qy for code clarity
+            qx = qdist[0]
+            qy = qdist[1]
             
-        return iq_array
+            # Create output array
+            iq_array = numpy.zeros([qx.shape[0], qy.shape[1]])
+             
+            for i in range(qx.shape[0]):
+                for j in range(qy.shape[1]):
+                    iq_array[i][j] = self.runXY([qx[i][0],qy[0][j]])
+            return iq_array
+                
+        elif qdist.__class__.__name__ == 'ndarray':
+                # We have a simple 1D distribution of q-values
+                iq_array = numpy.zeros(len(qdist))
+                for i in range(len(qdist)):
+                    iq_array[i] = self.runXY(qdist[i])
+                return iq_array
+            
+        else:
+            mesg = "evalDistribution is expecting an ndarray of scalar q-values"
+            mesg += " or a list [qx,qy] where qx,qy are 2D ndarrays."
+            raise RuntimeError, mesg
     
     def clone(self):
         """ Returns a new object identical to the current object """
