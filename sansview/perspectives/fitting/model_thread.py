@@ -53,21 +53,17 @@ class Calc2D(CalcThread):
         index_data= (self.qmin<= radius)
         index_model = (self.qmin <= radius)&(radius<= self.qmax)
        
-        try:
-            ## receive only list of 2 numpy array 
-            ## One must reshape to vertical and the other to horizontal
-            value = self.model.evalDistribution([self.y_array,self.x_array] )
-            ## for data ignore the qmax 
-            if self.data == None:
-                # Only qmin value will be consider for the detector
-                output = value *index_data  
-            else:
-                # The user can define qmin and qmax for the detector
-                output = value*index_model
-        except:
-            ## looping trough all x and y points
-            output= self.compute_point()  
-       
+        ## receive only list of 2 numpy array 
+        ## One must reshape to vertical and the other to horizontal
+        value = self.model.evalDistribution([self.y_array,self.x_array] )
+        ## for data ignore the qmax 
+        if self.data == None:
+            # Only qmin value will be consider for the detector
+            output = value *index_data  
+        else:
+            # The user can define qmin and qmax for the detector
+            output = value*index_model
+        
         elapsed = time.time()-self.starttime
         self.complete( image = output,
                        data = self.data , 
@@ -141,12 +137,9 @@ class Calc1D(CalcThread):
         
         self.starttime = time.time()
         
-        try:
-            index= (self.qmin <= self.x)& (self.x <= self.qmax)
-            output = self.model.evalDistribution(self.x[index])
-        except:
-            output= self.compute_point()
-
+        index= (self.qmin <= self.x)& (self.x <= self.qmax)
+        output = self.model.evalDistribution(self.x[index])
+ 
         ##smearer the ouput of the plot    
         if self.smearer!=None:
             output = self.smearer(output) #Todo: Why always output[0]=0???
