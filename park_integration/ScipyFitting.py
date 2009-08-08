@@ -57,10 +57,10 @@ class ScipyFit(FitEngine):
         """
         self.fitArrangeDict={}
         self.paramList=[]
-    def fit(self, *args, **kw):
-        return profile(self._fit, *args, **kw)
+    #def fit(self, *args, **kw):
+    #    return profile(self._fit, *args, **kw)
 
-    def _fit(self ,handler=None,curr_thread= None):
+    def fit(self ,handler=None,curr_thread= None):
        
         fitproblem=[]
         for id ,fproblem in self.fitArrangeDict.iteritems():

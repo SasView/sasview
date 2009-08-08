@@ -2,10 +2,6 @@
      Installation script for SANS fitting
 """
 
-import sys
-import os
-if len(sys.argv) == 1:
-    sys.argv.append('install')
 
 # Then build and install the modules
 from distutils.core import setup, Extension
