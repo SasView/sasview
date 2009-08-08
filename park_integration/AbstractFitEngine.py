@@ -114,10 +114,8 @@ class Model(park.Model):
         try:
             return self.model.evalDistribution(x)
         except:
-            return self.model.runXY(x)
-   
-   
-
+            print "AbstractFitEngine.Model.eval [FIXME]:", sys.exc_value
+            raise
 
 class Data(object):
     """ Wrapper class  for SANS data """
@@ -385,13 +383,9 @@ class FitData2D(object):
         return self.qmin, self.qmax
      
     def residuals(self, fn): 
-        try:
-            res=self.index_model*(self.image - fn([self.y_bins_array,
-                             self.x_bins_array]))/self.res_err_image
-            return res.ravel() 
-        except:
-            print "Using old residual method"
-            return self.old_residuals( fn)
+        res=self.index_model*(self.image - fn([self.y_bins_array,
+                         self.x_bins_array]))/self.res_err_image
+        return res.ravel() 
     
     
     def old_residuals(self, fn):
