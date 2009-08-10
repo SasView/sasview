@@ -61,7 +61,7 @@ class CalcChisqr1D(CalcThread):
         output= None
         res=[]
         try:
-            res = self.fitdata.residuals(self.model.run)
+            res = self.fitdata.residuals(self.model.evalDistribution)
             sum=0
             for item in res:
                 # Check whether we need to bail out
@@ -132,7 +132,7 @@ class CalcChisqr2D(CalcThread):
         output= None
         res=[]
         try:
-            res = self.fitdata.residuals(self.model.run)
+            res = self.fitdata.residuals(self.model.evalDistribution)
             sum=0
             for item in res:
                 # Check whether we need to bail out

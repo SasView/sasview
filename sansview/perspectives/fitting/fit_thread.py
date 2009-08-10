@@ -145,7 +145,7 @@ class FitThread(CalcThread):
                           pars = self.pars,
                           cpage= self.cpage,
                           elapsed=elapsed )
-            
+           
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
@@ -154,6 +154,7 @@ class FitThread(CalcThread):
         
         except :
             #Stop on exception during fitting. Todo: need to put some mssg and reset progress bar.
-            wx.PostEvent(self.parent, StatusEvent(status=" Fit exception occurred..." ,type="stop"))
+            msg= " Fit Error occurred... %s"%sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status= msg,type="stop"))
             #raise
     

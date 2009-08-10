@@ -53,17 +53,21 @@ class Calc2D(CalcThread):
         index_data= (self.qmin<= radius)
         index_model = (self.qmin <= radius)&(radius<= self.qmax)
        
-        ## receive only list of 2 numpy array 
-        ## One must reshape to vertical and the other to horizontal
-        value = self.model.evalDistribution([self.y_array,self.x_array] )
-        ## for data ignore the qmax 
-        if self.data == None:
-            # Only qmin value will be consider for the detector
-            output = value *index_data  
-        else:
-            # The user can define qmin and qmax for the detector
-            output = value*index_model
-        
+        try:
+            ## receive only list of 2 numpy array 
+            ## One must reshape to vertical and the other to horizontal
+            value = self.model.evalDistribution([self.y_array,self.x_array] )
+            ## for data ignore the qmax 
+            if self.data == None:
+                # Only qmin value will be consider for the detector
+                output = value *index_data  
+            else:
+                # The user can define qmin and qmax for the detector
+                output = value*index_model
+        except:
+            raise
+           
+       
         elapsed = time.time()-self.starttime
         self.complete( image = output,
                        data = self.data , 
@@ -73,36 +77,7 @@ class Calc2D(CalcThread):
                        qmax =self.qmax,
                        qstep = self.qstep )
         
-    def compute_point(self):
-        """
-            Compute the data given a model function. Loop through each point
-            of x and y to compute the model
-            @return output : is a matrix of size x*y
-        """
-        output = numpy.zeros((len(self.x),len(self.y)))
-       
-        for i_x in range(len(self.x)):
-            # Check whether we need to bail out
-            self.update(output=output )
-            self.isquit()
-       
-            for i_y in range(int(len(self.y))):
-                radius = math.sqrt(self.x[i_x]*self.x[i_x]+self.y[i_y]*self.y[i_y])
-                ## for data ignore the qmax 
-                if self.data == None:
-                    if  self.qmin <= radius :
-                        value = self.model.runXY( [self.x[i_x], self.y[i_y]] )
-                        output[i_y][i_x] =value   
-                    else:
-                        output[i_y][i_x] =0   
-                else:  
-                    if  self.qmin <= radius and radius<= self.qmax:
-                        value = self.model.runXY( [self.x[i_x], self.y[i_y]] )
-                        output[i_y][i_x] =value   
-                    else:
-                        output[i_y][i_x] =0  
-        return output 
-     
+   
     
 
 class Calc1D(CalcThread):
@@ -137,9 +112,13 @@ class Calc1D(CalcThread):
         
         self.starttime = time.time()
         
-        index= (self.qmin <= self.x)& (self.x <= self.qmax)
-        output = self.model.evalDistribution(self.x[index])
- 
+        try:
+            index= (self.qmin <= self.x)& (self.x <= self.qmax)
+            output = self.model.evalDistribution(self.x[index])
+        except:
+            raise
+            
+
         ##smearer the ouput of the plot    
         if self.smearer!=None:
             output = self.smearer(output) #Todo: Why always output[0]=0???
@@ -149,28 +128,11 @@ class Calc1D(CalcThread):
         output[new_index] = None
                 
         elapsed = time.time()-self.starttime
-        
+       
         self.complete(x= self.x, y= output, 
                       elapsed=elapsed, model= self.model, data=self.data)
         
-    def compute_point(self):
-        """
-            Compute the data given a model function. Loop through each point
-            of x  compute the model
-            @return output : is a numpy vector of size x
-        """  
-        output = numpy.zeros(len(self.x))      
-        # Loop through each q of data.x
-        for i_x in range(len(self.x)):
-            self.update(x= self.x, output=output )
-            # Check whether we need to bail out
-            self.isquit()
-            if self.qmin <= self.x[i_x] and self.x[i_x] <= self.qmax:
-                value = self.model.run(self.x[i_x])
-                output[i_x] = value
-                
-        return output
-                
+ 
                 
 class CalcCommandline:
     def __init__(self, n=20000):
