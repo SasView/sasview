@@ -112,70 +112,10 @@ class Model(park.Model):
             @param x: the x value used to compute a function
         """
         try:
-            return self.model.evalDistribution(x)
+        	return self.model.evalDistribution(x)
         except:
-            print "AbstractFitEngine.Model.eval [FIXME]:", sys.exc_value
-            raise
+        	raise
 
-class Data(object):
-    """ Wrapper class  for SANS data """
-    def __init__(self,x=None,y=None,dy=None,dx=None,sans_data=None):
-        """
-            Data can be initital with a data (sans plottable)
-            or with vectors.
-        """
-        if  sans_data !=None:
-            self.x= sans_data.x
-            self.y= sans_data.y
-            self.dx= sans_data.dx
-            self.dy= sans_data.dy
-           
-        elif (x!=None and y!=None and dy!=None):
-                self.x=x
-                self.y=y
-                self.dx=dx
-                self.dy=dy
-        else:
-            raise ValueError,\
-            "Data is missing x, y or dy, impossible to compute residuals later on"
-        self.qmin=None
-        self.qmax=None
-       
-       
-    def setFitRange(self,mini=None,maxi=None):
-        """ to set the fit range"""
-        
-        self.qmin=mini           
-        self.qmax=maxi
-        
-        
-    def getFitRange(self):
-        """
-            @return the range of data.x to fit
-        """
-        return self.qmin, self.qmax
-     
-     
-    def residuals(self, fn):
-        """ @param fn: function that return model value
-            @return residuals
-        """
-        x,y,dy = [numpy.asarray(v) for v in (self.x,self.y,self.dy)]
-        if self.qmin==None and self.qmax==None: 
-            fx =numpy.asarray([fn(v) for v in x])
-            return (y - fx)/dy
-        else:
-            idx = (x>=self.qmin) & (x <= self.qmax)
-            fx = numpy.asarray([fn(item)for item in x[idx ]])
-            return (y[idx] - fx)/dy[idx]
-        
-    def residuals_deriv(self, model, pars=[]):
-        """ 
-            @return residuals derivatives .
-            @note: in this case just return empty array
-        """
-        return []
-    
     
 class FitData1D(object):
     """ Wrapper class  for SANS data """
@@ -205,10 +145,18 @@ class FitData1D(object):
       
         # Initialize from Data1D object
         self.data=sans_data1d
-        self.x= sans_data1d.x
-        self.y= sans_data1d.y
+        self.x= numpy.array(sans_data1d.x)
+        self.y= numpy.array(sans_data1d.y)
         self.dx= sans_data1d.dx
-        self.dy= sans_data1d.dy
+        if sans_data1d.dy ==None or sans_data1d.dy==[]:
+            self.dy= numpy.zeros(len(y))  
+        else:
+            self.dy= numpy.asarray(sans_data1d.dy)
+     
+        # For fitting purposes, replace zero errors by 1
+        #TODO: check validity for the rare case where only
+        # a few points have zero errors 
+        self.dy[self.dy==0]=1
         
         ## Min Q-value
         #Skip the Q=0 point, especially when y(q=0)=None at x[0].
@@ -222,6 +170,10 @@ class FitData1D(object):
         # Range used for input to smearing
         self._qmin_unsmeared = self.qmin
         self._qmax_unsmeared = self.qmax
+        # Identify the bin range for the unsmeared and smeared spaces
+        self.idx = (self.x>=self.qmin) & (self.x <= self.qmax)
+        self.idx_unsmeared = (self.x>=self._qmin_unsmeared) & (self.x <= self._qmax_unsmeared)
+  
        
        
     def setFitRange(self,qmin=None,qmax=None):
@@ -255,7 +207,10 @@ class FitData1D(object):
                 self._qmax_unsmeared = min([max(self.data.x), self.qmax+offset])
             except:
                 logging.error("FitData1D.setFitRange: %s" % sys.exc_value)
-        
+        # Identify the bin range for the unsmeared and smeared spaces
+        self.idx = (self.x>=self.qmin) & (self.x <= self.qmax)
+        self.idx_unsmeared = (self.x>=self._qmin_unsmeared) & (self.x <= self._qmax_unsmeared)
+  
         
     def getFitRange(self):
         """
@@ -273,52 +228,34 @@ class FitData1D(object):
             @param fn: function that return model value
             @return residuals
         """
-        x,y = [numpy.asarray(v) for v in (self.x,self.y)]
-        if self.dy ==None or self.dy==[]:
-            dy= numpy.zeros(len(y))  
-        else:
-            dy= numpy.asarray(self.dy)
-     
-        # For fitting purposes, replace zero errors by 1
-        #TODO: check validity for the rare case where only
-        # a few points have zero errors 
-        dy[dy==0]=1
-        
-        # Identify the bin range for the unsmeared and smeared spaces
-        idx = (x>=self.qmin) & (x <= self.qmax)
-        idx_unsmeared = (x>=self._qmin_unsmeared) & (x <= self._qmax_unsmeared)
-  
         # Compute theory data f(x)
-        fx= numpy.zeros(len(x))
-    
+        fx= numpy.zeros(len(self.x))
         _first_bin = None
         _last_bin  = None
-        for i_x in range(len(x)):
-            try:
-                if idx_unsmeared[i_x]==True:
-                    # Identify first and last bin
-                    #TODO: refactor this to pass q-values to the smearer
-                    # and let it figure out which bin range to use
-                    if _first_bin is None:
-                        _first_bin = i_x
-                    else:
-                        _last_bin  = i_x
-                    
-                    value = fn(x[i_x])
-                    fx[i_x] = value
-            except:
-                ## skip error for model.run(x)
-                pass
-                 
+       
+        fx = fn(self.x[self.idx_unsmeared])
+       
+        
+        for i_x in range(len(self.x)):
+            if self.idx_unsmeared[i_x]==True:
+                # Identify first and last bin
+                #TODO: refactor this to pass q-values to the smearer
+                # and let it figure out which bin range to use
+                if _first_bin is None:
+                    _first_bin = i_x
+                else:
+                    _last_bin  = i_x
+               
         ## Smear theory data
         if self.smearer is not None:
             fx = self.smearer(fx, _first_bin, _last_bin)
        
         ## Sanity check
-        if numpy.size(dy)!= numpy.size(fx):
-            raise RuntimeError, "FitData1D: invalid error array %d <> %d" % (numpy.size(dy), numpy.size(fx))
-
-        return (y[idx]-fx[idx])/dy[idx]
+        if numpy.size(self.dy)!= numpy.size(fx):
+            raise RuntimeError, "FitData1D: invalid error array %d <> %d" % (numpy.shape(self.dy),
+                                                                              numpy.size(fx))
+                                                                              
+        return (self.y[self.idx]-fx[self.idx])/self.dy[self.idx]
      
   
         
@@ -345,10 +282,6 @@ class FitData2D(object):
         self.y_bins_array = numpy.reshape(sans_data2d.y_bins,
                                           [len(sans_data2d.y_bins),1])
         
-        
-        self.x_bins = sans_data2d.x_bins
-        self.y_bins = sans_data2d.y_bins
-       
         x = max(self.data.xmin, self.data.xmax)
         y = max(self.data.ymin, self.data.ymax)
         
@@ -383,28 +316,12 @@ class FitData2D(object):
         return self.qmin, self.qmax
      
     def residuals(self, fn): 
-        res=self.index_model*(self.image - fn([self.y_bins_array,
-                         self.x_bins_array]))/self.res_err_image
-        return res.ravel() 
-    
-    
-    def old_residuals(self, fn):
-        """ @param fn: function that return model value
-            @return residuals
-        """
-        res=[]
-       
-        for i in range(len(self.x_bins)):
-            for j in range(len(self.y_bins)):
-                temp = math.pow(self.data.x_bins[i],2)+math.pow(self.data.y_bins[j],2)
-                radius= math.sqrt(temp)
-                if self.qmin <= radius and radius <= self.qmax:
-                    res.append( (self.image[j][i]- fn([self.x_bins[i],self.y_bins[j]]))\
-                            /self.res_err_image[j][i] )
         
-        return numpy.array(res)
-       
-          
+        res=self.index_model*(self.image - fn([self.y_bins_array,
+                             self.x_bins_array]))/self.res_err_image
+        return res.ravel() 
+        
+ 
     def residuals_deriv(self, model, pars=[]):
         """ 
             @return residuals derivatives .
