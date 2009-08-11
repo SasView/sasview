@@ -53,6 +53,7 @@ class Calc2D(CalcThread):
         index_data= (self.qmin<= radius)
         index_model = (self.qmin <= radius)&(radius<= self.qmax)
        
+        output = numpy.zeros((len(self.x),len(self.y)))
         try:
             ## receive only list of 2 numpy array 
             ## One must reshape to vertical and the other to horizontal
@@ -111,14 +112,10 @@ class Calc1D(CalcThread):
         """
         
         self.starttime = time.time()
-        
-        try:
-            index= (self.qmin <= self.x)& (self.x <= self.qmax)
-            output = self.model.evalDistribution(self.x[index])
-        except:
-            raise
-            
-
+        output = numpy.zeros((len(self.x)))
+        index= (self.qmin <= self.x)& (self.x <= self.qmax)
+        output[index] = self.model.evalDistribution(self.x[index])
+      
         ##smearer the ouput of the plot    
         if self.smearer!=None:
             output = self.smearer(output) #Todo: Why always output[0]=0???
