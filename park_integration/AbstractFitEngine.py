@@ -233,7 +233,7 @@ class FitData1D(object):
         _first_bin = None
         _last_bin  = None
        
-        fx = fn(self.x[self.idx_unsmeared])
+        fx[self.idx_unsmeared] = fn(self.x[self.idx_unsmeared])
        
         
         for i_x in range(len(self.x)):
