@@ -123,7 +123,7 @@ double parallelepiped_analytical_2D_scaled(ParallelepipedParameters *pars, doubl
     alpha = acos(cos_val_c);
 
     // parallelepiped a axis orientation
-    parallel_x = (1-sin(pars->parallel_theta)*sin(pars->parallel_phi))*sin(pars->parallel_psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)*sin(pars->parallel_psi);
+    parallel_x = -(1-sin(pars->parallel_theta)*sin(pars->parallel_phi))*sin(pars->parallel_psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)*sin(pars->parallel_psi);
     parallel_y = (1-sin(pars->parallel_theta)*sin(pars->parallel_phi))*cos(pars->parallel_psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)*cos(pars->parallel_psi);
     cos_val_a = (parallel_x*q_x + parallel_y*q_y);
 
