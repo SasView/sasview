@@ -6,10 +6,10 @@
 #define stacked_disks_h
 /** Structure definition for stacked disks parameters
  * [PYTHONCLASS] = StackedDisksModel
- * [DISP_PARAMS] = length, radius, axis_theta, axis_phi
+ * [DISP_PARAMS] = core_thick, layer_thick, radius, axis_theta, axis_phi
    [DESCRIPTION] = <text>
 		</text>
-	[FIXED]= <text>length.width; radius.width; axis_theta.width; axis_phi.width</text>
+	[FIXED]= <text>core_thick.width;layer_thick.width; radius.width; axis_theta.width; axis_phi.width</text>
 	[ORIENTATION_PARAMS]= <text>axis_phi; axis_theta; axis_phi.width; axis_theta.width</text>
 
 
@@ -21,12 +21,12 @@ typedef struct {
 	/// radius of the staked disk [A]
     //  [DEFAULT]=radius=3000 [A]
     double radius;
-    /// Length of the staked disk [A]
-    //  [DEFAULT]=length=10.0 [A]
-    double length;
+    /// Thickness of the core disk [A]
+    //  [DEFAULT]=core_thick=10.0 [A]
+    double core_thick;
 	/// Thickness of the staked disk [A]
-    //  [DEFAULT]=thickness=15.0 [A]
-    double thickness;
+    //  [DEFAULT]=layer_thick=15.0 [A]
+    double layer_thick;
 	/// Core scattering length density[1/A²]
     //  [DEFAULT]=core_sld=4e-6 [1/A²]
     double core_sld;
@@ -36,20 +36,20 @@ typedef struct {
 	/// solvent scattering length density[1/A²]
     //  [DEFAULT]=solvent_sld=5.0e-6 [1/A²]
     double solvent_sld;
-    /// number of layers
-    //  [DEFAULT]=nlayers=1
-	double nlayers;
-    /// GSD of disks spacing
-    //  [DEFAULT]=spacing=0
-    double spacing;
-	/// Incoherent Background [1/cm] 
+    /// number of stacking
+    //  [DEFAULT]=n_stacking=1
+	double n_stacking;
+    /// GSD of disks sigma_d
+    //  [DEFAULT]=sigma_d=0
+    double sigma_d;
+	/// Incoherent Background [1/cm]
 	//  [DEFAULT]=background=0.001 [1/cm]
 	double background;
     /// Orientation of the staked disk axis w/respect incoming beam [rad]
-    //  [DEFAULT]=axis_theta=1.0 [rad]
+    //  [DEFAULT]=axis_theta=0.0 [rad]
     double axis_theta;
     /// Orientation of the  staked disk in the plane of the detector [rad]
-    //  [DEFAULT]=axis_phi=1.0 [rad]
+    //  [DEFAULT]=axis_phi=0.0 [rad]
     double axis_phi;
 
 

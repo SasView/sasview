@@ -85,24 +85,27 @@ CStackedDisksModel_init(CStackedDisksModel *self, PyObject *args, PyObject *kwds
         self->model = new StackedDisksModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",0.010000));
-        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.000000));
-        PyDict_SetItemString(self->params,"spacing",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"nlayers",Py_BuildValue("d",1.000000));
-        PyDict_SetItemString(self->params,"layer_sld",Py_BuildValue("d",-0.000000));
-        PyDict_SetItemString(self->params,"solvent_sld",Py_BuildValue("d",0.000005));
-        PyDict_SetItemString(self->params,"thickness",Py_BuildValue("d",15.000000));
-        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",1.000000));
-        PyDict_SetItemString(self->params,"length",Py_BuildValue("d",10.000000));
         PyDict_SetItemString(self->params,"core_sld",Py_BuildValue("d",0.000004));
+        PyDict_SetItemString(self->params,"core_thick",Py_BuildValue("d",10.000000));
+        PyDict_SetItemString(self->params,"layer_thick",Py_BuildValue("d",15.000000));
+        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",0.000000));
+        PyDict_SetItemString(self->params,"layer_sld",Py_BuildValue("d",-0.000000));
+        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",0.000000));
+        PyDict_SetItemString(self->params,"solvent_sld",Py_BuildValue("d",0.000005));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",0.010000));
         PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",3000.000000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000));
+        PyDict_SetItemString(self->params,"sigma_d",Py_BuildValue("d",0.000000));
+        PyDict_SetItemString(self->params,"n_stacking",Py_BuildValue("d",1.000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
         disp_dict = PyDict_New();
-        self->model->length.dispersion->accept_as_source(visitor, self->model->length.dispersion, disp_dict);
-        PyDict_SetItemString(self->dispersion, "length", disp_dict);
+        self->model->core_thick.dispersion->accept_as_source(visitor, self->model->core_thick.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "core_thick", disp_dict);
+        disp_dict = PyDict_New();
+        self->model->layer_thick.dispersion->accept_as_source(visitor, self->model->layer_thick.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "layer_thick", disp_dict);
         disp_dict = PyDict_New();
         self->model->radius.dispersion->accept_as_source(visitor, self->model->radius.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "radius", disp_dict);
@@ -179,43 +182,7 @@ static PyObject *evaluateOneDim(StackedDisksModel* model, PyArrayObject *q){
 	}
     return PyArray_Return(result); 
  }
-/**
- * Function to call to evaluate model
- * @param args: input numpy array  [q[],phi[]]
- * @return: numpy array object 
- */
-static PyObject * evaluateTwoDim( StackedDisksModel* model, 
-                              PyArrayObject *q, PyArrayObject *phi)
- {
-    PyArrayObject *result;
-    //check validity of input vectors
-    if (q->nd != 1 || q->descr->type_num != PyArray_DOUBLE
-        || phi->nd != 1 || phi->descr->type_num != PyArray_DOUBLE
-        || phi->dimensions[0] != q->dimensions[0]){
-     
-        //const char * message= "Invalid array: q->nd=%d,type_num=%d\n",q->nd,q->descr->type_num;
-        PyErr_SetString(PyExc_ValueError ,"wrong input"); 
-        return NULL;
-    }
-	result= (PyArrayObject *)PyArray_FromDims(q->nd,(int*)(q->dimensions), PyArray_DOUBLE);
 
-	if (result == NULL){
-	    const char * message= "Could not create result ";
-        PyErr_SetString(PyExc_RuntimeError , message);
-	    return NULL;
-	}
-	
-    for (int i = 0; i < q->dimensions[0]; i++) {
-      double q_value = *(double *)(q->data + i*q->strides[0]);
-      double phi_value = *(double *)(phi->data + i*phi->strides[0]);
-      double *result_value = (double *)(result->data + i*result->strides[0]);
-      if (q_value == 0)
-          *result_value = 0.0;
-      else
-          *result_value = model->evaluate_rphi(q_value, phi_value);
-    }
-    return PyArray_Return(result); 
- }
  /**
  * Function to call to evaluate model
  * @param args: input numpy array  [x[],y[]]
@@ -278,23 +245,25 @@ static PyObject * evalDistribution(CStackedDisksModel *self, PyObject *args){
 	// Get parameters
 	
 	    // Reader parameter dictionary
-    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
-    self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
-    self->model->spacing = PyFloat_AsDouble( PyDict_GetItemString(self->params, "spacing") );
-    self->model->nlayers = PyFloat_AsDouble( PyDict_GetItemString(self->params, "nlayers") );
-    self->model->layer_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "layer_sld") );
-    self->model->solvent_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "solvent_sld") );
-    self->model->thickness = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thickness") );
-    self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
-    self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
     self->model->core_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_sld") );
+    self->model->core_thick = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_thick") );
+    self->model->layer_thick = PyFloat_AsDouble( PyDict_GetItemString(self->params, "layer_thick") );
+    self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
+    self->model->layer_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "layer_sld") );
+    self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
+    self->model->solvent_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "solvent_sld") );
+    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
     self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->sigma_d = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sigma_d") );
+    self->model->n_stacking = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_stacking") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "length");
-    self->model->length.dispersion->accept_as_destination(visitor, self->model->length.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "core_thick");
+    self->model->core_thick.dispersion->accept_as_destination(visitor, self->model->core_thick.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "layer_thick");
+    self->model->layer_thick.dispersion->accept_as_destination(visitor, self->model->layer_thick.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "radius");
     self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
@@ -363,23 +332,25 @@ static PyObject * run(CStackedDisksModel *self, PyObject *args) {
 	// Get parameters
 	
 	    // Reader parameter dictionary
-    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
-    self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
-    self->model->spacing = PyFloat_AsDouble( PyDict_GetItemString(self->params, "spacing") );
-    self->model->nlayers = PyFloat_AsDouble( PyDict_GetItemString(self->params, "nlayers") );
-    self->model->layer_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "layer_sld") );
-    self->model->solvent_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "solvent_sld") );
-    self->model->thickness = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thickness") );
-    self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
-    self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
     self->model->core_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_sld") );
+    self->model->core_thick = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_thick") );
+    self->model->layer_thick = PyFloat_AsDouble( PyDict_GetItemString(self->params, "layer_thick") );
+    self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
+    self->model->layer_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "layer_sld") );
+    self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
+    self->model->solvent_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "solvent_sld") );
+    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
     self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->sigma_d = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sigma_d") );
+    self->model->n_stacking = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_stacking") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "length");
-    self->model->length.dispersion->accept_as_destination(visitor, self->model->length.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "core_thick");
+    self->model->core_thick.dispersion->accept_as_destination(visitor, self->model->core_thick.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "layer_thick");
+    self->model->layer_thick.dispersion->accept_as_destination(visitor, self->model->layer_thick.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "radius");
     self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
@@ -437,23 +408,25 @@ static PyObject * runXY(CStackedDisksModel *self, PyObject *args) {
 	// Get parameters
 	
 	    // Reader parameter dictionary
-    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
-    self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
-    self->model->spacing = PyFloat_AsDouble( PyDict_GetItemString(self->params, "spacing") );
-    self->model->nlayers = PyFloat_AsDouble( PyDict_GetItemString(self->params, "nlayers") );
-    self->model->layer_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "layer_sld") );
-    self->model->solvent_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "solvent_sld") );
-    self->model->thickness = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thickness") );
-    self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
-    self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
     self->model->core_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_sld") );
+    self->model->core_thick = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_thick") );
+    self->model->layer_thick = PyFloat_AsDouble( PyDict_GetItemString(self->params, "layer_thick") );
+    self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
+    self->model->layer_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "layer_sld") );
+    self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
+    self->model->solvent_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "solvent_sld") );
+    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
     self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->sigma_d = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sigma_d") );
+    self->model->n_stacking = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_stacking") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "length");
-    self->model->length.dispersion->accept_as_destination(visitor, self->model->length.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "core_thick");
+    self->model->core_thick.dispersion->accept_as_destination(visitor, self->model->core_thick.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "layer_thick");
+    self->model->layer_thick.dispersion->accept_as_destination(visitor, self->model->layer_thick.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "radius");
     self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
@@ -515,8 +488,10 @@ static PyObject * set_dispersion(CStackedDisksModel *self, PyObject *args) {
 
 	// Ugliness necessary to go from python to C
 	    // TODO: refactor this
-    if (!strcmp(par_name, "length")) {
-        self->model->length.dispersion = dispersion;
+    if (!strcmp(par_name, "core_thick")) {
+        self->model->core_thick.dispersion = dispersion;
+    } else    if (!strcmp(par_name, "layer_thick")) {
+        self->model->layer_thick.dispersion = dispersion;
     } else    if (!strcmp(par_name, "radius")) {
         self->model->radius.dispersion = dispersion;
     } else    if (!strcmp(par_name, "axis_theta")) {

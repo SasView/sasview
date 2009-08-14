@@ -33,16 +33,16 @@ class StackedDisksModel(CStackedDisksModel, BaseComponent):
     	List of default parameters:
          scale           = 0.01 
          radius          = 3000.0 [A]
-         length          = 10.0 [A]
-         thickness       = 15.0 [A]
+         core_thick      = 10.0 [A]
+         layer_thick     = 15.0 [A]
          core_sld        = 4e-006 [1/A²]
          layer_sld       = -4e-007 [1/A²]
          solvent_sld     = 5e-006 [1/A²]
-         nlayers         = 1.0 
-         spacing         = 0.0 
+         n_stacking      = 1.0 
+         sigma_d         = 0.0 
          background      = 0.001 [1/cm]
-         axis_theta      = 1.0 [rad]
-         axis_phi        = 1.0 [rad]
+         axis_theta      = 0.0 [rad]
+         axis_phi        = 0.0 [rad]
 
     """
         
@@ -62,19 +62,19 @@ class StackedDisksModel(CStackedDisksModel, BaseComponent):
         self.details = {}
         self.details['scale'] = ['', None, None]
         self.details['radius'] = ['[A]', None, None]
-        self.details['length'] = ['[A]', None, None]
-        self.details['thickness'] = ['[A]', None, None]
+        self.details['core_thick'] = ['[A]', None, None]
+        self.details['layer_thick'] = ['[A]', None, None]
         self.details['core_sld'] = ['[1/A²]', None, None]
         self.details['layer_sld'] = ['[1/A²]', None, None]
         self.details['solvent_sld'] = ['[1/A²]', None, None]
-        self.details['nlayers'] = ['', None, None]
-        self.details['spacing'] = ['', None, None]
+        self.details['n_stacking'] = ['', None, None]
+        self.details['sigma_d'] = ['', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['axis_theta'] = ['[rad]', None, None]
         self.details['axis_phi'] = ['[rad]', None, None]
 
 		## fittable parameters
-        self.fixed=['length.width', 'radius.width', 'axis_theta.width', 'axis_phi.width']
+        self.fixed=['core_thick.width', 'layer_thick.width', 'radius.width', 'axis_theta.width', 'axis_phi.width']
         
         ## parameters with orientation
         self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']

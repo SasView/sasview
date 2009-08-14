@@ -37,8 +37,9 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
          longuest_edgeC  = 400.0 [A]
          contrast        = 5.3e-006 [1/A²]
          background      = 0.0 [1/cm]
-         parallel_theta  = 1.0 [rad]
-         parallel_phi    = 1.0 [rad]
+         parallel_theta  = 0.0 [rad]
+         parallel_phi    = 0.0 [rad]
+         parallel_psi    = 0.0 [rad]
 
     """
         
@@ -71,12 +72,13 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
         self.details['background'] = ['[1/cm]', None, None]
         self.details['parallel_theta'] = ['[rad]', None, None]
         self.details['parallel_phi'] = ['[rad]', None, None]
+        self.details['parallel_psi'] = ['[rad]', None, None]
 
 		## fittable parameters
-        self.fixed=['short_edgeA.width', 'longer_edgeB.width', 'longuest_edgeC.width', 'parallel_phi.width', 'parallel_theta.width']
+        self.fixed=['short_edgeA.width', 'longer_edgeB.width', 'longuest_edgeC.width', 'parallel_phi.width', 'parallel_psi.width', 'parallel_theta.width']
         
         ## parameters with orientation
-        self.orientation_params =['parallel_phi', 'parallel_theta', 'parallel_phi.width', 'parallel_theta.width']
+        self.orientation_params =['parallel_phi', 'parallel_psi', 'parallel_theta', 'parallel_phi.width', 'parallel_psi.width', 'parallel_theta.width']
    
     def clone(self):
         """ Return a identical copy of self """

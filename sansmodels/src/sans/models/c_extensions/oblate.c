@@ -65,9 +65,9 @@ double oblate_analytical_2D(OblateParameters *pars, double q, double phi) {
  * @param q_y: q_y / q
  * @return: function value
  */
-/*
+
 double oblate_analytical_2D_scaled(OblateParameters *pars, double q, double q_x, double q_y) {
 
 	return 1.0;
 }
-*/
+

@@ -85,14 +85,14 @@ CBinaryHSModel_init(CBinaryHSModel *self, PyObject *args, PyObject *kwds)
         self->model = new BinaryHSModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"vol_frac_ls",Py_BuildValue("d",0.200000));
+        PyDict_SetItemString(self->params,"vol_frac_ls",Py_BuildValue("d",0.100000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000));
         PyDict_SetItemString(self->params,"vol_frac_ss",Py_BuildValue("d",0.200000));
         PyDict_SetItemString(self->params,"solvent_sld",Py_BuildValue("d",0.000006));
         PyDict_SetItemString(self->params,"ls_sld",Py_BuildValue("d",0.000003));
         PyDict_SetItemString(self->params,"ss_sld",Py_BuildValue("d",0.000000));
         PyDict_SetItemString(self->params,"s_radius",Py_BuildValue("d",25.000000));
-        PyDict_SetItemString(self->params,"l_radius",Py_BuildValue("d",160.000000));
+        PyDict_SetItemString(self->params,"l_radius",Py_BuildValue("d",100.000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
@@ -169,43 +169,7 @@ static PyObject *evaluateOneDim(BinaryHSModel* model, PyArrayObject *q){
 	}
     return PyArray_Return(result); 
  }
-/**
- * Function to call to evaluate model
- * @param args: input numpy array  [q[],phi[]]
- * @return: numpy array object 
- */
-static PyObject * evaluateTwoDim( BinaryHSModel* model, 
-                              PyArrayObject *q, PyArrayObject *phi)
- {
-    PyArrayObject *result;
-    //check validity of input vectors
-    if (q->nd != 1 || q->descr->type_num != PyArray_DOUBLE
-        || phi->nd != 1 || phi->descr->type_num != PyArray_DOUBLE
-        || phi->dimensions[0] != q->dimensions[0]){
-     
-        //const char * message= "Invalid array: q->nd=%d,type_num=%d\n",q->nd,q->descr->type_num;
-        PyErr_SetString(PyExc_ValueError ,"wrong input"); 
-        return NULL;
-    }
-	result= (PyArrayObject *)PyArray_FromDims(q->nd,(int*)(q->dimensions), PyArray_DOUBLE);
 
-	if (result == NULL){
-	    const char * message= "Could not create result ";
-        PyErr_SetString(PyExc_RuntimeError , message);
-	    return NULL;
-	}
-	
-    for (int i = 0; i < q->dimensions[0]; i++) {
-      double q_value = *(double *)(q->data + i*q->strides[0]);
-      double phi_value = *(double *)(phi->data + i*phi->strides[0]);
-      double *result_value = (double *)(result->data + i*result->strides[0]);
-      if (q_value == 0)
-          *result_value = 0.0;
-      else
-          *result_value = model->evaluate_rphi(q_value, phi_value);
-    }
-    return PyArray_Return(result); 
- }
  /**
  * Function to call to evaluate model
  * @param args: input numpy array  [x[],y[]]

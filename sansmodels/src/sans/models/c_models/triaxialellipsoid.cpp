@@ -43,6 +43,7 @@ TriaxialEllipsoidModel :: TriaxialEllipsoidModel() {
 	background = Parameter(0.0);
 	axis_theta  = Parameter(0.0, true);
 	axis_phi    = Parameter(0.0, true);
+	axis_psi    = Parameter(0.0, true);
 }
 
 /**
@@ -52,7 +53,7 @@ TriaxialEllipsoidModel :: TriaxialEllipsoidModel() {
  * @return: function value
  */
 double TriaxialEllipsoidModel :: operator()(double q) {
-	double dp[5];
+	double dp[6];
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
@@ -118,6 +119,7 @@ double TriaxialEllipsoidModel :: operator()(double qx, double qy) {
 	dp.background = 0.0;
 	dp.axis_theta  = axis_theta();
 	dp.axis_phi    = axis_phi();
+	dp.axis_psi    = axis_psi();
 
 	// Get the dispersion points for the semi_axis A
 	vector<WeightPoint> weights_semi_axisA;
@@ -138,6 +140,10 @@ double TriaxialEllipsoidModel :: operator()(double qx, double qy) {
 	// Get angular averaging for phi
 	vector<WeightPoint> weights_phi;
 	axis_phi.get_weights(weights_phi);
+
+	// Get angular averaging for psi
+	vector<WeightPoint> weights_psi;
+	axis_psi.get_weights(weights_psi);
 
 	// Perform the computation, with all weight points
 	double sum = 0.0;
@@ -162,23 +168,29 @@ double TriaxialEllipsoidModel :: operator()(double qx, double qy) {
 					// Average over phi distribution
 					for(int m=0; m <(int)weights_phi.size(); m++) {
 						dp.axis_phi = weights_phi[m].value;
+						// Average over psi distribution
+						for(int n=0; n <(int)weights_psi.size(); n++) {
+							dp.axis_psi = weights_psi[n].value;
 
-						double _ptvalue = weights_semi_axisA[i].weight
-							* weights_semi_axisB[j].weight
-							* weights_semi_axisC[k].weight
-							* weights_theta[l].weight
-							* weights_phi[m].weight
-							* triaxial_ellipsoid_analytical_2DXY(&dp, qx, qy);
-						if (weights_theta.size()>1) {
-							_ptvalue *= sin(weights_theta[k].value);
+							double _ptvalue = weights_semi_axisA[i].weight
+								* weights_semi_axisB[j].weight
+								* weights_semi_axisC[k].weight
+								* weights_theta[l].weight
+								* weights_phi[m].weight
+								* weights_psi[n].weight
+								* triaxial_ellipsoid_analytical_2DXY(&dp, qx, qy);
+							if (weights_theta.size()>1) {
+								_ptvalue *= sin(weights_theta[k].value);
+							}
+							sum += _ptvalue;
+
+							norm += weights_semi_axisA[i].weight
+								* weights_semi_axisB[j].weight
+								* weights_semi_axisC[k].weight
+								* weights_theta[l].weight
+								* weights_phi[m].weight
+								* weights_psi[m].weight;
 						}
-						sum += _ptvalue;
-
-						norm += weights_semi_axisA[i].weight
-							* weights_semi_axisB[j].weight
-							* weights_semi_axisC[k].weight
-							* weights_theta[l].weight
-							* weights_phi[m].weight;
 					}
 
 				}

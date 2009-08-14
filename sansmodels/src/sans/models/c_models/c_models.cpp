@@ -29,6 +29,7 @@ void addCFlexibleCylinderModel(PyObject *module);
 void addCStackedDisksModel(PyObject *module);
 void addCLamellarPSModel(PyObject *module);
 void addCLamellarPSHGModel(PyObject *module);
+void addCCoreShellSpheroidModel(PyObject *module);
 void addCOblateModel(PyObject *module);
 void addCProlateModel(PyObject *module);
 void addCLamellarModel(PyObject *module);
@@ -224,6 +225,7 @@ initc_models(void)
 	addCStackedDisksModel(m);
 	addCLamellarPSModel(m);
 	addCLamellarPSHGModel(m);
+	addCCoreShellSpheroidModel(m);
 	addCOblateModel(m);
 	addCProlateModel(m);
 	addCLamellarModel(m);

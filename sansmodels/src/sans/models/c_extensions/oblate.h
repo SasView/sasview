@@ -23,7 +23,7 @@
 			</text>
 
    [FIXED] = <text>major_core.width;minor_core.width; major_shell.width; minor_shell.width</text>
-   [ORIENTATION_PARAMS] =
+   [ORIENTATION_PARAMS]= <text>axis_phi; axis_theta; axis_phi.width; axis_theta.width</text>
 
  **/
 typedef struct {
@@ -51,14 +51,14 @@ typedef struct {
 	/// Incoherent Background [1/cm] 0.001
 	//  [DEFAULT]=background=0.001 [1/cm]
 	double background;
-	/*//Disable for now
+	//Disable for now
     /// Orientation of the oblate axis w/respect incoming beam [rad]
     //  [DEFAULT]=axis_theta=1.0 [rad]
     double axis_theta;
     /// Orientation of the oblate in the plane of the detector [rad]
     //  [DEFAULT]=axis_phi=1.0 [rad]
     double axis_phi;
-	*/
+
 } OblateParameters;
 
 

@@ -79,7 +79,7 @@ EllipCyl76(double dp[], double q)
 	int nord=76;			//order of integration
 	double va,vb;		//upper and lower integration limits
 	double summ,zi,yyy,answer,vell;			//running tally of integration
-	double summj,vaj,vbj,zij,arg;			//for the inner integration
+	double summj,vaj,vbj,zij,arg, si;			//for the inner integration
 
 	Pi = 4.0*atan(1.0);
 	va = 0;
@@ -113,7 +113,12 @@ EllipCyl76(double dp[], double q)
 
 		//now calculate outer integral
 		arg = q*length*zi/2;
-		yyy = Gauss76Wt[i] * answer * sin(arg) * sin(arg) / arg / arg;
+		if (arg == 0){
+			si = 1;
+		}else{
+			si = sin(arg) * sin(arg) / arg / arg;
+		}
+		yyy = Gauss76Wt[i] * answer * si;
 		summ += yyy;
 	}
 	answer = (vb-va)/2.0*summ;
@@ -154,7 +159,7 @@ EllipCyl20(double dp[], double q)
 	int nordj=20;
 	double va,vb;		//upper and lower integration limits
 	double summ,zi,yyy,answer,vell;			//running tally of integration
-	double summj,vaj,vbj,zij,arg;			//for the inner integration
+	double summj,vaj,vbj,zij,arg,si;			//for the inner integration
 
 	Pi = 4.0*atan(1.0);
 	va = 0;
@@ -188,7 +193,12 @@ EllipCyl20(double dp[], double q)
 
 		//now calculate outer integral
 		arg = q*length*zi/2;
-		yyy = Gauss76Wt[i] * answer * sin(arg) * sin(arg) / arg / arg;
+		if (arg == 0){
+			si = 1;
+		}else{
+			si = sin(arg) * sin(arg) / arg / arg;
+		}
+		yyy = Gauss76Wt[i] * answer * si;
 		summ += yyy;
 	}
 
@@ -892,7 +902,34 @@ LamellarFF(double dp[], double q)
 
 	return(inten+bkg);
 }
+/*	LamellarFFX  :  calculates the form factor of a lamellar structure - no S(q) effects included
+						-NO polydispersion included
+*/
+double lamellar_kernel(double dp[], double q){
+	double scale,del,sld_bi,sld_sol,contr,bkg;		//local variables of coefficient wave
+	double inten, qval,Pq;
+	double Pi;
 
+
+	Pi = 4.0*atan(1.0);
+	scale = dp[0];
+	del = dp[1];
+	sld_bi = dp[2];
+	sld_sol = dp[3];
+	bkg = dp[4];
+	qval = q;
+	contr = sld_bi -sld_sol;
+
+	Pq = 2.0*contr*contr/qval/qval*(1.0-cos(qval*del));
+
+	inten = 2.0*Pi*scale*Pq/(qval*qval);		//this is now dimensionless...
+
+	inten /= del;			//normalize by the thickness (in A)
+
+	inten *= 1.0e8;		// 1/A to 1/cm
+
+	return(inten+bkg);
+}
 /*	LamellarPSX  :  calculates the form factor of a lamellar structure - with S(q) effects included
 -------
 ------- resolution effects ARE included, but only a CONSTANT default value, not the real q-dependent resolution!!
@@ -1681,7 +1718,7 @@ double
 gfn2(double xx, double crmaj, double crmin, double trmaj, double trmin, double delpc, double delps, double qq)
 {
 	// local variables
-	double aa,bb,u2,ut2,uq,ut,vc,vt,gfnc,gfnt,gfn2,pi43,gfn,Pi;
+	double aa,bb,u2,ut2,uq,ut,vc,vt,siq,sit,gfnc,gfnt,gfn2,pi43,gfn,Pi;
 
 	Pi = 4.0*atan(1.0);
 
@@ -1694,8 +1731,18 @@ gfn2(double xx, double crmaj, double crmin, double trmaj, double trmin, double d
 	ut= sqrt(ut2)*qq;
 	vc = pi43*aa*bb*bb;
 	vt = pi43*trmaj*trmin*trmin;
-	gfnc = 3.0*(sin(uq)/uq/uq - cos(uq)/uq)/uq*vc*delpc;
-	gfnt = 3.0*(sin(ut)/ut/ut - cos(ut)/ut)/ut*vt*delps;
+   	if (uq == 0){
+   		siq = 1/3;
+   	}else{
+   		siq = (sin(uq)/uq/uq - cos(uq)/uq)/uq;
+   	}
+   	if (ut == 0){
+   		sit = 1/3;
+   	}else{
+   		sit = (sin(ut)/ut/ut - cos(ut)/ut)/ut;
+   	}
+	gfnc = 3.0*siq*vc*delpc;
+	gfnt = 3.0*sit*vt*delps;
 	gfn = gfnc+gfnt;
 	gfn2 = gfn*gfn;
 
@@ -1713,7 +1760,7 @@ double
 gfn4(double xx, double crmaj, double crmin, double trmaj, double trmin, double delpc, double delps, double qq)
 {
 	// local variables
-	double aa,bb,u2,ut2,uq,ut,vc,vt,gfnc,gfnt,tgfn,gfn4,pi43,Pi;
+	double aa,bb,u2,ut2,uq,ut,vc,vt,siq,sit,gfnc,gfnt,tgfn,gfn4,pi43,Pi;
 
 	Pi = 4.0*atan(1.0);
 	pi43=4.0/3.0*Pi;
@@ -1725,8 +1772,18 @@ gfn4(double xx, double crmaj, double crmin, double trmaj, double trmin, double d
  	ut= sqrt(ut2)*qq;
 	vc = pi43*aa*aa*bb;
    	vt = pi43*trmaj*trmaj*trmin;
-   	gfnc = 3.0*(sin(uq)/uq/uq - cos(uq)/uq)/uq*vc*delpc;
-  	gfnt = 3.0*(sin(ut)/ut/ut - cos(ut)/ut)/ut*vt*delps;
+   	if (uq == 0){
+   		siq = 1/3;
+   	}else{
+   		siq = (sin(uq)/uq/uq - cos(uq)/uq)/uq;
+   	}
+   	if (ut == 0){
+   		sit = 1/3;
+   	}else{
+   		sit = (sin(ut)/ut/ut - cos(ut)/ut)/ut;
+   	}
+   	gfnc = 3.0*siq*vc*delpc;
+  	gfnt = 3.0*sit*vt*delps;
   	tgfn = gfnc+gfnt;
   	gfn4 = tgfn*tgfn;
 
@@ -1743,8 +1800,9 @@ FlePolyLen_kernel(double q, double radius, double length, double lb, double zz, 
     qr = q*radius;
 
     Pq = Sk_WR(q,zi,lb);		//does not have cross section term
-    Pq *= (2.0*NR_BessJ1(qr)/qr)*(2.0*NR_BessJ1(qr)/qr);
-
+    if (qr !=0){
+    	Pq *= (2.0*NR_BessJ1(qr)/qr)*(2.0*NR_BessJ1(qr)/qr);
+    } //else Pk *=1;
     vcyl=Pi*radius*radius*zi;
     Pq *= vcyl*vcyl;
 
@@ -1763,7 +1821,9 @@ FlePolyRad_kernel(double q, double ravg, double Lc, double Lb, double zz, double
     qr = q*zi;
 
     Pq = Sk_WR(q,Lc,Lb);		//does not have cross section term
-    Pq *= (2.0*NR_BessJ1(qr)/qr)*(2.0*NR_BessJ1(qr)/qr);
+    if (qr !=0){
+    	Pq *= (2.0*NR_BessJ1(qr)/qr)*(2.0*NR_BessJ1(qr)/qr);
+    }
 
     vcyl=Pi*zi*zi*Lc;
     Pq *= vcyl*vcyl;
@@ -1810,7 +1870,7 @@ CScyl(double qq, double rad, double radthick, double facthick, double rhoc, doub
 	// length is the *Half* CORE-LENGTH of the cylinder
 	// dum is the dummy variable for the integration (theta)
 
-	double dr1,dr2,besarg1,besarg2,vol1,vol2,sinarg1,sinarg2,t1,t2,retval;
+	double dr1,dr2,besarg1,besarg2,vol1,vol2,sinarg1,sinarg2,si1,si2,be1,be2,t1,t2,retval;
 	double Pi;
 
 	Pi = 4.0*atan(1.0);
@@ -1824,9 +1884,29 @@ CScyl(double qq, double rad, double radthick, double facthick, double rhoc, doub
 	besarg2 = qq*(rad+radthick)*sin(dum);
 	sinarg1 = qq*length*cos(dum);
 	sinarg2 = qq*(length+facthick)*cos(dum);
+	if (besarg1 == 0){
+		be1 = 0.5;
+	}else{
+		be1 = NR_BessJ1(besarg1)/besarg1;
+	}
+	if (besarg2 == 0){
+		be2 = 0.5;
+	}else{
+		be2 = NR_BessJ1(besarg2)/besarg2;
+	}
+	if (sinarg1 == 0){
+		si1 = 1;
+	}else{
+		si1 = sin(sinarg1)/sinarg1;
+	}
+	if (besarg2 == 0){
+		si2 = 1;
+	}else{
+		si2 = sin(sinarg2)/sinarg2;
+	}
 
-	t1 = 2.0*vol1*dr1*sin(sinarg1)/sinarg1*NR_BessJ1(besarg1)/besarg1;
-	t2 = 2.0*vol2*dr2*sin(sinarg2)/sinarg2*NR_BessJ1(besarg2)/besarg2;
+	t1 = 2.0*vol1*dr1*si1*be1;
+	t2 = 2.0*vol2*dr2*si2*be2;
 
 	retval = ((t1+t2)*(t1+t2))*sin(dum);
 	return (retval);
@@ -1838,7 +1918,7 @@ double
 CoreShellCylKernel(double qq, double rcore, double thick, double rhoc, double rhos, double rhosolv, double length, double dum)
 {
 
-    double dr1,dr2,besarg1,besarg2,vol1,vol2,sinarg1,sinarg2,t1,t2,retval;
+    double dr1,dr2,besarg1,besarg2,vol1,vol2,sinarg1,sinarg2,si1,si2,be1,be2,t1,t2,retval;
     double Pi;
 
     Pi = 4.0*atan(1.0);
@@ -1853,8 +1933,29 @@ CoreShellCylKernel(double qq, double rcore, double thick, double rhoc, double rh
     sinarg1 = qq*length*cos(dum);
     sinarg2 = qq*(length+thick)*cos(dum);
 
-    t1 = 2.0*vol1*dr1*sin(sinarg1)/sinarg1*NR_BessJ1(besarg1)/besarg1;
-    t2 = 2.0*vol2*dr2*sin(sinarg2)/sinarg2*NR_BessJ1(besarg2)/besarg2;
+	if (besarg1 == 0){
+		be1 = 0.5;
+	}else{
+		be1 = NR_BessJ1(besarg1)/besarg1;
+	}
+	if (besarg2 == 0){
+		be2 = 0.5;
+	}else{
+		be2 = NR_BessJ1(besarg2)/besarg2;
+	}
+	if (sinarg1 == 0){
+		si1 = 1;
+	}else{
+		si1 = sin(sinarg1)/sinarg1;
+	}
+	if (besarg2 == 0){
+		si2 = 1;
+	}else{
+		si2 = sin(sinarg2)/sinarg2;
+	}
+
+    t1 = 2.0*vol1*dr1*si1*be1;
+    t2 = 2.0*vol2*dr2*si2*be2;
 
     retval = ((t1+t2)*(t1+t2))*sin(dum);
 
@@ -1905,7 +2006,7 @@ Stackdisc_kern(double qq, double rcore, double rhoc, double rhol, double rhosolv
 	// dum is the dummy variable for the integration (x in Feigin's notation)
 
 	//Local variables
-	double totald,dr1,dr2,besarg1,besarg2,area,sinarg1,sinarg2,t1,t2,retval,sqq,dexpt;
+	double totald,dr1,dr2,besarg1,besarg2,be1,be2,si1,si2,area,sinarg1,sinarg2,t1,t2,retval,sqq,dexpt;
 	double Pi;
 	int kk;
 
@@ -1922,8 +2023,29 @@ Stackdisc_kern(double qq, double rcore, double rhoc, double rhol, double rhosolv
 	sinarg1 = qq*length*cos(dum);
 	sinarg2 = qq*(length+thick)*cos(dum);
 
-	t1 = 2*area*(2*length)*dr1*(sin(sinarg1)/sinarg1)*(NR_BessJ1(besarg1)/besarg1);
-	t2 = 2*area*dr2*(totald*sin(sinarg2)/sinarg2-2*length*sin(sinarg1)/sinarg1)*(NR_BessJ1(besarg2)/besarg2);
+	if (besarg1 == 0){
+		be1 = 0.5;
+	}else{
+		be1 = NR_BessJ1(besarg1)/besarg1;
+	}
+	if (besarg2 == 0){
+		be2 = 0.5;
+	}else{
+		be2 = NR_BessJ1(besarg2)/besarg2;
+	}
+	if (sinarg1 == 0){
+		si1 = 1;
+	}else{
+		si1 = sin(sinarg1)/sinarg1;
+	}
+	if (besarg2 == 0){
+		si2 = 1;
+	}else{
+		si2 = sin(sinarg2)/sinarg2;
+	}
+
+	t1 = 2*area*(2*length)*dr1*(si1)*(be1);
+	t2 = 2*area*dr2*(totald*si2-2*length*si1)*(be2);
 
 	retval =((t1+t2)*(t1+t2))*sin(dum);
 
@@ -1936,6 +2058,7 @@ Stackdisc_kern(double qq, double rcore, double rhoc, double rhol, double rhosolv
 
 	// end of loop for S(q)
 	sqq=1.0+2.0*sqq/N;
+
 	retval *= sqq;
 
 	return(retval);
@@ -2015,8 +2138,11 @@ EllipsoidKernel(double qq, double a, double nua, double dum)
 
     nu = nua/a;
     arg = qq*a*sqrt(1+dum*dum*(nu*nu-1));
-
-    retval = (sin(arg)-arg*cos(arg))/(arg*arg*arg);
+    if (arg == 0){
+    	retval =1/3;
+    }else{
+    	retval = (sin(arg)-arg*cos(arg))/(arg*arg*arg);
+    }
     retval *= retval;
     retval *= 9;
 
@@ -2031,12 +2157,24 @@ HolCylKernel(double qq, double rcore, double rshell, double length, double dum)
     gamma = rcore/rshell;
     arg1 = qq*rshell*sqrt(1-dum*dum);		//1=shell (outer radius)
     arg2 = qq*rcore*sqrt(1-dum*dum);			//2=core (inner radius)
-    lam1 = 2*NR_BessJ1(arg1)/arg1;
-    lam2 = 2*NR_BessJ1(arg2)/arg2;
+    if (arg1 == 0){
+    	lam1 = 1;
+    }else{
+    	lam1 = 2*NR_BessJ1(arg1)/arg1;
+    }
+    if (arg2 == 0){
+    	lam2 = 1;
+    }else{
+    	lam2 = 2*NR_BessJ1(arg2)/arg2;
+    }
+    //Todo: Need to check psi behavior as gamma goes to 1.
     psi = 1/(1-gamma*gamma)*(lam1 -  gamma*gamma*lam2);		//SRK 10/19/00
-
     sinarg = qq*length*dum/2;
-    t2 = sin(sinarg)/sinarg;
+    if (sinarg == 0){
+    	t2 = 1;
+    }else{
+    	t2 = sin(sinarg)/sinarg;
+    }
 
     retval = psi*psi*t2*t2;
 
@@ -2083,8 +2221,11 @@ TriaxialKernel(double q, double aa, double bb, double cc, double dx, double dy)
     arg += bb*bb*sin(pi*dx/2)*sin(pi*dx/2)*(1-dy*dy);
     arg += cc*cc*dy*dy;
     arg = q*sqrt(arg);
-    val = 9 * ( (sin(arg) - arg*cos(arg))/(arg*arg*arg) ) * ( (sin(arg) - arg*cos(arg))/(arg*arg*arg) );
-
+    if (arg == 0){
+    	val = 1; // as arg --> 0, val should go to 1.0
+    }else{
+    	val = 9 * ( (sin(arg) - arg*cos(arg))/(arg*arg*arg) ) * ( (sin(arg) - arg*cos(arg))/(arg*arg*arg) );
+    }
     return (val);
 
 }//Function TriaxialKernel()
@@ -2098,26 +2239,36 @@ CylKernel(double qq, double rr,double h, double theta)
 	// rr is the radius of the cylinder (A)
 	// h is the HALF-LENGTH of the cylinder = L/2 (A)
 
-    double besarg,bj,retval,d1,t1,b1,t2,b2;		 //Local variables
+    double besarg,bj,retval,d1,t1,b1,t2,b2,siarg,be,si;		 //Local variables
 
 
     besarg = qq*rr*sin(theta);
-
+    siarg = qq * h * cos(theta);
     bj =NR_BessJ1(besarg);
 
 	//* Computing 2nd power */
-    d1 = sin(qq * h * cos(theta));
+    d1 = sin(siarg);
     t1 = d1 * d1;
 	//* Computing 2nd power */
     d1 = bj;
     t2 = d1 * d1 * 4.0 * sin(theta);
 	//* Computing 2nd power */
-    d1 = qq * h * cos(theta);
+    d1 = siarg;
     b1 = d1 * d1;
 	//* Computing 2nd power */
     d1 = qq * rr * sin(theta);
     b2 = d1 * d1;
-    retval = t1 * t2 / b1 / b2;
+    if (besarg == 0){
+    	be = sin(theta);
+    }else{
+    	be = t2 / b2;
+    }
+    if (siarg == 0){
+    	si = 1;
+    }else{
+    	si = t1 / b1;
+    }
+    retval = be * si;
 
     return (retval);
 
@@ -2135,8 +2286,11 @@ EllipCylKernel(double qq, double ra,double nu, double theta)
 	double retval,arg;		 //Local variables
 
 	arg = qq*ra*sqrt((1+nu*nu)/2+(1-nu*nu)*cos(theta)/2);
-
-	retval = 2*NR_BessJ1(arg)/arg;
+	if (arg == 0){
+		retval = 1;
+	}else{
+		retval = 2*NR_BessJ1(arg)/arg;
+	}
 
 	//square it
 	retval *= retval;

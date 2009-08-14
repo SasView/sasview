@@ -13,25 +13,26 @@ double
 SphereForm(double dp[], double q)
 {
 	double scale,radius,delrho,bkg;		//my local names
-	double bes,f,vol,f2,pi;
-	
+	double bes,f,vol,f2,pi,qr;
+
 	pi = 4.0*atan(1.0);
 	scale = dp[0];
 	radius = dp[1];
 	delrho = dp[2];
 	bkg = dp[3];
-	//handle q==0 separately
-	if(q==0){
-		f = 4.0/3.0*pi*radius*radius*radius*delrho*delrho*scale*1.0e8 + bkg;
-		return(f);
+
+	qr = q*radius;
+	if(qr == 0){
+		bes = 1.0;
+	}else{
+		bes = 3.0*(sin(qr)-qr*cos(qr))/(qr*qr*qr);
 	}
-	
-	bes = 3.0*(sin(q*radius)-q*radius*cos(q*radius))/(q*q*q)/(radius*radius*radius);
+
 	vol = 4.0*pi/3.0*radius*radius*radius;
 	f = vol*bes*delrho;		// [=] A-1
 							// normalize to single particle volume, convert to 1/cm
 	f2 = f * f / vol * 1.0e8;		// [=] 1/cm
-	
+
 	return(scale*f2+bkg);	//scale, and add in the background
 }
 
@@ -42,10 +43,10 @@ CoreShellForm(double dp[], double q)
 	double x,pi;
 	double scale,rcore,thick,rhocore,rhoshel,rhosolv,bkg;		//my local names
 	double bes,f,vol,qr,contr,f2;
-	
+
 	pi = 4.0*atan(1.0);
 	x=q;
-	
+
 	scale = dp[0];
 	rcore = dp[1];
 	thick = dp[2];
@@ -56,24 +57,32 @@ CoreShellForm(double dp[], double q)
 	// core first, then add in shell
 	qr=x*rcore;
 	contr = rhocore-rhoshel;
-	bes = 3.0*(sin(qr)-qr*cos(qr))/(qr*qr*qr);
+	if(qr == 0){
+		bes = 1.0;
+	}else{
+		bes = 3.0*(sin(qr)-qr*cos(qr))/(qr*qr*qr);
+	}
 	vol = 4.0*pi/3.0*rcore*rcore*rcore;
 	f = vol*bes*contr;
 	//now the shell
 	qr=x*(rcore+thick);
 	contr = rhoshel-rhosolv;
-	bes = 3.0*(sin(qr)-qr*cos(qr))/(qr*qr*qr);
+	if(qr == 0){
+		bes = 1.0;
+	}else{
+		bes = 3.0*(sin(qr)-qr*cos(qr))/(qr*qr*qr);
+	}
 	vol = 4.0*pi/3.0*pow((rcore+thick),3);
 	f += vol*bes*contr;
-	
+
 	// normalize to particle volume and rescale from [A-1] to [cm-1]
 	f2 = f*f/vol*1.0e8;
-	
+
 	//scale if desired
 	f2 *= scale;
 	// then add in the background
 	f2 += bkg;
-	
+
 	return(f2);
 }
 
@@ -87,7 +96,7 @@ VesicleForm(double dp[], double q)
 	double bes,f,vol,qr,contr,f2;
 	pi = 4.0*atan(1.0);
 	x= q;
-	
+
 	scale = dp[0];
 	rcore = dp[1];
 	thick = dp[2];
@@ -98,26 +107,34 @@ VesicleForm(double dp[], double q)
 	// core first, then add in shell
 	qr=x*rcore;
 	contr = rhocore-rhoshel;
-	bes = 3.0*(sin(qr)-qr*cos(qr))/(qr*qr*qr);
+	if(qr == 0){
+		bes = 1.0;
+	}else{
+		bes = 3.0*(sin(qr)-qr*cos(qr))/(qr*qr*qr);
+	}
 	vol = 4.0*pi/3.0*rcore*rcore*rcore;
 	f = vol*bes*contr;
 	//now the shell
 	qr=x*(rcore+thick);
 	contr = rhoshel-rhosolv;
-	bes = 3.0*(sin(qr)-qr*cos(qr))/(qr*qr*qr);
+	if(qr == 0){
+		bes = 1.0;
+	}else{
+		bes = 3.0*(sin(qr)-qr*cos(qr))/(qr*qr*qr);
+	}
 	vol = 4.0*pi/3.0*pow((rcore+thick),3);
 	f += vol*bes*contr;
-	
+
 	// normalize to the particle volume and rescale from [A-1] to [cm-1]
 	//note that for the vesicle model, the volume is ONLY the shell volume
 	vol = 4.0*pi/3.0*(pow((rcore+thick),3)-pow(rcore,3));
 	f2 = f*f/vol*1.0e8;
-	
+
 	//scale if desired
 	f2 *= scale;
 	// then add in the background
 	f2 += bkg;
-	
+
 	return(f2);
 }
 
@@ -134,7 +151,7 @@ PolyCoreForm(double dp[], double q)
 	double t4, t5, tb, cy, sy, tb1, tb2, tb3, c2y, zp1, zp2;
 	double zp3,vpoly;
 	double s2y, arg1, arg2, arg3, drh1, drh2;
-	
+
 	pi = 4.0*atan(1.0);
 	qq= q;
 	scale = dp[0];
@@ -144,11 +161,11 @@ PolyCoreForm(double dp[], double q)
 	drho1 = dp[4]-dp[5];		//core-shell
 	drho2 = dp[5]-dp[6];		//shell-solvent
 	bkg = dp[7];
-	
-	zz = (1.0/sig)*(1.0/sig) - 1.0;   
-	
+
+	zz = (1.0/sig)*(1.0/sig) - 1.0;
+
 	h=qq;
-	
+
 	drh1 = drho1;
 	drh2 = drho2;
 	g = drh2 * -1. / drh1;
@@ -156,8 +173,8 @@ PolyCoreForm(double dp[], double q)
 	zp2 = zz + 2.;
 	zp3 = zz + 3.;
 	vpoly = 4*pi/3*zp3*zp2/zp1/zp1*pow((corrad+del),3);
-	
-	
+
+
 	// remember that h is the passed in value of q for the calculation
 	y = h *del;
 	x = h *corrad;
@@ -178,12 +195,12 @@ PolyCoreForm(double dp[], double q)
 	c7 = g * sy - g * .5 * g * (y * y + 1.) * s2y - c5;
 	c8 = c4 - .5 + g * cy - g * .5 * g * (y * y + 1.) * c2y;
 	c9 = g * sy * (1. - g * cy);
-	
+
 	tb = log(zp1 * zp1 / (zp1 * zp1 + x * 4. * x));
 	tb1 = exp(zp1 * .5 * tb);
 	tb2 = exp(zp2 * .5 * tb);
 	tb3 = exp(zp3 * .5 * tb);
-	
+
 	t1 = c1 + c2 * x + c3 * x * x * zp2 / zp1;
 	t2 = tb1 * (c4 * cos(arg1) + c7 * sin(arg1));
 	t3 = x * tb2 * (c5 * cos(arg2) + c8 * sin(arg2));
@@ -198,7 +215,7 @@ PolyCoreForm(double dp[], double q)
 	form *= scale;
 	// then add in the background
 	form += bkg;
-	
+
 	return(form);
 }
 
@@ -217,21 +234,21 @@ PolyHardSphereIntensity(double dp[], double q)
 	double capl,capl1,capmu,capmu1,r3,pq;
 	double ka2,r1,heff;
 	double hh,k;
-	
+
 	pi = 4.0*atan(1.0);
 	k= q;
-	
+
 	rad = dp[0];		// radius (A)
 	z2 = dp[1];		//polydispersity (0<z2<1)
 	phi = dp[2];		// volume fraction (0<phi<1)
 	cont = dp[3]*1.0e4;		// contrast (odd units)
 	bkg = dp[4];
 	sigma = 2*rad;
-	
+
 	zz=1.0/(z2*z2)-1.0;
 	bb = sigma/(zz+1.0);
 	cc = zz+1.0;
-	
+
 	//*c   Compute the number density by <r-cubed>, not <r> cubed*/
 	r1 = sigma/2.0;
 	r3 = r1*r1*r1;
@@ -263,32 +280,32 @@ PolyHardSphereIntensity(double dp[], double q)
 	d4=(pi/capd)*(k-(pi/capd)*(rho/k)*(chi1-s1));
 	d5=pow((pi/capd),2)*((rho/k)*(chi-1.0)+0.5*k*t2);
 	d6=pow((pi/capd),2)*(rho/k)*(chi2-s2);
-	
+
 	e1=pow((pi/capd),2)*pow((rho/k/k),2)*((chi-1.0)*(chi2-s2)-(chi1-s1)*(chi1-s1)-(k*s1-pp)*(k*s3-p2)+pow((k*s2-p1),2));
 	ee=1.0-(2.0*pi/capd)*(1.0+0.5*pi*t3/capd)*(rho/k/k/k)*(k*s1-pp)-(2.0*pi/capd)*rho/k/k*((chi1-s1)+(0.25*pi*t2/capd)*(chi2-s2))-e1;
 	y1=pow((pi/capd),2)*pow((rho/k/k),2)*((k*s1-pp)*(chi2-s2)-2.0*(k*s2-p1)*(chi1-s1)+(k*s3-p2)*(chi-1.0));
-	yy = (2.0*pi/capd)*(1.0+0.5*pi*t3/capd)*(rho/k/k/k)*(chi+0.5*k*k*s2-1.0)-(2.0*pi*rho/capd/k/k)*(k*s2-p1+(0.25*pi*t2/capd)*(k*s3-p2))-y1;    
-	
+	yy = (2.0*pi/capd)*(1.0+0.5*pi*t3/capd)*(rho/k/k/k)*(chi+0.5*k*k*s2-1.0)-(2.0*pi*rho/capd/k/k)*(k*s2-p1+(0.25*pi*t2/capd)*(k*s3-p2))-y1;
+
 	capl=2.0*pi*cont*rho/k/k/k*(pp-0.5*k*(s1+chi1));
 	capl1=2.0*pi*cont*rho/k/k/k*(p1-0.5*k*(s2+chi2));
 	capmu=2.0*pi*cont*rho/k/k/k*(1.0-chi-0.5*k*p1);
 	capmu1=2.0*pi*cont*rho/k/k/k*(s1-chi1-0.5*k*p2);
-	
+
 	h1=capl*(capl*(yy*d1-ee*d6)+capl1*(yy*d2-ee*d4)+capmu*(ee*d1+yy*d6)+capmu1*(ee*d2+yy*d4));
 	h2=capl1*(capl*(yy*d2-ee*d4)+capl1*(yy*d3-ee*d5)+capmu*(ee*d2+yy*d4)+capmu1*(ee*d3+yy*d5));
 	h3=capmu*(capl*(ee*d1+yy*d6)+capl1*(ee*d2+yy*d4)+capmu*(ee*d6-yy*d1)+capmu1*(ee*d4-yy*d2));
 	h4=capmu1*(capl*(ee*d2+yy*d4)+capl1*(ee*d3+yy*d5)+capmu*(ee*d4-yy*d2)+capmu1*(ee*d5-yy*d3));
-	
+
 	//*  This part computes the second integral in equation (1) of the paper.*/
-	
+
 	hint1 = -2.0*(h1+h2+h3+h4)/(k*k*k*(ee*ee+yy*yy));
-	
+
 	//*  This part computes the first integral in equation (1).  It also
 	// generates the KC approximated effective structure factor.*/
-	
+
 	pq=4.0*pi*cont*(sin(k*sigma/2.0)-0.5*k*sigma*cos(k*sigma/2.0));
 	hint2=8.0*pi*pi*rho*cont*cont/(k*k*k*k*k*k)*(1.0-chi-k*p1+0.25*k*k*(s2+chi2));
-	
+
 	ka=k*(sigma/2.0);
 	//
 	hh=hint1+hint2;		// this is the model intensity
@@ -296,12 +313,12 @@ PolyHardSphereIntensity(double dp[], double q)
 	heff=1.0+hint1/hint2;
 	ka2=ka*ka;
 	//*
-	//  heff is PY analytical solution for intensity divided by the 
+	//  heff is PY analytical solution for intensity divided by the
 	//   form factor.  happ is the KC approximated effective S(q)
-	 
+
 	 //*******************
 	 //  add in the background then return the intensity value
-	 
+
 	 return(hh+bkg);	//scale, and add in the background
 }
 
@@ -314,9 +331,9 @@ BimodalSchulzSpheres(double dp[], double q)
 	double x,pq;
 	double scale,ravg,pd,bkg,rho,rhos;		//my local names
 	double scale2,ravg2,pd2,rho2;		//my local names
-	
+
 	x= q;
-	
+
 	scale = dp[0];
 	ravg = dp[1];
 	pd = dp[2];
@@ -327,12 +344,12 @@ BimodalSchulzSpheres(double dp[], double q)
 	rho2 = dp[7];
 	rhos = dp[8];
 	bkg = dp[9];
-	
+
 	pq = SchulzSphere_Fn( scale,  ravg,  pd,  rho,  rhos, x);
 	pq += SchulzSphere_Fn( scale2,  ravg2,  pd2,  rho2,  rhos, x);
 	// add in the background
 	pq += bkg;
-	
+
 	return (pq);
 }
 
@@ -343,9 +360,9 @@ SchulzSpheres(double dp[], double q)
 {
 	double x,pq;
 	double scale,ravg,pd,bkg,rho,rhos;		//my local names
-	
+
 	x= q;
-	
+
 	scale = dp[0];
 	ravg = dp[1];
 	pd = dp[2];
@@ -355,7 +372,7 @@ SchulzSpheres(double dp[], double q)
 	pq = SchulzSphere_Fn( scale,  ravg,  pd,  rho,  rhos, x);
 	// add in the background
 	pq += bkg;
-	
+
 	return(pq);
 }
 
@@ -366,11 +383,11 @@ SchulzSphere_Fn(double scale, double ravg, double pd, double rho, double rhos, d
 	double zp1,zp2,zp3,zp4,zp5,zp6,zp7,vpoly;
 	double aa,at1,at2,rt1,rt2,rt3,t1,t2,t3;
 	double v1,v2,v3,g1,pq,pi,delrho,zz;
-	
+
 	pi = 4.0*atan(1.0);
 	delrho = rho-rhos;
-	zz = (1.0/pd)*(1.0/pd) - 1.0;   
-	
+	zz = (1.0/pd)*(1.0/pd) - 1.0;
+
 	zp1 = zz + 1.0;
 	zp2 = zz + 2.0;
 	zp3 = zz + 3.0;
@@ -380,13 +397,13 @@ SchulzSphere_Fn(double scale, double ravg, double pd, double rho, double rhos, d
 	zp7 = zz + 7.0;
 	//
 	aa = (zz+1)/x/ravg;
-	
+
 	at1 = atan(1.0/aa);
 	at2 = atan(2.0/aa);
 	//
 	//  calculations are performed to avoid  large # errors
 	// - trick is to propogate the a^(z+7) term through the g1
-	// 
+	//
 	t1 = zp7*log10(aa) - zp1/2.0*log10(aa*aa+4.0);
 	t2 = zp7*log10(aa) - zp3/2.0*log10(aa*aa+4.0);
 	t3 = zp7*log10(aa) - zp2/2.0*log10(aa*aa+4.0);
@@ -398,31 +415,31 @@ SchulzSphere_Fn(double scale, double ravg, double pd, double rho, double rhos, d
 	v2 = zp1*zp2*( pow(aa,4) + rt2*cos(zp3*at2) );
 	v3 = -2.0*zp1*rt3*sin(zp2*at2);
 	g1 = (v1+v2+v3);
-	
+
 	pq = log10(g1) - 6.0*log10(zp1) + 6.0*log10(ravg);
 	pq = pow(10,pq)*8*pi*pi*delrho*delrho;
-	
+
 	//
-	// beta factor is not used here, but could be for the 
+	// beta factor is not used here, but could be for the
 	// decoupling approximation
-	// 
+	//
 	//	g11 = g1
 	//	gd = -zp7*log(aa)
 	//	g1 = log(g11) + gd
-	//                       
+	//
 	//	t1 = zp1*at1
 	//	t2 = zp2*at1
 	//	g2 = sin( t1 ) - zp1/sqrt(aa*aa+1)*cos( t2 )
 	//	g22 = g2*g2
-	//	beta = zp1*log(aa) - zp1*log(aa*aa+1) - g1 + log(g22) 
+	//	beta = zp1*log(aa) - zp1*log(aa*aa+1) - g1 + log(g22)
 	//	beta = 2*alog(beta)
-	
+
 	//re-normalize by the average volume
 	vpoly = 4.0*pi/3.0*zp3*zp2/zp1/zp1*ravg*ravg*ravg;
 	pq /= vpoly;
 	//scale, convert to cm^-1
 	pq *= scale * 1.0e8;
-    
+
     return(pq);
 }
 
@@ -434,23 +451,23 @@ PolyRectSpheres(double dp[], double q)
 	double pi,x;
 	double scale,rad,pd,cont,bkg;		//my local names
 	double inten,h1,qw,qr,width,sig,averad3;
-	
+
 	pi = 4.0*atan(1.0);
 	x= q;
-	
+
 	scale = dp[0];
 	rad = dp[1];		// radius (A)
 	pd = dp[2];		//polydispersity of rectangular distribution
 	cont = dp[3];		// contrast (A^-2)
 	bkg = dp[4];
-	
+
 	// as usual, poly = sig/ravg
 	// for the rectangular distribution, sig = width/sqrt(3)
 	// width is the HALF- WIDTH of the rectangular distrubution
-	
+
 	sig = pd*rad;
 	width = sqrt(3.0)*sig;
-	
+
 	//x is the q-value
 	qw = x*width;
 	qr = x*rad;
@@ -462,18 +479,18 @@ PolyRectSpheres(double dp[], double q)
 	h1 += 3.0*qw*(cos(qr)*cos(qw))*(cos(qr)*cos(qw));
 	h1+= 3.0*qw*(sin(qr)*sin(qw))*(sin(qr)*sin(qw));
 	h1 -= 6.0*qr*cos(qr)*sin(qr)*cos(qw)*sin(qw);
-	
+
 	// calculate P(q) = <f^2>
 	inten = 8.0*pi*pi*cont*cont/width/pow(x,7)*h1;
-	
+
 	// beta(q) would be calculated as 2/width/x/h1*h2*h2
-	// with 
+	// with
 	// h2 = 2*sin(x*rad)*sin(x*width)-x*rad*cos(x*rad)*sin(x*width)-x*width*sin(x*rad)*cos(x*width)
-	
+
 	// normalize to the average volume
 	// <R^3> = ravg^3*(1+3*pd^2)
 	// or... "zf"  = (1 + 3*p^2), which will be greater than one
-	
+
 	averad3 =  rad*rad*rad*(1.0+3.0*pd*pd);
 	inten /= 4.0*pi/3.0*averad3;
 	//resacle to 1/cm
@@ -482,7 +499,7 @@ PolyRectSpheres(double dp[], double q)
 	inten *= scale;
 	// then add in the background
 	inten += bkg;
-	
+
 	return(inten);
 }
 
@@ -496,10 +513,10 @@ GaussPolySphere(double dp[], double q)
 	double scale,rad,pd,sig,rho,rhos,bkg,delrho;		//my local names
 	double va,vb,zi,yy,summ,inten;
 	int nord=20,ii;
-	
+
 	pi = 4.0*atan(1.0);
 	x= q;
-	
+
 	scale=dp[0];
 	rad=dp[1];
 	pd=dp[2];
@@ -508,13 +525,13 @@ GaussPolySphere(double dp[], double q)
 	rhos=dp[4];
 	delrho=rho-rhos;
 	bkg=dp[5];
-	
+
 	va = -4.0*sig + rad;
 	if (va<0) {
 		va=0;		//to avoid numerical error when  va<0 (-ve q-value)
 	}
 	vb = 4.0*sig +rad;
-	
+
 	summ = 0.0;		// initialize integral
 	for(ii=0;ii<nord;ii+=1) {
 		// calculate Gauss points on integration interval (r-value for evaluation)
@@ -524,19 +541,19 @@ GaussPolySphere(double dp[], double q)
 		yy = F_func(x*zi)*(4.0*pi/3.0*zi*zi*zi)*delrho;
 		yy *= yy;
 		yy *= Gauss20Wt[ii] *  Gauss_distr(sig,rad,zi);
-		
+
 		summ += yy;		//add to the running total of the quadrature
    	}
 	// calculate value of integral to return
 	inten = (vb-va)/2.0*summ;
-	
+
 	//re-normalize by polydisperse sphere volume
 	inten /= (4.0*pi/3.0*rad*rad*rad)*(1.0+3.0*pd*pd);
-	
+
 	inten *= 1.0e8;
 	inten *= scale;
 	inten += bkg;
-	
+
     return(inten);	//scale, and add in the background
 }
 
@@ -549,10 +566,10 @@ LogNormalPolySphere(double dp[], double q)
 	double scale,rad,sig,rho,rhos,bkg,delrho,mu,r3;		//my local names
 	double va,vb,zi,yy,summ,inten;
 	int nord=76,ii;
-	
+
 	pi = 4.0*atan(1.0);
 	x= q;
-	
+
 	scale=dp[0];
 	rad=dp[1];		//rad is the median radius
 	mu = log(dp[1]);
@@ -561,7 +578,7 @@ LogNormalPolySphere(double dp[], double q)
 	rhos=dp[4];
 	delrho=rho-rhos;
 	bkg=dp[5];
-	
+
 	va = -3.5*sig + mu;
 	va = exp(va);
 	if (va<0) {
@@ -569,7 +586,7 @@ LogNormalPolySphere(double dp[], double q)
 	}
 	vb = 3.5*sig*(1.0+sig) +mu;
 	vb = exp(vb);
-	
+
 	summ = 0.0;		// initialize integral
 	for(ii=0;ii<nord;ii+=1) {
 		// calculate Gauss points on integration interval (r-value for evaluation)
@@ -579,28 +596,28 @@ LogNormalPolySphere(double dp[], double q)
 		yy = F_func(x*zi)*(4.0*pi/3.0*zi*zi*zi)*delrho;
 		yy *= yy;
 		yy *= Gauss76Wt[ii] *  LogNormal_distr(sig,mu,zi);
-		
+
 		summ += yy;		//add to the running total of the quadrature
    	}
 	// calculate value of integral to return
 	inten = (vb-va)/2.0*summ;
-	
+
 	//re-normalize by polydisperse sphere volume
 	r3 = exp(3.0*mu + 9.0/2.0*sig*sig);		// <R^3> directly
 	inten /= (4.0*pi/3.0*r3);		//polydisperse volume
-	
+
 	inten *= 1.0e8;
 	inten *= scale;
 	inten += bkg;
-	
+
 	return(inten);
 }
 
 static double
 LogNormal_distr(double sig, double mu, double pt)
-{	
+{
 	double retval,pi;
-	
+
 	pi = 4.0*atan(1.0);
 	retval = (1/ (sig*pt*sqrt(2.0*pi)) )*exp( -0.5*(log(pt) - mu)*(log(pt) - mu)/sig/sig );
 	return(retval);
@@ -608,9 +625,9 @@ LogNormal_distr(double sig, double mu, double pt)
 
 static double
 Gauss_distr(double sig, double avg, double pt)
-{	
+{
 	double retval,Pi;
-	
+
 	Pi = 4.0*atan(1.0);
 	retval = (1.0/ (sig*sqrt(2.0*Pi)) )*exp(-(avg-pt)*(avg-pt)/sig/sig/2.0);
 	return(retval);
@@ -626,10 +643,10 @@ PolyCoreShellRatio(double dp[], double q)
 	double scale,corrad,thick,shlrad,pp,drho1,drho2,sig,zz,bkg;		//my local names
 	double sld1,sld2,sld3,zp1,zp2,zp3,vpoly;
 	double pi43,c1,c2,form,volume,arg1,arg2;
-	
+
 	pi = 4.0*atan(1.0);
 	x= q;
-	
+
 	scale = dp[0];
 	corrad = dp[1];
 	thick = dp[2];
@@ -638,8 +655,8 @@ PolyCoreShellRatio(double dp[], double q)
 	sld2 = dp[5];
 	sld3 = dp[6];
 	bkg = dp[7];
-	
-	zz = (1.0/sig)*(1.0/sig) - 1.0;   
+
+	zz = (1.0/sig)*(1.0/sig) - 1.0;
 	shlrad = corrad + thick;
 	drho1 = sld1-sld2;		//core-shell
 	drho2 = sld2-sld3;		//shell-solvent
@@ -647,36 +664,36 @@ PolyCoreShellRatio(double dp[], double q)
 	zp2 = zz + 2.;
 	zp3 = zz + 3.;
 	vpoly = 4.0*pi/3.0*zp3*zp2/zp1/zp1*pow((corrad+thick),3);
-	
+
 	// the beta factor is not calculated
  	// the calculated form factor <f^2> has units [length^2]
  	// and must be multiplied by number density [l^-3] and the correct unit
  	// conversion to get to absolute scale
-	
+
 	pi43=4.0/3.0*pi;
  	pp=corrad/shlrad;
  	volume=pi43*shlrad*shlrad*shlrad;
  	c1=drho1*volume;
  	c2=drho2*volume;
-	
+
 	arg1 = x*shlrad*pp;
 	arg2 = x*shlrad;
-	
+
 	form=pow(pp,6)*c1*c1*fnt2(arg1,zz);
 	form += c2*c2*fnt2(arg2,zz);
 	form += 2.0*c1*c2*fnt3(arg2,pp,zz);
-	
+
 	//convert the result to [cm^-1]
-	
+
 	//scale the result
 	// - divide by the polydisperse volume, mult by 10^8
 	form  /= vpoly;
 	form *= 1.0e8;
 	form *= scale;
-	
+
 	//add in the background
 	form += bkg;
-	
+
 	return(form);
 }
 
@@ -688,7 +705,7 @@ double
 fnt2(double yy, double zz)
 {
 	double z1,z2,z3,u,ww,term1,term2,term3,ans;
-	
+
 	z1=zz+1.0;
 	z2=zz+2.0;
 	z3=zz+3.0;
@@ -698,7 +715,7 @@ fnt2(double yy, double zz)
 	term2=2.0*yy*sin(z2*ww)/pow((1.0+4.0*u*u),(z2/2.0));
 	term3=1.0+cos(z3*ww)/pow((1.0+4.0*u*u),(z3/2.0));
 	ans=(4.50/z1/pow(yy,6))*(z1*(1.0-term1-term2)+yy*yy*z2*term3);
-	
+
 	return(ans);
 }
 
@@ -708,9 +725,9 @@ fnt2(double yy, double zz)
 //c
 double
 fnt3(double yy, double pp, double zz)
-{     	
+{
 	double z1,z2,z3,yp,yn,up,un,vp,vn,term1,term2,term3,term4,term5,term6,ans;
-	
+
 	z1=zz+1.0;
 	z2=zz+2.0;
 	z3=zz+3.0;
@@ -728,7 +745,7 @@ fnt3(double yy, double pp, double zz)
 	term6=yp*sin(z2*vp)/pow((1.0+up*up),(z2/2.0));
 	ans=4.5/z1/pow(yy,6);
 	ans *=(z1*(term1-term2)+yy*yy*pp*z2*(term3+term4)+z1*(term5-term6));
-	
+
 	return(ans);
 }
 
@@ -751,9 +768,9 @@ BinaryHS(double dp[], double q)
 	double r2,r1,nf2,phi,aa,rho2,rho1,rhos,inten,bgd;		//my local names
 	double psf11,psf12,psf22;
 	double phi1,phi2,phr,a3;
-	double v1,v2,n1,n2,qr1,qr2,b1,b2;
+	double v1,v2,n1,n2,qr1,qr2,b1,b2,sc1,sc2;
 	int err;
-	
+
 	pi = 4.0*atan(1.0);
 	x= q;
 	r2 = dp[0];
@@ -764,8 +781,8 @@ BinaryHS(double dp[], double q)
 	rho1 = dp[5];
 	rhos = dp[6];
 	bgd = dp[7];
-	
-	
+
+
 	phi = phi1 + phi2;
 	aa = r1/r2;
 	//calculate the number fraction of larger spheres (eqn 2 in reference)
@@ -774,28 +791,38 @@ BinaryHS(double dp[], double q)
 	nf2 = phr*a3/(1.0-phr+phr*a3);
 	// calculate the PSF's here
 	err = ashcroft(x,r2,nf2,aa,phi,&psf11,&psf22,&psf12);
-	
+
 	// /* do form factor calculations  */
-	
+
 	v1 = 4.0*pi/3.0*r1*r1*r1;
 	v2 = 4.0*pi/3.0*r2*r2*r2;
-	
+
 	n1 = phi1/v1;
 	n2 = phi2/v2;
-	
+
 	qr1 = r1*x;
 	qr2 = r2*x;
-	
-	b1 = r1*r1*r1*(rho1-rhos)*4.0*pi*(sin(qr1)-qr1*cos(qr1))/qr1/qr1/qr1;
-	b2 = r2*r2*r2*(rho2-rhos)*4.0*pi*(sin(qr2)-qr2*cos(qr2))/qr2/qr2/qr2;
+
+	if (qr1 == 0){
+		sc1 = 1.0/3.0;
+	}else{
+		sc1 = (sin(qr1)-qr1*cos(qr1))/qr1/qr1/qr1;
+	}
+	if (qr2 == 0){
+		sc2 = 1.0/3.0;
+	}else{
+		sc2 = (sin(qr2)-qr2*cos(qr2))/qr2/qr2/qr2;
+	}
+	b1 = r1*r1*r1*(rho1-rhos)*4.0*pi*sc1;
+	b2 = r2*r2*r2*(rho2-rhos)*4.0*pi*sc2;
 	inten = n1*b1*b1*psf11;
 	inten += sqrt(n1*n2)*2.0*b1*b2*psf12;
 	inten += n2*b2*b2*psf22;
 	///* convert I(1/A) to (1/cm)  */
 	inten *= 1.0e8;
-	
+
 	inten += bgd;
-	
+
 	return(inten);
 }
 
@@ -807,7 +834,7 @@ BinaryHS_PSF11(double dp[], double q)
 	double psf11,psf12,psf22;
 	double phi1,phi2,phr,a3;
 	int err;
-	
+
 	pi = 4.0*atan(1.0);
 	x= q;
 	r2 = dp[0];
@@ -826,7 +853,7 @@ BinaryHS_PSF11(double dp[], double q)
 	nf2 = phr*a3/(1.0-phr+phr*a3);
 	// calculate the PSF's here
 	err = ashcroft(x,r2,nf2,aa,phi,&psf11,&psf22,&psf12);
-	
+
     return(psf11);	//scale, and add in the background
 }
 
@@ -838,7 +865,7 @@ BinaryHS_PSF12(double dp[], double q)
 	double psf11,psf12,psf22;
 	double phi1,phi2,phr,a3;
 	int err;
-	
+
 	pi = 4.0*atan(1.0);
 	x= q;
 	r2 = dp[0];
@@ -857,7 +884,7 @@ BinaryHS_PSF12(double dp[], double q)
 	nf2 = phr*a3/(1.0-phr+phr*a3);
 	// calculate the PSF's here
 	err = ashcroft(x,r2,nf2,aa,phi,&psf11,&psf22,&psf12);
-	
+
     return(psf12);	//scale, and add in the background
 }
 
@@ -869,10 +896,10 @@ BinaryHS_PSF22(double dp[], double q)
 	double psf11,psf12,psf22;
 	double phi1,phi2,phr,a3;
 	int err;
-	
+
 	pi = 4.0*atan(1.0);
 	x= q;
-	
+
 	r2 = dp[0];
 	r1 = dp[1];
 	phi2 = dp[2];
@@ -889,7 +916,7 @@ BinaryHS_PSF22(double dp[], double q)
 	nf2 = phr*a3/(1.0-phr+phr*a3);
 	// calculate the PSF's here
 	err = ashcroft(x,r2,nf2,aa,phi,&psf11,&psf22,&psf12);
-	
+
     return(psf22);	//scale, and add in the background
 }
 
@@ -897,14 +924,14 @@ int
 ashcroft(double qval, double r2, double nf2, double aa, double phi, double *s11, double *s22, double *s12)
 {
 	//	variable qval,r2,nf2,aa,phi,&s11,&s22,&s12
-	
+
 	//   calculate constant terms
 	double s1,s2,v,a3,v1,v2,g11,g12,g22,wmv,wmv3,wmv4;
 	double a1,a2i,a2,b1,b2,b12,gm1,gm12;
 	double err=0,yy,ay,ay2,ay3,t1,t2,t3,f11,y2,y3,tt1,tt2,tt3;
 	double c11,c22,c12,f12,f22,ttt1,ttt2,ttt3,ttt4,yl,y13;
 	double t21,t22,t23,t31,t32,t33,t41,t42,yl3,wma3,y1;
-	
+
 	s2 = 2.0*r2;
 	s1 = aa*s2;
 	v = phi;
@@ -925,11 +952,11 @@ ashcroft(double qval, double r2, double nf2, double aa, double phi, double *s11,
 	b12=-3.*aa*(1.+aa)*(v1*g11/aa/aa+v2*g22)*g12;
 	gm1=(v1*a1+a3*v2*a2)*.5;
 	gm12=2.*gm1*(1.-aa)/aa;
-	//c  
+	//c
 	//c   calculate the direct correlation functions and print results
 	//c
 	//	do 20 j=1,npts
-	
+
 	yy=qval*s2;
 	//c   calculate direct correlation functions
 	//c   ----c11
@@ -940,7 +967,7 @@ ashcroft(double qval, double r2, double nf2, double aa, double phi, double *s11,
 	t2=b1*(2.*ay*sin(ay)-(ay2-2.)*cos(ay)-2.)/ay;
 	t3=gm1*((4.*ay*ay2-24.*ay)*sin(ay)-(ay2*ay2-12.*ay2+24.)*cos(ay)+24.)/ay3;
 	f11=24.*v1*(t1+t2+t3)/ay3;
-	
+
 	//c ------c22
 	y2=yy*yy;
 	y3=yy*y2;
@@ -948,7 +975,7 @@ ashcroft(double qval, double r2, double nf2, double aa, double phi, double *s11,
 	tt2=b2*(2.*yy*sin(yy)-(y2-2.)*cos(yy)-2.)/yy;
 	tt3=gm1*((4.*y3-24.*yy)*sin(yy)-(y2*y2-12.*y2+24.)*cos(yy)+24.)/ay3;
 	f22=24.*v2*(tt1+tt2+tt3)/y3;
-	
+
 	//c   -----c12
 	yl=.5*yy*(1.-aa);
 	yl3=yl*yl*yl;
@@ -968,14 +995,14 @@ ashcroft(double qval, double r2, double nf2, double aa, double phi, double *s11,
 	ttt3=cos(yl)*(t31+t32+t33)/(y13*y1);
 	ttt4=a1*(t41+t42)/y1;
 	f12=ttt1+24.*v*sqrt(nf2)*sqrt(1.-nf2)*a3*(ttt2+ttt3+ttt4)/(nf2+(1.-nf2)*a3);
-	
+
 	c11=f11;
 	c22=f22;
 	c12=f12;
 	*s11=1./(1.+c11-(c12)*c12/(1.+c22));
-	*s22=1./(1.+c22-(c12)*c12/(1.+c11)); 
-	*s12=-c12/((1.+c11)*(1.+c22)-(c12)*(c12));   
-	
+	*s22=1./(1.+c22-(c12)*c12/(1.+c11));
+	*s12=-c12/((1.+c11)*(1.+c22)-(c12)*(c12));
+
 	return(err);
 }
 
@@ -988,7 +1015,7 @@ ashcroft(double qval, double r2, double nf2, double aa, double phi, double *s11,
  //
  // bragg peaks arise naturally from the periodicity of the sample
  // resolution smeared version gives he most appropriate view of the model
- 
+
 	Warning:
  The call to WaveData() below returns a pointer to the middle
  of an unlocked Macintosh handle. In the unlikely event that your
@@ -1003,9 +1030,9 @@ MultiShell(double dp[], double q)
 	int ii;
 	double fval,voli,ri,sldi;
 	double pi;
-	
+
 	pi = 4.0*atan(1.0);
-	
+
 	x= q;
 	scale = dp[0];
 	rcore = dp[1];
@@ -1015,12 +1042,12 @@ MultiShell(double dp[], double q)
 	rhoshel = dp[5];
 	num = dp[6];
 	bkg = dp[7];
-	
+
 	//calculate with a loop, two shells at a time
-	
+
 	ii=0;
 	fval=0;
-	
+
 	do {
 		ri = rcore + (double)ii*ts + (double)ii*tw;
 		voli = 4*pi/3*ri*ri*ri;
@@ -1032,12 +1059,12 @@ MultiShell(double dp[], double q)
 		fval += voli*sldi*F_func(ri*x);
 		ii+=1;		//do 2 layers at a time
 	} while(ii<=num-1);  //change to make 0 < num < 2 correspond to unilamellar vesicles (C. Glinka, 11/24/03)
-	
+
 	fval *= fval;		//square it
 	fval /= voli;		//normalize by the overall volume
 	fval *= scale*1e8;
 	fval += bkg;
-	
+
 	return(fval);
 }
 
@@ -1067,10 +1094,10 @@ PolyMultiShell(double dp[], double q)
 	int ii,minPairs,maxPairs,first;
 	double fval,ri,pi;
 	double avg,pd,zz,lo,hi,r1,r2,d1,d2,distr;
-	
-	pi = 4.0*atan(1.0);	
+
+	pi = 4.0*atan(1.0);
 	x= q;
-	
+
 	scale = dp[0];
 	avg = dp[1];		// average (total) outer radius
 	pd = dp[2];
@@ -1080,17 +1107,17 @@ PolyMultiShell(double dp[], double q)
 	rhocore = dp[6];
 	rhoshel = dp[7];
 	bkg = dp[8];
-	
+
 	zz = (1.0/pd)*(1.0/pd)-1.0;
-	
+
 	//max radius set to be 5 std deviations past mean
 	hi = avg + pd*avg*5.0;
 	lo = avg - pd*avg*5.0;
-	
+
 	maxPairs = trunc( (hi-rcore+tw)/(ts+tw) );
 	minPairs = trunc( (lo-rcore+tw)/(ts+tw) );
 	minPairs = (minPairs < 1) ? 1 : minPairs;	// need a minimum of one
-	
+
 	ii=minPairs;
 	fval=0;
 	d1 = 0;
@@ -1103,7 +1130,7 @@ PolyMultiShell(double dp[], double q)
 		//make the current values old
 		r1 = r2;
 		d1 = d2;
-		
+
 		ri = (double)ii*(ts+tw) - tw + rcore;
 		fval += SchulzPoint(ri,avg,zz) * MultiShellGuts(x, rcore, ts, tw, rhocore, rhoshel, ii) * (4*pi/3*ri*ri*ri);
 		// get a running integration of the fraction of the distribution used, but not the first time
@@ -1115,25 +1142,25 @@ PolyMultiShell(double dp[], double q)
 		ii+=1;
 		first = 0;
 	} while(ii<=maxPairs);
-	
+
 	fval /= 4*pi/3*avg*avg*avg;		//normalize by the overall volume
 	fval /= distr;
 	fval *= scale;
 	fval += bkg;
-	
+
 	return(fval);
 }
 
 double
 MultiShellGuts(double x,double rcore,double ts,double tw,double rhocore,double rhoshel,int num) {
-	
+
     double ri,sldi,fval,voli,pi;
     int ii;
-    
+
 	pi = 4.0*atan(1.0);
     ii=0;
     fval=0;
-    
+
     do {
         ri = rcore + (double)ii*ts + (double)ii*tw;
         voli = 4*pi/3*ri*ri*ri;
@@ -1145,32 +1172,32 @@ MultiShellGuts(double x,double rcore,double ts,double tw,double rhocore,double r
         fval += voli*sldi*F_func(ri*x);
         ii+=1;		//do 2 layers at a time
     } while(ii<=num-1);  //change to make 0 < num < 2 correspond to unilamellar vesicles (C. Glinka, 11/24/03)
-    
+
     fval *= fval;
     fval /= voli;
     fval *= 1e8;
-    
+
     return(fval);	// this result still needs to be multiplied by scale and have background added
 }
 
 static double
 SchulzPoint(double x, double avg, double zz) {
-	
+
     double dr;
-    
+
     dr = zz*log(x) - gammln(zz+1)+(zz+1)*log((zz+1)/avg)-(x/avg*(zz+1));
     return (exp(dr));
 }
 
 static double
 gammln(double xx) {
-	
+
     double x,y,tmp,ser;
     static double cof[6]={76.18009172947146,-86.50532032941677,
 		24.01409824083091,-1.231739572450155,
 		0.1208650973866179e-2,-0.5395239384953e-5};
     int j;
-	
+
     y=x=xx;
     tmp=x+5.5;
     tmp -= (x+0.5)*log(tmp);
@@ -1181,6 +1208,12 @@ gammln(double xx) {
 
 double
 F_func(double qr) {
-	return(3*(sin(qr) - qr*cos(qr))/(qr*qr*qr));
+	double sc;
+	if (qr == 0){
+		sc = 1.0;
+	}else{
+		sc=(3*(sin(qr) - qr*cos(qr))/(qr*qr*qr));
+	}
+	return sc;
 }
 

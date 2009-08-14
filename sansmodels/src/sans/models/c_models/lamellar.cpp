@@ -33,11 +33,10 @@ extern "C" {
 
 LamellarModel :: LamellarModel() {
 	scale      = Parameter(1.0);
-	delta     = Parameter(50.0);
-	delta.set_min(0.0);
-	sigma    = Parameter(0.15);
-	sigma.set_min(0.0);
-	contrast   = Parameter(5.3e-6);
+	bi_thick     = Parameter(50.0, true);
+	bi_thick.set_min(0.0);
+	sld_bi    = Parameter(1.0e-6);
+	sld_sol    = Parameter(6.3e-6);
 	background = Parameter(0.0);
 
 }
@@ -54,12 +53,28 @@ double LamellarModel :: operator()(double q) {
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
 	dp[0] = scale();
-	dp[1] = delta();
-	dp[2] = sigma();
-	dp[3] = contrast();
-	dp[4] = background();
+	dp[1] = bi_thick();
+	dp[2] = sld_bi();
+	dp[3] = sld_sol();
+	dp[4] = 0.0;
 
-	return LamellarFF(dp, q);
+	// Get the dispersion points for the bi_thick
+	vector<WeightPoint> weights_bi_thick;
+	bi_thick.get_weights(weights_bi_thick);
+	// Perform the computation, with all weight points
+	double sum = 0.0;
+	double norm = 0.0;
+
+	// Loop over short_edgeA weight points
+	for(int i=0; i< (int)weights_bi_thick.size(); i++) {
+		dp[1] = weights_bi_thick[i].value;
+
+		sum += weights_bi_thick[i].weight * lamellar_kernel(dp, q);
+		norm += weights_bi_thick[i].weight;
+
+	}
+
+	return sum/norm + background();
 }
 
 /**

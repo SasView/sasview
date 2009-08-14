@@ -37,8 +37,9 @@ class TriaxialEllipsoidModel(CTriaxialEllipsoidModel, BaseComponent):
          semi_axisC      = 400.0 [A]
          contrast        = 5.3e-006 [1/A²]
          background      = 0.0 [1/cm]
-         axis_theta      = 1.0 [rad]
-         axis_phi        = 1.0 [rad]
+         axis_theta      = 0.0 [rad]
+         axis_phi        = 0.0 [rad]
+         axis_psi        = 0.0 [rad]
 
     """
         
@@ -66,12 +67,13 @@ class TriaxialEllipsoidModel(CTriaxialEllipsoidModel, BaseComponent):
         self.details['background'] = ['[1/cm]', None, None]
         self.details['axis_theta'] = ['[rad]', None, None]
         self.details['axis_phi'] = ['[rad]', None, None]
+        self.details['axis_psi'] = ['[rad]', None, None]
 
 		## fittable parameters
-        self.fixed=['axis_phi.width', 'axis_theta.width', 'semi_axisA.width', 'semi_axisB.width', 'semi_axisC.width']
+        self.fixed=['axis_psi.width', 'axis_phi.width', 'axis_theta.width', 'semi_axisA.width', 'semi_axisB.width', 'semi_axisC.width']
         
         ## parameters with orientation
-        self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
+        self.orientation_params =['axis_psi', 'axis_phi', 'axis_theta', 'axis_psi.width', 'axis_phi.width', 'axis_theta.width']
    
     def clone(self):
         """ Return a identical copy of self """

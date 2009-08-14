@@ -32,9 +32,9 @@ class LamellarModel(CLamellarModel, BaseComponent):
     	for details of the model.
     	List of default parameters:
          scale           = 1.0 
-         delta           = 50.0 [A]
-         sigma           = 0.15 
-         contrast        = 5.3e-006 [1/A²]
+         bi_thick        = 50.0 [A]
+         sld_bi          = 1e-006 [1/A²]
+         sld_sol         = 6.3e-006 [1/A²]
          background      = 0.0 [1/cm]
 
     """
@@ -51,20 +51,20 @@ class LamellarModel(CLamellarModel, BaseComponent):
         ## Model description
         self.description ="""[Dilute Lamellar Form Factor](from a lyotropic lamellar phase)
 		I(q)= 2*pi*P(q)/(delta *q^(2)), where
-		P(q)=2*(contrast/q)^(2)*(1-cos(q*delta)
-		*e^(1/2*(q*sigma)^(2)).
-		delta = bilayer thickness
-		sigma = variation in bilayer thickness
-		= delta*polydispersity
-		contrast = SLD_solvent - SLD_bilayer
-		Note: the polydispersity in delta is included."""
+		P(q)=2*(contrast/q)^(2)*(1-cos(q*delta))^(2))
+		bi_thick = bilayer thickness
+		sld_bi = SLD of bilayer
+		sld_sol = SLD of solvent
+		background = Incoherent background
+		scale = scale factor
+		"""
        
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
-        self.details['delta'] = ['[A]', None, None]
-        self.details['sigma'] = ['', None, None]
-        self.details['contrast'] = ['[1/A²]', None, None]
+        self.details['bi_thick'] = ['[A]', None, None]
+        self.details['sld_bi'] = ['[1/A²]', None, None]
+        self.details['sld_sol'] = ['[1/A²]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters

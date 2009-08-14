@@ -45,7 +45,7 @@ public:
 
 class ParallelepipedModel{
 public:
-	// TODO: add 2D 
+	// TODO: add 2D
 	// Model parameters
 	Parameter scale;
 	Parameter short_edgeA;
@@ -55,6 +55,7 @@ public:
 	Parameter background;
 	Parameter parallel_theta;
 	Parameter parallel_phi;
+	Parameter parallel_psi;
 
 	// Constructor
 	ParallelepipedModel();
@@ -276,7 +277,8 @@ public:
 	Parameter background;
 	Parameter axis_theta;
 	Parameter axis_phi;
-	
+	Parameter axis_psi;
+
 	// Constructor
 	TriaxialEllipsoidModel();
 
@@ -297,7 +299,7 @@ public:
 	Parameter background;
 	Parameter axis_theta;
 	Parameter axis_phi;
-	
+
 	// Constructor
 	FlexibleCylinderModel();
 
@@ -311,18 +313,18 @@ class StackedDisksModel{
 public:
 	// Model parameters
 	Parameter scale;
-	Parameter length;
+	Parameter core_thick;
 	Parameter radius;
-	Parameter thickness;
+	Parameter layer_thick;
 	Parameter core_sld;
 	Parameter layer_sld;
 	Parameter solvent_sld;
-	Parameter nlayers;
-	Parameter spacing;
+	Parameter n_stacking;
+	Parameter sigma_d;
 	Parameter background;
 	Parameter axis_theta;
 	Parameter axis_phi;
-	
+
 	// Constructor
 	StackedDisksModel();
 
@@ -336,11 +338,11 @@ class LamellarModel{
 public:
 	// Model parameters
 	Parameter scale;
-	Parameter delta;
-	Parameter sigma;
-	Parameter contrast;
+	Parameter bi_thick;
+	Parameter sld_bi;
+	Parameter sld_sol;
 	Parameter background;
-	
+
 	// Constructor
 	LamellarModel();
 
@@ -361,7 +363,7 @@ public:
 	Parameter sld_head;
 	Parameter sld_solvent;
 	Parameter background;
-	
+
 	// Constructor
 	LamellarFFHGModel();
 
@@ -385,7 +387,7 @@ public:
 	Parameter n_plates;
 	Parameter caille;
 	Parameter background;
-	
+
 	// Constructor
 	LamellarPSModel();
 
@@ -408,9 +410,32 @@ public:
 	Parameter n_plates;
 	Parameter caille;
 	Parameter background;
-	
+
 	// Constructor
 	LamellarPSHGModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double evaluate_rphi(double q, double phi);
+};
+
+class CoreShellSpheroidModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter equat_core;
+	Parameter polar_core;
+	Parameter equat_shell;
+	Parameter polar_shell;
+	Parameter contrast;
+	Parameter sld_solvent;
+	Parameter background;
+	Parameter axis_theta;
+	Parameter axis_phi;
+
+	// Constructor
+	CoreShellSpheroidModel();
 
 	// Operators to get I(Q)
 	double operator()(double q);
@@ -431,7 +456,7 @@ public:
 	Parameter background;
 	Parameter axis_theta;
 	Parameter axis_phi;
-	
+
 	// Constructor
 	OblateModel();
 
@@ -453,7 +478,7 @@ public:
 	Parameter background;
 	Parameter axis_theta;
 	Parameter axis_phi;
-	
+
 	// Constructor
 	ProlateModel();
 
@@ -473,10 +498,10 @@ public:
 	Parameter background;
 	Parameter axis_theta;
 	Parameter axis_phi;
-	
+
 	//Constructor
 	HollowCylinderModel();
-	
+
 	//Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx , double qy);
@@ -494,10 +519,10 @@ public:
 	Parameter shell_sld;
 	Parameter n_pairs;
 	Parameter background;
-	
+
 	//Constructor
 	MultiShellModel();
-	
+
 	//Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx , double qy);
@@ -513,10 +538,10 @@ public:
 	Parameter core_sld;
 	Parameter shell_sld;
 	Parameter background;
-	
+
 	//Constructor
 	VesicleModel();
-	
+
 	//Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx , double qy);
@@ -534,10 +559,10 @@ public:
 	Parameter ss_sld;
 	Parameter solvent_sld;
 	Parameter background;
-	
+
 	//Constructor
 	BinaryHSModel();
-	
+
 	//Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx , double qy);
@@ -555,10 +580,10 @@ public:
 	Parameter ss_sld;
 	Parameter solvent_sld;
 	Parameter background;
-	
+
 	//Constructor
 	BinaryHSPSF11Model();
-	
+
 	//Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx , double qy);

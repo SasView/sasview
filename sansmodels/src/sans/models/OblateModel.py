@@ -89,7 +89,7 @@ class OblateModel(COblateModel, BaseComponent):
         self.fixed=['major_core.width', 'minor_core.width', 'major_shell.width', 'minor_shell.width']
         
         ## parameters with orientation
-        self.orientation_params =[]
+        self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
    
     def clone(self):
         """ Return a identical copy of self """

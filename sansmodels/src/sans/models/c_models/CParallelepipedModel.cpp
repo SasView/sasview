@@ -87,9 +87,10 @@ CParallelepipedModel_init(CParallelepipedModel *self, PyObject *args, PyObject *
         // Initialize parameter dictionary
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
         PyDict_SetItemString(self->params,"longer_edgeB",Py_BuildValue("d",75.000000));
+        PyDict_SetItemString(self->params,"parallel_psi",Py_BuildValue("d",0.000000));
         PyDict_SetItemString(self->params,"longuest_edgeC",Py_BuildValue("d",400.000000));
-        PyDict_SetItemString(self->params,"parallel_phi",Py_BuildValue("d",1.000000));
-        PyDict_SetItemString(self->params,"parallel_theta",Py_BuildValue("d",1.000000));
+        PyDict_SetItemString(self->params,"parallel_phi",Py_BuildValue("d",0.000000));
+        PyDict_SetItemString(self->params,"parallel_theta",Py_BuildValue("d",0.000000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000));
         PyDict_SetItemString(self->params,"short_edgeA",Py_BuildValue("d",35.000000));
         PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000005));
@@ -108,6 +109,9 @@ CParallelepipedModel_init(CParallelepipedModel *self, PyObject *args, PyObject *
         disp_dict = PyDict_New();
         self->model->parallel_phi.dispersion->accept_as_source(visitor, self->model->parallel_phi.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "parallel_phi", disp_dict);
+        disp_dict = PyDict_New();
+        self->model->parallel_psi.dispersion->accept_as_source(visitor, self->model->parallel_psi.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "parallel_psi", disp_dict);
         disp_dict = PyDict_New();
         self->model->parallel_theta.dispersion->accept_as_source(visitor, self->model->parallel_theta.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "parallel_theta", disp_dict);
@@ -178,43 +182,7 @@ static PyObject *evaluateOneDim(ParallelepipedModel* model, PyArrayObject *q){
 	}
     return PyArray_Return(result); 
  }
-/**
- * Function to call to evaluate model
- * @param args: input numpy array  [q[],phi[]]
- * @return: numpy array object 
- */
-static PyObject * evaluateTwoDim( ParallelepipedModel* model, 
-                              PyArrayObject *q, PyArrayObject *phi)
- {
-    PyArrayObject *result;
-    //check validity of input vectors
-    if (q->nd != 1 || q->descr->type_num != PyArray_DOUBLE
-        || phi->nd != 1 || phi->descr->type_num != PyArray_DOUBLE
-        || phi->dimensions[0] != q->dimensions[0]){
-     
-        //const char * message= "Invalid array: q->nd=%d,type_num=%d\n",q->nd,q->descr->type_num;
-        PyErr_SetString(PyExc_ValueError ,"wrong input"); 
-        return NULL;
-    }
-	result= (PyArrayObject *)PyArray_FromDims(q->nd,(int*)(q->dimensions), PyArray_DOUBLE);
 
-	if (result == NULL){
-	    const char * message= "Could not create result ";
-        PyErr_SetString(PyExc_RuntimeError , message);
-	    return NULL;
-	}
-	
-    for (int i = 0; i < q->dimensions[0]; i++) {
-      double q_value = *(double *)(q->data + i*q->strides[0]);
-      double phi_value = *(double *)(phi->data + i*phi->strides[0]);
-      double *result_value = (double *)(result->data + i*result->strides[0]);
-      if (q_value == 0)
-          *result_value = 0.0;
-      else
-          *result_value = model->evaluate_rphi(q_value, phi_value);
-    }
-    return PyArray_Return(result); 
- }
  /**
  * Function to call to evaluate model
  * @param args: input numpy array  [x[],y[]]
@@ -279,6 +247,7 @@ static PyObject * evalDistribution(CParallelepipedModel *self, PyObject *args){
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
     self->model->longer_edgeB = PyFloat_AsDouble( PyDict_GetItemString(self->params, "longer_edgeB") );
+    self->model->parallel_psi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_psi") );
     self->model->longuest_edgeC = PyFloat_AsDouble( PyDict_GetItemString(self->params, "longuest_edgeC") );
     self->model->parallel_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_phi") );
     self->model->parallel_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_theta") );
@@ -296,6 +265,8 @@ static PyObject * evalDistribution(CParallelepipedModel *self, PyObject *args){
     self->model->longuest_edgeC.dispersion->accept_as_destination(visitor, self->model->longuest_edgeC.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "parallel_phi");
     self->model->parallel_phi.dispersion->accept_as_destination(visitor, self->model->parallel_phi.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "parallel_psi");
+    self->model->parallel_psi.dispersion->accept_as_destination(visitor, self->model->parallel_psi.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "parallel_theta");
     self->model->parallel_theta.dispersion->accept_as_destination(visitor, self->model->parallel_theta.dispersion, disp_dict);
 
@@ -362,6 +333,7 @@ static PyObject * run(CParallelepipedModel *self, PyObject *args) {
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
     self->model->longer_edgeB = PyFloat_AsDouble( PyDict_GetItemString(self->params, "longer_edgeB") );
+    self->model->parallel_psi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_psi") );
     self->model->longuest_edgeC = PyFloat_AsDouble( PyDict_GetItemString(self->params, "longuest_edgeC") );
     self->model->parallel_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_phi") );
     self->model->parallel_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_theta") );
@@ -379,6 +351,8 @@ static PyObject * run(CParallelepipedModel *self, PyObject *args) {
     self->model->longuest_edgeC.dispersion->accept_as_destination(visitor, self->model->longuest_edgeC.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "parallel_phi");
     self->model->parallel_phi.dispersion->accept_as_destination(visitor, self->model->parallel_phi.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "parallel_psi");
+    self->model->parallel_psi.dispersion->accept_as_destination(visitor, self->model->parallel_psi.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "parallel_theta");
     self->model->parallel_theta.dispersion->accept_as_destination(visitor, self->model->parallel_theta.dispersion, disp_dict);
 
@@ -434,6 +408,7 @@ static PyObject * runXY(CParallelepipedModel *self, PyObject *args) {
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
     self->model->longer_edgeB = PyFloat_AsDouble( PyDict_GetItemString(self->params, "longer_edgeB") );
+    self->model->parallel_psi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_psi") );
     self->model->longuest_edgeC = PyFloat_AsDouble( PyDict_GetItemString(self->params, "longuest_edgeC") );
     self->model->parallel_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_phi") );
     self->model->parallel_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_theta") );
@@ -451,6 +426,8 @@ static PyObject * runXY(CParallelepipedModel *self, PyObject *args) {
     self->model->longuest_edgeC.dispersion->accept_as_destination(visitor, self->model->longuest_edgeC.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "parallel_phi");
     self->model->parallel_phi.dispersion->accept_as_destination(visitor, self->model->parallel_phi.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "parallel_psi");
+    self->model->parallel_psi.dispersion->accept_as_destination(visitor, self->model->parallel_psi.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "parallel_theta");
     self->model->parallel_theta.dispersion->accept_as_destination(visitor, self->model->parallel_theta.dispersion, disp_dict);
 
@@ -516,6 +493,8 @@ static PyObject * set_dispersion(CParallelepipedModel *self, PyObject *args) {
         self->model->longuest_edgeC.dispersion = dispersion;
     } else    if (!strcmp(par_name, "parallel_phi")) {
         self->model->parallel_phi.dispersion = dispersion;
+    } else    if (!strcmp(par_name, "parallel_psi")) {
+        self->model->parallel_psi.dispersion = dispersion;
     } else    if (!strcmp(par_name, "parallel_theta")) {
         self->model->parallel_theta.dispersion = dispersion;
     } else {

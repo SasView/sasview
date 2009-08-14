@@ -44,6 +44,7 @@ ParallelepipedModel :: ParallelepipedModel() {
 	background = Parameter(0.0);
 	parallel_theta  = Parameter(0.0, true);
 	parallel_phi    = Parameter(0.0, true);
+	parallel_psi    = Parameter(0.0, true);
 }
 
 /**
@@ -53,7 +54,7 @@ ParallelepipedModel :: ParallelepipedModel() {
  * @return: function value
  */
 double ParallelepipedModel :: operator()(double q) {
-	double dp[5];
+	double dp[6];
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
@@ -62,13 +63,12 @@ double ParallelepipedModel :: operator()(double q) {
 	dp[2] = longer_edgeB();
 	dp[3] = longuest_edgeC();
 	dp[4] = contrast();
-	//dp[5] = background();
 	dp[5] = 0.0;
 
 	// Get the dispersion points for the short_edgeA
 	vector<WeightPoint> weights_short_edgeA;
 	short_edgeA.get_weights(weights_short_edgeA);
-	
+
 	// Get the dispersion points for the longer_edgeB
 	vector<WeightPoint> weights_longer_edgeB;
 	longer_edgeB.get_weights(weights_longer_edgeB);
@@ -82,7 +82,7 @@ double ParallelepipedModel :: operator()(double q) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
-	
+
 	// Loop over short_edgeA weight points
 	for(int i=0; i< (int)weights_short_edgeA.size(); i++) {
 		dp[1] = weights_short_edgeA[i].value;
@@ -95,7 +95,7 @@ double ParallelepipedModel :: operator()(double q) {
 			for(int k=0; k< (int)weights_longuest_edgeC.size(); k++) {
 				dp[3] = weights_longuest_edgeC[j].value;
 
-				sum += weights_short_edgeA[i].weight * weights_longer_edgeB[j].weight 
+				sum += weights_short_edgeA[i].weight * weights_longer_edgeB[j].weight
 					* weights_longuest_edgeC[k].weight * Parallelepiped(dp, q);
 
 				norm += weights_short_edgeA[i].weight
@@ -123,7 +123,8 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 	//dp.background = background();
 	dp.parallel_theta  = parallel_theta();
 	dp.parallel_phi    = parallel_phi();
-	
+	dp.parallel_psi    = parallel_psi();
+
 
 	// Get the dispersion points for the short_edgeA
 	vector<WeightPoint> weights_short_edgeA;
@@ -145,6 +146,9 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 	vector<WeightPoint> weights_parallel_phi;
 	parallel_phi.get_weights(weights_parallel_phi);
 
+	// Get angular averaging for psi
+	vector<WeightPoint> weights_parallel_psi;
+	parallel_psi.get_weights(weights_parallel_psi);
 
 	// Perform the computation, with all weight points
 	double sum = 0.0;
@@ -170,22 +174,29 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 					for(int m=0; m< (int)weights_parallel_phi.size(); m++) {
 						dp.parallel_phi = weights_parallel_phi[m].value;
 
-						double _ptvalue = weights_short_edgeA[i].weight
-							* weights_longer_edgeB[j].weight
-							* weights_longuest_edgeC[k].weight
-							* weights_parallel_theta[l].weight
-							* weights_parallel_phi[m].weight
-							* parallelepiped_analytical_2DXY(&dp, qx, qy);
-						if (weights_parallel_theta.size()>1) {
-							_ptvalue *= sin(weights_parallel_theta[l].value);
-						}
-						sum += _ptvalue;
+						// Average over phi distribution
+						for(int n=0; n< (int)weights_parallel_psi.size(); n++) {
+							dp.parallel_psi = weights_parallel_psi[n].value;
 
-						norm += weights_short_edgeA[i].weight
-							* weights_longer_edgeB[j].weight
-							* weights_longuest_edgeC[k].weight
-							* weights_parallel_theta[l].weight
-							* weights_parallel_phi[m].weight;
+							double _ptvalue = weights_short_edgeA[i].weight
+								* weights_longer_edgeB[j].weight
+								* weights_longuest_edgeC[k].weight
+								* weights_parallel_theta[l].weight
+								* weights_parallel_phi[m].weight
+								* weights_parallel_psi[n].weight
+								* parallelepiped_analytical_2DXY(&dp, qx, qy);
+							if (weights_parallel_theta.size()>1) {
+								_ptvalue *= sin(weights_parallel_theta[l].value);
+							}
+							sum += _ptvalue;
+
+							norm += weights_short_edgeA[i].weight
+								* weights_longer_edgeB[j].weight
+								* weights_longuest_edgeC[k].weight
+								* weights_parallel_theta[l].weight
+								* weights_parallel_phi[m].weight
+								* weights_parallel_psi[n].weight;
+						}
 					}
 
 				}

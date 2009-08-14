@@ -2,13 +2,13 @@
 #define triaxial_ellipsoid_h
 /** Structure definition for cylinder parameters
  * [PYTHONCLASS] = TriaxialEllipsoidModel
- * [DISP_PARAMS] = axis_theta, axis_phi
+ * [DISP_PARAMS] = axis_theta, axis_phi, axis_psi
    [DESCRIPTION] = <text> Note:
 					Constraints must be applied during fitting to ensure that the inequality a<b<c is not
 						  violated. The calculation will not report an error, but the results will not be correct.
 				   </text>
-	[FIXED]= <text>axis_phi.width; axis_theta.width; semi_axisA.width; semi_axisB.width; semi_axisC.width </text>
-	[ORIENTATION_PARAMS]= <text>axis_phi; axis_theta; axis_phi.width; axis_theta.width</text>
+	[FIXED]= <text>axis_psi.width; axis_phi.width; axis_theta.width; semi_axisA.width; semi_axisB.width; semi_axisC.width </text>
+	[ORIENTATION_PARAMS]= <text>axis_psi; axis_phi; axis_theta; axis_psi.width; axis_phi.width; axis_theta.width</text>
 
 
  **/
@@ -32,11 +32,14 @@ typedef struct {
 	//  [DEFAULT]=background=0.0 [1/cm]
 	double background;
     /// Orientation of the triaxial_ellipsoid axis w/respect incoming beam [rad]
-    //  [DEFAULT]=axis_theta=1.0 [rad]
+    //  [DEFAULT]=axis_theta=0.0 [rad]
     double axis_theta;
     /// Orientation of the triaxial_ellipsoid in the plane of the detector [rad]
-    //  [DEFAULT]=axis_phi=1.0 [rad]
+    //  [DEFAULT]=axis_phi=0.0 [rad]
     double axis_phi;
+    /// Orientation of the cross section of the triaxial_ellipsoid in the plane of the detector [rad]
+    //  [DEFAULT]=axis_psi=0.0 [rad]
+    double axis_psi;
 
 } TriaxialEllipsoidParameters;
 

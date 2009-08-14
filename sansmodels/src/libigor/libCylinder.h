@@ -33,6 +33,7 @@ double CylKernel(double qq, double rr,double h, double theta);
 double NR_BessJ1(double x);
 double EllipCylKernel(double qq, double ra,double nu, double theta);
 double TriaxialKernel(double q, double aa, double bb, double cc, double dx, double dy);
+double lamellar_kernel(double dp[], double q);
 double PPKernel(double aa, double mu, double uu);
 double HolCylKernel(double qq, double rcore, double rshell, double length, double dum);
 double EllipsoidKernel(double qq, double a, double va, double dum);

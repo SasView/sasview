@@ -21,15 +21,17 @@ double lamellar_analytical_1D(LamellarParameters *pars, double q) {
 
 	// Fill paramater array
 	dp[0] = pars->scale;
-	dp[1] = pars->delta;
-	dp[2] = pars->sigma;
-	dp[3] = pars->contrast;
+	dp[1] = pars->bi_thick;
+	dp[2] = pars->sld_bi;
+	dp[3] = pars->sld_sol;
 	dp[4] = pars->background;
 
 
 	// Call library function to evaluate model
-	return LamellarFF(dp, q);
+	return lamellar_kernel(dp, q);
 }
+
+
 /**
  * Function to evaluate 2D scattering function
  * @param pars: parameters of the lamellar

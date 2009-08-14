@@ -2,30 +2,32 @@
 #define lamellar_h
 /** Structure definition for lamellar parameters
  * [PYTHONCLASS] = LamellarModel
+ * [DISP_PARAMS] = bi_thick
    [DESCRIPTION] = <text>[Dilute Lamellar Form Factor](from a lyotropic lamellar phase)
-	   I(q)= 2*pi*P(q)/(delta *q^(2)), where
-		P(q)=2*(contrast/q)^(2)*(1-cos(q*delta)
-		*e^(1/2*(q*sigma)^(2)).
-		delta = bilayer thickness
-		sigma = variation in bilayer thickness
-			= delta*polydispersity
-		contrast = SLD_solvent - SLD_bilayer
-	Note: the polydispersity in delta is included.
+		I(q)= 2*pi*P(q)/(delta *q^(2)), where
+		P(q)=2*(contrast/q)^(2)*(1-cos(q*delta))^(2))
+		bi_thick = bilayer thickness
+		sld_bi = SLD of bilayer
+		sld_sol = SLD of solvent
+		background = Incoherent background
+		scale = scale factor
+
  </text>
+[FIXED]= <text>bi_thick.width</text>
  **/
 typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0
     double scale;
     /// delta bilayer thickness [A]
-    //  [DEFAULT]=delta=50.0 [A]
-    double delta;
-    /// variation in bilayer thickness
-    //  [DEFAULT]=sigma=0.15
-    double sigma;
-    /// Contrast [1/A²]
-    //  [DEFAULT]=contrast=5.3e-6 [1/A²]
-    double contrast;
+    //  [DEFAULT]=bi_thick=50.0 [A]
+    double bi_thick;
+    /// SLD of bilayer [1/A²]
+    //  [DEFAULT]=sld_bi=1.0e-6 [1/A²]
+    double sld_bi;
+    /// SLD of solvent [1/A²]
+    //  [DEFAULT]=sld_sol=6.3e-6 [1/A²]
+    double sld_sol;
 	/// Incoherent Background [1/cm] 0.00
 	//  [DEFAULT]=background=0.0 [1/cm]
 	double background;

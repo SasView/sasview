@@ -31,9 +31,9 @@ class BinaryHSModel(CBinaryHSModel, BaseComponent):
     	Refer to that file and the structure it contains
     	for details of the model.
     	List of default parameters:
-         l_radius        = 160.0 [A]
+         l_radius        = 100.0 [A]
          s_radius        = 25.0 [A]
-         vol_frac_ls     = 0.2 
+         vol_frac_ls     = 0.1 
          vol_frac_ss     = 0.2 
          ls_sld          = 3.5e-006 [1/A²]
          ss_sld          = 5e-007 [1/A²]
@@ -52,11 +52,8 @@ class BinaryHSModel(CBinaryHSModel, BaseComponent):
         ## Name of the model
         self.name = "BinaryHSModel"
         ## Model description
-        self.description ="""
-		Model parameters:
-		
-		l_radius : large radius of the binary hard sphere
-		s_radius : small radius of the binary hard sphere
+        self.description =""" Model parameters: l_radius : large radius of binary hard sphere
+		s_radius : small radius of binary hard sphere
 		vol_frac_ls : volume fraction of large spheres
 		vol_frac_ss : volume fraction of small spheres
 		ls_sld: large sphere  scattering length density

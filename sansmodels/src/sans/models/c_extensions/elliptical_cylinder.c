@@ -30,9 +30,10 @@ double elliptical_cylinder_analytical_1D(EllipticalCylinderParameters *pars, dou
 	return EllipCyl20(dp, q);
 }
 
-double elliptical_cylinder_kernel(EllipticalCylinderParameters *pars, double q, double alpha, double psi, double nu) {
+double elliptical_cylinder_kernel(EllipticalCylinderParameters *pars, double q, double alpha, double nu) {
 	double qr;
 	double qL;
+	double Be,Si;
 	double r_major;
 	double kernel;
 
@@ -41,7 +42,19 @@ double elliptical_cylinder_kernel(EllipticalCylinderParameters *pars, double q, 
 	qr = q*sin(alpha)*sqrt( r_major*r_major*sin(nu)*sin(nu) + pars->r_minor*pars->r_minor*cos(nu)*cos(nu) );
 	qL = q*pars->length*cos(alpha)/2.0;
 
-	kernel = 2.0*NR_BessJ1(qr)/qr * sin(qL)/qL;
+	if (qr==0){
+		Be = 0.5;
+	}else{
+		Be = NR_BessJ1(qr)/qr;
+	}
+	if (qL==0){
+		Si = 1.0;
+	}else{
+		Si = sin(qL)/qL;
+	}
+
+
+	kernel = 2.0*Be * Si;
 	return kernel*kernel;
 }
 
@@ -128,7 +141,7 @@ double elliptical_cylinder_analytical_2D_scaled(EllipticalCylinderParameters *pa
      	return 0;
     }
 
-	answer = elliptical_cylinder_kernel(pars, q, alpha, pars->cyl_psi,nu);
+	answer = elliptical_cylinder_kernel(pars, q, alpha,nu);
 
 	// Multiply by contrast^2
 	answer *= pars->contrast*pars->contrast;

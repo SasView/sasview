@@ -85,14 +85,17 @@ CLamellarModel_init(CLamellarModel *self, PyObject *args, PyObject *kwds)
         self->model = new LamellarModel();
         
         // Initialize parameter dictionary
+        PyDict_SetItemString(self->params,"sld_sol",Py_BuildValue("d",0.000006));
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
-        PyDict_SetItemString(self->params,"sigma",Py_BuildValue("d",0.150000));
+        PyDict_SetItemString(self->params,"bi_thick",Py_BuildValue("d",50.000000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000005));
-        PyDict_SetItemString(self->params,"delta",Py_BuildValue("d",50.000000));
+        PyDict_SetItemString(self->params,"sld_bi",Py_BuildValue("d",0.000001));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
+        disp_dict = PyDict_New();
+        self->model->bi_thick.dispersion->accept_as_source(visitor, self->model->bi_thick.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "bi_thick", disp_dict);
 
 
          
@@ -160,43 +163,7 @@ static PyObject *evaluateOneDim(LamellarModel* model, PyArrayObject *q){
 	}
     return PyArray_Return(result); 
  }
-/**
- * Function to call to evaluate model
- * @param args: input numpy array  [q[],phi[]]
- * @return: numpy array object 
- */
-static PyObject * evaluateTwoDim( LamellarModel* model, 
-                              PyArrayObject *q, PyArrayObject *phi)
- {
-    PyArrayObject *result;
-    //check validity of input vectors
-    if (q->nd != 1 || q->descr->type_num != PyArray_DOUBLE
-        || phi->nd != 1 || phi->descr->type_num != PyArray_DOUBLE
-        || phi->dimensions[0] != q->dimensions[0]){
-     
-        //const char * message= "Invalid array: q->nd=%d,type_num=%d\n",q->nd,q->descr->type_num;
-        PyErr_SetString(PyExc_ValueError ,"wrong input"); 
-        return NULL;
-    }
-	result= (PyArrayObject *)PyArray_FromDims(q->nd,(int*)(q->dimensions), PyArray_DOUBLE);
 
-	if (result == NULL){
-	    const char * message= "Could not create result ";
-        PyErr_SetString(PyExc_RuntimeError , message);
-	    return NULL;
-	}
-	
-    for (int i = 0; i < q->dimensions[0]; i++) {
-      double q_value = *(double *)(q->data + i*q->strides[0]);
-      double phi_value = *(double *)(phi->data + i*phi->strides[0]);
-      double *result_value = (double *)(result->data + i*result->strides[0]);
-      if (q_value == 0)
-          *result_value = 0.0;
-      else
-          *result_value = model->evaluate_rphi(q_value, phi_value);
-    }
-    return PyArray_Return(result); 
- }
  /**
  * Function to call to evaluate model
  * @param args: input numpy array  [x[],y[]]
@@ -259,14 +226,16 @@ static PyObject * evalDistribution(CLamellarModel *self, PyObject *args){
 	// Get parameters
 	
 	    // Reader parameter dictionary
+    self->model->sld_sol = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_sol") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
-    self->model->sigma = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sigma") );
+    self->model->bi_thick = PyFloat_AsDouble( PyDict_GetItemString(self->params, "bi_thick") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
-    self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
+    self->model->sld_bi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_bi") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "bi_thick");
+    self->model->bi_thick.dispersion->accept_as_destination(visitor, self->model->bi_thick.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -329,14 +298,16 @@ static PyObject * run(CLamellarModel *self, PyObject *args) {
 	// Get parameters
 	
 	    // Reader parameter dictionary
+    self->model->sld_sol = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_sol") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
-    self->model->sigma = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sigma") );
+    self->model->bi_thick = PyFloat_AsDouble( PyDict_GetItemString(self->params, "bi_thick") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
-    self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
+    self->model->sld_bi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_bi") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "bi_thick");
+    self->model->bi_thick.dispersion->accept_as_destination(visitor, self->model->bi_thick.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -388,14 +359,16 @@ static PyObject * runXY(CLamellarModel *self, PyObject *args) {
 	// Get parameters
 	
 	    // Reader parameter dictionary
+    self->model->sld_sol = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_sol") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
-    self->model->sigma = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sigma") );
+    self->model->bi_thick = PyFloat_AsDouble( PyDict_GetItemString(self->params, "bi_thick") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
-    self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
+    self->model->sld_bi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_bi") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "bi_thick");
+    self->model->bi_thick.dispersion->accept_as_destination(visitor, self->model->bi_thick.dispersion, disp_dict);
 
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
@@ -451,7 +424,9 @@ static PyObject * set_dispersion(CLamellarModel *self, PyObject *args) {
 
 	// Ugliness necessary to go from python to C
 	    // TODO: refactor this
- {
+    if (!strcmp(par_name, "bi_thick")) {
+        self->model->bi_thick.dispersion = dispersion;
+    } else {
 	    PyErr_SetString(CLamellarModelError,
 	    	"CLamellarModel.set_dispersion expects a valid parameter name.");
 		return NULL;
