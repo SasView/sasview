@@ -15,36 +15,11 @@ copyright 2009, University of Tennessee
 """
 
 import os, sys
-from xml import xpath
-import xml.dom.minidom 
 import logging
-
-from xml.dom.minidom import parse
+from lxml import etree   
 
 ## Format version for the XML settings file
-VERSION = '1.0'
-
-def get_node_text(node):
-    """
-        Get the text context of a node
-        
-        @param node: node to read from
-        @return: content, attribute list
-    """
-    content = None
-    attr    = {}
-    for item in node.childNodes:
-        if item.nodeName.find('text')>=0 \
-            and len(item.nodeValue.strip())>0:
-            content = item.nodeValue.strip()
-            break
-        
-    if node.hasAttributes():
-        for i in range(node.attributes.length):
-            attr[node.attributes.item(i).nodeName] \
-                = node.attributes.item(i).nodeValue
-
-    return content, attr
+VERSION = 'sansloader/1.0'
 
 def read_associations(loader, settings='defaults.xml'):
     """
@@ -63,31 +38,28 @@ def read_associations(loader, settings='defaults.xml'):
         path = os.path.join(os.getcwd(), settings)
     
     if os.path.isfile(path):
-        dom = parse(path)
+        tree = etree.parse(path, parser=etree.ETCompatXMLParser())
         
         # Check the format version number
-        nodes = xpath.Evaluate('SansLoader', dom)
-        if nodes[0].hasAttributes():
-            for i in range(nodes[0].attributes.length):
-                if nodes[0].attributes.item(i).nodeName=='version':
-                    if nodes[0].attributes.item(i).nodeValue != VERSION:
-                        raise ValueError, "associations: unrecognized SansLoader version number %s" % \
-                            nodes[0].attributes.item(i).nodeValue
+        # Specifying the namespace will take care of the file format version 
+        root = tree.getroot()
         
         # Read in the file extension associations
-        entry_list = xpath.Evaluate('SansLoader/FileType', dom)
+        entry_list = root.xpath('/ns:SansLoader/ns:FileType', namespaces={'ns': VERSION})
+
+        # For each FileType entry, get the associated reader and extension
         for entry in entry_list:
-            value, attr = get_node_text(entry)
-            if attr is not None \
-                and attr.has_key('reader') and attr.has_key('extension'):
-                
+            reader = entry.get('reader')
+            ext    = entry.get('extension')
+            
+            if reader is not None and ext is not None:
                 # Associate the extension with a particular reader
                 # TODO: Modify the Register code to be case-insensitive and remove the
                 #       extra line below.
                 try:
-                    exec "import %s" % attr['reader']
-                    exec "loader.associate_file_type('%s', %s)" % (attr['extension'].lower(), attr['reader'])
-                    exec "loader.associate_file_type('%s', %s)" % (attr['extension'].upper(), attr['reader'])
+                    exec "import %s" % reader
+                    exec "loader.associate_file_type('%s', %s)" % (ext.lower(), reader)
+                    exec "loader.associate_file_type('%s', %s)" % (ext.upper(), reader)
                 except:
                     logging.error("read_associations: skipping association for %s\n  %s" % (attr['extension'], sys.exc_value))
          
@@ -101,6 +73,7 @@ def register_readers(registry_function):
     
         @param registry_function: function to be called to register each reader
     """
+    logging.info("register_readers is now obsolete: use read_associations()")
     import abs_reader
     import cansas_reader
     import ascii_reader
