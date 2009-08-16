@@ -5,7 +5,7 @@ project funded by the US National Science Foundation.
 
 See the license text in license.txt
 
-copyright 2008, University of Tennessee
+copyright 2008, 2009, University of Tennessee
 """
 # Known issue: reader not compatible with multiple SASdata entries
 # within a single SASentry. Will raise a runtime error.
@@ -23,15 +23,16 @@ import logging
 import numpy
 import os, sys
 from DataLoader.data_info import Data1D, Collimation, Detector, Process, Aperture
-from xml import xpath
-import xml.dom.minidom 
-
+from lxml import etree
+import xml.dom.minidom
 
 has_converter = True
 try:
     from data_util.nxsunit import Converter
 except:
     has_converter = False
+
+CANSAS_NS = "cansas1d/1.0"
 
 def write_node(doc, parent, name, value, attr={}):
     """
@@ -51,75 +52,43 @@ def write_node(doc, parent, name, value, attr={}):
         return True
     return False
 
-def get_node_text(node):
-    """
-        Get the text context of a node
-        
-        @param node: node to read from
-        @return: content, attribute list
-    """
-    content = None
-    attr    = {}
-    for item in node.childNodes:
-        if item.nodeName.find('text')>=0 \
-            and len(item.nodeValue.strip())>0:
-            content = item.nodeValue.strip()
-            break
-        
-    if node.hasAttributes():
-        for i in range(node.attributes.length):
-            attr[node.attributes.item(i).nodeName] \
-                = node.attributes.item(i).nodeValue
-
-    return content, attr
-
 def get_content(location, node):
     """
         Get the first instance of the content of a xpath location
         
         @param location: xpath location
         @param node: node to start at
+        @return: Element, or None
     """
-    value = None
-    attr  = {}
-    nodes = xpath.Evaluate(location, node)
+    nodes = node.xpath(location, namespaces={'ns': CANSAS_NS})
+    
     if len(nodes)>0:
-        try:
-            # Skip comments and empty lines 
-            for item in nodes[0].childNodes:
-                if item.nodeName.find('text')>=0 \
-                    and len(item.nodeValue.strip())>0:
-                    value = item.nodeValue.strip()
-                    break
-                
-            if nodes[0].hasAttributes():
-                for i in range(nodes[0].attributes.length):
-                    attr[nodes[0].attributes.item(i).nodeName] \
-                        = nodes[0].attributes.item(i).nodeValue
-        except:
-            # problem reading the node. Skip it and return that
-            # nothing was found
-            logging.error("cansas_reader.get_content: %s\n  %s" % (location, sys.exc_value))
-        
-    return value, attr
+        return nodes[0]
+    else:
+        return None
 
 def get_float(location, node):
     """
-        Get the content of a node as a float
+        Get the content of a node as a float 
         
         @param location: xpath location
         @param node: node to start at
     """
+    nodes = node.xpath(location, namespaces={'ns': CANSAS_NS})
+    
     value = None
     attr = {}
-    content, attr = get_content(location, node)
-    if content is not None:
+    
+    if len(nodes)>0:
         try:
-            value = float(content)   
+            value = float(nodes[0].text)   
         except:
             # Could not pass, skip and return None
-            logging.error("cansas_reader.get_float: could not convert '%s' to float" % content)
+            logging.error("cansas_reader.get_float: could not convert '%s' to float" % nodes[0].text)
         
+        if nodes[0].get('unit') is not None:
+            attr['unit'] = nodes[0].get('unit')
+            
     return value, attr
 
 def _store_float(location, node, variable, storage):
@@ -139,28 +108,30 @@ def _store_float(location, node, variable, storage):
         
         @raise ValueError: raised when the units are not recognized
     """
-    value, attr = get_float(location, node)
+    entry = get_content(location, node)
+    try:
+        value = float(entry.text)
+    except:
+        value = None
+        
     if value is not None:
         # If the entry has units, check to see that they are
         # compatible with what we currently have in the data object
-        if attr.has_key('unit'):
+        units = entry.get('unit')
+        if units is not None:
             toks = variable.split('.')
             exec "local_unit = storage.%s_unit" % toks[0]
-            if attr['unit'].lower()!=local_unit.lower():
+            if units.lower()!=local_unit.lower():
                 if has_converter==True:
                     try:
-                        conv = Converter(attr['unit'])
+                        conv = Converter(units)
                         exec "storage.%s = %g" % (variable, conv(value, units=local_unit))
                     except:
-                        #Below three lines were added for the unit = 1/A. local unit is defined in 'mm'. Need to check!!!
-                        if variable == 'slit_length' and attr['unit'] !=local_unit:
-                            pass
-                        else:
-                            raise ValueError, "CanSAS reader: could not convert %s unit [%s]; expecting [%s]\n  %s" \
-                            % (variable, attr['unit'], local_unit, sys.exc_value)
+                        raise ValueError, "CanSAS reader: could not convert %s unit [%s]; expecting [%s]\n  %s" \
+                        % (variable, units, local_unit, sys.exc_value)
                 else:
                     raise ValueError, "CanSAS reader: unrecognized %s unit [%s]; expecting [%s]" \
-                        % (variable, attr['unit'], local_unit)
+                        % (variable, units, local_unit)
             else:
                 exec "storage.%s = value" % variable
         else:
@@ -180,9 +151,9 @@ def _store_content(location, node, variable, storage):
         @param variable: name of the data member to store it in [string]
         @param storage: data object that has the 'variable' data member
     """
-    value, attr = get_content(location, node)
-    if value is not None:
-        exec "storage.%s = value" % variable
+    entry = get_content(location, node)
+    if entry is not None and entry.text is not None:
+        exec "storage.%s = entry.text.strip()" % variable
 
 
 class Reader:
@@ -212,8 +183,6 @@ class Reader:
             @raise RuntimeError: when the file can't be opened
             @raise ValueError: when the length of the data vectors are inconsistent
         """
-        from xml.dom.minidom import parse
-        
         output = []
         
         if os.path.isfile(path):
@@ -221,18 +190,13 @@ class Reader:
             root, extension = os.path.splitext(basename)
             if extension.lower() in self.ext:
                 
-                dom = parse(path)
-                
+                tree = etree.parse(path, parser=etree.ETCompatXMLParser())
                 # Check the format version number
-                nodes = xpath.Evaluate('SASroot', dom)
-                if nodes[0].hasAttributes():
-                    for i in range(nodes[0].attributes.length):
-                        if nodes[0].attributes.item(i).nodeName=='version':
-                            if nodes[0].attributes.item(i).nodeValue != self.version:
-                                raise ValueError, "cansas_reader: unrecognized version number %s" % \
-                                    nodes[0].attributes.item(i).nodeValue
+                # Specifying the namespace will take care of the file format version 
+                root = tree.getroot()
                 
-                entry_list = xpath.Evaluate('SASroot/SASentry', dom)
+                entry_list = root.xpath('/ns:SASroot/ns:SASentry', namespaces={'ns': CANSAS_NS})
+                
                 for entry in entry_list:
                     sas_entry = self._parse_entry(entry)
                     sas_entry.filename = basename
@@ -261,206 +225,202 @@ class Reader:
         
         data_info = Data1D(x, y)
         
-        # Look up title
-        _store_content('Title', dom, 'title', data_info)
+        # Look up title      
+        _store_content('ns:Title', dom, 'title', data_info)
+        
         # Look up run number   
-        nodes = xpath.Evaluate('Run', dom)
+        nodes = dom.xpath('ns:Run', namespaces={'ns': CANSAS_NS})
         for item in nodes:    
-            value, attr = get_node_text(item)
-            if value is not None:
-                data_info.run.append(value)
-                if attr.has_key('name'):
-                    data_info.run_name[value] = attr['name']         
+            if item.text is not None:
+                value = item.text.strip()
+                if len(value) > 0:
+                    data_info.run.append(value)
+                    if item.get('name') is not None:
+                        data_info.run_name[value] = item.get('name')
                            
         # Look up instrument name              
-        _store_content('SASinstrument/name', dom, 'instrument', data_info)
-        #value, attr = get_content('SASinstrument', dom)
-        #if attr.has_key('name'):
-        #    data_info.instrument = attr['name']
+        _store_content('ns:SASinstrument/ns:name', dom, 'instrument', data_info)
 
-        note_list = xpath.Evaluate('SASnote', dom)
+        # Notes
+        note_list = dom.xpath('ns:SASnote', namespaces={'ns': CANSAS_NS})
         for note in note_list:
             try:
-                note_value, note_attr = get_node_text(note)
-                if note_value is not None:
-                    data_info.notes.append(note_value)
+                if note.text is not None:
+                    note_value = note.text.strip()
+                    if len(note_value) > 0:
+                        data_info.notes.append(note_value)
             except:
                 logging.error("cansas_reader.read: error processing entry notes\n  %s" % sys.exc_value)
-
         
         # Sample info ###################
-        value, attr = get_content('SASsample', dom)
-        if attr.has_key('name'):
-            data_info.sample.name = attr['name']
+        entry = get_content('ns:SASsample', dom)
+        if entry is not None:
+            data_info.sample.name = entry.get('name')
             
-        _store_content('SASsample/ID', 
+        _store_content('ns:SASsample/ns:ID', 
                      dom, 'ID', data_info.sample)                    
-        _store_float('SASsample/thickness', 
+        _store_float('ns:SASsample/ns:thickness', 
                      dom, 'thickness', data_info.sample)
-        _store_float('SASsample/transmission', 
+        _store_float('ns:SASsample/ns:transmission', 
                      dom, 'transmission', data_info.sample)
-        _store_float('SASsample/temperature', 
+        _store_float('ns:SASsample/ns:temperature', 
                      dom, 'temperature', data_info.sample)
-        nodes = xpath.Evaluate('SASsample/details', dom)
+        
+        nodes = dom.xpath('ns:SASsample/ns:details', namespaces={'ns': CANSAS_NS})
         for item in nodes:
             try:
-                detail_value, detail_attr = get_node_text(item)
-                if detail_value is not None:
-                    data_info.sample.details.append(detail_value)
+                if item.text is not None:
+                    detail_value = item.text.strip()
+                    if len(detail_value) > 0:
+                        data_info.sample.details.append(detail_value)
             except:
                 logging.error("cansas_reader.read: error processing sample details\n  %s" % sys.exc_value)
         
         # Position (as a vector)
-        _store_float('SASsample/position/x', 
+        _store_float('ns:SASsample/ns:position/ns:x', 
                      dom, 'position.x', data_info.sample)          
-        _store_float('SASsample/position/y', 
+        _store_float('ns:SASsample/ns:position/ns:y', 
                      dom, 'position.y', data_info.sample)          
-        _store_float('SASsample/position/z', 
+        _store_float('ns:SASsample/ns:position/ns:z', 
                      dom, 'position.z', data_info.sample)          
         
         # Orientation (as a vector)
-        _store_float('SASsample/orientation/roll', 
+        _store_float('ns:SASsample/ns:orientation/ns:roll', 
                      dom, 'orientation.x', data_info.sample)          
-        _store_float('SASsample/orientation/pitch', 
+        _store_float('ns:SASsample/ns:orientation/ns:pitch', 
                      dom, 'orientation.y', data_info.sample)          
-        _store_float('SASsample/orientation/yaw', 
+        _store_float('ns:SASsample/ns:orientation/ns:yaw', 
                      dom, 'orientation.z', data_info.sample)          
        
         # Source info ###################
-        value, attr = get_content('SASinstrument/SASsource', dom)
-        if attr.has_key('name'):
-            data_info.source.name = attr['name']
+        entry = get_content('ns:SASinstrument/ns:SASsource', dom)
+        if entry is not None:
+            data_info.source.name = entry.get('name')
         
-        _store_content('SASinstrument/SASsource/radiation', 
+        _store_content('ns:SASinstrument/ns:SASsource/ns:radiation', 
                      dom, 'radiation', data_info.source)                    
-        _store_content('SASinstrument/SASsource/beam_shape', 
+        _store_content('ns:SASinstrument/ns:SASsource/ns:beam_shape', 
                      dom, 'beam_shape', data_info.source)                    
-        _store_float('SASinstrument/SASsource/wavelength', 
+        _store_float('ns:SASinstrument/ns:SASsource/ns:wavelength', 
                      dom, 'wavelength', data_info.source)          
-        _store_float('SASinstrument/SASsource/wavelength_min', 
+        _store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_min', 
                      dom, 'wavelength_min', data_info.source)          
-        _store_float('SASinstrument/SASsource/wavelength_max', 
+        _store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_max', 
                      dom, 'wavelength_max', data_info.source)          
-        _store_float('SASinstrument/SASsource/wavelength_spread', 
+        _store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_spread', 
                      dom, 'wavelength_spread', data_info.source)    
         
         # Beam size (as a vector)   
-        value, attr = get_content('SASinstrument/SASsource/beam_size', dom)
-        if attr.has_key('name'):
-            data_info.source.beam_size_name = attr['name']
+        entry = get_content('ns:SASinstrument/ns:SASsource/ns:beam_size', dom)
+        if entry is not None:
+            data_info.source.beam_size_name = entry.get('name')
             
-        _store_float('SASinstrument/SASsource/beam_size/x', 
+        _store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:x', 
                      dom, 'beam_size.x', data_info.source)    
-        _store_float('SASinstrument/SASsource/beam_size/y', 
+        _store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:y', 
                      dom, 'beam_size.y', data_info.source)    
-        _store_float('SASinstrument/SASsource/beam_size/z', 
+        _store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:z', 
                      dom, 'beam_size.z', data_info.source)    
         
         # Collimation info ###################
-        nodes = xpath.Evaluate('SASinstrument/SAScollimation', dom)
+        nodes = dom.xpath('ns:SASinstrument/ns:SAScollimation', namespaces={'ns': CANSAS_NS})
         for item in nodes:
             collim = Collimation()
-            value, attr = get_node_text(item)
-            if attr.has_key('name'):
-                collim.name = attr['name']
-            _store_float('length', item, 'length', collim)  
+            if item.get('name') is not None:
+                collim.name = item.get('name')
+            _store_float('ns:length', item, 'length', collim)  
             
             # Look for apertures
-            apert_list = xpath.Evaluate('aperture', item)
+            apert_list = item.xpath('ns:aperture', namespaces={'ns': CANSAS_NS})
             for apert in apert_list:
                 aperture =  Aperture()
                 
                 # Get the name and type of the aperture
-                ap_value, ap_attr = get_node_text(apert)
-                if ap_attr.has_key('name'):
-                    aperture.name = ap_attr['name']
-                if ap_attr.has_key('type'):
-                    aperture.type = ap_attr['type']
+                aperture.name = apert.get('name')
+                aperture.type = apert.get('type')
                     
-                _store_float('distance', apert, 'distance', aperture)    
+                _store_float('ns:distance', apert, 'distance', aperture)    
                 
-                value, attr = get_content('size', apert)
-                if attr.has_key('name'):
-                    aperture.size_name = attr['name']
+                entry = get_content('ns:size', apert)
+                if entry is not None:
+                    aperture.size_name = entry.get('name')
                 
-                _store_float('size/x', apert, 'size.x', aperture)    
-                _store_float('size/y', apert, 'size.y', aperture)    
-                _store_float('size/z', apert, 'size.z', aperture)
+                _store_float('ns:size/ns:x', apert, 'size.x', aperture)    
+                _store_float('ns:size/ns:y', apert, 'size.y', aperture)    
+                _store_float('ns:size/ns:z', apert, 'size.z', aperture)
                 
                 collim.aperture.append(aperture)
                 
             data_info.collimation.append(collim)
         
         # Detector info ######################
-        nodes = xpath.Evaluate('SASinstrument/SASdetector', dom)
+        nodes = dom.xpath('ns:SASinstrument/ns:SASdetector', namespaces={'ns': CANSAS_NS})
         for item in nodes:
             
             detector = Detector()
             
-            _store_content('name', item, 'name', detector)
-            _store_float('SDD', item, 'distance', detector)    
+            _store_content('ns:name', item, 'name', detector)
+            _store_float('ns:SDD', item, 'distance', detector)    
             
             # Detector offset (as a vector)
-            _store_float('offset/x', item, 'offset.x', detector)    
-            _store_float('offset/y', item, 'offset.y', detector)    
-            _store_float('offset/z', item, 'offset.z', detector)    
+            _store_float('ns:offset/ns:x', item, 'offset.x', detector)    
+            _store_float('ns:offset/ns:y', item, 'offset.y', detector)    
+            _store_float('ns:offset/ns:z', item, 'offset.z', detector)    
             
             # Detector orientation (as a vector)
-            _store_float('orientation/roll',  item, 'orientation.x', detector)    
-            _store_float('orientation/pitch', item, 'orientation.y', detector)    
-            _store_float('orientation/yaw',   item, 'orientation.z', detector)    
+            _store_float('ns:orientation/ns:roll',  item, 'orientation.x', detector)    
+            _store_float('ns:orientation/ns:pitch', item, 'orientation.y', detector)    
+            _store_float('ns:orientation/ns:yaw',   item, 'orientation.z', detector)    
             
             # Beam center (as a vector)
-            _store_float('beam_center/x', item, 'beam_center.x', detector)    
-            _store_float('beam_center/y', item, 'beam_center.y', detector)    
-            _store_float('beam_center/z', item, 'beam_center.z', detector)    
+            _store_float('ns:beam_center/ns:x', item, 'beam_center.x', detector)    
+            _store_float('ns:beam_center/ns:y', item, 'beam_center.y', detector)    
+            _store_float('ns:beam_center/ns:z', item, 'beam_center.z', detector)    
             
             # Pixel size (as a vector)
-            _store_float('pixel_size/x', item, 'pixel_size.x', detector)    
-            _store_float('pixel_size/y', item, 'pixel_size.y', detector)    
-            _store_float('pixel_size/z', item, 'pixel_size.z', detector)    
+            _store_float('ns:pixel_size/ns:x', item, 'pixel_size.x', detector)    
+            _store_float('ns:pixel_size/ns:y', item, 'pixel_size.y', detector)    
+            _store_float('ns:pixel_size/ns:z', item, 'pixel_size.z', detector)    
             
-            _store_float('slit_length', item, 'slit_length', detector)
+            _store_float('ns:slit_length', item, 'slit_length', detector)
             
             data_info.detector.append(detector)    
 
         # Processes info ######################
-        nodes = xpath.Evaluate('SASprocess', dom)
+        nodes = dom.xpath('ns:SASprocess', namespaces={'ns': CANSAS_NS})
         for item in nodes:
             process = Process()
-            _store_content('name', item, 'name', process)
-            _store_content('date', item, 'date', process)
-            _store_content('description', item, 'description', process)
+            _store_content('ns:name', item, 'name', process)
+            _store_content('ns:date', item, 'date', process)
+            _store_content('ns:description', item, 'description', process)
             
-            term_list = xpath.Evaluate('term', item)
+            term_list = item.xpath('ns:term', namespaces={'ns': CANSAS_NS})
             for term in term_list:
                 try:
-                    term_value, term_attr = get_node_text(term)
-                    term_attr['value'] = term_value
-                    if term_value is not None:
+                    term_attr = {}
+                    for attr in term.keys():
+                        term_attr[attr] = term.get(attr).strip()
+                    if term.text is not None:
+                        term_attr['value'] = term.text.strip()
                         process.term.append(term_attr)
                 except:
                     logging.error("cansas_reader.read: error processing process term\n  %s" % sys.exc_value)
             
-            note_list = xpath.Evaluate('SASprocessnote', item)
+            note_list = item.xpath('ns:SASprocessnote', namespaces={'ns': CANSAS_NS})
             for note in note_list:
-                try:
-                    note_value, note_attr = get_node_text(note)
-                    if note_value is not None:
-                        process.notes.append(note_value)
-                except:
-                    logging.error("cansas_reader.read: error processing process notes\n  %s" % sys.exc_value)
-            
+                if note.text is not None:
+                    process.notes.append(note.text.strip())
             
             data_info.process.append(process)
             
             
         # Data info ######################
-        nodes = xpath.Evaluate('SASdata', dom)
+        nodes = dom.xpath('ns:SASdata', namespaces={'ns': CANSAS_NS})
         if len(nodes)>1:
             raise RuntimeError, "CanSAS reader is not compatible with multiple SASdata entries"
         
-        nodes = xpath.Evaluate('SASdata/Idata', dom)
+        nodes = dom.xpath('ns:SASdata/ns:Idata', namespaces={'ns': CANSAS_NS})
+
         x  = numpy.zeros(0)
         y  = numpy.zeros(0)
         dx = numpy.zeros(0)
@@ -469,10 +429,10 @@ class Reader:
         dxl = numpy.zeros(0)
         
         for item in nodes:
-            _x, attr = get_float('Q', item)
-            _dx, attr_d = get_float('Qdev', item)
-            _dxl, attr_l = get_float('dQl', item)
-            _dxw, attr_w = get_float('dQw', item)
+            _x, attr = get_float('ns:Q', item)
+            _dx, attr_d = get_float('ns:Qdev', item)
+            _dxl, attr_l = get_float('ns:dQl', item)
+            _dxw, attr_w = get_float('ns:dQw', item)
             if _dx == None:
                 _dx = 0.0
             if _dxl == None:
@@ -528,8 +488,8 @@ class Reader:
                     raise ValueError, "CanSAS reader: unrecognized dQw unit [%s]; expecting [%s]" \
                         % (attr['unit'], data_info.x_unit)
                     
-            _y, attr = get_float('I', item)
-            _dy, attr_d = get_float('Idev', item)
+            _y, attr = get_float('ns:I', item)
+            _dy, attr_d = get_float('ns:Idev', item)
             if _dy == None:
                 _dy = 0.0
             if attr.has_key('unit') and attr['unit'].lower() != data_info.y_unit.lower():
@@ -803,6 +763,7 @@ if __name__ == "__main__":
                         filemode='w')
     reader = Reader()
     print reader.read("../test/cansas1d.xml")
+    #print reader.read("../test/latex_smeared.xml")
     
     
                         
