@@ -48,9 +48,9 @@ public:
 	// TODO: add 2D
 	// Model parameters
 	Parameter scale;
-	Parameter short_edgeA;
-	Parameter longer_edgeB;
-	Parameter longuest_edgeC;
+	Parameter short_a;
+	Parameter long_b;
+	Parameter longer_c;
 	Parameter contrast;
 	Parameter background;
 	Parameter parallel_theta;

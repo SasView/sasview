@@ -21,9 +21,9 @@ double parallelepiped_analytical_1D(ParallelepipedParameters *pars, double q) {
 
 	// Fill paramater array
 	dp[0] = pars->scale;
-	dp[1] = pars->short_edgeA;
-	dp[2] = pars->longer_edgeB;
-	dp[3] = pars->longuest_edgeC;
+	dp[1] = pars->short_a;
+	dp[2] = pars->long_b;
+	dp[3] = pars->longer_c;
 	dp[4] = pars->contrast;
 	dp[5] = pars->background;
 
@@ -37,9 +37,9 @@ double pkernel(double a, double b,double c, double ala, double alb, double alc){
     double argA,argB,argC,tmp1,tmp2,tmp3;			//local variables
 
     //handle arg=0 separately, as sin(t)/t -> 1 as t->0
-    argA = a*ala;
-    argB = b*alb;
-    argC = c*alc;
+    argA = a*ala/2;
+    argB = b*alb/2;
+    argC = c*alc/2;
     if(argA==0.0) {
 		tmp1 = 1.0;
 	} else {
@@ -104,9 +104,9 @@ double parallelepiped_analytical_2D_scaled(ParallelepipedParameters *pars, doubl
 	double answer;
 	double pi = 4.0*atan(1.0);
 
-	edgeA = pars->short_edgeA;
-	edgeB = pars->longer_edgeB;
-	edgeC = pars->longuest_edgeC;
+	edgeA = pars->short_a;
+	edgeB = pars->long_b;
+	edgeC = pars->longer_c;
 
 
     // parallelepiped c axis orientation
@@ -151,7 +151,7 @@ double parallelepiped_analytical_2D_scaled(ParallelepipedParameters *pars, doubl
 
 	//normalize by cylinder volume
 	//NOTE that for this (Fournet) definition of the integral, one must MULTIPLY by Vparallel
-    vol = 8*edgeA* edgeB * edgeC;
+    vol = edgeA* edgeB * edgeC;
 	answer *= vol;
 
 	//convert to [cm-1]
