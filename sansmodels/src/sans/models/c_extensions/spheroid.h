@@ -1,7 +1,7 @@
 #if !defined(spheroid_h)
 #define spheroid_h
 /** Structure definition for oblate parameters
- * [PYTHONCLASS] = CoreShellSpheroidModel
+ * [PYTHONCLASS] = CoreShellEllipsoidModel
  * [DISP_PARAMS] = equat_core, polar_core, equat_shell,polar_shell,axis_phi, axis_theta
    [DESCRIPTION] = <text>[SpheroidCoreShellModel] Calculates the form factor for an spheroid
 			ellipsoid particle with a core_shell structure.
@@ -20,6 +20,8 @@
 			scale =scale
 			Note:It is the users' responsibility to ensure
 			that shell radii are larger than core radii.
+			oblate shell: equatorial radius > polar radius
+			prolate shell: equatorial radius < polar radius
 			</text>
 
    [FIXED] = <text>equat_core.width;polar_core.width; equat_shell.width; polar_shell.width; axis_phi.width; axis_theta.width</text>

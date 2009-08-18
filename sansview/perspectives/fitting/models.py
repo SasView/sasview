@@ -118,30 +118,36 @@ class ModelManager:
         self.shape_list.append(SphereModel)
         self.multiplication_factor.append(SphereModel)
         
-        from sans.models.CylinderModel import CylinderModel
-        self.shape_list.append(CylinderModel)
-        self.multiplication_factor.append(CylinderModel)
-        
-        from sans.models.ParallelepipedModel import ParallelepipedModel
-        self.shape_list.append(ParallelepipedModel)
-        
         from sans.models.CoreShellModel import CoreShellModel
         self.shape_list.append(CoreShellModel)
-        
-        from sans.models.CoreShellCylinderModel import CoreShellCylinderModel
-        self.shape_list.append(CoreShellCylinderModel)
         
         from sans.models.MultiShellModel import MultiShellModel
         self.shape_list.append(MultiShellModel)
         
-        from sans.models.BinaryHSModel import BinaryHSModel
-        self.shape_list.append(BinaryHSModel)
-        
         from sans.models.VesicleModel import VesicleModel
         self.shape_list.append(VesicleModel)
         
+        from sans.models.BinaryHSModel import BinaryHSModel
+        self.shape_list.append(BinaryHSModel)
+        
+        from sans.models.CylinderModel import CylinderModel
+        self.shape_list.append(CylinderModel)
+        self.multiplication_factor.append(CylinderModel)
+        
+        from sans.models.CoreShellCylinderModel import CoreShellCylinderModel
+        self.shape_list.append(CoreShellCylinderModel)
+        
         from sans.models.HollowCylinderModel import HollowCylinderModel
         self.shape_list.append(HollowCylinderModel)
+              
+        from sans.models.FlexibleCylinderModel import FlexibleCylinderModel
+        self.shape_list.append(FlexibleCylinderModel)
+        
+        from sans.models.StackedDisksModel import StackedDisksModel
+        self.shape_list.append(StackedDisksModel)
+        
+        from sans.models.ParallelepipedModel import ParallelepipedModel
+        self.shape_list.append(ParallelepipedModel)
         
         from sans.models.EllipticalCylinderModel import EllipticalCylinderModel
         self.shape_list.append(EllipticalCylinderModel)
@@ -149,15 +155,12 @@ class ModelManager:
         from sans.models.EllipsoidModel import EllipsoidModel
         self.shape_list.append(EllipsoidModel)
         self.multiplication_factor.append(EllipsoidModel)
+      
+        from sans.models.CoreShellEllipsoidModel import CoreShellEllipsoidModel
+        self.shape_list.append(CoreShellEllipsoidModel)
          
         from sans.models.TriaxialEllipsoidModel import TriaxialEllipsoidModel
         self.shape_list.append(TriaxialEllipsoidModel)
-       
-        from sans.models.FlexibleCylinderModel import FlexibleCylinderModel
-        self.shape_list.append(FlexibleCylinderModel)
-        
-        from sans.models.StackedDisksModel import StackedDisksModel
-        self.shape_list.append(StackedDisksModel)
         
         from sans.models.LamellarModel import LamellarModel
         self.shape_list.append(LamellarModel)
@@ -170,12 +173,6 @@ class ModelManager:
      
         from sans.models.LamellarPSHGModel import LamellarPSHGModel
         self.shape_list.append(LamellarPSHGModel)
-      
-        from sans.models.OblateModel import OblateModel
-        self.shape_list.append(OblateModel)
-        
-        from sans.models.ProlateModel import ProlateModel
-        self.shape_list.append(ProlateModel)
       
         ## Structure factor 
         from sans.models.SquareWellStructure import SquareWellStructure
@@ -207,9 +204,6 @@ class ModelManager:
         from sans.models.PorodModel import PorodModel
         self.shape_indep_list.append(PorodModel )
         
-        from sans.models.LineModel import LineModel
-        self.shape_indep_list.append(LineModel)
-        
         from sans.models.PeakGaussModel import PeakGaussModel
         self.shape_indep_list.append(PeakGaussModel)
         
@@ -235,6 +229,9 @@ class ModelManager:
         self.shape_indep_list.append( PowerLawAbsModel )
         from sans.models.TeubnerStreyModel import TeubnerStreyModel
         self.shape_indep_list.append(TeubnerStreyModel )
+        
+        from sans.models.LineModel import LineModel
+        self.shape_indep_list.append(LineModel)
     
         #Looking for plugins
         self.plugins = findModels()

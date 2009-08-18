@@ -31,7 +31,7 @@ extern "C" {
 	#include "spheroid.h"
 }
 
-CoreShellSpheroidModel :: CoreShellSpheroidModel() {
+CoreShellEllipsoidModel :: CoreShellEllipsoidModel() {
 	scale      = Parameter(1.0);
 	equat_core     = Parameter(200.0, true);
 	equat_core.set_min(0.0);
@@ -55,7 +55,7 @@ CoreShellSpheroidModel :: CoreShellSpheroidModel() {
  * @param q: q-value
  * @return: function value
  */
-double CoreShellSpheroidModel :: operator()(double q) {
+double CoreShellEllipsoidModel :: operator()(double q) {
 	double dp[8];
 
 	// Fill parameter array for IGOR library
@@ -138,12 +138,12 @@ double OblateModel :: operator()(double qx, double qy) {
  * @param phi: angle phi
  * @return: function value
  */
-double CoreShellSpheroidModel :: evaluate_rphi(double q, double phi) {
+double CoreShellEllipsoidModel :: evaluate_rphi(double q, double phi) {
 	return (*this).operator()(q);
 }
 
 
-double CoreShellSpheroidModel :: operator()(double qx, double qy) {
+double CoreShellEllipsoidModel :: operator()(double qx, double qy) {
 	SpheroidParameters dp;
 	// Fill parameter array
 	dp.scale      = scale();

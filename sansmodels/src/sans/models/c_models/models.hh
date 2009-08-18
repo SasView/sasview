@@ -420,7 +420,7 @@ public:
 	double evaluate_rphi(double q, double phi);
 };
 
-class CoreShellSpheroidModel{
+class CoreShellEllipsoidModel{
 public:
 	// Model parameters
 	Parameter scale;
@@ -435,7 +435,7 @@ public:
 	Parameter axis_phi;
 
 	// Constructor
-	CoreShellSpheroidModel();
+	CoreShellEllipsoidModel();
 
 	// Operators to get I(Q)
 	double operator()(double q);
