@@ -34,12 +34,12 @@ extern "C" {
 
 ParallelepipedModel :: ParallelepipedModel() {
 	scale      = Parameter(1.0);
-	short_edgeA     = Parameter(35.0, true);
-	short_edgeA.set_max(1.0);
-	longer_edgeB     = Parameter(75.0, true);
-	longer_edgeB.set_min(1.0);
-	longuest_edgeC     = Parameter(400.0, true);
-	longuest_edgeC.set_min(1.0);
+	short_a     = Parameter(35.0, true);
+	short_a.set_max(1.0);
+	long_b     = Parameter(75.0, true);
+	long_b.set_min(1.0);
+	longer_c     = Parameter(400.0, true);
+	longer_c.set_min(1.0);
 	contrast   = Parameter(53.e-7);
 	background = Parameter(0.0);
 	parallel_theta  = Parameter(0.0, true);
@@ -59,23 +59,23 @@ double ParallelepipedModel :: operator()(double q) {
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
 	dp[0] = scale();
-	dp[1] = short_edgeA();
-	dp[2] = longer_edgeB();
-	dp[3] = longuest_edgeC();
+	dp[1] = short_a();
+	dp[2] = long_b();
+	dp[3] = longer_c();
 	dp[4] = contrast();
 	dp[5] = 0.0;
 
 	// Get the dispersion points for the short_edgeA
-	vector<WeightPoint> weights_short_edgeA;
-	short_edgeA.get_weights(weights_short_edgeA);
+	vector<WeightPoint> weights_short_a;
+	short_a.get_weights(weights_short_a);
 
 	// Get the dispersion points for the longer_edgeB
-	vector<WeightPoint> weights_longer_edgeB;
-	longer_edgeB.get_weights(weights_longer_edgeB);
+	vector<WeightPoint> weights_long_b;
+	long_b.get_weights(weights_long_b);
 
 	// Get the dispersion points for the longuest_edgeC
-	vector<WeightPoint> weights_longuest_edgeC;
-	longuest_edgeC.get_weights(weights_longuest_edgeC);
+	vector<WeightPoint> weights_longer_c;
+	longer_c.get_weights(weights_longer_c);
 
 
 
@@ -84,22 +84,22 @@ double ParallelepipedModel :: operator()(double q) {
 	double norm = 0.0;
 
 	// Loop over short_edgeA weight points
-	for(int i=0; i< (int)weights_short_edgeA.size(); i++) {
-		dp[1] = weights_short_edgeA[i].value;
+	for(int i=0; i< (int)weights_short_a.size(); i++) {
+		dp[1] = weights_short_a[i].value;
 
 		// Loop over longer_edgeB weight points
-		for(int j=0; j< (int)weights_longer_edgeB.size(); j++) {
-			dp[2] = weights_longer_edgeB[i].value;
+		for(int j=0; j< (int)weights_long_b.size(); j++) {
+			dp[2] = weights_long_b[j].value;
 
 			// Loop over longuest_edgeC weight points
-			for(int k=0; k< (int)weights_longuest_edgeC.size(); k++) {
-				dp[3] = weights_longuest_edgeC[j].value;
+			for(int k=0; k< (int)weights_longer_c.size(); k++) {
+				dp[3] = weights_longer_c[k].value;
 
-				sum += weights_short_edgeA[i].weight * weights_longer_edgeB[j].weight
-					* weights_longuest_edgeC[k].weight * Parallelepiped(dp, q);
+				sum += weights_short_a[i].weight * weights_long_b[j].weight
+					* weights_longer_c[k].weight * Parallelepiped(dp, q);
 
-				norm += weights_short_edgeA[i].weight
-					 * weights_longer_edgeB[j].weight * weights_longuest_edgeC[k].weight;
+				norm += weights_short_a[i].weight
+					 * weights_long_b[j].weight * weights_longer_c[k].weight;
 			}
 		}
 	}
@@ -115,9 +115,9 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 	ParallelepipedParameters dp;
 	// Fill parameter array
 	dp.scale      = scale();
-	dp.short_edgeA   = short_edgeA();
-	dp.longer_edgeB   = longer_edgeB();
-	dp.longuest_edgeC  = longuest_edgeC();
+	dp.short_a   = short_a();
+	dp.long_b   = long_b();
+	dp.longer_c  = longer_c();
 	dp.contrast   = contrast();
 	dp.background = 0.0;
 	//dp.background = background();
@@ -127,16 +127,16 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 
 
 	// Get the dispersion points for the short_edgeA
-	vector<WeightPoint> weights_short_edgeA;
-	short_edgeA.get_weights(weights_short_edgeA);
+	vector<WeightPoint> weights_short_a;
+	short_a.get_weights(weights_short_a);
 
 	// Get the dispersion points for the longer_edgeB
-	vector<WeightPoint> weights_longer_edgeB;
-	longer_edgeB.get_weights(weights_longer_edgeB);
+	vector<WeightPoint> weights_long_b;
+	long_b.get_weights(weights_long_b);
 
 	// Get angular averaging for the longuest_edgeC
-	vector<WeightPoint> weights_longuest_edgeC;
-	longuest_edgeC.get_weights(weights_longuest_edgeC);
+	vector<WeightPoint> weights_longer_c;
+	longer_c.get_weights(weights_longer_c);
 
 	// Get angular averaging for theta
 	vector<WeightPoint> weights_parallel_theta;
@@ -155,16 +155,16 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 	double norm = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i< (int)weights_short_edgeA.size(); i++) {
-		dp.short_edgeA = weights_short_edgeA[i].value;
+	for(int i=0; i< (int)weights_short_a.size(); i++) {
+		dp.short_a = weights_short_a[i].value;
 
 		// Loop over longer_edgeB weight points
-		for(int j=0; j< (int)weights_longer_edgeB.size(); j++) {
-			dp.longer_edgeB = weights_longer_edgeB[j].value;
+		for(int j=0; j< (int)weights_long_b.size(); j++) {
+			dp.long_b = weights_long_b[j].value;
 
 			// Average over longuest_edgeC distribution
-			for(int k=0; k< (int)weights_longuest_edgeC.size(); k++) {
-				dp.longuest_edgeC = weights_longuest_edgeC[k].value;
+			for(int k=0; k< (int)weights_longer_c.size(); k++) {
+				dp.longer_c = weights_longer_c[k].value;
 
 				// Average over theta distribution
 				for(int l=0; l< (int)weights_parallel_theta.size(); l++) {
@@ -178,9 +178,9 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 						for(int n=0; n< (int)weights_parallel_psi.size(); n++) {
 							dp.parallel_psi = weights_parallel_psi[n].value;
 
-							double _ptvalue = weights_short_edgeA[i].weight
-								* weights_longer_edgeB[j].weight
-								* weights_longuest_edgeC[k].weight
+							double _ptvalue = weights_short_a[i].weight
+								* weights_long_b[j].weight
+								* weights_longer_c[k].weight
 								* weights_parallel_theta[l].weight
 								* weights_parallel_phi[m].weight
 								* weights_parallel_psi[n].weight
@@ -190,9 +190,9 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 							}
 							sum += _ptvalue;
 
-							norm += weights_short_edgeA[i].weight
-								* weights_longer_edgeB[j].weight
-								* weights_longuest_edgeC[k].weight
+							norm += weights_short_a[i].weight
+								* weights_long_b[j].weight
+								* weights_longer_c[k].weight
 								* weights_parallel_theta[l].weight
 								* weights_parallel_phi[m].weight
 								* weights_parallel_psi[n].weight;

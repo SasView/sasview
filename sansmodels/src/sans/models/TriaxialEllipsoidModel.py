@@ -32,13 +32,13 @@ class TriaxialEllipsoidModel(CTriaxialEllipsoidModel, BaseComponent):
     	for details of the model.
     	List of default parameters:
          scale           = 1.0 
-         semi_axisB      = 35.0 [A]
-         semi_axisA      = 100.0 [A]
+         semi_axisA      = 35.0 [A]
+         semi_axisB      = 100.0 [A]
          semi_axisC      = 400.0 [A]
          contrast        = 5.3e-006 [1/A²]
          background      = 0.0 [1/cm]
-         axis_theta      = 0.0 [rad]
-         axis_phi        = 0.0 [rad]
+         axis_theta      = 1.0 [rad]
+         axis_phi        = 1.0 [rad]
          axis_psi        = 0.0 [rad]
 
     """
@@ -60,8 +60,8 @@ class TriaxialEllipsoidModel(CTriaxialEllipsoidModel, BaseComponent):
 		## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
-        self.details['semi_axisB'] = ['[A]', None, None]
         self.details['semi_axisA'] = ['[A]', None, None]
+        self.details['semi_axisB'] = ['[A]', None, None]
         self.details['semi_axisC'] = ['[A]', None, None]
         self.details['contrast'] = ['[1/A²]', None, None]
         self.details['background'] = ['[1/cm]', None, None]

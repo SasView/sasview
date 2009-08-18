@@ -33,16 +33,16 @@ extern "C" {
 
 TriaxialEllipsoidModel :: TriaxialEllipsoidModel() {
 	scale      = Parameter(1.0);
-	semi_axisA     = Parameter(20.0, true);
+	semi_axisA     = Parameter(35.0, true);
 	semi_axisA.set_min(0.0);
-	semi_axisB     = Parameter(20.0, true);
+	semi_axisB     = Parameter(100.0, true);
 	semi_axisB.set_min(0.0);
 	semi_axisC  = Parameter(400.0, true);
 	semi_axisC.set_min(0.0);
 	contrast   = Parameter(5.3e-6);
 	background = Parameter(0.0);
-	axis_theta  = Parameter(0.0, true);
-	axis_phi    = Parameter(0.0, true);
+	axis_theta  = Parameter(1.0, true);
+	axis_phi    = Parameter(1.0, true);
 	axis_psi    = Parameter(0.0, true);
 }
 
@@ -189,7 +189,7 @@ double TriaxialEllipsoidModel :: operator()(double qx, double qy) {
 								* weights_semi_axisC[k].weight
 								* weights_theta[l].weight
 								* weights_phi[m].weight
-								* weights_psi[m].weight;
+								* weights_psi[n].weight;
 						}
 					}
 

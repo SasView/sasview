@@ -34,17 +34,17 @@ double triaxial_ellipsoid_analytical_1D(TriaxialEllipsoidParameters *pars, doubl
 double triaxial_ellipsoid_kernel(TriaxialEllipsoidParameters *pars, double q, double alpha, double nu) {
 	double t,a,b,c;
 	double kernel;
-	double pi = acos(-1.0);
+	double pi = 4.0*atan(1.0);
 
 	a = pars->semi_axisA ;
 	b = pars->semi_axisB ;
 	c = pars->semi_axisC ;
 
 	t = q * sqrt(a*a*cos(nu)*cos(nu)+b*b*sin(nu)*sin(nu)*sin(alpha)*sin(alpha)+c*c*cos(alpha)*cos(alpha));
-	if (t==0){
+	if (t==0.0){
 		kernel  = 1.0;
 	}else{
-		kernel  = 3*(sin(t)-t*cos(t))/(t*t*t);
+		kernel  = 3.0*(sin(t)-t*cos(t))/(t*t*t);
 	}
 	return kernel*kernel;
 }
@@ -136,12 +136,10 @@ double triaxial_ellipsoid_analytical_2D_scaled(TriaxialEllipsoidParameters *pars
 
 	//normalize by cylinder volume
 	//NOTE that for this (Fournet) definition of the integral, one must MULTIPLY by Vcyl
-    vol = 4/3 * pi * pars->semi_axisA * pars->semi_axisB * pars->semi_axisC;
+    vol = 4.0* pi/3.0  * pars->semi_axisA * pars->semi_axisB * pars->semi_axisC;
 	answer *= vol;
-
 	//convert to [cm-1]
 	answer *= 1.0e8;
-
 	//Scale
 	answer *= pars->scale;
 

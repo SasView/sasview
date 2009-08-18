@@ -16,11 +16,11 @@ typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0
     double scale;
-    /// semi -axis B of the triaxial_ellipsoid [A]
-    //  [DEFAULT]=semi_axisB= 35.0 [A]
+    /// semi -axis A of the triaxial_ellipsoid [A]
+    //  [DEFAULT]=semi_axisA= 35.0 [A]
     double semi_axisA;
     /// semi -axis B of the triaxial_ellipsoid [A]
-    //  [DEFAULT]=semi_axisA=100.0 [A]
+    //  [DEFAULT]=semi_axisB=100.0 [A]
     double semi_axisB;
 	/// semi -axis C of the triaxial_ellipsoid [A]
     //  [DEFAULT]=semi_axisC=400.0 [A]
@@ -32,10 +32,10 @@ typedef struct {
 	//  [DEFAULT]=background=0.0 [1/cm]
 	double background;
     /// Orientation of the triaxial_ellipsoid axis w/respect incoming beam [rad]
-    //  [DEFAULT]=axis_theta=0.0 [rad]
+    //  [DEFAULT]=axis_theta=1.0 [rad]
     double axis_theta;
     /// Orientation of the triaxial_ellipsoid in the plane of the detector [rad]
-    //  [DEFAULT]=axis_phi=0.0 [rad]
+    //  [DEFAULT]=axis_phi=1.0 [rad]
     double axis_phi;
     /// Orientation of the cross section of the triaxial_ellipsoid in the plane of the detector [rad]
     //  [DEFAULT]=axis_psi=0.0 [rad]
