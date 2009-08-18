@@ -112,9 +112,9 @@ EllipCyl76(double dp[], double q)
 		answer /=Pi;
 
 		//now calculate outer integral
-		arg = q*length*zi/2;
-		if (arg == 0){
-			si = 1;
+		arg = q*length*zi/2.0;
+		if (arg == 0.0){
+			si = 1.0;
 		}else{
 			si = sin(arg) * sin(arg) / arg / arg;
 		}
@@ -193,8 +193,8 @@ EllipCyl20(double dp[], double q)
 
 		//now calculate outer integral
 		arg = q*length*zi/2;
-		if (arg == 0){
-			si = 1;
+		if (arg == 0.0){
+			si = 1.0;
 		}else{
 			si = sin(arg) * sin(arg) / arg / arg;
 		}
@@ -277,7 +277,7 @@ TriaxialEllipsoid(double dp[], double q)
 	// Multiply by contrast^2
 	answer *= delrho*delrho;
 	//normalize by ellipsoid volume
-	answer *= 4*Pi/3*aa*bb*cc;
+	answer *= 4.0*Pi/3.0*aa*bb*cc;
 	//convert to [cm-1]
 	answer *= 1.0e8;
 	//Scale
@@ -1731,13 +1731,13 @@ gfn2(double xx, double crmaj, double crmin, double trmaj, double trmin, double d
 	ut= sqrt(ut2)*qq;
 	vc = pi43*aa*bb*bb;
 	vt = pi43*trmaj*trmin*trmin;
-   	if (uq == 0){
-   		siq = 1/3;
+   	if (uq == 0.0){
+   		siq = 1.0/3.0;
    	}else{
    		siq = (sin(uq)/uq/uq - cos(uq)/uq)/uq;
    	}
-   	if (ut == 0){
-   		sit = 1/3;
+   	if (ut == 0.0){
+   		sit = 1.0/3.0;
    	}else{
    		sit = (sin(ut)/ut/ut - cos(ut)/ut)/ut;
    	}
@@ -1772,13 +1772,13 @@ gfn4(double xx, double crmaj, double crmin, double trmaj, double trmin, double d
  	ut= sqrt(ut2)*qq;
 	vc = pi43*aa*aa*bb;
    	vt = pi43*trmaj*trmaj*trmin;
-   	if (uq == 0){
-   		siq = 1/3;
+   	if (uq == 0.0){
+   		siq = 1.0/3.0;
    	}else{
    		siq = (sin(uq)/uq/uq - cos(uq)/uq)/uq;
    	}
-   	if (ut == 0){
-   		sit = 1/3;
+   	if (ut == 0.0){
+   		sit = 1.0/3.0;
    	}else{
    		sit = (sin(ut)/ut/ut - cos(ut)/ut)/ut;
    	}
@@ -1884,23 +1884,23 @@ CScyl(double qq, double rad, double radthick, double facthick, double rhoc, doub
 	besarg2 = qq*(rad+radthick)*sin(dum);
 	sinarg1 = qq*length*cos(dum);
 	sinarg2 = qq*(length+facthick)*cos(dum);
-	if (besarg1 == 0){
+	if (besarg1 == 0.0){
 		be1 = 0.5;
 	}else{
 		be1 = NR_BessJ1(besarg1)/besarg1;
 	}
-	if (besarg2 == 0){
+	if (besarg2 == 0.0){
 		be2 = 0.5;
 	}else{
 		be2 = NR_BessJ1(besarg2)/besarg2;
 	}
-	if (sinarg1 == 0){
-		si1 = 1;
+	if (sinarg1 == 0.0){
+		si1 = 1.0;
 	}else{
 		si1 = sin(sinarg1)/sinarg1;
 	}
-	if (besarg2 == 0){
-		si2 = 1;
+	if (besarg2 == 0.0){
+		si2 = 1.0;
 	}else{
 		si2 = sin(sinarg2)/sinarg2;
 	}
@@ -1933,23 +1933,23 @@ CoreShellCylKernel(double qq, double rcore, double thick, double rhoc, double rh
     sinarg1 = qq*length*cos(dum);
     sinarg2 = qq*(length+thick)*cos(dum);
 
-	if (besarg1 == 0){
+	if (besarg1 == 0.0){
 		be1 = 0.5;
 	}else{
 		be1 = NR_BessJ1(besarg1)/besarg1;
 	}
-	if (besarg2 == 0){
+	if (besarg2 == 0.0){
 		be2 = 0.5;
 	}else{
 		be2 = NR_BessJ1(besarg2)/besarg2;
 	}
-	if (sinarg1 == 0){
-		si1 = 1;
+	if (sinarg1 == 0.0){
+		si1 = 1.0;
 	}else{
 		si1 = sin(sinarg1)/sinarg1;
 	}
-	if (besarg2 == 0){
-		si2 = 1;
+	if (besarg2 == 0.0){
+		si2 = 1.0;
 	}else{
 		si2 = sin(sinarg2)/sinarg2;
 	}
@@ -2023,29 +2023,29 @@ Stackdisc_kern(double qq, double rcore, double rhoc, double rhol, double rhosolv
 	sinarg1 = qq*length*cos(dum);
 	sinarg2 = qq*(length+thick)*cos(dum);
 
-	if (besarg1 == 0){
+	if (besarg1 == 0.0){
 		be1 = 0.5;
 	}else{
 		be1 = NR_BessJ1(besarg1)/besarg1;
 	}
-	if (besarg2 == 0){
+	if (besarg2 == 0.0){
 		be2 = 0.5;
 	}else{
 		be2 = NR_BessJ1(besarg2)/besarg2;
 	}
-	if (sinarg1 == 0){
-		si1 = 1;
+	if (sinarg1 == 0.0){
+		si1 = 1.0;
 	}else{
 		si1 = sin(sinarg1)/sinarg1;
 	}
-	if (besarg2 == 0){
-		si2 = 1;
+	if (besarg2 == 0.0){
+		si2 = 1.0;
 	}else{
 		si2 = sin(sinarg2)/sinarg2;
 	}
 
-	t1 = 2*area*(2*length)*dr1*(si1)*(be1);
-	t2 = 2*area*dr2*(totald*si2-2*length*si1)*(be2);
+	t1 = 2.0*area*(2.0*length)*dr1*(si1)*(be1);
+	t2 = 2.0*area*dr2*(totald*si2-2.0*length*si1)*(be2);
 
 	retval =((t1+t2)*(t1+t2))*sin(dum);
 
@@ -2138,13 +2138,13 @@ EllipsoidKernel(double qq, double a, double nua, double dum)
 
     nu = nua/a;
     arg = qq*a*sqrt(1+dum*dum*(nu*nu-1));
-    if (arg == 0){
-    	retval =1/3;
+    if (arg == 0.0){
+    	retval =1.0/3.0;
     }else{
     	retval = (sin(arg)-arg*cos(arg))/(arg*arg*arg);
     }
     retval *= retval;
-    retval *= 9;
+    retval *= 9.0;
 
     return(retval);
 }//Function EllipsoidKernel()
@@ -2157,21 +2157,21 @@ HolCylKernel(double qq, double rcore, double rshell, double length, double dum)
     gamma = rcore/rshell;
     arg1 = qq*rshell*sqrt(1-dum*dum);		//1=shell (outer radius)
     arg2 = qq*rcore*sqrt(1-dum*dum);			//2=core (inner radius)
-    if (arg1 == 0){
-    	lam1 = 1;
+    if (arg1 == 0.0){
+    	lam1 = 1.0;
     }else{
-    	lam1 = 2*NR_BessJ1(arg1)/arg1;
+    	lam1 = 2.0*NR_BessJ1(arg1)/arg1;
     }
-    if (arg2 == 0){
-    	lam2 = 1;
+    if (arg2 == 0.0){
+    	lam2 = 1.0;
     }else{
-    	lam2 = 2*NR_BessJ1(arg2)/arg2;
+    	lam2 = 2.0*NR_BessJ1(arg2)/arg2;
     }
     //Todo: Need to check psi behavior as gamma goes to 1.
-    psi = 1/(1-gamma*gamma)*(lam1 -  gamma*gamma*lam2);		//SRK 10/19/00
-    sinarg = qq*length*dum/2;
-    if (sinarg == 0){
-    	t2 = 1;
+    psi = 1.0/(1.0-gamma*gamma)*(lam1 -  gamma*gamma*lam2);		//SRK 10/19/00
+    sinarg = qq*length*dum/2.0;
+    if (sinarg == 0.0){
+    	t2 = 1.0;
     }else{
     	t2 = sin(sinarg)/sinarg;
     }
@@ -2192,14 +2192,14 @@ PPKernel(double aa, double mu, double uu)
     //handle arg=0 separately, as sin(t)/t -> 1 as t->0
     arg1 = (mu/2)*cos(Pi*uu/2);
     arg2 = (mu*aa/2)*sin(Pi*uu/2);
-    if(arg1==0) {
-		tmp1 = 1;
+    if(arg1==0.0) {
+		tmp1 = 1.0;
 	} else {
 		tmp1 = sin(arg1)*sin(arg1)/arg1/arg1;
     }
 
-    if (arg2==0) {
-		tmp2 = 1;
+    if (arg2==0.0) {
+		tmp2 = 1.0;
 	} else {
 		tmp2 = sin(arg2)*sin(arg2)/arg2/arg2;
     }
@@ -2221,10 +2221,10 @@ TriaxialKernel(double q, double aa, double bb, double cc, double dx, double dy)
     arg += bb*bb*sin(pi*dx/2)*sin(pi*dx/2)*(1-dy*dy);
     arg += cc*cc*dy*dy;
     arg = q*sqrt(arg);
-    if (arg == 0){
-    	val = 1; // as arg --> 0, val should go to 1.0
+    if (arg == 0.0){
+    	val = 1.0; // as arg --> 0, val should go to 1.0
     }else{
-    	val = 9 * ( (sin(arg) - arg*cos(arg))/(arg*arg*arg) ) * ( (sin(arg) - arg*cos(arg))/(arg*arg*arg) );
+    	val = 9.0 * ( (sin(arg) - arg*cos(arg))/(arg*arg*arg) ) * ( (sin(arg) - arg*cos(arg))/(arg*arg*arg) );
     }
     return (val);
 
@@ -2258,13 +2258,13 @@ CylKernel(double qq, double rr,double h, double theta)
 	//* Computing 2nd power */
     d1 = qq * rr * sin(theta);
     b2 = d1 * d1;
-    if (besarg == 0){
+    if (besarg == 0.0){
     	be = sin(theta);
     }else{
     	be = t2 / b2;
     }
-    if (siarg == 0){
-    	si = 1;
+    if (siarg == 0.0){
+    	si = 1.0;
     }else{
     	si = t1 / b1;
     }
@@ -2286,10 +2286,10 @@ EllipCylKernel(double qq, double ra,double nu, double theta)
 	double retval,arg;		 //Local variables
 
 	arg = qq*ra*sqrt((1+nu*nu)/2+(1-nu*nu)*cos(theta)/2);
-	if (arg == 0){
-		retval = 1;
+	if (arg == 0.0){
+		retval = 1.0;
 	}else{
-		retval = 2*NR_BessJ1(arg)/arg;
+		retval = 2.0*NR_BessJ1(arg)/arg;
 	}
 
 	//square it
