@@ -26,6 +26,7 @@ from sans.guicomm.events import EVT_SLICER_PARS_UPDATE
 from sans.fit.AbstractFitEngine import Model
 from sans.fit.AbstractFitEngine import FitAbort
 
+
 from fitproblem import FitProblem
 from fitpanel import FitPanel
 from fit_thread import FitThread
@@ -125,15 +126,20 @@ class Plugin:
         self.menu1.FindItemByPosition(1).Check(False)
             
         self.menu1.AppendSeparator()
-        
         id1 = wx.NewId()
         simul_help = "Allow to edit fit engine with multiple model and data"
         self.menu1.Append(id1, '&Simultaneous Page',simul_help)
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
+        #menu for SLD Calculator
+        self.menu1.AppendSeparator()
+        sld_menu = wx.Menu()
+        sld_id = wx.NewId()
+        sld_help= "Compute the scattering length density of molecules"
+        self.menu1.Append(sld_id, "SLD Calculator",sld_help)
+        wx.EVT_MENU(owner,sld_id,  self.onCalculateSld)
     
         #menu for model
         menu2 = wx.Menu()
-    
         self.menu_mng.populate_menu(menu2, owner)
         id2 = wx.NewId()
         owner.Bind(models.EVT_MODEL,self._on_model_menu)
@@ -515,8 +521,15 @@ class Plugin:
             wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
             return 
            
-           
-           
+    def onCalculateSld(self, event):
+        """
+            Compute the scattering length density of molecula
+        """  
+        from sldPanel import SldWindow
+        frame = SldWindow(base=self.parent)
+        frame.Show(True) 
+      
+          
     def _onEVT_SLICER_PANEL(self, event):
         """
             receive and event telling to update a panel with a name starting with 

@@ -58,7 +58,7 @@ class HelpDialog(wx.Dialog):
         self.Centre()
 
 class HelpWindow(wx.Frame):
-    def __init__(self, parent, id, title):
+    def __init__(self, parent, id, title= 'HelpWindow', pageToOpen=None):
         wx.Frame.__init__(self, parent, id, title, size=(700, 450))
         """
              contains help info
@@ -117,6 +117,7 @@ class HelpWindow(wx.Frame):
             <li><a href ="doc/single_fit_help.html" target ="showframe">Single Fit</a><br></li>
             <li><a href ="doc/model_use_help.html" target ="showframe">Visualize Model</a><br></li>
             <li><a href ="doc/averaging_help.html" target ="showframe">Data Averaging</a><br></li>
+            <li><a href ="doc/sld_calculator_help.html" target ="showframe">SLD Calculator</a><br></li>
             <li><a href ="doc/model_functions.html" target ="showframe">Model Functions</a><br></li>
             </ul>
             </body>
@@ -125,9 +126,9 @@ class HelpWindow(wx.Frame):
         self.lhelp.SetPage(page)
         self.lhelp.Bind(wx.html.EVT_HTML_LINK_CLICKED,self.OnLinkClicked )
         
-        #'HelpWindow' from menu bar, title=model name from 'More Details' button in model penal
-        if title != 'HelpWindow':
-            self.rhelp.LoadPage("doc/model_functions.html")
+        #open the help frame a the current page
+        if  pageToOpen!= None:
+            self.rhelp.LoadPage(str( pageToOpen))
             
         vbox.Add(self.rhelp,1, wx.EXPAND)
         vboxl.Add(self.lhelp, 1, wx.EXPAND)

@@ -432,7 +432,7 @@ class ModelPage(BasicPage):
             name = 'FuncHelp'
         else:
             name = self.model.name
-        frame = HelpWindow(None, -1, name)    
+        frame = HelpWindow(None, -1,  pageToOpen="doc/model_functions.html")    
         frame.Show(True)
         if frame.rhelp.HasAnchor(name):
             frame.rhelp.ScrollToAnchor(name)
