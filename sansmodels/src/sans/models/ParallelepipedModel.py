@@ -33,8 +33,8 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
     	List of default parameters:
          scale           = 1.0 
          short_a         = 35.0 [A]
-         long_b          = 75.0 [A]
-         longer_c        = 400.0 [A]
+         short_b         = 75.0 [A]
+         long_c          = 400.0 [A]
          contrast        = 5.3e-006 [1/A²]
          background      = 0.0 [1/cm]
          parallel_theta  = 0.0 [rad]
@@ -56,9 +56,9 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
         self.description =""" Form factor for a rectangular solid with uniform scattering length density.
 		
 		scale:Scale factor
-		short_a: length of short side of the parallelepiped [A]
-		long_b: length of long side of the parallelepiped [A]
-		longer_c: length of longer side of the parallelepiped [A]
+		short_a: length of short edge  [A]
+		short_b: length of another short edge [A]
+		long_c: length of long edge  of the parallelepiped [A]
 		contrast: particle_sld - solvent_sld
 		background:Incoherent Background [1/cm]"""
        
@@ -66,8 +66,8 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
         self.details = {}
         self.details['scale'] = ['', None, None]
         self.details['short_a'] = ['[A]', None, None]
-        self.details['long_b'] = ['[A]', None, None]
-        self.details['longer_c'] = ['[A]', None, None]
+        self.details['short_b'] = ['[A]', None, None]
+        self.details['long_c'] = ['[A]', None, None]
         self.details['contrast'] = ['[1/A²]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['parallel_theta'] = ['[rad]', None, None]
@@ -75,7 +75,7 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
         self.details['parallel_psi'] = ['[rad]', None, None]
 
 		## fittable parameters
-        self.fixed=['short_a.width', 'long_b.width', 'longer_c.width', 'parallel_phi.width', 'parallel_psi.width', 'parallel_theta.width']
+        self.fixed=['short_a.width', 'short_b.width', 'long_c.width', 'parallel_phi.width', 'parallel_psi.width', 'parallel_theta.width']
         
         ## parameters with orientation
         self.orientation_params =['parallel_phi', 'parallel_psi', 'parallel_theta', 'parallel_phi.width', 'parallel_psi.width', 'parallel_theta.width']

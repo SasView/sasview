@@ -82,9 +82,9 @@ EllipCyl76(double dp[], double q)
 	double summj,vaj,vbj,zij,arg, si;			//for the inner integration
 
 	Pi = 4.0*atan(1.0);
-	va = 0;
-	vb = 1;		//orintational average, outer integral
-	vaj=0;
+	va = 0.0;
+	vb = 1.0;		//orintational average, outer integral
+	vaj=0.0;
 	vbj=Pi;		//endpoints of inner integral
 
 	summ = 0.0;			//initialize intergral
@@ -162,9 +162,9 @@ EllipCyl20(double dp[], double q)
 	double summj,vaj,vbj,zij,arg,si;			//for the inner integration
 
 	Pi = 4.0*atan(1.0);
-	va = 0;
-	vb = 1;		//orintational average, outer integral
-	vaj=0;
+	va = 0.0;
+	vb = 1.0;		//orintational average, outer integral
+	vaj=0.0;
 	vbj=Pi;		//endpoints of inner integral
 
 	summ = 0.0;			//initialize intergral
@@ -242,10 +242,10 @@ TriaxialEllipsoid(double dp[], double q)
 	double summj,vaj,vbj,zij;			//for the inner integration
 
 	Pi = 4.0*atan(1.0);
-	va = 0;
-	vb = 1;		//orintational average, outer integral
-	vaj = 0;
-	vbj = 1;		//endpoints of inner integral
+	va = 0.0;
+	vb = 1.0;		//orintational average, outer integral
+	vaj = 0.0;
+	vbj = 1.0;		//endpoints of inner integral
 
 	summ = 0.0;			//initialize intergral
 
@@ -313,10 +313,10 @@ Parallelepiped(double dp[], double q)
 
 
 	//	Pi = 4.0*atan(1.0);
-	va = 0;
-	vb = 1;		//orintational average, outer integral
-	vaj = 0;
-	vbj = 1;		//endpoints of inner integral
+	va = 0.0;
+	vb = 1.0;		//orintational average, outer integral
+	vaj = 0.0;
+	vbj = 1.0;		//endpoints of inner integral
 
 	summ = 0.0;			//initialize intergral
 
@@ -348,9 +348,9 @@ Parallelepiped(double dp[], double q)
 		//now calculate the value of the inner integral
 		answer = (vbj-vaj)/2.0*summj;
 
-		arg = mu*cc*sigma/2;
-		if ( arg == 0 ) {
-			answer *= 1;
+		arg = mu*cc*sigma/2.0;
+		if ( arg == 0.0 ) {
+			answer *= 1.0;
 		} else {
 			answer *= sin(arg)*sin(arg)/arg/arg;
 		}
@@ -396,8 +396,8 @@ HollowCylinder(double dp[], double q)
 	double summ,answer,pi;			//running tally of integration
 
 	pi = 4.0*atan(1.0);
-	va = 0;
-	vb = 1;		//limits of numerical integral
+	va = 0.0;
+	vb = 1.0;		//limits of numerical integral
 
 	summ = 0.0;			//initialize intergral
 
@@ -449,8 +449,8 @@ EllipsoidForm(double dp[], double q)
 	double summ,answer,pi;			//running tally of integration
 
 	pi = 4.0*atan(1.0);
-	va = 0;
-	vb = 1;		//limits of numerical integral
+	va = 0.0;
+	vb = 1.0;		//limits of numerical integral
 
 	summ = 0.0;			//initialize intergral
 
@@ -469,7 +469,7 @@ EllipsoidForm(double dp[], double q)
 	// Multiply by contrast^2
 	answer *= delrho*delrho;
 	//normalize by volume
-	answer *= 4*pi/3*a*a*nua;
+	answer *= 4.0*pi/3.0*a*a*nua;
 	//convert to [cm-1]
 	answer *= 1.0e8;
 	//Scale
@@ -803,7 +803,7 @@ ProlateForm(double dp[], double q)
 
 	answer = (uplim-lolim)/2.0*summ;
 	// normalize by particle volume
-	prolatevol = 4*Pi/3*trmaj*trmin*trmin;
+	prolatevol = 4.0*Pi/3.0*trmaj*trmin*trmin;
 	answer /= prolatevol;
 
 	//convert to [cm-1]
@@ -1008,7 +1008,7 @@ LamellarPS_HG(double dp[], double q)
 
 
 	Euler = 0.5772156649;		// Euler's constant
-	dQDefault = 0; //0.0025;		//[=] 1/A, q-resolution, default value
+	dQDefault = 0.0; //0.0025;		//[=] 1/A, q-resolution, default value
 	dQ = dQDefault;
 
 	Pi = 4.0*atan(1.0);
@@ -1601,26 +1601,26 @@ a2long(double q, double L, double b, double p1, double p2, double q0)
 
     t1 = (1.0/(b* p1*pow(q0,((-1.0) - p1 - p2)) - b*p2*pow(q0,((-1.0) - p1 - p2)) ));
 
-    t2 = (b*C*(((-1.0*((14.0*b3)/(15.0*q03*Rg2))) + (14*b3*pow(E,(-((q02*Rg2)/b2))))/(15*q03*Rg2) + (2*pow(E,(-((q02*Rg2)/b2)))*q0*((11.0/15.0 + (7*b2)/(15*q02*Rg2)))*Rg2)/b)))/L;
+    t2 = (b*C*(((-1.0*((14.0*b3)/(15.0*q03*Rg2))) + (14.0*b3*pow(E,(-((q02*Rg2)/b2))))/(15.0*q03*Rg2) + (2.0*pow(E,(-((q02*Rg2)/b2)))*q0*((11.0/15.0 + (7*b2)/(15.0*q02*Rg2)))*Rg2)/b)))/L;
 
-    t3 = (sqrt(Rg2)*((C3*pow((((sqrt(Rg2)*q0)/b)),((-3)/miu)) + C2*pow((((sqrt(Rg2)*q0)/b)),((-2)/miu)) + C1*pow((((sqrt(Rg2)*q0)/b)),((-1.0)/miu))))*pow(sech_WR(((-C4) + (sqrt(Rg2)*q0)/b)/C5),2))/(2*C5);
+    t3 = (sqrt(Rg2)*((C3*pow((((sqrt(Rg2)*q0)/b)),((-3.0)/miu)) + C2*pow((((sqrt(Rg2)*q0)/b)),((-2.0)/miu)) + C1*pow((((sqrt(Rg2)*q0)/b)),((-1.0)/miu))))*pow(sech_WR(((-C4) + (sqrt(Rg2)*q0)/b)/C5),2.0))/(2.0*C5);
 
-    t4 = (b4*sqrt(Rg2)*(((-1) + pow(E,(-((q02*Rg2)/b2))) + (q02*Rg2)/b2))*pow(sech_WR(((-C4) + (sqrt(Rg2)*q0)/b)/C5),2))/(C5*q04*Rg22);
+    t4 = (b4*sqrt(Rg2)*(((-1.0) + pow(E,(-((q02*Rg2)/b2))) + (q02*Rg2)/b2))*pow(sech_WR(((-C4) + (sqrt(Rg2)*q0)/b)/C5),2))/(C5*q04*Rg22);
 
-    t5 = (2*b4*(((2*q0*Rg2)/b - (2*pow(E,(-((q02*Rg2)/b2)))*q0*Rg2)/b))*((1 + 1.0/2.0*(((-1) - tanh(((-C4) + (sqrt(Rg2)*q0)/b)/C5))))))/(q04*Rg22);
+    t5 = (2.0*b4*(((2*q0*Rg2)/b - (2.0*pow(E,(-((q02*Rg2)/b2)))*q0*Rg2)/b))*((1.0 + 1.0/2.0*(((-1.0) - tanh(((-C4) + (sqrt(Rg2)*q0)/b)/C5))))))/(q04*Rg22);
 
-    t6 = (8*b4*b*(((-1) + pow(E,(-((q02*Rg2)/b2))) + (q02*Rg2)/b2))*((1 + 1.0/2.0*(((-1) - tanh(((-C4) + (sqrt(Rg2)*q0)/b)/C5))))))/(q05*Rg22);
+    t6 = (8.0*b4*b*(((-1.0) + pow(E,(-((q02*Rg2)/b2))) + (q02*Rg2)/b2))*((1.0 + 1.0/2.0*(((-1) - tanh(((-C4) + (sqrt(Rg2)*q0)/b)/C5))))))/(q05*Rg22);
 
-    t7 = (((-((3*C3*sqrt(Rg2)*pow((((sqrt(Rg2)*q0)/b)),((-1) - 3/miu)))/miu)) - (2*C2*sqrt(Rg2)*pow((((sqrt(Rg2)*q0)/b)),((-1) - 2/miu)))/miu - (C1*sqrt(Rg2)*pow((((sqrt(Rg2)*q0)/b)),((-1) - 1/miu)))/miu));
+    t7 = (((-((3.0*C3*sqrt(Rg2)*pow((((sqrt(Rg2)*q0)/b)),((-1.0) - 3.0/miu)))/miu)) - (2.0*C2*sqrt(Rg2)*pow((((sqrt(Rg2)*q0)/b)),((-1.0) - 2.0/miu)))/miu - (C1*sqrt(Rg2)*pow((((sqrt(Rg2)*q0)/b)),((-1.0) - 1.0/miu)))/miu));
 
-    t8 = ((1 + tanh(((-C4) + (sqrt(Rg2)*q0)/b)/C5)));
+    t8 = ((1.0 + tanh(((-C4) + (sqrt(Rg2)*q0)/b)/C5)));
 
-    t9 = (b*C*((4.0/15.0 - pow(E,(-((q02*Rg2)/b2)))*((11.0/15.0 + (7*b2)/(15*q02*Rg2))) + (7*b2)/(15*q02*Rg2))))/L;
+    t9 = (b*C*((4.0/15.0 - pow(E,(-((q02*Rg2)/b2)))*((11.0/15.0 + (7.0*b2)/(15*q02*Rg2))) + (7.0*b2)/(15.0*q02*Rg2))))/L;
 
-    t10 = (2*b4*(((-1) + pow(E,(-((q02*Rg2)/b2))) + (q02*Rg2)/b2))*((1 + 1.0/2.0*(((-1) - tanh(((-C4) + (sqrt(Rg2)*q0)/b)/C5))))))/(q04*Rg22);
+    t10 = (2.0*b4*(((-1) + pow(E,(-((q02*Rg2)/b2))) + (q02*Rg2)/b2))*((1.0 + 1.0/2.0*(((-1) - tanh(((-C4) + (sqrt(Rg2)*q0)/b)/C5))))))/(q04*Rg22);
 
 
-    yy = ((-1*(t1* ((-pow(q0,-p1)*(((b2*pi)/(L*q02) + t2 + t3 - t4 + t5 - t6 + 1.0/2.0*t7*t8)) - b*p1*pow(q0,((-1) - p1))*(((-((b*pi)/(L*q0))) + t9 + t10 + 1.0/2.0*((C3*pow((((sqrt(Rg2)*q0)/b)),((-3)/miu)) + C2*pow((((sqrt(Rg2)*q0)/b)),((-2)/miu)) + C1*pow((((sqrt(Rg2)*q0)/b)),((-1)/miu))))*((1 + tanh(((-C4) + (sqrt(Rg2)*q0)/b)/C5))))))))));
+    yy = ((-1.0*(t1* ((-pow(q0,-p1)*(((b2*pi)/(L*q02) + t2 + t3 - t4 + t5 - t6 + 1.0/2.0*t7*t8)) - b*p1*pow(q0,((-1.0) - p1))*(((-((b*pi)/(L*q0))) + t9 + t10 + 1.0/2.0*((C3*pow((((sqrt(Rg2)*q0)/b)),((-3.0)/miu)) + C2*pow((((sqrt(Rg2)*q0)/b)),((-2.0)/miu)) + C1*pow((((sqrt(Rg2)*q0)/b)),((-1.0)/miu))))*((1.0 + tanh(((-C4) + (sqrt(Rg2)*q0)/b)/C5))))))))));
 
     return (yy);
 }
@@ -1844,7 +1844,7 @@ CSCylIntegration(double qq, double rad, double radthick, double facthick, double
 	Pi = 4.0*atan(1.0);
 	nord = 76;
 	lolim = 0;
-	uplim = Pi/2;
+	uplim = Pi/2.0;
 	halfheight = length/2.0;
 
 	summ = 0.0;				// initialize integral
@@ -2190,8 +2190,8 @@ PPKernel(double aa, double mu, double uu)
     Pi = 4.0*atan(1.0);
 
     //handle arg=0 separately, as sin(t)/t -> 1 as t->0
-    arg1 = (mu/2)*cos(Pi*uu/2);
-    arg2 = (mu*aa/2)*sin(Pi*uu/2);
+    arg1 = (mu/2.0)*cos(Pi*uu/2.0);
+    arg2 = (mu*aa/2.0)*sin(Pi*uu/2.0);
     if(arg1==0.0) {
 		tmp1 = 1.0;
 	} else {

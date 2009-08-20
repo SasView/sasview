@@ -24,7 +24,7 @@
     Note: 
         Averaging the 3-axes 2D scattering intensity give a slightly
         different output than the 1D function  
-        at hight Q (Q>~0.1). This is due(?) to the way the IGOR library 
+        at hight Q (Q>~0.2). This is due(?) to the way the IGOR library 
         averages, taking only 76 points in alpha, the angle between
         the axis of the ellipsoid and the q vector.
         
@@ -80,10 +80,10 @@ class Validate2D:
         if not model.params.has_key(psi_label):
             psi_label = 'axis_psi'
             
-        output_f = open("%s_avg1.txt" % model.__class__.__name__,'w')
+        output_f = open("%s_avg.txt" % model.__class__.__name__,'w')
         output_f.write("<q_average> <2d_average> <1d_average>\n")
             
-        for i_q in range(1, 30):
+        for i_q in range(1, 40):
             q = 0.01*i_q
             sum = 0.0
             for i_theta in range(npts):
@@ -113,7 +113,8 @@ class Validate2D:
         
 if __name__ == '__main__':
     validator = Validate2D()
-
+    
+    #te was not passed.
     te_passed =validator(TriaxialEllipsoidModel, points=76)
     pp_passed = validator(ParallelepipedModel, points=76)
     ell_passed = validator(EllipticalCylinderModel, points=76)
@@ -121,8 +122,8 @@ if __name__ == '__main__':
     print ""
     print "Model             Passed"
     print "TriaxialEllipsoid         %s" % te_passed
-    print "EllipticalCylinder        %s" % ell_passed
     print "ParallelepipedModel    %s" % pp_passed
+    print "EllipticalCylinder        %s" % ell_passed
  
         
         

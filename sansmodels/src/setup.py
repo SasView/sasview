@@ -179,7 +179,7 @@ setup(
         "sans/models/c_models/lamellarPS_HG.cpp",                
         srcdir+"/lamellarPS_HG.c",
         #srcdir+"/COblateModel.c",
-        "sans/models/c_models/CCoreShellSpheroidModel.cpp",
+        "sans/models/c_models/CCoreShellEllipsoidModel.cpp",
         "sans/models/c_models/spheroid.cpp",   
         srcdir+"/spheroid.c",             
         #srcdir+"/COblateModel.c",

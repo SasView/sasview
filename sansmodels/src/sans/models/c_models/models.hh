@@ -49,8 +49,8 @@ public:
 	// Model parameters
 	Parameter scale;
 	Parameter short_a;
-	Parameter long_b;
-	Parameter longer_c;
+	Parameter short_b;
+	Parameter long_c;
 	Parameter contrast;
 	Parameter background;
 	Parameter parallel_theta;

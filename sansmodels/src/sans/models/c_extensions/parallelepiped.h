@@ -6,17 +6,17 @@
 #define parallelepiped_h
 /** Structure definition for Parallelepiped parameters
  * [PYTHONCLASS] = ParallelepipedModel
- * [DISP_PARAMS] = short_a, long_b, longer_c,parallel_phi,parallel_psi, parallel_theta
+ * [DISP_PARAMS] = short_a, short_b, long_c,parallel_phi,parallel_psi, parallel_theta
    [DESCRIPTION] = <text> Form factor for a rectangular solid with uniform scattering length density.
 
 		scale:Scale factor
-		short_a: length of short side of the parallelepiped [A]
-		long_b: length of long side of the parallelepiped [A]
-		longer_c: length of longer side of the parallelepiped [A]
+		short_a: length of short edge  [A]
+		short_b: length of another short edge [A]
+		long_c: length of long edge  of the parallelepiped [A]
 		contrast: particle_sld - solvent_sld
 		background:Incoherent Background [1/cm]
 		</text>
-	[FIXED]= <text>short_a.width; long_b.width; longer_c.width;parallel_phi.width;parallel_psi.width; parallel_theta.width</text>
+	[FIXED]= <text>short_a.width; short_b.width; long_c.width;parallel_phi.width;parallel_psi.width; parallel_theta.width</text>
 	[ORIENTATION_PARAMS]= <text>parallel_phi;parallel_psi; parallel_theta; parallel_phi.width;parallel_psi.width; parallel_theta.width</text>
 
 
@@ -25,15 +25,15 @@ typedef struct {
     /// Scale factor
     //  [DEFAULT]=scale=1.0
     double scale;
-    ///  Length of short side of the parallelepiped [A]
+    ///  Length of short edge of the parallelepiped [A]
     //  [DEFAULT]=short_a=35 [A]
     double short_a;
-	/// Length of long side edge of the parallelepiped [A]
-    //  [DEFAULT]=long_b=75 [A]
-    double long_b;
-	/// Length of longer side of the parallelepiped [A]
-    //  [DEFAULT]=longer_c=400 [A]
-    double longer_c;
+	/// Length of short edge edge of the parallelepiped [A]
+    //  [DEFAULT]=short_b=75 [A]
+    double short_b;
+	/// Length of long edge of the parallelepiped [A]
+    //  [DEFAULT]=long_c=400 [A]
+    double long_c;
     /// Contrast [1/A²]
     //  [DEFAULT]=contrast=5.3e-6 [1/A²]
     double contrast;

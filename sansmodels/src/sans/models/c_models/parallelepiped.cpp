@@ -36,10 +36,10 @@ ParallelepipedModel :: ParallelepipedModel() {
 	scale      = Parameter(1.0);
 	short_a     = Parameter(35.0, true);
 	short_a.set_max(1.0);
-	long_b     = Parameter(75.0, true);
-	long_b.set_min(1.0);
-	longer_c     = Parameter(400.0, true);
-	longer_c.set_min(1.0);
+	short_b     = Parameter(75.0, true);
+	short_b.set_min(1.0);
+	long_c     = Parameter(400.0, true);
+	long_c.set_min(1.0);
 	contrast   = Parameter(53.e-7);
 	background = Parameter(0.0);
 	parallel_theta  = Parameter(0.0, true);
@@ -60,8 +60,8 @@ double ParallelepipedModel :: operator()(double q) {
 	// Add the background after averaging
 	dp[0] = scale();
 	dp[1] = short_a();
-	dp[2] = long_b();
-	dp[3] = longer_c();
+	dp[2] = short_b();
+	dp[3] = long_c();
 	dp[4] = contrast();
 	dp[5] = 0.0;
 
@@ -70,12 +70,12 @@ double ParallelepipedModel :: operator()(double q) {
 	short_a.get_weights(weights_short_a);
 
 	// Get the dispersion points for the longer_edgeB
-	vector<WeightPoint> weights_long_b;
-	long_b.get_weights(weights_long_b);
+	vector<WeightPoint> weights_short_b;
+	short_b.get_weights(weights_short_b);
 
 	// Get the dispersion points for the longuest_edgeC
-	vector<WeightPoint> weights_longer_c;
-	longer_c.get_weights(weights_longer_c);
+	vector<WeightPoint> weights_long_c;
+	long_c.get_weights(weights_long_c);
 
 
 
@@ -88,18 +88,18 @@ double ParallelepipedModel :: operator()(double q) {
 		dp[1] = weights_short_a[i].value;
 
 		// Loop over longer_edgeB weight points
-		for(int j=0; j< (int)weights_long_b.size(); j++) {
-			dp[2] = weights_long_b[j].value;
+		for(int j=0; j< (int)weights_short_b.size(); j++) {
+			dp[2] = weights_short_b[j].value;
 
 			// Loop over longuest_edgeC weight points
-			for(int k=0; k< (int)weights_longer_c.size(); k++) {
-				dp[3] = weights_longer_c[k].value;
+			for(int k=0; k< (int)weights_long_c.size(); k++) {
+				dp[3] = weights_long_c[k].value;
 
-				sum += weights_short_a[i].weight * weights_long_b[j].weight
-					* weights_longer_c[k].weight * Parallelepiped(dp, q);
+				sum += weights_short_a[i].weight * weights_short_b[j].weight
+					* weights_long_c[k].weight * Parallelepiped(dp, q);
 
 				norm += weights_short_a[i].weight
-					 * weights_long_b[j].weight * weights_longer_c[k].weight;
+					 * weights_short_b[j].weight * weights_long_c[k].weight;
 			}
 		}
 	}
@@ -116,8 +116,8 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 	// Fill parameter array
 	dp.scale      = scale();
 	dp.short_a   = short_a();
-	dp.long_b   = long_b();
-	dp.longer_c  = longer_c();
+	dp.short_b   = short_b();
+	dp.long_c  = long_c();
 	dp.contrast   = contrast();
 	dp.background = 0.0;
 	//dp.background = background();
@@ -131,12 +131,12 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 	short_a.get_weights(weights_short_a);
 
 	// Get the dispersion points for the longer_edgeB
-	vector<WeightPoint> weights_long_b;
-	long_b.get_weights(weights_long_b);
+	vector<WeightPoint> weights_short_b;
+	short_b.get_weights(weights_short_b);
 
 	// Get angular averaging for the longuest_edgeC
-	vector<WeightPoint> weights_longer_c;
-	longer_c.get_weights(weights_longer_c);
+	vector<WeightPoint> weights_long_c;
+	long_c.get_weights(weights_long_c);
 
 	// Get angular averaging for theta
 	vector<WeightPoint> weights_parallel_theta;
@@ -159,12 +159,12 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 		dp.short_a = weights_short_a[i].value;
 
 		// Loop over longer_edgeB weight points
-		for(int j=0; j< (int)weights_long_b.size(); j++) {
-			dp.long_b = weights_long_b[j].value;
+		for(int j=0; j< (int)weights_short_b.size(); j++) {
+			dp.short_b = weights_short_b[j].value;
 
 			// Average over longuest_edgeC distribution
-			for(int k=0; k< (int)weights_longer_c.size(); k++) {
-				dp.longer_c = weights_longer_c[k].value;
+			for(int k=0; k< (int)weights_long_c.size(); k++) {
+				dp.long_c = weights_long_c[k].value;
 
 				// Average over theta distribution
 				for(int l=0; l< (int)weights_parallel_theta.size(); l++) {
@@ -179,8 +179,8 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 							dp.parallel_psi = weights_parallel_psi[n].value;
 
 							double _ptvalue = weights_short_a[i].weight
-								* weights_long_b[j].weight
-								* weights_longer_c[k].weight
+								* weights_short_b[j].weight
+								* weights_long_c[k].weight
 								* weights_parallel_theta[l].weight
 								* weights_parallel_phi[m].weight
 								* weights_parallel_psi[n].weight
@@ -191,8 +191,8 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 							sum += _ptvalue;
 
 							norm += weights_short_a[i].weight
-								* weights_long_b[j].weight
-								* weights_longer_c[k].weight
+								* weights_short_b[j].weight
+								* weights_long_c[k].weight
 								* weights_parallel_theta[l].weight
 								* weights_parallel_phi[m].weight
 								* weights_parallel_psi[n].weight;
