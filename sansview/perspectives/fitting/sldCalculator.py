@@ -78,7 +78,7 @@ class SldCalculator(object):
         return self.coherence, self.absorption, self.incoherence
     
     
-    def computeLength(self):
+    def calculateLength(self):
         """
             Compute the neutron 1/e length
         """
@@ -86,7 +86,7 @@ class SldCalculator(object):
         return self.length
         
         
-    def absorptionIm(self):
+    def calculateAbsorptionIm(self):
         """
             Compute imaginary part of the absorption 
         """

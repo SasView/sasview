@@ -309,8 +309,8 @@ class SldPanel(wx.Panel):
                 self.mo_ka_sld_im_ctl.SetValue(format_number(Mo_im*_SCALE))
                
                 coh,absorp,inc= self.calculator.calculateNSld()
-                im = self.calculator.absorptionIm()
-                length = self.calculator.computeLength()
+                im = self.calculator.calculateAbsorptionIm()
+                length = self.calculator.calculateLength()
                 # Neutron SLD
                 self.neutron_sld_reel_ctl.SetValue(format_number(coh*_SCALE))
                 self.neutron_sld_im_ctl.SetValue(format_number(im*_SCALE))
