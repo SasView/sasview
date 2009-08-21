@@ -24,8 +24,8 @@
     Note: 
         Averaging the 3-axes 2D scattering intensity give a slightly
         different output than the 1D function  
-        at hight Q (Q>~0.2). This is due(?) to the way the IGOR library 
-        averages, taking only 76 points in alpha, the angle between
+        at hight Q (Q>~0.2). This is due to the way the IGOR library 
+        averages(?), taking only 76 points in alpha, the angle between
         the axis of the ellipsoid and the q vector.
         
     Note: Core-shell and sphere models are symmetric around
@@ -58,6 +58,8 @@ class Validate2D:
         passed = True
         
         npts =points
+        #The average values are very sensitive to npts of phi so npts_alpha should be large enough.
+        npts_alpha =180 #npts of phi
         model = model_class()
         #model.setParam('scale', 1.0)
         #model.setParam('contrast', 1.0)
@@ -83,25 +85,29 @@ class Validate2D:
         output_f = open("%s_avg.txt" % model.__class__.__name__,'w')
         output_f.write("<q_average> <2d_average> <1d_average>\n")
             
-        for i_q in range(1, 40):
+        for i_q in range(1, 23):
             q = 0.01*i_q
             sum = 0.0
+            weight = 0.0
             for i_theta in range(npts):
                 theta = math.pi/npts*(i_theta+1)
                 
                 model.setParam(theta_label, theta)
                 
-                for j in range(npts):
-                    model.setParam(phi_label, math.pi * 2.0 / npts * j)
+                for j in range(npts_alpha):
+                    model.setParam(phi_label, math.pi * 2.0 / npts_alpha * j)
                     for k in range(npts):
                         model.setParam(psi_label, math.pi * 2.0 / npts * k)
                         if str(model.run([q, 0])).count("INF")>0:                        
                             print "ERROR", q, theta, math.pi * 2.0 / npts * k
+                            
+                        # sin() is due to having not uniform bin number density wrt the q plane.
                         sum += model.run([q, 0])*math.sin(theta)
-                        #sum += model.run([q, 0])
-            value = sum/npts/(npts)/npts*math.pi/2.0
+                        weight += math.sin(theta) 
+
+            value = sum/weight #*math.pi/2.0
             ana = model.run(q)
-            if q<0.2 and (value-ana)/ana>0.05:
+            if q<0.3 and (value-ana)/ana>0.05:
                 passed = False
             output_f.write("%10g %10g %10g\n" % (q, value, ana))
             print "Q=%g: %10g %10g %10g %10g" % (q, value, ana, value-ana, value/ana)
@@ -114,16 +120,17 @@ class Validate2D:
 if __name__ == '__main__':
     validator = Validate2D()
     
-    #te was not passed.
+    #Note: Test one model by one model, otherwise it could crash depending on the memory.
+    
     te_passed =validator(TriaxialEllipsoidModel, points=76)
-    pp_passed = validator(ParallelepipedModel, points=76)
-    ell_passed = validator(EllipticalCylinderModel, points=76)
+    #pp_passed = validator(ParallelepipedModel, points=76)
+    #ell_passed = validator(EllipticalCylinderModel, points=76)
         
     print ""
     print "Model             Passed"
     print "TriaxialEllipsoid         %s" % te_passed
-    print "ParallelepipedModel    %s" % pp_passed
-    print "EllipticalCylinder        %s" % ell_passed
+    #print "ParallelepipedModel    %s" % pp_passed
+    #print "EllipticalCylinder        %s" % ell_passed
  
         
         
