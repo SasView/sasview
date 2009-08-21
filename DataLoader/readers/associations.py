@@ -16,7 +16,9 @@ copyright 2009, University of Tennessee
 
 import os, sys
 import logging
-from lxml import etree   
+from lxml import etree 
+# Py2exe compatibility: import _elementpath to ensure that py2exe finds it
+from lxml import _elementpath  
 
 ## Format version for the XML settings file
 VERSION = 'sansloader/1.0'
