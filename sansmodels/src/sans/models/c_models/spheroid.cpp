@@ -107,7 +107,7 @@ double CoreShellEllipsoidModel :: operator()(double q) {
 					dp[4] = weights_polar_shell[l].value;
 
 					sum += weights_equat_core[i].weight* weights_polar_core[j].weight * weights_equat_shell[k].weight
-						* weights_polar_shell[l].weight * OblateForm(dp, q);
+						* weights_polar_shell[l].weight * ProlateForm(dp, q);
 					norm += weights_equat_core[i].weight* weights_polar_core[j].weight * weights_equat_shell[k].weight
 							* weights_polar_shell[l].weight;
 				}
