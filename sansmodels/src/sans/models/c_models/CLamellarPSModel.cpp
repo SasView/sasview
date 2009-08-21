@@ -91,11 +91,13 @@ CLamellarPSModel_init(CLamellarPSModel *self, PyObject *args, PyObject *kwds)
         PyDict_SetItemString(self->params,"caille",Py_BuildValue("d",0.100000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000));
         PyDict_SetItemString(self->params,"delta",Py_BuildValue("d",30.000000));
-        PyDict_SetItemString(self->params,"sigma",Py_BuildValue("d",0.150000));
         PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000005));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
+        disp_dict = PyDict_New();
+        self->model->delta.dispersion->accept_as_source(visitor, self->model->delta.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "delta", disp_dict);
         disp_dict = PyDict_New();
         self->model->spacing.dispersion->accept_as_source(visitor, self->model->spacing.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "spacing", disp_dict);
@@ -166,43 +168,7 @@ static PyObject *evaluateOneDim(LamellarPSModel* model, PyArrayObject *q){
 	}
     return PyArray_Return(result); 
  }
-/**
- * Function to call to evaluate model
- * @param args: input numpy array  [q[],phi[]]
- * @return: numpy array object 
- */
-static PyObject * evaluateTwoDim( LamellarPSModel* model, 
-                              PyArrayObject *q, PyArrayObject *phi)
- {
-    PyArrayObject *result;
-    //check validity of input vectors
-    if (q->nd != 1 || q->descr->type_num != PyArray_DOUBLE
-        || phi->nd != 1 || phi->descr->type_num != PyArray_DOUBLE
-        || phi->dimensions[0] != q->dimensions[0]){
-     
-        //const char * message= "Invalid array: q->nd=%d,type_num=%d\n",q->nd,q->descr->type_num;
-        PyErr_SetString(PyExc_ValueError ,"wrong input"); 
-        return NULL;
-    }
-	result= (PyArrayObject *)PyArray_FromDims(q->nd,(int*)(q->dimensions), PyArray_DOUBLE);
 
-	if (result == NULL){
-	    const char * message= "Could not create result ";
-        PyErr_SetString(PyExc_RuntimeError , message);
-	    return NULL;
-	}
-	
-    for (int i = 0; i < q->dimensions[0]; i++) {
-      double q_value = *(double *)(q->data + i*q->strides[0]);
-      double phi_value = *(double *)(phi->data + i*phi->strides[0]);
-      double *result_value = (double *)(result->data + i*result->strides[0]);
-      if (q_value == 0)
-          *result_value = 0.0;
-      else
-          *result_value = model->evaluate_rphi(q_value, phi_value);
-    }
-    return PyArray_Return(result); 
- }
  /**
  * Function to call to evaluate model
  * @param args: input numpy array  [x[],y[]]
@@ -271,11 +237,12 @@ static PyObject * evalDistribution(CLamellarPSModel *self, PyObject *args){
     self->model->caille = PyFloat_AsDouble( PyDict_GetItemString(self->params, "caille") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
-    self->model->sigma = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sigma") );
     self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "delta");
+    self->model->delta.dispersion->accept_as_destination(visitor, self->model->delta.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "spacing");
     self->model->spacing.dispersion->accept_as_destination(visitor, self->model->spacing.dispersion, disp_dict);
 
@@ -346,11 +313,12 @@ static PyObject * run(CLamellarPSModel *self, PyObject *args) {
     self->model->caille = PyFloat_AsDouble( PyDict_GetItemString(self->params, "caille") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
-    self->model->sigma = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sigma") );
     self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "delta");
+    self->model->delta.dispersion->accept_as_destination(visitor, self->model->delta.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "spacing");
     self->model->spacing.dispersion->accept_as_destination(visitor, self->model->spacing.dispersion, disp_dict);
 
@@ -410,11 +378,12 @@ static PyObject * runXY(CLamellarPSModel *self, PyObject *args) {
     self->model->caille = PyFloat_AsDouble( PyDict_GetItemString(self->params, "caille") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
-    self->model->sigma = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sigma") );
     self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "delta");
+    self->model->delta.dispersion->accept_as_destination(visitor, self->model->delta.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "spacing");
     self->model->spacing.dispersion->accept_as_destination(visitor, self->model->spacing.dispersion, disp_dict);
 
@@ -472,7 +441,9 @@ static PyObject * set_dispersion(CLamellarPSModel *self, PyObject *args) {
 
 	// Ugliness necessary to go from python to C
 	    // TODO: refactor this
-    if (!strcmp(par_name, "spacing")) {
+    if (!strcmp(par_name, "delta")) {
+        self->model->delta.dispersion = dispersion;
+    } else    if (!strcmp(par_name, "spacing")) {
         self->model->spacing.dispersion = dispersion;
     } else {
 	    PyErr_SetString(CLamellarPSModelError,

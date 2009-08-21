@@ -27,7 +27,7 @@
 using namespace std;
 
 extern "C" {
-	#include "libCylinder.h"
+//	#include "libCylinder.h"
 	#include "lamellar.h"
 }
 

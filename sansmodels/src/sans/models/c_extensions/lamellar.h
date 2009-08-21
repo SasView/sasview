@@ -35,8 +35,8 @@ typedef struct {
 
 } LamellarParameters;
 
-
-
+/// kernel
+double lamellar_kernel(double dp[], double q);
 /// 1D scattering function
 double lamellar_analytical_1D(LamellarParameters *pars, double q);
 

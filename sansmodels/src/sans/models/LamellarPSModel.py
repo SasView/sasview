@@ -34,7 +34,6 @@ class LamellarPSModel(CLamellarPSModel, BaseComponent):
          scale           = 1.0 
          spacing         = 400.0 [A]
          delta           = 30.0 [A]
-         sigma           = 0.15 
          contrast        = 5.3e-006 [1/A²]
          n_plates        = 20.0 
          caille          = 0.1 
@@ -65,7 +64,6 @@ class LamellarPSModel(CLamellarPSModel, BaseComponent):
 		in the structure factor of this model.
 		*Parameters: spacing = repeat spacing,
 		delta = bilayer thickness,
-		sigma = variation in bilayer thickness
 		contrast = SLD_solvent - SLD_bilayer
 		n_plate = # of Lamellar plates
 		caille = Caille parameter (<0.8 or <1)
@@ -77,14 +75,13 @@ class LamellarPSModel(CLamellarPSModel, BaseComponent):
         self.details['scale'] = ['', None, None]
         self.details['spacing'] = ['[A]', None, None]
         self.details['delta'] = ['[A]', None, None]
-        self.details['sigma'] = ['', None, None]
         self.details['contrast'] = ['[1/A²]', None, None]
         self.details['n_plates'] = ['', None, None]
         self.details['caille'] = ['', None, None]
         self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters
-        self.fixed=['spacing.width']
+        self.fixed=['delta.width', 'spacing.width']
         
         ## parameters with orientation
         self.orientation_params =[]

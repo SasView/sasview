@@ -19,6 +19,8 @@
 extern "C" {
 	#include "cylinder.h"
 	#include "parallelepiped.h"
+	#include "lamellarPS.h"
+	#include "lamellar.h"
 }
 
 using namespace std;
@@ -382,7 +384,6 @@ public:
 	Parameter scale;
 	Parameter spacing;
 	Parameter delta;
-	Parameter sigma;
 	Parameter contrast;
 	Parameter n_plates;
 	Parameter caille;

@@ -6,7 +6,7 @@
 #define lamellarPS_h
 /** Structure definition for concentrated lamellar form factor parameters
  * [PYTHONCLASS] = LamellarPSModel
- * [DISP_PARAMS] = spacing
+ * [DISP_PARAMS] = delta, spacing
    [DESCRIPTION] = <text>[Concentrated Lamellar Form Factor] Calculates the scattered
 	   intensity from a lyotropic lamellar phase.
 	   The intensity (form factor and structure
@@ -20,14 +20,13 @@
 		in the structure factor of this model.
 		*Parameters: spacing = repeat spacing,
 		delta = bilayer thickness,
-		sigma = variation in bilayer thickness
 		contrast = SLD_solvent - SLD_bilayer
 		n_plate = # of Lamellar plates
 		caille = Caille parameter (<0.8 or <1)
 		background = incoherent bgd
 		scale = scale factor
 </text>
-   [FIXED]= spacing.width
+   [FIXED]= <text>delta.width; spacing.width</text>
    [ORIENTATION_PARAMS]=
 
  **/
@@ -41,9 +40,6 @@ typedef struct {
 	/// bilayer thicknes [A]
     //  [DEFAULT]=delta=30 [A]
     double delta;
-	/// polydispersity of the bilayer thickness  [A]
-    //  [DEFAULT]=sigma=0.15
-    double sigma;
     /// Contrast [1/A²]
     //  [DEFAULT]=contrast=5.3e-6 [1/A²]
     double contrast;
@@ -59,8 +55,8 @@ typedef struct {
 
 } LamellarPSParameters;
 
-
-
+/// kernel
+double LamellarPS_kernel(double dp[], double q);
 /// 1D scattering function
 double lamellarPS_analytical_1D(LamellarPSParameters *pars, double q);
 

@@ -5,7 +5,7 @@
 
 #include "lamellar.h"
 #include <math.h>
-#include "libCylinder.h"
+//#include "libCylinder.h"
 #include <stdio.h>
 #include <stdlib.h>
 
