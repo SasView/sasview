@@ -25,8 +25,8 @@ class Calc2D(CalcThread):
         self.qmax= qmax
         self.qstep= qstep
         # Reshape dimensions of x and y to call evalDistribution
-        self.x_array = numpy.reshape(x,[1,len(x)])
-        self.y_array = numpy.reshape(y,[len(y), 1])
+        self.x_array = numpy.reshape(x,[len(x),1])
+        self.y_array = numpy.reshape(y,[1,len(y)])
         # Numpy array of dimensions 1 used for model.run method
         self.x= numpy.array(x)
         self.y= numpy.array(y)
