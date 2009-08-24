@@ -204,8 +204,9 @@ static PyObject *evaluateOneDim(CoreShellEllipsoidModel* model, PyArrayObject *q
     }
    
 	if (PyArray_Check(x) && PyArray_Check(y)) {
-	    x_len = dims[0]= x->dimensions[0];
-        y_len = dims[1]= y->dimensions[1];
+		
+	    x_len = dims[1]= x->dimensions[1];
+        y_len = dims[0]= y->dimensions[0];
 	    
 	    // Make a new double matrix of same dims
         result=(PyArrayObject *) PyArray_FromDims(2,dims,NPY_DOUBLE);
@@ -218,10 +219,10 @@ static PyObject *evaluateOneDim(CoreShellEllipsoidModel* model, PyArrayObject *q
         /* Do the calculation. */
         for ( i=0; i< x_len; i++) {
             for ( j=0; j< y_len; j++) {
-                double x_value = *(double *)(x->data + i*x->strides[0]);
-      		    double y_value = *(double *)(y->data + j*y->strides[1]);
+                double x_value = *(double *)(x->data + i*x->strides[1]);
+      		    double y_value = *(double *)(y->data + j*y->strides[0]);
       			double *result_value = (double *)(result->data +
-      			      i*result->strides[0] + j*result->strides[1]);
+      			      i*result->strides[1] + j*result->strides[0]);
       			*result_value = (*model)(x_value, y_value);
             }           
         }

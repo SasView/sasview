@@ -1,4 +1,4 @@
-/** [PYTHONCLASS]
+/** CSphereModel
  *
  * C extension 
  *
@@ -19,7 +19,7 @@
 #include "sphere.h"
 
 /// Error object for raised exceptions
-static PyObject * [PYTHONCLASS]Error = NULL;
+static PyObject * CSphereModelError = NULL;
 
 
 // Class definition
@@ -31,11 +31,11 @@ typedef struct {
     PyObject * log;
     /// Model parameters
 	SphereParameters model_pars;
-} [PYTHONCLASS];
+} CSphereModel;
 
 
 static void
-[PYTHONCLASS]_dealloc([PYTHONCLASS]* self)
+CSphereModel_dealloc(CSphereModel* self)
 {
     self->ob_type->tp_free((PyObject*)self);
     
@@ -43,17 +43,17 @@ static void
 }
 
 static PyObject *
-[PYTHONCLASS]_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+CSphereModel_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-    [PYTHONCLASS] *self;
+    CSphereModel *self;
     
-    self = ([PYTHONCLASS] *)type->tp_alloc(type, 0);
+    self = (CSphereModel *)type->tp_alloc(type, 0);
    
     return (PyObject *)self;
 }
 
 static int
-[PYTHONCLASS]_init([PYTHONCLASS] *self, PyObject *args, PyObject *kwds)
+CSphereModel_init(CSphereModel *self, PyObject *args, PyObject *kwds)
 {
     if (self != NULL) {
     	
@@ -61,10 +61,10 @@ static int
         self->params = PyDict_New();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",0.000001));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
         PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",60.000000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",1.000000));
+        PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000001));
 
          
         // Create empty log
@@ -76,10 +76,10 @@ static int
     return 0;
 }
 
-static PyMemberDef [PYTHONCLASS]_members[] = {
-    {"params", T_OBJECT, offsetof([PYTHONCLASS], params), 0,
+static PyMemberDef CSphereModel_members[] = {
+    {"params", T_OBJECT, offsetof(CSphereModel, params), 0,
      "Parameters"},
-    {"log", T_OBJECT, offsetof([PYTHONCLASS], log), 0,
+    {"log", T_OBJECT, offsetof(CSphereModel, log), 0,
      "Log"},
     {NULL}  /* Sentinel */
 };
@@ -88,7 +88,7 @@ static PyMemberDef [PYTHONCLASS]_members[] = {
     @param p PyObject
     @return double
 */
-double [PYTHONCLASS]_readDouble(PyObject *p) {
+double CSphereModel_readDouble(PyObject *p) {
     if (PyFloat_Check(p)==1) {
         return (double)(((PyFloatObject *)(p))->ob_fval);
     } else if (PyInt_Check(p)==1) {
@@ -106,7 +106,7 @@ double [PYTHONCLASS]_readDouble(PyObject *p) {
  * @param args: input q or [q,phi]
  * @return: function value
  */
-static PyObject * run([PYTHONCLASS] *self, PyObject *args) {
+static PyObject * run(CSphereModel *self, PyObject *args) {
 	double q_value, phi_value;
 	PyObject* pars;
 	int npars;
@@ -122,8 +122,8 @@ static PyObject * run([PYTHONCLASS] *self, PyObject *args) {
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
 	if ( !PyArg_ParseTuple(args,"O",&pars) ) {
-	    PyErr_SetString([PYTHONCLASS]Error, 
-	    	"[PYTHONCLASS].run expects a q value.");
+	    PyErr_SetString(CSphereModelError, 
+	    	"CSphereModel.run expects a q value.");
 		return NULL;
 	}
 	  
@@ -133,14 +133,14 @@ static PyObject * run([PYTHONCLASS] *self, PyObject *args) {
 		// Length of list should be 2 for I(q,phi)
 	    npars = PyList_GET_SIZE(pars); 
 	    if(npars!=2) {
-	    	PyErr_SetString([PYTHONCLASS]Error, 
-	    		"[PYTHONCLASS].run expects a double or a list of dimension 2.");
+	    	PyErr_SetString(CSphereModelError, 
+	    		"CSphereModel.run expects a double or a list of dimension 2.");
 	    	return NULL;
 	    }
 	    // We have a vector q, get the q and phi values at which
 	    // to evaluate I(q,phi)
-	    q_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,0));
-	    phi_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,1));
+	    q_value = CSphereModel_readDouble(PyList_GET_ITEM(pars,0));
+	    phi_value = CSphereModel_readDouble(PyList_GET_ITEM(pars,1));
 	    // Skip zero
 	    if (q_value==0) {
 	    	return Py_BuildValue("d",0.0);
@@ -150,7 +150,7 @@ static PyObject * run([PYTHONCLASS] *self, PyObject *args) {
 	} else {
 
 		// We have a scalar q, we will evaluate I(q)
-		q_value = [PYTHONCLASS]_readDouble(pars);		
+		q_value = CSphereModel_readDouble(pars);		
 		
 		return Py_BuildValue("d",sphere_analytical_1D(&(self->model_pars),q_value));
 	}	
@@ -161,7 +161,7 @@ static PyObject * run([PYTHONCLASS] *self, PyObject *args) {
  * @param args: input q or [qx, qy]]
  * @return: function value
  */
-static PyObject * runXY([PYTHONCLASS] *self, PyObject *args) {
+static PyObject * runXY(CSphereModel *self, PyObject *args) {
 	double qx_value, qy_value;
 	PyObject* pars;
 	int npars;
@@ -177,8 +177,8 @@ static PyObject * runXY([PYTHONCLASS] *self, PyObject *args) {
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
 	if ( !PyArg_ParseTuple(args,"O",&pars) ) {
-	    PyErr_SetString([PYTHONCLASS]Error, 
-	    	"[PYTHONCLASS].run expects a q value.");
+	    PyErr_SetString(CSphereModelError, 
+	    	"CSphereModel.run expects a q value.");
 		return NULL;
 	}
 	  
@@ -188,33 +188,33 @@ static PyObject * runXY([PYTHONCLASS] *self, PyObject *args) {
 		// Length of list should be 2 for I(qx, qy))
 	    npars = PyList_GET_SIZE(pars); 
 	    if(npars!=2) {
-	    	PyErr_SetString([PYTHONCLASS]Error, 
-	    		"[PYTHONCLASS].run expects a double or a list of dimension 2.");
+	    	PyErr_SetString(CSphereModelError, 
+	    		"CSphereModel.run expects a double or a list of dimension 2.");
 	    	return NULL;
 	    }
 	    // We have a vector q, get the qx and qy values at which
 	    // to evaluate I(qx,qy)
-	    qx_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,0));
-	    qy_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,1));
+	    qx_value = CSphereModel_readDouble(PyList_GET_ITEM(pars,0));
+	    qy_value = CSphereModel_readDouble(PyList_GET_ITEM(pars,1));
 		return Py_BuildValue("d",sphere_analytical_2DXY(&(self->model_pars),qx_value,qy_value));
 
 	} else {
 
 		// We have a scalar q, we will evaluate I(q)
-		qx_value = [PYTHONCLASS]_readDouble(pars);		
+		qx_value = CSphereModel_readDouble(pars);		
 		
 		return Py_BuildValue("d",sphere_analytical_1D(&(self->model_pars),qx_value));
 	}	
 }
 
-static PyObject * reset([PYTHONCLASS] *self, PyObject *args) {
+static PyObject * reset(CSphereModel *self, PyObject *args) {
     
 
     return Py_BuildValue("d",0.0);
 }
 
 
-static PyMethodDef [PYTHONCLASS]_methods[] = {
+static PyMethodDef CSphereModel_methods[] = {
     {"run",      (PyCFunction)run     , METH_VARARGS,
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
@@ -226,13 +226,13 @@ static PyMethodDef [PYTHONCLASS]_methods[] = {
    {NULL}
 };
 
-static PyTypeObject [PYTHONCLASS]Type = {
+static PyTypeObject CSphereModelType = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "[PYTHONCLASS]",             /*tp_name*/
-    sizeof([PYTHONCLASS]),             /*tp_basicsize*/
+    "CSphereModel",             /*tp_name*/
+    sizeof(CSphereModel),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
-    (destructor)[PYTHONCLASS]_dealloc, /*tp_dealloc*/
+    (destructor)CSphereModel_dealloc, /*tp_dealloc*/
     0,                         /*tp_print*/
     0,                         /*tp_getattr*/
     0,                         /*tp_setattr*/
@@ -248,24 +248,24 @@ static PyTypeObject [PYTHONCLASS]Type = {
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-    "[PYTHONCLASS] objects",           /* tp_doc */
+    "CSphereModel objects",           /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
     0,		               /* tp_richcompare */
     0,		               /* tp_weaklistoffset */
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
-    [PYTHONCLASS]_methods,             /* tp_methods */
-    [PYTHONCLASS]_members,             /* tp_members */
+    CSphereModel_methods,             /* tp_methods */
+    CSphereModel_members,             /* tp_members */
     0,                         /* tp_getset */
     0,                         /* tp_base */
     0,                         /* tp_dict */
     0,                         /* tp_descr_get */
     0,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
-    (initproc)[PYTHONCLASS]_init,      /* tp_init */
+    (initproc)CSphereModel_init,      /* tp_init */
     0,                         /* tp_alloc */
-    [PYTHONCLASS]_new,                 /* tp_new */
+    CSphereModel_new,                 /* tp_new */
 };
 
 
@@ -277,17 +277,17 @@ static PyMethodDef module_methods[] = {
  * Function used to add the model class to a module
  * @param module: module to add the class to
  */ 
-void add[PYTHONCLASS](PyObject *module) {
+void addCSphereModel(PyObject *module) {
 	PyObject *d;
 	
-    if (PyType_Ready(&[PYTHONCLASS]Type) < 0)
+    if (PyType_Ready(&CSphereModelType) < 0)
         return;
 
-    Py_INCREF(&[PYTHONCLASS]Type);
-    PyModule_AddObject(module, "[PYTHONCLASS]", (PyObject *)&[PYTHONCLASS]Type);
+    Py_INCREF(&CSphereModelType);
+    PyModule_AddObject(module, "CSphereModel", (PyObject *)&CSphereModelType);
     
     d = PyModule_GetDict(module);
-    [PYTHONCLASS]Error = PyErr_NewException("[PYTHONCLASS].error", NULL, NULL);
-    PyDict_SetItemString(d, "[PYTHONCLASS]Error", [PYTHONCLASS]Error);
+    CSphereModelError = PyErr_NewException("CSphereModel.error", NULL, NULL);
+    PyDict_SetItemString(d, "CSphereModelError", CSphereModelError);
 }
 

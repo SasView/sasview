@@ -21,9 +21,12 @@
  *          AND RE-RUN THE GENERATOR SCRIPT
  *
  */
+#define NO_IMPORT_ARRAY
+#define PY_ARRAY_UNIQUE_SYMBOL PyArray_API_sans
  
 extern "C" {
 #include <Python.h>
+#include <arrayobject.h>
 #include "structmember.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -141,7 +144,167 @@ double CLamellarPSHGModel_readDouble(PyObject *p) {
         return 0.0;
     }
 }
+/**
+ * Function to call to evaluate model
+ * @param args: input numpy array q[] 
+ * @return: numpy array object 
+ */
+ 
+static PyObject *evaluateOneDim(LamellarPSHGModel* model, PyArrayObject *q){
+    PyArrayObject *result;
+   
+    // Check validity of array q , q must be of dimension 1, an array of double
+    if (q->nd != 1 || q->descr->type_num != PyArray_DOUBLE)
+    {
+        //const char * message= "Invalid array: q->nd=%d,type_num=%d\n",q->nd,q->descr->type_num;
+        //PyErr_SetString(PyExc_ValueError , message);
+        return NULL;
+    }
+    result = (PyArrayObject *)PyArray_FromDims(q->nd, (int *)(q->dimensions), 
+										  PyArray_DOUBLE);
+	if (result == NULL) {
+        const char * message= "Could not create result ";
+        PyErr_SetString(PyExc_RuntimeError , message);
+		return NULL;
+	}
+	 for (int i = 0; i < q->dimensions[0]; i++){
+      double q_value  = *(double *)(q->data + i*q->strides[0]);
+      double *result_value = (double *)(result->data + i*result->strides[0]);
+      *result_value =(*model)(q_value);
+	}
+    return PyArray_Return(result); 
+ }
 
+ /**
+ * Function to call to evaluate model
+ * @param args: input numpy array  [x[],y[]]
+ * @return: numpy array object 
+ */
+ static PyObject * evaluateTwoDimXY( LamellarPSHGModel* model, 
+                              PyArrayObject *x, PyArrayObject *y)
+ {
+    PyArrayObject *result;
+    int i,j, x_len, y_len, dims[2];
+    //check validity of input vectors
+    if (x->nd != 2 || x->descr->type_num != PyArray_DOUBLE
+        || y->nd != 2 || y->descr->type_num != PyArray_DOUBLE
+        || y->dimensions[1] != x->dimensions[0]){
+        const char * message= "evaluateTwoDimXY  expect 2 numpy arrays";
+        PyErr_SetString(PyExc_ValueError , message); 
+        return NULL;
+    }
+   
+	if (PyArray_Check(x) && PyArray_Check(y)) {
+		
+	    x_len = dims[1]= x->dimensions[1];
+        y_len = dims[0]= y->dimensions[0];
+	    
+	    // Make a new double matrix of same dims
+        result=(PyArrayObject *) PyArray_FromDims(2,dims,NPY_DOUBLE);
+        if (result == NULL){
+	    const char * message= "Could not create result ";
+        PyErr_SetString(PyExc_RuntimeError , message);
+	    return NULL;
+	    }
+       
+        /* Do the calculation. */
+        for ( i=0; i< x_len; i++) {
+            for ( j=0; j< y_len; j++) {
+                double x_value = *(double *)(x->data + i*x->strides[1]);
+      		    double y_value = *(double *)(y->data + j*y->strides[0]);
+      			double *result_value = (double *)(result->data +
+      			      i*result->strides[1] + j*result->strides[0]);
+      			*result_value = (*model)(x_value, y_value);
+            }           
+        }
+        return PyArray_Return(result); 
+        
+        }else{
+		    PyErr_SetString(CLamellarPSHGModelError, 
+                   "CLamellarPSHGModel.evaluateTwoDimXY couldn't run.");
+	        return NULL;
+		}      	
+}
+/**
+ *  evalDistribution function evaluate a model function with input vector
+ *  @param args: input q as vector or [qx, qy] where qx, qy are vectors
+ *
+ */ 
+static PyObject * evalDistribution(CLamellarPSHGModel *self, PyObject *args){
+	PyObject *qx, *qy;
+	PyArrayObject * pars;
+	int npars ,mpars;
+	
+	// Get parameters
+	
+	    // Reader parameter dictionary
+    self->model->n_plates = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_plates") );
+    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->deltaT = PyFloat_AsDouble( PyDict_GetItemString(self->params, "deltaT") );
+    self->model->spacing = PyFloat_AsDouble( PyDict_GetItemString(self->params, "spacing") );
+    self->model->sld_tail = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_tail") );
+    self->model->sld_solvent = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_solvent") );
+    self->model->caille = PyFloat_AsDouble( PyDict_GetItemString(self->params, "caille") );
+    self->model->sld_head = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_head") );
+    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->deltaH = PyFloat_AsDouble( PyDict_GetItemString(self->params, "deltaH") );
+    // Read in dispersion parameters
+    PyObject* disp_dict;
+    DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "deltaT");
+    self->model->deltaT.dispersion->accept_as_destination(visitor, self->model->deltaT.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "deltaH");
+    self->model->deltaH.dispersion->accept_as_destination(visitor, self->model->deltaH.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "spacing");
+    self->model->spacing.dispersion->accept_as_destination(visitor, self->model->spacing.dispersion, disp_dict);
+
+	
+	// Get input and determine whether we have to supply a 1D or 2D return value.
+	if ( !PyArg_ParseTuple(args,"O",&pars) ) {
+	    PyErr_SetString(CLamellarPSHGModelError, 
+	    	"CLamellarPSHGModel.evalDistribution expects a q value.");
+		return NULL;
+	}
+    // Check params
+	
+    if(PyArray_Check(pars)==1) {
+		
+	    // Length of list should 1 or 2
+	    npars = pars->nd; 
+	    if(npars==1) {
+	        // input is a numpy array
+	        if (PyArray_Check(pars)) {
+		        return evaluateOneDim(self->model, (PyArrayObject*)pars); 
+		    }
+		}else{
+		    PyErr_SetString(CLamellarPSHGModelError, 
+                   "CLamellarPSHGModel.evalDistribution expect numpy array of one dimension.");
+	        return NULL;
+		}
+    }else if( PyList_Check(pars)==1) {
+    	// Length of list should be 2 for I(qx,qy)
+	    mpars = PyList_GET_SIZE(pars); 
+	    if(mpars!=2) {
+	    	PyErr_SetString(CLamellarPSHGModelError, 
+	    		"CLamellarPSHGModel.evalDistribution expects a list of dimension 2.");
+	    	return NULL;
+	    }
+	     qx = PyList_GET_ITEM(pars,0);
+	     qy = PyList_GET_ITEM(pars,1);
+	     if (PyArray_Check(qx) && PyArray_Check(qy)) {
+	         return evaluateTwoDimXY(self->model, (PyArrayObject*)qx,
+		           (PyArrayObject*)qy);
+		 }else{
+		    PyErr_SetString(CLamellarPSHGModelError, 
+                   "CLamellarPSHGModel.evalDistribution expect 2 numpy arrays in list.");
+	        return NULL;
+	     }
+	}else{
+	    PyErr_SetString(CLamellarPSHGModelError, 
+                   "CLamellarPSHGModel.evalDistribution couln't be run.");
+	    return NULL;
+	}
+}
 
 /**
  * Function to call to evaluate model
@@ -325,6 +488,9 @@ static PyMethodDef CLamellarPSHGModel_methods[] = {
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy"},
+      
+    {"evalDistribution",  (PyCFunction)evalDistribution , METH_VARARGS,
+      "Evaluate the model at a given Q or Qx, Qy vector "},
     {"reset",    (PyCFunction)reset   , METH_VARARGS,
       "Reset pair correlation"},
     {"set_dispersion",      (PyCFunction)set_dispersion     , METH_VARARGS,
@@ -375,9 +541,9 @@ static PyTypeObject CLamellarPSHGModelType = {
 };
 
 
-static PyMethodDef module_methods[] = {
-    {NULL} 
-};
+//static PyMethodDef module_methods[] = {
+//    {NULL} 
+//};
 
 /**
  * Function used to add the model class to a module

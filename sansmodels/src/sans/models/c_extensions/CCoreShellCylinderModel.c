@@ -1,4 +1,4 @@
-/** [PYTHONCLASS]
+/** CCoreShellCylinderModel
  *
  * C extension 
  *
@@ -19,7 +19,7 @@
 #include "core_shell_cylinder.h"
 
 /// Error object for raised exceptions
-static PyObject * [PYTHONCLASS]Error = NULL;
+static PyObject * CCoreShellCylinderModelError = NULL;
 
 
 // Class definition
@@ -31,11 +31,11 @@ typedef struct {
     PyObject * log;
     /// Model parameters
 	CoreShellCylinderParameters model_pars;
-} [PYTHONCLASS];
+} CCoreShellCylinderModel;
 
 
 static void
-[PYTHONCLASS]_dealloc([PYTHONCLASS]* self)
+CCoreShellCylinderModel_dealloc(CCoreShellCylinderModel* self)
 {
     self->ob_type->tp_free((PyObject*)self);
     
@@ -43,17 +43,17 @@ static void
 }
 
 static PyObject *
-[PYTHONCLASS]_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+CCoreShellCylinderModel_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-    [PYTHONCLASS] *self;
+    CCoreShellCylinderModel *self;
     
-    self = ([PYTHONCLASS] *)type->tp_alloc(type, 0);
+    self = (CCoreShellCylinderModel *)type->tp_alloc(type, 0);
    
     return (PyObject *)self;
 }
 
 static int
-[PYTHONCLASS]_init([PYTHONCLASS] *self, PyObject *args, PyObject *kwds)
+CCoreShellCylinderModel_init(CCoreShellCylinderModel *self, PyObject *args, PyObject *kwds)
 {
     if (self != NULL) {
     	
@@ -82,10 +82,10 @@ static int
     return 0;
 }
 
-static PyMemberDef [PYTHONCLASS]_members[] = {
-    {"params", T_OBJECT, offsetof([PYTHONCLASS], params), 0,
+static PyMemberDef CCoreShellCylinderModel_members[] = {
+    {"params", T_OBJECT, offsetof(CCoreShellCylinderModel, params), 0,
      "Parameters"},
-    {"log", T_OBJECT, offsetof([PYTHONCLASS], log), 0,
+    {"log", T_OBJECT, offsetof(CCoreShellCylinderModel, log), 0,
      "Log"},
     {NULL}  /* Sentinel */
 };
@@ -94,7 +94,7 @@ static PyMemberDef [PYTHONCLASS]_members[] = {
     @param p PyObject
     @return double
 */
-double [PYTHONCLASS]_readDouble(PyObject *p) {
+double CCoreShellCylinderModel_readDouble(PyObject *p) {
     if (PyFloat_Check(p)==1) {
         return (double)(((PyFloatObject *)(p))->ob_fval);
     } else if (PyInt_Check(p)==1) {
@@ -112,7 +112,7 @@ double [PYTHONCLASS]_readDouble(PyObject *p) {
  * @param args: input q or [q,phi]
  * @return: function value
  */
-static PyObject * run([PYTHONCLASS] *self, PyObject *args) {
+static PyObject * run(CCoreShellCylinderModel *self, PyObject *args) {
 	double q_value, phi_value;
 	PyObject* pars;
 	int npars;
@@ -134,8 +134,8 @@ static PyObject * run([PYTHONCLASS] *self, PyObject *args) {
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
 	if ( !PyArg_ParseTuple(args,"O",&pars) ) {
-	    PyErr_SetString([PYTHONCLASS]Error, 
-	    	"[PYTHONCLASS].run expects a q value.");
+	    PyErr_SetString(CCoreShellCylinderModelError, 
+	    	"CCoreShellCylinderModel.run expects a q value.");
 		return NULL;
 	}
 	  
@@ -145,14 +145,14 @@ static PyObject * run([PYTHONCLASS] *self, PyObject *args) {
 		// Length of list should be 2 for I(q,phi)
 	    npars = PyList_GET_SIZE(pars); 
 	    if(npars!=2) {
-	    	PyErr_SetString([PYTHONCLASS]Error, 
-	    		"[PYTHONCLASS].run expects a double or a list of dimension 2.");
+	    	PyErr_SetString(CCoreShellCylinderModelError, 
+	    		"CCoreShellCylinderModel.run expects a double or a list of dimension 2.");
 	    	return NULL;
 	    }
 	    // We have a vector q, get the q and phi values at which
 	    // to evaluate I(q,phi)
-	    q_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,0));
-	    phi_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,1));
+	    q_value = CCoreShellCylinderModel_readDouble(PyList_GET_ITEM(pars,0));
+	    phi_value = CCoreShellCylinderModel_readDouble(PyList_GET_ITEM(pars,1));
 	    // Skip zero
 	    if (q_value==0) {
 	    	return Py_BuildValue("d",0.0);
@@ -162,7 +162,7 @@ static PyObject * run([PYTHONCLASS] *self, PyObject *args) {
 	} else {
 
 		// We have a scalar q, we will evaluate I(q)
-		q_value = [PYTHONCLASS]_readDouble(pars);		
+		q_value = CCoreShellCylinderModel_readDouble(pars);		
 		
 		return Py_BuildValue("d",core_shell_cylinder_analytical_1D(&(self->model_pars),q_value));
 	}	
@@ -173,7 +173,7 @@ static PyObject * run([PYTHONCLASS] *self, PyObject *args) {
  * @param args: input q or [qx, qy]]
  * @return: function value
  */
-static PyObject * runXY([PYTHONCLASS] *self, PyObject *args) {
+static PyObject * runXY(CCoreShellCylinderModel *self, PyObject *args) {
 	double qx_value, qy_value;
 	PyObject* pars;
 	int npars;
@@ -195,8 +195,8 @@ static PyObject * runXY([PYTHONCLASS] *self, PyObject *args) {
 	
 	// Get input and determine whether we have to supply a 1D or 2D return value.
 	if ( !PyArg_ParseTuple(args,"O",&pars) ) {
-	    PyErr_SetString([PYTHONCLASS]Error, 
-	    	"[PYTHONCLASS].run expects a q value.");
+	    PyErr_SetString(CCoreShellCylinderModelError, 
+	    	"CCoreShellCylinderModel.run expects a q value.");
 		return NULL;
 	}
 	  
@@ -206,33 +206,33 @@ static PyObject * runXY([PYTHONCLASS] *self, PyObject *args) {
 		// Length of list should be 2 for I(qx, qy))
 	    npars = PyList_GET_SIZE(pars); 
 	    if(npars!=2) {
-	    	PyErr_SetString([PYTHONCLASS]Error, 
-	    		"[PYTHONCLASS].run expects a double or a list of dimension 2.");
+	    	PyErr_SetString(CCoreShellCylinderModelError, 
+	    		"CCoreShellCylinderModel.run expects a double or a list of dimension 2.");
 	    	return NULL;
 	    }
 	    // We have a vector q, get the qx and qy values at which
 	    // to evaluate I(qx,qy)
-	    qx_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,0));
-	    qy_value = [PYTHONCLASS]_readDouble(PyList_GET_ITEM(pars,1));
+	    qx_value = CCoreShellCylinderModel_readDouble(PyList_GET_ITEM(pars,0));
+	    qy_value = CCoreShellCylinderModel_readDouble(PyList_GET_ITEM(pars,1));
 		return Py_BuildValue("d",core_shell_cylinder_analytical_2DXY(&(self->model_pars),qx_value,qy_value));
 
 	} else {
 
 		// We have a scalar q, we will evaluate I(q)
-		qx_value = [PYTHONCLASS]_readDouble(pars);		
+		qx_value = CCoreShellCylinderModel_readDouble(pars);		
 		
 		return Py_BuildValue("d",core_shell_cylinder_analytical_1D(&(self->model_pars),qx_value));
 	}	
 }
 
-static PyObject * reset([PYTHONCLASS] *self, PyObject *args) {
+static PyObject * reset(CCoreShellCylinderModel *self, PyObject *args) {
     
 
     return Py_BuildValue("d",0.0);
 }
 
 
-static PyMethodDef [PYTHONCLASS]_methods[] = {
+static PyMethodDef CCoreShellCylinderModel_methods[] = {
     {"run",      (PyCFunction)run     , METH_VARARGS,
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
@@ -244,13 +244,13 @@ static PyMethodDef [PYTHONCLASS]_methods[] = {
    {NULL}
 };
 
-static PyTypeObject [PYTHONCLASS]Type = {
+static PyTypeObject CCoreShellCylinderModelType = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "[PYTHONCLASS]",             /*tp_name*/
-    sizeof([PYTHONCLASS]),             /*tp_basicsize*/
+    "CCoreShellCylinderModel",             /*tp_name*/
+    sizeof(CCoreShellCylinderModel),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
-    (destructor)[PYTHONCLASS]_dealloc, /*tp_dealloc*/
+    (destructor)CCoreShellCylinderModel_dealloc, /*tp_dealloc*/
     0,                         /*tp_print*/
     0,                         /*tp_getattr*/
     0,                         /*tp_setattr*/
@@ -266,24 +266,24 @@ static PyTypeObject [PYTHONCLASS]Type = {
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-    "[PYTHONCLASS] objects",           /* tp_doc */
+    "CCoreShellCylinderModel objects",           /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
     0,		               /* tp_richcompare */
     0,		               /* tp_weaklistoffset */
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
-    [PYTHONCLASS]_methods,             /* tp_methods */
-    [PYTHONCLASS]_members,             /* tp_members */
+    CCoreShellCylinderModel_methods,             /* tp_methods */
+    CCoreShellCylinderModel_members,             /* tp_members */
     0,                         /* tp_getset */
     0,                         /* tp_base */
     0,                         /* tp_dict */
     0,                         /* tp_descr_get */
     0,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
-    (initproc)[PYTHONCLASS]_init,      /* tp_init */
+    (initproc)CCoreShellCylinderModel_init,      /* tp_init */
     0,                         /* tp_alloc */
-    [PYTHONCLASS]_new,                 /* tp_new */
+    CCoreShellCylinderModel_new,                 /* tp_new */
 };
 
 
@@ -295,17 +295,17 @@ static PyMethodDef module_methods[] = {
  * Function used to add the model class to a module
  * @param module: module to add the class to
  */ 
-void add[PYTHONCLASS](PyObject *module) {
+void addCCoreShellCylinderModel(PyObject *module) {
 	PyObject *d;
 	
-    if (PyType_Ready(&[PYTHONCLASS]Type) < 0)
+    if (PyType_Ready(&CCoreShellCylinderModelType) < 0)
         return;
 
-    Py_INCREF(&[PYTHONCLASS]Type);
-    PyModule_AddObject(module, "[PYTHONCLASS]", (PyObject *)&[PYTHONCLASS]Type);
+    Py_INCREF(&CCoreShellCylinderModelType);
+    PyModule_AddObject(module, "CCoreShellCylinderModel", (PyObject *)&CCoreShellCylinderModelType);
     
     d = PyModule_GetDict(module);
-    [PYTHONCLASS]Error = PyErr_NewException("[PYTHONCLASS].error", NULL, NULL);
-    PyDict_SetItemString(d, "[PYTHONCLASS]Error", [PYTHONCLASS]Error);
+    CCoreShellCylinderModelError = PyErr_NewException("CCoreShellCylinderModel.error", NULL, NULL);
+    PyDict_SetItemString(d, "CCoreShellCylinderModelError", CCoreShellCylinderModelError);
 }
 

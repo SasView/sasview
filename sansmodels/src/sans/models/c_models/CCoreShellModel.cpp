@@ -168,43 +168,7 @@ static PyObject *evaluateOneDim(CoreShellModel* model, PyArrayObject *q){
 	}
     return PyArray_Return(result); 
  }
-/**
- * Function to call to evaluate model
- * @param args: input numpy array  [q[],phi[]]
- * @return: numpy array object 
- */
-static PyObject * evaluateTwoDim( CoreShellModel* model, 
-                              PyArrayObject *q, PyArrayObject *phi)
- {
-    PyArrayObject *result;
-    //check validity of input vectors
-    if (q->nd != 1 || q->descr->type_num != PyArray_DOUBLE
-        || phi->nd != 1 || phi->descr->type_num != PyArray_DOUBLE
-        || phi->dimensions[0] != q->dimensions[0]){
-     
-        //const char * message= "Invalid array: q->nd=%d,type_num=%d\n",q->nd,q->descr->type_num;
-        PyErr_SetString(PyExc_ValueError ,"wrong input"); 
-        return NULL;
-    }
-	result= (PyArrayObject *)PyArray_FromDims(q->nd,(int*)(q->dimensions), PyArray_DOUBLE);
 
-	if (result == NULL){
-	    const char * message= "Could not create result ";
-        PyErr_SetString(PyExc_RuntimeError , message);
-	    return NULL;
-	}
-	
-    for (int i = 0; i < q->dimensions[0]; i++) {
-      double q_value = *(double *)(q->data + i*q->strides[0]);
-      double phi_value = *(double *)(phi->data + i*phi->strides[0]);
-      double *result_value = (double *)(result->data + i*result->strides[0]);
-      if (q_value == 0)
-          *result_value = 0.0;
-      else
-          *result_value = model->evaluate_rphi(q_value, phi_value);
-    }
-    return PyArray_Return(result); 
- }
  /**
  * Function to call to evaluate model
  * @param args: input numpy array  [x[],y[]]
@@ -225,8 +189,9 @@ static PyObject * evaluateTwoDim( CoreShellModel* model,
     }
    
 	if (PyArray_Check(x) && PyArray_Check(y)) {
-	    x_len = dims[0]= x->dimensions[0];
-        y_len = dims[1]= y->dimensions[1];
+		
+	    x_len = dims[1]= x->dimensions[1];
+        y_len = dims[0]= y->dimensions[0];
 	    
 	    // Make a new double matrix of same dims
         result=(PyArrayObject *) PyArray_FromDims(2,dims,NPY_DOUBLE);
@@ -239,10 +204,10 @@ static PyObject * evaluateTwoDim( CoreShellModel* model,
         /* Do the calculation. */
         for ( i=0; i< x_len; i++) {
             for ( j=0; j< y_len; j++) {
-                double x_value = *(double *)(x->data + i*x->strides[0]);
-      		    double y_value = *(double *)(y->data + j*y->strides[1]);
+                double x_value = *(double *)(x->data + i*x->strides[1]);
+      		    double y_value = *(double *)(y->data + j*y->strides[0]);
       			double *result_value = (double *)(result->data +
-      			      i*result->strides[0] + j*result->strides[1]);
+      			      i*result->strides[1] + j*result->strides[0]);
       			*result_value = (*model)(x_value, y_value);
             }           
         }
