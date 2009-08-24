@@ -278,9 +278,9 @@ class FitData2D(object):
         self.image = sans_data2d.data
         self.err_image = sans_data2d.err_data
         self.x_bins_array= numpy.reshape(sans_data2d.x_bins,
-                                         [1,len(sans_data2d.x_bins)])
+                                         [len(sans_data2d.x_bins),1])
         self.y_bins_array = numpy.reshape(sans_data2d.y_bins,
-                                          [len(sans_data2d.y_bins),1])
+                                          [1,len(sans_data2d.y_bins)])
         
         x = max(self.data.xmin, self.data.xmax)
         y = max(self.data.ymin, self.data.ymax)
