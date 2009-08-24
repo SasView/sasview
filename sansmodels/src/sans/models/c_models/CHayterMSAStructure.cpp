@@ -186,8 +186,8 @@ static PyObject *evaluateOneDim(HayterMSAStructure* model, PyArrayObject *q){
    
 	if (PyArray_Check(x) && PyArray_Check(y)) {
 		
-	    x_len = dims[1]= x->dimensions[1];
-        y_len = dims[0]= y->dimensions[0];
+	    x_len = dims[1]= x->dimensions[0];
+        y_len = dims[0]= y->dimensions[1];
 	    
 	    // Make a new double matrix of same dims
         result=(PyArrayObject *) PyArray_FromDims(2,dims,NPY_DOUBLE);
@@ -200,10 +200,10 @@ static PyObject *evaluateOneDim(HayterMSAStructure* model, PyArrayObject *q){
         /* Do the calculation. */
         for ( j=0; j< y_len; j++) {
             for ( i=0; i< x_len; i++) {
-                double x_value = *(double *)(x->data + i*x->strides[1]);
-      		    double y_value = *(double *)(y->data + j*y->strides[0]);
+                double x_value = *(double *)(x->data + i*x->strides[0]);
+      		    double y_value = *(double *)(y->data + j*y->strides[1]);
       			double *result_value = (double *)(result->data +
-      			      i*result->strides[1] + j*result->strides[0]);
+      			      j*result->strides[0] + i*result->strides[1]);
       			*result_value = (*model)(x_value, y_value);
             }           
         }
