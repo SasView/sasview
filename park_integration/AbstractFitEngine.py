@@ -317,8 +317,8 @@ class FitData2D(object):
      
     def residuals(self, fn): 
         
-        res=self.index_model*(self.image - fn([self.y_bins_array,
-                             self.x_bins_array]))/self.res_err_image
+        res=self.index_model*(self.image - fn([self.x_bins_array,
+                             self.y_bins_array]))/self.res_err_image
         return res.ravel() 
         
  
