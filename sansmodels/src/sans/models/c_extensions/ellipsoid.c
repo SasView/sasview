@@ -113,7 +113,7 @@ double ellipsoid_analytical_2D_scaled(EllipsoidParameters *pars, double q, doubl
 	alpha = acos( cos_val );
 
 	// Call the IGOR library function to get the kernel
-	answer = EllipsoidKernel(q, pars->radius_a, pars->radius_b, cos_val);
+	answer = EllipsoidKernel(q, pars->radius_b, pars->radius_a, cos_val);
 
 	// Multiply by contrast^2
 	answer *= pars->contrast*pars->contrast;
