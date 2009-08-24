@@ -226,10 +226,10 @@ class ModelPage(BasicPage):
                         ctl1.SetValue(str (format_number(value)))
                         if not self.enable2D:
                             ctl1.Hide()
-                            #ctl1.Disable()
+                            ctl1.Disable()
                         else:
                             ctl1.Show(True)
-                            #ctl1.Enable()
+                            ctl1.Enable()
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                         self.fittable_param.append([None,name1,ctl1,None,
                                                     None, None, None,None])
@@ -243,10 +243,10 @@ class ModelPage(BasicPage):
                             Tctl1.SetValue(str (format_number(value)))
                             if not self.enable2D:
                                 Tctl1.Hide()
-                               # Tctl1.Disable()
+                                Tctl1.Disable()
                             else:
                                 Tctl1.Show(True)
-                                #Tctl1.Enable()
+                                Tctl1.Enable()
                             self.sizer4_4.Add(Tctl1, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             self.fixed_param.append([None,name2, Tctl1,None,None,
@@ -261,10 +261,10 @@ class ModelPage(BasicPage):
                             Tctl2.SetValue(str (format_number(value)))
                             if not self.enable2D:
                                 Tctl2.Hide()
-                                #Tctl2.Disable()
+                                Tctl2.Disable()
                             else:
                                 Tctl2.Show(True)
-                                #Tctl2.Enable()
+                                Tctl2.Enable()
                             self.sizer4_4.Add(Tctl2, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             ix +=1
@@ -306,7 +306,7 @@ class ModelPage(BasicPage):
             dispersity= self.disp_box.GetClientData(n)
  
             self.set_model_param_sizer(self.model)
-            #self._set_sizer_dispersion(dispersity)
+            self._set_sizer_dispersion(dispersity)
             
             if len(self.orientation_params)>0:
                 #recover hidden orient. param.s
@@ -570,10 +570,10 @@ class ModelPage(BasicPage):
                 ctl1.SetValue(str (format_number(value)))
                 if not self.enable2D:
                     ctl1.Hide()
-                    #ctl1.Disable()
+                    ctl1.Disable()
                 else:
                     ctl1.Show(True)
-                    #ctl1.Enable()
+                    ctl1.Enable()
                 
                 sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                 ix +=1
