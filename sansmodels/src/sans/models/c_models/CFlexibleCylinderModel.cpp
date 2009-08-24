@@ -204,8 +204,8 @@ static PyObject *evaluateOneDim(FlexibleCylinderModel* model, PyArrayObject *q){
 	    }
        
         /* Do the calculation. */
-        for ( i=0; i< x_len; i++) {
-            for ( j=0; j< y_len; j++) {
+        for ( j=0; j< y_len; j++) {
+            for ( i=0; i< x_len; i++) {
                 double x_value = *(double *)(x->data + i*x->strides[1]);
       		    double y_value = *(double *)(y->data + j*y->strides[0]);
       			double *result_value = (double *)(result->data +
@@ -291,11 +291,11 @@ static PyObject * evalDistribution(CFlexibleCylinderModel *self, PyObject *args)
                    "CFlexibleCylinderModel.evalDistribution expect 2 numpy arrays in list.");
 	        return NULL;
 	     }
-	}else{
-	    PyErr_SetString(CFlexibleCylinderModelError, 
-                   "CFlexibleCylinderModel.evalDistribution couln't be run.");
-	    return NULL;
 	}
+	PyErr_SetString(CFlexibleCylinderModelError, 
+                   "CFlexibleCylinderModel.evalDistribution couln't be run.");
+	return NULL;
+	
 }
 
 /**
