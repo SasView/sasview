@@ -26,7 +26,7 @@ class Calc2D(CalcThread):
         self.qstep= qstep
         # Reshape dimensions of x and y to call evalDistribution
         self.x_array = numpy.reshape(x,[1,len(x)])
-        self.y_array = numpy.reshape(y,[len(y),1])
+        self.y_array = numpy.reshape(y,[len(y), 1])
         # Numpy array of dimensions 1 used for model.run method
         self.x= numpy.array(x)
         self.y= numpy.array(y)
@@ -57,7 +57,7 @@ class Calc2D(CalcThread):
         try:
             ## receive only list of 2 numpy array 
             ## One must reshape to vertical and the other to horizontal
-            value = self.model.evalDistribution([self.y_array,self.x_array] )
+            value = self.model.evalDistribution([self.x_array,self.y_array] )
             ## for data ignore the qmax 
             if self.data == None:
                 # Only qmin value will be consider for the detector
