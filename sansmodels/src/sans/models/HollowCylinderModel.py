@@ -33,7 +33,7 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
     	List of default parameters:
          scale           = 1.0 
          core_radius     = 20.0 [A]
-         shell_radius    = 30.0 [A]
+         radius          = 30.0 [A]
          length          = 400.0 [A]
          contrast        = 5.3e-006 [1/A²]
          background      = 0.01 [1/cm]
@@ -58,7 +58,7 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
         self.details = {}
         self.details['scale'] = ['', None, None]
         self.details['core_radius'] = ['[A]', None, None]
-        self.details['shell_radius'] = ['[A]', None, None]
+        self.details['radius'] = ['[A]', None, None]
         self.details['length'] = ['[A]', None, None]
         self.details['contrast'] = ['[1/A²]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
@@ -66,7 +66,7 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
         self.details['axis_phi'] = ['[rad]', None, None]
 
 		## fittable parameters
-        self.fixed=['axis_phi.width', 'axis_theta.width', 'length.width', 'core_radius.width', 'shell_radius']
+        self.fixed=['axis_phi.width', 'axis_theta.width', 'length.width', 'core_radius.width', 'radius']
         
         ## parameters with orientation
         self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']

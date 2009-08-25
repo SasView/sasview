@@ -5,9 +5,9 @@
  * Structure definition for hollow cylinder parameters
  */
  //[PYTHONCLASS] = HollowCylinderModel
- //[DISP_PARAMS] = core_radius, shell_radius, length, axis_theta, axis_phi
+ //[DISP_PARAMS] = core_radius, radius, length, axis_theta, axis_phi
  //[DESCRIPTION] = <text></text>
- //[FIXED]= <text> axis_phi.width; axis_theta.width; length.width;core_radius.width; shell_radius</text>
+ //[FIXED]= <text> axis_phi.width; axis_theta.width; length.width;core_radius.width; radius</text>
  //[ORIENTATION_PARAMS]= axis_phi; axis_theta;axis_phi.width; axis_theta.width
 
 
@@ -21,8 +21,8 @@ typedef struct {
     double core_radius;
 
     /// Shell radius [A]
-    //  [DEFAULT]=shell_radius=30.0 [A]
-    double shell_radius;
+    //  [DEFAULT]=radius=30.0 [A]
+    double radius;
 
     /// Hollow cylinder length [A]
     //  [DEFAULT]=length=400.0 [A]

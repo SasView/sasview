@@ -4,15 +4,15 @@
 /**
  * Structure definition for vesicle parameters
 [PYTHONCLASS] = VesicleModel
-[DISP_PARAMS] = core_radius,thickness
-[DESCRIPTION] =<text>Model parameters:  core_radius : Core radius of the vesicle
+[DISP_PARAMS] = radius,thickness
+[DESCRIPTION] =<text>Model parameters:  radius : core radius of the vesicle
 		thickness: shell thickness
 		core_sld: core scattering length density
 		shell_sld: shell scattering length density
 		background: incoherent background
 		scale : scale factor
 </text>
-[FIXED]=  core_radius.width; thickness.width
+[FIXED]=  radius.width; thickness.width
 [ORIENTATION_PARAMS]= <text> </text>
  */
 typedef struct {
@@ -21,8 +21,8 @@ typedef struct {
     double scale;
 
     ///	Core radius of the vesicle [A]
-    //  [DEFAULT]=core_radius= 100.0 [A]
-    double core_radius;
+    //  [DEFAULT]=radius= 100.0 [A]
+    double radius;
 
 	///	shell thickness [Å]
     //  [DEFAULT]=thickness= 30.0 [A]

@@ -35,8 +35,8 @@ HollowCylinderModel :: HollowCylinderModel() {
 	scale      = Parameter(1.0);
 	core_radius = Parameter(20.0, true);
 	core_radius.set_min(0.0);
-	shell_radius  = Parameter(30.0, true);
-	shell_radius.set_min(0.0);
+	radius  = Parameter(30.0, true);
+	radius.set_min(0.0);
 	length     = Parameter(400.0, true);
 	length.set_min(0.0);
 	contrast  = Parameter(5.3e-6);
@@ -56,7 +56,7 @@ double HollowCylinderModel :: operator()(double q) {
 
 	dp[0] = scale();
 	dp[1] = core_radius();
-	dp[2] = shell_radius();
+	dp[2] = radius();
 	dp[3] = length();
 	dp[4] = contrast();
 	dp[5] = 0.0;
@@ -66,8 +66,8 @@ double HollowCylinderModel :: operator()(double q) {
 	core_radius.get_weights(weights_core_radius);
 
 	// Get the dispersion points for the shell radius
-	vector<WeightPoint> weights_shell_radius;
-	shell_radius.get_weights(weights_shell_radius);
+	vector<WeightPoint> weights_radius;
+	radius.get_weights(weights_radius);
 
 	// Get the dispersion points for the length
 	vector<WeightPoint> weights_length;
@@ -86,16 +86,16 @@ double HollowCylinderModel :: operator()(double q) {
 			dp[3] = weights_length[j].value;
 
 			// Loop over shell radius weight points
-			for(int k=0; k< (int)weights_shell_radius.size(); k++) {
-				dp[2] = weights_shell_radius[k].value;
+			for(int k=0; k< (int)weights_radius.size(); k++) {
+				dp[2] = weights_radius[k].value;
 
 				sum += weights_core_radius[i].weight
 					* weights_length[j].weight
-					* weights_shell_radius[k].weight
+					* weights_radius[k].weight
 					* HollowCylinder(dp, q);
 				norm += weights_core_radius[i].weight
 				* weights_length[j].weight
-				* weights_shell_radius[k].weight;
+				* weights_radius[k].weight;
 			}
 		}
 	}
@@ -113,7 +113,7 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 	// Fill parameter array
 	dp.scale      = scale();
 	dp.core_radius     = core_radius();
-	dp.shell_radius  = shell_radius();
+	dp.radius  = radius();
 	dp.length     = length();
 	dp.contrast   = contrast();
 	dp.background = 0.0;
@@ -125,8 +125,8 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 	core_radius.get_weights(weights_core_radius);
 
 	// Get the dispersion points for the shell radius
-	vector<WeightPoint> weights_shell_radius;
-	shell_radius.get_weights(weights_shell_radius);
+	vector<WeightPoint> weights_radius;
+	radius.get_weights(weights_radius);
 
 	// Get the dispersion points for the length
 	vector<WeightPoint> weights_length;
@@ -154,8 +154,8 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 			dp.length = weights_length[j].value;
 
 			// Loop over shell radius weight points
-			for(int m=0; m< (int)weights_shell_radius.size(); m++) {
-				dp.shell_radius = weights_shell_radius[m].value;
+			for(int m=0; m< (int)weights_radius.size(); m++) {
+				dp.radius = weights_radius[m].value;
 
 			// Average over theta distribution
 			for(int k=0; k< (int)weights_theta.size(); k++) {
@@ -167,7 +167,7 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 
 					double _ptvalue = weights_core_radius[i].weight
 						* weights_length[j].weight
-						* weights_shell_radius[m].weight
+						* weights_radius[m].weight
 						* weights_theta[k].weight
 						* weights_phi[l].weight
 						* hollow_cylinder_analytical_2DXY(&dp, qx, qy);
@@ -178,7 +178,7 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 
 					norm += weights_core_radius[i].weight
 						* weights_length[j].weight
-						* weights_shell_radius[m].weight
+						* weights_radius[m].weight
 						* weights_theta[k].weight
 						* weights_phi[l].weight;
 

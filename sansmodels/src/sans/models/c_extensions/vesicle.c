@@ -16,18 +16,18 @@
  */
 double vesicle_analytical_1D(VesicleParameters *pars, double q) {
 	double dp[6];
-	
+
 	dp[0] = pars->scale;
-	dp[1] = pars->core_radius;
+	dp[1] = pars->radius;
 	dp[2] = pars->thickness;
 	dp[3] = pars->core_sld;
 	dp[4] = pars->shell_sld;
 	dp[5] = pars->background;
 
-	
+
 	return VesicleForm(dp, q);
 }
-    
+
 /**
  * Function to evaluate 2D scattering function
  * @param pars: parameters of the vesicle
@@ -39,5 +39,5 @@ double vesicle_analytical_2D(VesicleParameters *pars, double q, double phi) {
 }
 
 double vesicle_analytical_2DXY(VesicleParameters *pars, double qx, double qy){
-	return vesicle_analytical_1D(pars,sqrt(qx*qx+qy*qy));	
+	return vesicle_analytical_1D(pars,sqrt(qx*qx+qy*qy));
 }

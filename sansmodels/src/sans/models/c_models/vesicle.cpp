@@ -31,8 +31,8 @@ extern "C" {
 
 VesicleModel :: VesicleModel() {
 	scale      = Parameter(1.0);
-	core_radius     = Parameter(100.0, true);
-	core_radius.set_min(0.0);
+	radius     = Parameter(100.0, true);
+	radius.set_min(0.0);
 	thickness  = Parameter(30.0, true);
 	thickness.set_min(0.0);
 	core_sld   = Parameter(6.36e-6);
@@ -52,7 +52,7 @@ double VesicleModel :: operator()(double q) {
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
 	dp[0] = scale();
-	dp[1] = core_radius();
+	dp[1] = radius();
 	dp[2] = thickness();
 	dp[3] = core_sld();
 	dp[4] = shell_sld();
@@ -60,8 +60,8 @@ double VesicleModel :: operator()(double q) {
 
 
 	// Get the dispersion points for the core radius
-	vector<WeightPoint> weights_core_radius;
-	core_radius.get_weights(weights_core_radius);
+	vector<WeightPoint> weights_radius;
+	radius.get_weights(weights_radius);
 	// Get the dispersion points for the thickness
 	vector<WeightPoint> weights_thickness;
 	thickness.get_weights(weights_thickness);
@@ -71,13 +71,13 @@ double VesicleModel :: operator()(double q) {
 	double norm = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i< (int)weights_core_radius.size(); i++) {
-		dp[1] = weights_core_radius[i].value;
-		for(int j=0; j< (int)weights_core_radius.size(); j++) {
+	for(int i=0; i< (int)weights_radius.size(); i++) {
+		dp[1] = weights_radius[i].value;
+		for(int j=0; j< (int)weights_thickness.size(); j++) {
 			dp[2] = weights_thickness[j].value;
-			sum += weights_core_radius[i].weight
+			sum += weights_radius[i].weight
 				* weights_thickness[j].weight * VesicleForm(dp, q);
-			norm += weights_core_radius[i].weight * weights_thickness[j].weight;
+			norm += weights_radius[i].weight * weights_thickness[j].weight;
 		}
 	}
 	return sum/norm + background();

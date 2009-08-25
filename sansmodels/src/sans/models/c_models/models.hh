@@ -493,7 +493,7 @@ public:
 	// Model parameters
 	Parameter scale;
 	Parameter core_radius;
-	Parameter shell_radius;
+	Parameter radius;
 	Parameter length;
 	Parameter contrast;
 	Parameter background;
@@ -534,7 +534,7 @@ class VesicleModel{
 public:
 	// Model parameters
 	Parameter scale;
-	Parameter core_radius;
+	Parameter radius;
 	Parameter thickness;
 	Parameter core_sld;
 	Parameter shell_sld;

@@ -90,8 +90,8 @@ CHollowCylinderModel_init(CHollowCylinderModel *self, PyObject *args, PyObject *
         PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.570000));
         PyDict_SetItemString(self->params,"length",Py_BuildValue("d",400.000000));
         PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",0.000000));
+        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",30.000000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.010000));
-        PyDict_SetItemString(self->params,"shell_radius",Py_BuildValue("d",30.000000));
         PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000005));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
@@ -100,8 +100,8 @@ CHollowCylinderModel_init(CHollowCylinderModel *self, PyObject *args, PyObject *
         self->model->core_radius.dispersion->accept_as_source(visitor, self->model->core_radius.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "core_radius", disp_dict);
         disp_dict = PyDict_New();
-        self->model->shell_radius.dispersion->accept_as_source(visitor, self->model->shell_radius.dispersion, disp_dict);
-        PyDict_SetItemString(self->dispersion, "shell_radius", disp_dict);
+        self->model->radius.dispersion->accept_as_source(visitor, self->model->radius.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "radius", disp_dict);
         disp_dict = PyDict_New();
         self->model->length.dispersion->accept_as_source(visitor, self->model->length.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "length", disp_dict);
@@ -247,16 +247,16 @@ static PyObject * evalDistribution(CHollowCylinderModel *self, PyObject *args){
     self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
     self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
     self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
+    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->shell_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "shell_radius") );
     self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
     disp_dict = PyDict_GetItemString(self->dispersion, "core_radius");
     self->model->core_radius.dispersion->accept_as_destination(visitor, self->model->core_radius.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "shell_radius");
-    self->model->shell_radius.dispersion->accept_as_destination(visitor, self->model->shell_radius.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "radius");
+    self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "length");
     self->model->length.dispersion->accept_as_destination(visitor, self->model->length.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
@@ -330,16 +330,16 @@ static PyObject * run(CHollowCylinderModel *self, PyObject *args) {
     self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
     self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
     self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
+    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->shell_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "shell_radius") );
     self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
     disp_dict = PyDict_GetItemString(self->dispersion, "core_radius");
     self->model->core_radius.dispersion->accept_as_destination(visitor, self->model->core_radius.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "shell_radius");
-    self->model->shell_radius.dispersion->accept_as_destination(visitor, self->model->shell_radius.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "radius");
+    self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "length");
     self->model->length.dispersion->accept_as_destination(visitor, self->model->length.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
@@ -402,16 +402,16 @@ static PyObject * runXY(CHollowCylinderModel *self, PyObject *args) {
     self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
     self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
     self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
+    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->shell_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "shell_radius") );
     self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
     disp_dict = PyDict_GetItemString(self->dispersion, "core_radius");
     self->model->core_radius.dispersion->accept_as_destination(visitor, self->model->core_radius.dispersion, disp_dict);
-    disp_dict = PyDict_GetItemString(self->dispersion, "shell_radius");
-    self->model->shell_radius.dispersion->accept_as_destination(visitor, self->model->shell_radius.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "radius");
+    self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "length");
     self->model->length.dispersion->accept_as_destination(visitor, self->model->length.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
@@ -475,8 +475,8 @@ static PyObject * set_dispersion(CHollowCylinderModel *self, PyObject *args) {
 	    // TODO: refactor this
     if (!strcmp(par_name, "core_radius")) {
         self->model->core_radius.dispersion = dispersion;
-    } else    if (!strcmp(par_name, "shell_radius")) {
-        self->model->shell_radius.dispersion = dispersion;
+    } else    if (!strcmp(par_name, "radius")) {
+        self->model->radius.dispersion = dispersion;
     } else    if (!strcmp(par_name, "length")) {
         self->model->length.dispersion = dispersion;
     } else    if (!strcmp(par_name, "axis_theta")) {

@@ -86,17 +86,17 @@ CVesicleModel_init(CVesicleModel *self, PyObject *args, PyObject *kwds)
         
         // Initialize parameter dictionary
         PyDict_SetItemString(self->params,"core_sld",Py_BuildValue("d",0.000006));
-        PyDict_SetItemString(self->params,"core_radius",Py_BuildValue("d",100.000000));
         PyDict_SetItemString(self->params,"thickness",Py_BuildValue("d",30.000000));
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
+        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",100.000000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000));
         PyDict_SetItemString(self->params,"shell_sld",Py_BuildValue("d",0.000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
         disp_dict = PyDict_New();
-        self->model->core_radius.dispersion->accept_as_source(visitor, self->model->core_radius.dispersion, disp_dict);
-        PyDict_SetItemString(self->dispersion, "core_radius", disp_dict);
+        self->model->radius.dispersion->accept_as_source(visitor, self->model->radius.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "radius", disp_dict);
         disp_dict = PyDict_New();
         self->model->thickness.dispersion->accept_as_source(visitor, self->model->thickness.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "thickness", disp_dict);
@@ -232,16 +232,16 @@ static PyObject * evalDistribution(CVesicleModel *self, PyObject *args){
 	
 	    // Reader parameter dictionary
     self->model->core_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_sld") );
-    self->model->core_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_radius") );
     self->model->thickness = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thickness") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->shell_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "shell_sld") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "core_radius");
-    self->model->core_radius.dispersion->accept_as_destination(visitor, self->model->core_radius.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "radius");
+    self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thickness");
     self->model->thickness.dispersion->accept_as_destination(visitor, self->model->thickness.dispersion, disp_dict);
 
@@ -307,16 +307,16 @@ static PyObject * run(CVesicleModel *self, PyObject *args) {
 	
 	    // Reader parameter dictionary
     self->model->core_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_sld") );
-    self->model->core_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_radius") );
     self->model->thickness = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thickness") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->shell_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "shell_sld") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "core_radius");
-    self->model->core_radius.dispersion->accept_as_destination(visitor, self->model->core_radius.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "radius");
+    self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thickness");
     self->model->thickness.dispersion->accept_as_destination(visitor, self->model->thickness.dispersion, disp_dict);
 
@@ -371,16 +371,16 @@ static PyObject * runXY(CVesicleModel *self, PyObject *args) {
 	
 	    // Reader parameter dictionary
     self->model->core_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_sld") );
-    self->model->core_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_radius") );
     self->model->thickness = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thickness") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->shell_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "shell_sld") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "core_radius");
-    self->model->core_radius.dispersion->accept_as_destination(visitor, self->model->core_radius.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "radius");
+    self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thickness");
     self->model->thickness.dispersion->accept_as_destination(visitor, self->model->thickness.dispersion, disp_dict);
 
@@ -438,8 +438,8 @@ static PyObject * set_dispersion(CVesicleModel *self, PyObject *args) {
 
 	// Ugliness necessary to go from python to C
 	    // TODO: refactor this
-    if (!strcmp(par_name, "core_radius")) {
-        self->model->core_radius.dispersion = dispersion;
+    if (!strcmp(par_name, "radius")) {
+        self->model->radius.dispersion = dispersion;
     } else    if (!strcmp(par_name, "thickness")) {
         self->model->thickness.dispersion = dispersion;
     } else {
