@@ -5,8 +5,8 @@ double HardSphereStruct(double dp[], double q);
 double SquareWellStruct(double dp[], double q);
 double StickyHS_Struct(double dp[], double q);
 double HayterPenfoldMSA(double dp[], double q);
-double DiamCyl(double a, double b);
-double DiamEllip(double a, double b);
+double DiamCyl(double aa, double bb);
+double DiamEllip(double hcyl, double rcyl);
 
 static double gMSAWave[17]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};
 
