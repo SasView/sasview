@@ -98,7 +98,8 @@ class ModelPage(BasicPage):
              call back for model selection
         """    
         self._on_select_model_helper() 
-
+        #Reset dispersity that was not done in _on_select_model_helper() 
+        self._reset_dispersity()
         self.select_model(self.model)
         
        
