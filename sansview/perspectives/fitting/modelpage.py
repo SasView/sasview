@@ -301,37 +301,32 @@ class ModelPage(BasicPage):
             self._draw_model()
             self.model_view.Disable()
            
-            #ToDo:cleanup this mess.  resets orient param on 2D when polydis. is on.  
-            #broken since _set_sizer_gaussian() was removed from the code.  
             n = self.disp_box.GetCurrentSelection()
             dispersity= self.disp_box.GetClientData(n)
- 
+            #TODO:Find a better way to reinitialize the parameters containers 
+            # when resetting the page and 2D view is enable
+            #self.set_model_param_sizer(self.model): called here is using a lot
+            #of for loops and redraw the sizer again .How to avoid it?
             self.set_model_param_sizer(self.model)
-            self._set_sizer_dispersion(dispersity)
             
             if len(self.orientation_params)>0:
-                #recover hidden orient. param.s
-                #for item in self.temp:
-                #    for num in range(len(item)):
-                #        item[num].Show(True)
                 for item in self.orientation_params:
                     if item[2]!=None:      
-                        #item[2].Show()
                         item[2].Enable()
-            
-            if  self.disp_name.lower() == "array":                
+            # same as above why do we have to redraw the sizer of dispersity to get
+            # the appropriate value of parameters containers on reset page?
+            # Reset containers of dispersity parameters for the appropriate dispersity
+            #and model
+            if  self.disp_name.lower()in ["array","arraydispersion"]:                
                 self._set_sizer_arraydispersion()  
             else:
-
+                self._set_sizer_dispersion(dispersity)
                 if len(self.orientation_params_disp)>0:
-                    #for item in self.temp:
-                    #    for num in range(len(item)):
-                    #        item[num].Show(True)
-                    
+                   
                     for item in self.orientation_params_disp:
                         if item[2]!=None:
-                            #item[2].Show()
                             item[2].Enable()
+                            
         self.state.enable2D =  copy.deepcopy(self.enable2D)
         self.Layout()
         ## post state to fit panel

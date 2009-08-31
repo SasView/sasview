@@ -1086,10 +1086,8 @@ class BasicPage(wx.ScrolledWindow):
                             self.formfactorbox.SetSelection(i)
                             break
                     break
-        ## save state and post
-        
-                    
-        
+    
+    
     def _draw_model(self):
         """
             Method to draw or refresh a plotted model.
@@ -1400,16 +1398,20 @@ class BasicPage(wx.ScrolledWindow):
  
     def _set_dipers_Param(self, event):
         """
-            Add more item to select user dispersity
+            respond to self.enable_disp and self.disable_disp radio box.
+            The dispersity object is reset inside the model into Gaussian. 
+            When the user select yes , this method display a combo box for more selection
+            when the user selects No,the combo box disappears.
+            Redraw the model with the default dispersity (Gaussian)
         """
+        
         self._reset_dispersity()
-
+    
         if self.model ==None:
             self.model_disp.Hide()
             self.disp_box.Hide()
             self.sizer4_4.Clear(True)
-            ## save the state of the dispersity
-            #self.save_current_state()
+      
             return
             
         if self.enable_disp.GetValue():
@@ -1436,7 +1438,7 @@ class BasicPage(wx.ScrolledWindow):
             self._undo.Enable(True)
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event)
-        
+        #draw the model with the current dispersity
         self._draw_model()
         self.sizer4_4.Layout()
         self.sizer4.Layout()
@@ -1505,7 +1507,7 @@ class BasicPage(wx.ScrolledWindow):
                 except:
                     pass
 				# Redraw the model
-                self._draw_model()
+                #self._draw_model()
         ## save state into
         self.save_current_state()
         self.sizer4_4.Layout()
