@@ -15,11 +15,11 @@
  * @return: 2 virial coefficient value
  */
 double DiamEllips_analytical_1D(DiamEllipsParameters *pars, double q) {
-	double dp[2];
+	double ell_a, ell_b;
 
-	dp[0] = pars->radius_a;
-	dp[1] = pars->radius_b;
-	return DiamEllip(dp, q);
+	ell_a = pars->radius_a;
+	ell_b = pars->radius_b;
+	return DiamEllip(ell_a, ell_b);
 }
 
 /**

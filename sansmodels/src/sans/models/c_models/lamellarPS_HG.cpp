@@ -128,6 +128,14 @@ double LamellarPSHGModel :: operator()(double qx, double qy) {
 double LamellarPSHGModel :: evaluate_rphi(double q, double phi) {
 	return (*this).operator()(q);
 }
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double LamellarPSHGModel :: calculate_ER() {
+//NOT implemented yet!!!
+}
 
 /*
 double LamellarPSHGModel :: operator()(double qx, double qy) {

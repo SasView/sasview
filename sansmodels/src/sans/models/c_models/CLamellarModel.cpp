@@ -346,7 +346,33 @@ static PyObject * run(CLamellarModel *self, PyObject *args) {
 		return Py_BuildValue("d",(*(self->model))(q_value));
 	}	
 }
+/**
+ * Function to call to calculate_ER
+ * @return: effective radius value 
+ */
+static PyObject * calculate_ER(CLamellarModel *self) {
 
+	PyObject* pars;
+	int npars;
+	
+	// Get parameters
+	
+	    // Reader parameter dictionary
+    self->model->sld_sol = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_sol") );
+    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->bi_thick = PyFloat_AsDouble( PyDict_GetItemString(self->params, "bi_thick") );
+    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->sld_bi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_bi") );
+    // Read in dispersion parameters
+    PyObject* disp_dict;
+    DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "bi_thick");
+    self->model->bi_thick.dispersion->accept_as_destination(visitor, self->model->bi_thick.dispersion, disp_dict);
+
+		
+	return Py_BuildValue("d",(*(self->model)).calculate_ER());
+
+}
 /**
  * Function to call to evaluate model in cartesian coordinates
  * @param args: input q or [qx, qy]]
@@ -446,6 +472,8 @@ static PyMethodDef CLamellarModel_methods[] = {
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy"},
+    {"calculate_ER",      (PyCFunction)calculate_ER     , METH_VARARGS,
+      "Evaluate the model at a given Q or Q, phi"},
       
     {"evalDistribution",  (PyCFunction)evalDistribution , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy vector "},

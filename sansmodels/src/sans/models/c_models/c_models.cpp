@@ -18,8 +18,6 @@ void addCHardsphereStructure(PyObject *module);
 void addCStickyHSStructure(PyObject *module);
 void addCSquareWellStructure(PyObject *module);
 void addCHayterMSAStructure(PyObject *module);
-void addCDiamEllipFunc(PyObject *module);
-void addCDiamCylFunc(PyObject *module);
 void addCCoreShellModel(PyObject *module);
 void addCCoreShellCylinderModel(PyObject *module);
 void addCEllipsoidModel(PyObject *module);
@@ -30,8 +28,11 @@ void addCStackedDisksModel(PyObject *module);
 void addCLamellarPSModel(PyObject *module);
 void addCLamellarPSHGModel(PyObject *module);
 void addCCoreShellEllipsoidModel(PyObject *module);
-void addCOblateModel(PyObject *module);
-void addCProlateModel(PyObject *module);
+void addCDiamEllipFunc(PyObject *module);
+void addCDiamCylFunc(PyObject *module);
+
+//void addCOblateModel(PyObject *module);
+//void addCProlateModel(PyObject *module);
 void addCLamellarModel(PyObject *module);
 void addCLamellarFFHGModel(PyObject *module);
 void addCHollowCylinderModel(PyObject *module);
@@ -217,8 +218,6 @@ initc_models(void)
 	addCStickyHSStructure(m);
 	addCSquareWellStructure(m);
 	addCHayterMSAStructure(m);
-	addCDiamEllipFunc(m);
-	addCDiamCylFunc(m);
 	addCEllipticalCylinderModel(m);
 	addCTriaxialEllipsoidModel(m);
 	addCFlexibleCylinderModel(m);
@@ -226,8 +225,11 @@ initc_models(void)
 	addCLamellarPSModel(m);
 	addCLamellarPSHGModel(m);
 	addCCoreShellEllipsoidModel(m);
-	addCOblateModel(m);
-	addCProlateModel(m);
+	addCDiamEllipFunc(m);
+	addCDiamCylFunc(m);
+
+//	addCOblateModel(m);
+//	addCProlateModel(m);
 	addCLamellarModel(m);
 	addCLamellarFFHGModel(m);
 	addCHollowCylinderModel(m);

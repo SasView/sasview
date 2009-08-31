@@ -309,7 +309,22 @@ static PyObject * run([PYTHONCLASS] *self, PyObject *args) {
 		return Py_BuildValue("d",(*(self->model))(q_value));
 	}	
 }
+/**
+ * Function to call to calculate_ER
+ * @return: effective radius value 
+ */
+static PyObject * calculate_ER([PYTHONCLASS] *self) {
 
+	PyObject* pars;
+	int npars;
+	
+	// Get parameters
+	
+	[READDICTIONARY]
+		
+	return Py_BuildValue("d",(*(self->model)).calculate_ER());
+
+}
 /**
  * Function to call to evaluate model in cartesian coordinates
  * @param args: input q or [qx, qy]]
@@ -394,6 +409,8 @@ static PyMethodDef [PYTHONCLASS]_methods[] = {
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy"},
+    {"calculate_ER",      (PyCFunction)calculate_ER     , METH_VARARGS,
+      "Evaluate the model at a given Q or Q, phi"},
       
     {"evalDistribution",  (PyCFunction)evalDistribution , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy vector "},

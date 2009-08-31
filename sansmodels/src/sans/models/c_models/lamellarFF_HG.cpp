@@ -112,3 +112,11 @@ double LamellarFFHGModel :: operator()(double qx, double qy) {
 double LamellarFFHGModel :: evaluate_rphi(double q, double phi) {
 	return (*this).operator()(q);
 }
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double LamellarFFHGModel :: calculate_ER() {
+//NOT implemented yet!!!
+}

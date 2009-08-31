@@ -333,7 +333,29 @@ static PyObject * run(CLorentzian *self, PyObject *args) {
 		return Py_BuildValue("d",(*(self->model))(q_value));
 	}	
 }
+/**
+ * Function to call to calculate_ER
+ * @return: effective radius value 
+ */
+static PyObject * calculate_ER(CLorentzian *self) {
 
+	PyObject* pars;
+	int npars;
+	
+	// Get parameters
+	
+	    // Reader parameter dictionary
+    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->center = PyFloat_AsDouble( PyDict_GetItemString(self->params, "center") );
+    self->model->gamma = PyFloat_AsDouble( PyDict_GetItemString(self->params, "gamma") );
+    // Read in dispersion parameters
+    PyObject* disp_dict;
+    DispersionVisitor* visitor = new DispersionVisitor();
+
+		
+	return Py_BuildValue("d",(*(self->model)).calculate_ER());
+
+}
 /**
  * Function to call to evaluate model in cartesian coordinates
  * @param args: input q or [qx, qy]]
@@ -427,6 +449,8 @@ static PyMethodDef CLorentzian_methods[] = {
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy"},
+    {"calculate_ER",      (PyCFunction)calculate_ER     , METH_VARARGS,
+      "Evaluate the model at a given Q or Q, phi"},
       
     {"evalDistribution",  (PyCFunction)evalDistribution , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy vector "},

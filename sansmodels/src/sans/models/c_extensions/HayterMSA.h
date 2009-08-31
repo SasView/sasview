@@ -5,7 +5,7 @@
  * Structure definition for screened Coulomb interaction
  */
  //[PYTHONCLASS] = HayterMSAStructure
- //[DISP_PARAMS] = radius
+ //[DISP_PARAMS] = effect_radius
  //[DESCRIPTION] =<text>To calculate the structure factor (the Fourier transform of the
  //                     pair correlation function g(r)) for a system of
  //                     charged, spheroidal objects in a dielectric
@@ -21,12 +21,12 @@
  //                           Physics 46, 651-656 (1982).
  //
  //				</text>
- //[FIXED]= radius.width
+ //[FIXED]= effect_radius.width
 
 typedef struct {
-    ///	Radius of particle [A]
-    //  [DEFAULT]=radius=20.75 [A]
-    double radius;
+    ///	effetitve radius of particle [A]
+    //  [DEFAULT]=effect_radius=20.75 [A]
+    double effect_radius;
 
     /// charge
     //  [DEFAULT]=charge= 19

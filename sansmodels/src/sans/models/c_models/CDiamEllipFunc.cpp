@@ -344,7 +344,32 @@ static PyObject * run(CDiamEllipFunc *self, PyObject *args) {
 		return Py_BuildValue("d",(*(self->model))(q_value));
 	}	
 }
+/**
+ * Function to call to calculate_ER
+ * @return: effective radius value 
+ */
+static PyObject * calculate_ER(CDiamEllipFunc *self) {
 
+	PyObject* pars;
+	int npars;
+	
+	// Get parameters
+	
+	    // Reader parameter dictionary
+    self->model->radius_b = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius_b") );
+    self->model->radius_a = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius_a") );
+    // Read in dispersion parameters
+    PyObject* disp_dict;
+    DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "radius_a");
+    self->model->radius_a.dispersion->accept_as_destination(visitor, self->model->radius_a.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "radius_b");
+    self->model->radius_b.dispersion->accept_as_destination(visitor, self->model->radius_b.dispersion, disp_dict);
+
+		
+	return Py_BuildValue("d",(*(self->model)).calculate_ER());
+
+}
 /**
  * Function to call to evaluate model in cartesian coordinates
  * @param args: input q or [qx, qy]]
@@ -445,6 +470,8 @@ static PyMethodDef CDiamEllipFunc_methods[] = {
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy"},
+    {"calculate_ER",      (PyCFunction)calculate_ER     , METH_VARARGS,
+      "Evaluate the model at a given Q or Q, phi"},
       
     {"evalDistribution",  (PyCFunction)evalDistribution , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy vector "},

@@ -28,6 +28,7 @@ using namespace std;
 
 extern "C" {
 	#include "libCylinder.h"
+	#include "libStructureFactor.h"
 	#include "spheroid.h"
 }
 
@@ -139,10 +140,17 @@ double OblateModel :: operator()(double qx, double qy) {
  * @return: function value
  */
 double CoreShellEllipsoidModel :: evaluate_rphi(double q, double phi) {
-	return (*this).operator()(q);
+	double qx = q*cos(phi);
+	double qy = q*sin(phi);
+	return (*this).operator()(qx, qy);
 }
 
-
+/**
+ * Function to evaluate 2D scattering function
+ * @param q_x: value of Q along x
+ * @param q_y: value of Q along y
+ * @return: function value
+ */
 double CoreShellEllipsoidModel :: operator()(double qx, double qy) {
 	SpheroidParameters dp;
 	// Fill parameter array
@@ -153,7 +161,7 @@ double CoreShellEllipsoidModel :: operator()(double qx, double qy) {
 	dp.polar_shell = polar_shell();
 	dp.contrast = contrast();
 	dp.sld_solvent = sld_solvent();
-	dp.background = background();
+	dp.background = 0.0;
 	dp.axis_theta = axis_theta();
 	dp.axis_phi = axis_phi();
 
@@ -236,3 +244,49 @@ double CoreShellEllipsoidModel :: operator()(double qx, double qy) {
 	return sum/norm + background();
 }
 
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double CoreShellEllipsoidModel :: calculate_ER() {
+	SpheroidParameters dp;
+
+	dp.equat_shell = equat_shell();
+	dp.polar_shell = polar_shell();
+
+	double rad_out = 0.0;
+
+	// Perform the computation, with all weight points
+	double sum = 0.0;
+	double norm = 0.0;
+
+	// Get the dispersion points for the major shell
+	vector<WeightPoint> weights_equat_shell;
+	equat_shell.get_weights(weights_equat_shell);
+
+	// Get the dispersion points for the minor shell
+	vector<WeightPoint> weights_polar_shell;
+	polar_shell.get_weights(weights_polar_shell);
+
+	// Loop over major shell weight points
+	for(int i=0; i< (int)weights_equat_shell.size(); i++) {
+		dp.equat_shell = weights_equat_shell[i].value;
+		for(int k=0; k< (int)weights_polar_shell.size(); k++) {
+			dp.polar_shell = weights_polar_shell[k].value;
+			//Note: output of "DiamEllip(dp.polar_shell,dp.equat_shell)" is DIAMETER.
+			sum +=weights_equat_shell[i].weight
+				* weights_polar_shell[k].weight*DiamEllip(dp.polar_shell,dp.equat_shell)/2.0;
+			norm += weights_equat_shell[i].weight* weights_polar_shell[k].weight;
+		}
+	}
+	if (norm != 0){
+		//return the averaged value
+		rad_out =  sum/norm;}
+	else{
+		//return normal value
+		//Note: output of "DiamEllip(dp.polar_shell,dp.equat_shell)" is DIAMETER.
+		rad_out = DiamEllip(dp.polar_shell,dp.equat_shell)/2.0;}
+
+	return rad_out;
+}

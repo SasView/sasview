@@ -64,15 +64,15 @@ class CoreShellEllipsoidModel(CCoreShellEllipsoidModel, BaseComponent):
 		equat_core = equatorial radius of core,
 		polar_core = polar radius of core,
 		equat_shell = equatorial radius of shell,
-		polar_shell = polar radius of shell,
+		polar_shell = polar radius (revolution axis) of shell,
 		contrast = SLD_core - SLD_shell
 		sld_solvent = SLD_solvent
 		background = Incoherent bkg
 		scale =scale
 		Note:It is the users' responsibility to ensure
 		that shell radii are larger than core radii.
-		oblate shell: equatorial radius > polar radius
-		prolate shell: equatorial radius < polar radius"""
+		oblate: polar radius < equatorial radius
+		prolate :  polar radius > equatorial radius"""
        
 		## Parameter details [units, min, max]
         self.details = {}
@@ -119,6 +119,13 @@ class CoreShellEllipsoidModel(CCoreShellEllipsoidModel, BaseComponent):
             @return: scattering function P(q[])
         """
         return CCoreShellEllipsoidModel.evalDistribition(self, x)
+        
+    def calculate_ER(self):
+        """ Calculate the effective radius for P(q)*S(q)
+            @param x: input q, or [q,phi]
+            @return: the value of the effective radius
+        """       
+        return CCoreShellEllipsoidModel.calculate_ER(self)
         
     def set_dispersion(self, parameter, dispersion):
         """

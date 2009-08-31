@@ -395,7 +395,48 @@ static PyObject * run(CStackedDisksModel *self, PyObject *args) {
 		return Py_BuildValue("d",(*(self->model))(q_value));
 	}	
 }
+/**
+ * Function to call to calculate_ER
+ * @return: effective radius value 
+ */
+static PyObject * calculate_ER(CStackedDisksModel *self) {
 
+	PyObject* pars;
+	int npars;
+	
+	// Get parameters
+	
+	    // Reader parameter dictionary
+    self->model->core_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_sld") );
+    self->model->core_thick = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_thick") );
+    self->model->layer_thick = PyFloat_AsDouble( PyDict_GetItemString(self->params, "layer_thick") );
+    self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
+    self->model->layer_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "layer_sld") );
+    self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
+    self->model->solvent_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "solvent_sld") );
+    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
+    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->sigma_d = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sigma_d") );
+    self->model->n_stacking = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_stacking") );
+    // Read in dispersion parameters
+    PyObject* disp_dict;
+    DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "core_thick");
+    self->model->core_thick.dispersion->accept_as_destination(visitor, self->model->core_thick.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "layer_thick");
+    self->model->layer_thick.dispersion->accept_as_destination(visitor, self->model->layer_thick.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "radius");
+    self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
+    self->model->axis_theta.dispersion->accept_as_destination(visitor, self->model->axis_theta.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "axis_phi");
+    self->model->axis_phi.dispersion->accept_as_destination(visitor, self->model->axis_phi.dispersion, disp_dict);
+
+		
+	return Py_BuildValue("d",(*(self->model)).calculate_ER());
+
+}
 /**
  * Function to call to evaluate model in cartesian coordinates
  * @param args: input q or [qx, qy]]
@@ -518,6 +559,8 @@ static PyMethodDef CStackedDisksModel_methods[] = {
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy"},
+    {"calculate_ER",      (PyCFunction)calculate_ER     , METH_VARARGS,
+      "Evaluate the model at a given Q or Q, phi"},
       
     {"evalDistribution",  (PyCFunction)evalDistribution , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy vector "},

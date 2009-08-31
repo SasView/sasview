@@ -99,3 +99,11 @@ double LamellarModel :: operator()(double qx, double qy) {
 double LamellarModel :: evaluate_rphi(double q, double phi) {
 	return (*this).operator()(q);
 }
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double LamellarModel :: calculate_ER() {
+//NOT implemented yet!!!
+}

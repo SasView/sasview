@@ -15,11 +15,12 @@
  * @return: 2 virial coefficient value
  */
 double DiamCyld_analytical_1D(DiamCyldParameters *pars, double q) {
-	double dp[2];
+	double cylh;
+	double cylr;
 
-	dp[0] = pars->radius;
-	dp[1] = pars->length;
-	return DiamCyl(dp, q);
+	cylr = pars->radius;
+	cylh = pars->length;
+	return DiamCyl(cylh, cylr);
 }
 
 /**

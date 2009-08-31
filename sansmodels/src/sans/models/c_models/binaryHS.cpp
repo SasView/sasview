@@ -27,6 +27,7 @@ using namespace std;
 
 extern "C" {
 	#include "libSphere.h"
+	#include "binaryHS.h"
 }
 
 BinaryHSModel :: BinaryHSModel() {
@@ -113,3 +114,14 @@ double BinaryHSModel :: operator()(double qx, double qy) {
 double BinaryHSModel :: evaluate_rphi(double q, double phi) {
 	return (*this).operator()(q);
 }
+
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double BinaryHSModel :: calculate_ER() {
+	//NOT implemented yet!!!
+	double rad_out;
+}
+

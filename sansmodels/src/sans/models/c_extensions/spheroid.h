@@ -13,15 +13,15 @@
 			equat_core = equatorial radius of core,
 			polar_core = polar radius of core,
 			equat_shell = equatorial radius of shell,
-			polar_shell = polar radius of shell,
+			polar_shell = polar radius (revolution axis) of shell,
 			contrast = SLD_core - SLD_shell
 			sld_solvent = SLD_solvent
 			background = Incoherent bkg
 			scale =scale
 			Note:It is the users' responsibility to ensure
 			that shell radii are larger than core radii.
-			oblate shell: equatorial radius > polar radius
-			prolate shell: equatorial radius < polar radius
+			oblate: polar radius < equatorial radius
+			prolate :  polar radius > equatorial radius
 			</text>
 
    [FIXED] = <text>equat_core.width;polar_core.width; equat_shell.width; polar_shell.width; axis_phi.width; axis_theta.width</text>

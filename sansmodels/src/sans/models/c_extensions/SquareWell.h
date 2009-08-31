@@ -4,7 +4,7 @@
 /**Structure definition for SquareWell parameters
 */
 //   [PYTHONCLASS] = SquareWellStructure
-//   [DISP_PARAMS] = radius
+//   [DISP_PARAMS] = effect_radius
 //   [DESCRIPTION] = <text> Structure Factor for interacting particles:             .
 //
 //  The interaction potential is
@@ -13,7 +13,7 @@
 //			= -d    , 2R <= r <=2Rw
 //			= 0     , r >= 2Rw
 //
-//		R: radius (A)of the particle
+//		R: effective radius (A)of the particle
 //		v: volume fraction
 //		d: well depth
 //		w: well width; multiples of the
@@ -22,14 +22,14 @@
 //		Ref: Sharma, R. V.; Sharma,
 //      K. C., Physica, 1977, 89A, 213.
 //   			</text>
-//   [FIXED]= radius.width
+//   [FIXED]= effect_radius.width
 //[ORIENTATION_PARAMS]= <text> </text>
 
 
 typedef struct {
-    ///	Radius of particle [A]
-    //  [DEFAULT]=radius=50.0 [A]
-    double radius;
+    ///	effective radius of particle [A]
+    //  [DEFAULT]=effect_radius=50.0 [A]
+    double effect_radius;
 
     /// Volume fraction
     //  [DEFAULT]=volfraction= 0.040

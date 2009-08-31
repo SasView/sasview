@@ -27,6 +27,7 @@ using namespace std;
 
 extern "C" {
 	#include "libSphere.h"
+	#include "multishell.h"
 }
 
 MultiShellModel :: MultiShellModel() {
@@ -117,4 +118,60 @@ double MultiShellModel :: operator()(double qx, double qy) {
  */
 double MultiShellModel :: evaluate_rphi(double q, double phi) {
 	return (*this).operator()(q);
+}
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double MultiShellModel :: calculate_ER() {
+	MultiShellParameters dp;
+
+	dp.core_radius     = core_radius();
+	dp.s_thickness  = s_thickness();
+	dp.w_thickness  = w_thickness();
+	dp.n_pairs = n_pairs();
+
+	double rad_out = 0.0;
+
+	// Perform the computation, with all weight points
+	double sum = 0.0;
+	double norm = 0.0;
+	if (dp.n_pairs <= 0.0 ){
+		dp.n_pairs = 0.0;
+	}
+
+	// Get the dispersion points for the core radius
+	vector<WeightPoint> weights_core_radius;
+	core_radius.get_weights(weights_core_radius);
+
+	// Get the dispersion points for the s_thickness
+	vector<WeightPoint> weights_s_thickness;
+	s_thickness.get_weights(weights_s_thickness);
+
+	// Get the dispersion points for the w_thickness
+	vector<WeightPoint> weights_w_thickness;
+	w_thickness.get_weights(weights_w_thickness);
+
+	// Loop over major shell weight points
+	for(int i=0; i< (int)weights_s_thickness.size(); i++) {
+		dp.s_thickness = weights_s_thickness[i].value;
+		for(int j=0; j< (int)weights_w_thickness.size(); j++) {
+			dp.w_thickness = weights_w_thickness[j].value;
+			for(int k=0; k< (int)weights_core_radius.size(); k++) {
+				dp.core_radius = weights_core_radius[k].value;
+				sum += weights_s_thickness[i].weight*weights_w_thickness[j].weight
+					* weights_core_radius[k].weight*(dp.core_radius+dp.n_pairs*dp.s_thickness+(dp.n_pairs-1.0)*dp.w_thickness);
+				norm += weights_s_thickness[i].weight*weights_w_thickness[j].weight* weights_core_radius[k].weight;
+			}
+		}
+	}
+	if (norm != 0){
+		//return the averaged value
+		rad_out =  sum/norm;}
+	else{
+		//return normal value
+		rad_out = (dp.core_radius+dp.n_pairs*dp.s_thickness+(dp.n_pairs-1.0)*dp.w_thickness);}
+
+	return rad_out;
 }

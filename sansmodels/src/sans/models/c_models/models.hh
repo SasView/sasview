@@ -42,6 +42,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -65,6 +66,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -83,13 +85,14 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
 class HardsphereStructure{
 public:
 	// Model parameters
-	Parameter radius;
+	Parameter effect_radius;
 	Parameter volfraction;
 
 	// Constructor
@@ -98,13 +101,14 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
 class StickyHSStructure{
 public:
 	// Model parameters
-	Parameter radius;
+	Parameter effect_radius;
 	Parameter volfraction;
 	Parameter perturb;
 	Parameter stickiness;
@@ -115,13 +119,14 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
 class SquareWellStructure{
 public:
 	// Model parameters
-	Parameter radius;
+	Parameter effect_radius;
 	Parameter volfraction;
 	Parameter welldepth;
 	Parameter wellwidth;
@@ -132,13 +137,14 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
 class HayterMSAStructure{
 public:
 	// Model parameters
-	Parameter radius;
+	Parameter effect_radius;
 	Parameter charge;
 	Parameter volfraction;
 	Parameter temperature;
@@ -151,6 +157,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -166,6 +173,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -181,6 +189,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -201,6 +210,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -224,6 +234,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -244,6 +255,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -266,6 +278,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 class TriaxialEllipsoidModel{
@@ -287,6 +300,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -308,6 +322,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -333,6 +348,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -351,6 +367,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 
 };
@@ -372,6 +389,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 
 };
@@ -395,6 +413,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -418,6 +437,7 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -441,53 +461,10 @@ public:
 	// Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx, double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
-class OblateModel{
-public:
-	// Model parameters
-	Parameter scale;
-	Parameter major_core;
-	Parameter minor_core;
-	Parameter major_shell;
-	Parameter minor_shell;
-	Parameter contrast;
-	Parameter sld_solvent;
-	Parameter background;
-	Parameter axis_theta;
-	Parameter axis_phi;
-
-	// Constructor
-	OblateModel();
-
-	// Operators to get I(Q)
-	double operator()(double q);
-	double operator()(double qx, double qy);
-	double evaluate_rphi(double q, double phi);
-};
-class ProlateModel{
-public:
-	// Model parameters
-	Parameter scale;
-	Parameter major_core;
-	Parameter minor_core;
-	Parameter major_shell;
-	Parameter minor_shell;
-	Parameter contrast;
-	Parameter sld_solvent;
-	Parameter background;
-	Parameter axis_theta;
-	Parameter axis_phi;
-
-	// Constructor
-	ProlateModel();
-
-	// Operators to get I(Q)
-	double operator()(double q);
-	double operator()(double qx, double qy);
-	double evaluate_rphi(double q, double phi);
-};
 class HollowCylinderModel{
 public:
 	// Model parameters
@@ -506,6 +483,7 @@ public:
 	//Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx , double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -527,6 +505,7 @@ public:
 	//Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx , double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -546,6 +525,7 @@ public:
 	//Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx , double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -567,6 +547,7 @@ public:
 	//Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx , double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 
@@ -588,6 +569,7 @@ public:
 	//Operators to get I(Q)
 	double operator()(double q);
 	double operator()(double qx , double qy);
+	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
 

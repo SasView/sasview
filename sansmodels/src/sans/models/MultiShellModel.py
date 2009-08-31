@@ -52,7 +52,7 @@ class MultiShellModel(CMultiShellModel, BaseComponent):
         ## Name of the model
         self.name = "MultiShellModel"
         ## Model description
-        self.description ="""Model parameters:
+        self.description =""" MultiShell (Sphere) Model (or Multilamellar Vesicles): Model parameters;
 		scale : scale factor
 		core_radius : Core radius of the multishell
 		s_thickness: shell thickness
@@ -105,6 +105,13 @@ class MultiShellModel(CMultiShellModel, BaseComponent):
             @return: scattering function P(q[])
         """
         return CMultiShellModel.evalDistribition(self, x)
+        
+    def calculate_ER(self):
+        """ Calculate the effective radius for P(q)*S(q)
+            @param x: input q, or [q,phi]
+            @return: the value of the effective radius
+        """       
+        return CMultiShellModel.calculate_ER(self)
         
     def set_dispersion(self, parameter, dispersion):
         """

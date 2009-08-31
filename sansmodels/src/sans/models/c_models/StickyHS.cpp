@@ -32,13 +32,13 @@ extern "C" {
 }
 
 StickyHSStructure :: StickyHSStructure() {
-	radius      = Parameter(50.0, true);
-	radius.set_min(0.0);
+	effect_radius      = Parameter(50.0, true);
+	effect_radius.set_min(0.0);
 	volfraction = Parameter(0.10, true);
 	volfraction.set_min(0.0);
 	perturb = Parameter(0.05, true);
 	perturb.set_min(0.0);
-	stickiness = Parameter(0.20, true);;	
+	stickiness = Parameter(0.20, true);;
 	stickiness.set_min(0.0);
 }
 
@@ -53,14 +53,14 @@ double StickyHSStructure :: operator()(double q) {
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
-	dp[0] = radius();
+	dp[0] = effect_radius();
 	dp[1] = volfraction();
 	dp[2] = perturb();
 	dp[3] = stickiness();
 
 	// Get the dispersion points for the radius
 	vector<WeightPoint> weights_rad;
-	radius.get_weights(weights_rad);
+	effect_radius.get_weights(weights_rad);
 
 	// Perform the computation, with all weight points
 	double sum = 0.0;
@@ -86,14 +86,14 @@ double StickyHSStructure :: operator()(double q) {
 double StickyHSStructure :: operator()(double qx, double qy) {
 	StickyHSParameters dp;
 	// Fill parameter array
-	dp.radius      = radius();
+	dp.effect_radius      = effect_radius();
 	dp.volfraction = volfraction();
 	dp.perturb = perturb();
 	dp.stickiness = stickiness();
 
 	// Get the dispersion points for the radius
 	vector<WeightPoint> weights_rad;
-	radius.get_weights(weights_rad);
+	effect_radius.get_weights(weights_rad);
 
 	// Perform the computation, with all weight points
 	double sum = 0.0;
@@ -101,7 +101,7 @@ double StickyHSStructure :: operator()(double qx, double qy) {
 
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
-		dp.radius = weights_rad[i].value;
+		dp.effect_radius = weights_rad[i].value;
 
 					double _ptvalue = weights_rad[i].weight
 						* StickyHS_analytical_2DXY(&dp, qx, qy);
@@ -126,4 +126,12 @@ double StickyHSStructure :: evaluate_rphi(double q, double phi) {
 	double qx = q*cos(phi);
 	double qy = q*sin(phi);
 	return (*this).operator()(qx, qy);
+}
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double StickyHSStructure :: calculate_ER() {
+//NOT implemented yet!!!
 }

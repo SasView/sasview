@@ -344,7 +344,32 @@ static PyObject * run(CDiamCylFunc *self, PyObject *args) {
 		return Py_BuildValue("d",(*(self->model))(q_value));
 	}	
 }
+/**
+ * Function to call to calculate_ER
+ * @return: effective radius value 
+ */
+static PyObject * calculate_ER(CDiamCylFunc *self) {
 
+	PyObject* pars;
+	int npars;
+	
+	// Get parameters
+	
+	    // Reader parameter dictionary
+    self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
+    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
+    // Read in dispersion parameters
+    PyObject* disp_dict;
+    DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "radius");
+    self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "length");
+    self->model->length.dispersion->accept_as_destination(visitor, self->model->length.dispersion, disp_dict);
+
+		
+	return Py_BuildValue("d",(*(self->model)).calculate_ER());
+
+}
 /**
  * Function to call to evaluate model in cartesian coordinates
  * @param args: input q or [qx, qy]]
@@ -445,6 +470,8 @@ static PyMethodDef CDiamCylFunc_methods[] = {
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy"},
+    {"calculate_ER",      (PyCFunction)calculate_ER     , METH_VARARGS,
+      "Evaluate the model at a given Q or Q, phi"},
       
     {"evalDistribution",  (PyCFunction)evalDistribution , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy vector "},

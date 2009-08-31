@@ -359,7 +359,37 @@ static PyObject * run(CCoreShellModel *self, PyObject *args) {
 		return Py_BuildValue("d",(*(self->model))(q_value));
 	}	
 }
+/**
+ * Function to call to calculate_ER
+ * @return: effective radius value 
+ */
+static PyObject * calculate_ER(CCoreShellModel *self) {
 
+	PyObject* pars;
+	int npars;
+	
+	// Get parameters
+	
+	    // Reader parameter dictionary
+    self->model->core_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_sld") );
+    self->model->thickness = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thickness") );
+    self->model->solvent_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "solvent_sld") );
+    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
+    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->shell_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "shell_sld") );
+    // Read in dispersion parameters
+    PyObject* disp_dict;
+    DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "radius");
+    self->model->radius.dispersion->accept_as_destination(visitor, self->model->radius.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "thickness");
+    self->model->thickness.dispersion->accept_as_destination(visitor, self->model->thickness.dispersion, disp_dict);
+
+		
+	return Py_BuildValue("d",(*(self->model)).calculate_ER());
+
+}
 /**
  * Function to call to evaluate model in cartesian coordinates
  * @param args: input q or [qx, qy]]
@@ -465,6 +495,8 @@ static PyMethodDef CCoreShellModel_methods[] = {
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy"},
+    {"calculate_ER",      (PyCFunction)calculate_ER     , METH_VARARGS,
+      "Evaluate the model at a given Q or Q, phi"},
       
     {"evalDistribution",  (PyCFunction)evalDistribution , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy vector "},

@@ -32,8 +32,8 @@ extern "C" {
 }
 
 HayterMSAStructure :: HayterMSAStructure() {
-	radius      = Parameter(20.75, true);
-	radius.set_min(0.0);
+	effect_radius      = Parameter(20.75, true);
+	effect_radius.set_min(0.0);
 	charge      = Parameter(19.0, true);
 	charge.set_min(0.0);
 	volfraction = Parameter(0.0192, true);
@@ -55,7 +55,7 @@ double HayterMSAStructure :: operator()(double q) {
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
-	dp[0] = radius();
+	dp[0] = effect_radius();
 	dp[1] = charge();
 	dp[2] = volfraction();
 	dp[3] = temperature();
@@ -64,7 +64,7 @@ double HayterMSAStructure :: operator()(double q) {
 
 	// Get the dispersion points for the radius
 	vector<WeightPoint> weights_rad;
-	radius.get_weights(weights_rad);
+	effect_radius.get_weights(weights_rad);
 
 	// Perform the computation, with all weight points
 	double sum = 0.0;
@@ -90,7 +90,7 @@ double HayterMSAStructure :: operator()(double q) {
 double HayterMSAStructure :: operator()(double qx, double qy) {
 	HayterMSAParameters dp;
 	// Fill parameter array
-	dp.radius      = radius();
+	dp.effect_radius      = effect_radius();
 	dp.charge      = charge();
 	dp.volfraction = volfraction();
 	dp.temperature   = temperature();
@@ -99,7 +99,7 @@ double HayterMSAStructure :: operator()(double qx, double qy) {
 
 	// Get the dispersion points for the radius
 	vector<WeightPoint> weights_rad;
-	radius.get_weights(weights_rad);
+	effect_radius.get_weights(weights_rad);
 
 	// Perform the computation, with all weight points
 	double sum = 0.0;
@@ -107,7 +107,7 @@ double HayterMSAStructure :: operator()(double qx, double qy) {
 
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
-		dp.radius = weights_rad[i].value;
+		dp.effect_radius = weights_rad[i].value;
 
 					double _ptvalue = weights_rad[i].weight
 						* HayterMSA_analytical_2DXY(&dp, qx, qy);
@@ -132,6 +132,14 @@ double HayterMSAStructure :: evaluate_rphi(double q, double phi) {
 	double qx = q*cos(phi);
 	double qy = q*sin(phi);
 	return (*this).operator()(qx, qy);
+}
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double HayterMSAStructure :: calculate_ER() {
+//NOT implemented yet!!!
 }
 
 // Testing code

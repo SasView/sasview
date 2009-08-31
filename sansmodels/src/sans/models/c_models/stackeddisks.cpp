@@ -29,6 +29,7 @@ using namespace std;
 
 extern "C" {
 	#include "libCylinder.h"
+	#include "libStructureFactor.h"
 	#include "stacked_disks.h"
 }
 
@@ -122,7 +123,7 @@ double StackedDisksModel :: operator()(double qx, double qy) {
 	dp.scale      = scale();
 	dp.core_thick    = core_thick();
 	dp.radius	  = radius();
-	dp.core_thick  = core_thick();
+	dp.layer_thick  = layer_thick();
 	dp.core_sld   = core_sld();
 	dp.layer_sld  = layer_sld();
 	dp.solvent_sld= solvent_sld();
@@ -214,4 +215,62 @@ double StackedDisksModel :: evaluate_rphi(double q, double phi) {
 	double qx = q*cos(phi);
 	double qy = q*sin(phi);
 	return (*this).operator()(qx, qy);
+}
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double StackedDisksModel :: calculate_ER() {
+	StackedDisksParameters dp;
+
+	dp.core_thick    = core_thick();
+	dp.radius	  = radius();
+	dp.layer_thick  = layer_thick();
+	dp.n_stacking	  = n_stacking();
+
+	double rad_out = 0.0;
+	if (dp.n_stacking <= 0.0){
+		return rad_out;
+	}
+
+	// Perform the computation, with all weight points
+	double sum = 0.0;
+	double norm = 0.0;
+
+	// Get the dispersion points for the length
+	vector<WeightPoint> weights_core_thick;
+	core_thick.get_weights(weights_core_thick);
+
+	// Get the dispersion points for the radius
+	vector<WeightPoint> weights_radius;
+	radius.get_weights(weights_radius);
+
+	// Get the dispersion points for the thickness
+	vector<WeightPoint> weights_layer_thick;
+	layer_thick.get_weights(weights_layer_thick);
+
+	// Loop over major shell weight points
+	for(int i=0; i< (int)weights_core_thick.size(); i++) {
+		dp.core_thick = weights_core_thick[i].value;
+		for(int j=0; j< (int)weights_layer_thick.size(); j++) {
+			dp.layer_thick = weights_layer_thick[j].value;
+			for(int k=0; k< (int)weights_radius.size(); k++) {
+				dp.radius = weights_radius[k].value;
+				//Note: output of "DiamCyl(dp.length,dp.radius)" is DIAMETER.
+				sum +=weights_core_thick[i].weight*weights_layer_thick[j].weight
+					* weights_radius[k].weight*DiamCyl(dp.n_stacking*(dp.layer_thick*2.0+dp.core_thick),dp.radius)/2.0;
+				norm += weights_core_thick[i].weight*weights_layer_thick[j].weight* weights_radius[k].weight;
+			}
+		}
+	}
+	if (norm != 0){
+		//return the averaged value
+		rad_out =  sum/norm;}
+	else{
+		//return normal value
+		//Note: output of "DiamCyl(dp.length,dp.radius)" is DIAMETER.
+		rad_out = DiamCyl(dp.n_stacking*(dp.layer_thick*2.0+dp.core_thick),dp.radius)/2.0;}
+
+	return rad_out;
 }

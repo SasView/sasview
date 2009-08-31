@@ -393,7 +393,47 @@ static PyObject * run(CParallelepipedModel *self, PyObject *args) {
 		return Py_BuildValue("d",(*(self->model))(q_value));
 	}	
 }
+/**
+ * Function to call to calculate_ER
+ * @return: effective radius value 
+ */
+static PyObject * calculate_ER(CParallelepipedModel *self) {
 
+	PyObject* pars;
+	int npars;
+	
+	// Get parameters
+	
+	    // Reader parameter dictionary
+    self->model->short_a = PyFloat_AsDouble( PyDict_GetItemString(self->params, "short_a") );
+    self->model->short_b = PyFloat_AsDouble( PyDict_GetItemString(self->params, "short_b") );
+    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->long_c = PyFloat_AsDouble( PyDict_GetItemString(self->params, "long_c") );
+    self->model->parallel_psi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_psi") );
+    self->model->parallel_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_phi") );
+    self->model->parallel_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_theta") );
+    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    // Read in dispersion parameters
+    PyObject* disp_dict;
+    DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "short_a");
+    self->model->short_a.dispersion->accept_as_destination(visitor, self->model->short_a.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "short_b");
+    self->model->short_b.dispersion->accept_as_destination(visitor, self->model->short_b.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "long_c");
+    self->model->long_c.dispersion->accept_as_destination(visitor, self->model->long_c.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "parallel_phi");
+    self->model->parallel_phi.dispersion->accept_as_destination(visitor, self->model->parallel_phi.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "parallel_psi");
+    self->model->parallel_psi.dispersion->accept_as_destination(visitor, self->model->parallel_psi.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "parallel_theta");
+    self->model->parallel_theta.dispersion->accept_as_destination(visitor, self->model->parallel_theta.dispersion, disp_dict);
+
+		
+	return Py_BuildValue("d",(*(self->model)).calculate_ER());
+
+}
 /**
  * Function to call to evaluate model in cartesian coordinates
  * @param args: input q or [qx, qy]]
@@ -517,6 +557,8 @@ static PyMethodDef CParallelepipedModel_methods[] = {
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy"},
+    {"calculate_ER",      (PyCFunction)calculate_ER     , METH_VARARGS,
+      "Evaluate the model at a given Q or Q, phi"},
       
     {"evalDistribution",  (PyCFunction)evalDistribution , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy vector "},

@@ -5,7 +5,7 @@
  * Structure definition for HardsphereStructure (factor) parameters
  */
  //[PYTHONCLASS] = HardsphereStructure
- //[DISP_PARAMS] = radius
+ //[DISP_PARAMS] = effect_radius
  //[DESCRIPTION] =<text>Structure factor for interacting particles:                   .
  //
  //  The interparticle potential is
@@ -13,19 +13,19 @@
  //                     U(r)= inf   , r < 2R
  //                         = 0     , r >= 2R
  //
- //						R: radius of the Hardsphere particle
+ //						R: effective radius of the Hardsphere particle
  //						V:The volume fraction
  //
  //    Ref: Percus., J. K.,etc., J. Phy.
  //     Rev. 1958, 110, 1.
  //	 </text>
- //[FIXED]= radius.width
+ //[FIXED]= effect_radius.width
 
 
 typedef struct {
-    /// Radius of hardsphere [A]
-    //  [DEFAULT]=radius=50.0 [A]
-    double radius;
+    /// effect radius of hardsphere [A]
+    //  [DEFAULT]=effect_radius=50.0 [A]
+    double effect_radius;
 
     ///	Volume fraction
     //  [DEFAULT]=volfraction= 0.2

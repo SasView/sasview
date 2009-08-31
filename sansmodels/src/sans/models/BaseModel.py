@@ -73,7 +73,7 @@ class BaseModel(ModelAdaptor):
     # Evaluation methods to be implemented by the models
     def run(self, x=0):  return NotImplemented
     def runXY(self, x=0):  return NotImplemented
-    
+    def calculate_ER(self, x=0):  return NotImplemented
     def __call__(self, x=0):
         """     
             Evaluate the model. Equivalent to runXY(x)

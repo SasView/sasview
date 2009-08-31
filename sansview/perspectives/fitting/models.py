@@ -120,12 +120,15 @@ class ModelManager:
         
         from sans.models.CoreShellModel import CoreShellModel
         self.shape_list.append(CoreShellModel)
-        
-        from sans.models.MultiShellModel import MultiShellModel
-        self.shape_list.append(MultiShellModel)
+        self.multiplication_factor.append(CoreShellModel)
         
         from sans.models.VesicleModel import VesicleModel
         self.shape_list.append(VesicleModel)
+        self.multiplication_factor.append(VesicleModel)
+        
+        from sans.models.MultiShellModel import MultiShellModel
+        self.shape_list.append(MultiShellModel)
+        self.multiplication_factor.append(MultiShellModel)
         
         from sans.models.BinaryHSModel import BinaryHSModel
         self.shape_list.append(BinaryHSModel)
@@ -136,15 +139,19 @@ class ModelManager:
         
         from sans.models.CoreShellCylinderModel import CoreShellCylinderModel
         self.shape_list.append(CoreShellCylinderModel)
+        self.multiplication_factor.append(CoreShellCylinderModel)
         
         from sans.models.HollowCylinderModel import HollowCylinderModel
         self.shape_list.append(HollowCylinderModel)
+        self.multiplication_factor.append(HollowCylinderModel)
               
         from sans.models.FlexibleCylinderModel import FlexibleCylinderModel
         self.shape_list.append(FlexibleCylinderModel)
+        self.multiplication_factor.append(FlexibleCylinderModel)
         
         from sans.models.StackedDisksModel import StackedDisksModel
         self.shape_list.append(StackedDisksModel)
+        self.multiplication_factor.append(StackedDisksModel)
         
         from sans.models.ParallelepipedModel import ParallelepipedModel
         self.shape_list.append(ParallelepipedModel)
@@ -158,6 +165,7 @@ class ModelManager:
       
         from sans.models.CoreShellEllipsoidModel import CoreShellEllipsoidModel
         self.shape_list.append(CoreShellEllipsoidModel)
+        self.multiplication_factor.append(CoreShellEllipsoidModel)
          
         from sans.models.TriaxialEllipsoidModel import TriaxialEllipsoidModel
         self.shape_list.append(TriaxialEllipsoidModel)

@@ -28,6 +28,7 @@ using namespace std;
 
 extern "C" {
 	#include "libCylinder.h"
+	#include "libStructureFactor.h"
 	#include "ellipsoid.h"
 }
 
@@ -180,4 +181,49 @@ double EllipsoidModel :: evaluate_rphi(double q, double phi) {
 	double qx = q*cos(phi);
 	double qy = q*sin(phi);
 	return (*this).operator()(qx, qy);
+}
+
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double EllipsoidModel :: calculate_ER() {
+	EllipsoidParameters dp;
+
+	dp.radius_a = radius_a();
+	dp.radius_b = radius_b();
+
+	double rad_out = 0.0;
+
+	// Perform the computation, with all weight points
+	double sum = 0.0;
+	double norm = 0.0;
+
+	// Get the dispersion points for the major shell
+	vector<WeightPoint> weights_radius_a;
+	radius_a.get_weights(weights_radius_a);
+
+	// Get the dispersion points for the minor shell
+	vector<WeightPoint> weights_radius_b;
+	radius_b.get_weights(weights_radius_b);
+
+	// Loop over major shell weight points
+	for(int i=0; i< (int)weights_radius_b.size(); i++) {
+		dp.radius_b = weights_radius_b[i].value;
+		for(int k=0; k< (int)weights_radius_a.size(); k++) {
+			dp.radius_a = weights_radius_a[k].value;
+			sum +=weights_radius_b[i].weight
+				* weights_radius_a[k].weight*DiamEllip(dp.radius_a,dp.radius_b)/2.0;
+			norm += weights_radius_b[i].weight* weights_radius_a[k].weight;
+		}
+	}
+	if (norm != 0){
+		//return the averaged value
+		rad_out =  sum/norm;}
+	else{
+		//return normal value
+		rad_out = DiamEllip(dp.radius_a,dp.radius_b)/2.0;}
+
+	return rad_out;
 }

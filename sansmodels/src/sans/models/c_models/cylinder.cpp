@@ -28,6 +28,7 @@ using namespace std;
 
 extern "C" {
 	#include "libCylinder.h"
+	#include "libStructureFactor.h"
 	#include "cylinder.h"
 }
 
@@ -231,4 +232,49 @@ int main(void)
 
 
 	return 0;
+}
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double CylinderModel :: calculate_ER() {
+	CylinderParameters dp;
+
+	dp.radius     = radius();
+	dp.length     = length();
+	double rad_out = 0.0;
+
+	// Perform the computation, with all weight points
+	double sum = 0.0;
+	double norm = 0.0;
+
+	// Get the dispersion points for the major shell
+	vector<WeightPoint> weights_length;
+	length.get_weights(weights_length);
+
+	// Get the dispersion points for the minor shell
+	vector<WeightPoint> weights_radius ;
+	radius.get_weights(weights_radius);
+
+	// Loop over major shell weight points
+	for(int i=0; i< (int)weights_length.size(); i++) {
+		dp.length = weights_length[i].value;
+		for(int k=0; k< (int)weights_radius.size(); k++) {
+			dp.radius = weights_radius[k].value;
+			//Note: output of "DiamCyl(dp.length,dp.radius)" is DIAMETER.
+			sum +=weights_length[i].weight
+				* weights_radius[k].weight*DiamCyl(dp.length,dp.radius)/2.0;
+			norm += weights_length[i].weight* weights_radius[k].weight;
+		}
+	}
+	if (norm != 0){
+		//return the averaged value
+		rad_out =  sum/norm;}
+	else{
+		//return normal value
+		//Note: output of "DiamCyl(dp.length,dp.radius)" is DIAMETER.
+		rad_out = DiamCyl(dp.length,dp.radius)/2.0;}
+
+	return rad_out;
 }

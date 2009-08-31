@@ -27,6 +27,7 @@ using namespace std;
 
 extern "C" {
 	#include "libSphere.h"
+	#include "sphere.h"
 }
 
 SphereModel :: SphereModel() {
@@ -92,4 +93,40 @@ double SphereModel :: operator()(double qx, double qy) {
  */
 double SphereModel :: evaluate_rphi(double q, double phi) {
 	return (*this).operator()(q);
+}
+
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double SphereModel :: calculate_ER() {
+	SphereParameters dp;
+	dp.scale = scale();
+	dp.radius = radius();
+	dp.contrast = contrast();
+	dp.background = background();
+	double rad_out = 0.0;
+
+	// Perform the computation, with all weight points
+	double sum = 0.0;
+	double norm = 0.0;
+
+	// Get the dispersion points for the radius
+	vector<WeightPoint> weights_rad;
+	radius.get_weights(weights_rad);
+	// Loop over radius weight points to average the radius value
+	for(int i=0; i<weights_rad.size(); i++) {
+		sum += weights_rad[i].weight
+			* weights_rad[i].value;
+		norm += weights_rad[i].weight;
+	}
+	if (norm != 0){
+		//return the averaged value
+		rad_out =  sum/norm;}
+	else{
+		//return normal value
+		rad_out = radius();}
+
+	return rad_out;
 }

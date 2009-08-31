@@ -6,7 +6,7 @@
 
 	[PYTHONCLASS] = MultiShellModel
 	[DISP_PARAMS] = core_radius, s_thickness, w_thickness
-	[DESCRIPTION] =<text>Model parameters:
+	[DESCRIPTION] =<text> MultiShell (Sphere) Model (or Multilamellar Vesicles): Model parameters;
 				scale : scale factor
 				core_radius : Core radius of the multishell
 				s_thickness: shell thickness

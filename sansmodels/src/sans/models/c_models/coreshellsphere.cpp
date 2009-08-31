@@ -27,6 +27,7 @@ using namespace std;
 
 extern "C" {
 	#include "libSphere.h"
+	#include "core_shell.h"
 }
 
 CoreShellModel :: CoreShellModel() {
@@ -111,4 +112,49 @@ double CoreShellModel :: operator()(double qx, double qy) {
  */
 double CoreShellModel :: evaluate_rphi(double q, double phi) {
 	return (*this).operator()(q);
+}
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double CoreShellModel :: calculate_ER() {
+	CoreShellParameters dp;
+
+	dp.radius     = radius();
+	dp.thickness  = thickness();
+
+	double rad_out = 0.0;
+
+	// Perform the computation, with all weight points
+	double sum = 0.0;
+	double norm = 0.0;
+
+
+	// Get the dispersion points for the major shell
+	vector<WeightPoint> weights_thickness;
+	thickness.get_weights(weights_thickness);
+
+	// Get the dispersion points for the minor shell
+	vector<WeightPoint> weights_radius ;
+	radius.get_weights(weights_radius);
+
+	// Loop over major shell weight points
+	for(int j=0; j< (int)weights_thickness.size(); j++) {
+		dp.thickness = weights_thickness[j].value;
+		for(int k=0; k< (int)weights_radius.size(); k++) {
+			dp.radius = weights_radius[k].value;
+			sum += weights_thickness[j].weight
+				* weights_radius[k].weight*(dp.radius+dp.thickness);
+			norm += weights_thickness[j].weight* weights_radius[k].weight;
+		}
+	}
+	if (norm != 0){
+		//return the averaged value
+		rad_out =  sum/norm;}
+	else{
+		//return normal value
+		rad_out = (dp.radius+dp.thickness);}
+
+	return rad_out;
 }

@@ -99,6 +99,13 @@ class SphereModel(CSphereModel, BaseComponent):
         """
         return CSphereModel.evalDistribition(self, x)
         
+    def calculate_ER(self):
+        """ Calculate the effective radius for P(q)*S(q)
+            @param x: input q, or [q,phi]
+            @return: the value of the effective radius
+        """       
+        return CSphereModel.calculate_ER(self)
+        
     def set_dispersion(self, parameter, dispersion):
         """
             Set the dispersion object for a model parameter

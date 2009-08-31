@@ -219,3 +219,11 @@ double EllipticalCylinderModel :: evaluate_rphi(double q, double phi) {
 	double qy = q*sin(phi);
 	return (*this).operator()(qx, qy);
 }
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double EllipticalCylinderModel :: calculate_ER() {
+//NOT implemented yet!!!
+}

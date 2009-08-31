@@ -72,7 +72,7 @@ double DiamCylFunc :: operator()(double q) {
 			dp[1] = weights_len[j].value;
 
 			sum += weights_rad[i].weight
-						* weights_len[j].weight *DiamCyl(dp, q);
+						* weights_len[j].weight *DiamCyl(dp[1], dp[0]);
 			norm += weights_rad[i].weight
 				* weights_len[j].weight;
 		}
@@ -138,7 +138,14 @@ double DiamCylFunc :: evaluate_rphi(double q, double phi) {
 	double qy = q*sin(phi);
 	return (*this).operator()(qx, qy);
 }
-
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double DiamCylFunc :: calculate_ER() {
+//NOT implemented yet!!!
+}
 // Testing code
 
 /**

@@ -113,3 +113,11 @@ double BinaryHSPSF11Model :: operator()(double qx, double qy) {
 double BinaryHSPSF11Model :: evaluate_rphi(double q, double phi) {
 	return (*this).operator()(q);
 }
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double BinaryHSPSF11Model :: calculate_ER() {
+//NOT implemented yet!!!
+}

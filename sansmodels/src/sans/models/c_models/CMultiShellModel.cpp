@@ -369,7 +369,40 @@ static PyObject * run(CMultiShellModel *self, PyObject *args) {
 		return Py_BuildValue("d",(*(self->model))(q_value));
 	}	
 }
+/**
+ * Function to call to calculate_ER
+ * @return: effective radius value 
+ */
+static PyObject * calculate_ER(CMultiShellModel *self) {
 
+	PyObject* pars;
+	int npars;
+	
+	// Get parameters
+	
+	    // Reader parameter dictionary
+    self->model->core_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_sld") );
+    self->model->core_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "core_radius") );
+    self->model->n_pairs = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_pairs") );
+    self->model->w_thickness = PyFloat_AsDouble( PyDict_GetItemString(self->params, "w_thickness") );
+    self->model->s_thickness = PyFloat_AsDouble( PyDict_GetItemString(self->params, "s_thickness") );
+    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->shell_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "shell_sld") );
+    // Read in dispersion parameters
+    PyObject* disp_dict;
+    DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "core_radius");
+    self->model->core_radius.dispersion->accept_as_destination(visitor, self->model->core_radius.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "s_thickness");
+    self->model->s_thickness.dispersion->accept_as_destination(visitor, self->model->s_thickness.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "w_thickness");
+    self->model->w_thickness.dispersion->accept_as_destination(visitor, self->model->w_thickness.dispersion, disp_dict);
+
+		
+	return Py_BuildValue("d",(*(self->model)).calculate_ER());
+
+}
 /**
  * Function to call to evaluate model in cartesian coordinates
  * @param args: input q or [qx, qy]]
@@ -480,6 +513,8 @@ static PyMethodDef CMultiShellModel_methods[] = {
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy"},
+    {"calculate_ER",      (PyCFunction)calculate_ER     , METH_VARARGS,
+      "Evaluate the model at a given Q or Q, phi"},
       
     {"evalDistribution",  (PyCFunction)evalDistribution , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy vector "},

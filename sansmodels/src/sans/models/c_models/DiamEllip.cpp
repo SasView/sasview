@@ -72,7 +72,7 @@ double DiamEllipFunc :: operator()(double q) {
 			dp[1] = weights_rad_b[j].value;
 
 			sum += weights_rad_a[i].weight*weights_rad_b[j].weight
-				* DiamEllip(dp, q);
+				* DiamEllip(dp[0], dp[1]);
 			norm += weights_rad_a[i].weight*weights_rad_b[j].weight;
 		}
 	}
@@ -136,7 +136,14 @@ double DiamEllipFunc :: evaluate_rphi(double q, double phi) {
 	double qy = q*sin(phi);
 	return (*this).operator()(qx, qy);
 }
-
+/**
+ * Function to calculate effective radius
+ * @param pars: parameters of the sphere
+ * @return: effective radius value
+ */
+double DiamEllipFunc :: calculate_ER() {
+//NOT implemented yet!!!
+}
 // Testing code
 /*
 int main(void)

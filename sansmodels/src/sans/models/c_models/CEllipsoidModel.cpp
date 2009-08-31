@@ -373,7 +373,41 @@ static PyObject * run(CEllipsoidModel *self, PyObject *args) {
 		return Py_BuildValue("d",(*(self->model))(q_value));
 	}	
 }
+/**
+ * Function to call to calculate_ER
+ * @return: effective radius value 
+ */
+static PyObject * calculate_ER(CEllipsoidModel *self) {
 
+	PyObject* pars;
+	int npars;
+	
+	// Get parameters
+	
+	    // Reader parameter dictionary
+    self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
+    self->model->radius_b = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius_b") );
+    self->model->radius_a = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius_a") );
+    self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
+    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    // Read in dispersion parameters
+    PyObject* disp_dict;
+    DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "radius_a");
+    self->model->radius_a.dispersion->accept_as_destination(visitor, self->model->radius_a.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "radius_b");
+    self->model->radius_b.dispersion->accept_as_destination(visitor, self->model->radius_b.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
+    self->model->axis_theta.dispersion->accept_as_destination(visitor, self->model->axis_theta.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "axis_phi");
+    self->model->axis_phi.dispersion->accept_as_destination(visitor, self->model->axis_phi.dispersion, disp_dict);
+
+		
+	return Py_BuildValue("d",(*(self->model)).calculate_ER());
+
+}
 /**
  * Function to call to evaluate model in cartesian coordinates
  * @param args: input q or [qx, qy]]
@@ -487,6 +521,8 @@ static PyMethodDef CEllipsoidModel_methods[] = {
       "Evaluate the model at a given Q or Q, phi"},
     {"runXY",      (PyCFunction)runXY     , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy"},
+    {"calculate_ER",      (PyCFunction)calculate_ER     , METH_VARARGS,
+      "Evaluate the model at a given Q or Q, phi"},
       
     {"evalDistribution",  (PyCFunction)evalDistribution , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy vector "},
