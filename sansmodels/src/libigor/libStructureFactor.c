@@ -687,7 +687,7 @@ DiamEllip(double aa, double bb)
 		return 0.0;
 	}
 	if (aa == bb) {
-		return aa;
+		return 2*aa;
 	}
 	if(aa>bb) {
 		ee = (aa*aa - bb*bb)/(aa*aa);
