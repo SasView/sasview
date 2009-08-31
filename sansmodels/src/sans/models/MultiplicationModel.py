@@ -17,7 +17,7 @@ class MultiplicationModel(BaseComponent):
        
         ## Setting  model name model description
         self.description=""
-        if  model1.name != "NoStructure"and  model2.name != "NoStructure":
+        if  model1.name != "NoStructure" and  model2.name != "NoStructure":
              self.name = model1.name +" * "+ model2.name
              self.description= self.name+"\n"
              self.description +="see %s description and %s description"%( model1.name,
@@ -29,33 +29,13 @@ class MultiplicationModel(BaseComponent):
             self.name = model1.name
             self.description= model1.description
                         
-        #For virial coefficients for only two P(Q) models,"CylinderModel","EllipsoidModel". SphereModel works w/o it.
-        modelDiam = None
-        if model1.__class__.__name__ == "CylinderModel":
-            Model1DPlugin("DiamCylFunc")
-            modelDiam = DiamCylFunc()
-            para1 = 'radius'
-            para2 = 'length'
-            
-        elif model1.__class__.__name__  == "EllipsoidModel":
-            Model1DPlugin("DiamEllipFunc")
-            modelDiam = DiamEllipFunc()
-            para1 = 'radius_a'
-            para2 = 'radius_b'
-            
-        self.modelD = modelDiam
-        
-        if model1.__class__.__name__ == "CylinderModel" \
-            or model1.__class__.__name__  == "EllipsoidModel":
-          
-            self.para1 = para1
-            self.para2 = para2
 
-        
+
         self.model1= model1
         self.model2= model2
-        
-       
+              
+        ## Define diaparams 
+        self._set_diaparams()
         ## dispersion
         self._set_dispersion()
         ## Define parameters
@@ -72,7 +52,7 @@ class MultiplicationModel(BaseComponent):
             if not item in self.orientation_params:
                 self.orientation_params.append(item)
                 
-        
+         
     def _clone(self, obj):
         """
             Internal utility function to copy the internal
@@ -100,26 +80,41 @@ class MultiplicationModel(BaseComponent):
             if not name in self.dispersion.keys()and name !='radius': 
                 self.dispersion[name]= value
 
-                    
-                
+    
                 
     def _set_params(self):
         """
             Concatenate the parameters of the two models to create
             this model parameters 
         """
+        #Prepare for radius calculation for Diam** functions
+        #Only allows two case of radius modifications (radius = core_radius + thickness or just radius =radius).
+        dia_rad = 0
         
         for name , value in self.model1.params.iteritems():
             self.params[name]= value
             
-            if self.modelD !=None:
-                if name == self.para1 or name == self.para2:
-                    self.modelD.params[name]= value
-                elif name in self.model2.getParamList() and name !='radius':
+            if self.model2.name != 'NoStructure':
+                if len(self.diapara[self.para[0]])>1 and \
+                        (name == self.diapara[self.para[0]][0] or \
+                         name == self.diapara[self.para[0]][1]):
+                    dia_rad += value
+                    
+                    if self.modelD !=None:
+                        self.modelD.params[self.para[0]]= dia_rad
+                    else:
+                        self.model2.setParam("radius", dia_rad)
+                    
+                elif self.modelD !=None:
+                    if name == self.diapara[self.para[0]]:
+                        self.modelD.params[self.para[0]]= value
+                    elif name == self.diapara[self.para[1]]:
+                        self.modelD.params[self.para[1]]= value
+                elif name in self.model2.getParamList():
                     self.model2.setParam( name, value)
-
-            elif name in self.model2.getParamList():
-                self.model2.setParam(name, value)
+                        
+                        
+            print "value=",dia_rad 
         if self.modelD !=None:
             self.model2.setParam('radius', self.modelD.run())
             
@@ -151,17 +146,23 @@ class MultiplicationModel(BaseComponent):
 
         if name in self.model1.getParamList():
             self.model1.setParam( name, value)
-        if self.modelD !=None:
-            if name==self.para1 or name == self.para2:
-                    self.modelD.params[name]= value
+            
+        if self.model2.name != 'NoStructure':
+            if len(self.diapara[self.para[0]])>1 and \
+                    (name == self.diapara[self.para[0]][0] or \
+                     name == self.diapara[self.para[0]][1]):
+                self._set_params()
+            elif self.modelD !=None:
+                if name == self.diapara[self.para[0]]:
+                    self.modelD.params[self.para[0]]= value
+                    self.model2.setParam('radius', self.modelD.run())
+                elif name == self.diapara[self.para[1]]:
+                    self.modelD.params[self.para[1]]= value
                     self.model2.setParam('radius', self.modelD.run())
             elif name in self.model2.getParamList():
-                        self.model2.setParam( name, value)        
-        else:
-            if name in self.model2.getParamList():
                 self.model2.setParam( name, value)
-            
-        
+
+        #print "val2=",name,self.model2.params['radius']
             
         self._setParamHelper( name, value)
         
@@ -202,8 +203,70 @@ class MultiplicationModel(BaseComponent):
             if not item in self.fixed:
                 self.fixed.append(item)
         self.fixed.sort()
-                
-                
+        
+
+    def _set_diaparams(self):
+        """
+            Assign diamfunction parameters from model1.
+        """
+        #For virial coefficients for only two P(Q) models,"CylinderModel","EllipsoidModel". SphereModel works w/o it.
+        modelDiam = None
+        
+        #List of models by type that can be multiplied of  P(Q)*S(Q) 
+        #Parameters of model1 that need apply to the modelDiam corresponding to the models above
+        list_sph_model_param = {'SphereModel':[['radius']],\
+                                'CoreShellModel':[['radius','thickness']],\
+                                'VesicleModel':[['radius','thickness']], \
+                                 'BinaryHSModel':[['l_radius']], \
+                                'MultiShellModel':[['core_radius','s_thickness']]}
+        list_cyl_model_param = {'CylinderModel':[['radius'],['length']],\
+                                'CoreShellCylinderModel':[['radius','thickness'],['length']],\
+                                'HollowCylinderModel':[['radius'],['length']],\
+                                'FlexibleCylinderModel':[['radius'],['length']]}
+        list_ell_model_param = {'EllipsoidModel':[['radius_a'],['radius_b']],\
+                                'CoreShellEllipsoidModel':[['polar_shell'],['equat_shell']]}   
+        
+        #This is where the list of the input parameters for ModelDiam will be.
+        self.diapara = {}
+        for key in list_sph_model_param:
+            print "list_sph_models.param[]",len(list_sph_model_param['SphereModel'])
+        #Find the input parameters for ModelDiam depending on model1.        
+        para = {}
+        self.para = {}
+        
+        #Determine the type of the model1
+        if self.model1.__class__.__name__ in list_cyl_model_param.keys():
+            Model1DPlugin("DiamCylFunc")
+            basename = 'CylinderModel'
+            modelDiam = DiamCylFunc()
+            #loop for the # of parameters of DiamCylFunc()
+            for idx in (0,len(list_cyl_model_param[basename])-1):
+                #Parameter names of DiamCYlFunc
+                para[idx] = list_cyl_model_param[basename][idx][0]
+                #Find the  equivalent parameters of model1 function .
+                self.diapara[para[idx]] = list_cyl_model_param[self.model1.__class__.__name__][idx]
+                self.para[idx] = para[idx]
+            
+        elif self.model1.__class__.__name__  in list_ell_model_param.keys():
+            Model1DPlugin("DiamEllipFunc")
+            basename = 'EllipsoidModel'
+            modelDiam = DiamEllipFunc()
+            for idx in (0,len(list_ell_model_param[basename])-1):
+                para[idx ] = list_ell_model_param[basename][idx ][0]
+                self.diapara[para[idx]] = list_ell_model_param[self.model1.__class__.__name__][idx]
+                self.para[idx] = para[idx]
+                                
+        elif self.model1.__class__.__name__  in list_sph_model_param.keys() :
+            basename = 'SphereModel'
+            for idx in (0,len(list_sph_model_param[basename])-1):
+                para[idx] = list_sph_model_param[basename][idx][0]
+                self.diapara[para[idx]] = list_sph_model_param[self.model1.__class__.__name__][idx]
+                self.para[idx] = para[idx]
+            
+        #print "self.diapara1",para[0],self.diapara[para[0]]
+        
+        self.modelD = modelDiam
+                        
     def run(self, x = 0.0):
         """ Evaluate the model
             @param x: input q-value (float or [float, float] as [r, theta])
@@ -216,6 +279,7 @@ class MultiplicationModel(BaseComponent):
             @param x: input q-value (float or [float, float] as [qx, qy])
             @return: DAB value
         """
+        print "model1.effecitve_radius",self.model1.calculate_ER() 
         return self.model1.runXY(x)* self.model2.runXY(x)
     
     def set_dispersion(self, parameter, dispersion):
@@ -228,7 +292,7 @@ class MultiplicationModel(BaseComponent):
         try:
             if parameter in self.model1.dispersion.keys():
                 value= self.model1.set_dispersion(parameter, dispersion)
-            #There is no dispersion for the structure factors(S(Q)). 
+            #There is no dispersion for the structure factors(S(Q)) for now. 
             #ToDo: need to decide whether or not the dispersion for S(Q) has to be considered for P*S.  
             elif parameter in self.model2.dispersion.keys()and name !='radius':
                 value= self.model2.set_dispersion(parameter, dispersion)
