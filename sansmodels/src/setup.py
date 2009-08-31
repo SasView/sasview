@@ -12,7 +12,6 @@
 import sys
 import os
 
-
 numpy_incl_path = os.path.join(sys.prefix, "Lib", "site-packages", "numpy", "core", "include", "numpy")
 
 
@@ -109,13 +108,13 @@ setup(
         "sans/models/c_models/StickyHS.cpp",      
         srcdir+"/Hardsphere.c",         
         "sans/models/c_models/CHardsphereStructure.cpp", 
-        "sans/models/c_models/Hardsphere.cpp",      
+        "sans/models/c_models/Hardsphere.cpp",    
         srcdir+"/DiamCyl.c",         
         "sans/models/c_models/CDiamCylFunc.cpp", 
         "sans/models/c_models/DiamCyl.cpp",   
         srcdir+"/DiamEllip.c",         
         "sans/models/c_models/CDiamEllipFunc.cpp", 
-        "sans/models/c_models/DiamEllip.cpp",   
+        "sans/models/c_models/DiamEllip.cpp",     
         srcdir+"/HayterMSA.c",         
         "sans/models/c_models/CHayterMSAStructure.cpp", 
         "sans/models/c_models/HayterMSA.cpp",             
@@ -183,13 +182,13 @@ setup(
         "sans/models/c_models/spheroid.cpp",   
         srcdir+"/spheroid.c",             
         #srcdir+"/COblateModel.c",
-        "sans/models/c_models/COblateModel.cpp",
-        "sans/models/c_models/oblate.cpp",                
-        srcdir+"/oblate.c",
+        #"sans/models/c_models/COblateModel.cpp",
+        #"sans/models/c_models/oblate.cpp",                
+        #srcdir+"/oblate.c",
         #srcdir+"/CProlateModel.c",
-        "sans/models/c_models/CProlateModel.cpp",
-        "sans/models/c_models/prolate.cpp",                
-        srcdir+"/prolate.c",
+        #"sans/models/c_models/CProlateModel.cpp",
+        #"sans/models/c_models/prolate.cpp",                
+        #srcdir+"/prolate.c",
         #srcdir+"/CMultishellModel.c",
         "sans/models/c_models/CMultishellModel.cpp",
         "sans/models/c_models/multishell.cpp",                
