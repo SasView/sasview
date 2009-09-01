@@ -16,8 +16,8 @@
  */
 double HayterMSA_analytical_1D(HayterMSAParameters *pars, double q) {
 	double dp[6];
-
-	dp[0] = pars->effect_radius;
+	//Hayer takes diameter.
+	dp[0] = 2.0*pars->effect_radius;
 	dp[1] = pars->charge;
 	dp[1] = pars->volfraction;
 	dp[3] = pars->temperature;

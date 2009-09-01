@@ -55,7 +55,7 @@ double HayterMSAStructure :: operator()(double q) {
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
-	dp[0] = effect_radius();
+	dp[0] = 2.0*effect_radius();
 	dp[1] = charge();
 	dp[2] = volfraction();
 	dp[3] = temperature();
@@ -72,7 +72,7 @@ double HayterMSAStructure :: operator()(double q) {
 
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
-		dp[0] = weights_rad[i].value;
+		dp[0] = 2.0*weights_rad[i].value;
 
 		sum += weights_rad[i].weight
 				* HayterPenfoldMSA(dp, q);
@@ -90,7 +90,7 @@ double HayterMSAStructure :: operator()(double q) {
 double HayterMSAStructure :: operator()(double qx, double qy) {
 	HayterMSAParameters dp;
 	// Fill parameter array
-	dp.effect_radius      = effect_radius();
+	dp.effect_radius      = 2.0*effect_radius();
 	dp.charge      = charge();
 	dp.volfraction = volfraction();
 	dp.temperature   = temperature();
@@ -107,7 +107,7 @@ double HayterMSAStructure :: operator()(double qx, double qy) {
 
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
-		dp.effect_radius = weights_rad[i].value;
+		dp.effect_radius = 2.0*weights_rad[i].value;
 
 					double _ptvalue = weights_rad[i].weight
 						* HayterMSA_analytical_2DXY(&dp, qx, qy);
