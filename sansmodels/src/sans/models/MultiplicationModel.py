@@ -75,7 +75,7 @@ class MultiplicationModel(BaseComponent):
         for name , value in self.model2.dispersion.iteritems():
             # S(Q) has only 'radius' for dispersion.
             if not name in self.dispersion.keys():
-                if item != 'effect_radius':
+                if name != 'effect_radius':
                     self.dispersion[name]= value
 
                     
@@ -92,7 +92,7 @@ class MultiplicationModel(BaseComponent):
             
         for name , value in self.model2.params.iteritems():
             if not name in self.params.keys():
-                if item != 'effect_radius': 
+                if name != 'effect_radius': 
                     self.params[name]= value
             
     def _set_details(self):
