@@ -933,7 +933,6 @@ class BasicPage(wx.ScrolledWindow):
             @param listtocopy: the list of check button to copy
             @param statelist: list of state object to store the current state
         """
-        #statelist=[]
         if len(listtocopy)==0:
             return
        
