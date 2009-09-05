@@ -136,7 +136,7 @@ class Detector:
         Class to hold detector information
     """
     ## Name of the instrument [string]
-    name = ''
+    name = None
     ## Sample to detector distance [float] [mm]
     distance = None
     distance_unit = 'mm'
@@ -154,7 +154,6 @@ class Detector:
     pixel_size_unit = 'mm'
     ## Slit length of the instrument for this detector.[float] [mm]
     slit_length = None
-    #slit_length_unit = '1/A'
     slit_length_unit = 'mm'
     
     def __init__(self):
@@ -206,7 +205,7 @@ class Collimation:
         Class to hold collimation information
     """
     ## Name
-    name = ''
+    name = None
     ## Length [float] [mm]
     length = None
     length_unit = 'mm'

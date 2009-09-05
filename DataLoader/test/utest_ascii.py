@@ -24,6 +24,8 @@ class abs_reader(unittest.TestCase):
         self.assertEqual(f.x[0],0.002618)
         self.assertEqual(f.x[9],0.0497)
         
+        self.assertEqual(f.meta_data['loader'],"ASCII")
+        
     def test_truncated_1(self):
         """
             Test an ascii file with header and a 

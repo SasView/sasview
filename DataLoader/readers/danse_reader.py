@@ -274,7 +274,10 @@ class Reader:
                 raise ValueError,"Danse_reader can't read this file %s"%filename
             else:
                 logging.info("Danse_reader Reading %s \n"%filename)
-                return output
+            
+            # Store loading process information
+            output.meta_data['loader'] = self.type_name    
+            return output
         
         return None
 

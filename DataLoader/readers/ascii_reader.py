@@ -307,6 +307,10 @@ class Reader:
                     output.yaxis("\\rm{Intensity}", output.y_unit)
                 else:
                     output.yaxis("\\rm{Intensity}","cm^{-1}")
+                    
+                # Store loading process information
+                output.meta_data['loader'] = self.type_name    
+                    
                 return output
             
         else:

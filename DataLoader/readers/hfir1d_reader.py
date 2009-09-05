@@ -119,6 +119,8 @@ class Reader(object):
                 else:
                     output.yaxis("\\rm{Intensity}","cm^{-1}")
                 
+                # Store loading process information
+                output.meta_data['loader'] = self.type_name   
                 return output
         else:
             raise RuntimeError, "%s is not a file" % path

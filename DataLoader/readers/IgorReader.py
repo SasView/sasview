@@ -289,7 +289,8 @@ class Reader:
         else:
             output.zaxis("\\rm{Intensity}","cm^{-1}")
     
-        
+        # Store loading process information
+        output.meta_data['loader'] = self.type_name
         return output
     
 if __name__ == "__main__": 

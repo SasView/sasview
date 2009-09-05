@@ -94,6 +94,8 @@ class Reader:
         output.ymin       = 0
         output.ymax       = im.size[0]-1
         
+        # Store loading process information
+        output.meta_data['loader'] = self.type_name 
         return output
         
 

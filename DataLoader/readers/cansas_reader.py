@@ -91,70 +91,7 @@ def get_float(location, node):
             
     return value, attr
 
-def _store_float(location, node, variable, storage):
-    """
-        Get the content of a xpath location and store
-        the result. Check that the units are compatible
-        with the destination. The value is expected to
-        be a float.
-        
-        The xpath location might or might not exist.
-        If it does not exist, nothing is done
-        
-        @param location: xpath location to fetch
-        @param node: node to read the data from
-        @param variable: name of the data member to store it in [string]
-        @param storage: data object that has the 'variable' data member
-        
-        @raise ValueError: raised when the units are not recognized
-    """
-    entry = get_content(location, node)
-    try:
-        value = float(entry.text)
-    except:
-        value = None
-        
-    if value is not None:
-        # If the entry has units, check to see that they are
-        # compatible with what we currently have in the data object
-        units = entry.get('unit')
-        if units is not None:
-            toks = variable.split('.')
-            exec "local_unit = storage.%s_unit" % toks[0]
-            if units.lower()!=local_unit.lower():
-                if has_converter==True:
-                    try:
-                        conv = Converter(units)
-                        exec "storage.%s = %g" % (variable, conv(value, units=local_unit))
-                    except:
-                        raise ValueError, "CanSAS reader: could not convert %s unit [%s]; expecting [%s]\n  %s" \
-                        % (variable, units, local_unit, sys.exc_value)
-                else:
-                    raise ValueError, "CanSAS reader: unrecognized %s unit [%s]; expecting [%s]" \
-                        % (variable, units, local_unit)
-            else:
-                exec "storage.%s = value" % variable
-        else:
-            exec "storage.%s = value" % variable
             
-
-def _store_content(location, node, variable, storage):
-    """
-        Get the content of a xpath location and store
-        the result. The value is treated as a string.
-        
-        The xpath location might or might not exist.
-        If it does not exist, nothing is done
-        
-        @param location: xpath location to fetch
-        @param node: node to read the data from
-        @param variable: name of the data member to store it in [string]
-        @param storage: data object that has the 'variable' data member
-    """
-    entry = get_content(location, node)
-    if entry is not None and entry.text is not None:
-        exec "storage.%s = entry.text.strip()" % variable
-
 
 class Reader:
     """
@@ -171,6 +108,10 @@ class Reader:
     type = ["CanSAS 1D files (*.xml)|*.xml"]
     ## List of allowed extensions
     ext=['.xml', '.XML']  
+    
+    def __init__(self):
+        ## List of errors
+        self.errors = []
     
     def read(self, path):
         """ 
@@ -198,8 +139,13 @@ class Reader:
                 entry_list = root.xpath('/ns:SASroot/ns:SASentry', namespaces={'ns': CANSAS_NS})
                 
                 for entry in entry_list:
+                    self.errors = []
                     sas_entry = self._parse_entry(entry)
                     sas_entry.filename = basename
+                    
+                    # Store loading process information
+                    sas_entry.errors = self.errors
+                    sas_entry.meta_data['loader'] = self.type_name
                     output.append(sas_entry)
                 
         else:
@@ -226,7 +172,7 @@ class Reader:
         data_info = Data1D(x, y)
         
         # Look up title      
-        _store_content('ns:Title', dom, 'title', data_info)
+        self._store_content('ns:Title', dom, 'title', data_info)
         
         # Look up run number   
         nodes = dom.xpath('ns:Run', namespaces={'ns': CANSAS_NS})
@@ -239,7 +185,7 @@ class Reader:
                         data_info.run_name[value] = item.get('name')
                            
         # Look up instrument name              
-        _store_content('ns:SASinstrument/ns:name', dom, 'instrument', data_info)
+        self._store_content('ns:SASinstrument/ns:name', dom, 'instrument', data_info)
 
         # Notes
         note_list = dom.xpath('ns:SASnote', namespaces={'ns': CANSAS_NS})
@@ -250,20 +196,22 @@ class Reader:
                     if len(note_value) > 0:
                         data_info.notes.append(note_value)
             except:
-                logging.error("cansas_reader.read: error processing entry notes\n  %s" % sys.exc_value)
+                err_mess = "cansas_reader.read: error processing entry notes\n  %s" % sys.exc_value
+                self.errors.append(err_mess)
+                logging.error(err_mess)
         
         # Sample info ###################
         entry = get_content('ns:SASsample', dom)
         if entry is not None:
             data_info.sample.name = entry.get('name')
             
-        _store_content('ns:SASsample/ns:ID', 
+        self._store_content('ns:SASsample/ns:ID', 
                      dom, 'ID', data_info.sample)                    
-        _store_float('ns:SASsample/ns:thickness', 
+        self._store_float('ns:SASsample/ns:thickness', 
                      dom, 'thickness', data_info.sample)
-        _store_float('ns:SASsample/ns:transmission', 
+        self._store_float('ns:SASsample/ns:transmission', 
                      dom, 'transmission', data_info.sample)
-        _store_float('ns:SASsample/ns:temperature', 
+        self._store_float('ns:SASsample/ns:temperature', 
                      dom, 'temperature', data_info.sample)
         
         nodes = dom.xpath('ns:SASsample/ns:details', namespaces={'ns': CANSAS_NS})
@@ -274,22 +222,24 @@ class Reader:
                     if len(detail_value) > 0:
                         data_info.sample.details.append(detail_value)
             except:
-                logging.error("cansas_reader.read: error processing sample details\n  %s" % sys.exc_value)
+                err_mess = "cansas_reader.read: error processing sample details\n  %s" % sys.exc_value
+                self.errors.append(err_mess)
+                logging.error(err_mess)
         
         # Position (as a vector)
-        _store_float('ns:SASsample/ns:position/ns:x', 
+        self._store_float('ns:SASsample/ns:position/ns:x', 
                      dom, 'position.x', data_info.sample)          
-        _store_float('ns:SASsample/ns:position/ns:y', 
+        self._store_float('ns:SASsample/ns:position/ns:y', 
                      dom, 'position.y', data_info.sample)          
-        _store_float('ns:SASsample/ns:position/ns:z', 
+        self._store_float('ns:SASsample/ns:position/ns:z', 
                      dom, 'position.z', data_info.sample)          
         
         # Orientation (as a vector)
-        _store_float('ns:SASsample/ns:orientation/ns:roll', 
+        self._store_float('ns:SASsample/ns:orientation/ns:roll', 
                      dom, 'orientation.x', data_info.sample)          
-        _store_float('ns:SASsample/ns:orientation/ns:pitch', 
+        self._store_float('ns:SASsample/ns:orientation/ns:pitch', 
                      dom, 'orientation.y', data_info.sample)          
-        _store_float('ns:SASsample/ns:orientation/ns:yaw', 
+        self._store_float('ns:SASsample/ns:orientation/ns:yaw', 
                      dom, 'orientation.z', data_info.sample)          
        
         # Source info ###################
@@ -297,17 +247,17 @@ class Reader:
         if entry is not None:
             data_info.source.name = entry.get('name')
         
-        _store_content('ns:SASinstrument/ns:SASsource/ns:radiation', 
+        self._store_content('ns:SASinstrument/ns:SASsource/ns:radiation', 
                      dom, 'radiation', data_info.source)                    
-        _store_content('ns:SASinstrument/ns:SASsource/ns:beam_shape', 
+        self._store_content('ns:SASinstrument/ns:SASsource/ns:beam_shape', 
                      dom, 'beam_shape', data_info.source)                    
-        _store_float('ns:SASinstrument/ns:SASsource/ns:wavelength', 
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength', 
                      dom, 'wavelength', data_info.source)          
-        _store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_min', 
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_min', 
                      dom, 'wavelength_min', data_info.source)          
-        _store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_max', 
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_max', 
                      dom, 'wavelength_max', data_info.source)          
-        _store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_spread', 
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_spread', 
                      dom, 'wavelength_spread', data_info.source)    
         
         # Beam size (as a vector)   
@@ -315,11 +265,11 @@ class Reader:
         if entry is not None:
             data_info.source.beam_size_name = entry.get('name')
             
-        _store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:x', 
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:x', 
                      dom, 'beam_size.x', data_info.source)    
-        _store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:y', 
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:y', 
                      dom, 'beam_size.y', data_info.source)    
-        _store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:z', 
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:z', 
                      dom, 'beam_size.z', data_info.source)    
         
         # Collimation info ###################
@@ -328,7 +278,7 @@ class Reader:
             collim = Collimation()
             if item.get('name') is not None:
                 collim.name = item.get('name')
-            _store_float('ns:length', item, 'length', collim)  
+            self._store_float('ns:length', item, 'length', collim)  
             
             # Look for apertures
             apert_list = item.xpath('ns:aperture', namespaces={'ns': CANSAS_NS})
@@ -339,15 +289,15 @@ class Reader:
                 aperture.name = apert.get('name')
                 aperture.type = apert.get('type')
                     
-                _store_float('ns:distance', apert, 'distance', aperture)    
+                self._store_float('ns:distance', apert, 'distance', aperture)    
                 
                 entry = get_content('ns:size', apert)
                 if entry is not None:
                     aperture.size_name = entry.get('name')
                 
-                _store_float('ns:size/ns:x', apert, 'size.x', aperture)    
-                _store_float('ns:size/ns:y', apert, 'size.y', aperture)    
-                _store_float('ns:size/ns:z', apert, 'size.z', aperture)
+                self._store_float('ns:size/ns:x', apert, 'size.x', aperture)    
+                self._store_float('ns:size/ns:y', apert, 'size.y', aperture)    
+                self._store_float('ns:size/ns:z', apert, 'size.z', aperture)
                 
                 collim.aperture.append(aperture)
                 
@@ -359,30 +309,30 @@ class Reader:
             
             detector = Detector()
             
-            _store_content('ns:name', item, 'name', detector)
-            _store_float('ns:SDD', item, 'distance', detector)    
+            self._store_content('ns:name', item, 'name', detector)
+            self._store_float('ns:SDD', item, 'distance', detector)    
             
             # Detector offset (as a vector)
-            _store_float('ns:offset/ns:x', item, 'offset.x', detector)    
-            _store_float('ns:offset/ns:y', item, 'offset.y', detector)    
-            _store_float('ns:offset/ns:z', item, 'offset.z', detector)    
+            self._store_float('ns:offset/ns:x', item, 'offset.x', detector)    
+            self._store_float('ns:offset/ns:y', item, 'offset.y', detector)    
+            self._store_float('ns:offset/ns:z', item, 'offset.z', detector)    
             
             # Detector orientation (as a vector)
-            _store_float('ns:orientation/ns:roll',  item, 'orientation.x', detector)    
-            _store_float('ns:orientation/ns:pitch', item, 'orientation.y', detector)    
-            _store_float('ns:orientation/ns:yaw',   item, 'orientation.z', detector)    
+            self._store_float('ns:orientation/ns:roll',  item, 'orientation.x', detector)    
+            self._store_float('ns:orientation/ns:pitch', item, 'orientation.y', detector)    
+            self._store_float('ns:orientation/ns:yaw',   item, 'orientation.z', detector)    
             
             # Beam center (as a vector)
-            _store_float('ns:beam_center/ns:x', item, 'beam_center.x', detector)    
-            _store_float('ns:beam_center/ns:y', item, 'beam_center.y', detector)    
-            _store_float('ns:beam_center/ns:z', item, 'beam_center.z', detector)    
+            self._store_float('ns:beam_center/ns:x', item, 'beam_center.x', detector)    
+            self._store_float('ns:beam_center/ns:y', item, 'beam_center.y', detector)    
+            self._store_float('ns:beam_center/ns:z', item, 'beam_center.z', detector)    
             
             # Pixel size (as a vector)
-            _store_float('ns:pixel_size/ns:x', item, 'pixel_size.x', detector)    
-            _store_float('ns:pixel_size/ns:y', item, 'pixel_size.y', detector)    
-            _store_float('ns:pixel_size/ns:z', item, 'pixel_size.z', detector)    
+            self._store_float('ns:pixel_size/ns:x', item, 'pixel_size.x', detector)    
+            self._store_float('ns:pixel_size/ns:y', item, 'pixel_size.y', detector)    
+            self._store_float('ns:pixel_size/ns:z', item, 'pixel_size.z', detector)    
             
-            _store_float('ns:slit_length', item, 'slit_length', detector)
+            self._store_float('ns:slit_length', item, 'slit_length', detector)
             
             data_info.detector.append(detector)    
 
@@ -390,9 +340,9 @@ class Reader:
         nodes = dom.xpath('ns:SASprocess', namespaces={'ns': CANSAS_NS})
         for item in nodes:
             process = Process()
-            _store_content('ns:name', item, 'name', process)
-            _store_content('ns:date', item, 'date', process)
-            _store_content('ns:description', item, 'description', process)
+            self._store_content('ns:name', item, 'name', process)
+            self._store_content('ns:date', item, 'date', process)
+            self._store_content('ns:description', item, 'description', process)
             
             term_list = item.xpath('ns:term', namespaces={'ns': CANSAS_NS})
             for term in term_list:
@@ -404,7 +354,9 @@ class Reader:
                         term_attr['value'] = term.text.strip()
                         process.term.append(term_attr)
                 except:
-                    logging.error("cansas_reader.read: error processing process term\n  %s" % sys.exc_value)
+                    err_mess = "cansas_reader.read: error processing process term\n  %s" % sys.exc_value
+                    self.errors.append(err_mess)
+                    logging.error(err_mess)
             
             note_list = item.xpath('ns:SASprocessnote', namespaces={'ns': CANSAS_NS})
             for note in note_list:
@@ -755,7 +707,83 @@ class Reader:
         fd.write(doc.toprettyxml())
         fd.close()
         
-        
+    def _store_float(self, location, node, variable, storage, optional=True):
+        """
+            Get the content of a xpath location and store
+            the result. Check that the units are compatible
+            with the destination. The value is expected to
+            be a float.
+            
+            The xpath location might or might not exist.
+            If it does not exist, nothing is done
+            
+            @param location: xpath location to fetch
+            @param node: node to read the data from
+            @param variable: name of the data member to store it in [string]
+            @param storage: data object that has the 'variable' data member
+            @param optional: if True, no exception will be raised if unit conversion can't be done
+    
+            @raise ValueError: raised when the units are not recognized
+        """
+        entry = get_content(location, node)
+        try:
+            value = float(entry.text)
+        except:
+            value = None
+            
+        if value is not None:
+            # If the entry has units, check to see that they are
+            # compatible with what we currently have in the data object
+            units = entry.get('unit')
+            if units is not None:
+                toks = variable.split('.')
+                exec "local_unit = storage.%s_unit" % toks[0]
+                if units.lower()!=local_unit.lower():
+                    if has_converter==True:
+                        try:
+                            conv = Converter(units)
+                            exec "storage.%s = %g" % (variable, conv(value, units=local_unit))
+                        except:
+                            err_mess = "CanSAS reader: could not convert %s unit [%s]; expecting [%s]\n  %s" \
+                                % (variable, units, local_unit, sys.exc_value)
+                            self.errors.append(err_mess)
+                            if optional:
+                                logging.info(err_mess)
+                            else:
+                                raise ValueError, err_mess 
+                    else:
+                        err_mess = "CanSAS reader: unrecognized %s unit [%s]; expecting [%s]" \
+                            % (variable, units, local_unit)
+                        self.errors.append(err_mess)
+                        if optional:
+                            logging.info(err_mess)
+                        else:
+                            raise ValueError, err_mess
+                else:
+                    exec "storage.%s = value" % variable
+            else:
+                exec "storage.%s = value" % variable
+                
+    def _store_content(self, location, node, variable, storage):
+        """
+            Get the content of a xpath location and store
+            the result. The value is treated as a string.
+            
+            The xpath location might or might not exist.
+            If it does not exist, nothing is done
+            
+            @param location: xpath location to fetch
+            @param node: node to read the data from
+            @param variable: name of the data member to store it in [string]
+            @param storage: data object that has the 'variable' data member
+            @return: return a list of errors
+        """
+        entry = get_content(location, node)
+        if entry is not None and entry.text is not None:
+            exec "storage.%s = entry.text.strip()" % variable
+
+            
+            
 if __name__ == "__main__": 
     logging.basicConfig(level=logging.ERROR,
                         format='%(asctime)s %(levelname)s %(message)s',

@@ -12,7 +12,8 @@ import os.path
 class abs_reader(unittest.TestCase):
     
     def setUp(self):
-        self.data = Loader().load("jan08002.ABS")
+        from DataLoader.readers.abs_reader import Reader
+        self.data = Reader().read("jan08002.ABS")
         
     def test_checkdata(self):
         """
@@ -23,6 +24,7 @@ class abs_reader(unittest.TestCase):
             tests won't pass
         """
         self.assertEqual(self.data.filename, "jan08002.ABS")
+        self.assertEqual(self.data.meta_data['loader'], "IGOR 1D")
         
         self.assertEqual(self.data.source.wavelength_unit, 'A')
         self.assertEqual(self.data.source.wavelength, 6.0)
@@ -68,6 +70,8 @@ class hfir_reader(unittest.TestCase):
             it matches the specific file we loaded.
         """
         self.assertEqual(self.data.filename, "S2-30dq.d1d")
+        # THIS FILE FORMAT IS CURRENTLY READ BY THE ASCII READER
+        self.assertEqual(self.data.meta_data['loader'], "ASCII")
         self.assertEqual(len(self.data.x), 134)
         self.assertEqual(len(self.data.y), 134)
         #          Q           I               dI          dQ  
@@ -92,6 +96,7 @@ class igor_reader(unittest.TestCase):
             tests won't pass
         """
         self.assertEqual(self.data.filename, "MAR07232_rest.ASC")
+        self.assertEqual(self.data.meta_data['loader'], "IGOR 2D")
         
         self.assertEqual(self.data.source.wavelength_unit, 'A')
         self.assertEqual(self.data.source.wavelength, 8.4)
@@ -126,6 +131,7 @@ class danse_reader(unittest.TestCase):
             tests won't pass
         """
         self.assertEqual(self.data.filename, "MP_New.sans")
+        self.assertEqual(self.data.meta_data['loader'], "DANSE")
         
         self.assertEqual(self.data.source.wavelength_unit, 'A')
         self.assertEqual(self.data.source.wavelength, 7.5)
@@ -168,6 +174,8 @@ class cansas_reader(unittest.TestCase):
         """
         
         self.assertEqual(self.data.run[0], "1234")
+        self.assertEqual(self.data.meta_data['loader'], "CanSAS 1D")
+        self.assertEqual(len(self.data.errors), 0)
         
         # Data
         self.assertEqual(len(self.data.x), 2)
@@ -324,6 +332,22 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.filename, filename)
         self._checkdata()
         
+    def test_badunits(self):
+        """
+            Check units.
+            Note that not all units are available.
+        """
+        filename = "cansas1d_badunits.xml"
+        self.data = Loader().load(filename)
+        self.assertEqual(self.data.filename, filename)
+        # The followed should not have been loaded
+        self.assertEqual(self.data.sample.thickness, None)
+        # This one should
+        self.assertEqual(self.data.sample.transmission, 0.327)
+        
+        self.assertEqual(self.data.meta_data['loader'], "CanSAS 1D")
+        self.assertEqual(len(self.data.errors), 1)
+        
         
     def test_slits(self):
         """
@@ -355,5 +379,10 @@ class cansas_reader(unittest.TestCase):
             
 
 if __name__ == '__main__':
+    import logging
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(levelname)s %(message)s',
+                        filename='utest_abs_reader.log',
+                        filemode='w')
     unittest.main()
    
