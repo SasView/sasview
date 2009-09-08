@@ -82,6 +82,18 @@ class abs_reader(unittest.TestCase):
         self.assertEqual(f.x[0],0.02879)
         self.assertEqual(f.x[4],0.0497)
         
+    def test_truncated_5(self):
+        """
+            Test a 6-col ascii file with complex header where one of them has a letter and 
+            many lines with 2 or 2 columns in the middle of the data section.
+            Only last four lines should be read.
+        """
+        # Test .ABS file loaded as ascii
+        f = self.loader.load("ascii_test_6.txt")
+        # The length of the data is 5
+        self.assertEqual(len(f.x), 4)
+        self.assertEqual(f.x[0],0.013534)
+        self.assertEqual(f.x[3],0.022254)
         
 if __name__ == '__main__':
     unittest.main()

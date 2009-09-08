@@ -108,7 +108,10 @@ class Reader:
                     toks = line.split()
                     
                     try:
-                        
+                        #Make sure that all columns are numbers.
+                        for colnum in range(len(toks)):
+                            float(toks[colnum])
+                            
                         _x = float(toks[0])
                         _y = float(toks[1])
                         
