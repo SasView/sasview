@@ -14,12 +14,13 @@
  * @param q: q-value
  * @return: function value
  */
+
 double HayterMSA_analytical_1D(HayterMSAParameters *pars, double q) {
 	double dp[6];
 	//Hayer takes diameter.
-	dp[0] = 2.0*pars->effect_radius;
+	dp[0] = 2.0 * pars->effect_radius;
 	dp[1] = pars->charge;
-	dp[1] = pars->volfraction;
+	dp[2] = pars->volfraction;
 	dp[3] = pars->temperature;
 	dp[4] = pars->saltconc;
 	dp[5] = pars->dielectconst;

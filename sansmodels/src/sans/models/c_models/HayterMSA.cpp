@@ -90,7 +90,7 @@ double HayterMSAStructure :: operator()(double q) {
 double HayterMSAStructure :: operator()(double qx, double qy) {
 	HayterMSAParameters dp;
 	// Fill parameter array
-	dp.effect_radius      = 2.0*effect_radius();
+	dp.effect_radius      = effect_radius();
 	dp.charge      = charge();
 	dp.volfraction = volfraction();
 	dp.temperature   = temperature();
@@ -107,13 +107,13 @@ double HayterMSAStructure :: operator()(double qx, double qy) {
 
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
-		dp.effect_radius = 2.0*weights_rad[i].value;
+		dp.effect_radius = weights_rad[i].value;
 
-					double _ptvalue = weights_rad[i].weight
-						* HayterMSA_analytical_2DXY(&dp, qx, qy);
-					sum += _ptvalue;
+		double _ptvalue = weights_rad[i].weight
+			* HayterMSA_analytical_2DXY(&dp, qx, qy);
+		sum += _ptvalue;
 
-					norm += weights_rad[i].weight;
+		norm += weights_rad[i].weight;
 	}
 	// Averaging in theta needs an extra normalization
 	// factor to account for the sin(theta) term in the

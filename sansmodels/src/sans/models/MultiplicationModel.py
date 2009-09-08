@@ -5,8 +5,8 @@ import copy
 from sans.models.pluginmodel import Model1DPlugin
 class MultiplicationModel(BaseComponent):
     """
-        Use for P(Q)*S(Q); function call maut be in order of P(Q) and then S(Q).
-        Perform multplication of two models.
+        Use for P(Q)*S(Q); function call must be in order of P(Q) and then S(Q).
+        Perform multiplication of two models.
         Contains the models parameters combined.
     """
     def __init__(self, model1, model2 ):
@@ -15,11 +15,10 @@ class MultiplicationModel(BaseComponent):
        
         ## Setting  model name model description
         self.description=""
-        if  model1.name != "NoStructure"and  model2.name != "NoStructure":
+        if  model1.name != "NoStructure" and  model2.name != "NoStructure":
              self.name = model1.name +" * "+ model2.name
              self.description= self.name+"\n"
-             self.description +="see %s description and %s description"%( model1.name,
-                                                                         model2.name )
+             self.fill_description(model1, model2)
         elif  model2.name != "NoStructure":
             self.name = model2.name
             self.description= model2.description
@@ -46,8 +45,7 @@ class MultiplicationModel(BaseComponent):
             
         for item in self.model2.orientation_params:
             if not item in self.orientation_params:
-                if item != 'effect_radius':
-                    self.orientation_params.append(item)
+                self.orientation_params.append(item)
                 
         
     def _clone(self, obj):
@@ -73,7 +71,8 @@ class MultiplicationModel(BaseComponent):
             self.dispersion[name]= value
             
         for name , value in self.model2.dispersion.iteritems():
-            # S(Q) has only 'radius' for dispersion.
+            ## All S(Q) has only 'effect_radius' for dispersion which 
+            #    will not be allowed for now.
             if not name in self.dispersion.keys():
                 if name != 'effect_radius':
                     self.dispersion[name]= value
@@ -92,6 +91,7 @@ class MultiplicationModel(BaseComponent):
             
         for name , value in self.model2.params.iteritems():
             if not name in self.params.keys():
+                #effect_radius is not treated as a parameter anymore.
                 if name != 'effect_radius': 
                     self.params[name]= value
             
@@ -104,8 +104,9 @@ class MultiplicationModel(BaseComponent):
             self.details[name]= detail
             
         for name , detail in self.model2.details.iteritems():
-            if not name in self.details.keys()and name != 'effect_radius': #????
-                self.details[name]= detail
+            if not name in self.details.keys(): 
+                if name != 'effect_radius': 
+                    self.details[name]= detail
                 
     def setParam(self, name, value):
         """ 
@@ -154,10 +155,11 @@ class MultiplicationModel(BaseComponent):
         """
         for item in self.model1.fixed:
             self.fixed.append(item)
-            
-        for item in self.model2.fixed:
-            if not item in self.fixed:
-                self.fixed.append(item)
+        #S(Q) should not have fixed items for P*S for now.
+        #for item in self.model2.fixed:
+        #    if not item in self.fixed:
+        #        self.fixed.append(item)
+
         self.fixed.sort()
                 
                 
@@ -179,6 +181,7 @@ class MultiplicationModel(BaseComponent):
             @param x: input q-value (float or [float, float] as [qx, qy])
             @return: DAB value
         """
+        
         #Reset radius of model2 just before the run
         effective_radius = None    
         effective_radius = self.model1.calculate_ER()
@@ -199,13 +202,24 @@ class MultiplicationModel(BaseComponent):
                 value= self.model1.set_dispersion(parameter, dispersion)
             #There is no dispersion for the structure factors(S(Q)). 
             #ToDo: need to decide whether or not the dispersion for S(Q) has to be considered for P*S.  
-            elif parameter in self.model2.dispersion.keys():
-                if item != 'effect_radius':
-                    value= self.model2.set_dispersion(parameter, dispersion)
+            #elif parameter in self.model2.dispersion.keys():
+            #    if item != 'effect_radius':
+            #        value= self.model2.set_dispersion(parameter, dispersion)
             self._set_dispersion()
             return value
         except:
             raise 
 
-
+    def fill_description(self, model1, model2):
+        """
+            Fill the description for P(Q)*S(Q)
+        """
+        description = ""
+        description += "Note:1) The effect_radius (effective radius) of %s \n"% (model2.name)
+        description +="             is automatically calculated from size parameters (radius...).\n"
+        description += "         2) For non-spherical shape, this approximation is valid \n"
+        description += "            only for highly dilute systems. Thus, use it at your own risk.\n"
+        description +="See %s description and %s description \n"%( model1.name,model2.name )
+        description += "        for details."
+        self.description += description
     

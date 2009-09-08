@@ -49,8 +49,6 @@ typedef struct {
     double dielectconst;
 } HayterMSAParameters;
 
-
-
 /// 1D scattering function
 double HayterMSA_analytical_1D(HayterMSAParameters *pars, double q);
 
