@@ -16,6 +16,7 @@ import wx
 import numpy
 import math
 import logging
+import sys
 
 # Avoid Matplotlib complaining about the lack of legend on the plot 
 import warnings
@@ -351,10 +352,10 @@ class ExploreDialog(wx.Dialog):
         for i in range(content.npts):    
             d = content.dmin + i * (content.dmax - content.dmin)/(content.npts-1.0)
             self.pr_state.d_max = d
-            out, cov = self.pr_state.invert(self.nfunc)    
-            
-            # Store results
             try:
+                out, cov = self.pr_state.invert(self.nfunc)   
+            
+                # Store results
                 iq0 = self.pr_state.iq0(out)
                 rg = self.pr_state.rg(out)
                 pos = self.pr_state.get_positive(out)
@@ -371,7 +372,7 @@ class ExploreDialog(wx.Dialog):
                 results.osc.append(osc)           
             except:
                 # This inversion failed, skip this D_max value
-                logging.error("ExploreDialog: inversion failed for D_max=%s" % str(d))
+                logging.error("ExploreDialog: inversion failed for D_max=%s\n%s" % (str(d), sys.exc_value))
             
         self.results = results            
          
