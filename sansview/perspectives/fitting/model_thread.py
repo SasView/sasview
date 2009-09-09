@@ -25,8 +25,10 @@ class Calc2D(CalcThread):
         self.qmax= qmax
         self.qstep= qstep
         # Reshape dimensions of x and y to call evalDistribution
-        self.x_array = numpy.reshape(x,[len(x),1])
-        self.y_array = numpy.reshape(y,[1,len(y)])
+        #self.x_array = numpy.reshape(x,[len(x),1])
+        #self.y_array = numpy.reshape(y,[1,len(y)])
+        self.x_array = numpy.reshape(x,[1,len(x)])
+        self.y_array = numpy.reshape(y,[len(y),1])
         # Numpy array of dimensions 1 used for model.run method
         self.x= numpy.array(x)
         self.y= numpy.array(y)
@@ -49,26 +51,23 @@ class Calc2D(CalcThread):
                 newy= math.pow(max(math.fabs(self.data.ymax),math.fabs(self.data.ymin)),2)
                 self.qmax=math.sqrt( newx + newy )
         # Define matrix where data will be plotted        
-        radius= numpy.sqrt(self.x_array**2 + self.y_array**2)
+        radius= numpy.sqrt( self.x_array**2 + self.y_array**2 )
         index_data= (self.qmin<= radius)
         index_model = (self.qmin <= radius)&(radius<= self.qmax)
        
         output = numpy.zeros((len(self.x),len(self.y)))
-        try:
-            ## receive only list of 2 numpy array 
-            ## One must reshape to vertical and the other to horizontal
-            value = self.model.evalDistribution([self.x_array,self.y_array] )
-            ## for data ignore the qmax 
-            if self.data == None:
-                # Only qmin value will be consider for the detector
-                output = value *index_data  
-            else:
-                # The user can define qmin and qmax for the detector
-                output = value*index_model
-        except:
-            raise
-           
-       
+     
+        ## receive only list of 2 numpy array 
+        ## One must reshape to vertical and the other to horizontal
+        value = self.model.evalDistribution([self.x_array,self.y_array] )
+        ## for data ignore the qmax 
+        if self.data == None:
+            # Only qmin value will be consider for the detector
+            output = value *index_data  
+        else:
+            # The user can define qmin and qmax for the detector
+            output = index_model*value
+      
         elapsed = time.time()-self.starttime
         self.complete( image = output,
                        data = self.data , 
