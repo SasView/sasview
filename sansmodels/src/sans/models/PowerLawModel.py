@@ -35,7 +35,7 @@ class PowerLawModel(BaseComponent):
         self.params['scale']        = 1.0
         self.params['background']   = 0.0
         self.description=""" The Power_Law model.
-        F(x) = scale* (|x|)^(-m) + bkd
+        F(x) = scale* (x)^(-m) + bkd
         
         The model has three parameters: 
         m     =  power
@@ -50,7 +50,7 @@ class PowerLawModel(BaseComponent):
         self.fixed= []    
     def _PowerLaw(self, x):
         """
-            Evaluate  F(x) = scale* (|x|)^(-m) + bkd
+            Evaluate  F(x) = scale* (x)^(-m) + bkd
            
         """
         #if x!=0 and self.params['m']!=0:

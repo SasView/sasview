@@ -23,11 +23,11 @@ class TestSphere(unittest.TestCase):
         
     def test1D(self):
         """ Test 1D model for a sphere """
-        self.assertAlmostEqual(self.comp.run(1.0), 56.3878, 4)
+        self.assertAlmostEqual(self.comp.run(1.0), 5.6387e-5, 4)
         
     def test1D_2(self):
         """ Test 2D model for a sphere """
-        self.assertAlmostEqual(self.comp.run([1.0, 1.3]), 56.3878, 4)
+        self.assertAlmostEqual(self.comp.run([1.0, 1.3]), 5.6387e-5, 4)
 
 class TestCyl(unittest.TestCase):
     """Unit tests for cylinder"""

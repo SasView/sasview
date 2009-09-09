@@ -10,7 +10,7 @@ import math
 class PorodModel(BaseComponent):
     """ Class that evaluates a Porod model.
     
-       I(q) = scale/q^4
+       I(q) = scale/q^4 +background
         
     """
         
@@ -28,7 +28,7 @@ class PorodModel(BaseComponent):
         self.params['scale'] = 1.0
         self.params['background'] = 0.0
         self.description= """The Porod model.
-        I(q) = scale/q^4"""
+        I(q) = scale/q^4 +background"""
 
         ## Parameter details [units, min, max]
         self.details = {}

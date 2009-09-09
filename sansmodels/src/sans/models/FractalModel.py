@@ -29,7 +29,7 @@ class FractalModel(BaseComponent):
     def __init__(self):
         """ Initialization """
         
-        # Initialize BaseComponent first, then sphere
+        # Initialize BaseComponent first, then fractal
         BaseComponent.__init__(self)
         
         ## Name of the model

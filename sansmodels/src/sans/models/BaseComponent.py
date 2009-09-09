@@ -84,8 +84,8 @@ class BaseComponent:
             The qxprime and qyprime are 2D arrays. From the two lists of q-values 
             above, numpy arrays must be created the following way:
 
-            qx_prime = numpy.reshape(qx, [3,1])
-            qy_prime = numpy.reshape(qy, [1,3])
+            qx_prime = numpy.reshape(qx, [1,3])
+            qy_prime = numpy.reshape(qy, [3,1])
             
             The method is then called the following way:
             
@@ -105,11 +105,11 @@ class BaseComponent:
             qy = qdist[1]
             
             # Create output array
-            iq_array = numpy.zeros([qx.shape[0], qy.shape[1]])
+            iq_array = numpy.zeros([qx.shape[1], qy.shape[0]])
              
-            for i in range(qx.shape[0]):
-                for j in range(qy.shape[1]):
-                    iq_array[i][j] = self.runXY([qx[i][0],qy[0][j]])
+            for j in range(qy.shape[0]):
+                for i in range(qx.shape[1]):
+                    iq_array[j][i] = self.runXY([qx[0][i],qy[j][0]])
             return iq_array
                 
         elif qdist.__class__.__name__ == 'ndarray':
