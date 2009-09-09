@@ -1,6 +1,5 @@
 """
     Unit tests for specific models
-    @author: Mathieu Doucet / UTK
 """
 
 import unittest, time, math
