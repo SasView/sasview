@@ -76,10 +76,10 @@ class DistExplorer(object):
         for i in range(npts):    
             d = dmin + i * (dmax - dmin)/(npts-1.0)
             self.pr_state.d_max = d
-            out, cov = self.pr_state.invert(self.pr_state.nfunc)    
-            
-            # Store results
             try:
+                out, cov = self.pr_state.invert(self.pr_state.nfunc)    
+            
+                # Store results
                 iq0 = self.pr_state.iq0(out)
                 rg = self.pr_state.rg(out)
                 pos = self.pr_state.get_positive(out)
