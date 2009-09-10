@@ -120,8 +120,8 @@ class Calc1D(CalcThread):
             output = self.smearer(output) #Todo: Why always output[0]=0???
         
         ######Temp. FIX for Qrange w/ smear. #ToDo: Should not pass all the data to 'run' or 'smear'...
-        #new_index = (self.qmin > self.x) |(self.x > self.qmax)
-        #output[new_index] = None
+        new_index = (self.qmin > self.x) |(self.x > self.qmax)
+        output[new_index] = None
                 
         elapsed = time.time()-self.starttime
        
