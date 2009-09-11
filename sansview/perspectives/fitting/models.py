@@ -171,6 +171,7 @@ class ModelManager:
          
         from sans.models.TriaxialEllipsoidModel import TriaxialEllipsoidModel
         self.shape_list.append(TriaxialEllipsoidModel)
+        self.multiplication_factor.append(TriaxialEllipsoidModel)
         
         from sans.models.LamellarModel import LamellarModel
         self.shape_list.append(LamellarModel)
