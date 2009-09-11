@@ -7,12 +7,17 @@ See the license text in license.txt
 
 copyright 2009, University of Tennessee
 """
-import time, os
+import time, os, sys
 import logging
 import DataLoader
+from xml.dom.minidom import parse
+from lxml import etree
+
 from DataLoader.readers.cansas_reader import Reader as CansasReader
+from DataLoader.readers.cansas_reader import get_content
 
 PRNODE_NAME = 'pr_inversion'
+CANSAS_NS = "cansas1d/1.0"
 
 ## List of P(r) inversion inputs 
 in_list=  [["nterms",       "self.nfunc"],
@@ -212,120 +217,113 @@ class InversionState(object):
             @param node: node of a XML document to read from
         """
         if file is not None:
-            # Check whether the file is valid
-            if not os.path.isfile(file):
-                raise  RuntimeError, "P(r) reader: cannot open %s" % file
-        
-            from xml.dom.minidom import parse
-            doc = parse(file)
-            node = doc.documentElement
+            raise RuntimeError, "InversionState no longer supports non-CanSAS format for P(r) files"
             
-        if node.tagName == PRNODE_NAME:
-            if node.hasAttribute('version')\
-                and node.getAttribute('version') == '1.0':
-                
-                if node.hasChildNodes():
-                    for node in node.childNodes:
-                        if node.nodeName == 'filename':
-                            if node.hasChildNodes():
-                                self.file = node.childNodes[0].nodeValue.strip()
-                        elif node.nodeName == 'timestamp':
-                            if node.hasAttribute('epoch'):
-                                try:
-                                    self.timestamp = float(node.getAttribute('epoch'))
-                                except:
-                                    # Could not read timestamp: pass
-                                    pass
-                                
-                        # Parse inversion inputs
-                        elif node.nodeName == 'inputs':
-                            if node.hasChildNodes():
-                                for item in node.childNodes:
-                                    for out in in_list:
-                                        if item.nodeName == out[0]:
-                                            try:
-                                                exec '%s = float(item.childNodes[0].nodeValue.strip())' % out[1]
-                                            except:
-                                                exec '%s = None' % out[1]
-                                        elif item.nodeName == 'estimate_bck':
-                                            try:
-                                                self.estimate_bck = item.childNodes[0].nodeValue.strip()=='True'
-                                            except:
-                                                self.estimate_bck = False
-                            
-                        # Parse inversion outputs
-                        elif node.nodeName == 'outputs':
-                            if node.hasChildNodes():
-                                for item in node.childNodes:
-                                    # Look for standard outputs
-                                    for out in out_list:
-                                        if item.nodeName == out[0]:
-                                            try:
-                                                exec '%s = float(item.childNodes[0].nodeValue.strip())' % out[1]
-                                            except:
-                                                exec '%s = None' % out[1]
-                                                
-                                    # Look for coefficients
-                                    # Format is [value, value, value, value]
-                                    if item.nodeName == 'coefficients':
-                                        # Remove brackets
-                                        c_values = item.childNodes[0].nodeValue.strip().replace('[','')
-                                        c_values = c_values.replace(']','')
-                                        toks = c_values.split()
-                                        self.coefficients = []
-                                        for c in toks:
-                                            try:
-                                                self.coefficients.append(float(c))
-                                            except:
-                                                # Bad data, skip. We will count the number of 
-                                                # coefficients at the very end and deal with 
-                                                # inconsistencies then.
-                                                pass
-                                        # Sanity check
-                                        if not len(self.coefficients) == self.nfunc:
-                                            # Inconsistent number of coefficients. Don't keep the data.
-                                            err_msg = "InversionState.fromXML: inconsistant number of coefficients: "
-                                            err_msg += "%d %d" % (len(self.coefficients), self.nfunc)
-                                            logging.error(err_msg)
-                                            self.coefficients = None
-                                            
-                                    # Look for covariance matrix
-                                    # Format is [ [value, value], [value, value] ]
-                                    elif item.nodeName == "covariance":
-                                        # Parse rows
-                                        rows = item.childNodes[0].nodeValue.strip().split('[')
-                                        self.covariance = []
-                                        for row in rows:
-                                            row = row.strip()
-                                            if len(row) == 0: continue
-                                            # Remove end bracket
-                                            row = row.replace(']','')
-                                            c_values = row.split()
-                                            cov_row = []
-                                            for c in c_values:
-                                                try:
-                                                    cov_row.append(float(c))
-                                                except:
-                                                    # Bad data, skip. We will count the number of 
-                                                    # coefficients at the very end and deal with 
-                                                    # inconsistencies then.
-                                                    pass
-                                            # Sanity check: check the number of entries in the row
-                                            if len(cov_row) == self.nfunc:
-                                                self.covariance.append(cov_row)
-                                        # Sanity check: check the number of rows in the covariance
-                                        # matrix
-                                        if not len(self.covariance) == self.nfunc:
-                                            # Inconsistent dimensions of the covariance matrix.
-                                            # Don't keep the data.
-                                            err_msg = "InversionState.fromXML: inconsistant dimensions of the covariance matrix: "
-                                            err_msg += "%d %d" % (len(self.covariance), self.nfunc)
-                                            logging.error(err_msg)
-                                            self.covariance = None
-            else:
-                raise RuntimeError, "Unsupported P(r) file version"
-        
+        if node.get('version')\
+            and node.get('version') == '1.0':
+            
+            # Get file name
+            entry = get_content('ns:filename', node)
+            if entry is not None:
+                self.file = entry.text.strip()
+            
+            # Get time stamp
+            entry = get_content('ns:timestamp', node)
+            if entry is not None and entry.get('epoch'):
+                try:
+                    self.timestamp = float(entry.get('epoch'))
+                except:
+                    logging.error("InversionState.fromXML: Could not read timestamp\n %s" % sys.exc_value)
+            
+            # Parse inversion inputs
+            entry = get_content('ns:inputs', node)
+            if entry is not None:
+                for item in in_list:
+                    input_field = get_content('ns:%s' % item[0], entry)
+                    if input_field is not None:
+                        try:
+                            exec '%s = float(input_field.text.strip())' % item[1]
+                        except:
+                            exec '%s = None' % item[1]
+                input_field = get_content('ns:estimate_bck', entry)
+                if input_field is not None:
+                    try:
+                        self.estimate_bck = input_field.text.strip()=='True'
+                    except:
+                        self.estimate_bck = False
                     
+            # Parse inversion outputs
+            entry = get_content('ns:outputs', node)
+            if entry is not None:
+                # Output parameters (scalars)
+                for item in out_list:
+                    input_field = get_content('ns:%s' % item[0], entry)
+                    if input_field is not None:
+                        try:
+                            exec '%s = float(input_field.text.strip())' % item[1]
+                        except:
+                            exec '%s = None' % item[1]
+            
+                # Look for coefficients
+                # Format is [value, value, value, value]
+                coeff = get_content('ns:coefficients', entry)
+                if coeff is not None:
+                    # Remove brackets
+                    c_values = coeff.text.strip().replace('[','')
+                    c_values = c_values.replace(']','')
+                    toks = c_values.split()
+                    self.coefficients = []
+                    for c in toks:
+                        try:
+                            self.coefficients.append(float(c))
+                        except:
+                            # Bad data, skip. We will count the number of 
+                            # coefficients at the very end and deal with 
+                            # inconsistencies then.
+                            pass
+                    # Sanity check
+                    if not len(self.coefficients) == self.nfunc:
+                        # Inconsistent number of coefficients. Don't keep the data.
+                        err_msg = "InversionState.fromXML: inconsistant number of coefficients: "
+                        err_msg += "%d %d" % (len(self.coefficients), self.nfunc)
+                        logging.error(err_msg)
+                        self.coefficients = None
+                
+                # Look for covariance matrix
+                # Format is [ [value, value], [value, value] ]
+                coeff = get_content('ns:covariance', entry)
+                if coeff is not None:
+                    # Parse rows
+                    rows = coeff.text.strip().split('[')
+                    self.covariance = []
+                    for row in rows:
+                        row = row.strip()
+                        if len(row) == 0: continue
+                        # Remove end bracket
+                        row = row.replace(']','')
+                        c_values = row.split()
+                        cov_row = []
+                        for c in c_values:
+                            try:
+                                cov_row.append(float(c))
+                            except:
+                                # Bad data, skip. We will count the number of 
+                                # coefficients at the very end and deal with 
+                                # inconsistencies then.
+                                pass
+                        # Sanity check: check the number of entries in the row
+                        if len(cov_row) == self.nfunc:
+                            self.covariance.append(cov_row)
+                    # Sanity check: check the number of rows in the covariance
+                    # matrix
+                    if not len(self.covariance) == self.nfunc:
+                        # Inconsistent dimensions of the covariance matrix.
+                        # Don't keep the data.
+                        err_msg = "InversionState.fromXML: inconsistant dimensions of the covariance matrix: "
+                        err_msg += "%d %d" % (len(self.covariance), self.nfunc)
+                        logging.error(err_msg)
+                        self.covariance = None
+    
 class Reader(CansasReader):
     """
         Class to load a .prv P(r) inversion file
@@ -386,20 +384,15 @@ class Reader(CansasReader):
             @param entry: XML node to read from 
             @return: InversionState object
         """
-        from xml import xpath
-
         # Create an empty state
         state = InversionState()
         
         # Locate the P(r) node
         try:
-            nodes = xpath.Evaluate(PRNODE_NAME, entry)
+            nodes = entry.xpath('ns:%s' % PRNODE_NAME, namespaces={'ns': CANSAS_NS})
             state.fromXML(node=nodes[0])
         except:
-            #raise RuntimeError, "%s is not a file with P(r) information." % path
-            logging.info("XML document does not contain P(r) information.")
-            import sys
-            print sys.exc_value
+            logging.info("XML document does not contain P(r) information.\n %s" % sys.exc_value)
             
         return state
     
@@ -414,8 +407,6 @@ class Reader(CansasReader):
             @raise RuntimeError: when the file can't be opened
             @raise ValueError: when the length of the data vectors are inconsistent
         """
-        from xml.dom.minidom import parse
-        from xml import xpath
         output = []
         
         if os.path.isfile(path):
@@ -426,19 +417,13 @@ class Reader(CansasReader):
             if  extension.lower() in self.ext or \
                 extension.lower() == '.xml':
                 
-                dom = parse(path)
-                
-                # Format 1: check whether we have a CanSAS file
-                nodes = xpath.Evaluate('SASroot', dom)
+                tree = etree.parse(path, parser=etree.ETCompatXMLParser())
                 # Check the format version number
-                if nodes[0].hasAttributes():
-                    for i in range(nodes[0].attributes.length):
-                        if nodes[0].attributes.item(i).nodeName=='version':
-                            if nodes[0].attributes.item(i).nodeValue != self.version:
-                                raise ValueError, "cansas_reader: unrecognized version number %s" % \
-                                    nodes[0].attributes.item(i).nodeValue
+                # Specifying the namespace will take care of the file format version 
+                root = tree.getroot()
                 
-                entry_list = xpath.Evaluate('SASroot/SASentry', dom)
+                entry_list = root.xpath('/ns:SASroot/ns:SASentry', namespaces={'ns': CANSAS_NS})
+
                 for entry in entry_list:
                     sas_entry = self._parse_entry(entry)
                     prstate = self._parse_prstate(entry)
@@ -489,37 +474,5 @@ class Reader(CansasReader):
         else:
             prstate.toXML(file=filename)
         
-        
-if __name__ == "__main__": 
-    #TODO: turn all this into unit tests
-    
-    state = InversionState()
-    #print state.fromXML('../../test/pr_state.prv')     
-    print state.fromXML('../../test/test.prv')     
-    print state   
-    state.toXML('test_copy.prv')
-    
-    from DataLoader.loader import Loader
-    l = Loader()
-    datainfo = l.load("../../test/cansas1d.xml")
-    
-    def call_back(state, datainfo=None):
-        print state
-        
-    reader = Reader(call_back)
-    reader.cansas = False
-    reader.write("test_copy_from_reader.prv", prstate=state)
-    reader.cansas = True
-    reader.write("testout.prv", datainfo, state)
-    reader.write("testout_wo_datainfo.prv", prstate=state)
-    
-    # Now try to load things back
-    reader.cansas = False
-    #print reader.read("test_copy_from_reader.prv")
-    reader.cansas = True
-    #data = reader.read("testout.prv")
-    data = reader.read("testout_wo_datainfo.prv")
-    print data
-    print data.meta_data['prstate']
     
     
