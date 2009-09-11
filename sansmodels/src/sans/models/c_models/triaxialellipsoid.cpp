@@ -28,6 +28,7 @@ using namespace std;
 
 extern "C" {
 	#include "libCylinder.h"
+	#include "libStructureFactor.h"
 	#include "triaxial_ellipsoid.h"
 }
 
@@ -218,9 +219,67 @@ double TriaxialEllipsoidModel :: evaluate_rphi(double q, double phi) {
 }
 /**
  * Function to calculate effective radius
- * @param pars: parameters of the sphere
  * @return: effective radius value
  */
 double TriaxialEllipsoidModel :: calculate_ER() {
-//NOT implemented yet!!!
+	TriaxialEllipsoidParameters dp;
+
+	dp.semi_axisA   = semi_axisA();
+	dp.semi_axisB     = semi_axisB();
+	//polar axis C
+	dp.semi_axisC     = semi_axisC();
+
+	double rad_out = 0.0;
+	//Surface average radius at the equat. cross section.
+	double suf_rad = sqrt(dp.semi_axisA * dp.semi_axisB);
+
+	// Perform the computation, with all weight points
+	double sum = 0.0;
+	double norm = 0.0;
+
+	// Get the dispersion points for the semi_axis A
+	vector<WeightPoint> weights_semi_axisA;
+	semi_axisA.get_weights(weights_semi_axisA);
+
+	// Get the dispersion points for the semi_axis B
+	vector<WeightPoint> weights_semi_axisB;
+	semi_axisB.get_weights(weights_semi_axisB);
+
+	// Get the dispersion points for the semi_axis C
+	vector<WeightPoint> weights_semi_axisC;
+	semi_axisC.get_weights(weights_semi_axisC);
+
+	// Loop over semi axis A weight points
+	for(int i=0; i< (int)weights_semi_axisA.size(); i++) {
+		dp.semi_axisA = weights_semi_axisA[i].value;
+
+		// Loop over semi axis B weight points
+		for(int j=0; j< (int)weights_semi_axisB.size(); j++) {
+			dp.semi_axisB = weights_semi_axisB[j].value;
+
+			// Loop over semi axis C weight points
+			for(int k=0; k < (int)weights_semi_axisC.size(); k++) {
+				dp.semi_axisC = weights_semi_axisC[k].value;
+
+				//Calculate surface averaged radius
+				suf_rad = sqrt(dp.semi_axisA * dp.semi_axisB);
+
+				//Sum
+				sum += weights_semi_axisA[i].weight
+					* weights_semi_axisB[j].weight
+					* weights_semi_axisC[k].weight * DiamEllip(dp.semi_axisC, suf_rad)/2.0;
+				//Norm
+				norm += weights_semi_axisA[i].weight* weights_semi_axisB[j].weight
+					* weights_semi_axisC[k].weight;
+			}
+		}
+	}
+	if (norm != 0){
+		//return the averaged value
+		rad_out =  sum/norm;}
+	else{
+		//return normal value
+		rad_out = DiamEllip(dp.semi_axisC, suf_rad)/2.0;}
+
+	return rad_out;
 }

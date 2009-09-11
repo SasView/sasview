@@ -29,13 +29,14 @@ using namespace std;
 
 extern "C" {
 	#include "libCylinder.h"
+	#include "libStructureFactor.h"
 	#include "parallelepiped.h"
 }
 
 ParallelepipedModel :: ParallelepipedModel() {
 	scale      = Parameter(1.0);
 	short_a     = Parameter(35.0, true);
-	short_a.set_max(1.0);
+	short_a.set_min(1.0);
 	short_b     = Parameter(75.0, true);
 	short_b.set_min(1.0);
 	long_c     = Parameter(400.0, true);
@@ -94,7 +95,6 @@ double ParallelepipedModel :: operator()(double q) {
 			// Loop over longuest_edgeC weight points
 			for(int k=0; k< (int)weights_long_c.size(); k++) {
 				dp[3] = weights_long_c[k].value;
-
 				sum += weights_short_a[i].weight * weights_short_b[j].weight
 					* weights_long_c[k].weight * Parallelepiped(dp, q);
 
@@ -103,6 +103,7 @@ double ParallelepipedModel :: operator()(double q) {
 			}
 		}
 	}
+
 	return sum/norm + background();
 }
 /**
@@ -225,9 +226,63 @@ double ParallelepipedModel :: evaluate_rphi(double q, double phi) {
 }
 /**
  * Function to calculate effective radius
- * @param pars: parameters of the sphere
  * @return: effective radius value
  */
 double ParallelepipedModel :: calculate_ER() {
-//NOT implemented yet!!!
+	ParallelepipedParameters dp;
+	dp.short_a   = short_a();
+	dp.short_b   = short_b();
+	dp.long_c  = long_c();
+	double rad_out = 0.0;
+	double pi = 4.0*atan(1.0);
+	double suf_rad = sqrt(dp.short_a*dp.short_b/pi);
+
+	// Perform the computation, with all weight points
+	double sum = 0.0;
+	double norm = 0.0;
+
+	// Get the dispersion points for the short_edgeA
+	vector<WeightPoint> weights_short_a;
+	short_a.get_weights(weights_short_a);
+
+	// Get the dispersion points for the longer_edgeB
+	vector<WeightPoint> weights_short_b;
+	short_b.get_weights(weights_short_b);
+
+	// Get angular averaging for the longuest_edgeC
+	vector<WeightPoint> weights_long_c;
+	long_c.get_weights(weights_long_c);
+
+	// Loop over radius weight points
+	for(int i=0; i< (int)weights_short_a.size(); i++) {
+		dp.short_a = weights_short_a[i].value;
+
+		// Loop over longer_edgeB weight points
+		for(int j=0; j< (int)weights_short_b.size(); j++) {
+			dp.short_b = weights_short_b[j].value;
+
+			// Average over longuest_edgeC distribution
+			for(int k=0; k< (int)weights_long_c.size(); k++) {
+				dp.long_c = weights_long_c[k].value;
+				//Calculate surface averaged radius
+				//This is rough approximation.
+				suf_rad = sqrt(dp.short_a*dp.short_b/pi);
+
+				//Note: output of "DiamCyl(dp.length,dp.radius)" is DIAMETER.
+				sum +=weights_short_a[i].weight* weights_short_b[j].weight
+					* weights_long_c[k].weight*DiamCyl(dp.long_c, suf_rad)/2.0;
+				norm += weights_short_a[i].weight* weights_short_b[j].weight*weights_long_c[k].weight;
+			}
+		}
+	}
+
+	if (norm != 0){
+		//return the averaged value
+		rad_out =  sum/norm;}
+	else{
+		//return normal value
+		//Note: output of "DiamCyl(length,radius)" is DIAMETER.
+		rad_out = DiamCyl(dp.long_c, suf_rad)/2.0;}
+	return rad_out;
+
 }

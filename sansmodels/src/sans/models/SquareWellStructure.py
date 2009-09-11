@@ -107,7 +107,6 @@ class SquareWellStructure(CSquareWellStructure, BaseComponent):
         
     def calculate_ER(self):
         """ Calculate the effective radius for P(q)*S(q)
-            @param x: input q, or [q,phi]
             @return: the value of the effective radius
         """       
         return CSquareWellStructure.calculate_ER(self)

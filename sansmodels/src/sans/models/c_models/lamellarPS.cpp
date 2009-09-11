@@ -110,7 +110,6 @@ double LamellarPSModel :: evaluate_rphi(double q, double phi) {
 }
 /**
  * Function to calculate effective radius
- * @param pars: parameters of the sphere
  * @return: effective radius value
  */
 double LamellarPSModel :: calculate_ER() {

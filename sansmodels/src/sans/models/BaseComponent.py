@@ -55,7 +55,7 @@ class BaseComponent:
    
     def run(self, x): return NotImplemented
     def runXY(self, x): return NotImplemented  
-    def calculate_ER(self, x): return NotImplemented  
+    def calculate_ER(self): return NotImplemented  
     def evalDistribution(self, qdist):
         """
             Evaluate a distribution of q-values.

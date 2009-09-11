@@ -246,7 +246,6 @@ double CoreShellEllipsoidModel :: operator()(double qx, double qy) {
 
 /**
  * Function to calculate effective radius
- * @param pars: parameters of the sphere
  * @return: effective radius value
  */
 double CoreShellEllipsoidModel :: calculate_ER() {

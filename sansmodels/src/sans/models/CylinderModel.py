@@ -110,7 +110,6 @@ class CylinderModel(CCylinderModel, BaseComponent):
         
     def calculate_ER(self):
         """ Calculate the effective radius for P(q)*S(q)
-            @param x: input q, or [q,phi]
             @return: the value of the effective radius
         """       
         return CCylinderModel.calculate_ER(self)

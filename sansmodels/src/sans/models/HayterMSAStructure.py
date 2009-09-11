@@ -109,7 +109,6 @@ class HayterMSAStructure(CHayterMSAStructure, BaseComponent):
         
     def calculate_ER(self):
         """ Calculate the effective radius for P(q)*S(q)
-            @param x: input q, or [q,phi]
             @return: the value of the effective radius
         """       
         return CHayterMSAStructure.calculate_ER(self)

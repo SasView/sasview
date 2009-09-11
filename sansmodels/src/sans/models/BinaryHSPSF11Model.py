@@ -110,7 +110,6 @@ class BinaryHSPSF11Model(CBinaryHSPSF11Model, BaseComponent):
         
     def calculate_ER(self):
         """ Calculate the effective radius for P(q)*S(q)
-            @param x: input q, or [q,phi]
             @return: the value of the effective radius
         """       
         return CBinaryHSPSF11Model.calculate_ER(self)

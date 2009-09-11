@@ -28,6 +28,7 @@ using namespace std;
 
 extern "C" {
 	#include "libCylinder.h"
+	#include "libStructureFactor.h"
 	#include "elliptical_cylinder.h"
 }
 
@@ -221,9 +222,61 @@ double EllipticalCylinderModel :: evaluate_rphi(double q, double phi) {
 }
 /**
  * Function to calculate effective radius
- * @param pars: parameters of the sphere
  * @return: effective radius value
  */
 double EllipticalCylinderModel :: calculate_ER() {
-//NOT implemented yet!!!
+	EllipticalCylinderParameters dp;
+	dp.r_minor    = r_minor();
+	dp.r_ratio    = r_ratio();
+	dp.length     = length();
+	double rad_out = 0.0;
+	double pi = 4.0*atan(1.0);
+	double suf_rad = sqrt(dp.r_minor*dp.r_minor*dp.r_ratio);
+
+	// Perform the computation, with all weight points
+	double sum = 0.0;
+	double norm = 0.0;
+
+	// Get the dispersion points for the r_minor
+	vector<WeightPoint> weights_rad;
+	r_minor.get_weights(weights_rad);
+
+	// Get the dispersion points for the r_ratio
+	vector<WeightPoint> weights_rat;
+	r_ratio.get_weights(weights_rat);
+
+	// Get the dispersion points for the length
+	vector<WeightPoint> weights_len;
+	length.get_weights(weights_len);
+
+	// Loop over minor radius weight points
+	for(int i=0; i<weights_rad.size(); i++) {
+		dp.r_minor = weights_rad[i].value;
+
+		// Loop over length weight points
+		for(int j=0; j<weights_len.size(); j++) {
+			dp.length = weights_len[j].value;
+
+			// Loop over r_ration weight points
+			for(int m=0; m<weights_rat.size(); m++) {
+				dp.r_ratio = weights_rat[m].value;
+				//Calculate surface averaged radius
+				suf_rad = sqrt(dp.r_minor * dp.r_minor * dp.r_ratio);
+
+				//Note: output of "DiamCyl(dp.length,dp.radius)" is DIAMETER.
+				sum +=weights_rad[i].weight *weights_len[j].weight
+					* weights_rat[m].weight*DiamCyl(dp.length, suf_rad)/2.0;
+				norm += weights_rad[i].weight *weights_len[j].weight* weights_rat[m].weight;
+			}
+		}
+	}
+	if (norm != 0){
+		//return the averaged value
+		rad_out =  sum/norm;}
+	else{
+		//return normal value
+		//Note: output of "DiamCyl(dp.length,dp.radius)" is DIAMETER.
+		rad_out = DiamCyl(dp.length, suf_rad)/2.0;}
+
+	return rad_out;
 }
