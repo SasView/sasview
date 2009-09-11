@@ -945,7 +945,7 @@ class Plugin:
         
         if model ==None:
             return
-       
+        model.origin_name = model.name
         current_pg = self.fit_panel.get_current_page() 
         ## make sure nothing is done on self.sim_page
         ## example trying to call set_panel on self.sim_page

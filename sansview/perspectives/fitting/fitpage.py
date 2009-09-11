@@ -47,6 +47,7 @@ class FitPage(BasicPage):
         self._fill_datainfo_sizer()
        
         self._fill_model_sizer( self.sizer1)
+ 
         self._fill_range_sizer() 
         #self._on_select_model(event=None)
         if self.data !=None:
@@ -229,16 +230,19 @@ class FitPage(BasicPage):
         self.sizer0.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer0.Layout()
        
-        
-       
     def _fill_model_sizer(self, sizer):
         """
             fill sizer containing model info
         """
-       
-        ## class base method  to add view 2d button    
-        self._set_model_sizer(sizer=sizer, title="Model",object=None )    
+        ##Add model function Details button in fitpanel.
+        id = wx.NewId()
+        self.model_help =wx.Button(self,id,'Details')
+        self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked,id=id)
+        self.model_help.SetToolTipString("Model Function Help")
         
+        ## class base method  to add view 2d button    
+        self._set_model_sizer(sizer=sizer, title="Model",object=self.model_help )   
+
     
     #def _set_sizer_gaussian(self):
     def _set_sizer_dispersion(self, dispersity):
@@ -250,7 +254,6 @@ class FitPage(BasicPage):
         self.orientation_params_disp=[]
        
         self.sizer4_4.Clear(True)
-       
         if self.model==None:
             ##no model is selected
             return
@@ -1285,7 +1288,6 @@ class FitPage(BasicPage):
         self.Refresh()
         self.SetScrollbars(20,20,200,100)
        
-            
         
 class HelpWindow(wx.Frame):
     def __init__(self, parent, id, title):

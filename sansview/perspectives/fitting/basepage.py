@@ -1121,7 +1121,7 @@ class BasicPage(wx.ScrolledWindow):
         self.shape_indep_rbutton = wx.RadioButton(self, -1, "Shape-Independent")
         self.struct_rbutton = wx.RadioButton(self, -1, "Structure Factor ")
         self.plugin_rbutton = wx.RadioButton(self, -1, "Customized Models")
-        
+                
         self.Bind( wx.EVT_RADIOBUTTON, self._show_combox,
                             id= self.shape_rbutton.GetId() ) 
         self.Bind( wx.EVT_RADIOBUTTON, self._show_combox,
@@ -1711,5 +1711,23 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer6.Layout()
         self.SetScrollbars(20,20,200,100)
         
+    def on_model_help_clicked(self,event):
+        """
+        #On 'More details' button
+        """
+        from helpPanel import  HelpWindow
         
+        if self.model == None:
+            name = 'FuncHelp'
+        else:
+            name = self.model.origin_name
+
+        frame = HelpWindow(None, -1,  pageToOpen="doc/model_functions.html")    
+        frame.Show(True)
+        if frame.rhelp.HasAnchor(name):
+            frame.rhelp.ScrollToAnchor(name)
+        else:
+           msg= "Model does not contains an available description "
+           msg +="Please try searching in the Help window"
+           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))                    
                 
