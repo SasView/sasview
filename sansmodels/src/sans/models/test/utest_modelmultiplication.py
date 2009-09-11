@@ -1,6 +1,6 @@
 """
     Unit tests for specific models
-    @author: Gervaise Alina / UTK
+    @author: JHJ Cho / UTK
 """
 #This test replaces the older utests for multiplicationModel. Aug. 31, 2009. JC
 import unittest, numpy,math
@@ -558,7 +558,7 @@ class TestcylinderSHS(unittest.TestCase):
         
 class TestcylinderHayterM(unittest.TestCase):
     """ 
-        Unit tests for SphereModel(Q) * HayterMSAStructure(Q)
+        Unit tests for CylinderModel(Q) * HayterMSAStructure(Q)
     """
     def setUp(self):
         from sans.models.CylinderModel import CylinderModel
@@ -634,6 +634,56 @@ class TestcylinderHayterM(unittest.TestCase):
         model4= self.model3.clone()
         self.assertEqual(model4.getParam("radius"), 20)        
         
+class TestGuinierHayterM(unittest.TestCase):
+    """ 
+        Unit tests for GuinierModel(Q) * HayterMSAStructure(Q)
+    """
+    def setUp(self):
+        from sans.models.GuinierModel import GuinierModel
+        from sans.models.HayterMSAStructure import HayterMSAStructure
+        from sans.models.MultiplicationModel import MultiplicationModel
+
+        self.model = GuinierModel()
+        self.model2 = HayterMSAStructure()
+        self.model3 = MultiplicationModel(self.model, self.model2)  
+
+    #Radius of model1.calculate_ER should be equal to the output/2 of DiamFunctions
+    def test_multplication_radius(self):
+        """
+            test multiplication model (check the effective radius & the output
+             of the multiplication)
+        """
+        self.model.setParam("rg", 60)
+        self.model.setParam("scale", 1)
+        #Compare new method with old method         
+        self.assertEqual(self.model3.run(0.1), self.model.run(0.1)*self.model2.run(0.1))
         
+        #effective radius calculation is not implemented for this model. 
+        self.assertEqual(self.model3.calculate_ER(), NotImplemented)       
+        
+class TestLamellarHayterM(unittest.TestCase):
+    """ 
+        Unit tests for LamellarModel(Q) * HayterMSAStructure(Q)
+    """
+    def setUp(self):
+        from sans.models.LamellarModel import LamellarModel
+        from sans.models.HayterMSAStructure import HayterMSAStructure
+        from sans.models.MultiplicationModel import MultiplicationModel
+
+        self.model = LamellarModel()
+        self.model2 = HayterMSAStructure()
+        self.model3 = MultiplicationModel(self.model, self.model2)  
+
+    #Radius of model1.calculate_ER should Not be finite.
+    def test_multplication_radius(self):
+        """
+            test multiplication model (check the effective radius & the output
+             of the multiplication)
+        """
+        #Check run       
+        self.assertFalse(numpy.isfinite(self.model3.run(0.1)))
+        #check effective radius . 
+        self.assertFalse(numpy.isfinite(self.model.calculate_ER()))      
+                
 if __name__ == '__main__':
     unittest.main()

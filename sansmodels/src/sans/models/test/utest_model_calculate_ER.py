@@ -1,16 +1,9 @@
 """
-    Unit tests for specific models
+    Unit tests for calculate_ER of specific models
+    @author: JHJ Cho / UTK
 """
 
-import unittest, time, math
-
-# Disable "missing docstring" complaint
-# pylint: disable-msg=C0111
-# Disable "too many methods" complaint 
-# pylint: disable-msg=R0904 
-# Disable "could be a function" complaint 
-# pylint: disable-msg=R0201
-
+import unittest, time, math, numpy
 
         
 class TestSphere(unittest.TestCase):
@@ -135,8 +128,46 @@ class TestStackedDisksModel(unittest.TestCase):
         self.comp.setParam("layer_thick", 15)
         self.diam.setParam("radius", 3000)
         self.diam.setParam("length",80)       
-        self.assertAlmostEqual(self.comp.calculate_ER(), self.diam.run(0.1)/2)       
-
+        self.assertAlmostEqual(self.comp.calculate_ER(), self.diam.run(0.1)/2)  
+             
+class TestEllipticalCylinder(unittest.TestCase):
+    """ Unit tests for calculate_ER (EllipticalCylindermodel) """
+    
+    def setUp(self):
+        from sans.models.EllipticalCylinderModel import EllipticalCylinderModel
+        from sans.models.DiamCylFunc import DiamCylFunc
+        self.comp = EllipticalCylinderModel()
+        self.diam = DiamCylFunc()
+        
+    def test(self):
+        """ Test 1D model for a EllipticalCylinder """
+        self.comp.setParam("r_minor", 20)
+        self.comp.setParam("r_ratio",1.5)  
+        self.comp.setParam("length",400)  
+        r_value = math.sqrt(20*20*1.5)    
+        self.diam.setParam("radius", r_value)
+        self.diam.setParam("length",400)       
+        self.assertAlmostEqual(self.comp.calculate_ER(), self.diam.run(0.1)/2)  
+         
+class TestParallelepiped(unittest.TestCase):
+    """ Unit tests for calculate_ER (Parallelepipedmodel) """
+    
+    def setUp(self):
+        from sans.models.ParallelepipedModel import ParallelepipedModel
+        from sans.models.DiamCylFunc import DiamCylFunc
+        self.comp = ParallelepipedModel()
+        self.diam = DiamCylFunc()
+        
+    def test(self):
+        """ Test 1D model for a Parallelepiped """
+        self.comp.setParam("short_a", 35)
+        self.comp.setParam("short_b", 75)  
+        self.comp.setParam("long_c",400)  
+        r_value = math.sqrt(35*75/math.pi)    
+        self.diam.setParam("radius", r_value)
+        self.diam.setParam("length",400)   
+        self.assertAlmostEqual(self.comp.calculate_ER(), self.diam.run(0.1)/2)   
+                                                  
 class TestEllipsoid(unittest.TestCase):
     """ Unit tests for calculate_ER (Ellipsoid model) """
     
@@ -169,6 +200,31 @@ class TestCoreShellEllipsoid(unittest.TestCase):
         self.comp.setParam("equat_shell",400)       
         self.diam.setParam("radius_a", 20)
         self.diam.setParam("radius_b",400)
-        self.assertAlmostEqual(self.comp.calculate_ER(), self.diam.run(0.1)/2)                      
+        self.assertAlmostEqual(self.comp.calculate_ER(), self.diam.run(0.1)/2) 
+            
+class TestLamellar(unittest.TestCase):
+    """ Unit tests for calculate_ER (Lamellarmodel)"""
+    
+    def setUp(self):
+        from sans.models.LamellarModel import LamellarModel
+        self.comp = LamellarModel()
+        
+    def test(self):
+        """ Test 1D model for a Lamellar """
+        #No finite number should return from Lamellar models.
+        self.assertFalse(numpy.isfinite(self.comp.calculate_ER())) 
+         
+class TestGuinier(unittest.TestCase):
+    """ Unit tests for calculate_ER (Guinier model) """
+    
+    def setUp(self):
+        from sans.models.GuinierModel import GuinierModel
+        self.comp = GuinierModel()
+        
+    def test(self):
+        """ Test 1D model for Guinier """    
+        #calculate_ER() is not implemented for pure python model functions
+        self.assertEqual(self.comp.calculate_ER(), NotImplemented)  
+        
 if __name__ == '__main__':
     unittest.main()
