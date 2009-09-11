@@ -22,6 +22,7 @@ from sans.guicomm.events import NewPlotEvent, StatusEvent
 import math, numpy
 from sans.pr.invertor import Invertor
 from DataLoader.loader import Loader
+import DataLoader
 from sans.guiframe.data_loader import load_error 
 
 import copy
@@ -593,7 +594,8 @@ class Plugin:
             elif item.name==graph.selected_plottable:
 	            #TODO: we might want to check that the units are consistent with I(q)
 	            #      before allowing this menu item
-                return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion]]      
+                if issubclass(item.__class__, DataLoader.data_info.Data1D):
+                    return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion]]      
                 
         return []
 

@@ -19,26 +19,27 @@ from DataLoader.readers.cansas_reader import get_content
 PRNODE_NAME = 'pr_inversion'
 CANSAS_NS = "cansas1d/1.0"
 
+# Translation of names between stored and object data
 ## List of P(r) inversion inputs 
-in_list=  [["nterms",       "self.nfunc"],
-           ["d_max",        "self.d_max"],
-           ["alpha",        "self.alpha"],
-           ["slit_width",   "self.width"],
-           ["slit_height",  "self.height"],
-           ["qmin",         "self.qmin"],
-           ["qmax",         "self.qmax"]]                      
+in_list=  [["nterms",       "nfunc"],
+           ["d_max",        "d_max"],
+           ["alpha",        "alpha"],
+           ["slit_width",   "width"],
+           ["slit_height",  "height"],
+           ["qmin",         "qmin"],
+           ["qmax",         "qmax"]]                      
 
 ## List of P(r) inversion outputs
-out_list= [["elapsed", "self.elapsed"],
-           ["rg",      "self.rg"],
-           ["iq0",     "self.iq0"],
-           ["bck",     "self.bck"],
-           ["chi2",    "self.chi2"],
-           ["osc",     "self.osc"],
-           ["pos",     "self.pos"],
-           ["pos_err", "self.pos_err"],
-           ["alpha_estimate", "self.alpha_estimate"],
-           ["nterms_estimate", "self.nterms_estimate"]]
+out_list= [["elapsed", "elapsed"],
+           ["rg",      "rg"],
+           ["iq0",     "iq0"],
+           ["bck",     "bck"],
+           ["chi2",    "chi2"],
+           ["osc",     "osc"],
+           ["pos",     "pos"],
+           ["pos_err", "pos_err"],
+           ["alpha_estimate", "alpha_estimate"],
+           ["nterms_estimate", "nterms_estimate"]]
 
 class InversionState(object):
     """
@@ -180,7 +181,7 @@ class InversionState(object):
         
         for item in in_list:
             element = newdoc.createElement(item[0])
-            exec "element.appendChild(newdoc.createTextNode(str(%s)))" % item[1]
+            exec "element.appendChild(newdoc.createTextNode(str(self.%s)))" % item[1]
             inputs.appendChild(element)
               
         # Outputs
@@ -189,7 +190,7 @@ class InversionState(object):
         
         for item in out_list:
             element = newdoc.createElement(item[0])
-            exec "element.appendChild(newdoc.createTextNode(str(%s)))" % item[1]
+            exec "element.appendChild(newdoc.createTextNode(str(self.%s)))" % item[1]
             outputs.appendChild(element)
                     
         # Save output coefficients and its covariance matrix
@@ -242,9 +243,9 @@ class InversionState(object):
                     input_field = get_content('ns:%s' % item[0], entry)
                     if input_field is not None:
                         try:
-                            exec '%s = float(input_field.text.strip())' % item[1]
+                            exec 'self.%s = float(input_field.text.strip())' % item[1]
                         except:
-                            exec '%s = None' % item[1]
+                            exec 'self.%s = None' % item[1]
                 input_field = get_content('ns:estimate_bck', entry)
                 if input_field is not None:
                     try:
@@ -260,9 +261,9 @@ class InversionState(object):
                     input_field = get_content('ns:%s' % item[0], entry)
                     if input_field is not None:
                         try:
-                            exec '%s = float(input_field.text.strip())' % item[1]
+                            exec 'self.%s = float(input_field.text.strip())' % item[1]
                         except:
-                            exec '%s = None' % item[1]
+                            exec 'self.%s = None' % item[1]
             
                 # Look for coefficients
                 # Format is [value, value, value, value]
