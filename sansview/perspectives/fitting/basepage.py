@@ -981,10 +981,10 @@ class BasicPage(wx.ScrolledWindow):
         """
         if model ==None:
             return
-        if hasattr(model ,"model2"):
+        if hasattr(model ,"s_model"):
             
-            class_name= model.model2.__class__
-            name= model.model2.name
+            class_name= model.s_model.__class__
+            name= model.s_model.name
             flag= name != "NoStructure"
             if flag and (class_name in self.model_list_box["Structure Factors"]):
                 self.structurebox.Show()
@@ -999,9 +999,9 @@ class BasicPage(wx.ScrolledWindow):
                         self.structurebox.SetSelection(i)
                         break
                     
-        if hasattr(model ,"model1"):
-            class_name = model.model1.__class__
-            name = model.model1.name
+        if hasattr(model ,"p_model"):
+            class_name = model.p_model.__class__
+            name = model.p_model.name
             self.formfactorbox.Clear()
             
             for k, list in self.model_list_box.iteritems():

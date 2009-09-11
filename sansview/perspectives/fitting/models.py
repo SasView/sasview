@@ -147,7 +147,7 @@ class ModelManager:
               
         from sans.models.FlexibleCylinderModel import FlexibleCylinderModel
         self.shape_list.append(FlexibleCylinderModel)
-        self.multiplication_factor.append(FlexibleCylinderModel)
+
         
         from sans.models.StackedDisksModel import StackedDisksModel
         self.shape_list.append(StackedDisksModel)
@@ -155,10 +155,12 @@ class ModelManager:
         
         from sans.models.ParallelepipedModel import ParallelepipedModel
         self.shape_list.append(ParallelepipedModel)
+        self.multiplication_factor.append(ParallelepipedModel)
         
         from sans.models.EllipticalCylinderModel import EllipticalCylinderModel
         self.shape_list.append(EllipticalCylinderModel)
-        
+        self.multiplication_factor.append(EllipticalCylinderModel)
+                
         from sans.models.EllipsoidModel import EllipsoidModel
         self.shape_list.append(EllipsoidModel)
         self.multiplication_factor.append(EllipsoidModel)
