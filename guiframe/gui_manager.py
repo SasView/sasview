@@ -20,7 +20,6 @@ import wx
 import wx.aui
 import os, sys
 import xml
-from xml import xpath
 try:
     # Try to find a local config
     import imp
@@ -470,10 +469,7 @@ class ViewerFrame(wx.Frame):
                           Resizable(True).
                           # Use a large best size to make sure the AUI manager
                           # takes all the available space
-                          BestSize(wx.Size(1300,1300)))
-                          #MinSize(wx.Size(500,500)))
-                          #BestSize(wx.Size(400,400)).
-                          #MinSize(wx.Size(350,350)))
+                          BestSize(wx.Size(400,400)))
         pane = self._mgr.GetPane(windowname)
         self._mgr.MaximizePane(pane)
         self._mgr.RestoreMaximizedPane()
@@ -731,28 +727,8 @@ class ViewerFrame(wx.Frame):
         if config._do_aboutbox:
             import aboutbox 
             dialog = aboutbox.DialogAbout(None, -1, "")
-            dialog.ShowModal()
+            dialog.ShowModal()            
             
-            
-    def _saveOpenData(self):
-        """
-            Savename and path of n opened data  into as xml file
-        """
-        try:
-            fd = open("fileOpened.xml",'r')
-            from xml.dom.minidom import parse
-            dom = parse(fd)
-            ## Check the format version number
-            nodes = xpath.Evaluate('file Path\File', dom)
-            print "node",nodes
-            if nodes[0].hasAttributes():
-                print "--->"
-            fd.close()
-        except:
-            raise
-       
-       
-        
     def _onreloaFile(self, event):  
         """
             load a data previously opened 
