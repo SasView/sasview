@@ -201,7 +201,26 @@ class TestCoreShellEllipsoid(unittest.TestCase):
         self.diam.setParam("radius_a", 20)
         self.diam.setParam("radius_b",400)
         self.assertAlmostEqual(self.comp.calculate_ER(), self.diam.run(0.1)/2) 
-            
+
+class TestTriaxialEllipsoid(unittest.TestCase):
+    """ Unit tests for calculate_ER (TriaxialEllipsoid model) """
+    
+    def setUp(self):
+        from sans.models.TriaxialEllipsoidModel import TriaxialEllipsoidModel
+        from sans.models.DiamEllipFunc import DiamEllipFunc
+        self.comp = TriaxialEllipsoidModel()
+        self.diam = DiamEllipFunc()
+        
+    def test(self):
+        """ Test 1D model for a TriaxialEllipsoid """
+        self.comp.setParam("semi_axisA", 35)
+        self.comp.setParam("semi_axisB", 100)
+        self.comp.setParam("semi_axisC", 400)  
+        r_value = math.sqrt(35*100)    
+        self.diam.setParam("radius_a", 400)
+        self.diam.setParam("radius_b",r_value)
+        self.assertAlmostEqual(self.comp.calculate_ER(), self.diam.run(0.1)/2) 
+                    
 class TestLamellar(unittest.TestCase):
     """ Unit tests for calculate_ER (Lamellarmodel)"""
     
