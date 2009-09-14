@@ -229,15 +229,15 @@ double CoreShellCylinderModel :: calculate_ER() {
 	double sum = 0.0;
 	double norm = 0.0;
 
-	// Get the dispersion points for the major shell
+	// Get the dispersion points for the length
 	vector<WeightPoint> weights_length;
 	length.get_weights(weights_length);
 
-	// Get the dispersion points for the major shell
+	// Get the dispersion points for the thickness
 	vector<WeightPoint> weights_thickness;
 	thickness.get_weights(weights_thickness);
 
-	// Get the dispersion points for the minor shell
+	// Get the dispersion points for the radius
 	vector<WeightPoint> weights_radius ;
 	radius.get_weights(weights_radius);
 
@@ -248,9 +248,9 @@ double CoreShellCylinderModel :: calculate_ER() {
 			dp.thickness = weights_thickness[j].value;
 			for(int k=0; k< (int)weights_radius.size(); k++) {
 				dp.radius = weights_radius[k].value;
-				//Note: output of "DiamCyl(dp.length,dp.radius)" is DIAMETER.
+				//Note: output of "DiamCyl( )" is DIAMETER.
 				sum +=weights_length[i].weight * weights_thickness[j].weight
-					* weights_radius[k].weight*DiamCyl(dp.length,dp.radius+dp.thickness)/2.0;
+					* weights_radius[k].weight*DiamCyl(dp.length+2.0*dp.thickness,dp.radius+dp.thickness)/2.0;
 				norm += weights_length[i].weight* weights_thickness[j].weight* weights_radius[k].weight;
 			}
 		}
@@ -260,8 +260,8 @@ double CoreShellCylinderModel :: calculate_ER() {
 		rad_out =  sum/norm;}
 	else{
 		//return normal value
-		//Note: output of "DiamCyl(dp.length,dp.radius)" is DIAMETER.
-		rad_out = DiamCyl(dp.length,dp.radius+dp.thickness)/2.0;}
+		//Note: output of "DiamCyl()" is DIAMETER.
+		rad_out = DiamCyl(dp.length+2.0*dp.thickness,dp.radius+dp.thickness)/2.0;}
 
 	return rad_out;
 }

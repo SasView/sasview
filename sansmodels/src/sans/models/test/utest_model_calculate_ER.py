@@ -91,7 +91,7 @@ class TestCoreShellCylinder(unittest.TestCase):
         self.comp.setParam("thickness", 10)
         self.comp.setParam("length",400)
         self.diam.setParam("radius", 30)
-        self.diam.setParam("length",400)       
+        self.diam.setParam("length",420)       
         self.assertAlmostEqual(self.comp.calculate_ER(), self.diam.run(0.1)/2)   
 
 class TestHollowCylinder(unittest.TestCase):
