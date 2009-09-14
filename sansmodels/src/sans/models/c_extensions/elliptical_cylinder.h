@@ -4,9 +4,14 @@
 /** Structure definition for cylinder parameters
  * [PYTHONCLASS] = EllipticalCylinderModel
  * [DISP_PARAMS] = r_minor, r_ratio, length, cyl_theta, cyl_phi, cyl_psi
- * [DESCRIPTION] = Please see details...
+ * [DESCRIPTION] = <text> Model parameters: r_minor = the radius of minor axis of the cross section
+r_ratio = the ratio of (r_major /r_minor >= 1)
+length = the length of the cylinder
+contrast = SLD of solvent - SLD of the cylinder
+background = incoherent background
+  *</text>
  * [FIXED]= <text> cyl_phi.width;
- * cyl_theta.width; cyl_psi.width; length.width; r_minor.width; r_ratio.width 
+ * cyl_theta.width; cyl_psi.width; length.width; r_minor.width; r_ratio.width
  *</text>
  * [ORIENTATION_PARAMS]= cyl_phi; cyl_theta; cyl_psi;  cyl_phi.width; cyl_theta.width; cyl_psi.width
  * */

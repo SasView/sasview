@@ -3,14 +3,12 @@
 /** Structure definition for cylinder parameters
  * [PYTHONCLASS] = TriaxialEllipsoidModel
  * [DISP_PARAMS] = axis_theta, axis_phi, axis_psi
-   [DESCRIPTION] = <text> Note:
-					Constraints must be applied during fitting to ensure that the inequality a<b<c is not
-						  violated. The calculation will not report an error, but the results will not be correct.
-				   </text>
+	[DESCRIPTION] = <text>Note: During fitting ensure that the inequality A<B<C is not
+	violated. Otherwise the calculation will
+	not be correct.
+	</text>
 	[FIXED]= <text>axis_psi.width; axis_phi.width; axis_theta.width; semi_axisA.width; semi_axisB.width; semi_axisC.width </text>
 	[ORIENTATION_PARAMS]= <text>axis_psi; axis_phi; axis_theta; axis_psi.width; axis_phi.width; axis_theta.width</text>
-
-
  **/
 typedef struct {
     /// Scale factor

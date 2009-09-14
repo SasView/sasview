@@ -53,7 +53,11 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
         ## Name of the model
         self.name = "EllipticalCylinderModel"
         ## Model description
-        self.description ="""Please see details..."""
+        self.description =""" Model parameters: r_minor = the radius of minor axis of the cross section
+		r_ratio = the ratio of (r_major /r_minor >= 1)
+		length = the length of the cylinder
+		contrast = SLD of solvent - SLD of the cylinder
+		background = incoherent background"""
        
 		## Parameter details [units, min, max]
         self.details = {}

@@ -52,7 +52,12 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
         ## Name of the model
         self.name = "HollowCylinderModel"
         ## Model description
-        self.description =""""""
+        self.description =""" P(q) = scale*<f*f>/Vol + bkg, where f is the scattering amplitude.
+		core_radius = the radius of core
+		radius = the radius of shell
+		length = the total length of the cylinder
+		contrast = SLD of solvent - SLD of shell
+		background = incoherent background"""
        
 		## Parameter details [units, min, max]
         self.details = {}

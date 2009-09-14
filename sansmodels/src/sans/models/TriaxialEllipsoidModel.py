@@ -53,9 +53,9 @@ class TriaxialEllipsoidModel(CTriaxialEllipsoidModel, BaseComponent):
         ## Name of the model
         self.name = "TriaxialEllipsoidModel"
         ## Model description
-        self.description =""" Note:
-		Constraints must be applied during fitting to ensure that the inequality a<b<c is not
-		violated. The calculation will not report an error, but the results will not be correct."""
+        self.description ="""Note: During fitting ensure that the inequality A<B<C is not
+		violated. Otherwise the calculation will
+		not be correct."""
        
 		## Parameter details [units, min, max]
         self.details = {}

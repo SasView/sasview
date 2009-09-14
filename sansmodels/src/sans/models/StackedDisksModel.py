@@ -56,7 +56,15 @@ class StackedDisksModel(CStackedDisksModel, BaseComponent):
         ## Name of the model
         self.name = "StackedDisksModel"
         ## Model description
-        self.description =""""""
+        self.description =""" One layer of disk consists of a core, a top layer, and a bottom layer.
+		radius =  the radius of the disk
+		core_thick = thickness of the core
+		layer_thick = thickness of a layer
+		core_sld = the SLD of the core
+		layer_sld = the SLD of the layers
+		n_stacking = the number of the disks
+		sigma_d =  Gaussian STD of d-spacing
+		solvent_sld = the SLD of the solvent"""
        
 		## Parameter details [units, min, max]
         self.details = {}

@@ -5,10 +5,10 @@
  * Structure definition for vesicle parameters
 [PYTHONCLASS] = VesicleModel
 [DISP_PARAMS] = radius,thickness
-[DESCRIPTION] =<text>Model parameters:  radius : core radius of the vesicle
-		thickness: shell thickness
-		core_sld: core scattering length density
-		shell_sld: shell scattering length density
+[DESCRIPTION] =<text>Model parameters:    radius : the core radius of the vesicle
+		thickness: the shell thickness
+		core_sld: the core SLD
+		shell_sld: the shell SLD
 		background: incoherent background
 		scale : scale factor
 </text>

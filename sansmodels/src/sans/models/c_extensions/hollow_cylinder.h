@@ -6,7 +6,13 @@
  */
  //[PYTHONCLASS] = HollowCylinderModel
  //[DISP_PARAMS] = core_radius, radius, length, axis_theta, axis_phi
- //[DESCRIPTION] = <text></text>
+ //[DESCRIPTION] = <text> P(q) = scale*<f*f>/Vol + bkg, where f is the scattering amplitude.
+ //					core_radius = the radius of core
+ //				radius = the radius of shell
+ // 			length = the total length of the cylinder
+ //				contrast = SLD of solvent - SLD of shell
+ //				background = incoherent background
+ //	</text>
  //[FIXED]= <text> axis_phi.width; axis_theta.width; length.width;core_radius.width; radius</text>
  //[ORIENTATION_PARAMS]= axis_phi; axis_theta;axis_phi.width; axis_theta.width
 

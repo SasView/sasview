@@ -7,7 +7,15 @@
 /** Structure definition for stacked disks parameters
  * [PYTHONCLASS] = StackedDisksModel
  * [DISP_PARAMS] = core_thick, layer_thick, radius, axis_theta, axis_phi
-   [DESCRIPTION] = <text>
+   [DESCRIPTION] = <text> One layer of disk consists of a core, a top layer, and a bottom layer.
+		radius =  the radius of the disk
+		core_thick = thickness of the core
+		layer_thick = thickness of a layer
+		core_sld = the SLD of the core
+		layer_sld = the SLD of the layers
+		n_stacking = the number of the disks
+		sigma_d =  Gaussian STD of d-spacing
+		solvent_sld = the SLD of the solvent
 		</text>
 	[FIXED]= <text>core_thick.width;layer_thick.width; radius.width; axis_theta.width; axis_phi.width</text>
 	[ORIENTATION_PARAMS]= <text>axis_phi; axis_theta; axis_phi.width; axis_theta.width</text>

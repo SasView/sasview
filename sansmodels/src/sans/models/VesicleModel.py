@@ -50,10 +50,10 @@ class VesicleModel(CVesicleModel, BaseComponent):
         ## Name of the model
         self.name = "VesicleModel"
         ## Model description
-        self.description ="""Model parameters:  radius : core radius of the vesicle
-		thickness: shell thickness
-		core_sld: core scattering length density
-		shell_sld: shell scattering length density
+        self.description ="""Model parameters:    radius : the core radius of the vesicle
+		thickness: the shell thickness
+		core_sld: the core SLD
+		shell_sld: the shell SLD
 		background: incoherent background
 		scale : scale factor"""
        
