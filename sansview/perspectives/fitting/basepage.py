@@ -72,7 +72,7 @@ class BasicPage(wx.ScrolledWindow):
         ## check that the fit range is correct to plot the model again
         self.fitrange= True
         ## Q range
-        self.qmin_x= 0.0001
+        self.qmin_x= 0.001
         self.qmax_x= 0.13
         self.num_points= 50
         
@@ -326,7 +326,7 @@ class BasicPage(wx.ScrolledWindow):
     def select_disp_angle(self, event): 
         """
             Event for when a user select a parameter to average over.
-            @param event: check box event
+            @param event: radiobutton event
         """
         self.values=[]
         self.weights=[]
@@ -336,13 +336,12 @@ class BasicPage(wx.ScrolledWindow):
             self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
             # Catch which one of the box was just checked or unchecked.
             if event.GetEventObject() == self.disp_cb_dict[p]:              
-               
                 if self.disp_cb_dict[p].GetValue() == True:
                     
                     ##Temp. FIX for V1.0 regarding changing checkbox to radiobutton.
-                    ##This (self._reset_dispersity) should be removed when the array dispersion is fixed.
+                    ##This (self._reset_dispersity) should be removed when the array dispersion is fixed.                
                     self._reset_dispersity()
-                    
+
                     # The user wants this parameter to be averaged. 
                     # Pop up the file selection dialog.
                     path = self._selectDlg()
@@ -1488,7 +1487,6 @@ class BasicPage(wx.ScrolledWindow):
         self.orientation_params_disp=[]
         self.values=[]
         self.weights=[]
-       
       
         from sans.models.dispersion_models import GaussianDispersion, ArrayDispersion
         if len(self.disp_cb_dict)==0:
@@ -1585,23 +1583,23 @@ class BasicPage(wx.ScrolledWindow):
                 ix+=1 
                 self.disp_cb_dict[p] = wx.RadioButton(self, -1, p, (10, 10))
                 self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
-
-                wx.EVT_RADIOBUTTON(self, self.disp_cb_dict[p].GetId(), self.select_disp_angle)
+                self.Bind(wx.EVT_RADIOBUTTON, self.select_disp_angle, id=self.disp_cb_dict[p].GetId())
+                #wx.EVT_RADIOBUTTON(self, self.disp_cb_dict[p].GetId(), self.select_disp_angle)
                 self.sizer4_4.Add(self.disp_cb_dict[p], (iy, ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         for p in self.model.dispersion.keys():
             if p in self.model.orientation_params:
                 ix+=1 
-                self.disp_cb_dict[p] = wx.CheckBox(self, -1, p, (10, 10))
+                self.disp_cb_dict[p] = wx.RadioButton(self, -1, p, (10, 10))
                 self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
                 #print "self.enable2D",self.enable2D
                 if not (self.enable2D or self.data.__class__.__name__ =="Data2D"):
                     self.disp_cb_dict[p].Hide()
-                    self.disp_cb_dict[p].Disable()
+                    #self.disp_cb_dict[p].Disable()
                 else:
                     self.disp_cb_dict[p].Show(True)
-                    self.disp_cb_dict[p].Enable()
-
-                wx.EVT_CHECKBOX(self, self.disp_cb_dict[p].GetId(), self.select_disp_angle)
+                    #self.disp_cb_dict[p].Enable()
+                self.Bind(wx.EVT_RADIOBUTTON, self.select_disp_angle, id=self.disp_cb_dict[p].GetId())
+                #wx.EVT_RADIOBUTTON(self, self.disp_cb_dict[p].GetId(), self.select_disp_angle)
                 self.sizer4_4.Add(self.disp_cb_dict[p], (iy, ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
 
 
