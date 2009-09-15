@@ -95,33 +95,37 @@ class FitPage(BasicPage):
                 self.text2_min.Show(True)
                 self.text2_max.Show(True)
         for item in self.orientation_params:
-            if event.type =="scipy":
-                item[5].SetValue("")
-                item[5].Hide()
-                item[6].SetValue("")
-                item[6].Hide()
-                self.text2_min.Hide()
-                self.text2_max.Hide()
-            else:
-                item[5].Show(True)
-                item[6].Show(True)
-                self.text2_min.Show(True)
-                self.text2_max.Show(True)
+            if item[5]!=None and item[6]!=None:
+                if event.type =="scipy" or self.data.__class__.__name__ !="Data2D":
+                    item[5].SetValue("")
+                    item[5].Hide()
+                    item[6].SetValue("")
+                    item[6].Hide()
+                    self.text2_min.Hide()
+                    self.text2_max.Hide()
+                else:
+                    item[5].Show(True)
+                    item[6].Show(True)
+                    self.text2_min.Show(True)
+                    self.text2_max.Show(True)
             
-        for item in self.orientation_params_disp:
-            if event.type =="scipy":
-                item[5].SetValue("")
-                item[5].Hide()
-                item[6].SetValue("")
-                item[6].Hide()
-                self.text2_min.Hide()
-                self.text2_max.Hide()
-            else:
-                item[5].Show(True)
-                item[6].Show(True)
-                self.text2_min.Show(True)
-                self.text2_max.Show(True)
-                
+        for item in self.orientation_params_disp:           
+            if item[5]!=None and item[6]!=None:
+                if event.type =="scipy" or self.data.__class__.__name__ !="Data2D":
+                    print "here21"
+                    item[5].SetValue("")
+                    item[5].Hide()
+                    item[6].SetValue("")
+                    item[6].Hide()
+                    self.text2_min.Hide()
+                    self.text2_max.Hide()
+                else:
+                    print "here22"
+                    item[5].Show(True)
+                    item[6].Show(True)
+                    self.text2_min.Show(True)
+                    self.text2_max.Show(True)
+            
         self.sizer3.Layout()
         self.SetScrollbars(20,20,25,65)
         
@@ -369,10 +373,8 @@ class FitPage(BasicPage):
                                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                         if self.data.__class__.__name__ =="Data2D":
                             cb.Show(True)
-                            cb.Enable()
                         else:
                             cb.Hide()
-                            cb.Disable()
                         ix = 1
                         value= self.model.getParam(name1)
                         ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
@@ -380,10 +382,8 @@ class FitPage(BasicPage):
                         ctl1.SetValue(str (format_number(value)))
                         if self.data.__class__.__name__ =="Data2D":
                             ctl1.Show(True)
-                            ctl1.Enable()
                         else:
                             ctl1.Hide()
-                            ctl1.Disable()
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1),wx.EXPAND)
                         ## text to show error sign
                         ix = 2
@@ -397,10 +397,8 @@ class FitPage(BasicPage):
                         self.sizer4_4.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                         ctl2.Hide()
                         if self.data.__class__.__name__ =="Data2D":
-                            #ctl2.Show(True)
                             ctl2.Enable()
                         else:
-                            #ctl2.Hide()
                             ctl2.Disable()
                         self.fittable_param.append([cb,name1,ctl1,text2,
                                                     ctl2, None, None,None])
@@ -415,10 +413,8 @@ class FitPage(BasicPage):
                             Tctl.SetValue(str (format_number(value)))
                             if self.data.__class__.__name__ =="Data2D":
                                 Tctl.Show(True)
-                                Tctl.Enable()
                             else:
                                 Tctl.Hide()
-                                Tctl.Disable()
                             self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             self.fixed_param.append([None,name2, Tctl,None,None,
@@ -433,10 +429,8 @@ class FitPage(BasicPage):
                             Tctl.SetValue(str (format_number(value)))
                             if self.data.__class__.__name__ =="Data2D":
                                 Tctl.Show(True)
-                                Tctl.Enable()
                             else:
                                 Tctl.Hide()
-                                Tctl.Disable()
                             self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             ix +=1
@@ -1167,10 +1161,10 @@ class FitPage(BasicPage):
                     wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                     if self.data.__class__.__name__ =="Data2D":
                         cb.Show(True)
-                        cb.Enable()
+                        #cb.Enable()
                     else:
                         cb.Hide()
-                        cb.Disable()
+                        #cb.Disable()
                     sizer.Add( cb,( iy, ix),(1,1),
                                  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
     
@@ -1182,11 +1176,11 @@ class FitPage(BasicPage):
                     
                     ctl1.SetValue(format_number(value))
                     if self.data.__class__.__name__ =="Data2D":
-                        #ctl1.Show(True)
-                        ctl1.Enable()
+                        ctl1.Show(True)
+                        #ctl1.Enable()
                     else:
-                        #ctl1.Hide()
-                        ctl1.Disable()
+                        ctl1.Hide()
+                        #ctl1.Disable()
                     sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                     ## text to show error sign
                     ix += 1
@@ -1201,10 +1195,10 @@ class FitPage(BasicPage):
                     ctl2.Hide()
                     if self.data.__class__.__name__ =="Data2D":
                         ctl1.Show(True)
-                        ctl1.Enable()
+                        #ctl1.Enable()
                     else:
                         ctl1.Hide()
-                        ctl1.Disable()
+                        #ctl1.Disable()
                     param_min, param_max= self.model.details[item][1:]
                     ix += 1
                     ctl3 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
@@ -1217,11 +1211,11 @@ class FitPage(BasicPage):
                     sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                     ctl3.Hide()
                     if self.data.__class__.__name__ =="Data2D":
-                        #ctl3.Show(True)
-                        ctl3.Enable()
+                        ctl3.Show(True)
+                        #ctl3.Enable()
                     else:
-                        #ctl3.Hide()
-                        ctl3.Disable()
+                        ctl3.Hide()
+                        #ctl3.Disable()
                     ix += 1
                     ctl4 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                    kill_focus_callback = self._onparamRangeEnter,
@@ -1233,14 +1227,18 @@ class FitPage(BasicPage):
                         ctl4.SetValue(str(param_max))
                     ctl4.Hide()
                     if self.data.__class__.__name__ =="Data2D":
-                        #ctl4.Show(True)
-                        ctl4.Enable()
+                        ctl4.Show(True)
+                        #ctl4.Enable()
                     else:
-                        #ctl4.Hide()
-                        ctl4.Disable()
-                    if self.engine_type=="park":
+                        ctl4.Hide()
+                        #ctl4.Disable()
+                    if self.engine_type !="park":
+                        ctl3.Hide()
+                        ctl4.Hide()
+                    else:
                         ctl3.Show(True)
                         ctl4.Show(True)
+                    
                     ix +=1
                     # Units
                     try:
@@ -1249,10 +1247,10 @@ class FitPage(BasicPage):
                         units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                     if self.data.__class__.__name__ =="Data2D":
                         units.Show(True)
-                        units.Enable()
+                        #units.Enable()
                     else:
                         units.Hide()
-                        units.Disable()
+                        #units.Disable()
                     sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                         
                     
