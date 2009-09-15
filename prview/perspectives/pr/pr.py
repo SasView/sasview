@@ -894,7 +894,11 @@ class Plugin:
         prstate.covariance = self._last_cov
         
         # Write the output to file
-        self.state_reader.write(filepath, self.current_plottable, prstate)
+        # First, check that the data is of the right type
+        if issubclass(self.current_plottable.__class__, DataLoader.data_info.Data1D):
+            self.state_reader.write(filepath, self.current_plottable, prstate)
+        else:
+            raise RuntimeError, "pr.save_data: the data being saved is not a DataLoader.data_info.Data1D object" 
         
         
     def setup_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None, 
