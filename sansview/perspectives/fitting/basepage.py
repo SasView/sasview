@@ -338,6 +338,11 @@ class BasicPage(wx.ScrolledWindow):
             if event.GetEventObject() == self.disp_cb_dict[p]:              
                
                 if self.disp_cb_dict[p].GetValue() == True:
+                    
+                    ##Temp. FIX for V1.0 regarding changing checkbox to radiobutton.
+                    ##This (self._reset_dispersity) should be removed when the array dispersion is fixed.
+                    self._reset_dispersity()
+                    
                     # The user wants this parameter to be averaged. 
                     # Pop up the file selection dialog.
                     path = self._selectDlg()
@@ -1578,10 +1583,10 @@ class BasicPage(wx.ScrolledWindow):
         for p in self.model.dispersion.keys():
             if not p in self.model.orientation_params:
                 ix+=1 
-                self.disp_cb_dict[p] = wx.CheckBox(self, -1, p, (10, 10))
+                self.disp_cb_dict[p] = wx.RadioButton(self, -1, p, (10, 10))
                 self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
 
-                wx.EVT_CHECKBOX(self, self.disp_cb_dict[p].GetId(), self.select_disp_angle)
+                wx.EVT_RADIOBUTTON(self, self.disp_cb_dict[p].GetId(), self.select_disp_angle)
                 self.sizer4_4.Add(self.disp_cb_dict[p], (iy, ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         for p in self.model.dispersion.keys():
             if p in self.model.orientation_params:
