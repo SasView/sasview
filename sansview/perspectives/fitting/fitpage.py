@@ -123,7 +123,7 @@ class FitPage(BasicPage):
                 self.text2_max.Show(True)
                 
         self.sizer3.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         
     
     def _fill_range_sizer(self):
@@ -463,7 +463,7 @@ class FitPage(BasicPage):
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         self.Refresh()
      
         
@@ -626,7 +626,7 @@ class FitPage(BasicPage):
         self.data =data
         self.state.data= data 
         self._fill_datainfo_sizer()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         self.Layout()   
         
     def reset_page(self, state,first=False):
@@ -753,7 +753,7 @@ class FitPage(BasicPage):
         self.sizer4.Layout()
         self.Layout()
         self.Refresh()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         
         
     def onSmear(self, event):
@@ -1009,7 +1009,7 @@ class FitPage(BasicPage):
         
         if model ==None:
             self.sizer3.Layout()
-            self.SetScrollbars(20,20,200,100)
+            self.SetScrollbars(20,20,25,65)
             return
         ## the panel is drawn using the current value of the fit engine
         if self.engine_type==None and self.manager !=None:
@@ -1286,7 +1286,7 @@ class FitPage(BasicPage):
         self.sizer3.Layout()
         self.Layout()
         self.Refresh()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
        
         
 class HelpWindow(wx.Frame):

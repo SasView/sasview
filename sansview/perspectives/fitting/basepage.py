@@ -226,7 +226,7 @@ class BasicPage(wx.ScrolledWindow):
         
         
     def set_scroll(self):
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         self.Layout()   
         self.SetAutoLayout(True)
          
@@ -316,7 +316,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         self.Refresh()
         ## saving the state of enable dispersity button
         self.state.enable_disp= self.enable_disp.GetValue()
@@ -998,7 +998,7 @@ class BasicPage(wx.ScrolledWindow):
                 self.text2.Enable()
                 items = self.structurebox.GetItems()
                 self.sizer1.Layout()
-                self.SetScrollbars(20,20,200,100)
+                self.SetScrollbars(20,20,25,65)
                 for i in range(len(items)):
                     if items[i]== str(name):
                         self.structurebox.SetSelection(i)
@@ -1202,7 +1202,7 @@ class BasicPage(wx.ScrolledWindow):
         #--------------------------------------------------------
         sizer.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         sizer.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         
         
     def _show_combox(self, event):
@@ -1251,7 +1251,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4.Layout()
         self.Layout()
         self.Refresh()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
             
     def _populate_box(self, combobox, list):
         """
@@ -1314,7 +1314,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         self.Refresh()
         
        
@@ -1448,7 +1448,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4.Layout()
         self.Layout()
         self.Refresh()
-        self.SetScrollbars(20,20,200,100)       
+        self.SetScrollbars(20,20,25,65)       
           
         
     def _layout_sizer_noDipers(self):
@@ -1468,7 +1468,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Add(model_disp,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         self.sizer4_4.Layout()
         self.sizer4.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
       
             
     def _reset_dispersity(self):
@@ -1497,7 +1497,7 @@ class BasicPage(wx.ScrolledWindow):
             self.sizer4.Layout()
             self.Layout()
             self.Refresh()
-            self.SetScrollbars(20,20,200,100)   
+            self.SetScrollbars(20,20,25,65)   
             return 
         if (len(self.disp_cb_dict)>0) :
             for p in self.disp_cb_dict:
@@ -1517,7 +1517,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
-        self.SetScrollbars(20,20,200,100)    
+        self.SetScrollbars(20,20,25,65)    
         self.Refresh()
         
             
@@ -1549,7 +1549,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         self.Refresh()
         
     def _set_sizer_arraydispersion(self):
@@ -1610,7 +1610,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)        
         self.sizer4_4.Layout()
         self.sizer4.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         ## save state into
 
         self.state.orientation_params =[]
@@ -1686,7 +1686,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer5.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer5.Layout()
         self.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
     
     
     def _fill_save_sizer(self):
@@ -1714,7 +1714,7 @@ class BasicPage(wx.ScrolledWindow):
         boxsizer1.Add(sizer_save)
         self.sizer6.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer6.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         
     def on_model_help_clicked(self,event):
         """
