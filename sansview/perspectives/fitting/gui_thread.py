@@ -77,7 +77,7 @@ class CalcChisqr1D(CalcThread):
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
-            raise KeyboardInterrupt
+            raise
       
         
 class CalcChisqr2D(CalcThread):
@@ -147,5 +147,5 @@ class CalcChisqr2D(CalcThread):
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
-            raise KeyboardInterrupt
+            raise 
        

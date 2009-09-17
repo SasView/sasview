@@ -10,7 +10,7 @@ import wx.lib.newevent
 import imp
 import os,sys,math
 import os.path
-from sans.models.pluginmodel import Model1DPlugin
+
 (ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
 from sans.guicomm.events import StatusEvent  
 # Time is needed by the log method
@@ -37,24 +37,24 @@ def _check_plugin(model, name):
         Do some checking before model adding plugins in the list
         @param model: class model to add into the plugin list
         @param name:name of the module plugin
-        @return model: model if valid model or nothing if not valid
+        @return model: model if valid model or None if not valid
     """
     #Check is the plugin is of type Model1DPlugin
     if not issubclass(model, Model1DPlugin):
         msg= "Plugin %s must be of type Model1DPlugin \n"%str(name)
         log(msg)
-        return 
+        return None
     if model.__name__!="Model":
         msg= "Plugin %s class name must be Model \n"%str(name)
         log(msg)
-        return 
+        return None
     try:
         new_instance= model()
     except:
         msg="Plugin %s error in __init__ \n\t: %s %s\n"%(str(name),
                                     str(sys.exc_type),sys.exc_value)
         log(msg)
-        return
+        return None
    
     new_instance= model() 
     if hasattr(new_instance,"function"):
@@ -64,11 +64,11 @@ def _check_plugin(model, name):
            msg="Plugin %s: error writing function \n\t :%s %s\n "%(str(name),
                                     str(sys.exc_type),sys.exc_value)
            log(msg)
-           return
+           return None
     else:
        msg="Plugin  %s needs a method called function \n"%str(name)
        log(msg)
-       return 
+       return None
     return model
   
   
@@ -91,7 +91,6 @@ def _findModels(dir):
                     if hasattr(module, "Model"):
                         try:
                             if _check_plugin(module.Model, name)!=None:
-                            #plugins.append(module.Model)
                                 plugins.append(module.Model)
                         except:
                             msg="Error accessing Model"
