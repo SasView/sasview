@@ -149,7 +149,7 @@ class ModelPage(BasicPage):
         self.sizer4_4.Add(disp,( iy, ix),(1,1), 
                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1 
-        values = wx.StaticText(self, -1, 'Values')
+        values = wx.StaticText(self, -1, 'Sigmas (STD)')
         self.sizer4_4.Add(values,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
        
         ix += 1 
