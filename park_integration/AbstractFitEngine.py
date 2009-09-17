@@ -37,13 +37,14 @@ class SansParameter(park.Parameter):
             Override _getrange of park parameter
             return the range of parameter
         """
-        if not  self.name in self._model.getDispParamList():
-            lo,hi = self._model.details[self.name][1:]
-            if lo is None: lo = -numpy.inf
-            if hi is None: hi = numpy.inf
-        else:
-            lo= -numpy.inf
-            hi= numpy.inf
+        #if not  self.name in self._model.getDispParamList():
+        lo,hi = self._model.details[self.name][1:]
+        if lo is None: lo = -numpy.inf
+        if hi is None: hi = numpy.inf
+        #else:
+            #lo,hi = self._model.details[self.name][1:]
+            #if lo is None: lo = -numpy.inf
+            #if hi is None: hi = numpy.inf
         if lo >= hi:
             raise ValueError,"wrong fit range for parameters"
         

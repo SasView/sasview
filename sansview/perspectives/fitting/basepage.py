@@ -293,7 +293,6 @@ class BasicPage(wx.ScrolledWindow):
         for key, value in self.polydisp.iteritems():
             name = str(key)
             self.disp_box.Append(name,value)
-        
         self.disp_box.SetStringSelection("gaussian") 
         wx.EVT_COMBOBOX(self.disp_box,-1, self._on_select_Disp) 
              
@@ -1416,7 +1415,11 @@ class BasicPage(wx.ScrolledWindow):
             self.sizer4_4.Clear(True)
       
             return
-            
+        #remove previous added details for dispersion parameters.
+        for item in self.model.details.keys():
+            if item in self.model.fixed:
+                del self.model.details [item]                           
+    
         if self.enable_disp.GetValue():
             self.model_disp.Show(True)
             self.disp_box.Show(True)
@@ -1562,7 +1565,9 @@ class BasicPage(wx.ScrolledWindow):
             for item in self.orientation_params_disp:
                 if item in self.param_toFit:
                     self.param_toFit.remove(item)
-                  
+        for item in self.model.details.keys():
+            if item in self.model.fixed:
+                del self.model.details [item]                           
 
         self.fittable_param=[]
         self.fixed_param=[]
