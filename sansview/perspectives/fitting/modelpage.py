@@ -330,7 +330,7 @@ class ModelPage(BasicPage):
         self.state.enable2D =  copy.deepcopy(self.enable2D)
         self.Layout()
         ## post state to fit panel
-        self._undo.Enable(True)
+        #self._undo.Enable(True)
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
               
@@ -364,7 +364,7 @@ class ModelPage(BasicPage):
         self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
        
         ## post state to fit panel
-        self._undo.Enable(True)
+        #self._undo.Enable(True)
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)               
     

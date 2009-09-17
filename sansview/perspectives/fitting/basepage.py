@@ -94,21 +94,21 @@ class BasicPage(wx.ScrolledWindow):
         
         ## Create context menu for page
         self.popUpMenu = wx.Menu()
-        id = wx.NewId()
-        self._undo = wx.MenuItem(self.popUpMenu,id, "Undo","cancel the previous action")
-        self.popUpMenu.AppendItem(self._undo)
-        self._undo.Enable(False)
-        wx.EVT_MENU(self, id, self.onUndo)
+        #id = wx.NewId()
+        #self._undo = wx.MenuItem(self.popUpMenu,id, "Undo","cancel the previous action")
+        #self.popUpMenu.AppendItem(self._undo)
+        #self._undo.Enable(False)
+        #wx.EVT_MENU(self, id, self.onUndo)
         
-        id = wx.NewId()
-        self._redo = wx.MenuItem(self.popUpMenu,id,"Redo"," Restore the previous action")
-        self.popUpMenu.AppendItem(self._redo)
-        self._redo.Enable(False)
-        wx.EVT_MENU(self, id, self.onRedo)       
-        self.popUpMenu.AppendSeparator()
+        #id = wx.NewId()
+        #self._redo = wx.MenuItem(self.popUpMenu,id,"Redo"," Restore the previous action")
+        #self.popUpMenu.AppendItem(self._redo)
+        #self._redo.Enable(False)
+        #wx.EVT_MENU(self, id, self.onRedo)       
+        #self.popUpMenu.AppendSeparator()
                 
         id = wx.NewId()
-        self._keep = wx.MenuItem(self.popUpMenu,id,"Keep"," Keep the panel status to recall it later")
+        self._keep = wx.MenuItem(self.popUpMenu,id,"Bookmark"," Keep the panel status to recall it later")
         self.popUpMenu.AppendItem(self._keep)
         self._keep.Enable(True)
         wx.EVT_MENU(self, id, self.onSave)
@@ -640,7 +640,7 @@ class BasicPage(wx.ScrolledWindow):
             state of the graphic interface
         """
         if state ==None:
-            self._undo.Enable(False)
+            #self._undo.Enable(False)
             return 
        
         self.model= state.model
@@ -805,7 +805,7 @@ class BasicPage(wx.ScrolledWindow):
         self.state.structurebox= self.structurebox.GetCurrentSelection()
         self.state.formfactorbox = self.formfactorbox.GetCurrentSelection()
         
-        self._undo.Enable(True)
+        #self._undo.Enable(True)
         ## post state to fit panel
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
@@ -827,7 +827,7 @@ class BasicPage(wx.ScrolledWindow):
              model
              use : _check_value_enter 
         """
-        self._undo.Enable(True)
+        #self._undo.Enable(True)
         if self.model !=None:
             
            
@@ -1314,7 +1314,7 @@ class BasicPage(wx.ScrolledWindow):
         ## save current state
         self.save_current_state()
         if event !=None:
-            self._undo.Enable(True)
+            #self._undo.Enable(True)
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event)
             
@@ -1430,7 +1430,7 @@ class BasicPage(wx.ScrolledWindow):
         ## post state to fit panel 
         self.save_current_state()
         if event !=None:
-            self._undo.Enable(True)
+            #self._undo.Enable(True)
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event)
         #draw the model with the current dispersity
@@ -1532,7 +1532,7 @@ class BasicPage(wx.ScrolledWindow):
             
         self.state.disp_box= n
         
-        self._undo.Enable(True)
+        #self._undo.Enable(True)
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
         

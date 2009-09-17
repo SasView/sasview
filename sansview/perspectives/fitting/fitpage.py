@@ -662,7 +662,7 @@ class FitPage(BasicPage):
       
        
         if event !=None:
-            self._undo.Enable(True)
+            #self._undo.Enable(True)
             ## post state to fit panel
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
@@ -697,7 +697,7 @@ class FitPage(BasicPage):
         self.compute_chisqr(smearer= temp_smearer)  
         ## new state posted
         if self.state_change:
-            self._undo.Enable(True)
+            #self._undo.Enable(True)
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event)
             self.state_change= False
@@ -718,7 +718,7 @@ class FitPage(BasicPage):
             self.compute_chisqr(smearer= temp_smearer)
             ## new state posted
             if self.state_change:
-                self._undo.Enable(True)
+                #self._undo.Enable(True)
                 event = PageInfoEvent(page = self)
                 wx.PostEvent(self.parent, event)
                 self.state_change= False
@@ -750,7 +750,7 @@ class FitPage(BasicPage):
         
         ## new state posted
         if self.state_change:
-            self._undo.Enable(True)
+            #self._undo.Enable(True)
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event)
             self.state_change= False
@@ -773,8 +773,8 @@ class FitPage(BasicPage):
         """
             reset the state
         """
-        if first:
-            self._undo.Enable(False)
+        #if first:
+        #    self._undo.Enable(False)
            
         self.reset_page_helper(state)
         evt = ModelEventbox(model=state.model)
@@ -1078,7 +1078,7 @@ class FitPage(BasicPage):
            
         #self.save_current_state()  
         if event !=None:
-            self._undo.Enable(True)
+            #self._undo.Enable(True)
             ## post state to fit panel
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
@@ -1125,7 +1125,7 @@ class FitPage(BasicPage):
         
         #self.save_current_state()
         if event !=None:
-            self._undo.Enable(True)
+            #self._undo.Enable(True)
             ## post state to fit panel
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
