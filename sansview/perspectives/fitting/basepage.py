@@ -13,7 +13,9 @@ from pagestate import PageState
 (PreviousStateEvent, EVT_PREVIOUS_STATE)   = wx.lib.newevent.NewEvent()
 (NextStateEvent, EVT_NEXT_STATE)   = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 76
-
+_QMIN_DEFAULT = 0.001
+_QMAX_DEFAULT = 0.13
+_NPTS_DEFAULT = 50
 class BasicPage(wx.ScrolledWindow):
     """
         This class provide general structure of  fitpanel page
@@ -72,14 +74,11 @@ class BasicPage(wx.ScrolledWindow):
         self.enable2D= False
         ## check that the fit range is correct to plot the model again
         self.fitrange= True
-        ## Q range defaults
-        self.qmin_def = 0.001
-        self.qmax_def = 0.13
-        self.num_points_def = 50
+
         ## Q range
-        self.qmin_x= 0.001
-        self.qmax_x= 0.13
-        self.num_points= 50
+        self.qmin_x= _QMIN_DEFAULT
+        self.qmax_x= _QMAX_DEFAULT
+        self.num_points= _NPTS_DEFAULT
         
         ## Create memento to save the current state
         self.state= PageState(parent= self.parent,model=self.model, data=self.data)
@@ -1667,12 +1666,6 @@ class BasicPage(wx.ScrolledWindow):
         sizer.Add(wx.StaticText(self, -1, ' Min'))
         sizer.Add(wx.StaticText(self, -1, ' Max'))
         sizer.Add(self.reset_qrange)   
-        
-        
-        sizer.Add((5,5))
-        sizer.Add(wx.StaticText(self, -1, 'Min'))
-        sizer.Add(wx.StaticText(self, -1, 'Max'))
-        sizer.Add(wx.StaticText(self, -1, 'Q range'))
              
         sizer.Add(self.qmin)
         sizer.Add(self.qmax)
@@ -1735,9 +1728,9 @@ class BasicPage(wx.ScrolledWindow):
             self.qmin_x = min(self.data.x)
             self.qmax_x = max(self.data.x)
         else:
-            self.qmin_x = self.qmin_def
-            self.qmax_x = self.qmax_def
-            self.num_points = self.num_points_def
+            self.qmin_x = _QMIN_DEFAULT
+            self.qmax_x = _QMAX_DEFAULT
+            self.num_points = _NPTS_DEFAULT            
             self.state.npts = self.num_points
         
         self.state.qmin = self.qmin_x
