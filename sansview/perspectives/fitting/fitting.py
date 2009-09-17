@@ -12,11 +12,12 @@ import sys, wx, logging
 import string, numpy, math
 import time
 import thread
-from danse.common.plottools.plottables import Theory1D
+#from danse.common.plottools.plottables import Theory1D
 from danse.common.plottools.PlotPanel import PlotPanel
 
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.dataFitting import Data1D
+from sans.guiframe.dataFitting import Theory1D
 from sans.guiframe import dataFitting 
 
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
@@ -276,48 +277,23 @@ class Plugin:
             and create a new data1D data
             @param return 
         """
-        detector=None
-        source=None
-        info = None
+      
         id=None
-        dxl=None
-        dxw=None
-        dx=None
-        if hasattr(item, "dxl"):
-            dxl = copy.deepcopy(item.dxl)
-        if hasattr(item, "dxw"):
-            dxw = copy.deepcopy(item.dxw)
-        if hasattr(item, "detector"):
-            detector = copy.deepcopy(item.detector)
-        if hasattr(item, "source"):
-            source = copy.deepcopy(item.source)
-        if hasattr(item ,"info"):
-            info= copy.deepcopy(item.info)
+        
         if hasattr(item,"id"):
             id = copy.deepcopy(item.id)
-        if hasattr(item, "dx"):
-            dx= item.dx
-            
+       
         
-        data= Data1D(x=item.x, y=item.y,dx=dx, dy=dy)
-        data.dxl = dxl
-        data.dxw = dxw
-        
+        data= Data1D(x=item.x, y=item.y,dx=None, dy=None)
+        data.copy_from_datainfo(item) 
+        item.clone_without_data(clone=data)    
+        data.dy=dy
         data.name = item.name
-        if detector!=None:
-            data.detector = detector
-        if source!=None:
-            data.source = source
+       
         ## allow to highlight data when plotted
         data.interactive = copy.deepcopy(item.interactive)
         ## when 2 data have the same id override the 1 st plotted
         data.id = id
-        ## info is a reference to output of dataloader that can be used
-        ## to save  data 1D as cansas xml file
-        data.info= info
-        ## If the data file does not tell us what the axes are, just assume...
-        data.xaxis(copy.deepcopy(item._xaxis),copy.deepcopy(item._xunit))
-        data.yaxis(copy.deepcopy(item._yaxis),copy.deepcopy(item._yunit))
        
         data.group_id = item.group_id
         return data
@@ -1098,13 +1074,9 @@ class Plugin:
                     new_plot.id += "Model"
                 new_plot.is_data =False 
            
-            from DataLoader import data_info
-            info= Data1D(x= new_plot.x, y=new_plot.y)
-            info.title= new_plot.name
-            title= my_info.title
-            info.xaxis(new_plot._xaxis,  new_plot._xunit)
-            info.yaxis( new_plot._yaxis, new_plot._yunit)
-            new_plot.info = info
+           
+            title= new_plot.name
+           
             # Pass the reset flag to let the plotting event handler
             # know that we are replacing the whole plot
             if title== None:
