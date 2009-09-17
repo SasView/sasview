@@ -77,9 +77,9 @@ class BasicPage(wx.ScrolledWindow):
         self.qmax_def = 0.13
         self.num_points_def = 50
         ## Q range
-        self.qmin_x= self.qmin_def
-        self.qmax_x= self.qmax_def
-        self.num_points= self.num_points_def
+        self.qmin_x= 0.001
+        self.qmax_x= 0.13
+        self.num_points= 50
         
         ## Create memento to save the current state
         self.state= PageState(parent= self.parent,model=self.model, data=self.data)
@@ -646,7 +646,9 @@ class BasicPage(wx.ScrolledWindow):
        
         self.model= state.model
         self.data = state.data
-        self.smearer= state.smearer
+        if self.data !=None:
+            from DataLoader.qsmearing import smear_selection
+            self.smearer= smear_selection( self.data )
         self.enable2D= state.enable2D
         
         #???
@@ -697,12 +699,7 @@ class BasicPage(wx.ScrolledWindow):
             name= dispersity.__name__     
 
             self._set_dipers_Param(event=None)
-            
-            #self.disp_cb_dict = {}
-            #for k,v in self.state.disp_cb_dict.iteritems():
-            #    self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
-            #    self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
-
+       
             if name=="ArrayDispersion":
                 
                 for item in self.disp_cb_dict.keys():
@@ -732,11 +729,7 @@ class BasicPage(wx.ScrolledWindow):
                 for k,v in self.state.disp_cb_dict.iteritems():
                     self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
                     self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
-                
-                #self._disp_obj_dict={}
-                #for k , v in self.state._disp_obj_dict.iteritems():
-                #    self._disp_obj_dict[k]=v
-                
+      
         ##plotting range restore    
         self._reset_plotting_range(state)
         ## smearing info  restore
@@ -744,12 +737,13 @@ class BasicPage(wx.ScrolledWindow):
             ## set smearing value whether or not the data contain the smearing info
             self.enable_smearer.SetValue(state.enable_smearer)
             self.disable_smearer.SetValue(state.disable_smearer)
+            self.onSmear(event=None)
             self.tcChi.SetLabel(str( state.tcChi))
             self.sizer5.Layout()
             self.Layout()
             self.Refresh()
-            #self.compute_chisqr(smearer= self.smearer)  
-        #self._draw_model()   
+            
+       
         ## reset state of checkbox,textcrtl  and dispersity parameters value
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
         self._reset_parameters_state(self.fixed_param,state.fixed_param)
@@ -759,16 +753,7 @@ class BasicPage(wx.ScrolledWindow):
         
         ## reset context menu items
         self._reset_context_menu()
-        
-        #self._reset_dispersity()
-        #self._set_dipers_Param(event=None) #to bo removed //resets disper para value
-
-        #self.disp_cb_dict = {}
-        #for k,v in self.state.disp_cb_dict.iteritems():
-            #self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
-            #self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
-
-
+    
         ## set the value of the current state to the state given as parameter
         self.state = state.clone() 
         self._draw_model()
@@ -1684,6 +1669,10 @@ class BasicPage(wx.ScrolledWindow):
         sizer.Add(self.reset_qrange)   
         
         
+        sizer.Add((5,5))
+        sizer.Add(wx.StaticText(self, -1, 'Min'))
+        sizer.Add(wx.StaticText(self, -1, 'Max'))
+        sizer.Add(wx.StaticText(self, -1, 'Q range'))
              
         sizer.Add(self.qmin)
         sizer.Add(self.qmax)

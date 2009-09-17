@@ -921,10 +921,9 @@ class FitPage(BasicPage):
                                      qmax= float(self.qmax_x)) 
         ##Calculate chi2
         self.compute_chisqr(smearer= temp_smearer)  
-        ## save the state enable smearing
-        self.state.smearer= temp_smearer
-        #self.save_current_state() 
-   
+        
+        self.state.enable_smearer=  self.enable_smearer.GetValue()
+        self.state.disable_smearer=self.disable_smearer.GetValue()
    
     def complete_chisqr(self, output, elapsed=None):  
         """
@@ -940,8 +939,7 @@ class FitPage(BasicPage):
             self.Refresh
             ## post state to fit panel
             self.state.tcChi =output
-            #event = PageInfoEvent(page = self)
-            #wx.PostEvent(self.parent, event)
+          
         except:
             pass
         
