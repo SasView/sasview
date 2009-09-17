@@ -10,7 +10,7 @@ import wx.lib.newevent
 import imp
 import os,sys,math
 import os.path
-
+from sans.models.pluginmodel import Model1DPlugin
 (ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
 from sans.guicomm.events import StatusEvent  
 # Time is needed by the log method
@@ -32,6 +32,46 @@ def findModels():
         return _findModels('plugins')
     return []
     
+def _check_plugin(model, name):
+    """
+        Do some checking before model adding plugins in the list
+        @param model: class model to add into the plugin list
+        @param name:name of the module plugin
+        @return model: model if valid model or nothing if not valid
+    """
+    #Check is the plugin is of type Model1DPlugin
+    if not issubclass(model, Model1DPlugin):
+        msg= "Plugin %s must be of type Model1DPlugin \n"%str(name)
+        log(msg)
+        return 
+    if model.__name__!="Model":
+        msg= "Plugin %s class name must be Model \n"%str(name)
+        log(msg)
+        return 
+    try:
+        new_instance= model()
+    except:
+        msg="Plugin %s error in __init__ \n\t: %s %s\n"%(str(name),
+                                    str(sys.exc_type),sys.exc_value)
+        log(msg)
+        return
+   
+    new_instance= model() 
+    if hasattr(new_instance,"function"):
+        try:
+           value=new_instance.function()
+        except:
+           msg="Plugin %s: error writing function \n\t :%s %s\n "%(str(name),
+                                    str(sys.exc_type),sys.exc_value)
+           log(msg)
+           return
+    else:
+       msg="Plugin  %s needs a method called function \n"%str(name)
+       log(msg)
+       return 
+    return model
+  
+  
 def _findModels(dir):
     # List of plugin objects
     plugins = []
@@ -50,11 +90,19 @@ def _findModels(dir):
                     module = imp.load_module( name, file, item, info )
                     if hasattr(module, "Model"):
                         try:
-                            plugins.append(module.Model)
+                            if _check_plugin(module.Model, name)!=None:
+                            #plugins.append(module.Model)
+                                plugins.append(module.Model)
                         except:
-                            log("Error accessing Model in %s\n  %s" % (name, sys.exc_value))
+                            msg="Error accessing Model"
+                            msg+="in %s\n  %s %s\n" % (name,
+                                    str(sys.exc_type), sys.exc_value)
+                            log(msg)
                 except:
-                    log("Error accessing Model in %s\n  %s" % (name, sys.exc_value))
+                    msg="Error accessing Model"
+                    msg +=" in %s\n  %s %s \n" %(name,
+                                    str(sys.exc_type), sys.exc_value)
+                    log(msg)
                 finally:
               
                     if not file==None:
@@ -284,7 +332,7 @@ class ModelManager:
                                           "List of Structure factors models" ],
                                 list1= self.struct_list )
         
-        self._fill_simple_menu( menuinfo = ["Customized Models", added_models,
+        self._fill_plugin_menu( menuinfo = ["Customized Models", added_models,
                                             "List of additional models"],
                                  list1= self.plugins )
         
@@ -296,6 +344,17 @@ class ModelManager:
         
         return 0
     
+    def _fill_plugin_menu(self,menuinfo, list1):
+        """
+            fill the plugin menu with costumized models
+        """
+        if len(list1)==0:
+            id = wx.NewId() 
+            msg= "No model available check plugins.log for errors to fix problem"
+            menuinfo[1].Append(int(id),"Empty",msg)
+        self._fill_simple_menu( menuinfo,list1)
+        
+        
     def _fill_simple_menu(self,menuinfo, list1):
         """
             Fill the menu with list item
