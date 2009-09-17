@@ -241,15 +241,11 @@ class ModelPanel1D(PlotPanel):
             #if self.plots[self.graph.selected_plottable].name in self.err_dy.iterkeys()\
             #    and self.errors_hide:
             if selected_plot.__class__.__name__=="Data1D":
-                if selected_plot.dy ==None or selected_plot.dy== []:
+                if numpy.all(selected_plot.dy==0):
                     id = wx.NewId()
-                    slicerpop.Append(id, '&Show errors to data')
+                    slicerpop.Append(id, '&Show errors')
                     wx.EVT_MENU(self, id, self._on_add_errors)
-                elif numpy.all(selected_plot.dy==0):
-                    id = wx.NewId()
-                    slicerpop.Append(id, '&Show errors to data')
-                    wx.EVT_MENU(self, id, self._on_add_errors)
-                else:
+                elif selected_plot.dy !=None and selected_plot.dy != []:
                     id = wx.NewId()
                     slicerpop.Append(id, '&Hide Error bars')
                     wx.EVT_MENU(self, id, self._on_remove_errors)
