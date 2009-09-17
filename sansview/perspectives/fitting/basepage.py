@@ -4,6 +4,7 @@ import wx
 import numpy
 import time
 import copy 
+import math
 from sans.guiframe.utils import format_number,check_float
 from sans.guicomm.events import StatusEvent   
 import pagestate
@@ -71,10 +72,14 @@ class BasicPage(wx.ScrolledWindow):
         self.enable2D= False
         ## check that the fit range is correct to plot the model again
         self.fitrange= True
+        ## Q range defaults
+        self.qmin_def = 0.001
+        self.qmax_def = 0.13
+        self.num_points_def = 50
         ## Q range
-        self.qmin_x= 0.001
-        self.qmax_x= 0.13
-        self.num_points= 50
+        self.qmin_x= self.qmin_def
+        self.qmax_x= self.qmax_def
+        self.num_points= self.num_points_def
         
         ## Create memento to save the current state
         self.state= PageState(parent= self.parent,model=self.model, data=self.data)
@@ -1664,14 +1669,21 @@ class BasicPage(wx.ScrolledWindow):
         #self.qmax.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
         #self.qmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         #self.qmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
+        
+        id = wx.NewId()
+        self.reset_qrange =wx.Button(self,id,'Reset')
+        self.reset_qrange.Bind(wx.EVT_BUTTON, self.on_reset_clicked,id=id)
+        self.reset_qrange.SetToolTipString("Reset Q range to the default values")
      
         sizer_horizontal=wx.BoxSizer(wx.HORIZONTAL)
-        sizer= wx.GridSizer(3, 3,5, 5)
+        sizer= wx.GridSizer(3, 3,2, 5)
         
-        sizer.Add((5,5))
-        sizer.Add(wx.StaticText(self, -1, 'Min'))
-        sizer.Add(wx.StaticText(self, -1, 'Max'))
-        sizer.Add(wx.StaticText(self, -1, 'Q range'))
+        sizer.Add(wx.StaticText(self, -1, '    Q range'))     
+        sizer.Add(wx.StaticText(self, -1, ' Min'))
+        sizer.Add(wx.StaticText(self, -1, ' Max'))
+        sizer.Add(self.reset_qrange)   
+        
+        
              
         sizer.Add(self.qmin)
         sizer.Add(self.qmax)
@@ -1718,7 +1730,35 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer6.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer6.Layout()
         self.SetScrollbars(20,20,25,65)
+
+    def on_reset_clicked(self,event):
+        """
+        #On 'Reset' button  for Q range clicked
+        """
+        ##For 3 different cases: Data2D, Data1D, and theory
+        if self.data.__class__.__name__ == "Data2D":
+            data_min= 0
+            x= max(math.fabs(self.data.xmin), math.fabs(self.data.xmax)) 
+            y= max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
+            self.qmin_x = data_min
+            self.qmax_x = math.sqrt(x*x + y*y)
+        elif self.data.__class__.__name__ == "Data1D":
+            self.qmin_x = min(self.data.x)
+            self.qmax_x = max(self.data.x)
+        else:
+            self.qmin_x = self.qmin_def
+            self.qmax_x = self.qmax_def
+            self.num_points = self.num_points_def
+            self.state.npts = self.num_points
         
+        self.state.qmin = self.qmin_x
+        self.state.qmax = self.qmax_x
+        
+        #reset the q range values
+        self._reset_plotting_range(self.state)
+        #Re draw plot
+        self._draw_model()
+
     def on_model_help_clicked(self,event):
         """
         #On 'More details' button
