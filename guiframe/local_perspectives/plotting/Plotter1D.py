@@ -19,14 +19,14 @@ import time
 
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools.plottables import Graph,Theory1D
+from danse.common.plottools.plottables import Graph
 from sans.guiframe import dataFitting 
 from sans.guicomm.events import EVT_NEW_PLOT
 from sans.guicomm.events import StatusEvent ,NewPlotEvent,SlicerEvent,ErrorDataEvent
 from sans.guicomm.events import RemoveDataEvent
 from sans.guiframe.utils import PanelMenu
 from sans.guiframe.dataFitting import Data1D
-
+from sans.guiframe.dataFitting import Theory1D
 from binder import BindArtist
 
 

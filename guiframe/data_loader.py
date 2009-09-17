@@ -141,9 +141,7 @@ def plot_data(parent, path):
         new_plot.interactive = True
         ## when 2 data have the same id override the 1 st plotted
         new_plot.id = name
-        ## info is a reference to output of dataloader that can be used
-        ## to save  data 1D as cansas xml file
-        new_plot.info= output
+      
         ##group_id specify on which panel to plot this data
         new_plot.group_id = name
         new_plot.is_data =True
@@ -194,7 +192,7 @@ def plot_data(parent, path):
          
             new_plot.group_id = name
             new_plot.id = name
-            new_plot.info= item
+     
             new_plot.is_data =True
             if hasattr(item,"title"):
                 title= item.title

@@ -3,6 +3,7 @@
 """
 from danse.common.plottools.plottables import Data1D as PlotData1D
 from danse.common.plottools.plottables import Data2D as PlotData2D
+from danse.common.plottools.plottables import Theory1D as PlotTheory1D
 
 from DataLoader.data_info import Data1D as LoadData1D
 from DataLoader.data_info import Data2D as LoadData2D
@@ -32,7 +33,25 @@ class Data1D(PlotData1D,LoadData1D):
         self.xaxis(data1d._xaxis,data1d._xunit)
         self.yaxis(data1d._yaxis,data1d._yunit)
     
+class Theory1D(PlotTheory1D,LoadData1D):
     
+    def __init__(self,x=[],y=[],dy=None):
+        PlotTheory1D.__init__(self, x, y, dy)
+        LoadData1D.__init__(self, x, y, dy)
+        self.id= None
+        self.group_id =None
+        self.is_data = True
+    
+    def copy_from_datainfo(self, data1d):
+        """
+            copy values of Data1D of type DataLaoder.Data_info
+        """
+        self.x  = copy.deepcopy(data1d.x)
+        self.y  = copy.deepcopy(data1d.y)
+        self.dy = copy.deepcopy(data1d.dy)
+   
+        self.xaxis(data1d._xaxis,data1d._xunit)
+        self.yaxis(data1d._yaxis,data1d._yunit)
       
 class Data2D(PlotData2D,LoadData2D):
     def __init__(self,image=None,err_image=None,xmin=None,xmax=None,ymin=None,ymax=None,zmin=None,zmax=None):
