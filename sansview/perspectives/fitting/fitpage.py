@@ -746,7 +746,7 @@ class FitPage(BasicPage):
         else:
            tcrtl.SetBackgroundColour(wx.WHITE)
            tcrtl.Refresh()  
-        #self._onparamEnter_helper() 
+        self._onparamEnter_helper() 
         
         ## new state posted
         if self.state_change:
