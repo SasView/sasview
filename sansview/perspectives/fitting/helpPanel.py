@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import wx
 import wx.html as html
+from wx.lib.splitter import MultiSplitterWindow
 import os
 def help():
     """
@@ -63,17 +64,11 @@ class HelpWindow(wx.Frame):
         """
              contains help info
         """
-        vbox1  =wx.FlexGridSizer(1, 2,0,0)
-
-        lpanel = wx.Panel(self, -1,style=wx.BORDER_SUNKEN)
-        rpanel = wx.Panel(self, -1)
+      
+        splitter = MultiSplitterWindow(self, style=wx.SP_LIVE_UPDATE)
+        rpanel = wx.Panel(splitter, -1)
+        lpanel = wx.Panel(splitter, -1,style=wx.BORDER_SUNKEN)
         
-        vbox1.AddMany([ (lpanel,-1,wx.EXPAND,0), 
-            (rpanel, -1,wx.EXPAND,0)])
-        vbox1.AddGrowableRow(0, 0)
-        vbox1.AddGrowableCol(0, 1)
-       
-
         vbox = wx.BoxSizer(wx.VERTICAL)
         header = wx.Panel(rpanel, -1)
         header.SetBackgroundColour('#6666FF')
@@ -136,6 +131,10 @@ class HelpWindow(wx.Frame):
         lpanel.SetSizer(vboxl)
         lpanel.SetFocus()
         
+        vbox1 = wx.BoxSizer(wx.HORIZONTAL)
+        vbox1.Add(splitter,1,wx.EXPAND)
+        splitter.AppendWindow(lpanel, 200)
+        splitter.AppendWindow(rpanel)
         self.SetSizer(vbox1)
        
         self.Centre()
