@@ -276,21 +276,38 @@ class Plugin:
             and create a new data1D data
             @param return 
         """
-       
+        detector=None
+        source=None
         info = None
         id=None
-    
+        dxl=None
+        dxw=None
+        dx=None
+        if hasattr(item, "dxl"):
+            dxl = copy.deepcopy(item.dxl)
+        if hasattr(item, "dxw"):
+            dxw = copy.deepcopy(item.dxw)
+        if hasattr(item, "detector"):
+            detector = copy.deepcopy(item.detector)
+        if hasattr(item, "source"):
+            source = copy.deepcopy(item.source)
         if hasattr(item ,"info"):
             info= copy.deepcopy(item.info)
         if hasattr(item,"id"):
             id = copy.deepcopy(item.id)
-       
-        data= Data1D(x=item.x, y=item.y,dx=None, dy=None)
-        data.copy_from_datainfo(item) 
-        item.clone_without_data(clone=data)      
-        data.dy= dy
+        if hasattr(item, "dx"):
+            dx= item.dx
+            
+        
+        data= Data1D(x=item.x, y=item.y,dx=dx, dy=dy)
+        data.dxl = dxl
+        data.dxw = dxw
+        
         data.name = item.name
-      
+        if detector!=None:
+            data.detector = detector
+        if source!=None:
+            data.source = source
         ## allow to highlight data when plotted
         data.interactive = copy.deepcopy(item.interactive)
         ## when 2 data have the same id override the 1 st plotted
@@ -298,6 +315,10 @@ class Plugin:
         ## info is a reference to output of dataloader that can be used
         ## to save  data 1D as cansas xml file
         data.info= info
+        ## If the data file does not tell us what the axes are, just assume...
+        data.xaxis(copy.deepcopy(item._xaxis),copy.deepcopy(item._xunit))
+        data.yaxis(copy.deepcopy(item._yaxis),copy.deepcopy(item._yunit))
+       
         data.group_id = item.group_id
         return data
     
