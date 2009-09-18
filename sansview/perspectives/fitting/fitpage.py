@@ -651,6 +651,9 @@ class FitPage(BasicPage):
             except:
                 ## error occured on chisqr computation
                 pass
+            ## set smearing value whether or not the data contain the smearing info
+            self.manager.set_smearer(smearer=temp_smear, qmin= float(self.qmin_x),
+                                     qmax= float(self.qmax_x)) 
             evt = ModelEventbox(model=self.model)
             wx.PostEvent(self.event_owner, evt)   
         self.btFit.SetFocus() 
@@ -901,9 +904,13 @@ class FitPage(BasicPage):
             Create a smear object that will change the way residuals
             are compute when fitting
         """
+        if self.model ==None:
+            msg="Need model and data to smear plot"
+            wx.PostEvent(self.manager.parent, StatusEvent(status=\
+                            "Smear: %s"%msg))
+            return
         temp_smearer = None
         if self.enable_smearer.GetValue():
-            msg=""
             temp_smearer= self.smearer
             if hasattr(self.data,"dxl"):
                 msg= ": Resolution smearing parameters"

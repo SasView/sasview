@@ -277,24 +277,19 @@ class Plugin:
             and create a new data1D data
             @param return 
         """
-      
         id=None
-        
         if hasattr(item,"id"):
             id = copy.deepcopy(item.id)
-       
-        
+
         data= Data1D(x=item.x, y=item.y,dx=None, dy=None)
-        data.copy_from_datainfo(item) 
+        data.copy_from_datainfo(item)
         item.clone_without_data(clone=data)    
         data.dy=dy
         data.name = item.name
-       
         ## allow to highlight data when plotted
         data.interactive = copy.deepcopy(item.interactive)
         ## when 2 data have the same id override the 1 st plotted
         data.id = id
-       
         data.group_id = item.group_id
         return data
     
