@@ -27,8 +27,8 @@ class Data1D(PlotData1D,LoadData1D):
         self.dx = copy.deepcopy(data1d.dx)
         self.y  = copy.deepcopy(data1d.y)
         self.dy = copy.deepcopy(data1d.dy)
-        dxl = copy.deepcopy(data1d.dxl)
-        dxw = copy.deepcopy(data1d.dxw)
+        self.dxl = copy.deepcopy(data1d.dxl)
+        self.dxw = copy.deepcopy(data1d.dxw)
     
         self.xaxis(data1d._xaxis,data1d._xunit)
         self.yaxis(data1d._yaxis,data1d._yunit)
