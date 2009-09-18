@@ -1055,7 +1055,6 @@ class Plugin:
         """ 
        
         try:
-            
             new_plot = Theory1D(x=x, y=y)
             my_info = self._get_plotting_info( data)
             new_plot.name = model.name
@@ -1071,11 +1070,12 @@ class Plugin:
            
            
             title= new_plot.name
-           
+            
             # Pass the reset flag to let the plotting event handler
             # know that we are replacing the whole plot
             if title== None:
                 title = "Analytical model 1D "
+            if data ==None:
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                              title= str(title), reset=True ))
             else:
