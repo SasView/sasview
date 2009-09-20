@@ -53,6 +53,22 @@ PyObject * new_slit_smearer(PyObject *, PyObject *args) {
 }
 
 /**
+ * Create a SlitSmearer as a python object by supplying a q array
+ */
+PyObject * new_slit_smearer_with_q(PyObject *, PyObject *args) {
+	PyObject *qvalues_obj;
+	Py_ssize_t n_q;
+	double* qvalues;
+	double width;
+	double height;
+
+	if (!PyArg_ParseTuple(args, "ddO", &width, &height, &qvalues_obj)) return NULL;
+	OUTVECTOR(qvalues_obj, qvalues, n_q);
+	SlitSmearer* smearer = new SlitSmearer(width, height, qvalues, n_q);
+	return PyCObject_FromVoidPtr(smearer, del_slit_smearer);
+}
+
+/**
  * Delete a QSmearer object
  */
 void del_q_smearer(void *ptr){
@@ -75,6 +91,24 @@ PyObject * new_q_smearer(PyObject *, PyObject *args) {
 	if (!PyArg_ParseTuple(args, "Oddi", &width_obj, &qmin, &qmax, &nbins)) return NULL;
 	OUTVECTOR(width_obj, width, n_w);
 	QSmearer* smearer = new QSmearer(width, qmin, qmax, nbins);
+	return PyCObject_FromVoidPtr(smearer, del_q_smearer);
+}
+
+/**
+ * Create a QSmearer as a python object by supplying a q array
+ */
+PyObject * new_q_smearer_with_q(PyObject *, PyObject *args) {
+	PyObject *width_obj;
+	Py_ssize_t n_w;
+	double* width;
+	PyObject *qvalues_obj;
+	Py_ssize_t n_q;
+	double* qvalues;
+
+	if (!PyArg_ParseTuple(args, "OO", &width_obj, &qvalues_obj)) return NULL;
+	OUTVECTOR(width_obj, width, n_w);
+	OUTVECTOR(qvalues_obj, qvalues, n_q);
+	QSmearer* smearer = new QSmearer(width, qvalues, n_q);
 	return PyCObject_FromVoidPtr(smearer, del_q_smearer);
 }
 
@@ -113,6 +147,25 @@ PyObject * smear_input(PyObject *, PyObject *args) {
 	return Py_BuildValue("i",1);
 }
 
+/**
+ * Get the q-value of a given bin
+ */
+PyObject * get_q(PyObject *, PyObject *args) {
+	PyObject *smear_obj;
+	int bin;
+
+	if (!PyArg_ParseTuple(args, "Oi", &smear_obj, &bin)) return NULL;
+
+	// Set the array pointers
+	void *temp = PyCObject_AsVoidPtr(smear_obj);
+	BaseSmearer* s = static_cast<BaseSmearer *>(temp);
+
+	double q, q_min, q_max;
+	s->get_bin_range(bin, &q, &q_min, &q_max);
+
+	return Py_BuildValue("d", q);
+}
+
 
 /**
  * Define module methods
@@ -120,10 +173,16 @@ PyObject * smear_input(PyObject *, PyObject *args) {
 static PyMethodDef module_methods[] = {
 	{"new_slit_smearer", (PyCFunction)new_slit_smearer, METH_VARARGS,
 		  "Create a new Slit Smearer object"},
+	{"new_slit_smearer_with_q", (PyCFunction)new_slit_smearer_with_q, METH_VARARGS,
+		  "Create a new Slit Smearer object by supplying an array of Q values"},
 	{"new_q_smearer", (PyCFunction)new_q_smearer, METH_VARARGS,
 		  "Create a new Q Smearer object"},
+	{"new_q_smearer_with_q", (PyCFunction)new_q_smearer_with_q, METH_VARARGS,
+		  "Create a new Q Smearer object by supplying an array of Q values"},
 	{"smear",(PyCFunction)smear_input, METH_VARARGS,
 		  "Smear the given input array"},
+	{"get_q",(PyCFunction)get_q, METH_VARARGS,
+		  "Get the q-value of a given bin"},
     {NULL}
 };
 

@@ -32,6 +32,24 @@ BaseSmearer :: BaseSmearer(double qmin, double qmax, int nbins) {
 	// Flag to keep track of whether we have a smearing matrix or
 	// whether we need to compute one
 	has_matrix = false;
+	even_binning = true;
+};
+
+/**
+ * Constructor for BaseSmearer
+ *
+ * Used for uneven binning
+ * @param q: array of Q values
+ * @param nbins: number of Q bins
+ */
+BaseSmearer :: BaseSmearer(double* q, int nbins) {
+	// Number of bins
+	this->nbins = nbins;
+	this->q_values = q;
+	// Flag to keep track of whether we have a smearing matrix or
+	// whether we need to compute one
+	has_matrix = false;
+	even_binning = false;
 };
 
 /**
@@ -49,29 +67,76 @@ SlitSmearer :: SlitSmearer(double width, double height, double qmin, double qmax
 	this->width = width;
 };
 
-	/**
-	 * Constructor for SlitSmearer
-	 *
-	 * @param width: array slit widths for each Q point, in Q units
-	 * @param qmin: minimum Q value
-	 * @param qmax: maximum Q value
-	 * @param nbins: number of Q bins
-	 */
+/**
+ * Constructor for SlitSmearer
+ *
+ * @param width: slit width in Q units
+ * @param height: slit height in Q units
+ * @param q: array of Q values
+ * @param nbins: number of Q bins
+ */
+SlitSmearer :: SlitSmearer(double width, double height, double* q, int nbins) :
+	BaseSmearer(q, nbins){
+	this->height = height;
+	this->width = width;
+};
+
+/**
+ * Constructor for QSmearer
+ *
+ * @param width: array slit widths for each Q point, in Q units
+ * @param qmin: minimum Q value
+ * @param qmax: maximum Q value
+ * @param nbins: number of Q bins
+ */
 QSmearer :: QSmearer(double* width, double qmin, double qmax, int nbins) :
 	BaseSmearer(qmin, qmax, nbins){
 	this->width = width;
 };
 
 /**
+ * Constructor for QSmearer
+ *
+ * @param width: array slit widths for each Q point, in Q units
+ * @param q: array of Q values
+ * @param nbins: number of Q bins
+ */
+QSmearer :: QSmearer(double* width, double* q, int nbins) :
+	BaseSmearer(q, nbins){
+	this->width = width;
+};
+
+/**
  * Compute the slit smearing matrix
+ *
+ * For even binning (q_min to q_max with nbins):
+ *
+ *   step = (q_max-q_min)/(nbins-1)
+ *   first bin goes from q_min to q_min+step
+ *   last bin goes from q_max to q_max+step
+ *
+ * For binning according to q array:
+ *
+ * Each q point represents a bin going from half the distance between it
+ * and the previous point to half the distance between it and the next point.
+ *
+ *    Example: bin i goes from (q_values[i-1]+q_values[i])/2 to (q_values[i]+q_values[i+1])/2
+ *
+ * The exceptions are the first and last bins, which are centered at the first and
+ * last q-values, respectively. The width of the first and last bins is the distance between
+ * their respective neighboring q-value.
  */
 void SlitSmearer :: compute_matrix(){
 
 	weights = new vector<double>(nbins*nbins,0);
 
+	// Check the length of the data
+	if (nbins<2) return;
+
 	// Loop over all q-values
 	for(int i=0; i<nbins; i++) {
-		double q = qmin + (double)i*(qmax-qmin)/((double)nbins-1.0);
+		double q, q_min, q_max;
+		get_bin_range(i, &q, &q_min, &q_max);
 
 		// For each q-value, compute the weight of each other q-bin
 		// in the I(q) array
@@ -101,7 +166,23 @@ void SlitSmearer :: compute_matrix(){
 					shift_w = width/((double)npts_w-1.0) * (double)j;
 				}
 				double q_shifted = sqrt( ((q-shift_w)*(q-shift_w) + shift_h*shift_h) );
-				int q_i = (int)(floor( (q_shifted-qmin) /((qmax-qmin)/((double)nbins -1.0)) ));
+
+				// Find in which bin this shifted value belongs
+				int q_i=nbins;
+				if (even_binning) {
+					// This is kept for backward compatibility since the binning
+					// was originally defined differently for even bins.
+					q_i = (int)(floor( (q_shifted-qmin) /((qmax-qmin)/((double)nbins -1.0)) ));
+				} else {
+					for(int t=0; t<nbins; t++) {
+						double q_t, q_high, q_low;
+						get_bin_range(t, &q_t, &q_low, &q_high);
+						if(q_shifted>=q_low && q_shifted<q_high) {
+							q_i = t;
+							break;
+						}
+					}
+				}
 
 				// Skip the entries outside our I(q) range
 				//TODO: be careful with edge effect
@@ -120,19 +201,53 @@ void QSmearer :: compute_matrix(){
 
 	// Loop over all q-values
 	double step = (qmax-qmin)/((double)nbins-1.0);
+	double q, q_min, q_max;
+	double q_j, q_jmax, q_jmin;
 	for(int i=0; i<nbins; i++) {
-		double q = qmin + (double)i*step;
-		double q_min = q - 0.5*step;
-		double q_max = q + 0.5*step;
+		get_bin_range(i, &q, &q_min, &q_max);
 
 		for(int j=0; j<nbins; j++) {
-			double q_j = qmin + (double)j*step;
+			get_bin_range(j, &q_j, &q_jmin, &q_jmax);
 
 			// Compute the fraction of the Gaussian contributing
 			// to the q bin between q_min and q_max
 			double value =  erf( (q_max-q_j)/(sqrt(2.0)*width[j]) );
         	value -= erf( (q_min-q_j)/(sqrt(2.0)*width[j]) );
         	(*weights)[i*nbins+j] += value;
+		}
+	}
+}
+
+/**
+ * Computes the Q range of a given bin of the Q distribution.
+ * The range is computed according the the data distribution that
+ * was given to the object at initialization.
+ *
+ * @param i: number of the bin in the distribution
+ * @param q: q-value of bin i
+ * @param q_min: lower bound of the bin
+ * @param q_max: higher bound of the bin
+ *
+ */
+void BaseSmearer :: get_bin_range(int i, double* q, double* q_min, double* q_max) {
+	if (even_binning) {
+		double step = (qmax-qmin)/((double)nbins-1.0);
+		*q = qmin + (double)i*step;
+		*q_min = *q - 0.5*step;
+		*q_max = *q + 0.5*step;
+	} else {
+		*q = q_values[i];
+		if (i==0) {
+			double step = (q_values[1]-q_values[0])/2.0;
+			*q_min = *q - step;
+			*q_max = *q + step;
+		} else if (i==nbins-1) {
+			double step = (q_values[i]-q_values[i-1])/2.0;
+			*q_min = *q - step;
+			*q_max = *q + step;
+		} else {
+			*q_min = *q - (q_values[i]-q_values[i-1])/2.0;
+			*q_max = *q + (q_values[i+1]-q_values[i])/2.0;
 		}
 	}
 }

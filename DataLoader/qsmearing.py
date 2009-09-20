@@ -11,6 +11,7 @@ copyright 2009, University of Tennessee
 import DataLoader.extensions.smearer as smearer
 import numpy
 import math
+import logging, sys
 import scipy.special
 
 def smear_selection(data1D):
@@ -99,6 +100,34 @@ class _BaseSmearer(object):
         
     def _compute_matrix(self): return NotImplemented
 
+    def get_bin_range(self, q_min=None, q_max=None):
+        """
+            @param q_min: minimum q-value to smear
+            @param q_max: maximum q-value to smear 
+        """
+        if q_min == None:
+            q_min = self.min
+        
+        if q_max == None:
+            q_max = self.max
+        
+        _qmin_unsmeared, _qmax_unsmeared = self.get_unsmeared_range(q_min, q_max)
+        
+        _first_bin = None
+        _last_bin  = None
+
+        step = (self.max-self.min)/(self.nbins-1.0)
+        for i in range(self.nbins):
+            q_i = smearer.get_q(self._smearer, i)
+            if (q_i >= _qmin_unsmeared) and (q_i <= _qmax_unsmeared):
+                # Identify first and last bin
+                if _first_bin is None:
+                    _first_bin = i
+                else:
+                    _last_bin  = i
+               
+        return _first_bin, _last_bin
+
     def __call__(self, iq_in, first_bin=0, last_bin=None):
         """
             Perform smearing
@@ -160,9 +189,24 @@ class _SlitSmearer(_BaseSmearer):
             Initialize the C++ smearer object.
             This method HAS to be called before smearing
         """
-        self._smearer = smearer.new_slit_smearer(self.width, self.height, self.min, self.max, self.nbins)
+        #self._smearer = smearer.new_slit_smearer(self.width, self.height, self.min, self.max, self.nbins)
+        self._smearer = smearer.new_slit_smearer_with_q(self.width, self.height, self.qvalues)
         self._init_complete = True
 
+    def get_unsmeared_range(self, q_min, q_max):
+        """
+            Determine the range needed in unsmeared-Q to cover
+            the smeared Q range
+        """
+        # Range used for input to smearing
+        _qmin_unsmeared = q_min
+        _qmax_unsmeared = q_max 
+        try:
+            _qmin_unsmeared = self.min
+            _qmax_unsmeared = self.max
+        except:
+            logging.error("_SlitSmearer.get_bin_range: %s" % sys.exc_value)
+        return _qmin_unsmeared, _qmax_unsmeared
 
 class SlitSmearer(_SlitSmearer):
     """
@@ -198,11 +242,12 @@ class SlitSmearer(_SlitSmearer):
         ## Number of Q bins
         self.nbins = len(data1D.x)
         ## Minimum Q 
-        self.min = data1D.x[0]
+        self.min = min(data1D.x)
         ## Maximum
-        self.max = data1D.x[len(data1D.x)-1]        
-
-        #print "nbin,npts",self.nbins,self.npts
+        self.max = max(data1D.x)
+        ## Q-values
+        self.qvalues = data1D.x
+        
 
 class _QSmearer(_BaseSmearer):
     """
@@ -235,8 +280,28 @@ class _QSmearer(_BaseSmearer):
             Initialize the C++ smearer object.
             This method HAS to be called before smearing
         """
-        self._smearer = smearer.new_q_smearer(numpy.asarray(self.width), self.min, self.max, self.nbins)
+        #self._smearer = smearer.new_q_smearer(numpy.asarray(self.width), self.min, self.max, self.nbins)
+        self._smearer = smearer.new_q_smearer_with_q(numpy.asarray(self.width), self.qvalues)
         self._init_complete = True
+        
+    def get_unsmeared_range(self, q_min, q_max):
+        """
+            Determine the range needed in unsmeared-Q to cover
+            the smeared Q range
+            Take 3 sigmas as the offset between smeared and unsmeared space
+        """
+        # Range used for input to smearing
+        _qmin_unsmeared = q_min
+        _qmax_unsmeared = q_max 
+        try:
+            offset = 3.0*max(self.width)
+            _qmin_unsmeared = max([self.min, q_min-offset])
+            _qmax_unsmeared = min([self.max, q_max+offset])
+        except:
+            logging.error("_QSmearer.get_bin_range: %s" % sys.exc_value)
+        return _qmin_unsmeared, _qmax_unsmeared
+        
+        
         
 class QSmearer(_QSmearer):
     """
@@ -259,9 +324,11 @@ class QSmearer(_QSmearer):
         ## Number of Q bins
         self.nbins = len(data1D.x)
         ## Minimum Q 
-        self.min = data1D.x[0]
+        self.min = min(data1D.x)
         ## Maximum
-        self.max = data1D.x[len(data1D.x)-1]        
+        self.max = max(data1D.x)
+        ## Q-values
+        self.qvalues = data1D.x
 
 
 if __name__ == '__main__':

@@ -53,7 +53,9 @@ class smear_tests(unittest.TestCase):
         
         input = 12.0-numpy.arange(1,11)
         output = s(input)
-        answer = [ 9.666,  9.056,  8.329,  7.494,  6.642,  5.721,  4.774,  3.824,  2.871, 2.   ]
+        # The following commented line was the correct output for even bins [see smearer.cpp for details] 
+        #answer = [ 9.666,  9.056,  8.329,  7.494,  6.642,  5.721,  4.774,  3.824,  2.871, 2.   ]
+        answer = [ 9.2302,  8.6806,  7.9533,  7.1673,  6.2889,  5.4,     4.5028,  3.5744,  2.6083, 2.    ]
         for i in range(len(input)):
             self.assertAlmostEqual(answer[i], output[i], 2)
         
