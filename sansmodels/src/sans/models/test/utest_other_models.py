@@ -1101,7 +1101,7 @@ class TestGuinierModel(unittest.TestCase):
         from sans.models.GuinierModel import GuinierModel
         self.comp = GuinierModel()
         self.comp.setParam('scale',1.0)
-        self.comp.setParam('rg', 60)
+        self.comp.setParam('rg', 1)
         
         self.x = numpy.array([0.4, 1.3])
         self.y = numpy.array([0.5, 1.57])
@@ -1115,13 +1115,12 @@ class TestGuinierModel(unittest.TestCase):
         
     def test1D(self):
         """ Test 1D model for a GuinierModel"""
-        self.assertAlmostEqual(self.comp.run(1.0), 5.6387e-5, 4)
+        self.assertAlmostEqual(self.comp.run(1.0),0.716531, 4)
         
     def test1D_2(self):
         """ Test 2D model for a GuinierModel"""
-        self.assertAlmostEqual(self.comp.run([1.0, 1.3]), 5.6387e-5, 4)  
-        from sans.models.GuinierModel import GuinierModel
-        self.shape_indep_list.append(GuinierModel )
+        self.assertAlmostEqual(self.comp.run([1.0, 1.3]),0.716531, 4)
+     
         
     def testEval_1D(self):
         """ Test 1D model for a GuinierModel with evalDistribution"""
