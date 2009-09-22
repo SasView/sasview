@@ -105,6 +105,11 @@ class _BaseSmearer(object):
             @param q_min: minimum q-value to smear
             @param q_max: maximum q-value to smear 
         """
+        # If this is the first time we call for smearing,
+        # initialize the C++ smearer object first
+        if not self._init_complete:
+            self._initialize_smearer()
+            
         if q_min == None:
             q_min = self.min
         
@@ -117,14 +122,17 @@ class _BaseSmearer(object):
         _last_bin  = None
 
         step = (self.max-self.min)/(self.nbins-1.0)
-        for i in range(self.nbins):
-            q_i = smearer.get_q(self._smearer, i)
-            if (q_i >= _qmin_unsmeared) and (q_i <= _qmax_unsmeared):
-                # Identify first and last bin
-                if _first_bin is None:
-                    _first_bin = i
-                else:
-                    _last_bin  = i
+        try:
+            for i in range(self.nbins):
+                q_i = smearer.get_q(self._smearer, i)
+                if (q_i >= _qmin_unsmeared) and (q_i <= _qmax_unsmeared):
+                    # Identify first and last bin
+                    if _first_bin is None:
+                        _first_bin = i
+                    else:
+                        _last_bin  = i
+        except:
+            raise RuntimeError, "_BaseSmearer.get_bin_range: error getting range\n  %s" % sys.exc_value
                
         return _first_bin, _last_bin
 
@@ -150,7 +158,9 @@ class _BaseSmearer(object):
              
         # Storage for smeared I(q)   
         iq_out = numpy.zeros(self.nbins)
-        smearer.smear(self._smearer, iq_in, iq_out, first_bin, last_bin)
+        smear_output = smearer.smear(self._smearer, iq_in, iq_out, first_bin, last_bin)
+        if smear_output < 0:
+            raise RuntimeError, "_BaseSmearer: could not smear, code = %g" % smear_output
         return iq_out
     
 class _SlitSmearer(_BaseSmearer):
@@ -183,6 +193,7 @@ class _SlitSmearer(_BaseSmearer):
         self.npts   = 10000
         ## Smearing matrix
         self._weights = None
+        self.qvalues  = None
         
     def _initialize_smearer(self):
         """
@@ -274,6 +285,7 @@ class _QSmearer(_BaseSmearer):
         self.nbins  = nbins
         ## Smearing matrix
         self._weights = None
+        self.qvalues  = None
         
     def _initialize_smearer(self):
         """

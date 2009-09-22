@@ -229,13 +229,14 @@ void QSmearer :: compute_matrix(){
  * @param q_max: higher bound of the bin
  *
  */
-void BaseSmearer :: get_bin_range(int i, double* q, double* q_min, double* q_max) {
+int BaseSmearer :: get_bin_range(int i, double* q, double* q_min, double* q_max) {
 	if (even_binning) {
 		double step = (qmax-qmin)/((double)nbins-1.0);
 		*q = qmin + (double)i*step;
 		*q_min = *q - 0.5*step;
 		*q_max = *q + 0.5*step;
-	} else {
+		return 1;
+	} else if (i>=0 && i<nbins) {
 		*q = q_values[i];
 		if (i==0) {
 			double step = (q_values[1]-q_values[0])/2.0;
@@ -249,7 +250,9 @@ void BaseSmearer :: get_bin_range(int i, double* q, double* q_min, double* q_max
 			*q_min = *q - (q_values[i]-q_values[i-1])/2.0;
 			*q_max = *q + (q_values[i+1]-q_values[i])/2.0;
 		}
+		return 1;
 	}
+	return -1;
 }
 
 /**

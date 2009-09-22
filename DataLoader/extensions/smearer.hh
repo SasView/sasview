@@ -49,7 +49,7 @@ public:
 	// Utility function to check the number of bins
 	int get_nbins() { return nbins; }
 	// Get the q range of a particular bin
-	virtual void get_bin_range(int, double*, double*, double*);
+	virtual int get_bin_range(int, double*, double*, double*);
 };
 
 

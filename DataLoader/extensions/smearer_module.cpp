@@ -160,9 +160,14 @@ PyObject * get_q(PyObject *, PyObject *args) {
 	void *temp = PyCObject_AsVoidPtr(smear_obj);
 	BaseSmearer* s = static_cast<BaseSmearer *>(temp);
 
-	double q, q_min, q_max;
-	s->get_bin_range(bin, &q, &q_min, &q_max);
+	if(s->get_nbins()<=0 || s->get_nbins()<=bin) {
+		return NULL;
+	}
 
+	double q, q_min, q_max;
+	if (s->get_bin_range(bin, &q, &q_min, &q_max)<0) {
+		return NULL;
+	}
 	return Py_BuildValue("d", q);
 }
 
