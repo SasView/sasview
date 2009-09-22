@@ -115,32 +115,14 @@ class Calc1D(CalcThread):
         index= (self.qmin <= self.x)& (self.x <= self.qmax)
         output[index] = self.model.evalDistribution(self.x[index])
      
-        _first_bin = None
-        _last_bin  = None
-       
-        for i_x in xrange(len(self.x)):
-            if index[i_x]:
-                # Identify first and last bin
-                #TODO: refactor this to pass q-values to the smearer
-                # and let it figure out which bin range to use
-                if _first_bin is None:
-                    _first_bin = i_x
-                else:
-                    _last_bin  = i_x
-      
         ##smearer the ouput of the plot    
         if self.smearer!=None:
-            #output= self.smearer(output)
-            output = self.smearer(output, _first_bin,_last_bin) #Todo: Why always output[0]=0???
+            first_bin, last_bin = self.smearer.get_bin_range(self.qmin, self.qmax)
+            output = self.smearer(output, first_bin, last_bin) 
          
-        ######Temp. FIX for Qrange w/ smear. #ToDo: Should not pass all the data to 'run' or 'smear'...
-        #new_index = (self.qmin > self.x) |(self.x > self.qmax)
-        #output[new_index] = None
-                
-        #print "output------",output
         elapsed = time.time()-self.starttime
        
-        self.complete(x= self.x, y= output, 
+        self.complete(x= self.x[index], y= output[index], 
                       elapsed=elapsed, model= self.model, data=self.data)
         
  
