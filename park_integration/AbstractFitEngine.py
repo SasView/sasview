@@ -189,25 +189,19 @@ class FitData1D(object):
         if qmax !=None:
             self.qmax = qmax
             
-        # Range used for input to smearing
+        # Determine the range needed in unsmeared-Q to cover
+        # the smeared Q range
         self._qmin_unsmeared = self.qmin
         self._qmax_unsmeared = self.qmax    
         
-        # Determine the range needed in unsmeared-Q to cover
-        # the smeared Q range
-        #TODO: use the smearing matrix to determine which 
-        # bin range to use
-        if self.smearer.__class__.__name__ == 'SlitSmearer':
-            self._qmin_unsmeared = min(self.data.x)
-            self._qmax_unsmeared = max(self.data.x)
-        elif self.smearer.__class__.__name__ == 'QSmearer':
-            # Take 3 sigmas as the offset between smeared and unsmeared space
-            try:
-                offset = 3.0*max(self.smearer.width)
-                self._qmin_unsmeared = max([min(self.data.x), self.qmin-offset])
-                self._qmax_unsmeared = min([max(self.data.x), self.qmax+offset])
-            except:
-                logging.error("FitData1D.setFitRange: %s" % sys.exc_value)
+        self._first_unsmeared_bin = 0
+        self._last_unsmeared_bin  = len(self.data.x)-1
+        
+        if self.smearer!=None:
+            self._first_unsmeared_bin, self._last_unsmeared_bin = self.smearer.get_bin_range(self.qmin, self.qmax)
+            self._qmin_unsmeared = self.data.x[self._first_unsmeared_bin]
+            self._qmax_unsmeared = self.data.x[self._last_unsmeared_bin]
+            
         # Identify the bin range for the unsmeared and smeared spaces
         self.idx = (self.x>=self.qmin) & (self.x <= self.qmax)
         self.idx_unsmeared = (self.x>=self._qmin_unsmeared) & (self.x <= self._qmax_unsmeared)
@@ -231,25 +225,11 @@ class FitData1D(object):
         """
         # Compute theory data f(x)
         fx= numpy.zeros(len(self.x))
-        _first_bin = None
-        _last_bin  = None
-       
         fx[self.idx_unsmeared] = fn(self.x[self.idx_unsmeared])
        
-        
-        for i_x in range(len(self.x)):
-            if self.idx_unsmeared[i_x]==True:
-                # Identify first and last bin
-                #TODO: refactor this to pass q-values to the smearer
-                # and let it figure out which bin range to use
-                if _first_bin is None:
-                    _first_bin = i_x
-                else:
-                    _last_bin  = i_x
-               
         ## Smear theory data
         if self.smearer is not None:
-            fx = self.smearer(fx, _first_bin, _last_bin)
+            fx = self.smearer(fx, self._first_unsmeared_bin, self._last_unsmeared_bin)
        
         ## Sanity check
         if numpy.size(self.dy)!= numpy.size(fx):
