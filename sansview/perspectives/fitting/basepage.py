@@ -333,8 +333,13 @@ class BasicPage(wx.ScrolledWindow):
         """
         self.values=[]
         self.weights=[]
+        if event.GetEventObject()==self.noDisper_rbox:
+            if self.noDisper_rbox.GetValue():
+                #No array dispersity apply yet
+                self._reset_dispersity()
+                ## Redraw the model ???
+                self._draw_model()
         # Go through the list of dispersion check boxes to identify which one has changed 
-
         for p in self.disp_cb_dict:
             self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
             # Catch which one of the box was just checked or unchecked.
@@ -402,7 +407,7 @@ class BasicPage(wx.ScrolledWindow):
                 else:
                     self._reset_dispersity()
               
-                ## Redraw the model ???
+                ## Redraw the model
                 self._draw_model()
         
         ## post state to fit panel
@@ -1529,9 +1534,9 @@ class BasicPage(wx.ScrolledWindow):
         else:
             self._set_sizer_dispersion(dispersity= dispersity)
             
-            
         self.state.disp_box= n
-        
+        ## Redraw the model
+        self._draw_model() 
         #self._undo.Enable(True)
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
@@ -1571,6 +1576,11 @@ class BasicPage(wx.ScrolledWindow):
         # Look for model parameters to which we can apply an ArrayDispersion model
         # Add a check box for each parameter.
         self.disp_cb_dict = {}
+        ix+=1 
+        self.noDisper_rbox = wx.RadioButton(self, -1,"None", (10, 10),style= wx.RB_GROUP)
+        self.Bind(wx.EVT_RADIOBUTTON,self.select_disp_angle , id=self.noDisper_rbox.GetId())
+        self.sizer4_4.Add(self.noDisper_rbox, (iy, ix),
+                           (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
         for p in self.model.dispersion.keys():
             if not p in self.model.orientation_params:
@@ -1580,12 +1590,12 @@ class BasicPage(wx.ScrolledWindow):
                 self.Bind(wx.EVT_RADIOBUTTON, self.select_disp_angle, id=self.disp_cb_dict[p].GetId())
                 #wx.EVT_RADIOBUTTON(self, self.disp_cb_dict[p].GetId(), self.select_disp_angle)
                 self.sizer4_4.Add(self.disp_cb_dict[p], (iy, ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
         for p in self.model.dispersion.keys():
             if p in self.model.orientation_params:
                 ix+=1 
                 self.disp_cb_dict[p] = wx.RadioButton(self, -1, p, (10, 10))
                 self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
-                #print "self.enable2D",self.enable2D
                 if not (self.enable2D or self.data.__class__.__name__ =="Data2D"):
                     self.disp_cb_dict[p].Hide()
                     #self.disp_cb_dict[p].Disable()
