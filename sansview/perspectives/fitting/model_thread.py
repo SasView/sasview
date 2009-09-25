@@ -113,12 +113,14 @@ class Calc1D(CalcThread):
         self.starttime = time.time()
         output = numpy.zeros((len(self.x)))
         index= (self.qmin <= self.x)& (self.x <= self.qmax)
-        output[index] = self.model.evalDistribution(self.x[index])
      
         ##smearer the ouput of the plot    
         if self.smearer!=None:
             first_bin, last_bin = self.smearer.get_bin_range(self.qmin, self.qmax)
+            output[first_bin:last_bin] = self.model.evalDistribution(self.x[first_bin:last_bin])
             output = self.smearer(output, first_bin, last_bin) 
+        else:
+            output[index] = self.model.evalDistribution(self.x[index])
          
         elapsed = time.time()-self.starttime
        
