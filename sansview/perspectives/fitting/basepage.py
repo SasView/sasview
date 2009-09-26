@@ -139,6 +139,11 @@ class BasicPage(wx.ScrolledWindow):
             @param mouse_up_callback:   callback method for EVT_LEFT_UP event
             @param text_enter_callback: callback method for EVT_TEXT_ENTER event
         """
+        ## Set to True when the mouse is clicked while the whole string is selected
+        full_selection = False
+        ## Call back for EVT_SET_FOCUS events
+        _on_set_focus_callback = None
+        
         def __init__(self, parent, id=-1, value=wx.EmptyString, pos=wx.DefaultPosition, 
                      size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.TextCtrlNameStr,
                      kill_focus_callback = None, set_focus_callback  = None,
@@ -147,14 +152,44 @@ class BasicPage(wx.ScrolledWindow):
             wx.TextCtrl.__init__(self, parent, id, value, pos, size, style, validator, name)
             
             # Bind appropriate events
-            self.Bind(wx.EVT_SET_FOCUS,  parent.onSetFocus \
-                      if set_focus_callback is None else set_focus_callback)
+            self._on_set_focus_callback = parent.onSetFocus \
+                      if set_focus_callback is None else set_focus_callback
+            self.Bind(wx.EVT_SET_FOCUS, self._on_set_focus)
             self.Bind(wx.EVT_KILL_FOCUS, parent._onparamEnter \
                       if kill_focus_callback is None else kill_focus_callback)
             self.Bind(wx.EVT_TEXT_ENTER, parent._onparamEnter \
                       if text_enter_callback is None else text_enter_callback)
-            self.Bind(wx.EVT_LEFT_UP,    parent._highlight_text \
+            self.Bind(wx.EVT_LEFT_UP,    self._highlight_text \
                       if mouse_up_callback is None else mouse_up_callback)
+            
+        def _on_set_focus(self, event):
+            """
+                Catch when the text control is set in focus to highlight the whole
+                text if necessary
+                @param event: mouse event
+            """
+            event.Skip()
+            self.full_selection = True
+            return self._on_set_focus_callback(event)
+        
+        def _highlight_text(self, event):
+            """
+                Highlight text of a TextCtrl only of no text has be selected
+                @param event: mouse event
+            """
+            # Make sure the mouse event is available to other listeners
+            event.Skip()
+            control  = event.GetEventObject()
+            if self.full_selection:
+                self.full_selection = False
+                # Check that we have a TextCtrl
+                if issubclass(control.__class__, wx.TextCtrl):
+                    # Check whether text has been selected, 
+                    # if not, select the whole string
+                    (start, end) = control.GetSelection()
+                    if start==end:
+                        control.SetSelection(-1,-1)
+                    
        
     def onContextMenu(self, event): 
         """
@@ -478,7 +513,6 @@ class BasicPage(wx.ScrolledWindow):
             highlight the current textcrtl and hide the error text control shown 
             after fitting
         """
-        
         if hasattr(self,"text2_3"):
             self.text2_3.Hide()
         if len(self.parameters)>0:
@@ -502,24 +536,6 @@ class BasicPage(wx.ScrolledWindow):
         self.Layout()
         return
     
-    def _highlight_text(self, event):
-        """
-            Highlight text of a TextCtrl only of no text has be selected
-            @param event: mouse event
-        """
-        control  = event.GetEventObject()
-        # Check that we have a TextCtrl
-        if issubclass(control.__class__, wx.TextCtrl):
-            # Check whether text has been selected, 
-            # if not, select the whole string
-
-            (start, end) = control.GetSelection()
-            if start==end:
-                control.SetSelection(-1,-1)
-                
-        # Make sure the mouse event is available to other listeners
-        event.Skip()
-
     
     def read_file(self, path):
         """
