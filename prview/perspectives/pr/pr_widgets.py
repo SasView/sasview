@@ -24,26 +24,40 @@ class PrTextCtrl(wx.TextCtrl):
         
         wx.TextCtrl.__init__(self, *args, **kwds)
         
+        ## Set to True when the mouse is clicked while the whole string is selected
+        full_selection = False
+        ## Call back for EVT_SET_FOCUS events
+        _on_set_focus_callback = None
         # Bind appropriate events
         self.Bind(wx.EVT_LEFT_UP, self._highlight_text)
+        self.Bind(wx.EVT_SET_FOCUS, self._on_set_focus)
+
+    def _on_set_focus(self, event):
+        """
+            Catch when the text control is set in focus to highlight the whole
+            text if necessary
+            @param event: mouse event
+        """
+        event.Skip()
+        self.full_selection = True
         
     def _highlight_text(self, event):
         """
             Highlight text of a TextCtrl only of no text has be selected
             @param event: mouse event
         """
-        control  = event.GetEventObject()
-        # Check that we have a TextCtrl
-        if issubclass(control.__class__, wx.TextCtrl):
-            # Check whether text has been selected, 
-            # if not, select the whole string
-
-            (start, end) = control.GetSelection()
-            if start==end:
-                control.SetSelection(-1,-1)
-                
         # Make sure the mouse event is available to other listeners
         event.Skip()
+        control  = event.GetEventObject()
+        if self.full_selection:
+            self.full_selection = False
+            # Check that we have a TextCtrl
+            if issubclass(control.__class__, wx.TextCtrl):
+                # Check whether text has been selected, 
+                # if not, select the whole string
+                (start, end) = control.GetSelection()
+                if start==end:
+                    control.SetSelection(-1,-1)
 
 class OutputTextCtrl(wx.TextCtrl):
     """
