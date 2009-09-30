@@ -841,7 +841,7 @@ class InversionControl(ScrolledPanel):
         
         if flag:
             dataset = self.plot_data.GetValue()
-            if len(dataset.strip())==0:
+            if dataset==None or len(dataset.strip())==0:
                 message = "No data to invert. Select a data set before proceeding with P(r) inversion."
                 wx.PostEvent(self.manager.parent, StatusEvent(status=message))
             else:
