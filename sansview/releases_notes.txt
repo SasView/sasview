@@ -68,7 +68,10 @@ Package name: None
 3- Known Issues
 
 	3.1- All systems:
-		- None
+		- "Save Model" option does not
+		  save all changes related to the current active panel
+		- "Save Model" option does not save all information related to dispersion
+		- "hide and show errors" does not work properly
 
 	3.2- Windows:
 		- None
