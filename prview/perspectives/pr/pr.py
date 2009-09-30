@@ -325,8 +325,10 @@ class Plugin:
             new_plot.name = IQ_SMEARED_LABEL
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-            #new_plot.group_id = "test group"
-            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="I(q)"))
+            # If we have a group ID, use it
+            if pr.info.has_key("plot_group_id"):
+                new_plot.group_id = pr.info["plot_group_id"]
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
         
         
     def _on_pr_npts(self, evt):
@@ -594,7 +596,7 @@ class Plugin:
             elif item.name==graph.selected_plottable:
 	            #TODO: we might want to check that the units are consistent with I(q)
 	            #      before allowing this menu item
-                if issubclass(item.__class__, DataLoader.data_info.Data1D):
+                if not self.standalone and issubclass(item.__class__, DataLoader.data_info.Data1D):
                     return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion]]      
                 
         return []
