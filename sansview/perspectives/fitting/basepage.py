@@ -1724,7 +1724,7 @@ class BasicPage(wx.ScrolledWindow):
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         sizer_save = wx.BoxSizer(wx.HORIZONTAL)
         
-        self.btSave_title = wx.StaticText(self, -1, 'Save the current panel status')
+        self.btSave_title = wx.StaticText(self, -1, 'Save the current Model')
         self.btSave = wx.Button(self,wx.NewId(),'Save')
         self.btSave.Bind(wx.EVT_BUTTON, self.onSave,id= self.btSave.GetId())
         self.btSave.SetToolTipString("Save the current Model")
