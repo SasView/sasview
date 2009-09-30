@@ -564,8 +564,8 @@ class FitPage(BasicPage):
                                      self.state.orientation_params_disp)
         self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
-  
-                         
+
+
         wx.PostEvent(self.parent, StatusEvent(status=\
                         " Selected Distribution: Gaussian"))   
         ix =0
@@ -1122,6 +1122,7 @@ class FitPage(BasicPage):
         else:
             self.cb1.SetValue(False)
         ## save current state of the page
+        self.state.cb1 = self.cb1.GetValue()
         self._copy_parameters_state(self.orientation_params,
                                      self.state.orientation_params)
         self._copy_parameters_state(self.orientation_params_disp,
