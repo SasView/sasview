@@ -490,7 +490,8 @@ class BasicPage(wx.ScrolledWindow):
         new_state.enable2D = copy.deepcopy(self.enable2D)
         ##Add model state on context menu
         self.number_saved_state += 1
-        name= self.model.name+"[%g]"%self.number_saved_state 
+        #name= self.model.name+"[%g]"%self.number_saved_state 
+        name= self.model.__class__.__name__+"[%g]"%self.number_saved_state 
         self.saved_states[name]= new_state
         
         ## Add item in the context menu
@@ -905,8 +906,9 @@ class BasicPage(wx.ScrolledWindow):
             item_page_info = statelist[j]
             ##change the state of the check box for simple parameters
             if item_page[0]!=None:
+               
                 item_page[0].SetValue(item_page_info[0])
-    
+                print "item_page[0]",item_page[0].GetValue()
             if item_page[2]!=None:
                 item_page[2].SetValue(item_page_info[2])
                 
