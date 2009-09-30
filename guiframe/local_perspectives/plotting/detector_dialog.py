@@ -89,10 +89,16 @@ class DetectorDialog(wx.Dialog):
             reset detector info
         """
         try:
-            self.zmin_ctl.SetValue(str(float(self.reset_zmin_ctl)))
-            self.zmax_ctl.SetValue(str(float(self.reset_zmax_ctl)))
+            zmin= self.reset_zmin_ctl
+            zmax= self.reset_zmax_ctl
+            if zmin==None:
+                zmin= ""
+            if zmax==None:
+                zmax= ""    
+            self.zmin_ctl.SetValue(str(zmin))
+            self.zmax_ctl.SetValue(str(zmax))
             self.cmap = DEFAULT_CMAP
-            self.cmap_selector.SetValue("jet")
+            self.cmap_selector.SetStringSelection("jet")
             self._on_select_cmap(event=None)
         except:
             msg ="error occurs while resetting Detector: %s"%sys.exc_value
