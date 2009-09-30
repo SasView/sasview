@@ -108,7 +108,7 @@ class BasicPage(wx.ScrolledWindow):
         #self.popUpMenu.AppendSeparator()
                 
         id = wx.NewId()
-        self._keep = wx.MenuItem(self.popUpMenu,id,"Bookmark"," Keep the panel status to recall it later")
+        self._keep = wx.MenuItem(self.popUpMenu,id,"Save Model"," Keep the panel status to recall it later")
         self.popUpMenu.AppendItem(self._keep)
         self._keep.Enable(True)
         wx.EVT_MENU(self, id, self.onSave)
@@ -1720,14 +1720,14 @@ class BasicPage(wx.ScrolledWindow):
         #return
     
         self.sizer6.Clear(True)
-        box_description= wx.StaticBox(self, -1,"Save Status")
+        box_description= wx.StaticBox(self, -1,"Save Model")
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         sizer_save = wx.BoxSizer(wx.HORIZONTAL)
         
         self.btSave_title = wx.StaticText(self, -1, 'Save the current panel status')
         self.btSave = wx.Button(self,wx.NewId(),'Save')
         self.btSave.Bind(wx.EVT_BUTTON, self.onSave,id= self.btSave.GetId())
-        self.btSave.SetToolTipString("Save current panel status")
+        self.btSave.SetToolTipString("Save the current Model")
         
         sizer_save.Add(self.btSave_title)  
         sizer_save.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,45)  
