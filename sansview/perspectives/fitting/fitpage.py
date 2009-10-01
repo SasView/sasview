@@ -274,7 +274,7 @@ class FitPage(BasicPage):
         if not self.enable_disp.GetValue():
             ## the user didn't select dispersity display
             return 
-        
+
         self._reset_dispersity()
         # Create the dispersion objects
         for item in self.model.dispersion.keys():
@@ -558,7 +558,7 @@ class FitPage(BasicPage):
         self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)      
         self.state.model = self.model.clone()  
          ## save state into
-        
+        self.state.cb1 = self.cb1.GetValue()
         self._copy_parameters_state(self.parameters, self.state.parameters)
         self._copy_parameters_state(self.orientation_params_disp,
                                      self.state.orientation_params_disp)
@@ -641,7 +641,10 @@ class FitPage(BasicPage):
        
         self.enable_disp.SetValue(False)
         self.disable_disp.SetValue(True)
-        self.set_dispers_sizer()
+        try:
+            self.set_dispers_sizer()
+        except:
+            pass
         if self.model !=None:
             try:
                 temp_smear= None
@@ -656,10 +659,11 @@ class FitPage(BasicPage):
                                      qmax= float(self.qmax_x)) 
             evt = ModelEventbox(model=self.model)
             wx.PostEvent(self.event_owner, evt)   
+            
         self.btFit.SetFocus() 
         self.state.enable_disp = self.enable_disp.GetValue()
         self.state.disable_disp = self.disable_disp.GetValue()
-        
+    
         self.state.structurecombobox = self.structurebox.GetCurrentSelection()
         self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
       
@@ -1083,7 +1087,7 @@ class FitPage(BasicPage):
         self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
            
-        #self.save_current_state()  
+        self.save_current_state()  
         if event !=None:
             #self._undo.Enable(True)
             ## post state to fit panel
@@ -1131,7 +1135,7 @@ class FitPage(BasicPage):
         self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
         
-        #self.save_current_state()
+        self.save_current_state()
         if event !=None:
             #self._undo.Enable(True)
             ## post state to fit panel
