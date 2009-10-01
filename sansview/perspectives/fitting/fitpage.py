@@ -1079,15 +1079,16 @@ class FitPage(BasicPage):
                 for item in self.fittable_param:
                     item[0].SetValue(False)
                 self.param_toFit=[]
-        self._copy_parameters_state(self.orientation_params,
-                                     self.state.orientation_params)
-        self._copy_parameters_state(self.orientation_params_disp,
-                                     self.state.orientation_params_disp)
-        self._copy_parameters_state(self.parameters, self.state.parameters)
-        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
-        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
+                
+        #self._copy_parameters_state(self.orientation_params,
+        #                             self.state.orientation_params)
+        #self._copy_parameters_state(self.orientation_params_disp,
+        #                            self.state.orientation_params_disp)
+        #self._copy_parameters_state(self.parameters, self.state.parameters)
+        #self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        #self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
            
-        self.save_current_state()  
+        self.save_current_state_fit()  
         if event !=None:
             #self._undo.Enable(True)
             ## post state to fit panel
@@ -1126,16 +1127,16 @@ class FitPage(BasicPage):
         else:
             self.cb1.SetValue(False)
         ## save current state of the page
-        self.state.cb1 = self.cb1.GetValue()
-        self._copy_parameters_state(self.orientation_params,
-                                     self.state.orientation_params)
-        self._copy_parameters_state(self.orientation_params_disp,
-                                     self.state.orientation_params_disp)
-        self._copy_parameters_state(self.parameters, self.state.parameters)
-        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
-        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
+        #self.state.cb1 = self.cb1.GetValue()
+        #self._copy_parameters_state(self.orientation_params,
+        #                             self.state.orientation_params)
+        #self._copy_parameters_state(self.orientation_params_disp,
+        #                             self.state.orientation_params_disp)
+        #self._copy_parameters_state(self.parameters, self.state.parameters)
+        #self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        #self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
         
-        self.save_current_state()
+        self.save_current_state_fit()
         if event !=None:
             #self._undo.Enable(True)
             ## post state to fit panel
@@ -1426,22 +1427,23 @@ class FitPage(BasicPage):
                 break
             else:
                 self.text2_4.Hide()
-                
-        self._copy_parameters_state(self.orientation_params,
-                                     self.state.orientation_params)
-        self._copy_parameters_state(self.orientation_params_disp,
-                                     self.state.orientation_params_disp)
-        self._copy_parameters_state(self.parameters, self.state.parameters)
-        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
-        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
-        
+        #self.state.cb1 = self.cb1.GetValue()        
+        #self._copy_parameters_state(self.orientation_params,
+        #                             self.state.orientation_params)
+        #self._copy_parameters_state(self.orientation_params_disp,
+        #                             self.state.orientation_params_disp)
+        #self._copy_parameters_state(self.parameters, self.state.parameters)
+        #self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        #self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
+        self.save_current_state_fit()
         boxsizer1.Add(sizer)
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer3.Layout()
         self.Layout()
         self.Refresh()
         self.SetScrollbars(20,20,25,65)
-       
+
+
         
 class HelpWindow(wx.Frame):
     def __init__(self, parent, id, title):

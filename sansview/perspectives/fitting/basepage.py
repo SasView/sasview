@@ -653,7 +653,85 @@ class BasicPage(wx.ScrolledWindow):
         self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
     
+
+    def save_current_state_fit(self):
+        """
+            Store current state
+        """
+        ## save model option
+        if self.model!= None:
+            self.disp_list= self.model.getDispParamList()
+            self.state.disp_list= copy.deepcopy(self.disp_list)
+            self.state.model = self.model.clone()
+            
+        self.state.enable2D = copy.deepcopy(self.enable2D)
+        self.state.values= copy.deepcopy(self.values)
+        self.state.weights = copy.deepcopy( self.weights)
+        ## save data    
+        self.state.data= copy.deepcopy(self.data)
+        try:
+            n = self.disp_box.GetCurrentSelection()
+            dispersity= self.disp_box.GetClientData(n)
+            name= dispersity.__name__
+            self.disp_name = name
+            if name == "GaussianDispersion" :
+               if hasattr(self,"cb1"):
+                   self.state.cb1= self.cb1.GetValue()
+        except:
+            pass
+        
+        if hasattr(self,"enable_disp"):
+            self.state.enable_disp= self.enable_disp.GetValue()
+            self.state.disable_disp = self.disable_disp.GetValue()
+            
+        self.state.smearer = copy.deepcopy(self.smearer)
+        if hasattr(self,"enable_smearer"):
+            self.state.enable_smearer = copy.deepcopy(self.enable_smearer.GetValue())
+            self.state.disable_smearer = copy.deepcopy(self.disable_smearer.GetValue())
+            
+        if hasattr(self,"disp_box"):
+            self.state.disp_box = self.disp_box.GetCurrentSelection()
+
+            if len(self.disp_cb_dict)>0:
+                for k , v in self.disp_cb_dict.iteritems():
+         
+                    if v ==None :
+                        self.state.disp_cb_dict[k]= v
+                    else:
+                        try:
+                            self.state.disp_cb_dict[k]=v.GetValue()
+                        except:
+                            self.state.disp_cb_dict[k]= None
+           
+            if len(self._disp_obj_dict)>0:
+                for k , v in self._disp_obj_dict.iteritems():
+      
+                    self.state._disp_obj_dict[k]= v
+                        
+            
+            self.state.values = copy.deepcopy(self.values)
+            self.state.weights = copy.deepcopy(self.weights)
+        ## save plotting range
+        self._save_plotting_range()
+        
+        #self.state.orientation_params =[]
+        #self.state.orientation_params_disp =[]
+        #self.state.parameters =[]
+        #self.state.fittable_param =[]
+        #self.state.fixed_param =[]
+
+        
+        ## save checkbutton state and txtcrtl values
+        self._copy_parameters_state(self.orientation_params,
+                                     self.state.orientation_params)
+        self._copy_parameters_state(self.orientation_params_disp,
+                                     self.state.orientation_params_disp)
+        
+        self._copy_parameters_state(self.parameters, self.state.parameters)
+        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
     
+               
     def reset_page_helper(self, state):
         """
             Use page_state and change the state of existing page
