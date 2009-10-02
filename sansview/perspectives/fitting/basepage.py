@@ -108,7 +108,7 @@ class BasicPage(wx.ScrolledWindow):
         #self.popUpMenu.AppendSeparator()
                 
         id = wx.NewId()
-        self._keep = wx.MenuItem(self.popUpMenu,id,"Save Model"," Keep the panel status to recall it later")
+        self._keep = wx.MenuItem(self.popUpMenu,id,"BookMark"," Keep the panel status to recall it later")
         self.popUpMenu.AppendItem(self._keep)
         self._keep.Enable(True)
         wx.EVT_MENU(self, id, self.onSave)
@@ -217,7 +217,7 @@ class BasicPage(wx.ScrolledWindow):
         """
             Restore the previous action cancelled 
         """
-        print "enable redo"
+        #print "enable redo"
         event = NextStateEvent(page= self)
         wx.PostEvent(self.parent, event)
         
@@ -241,7 +241,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer3.SetMinSize((375,-1))
         self.sizer4.SetMinSize((375,-1))
         self.sizer5.SetMinSize((375,-1))
-        self.sizer6.SetMinSize((375,-1))
+        #self.sizer6.SetMinSize((375,-1))
         
         self.vbox.Add(self.sizer0)
         self.vbox.Add(self.sizer1)
@@ -249,7 +249,7 @@ class BasicPage(wx.ScrolledWindow):
         self.vbox.Add(self.sizer3)
         self.vbox.Add(self.sizer4)
         self.vbox.Add(self.sizer5)
-        self.vbox.Add(self.sizer6)
+        #self.vbox.Add(self.sizer6)
         
         
     def set_layout(self):
@@ -986,7 +986,7 @@ class BasicPage(wx.ScrolledWindow):
             if item_page[0]!=None:
                
                 item_page[0].SetValue(item_page_info[0])
-                print "item_page[0]",item_page[0].GetValue()
+                #print "item_page[0]",item_page[0].GetValue()
             if item_page[2]!=None:
                 item_page[2].SetValue(item_page_info[2])
                 
@@ -1797,7 +1797,7 @@ class BasicPage(wx.ScrolledWindow):
             Draw the layout for saving option
         """
         # Skipping save state functionality for release 0.9.0
-        #return
+        return
     
         self.sizer6.Clear(True)
         box_description= wx.StaticBox(self, -1,"Save Model")
