@@ -42,7 +42,7 @@ Package name: None
 		- Python version >= 2.5 and < 3.0 should be running on the system
 
 	2.2- Installing:
-		- Get the code from svn://danse.us/sans/releases/sansview-1.0 
+		- Get the code from svn://danse.us/sans/releases/sansview-1.0.0
 			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview-1.0' folder)
 		- This application is also dependent on the following DANSE code:
 			svn://danse.us/sans/releases/guiframe-0.1.8 (run 'python setup.py install' under the 'guiframe-0.1.8' folder)

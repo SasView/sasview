@@ -52,12 +52,12 @@ else:
 SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 
-# Release version 0.1.0
+# Release version 1.0.0
 SANSMODELS = "0.4.5"
 DATALOADER = "0.2.5"
 GUICOMM    = "0.1.3"
 GUIFRAME   = "0.1.8"
-SANSVIEW   = "0.1.0"
+SANSVIEW   = "1.0.0"
 PLOTTOOLS  = "0.1.7"
 UTIL       = "0.1.3"
 PARK       = "1.2"
