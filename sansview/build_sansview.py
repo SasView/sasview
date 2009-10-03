@@ -5,13 +5,16 @@
 #
 # SVN must be installed:
 # http://subversion.tigris.org/servlets/ProjectDocumentList?folderID=91
-# Make sure svn.exe in on the path. You might need to log out and log back in again after installing SVN.
 #
-# Inno Setup must be installed
 #
-# py2exe must be installed 
+# On Windows: 
+#   - make sure svn.exe in on the path. You might need to log out and log back in again after installing SVN.
 #
-# mingw must be installed
+#   - Inno Setup must be installed
+#
+#   - py2exe must be installed 
+#
+#   - mingw must be installed
 #
 # Usage:
 # python build_sansview [command]
@@ -19,7 +22,7 @@
 #   -h: lists the command line options
 #   -r: Builds a SansView using the released modules.
 #   -t: Builds SansView from the trunk.
-#   -i: Builds an installer from the release version.
+#   -i: Builds a Windows installer from the release version.
 #   -n: Print out the dependencies for the release notes
 
 import os
@@ -49,16 +52,18 @@ else:
 SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 
-# Release version 0.9.1
-SANSMODELS = "0.4.4"
-DATALOADER = "0.2.3"
-GUICOMM    = "0.1.2"
-GUIFRAME   = "0.1.6"
-SANSVIEW   = "0.9.1"
-PLOTTOOLS  = "0.1.5"
-UTIL       = "0.1.1"
+# Release version 0.1.0
+SANSMODELS = "0.4.5"
+DATALOADER = "0.2.5"
+GUICOMM    = "0.1.3"
+GUIFRAME   = "0.1.8"
+SANSVIEW   = "0.1.0"
+PLOTTOOLS  = "0.1.7"
+UTIL       = "0.1.3"
 PARK       = "1.2"
-PARK_INTEG = "0.1.2"
+PARK_INTEG = "0.1.3"
+PRVIEW     = "0.3.1"
+PR_INV     = "0.2.3"
 
 # URLs for SVN repos
 SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
@@ -70,6 +75,8 @@ UTIL_URL = "svn://danse.us/common/releases/util-%s" % UTIL
 SANSVIEW_URL = "svn://danse.us/sans/releases/sansview-%s" % SANSVIEW
 PARK_INTEG_URL = "svn://danse.us/sans/releases/park_integration-%s" % PARK_INTEG
 PARK_URL = "svn://danse.us/park/releases/park-%s" % PARK
+PRVIEW_URL = "svn://danse.us/sans/releases/prview-%s" % PRVIEW
+PR_INV_URL = "svn://danse.us/sans/releases/pr_inversion-%s" % PR_INV
 
 
 def check_system():
@@ -163,6 +170,18 @@ def checkout(release=False):
     else:
         install_pkg(".", "park_integration", "svn://danse.us/sans/trunk/park_integration")
     
+    os.chdir(wd)
+    if release:
+        install_pkg(".", "prview-%s" % PRVIEW, PRVIEW_URL)
+    else:
+        install_pkg(".", "prview", "svn://danse.us/sans/trunk/prview")
+    
+    os.chdir(wd)
+    if release:
+        install_pkg(".", "pr_inversion-%s" % PR_INV, PR_INV_URL)
+    else:
+        install_pkg(".", "pr_inversion", "svn://danse.us/sans/trunk/pr_inversion")
+    
     #TODO: need a release version of PARK
     os.chdir(wd)
     if release:
@@ -255,6 +274,8 @@ if __name__ == "__main__":
             print SANSVIEW_URL
             print PARK_INTEG_URL 
             print PARK_URL 
+            print PRVIEW 
+            print PR_INV 
         else:
             logging.info("Build script for SansView %s" % SANSVIEW)
                     
