@@ -103,7 +103,7 @@ class InvariantCalculator(object):
 
         if len(data.x)<=1 or len(data.y)<=1 or len(data.x)!=len(data.y)\
                 or len(data.x)!= len(data.dxl):
-            print ""
+           
             msg = "x, dxl, and y must be have the same length and greater than 1"
             raise ValueError,msg
         else:
@@ -131,10 +131,10 @@ class InvariantCalculator(object):
                 q_star= 2*(pi*contrast)**2* volume( 1- volume)
                 for k = q_star/(2*(pi*|contrast|)**2)
                 we get 2 values of volume:
-                     volume1 = (1- sqrt(1+ 4*k))/2
-                     volume2 = (1+ sqrt(1+ 4*k))/2
+                     volume1 = (1- sqrt(1- 4*k))/2
+                     volume2 = (1+ sqrt(1- 4*k))/2
                     
-            the result returned will be 0<volume <1 or None
+            the result returned will be 0<= volume <= 1 or None
             
             @param contrast: contrast value provides by the user of type float
             @return None : if the invariant Calculator does not a computed
@@ -154,17 +154,24 @@ class InvariantCalculator(object):
        
         #compute intermediate constant
         k =  self.q_star /(2*(math.pi* math.fabs(float(contrast)))**2)
-        # compute the volume
-        volume1 = 0.5 *(1 - math.sqrt(1 + 4*k))
-        volume2 = 0.5 *(1 + math.sqrt(1 + 4*k))
-        print "volume1",volume1
-        print "volume2",volume2
-        print
-        if 0< volume1< 1:
-            return volume1
-        elif 0< volume2< 1: 
-            return volume2 
-        return 
+        #check discriminant value
+        discrim= 1 - 4*k
+        if discrim < 0:
+            return 
+        elif discrim ==0:
+            volume = 1/2
+            return volume
+        else:
+            # compute the volume
+            volume1 = 0.5 *(1 - math.sqrt(discrim))
+            volume2 = 0.5 *(1 + math.sqrt(discrim))
+            print "volume1",volume1
+            print "volume2",volume2
+            if 0<= volume1<= 1:
+                return volume1
+            elif 0<= volume2<= 1: 
+                return volume2 
+            return 
     
     def _getSurface(self, pConst, volume=None):
         """
