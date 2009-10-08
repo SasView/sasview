@@ -129,16 +129,19 @@ class InvariantCalculator(object):
             Compute volume fraction is given by:
             
                 q_star= 2*(pi*contrast)**2* volume( 1- volume)
-                for k = q_star/(2*(pi*|contrast|)**2)
+                for k = 10^(8)*q_star/(2*(pi*|contrast|)**2)
                 we get 2 values of volume:
                      volume1 = (1- sqrt(1- 4*k))/2
                      volume2 = (1+ sqrt(1- 4*k))/2
-                    
+                contrast unit is 1/A^(2)= 10^(16)cm^(2)
+                q_star unit  1/A^(3)*1/cm
+                
             the result returned will be 0<= volume <= 1 or None
             
             @param contrast: contrast value provides by the user of type float
             @return None : if the invariant Calculator does not a computed
             q_star already  stored
+            @note: volume fraction must have no unit
         """
         if contrast ==None:
             #No contrast value is provided for calculation then no calculation
@@ -153,7 +156,7 @@ class InvariantCalculator(object):
             raise ValueError, "invariant must be greater than zero"
        
         #compute intermediate constant
-        k =  self.q_star /(2*(math.pi* math.fabs(float(contrast)))**2)
+        k =  1.e-8*self.q_star /(2*(math.pi* math.fabs(float(contrast)))**2)
         #check discriminant value
         discrim= 1 - 4*k
         if discrim < 0:
@@ -167,9 +170,10 @@ class InvariantCalculator(object):
             volume2 = 0.5 *(1 + math.sqrt(discrim))
             print "volume1",volume1
             print "volume2",volume2
-            if 0<= volume1<= 1:
+           
+            if 0<= volume1 and volume1 <= 1:
                 return volume1
-            elif 0<= volume2<= 1: 
+            elif 0<= volume2 and volume2<= 1: 
                 return volume2 
             return 
     
