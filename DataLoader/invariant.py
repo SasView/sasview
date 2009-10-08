@@ -155,9 +155,15 @@ class InvariantCalculator(object):
         #compute intermediate constant
         k =  self.q_star /(2*(math.pi* math.fabs(float(contrast)))**2)
         # compute the volume
-        volume = 0.5 *(1 - math.sqrt(1 + 4*k))
-        if 0< volume< 1:
-            return volume 
+        volume1 = 0.5 *(1 - math.sqrt(1 + 4*k))
+        volume2 = 0.5 *(1 + math.sqrt(1 + 4*k))
+        print "volume1",volume1
+        print "volume2",volume2
+        print
+        if 0< volume1< 1:
+            return volume1
+        elif 0< volume2< 1: 
+            return volume2 
         return 
     
     def _getSurface(self, pConst, volume=None):
