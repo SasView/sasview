@@ -36,7 +36,7 @@ class WelcomePanel(wx.Panel):
        
         wx.Panel.__init__(self, *args, **kwds)
         
-        image = "images\SVwelcome.png"
+        image = os.path.join("images","SVwelcome.png")
         
         self.bitmap_logo = wx.StaticBitmap(self, -1, wx.Bitmap(image))
        
