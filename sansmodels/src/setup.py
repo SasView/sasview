@@ -12,9 +12,10 @@
 import sys
 import os
 
-numpy_incl_path = os.path.join(sys.prefix, "Lib", "site-packages", "numpy", "core", "include", "numpy")
-
-
+if sys.platform.count("win32")>0:
+    numpy_incl_path = os.path.join(sys.prefix, "Lib", "site-packages", "numpy", "core", "include", "numpy")
+else:
+    numpy_incl_path = os.path.join(sys.prefix, "lib","python2.6", "site-packages", "numpy", "core", "include", "numpy")
 
 def createODBcontent(class_name):
     """
@@ -190,7 +191,7 @@ setup(
         #"sans/models/c_models/prolate.cpp",                
         #srcdir+"/prolate.c",
         #srcdir+"/CMultishellModel.c",
-        "sans/models/c_models/CMultishellModel.cpp",
+        "sans/models/c_models/CMultiShellModel.cpp",
         "sans/models/c_models/multishell.cpp",                
         srcdir+"/multishell.c",
         #srcdir+"/CVesicleModel.c",
