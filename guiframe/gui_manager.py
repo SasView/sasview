@@ -251,7 +251,7 @@ class ViewerFrame(wx.Frame):
         
         #self.Fit()
         
-        #self._check_update(None)
+        self._check_update(None)
              
     def _setup_layout(self):
         """
@@ -715,6 +715,7 @@ class ViewerFrame(wx.Frame):
                     if event != None:
                         self.SetStatusText("You have the latest version of %s" % config.__appname__)
         except:
+            logging.error("guiframe: could not get latest application version number\n  %s" % sys.exc_value)
             if event != None:
                 self.SetStatusText("You have the latest version of %s" % config.__appname__)
             
