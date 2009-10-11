@@ -4,7 +4,6 @@
 import time
 
 # Version of the application
-#__appname__ = "PrView"
 __appname__ = "SansView"
 __version__ = '1.0.0'
 __download_page__ = 'http://danse.chem.utk.edu'
@@ -12,7 +11,7 @@ __update_URL__ = 'http://danse.chem.utk.edu/sansview_version.php'
 
 
 # Debug message flag
-__EVT_DEBUG__ = True
+__EVT_DEBUG__ = False
 
 # Flag for automated testing
 __TEST__ = False
