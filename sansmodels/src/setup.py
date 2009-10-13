@@ -12,10 +12,12 @@
 import sys
 import os
 
-if sys.platform.count("win32")>0:
-    numpy_incl_path = os.path.join(sys.prefix, "Lib", "site-packages", "numpy", "core", "include", "numpy")
+toks = sys.version.split('.')
+if sys.platform.count("win32")>0 or sys.platform.count("win64"):
+    py_path = "lib"
 else:
-    numpy_incl_path = os.path.join(sys.prefix, "lib","python2.6", "site-packages", "numpy", "core", "include", "numpy")
+    py_path = os.path.join("lib","python"+toks[0]+"."+toks[1])
+numpy_incl_path = os.path.join(sys.prefix, py_path, "site-packages", "numpy", "core", "include", "numpy")
 
 def createODBcontent(class_name):
     """
