@@ -16,6 +16,12 @@ _BOX_WIDTH = 76
 _QMIN_DEFAULT = 0.001
 _QMAX_DEFAULT = 0.13
 _NPTS_DEFAULT = 50
+#Control panel width 
+if sys.platform.count("win32")>0:
+    PANEL_WIDTH = 420
+else:
+    PANEL_WIDTH = 490
+    
 class BasicPage(wx.ScrolledWindow):
     """
         This class provide general structure of  fitpanel page
@@ -235,12 +241,12 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
         self.sizer6 = wx.BoxSizer(wx.VERTICAL)
         
-        self.sizer0.SetMinSize((375,-1))
-        self.sizer1.SetMinSize((375,-1))
-        self.sizer2.SetMinSize((375,-1))
-        self.sizer3.SetMinSize((375,-1))
-        self.sizer4.SetMinSize((375,-1))
-        self.sizer5.SetMinSize((375,-1))
+        self.sizer0.SetMinSize((PANEL_WIDTH,-1))
+        self.sizer1.SetMinSize((PANEL_WIDTH,-1))
+        self.sizer2.SetMinSize((PANEL_WIDTH,-1))
+        self.sizer3.SetMinSize((PANEL_WIDTH,-1))
+        self.sizer4.SetMinSize((PANEL_WIDTH,-1))
+        self.sizer5.SetMinSize((PANEL_WIDTH,-1))
         #self.sizer6.SetMinSize((375,-1))
         
         self.vbox.Add(self.sizer0)
@@ -1285,7 +1291,7 @@ class BasicPage(wx.ScrolledWindow):
         boxsizer1.Add( sizer_selection )
         if object !=None:
             boxsizer1.Add( (-72,-72))
-            boxsizer1.Add( object,  0, wx.ALIGN_RIGHT| wx.RIGHT, 10)
+            boxsizer1.Add( object,  0, wx.ALIGN_RIGHT| wx.RIGHT, 40)
             boxsizer1.Add( (60,60))
         #--------------------------------------------------------
         sizer.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
@@ -1366,6 +1372,7 @@ class BasicPage(wx.ScrolledWindow):
         self._disp_obj_dict = {}
         self.disp_cb_dict ={}
         f_id = self.formfactorbox.GetCurrentSelection()
+
         form_factor = self.formfactorbox.GetClientData( f_id )
         if not form_factor in  self.model_list_box["multiplication"]:
             self.structurebox.Hide()

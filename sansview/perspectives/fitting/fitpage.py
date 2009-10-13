@@ -153,7 +153,7 @@ class FitPage(BasicPage):
       
         
         sizer_fit.Add((5,5),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)        
-        sizer_fit.Add(self.btFit,0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5) 
+        sizer_fit.Add(self.btFit,0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 35) 
         
         sizer_smearer = wx.BoxSizer(wx.HORIZONTAL)
         #Filling the sizer containing instruments smearing info.
@@ -169,10 +169,10 @@ class FitPage(BasicPage):
         sizer_smearer.Add( self.disable_smearer )
         
         #Display Chi^2/dof
-        sizer_smearer.Add((68,10))
+        sizer_smearer.Add((90,10))
         box_description= wx.StaticBox(self, -1,'Chi2/dof')
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-        boxsizer1.SetMinSize((60,-1))
+        boxsizer1.SetMinSize((80,-1))
         temp_smearer = None
         if self.enable_smearer.GetValue():
             temp_smearer= self.smearer
