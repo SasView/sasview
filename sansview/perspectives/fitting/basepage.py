@@ -317,7 +317,8 @@ class BasicPage(wx.ScrolledWindow):
         
         self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param, id=self.disable_disp.GetId())
         self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param, id=self.enable_disp.GetId())
-        
+        #MAC needs SetValue
+        self.disable_disp.SetValue(True)
         sizer_dispersion = wx.BoxSizer(wx.HORIZONTAL)
         sizer_dispersion.Add((20,20))
         name=""#Polydispersity and \nOrientational Distribution "
@@ -1207,14 +1208,19 @@ class BasicPage(wx.ScrolledWindow):
                                     enable2D=self.enable2D) 
         
         
-    def _set_model_sizer(self, sizer, title="", object=None):
+    def _set_model_sizer(self,sizer, box_sizer, title="", object=None):
         """
             Use lists to fill a sizer for model info
         """
        
         sizer.Clear(True)
-        box_description= wx.StaticBox(self, -1,str(title))
-        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+        ##For MAC, this should defined here.
+        if box_sizer == None:
+                box_description= wx.StaticBox(self, -1,str(title))
+                boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+        else:
+            boxsizer1 = box_sizer
+            
         #--------------------------------------------------------
         self.shape_rbutton = wx.RadioButton(self, -1, 'Shapes', style=wx.RB_GROUP)
         self.shape_indep_rbutton = wx.RadioButton(self, -1, "Shape-Independent")
@@ -1229,7 +1235,8 @@ class BasicPage(wx.ScrolledWindow):
                             id= self.struct_rbutton.GetId() ) 
         self.Bind( wx.EVT_RADIOBUTTON, self._show_combox,
                             id= self.plugin_rbutton.GetId() )  
-       
+		#MAC needs SetValue
+        self.shape_rbutton.SetValue(True)
       
         sizer_radiobutton = wx.GridSizer(2, 2,5, 5)
         sizer_radiobutton.Add(self.shape_rbutton)
@@ -1372,8 +1379,11 @@ class BasicPage(wx.ScrolledWindow):
         self._disp_obj_dict = {}
         self.disp_cb_dict ={}
         f_id = self.formfactorbox.GetCurrentSelection()
+        #For MAC
+        form_factor = None
+        if f_id >= 0:
+            form_factor = self.formfactorbox.GetClientData( f_id )
 
-        form_factor = self.formfactorbox.GetClientData( f_id )
         if not form_factor in  self.model_list_box["multiplication"]:
             self.structurebox.Hide()
             self.text2.Hide()           
@@ -1602,13 +1612,13 @@ class BasicPage(wx.ScrolledWindow):
                 # The parameter was un-selected. Go back to Gaussian model (with 0 pts)                    
                 disp_model = GaussianDispersion()
                
-            	self._disp_obj_dict[p] = disp_model
-            	# Set the new model as the dispersion object for the selected parameter
+                self._disp_obj_dict[p] = disp_model
+                # Set the new model as the dispersion object for the selected parameter
                 try:
-            	   self.model.set_dispersion(p, disp_model)
+                   self.model.set_dispersion(p, disp_model)
                 except:
                     pass
-				# Redraw the model
+                # Redraw the model
                 #self._draw_model()
         ## save state into
         self.save_current_state()
@@ -1682,6 +1692,8 @@ class BasicPage(wx.ScrolledWindow):
         ix+=1 
         self.noDisper_rbox = wx.RadioButton(self, -1,"None", (10, 10),style= wx.RB_GROUP)
         self.Bind(wx.EVT_RADIOBUTTON,self.select_disp_angle , id=self.noDisper_rbox.GetId())
+        #MAC needs SetValue
+        self.noDisper_rbox.SetValue(True)
         self.sizer4_4.Add(self.noDisper_rbox, (iy, ix),
                            (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
@@ -1745,14 +1757,19 @@ class BasicPage(wx.ScrolledWindow):
         
        
 
-    def _set_range_sizer(self, title, object1=None,object=None):
+    def _set_range_sizer(self, title, box_sizer=None, object1=None,object=None):
         """
-            Fill the 
+            Fill the Q range sizer
         """
         self.sizer5.Clear(True)
-        box_description= wx.StaticBox(self, -1,str(title))
-        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #--------------------------------------------------------------
+        if box_sizer == None:
+                box_description= wx.StaticBox(self, -1,str(title))
+                boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+        else:
+            #for MAC
+            boxsizer1 = box_sizer
+
         self.qmin    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.qmin.SetValue(str(self.qmin_x))
         self.qmin.SetToolTipString("Minimun value of Q in linear scale.")

@@ -82,15 +82,19 @@ class ModelPage(BasicPage):
             Fill the sizer containing the plotting range
             add  access to npts
         """
-        sizer_npts= wx.GridSizer(1, 1,5, 5)
-    
+        ##The following 3 lines are for Mac. Let JHC know before modifying..
+        title = "Plotted Q Range"
+        box_description= wx.StaticBox(self, -1,str(title))
+        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+
+        sizer_npts= wx.GridSizer(1, 1,5, 5)    
         self.npts    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.npts.SetValue(format_number(self.num_points))
         self.npts.SetToolTipString("Number of point to plot.")
         
         sizer_npts.Add(wx.StaticText(self, -1, 'Npts'),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)        
         sizer_npts.Add(self.npts,1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5) 
-        self._set_range_sizer( title="Plotted Q Range", object= sizer_npts)
+        self._set_range_sizer( title=title, box_sizer=boxsizer1, object= sizer_npts)
        
        
     def _on_select_model(self, event): 
@@ -107,13 +111,18 @@ class ModelPage(BasicPage):
         """
             fill sizer containing model info
         """
+        ##The following 3 lines are for Mac. Let JHC know before modifying..
+        title = "Model"
+        box_description= wx.StaticBox(self, -1,str(title))
+        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+        
         id = wx.NewId()
         self.model_view =wx.Button(self,id,'View 2D')
         self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D,id=id)
         self.model_view.SetToolTipString("View model in 2D")
         
         ## class base method  to add view 2d button   
-        self._set_model_sizer(sizer=sizer, title="Model",object= self.model_view )    
+        self._set_model_sizer(sizer=sizer,box_sizer=boxsizer1, title=title,object= self.model_view )    
     
   
     #def _set_sizer_gaussian(self):
@@ -396,6 +405,8 @@ class ModelPage(BasicPage):
         
         self.Bind( wx.EVT_RADIOBUTTON, self._on_display_description,
                    id=self.description_show.GetId() )
+        #MAC needs SetValue
+        self.description_hide.SetValue(True)
         
         self.model_description = wx.Button(self,-1, label="Details")
         self.model_description.Bind(wx.EVT_BUTTON,self.on_button_clicked)
@@ -404,7 +415,7 @@ class ModelPage(BasicPage):
         sizer_selection.Add( self.description_show )
         sizer_selection.Add( (20,20)) 
         sizer_selection.Add( self.description_hide )
-        sizer_selection.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,67)
+        sizer_selection.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,75)
         sizer_selection.Add( self.model_description )
                      
          

@@ -43,6 +43,7 @@ class FitPage(BasicPage):
         self.calc_Chisqr=None
         ## default fitengine type
         self.engine_type = None
+        #self.smearer = None
         ## draw sizer
         self._fill_datainfo_sizer()
        
@@ -145,6 +146,10 @@ class FitPage(BasicPage):
             Fill the sizer containing the plotting range
             add  access to npts
         """
+        title = "Fitting"
+        box_description_range = wx.StaticBox(self, -1,str(title))
+        boxsizer_range = wx.StaticBoxSizer(box_description_range, wx.VERTICAL)
+
         sizer_fit = wx.GridSizer(1, 1,0, 0)
     
         self.btFit = wx.Button(self,wx.NewId(),'Fit')
@@ -154,20 +159,20 @@ class FitPage(BasicPage):
         
         sizer_fit.Add((5,5),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)        
         sizer_fit.Add(self.btFit,0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 35) 
-        
+        sizer_fit.Layout()
         sizer_smearer = wx.BoxSizer(wx.HORIZONTAL)
         #Filling the sizer containing instruments smearing info.
         self.disable_smearer = wx.RadioButton(self, -1, 'No', style=wx.RB_GROUP)
         self.enable_smearer = wx.RadioButton(self, -1, 'Yes')
         self.Bind(wx.EVT_RADIOBUTTON, self.onSmear, id=self.disable_smearer.GetId())
         self.Bind(wx.EVT_RADIOBUTTON, self.onSmear, id=self.enable_smearer.GetId())
+        self.disable_smearer.SetValue(True)
         
         sizer_smearer.Add(wx.StaticText(self,-1,'Instrument Smearing? '))
         sizer_smearer.Add((10, 10))
         sizer_smearer.Add( self.enable_smearer )
         sizer_smearer.Add((10,10))
         sizer_smearer.Add( self.disable_smearer )
-        
         #Display Chi^2/dof
         sizer_smearer.Add((90,10))
         box_description= wx.StaticBox(self, -1,'Chi2/dof')
@@ -183,7 +188,7 @@ class FitPage(BasicPage):
         sizer_smearer.Add( boxsizer1 )
                
         #Set sizer for Fitting section
-        self._set_range_sizer( title="Fitting",object1=sizer_smearer, object= sizer_fit)
+        self._set_range_sizer( title=title,box_sizer=boxsizer_range, object1=sizer_smearer, object= sizer_fit)
   
        
     def _fill_datainfo_sizer(self):
@@ -249,13 +254,18 @@ class FitPage(BasicPage):
             fill sizer containing model info
         """
         ##Add model function Details button in fitpanel.
+        ##The following 3 lines are for Mac. Let JHC know before modifying... 
+        title = "Model"
+        box_description= wx.StaticBox(self, -1,str(title))
+        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+         
         id = wx.NewId()
         self.model_help =wx.Button(self,id,'Details')
         self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked,id=id)
         self.model_help.SetToolTipString("Model Function Help")
         
         ## class base method  to add view 2d button    
-        self._set_model_sizer(sizer=sizer, title="Model",object=self.model_help )   
+        self._set_model_sizer(sizer=sizer, box_sizer=boxsizer1, title="Model",object=self.model_help )   
 
     
     #def _set_sizer_gaussian(self):
