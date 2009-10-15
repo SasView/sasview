@@ -92,8 +92,9 @@ class ModelPage(BasicPage):
         self.npts.SetValue(format_number(self.num_points))
         self.npts.SetToolTipString("Number of point to plot.")
         
-        sizer_npts.Add(wx.StaticText(self, -1, 'Npts'),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)        
-        sizer_npts.Add(self.npts,1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5) 
+        sizer_npts.Add(wx.StaticText(self, -1, 'Npts'),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 13)        
+
+        sizer_npts.Add(self.npts,1,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10) 
         self._set_range_sizer( title=title, box_sizer=boxsizer1, object= sizer_npts)
        
        

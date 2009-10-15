@@ -1785,7 +1785,7 @@ class BasicPage(wx.ScrolledWindow):
         #self.qmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
         
         id = wx.NewId()
-        self.reset_qrange =wx.Button(self,id,'Reset')
+        self.reset_qrange =wx.Button(self,id,'Reset',size=(70,23))
         self.reset_qrange.Bind(wx.EVT_BUTTON, self.on_reset_clicked,id=id)
         self.reset_qrange.SetToolTipString("Reset Q range to the default values")
      
