@@ -8,7 +8,7 @@ class MyStatusBar(wx.StatusBar):
          #Layout of status bar
          self.SetFieldsCount(2) 
          width,height = self.GetSize()
-         self.gauge = wx.Gauge(self, size=(-1,height-4),style= wx.GA_HORIZONTAL)
+         self.gauge = wx.Gauge(self, size=(width/10,height-3),style= wx.GA_HORIZONTAL)
          self.SetStatusWidths([-4, -1])
          rect = self.GetFieldRect(1)
          self.gauge.SetPosition((rect.x+5, rect.y-2))
