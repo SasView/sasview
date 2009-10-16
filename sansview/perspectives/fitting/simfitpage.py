@@ -510,7 +510,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         
         self.Bind(  wx.EVT_RADIOBUTTON, self._display_constraint,
                          id= self.show_constraint.GetId()    )
-        
+        self.hide_constraint.SetValue(True)
         sizer_title.Add( wx.StaticText(self,-1," Model") )
         sizer_title.Add(( 10,10) )
         sizer_title.Add( wx.StaticText(self,-1," Parameter") )
