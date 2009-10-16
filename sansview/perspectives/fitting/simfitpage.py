@@ -317,6 +317,10 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         model_cbox.Clear()
         param_cbox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
         param_cbox.Hide()
+        
+        #This is for GetCLientData() _on_select_param: Was None return on MAC.
+        self.param_cbox = param_cbox
+        
         wx.EVT_COMBOBOX(param_cbox,-1, self._on_select_param)
         ctl2 = wx.TextCtrl(self, -1)
         egal_txt= wx.StaticText(self,-1," = ")
@@ -330,6 +334,8 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             ## then do not allow add constraint on parameters
             model_cbox.Append( str(model.name), model)
             
+        #This is for GetCLientData() passing to self._on_select_param: Was None return on MAC.
+        self.model_cbox = model_cbox
            
         wx.EVT_COMBOBOX(model_cbox,-1, self._on_select_model)
         
@@ -378,7 +384,10 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
          fill combox box with list of parameters
         """
-        model = event.GetClientData()
+        ##This way PC/MAC both work, instead of using event.GetClientData().
+        n = self.model_cbox.GetCurrentSelection()
+        model = self.model_cbox.GetClientData(n)
+        
         param_list= get_fittableParam(model)
         length = len(self.constraints_list)
         if length < 1:
@@ -401,7 +410,9 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
             Store the appropriate constraint in the page_finder
         """
-        model = event.GetClientData()
+        ##This way PC/MAC both work, instead of using event.GetClientData().
+        n = self.param_cbox.GetCurrentSelection()
+        model = self.param_cbox.GetClientData(n)
         param = event.GetString()
       
         length = len(self.constraints_list)
