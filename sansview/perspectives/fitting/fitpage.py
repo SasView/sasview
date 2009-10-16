@@ -152,7 +152,7 @@ class FitPage(BasicPage):
 
         sizer_fit = wx.GridSizer(1, 1,0, 0)
     
-        self.btFit = wx.Button(self,wx.NewId(),'Fit')
+        self.btFit = wx.Button(self,wx.NewId(),'Fit', size=(80,23))
         self.btFit.Bind(wx.EVT_BUTTON, self._onFit,id= self.btFit.GetId())
         self.btFit.SetToolTipString("Perform fit.")
       
@@ -174,7 +174,7 @@ class FitPage(BasicPage):
         sizer_smearer.Add((10,10))
         sizer_smearer.Add( self.disable_smearer )
         #Display Chi^2/dof
-        sizer_smearer.Add((90,10))
+        sizer_smearer.Add((78,10))
         box_description= wx.StaticBox(self, -1,'Chi2/dof')
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         boxsizer1.SetMinSize((80,-1))
@@ -260,7 +260,7 @@ class FitPage(BasicPage):
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
          
         id = wx.NewId()
-        self.model_help =wx.Button(self,id,'Details')
+        self.model_help =wx.Button(self,id,'Details', size=(80,23))
         self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked,id=id)
         self.model_help.SetToolTipString("Model Function Help")
         
@@ -625,7 +625,7 @@ class FitPage(BasicPage):
         #    self.btFit.Bind(event= wx.EVT_BUTTON, handler=self._onFit, id=self.btFit.GetId())
         self.btFit.SetFocus()    
         self.sizer5.Layout()
-        self.SetScrollbars(20,20,55,40)
+        #self.SetScrollbars(20,20,55,40)
         
     def _StopFit(self, event):
         """

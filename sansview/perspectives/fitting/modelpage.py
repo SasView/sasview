@@ -118,7 +118,7 @@ class ModelPage(BasicPage):
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         
         id = wx.NewId()
-        self.model_view =wx.Button(self,id,'View 2D')
+        self.model_view =wx.Button(self,id,'View 2D', size=(80,23))
         self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D,id=id)
         self.model_view.SetToolTipString("View model in 2D")
         
@@ -409,7 +409,7 @@ class ModelPage(BasicPage):
         #MAC needs SetValue
         self.description_hide.SetValue(True)
         
-        self.model_description = wx.Button(self,-1, label="Details")
+        self.model_description = wx.Button(self,-1, label="Details", size=(80,23))
         self.model_description.Bind(wx.EVT_BUTTON,self.on_button_clicked)
         self.model_description.SetToolTipString("Click Model Functions in HelpWindow...")
       
