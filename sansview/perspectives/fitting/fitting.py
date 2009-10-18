@@ -372,15 +372,15 @@ class Plugin:
             Get a smear object and store it to a fit problem
             @param smearer: smear object to allow smearing data
         """   
-        current_pg=self.fit_panel.get_current_page()
-        self.page_finder[current_pg].set_smearer(smearer)
+        self.current_pg=self.fit_panel.get_current_page()
+        self.page_finder[self.current_pg].set_smearer(smearer)
         ## draw model 1D with smeared data
-        data =  self.page_finder[current_pg].get_plotted_data()
-        model = self.page_finder[current_pg].get_model()
+        data =  self.page_finder[self.current_pg].get_plotted_data()
+        model = self.page_finder[self.current_pg].get_model()
         ## if user has already selected a model to plot
         ## redraw the model with data smeared
         
-        smear =self.page_finder[current_pg].get_smearer()
+        smear =self.page_finder[self.current_pg].get_smearer()
         if model!= None:
             self.draw_model( model=model, data= data, smearer= smear,
                 qmin= qmin, qmax= qmax)
@@ -439,7 +439,7 @@ class Plugin:
             engineType="Single Fit"
             
         fproblemId = 0
-        current_pg=None
+        self.current_pg=None
         for page, value in self.page_finder.iteritems():
             try:
                 if value.get_scheduled()==1:
@@ -451,10 +451,10 @@ class Plugin:
                         name = str(element[1])
                         pars.append(name)
                     #Set Engine  (model , data) related to the page on 
-                    self._fit_helper( current_pg=page, value=value,pars=pars,
+                    self._fit_helper( value=value,pars=pars,
                                       id=fproblemId, title= engineType ) 
                     fproblemId += 1 
-                    current_pg= page
+                    self.current_pg= page
             except:
                 msg= "%s error: %s" % (engineType,sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status= msg ))
@@ -471,10 +471,10 @@ class Plugin:
                                         curr_thread=self.calc_fit,type="progress"))
             ## perform single fit
             if self._fit_engine=="scipy":
-                qmin, qmax= current_pg.get_range()
+                qmin, qmax= self.current_pg.get_range()
                 self.calc_fit=FitThread(parent =self.parent,
                                         fn= self.fitter,
-                                       cpage=current_pg,
+                                       cpage=self.current_pg,
                                        pars= pars,
                                        completefn= self._single_fit_completed,
                                        updatefn=self._updateFit)
@@ -574,7 +574,7 @@ class Plugin:
         for page, fitproblem in self.page_finder.iteritems():
             fitproblem.schedule_tofit(value)
             
-    def _fit_helper(self,current_pg,pars,value, id, title="Single Fit " ):
+    def _fit_helper(self,pars,value, id, title="Single Fit " ):
         """
             helper for fitting
         """
@@ -920,25 +920,25 @@ class Plugin:
         if model ==None:
             return
         model.origin_name = model.name
-        current_pg = self.fit_panel.get_current_page() 
+        self.current_pg = self.fit_panel.get_current_page() 
         ## make sure nothing is done on self.sim_page
         ## example trying to call set_panel on self.sim_page
-        if current_pg != self.sim_page :
+        if self.current_pg != self.sim_page :
            
-            if self.page_finder[current_pg].get_model()== None :
+            if self.page_finder[self.current_pg].get_model()== None :
                 
                 model.name="M"+str(self.index_model)
                 self.index_model += 1  
             else:
-                model.name= self.page_finder[current_pg].get_model().name
+                model.name= self.page_finder[self.current_pg].get_model().name
                 
-            metadata = self.page_finder[current_pg].get_plotted_data()
+            metadata = self.page_finder[self.current_pg].get_plotted_data()
             
             # save the name containing the data name with the appropriate model
-            self.page_finder[current_pg].set_model(model)
-            qmin, qmax= current_pg.get_range()
-            self.page_finder[current_pg].set_range(qmin=qmin, qmax=qmax)
-            smearer=  self.page_finder[current_pg].get_smearer()
+            self.page_finder[self.current_pg].set_model(model)
+            qmin, qmax= self.current_pg.get_range()
+            self.page_finder[self.current_pg].set_range(qmin=qmin, qmax=qmax)
+            smearer=  self.page_finder[self.current_pg].get_smearer()
             # save model name
             self.draw_model( model=model,smearer=smearer, 
                              data= metadata, qmin=qmin, qmax=qmax)
