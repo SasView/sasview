@@ -19,6 +19,9 @@ else:
     py_path = os.path.join("lib","python"+toks[0]+"."+toks[1])
 numpy_incl_path = os.path.join(sys.prefix, py_path, "site-packages", "numpy", "core", "include", "numpy")
 
+from numpy.distutils.misc_util import get_numpy_include_dirs
+numpy_incl_path = os.path.extend(get_numpy_include_dirs()[0], "numpy")
+
 def createODBcontent(class_name):
     """
         Return the content of the Pyre odb file for a given class
