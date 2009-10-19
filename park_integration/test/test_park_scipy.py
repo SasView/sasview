@@ -4,7 +4,7 @@
 import unittest
 
 from sans.guiframe.dataFitting import Data1D 
-from sans.fit.AbstractFitEngine import Data, Model,FitData1D
+from sans.fit.AbstractFitEngine import Model,FitData1D
 import math
 from sans.fit.Fitting import Fit
 from DataLoader.loader import Loader

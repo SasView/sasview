@@ -2,9 +2,9 @@
     Unit tests for fitting module 
 """
 import unittest
-from sans.guitools.plottables import Theory1D
-from sans.guitools.plottables import Data1D
-from sans.fit.AbstractFitEngine import Data, Model,FitData1D
+from danse.common.plottools.plottables import Theory1D
+from danse.common.plottools.plottables import Data1D
+from sans.fit.AbstractFitEngine import Model,FitData1D
 import math
 from sans.fit.Fitting import Fit
 from DataLoader.loader import Loader
@@ -17,7 +17,7 @@ class testFitModule(unittest.TestCase):
         out=Loader().load("cyl_400_20.txt")
         data1 = Data1D(x=out.x, y=out.y, dx=out.dx, dy=out.y)
         
-        fitter = Fit('park')
+        fitter = Fit('scipy')
         # Receives the type of model for the fitting
         from sans.models.CylinderModel import CylinderModel
         model1  = CylinderModel()

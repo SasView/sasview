@@ -5,7 +5,7 @@ import unittest
 #from sans.guitools.plottables import Theory1D
 #from sans.guitools.plottables import Data1D
 from danse.common.plottools.plottables import Data1D,Theory1D
-from sans.fit.AbstractFitEngine import Data, Model,FitData1D
+from sans.fit.AbstractFitEngine import Model,FitData1D
 import math
 class testFitModule(unittest.TestCase):
     def smalltest(self):
