@@ -1,5 +1,6 @@
 """
     Unit tests for fitting module 
+    @author: G. Alina
 """
 import unittest
 

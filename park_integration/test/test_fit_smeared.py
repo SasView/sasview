@@ -1,5 +1,6 @@
 """
     Unit tests for fitting module 
+    @author M. Doucet
 """
 import unittest
 from sans.fit.AbstractFitEngine import Model
