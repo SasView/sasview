@@ -16,34 +16,41 @@ class testFitModule(unittest.TestCase):
     def test_scipy(self):
         """ Simple cylinder model fit (scipy)  """
         
-        out=Loader().load("cyl_testdata1.txt")
-        data1 = Data1D(x=out.x, y=out.y, dx=out.dx, dy=out.y)
+        out=Loader().load("cyl_400_20.txt")
+        data1 = Data1D(x=out.x, y=out.y, dx=out.dx, dy=out.dy)
+        data = FitData1D(data1)
         
-        fitter = Fit('scipy')
         # Receives the type of model for the fitting
         from sans.models.MultiplicationModel import MultiplicationModel
         from sans.models.CylinderModel import CylinderModel
         from sans.models.SquareWellStructure import SquareWellStructure
         model1  =  MultiplicationModel(CylinderModel(),SquareWellStructure())
-        model1.setParam('contrast', 1)
-        #data = Data(sans_data=data1)
-        data = FitData1D(data1)
+        model1.setParam('background', 0.0)
+        model1.setParam('contrast', 3e-006)
+        model1.setParam('length', 600)
+        model1.setParam('radius', 20)
+        model1.setParam('scale', 10)
+        model1.setParam('volfraction', 0.04)
+        model1.setParam('welldepth', 1.5)
+        model1.setParam('wellwidth', 1.2)
+      
         model = Model(model1)
-        
+    
         pars1 =['length','radius','scale']
+        fitter = Fit('scipy')
         fitter.set_data(data,1)
-        model.set(scale=1e-10)
         fitter.set_model(model,1,pars1)
         fitter.select_problem_for_fit(Uid=1,value=1)
         result1 = fitter.fit()
-        print "result ",result1.fitness,result1.pvec,result1.stderr
+      
         self.assert_(result1)
-        self.assertTrue(len(result1.pvec)>0 or len(result1.pvec)==0 )
-        self.assertTrue(len(result1.stderr)> 0 or len(result1.stderr)==0)
+        self.assertTrue(len(result1.pvec)>=0 )
+        self.assertTrue(len(result1.stderr)>= 0)
         
-        self.assertTrue( math.fabs(result1.pvec[0]-400.0)/3.0 < result1.stderr[0] )
-        self.assertTrue( math.fabs(result1.pvec[1]-20.0)/3.0  < result1.stderr[1] )
-        self.assertTrue( math.fabs(result1.pvec[2]-9.0e-12)/3.0   < result1.stderr[2] )
-        self.assertTrue( result1.fitness < 1.0 )
+        self.assertTrue( math.fabs(result1.pvec[0]-605)/3.0 <= result1.stderr[0] )
+        self.assertTrue( math.fabs(result1.pvec[1]-20.0)/3.0  <= result1.stderr[1] )
+        self.assertTrue( math.fabs(result1.pvec[2]-1)/3.0 <= result1.stderr[2] )
+        
+        self.assertTrue( result1.fitness/len(data.x) < 1.0 )
         
    

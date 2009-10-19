@@ -150,7 +150,7 @@ class FitData1D(object):
         self.y= numpy.array(sans_data1d.y)
         self.dx= sans_data1d.dx
         if sans_data1d.dy ==None or sans_data1d.dy==[]:
-            self.dy= numpy.zeros(len(y))  
+            self.dy= numpy.zeros(len(self.y))  
         else:
             self.dy= numpy.asarray(sans_data1d.dy)
      
