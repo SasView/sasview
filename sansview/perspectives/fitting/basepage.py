@@ -157,15 +157,12 @@ class BasicPage(wx.ScrolledWindow):
             
             wx.TextCtrl.__init__(self, parent, id, value, pos, size, style, validator, name)
             
-            #On Mac, wx.evt.set_focus not work, so skip it.
-            if sys.platform.count("darwin") <= 0:
-                # Bind appropriate events
-                self._on_set_focus_callback = parent.onSetFocus \
-                          if set_focus_callback is None else set_focus_callback
-                self.Bind(wx.EVT_SET_FOCUS, self._on_set_focus)
-                self.Bind(wx.EVT_KILL_FOCUS, parent._onparamEnter \
-                          if kill_focus_callback is None else kill_focus_callback)
-                
+            # Bind appropriate events
+            self._on_set_focus_callback = parent.onSetFocus \
+                      if set_focus_callback is None else set_focus_callback
+            self.Bind(wx.EVT_SET_FOCUS, self._on_set_focus)
+            self.Bind(wx.EVT_KILL_FOCUS, parent._onparamEnter \
+                      if kill_focus_callback is None else kill_focus_callback)                
             self.Bind(wx.EVT_TEXT_ENTER, parent._onparamEnter \
                       if text_enter_callback is None else text_enter_callback)
             self.Bind(wx.EVT_LEFT_UP,    self._highlight_text \
@@ -544,7 +541,8 @@ class BasicPage(wx.ScrolledWindow):
                 if item[4]!=None:
                     item[4].Clear()
                     item[4].Hide()
-        self.Layout()
+        ##Is this layout necessary? Had a problem w/MAC.
+        #self.Layout()
         return
     
     
