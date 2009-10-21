@@ -88,7 +88,7 @@ class ModelPage(BasicPage):
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
 
         sizer_npts= wx.GridSizer(1, 1,5, 5)    
-        self.npts    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.npts    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
         self.npts.SetValue(format_number(self.num_points))
         self.npts.SetToolTipString("Number of point to plot.")
         

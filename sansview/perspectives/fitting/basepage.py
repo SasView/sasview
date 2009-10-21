@@ -943,11 +943,12 @@ class BasicPage(wx.ScrolledWindow):
             is_modified = False
             is_modified =self._check_value_enter( self.fittable_param ,is_modified)
             is_modified =self._check_value_enter( self.fixed_param ,is_modified)
-            is_modified =self._check_value_enter( self.parameters ,is_modified)        
-            
-            self.sizer3.Layout()
-            self.Layout()
-            self.Refresh()
+            is_modified =self._check_value_enter( self.parameters ,is_modified) 
+                   
+            if is_modified:
+                self.sizer3.Layout()
+                self.Layout()
+                self.Refresh()
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
@@ -978,7 +979,15 @@ class BasicPage(wx.ScrolledWindow):
                 self._draw_model() 
                 self.save_current_state()
                 
-                
+            self._is_modified(is_modified = is_modified) 
+               
+    def _is_modified(self, is_modified = False):
+        """
+            return to self._is_modified
+        """
+        self.is_modified = is_modified
+        return self.is_modified
+                       
     def _reset_parameters_state(self, listtorestore,statelist):
         """
             Reset the parameters at the given state
@@ -1217,8 +1226,8 @@ class BasicPage(wx.ScrolledWindow):
         sizer.Clear(True)
         ##For MAC, this should defined here.
         if box_sizer == None:
-                box_description= wx.StaticBox(self, -1,str(title))
-                boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+            box_description= wx.StaticBox(self, -1,str(title))
+            boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         else:
             boxsizer1 = box_sizer
             
@@ -1765,20 +1774,20 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer5.Clear(True)
         #--------------------------------------------------------------
         if box_sizer == None:
-                box_description= wx.StaticBox(self, -1,str(title))
-                boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+            box_description= wx.StaticBox(self, -1,str(title))
+            boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         else:
             #for MAC
             boxsizer1 = box_sizer
 
-        self.qmin    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.qmin    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER)
         self.qmin.SetValue(str(self.qmin_x))
         self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
         #self.qmin.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
         #self.qmin.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
         #self.qmin.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
      
-        self.qmax    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.qmax    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER)
         self.qmax.SetValue(str(self.qmax_x))
         self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
         #self.qmax.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)

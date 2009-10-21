@@ -594,7 +594,7 @@ class FitPage(BasicPage):
         """
         from sans.guiframe.utils import check_value
         flag = check_value( self.qmin, self.qmax) 
-        
+                
         if not flag:
             msg= "Fitting range invalid"
             wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
@@ -604,6 +604,8 @@ class FitPage(BasicPage):
             msg= "Select at least one parameter to fit"
             wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
             return 
+        
+            
 
         # Remove or do not allow fitting on the Q=0 point, especially when y(q=0)=None at x[0].
         #ToDo: Fix this.                
@@ -691,6 +693,7 @@ class FitPage(BasicPage):
         """
         tcrtl= event.GetEventObject()
         if tcrtl.GetValue().lstrip().rstrip()!="":
+
             try:
                 value = float(tcrtl.GetValue())
                 tcrtl.SetBackgroundColour(wx.WHITE)
@@ -704,20 +707,22 @@ class FitPage(BasicPage):
            tcrtl.Refresh()  
         self._onparamEnter_helper() 
         
-        ##compute chisqr for range change
-        temp_smearer = None
-        if self.enable_smearer.GetValue():
-            msg=""
-            temp_smearer= self.smearer   
-         ##Calculate chi2
-       
-        self.compute_chisqr(smearer= temp_smearer)  
-        ## new state posted
-        if self.state_change:
-            #self._undo.Enable(True)
-            event = PageInfoEvent(page = self)
-            wx.PostEvent(self.parent, event)
-            self.state_change= False
+        self._is_modified()
+        if self._is_modified == True:
+            ##compute chisqr for range change
+            temp_smearer = None
+            if self.enable_smearer.GetValue():
+                msg=""
+                temp_smearer= self.smearer   
+             ##Calculate chi2
+           
+            self.compute_chisqr(smearer= temp_smearer)  
+            ## new state posted
+            if self.state_change:
+                #self._undo.Enable(True)
+                event = PageInfoEvent(page = self)
+                wx.PostEvent(self.parent, event)
+                self.state_change= False
         
         
     def _onparamEnter(self,event):
@@ -728,17 +733,19 @@ class FitPage(BasicPage):
        
         if check_float(tcrtl):
             self._onparamEnter_helper()
-            temp_smearer = None
-            if self.enable_smearer.GetValue():
-                temp_smearer= self.smearer
             
-            self.compute_chisqr(smearer= temp_smearer)
-            ## new state posted
-            if self.state_change:
-                #self._undo.Enable(True)
-                event = PageInfoEvent(page = self)
-                wx.PostEvent(self.parent, event)
-                self.state_change= False
+            if self._is_modified == True:
+                temp_smearer = None
+                if self.enable_smearer.GetValue():
+                    temp_smearer= self.smearer
+                
+                self.compute_chisqr(smearer= temp_smearer)
+                ## new state posted
+                if self.state_change:
+                    #self._undo.Enable(True)
+                    event = PageInfoEvent(page = self)
+                    wx.PostEvent(self.parent, event)
+                    self.state_change= False
         else:
             msg= "Cannot Plot :Must enter a number!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
@@ -764,13 +771,14 @@ class FitPage(BasicPage):
            tcrtl.SetBackgroundColour(wx.WHITE)
            tcrtl.Refresh()  
         self._onparamEnter_helper() 
-        
-        ## new state posted
-        if self.state_change:
-            #self._undo.Enable(True)
-            event = PageInfoEvent(page = self)
-            wx.PostEvent(self.parent, event)
-            self.state_change= False
+
+        if self._is_modified == True:
+            ## new state posted
+            if self.state_change:
+                #self._undo.Enable(True)
+                event = PageInfoEvent(page = self)
+                wx.PostEvent(self.parent, event)
+                self.state_change= False
         
                 
         
