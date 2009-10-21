@@ -268,23 +268,15 @@ class ModelManager:
         from sans.models.PeakLorentzModel import PeakLorentzModel
         self.shape_indep_list.append(PeakLorentzModel)
         
-        from sans.models.FractalModel import FractalModel
-        class FractalAbsModel(FractalModel):
-            def _Fractal(self, x):
-                return FractalModel._Fractal(self, math.fabs(x))
+        from sans.models.FractalAbsModel import FractalAbsModel
         self.shape_indep_list.append(FractalAbsModel)
         
         from sans.models.LorentzModel import LorentzModel
         self.shape_indep_list.append( LorentzModel) 
             
-        from sans.models.PowerLawModel import PowerLawModel
-        class PowerLawAbsModel(PowerLawModel):
-            def _PowerLaw(self, x):
-                try:
-                    return PowerLawModel._PowerLaw(self, math.fabs(x))
-                except:
-                    print sys.exc_value  
+        from sans.models.PowerLawAbsModel import PowerLawAbsModel
         self.shape_indep_list.append( PowerLawAbsModel )
+        
         from sans.models.TeubnerStreyModel import TeubnerStreyModel
         self.shape_indep_list.append(TeubnerStreyModel )
         
