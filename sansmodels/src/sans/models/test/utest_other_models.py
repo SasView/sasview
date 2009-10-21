@@ -4,8 +4,24 @@
     @note:  The models are running also with numpy array as input.
             Some models return limit of the function at critical point .
             So the user should expect finite value for some critical points.
+            Only critical q=0 will be tested. 
+            
+            Critical points tests that fail. the user is responsible of changing
+            the model tested or document the failure.
+            
             Initial values for models are given as the one of Igo software.
     @author: Gervaise Alina / UTK
+    @summary: Run by G. Alina 10/21/2009
+            Most of the lamellar tests are not passing. Check lamellar im
+            plementation.
+            critial points tested not passing for:
+            - Flexible Cylinder
+            - PeakLorenzt
+            - Squarewell Structure
+            - StickyHstructure
+            - hardSphereStructure
+            
+            
 """
 
 import unittest
@@ -55,7 +71,9 @@ class TestCoreShell(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
         
-        
+    def testCriticalPoint(self):
+        """ Test coreshell at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
   
 class TestMultiShellModel(unittest.TestCase):
     """ Unit tests for MultiShell Model """
@@ -101,6 +119,9 @@ class TestMultiShellModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
     
+    def testCriticalPoint(self):
+        """ Test multishell at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
     
 class TestVesicleModel(unittest.TestCase):
     """ Unit tests for Vesicle Model """
@@ -144,7 +165,11 @@ class TestVesicleModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
     
-      
+    def testCriticalPoint(self):
+        """ Test vesicle at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0))) 
+        
+        
 class TestBinaryHSModel(unittest.TestCase):
     """ Unit tests for BinaryHS Model"""
     
@@ -188,7 +213,11 @@ class TestBinaryHSModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-     
+        
+    def testCriticalPoint(self):
+        """ Test BinaryHS at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+       
      
 class TestCoreShellCylinderModel(unittest.TestCase):
     """ Unit tests for CoreShellCylinder Model"""
@@ -241,6 +270,10 @@ class TestCoreShellCylinderModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
  
+    def testCriticalPoint(self):
+        """ Test CoreShellCylinder at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+ 
  
 class TestHollowCylinderModel(unittest.TestCase):
     """ Unit tests for HollowCylinder Model"""
@@ -289,6 +322,10 @@ class TestHollowCylinderModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        
+    def testCriticalPoint(self):
+        """ Test HollowCylinder at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
         
         
 class TestFlexibleCylinderModel(unittest.TestCase):
@@ -339,6 +376,9 @@ class TestFlexibleCylinderModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
    
+    def testCriticalPoint(self):
+        """ Test FlexibleCylinder at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
   
               
 class TestStackedDisksModel(unittest.TestCase):
@@ -395,7 +435,11 @@ class TestStackedDisksModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-  
+    
+    def testCriticalPoint(self):
+        """ Test StackedDisks at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0))) 
+   
   
 class TestParallelepipedModel(unittest.TestCase):
     """ Unit tests for Parallelepiped Model"""
@@ -447,6 +491,9 @@ class TestParallelepipedModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
    
+    def testCriticalPoint(self):
+        """ Test Parallelepiped at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
   
 class TestEllipticalCylinderModel(unittest.TestCase):
     """ Unit tests for EllipticalCylinder Model"""
@@ -498,7 +545,10 @@ class TestEllipticalCylinderModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-        
+    
+    def testCriticalPoint(self):
+        """ Test EllipticalCylinder at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0))) 
   
         
 class TestEllipsoidModel(unittest.TestCase):
@@ -548,7 +598,10 @@ class TestEllipsoidModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-        
+    
+    def testCriticalPoint(self):
+        """ Test Ellipsoid at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
         
 class TestCoreShellEllipsoidModel(unittest.TestCase):
     """ Unit tests for CoreShellEllipsoid Model"""
@@ -602,7 +655,10 @@ class TestCoreShellEllipsoidModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
- 
+    
+    def testCriticalPoint(self):
+        """ Test CoreShellEllipsoid at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
     
 class TestTriaxialEllipsoidModel(unittest.TestCase):
     """ Unit tests for TriaxialEllipsoid Model"""
@@ -655,7 +711,10 @@ class TestTriaxialEllipsoidModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-                     
+    
+    def testCriticalPoint(self):
+        """ Test TriaxialEllipsoid at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))            
    
 class TestLamellarModel(unittest.TestCase):
     """ Unit tests for Lamellar Model"""
@@ -698,6 +757,9 @@ class TestLamellarModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)        
    
+    def testCriticalPoint(self):
+        """ Test Lamellar at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
      
 class TestLamellarFFHGModel(unittest.TestCase):
     """ Unit tests for LamellarFFHG Model"""
@@ -742,7 +804,10 @@ class TestLamellarFFHGModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)        
-                  
+    
+    def testCriticalPoint(self):
+        """ Test LamellarFFHG at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))              
     
 class TestLamellarPSModel(unittest.TestCase):
     """ Unit tests for LamellarPS Model"""
@@ -788,7 +853,9 @@ class TestLamellarPSModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)        
             
-     
+    def testCriticalPoint(self):
+        """ Test LamellarPS at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
      
 class TestLamellarPSHGModel(unittest.TestCase):
     """ Unit tests for LamellarPSHG Model"""
@@ -835,7 +902,10 @@ class TestLamellarPSHGModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)        
-     
+    
+    def testCriticalPoint(self):
+        """ Test LamellarPSHG at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
      
 class TestSquareWellStructure(unittest.TestCase):
     """ Unit tests for SquareWellStructure """
@@ -877,7 +947,10 @@ class TestSquareWellStructure(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-                         
+    
+    def testCriticalPoint(self):
+        """ Test SquareWellStructure at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))                     
      
 class TestHardsphereStructure(unittest.TestCase):
     """ Unit tests for HardsphereStructure"""
@@ -916,7 +989,10 @@ class TestHardsphereStructure(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-                      
+    
+    def testCriticalPoint(self):
+        """ Test HardsphereStructure at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))                  
     
 class TestStickyHSStructure(unittest.TestCase):
     """ Unit tests for StickyHSStructure"""
@@ -951,7 +1027,6 @@ class TestStickyHSStructure(unittest.TestCase):
         self.assertEquals(self.comp.run(0.4),self.x_array[0])
         self.assertEquals(self.comp.run(1.3),self.x_array[1])
         
-        
     def testEval_2D(self):
         """ Test 2D model for a StickyHSStructure with evalDistribution"""
         self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
@@ -959,7 +1034,9 @@ class TestStickyHSStructure(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
                
-     
+    def testCriticalPoint(self):
+        """ Test StickyHSStructure at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0))) 
         
 class TestHayterMSAStructure(unittest.TestCase):
     """ Unit tests for HayterMSAStructure"""
@@ -1002,7 +1079,10 @@ class TestHayterMSAStructure(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-                       
+    
+    def testCriticalPoint(self):
+        """ Test HayterMSAStructure at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))                   
      
      
 class TestBEPolyelectrolyte(unittest.TestCase):
@@ -1043,14 +1123,17 @@ class TestBEPolyelectrolyte(unittest.TestCase):
         self.assertEquals(self.comp.run(0.4),self.x_array[0])
         self.assertEquals(self.comp.run(1.3),self.x_array[1])
         
-        
     def testEval_2D(self):
         """ Test 2D model for a BEPolyelectrolyte with evalDistribution"""
         self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-               
+   
+    def testCriticalPoint(self):
+        """ Test BEPolyelectrolyte at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))            
+             
              
 class TestDABModel(unittest.TestCase):
     """ Unit tests for DABModel"""
@@ -1084,14 +1167,16 @@ class TestDABModel(unittest.TestCase):
         self.assertEquals(self.comp.run(0.4),self.x_array[0])
         self.assertEquals(self.comp.run(1.3),self.x_array[1])
         
-        
     def testEval_2D(self):
         """ Test 2D model for a DABModel with evalDistribution"""
         self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-               
+    
+    def testCriticalPoint(self):
+        """ Test DABModel at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))           
              
     
 class TestGuinierModel(unittest.TestCase):
@@ -1112,7 +1197,6 @@ class TestGuinierModel(unittest.TestCase):
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
         self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
         
-        
     def test1D(self):
         """ Test 1D model for a GuinierModel"""
         self.assertAlmostEqual(self.comp.run(1.0),0.716531, 4)
@@ -1121,7 +1205,6 @@ class TestGuinierModel(unittest.TestCase):
         """ Test 2D model for a GuinierModel"""
         self.assertAlmostEqual(self.comp.run([1.0, 1.3]),0.716531, 4)
      
-        
     def testEval_1D(self):
         """ Test 1D model for a GuinierModel with evalDistribution"""
         self.assertEquals(self.comp.run(0.4),self.x_array[0])
@@ -1134,6 +1217,9 @@ class TestGuinierModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
     
+    def testCriticalPoint(self):
+        """ Test GuinierModel at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
         
         
 class TestDebyeModel(unittest.TestCase):
@@ -1175,6 +1261,10 @@ class TestDebyeModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
     
+    def testCriticalPoint(self):
+        """ Test DebyeModel at the critical point"""
+        self.assertEquals(self.comp.run(0.0),1.001)
+        
        
 class TestPorodModel(unittest.TestCase):
     """ Unit tests for PorodModel"""
@@ -1214,7 +1304,7 @@ class TestPorodModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
     
-    def testCreaticalPt(self):
+    def testCreaticalPoint(self):
         """ Test for critical point for PorodModel run"""
         self.assertRaises(ZeroDivisionError, self.comp.run, 0.0)
         
@@ -1258,7 +1348,10 @@ class TestPeakGaussModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-        
+    
+    def testCriticalPoint(self):
+        """ Test PeakGauss at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))    
         
 class TestPeakLorentzModel(unittest.TestCase):
     """ Unit tests for PeakLorentzModel"""
@@ -1300,7 +1393,13 @@ class TestPeakLorentzModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
         
+    def testCriticalPoint(self):
+        """ Test PeakLorentz at the critical point"""
+        self.comp.setParam('B', 0.0)
+        self.assertRaises(ZeroDivisionError, self.comp.run, 10)
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))  
         
+       
 class TestFractalAbsModel(unittest.TestCase):
     """ Unit tests for FractalAbsModel"""
     
@@ -1343,7 +1442,10 @@ class TestFractalAbsModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-        
+    
+    def testCriticalPoint(self):
+        """ Test Fractal Abs at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))    
    
 class TestFractalModel(unittest.TestCase):
     """ Unit tests for FractalModel"""
@@ -1388,6 +1490,9 @@ class TestFractalModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
         
+    def testCriticalPoint(self):
+        """ Test Fractal at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
     
 class TestLorentzModel(unittest.TestCase):
     """ Unit tests for LorentzModel"""
@@ -1427,7 +1532,12 @@ class TestLorentzModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-            
+          
+    def testCriticalPoint(self):
+        """ Test Lorentz at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+        
+          
 class TestPowerLawAbsModel(unittest.TestCase):
     """ Unit tests for PowerLawAbsModel"""
     
@@ -1466,6 +1576,11 @@ class TestPowerLawAbsModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
     
+    def testCriticalPoint(self):
+        """ Test PowerLawAbs at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+        
+        
 class TestPowerLawModel(unittest.TestCase):
     """ Unit tests for PowerLawModel"""
     
@@ -1503,6 +1618,10 @@ class TestPowerLawModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+    
+    def testCriticalPoint(self):
+        """ Test PowerLawModel at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
       
       
 class TestTeubnerStreyModel(unittest.TestCase):
@@ -1543,7 +1662,11 @@ class TestTeubnerStreyModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-        
+    
+    def testCriticalPoint(self):
+        """ Test TeubnerStrey at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))    
+      
       
 class TestLineModel(unittest.TestCase):
     """ Unit tests for LineModel"""
@@ -1577,7 +1700,10 @@ class TestLineModel(unittest.TestCase):
         self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
         self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-  
+    
+    def testCriticalPoint(self):
+        """ Test line at the critical point"""
+        self.assert_(numpy.isfinite(self.comp.run(0.0)))
  
 if __name__ == '__main__':
     unittest.main()
