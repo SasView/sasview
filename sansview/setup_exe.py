@@ -62,6 +62,9 @@ class Target:
 matplotlibdatadir = matplotlib.get_data_path()
 matplotlibdata = findall(matplotlibdatadir)
 data_files = []
+# Copying SLD data
+import periodictable.xsf
+data_files.append(periodictable.xsf.setup_data_files())
 
 for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
