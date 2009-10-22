@@ -132,12 +132,12 @@ class Plugin:
         self.menu1.Append(id1, '&Simultaneous Page',simul_help)
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
         #menu for SLD Calculator
-        #self.tool_menu = wx.Menu()
-        #id_tool_menu = wx.NewId()
-        #sld_id = wx.NewId()
-        #sld_help= "Compute the scattering length density of molecules"
-        #self.tool_menu.Append(sld_id, "SLD Calculator",sld_help)
-        #wx.EVT_MENU(owner,sld_id,  self.onCalculateSld)
+        self.tool_menu = wx.Menu()
+        id_tool_menu = wx.NewId()
+        sld_id = wx.NewId()
+        sld_help= "Compute the scattering length density of molecules"
+        self.tool_menu.Append(sld_id, "SLD Calculator",sld_help)
+        wx.EVT_MENU(owner,sld_id,  self.onCalculateSld)
     
         #menu for model
         menu2 = wx.Menu()
@@ -151,6 +151,7 @@ class Plugin:
       
         #create  menubar items
         return [(id, self.menu1, "Fitting"),
+                (id_tool_menu, self.tool_menu,"Tools" ),
                 (id2, menu2, "Model")]
        
     
