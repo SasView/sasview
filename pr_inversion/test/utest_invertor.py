@@ -7,7 +7,7 @@
 # pylint: disable-msg=R0904 
 
 
-import unittest, math, numpy, pylab
+import unittest, math, numpy
 from sans.pr.invertor import Invertor
         
 class TestFiguresOfMerit(unittest.TestCase):
@@ -205,7 +205,7 @@ class TestBasicComponent(unittest.TestCase):
         
         # Check the computed P(r) with the theory
         # for shpere of radius 80
-        x = pylab.arange(0.01, self.invertor.d_max, self.invertor.d_max/51.0)
+        x = numpy.arange(0.01, self.invertor.d_max, self.invertor.d_max/51.0)
         y = numpy.zeros(len(x))
         dy = numpy.zeros(len(x))
         y_true = numpy.zeros(len(x))
@@ -267,7 +267,7 @@ class TestBasicComponent(unittest.TestCase):
         
         # Check the computed P(r) with the theory
         # for shpere of radius 80
-        x = pylab.arange(0.01, self.invertor.d_max, self.invertor.d_max/51.0)
+        x = numpy.arange(0.01, self.invertor.d_max, self.invertor.d_max/51.0)
         y = numpy.zeros(len(x))
         dy = numpy.zeros(len(x))
         y_true = numpy.zeros(len(x))

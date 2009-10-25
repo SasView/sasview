@@ -1,4 +1,4 @@
-import unittest, math, numpy, pylab, sys, string
+import unittest, math, numpy, sys, string
 from sans.pr.invertor import Invertor
 
 class Num_terms():    

@@ -38,7 +38,7 @@
 # \endverbatim
 #
 # \subsection depends External Dependencies
-# scipy, numpy, pylab
+# scipy, numpy
 #
 # \subsection build Building the code
 # The standard python package can be built with distutils.

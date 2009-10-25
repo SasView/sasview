@@ -6,7 +6,7 @@ from sans.pr.core.pr_inversion import Cinvertor
 import numpy
 import sys
 import math, time
-from scipy.linalg.basic import lstsq
+from numpy.linalg import lstsq
 
 def help():
     """
@@ -553,8 +553,6 @@ class Invertor(Cinvertor):
             @param path: path of the file to write
             @param npts: number of P(r) points to be written
         """
-        import pylab
-        
         file = open(path, 'w')
         file.write("#d_max=%g\n" % self.d_max)
         file.write("#nfunc=%g\n" % self.nfunc)
@@ -576,7 +574,7 @@ class Invertor(Cinvertor):
                 for i in range(len(self.out)):
                     file.write("#C_%i=%s+-%s\n" % (i, str(self.out[i]), str(self.cov[i][i])))
         file.write("<r>  <Pr>  <dPr>\n")
-        r = pylab.arange(0.0, self.d_max, self.d_max/npts)
+        r = numpy.arange(0.0, self.d_max, self.d_max/npts)
         
         for r_i in r:
             (value, err) = self.pr_err(self.out, self.cov, r_i)
