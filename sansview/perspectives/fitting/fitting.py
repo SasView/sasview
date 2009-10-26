@@ -486,8 +486,11 @@ class Plugin:
                                         fn= self.fitter,
                                        completefn= self._simul_fit_completed,
                                        updatefn=self._updateFit)
+
             self.calc_fit.queue()
-            self.calc_fit.ready(2.5)
+			#Mac crashes on this.
+            #self.calc_fit.ready(2.5)
+            time.sleep(0.5)
         
         except FitAbort:
             print "in pluging"

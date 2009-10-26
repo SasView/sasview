@@ -138,6 +138,7 @@ class FitPage(BasicPage):
                     item[6].Show(True)
      
         self.sizer3.Layout()
+
         self.SetScrollbars(20,20,25,65)
         
     
@@ -642,7 +643,7 @@ class FitPage(BasicPage):
             
         self.btFit.SetFocus()    
         self.sizer5.Layout()
-        self.SetScrollbars(20,20,55,40)    
+        #self.SetScrollbars(20,20,55,40)    
             
     def _on_select_model(self, event): 
         """
