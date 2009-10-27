@@ -137,7 +137,6 @@ class FitPage(BasicPage):
                     item[5].Show(True)
                     item[6].Show(True)
      
-        self.sizer3.Layout()
 
         self.SetScrollbars(20,20,25,65)
         

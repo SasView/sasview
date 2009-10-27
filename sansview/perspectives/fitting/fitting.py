@@ -488,9 +488,11 @@ class Plugin:
                                        updatefn=self._updateFit)
 
             self.calc_fit.queue()
-			#Mac crashes on this.
-            #self.calc_fit.ready(2.5)
-            time.sleep(0.5)
+            if fitproble_count > 1:
+    			#Mac crashes on this.
+                self.calc_fit.ready(2.5)
+            else:
+                time.sleep(0.5)
         
         except FitAbort:
             print "in pluging"
