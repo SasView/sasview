@@ -14,6 +14,9 @@
 # See for example the 'images' directory below.
 
 import os, sys
+if len(sys.argv)==1:
+    sys.argv.append("py2exe")
+    
 from distutils.core import setup
 from distutils.filelist import findall
 import matplotlib
@@ -64,8 +67,9 @@ matplotlibdata = findall(matplotlibdatadir)
 data_files = []
 # Copying SLD data
 import periodictable.xsf
-data_files.append(periodictable.xsf.setup_data_files())
+import logging
 
+data_files= periodictable.xsf.setup_data_files()
 for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
     data_files.append((os.path.split(dirname)[0], [f]))
