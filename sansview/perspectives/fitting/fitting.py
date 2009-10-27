@@ -488,7 +488,7 @@ class Plugin:
                                        updatefn=self._updateFit)
 
             self.calc_fit.queue()
-            if fitproble_count > 1:
+            if fitproblem_count > 1:
     			#Mac crashes on this.
                 self.calc_fit.ready(2.5)
             else:
