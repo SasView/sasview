@@ -4,8 +4,7 @@
 """
 import unittest
 
-from danse.common.plottools.plottables import Data1D,Theory1D
-from sans.fit.AbstractFitEngine import Model,FitData1D
+from sans.fit.AbstractFitEngine import Model
 import math
 from sans.fit.Fitting import Fit
 from DataLoader.loader import Loader
@@ -14,10 +13,7 @@ class TestSingleFit(unittest.TestCase):
     """ test single fitting """
     def setUp(self):
         """ initialize data"""
-        out = Loader().load("cyl_400_20.txt")
-        #Create data that fitting engine understands
-        data1 = Data1D(x=out.x, y=out.y, dx=out.dx, dy=out.dy)
-        self.data = FitData1D(data1)
+        self.data = Loader().load("cyl_400_20.txt")
         # Create model that fitting engine understands
         from sans.models.CylinderModel import CylinderModel
         model1  = CylinderModel()
@@ -76,13 +72,8 @@ class TestSimultaneousFit(unittest.TestCase):
     def setUp(self):
         """ initialize data"""
         
-        out=Loader().load("cyl_400_20.txt")
-        data1 = Data1D(x=out.x, y=out.y, dx=out.dx, dy=out.dy)
-        self.data1 = FitData1D(data1)
-        
-        out2=Loader().load("cyl_400_40.txt")
-        data2 = Data1D(x=out2.x, y=out2.y, dx=out2.dx, dy=out2.dy)
-        self.data2 = FitData1D(data2)
+        self.data1=Loader().load("cyl_400_20.txt")
+        self.data2=Loader().load("cyl_400_40.txt")
     
         # Receives the type of model for the fitting
         from sans.models.CylinderModel import CylinderModel

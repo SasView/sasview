@@ -1,6 +1,7 @@
 import logging, sys
 import park,numpy,math, copy
-
+from DataLoader.data_info import Data1D
+from DataLoader.data_info import Data2D
 class SansParameter(park.Parameter):
     """
         SANS model parameters for use in the PARK fitting service.
@@ -118,14 +119,16 @@ class Model(park.Model):
         	raise
 
     
-class FitData1D(object):
-    """ Wrapper class  for SANS data """
-    def __init__(self,sans_data1d, smearer=None):
+class FitData1D(Data1D):
+    """ 
+        Wrapper class  for SANS data 
+        FitData1D inherits from DataLoader.data_info.Data1D. Implements 
+        a way to get residuals from data.
+    """
+    def __init__(self,x, y,dx= None, dy=None, smearer=None):
+        Data1D.__init__(self, x=x, y=y, dx=dx, dy=dy)
         """
-            Data can be initital with a data (sans plottable)
-            or with vectors.
-            
-            self.smearer is an object of class QSmearer or SlitSmearer
+            @param smearer: is an object of class QSmearer or SlitSmearer
             that will smear the theory data (slit smearing or resolution 
             smearing) when set.
             
@@ -133,9 +136,12 @@ class FitData1D(object):
             do the following:
             
             from DataLoader.qsmearing import smear_selection
-            fitdata1d = FitData1D(some_data)
-            fitdata1d.smearer = smear_selection(some_data)
-            
+            smearer = smear_selection(some_data)
+            fitdata1d = FitData1D( x= [1,3,..,], 
+                                    y= [3,4,..,8], 
+                                    dx=None,
+                                    dy=[1,2...], smearer= smearer)
+           
             Note that some_data _HAS_ to be of class DataLoader.data_info.Data1D
             
             Setting it back to None will turn smearing off.
@@ -143,16 +149,10 @@ class FitData1D(object):
         """
         
         self.smearer = smearer
-      
-        # Initialize from Data1D object
-        self.data=sans_data1d
-        self.x= numpy.array(sans_data1d.x)
-        self.y= numpy.array(sans_data1d.y)
-        self.dx= sans_data1d.dx
-        if sans_data1d.dy ==None or sans_data1d.dy==[]:
+        if dy ==None or dy==[]:
             self.dy= numpy.zeros(len(self.y))  
         else:
-            self.dy= numpy.asarray(sans_data1d.dy)
+            self.dy= numpy.asarray(dy)
      
         # For fitting purposes, replace zero errors by 1
         #TODO: check validity for the rare case where only
@@ -161,12 +161,12 @@ class FitData1D(object):
         
         ## Min Q-value
         #Skip the Q=0 point, especially when y(q=0)=None at x[0].
-        if min (self.data.x) ==0.0 and self.data.x[0]==0 and not numpy.isfinite(self.data.y[0]):
-            self.qmin = min(self.data.x[self.data.x!=0])
+        if min (self.x) ==0.0 and self.x[0]==0 and not numpy.isfinite(self.y[0]):
+            self.qmin = min(self.x[self.x!=0])
         else:                              
-            self.qmin= min (self.data.x)
+            self.qmin= min (self.x)
         ## Max Q-value
-        self.qmax= max (self.data.x)
+        self.qmax = max (self.x)
         
         # Range used for input to smearing
         self._qmin_unsmeared = self.qmin
@@ -181,8 +181,8 @@ class FitData1D(object):
         """ to set the fit range"""
         # Skip Q=0 point, (especially for y(q=0)=None at x[0]).
         #ToDo: Fix this.
-        if qmin==0.0 and not numpy.isfinite(self.data.y[qmin]):
-            self.qmin = min(self.data.x[self.data.x!=0])
+        if qmin==0.0 and not numpy.isfinite(self.y[qmin]):
+            self.qmin = min(self.x[self.x!=0])
         elif qmin!=None:                       
             self.qmin = qmin            
 
@@ -195,12 +195,12 @@ class FitData1D(object):
         self._qmax_unsmeared = self.qmax    
         
         self._first_unsmeared_bin = 0
-        self._last_unsmeared_bin  = len(self.data.x)-1
+        self._last_unsmeared_bin  = len(self.x)-1
         
         if self.smearer!=None:
             self._first_unsmeared_bin, self._last_unsmeared_bin = self.smearer.get_bin_range(self.qmin, self.qmax)
-            self._qmin_unsmeared = self.data.x[self._first_unsmeared_bin]
-            self._qmax_unsmeared = self.data.x[self._last_unsmeared_bin]
+            self._qmin_unsmeared = self.x[self._first_unsmeared_bin]
+            self._qmax_unsmeared = self.x[self._last_unsmeared_bin]
             
         # Identify the bin range for the unsmeared and smeared spaces
         self.idx = (self.x>=self.qmin) & (self.x <= self.qmax)
@@ -248,27 +248,39 @@ class FitData1D(object):
         return []
     
     
-class FitData2D(object):
+class FitData2D(Data2D):
     """ Wrapper class  for SANS data """
-    def __init__(self,sans_data2d):
+    def __init__(self,sans_data2d ,data=None, err_data=None,):
+        Data2D.__init__(self, data= data, err_data= err_data)
         """
             Data can be initital with a data (sans plottable)
             or with vectors.
         """
-        self.data=sans_data2d
-        self.image = sans_data2d.data
-        self.err_image = sans_data2d.err_data
+        self.x_bins_array = []
+        self.y_bins_array = []
+        self.res_err_image=[]
+        self.index_model=[]
+        self.qmin= None
+        self.qmax= None
+        self.set_data(sans_data2d )
+        
+        
+    def set_data(self, sans_data2d ):
+        """
+            Determine the correct x_bin and y_bin to fit
+        """
+        self.err_data = sans_data2d.err_data
         self.x_bins_array= numpy.reshape(sans_data2d.x_bins,
                                          [1,len(sans_data2d.x_bins)])
         self.y_bins_array = numpy.reshape(sans_data2d.y_bins,
                                           [len(sans_data2d.y_bins),1])
         
-        x = max(self.data.xmin, self.data.xmax)
-        y = max(self.data.ymin, self.data.ymax)
+        x_max = max(self.data.xmin, self.data.xmax)
+        y_max = max(self.data.ymin, self.data.ymax)
         
         ## fitting range
         self.qmin = 1e-16
-        self.qmax = math.sqrt(x*x +y*y)
+        self.qmax = math.sqrt(x_max*x_max +y_max*y_max)
         ## new error image for fitting purpose
         if self.err_image== None or self.err_image ==[]:
             self.res_err_image= numpy.zeros(len(self.y_bins),len(self.x_bins))
@@ -466,9 +478,9 @@ class FitEngine:
             @param Uid: unique key corresponding to a fitArrange object with data
         """
         if data.__class__.__name__=='Data2D':
-            fitdata=FitData2D(data)
+            fitdata=FitData2D(sans_data2d=data, data=data.data, err_data= data.err_data)
         else:
-            fitdata=FitData1D(data, smearer)
+            fitdata=FitData1D(x=data.x, y=data.y , dx= data.dx,dy=data.dy,smearer=smearer)
        
         fitdata.setFitRange(qmin=qmin,qmax=qmax)
         #A fitArrange is already created but contains model only at Uid
