@@ -12,7 +12,6 @@ import DataLoader.extensions.smearer as smearer
 import numpy
 import math
 import logging, sys
-import scipy.special
 
 def smear_selection(data1D):
     """
