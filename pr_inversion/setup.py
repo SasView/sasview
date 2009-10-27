@@ -6,8 +6,10 @@ import sys, os
 # Then build and install the modules
 from distutils.core import setup, Extension
 
+from numpy.distutils.misc_util import get_numpy_include_dirs
+numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
 #numpy_incl = "Lib\site-packages\numpy\core\include\numpy"
-numpy_incl_path = os.path.join(sys.prefix, "Lib", "site-packages", "numpy", "core", "include", "numpy")
+#numpy_incl_path = os.path.join(sys.prefix, "Lib", "site-packages", "numpy", "core", "include", "numpy")
 print "NUMPY", numpy_incl_path
 
 # Build the module name

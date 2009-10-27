@@ -6,8 +6,8 @@ import os, sys
 # Then build and install the modules
 from distutils.core import setup, Extension
 from distutils.sysconfig import get_python_lib
-numpy_incl_path = os.path.join(sys.prefix, "Lib", "site-packages", "numpy", "core", "include", "numpy")
-
+from numpy.distutils.misc_util import get_numpy_include_dirs
+numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
 setup(
     name="DataLoader",
     version = "0.1",
