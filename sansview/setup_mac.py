@@ -5,16 +5,33 @@ Usage:
     python setup.py py2app
 """
 from setuptools import setup
+import periodictable.xsf
+import DataLoader.readers 
+from distutils.sysconfig import get_python_lib
+import os
+
+DATA_FILES = []
+
+#Periodictable data file
+DATA_FILES = periodictable.xsf.setup_data_files()
+
+#xml data files
+
+f = os.path.join(DataLoader.readers.get_data_path(),'default.xml')
+if os.path.isfile(f):
+    DAT_FILES.append(('.',[f]))
 
 APP = ['sansview.py']
 DATA_FILES = ['images','test','plugins','doc']
-OPTIONS = {'argv_emulation': True,
+OPTIONS = {'argv_emulation': True,'packages': ['lxml','periodictable'],
+           'frameworks':['/usr/lib/libxml2.2.dylib'],
            #'plist': dict(LSPrefersPPC=True)
            }
 
 setup(
     app=APP,
     data_files=DATA_FILES,
+    include_package_data= True,
     options={'py2app': OPTIONS},
     setup_requires=['py2app'],
 )
