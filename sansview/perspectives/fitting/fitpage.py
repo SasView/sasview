@@ -626,8 +626,7 @@ class FitPage(BasicPage):
         #    self.btFit.SetLabel("Fit")
         #    self.btFit.Bind(event= wx.EVT_BUTTON, handler=self._onFit, id=self.btFit.GetId())
         self.btFit.SetFocus()    
-        self.sizer5.Layout()
-        #self.SetScrollbars(20,20,55,40)
+
         
     def _StopFit(self, event):
         """
