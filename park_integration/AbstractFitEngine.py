@@ -250,7 +250,7 @@ class FitData1D(Data1D):
     
 class FitData2D(Data2D):
     """ Wrapper class  for SANS data """
-    def __init__(self,sans_data2d ,data=None, err_data=None,):
+    def __init__(self,sans_data2d ,data=None, err_data=None):
         Data2D.__init__(self, data= data, err_data= err_data)
         """
             Data can be initital with a data (sans plottable)
