@@ -269,24 +269,23 @@ class FitData2D(Data2D):
         """
             Determine the correct x_bin and y_bin to fit
         """
-        self.err_data = sans_data2d.err_data
         self.x_bins_array= numpy.reshape(sans_data2d.x_bins,
                                          [1,len(sans_data2d.x_bins)])
         self.y_bins_array = numpy.reshape(sans_data2d.y_bins,
                                           [len(sans_data2d.y_bins),1])
         
-        x_max = max(self.data.xmin, self.data.xmax)
-        y_max = max(self.data.ymin, self.data.ymax)
+        x_max = max(sans_data2d.xmin, sans_data2d.xmax)
+        y_max = max(sans_data2d.ymin, sans_data2d.ymax)
         
         ## fitting range
         self.qmin = 1e-16
         self.qmax = math.sqrt(x_max*x_max +y_max*y_max)
         ## new error image for fitting purpose
-        if self.err_image== None or self.err_image ==[]:
-            self.res_err_image= numpy.zeros(len(self.y_bins),len(self.x_bins))
+        if self.err_data== None or self.err_data ==[]:
+            self.res_err_data= numpy.zeros(len(self.y_bins),len(self.x_bins))
         else:
-            self.res_err_image = copy.deepcopy(self.err_image)
-        self.res_err_image[self.err_image==0]=1
+            self.res_err_data = copy.deepcopy(self.err_data)
+        self.res_err_data[self.res_err_data==0]=1
         
         self.radius= numpy.sqrt(self.x_bins_array**2 + self.y_bins_array**2)
         self.index_model = (self.qmin <= self.radius)&(self.radius<= self.qmax)
@@ -310,8 +309,8 @@ class FitData2D(Data2D):
      
     def residuals(self, fn): 
         
-        res=self.index_model*(self.image - fn([self.x_bins_array,
-                             self.y_bins_array]))/self.res_err_image
+        res=self.index_model*(self.data - fn([self.x_bins_array,
+                             self.y_bins_array]))/self.res_err_data
         return res.ravel() 
         
  
