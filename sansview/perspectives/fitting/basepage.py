@@ -979,13 +979,12 @@ class BasicPage(wx.ScrolledWindow):
                 self._draw_model() 
                 self.save_current_state()
                 
-            self._is_modified(is_modified = is_modified) 
+            self.is_modified = is_modified  
                
-    def _is_modified(self, is_modified = False):
+    def _is_modified(self):
         """
             return to self._is_modified
         """
-        self.is_modified = is_modified
         return self.is_modified
                        
     def _reset_parameters_state(self, listtorestore,statelist):
@@ -1461,9 +1460,9 @@ class BasicPage(wx.ScrolledWindow):
             each item of the list should be as follow:
             item=[cb state, name, value, "+/-", error of fit, min, max , units]
         """  
-        is_modified =  modified
+        self.is_modified =  modified
         if len(list)==0:
-            return is_modified
+            return self.is_modified
         for item in list:
             try:
                 name = str(item[1])
@@ -1505,14 +1504,14 @@ class BasicPage(wx.ScrolledWindow):
                 # +update the model and set the is_modified flag
                 if value != self.model.getParam(name):
                     self.model.setParam(name,value)
-                    is_modified = True   
+                    self.is_modified = True   
             
             except:
                 msg= "Model Drawing  Error:wrong value entered : %s"% sys.exc_value
                 wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
                 return 
         
-        return is_modified 
+        return self.is_modified 
         
  
     def _set_dipers_Param(self, event):

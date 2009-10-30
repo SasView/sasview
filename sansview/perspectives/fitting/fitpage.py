@@ -706,22 +706,20 @@ class FitPage(BasicPage):
            tcrtl.Refresh()  
         self._onparamEnter_helper() 
         
-        self._is_modified()
-        if self._is_modified == True:
-            ##compute chisqr for range change
-            temp_smearer = None
-            if self.enable_smearer.GetValue():
-                msg=""
-                temp_smearer= self.smearer   
-             ##Calculate chi2
-           
-            self.compute_chisqr(smearer= temp_smearer)  
-            ## new state posted
-            if self.state_change:
-                #self._undo.Enable(True)
-                event = PageInfoEvent(page = self)
-                wx.PostEvent(self.parent, event)
-                self.state_change= False
+        ##compute chisqr for range change
+        temp_smearer = None
+        if self.enable_smearer.GetValue():
+            msg=""
+            temp_smearer= self.smearer   
+         ##Calculate chi2
+       
+        self.compute_chisqr(smearer= temp_smearer)  
+        ## new state posted
+        if self.state_change:
+            #self._undo.Enable(True)
+            event = PageInfoEvent(page = self)
+            wx.PostEvent(self.parent, event)
+            self.state_change= False
         
         
     def _onparamEnter(self,event):
@@ -733,18 +731,17 @@ class FitPage(BasicPage):
         if check_float(tcrtl):
             self._onparamEnter_helper()
             
-            if self._is_modified == True:
-                temp_smearer = None
-                if self.enable_smearer.GetValue():
-                    temp_smearer= self.smearer
-                
-                self.compute_chisqr(smearer= temp_smearer)
-                ## new state posted
-                if self.state_change:
-                    #self._undo.Enable(True)
-                    event = PageInfoEvent(page = self)
-                    wx.PostEvent(self.parent, event)
-                    self.state_change= False
+            temp_smearer = None
+            if self.enable_smearer.GetValue():
+                temp_smearer= self.smearer
+            
+            self.compute_chisqr(smearer= temp_smearer)
+            ## new state posted
+            if self.state_change:
+                #self._undo.Enable(True)
+                event = PageInfoEvent(page = self)
+                wx.PostEvent(self.parent, event)
+                self.state_change= False
         else:
             msg= "Cannot Plot :Must enter a number!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
@@ -771,13 +768,12 @@ class FitPage(BasicPage):
            tcrtl.Refresh()  
         self._onparamEnter_helper() 
 
-        if self._is_modified == True:
-            ## new state posted
-            if self.state_change:
-                #self._undo.Enable(True)
-                event = PageInfoEvent(page = self)
-                wx.PostEvent(self.parent, event)
-                self.state_change= False
+        ## new state posted
+        if self.state_change:
+            #self._undo.Enable(True)
+            event = PageInfoEvent(page = self)
+            wx.PostEvent(self.parent, event)
+            self.state_change= False
         
                 
         
