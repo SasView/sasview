@@ -35,8 +35,8 @@ class CalcChisqr1D(CalcThread):
         if data1d.__class__.__name__ !="Data1D":
             msg= str(data1d.__class__.__name__)
             raise ValueError, "need Data1D to compute chisqr. Current class %s"%msg
-        
-        self.fitdata= FitData1D(data1d, smearer=smearer)
+
+        self.fitdata= FitData1D(x=data1d.x,y=data1d.y,dx=data1d.dx,dy=data1d.dy, smearer=smearer)
         self.fitdata.setFitRange(qmin=qmin,qmax=qmax)
         self.model = model
        
@@ -104,8 +104,8 @@ class CalcChisqr2D(CalcThread):
         if data2d.__class__.__name__ !="Data2D":
             msg= str(data2d.__class__.__name__)
             raise ValueError, "need Data2D to compute chisqr. Current class %s"%msg
-        
-        self.fitdata = FitData2D(data2d)
+       
+        self.fitdata = FitData2D(sans_data2d=data2d ,data=data2d.data, err_data=data2d.err_data)
         self.fitdata.setFitRange(qmin=qmin,qmax=qmax)
      
         self.model = model
