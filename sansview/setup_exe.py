@@ -66,10 +66,12 @@ matplotlibdatadir = matplotlib.get_data_path()
 matplotlibdata = findall(matplotlibdatadir)
 data_files = []
 # Copying SLD data
-import periodictable.xsf
+import periodictable
 import logging
 
-data_files= periodictable.xsf.setup_data_files()
+data_files += periodictable.data_files()
+
+
 for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
     data_files.append((os.path.split(dirname)[0], [f]))
@@ -139,7 +141,7 @@ setup(
             "bundle_files":2,
             },
     },
-    data_files=data_files
+    data_files=data_files,
     
 )
 
