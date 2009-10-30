@@ -14,8 +14,6 @@
 # See for example the 'images' directory below.
 
 import os, sys
-if len(sys.argv)==1:
-    sys.argv.append("py2exe")
     
 from distutils.core import setup
 from distutils.filelist import findall
