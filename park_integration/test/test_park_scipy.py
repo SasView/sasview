@@ -18,9 +18,7 @@ class testFitModule(unittest.TestCase):
         """ Simple cylinder model fit (scipy)  """
         
         out=Loader().load("cyl_400_20.txt")
-        data1 = Data1D(x=out.x, y=out.y, dx=out.dx, dy=out.dy)
-        data = FitData1D(data1)
-        
+        data = Data1D(x=out.x, y=out.y, dx=out.dx, dy=out.dy)
         # Receives the type of model for the fitting
         from sans.models.MultiplicationModel import MultiplicationModel
         from sans.models.CylinderModel import CylinderModel
@@ -54,4 +52,6 @@ class testFitModule(unittest.TestCase):
         
         self.assertTrue( result1.fitness/len(data.x) < 1.0 )
         
-   
+       
+if __name__ == '__main__':
+    unittest.main()  
