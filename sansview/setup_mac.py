@@ -11,21 +11,21 @@ from distutils.sysconfig import get_python_lib
 import os
 
 DATA_FILES = []
+RESOURCES_FILES = []
 
 #Periodictable data file
-DATA_FILES = periodictable.xsf.setup_data_files()
+DATA_FILES = periodictable.data_files()
 
-#xml data files
-
-f = os.path.join(DataLoader.readers.get_data_path(),'default.xml')
-if os.path.isfile(f):
-    DAT_FILES.append(('.',[f]))
+#CANSAxml reader data files
+RESOURCES_FILES.append(os.path.join(DataLoader.readers.get_data_path(),'defaults.xml'))
 
 APP = ['sansview.py']
 DATA_FILES = ['images','test','plugins','doc']
-OPTIONS = {'argv_emulation': True,'packages': ['lxml','periodictable'],
-           'frameworks':['/usr/lib/libxml2.2.dylib'],
-           #'plist': dict(LSPrefersPPC=True)
+OPTIONS = {'argv_emulation': True,
+           'packages': ['lxml','periodictable'],
+           'iconfile': 'images/ball.icns',
+           'frameworks':['/usr/local/lib/libxml2.2.dylib'], ##This dir path could be /usr/lib/yourlibxmlfile depending on the system.
+           'resources': RESOURCES_FILES
            }
 
 setup(
