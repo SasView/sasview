@@ -126,7 +126,7 @@ class FitData1D(Data1D):
         a way to get residuals from data.
     """
     def __init__(self,x, y,dx= None, dy=None, smearer=None):
-        Data1D.__init__(self, x=x, y=y, dx=dx, dy=dy)
+        Data1D.__init__(self, x=numpy.array(x), y=numpy.array(y), dx=dx, dy=dy)
         """
             @param smearer: is an object of class QSmearer or SlitSmearer
             that will smear the theory data (slit smearing or resolution 
