@@ -35,7 +35,7 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
          r_minor         = 20.0 [A]
          r_ratio         = 1.5 
          length          = 400.0 [A]
-         contrast        = 3e-006 [1/A²]
+         contrast        = 3e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
          cyl_theta       = 1.57 [rad]
          cyl_phi         = 0.0 [rad]
@@ -65,7 +65,7 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
         self.details['r_minor'] = ['[A]', None, None]
         self.details['r_ratio'] = ['', None, None]
         self.details['length'] = ['[A]', None, None]
-        self.details['contrast'] = ['[1/A²]', None, None]
+        self.details['contrast'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['cyl_theta'] = ['[rad]', None, None]
         self.details['cyl_phi'] = ['[rad]', None, None]

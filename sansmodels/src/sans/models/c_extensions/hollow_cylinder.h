@@ -34,8 +34,8 @@ typedef struct {
     //  [DEFAULT]=length=400.0 [A]
     double length;
 
-    /// Contrast  [1/A²]
-    //  [DEFAULT]=contrast=5.3e-6 [1/A²]
+    /// Contrast  [1/A^(2)]
+    //  [DEFAULT]=contrast=5.3e-6 [1/A^(2)]
     double contrast;
 
 	/// Incoherent Background [1/cm]

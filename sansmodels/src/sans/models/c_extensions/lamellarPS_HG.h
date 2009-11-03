@@ -44,14 +44,14 @@ typedef struct {
 	///  head thickness [A]
     //  [DEFAULT]=deltaH=2.0 [A]
     double deltaH;
-    /// scattering density length of tails [1/A²]
-    //  [DEFAULT]=sld_tail=0.4e-6 [1/A²]
+    /// scattering density length of tails [1/A^(2)]
+    //  [DEFAULT]=sld_tail=0.4e-6 [1/A^(2)]
     double sld_tail;
-	/// scattering density length of head [1/A²]
-    //  [DEFAULT]=sld_head=2e-6 [1/A²]
+	/// scattering density length of head [1/A^(2)]
+    //  [DEFAULT]=sld_head=2e-6 [1/A^(2)]
     double sld_head;
-	/// scattering density length of solvent [1/A²]
-    //  [DEFAULT]=sld_solvent=6e-6 [1/A²]
+	/// scattering density length of solvent [1/A^(2)]
+    //  [DEFAULT]=sld_solvent=6e-6 [1/A^(2)]
     double sld_solvent;
 	 /// Number of lamellar plates
     //  [DEFAULT]=n_plates=30

@@ -34,8 +34,8 @@ typedef struct {
 	/// Length of long edge of the parallelepiped [A]
     //  [DEFAULT]=long_c=400 [A]
     double long_c;
-    /// Contrast [1/A²]
-    //  [DEFAULT]=contrast=53e-7 [1/A²]
+    /// Contrast [1/A^(2)]
+    //  [DEFAULT]=contrast=53e-7 [1/A^(2)]
     double contrast;
 	/// Incoherent Background [1/cm]
 	//  [DEFAULT]=background=0.0 [1/cm]

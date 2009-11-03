@@ -34,7 +34,7 @@ class LamellarPSModel(CLamellarPSModel, BaseComponent):
          scale           = 1.0 
          spacing         = 400.0 [A]
          delta           = 30.0 [A]
-         contrast        = 5.3e-006 [1/A²]
+         contrast        = 5.3e-006 [1/A^(2)]
          n_plates        = 20.0 
          caille          = 0.1 
          background      = 0.0 [1/cm]
@@ -75,7 +75,7 @@ class LamellarPSModel(CLamellarPSModel, BaseComponent):
         self.details['scale'] = ['', None, None]
         self.details['spacing'] = ['[A]', None, None]
         self.details['delta'] = ['[A]', None, None]
-        self.details['contrast'] = ['[1/A²]', None, None]
+        self.details['contrast'] = ['[1/A^(2)]', None, None]
         self.details['n_plates'] = ['', None, None]
         self.details['caille'] = ['', None, None]
         self.details['background'] = ['[1/cm]', None, None]

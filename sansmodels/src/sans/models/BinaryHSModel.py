@@ -35,10 +35,6 @@ class BinaryHSModel(CBinaryHSModel, BaseComponent):
          s_radius        = 25.0 [A]
          vol_frac_ls     = 0.1 
          vol_frac_ss     = 0.2 
-         ls_sld          = 3.5e-006 [1/A²]
-         ss_sld          = 5e-007 [1/A²]
-         solvent_sld     = 6.36e-006 [1/A²]
-         background      = 0.001 [1/cm]
 
     """
         
@@ -67,10 +63,6 @@ class BinaryHSModel(CBinaryHSModel, BaseComponent):
         self.details['s_radius'] = ['[A]', None, None]
         self.details['vol_frac_ls'] = ['', None, None]
         self.details['vol_frac_ss'] = ['', None, None]
-        self.details['ls_sld'] = ['[1/A²]', None, None]
-        self.details['ss_sld'] = ['[1/A²]', None, None]
-        self.details['solvent_sld'] = ['[1/A²]', None, None]
-        self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters
         self.fixed=['l_radius.width', 's_radius.width']

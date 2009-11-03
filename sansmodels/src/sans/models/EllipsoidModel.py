@@ -34,7 +34,7 @@ class EllipsoidModel(CEllipsoidModel, BaseComponent):
          scale           = 1.0 
          radius_a        = 20.0 [A]
          radius_b        = 400.0 [A]
-         contrast        = 3e-006 [1/A²]
+         contrast        = 3e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
          axis_theta      = 1.57 [rad]
          axis_phi        = 0.0 [rad]
@@ -74,7 +74,7 @@ class EllipsoidModel(CEllipsoidModel, BaseComponent):
         self.details['scale'] = ['', None, None]
         self.details['radius_a'] = ['[A]', None, None]
         self.details['radius_b'] = ['[A]', None, None]
-        self.details['contrast'] = ['[1/A²]', None, None]
+        self.details['contrast'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['axis_theta'] = ['[rad]', None, None]
         self.details['axis_phi'] = ['[rad]', None, None]

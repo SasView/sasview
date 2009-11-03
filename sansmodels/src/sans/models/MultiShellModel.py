@@ -35,8 +35,8 @@ class MultiShellModel(CMultiShellModel, BaseComponent):
          core_radius     = 60.0 [A]
          s_thickness     = 10.0 [A]
          w_thickness     = 10.0 [A]
-         core_sld        = 6.4e-006 [1/A²]
-         shell_sld       = 4e-007 [1/A²]
+         core_sld        = 6.4e-006 [1/A^(2)]
+         shell_sld       = 4e-007 [1/A^(2)]
          n_pairs         = 2.0 
          background      = 0.0 [1/cm]
 
@@ -68,8 +68,8 @@ class MultiShellModel(CMultiShellModel, BaseComponent):
         self.details['core_radius'] = ['[A]', None, None]
         self.details['s_thickness'] = ['[A]', None, None]
         self.details['w_thickness'] = ['[A]', None, None]
-        self.details['core_sld'] = ['[1/A²]', None, None]
-        self.details['shell_sld'] = ['[1/A²]', None, None]
+        self.details['core_sld'] = ['[1/A^(2)]', None, None]
+        self.details['shell_sld'] = ['[1/A^(2)]', None, None]
         self.details['n_pairs'] = ['', None, None]
         self.details['background'] = ['[1/cm]', None, None]
 

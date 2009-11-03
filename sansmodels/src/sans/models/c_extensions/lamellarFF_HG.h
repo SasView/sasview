@@ -25,14 +25,14 @@ typedef struct {
     /// head thickness
     //  [DEFAULT]=h_thickness=10.0 [A]
     double h_thickness;
-	/// tail scrattering length density[1/A²]
-    //  [DEFAULT]=sld_tail=4e-7 [1/A²]
+	/// tail scrattering length density[1/A^(2)]
+    //  [DEFAULT]=sld_tail=4e-7 [1/A^(2)]
     double sld_tail;
-    /// head group scrattering length density[1/A²]
-    //  [DEFAULT]=sld_head=3e-6 [1/A²]
+    /// head group scrattering length density[1/A^(2)]
+    //  [DEFAULT]=sld_head=3e-6 [1/A^(2)]
     double sld_head;
-	 /// solvent scrattering length density[1/A²]
-    //  [DEFAULT]=sld_solvent=6e-6 [1/A²]
+	 /// solvent scrattering length density[1/A^(2)]
+    //  [DEFAULT]=sld_solvent=6e-6 [1/A^(2)]
     double sld_solvent;
 	/// Incoherent Background [1/cm] 0.00
 	//  [DEFAULT]=background=0.0 [1/cm]

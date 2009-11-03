@@ -36,16 +36,16 @@ typedef struct {
     //  [DEFAULT]=vol_frac_ss= 0.2
     double vol_frac_ss;
 
-	///	large sphere scattering length density [1/Å²]
-    //  [DEFAULT]=ls_sld= 3.5e-6 [1/A²]
+	///	large sphere scattering length density [1/A^(2)]
+    //  [DEFAULT]=ls_sld= 3.5e-6 [1/A^{2}]
     double ls_sld;
 
-	///	lsmall sphere scattering length density [1/Å²]
-    //  [DEFAULT]=ss_sld= 5e-7 [1/A²]
+	///	lsmall sphere scattering length density [1/A^(2)]
+    //  [DEFAULT]=ss_sld= 5e-7 [1/A^(2)]
     double ss_sld;
 
-    ///	solvent scattering length density [1/Å²]
-    //  [DEFAULT]=solvent_sld= 6.36e-6 [1/A²]
+    ///	solvent scattering length density [1/A^(2)]
+    //  [DEFAULT]=solvent_sld= 6.36e-6 [1/A^(2)]
     double solvent_sld;
 
 	/// Incoherent Background [1/cm]

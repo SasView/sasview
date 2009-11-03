@@ -23,8 +23,8 @@ typedef struct {
 	/// semi -axis C of the triaxial_ellipsoid [A]
     //  [DEFAULT]=semi_axisC=400.0 [A]
     double semi_axisC;
-    /// Contrast [1/A²]
-    //  [DEFAULT]=contrast=5.3e-6 [1/A²]
+    /// Contrast [1/A^(2)]
+    //  [DEFAULT]=contrast=5.3e-6 [1/A^(2)]
     double contrast;
 	/// Incoherent Background [1/cm] 0.00
 	//  [DEFAULT]=background=0.0 [1/cm]

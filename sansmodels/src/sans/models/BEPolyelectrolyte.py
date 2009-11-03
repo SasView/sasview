@@ -66,7 +66,7 @@ class BEPolyelectrolyte(BaseComponent):
         self.details = {}
         self.details['k']    = ['[barns]', None, None]
         self.details['lb'] = ['[A]', None, None]
-        self.details['h']   = ['[1/A³]', None, None]
+        self.details['h']   = ['[1/A^(2)]', None, None]
         self.details['b']    = ['[A]', None, None]
         self.details['cs'] = ['[mol/L]', None, None]
         self.details['alpha']   = ['', None, None]

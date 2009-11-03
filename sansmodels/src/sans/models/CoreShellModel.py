@@ -34,9 +34,9 @@ class CoreShellModel(CCoreShellModel, BaseComponent):
          scale           = 1.0 
          radius          = 60.0 [A]
          thickness       = 10.0 [A]
-         core_sld        = 1e-006 [1/A²]
-         shell_sld       = 2e-006 [1/A²]
-         solvent_sld     = 3e-006 [1/A²]
+         core_sld        = 1e-006 [1/A^(2)]
+         shell_sld       = 2e-006 [1/A^(2)]
+         solvent_sld     = 3e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
 
     """
@@ -67,9 +67,9 @@ class CoreShellModel(CCoreShellModel, BaseComponent):
         self.details['scale'] = ['', None, None]
         self.details['radius'] = ['[A]', None, None]
         self.details['thickness'] = ['[A]', None, None]
-        self.details['core_sld'] = ['[1/A²]', None, None]
-        self.details['shell_sld'] = ['[1/A²]', None, None]
-        self.details['solvent_sld'] = ['[1/A²]', None, None]
+        self.details['core_sld'] = ['[1/A^(2)]', None, None]
+        self.details['shell_sld'] = ['[1/A^(2)]', None, None]
+        self.details['solvent_sld'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters
@@ -107,7 +107,6 @@ class CoreShellModel(CCoreShellModel, BaseComponent):
         
     def calculate_ER(self):
         """ Calculate the effective radius for P(q)*S(q)
-            @param x: input q, or [q,phi]
             @return: the value of the effective radius
         """       
         return CCoreShellModel.calculate_ER(self)

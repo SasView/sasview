@@ -40,8 +40,8 @@ typedef struct {
 	/// bilayer thicknes [A]
     //  [DEFAULT]=delta=30 [A]
     double delta;
-    /// Contrast [1/A²]
-    //  [DEFAULT]=contrast=5.3e-6 [1/A²]
+    /// Contrast [1/A^(2)]
+    //  [DEFAULT]=contrast=5.3e-6 [1/A^(2)]
     double contrast;
 	 /// Number of lamellar plates
     //  [DEFAULT]=n_plates=20

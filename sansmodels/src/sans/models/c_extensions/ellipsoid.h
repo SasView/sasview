@@ -45,8 +45,8 @@ typedef struct {
     //  [DEFAULT]=radius_b=400 [A]
     double radius_b;
 
-    ///	Contrast [1/A²]
-    //  [DEFAULT]=contrast=3.0e-6 [1/A²]
+    ///	Contrast [1/A^(2)]
+    //  [DEFAULT]=contrast=3.0e-6 [1/A^(2)]
     double contrast;
 
 	/// Incoherent Background [1/cm]

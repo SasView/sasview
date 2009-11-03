@@ -30,14 +30,14 @@ typedef struct {
     /// Shell Thickness [A] 10.0
     //  [DEFAULT]=thickness=10 [A]
     double thickness;
-    ///	Core SLD [1/A²] 1.0e-6
-    //  [DEFAULT]=core_sld=1.0e-6 [1/A²]
+    ///	Core SLD [1/A^(2)] 1.0e-6
+    //  [DEFAULT]=core_sld=1.0e-6 [1/A^(2)]
     double core_sld;
-	/// Shell SLD [1/A²] 2.0e-6
-	//  [DEFAULT]=shell_sld=2.0e-6 [1/A²]
+	/// Shell SLD [1/A^(2)] 2.0e-6
+	//  [DEFAULT]=shell_sld=2.0e-6 [1/A^(2)]
 	double shell_sld;
-	/// Solvent SLD [1/A²] 3.0e-6
-	//  [DEFAULT]=solvent_sld=3.0e-6 [1/A²]
+	/// Solvent SLD [1/A^(2)] 3.0e-6
+	//  [DEFAULT]=solvent_sld=3.0e-6 [1/A^(2)]
 	double solvent_sld;
 	/// Incoherent Background [1/cm] 0.000
 	//  [DEFAULT]=background=0 [1/cm]

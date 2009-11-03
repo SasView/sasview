@@ -34,9 +34,9 @@ class LamellarFFHGModel(CLamellarFFHGModel, BaseComponent):
          scale           = 1.0 
          t_length        = 15.0 [A]
          h_thickness     = 10.0 [A]
-         sld_tail        = 4e-007 [1/A²]
-         sld_head        = 3e-006 [1/A²]
-         sld_solvent     = 6e-006 [1/A²]
+         sld_tail        = 4e-007 [1/A^(2)]
+         sld_head        = 3e-006 [1/A^(2)]
+         sld_solvent     = 6e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
 
     """
@@ -65,9 +65,9 @@ class LamellarFFHGModel(CLamellarFFHGModel, BaseComponent):
         self.details['scale'] = ['', None, None]
         self.details['t_length'] = ['[A]', None, None]
         self.details['h_thickness'] = ['[A]', None, None]
-        self.details['sld_tail'] = ['[1/A²]', None, None]
-        self.details['sld_head'] = ['[1/A²]', None, None]
-        self.details['sld_solvent'] = ['[1/A²]', None, None]
+        self.details['sld_tail'] = ['[1/A^(2)]', None, None]
+        self.details['sld_head'] = ['[1/A^(2)]', None, None]
+        self.details['sld_solvent'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters

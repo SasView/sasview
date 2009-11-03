@@ -22,11 +22,11 @@ typedef struct {
     /// delta bilayer thickness [A]
     //  [DEFAULT]=bi_thick=50.0 [A]
     double bi_thick;
-    /// SLD of bilayer [1/A²]
-    //  [DEFAULT]=sld_bi=1.0e-6 [1/A²]
+    /// SLD of bilayer [1/A^(2)]
+    //  [DEFAULT]=sld_bi=1.0e-6 [1/A^(2)]
     double sld_bi;
-    /// SLD of solvent [1/A²]
-    //  [DEFAULT]=sld_sol=6.3e-6 [1/A²]
+    /// SLD of solvent [1/A^(2)]
+    //  [DEFAULT]=sld_sol=6.3e-6 [1/A^(2)]
     double sld_sol;
 	/// Incoherent Background [1/cm] 0.00
 	//  [DEFAULT]=background=0.0 [1/cm]

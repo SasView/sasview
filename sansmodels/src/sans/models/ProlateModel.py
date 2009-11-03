@@ -36,8 +36,8 @@ class ProlateModel(CProlateModel, BaseComponent):
          minor_core      = 50.0 [A]
          major_shell     = 110.0 [A]
          minor_shell     = 60.0 [A]
-         contrast        = 1e-006 [1/A²]
-         sld_solvent     = 6.3e-006 [1/A²]
+         contrast        = 1e-006 [1/A^(2)]
+         sld_solvent     = 6.3e-006 [1/A^(2)]
          background      = 0.001 [1/cm]
 
     """
@@ -77,8 +77,8 @@ class ProlateModel(CProlateModel, BaseComponent):
         self.details['minor_core'] = ['[A]', None, None]
         self.details['major_shell'] = ['[A]', None, None]
         self.details['minor_shell'] = ['[A]', None, None]
-        self.details['contrast'] = ['[1/A²]', None, None]
-        self.details['sld_solvent'] = ['[1/A²]', None, None]
+        self.details['contrast'] = ['[1/A^(2)]', None, None]
+        self.details['sld_solvent'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters

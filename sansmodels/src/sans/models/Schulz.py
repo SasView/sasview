@@ -92,7 +92,6 @@ class Schulz(CSchulz, BaseComponent):
         
     def calculate_ER(self):
         """ Calculate the effective radius for P(q)*S(q)
-            @param x: input q, or [q,phi]
             @return: the value of the effective radius
         """       
         return CSchulz.calculate_ER(self)

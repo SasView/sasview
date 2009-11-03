@@ -35,14 +35,14 @@ typedef struct {
 	/// Thickness of the staked disk [A]
     //  [DEFAULT]=layer_thick=15.0 [A]
     double layer_thick;
-	/// Core scattering length density[1/A²]
-    //  [DEFAULT]=core_sld=4e-6 [1/A²]
+	/// Core scattering length density[1/A^(2)]
+    //  [DEFAULT]=core_sld=4e-6 [1/A^(2)]
     double core_sld;
-	/// layer scattering length density[1/A²]
-    //  [DEFAULT]=layer_sld=-4e-7 [1/A²]
+	/// layer scattering length density[1/A^(2)]
+    //  [DEFAULT]=layer_sld=-4e-7 [1/A^(2)]
     double layer_sld;
-	/// solvent scattering length density[1/A²]
-    //  [DEFAULT]=solvent_sld=5.0e-6 [1/A²]
+	/// solvent scattering length density[1/A^(2)]
+    //  [DEFAULT]=solvent_sld=5.0e-6 [1/A^(2)]
     double solvent_sld;
     /// number of stacking
     //  [DEFAULT]=n_stacking=1

@@ -24,16 +24,16 @@ typedef struct {
     //  [DEFAULT]=radius= 100.0 [A]
     double radius;
 
-	///	shell thickness [Å]
+	///	shell thickness [A]
     //  [DEFAULT]=thickness= 30.0 [A]
     double thickness;
 
-	///	core scattering length density [1/Å²]
-    //  [DEFAULT]=core_sld= 6.36e-6 [1/A²]
+	///	core scattering length density [1/A^(2)]
+    //  [DEFAULT]=core_sld= 6.36e-6 [1/A^(2)]
     double core_sld;
 
-    ///	shell scattering length density [1/Å²]
-    //  [DEFAULT]=shell_sld= 5.0e-7 [1/A²]
+    ///	shell scattering length density [1/A^(2)]
+    //  [DEFAULT]=shell_sld= 5.0e-7 [1/A^(2)]
     double shell_sld;
 
 	/// Incoherent Background [1/cm]

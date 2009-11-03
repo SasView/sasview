@@ -33,7 +33,7 @@ class SphereModel(CSphereModel, BaseComponent):
     	List of default parameters:
          scale           = 1.0 
          radius          = 60.0 [A]
-         contrast        = 1e-006 [1/A²]
+         contrast        = 1e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
 
     """
@@ -63,7 +63,7 @@ class SphereModel(CSphereModel, BaseComponent):
         self.details = {}
         self.details['scale'] = ['', None, None]
         self.details['radius'] = ['[A]', None, None]
-        self.details['contrast'] = ['[1/A²]', None, None]
+        self.details['contrast'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters

@@ -32,8 +32,8 @@ typedef struct {
     /// Length of the cylinder [A]
     //  [DEFAULT]=length=400.0 [A]
     double length;
-    /// Contrast [1/A²]
-    //  [DEFAULT]=contrast=3.0e-6 [1/A²]
+    /// Contrast [1/A^(2)]
+    //  [DEFAULT]=contrast=3.0e-6 [1/A^(2)]
     double contrast;
 	/// Incoherent Background [1/cm] 0.00
 	//  [DEFAULT]=background=0.0 [1/cm]

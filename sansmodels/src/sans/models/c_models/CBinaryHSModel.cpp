@@ -85,14 +85,10 @@ CBinaryHSModel_init(CBinaryHSModel *self, PyObject *args, PyObject *kwds)
         self->model = new BinaryHSModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"vol_frac_ls",Py_BuildValue("d",0.100000));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000));
-        PyDict_SetItemString(self->params,"vol_frac_ss",Py_BuildValue("d",0.200000));
-        PyDict_SetItemString(self->params,"solvent_sld",Py_BuildValue("d",0.000006));
-        PyDict_SetItemString(self->params,"ls_sld",Py_BuildValue("d",0.000003));
-        PyDict_SetItemString(self->params,"ss_sld",Py_BuildValue("d",0.000000));
         PyDict_SetItemString(self->params,"s_radius",Py_BuildValue("d",25.000000));
+        PyDict_SetItemString(self->params,"vol_frac_ss",Py_BuildValue("d",0.200000));
         PyDict_SetItemString(self->params,"l_radius",Py_BuildValue("d",100.000000));
+        PyDict_SetItemString(self->params,"vol_frac_ls",Py_BuildValue("d",0.100000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
@@ -233,14 +229,10 @@ static PyObject * evalDistribution(CBinaryHSModel *self, PyObject *args){
 	// Get parameters
 	
 	    // Reader parameter dictionary
-    self->model->vol_frac_ls = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ls") );
-    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->vol_frac_ss = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ss") );
-    self->model->solvent_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "solvent_sld") );
-    self->model->ls_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "ls_sld") );
-    self->model->ss_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "ss_sld") );
     self->model->s_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "s_radius") );
+    self->model->vol_frac_ss = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ss") );
     self->model->l_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "l_radius") );
+    self->model->vol_frac_ls = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ls") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -310,14 +302,10 @@ static PyObject * run(CBinaryHSModel *self, PyObject *args) {
 	// Get parameters
 	
 	    // Reader parameter dictionary
-    self->model->vol_frac_ls = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ls") );
-    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->vol_frac_ss = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ss") );
-    self->model->solvent_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "solvent_sld") );
-    self->model->ls_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "ls_sld") );
-    self->model->ss_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "ss_sld") );
     self->model->s_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "s_radius") );
+    self->model->vol_frac_ss = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ss") );
     self->model->l_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "l_radius") );
+    self->model->vol_frac_ls = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ls") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -374,14 +362,10 @@ static PyObject * calculate_ER(CBinaryHSModel *self) {
 	// Get parameters
 	
 	    // Reader parameter dictionary
-    self->model->vol_frac_ls = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ls") );
-    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->vol_frac_ss = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ss") );
-    self->model->solvent_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "solvent_sld") );
-    self->model->ls_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "ls_sld") );
-    self->model->ss_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "ss_sld") );
     self->model->s_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "s_radius") );
+    self->model->vol_frac_ss = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ss") );
     self->model->l_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "l_radius") );
+    self->model->vol_frac_ls = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ls") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -407,14 +391,10 @@ static PyObject * runXY(CBinaryHSModel *self, PyObject *args) {
 	// Get parameters
 	
 	    // Reader parameter dictionary
-    self->model->vol_frac_ls = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ls") );
-    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->vol_frac_ss = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ss") );
-    self->model->solvent_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "solvent_sld") );
-    self->model->ls_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "ls_sld") );
-    self->model->ss_sld = PyFloat_AsDouble( PyDict_GetItemString(self->params, "ss_sld") );
     self->model->s_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "s_radius") );
+    self->model->vol_frac_ss = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ss") );
     self->model->l_radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "l_radius") );
+    self->model->vol_frac_ls = PyFloat_AsDouble( PyDict_GetItemString(self->params, "vol_frac_ls") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();

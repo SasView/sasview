@@ -42,11 +42,11 @@ typedef struct {
 	/// Minor shell of oblate [A]
     //  [DEFAULT]=minor_shell=30.0 [A]
     double minor_shell;
-    ///  Scattering contrast [1/A²]
-    //  [DEFAULT]=contrast=1.0e-6 [1/A²]
+    ///  Scattering contrast [1/A^(2)]
+    //  [DEFAULT]=contrast=1.0e-6 [1/A^(2)]
     double contrast;
-	/// Solvent scattering length density  [1/A²]
-    //  [DEFAULT]=sld_solvent=6.3e-6 [1/A²]
+	/// Solvent scattering length density  [1/A^(2)]
+    //  [DEFAULT]=sld_solvent=6.3e-6 [1/A^(2)]
     double sld_solvent;
 	/// Incoherent Background [1/cm] 0.001
 	//  [DEFAULT]=background=0.001 [1/cm]

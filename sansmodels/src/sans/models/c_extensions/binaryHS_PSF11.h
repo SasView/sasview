@@ -8,10 +8,10 @@
 	[DISP_PARAMS] = l_radius,s_radius
 	[DESCRIPTION] =<text>
 						Model parameters:
-						
+
 						l_radius : large radius of the binary hard sphere
 						s_radius : small radius of the binary hard sphere
-						vol_frac_ls : volume fraction of large spheres 
+						vol_frac_ls : volume fraction of large spheres
 						vol_frac_ss : volume fraction of small spheres
 						ls_sld: large sphere  scattering length density
 						ss_sld: small sphere scattering length density
@@ -22,7 +22,7 @@
 	[ORIENTATION_PARAMS]= <text> </text>
  */
 typedef struct {
-    
+
 	///	large radius of the binary hard sphere [A]
     //  [DEFAULT]=l_radius= 160.0 [A]
     double l_radius;
@@ -31,24 +31,24 @@ typedef struct {
     //  [DEFAULT]=s_radius= 25.0 [A]
     double s_radius;
 
-	///	volume fraction of large spheres 
-    //  [DEFAULT]=vol_frac_ls= 0.2 
+	///	volume fraction of large spheres
+    //  [DEFAULT]=vol_frac_ls= 0.2
     double vol_frac_ls;
 
-	///	volume fraction of small spheres 
-    //  [DEFAULT]=vol_frac_ss= 0.2 
+	///	volume fraction of small spheres
+    //  [DEFAULT]=vol_frac_ss= 0.2
     double vol_frac_ss;
 
-	///	large sphere scattering length density [1/Å²]
-    //  [DEFAULT]=ls_sld= 3.5e-6 [1/A²]
+	///	large sphere scattering length density [1/A^(2)]
+    //  [DEFAULT]=ls_sld= 3.5e-6 [1/A^(2)]
     double ls_sld;
 
-	///	lsmall sphere scattering length density [1/Å²]
-    //  [DEFAULT]=ss_sld= 5e-7 [1/A²]
+	///	lsmall sphere scattering length density [1/A^(2)]
+    //  [DEFAULT]=ss_sld= 5e-7 [1/A^(2)]
     double ss_sld;
 
-    ///	solvent scattering length density [1/Å²]
-    //  [DEFAULT]=solvent_sld= 6.36e-6 [1/A²]
+    ///	solvent scattering length density [1/A^(2)]
+    //  [DEFAULT]=solvent_sld= 6.36e-6 [1/A^(2)]
     double solvent_sld;
 
 	/// Incoherent Background [1/cm]

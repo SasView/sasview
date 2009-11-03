@@ -33,8 +33,8 @@ class LamellarModel(CLamellarModel, BaseComponent):
     	List of default parameters:
          scale           = 1.0 
          bi_thick        = 50.0 [A]
-         sld_bi          = 1e-006 [1/A²]
-         sld_sol         = 6.3e-006 [1/A²]
+         sld_bi          = 1e-006 [1/A^(2)]
+         sld_sol         = 6.3e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
 
     """
@@ -63,8 +63,8 @@ class LamellarModel(CLamellarModel, BaseComponent):
         self.details = {}
         self.details['scale'] = ['', None, None]
         self.details['bi_thick'] = ['[A]', None, None]
-        self.details['sld_bi'] = ['[1/A²]', None, None]
-        self.details['sld_sol'] = ['[1/A²]', None, None]
+        self.details['sld_bi'] = ['[1/A^(2)]', None, None]
+        self.details['sld_sol'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
 
 		## fittable parameters

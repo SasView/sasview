@@ -52,16 +52,16 @@ typedef struct {
     //  [DEFAULT]=length=400.0 [A]
     double length;
 
-    /// Core SLD [1/A²]
-    //  [DEFAULT]=core_sld=1.0e-6 [1/A²]
+    /// Core SLD [1/A^(2)]
+    //  [DEFAULT]=core_sld=1.0e-6 [1/A^(2)]
     double core_sld;
 
-    /// Shell SLD [1/A²]
-    //  [DEFAULT]=shell_sld=4.0e-6 [1/A²]
+    /// Shell SLD [1/A^(2)]
+    //  [DEFAULT]=shell_sld=4.0e-6 [1/A^(2)]
     double shell_sld;
 
-    /// Solvent SLD [1/A²]
-    //  [DEFAULT]=solvent_sld=1.0e-6 [1/A²]
+    /// Solvent SLD [1/A^(2)]
+    //  [DEFAULT]=solvent_sld=1.0e-6 [1/A^(2)]
     double solvent_sld;
 
 	/// Incoherent Background [1/cm]

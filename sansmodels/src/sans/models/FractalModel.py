@@ -66,8 +66,8 @@ class FractalModel(BaseComponent):
         self.details['radius']      = ['[A]',    None, None]
         self.details['fractal_dim'] = ['',       0,  None]
         self.details['corr_length'] = ['[A]',    None, None]
-        self.details['block_sld']   = ['[1/A²]',  None, None]
-        self.details['solvent_sld'] = ['[1/A²]',  None, None]
+        self.details['block_sld']   = ['[1/A^(2)]',  None, None]
+        self.details['solvent_sld'] = ['[1/A^(2)]',  None, None]
         self.details['background']  = ['[1/cm]', None, None]
        
                
