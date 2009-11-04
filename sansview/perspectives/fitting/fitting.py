@@ -181,9 +181,13 @@ class Plugin:
         
     def get_context_menu(self, graph=None):
         """
-            Get the context menu items available for P(r)
+            Get the context menu items available for P(r).them allow fitting option
+            for Data2D and Data1D only.
+            
             @param graph: the Graph object to which we attach the context menu
             @return: a list of menu items with call-back function
+            @note: if Data1D was generated from Theory1D  
+                    the fitting option is not allowed
         """
         self.graph = graph
         fitOption = "Select data for fitting"
@@ -202,6 +206,8 @@ class Plugin:
                 if item.name==graph.selected_plottable :
                     if item.name !="$I_{obs}(q)$" and item.name !="$P_{fit}(r)$":
                         if hasattr(item, "group_id"):
+                            # if is_data is true , this in an actual data loaded
+                            #else it is a data created from a theory model
                             if hasattr(item,"is_data"):
                                 if item.is_data:
                                     return [[fitOption, fitOpenHint, self._onSelect]]
