@@ -191,10 +191,10 @@ class Plugin:
             @note: if Data1D was generated from Theory1D  
                     the fitting option is not allowed
         """
-        #TODO: clean this up so that the string are not copied 
-        #      multiple times.
-        self.graph=graph
-       
+        self.graph = graph
+        fitOption = "Select data for fitting"
+        fitOpenHint =  "Dialog with fitting parameters "
+               
         for item in graph.plottables:
             if item.__class__.__name__ is "Data2D":
                 
