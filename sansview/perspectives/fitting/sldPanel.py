@@ -14,6 +14,14 @@ _BOX_WIDTH = 76
 _STATICBOX_WIDTH = 350
 _SCALE = 1e-6
 
+#SLD panel size 
+if sys.platform.count("win32")>0:
+    _STATICBOX_WIDTH = 350
+    PANEL_SIZE = 400
+else:
+    _STATICBOX_WIDTH = 380
+    PANEL_SIZE = 430
+
 class SldPanel(wx.Panel):
     """
         Provides the SLD calculator GUI.
@@ -34,6 +42,11 @@ class SldPanel(wx.Panel):
         """
             Draw window content
         """
+        unit_a = '[A]'
+        unit_density = '[g/cm^(3)]'
+        unit_sld= '[1/A^(2)]'
+        unit_cm1='[1/cm]'
+        unit_cm='[cm]'
         sizer_input = wx.GridBagSizer(5,5)
         sizer_output = wx.GridBagSizer(5,5)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
@@ -45,13 +58,15 @@ class SldPanel(wx.Panel):
         boxsizer1 = wx.StaticBoxSizer(inputbox, wx.VERTICAL)
         boxsizer1.SetMinSize((_STATICBOX_WIDTH,-1))
         
-        compound_txt = wx.StaticText(self, -1, 'Compound')
+        compound_txt = wx.StaticText(self, -1, 'Compound ')
         self.compound_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        density_txt = wx.StaticText(self, -1, 'Density(g/cm^3)')
+        density_txt = wx.StaticText(self, -1, 'Density ')
         self.density_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        wavelength_txt = wx.StaticText(self, -1, 'Wavelength (A)')
+        unit_density_txt = wx.StaticText(self, -1, unit_density)
+        wavelength_txt = wx.StaticText(self, -1, 'Wavelength ')
         self.wavelength_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.wavelength_ctl.SetValue(str(self.wavelength))
+        unit_a_txt = wx.StaticText(self, -1, unit_a)
         iy = 0
         ix = 0
         sizer_input.Add(compound_txt,(iy, ix),(1,1),\
@@ -66,12 +81,18 @@ class SldPanel(wx.Panel):
         ix +=1
         sizer_input.Add(self.density_ctl,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+        ix +=1
+        sizer_input.Add(unit_density_txt,(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         iy += 1
         ix = 0
         sizer_input.Add(wavelength_txt,(iy, ix),(1,1),\
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix +=1
         sizer_input.Add(self.wavelength_ctl,(iy, ix),(1,1),\
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+        ix +=1
+        sizer_input.Add(unit_a_txt,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         boxsizer1.Add( sizer_input )
         sizer1.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
@@ -80,9 +101,6 @@ class SldPanel(wx.Panel):
         boxsizer2 = wx.StaticBoxSizer(outputbox, wx.VERTICAL)
         boxsizer2.SetMinSize((_STATICBOX_WIDTH,-1))
         
-        unit_a= '[A^(-2)]'
-        unit_cm1='[cm^(-1)]'
-        unit_cm='[cm]'
         i_complex= '+ i'
         neutron_sld_txt = wx.StaticText(self, -1, 'Neutron SLD')
         self.neutron_sld_reel_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
@@ -91,7 +109,7 @@ class SldPanel(wx.Panel):
         self.neutron_sld_im_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.neutron_sld_im_ctl.SetEditable(False)
         self.neutron_sld_im_ctl.SetToolTipString("Neutron SLD imaginary.")
-        neutron_sld_units_txt = wx.StaticText(self, -1, unit_a)
+        neutron_sld_units_txt = wx.StaticText(self, -1, unit_sld)
         
         cu_ka_sld_txt = wx.StaticText(self, -1, 'Cu Ka SLD')
         self.cu_ka_sld_reel_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
@@ -100,7 +118,7 @@ class SldPanel(wx.Panel):
         self.cu_ka_sld_im_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.cu_ka_sld_im_ctl.SetEditable(False)
         self.cu_ka_sld_im_ctl.SetToolTipString("Cu Ka SLD imaginary.")
-        cu_ka_sld_units_txt = wx.StaticText(self, -1, unit_a)
+        cu_ka_sld_units_txt = wx.StaticText(self, -1, unit_sld)
         
         mo_ka_sld_txt = wx.StaticText(self, -1, 'Mo Ka SLD')
         self.mo_ka_sld_reel_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
@@ -109,7 +127,7 @@ class SldPanel(wx.Panel):
         self.mo_ka_sld_im_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.mo_ka_sld_im_ctl.SetEditable(False)
         self.mo_ka_sld_im_ctl.SetToolTipString("Mo Ka SLD reel.")
-        mo_ka_sld_units_txt = wx.StaticText(self, -1, unit_a)
+        mo_ka_sld_units_txt = wx.StaticText(self, -1, unit_sld)
         
         neutron_inc_txt = wx.StaticText(self, -1, 'Neutron Inc. Xs')
         self.neutron_inc_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
@@ -338,7 +356,7 @@ class SldPanel(wx.Panel):
                
 class SldWindow(wx.Frame):
     def __init__(self, parent=None, id=1, title="SLD Calculator",base=None):
-        wx.Frame.__init__(self, parent, id, title, size=(400, 400))
+        wx.Frame.__init__(self, parent, id, title, size=( PANEL_SIZE,  PANEL_SIZE))
         
         self.panel = SldPanel(self, base=base)
         self.Centre()

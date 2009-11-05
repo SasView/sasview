@@ -30,7 +30,8 @@ class ModelPage(BasicPage):
             Initialization of the Panel
         """
         self._fill_model_sizer( self.sizer1)  
-        self._fill_range_sizer() 
+        self._fill_range_sizer()
+        self.engine_type = None 
          
         description=""
         if self.model!=None:

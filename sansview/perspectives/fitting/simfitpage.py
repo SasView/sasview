@@ -1,7 +1,13 @@
 
 import sys,re,string, wx  
 import wx.lib.newevent 
-from sans.guicomm.events import StatusEvent    
+from sans.guicomm.events import StatusEvent 
+   
+#Control panel width 
+if sys.platform.count("win32")>0:
+    PANEL_WID = 420
+else:
+    PANEL_WID = 490
 
             
 def get_fittableParam( model):
@@ -66,15 +72,16 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.sizer1 = wx.BoxSizer(wx.VERTICAL)
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
         self.sizer3 = wx.BoxSizer(wx.VERTICAL)
-        self.sizer1.SetMinSize((375,-1))
-        self.sizer2.SetMinSize((375,-1))
-        self.sizer3.SetMinSize((375,-1))
+
+        self.sizer1.SetMinSize((PANEL_WID,-1))
+        self.sizer2.SetMinSize((PANEL_WID,-1))
+        self.sizer3.SetMinSize((PANEL_WID,-1))
         self.vbox.Add(self.sizer1)
         self.vbox.Add(self.sizer2)
         self.vbox.Add(self.sizer3)
         
     def set_scroll(self):
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         self.Layout()  
          
     def set_layout(self):
@@ -106,7 +113,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 self.sizer_constraints.Remove(sizer)
               
                 self.sizer2.Layout()
-                self.SetScrollbars(20,20,200,100)
+                self.SetScrollbars(20,20,25,65)
                 self.constraints_list.remove(item)
                 self.nb_constraint -= 1
                 break
@@ -225,7 +232,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         
         #------------------------------------------------------
         if len(self.page_finder)==0:
-            sizer_title.Add(wx.StaticText(self,-1," No fit combination available !"))
+            sizer_title.Add(wx.StaticText(self,-1," No fit combinations are found!"))
         else:
             ## store model  
             self._store_model()
@@ -252,7 +259,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
        
         self.sizer1.Add(boxsizer1,1, wx.EXPAND | wx.ALL, 10)
         self.sizer1.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         self.AdjustScrollbars()
         
     def _store_model(self):
@@ -301,7 +308,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
                 self.sizer_constraints.Layout()
                 self.sizer2.Layout()
-                self.SetScrollbars(20,20,200,100)
+                self.SetScrollbars(20,20,25,65)
                 return
             
         if len(self.model_toFit) < 2 :
@@ -309,7 +316,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
             self.sizer_constraints.Layout()
             self.sizer2.Layout()
-            self.SetScrollbars(20,20,200,100)
+            self.SetScrollbars(20,20,25,65)
             return
             
         sizer_constraint =  wx.BoxSizer(wx.HORIZONTAL)
@@ -356,7 +363,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.nb_constraint += 1
         self.sizer_constraints.Layout()
         self.sizer2.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         
     def _hide_constraint(self): 
         """
@@ -375,7 +382,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.sizer_constraints.Clear(True) 
         self.sizer_constraints.Layout()    
         self.sizer2.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         self.AdjustScrollbars()    
                 
     
@@ -403,7 +410,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
        
        
         self.sizer2.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         
         
     def _on_select_param(self, event):
@@ -426,7 +433,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         
         
         self.sizer2.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         
         
     def _onAdd_constraint(self, event):  
@@ -485,7 +492,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         boxsizer1.Add(sizer_button, flag= wx.TOP|wx.BOTTOM,border=10)
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer3.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         
     def _fill_sizer_constraint(self):
         """
@@ -538,7 +545,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         
         self.sizer2.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer2.Layout()
-        self.SetScrollbars(20,20,200,100)
+        self.SetScrollbars(20,20,25,65)
         
         
         

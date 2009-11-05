@@ -18,9 +18,9 @@ _QMAX_DEFAULT = 0.13
 _NPTS_DEFAULT = 50
 #Control panel width 
 if sys.platform.count("win32")>0:
-    PANEL_WIDTH = 420
+    PANEL_WIDTH = 430
 else:
-    PANEL_WIDTH = 490
+    PANEL_WIDTH = 500
     
 class BasicPage(wx.ScrolledWindow):
     """
@@ -112,13 +112,13 @@ class BasicPage(wx.ScrolledWindow):
         #self._redo.Enable(False)
         #wx.EVT_MENU(self, id, self.onRedo)       
         #self.popUpMenu.AppendSeparator()
-                
-        id = wx.NewId()
-        self._keep = wx.MenuItem(self.popUpMenu,id,"BookMark"," Keep the panel status to recall it later")
-        self.popUpMenu.AppendItem(self._keep)
-        self._keep.Enable(True)
-        wx.EVT_MENU(self, id, self.onSave)
-        self.popUpMenu.AppendSeparator()
+        if sys.platform.count("win32")>0:        
+            id = wx.NewId()
+            self._keep = wx.MenuItem(self.popUpMenu,id,"BookMark"," Keep the panel status to recall it later")
+            self.popUpMenu.AppendItem(self._keep)
+            self._keep.Enable(True)
+            wx.EVT_MENU(self, id, self.onSave)
+            self.popUpMenu.AppendSeparator()
         
         ## Default locations
         self._default_save_location = os.getcwd()     
@@ -490,7 +490,13 @@ class BasicPage(wx.ScrolledWindow):
         #if not hasattr(self.model, "_persistency_dict"):
         #self.model._persistency_dict = {}
         #self.state.model._persistency_dict= copy.deepcopy(self.model._persistency_dict)
-                        
+        
+        #Remember fit engine_type for fit panel
+        if self.engine_type == None and self.manager !=None:
+            self.engine_type = self.manager._return_engine_type()
+        
+        self.state.engine_type = self.engine_type
+       
         new_state = self.state.clone()
         new_state.model.name = self.state.model.name
         
@@ -515,36 +521,13 @@ class BasicPage(wx.ScrolledWindow):
         self.popUpMenu.Append(id,name,str(msg))
         wx.EVT_MENU(self, id, self.onResetModel)
         
-        
     def onSetFocus(self, evt):
         """
             highlight the current textcrtl and hide the error text control shown 
             after fitting
+            :Not implemented.
         """
-        if hasattr(self,"text2_3"):
-            self.text2_3.Hide()
-        if len(self.parameters)>0:
-            for item in self.parameters:
-                ## hide statictext +/-    
-                if item[3]!=None:
-                    item[3].Hide()
-                ## hide textcrtl  for error after fit
-                if item[4]!=None:
-                    item[4].Clear()
-                    item[4].Hide()
-        if len(self.fittable_param)>0:
-            for item in self.fittable_param:
-                ## hide statictext +/-    
-                if item[3]!=None:
-                    item[3].Hide()
-                ## hide textcrtl  for error after fit
-                if item[4]!=None:
-                    item[4].Clear()
-                    item[4].Hide()
-        ##Is this layout necessary? Had a problem w/MAC.
-        #self.Layout()
         return
-    
     
     def read_file(self, path):
         """
@@ -593,7 +576,7 @@ class BasicPage(wx.ScrolledWindow):
             self.disp_list= self.model.getDispParamList()
             self.state.disp_list= copy.deepcopy(self.disp_list)
             self.state.model = self.model.clone()
-            
+
         self.state.enable2D = copy.deepcopy(self.enable2D)
         self.state.values= copy.deepcopy(self.values)
         self.state.weights = copy.deepcopy( self.weights)
@@ -664,14 +647,15 @@ class BasicPage(wx.ScrolledWindow):
 
     def save_current_state_fit(self):
         """
-            Store current state
+            Store current state for fit_page
         """
         ## save model option
         if self.model!= None:
             self.disp_list= self.model.getDispParamList()
             self.state.disp_list= copy.deepcopy(self.disp_list)
             self.state.model = self.model.clone()
-            
+        #if hasattr(self,self.engine_type)> 0:
+            #self.state.engine_type = self.engine_type.clone() 
         self.state.enable2D = copy.deepcopy(self.enable2D)
         self.state.values= copy.deepcopy(self.values)
         self.state.weights = copy.deepcopy( self.weights)
@@ -757,7 +741,7 @@ class BasicPage(wx.ScrolledWindow):
             from DataLoader.qsmearing import smear_selection
             self.smearer= smear_selection( self.data )
         self.enable2D= state.enable2D
-        
+        self.engine_type = state.engine_type
         #???
         self.disp_cb_dict = state.disp_cb_dict
         self.disp_list =state.disp_list
@@ -865,7 +849,37 @@ class BasicPage(wx.ScrolledWindow):
         self.state = state.clone() 
         self._draw_model()
        
+    def _clear_Err_on_Fit(self):
+        """
+            hide the error text control shown 
+            after fitting
+        """
         
+        if hasattr(self,"text2_3"):
+            self.text2_3.Hide()
+
+        if len(self.parameters)>0:
+            for item in self.parameters:
+                ## hide statictext +/-    
+                if item[3]!=None and item[3].IsShown():
+                    item[3].Hide()
+                ## hide textcrtl  for error after fit
+                if item[4]!=None and item[4].IsShown():                   
+                    item[4].Clear()
+                    item[4].Hide()
+        if len(self.fittable_param)>0:
+            for item in self.fittable_param:
+                ## hide statictext +/-    
+                if item[3]!=None and item[3].IsShown():
+                    item[3].Hide()
+                ## hide textcrtl  for error after fit
+                if item[4]!=None and item[4].IsShown():
+                    item[4].Clear()
+                    item[4].Hide()
+        ##Is this layout necessary? Had a problem w/MAC.
+        #self.Layout()
+        
+        return        
     def _selectDlg(self):
         """
             open a dialog file to selected the customized dispersity 
@@ -912,7 +926,7 @@ class BasicPage(wx.ScrolledWindow):
         self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
         self.state.structurebox= self.structurebox.GetCurrentSelection()
         self.state.formfactorbox = self.formfactorbox.GetCurrentSelection()
-        
+       
         #self._undo.Enable(True)
         ## post state to fit panel
         event = PageInfoEvent(page = self)
@@ -944,11 +958,12 @@ class BasicPage(wx.ScrolledWindow):
             is_modified =self._check_value_enter( self.fittable_param ,is_modified)
             is_modified =self._check_value_enter( self.fixed_param ,is_modified)
             is_modified =self._check_value_enter( self.parameters ,is_modified) 
-                   
+     
             if is_modified:
                 self.sizer3.Layout()
                 self.Layout()
                 self.Refresh()
+
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
@@ -971,21 +986,19 @@ class BasicPage(wx.ScrolledWindow):
                 else:
                     msg= "Cannot Plot :Must enter a number!!!  "
                     wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-                    
+                
             
             ## if any value is modify draw model with new value
             if is_modified:
                 self.state_change= True
                 self._draw_model() 
-                self.save_current_state()
-                
-            self.is_modified = is_modified  
+                self.save_current_state() 
                
-    def _is_modified(self):
+    def _is_modified(self, is_modified):
         """
             return to self._is_modified
         """
-        return self.is_modified
+        return is_modified
                        
     def _reset_parameters_state(self, listtorestore,statelist):
         """
@@ -995,6 +1008,7 @@ class BasicPage(wx.ScrolledWindow):
             return
         if len(statelist)!=  len(listtorestore) :
             return
+
         for j in range(len(listtorestore)):
             item_page = listtorestore[j]
             item_page_info = statelist[j]
@@ -1244,7 +1258,7 @@ class BasicPage(wx.ScrolledWindow):
                             id= self.struct_rbutton.GetId() ) 
         self.Bind( wx.EVT_RADIOBUTTON, self._show_combox,
                             id= self.plugin_rbutton.GetId() )  
-		#MAC needs SetValue
+        #MAC needs SetValue
         self.shape_rbutton.SetValue(True)
       
         sizer_radiobutton = wx.GridSizer(2, 2,5, 5)
@@ -1437,17 +1451,20 @@ class BasicPage(wx.ScrolledWindow):
         """ 
             when enter value on panel redraw model according to changed
         """
+
         tcrtl= event.GetEventObject()
+        
         ## save current state
         self.save_current_state()
         if event !=None:
             #self._undo.Enable(True)
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event)
-            
+              
         if check_float(tcrtl):
             
             self._onparamEnter_helper()
+            
         else:
             msg= "Cannot Plot :Must enter a number!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
@@ -1460,14 +1477,15 @@ class BasicPage(wx.ScrolledWindow):
             each item of the list should be as follow:
             item=[cb state, name, value, "+/-", error of fit, min, max , units]
         """  
-        self.is_modified =  modified
+        is_modified =  modified
         if len(list)==0:
-            return self.is_modified
+            return is_modified
         for item in list:
             try:
                 name = str(item[1])
-                if hasattr(self,"text2_3"):
-                    self.text2_3.Hide()
+                if hasattr(self,"text2_3") and self.text2_3.IsShown():
+                    if hasattr(self,"item[4]")and self.item[4] == None:
+                        self.text2_3.Hide()
                 ## check model parameters range
                 ## check minimun value
                 param_min= None
@@ -1475,7 +1493,6 @@ class BasicPage(wx.ScrolledWindow):
                 if item[5]!= None:
                     if item[5].GetValue().lstrip().rstrip()!="":
                         param_min = float(item[5].GetValue())
-                    
                 ## check maximum value
                 if item[6]!= None:
                     if item[6].GetValue().lstrip().rstrip()!="":
@@ -1488,30 +1505,28 @@ class BasicPage(wx.ScrolledWindow):
                         msg+= "name %s of model %s "%(name, self.model.name)
                         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
                 if name in self.model.details.keys():   
-                    self.model.details[name][1:]= param_min,param_max
-                
+                    self.model.details[name][1:3]= param_min,param_max
+                                    
                 ## hide statictext +/-    
-                if item[3]!=None:
-                    item[3].Hide()
+                #if item[3]!=None and item[3].IsShown():
+                #    item[3].Hide()
                 ## hide textcrtl  for error after fit
-                if item[4]!=None:
-                    item[4].Clear()
-                    item[4].Hide()
-                    
+                #if item[4]!=None and item[4].IsShown():
+                #    item[4].Clear()
+                #    item[4].Hide()
+
                 value= float(item[2].GetValue())
-                
                 # If the value of the parameter has changed,
                 # +update the model and set the is_modified flag
                 if value != self.model.getParam(name):
                     self.model.setParam(name,value)
-                    self.is_modified = True   
-            
+                    is_modified = True   
+
             except:
                 msg= "Model Drawing  Error:wrong value entered : %s"% sys.exc_value
                 wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
                 return 
-        
-        return self.is_modified 
+        return is_modified 
         
  
     def _set_dipers_Param(self, event):
@@ -1532,9 +1547,9 @@ class BasicPage(wx.ScrolledWindow):
       
             return
         #remove previous added details for dispersion parameters.
-        for item in self.model.details.keys():
-            if item in self.model.fixed:
-                del self.model.details [item]                           
+        #for item in self.model.dispersion.keys():#for item in self.model.details.keys():
+        #    if item in self.model.fixed and item in self.model.details.keys():
+        #        del self.model.details [item]                           
     
         if self.enable_disp.GetValue():
             self.model_disp.Show(True)
@@ -1821,8 +1836,8 @@ class BasicPage(wx.ScrolledWindow):
         #----------------------------------------------------------------
         self.sizer5.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer5.Layout()
-        self.Layout()
-        self.SetScrollbars(20,20,25,65)
+        #self.Layout()
+        #self.SetScrollbars(20,20,25,65)
     
     
     def _fill_save_sizer(self):

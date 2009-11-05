@@ -18,6 +18,8 @@ class PageState(object):
         self.reset = False
         #Data used for fitting 
         self.data = data
+        #engine type
+        self.engine_type = None
         # flag to allow data2D plot
         self.enable2D = False
         # model on which the fit would be performed
@@ -100,6 +102,7 @@ class PageState(object):
         obj          = PageState( self.parent,model= model )
         obj.data = copy.deepcopy(self.data)
         obj.model_list_box = copy.deepcopy(self.model_list_box)
+        obj.engine_type = copy.deepcopy(self.engine_type)
         
         obj.formfactorcombobox= self.formfactorcombobox
         obj.structurecombobox  =self.structurecombobox  
