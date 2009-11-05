@@ -39,7 +39,7 @@ class SansParameter(park.Parameter):
             return the range of parameter
         """
         #if not  self.name in self._model.getDispParamList():
-        lo,hi = self._model.details[self.name][1:]
+        lo,hi = self._model.details[self.name][1:3]
         if lo is None: lo = -numpy.inf
         if hi is None: hi = numpy.inf
         #else:
@@ -56,7 +56,7 @@ class SansParameter(park.Parameter):
             override _setrange of park parameter
             @param r: the value of the range to set
         """
-        self._model.details[self.name][1:] = r
+        self._model.details[self.name][1:3] = r
     range = property(_getrange,_setrange)
     
 class Model(park.Model):
