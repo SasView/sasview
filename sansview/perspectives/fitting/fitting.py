@@ -81,6 +81,8 @@ class Plugin:
         self.elapsed = 0.022
         # the type of optimizer selected, park or scipy
         self.fitter  = None
+        #let fit ready
+        self.fitproblem_count = None
         #Flag to let the plug-in know that it is running stand alone
         self.standalone=True
         ## dictionary of page closed and id 
@@ -189,10 +191,10 @@ class Plugin:
             @note: if Data1D was generated from Theory1D  
                     the fitting option is not allowed
         """
-        self.graph = graph
-        fitOption = "Select data for fitting"
-        fitOpenHint =  "Dialog with fitting parameters "
-        
+        #TODO: clean this up so that the string are not copied 
+        #      multiple times.
+        self.graph=graph
+       
         for item in graph.plottables:
             if item.__class__.__name__ is "Data2D":
                 
@@ -433,6 +435,8 @@ class Plugin:
         if fitproblem_count >1:
             self._on_change_engine(engine='park')
             
+        self.fitproblem_count = fitproblem_count  
+          
         from sans.fit.Fitting import Fit
         self.fitter= Fit(self._fit_engine)
         
@@ -488,21 +492,26 @@ class Plugin:
                                         fn= self.fitter,
                                        completefn= self._simul_fit_completed,
                                        updatefn=self._updateFit)
-
+            
             self.calc_fit.queue()
-            if fitproblem_count > 1:
-    			#Mac crashes on this.
-                self.calc_fit.ready(2.5)
-            else:
-                time.sleep(0.5)
-        
+            self.ready_fit()
+            
         except FitAbort:
             print "in pluging"
         except:
             msg= "%s error: %s" % (engineType,sys.exc_value)
             wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
             return 
-           
+    def ready_fit(self):
+        """
+        Ready for another fit
+        """
+        if self.fitproblem_count != None and self.fitproblem_count > 1:
+            self.calc_fit.ready(2.5)
+            
+        else:
+            time.sleep(0.4)
+             
     def onCalculateSld(self, event):
         """
             Compute the scattering length density of molecula
@@ -977,7 +986,8 @@ class Plugin:
         """
         wx.PostEvent(self.parent, StatusEvent(status="Plot \
         #updating ... ",type="update"))
-        self.calc_thread.ready(0.01)
+        self.ready_fit()
+        #self.calc_thread.ready(0.01)
     
     
     def _fill_default_model2D(self, theory, qmax,qstep, qmin=None):
@@ -1105,7 +1115,8 @@ class Plugin:
         """
         wx.PostEvent(self.parent, StatusEvent(status="Plot \
         #updating ... ",type="update"))
-        self.calc_thread.ready(0.01)
+        self.ready_fit()
+        #self.calc_thread.ready(0.01)
         
         
     def _complete2D(self, image,data, model,  elapsed,qmin, qmax,qstep=DEFAULT_NPTS):
