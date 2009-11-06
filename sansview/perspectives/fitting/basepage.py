@@ -18,7 +18,7 @@ _QMAX_DEFAULT = 0.13
 _NPTS_DEFAULT = 50
 #Control panel width 
 if sys.platform.count("win32")>0:
-    PANEL_WIDTH = 430
+    PANEL_WIDTH = 440
 else:
     PANEL_WIDTH = 500
     
@@ -960,9 +960,11 @@ class BasicPage(wx.ScrolledWindow):
             is_modified =self._check_value_enter( self.parameters ,is_modified) 
      
             if is_modified:
-                self.sizer3.Layout()
+                #self.sizer3.Layout()
                 self.Layout()
                 self.Refresh()
+            else:
+                self.Layout()
 
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 

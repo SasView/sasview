@@ -136,7 +136,7 @@ class FitPage(BasicPage):
                     item[5].Show(True)
                     item[6].Show(True)
         self.Layout()
-
+        #self.SetScrollbars(20,20,25,65)
         
     
     def _fill_range_sizer(self):
@@ -947,7 +947,7 @@ class FitPage(BasicPage):
             if not self.text2_3.IsShown():
                 self.text2_3.Show(True)                            
 
-        self.text2_3.Refresh()             
+        self.text2_3.Layout()             
         self.Layout()
         
         
@@ -994,6 +994,7 @@ class FitPage(BasicPage):
             self.tcChi.SetLabel(str(format_number(output)))
            
             self.sizer5.Layout()
+            #self.sizer5.Refresh()
             self.state.tcChi =output
           
         except:
