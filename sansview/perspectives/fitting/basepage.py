@@ -112,14 +112,14 @@ class BasicPage(wx.ScrolledWindow):
         #self._redo.Enable(False)
         #wx.EVT_MENU(self, id, self.onRedo)       
         #self.popUpMenu.AppendSeparator()
-        if sys.platform.count("win32")>0:        
-            id = wx.NewId()
-            self._keep = wx.MenuItem(self.popUpMenu,id,"BookMark"," Keep the panel status to recall it later")
-            self.popUpMenu.AppendItem(self._keep)
-            self._keep.Enable(True)
-            wx.EVT_MENU(self, id, self.onSave)
-            self.popUpMenu.AppendSeparator()
-        
+        #if sys.platform.count("win32")>0:        
+        id = wx.NewId()
+        self._keep = wx.MenuItem(self.popUpMenu,id,"BookMark"," Keep the panel status to recall it later")
+        self.popUpMenu.AppendItem(self._keep)
+        self._keep.Enable(True)
+        wx.EVT_MENU(self, id, self.onSave)
+        self.popUpMenu.AppendSeparator()
+    
         ## Default locations
         self._default_save_location = os.getcwd()     
         ## save initial state on context menu
@@ -1580,8 +1580,8 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
-        self.Refresh()
-        self.SetScrollbars(20,20,25,65)       
+        #self.Refresh()
+        #self.SetScrollbars(20,20,25,65)       
           
         
     def _layout_sizer_noDipers(self):

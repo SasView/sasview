@@ -81,7 +81,7 @@ class FitPage(BasicPage):
             return
         if event.type =="park":
             self.btFit.SetLabel("Fit")
-            
+
         for item in self.parameters:
             if event.type =="scipy" :
                 item[5].SetValue("")
@@ -135,8 +135,8 @@ class FitPage(BasicPage):
                 else:
                     item[5].Show(True)
                     item[6].Show(True)
-     
-        self.SetScrollbars(20,20,25,65)
+        self.Layout()
+
         
     
     def _fill_range_sizer(self):
@@ -834,10 +834,11 @@ class FitPage(BasicPage):
         else:
             raise ValueError,"missing parameter to fit"    
       
-    def onsetValues(self,chisqr, out,cov):
+    def onsetValues(self,chisqr,p_name, out,cov):
         """
             Build the panel from the fit result
             @param chisqr:Value of the goodness of fit metric
+            @p_name: the name of parameters
             @param out:list of parameter with the best value found during fitting
             @param cov:Covariance matrix
        
@@ -858,6 +859,7 @@ class FitPage(BasicPage):
             pass
         #set the panel when fit result are float not list
         if out.__class__== numpy.float64:
+            print "float64"
             self.param_toFit[0][2].SetValue(format_number(out))
             self.param_toFit[0][2].Refresh()
             
@@ -915,29 +917,27 @@ class FitPage(BasicPage):
                     except:
                         pass                   
                     for j in range(len(out)):
-                        if out[j]==self.model.getParam(item[1]):
-                            
+                        
+                        if item[1] == p_name[j]:
                             break
                         ## unable to compare cov[j]==numpy.nan so switch to None
                     #Save errors to model.details[item][3]
-                    self.model.details[item[1]][3] = cov[i]
-                                       
-                    
-                    if cov[i]==None or not numpy.isfinite(cov[i]):
+                    self.model.details[item[1]][3] = cov[j]
+                                                           
+                    if cov[j]==None or not numpy.isfinite(cov[j]):
 
                         if item[3].IsShown:
                             item[3].Hide()
                         if item[4].IsShown:
                             item[4].Hide()           
-                        #k += 1
-    
+                        #k += 1   
 
                     else:
                         k += 1
                         item[3].Show(True)
                         item[3].Refresh()
                         item[4].Show(True)
-                        item[4].SetValue(format_number(cov[i]))
+                        item[4].SetValue(format_number(cov[j]))
                         item[4].Refresh()
                     
  

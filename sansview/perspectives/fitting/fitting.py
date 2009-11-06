@@ -356,8 +356,12 @@ class Plugin:
         """
         if string.find(item,".")!=-1:
             param_names= re.split("\.",item)
-            model_name=param_names[0]
-            param_name=param_names[1]  
+            model_name=param_names[0]           
+            ##Assume max len is 3; eg., M0.radius.width
+            if len(param_names) == 3:
+                param_name=param_names[1]+"."+param_names[2]
+            else:
+                param_name=param_names[1]                    
             return model_name,param_name
         
    
@@ -754,15 +758,17 @@ class Plugin:
                 if page==cpage :
                     model= value.get_model()
                     break
+            param_name = []
             i = 0
             for name in pars:
+                param_name.append(name)
                 if result.pvec.__class__==numpy.float64:
                     model.setParam(name,result.pvec)
                 else:
                     model.setParam(name,result.pvec[i])
                     i += 1
             ## Reset values of the current page to fit result
-            cpage.onsetValues(result.fitness, result.pvec,result.stderr)
+            cpage.onsetValues(result.fitness,param_name, result.pvec,result.stderr)
             ## plot the current model with new param
             metadata =  self.page_finder[cpage].get_fit_data()
             model = self.page_finder[cpage].get_model()
@@ -803,6 +809,7 @@ class Plugin:
                 if value.get_scheduled()==1:
                     model = value.get_model()
                     metadata =  value.get_plotted_data()
+                    small_param_name = []
                     small_out = []
                     small_cov = []
                     i = 0
@@ -814,14 +821,15 @@ class Plugin:
                             if p.name == p_name:
                                 small_out.append(p.value )
                                 model.setParam(param_name,p.value) 
-                              
+                                small_param_name.append(param_name)
                                 small_cov.append(p.stderr)
                             else:
                                 value= model.getParam(param_name)
                                 small_out.append(value )
+                                small_param_name.append(param_name)
                                 small_cov.append(None)
                     # Display result on each page 
-                    page.onsetValues(result.fitness, small_out,small_cov)
+                    page.onsetValues(result.fitness, small_param_name,small_out,small_cov)
                     #Replot models
                     msg= "Simultaneous Fit completed. plotting... %s:"%model.name
                     wx.PostEvent(self.parent, StatusEvent(status="%s " % msg))
