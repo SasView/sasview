@@ -367,24 +367,16 @@ class FitPage(BasicPage):
 
                         ix = 3
                         ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
-                        #ctl2.SetValue(str(format_number(fit_errs)))
+                  
                         self.sizer4_4.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        #if fit_errs==None or not numpy.isfinite(fit_errs):
+                     
                         ctl2.Hide()
-                        #else:
-                        #    if not text2.IsShown():
-                        #        text2.Show(True)
-                        #    ctl2.Show(True)
-                        #Prepare add min and max in model.details.
-                        param_min, param_max= self.model.details[name1][1:]
+
                         ix = 4
                         ctl3 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                        kill_focus_callback = self._on_paramRangeEnter,
                                                        set_focus_callback  = self._on_paramRangeEnter)
-                        if param_min ==None or not numpy.isfinite(param_min):
-                            ctl3.SetValue("")
-                        else:
-                            ctl3.SetValue(str(param_min))
+
                         self.sizer4_4.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                         ctl3.Hide()
                 
@@ -393,10 +385,7 @@ class FitPage(BasicPage):
                                                        kill_focus_callback = self._on_paramRangeEnter,
                                                        set_focus_callback  = self._on_paramRangeEnter)
                         self.sizer4_4.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        if param_max==None or not numpy.isfinite(param_max):
-                            ctl4.SetValue("")
-                        else:
-                            ctl4.SetValue(str(param_max))
+
                         ctl4.Hide()
                         
                         if self.engine_type=="park":
@@ -481,15 +470,11 @@ class FitPage(BasicPage):
                         self.sizer4_4.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                         ctl2.Hide()
                             
-                        param_min, param_max= self.model.details[name1][1:]
                         ix = 4
                         ctl3 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                        kill_focus_callback = self._onparamRangeEnter,
                                                        set_focus_callback  = self._onparamRangeEnter)
-                        if param_min ==None or not numpy.isfinite(param_min):
-                            ctl3.SetValue("")
-                        else:
-                            ctl3.SetValue(str(param_min))
+
                         self.sizer4_4.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
 
                         ctl3.Hide()
@@ -873,12 +858,11 @@ class FitPage(BasicPage):
                     self.param_toFit[0][4].Show(True)
                     self.param_toFit[0][4].Refresh()
         else:
-            #i=0
+           
             if self.text2_3.IsShown():
                 self.text2_3.Hide()
-            #print "fittable",self.print "fittable",self.fittable_param[p_name]    
+            
             #Set the panel when fit result are list
-
             for item in self.param_toFit:               
                 ## reset error value to initial state
                 if item[3].IsShown():
@@ -909,8 +893,7 @@ class FitPage(BasicPage):
                         if item[3].IsShown:
                             item[3].Hide()
                         if item[4].IsShown:
-                            item[4].Hide()           
-                        #k += 1   
+                            item[4].Hide()             
 
                     else:                        
                         item[3].Show(True)
@@ -920,8 +903,6 @@ class FitPage(BasicPage):
                         item[4].Refresh()
                         has_error = True
                     
- 
-               # i+=1  
         #Show error title when any errors displayed
         if has_error: 
             if not self.text2_3.IsShown():
@@ -1136,7 +1117,6 @@ class FitPage(BasicPage):
         #Select parameters to fit for list of fittable parameters with dispersion          
         for item in self.fittable_param:
             if item[0].GetValue():
-                #print item[0].GetValue()
                 if not (item in self.param_toFit):
                     self.param_toFit.append(item)  
             else:
@@ -1262,15 +1242,11 @@ class FitPage(BasicPage):
                 sizer.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl2.Hide()
                 
-                param_min, param_max= self.model.details[item][1:]
                 ix += 1
                 ctl3 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                kill_focus_callback = self._on_paramRangeEnter,
                                                set_focus_callback  = self._on_paramRangeEnter)
-                if param_min ==None or not numpy.isfinite(param_min):
-                    ctl3.SetValue("")
-                else:
-                    ctl3.SetValue(str(param_min))
+     
                 sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl3.Hide()
         
@@ -1279,10 +1255,7 @@ class FitPage(BasicPage):
                                                kill_focus_callback = self._on_paramRangeEnter,
                                                set_focus_callback  = self._on_paramRangeEnter)
                 sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                if param_max==None or not numpy.isfinite(param_max):
-                    ctl4.SetValue("")
-                else:
-                    ctl4.SetValue(str(param_max))
+      
                 ctl4.Hide()
                 
                 if self.engine_type=="park":
@@ -1371,15 +1344,12 @@ class FitPage(BasicPage):
                             text2.Show(True)
                         ctl2.Show(True)
                     
-                    param_min, param_max= self.model.details[item][1:]
+                    #param_min, param_max= self.model.details[item][1:]
                     ix += 1
                     ctl3 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                    kill_focus_callback = self._onparamRangeEnter,
                                                    set_focus_callback  = self._onparamRangeEnter)
-                    if param_min ==None or not numpy.isfinite(param_min):
-                        ctl3.SetValue("")
-                    else:
-                        ctl3.SetValue(str(param_min))
+               
                     sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                     ctl3.Hide()
                     if self.data.__class__.__name__ =="Data2D":
@@ -1393,10 +1363,7 @@ class FitPage(BasicPage):
                                                    kill_focus_callback = self._onparamRangeEnter,
                                                    set_focus_callback  = self._onparamRangeEnter)
                     sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                    if param_max ==None or not numpy.isfinite(param_max):
-                        ctl4.SetValue("")
-                    else:
-                        ctl4.SetValue(str(param_max))
+                   
                     ctl4.Hide()
                     if self.data.__class__.__name__ =="Data2D":
                         ctl4.Show(True)
@@ -1503,13 +1470,9 @@ class HelpWindow(wx.Frame):
         
         self.page = FitPage(self, myinfo) 
         
-        
-        
         self.Centre()
         self.Show(True)
-
-
-   
+ 
 if __name__=="__main__":
     app = wx.App()
     HelpWindow(None, -1, 'HelpWindow')
