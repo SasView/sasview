@@ -18,7 +18,7 @@ _QMAX_DEFAULT = 0.13
 _NPTS_DEFAULT = 50
 #Control panel width 
 if sys.platform.count("win32")>0:
-    PANEL_WIDTH = 440
+    PANEL_WIDTH = 450
 else:
     PANEL_WIDTH = 500
     
@@ -54,6 +54,7 @@ class BasicPage(wx.ScrolledWindow):
         self._disp_obj_dict = {}
         ## selected parameters to apply dispersion
         self.disp_cb_dict ={}
+
         ## smearer object
         self.smearer = None
         
@@ -496,7 +497,7 @@ class BasicPage(wx.ScrolledWindow):
             self.engine_type = self.manager._return_engine_type()
         
         self.state.engine_type = self.engine_type
-       
+
         new_state = self.state.clone()
         new_state.model.name = self.state.model.name
         
@@ -669,6 +670,7 @@ class BasicPage(wx.ScrolledWindow):
             if name == "GaussianDispersion" :
                if hasattr(self,"cb1"):
                    self.state.cb1= self.cb1.GetValue()
+
         except:
             pass
         
@@ -703,6 +705,7 @@ class BasicPage(wx.ScrolledWindow):
             
             self.state.values = copy.deepcopy(self.values)
             self.state.weights = copy.deepcopy(self.weights)
+           
         ## save plotting range
         self._save_plotting_range()
         
@@ -718,7 +721,6 @@ class BasicPage(wx.ScrolledWindow):
                                      self.state.orientation_params)
         self._copy_parameters_state(self.orientation_params_disp,
                                      self.state.orientation_params_disp)
-        
         self._copy_parameters_state(self.parameters, self.state.parameters)
         self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
@@ -742,11 +744,11 @@ class BasicPage(wx.ScrolledWindow):
             self.smearer= smear_selection( self.data )
         self.enable2D= state.enable2D
         self.engine_type = state.engine_type
+
         #???
         self.disp_cb_dict = state.disp_cb_dict
-        self.disp_list =state.disp_list
+        self.disp_list = state.disp_list
 
-       
         ## set the state of the radio box
         self.shape_rbutton.SetValue(state.shape_rbutton )
         self.shape_indep_rbutton.SetValue(state.shape_indep_rbutton)
@@ -816,7 +818,7 @@ class BasicPage(wx.ScrolledWindow):
                         self.model._persistency_dict[item] = [state.values, state.weights]
                     
             else:
-
+                
                 for k,v in self.state.disp_cb_dict.iteritems():
                     self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
                     self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
@@ -1015,10 +1017,9 @@ class BasicPage(wx.ScrolledWindow):
             item_page = listtorestore[j]
             item_page_info = statelist[j]
             ##change the state of the check box for simple parameters
-            if item_page[0]!=None:
-               
+            if item_page[0]!=None:               
                 item_page[0].SetValue(item_page_info[0])
-                #print "item_page[0]",item_page[0].GetValue()
+                
             if item_page[2]!=None:
                 item_page[2].SetValue(item_page_info[2])
                 
@@ -1039,7 +1040,7 @@ class BasicPage(wx.ScrolledWindow):
                 ## show of hide the text crtl for fitting error
                 if item_page_info[5][0]:
                     item_page[5].Show(True)
-                    item_page[5].SetValue(item_page_info[4][1])
+                    item_page[5].SetValue(item_page_info[5][1])
                 else:
                     item_page[5].Hide()
                     
@@ -1403,6 +1404,7 @@ class BasicPage(wx.ScrolledWindow):
         ## reset dictionary containing reference to dispersion
         self._disp_obj_dict = {}
         self.disp_cb_dict ={}
+        
         f_id = self.formfactorbox.GetCurrentSelection()
         #For MAC
         form_factor = None
@@ -1438,11 +1440,9 @@ class BasicPage(wx.ScrolledWindow):
         ## post state to fit panel
         self.state.parameters =[]
         self.state.model =self.model
-        
         self.disp_list =self.model.getDispParamList()
         self.state.disp_list = self.disp_list
         self.sizer4_4.Layout()
-        self.sizer4.Layout()
         self.Layout()
         self.SetScrollbars(20,20,25,65)
         self.Refresh()
@@ -1492,6 +1492,7 @@ class BasicPage(wx.ScrolledWindow):
                 ## check minimun value
                 param_min= None
                 param_max= None
+
                 if item[5]!= None:
                     if item[5].GetValue().lstrip().rstrip()!="":
                         param_min = float(item[5].GetValue())
@@ -1507,7 +1508,7 @@ class BasicPage(wx.ScrolledWindow):
                         msg+= "name %s of model %s "%(name, self.model.name)
                         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
                 if name in self.model.details.keys():   
-                    self.model.details[name][1:3]= param_min,param_max
+                    self.model.details[name][1:]= param_min,param_max
                                     
                 ## hide statictext +/-    
                 #if item[3]!=None and item[3].IsShown():
@@ -1518,6 +1519,7 @@ class BasicPage(wx.ScrolledWindow):
                 #    item[4].Hide()
 
                 value= float(item[2].GetValue())
+                #print "val", value,self.model.getParam(name)
                 # If the value of the parameter has changed,
                 # +update the model and set the is_modified flag
                 if value != self.model.getParam(name):
@@ -1548,11 +1550,7 @@ class BasicPage(wx.ScrolledWindow):
             self.sizer4_4.Clear(True)
       
             return
-        #remove previous added details for dispersion parameters.
-        #for item in self.model.dispersion.keys():#for item in self.model.details.keys():
-        #    if item in self.model.fixed and item in self.model.details.keys():
-        #        del self.model.details [item]                           
-    
+
         if self.enable_disp.GetValue():
             self.model_disp.Show(True)
             self.disp_box.Show(True)
@@ -1661,7 +1659,6 @@ class BasicPage(wx.ScrolledWindow):
              allow selecting different dispersion
              self.disp_list should change type later .now only gaussian
         """
-
         n = self.disp_box.GetCurrentSelection()
         name = self.disp_box.GetValue()
         dispersity= self.disp_box.GetClientData(n)

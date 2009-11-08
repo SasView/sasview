@@ -122,7 +122,6 @@ class PageState(object):
         obj.fittable_param = copy.deepcopy(self.fittable_param)
         obj.orientation_params =  copy.deepcopy(self.orientation_params)
         obj.orientation_params_disp =  copy.deepcopy(self.orientation_params_disp)
-        
         obj.enable_disp = copy.deepcopy(self.enable_disp)
         obj.disable_disp = copy.deepcopy(self.disable_disp)
         obj.tcChi = self.tcChi
@@ -133,11 +132,12 @@ class PageState(object):
         if len(self.disp_cb_dict)>0:
             for k , v in self.disp_cb_dict.iteritems():
                 obj.disp_cb_dict[k]= v
+                
         obj.values = copy.deepcopy(self.values)
         obj.weights = copy.deepcopy(self.weights)
         obj.enable_smearer = copy.deepcopy(self.enable_smearer)
         obj.disable_smearer = copy.deepcopy(self.disable_smearer)
-        
+       
         obj.disp_box = copy.deepcopy(self.disp_box)
         obj.qmin = copy.deepcopy(self.qmin)
         obj.qmax = copy.deepcopy(self.qmax)
