@@ -374,16 +374,16 @@ class FitPage(BasicPage):
 
                         ix = 4
                         ctl3 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
-                                                       kill_focus_callback = self._on_paramRangeEnter,
-                                                       set_focus_callback  = self._on_paramRangeEnter)
+                                                       kill_focus_callback = self._onparamRangeEnter,
+                                                       set_focus_callback  = self._onparamRangeEnter)
 
                         self.sizer4_4.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                         ctl3.Hide()
                 
                         ix = 5
                         ctl4 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
-                                                       kill_focus_callback = self._on_paramRangeEnter,
-                                                       set_focus_callback  = self._on_paramRangeEnter)
+                                                       kill_focus_callback = self._onparamRangeEnter,
+                                                       set_focus_callback  = self._onparamRangeEnter)
                         self.sizer4_4.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
 
                         ctl4.Hide()
@@ -484,10 +484,6 @@ class FitPage(BasicPage):
                                                        kill_focus_callback = self._onparamRangeEnter,
                                                        set_focus_callback  = self._onparamRangeEnter)
                         self.sizer4_4.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        if param_max==None or not numpy.isfinite(param_max):
-                            ctl4.SetValue("")
-                        else:
-                            ctl4.SetValue(str(param_max))
                         ctl4.Hide()
                         #if self.data.__class__.__name__ =="Data2D":
                             #ctl4.Enable(True)
@@ -564,11 +560,11 @@ class FitPage(BasicPage):
                         " Selected Distribution: Gaussian"))   
         ix =0
         iy +=1 
-        self.sizer4_4.Layout()
-        self.sizer4.Layout()
+        #self.sizer4_4.Layout()
+        #self.sizer4.Layout()
         self.Layout()
-        self.SetScrollbars(20,20,25,65)
-        self.Refresh()
+        #self.SetScrollbars(20,20,25,65)
+        #self.Refresh()
      
         
     def _onFit(self, event):     
@@ -670,43 +666,7 @@ class FitPage(BasicPage):
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
      
-   
-    def _onparamRangeEnter(self, event):
-        """
-            Check validity of value enter in the parameters range field
-        """
-        tcrtl= event.GetEventObject()
-        if tcrtl.GetValue().lstrip().rstrip()!="":
-
-            try:
-                value = float(tcrtl.GetValue())
-                tcrtl.SetBackgroundColour(wx.WHITE)
-                tcrtl.Refresh()
-            except:
-                tcrtl.SetBackgroundColour("pink")
-                tcrtl.Refresh()
-                return
-        else:
-           tcrtl.SetBackgroundColour(wx.WHITE)
-           tcrtl.Refresh()  
-        self._onparamEnter_helper() 
-        
-        ##compute chisqr for range change
-        temp_smearer = None
-        if self.enable_smearer.GetValue():
-            msg=""
-            temp_smearer= self.smearer   
-         ##Calculate chi2
-       
-        self.compute_chisqr(smearer= temp_smearer)  
-        ## new state posted
-        if self.state_change:
-            #self._undo.Enable(True)
-            event = PageInfoEvent(page = self)
-            wx.PostEvent(self.parent, event)
-            self.state_change= False
-        
-        
+                
     def _onparamEnter(self,event):
         """ 
             when enter value on panel redraw model according to changed
@@ -732,9 +692,8 @@ class FitPage(BasicPage):
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
             return 
         
-    ### Same as _onparamRangeEnter but smear and chi^2 calculations are removed
-    ### and _onparamEnter_helper is not used, which causing mess sizer display
-    def _on_paramRangeEnter(self, event):
+
+    def _onparamRangeEnter(self, event):
         """
             Check validity of value enter in the parameters range field
         """
@@ -743,18 +702,26 @@ class FitPage(BasicPage):
             try:
                 value = float(tcrtl.GetValue())
                 tcrtl.SetBackgroundColour(wx.WHITE)
-                tcrtl.Refresh()
             except:
                 tcrtl.SetBackgroundColour("pink")
                 tcrtl.Refresh()
                 return
         else:
            tcrtl.SetBackgroundColour(wx.WHITE)
-           tcrtl.Refresh()  
-        self._onparamEnter_helper() 
-
+           
+        is_modified = False   
+        if self.model !=None:         
+            # Flag to register when a parameter has changed.            
+            is_modified =self._check_value_enter( self.fittable_param ,is_modified)
+            is_modified =self._check_value_enter( self.fixed_param ,is_modified)
+            is_modified =self._check_value_enter( self.parameters ,is_modified) 
+                
+        #self._onparamEnter_helper() 
+        tcrtl.Refresh()
         ## new state posted
-        if self.state_change:
+        if is_modified:
+            #self._undo.Enable(True)
+            self.save_current_state()
             #self._undo.Enable(True)
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event)
@@ -1244,16 +1211,16 @@ class FitPage(BasicPage):
                 
                 ix += 1
                 ctl3 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
-                                               kill_focus_callback = self._on_paramRangeEnter,
-                                               set_focus_callback  = self._on_paramRangeEnter)
+                                               kill_focus_callback = self._onparamRangeEnter,
+                                               set_focus_callback  = self._onparamRangeEnter)
      
                 sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl3.Hide()
         
                 ix += 1
                 ctl4 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
-                                               kill_focus_callback = self._on_paramRangeEnter,
-                                               set_focus_callback  = self._on_paramRangeEnter)
+                                               kill_focus_callback = self._onparamRangeEnter,
+                                               set_focus_callback  = self._onparamRangeEnter)
                 sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
       
                 ctl4.Hide()
@@ -1333,16 +1300,10 @@ class FitPage(BasicPage):
                     text2.Hide() 
                     ix += 1
                     ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
-                    ctl2.SetValue(str(format_number(fit_errs)))
+                    
                     sizer.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                     ctl2.Hide()
-                    if self.data.__class__.__name__ !="Data2D":
-                        ctl2.Hide()
-                    else:
-                      
-                        if not text2.IsShown():
-                            text2.Show(True)
-                        ctl2.Show(True)
+                    
                     
                     #param_min, param_max= self.model.details[item][1:]
                     ix += 1

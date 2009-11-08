@@ -1442,10 +1442,10 @@ class BasicPage(wx.ScrolledWindow):
         self.state.model =self.model
         self.disp_list =self.model.getDispParamList()
         self.state.disp_list = self.disp_list
-        self.sizer4_4.Layout()
+        #self.sizer4_4.Layout()
         self.Layout()
-        self.SetScrollbars(20,20,25,65)
-        self.Refresh()
+        #self.SetScrollbars(20,20,25,65)
+        #self.Refresh()
         
        
         
@@ -1577,8 +1577,8 @@ class BasicPage(wx.ScrolledWindow):
             wx.PostEvent(self.parent, event)
         #draw the model with the current dispersity
         self._draw_model()
-        self.sizer4_4.Layout()
-        self.sizer4.Layout()
+        #self.sizer4_4.Layout()
+        #self.sizer4.Layout()
         self.Layout()
         #self.Refresh()
         #self.SetScrollbars(20,20,25,65)       
@@ -1624,12 +1624,13 @@ class BasicPage(wx.ScrolledWindow):
       
         from sans.models.dispersion_models import GaussianDispersion, ArrayDispersion
         if len(self.disp_cb_dict)==0:
+            self.save_current_state()
             self.sizer4_4.Clear(True)
-            self.sizer4_4.Layout()
-            self.sizer4.Layout()
+            #self.sizer4_4.Layout()
+            #self.sizer4.Layout()
             self.Layout()
-            self.Refresh()
-            self.SetScrollbars(20,20,25,65)   
+            #self.Refresh()
+            #self.SetScrollbars(20,20,25,65)   
             return 
         if (len(self.disp_cb_dict)>0) :
             for p in self.disp_cb_dict:
@@ -1646,11 +1647,11 @@ class BasicPage(wx.ScrolledWindow):
                 #self._draw_model()
         ## save state into
         self.save_current_state()
-        self.sizer4_4.Layout()
-        self.sizer4.Layout()
+        #self.sizer4_4.Layout()
+        #self.sizer4.Layout()
         self.Layout()
-        self.SetScrollbars(20,20,25,65)    
-        self.Refresh()
+        #self.SetScrollbars(20,20,25,65)    
+        #self.Refresh()
         
             
             
@@ -1677,11 +1678,11 @@ class BasicPage(wx.ScrolledWindow):
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
         
-        self.sizer4_4.Layout()
-        self.sizer4.Layout()
-        self.Layout()
+        #self.sizer4_4.Layout()
+        #self.sizer4.Layout()
+        #self.Layout()
         self.SetScrollbars(20,20,25,65)
-        self.Refresh()
+        #self.Refresh()
         
     def _set_sizer_arraydispersion(self):
         """
@@ -1748,9 +1749,10 @@ class BasicPage(wx.ScrolledWindow):
         ix =0
         iy +=1 
         self.sizer4_4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)        
-        self.sizer4_4.Layout()
-        self.sizer4.Layout()
-        self.SetScrollbars(20,20,25,65)
+        #self.sizer4_4.Layout()
+        #self.sizer4.Layout()
+        self.Layout()
+        #self.SetScrollbars(20,20,25,65)
         ## save state into
 
         self.state.orientation_params =[]
