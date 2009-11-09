@@ -996,7 +996,7 @@ class BasicPage(wx.ScrolledWindow):
             if is_modified:
                 self.state_change= True
                 self._draw_model() 
-                self.save_current_state() 
+                 
                
     def _is_modified(self, is_modified):
         """
@@ -1488,19 +1488,20 @@ class BasicPage(wx.ScrolledWindow):
                 if hasattr(self,"text2_3") and self.text2_3.IsShown():
                     if hasattr(self,"item[4]")and self.item[4] == None:
                         self.text2_3.Hide()
-                ## check model parameters range
-                ## check minimun value
+                        
+                ## check model parameters range             
                 param_min= None
                 param_max= None
-
+                ## check minimun value
                 if item[5]!= None:
                     if item[5].GetValue().lstrip().rstrip()!="":
                         param_min = float(item[5].GetValue())
+                        is_modified = True
                 ## check maximum value
                 if item[6]!= None:
                     if item[6].GetValue().lstrip().rstrip()!="":
                         param_max = float(item[6].GetValue())
-                        
+                        is_modified = True
                 from sans.guiframe.utils import check_value
                 if param_min != None and param_max !=None:
                     if not check_value(item[5], item[6]):
@@ -1509,6 +1510,7 @@ class BasicPage(wx.ScrolledWindow):
                         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
                 if name in self.model.details.keys():   
                     self.model.details[name][1:]= param_min,param_max
+                
                                     
                 ## hide statictext +/-    
                 #if item[3]!=None and item[3].IsShown():
@@ -1519,7 +1521,7 @@ class BasicPage(wx.ScrolledWindow):
                 #    item[4].Hide()
 
                 value= float(item[2].GetValue())
-                #print "val", value,self.model.getParam(name)
+
                 # If the value of the parameter has changed,
                 # +update the model and set the is_modified flag
                 if value != self.model.getParam(name):
@@ -1548,7 +1550,6 @@ class BasicPage(wx.ScrolledWindow):
             self.model_disp.Hide()
             self.disp_box.Hide()
             self.sizer4_4.Clear(True)
-      
             return
 
         if self.enable_disp.GetValue():
@@ -1578,7 +1579,7 @@ class BasicPage(wx.ScrolledWindow):
         #draw the model with the current dispersity
         self._draw_model()
         #self.sizer4_4.Layout()
-        #self.sizer4.Layout()
+        #self.sizer5.Layout()
         self.Layout()
         #self.Refresh()
         #self.SetScrollbars(20,20,25,65)       
@@ -1642,6 +1643,7 @@ class BasicPage(wx.ScrolledWindow):
                 try:
                    self.model.set_dispersion(p, disp_model)
                 except:
+
                     pass
                 # Redraw the model
                 #self._draw_model()
@@ -1651,7 +1653,7 @@ class BasicPage(wx.ScrolledWindow):
         #self.sizer4.Layout()
         self.Layout()
         #self.SetScrollbars(20,20,25,65)    
-        #self.Refresh()
+        self.Refresh()
         
             
             

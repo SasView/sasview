@@ -409,16 +409,16 @@ class FitPage(BasicPage):
                     elif p=="nsigmas":
                             ix = 7
                             value= self.model.getParam(name3)
-                            Tctl = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tct2 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tctl.SetValue(str (format_number(value)))
-                            self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
+                            Tct2.SetValue(str (format_number(value)))
+                            self.sizer4_4.Add(Tct2, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             ix +=1
                             self.sizer4_4.Add((20,20), (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             
-                            self.fixed_param.append([None,name3, Tctl
+                            self.fixed_param.append([None,name3, Tct2
                                                      ,None,None,None, None,None])
                             
         ix =0
@@ -523,22 +523,22 @@ class FitPage(BasicPage):
                     elif p=="nsigmas":
                             ix = 7
                             value= self.model.getParam(name3)
-                            Tctl = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tct2 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tctl.SetValue(str (format_number(value)))
+                            Tct2.SetValue(str (format_number(value)))
                             if self.data.__class__.__name__ =="Data2D":
-                                Tctl.Show(True)
+                                Tct2.Show(True)
                             else:
-                                Tctl.Hide()
-                            self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
+                                Tct2.Hide()
+                            self.sizer4_4.Add(Tct2, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             ix +=1
                             #self.sizer4_4.Add((20,20), (iy,ix),(1,1),
                                                #wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                            self.fixed_param.append([None,name3, Tctl
+                            self.fixed_param.append([None,name3, Tct2
                                                      ,None,None, None, None,None])    
                                                        
-                            self.orientation_params_disp.append([None,name3, Tctl
+                            self.orientation_params_disp.append([None,name3, Tct2
                                                      ,None,None, None, None,None])
         #Display units text on panel
         for item in self.model.dispersion.keys(): 
@@ -684,6 +684,7 @@ class FitPage(BasicPage):
             ## new state posted
             if self.state_change:
                 #self._undo.Enable(True)
+                self.save_current_state()
                 event = PageInfoEvent(page = self)
                 wx.PostEvent(self.parent, event)
                 self.state_change= False
@@ -714,8 +715,8 @@ class FitPage(BasicPage):
             # Flag to register when a parameter has changed.            
             is_modified =self._check_value_enter( self.fittable_param ,is_modified)
             is_modified =self._check_value_enter( self.fixed_param ,is_modified)
-            is_modified =self._check_value_enter( self.parameters ,is_modified) 
-                
+            is_modified =self._check_value_enter( self.parameters ,is_modified)  
+            print "r",is_modified
         #self._onparamEnter_helper() 
         tcrtl.Refresh()
         ## new state posted
@@ -745,14 +746,20 @@ class FitPage(BasicPage):
         """
             reset the state
         """
+
         self.reset_page_helper(state)
         import sans.guiframe.gui_manager
         evt = ModelEventbox(model=state.model)
         wx.PostEvent(self.event_owner, evt)
     
         self.manager._on_change_engine(engine=self.engine_type)
+        
+        #self.state = self
+        self.save_current_state_fit()
+        #self.set_model_param_sizer(model=state.model)
+        self.Layout()
+        self.Refresh()
     
-            
     def get_range(self):
         """
             return the fitting range
