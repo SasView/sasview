@@ -716,7 +716,7 @@ class FitPage(BasicPage):
             is_modified =self._check_value_enter( self.fittable_param ,is_modified)
             is_modified =self._check_value_enter( self.fixed_param ,is_modified)
             is_modified =self._check_value_enter( self.parameters ,is_modified)  
-            print "r",is_modified
+
         #self._onparamEnter_helper() 
         tcrtl.Refresh()
         ## new state posted
@@ -803,7 +803,6 @@ class FitPage(BasicPage):
             pass
         #set the panel when fit result are float not list
         if out.__class__== numpy.float64:
-            print "float64"
             self.param_toFit[0][2].SetValue(format_number(out))
             self.param_toFit[0][2].Refresh()
             
@@ -831,6 +830,7 @@ class FitPage(BasicPage):
                     self.param_toFit[0][4].SetValue(format_number(cov[0]))
                     self.param_toFit[0][4].Show(True)
                     self.param_toFit[0][4].Refresh()
+                    has_error = True
         else:
            
             if self.text2_3.IsShown():
