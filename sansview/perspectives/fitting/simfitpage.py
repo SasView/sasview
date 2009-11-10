@@ -6,9 +6,10 @@ from sans.guicomm.events import StatusEvent
 #Control panel width 
 if sys.platform.count("win32")>0:
     PANEL_WID = 420
+    FONT_VARIANT = 0
 else:
     PANEL_WID = 490
-
+    FONT_VARIANT = 1
             
 def get_fittableParam( model):
     """
@@ -43,6 +44,9 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
              Simultaneous page display
         """
+        ##Font size
+        self.SetWindowVariant(variant = FONT_VARIANT)
+        
         self.parent = parent
         ## store page_finder
         self.page_finder = page_finder

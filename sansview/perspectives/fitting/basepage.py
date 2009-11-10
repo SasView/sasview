@@ -19,8 +19,10 @@ _NPTS_DEFAULT = 50
 #Control panel width 
 if sys.platform.count("win32")>0:
     PANEL_WIDTH = 450
+    FONT_VARIANT = 0
 else:
     PANEL_WIDTH = 500
+    FONT_VARIANT = 1
     
 class BasicPage(wx.ScrolledWindow):
     """
@@ -34,6 +36,8 @@ class BasicPage(wx.ScrolledWindow):
     def __init__(self,parent, page_info):
         wx.ScrolledWindow.__init__(self, parent,
                  style= wx.FULL_REPAINT_ON_RESIZE )
+        #Set window's font size 
+        self.SetWindowVariant(variant=FONT_VARIANT)
         ##window_name
         self.window_name = page_info.window_name
         ##window_caption
@@ -744,7 +748,7 @@ class BasicPage(wx.ScrolledWindow):
             self.smearer= smear_selection( self.data )
         self.enable2D= state.enable2D
         self.engine_type = state.engine_type
-
+        
         #???
         self.disp_cb_dict = state.disp_cb_dict
         self.disp_list = state.disp_list
@@ -818,7 +822,10 @@ class BasicPage(wx.ScrolledWindow):
                         self.model._persistency_dict[item] = [state.values, state.weights]
                     
             else:
-                
+                keys = self.model.getParamList()
+                for item in keys:
+                    if item in self.disp_list and not self.model.details.has_key(item):
+                        self.model.details[item]=["",None,None]
                 for k,v in self.state.disp_cb_dict.iteritems():
                     self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
                     self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
@@ -831,11 +838,7 @@ class BasicPage(wx.ScrolledWindow):
             self.enable_smearer.SetValue(state.enable_smearer)
             self.disable_smearer.SetValue(state.disable_smearer)
             self.onSmear(event=None)
-            self.tcChi.SetLabel(str( state.tcChi))
-            self.sizer5.Layout()
-            self.Layout()
-            self.Refresh()
-            
+            self.tcChi.SetLabel(str( state.tcChi))            
        
         ## reset state of checkbox,textcrtl  and dispersity parameters value
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
@@ -878,7 +881,7 @@ class BasicPage(wx.ScrolledWindow):
                 if item[4]!=None and item[4].IsShown():
                     item[4].Clear()
                     item[4].Hide()
-        ##Is this layout necessary? Had a problem w/MAC.
+        ##Is this layout necessary? Had a problem w/MAC:Not anymore.
         #self.Layout()
         
         return        
@@ -1578,11 +1581,10 @@ class BasicPage(wx.ScrolledWindow):
             wx.PostEvent(self.parent, event)
         #draw the model with the current dispersity
         self._draw_model()
-        #self.sizer4_4.Layout()
-        #self.sizer5.Layout()
+        self.sizer4_4.Layout()
+        self.sizer5.Layout()
         self.Layout()
-        #self.Refresh()
-        #self.SetScrollbars(20,20,25,65)       
+        #self.Refresh()      
           
         
     def _layout_sizer_noDipers(self):

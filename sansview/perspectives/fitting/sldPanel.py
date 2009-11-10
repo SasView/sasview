@@ -18,16 +18,21 @@ _SCALE = 1e-6
 if sys.platform.count("win32")>0:
     _STATICBOX_WIDTH = 350
     PANEL_SIZE = 400
+    FONT_VARIANT = 0
 else:
     _STATICBOX_WIDTH = 380
     PANEL_SIZE = 430
-
+    FONT_VARIANT = 1
+    
 class SldPanel(wx.Panel):
     """
         Provides the SLD calculator GUI.
     """
     def __init__(self, parent,base=None, id = -1):
         wx.Panel.__init__(self, parent, id = id)
+        #Font size 
+        self.SetWindowVariant(variant=FONT_VARIANT)
+        
         # Object that receive status event
         self.base= base
         self.calculator = SldCalculator()

@@ -14,10 +14,15 @@ copyright 2009, University of Tennessee
 import wx
 import wx.lib.hyperlink
 import os.path
-import os
-
+import os, sys
 import local_config as config
 
+#Font size width 
+if sys.platform.count("win32")>0:
+    FONT_VARIANT = 0
+else:
+    FONT_VARIANT = 1 
+    
 class WelcomePanel(wx.Panel):
     """
         Panel created like about box  as a welcome page
@@ -29,6 +34,7 @@ class WelcomePanel(wx.Panel):
     window_caption = "Welcome panel"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
+   
     
     def __init__(self, *args, **kwds):
 
@@ -38,6 +44,7 @@ class WelcomePanel(wx.Panel):
         
         image = os.path.join("images","SVwelcome.png")
         
+        self.SetWindowVariant(variant = FONT_VARIANT)
         self.bitmap_logo = wx.StaticBitmap(self, -1, wx.Bitmap(image))
        
         self.label_copyright = wx.StaticText(self, -1, config._copyright)
