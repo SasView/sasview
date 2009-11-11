@@ -859,7 +859,7 @@ class BasicPage(wx.ScrolledWindow):
             hide the error text control shown 
             after fitting
         """
-        
+        """
         if hasattr(self,"text2_3"):
             self.text2_3.Hide()
 
@@ -882,8 +882,8 @@ class BasicPage(wx.ScrolledWindow):
                     item[4].Clear()
                     item[4].Hide()
         ##Is this layout necessary? Had a problem w/MAC:Not anymore.
-        #self.Layout()
-        
+        self.Layout()
+        """
         return        
     def _selectDlg(self):
         """

@@ -19,6 +19,7 @@ from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Theory1D
 from sans.guiframe import dataFitting 
+from sans.guiframe.utils import format_number
 
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
 from sans.guicomm.events import EVT_SLICER_PANEL,ERR_DATA,EVT_REMOVE_DATA
@@ -750,7 +751,7 @@ class Plugin:
                 msg= "Simple Fitting Stop !!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
                 return
-            if numpy.any(result.pvec ==None )or not numpy.all(numpy.isfinite(result.pvec) ):
+            if not numpy.isfinite(result.fitness) or numpy.any(result.pvec ==None )or not numpy.all(numpy.isfinite(result.pvec) ):
                 msg= "Single Fitting did not converge!!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
                 return
@@ -797,15 +798,23 @@ class Plugin:
        
         ## fit more than 1 model at the same time 
         try:
+            msg = "" 
             if result ==None:
                 msg= "Complex Fitting Stop !!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
                 return
-            if numpy.any(result.pvec ==None )or not numpy.all(numpy.isfinite(result.pvec) ):
+            if not numpy.isfinite(result.fitness) or numpy.any(result.pvec ==None )or not numpy.all(numpy.isfinite(result.pvec) ):
                 msg= "Single Fitting did not converge!!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
                 return
+              
             for page, value in self.page_finder.iteritems():
+                if format_number(result.fitness) == page.get_chi2():
+                    #ToDo: Compare parameter inputs with outputs too.
+                    msg= "Simultaneous Fit completed"
+                    msg +=" but chi2 has not been improved..."
+                    wx.PostEvent(self.parent, StatusEvent(status="%s " % msg)) 
+                    break                   
                 if value.get_scheduled()==1:
                     model = value.get_model()
                     metadata =  value.get_plotted_data()
@@ -837,7 +846,7 @@ class Plugin:
                     smearer =self.page_finder[page].get_smearer()
                     self.draw_model( model=model, data= metadata, smearer=smearer,
                                      qmin= qmin, qmax= qmax)
-            wx.PostEvent(self.parent, StatusEvent(status="", type="stop"))
+            wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
         except:
              msg= "Simultaneous Fit completed"
              msg +=" but Following error occurred:%s"%sys.exc_value
