@@ -20,9 +20,11 @@ _NPTS_DEFAULT = 50
 if sys.platform.count("win32")>0:
     PANEL_WIDTH = 450
     FONT_VARIANT = 0
+    ON_MAC = False
 else:
     PANEL_WIDTH = 500
     FONT_VARIANT = 1
+    ON_MAC = True
     
 class BasicPage(wx.ScrolledWindow):
     """
@@ -170,8 +172,9 @@ class BasicPage(wx.ScrolledWindow):
                       if kill_focus_callback is None else kill_focus_callback)                
             self.Bind(wx.EVT_TEXT_ENTER, parent._onparamEnter \
                       if text_enter_callback is None else text_enter_callback)
-            self.Bind(wx.EVT_LEFT_UP,    self._highlight_text \
-                      if mouse_up_callback is None else mouse_up_callback)
+            if not ON_MAC :
+                self.Bind(wx.EVT_LEFT_UP,    self._highlight_text \
+                          if mouse_up_callback is None else mouse_up_callback)
             
         def _on_set_focus(self, event):
             """
@@ -179,10 +182,13 @@ class BasicPage(wx.ScrolledWindow):
                 text if necessary
                 @param event: mouse event
             """
+            
             event.Skip()
             self.full_selection = True
             return self._on_set_focus_callback(event)
         
+ 
+            
         def _highlight_text(self, event):
             """
                 Highlight text of a TextCtrl only of no text has be selected
@@ -999,7 +1005,42 @@ class BasicPage(wx.ScrolledWindow):
             if is_modified:
                 self.state_change= True
                 self._draw_model() 
-                 
+                
+    def _update_paramv_on_fit(self):
+        """
+             make sure that update param values just before the fitting
+        """
+        from sans.guiframe.utils import check_value 
+        #flag for qmin qmax check values
+        flag =False
+        is_modified = False
+        ##So make sure that update param values on_Fit.
+        #self._undo.Enable(True)
+        if self.model !=None:           
+            ##Check the values
+            self._check_value_enter( self.fittable_param ,is_modified)
+            self._check_value_enter( self.fixed_param ,is_modified)
+            self._check_value_enter( self.parameters ,is_modified) 
+
+            # If qmin and qmax have been modified, update qmin and qmax and 
+            if check_value( self.qmin, self.qmax):
+                if float(self.qmin.GetValue()) != self.qmin_x:
+                    self.qmin_x = float(self.qmin.GetValue())
+
+                if float(self.qmax.GetValue()) != self.qmax_x:
+                    self.qmax_x = float(self.qmax.GetValue())
+                flag = True
+                
+            if self.npts != None:
+                if check_float(self.npts):
+                    if float(self.npts.GetValue()) !=  self.num_points:
+                        self.num_points = float(self.npts.GetValue())
+
+        else:
+            msg= "Cannot Fit :Must select a model!!!  "
+            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        
+        return flag                           
                
     def _is_modified(self, is_modified):
         """
@@ -1514,15 +1555,6 @@ class BasicPage(wx.ScrolledWindow):
                 if name in self.model.details.keys():   
                     self.model.details[name][1:]= param_min,param_max
                 
-                                    
-                ## hide statictext +/-    
-                #if item[3]!=None and item[3].IsShown():
-                #    item[3].Hide()
-                ## hide textcrtl  for error after fit
-                #if item[4]!=None and item[4].IsShown():
-                #    item[4].Clear()
-                #    item[4].Hide()
-
                 value= float(item[2].GetValue())
 
                 # If the value of the parameter has changed,
