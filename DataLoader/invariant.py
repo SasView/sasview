@@ -13,27 +13,17 @@ class InvariantCalculator(object):
         @precondition:  the user must send a data of type DataLoader.Data1D
         @note: The data boundaries are assumed as infinite range. 
     """
-    def __init__(self, data,contrast=None, pConst=None):
+    def __init__(self, data):
         """
             Initialize variables
             @param data: data must be of type DataLoader.Data1D
             @param contrast: contrast value of type float
             @param pConst: Porod Constant of type float
         """
-        self.q_star = self.getQstar(data= data)
-        self.volume = self._getVolFrac(contrast= contrast)
-        self.surface= self._getSurface(pConst= pConst)
+        ## Invariant
+        self.q_star = self._get_q_star(data= data)
         
-    def __call__(self, contrast, pConst):
-        """
-            @precondition: self.q_star has already been computed
-        """
-        self.volume = self._getVolFrac(contrast= contrast)
-        self.surface = self._getSurface(pConst= pConst)
-        
-        return self
-        
-    def getQstar(self, data):
+    def _get_q_star(self, data):
         """
             @param data: data of type Data1D
             @return invariant value
@@ -41,14 +31,16 @@ class InvariantCalculator(object):
         if not issubclass(data.__class__, LoaderData1D):
             #Process only data that inherited from DataLoader.Data_info.Data1D
             raise ValueError,"Data must be of type DataLoader.Data1D"
-        if data.dxl == None:
-            return self._getQStarUnsmear(data= data)
+        
+        # Check whether we have slit smearing information
+        if data.is_slit_smeared():
+            return self._get_qstar_unsmeared(data= data)
         else:
-            return self._getQStarSmear(data= data)
+            return self._get_qstar_smeared(data= data)
     
             
             
-    def _getQStarUnsmear(self, data):
+    def _get_qstar_unsmeared(self, data):
         """
             @param data: data of type Data1D
             Compute invariant given by
@@ -85,10 +77,10 @@ class InvariantCalculator(object):
                 return sum
             
                
-    def _getQStarSmear(self, data):
+    def _get_qstar_smeared(self, data):
         """
             @param data: data of type Data1D
-            Compute invariant with smearing info
+            Compute invariant with slit smearing info
             q_star= x0*dxl *y0 *dx0 + x1*dxl *y1 *dx1 + ..+ xn*dxl *yn *dxn 
             where n= infinity
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
@@ -124,7 +116,7 @@ class InvariantCalculator(object):
                     sum += data.x[i]* data.dxl[i]* data.y[i]* dxi
                 return sum
         
-    def _getVolFrac(self,contrast):
+    def get_volume_fraction(self, contrast):
         """
             Compute volume fraction is given by:
             
@@ -136,31 +128,27 @@ class InvariantCalculator(object):
                 contrast unit is 1/A^(2)= 10^(16)cm^(2)
                 q_star unit  1/A^(3)*1/cm
                 
-            the result returned will be 0<= volume <= 1 or None
+            the result returned will be 0<= volume <= 1
             
             @param contrast: contrast value provides by the user of type float
-            @return None : if the invariant Calculator does not a computed
-            q_star already  stored
+            @return: volume fraction
             @note: volume fraction must have no unit
         """
-        if contrast ==None:
-            #No contrast value is provided for calculation then no calculation
-            return 
         if contrast < 0:
             raise ValueError, "contrast must be greater than zero"  
         
         if self.q_star ==None:
-            return  
+            raise RuntimeError, "Q_star is not defined"
         
         if self.q_star < 0:
-            raise ValueError, "invariant must be greater than zero"
+            raise ValueError, "invariant must be greater than zero. Q_star=%g" % self.q_star
        
         #compute intermediate constant
         k =  1.e-8*self.q_star /(2*(math.pi* math.fabs(float(contrast)))**2)
         #check discriminant value
         discrim= 1 - 4*k
         if discrim < 0:
-            return 
+            raise RuntimeError, "could not compute the volume fraction: negative discriminant"
         elif discrim ==0:
             volume = 1/2
             return volume
@@ -168,32 +156,32 @@ class InvariantCalculator(object):
             # compute the volume
             volume1 = 0.5 *(1 - math.sqrt(discrim))
             volume2 = 0.5 *(1 + math.sqrt(discrim))
-            print "volume1",volume1
-            print "volume2",volume2
            
             if 0<= volume1 and volume1 <= 1:
                 return volume1
             elif 0<= volume2 and volume2<= 1: 
                 return volume2 
-            return 
+            raise RuntimeError, "could not compute the volume fraction: inconsistent results"
     
-    def _getSurface(self, pConst, volume=None):
+    def get_surface(self, contrast, porod_const):
         """
             Compute the surface given by:
                 surface = (2*pi *volume(1- volume)*pConst)/ q_star
-            @param volume : volume previously calculated
-            @return None: if volume used for computation equal None
+                
+            @param contrast: contrast value provides by the user of type float
+            @param porod_const: Porod constant 
+            @return: specific surface
         """
-        #check if the user provides a value for volume
-        if volume != None:
-            self.volume = float(volume)
+        # Compute the volume
+        volume = self.get_volume_fraction(contrast)
         
-        #return None if volume or q_star is not computed
-        if self.q_star ==None or self.volume == None:
-            return 
+        # Check whether we have Q star
+        if self.q_star ==None:
+            raise RuntimeError, "Q_star is not defined"
+        
         if self.q_star ==0:
-            raise ZeroDivisionError, "invariant must be greater than zero"
+            raise ValueError, "invariant must be greater than zero. Q_star=%g" % self.q_star
         
-        return 2*math.pi*self.volume*(1- self.volume)*float(pConst)/self.q_star
+        return 2*math.pi*volume*(1-volume)*float(porod_const)/self.q_star
         
         

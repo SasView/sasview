@@ -563,6 +563,21 @@ class Data1D(plottable_1D, DataInfo):
 
         return _str
 
+    def is_slit_smeared(self):
+        """
+            Check whether the data has slit smearing information
+            
+            @return: True is slit smearing info is present, False otherwise
+        """
+        def _check(v):            
+            if (v.__class__==list or v.__class__==numpy.ndarray) \
+                and len(v)>0 and min(v)>0:
+                return True
+            
+            return False
+        
+        return _check(self.dxl) or _check(self.dxw)
+        
     def clone_without_data(self, length=0, clone=None):
         """
             Clone the current object, without copying the data (which
