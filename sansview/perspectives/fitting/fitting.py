@@ -471,6 +471,7 @@ class Plugin:
                 msg= "%s error: %s" % (engineType,sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status= msg ))
                 return 
+            
         #Do the simultaneous fit
         try:
             ## If a thread is already started, stop it
@@ -507,6 +508,8 @@ class Plugin:
             msg= "%s error: %s" % (engineType,sys.exc_value)
             wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
             return 
+        
+        
     def ready_fit(self):
         """
         Ready for another fit
@@ -607,22 +610,21 @@ class Plugin:
         self.fit_id =id
         #Create list of parameters for fitting used
         templist=[]
-        pars=pars
+       
         try:
-            ## create a park model and reset parameter value if constraint
-            ## is given
-            new_model = Model(model)
+            #Extra list of parameters and their constraints
+            listOfConstraint= []
+            
             param = value.get_model_param()
             if len(param)>0:
                 for item in param:
-                    param_value = item[1]
-                    param_name = item[0]
                     ## check if constraint
-                    if param_value !=None and param_name != None:
-                        new_model.parameterset[ param_name].set( param_value )
-            
+                    if item[0] !=None and item[1] != None:
+                        listOfConstraint.append((item[0],item[1]))
+                   
             #Do the single fit
-            self.fitter.set_model(new_model, self.fit_id, pars)
+            self.fitter.set_model(model, self.fit_id,
+                                   pars,constraints = listOfConstraint)
             
             self.fitter.set_data(data=metadata,Uid=self.fit_id,
                                  smearer=smearer,qmin= qmin,qmax=qmax )
@@ -633,7 +635,7 @@ class Plugin:
         except:
             msg= title +" error: %s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
-            return
+           
        
     def _onSelect(self,event):
         """ 
