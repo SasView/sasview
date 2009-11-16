@@ -48,19 +48,19 @@ class Fit:
         
    
     
-    def fit(self,handler=None, curr_thread=None):
+    def fit(self,q=None,handler=None, curr_thread=None):
         """Perform the fit """
         try:
-            return self._engine.fit(handler, curr_thread= curr_thread)
+            return self._engine.fit(q,handler, curr_thread= curr_thread)
         except:
             raise
     
     
-    def set_model(self,model,Uid,pars=[]):
+    def set_model(self,model,Uid,pars=[],constraints=[]):
         """
         store a model model to fit at the position Uid of the fit engine
         """
-        self._engine.set_model(model,Uid,pars)
+        self._engine.set_model(model,Uid,pars,constraints)
    
    
     def set_data(self,data,Uid,smearer=None,qmin=None, qmax=None):

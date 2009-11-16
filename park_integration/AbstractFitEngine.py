@@ -364,11 +364,11 @@ class SansAssembly:
         #import thread
         self.model.setParams(self.paramlist,params)
         self.res= self.data.residuals(self.model.eval)
-        #if self.curr_thread != None :
-        #    try:
-        #        self.curr_thread.isquit()
-        #    except:
-        #        raise FitAbort,"stop leastsqr optimizer"    
+        if self.curr_thread != None :
+            try:
+                self.curr_thread.isquit()
+            except:
+                raise FitAbort,"stop leastsqr optimizer"    
         return self.res
     
 class FitEngine:
@@ -434,35 +434,60 @@ class FitEngine:
             return data
         
         
-    def set_model(self,model,Uid,pars=[]):
+    def set_model(self,model,Uid,pars=[], constraints=[]):
         """
             set a model on a given uid in the fit engine.
-            @param model: the model to fit
+            @param model: sans.models type 
             @param Uid :is the key of the fitArrange dictionnary where model is saved as a value
             @param pars: the list of parameters to fit 
+            @param constraints: list of 
+                tuple (name of parameter, value of parameters)
+                the value of parameter must be a string to constraint 2 different
+                parameters.
+                Example:
+                we want to fit 2 model M1 and M2 both have parameters A and B.
+                constraints can be:
+                 constraints = [(M1.A, M2.B+2), (M1.B= M2.A *5),...,]
             @note : pars must contains only name of existing model's paramaters
         """
+        if model == None:
+            raise ValueError, "AbstractFitEngine: Need to set model to fit"
+        
+        new_model= model
+        if not issubclass(model.__class__, Model):
+            new_model= Model(model)
+        
+        if len(constraints)>0:
+            for constraint in constraints:
+                name, value = constraint
+                try:
+                    new_model.parameterset[ str(name)].set( str(value) )
+                except:
+                    msg= "Fit Engine: Error occurs when setting the constraint"
+                    msg += " %s for parameter %s "%(value, name)
+                    raise ValueError, msg
+                
         if len(pars) >0:
-            if model==None:
-                raise ValueError, "AbstractFitEngine: Specify parameters to fit"
-            else:
-                temp=[]
-                for item in pars:
-                    if item in model.model.getParamList():
-                        temp.append(item)
-                        self.paramList.append(item)
-                    else:
-                        raise ValueError,"wrong paramter %s used to set model %s. Choose\
-                            parameter name within %s"%(item, model.model.name,str(model.model.getParamList()))
-                        return
+            temp=[]
+            for item in pars:
+                if item in new_model.model.getParamList():
+                    temp.append(item)
+                    self.paramList.append(item)
+                else:
+                    
+                    msg = "wrong parameter %s used"%str(item)
+                    msg += "to set model %s. Choose"%str(new_model.model.name)
+                    msg += "parameter name within %s"%str(new_model.model.getParamList())
+                    raise ValueError,msg
+              
             #A fitArrange is already created but contains dList only at Uid
             if self.fitArrangeDict.has_key(Uid):
-                self.fitArrangeDict[Uid].set_model(model)
+                self.fitArrangeDict[Uid].set_model(new_model)
                 self.fitArrangeDict[Uid].pars= pars
             else:
             #no fitArrange object has been create with this Uid
                 fitproblem = FitArrange()
-                fitproblem.set_model(model)
+                fitproblem.set_model(new_model)
                 fitproblem.pars= pars
                 self.fitArrangeDict[Uid] = fitproblem
                 

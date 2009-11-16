@@ -16,22 +16,19 @@ class TestSingleFit(unittest.TestCase):
         self.data = Loader().load("cyl_400_20.txt")
         # Create model that fitting engine understands
         from sans.models.CylinderModel import CylinderModel
-        model1  = CylinderModel()
-        model1.setParam("scale", 1.0)
-        model1.setParam("radius",18)
-        model1.setParam("length", 397)
-        model1.setParam("contrast",3e-006 )
-        model1.setParam("background", 0.0)
-     
-        self.model = Model(model1)
-       
+        self.model  = CylinderModel()
+        self.model.setParam("scale", 1.0)
+        self.model.setParam("radius",18)
+        self.model.setParam("length", 397)
+        self.model.setParam("contrast",3e-006 )
+        self.model.setParam("background", 0.0)
+        #select parameters to fit
         self.pars1 =['length','radius','scale']
         
     def _fit(self, name="scipy"):
         """ return fit result """
         fitter = Fit(name)
         fitter.set_data(self.data,1)
-        
         fitter.set_model(self.model,1,self.pars1)
         fitter.select_problem_for_fit(Uid=1,value=1)
         return  fitter.fit()

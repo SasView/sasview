@@ -87,7 +87,7 @@ class ParkFit(FitEngine):
         self.problem =  park.Assembly(mylist)
         
     
-    def fit(self,handler=None, curr_thread= None):
+    def fit(self,q=None,handler=None, curr_thread= None):
         """
             Performs fit with park.fit module.It can  perform fit with one model
             and a set of data, more than two fit of  one model and sets of data or 
@@ -119,6 +119,9 @@ class ParkFit(FitEngine):
                          handler= handler)
         self.problem.all_results(result)
         if result !=None:
+            if q !=None:
+                q.put(result)
+                return q
             return result
         else:
             raise ValueError, "SVD did not converge"

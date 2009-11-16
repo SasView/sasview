@@ -2,7 +2,6 @@
     Unit tests for fitting module 
 """
 import unittest
-from sans.fit.AbstractFitEngine import Model
 import math
 from sans.fit.Fitting import Fit
 from DataLoader.loader import Loader
@@ -17,14 +16,13 @@ class testFitModule(unittest.TestCase):
         fitter = Fit('scipy')
         # Receives the type of model for the fitting
         from sans.models.CylinderModel import CylinderModel
-        model1  = CylinderModel()
-        model1.setParam('contrast', 1)
-        model = Model(model1)
-        
+        model  = CylinderModel()
+        model.setParam('contrast', 1)
+       
         pars1 =['length','radius','scale']
         fitter.set_data(out,1)
-        model.set( scale=1e-10 )
-        fitter.set_model(model,1,pars1)
+        model.setParam('scale', 1e-10)
+        fitter.set_model(model,1,pars1, constraints=())
         fitter.select_problem_for_fit(Uid=1,value=1)
         result1 = fitter.fit()
         
