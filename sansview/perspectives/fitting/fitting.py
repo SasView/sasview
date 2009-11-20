@@ -635,7 +635,7 @@ class Plugin:
         except:
             msg= title +" error: %s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
-           
+            return
        
     def _onSelect(self,event):
         """ 
@@ -768,7 +768,8 @@ class Plugin:
                 if result.pvec.__class__==numpy.float64:
                     model.setParam(name,result.pvec)
                 else:
-                    model.setParam(name,result.pvec[i])
+                    if result.pvec[i] != None and numpy.isfinite(result.pvec[i]):
+                        model.setParam(name,result.pvec[i])
                     i += 1
             ## Reset values of the current page to fit result
             cpage.onsetValues(result.fitness,param_name, result.pvec,result.stderr)
@@ -811,12 +812,14 @@ class Plugin:
                 return
               
             for page, value in self.page_finder.iteritems():
+                """
                 if format_number(result.fitness) == page.get_chi2():
                     #ToDo: Compare parameter inputs with outputs too.
                     msg= "Simultaneous Fit completed"
                     msg +=" but chi2 has not been improved..."
                     wx.PostEvent(self.parent, StatusEvent(status="%s " % msg)) 
-                    break                   
+                    break     
+                """              
                 if value.get_scheduled()==1:
                     model = value.get_model()
                     metadata =  value.get_plotted_data()
@@ -831,7 +834,8 @@ class Plugin:
                             p_name= model.name+"."+param_name
                             if p.name == p_name:
                                 small_out.append(p.value )
-                                model.setParam(param_name,p.value) 
+                                if p.value != None and numpy.isfinite(p.value):
+                                    model.setParam(param_name,p.value) 
                                 small_param_name.append(param_name)
                                 small_cov.append(p.stderr)
                             else:
@@ -1242,7 +1246,6 @@ class Plugin:
             @param data: loaded data
             @param model: the model to plot
         """
-         
         x=  numpy.linspace(start= qmin,
                            stop= qmax,
                            num= qstep,

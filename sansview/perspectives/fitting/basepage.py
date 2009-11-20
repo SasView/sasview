@@ -5,6 +5,7 @@ import numpy
 import time
 import copy 
 import math
+import string
 from sans.guiframe.utils import format_number,check_float
 from sans.guicomm.events import StatusEvent   
 import pagestate
@@ -495,18 +496,20 @@ class BasicPage(wx.ScrolledWindow):
             self.state.enable_disp = copy.deepcopy(self.enable_disp.GetValue())
         if hasattr(self, "disp_box"):
             self.state.disp_box = copy.deepcopy(self.disp_box.GetSelection())
-        
-        self.state.model = self.model.clone()
+
         self.state.model.name= self.model.name
         #if not hasattr(self.model, "_persistency_dict"):
         #self.model._persistency_dict = {}
         #self.state.model._persistency_dict= copy.deepcopy(self.model._persistency_dict)
         
         #Remember fit engine_type for fit panel
-        if self.engine_type == None and self.manager !=None:
-            self.engine_type = self.manager._return_engine_type()
+        if self.engine_type == None: 
+            self.engine_type = "scipy"
+        if self.manager !=None:
+            self.manager._on_change_engine(engine=self.engine_type)
+                #self.engine_type = self.manager._return_engine_type()
         
-        self.state.engine_type = self.engine_type
+            self.state.engine_type = self.engine_type
 
         new_state = self.state.clone()
         new_state.model.name = self.state.model.name
@@ -719,13 +722,6 @@ class BasicPage(wx.ScrolledWindow):
         ## save plotting range
         self._save_plotting_range()
         
-        #self.state.orientation_params =[]
-        #self.state.orientation_params_disp =[]
-        #self.state.parameters =[]
-        #self.state.fittable_param =[]
-        #self.state.fixed_param =[]
-
-        
         ## save checkbutton state and txtcrtl values
         self._copy_parameters_state(self.orientation_params,
                                      self.state.orientation_params)
@@ -754,8 +750,7 @@ class BasicPage(wx.ScrolledWindow):
             self.smearer= smear_selection( self.data )
         self.enable2D= state.enable2D
         self.engine_type = state.engine_type
-        
-        #???
+
         self.disp_cb_dict = state.disp_cb_dict
         self.disp_list = state.disp_list
 
@@ -767,7 +762,7 @@ class BasicPage(wx.ScrolledWindow):
         ##draw sizer containing model parameters value for the current model
         self._set_model_sizer_selection( self.model )
         self.set_model_param_sizer(self.model)
-        
+
         ## reset value of combox box
         self.structurebox.SetSelection(state.structurecombobox )
         self.formfactorbox.SetSelection(state.formfactorcombobox)
@@ -782,7 +777,7 @@ class BasicPage(wx.ScrolledWindow):
         ## set the select all check box to the a given state
         if hasattr(self, "cb1"):   
             self.cb1.SetValue(state.cb1)
-      
+     
         ## reset state of checkbox,textcrtl  and  regular parameters value
             
         self._reset_parameters_state(self.orientation_params_disp,
@@ -793,7 +788,7 @@ class BasicPage(wx.ScrolledWindow):
          ## display dispersion info layer        
         self.enable_disp.SetValue(state.enable_disp)
         self.disable_disp.SetValue(state.disable_disp)
-
+        
         if hasattr(self, "disp_box"):
             
             self.disp_box.SetSelection(state.disp_box) 
@@ -835,62 +830,31 @@ class BasicPage(wx.ScrolledWindow):
                 for k,v in self.state.disp_cb_dict.iteritems():
                     self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
                     self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
-      
+
         ##plotting range restore    
         self._reset_plotting_range(state)
+
         ## smearing info  restore
         if hasattr(self,"enable_smearer"):
             ## set smearing value whether or not the data contain the smearing info
             self.enable_smearer.SetValue(state.enable_smearer)
             self.disable_smearer.SetValue(state.disable_smearer)
-            self.onSmear(event=None)
-            self.tcChi.SetLabel(str( state.tcChi))            
+            self.onSmear(event=None)           
        
         ## reset state of checkbox,textcrtl  and dispersity parameters value
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
         self._reset_parameters_state(self.fixed_param,state.fixed_param)
-    
+        
         ## draw the model with previous parameters value
         self._onparamEnter_helper()
-        
+
         ## reset context menu items
         self._reset_context_menu()
     
         ## set the value of the current state to the state given as parameter
         self.state = state.clone() 
         self._draw_model()
-       
-    def _clear_Err_on_Fit(self):
-        """
-            hide the error text control shown 
-            after fitting
-        """
-        """
-        if hasattr(self,"text2_3"):
-            self.text2_3.Hide()
 
-        if len(self.parameters)>0:
-            for item in self.parameters:
-                ## hide statictext +/-    
-                if item[3]!=None and item[3].IsShown():
-                    item[3].Hide()
-                ## hide textcrtl  for error after fit
-                if item[4]!=None and item[4].IsShown():                   
-                    item[4].Clear()
-                    item[4].Hide()
-        if len(self.fittable_param)>0:
-            for item in self.fittable_param:
-                ## hide statictext +/-    
-                if item[3]!=None and item[3].IsShown():
-                    item[3].Hide()
-                ## hide textcrtl  for error after fit
-                if item[4]!=None and item[4].IsShown():
-                    item[4].Clear()
-                    item[4].Hide()
-        ##Is this layout necessary? Had a problem w/MAC:Not anymore.
-        self.Layout()
-        """
-        return        
     def _selectDlg(self):
         """
             open a dialog file to selected the customized dispersity 
@@ -962,20 +926,15 @@ class BasicPage(wx.ScrolledWindow):
         """
         #self._undo.Enable(True)
         if self.model !=None:
-            
-           
-            # Flag to register when a parameter has changed.
+            # Flag to register when a parameter has changed.      
             is_modified = False
-            is_modified =self._check_value_enter( self.fittable_param ,is_modified)
-            is_modified =self._check_value_enter( self.fixed_param ,is_modified)
-            is_modified =self._check_value_enter( self.parameters ,is_modified) 
-     
-            if is_modified:
-                #self.sizer3.Layout()
-                self.Layout()
-                self.Refresh()
-            else:
-                self.Layout()
+            try:
+                is_modified =self._check_value_enter( self.fittable_param ,is_modified)
+                is_modified =self._check_value_enter( self.fixed_param ,is_modified)
+                is_modified =self._check_value_enter( self.parameters ,is_modified) 
+            except:
+                pass
+            #if is_modified:
 
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
@@ -1005,7 +964,9 @@ class BasicPage(wx.ScrolledWindow):
             if is_modified:
                 self.state_change= True
                 self._draw_model() 
-                
+            self.Layout()
+            self.Refresh()
+
     def _update_paramv_on_fit(self):
         """
              make sure that update param values just before the fitting
@@ -1020,7 +981,7 @@ class BasicPage(wx.ScrolledWindow):
             ##Check the values
             self._check_value_enter( self.fittable_param ,is_modified)
             self._check_value_enter( self.fixed_param ,is_modified)
-            self._check_value_enter( self.parameters ,is_modified) 
+            self._check_value_enter( self.parameters ,is_modified)
 
             # If qmin and qmax have been modified, update qmin and qmax and 
             if check_value( self.qmin, self.qmax):
@@ -1035,7 +996,6 @@ class BasicPage(wx.ScrolledWindow):
                 if check_float(self.npts):
                     if float(self.npts.GetValue()) !=  self.num_points:
                         self.num_points = float(self.npts.GetValue())
-
         else:
             msg= "Cannot Fit :Must select a model!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
@@ -1500,6 +1460,10 @@ class BasicPage(wx.ScrolledWindow):
 
         tcrtl= event.GetEventObject()
         
+        #Clear msg if previously shown.
+        msg= ""
+        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        
         ## save current state
         self.save_current_state()
         if event !=None:
@@ -1510,7 +1474,7 @@ class BasicPage(wx.ScrolledWindow):
         if check_float(tcrtl):
             
             self._onparamEnter_helper()
-            
+        
         else:
             msg= "Cannot Plot :Must enter a number!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
@@ -1526,47 +1490,65 @@ class BasicPage(wx.ScrolledWindow):
         is_modified =  modified
         if len(list)==0:
             return is_modified
+        
         for item in list:
-            try:
-                name = str(item[1])
-                if hasattr(self,"text2_3") and self.text2_3.IsShown():
-                    if hasattr(self,"item[4]")and self.item[4] == None:
-                        self.text2_3.Hide()
-                        
+            #skip angle parameters for 1D
+            if self.data.__class__.__name__ !="Data2D":
+                if item in self.orientation_params:
+                    continue
+            #try:
+            name = str(item[1])
+            
+            if string.find(name,".npts") ==-1 and string.find(name,".nsigmas")==-1:      
                 ## check model parameters range             
                 param_min= None
                 param_max= None
+
                 ## check minimun value
-                if item[5]!= None:
+                if item[5]!= None and item[5]!= "":
                     if item[5].GetValue().lstrip().rstrip()!="":
-                        param_min = float(item[5].GetValue())
+                        try:
+                            param_min = float(item[5].GetValue())
+                        except:
+                            msg = "Wrong Fit parameter range entered "
+                            wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
+                            raise ValueError, msg
                         is_modified = True
                 ## check maximum value
-                if item[6]!= None:
+                if item[6]!= None and item[5]!= "":
                     if item[6].GetValue().lstrip().rstrip()!="":
-                        param_max = float(item[6].GetValue())
+                        try:
+                            param_max = float(item[6].GetValue())
+                        except:
+                            msg = "Wrong Fit parameter range entered "
+                            wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
+                            raise ValueError, msg
                         is_modified = True
                 from sans.guiframe.utils import check_value
+
                 if param_min != None and param_max !=None:
                     if not check_value(item[5], item[6]):
                         msg= "Wrong Fit range entered for parameter "
                         msg+= "name %s of model %s "%(name, self.model.name)
-                        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                        wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
+  
                 if name in self.model.details.keys():   
-                    self.model.details[name][1:]= param_min,param_max
-                
-                value= float(item[2].GetValue())
+                    if  param_min != self.model.details[name][1] or param_max != self.model.details[name][2]:
+                        self.model.details[name][1:3]= param_min,param_max
+                        is_modified = True
+    
+                else:
+                    self.model.details [name] = ["",param_min,param_max] 
+                    is_modified = True
+            
+            value= float(item[2].GetValue())
+  
+            # If the value of the parameter has changed,
+            # +update the model and set the is_modified flag
+            if value != self.model.getParam(name):
+                self.model.setParam(name,value)
+                is_modified = True   
 
-                # If the value of the parameter has changed,
-                # +update the model and set the is_modified flag
-                if value != self.model.getParam(name):
-                    self.model.setParam(name,value)
-                    is_modified = True   
-
-            except:
-                msg= "Model Drawing  Error:wrong value entered : %s"% sys.exc_value
-                wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-                return 
         return is_modified 
         
  
@@ -1616,7 +1598,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Layout()
         self.sizer5.Layout()
         self.Layout()
-        #self.Refresh()      
+        self.Refresh()      
           
         
     def _layout_sizer_noDipers(self):
@@ -1647,6 +1629,7 @@ class BasicPage(wx.ScrolledWindow):
             for item in self.fittable_param:
                 if item in self.param_toFit:
                     self.param_toFit.remove(item)
+
             for item in self.orientation_params_disp:
                 if item in self.param_toFit:
                     self.param_toFit.remove(item)
