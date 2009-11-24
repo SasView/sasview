@@ -316,10 +316,10 @@ class InvariantCalculator(object):
         
               Compute the surface given by:
                 surface = (2*pi *V(1- V)*porod_const)/ q_star
-                
+               
             @param contrast: contrast value to compute the volume
             @param porod_const: Porod constant to compute the surface 
-            @return: specific surface
+            @return: specific surface 
         """
        
     def get_volume_fraction(self, contrast):
@@ -417,21 +417,22 @@ class InvariantCalculator(object):
         
     def get_volume_fraction_with_error(self, contrast):
         """
-            Compute uncertainty on volume value.
+            Compute uncertainty on volume value as well as the volume fraction
             This uncertainty is given by the following equation:
             dV = 0.5 * (4*k* dq_star) /(2* math.sqrt(1-k* q_star))
                                  
             for k = 10^(8)*q_star/(2*(pi*|contrast|)**2)
+            
             q_star: the invariant value including extrapolated value if existing
             dq_star: the invariant uncertainty
             dV: the volume uncertainty
             @param contrast: contrast value 
-            @return: v, dv
+            @return: V, dV = self.get_volume_fraction_with_error(contrast), dV
         """
         
     def get_surface_with_error(self, contrast, porod_const):
         """
-            Compute uncertainty of the surface value.
+            Compute uncertainty of the surface value as well as thesurface value
             this uncertainty is given as follow:
             
             dS = porod_const *2*pi[( dV -2*V*dV)/q_star
