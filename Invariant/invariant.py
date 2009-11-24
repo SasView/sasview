@@ -10,9 +10,6 @@ from DataLoader.data_info import Data1D as LoaderData1D
 from DataLoader.qsmearing import smear_selection
 
 
-# PLEASE NEVER USE SUCH A DIRTY TRICK. Change your logic instead.
-#INFINITY = 10
-
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM  = 1e-5
 
@@ -37,7 +34,7 @@ class FitFunctor:
         #fitting range 
         self.qmin =  self.data[0]    
         if self.qmin == 0:
-            self.qmin = MINIMUM 
+            self.qmin = Q_MINIMUM 
     
         self.qmax = self.data[x_len]
         #Unsmeared q range
@@ -253,7 +250,7 @@ class InvariantCalculator(object):
                 q_star = x0**2 *y0 *dx0 +x1**2 *y1 *dx1 
                             + ..+ xn**2 *yn *dxn 
                             
-            where n= SOME GOOD DEFAULT
+            where n >= len(data.x)-1
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
             dx0 = (x1 - x0)/2
             dxn = xn - xn-1
@@ -267,7 +264,7 @@ class InvariantCalculator(object):
             This invariant is given by:
                 q_star = x0*dxl *y0*dx0 + x1*dxl *y1 *dx1 
                             + ..+ xn*dxl *yn *dxn 
-            where n= SOME GOOD DEFAULT
+            where n >= len(data.x)-1
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
             dx0 = x0+ (x1 - x0)/2
             dxn = xn - xn-1
@@ -282,7 +279,7 @@ class InvariantCalculator(object):
             This uncertainty is given as follow:
                dq_star = math.sqrt[(x0**2*(dy0)*dx0)**2 +
                     (x1**2 *(dy1)*dx1)**2 + ..+ (xn**2 *(dyn)*dxn)**2 ]
-            where n = SOME GOOD DEFAULT
+            where n >= len(data.x)-1
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
             dx0 = x0+ (x1 - x0)/2
             dxn = xn - xn-1
@@ -298,7 +295,7 @@ class InvariantCalculator(object):
             This uncertainty is given as follow:
                 dq_star = x0*dxl *dy0 *dx0 + x1*dxl *dy1 *dx1 
                             + ..+ xn*dxl *dyn *dxn 
-            where n= infinity
+            where n >= len(data.x)-1
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
             dx0 = x0+ (x1 - x0)/2
             dxn = xn - xn-1
@@ -337,7 +334,7 @@ class InvariantCalculator(object):
            
             q_star: the invariant value included extrapolation is applied
                          unit  1/A^(3)*1/cm
-                    q_star = self._get_qstar_total()
+                    q_star = self._qstar
                     
             the result returned will be 0<= volume <= 1
             
