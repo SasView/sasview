@@ -9,11 +9,20 @@ import numpy.linalg.lstsq
 from DataLoader.data_info import Data1D as LoaderData1D
 from DataLoader.qsmearing import smear_selection
 
-INFINITY = 10
-MINIMUM  = 1e-5
-STEPS = 1000
 
-class Functor:
+# PLEASE NEVER USE SUCH A DIRTY TRICK. Change your logic instead.
+#INFINITY = 10
+
+# The minimum q-value to be used when extrapolating
+Q_MINIMUM  = 1e-5
+
+# The maximum q-value to be used when extrapolating
+Q_MAXIMUM  = 10
+
+# Number of steps in the extrapolation
+INTEGRATION_NSTEPS = 1000
+
+class FitFunctor:
     """
         compute f(x)
     """
@@ -102,6 +111,28 @@ class Functor:
         """
         return self._get_residuals(params)
     
+    
+def guinier(x, scale=1, radius=0.1):
+    """
+        Compute a F(x) = scale* e-((radius*x)**2/3).
+        @param x: a vector of q values or one q value
+        @param scale: the scale value
+        @param radius: the guinier radius value
+        @return F(x)
+    """
+    
+def power_law(x, scale=1, power=4):
+    """
+        F(x) = scale* (x)^(-power)
+            when power= 4. the model is porod 
+            else power_law
+        The model has three parameters: 
+        @param power: power of the function
+        @param scale : scale factor value
+        @param F(x)
+    """    
+
+    
 class InvariantCalculator(object):
     """
         Compute invariant if data is given.
@@ -119,37 +150,66 @@ class InvariantCalculator(object):
             @param contrast: contrast value of type float
             @param pConst: Porod Constant of type float
         """
-        self.data = None
-        self.qstar = None
-        self.background = background
-        self.scale = scale
+        # Background and scale should be private data member if the only way to
+        # change them are by instantiating a new object.
+        self._background = background
+        self._scale = scale
         
-    def _get_guinier(self, x, scale=1, radius=0.1):
-        """
-            Compute a F(x) = scale* e-((radius*x)**2/3).
-            @param x: a vector of q values or one q value
-            @param scale: the scale value
-            @param radius: the guinier radius value
-            @return F(x)
-        """
+        # The data should be private
+        self._data = self._get_data(data)
         
-    def _get_power_law(self, x, scale=1, power=4):
-        """
-            F(x) = scale* (x)^(-power)
-                when power= 4. the model is porod 
-                else power_law
-            The model has three parameters: 
-            @param power: power of the function
-            @param scale : scale factor value
-            @param F()
-        """
+        # Since there are multiple variants of Q*, you should force the
+        # user to use the get method and keep Q* a private data member
+        self._qstar = None
         
-    def _get_data(self):
+        # You should keep the error on Q* so you can reuse it without
+        # recomputing the whole thing.
+        self._qstar_err = 0
+        
+        # Extrapolation parameters
+        self._low_extrapolation_npts = 4
+        self._low_extrapolation_function = guinier
+        self._low_extrapolation_power = 4
+        
+        self._high_extrapolation_npts = 4
+        self._high_extrapolation_function = power_law
+        self._high_extrapolation_power = 4
+        
+    def set_extrapolation(self, range, npts=4, function=None, power=4):
+        """
+            Set the extrapolation parameters for the high or low Q-range.
+            Note that this does not turn extrapolation on or off.
+        """
+        range = range.lower()
+        if range not in ['high', 'low']:
+            raise ValueError, "Extrapolation range should be 'high' or 'low'"
+        function = function.lower()
+        if function not in ['power_law', 'guinier']:
+            raise ValueError, "Extrapolation function should be 'guinier' or 'power_law'"
+        
+        if range=='high':
+            if function != 'power_law':
+                raise ValueError, "Extrapolation only allows a power law at high Q"
+            self._high_extrapolation_npts  = npts
+            self._high_extrapolation_power = power
+        else:
+            if function == 'power_law':
+                self._low_extrapolation_function = power_law
+            else:
+                self._low_extrapolation_function = guinier
+            self._low_extrapolation_npts  = npts
+            self._low_extrapolation_power = power
+        
+    def _get_data(self, data):
         """
             @note this function must be call before computing any type
              of invariant
-            @return data= self.scale *self.data - self.background
+            @return data= self._scale *data - self._background
         """
+        if not issubclass(data.__class__, LoaderData1D):
+            #Process only data that inherited from DataLoader.Data_info.Data1D
+            raise ValueError,"Data must be of type DataLoader.Data1D"
+        
         
     def _fit(self, function, params=[]):
         """
@@ -165,54 +225,64 @@ class InvariantCalculator(object):
             
         """
         
-    def _get_qstar(self):
+    def get_qstar(self, extrapolation=None):
         """
             Compute the invariant of the local copy of data.
             Implementation:
-                data = self._get_data()
                 if slit smear:
-                    return self._get_qstar_smear(data)
+                    qstar_0 = self._get_qstar_smear()
                 else:
-                    return self._get_qstar_unsmear(data)
+                    qstar_0 = self._get_qstar_unsmear()
+                    
+                if extrapolation==low:
+                    return qstar_0 + self._get_qstar_low()
+                elif extrapolation==high:
+                    return qstar_0 + self._get_qstar_high()
+                elif extrapolation==both:
+                    return qstar_0 + self._get_qstar_low() + self._get_qstar_high()
+                    
             @return q_star: invariant of the data within data's q range
         """
-    def _get_qstar_unsmear(self, data):
+        
+        
+    def _get_qstar_unsmear(self):
         """
             Compute invariant for pinhole data.
             This invariant is given by:
         
                 q_star = x0**2 *y0 *dx0 +x1**2 *y1 *dx1 
                             + ..+ xn**2 *yn *dxn 
-            where n= infinity
+                            
+            where n= SOME GOOD DEFAULT
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
             dx0 = (x1 - x0)/2
             dxn = xn - xn-1
-            @param data: data of type Data1D
+
             @return q_star: invariant value for pinhole data.
         """
         
-    def _get_qstar_smear(self, data):
+    def _get_qstar_smear(self):
         """
             Compute invariant for slit-smeared data.
             This invariant is given by:
                 q_star = x0*dxl *y0*dx0 + x1*dxl *y1 *dx1 
                             + ..+ xn*dxl *yn *dxn 
-            where n= infinity
+            where n= SOME GOOD DEFAULT
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
             dx0 = x0+ (x1 - x0)/2
             dxn = xn - xn-1
             dxl: slit smear value
-            @param data: data of type Data1D
+            
             @return q_star: invariant value for slit smeared data.
         """
         
-    def _get_qstar_unsmear_uncertainty(self, data):
+    def _get_qstar_unsmear_uncertainty(self):
         """
             Compute invariant uncertainty with with pinhole data.
             This uncertainty is given as follow:
                dq_star = math.sqrt[(x0**2*(dy0)*dx0)**2 +
                     (x1**2 *(dy1)*dx1)**2 + ..+ (xn**2 *(dyn)*dxn)**2 ]
-            where n = infinity
+            where n = SOME GOOD DEFAULT
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
             dx0 = x0+ (x1 - x0)/2
             dxn = xn - xn-1
@@ -221,7 +291,8 @@ class InvariantCalculator(object):
                         and the background is subtracted.
             note: if data doesn't contain dy assume dy= math.sqrt(data.y)
         """
-    def _get_qstar_smear_uncertainty(self, data):
+        
+    def _get_qstar_smear_uncertainty(self):
         """
             Compute invariant uncertainty with slit smeared data.
             This uncertainty is given as follow:
@@ -237,26 +308,6 @@ class InvariantCalculator(object):
                         and the background is subtracted.
           
             note: if data doesn't contain dy assume dy= math.sqrt(data.y)
-        """
-    def _get_qstar_total(self):
-        """
-            Compute the total invariant whether or not it is extrapolated.
-            Implementation:
-                qstar = self._get_qstar() + self._get_qstar_min()
-                        + self._get_qstar_max()
-            @return q_star: invariant total value
-        """
-        
-    def set_background(self, background=0):
-        """
-            Set the value of the background
-            @param background : the value uses to set the local background
-        """
-        
-    def set_scale(self, scale=1):
-        """
-            Set the value of the scale
-            @param scale: the value to set the scale.
         """
         
     def get_surface(self,contrast, porod_const):
@@ -296,84 +347,78 @@ class InvariantCalculator(object):
             @note: volume fraction must have no unit
         """
         
-    def get_qstar_min(self, npts=0, power_law=False):
+    def _get_qstar_low(self):
         """
             Compute the invariant for extrapolated data at low q range.
             
             Implementation:
-                data = self.get_extra_data_low( npts, power_law)
+                data = self.get_extra_data_low()
                 return self._get_qstar()
-                
-            @param npts: data the number of points of the local data to consider
-                when fitting and created extrapolated data.
                 
             @return q_star: the invariant for data extrapolated at low q.
         """
         
-    def get_qstar_max(self, npts=0):
+    def _get_qstar_high(self):
         """
             Compute the invariant for extrapolated data at high q range.
             
             Implementation:
-                data = self.get_extra_data_high( npts)
+                data = self.get_extra_data_high()
                 return self._get_qstar()
                 
-            @param npts: data the number of points of the local data to consider
-                when fitting and created extrapolated data.
             @return q_star: the invariant for data extrapolated at high q.
         """
         
-    def get_extra_data_low(self, data, npts, power_law=False):
+    def _get_extra_data_low(self):
         """
-            This method creates a new_data from the invariant calculator  data
-            It takes npts first points of  data , 
-            fits them with a given model
-            then uses
-            the new parameters resulting from the fit to create a new data.
-            the new data first point is MINIMUM .
-            the last point of the new data is the first point of the local data.
-            the number of q points of this data is STEPS.
+            This method creates a new data set from the invariant calculator.
             
-            @param power_law: a flag to allow the function used for fitting
-                to switch between a guinier or a power_law model.
-                if set to True: the power_law will be used for fitting
-                else: the guinier will be used.
-            @param data : the data to used to extrapolated
-                        assume data is scale and the background is removed
-            @param npts: the number of last points of data to fit.
+            It will use the extrapolation parameters kept as private data members.
             
-            @return new_data: a new data of type Data1D
+            self._low_extrapolation_npts is the number of data points to use in to fit.
+            self._low_extrapolation_function will be used as the fit function.
+            
+            
+            
+            It takes npts first points of data, fits them with a given model
+            then uses the new parameters resulting from the fit to create a new data set.
+            
+            The new data first point is Q_MINIMUM.
+            
+            The last point of the new data is the first point of the original data.
+            the number of q points of this data is INTEGRATION_NSTEPS.
+            
+            @return: a new data of type Data1D
         """
-    def get_extra_data_high(self, data, npts):
+        
+    def _get_extra_data_high(self):
         """
-            This method creates a new_data from the invariant calculator data
-            It takes npts last points of data , 
-            fits them with a given model
+            This method creates a new data from the invariant calculator.
+            
+            It takes npts last points of data, fits them with a given model
             (for this function only power_law will be use), then uses
-            the new parameters resulting from the fit to create a new_data.
-            the new_data first point is the last point of  data.
-            the last point of the new data is INFINITY.
-            the number of q points of this data is STEPS.
-            @param data : the data to used to extrapolated
-                        assume data is scale and the background is removed
-            @param npts: the number of last points of  data to fit.
+            the new parameters resulting from the fit to create a new data set.
+            The first point is the last point of data.
+            The last point of the new data is Q_MAXIMUM.
+            The number of q points of this data is INTEGRATION_NSTEPS.
+
             
-            @return new_data: a new data of type Data1D
+            @return: a new data of type Data1D
         """
-    def get_qstar_uncertainty(self):
+        
+    def get_qstar_with_error(self):
         """
             Compute the invariant uncertainty.
             This uncertainty computation depends on whether or not the data is
             smeared.
             @return dq_star:
-                data = self._get_data()
                 if slit smear:
-                    return self._get_qstar_smear_uncertainty(data)
+                    return self._get_qstar(), self._get_qstar_smear_uncertainty()
                 else:
-                    return self._get_qstar_unsmear_uncertainty(data) 
+                    return self._get_qstar(), self._get_qstar_unsmear_uncertainty()
         """
         
-    def get_volume_fraction_uncertainty(self, contrast):
+    def get_volume_fraction_with_error(self, contrast):
         """
             Compute uncertainty on volume value.
             This uncertainty is given by the following equation:
@@ -384,9 +429,10 @@ class InvariantCalculator(object):
             dq_star: the invariant uncertainty
             dV: the volume uncertainty
             @param contrast: contrast value 
+            @return: v, dv
         """
         
-    def get_surface_uncertainty(self, contrast, porod_const):
+    def get_surface_with_error(self, contrast, porod_const):
         """
             Compute uncertainty of the surface value.
             this uncertainty is given as follow:
@@ -401,7 +447,7 @@ class InvariantCalculator(object):
             
             @param contrast: contrast value
             @param porod_const: porod constant value 
-            @return dS: the surface uncertainty
+            @return S, dS: the surface, with its uncertainty
         """
         
     
