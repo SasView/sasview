@@ -52,12 +52,12 @@ class plottable_1D:
     _yunit = ''
     
     def __init__(self,x,y,dx=None,dy=None,dxl=None,dxw=None):
-        self.x = x
-        self.y = y
-        self.dx = dx
-        self.dy = dy
-        self.dxl = dxl
-        self.dxw = dxw
+        self.x = numpy.asarray(x)
+        self.y = numpy.asarray(y)
+        if dx is not None: self.dx = numpy.asarray(dx)
+        if dy is not None: self.dy = numpy.asarray(dy)
+        if dxl is not None: self.dxl = numpy.asarray(dxl)
+        if dxw is not None: self.dxw = numpy.asarray(dxw)
 
     def xaxis(self, label, unit):
         self._xaxis = label
