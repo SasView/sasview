@@ -92,7 +92,7 @@ class TestInvPolySphere(unittest.TestCase):
         #    The method should also check for consistency of the extrapolation and function
         #    parameters. For instance, you might not want to allow 'high' and 'guinier'.
         # The power parameter (not shown below) should default to 4.
-        inv.set_extrapolation(range='low', npts=20, function='guinier')
+        inv.set_extrapolation(range='low', npts=10, function='guinier')
         
         # The version of the call without error
         # At this point, we could still compute Q* without extrapolation by calling
@@ -107,7 +107,7 @@ class TestInvPolySphere(unittest.TestCase):
         s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
         
         # Test results
-        self.assertAlmostEquals(qstar, 7.49e-5,2)
+        self.assertAlmostEquals(qstar, 7.49e-5)
         self.assertAlmostEquals(v, 0.005648401)
         self.assertAlmostEquals(s, 9.42e+2,2)
             
@@ -119,7 +119,7 @@ class TestInvPolySphere(unittest.TestCase):
         inv = invariant.InvariantCalculator(data=self.data)
         
         # Set the extrapolation parameters for the high-Q range
-        inv.set_extrapolation(range='high', npts=20, function='power_law', power=4)
+        inv.set_extrapolation(range='high', npts=10, function='power_law', power=4)
         
         # The version of the call without error
         # The function parameter defaults to None, then is picked to be 'power_law' for extrapolation='high'
@@ -145,8 +145,8 @@ class TestInvPolySphere(unittest.TestCase):
         inv = invariant.InvariantCalculator(data=self.data)
         
         # Set the extrapolation parameters for the low- and high-Q ranges
-        inv.set_extrapolation(range='low', npts=5, function='guinier')
-        inv.set_extrapolation(range='high', npts=5, function='power_law', power=4)
+        inv.set_extrapolation(range='low', npts=10, function='guinier')
+        inv.set_extrapolation(range='high', npts=10, function='power_law', power=4)
         
         # The version of the call without error
         # The function parameter defaults to None, then is picked to be 'power_law' for extrapolation='high'
@@ -160,7 +160,7 @@ class TestInvPolySphere(unittest.TestCase):
         s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
         
         # Test results
-        self.assertAlmostEquals(qstar, 7.90069e-5,2)
+        self.assertAlmostEquals(qstar, 7.88981e-5,2)
         self.assertAlmostEquals(v, 0.005952674)
         self.assertAlmostEquals(s, 9.42e+2,2)
       
@@ -212,7 +212,7 @@ class TestInvSlitSmear(unittest.TestCase):
         # Create invariant object. Background and scale left as defaults.
         inv = invariant.InvariantCalculator(data=self.data_slit_smear)
         # Set the extrapolation parameters for the low-Q range
-        inv.set_extrapolation(range='low', npts=20, function='guinier')
+        inv.set_extrapolation(range='low', npts=10, function='guinier')
         # The version of the call without error
         # At this point, we could still compute Q* without extrapolation by calling
         # get_qstar with arguments, or with extrapolation=None.
@@ -236,7 +236,7 @@ class TestInvSlitSmear(unittest.TestCase):
         inv = invariant.InvariantCalculator(data=self.data_slit_smear)
         
         # Set the extrapolation parameters for the high-Q range
-        inv.set_extrapolation(range='high', npts=20, function='power_law', power=4)
+        inv.set_extrapolation(range='high', npts=10, function='power_law', power=4)
         
         # The version of the call without error
         # The function parameter defaults to None, then is picked to be 'power_law' for extrapolation='high'
@@ -262,8 +262,8 @@ class TestInvSlitSmear(unittest.TestCase):
         inv = invariant.InvariantCalculator(data=self.data_slit_smear)
         
         # Set the extrapolation parameters for the low- and high-Q ranges
-        inv.set_extrapolation(range='low', npts=20, function='guinier')
-        inv.set_extrapolation(range='high', npts=20, function='power_law', power=4)
+        inv.set_extrapolation(range='low', npts=10, function='guinier')
+        inv.set_extrapolation(range='high', npts=10, function='power_law', power=4)
         
         # The version of the call without error
         # The function parameter defaults to None, then is picked to be 'power_law' for extrapolation='high'
@@ -350,7 +350,7 @@ class TestInvPinholeSmear(unittest.TestCase):
         # Create invariant object. Background and scale left as defaults.
         inv = invariant.InvariantCalculator(data=self.data_q_smear)
         # Set the extrapolation parameters for the high-Q range
-        inv.set_extrapolation(range='high', npts=20, function='power_law', power=4)
+        inv.set_extrapolation(range='high', npts=10, function='power_law', power=4)
         # The version of the call without error
         qstar = inv.get_qstar(extrapolation='high')
         # The version of the call with error
@@ -371,8 +371,8 @@ class TestInvPinholeSmear(unittest.TestCase):
         # Create invariant object. Background and scale left as defaults.
         inv = invariant.InvariantCalculator(data=self.data_q_smear)
         # Set the extrapolation parameters for the low- and high-Q ranges
-        inv.set_extrapolation(range='low', npts=20, function='guinier')
-        inv.set_extrapolation(range='high', npts=20, function='power_law', power=4)
+        inv.set_extrapolation(range='low', npts=10, function='guinier')
+        inv.set_extrapolation(range='high', npts=10, function='power_law', power=4)
         # The version of the call without error
         # The function parameter defaults to None, then is picked to be 'power_law' for extrapolation='high'
         qstar = inv.get_qstar(extrapolation='both')
@@ -383,6 +383,6 @@ class TestInvPinholeSmear(unittest.TestCase):
         s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
         
         # Test results
-        self.assertAlmostEquals(qstar, 0.002157677)
+        self.assertAlmostEquals(qstar, 0.0021621)
         self.assertAlmostEquals(v, 0.202846825)
         self.assertAlmostEquals(s, 9.42e+2,2)

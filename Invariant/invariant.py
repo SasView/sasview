@@ -7,7 +7,6 @@ import math
 import numpy
 
 from DataLoader.data_info import Data1D as LoaderData1D
-#from DataLoader.data_info import Data1D as LoaderData1D
 from DataLoader.qsmearing import smear_selection
 
 
@@ -49,12 +48,11 @@ class FitFunctor:
     """
         compute f(x)
     """
-    def __init__(self,data , function):
+    def __init__(self,data):
         """
-            @param function :the function used for computing residuals
-            @param Data: data used for computing residuals
+            Determine a and b given a linear equation y = ax + b
+            @param Data: data containing x and y  such as  y = ax + b 
         """
-        self.function = function
         self.data  = data
         x_len = len(self.data.x) -1
         #fitting range 
@@ -110,12 +108,15 @@ class FitFunctor:
            Fit data for y = ax + b  return a and b
            
         """
-        fx = self.data.y
+        # Compute theory data f(x)
+        fx = numpy.zeros(len(self.data.x))
+        fx = self.data.y[self.idx_unsmeared ]
         ## Smear theory data
         if self.smearer is not None:
-            fx = self.smearer(fx, self._first_unsmeared_bin,
-                               self._last_unsmeared_bin)                                                         
-        A = numpy.vstack([ self.data.x, numpy.ones(len(self.data.x))]).T
+            fx = self.smearer(fx, self._first_unsmeared_bin,self._last_unsmeared_bin)
+    
+        A = numpy.vstack([ self.data.x[self.idx],
+                           numpy.ones(len(self.data.x[self.idx]))]).T
 
         a, b = numpy.linalg.lstsq(A, fx)[0]
         return a, b
@@ -222,15 +223,15 @@ class InvariantCalculator(object):
                     for power_law will be the power value
         """
         if function.__name__ == "guinier":
-            fit_x = self._data.x * self._data.x
+            fit_x = numpy.array([x * x for x in self._data.x])
             qmin = qmin**2
             qmax = qmax**2
-            fit_y = [math.log(y) for y in self._data.y]
+            fit_y = numpy.array([math.log(y) for y in self._data.y])
         elif function.__name__ == "power_law":
-            fit_x = [math.log(x) for x in self._data.x]
+            fit_x = numpy.array([math.log(x) for x in self._data.x])
             qmin = math.log(qmin)
             qmax = math.log(qmax)
-            fit_y = [math.log(y) for y in self._data.y]
+            fit_y = numpy.array([math.log(y) for y in self._data.y])
         else:
             raise ValueError("Unknown function used to fit %s"%function.__name__)
             
@@ -238,18 +239,18 @@ class InvariantCalculator(object):
         fit_data.dxl = self._data.dxl
         fit_data.dxw = self._data.dxw   
         
-        functor = FitFunctor(data=fit_data, function= function)
+        functor = FitFunctor(data=fit_data)
         functor.set_fit_range(qmin=qmin, qmax=qmax)
-        a, b = functor.fit()
+        b, a = functor.fit()
         
         if function.__name__ == "guinier":
             # b is the radius value of the guinier function
-            print "b",b
             b = math.sqrt(-3 * b)
-       
+        if function.__name__ == "power_law":
+            b = -1 * b
         # a is the scale of the guinier function
         a = math.exp(a)
-        return a, math.fabs(b)
+        return a, b
     
     def _get_qstar(self, data):
         """
@@ -445,7 +446,7 @@ class InvariantCalculator(object):
                 
             n = len(data.x) - 1
             #compute the first delta
-            dx0 = (data.x[1] - data.x[0])/2
+            dx0 = (data.x[1] + data.x[0])/2
             #compute the last delta
             dxn= data.x[n] - data.x[n-1]
             sum = 0
@@ -498,7 +499,7 @@ class InvariantCalculator(object):
                 
             n = len(data.x) - 1
             #compute the first delta
-            dx0 = (data.x[1] - data.x[0])/2
+            dx0 = (data.x[1] + data.x[0])/2
             #compute the last delta
             dxn = data.x[n] - data.x[n-1]
             sum = 0
@@ -569,20 +570,19 @@ class InvariantCalculator(object):
         if self._qstar < 0:
             raise RuntimeError, "invariant must be greater than zero"
         
-        print "self._qstar",self._qstar
         # Compute intermediate constant
         k =  1.e-8 * self._qstar/(2 * (math.pi * math.fabs(float(contrast)))**2)
         #Check discriminant value
         discrim = 1 - 4 * k
-        print "discrim",k,discrim
+        
         # Compute volume fraction
         if discrim < 0:
             raise RuntimeError, "could not compute the volume fraction: negative discriminant"
-        elif discrim ==0:
+        elif discrim == 0:
             return 1/2
         else:
-            volume1 = 0.5 *(1 - math.sqrt(discrim))
-            volume2 = 0.5 *(1 + math.sqrt(discrim))
+            volume1 = 0.5 * (1 - math.sqrt(discrim))
+            volume2 = 0.5 * (1 + math.sqrt(discrim))
             
             if 0 <= volume1 and volume1 <= 1:
                 return volume1
@@ -639,7 +639,7 @@ class InvariantCalculator(object):
         """
         # Data boundaries for fiiting
         qmin = self._data.x[0]
-        qmax = self._data.x[self._low_extrapolation_npts]
+        qmax = self._data.x[self._low_extrapolation_npts - 1]
         
         try:
             # fit the data with a model to get the appropriate parameters
@@ -647,24 +647,22 @@ class InvariantCalculator(object):
                                    qmin=qmin, qmax=qmax)
         except:
             raise
-            return None
+            #return None
        
         #create new Data1D to compute the invariant
         new_x = numpy.linspace(start=Q_MINIMUM,
                                stop=qmin,
                                num=INTEGRATION_NSTEPS,
                                endpoint=True)
-        new_y = self._low_extrapolation_function(x=new_x,
-                                                          scale=a, 
-                                                          radius=b)
+        new_y = self._low_extrapolation_function(x=new_x, scale=a, radius=b)
         dxl = None
         dxw = None
         if self._data.dxl is not None:
             dxl = numpy.ones(1, INTEGRATION_NSTEPS)
             dxl = dxl * self._data.dxl[0]
         if self._data.dxw is not None:
-            dwl = numpy.ones(1, INTEGRATION_NSTEPS)
-            dwl = dwl * self._data.dwl[0]
+            dxw = numpy.ones(1, INTEGRATION_NSTEPS)
+            dxw = dxw * self._data.dxw[0]
             
         data_min = LoaderData1D(x=new_x, y=new_y)
         data_min.dxl = dxl
@@ -689,7 +687,7 @@ class InvariantCalculator(object):
         """
         # Data boundaries for fiiting
         x_len = len(self._data.x) - 1
-        qmin = self._data.x[x_len - self._high_extrapolation_npts]
+        qmin = self._data.x[x_len - (self._high_extrapolation_npts - 1) ]
         qmax = self._data.x[x_len]
         
         try:
@@ -698,24 +696,24 @@ class InvariantCalculator(object):
                                    qmin=qmin, qmax=qmax)
         except:
             raise
-            return None
+            #return None
        
         #create new Data1D to compute the invariant
         new_x = numpy.linspace(start=qmax,
                                stop=Q_MAXIMUM,
                                num=INTEGRATION_NSTEPS,
                                endpoint=True)
-        new_y = self._high_extrapolation_function(x=new_x,
-                                                  scale=a, 
-                                                  power=b)
+       
+        new_y = self._high_extrapolation_function(x=new_x, scale=a, power=b)
+        
         dxl = None
         dxw = None
         if self._data.dxl is not None:
             dxl = numpy.ones(1, INTEGRATION_NSTEPS)
             dxl = dxl * self._data.dxl[0]
         if self._data.dxw is not None:
-            dwl = numpy.ones(1, INTEGRATION_NSTEPS)
-            dwl = dwl * self._data.dwl[0]
+            dxw = numpy.ones(1, INTEGRATION_NSTEPS)
+            dxw = dxw * self._data.dxw[0]
             
         data_max = LoaderData1D(x=new_x, y=new_y)
         data_max.dxl = dxl
@@ -745,7 +743,7 @@ class InvariantCalculator(object):
             This uncertainty is given by the following equation:
             dV = 0.5 * (4*k* dq_star) /(2* math.sqrt(1-k* q_star))
                                  
-            for k = 10^(8)*q_star/(2*(pi*|contrast|)**2)
+            for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
             
             q_star: the invariant value including extrapolated value if existing
             dq_star: the invariant uncertainty
@@ -759,13 +757,13 @@ class InvariantCalculator(object):
         if self._qstar < 0:
             raise ValueError, "invariant must be greater than zero"
         
-        k =  1.e-8 * self._qstar /(2*(math.pi* math.fabs(float(contrast)))**2)
+        k =  1.e-8 * self._qstar /(2 * (math.pi* math.fabs(float(contrast)))**2)
         #check value inside the sqrt function
         value = 1 - k * self._qstar
         if (1 - k * self._qstar) <= 0:
             raise ValueError, "Cannot compute incertainty on volume"
         # Compute uncertainty
-        uncertainty = (0.5 * 4 * k * self._qstar_err)/(2 * math.sqrt(1- k * self._qstar))
+        uncertainty = (0.5 * 4 * k * self._qstar_err)/(2 * math.sqrt(1 - k * self._qstar))
         
         return volume, math.fabs(uncertainty)
     
