@@ -4,9 +4,10 @@
 """
 
 import math 
-import numpy.linalg.lstsq
+import numpy
 
 from DataLoader.data_info import Data1D as LoaderData1D
+#from DataLoader.data_info import Data1D as LoaderData1D
 from DataLoader.qsmearing import smear_selection
 
 
@@ -18,6 +19,31 @@ Q_MAXIMUM  = 10
 
 # Number of steps in the extrapolation
 INTEGRATION_NSTEPS = 1000
+
+def guinier(x, scale=1, radius=0.1):
+    """
+        Compute a F(x) = scale* e-((radius*x)**2/3).
+        @param x: a vector of q values 
+        @param scale: the scale value
+        @param radius: the guinier radius value
+        @return F(x)
+    """   
+    value = numpy.array([math.exp(-((radius * i)**2/3)) for i in x ]) 
+    return scale * value
+
+def power_law(x, scale=1, power=4):
+    """
+        F(x) = scale* (x)^(-power)
+            when power= 4. the model is porod 
+            else power_law
+        The model has three parameters: 
+        @param x: a vector of q values
+        @param power: power of the function
+        @param scale : scale factor value
+        @param F(x)
+    """  
+    value = numpy.array([ math.pow(i, -power) for i in x ])  
+    return scale * value
 
 class FitFunctor:
     """
@@ -32,35 +58,34 @@ class FitFunctor:
         self.data  = data
         x_len = len(self.data.x) -1
         #fitting range 
-        self.qmin =  self.data[0]    
+        self.qmin =  self.data.x[0]    
         if self.qmin == 0:
             self.qmin = Q_MINIMUM 
     
-        self.qmax = self.data[x_len]
+        self.qmax = self.data.x[x_len]
         #Unsmeared q range
         self._qmin_unsmeared = 0
-        self._qmax_unsmeared = self.data[x_len]
+        self._qmax_unsmeared = self.data.x[x_len]
         
         #bin for smear data
         self._first_unsmeared_bin = 0
         self._last_unsmeared_bin  = x_len
         
         # Identify the bin range for the unsmeared and smeared spaces
-        self.idx = (self.x>=self.qmin) & (self.x <= self.qmax)
-        self.idx_unsmeared = (self.x>=self._qmin_unsmeared) & (self.x <= self._qmax_unsmeared)
+        self.idx = (self.data.x >= self.qmin) & (self.data.x <= self.qmax)
+        self.idx_unsmeared = (self.data.x >= self._qmin_unsmeared) \
+                            & (self.data.x <= self._qmax_unsmeared)
   
         #get the smear object of data
         self.smearer = smear_selection( self.data )
-        self.func_name = "Residuals"
+      
         
-    def setFitRange(self):
+    def set_fit_range(self ,qmin=None, qmax=None):
         """ to set the fit range"""
-        self.qmin =  self.data[0]    
-        if self.qmin== 0:
-            self.qmin= MINIMUM 
-        
-        x_len= len(self.data.x) -1
-        self.qmax= self.data[x_len]
+        if qmin is not None:
+            self.qmin = qmin
+        if qmax is not None:
+            self.qmax = qmax
             
         # Determine the range needed in unsmeared-Q to cover
         # the smeared Q range
@@ -76,60 +101,25 @@ class FitFunctor:
             self._qmax_unsmeared = self.data.x[self._last_unsmeared_bin]
             
         # Identify the bin range for the unsmeared and smeared spaces
-        self.idx = (self.data.x>=self.qmin) & (self.data.x <= self.qmax)
-        self.idx_unsmeared = (self.data.x>=self._qmin_unsmeared) & (self.data.x <= self._qmax_unsmeared)
+        self.idx = (self.data.x >= self.qmin) & (self.data.x <= self.qmax)
+        self.idx_unsmeared = (self.data.x >= self._qmin_unsmeared) \
+                                & (self.data.x <= self._qmax_unsmeared)
   
-        
-    def _get_residuals(self, params):
+    def fit(self):
         """
-            Compute residuals
-            @return res: numpy array of float of size.self.data.x
+           Fit data for y = ax + b  return a and b
+           
         """
-         # Compute theory data f(x)
-        fx = numpy.zeros(len(self.data.x))
-        fx[self.idx_unsmeared] = self.funtion(self.data.x[self.idx_unsmeared])
-       
+        fx = self.data.y
         ## Smear theory data
         if self.smearer is not None:
-            fx = self.smearer(fx, self._first_unsmeared_bin, self._last_unsmeared_bin)
-       
-        ## Sanity check
-        if numpy.size(self.data.dy)!= numpy.size(fx):
-            raise RuntimeError, "Residuals: invalid error array %d <> %d" % (numpy.shape(self.data.dy),
-                                                                              numpy.size(fx))
-                                                                              
-        return (self.data.y[self.idx]-fx[self.idx])/self.data.dy[self.idx]
-    
-    
-    def __call__(self,params):
-        """
-            Compute residuals
-            @param params: value of parameters to fit
-        """
-        return self._get_residuals(params)
-    
-    
-def guinier(x, scale=1, radius=0.1):
-    """
-        Compute a F(x) = scale* e-((radius*x)**2/3).
-        @param x: a vector of q values or one q value
-        @param scale: the scale value
-        @param radius: the guinier radius value
-        @return F(x)
-    """
-    
-def power_law(x, scale=1, power=4):
-    """
-        F(x) = scale* (x)^(-power)
-            when power= 4. the model is porod 
-            else power_law
-        The model has three parameters: 
-        @param power: power of the function
-        @param scale : scale factor value
-        @param F(x)
-    """    
+            fx = self.smearer(fx, self._first_unsmeared_bin,
+                               self._last_unsmeared_bin)                                                         
+        A = numpy.vstack([ self.data.x, numpy.ones(len(self.data.x))]).T
 
-    
+        a, b = numpy.linalg.lstsq(A, fx)[0]
+        return a, b
+
 class InvariantCalculator(object):
     """
         Compute invariant if data is given.
@@ -140,6 +130,8 @@ class InvariantCalculator(object):
                         
         @note: Some computations depends on each others. 
     """
+    
+    
     def __init__(self, data, background=0, scale=1 ):
         """
             Initialize variables
@@ -167,15 +159,22 @@ class InvariantCalculator(object):
         self._low_extrapolation_npts = 4
         self._low_extrapolation_function = guinier
         self._low_extrapolation_power = 4
-        
+   
         self._high_extrapolation_npts = 4
         self._high_extrapolation_function = power_law
         self._high_extrapolation_power = 4
+        
         
     def set_extrapolation(self, range, npts=4, function=None, power=4):
         """
             Set the extrapolation parameters for the high or low Q-range.
             Note that this does not turn extrapolation on or off.
+            @param range: a keyword set the type of extrapolation . type string
+            @param npts: the numbers of q points of data to consider for extrapolation
+            @param function: a keyword to select the function to use for extrapolation.
+                of type string.
+            @param power: an power to apply power_low function
+                
         """
         range = range.lower()
         if range not in ['high', 'low']:
@@ -184,7 +183,7 @@ class InvariantCalculator(object):
         if function not in ['power_law', 'guinier']:
             raise ValueError, "Extrapolation function should be 'guinier' or 'power_law'"
         
-        if range=='high':
+        if range == 'high':
             if function != 'power_law':
                 raise ValueError, "Extrapolation only allows a power law at high Q"
             self._high_extrapolation_npts  = npts
@@ -206,22 +205,66 @@ class InvariantCalculator(object):
         if not issubclass(data.__class__, LoaderData1D):
             #Process only data that inherited from DataLoader.Data_info.Data1D
             raise ValueError,"Data must be of type DataLoader.Data1D"
+        return self._scale * data - self._background
         
-        
-    def _fit(self, function, params=[]):
+    def _fit(self, function, qmin=Q_MINIMUM, qmax=Q_MAXIMUM):
         """
             fit data with function using 
             data= self._get_data()
             fx= Functor(data , function)
             y = data.y
             out, cov_x = linalg.lstsq(y,fx)
-
-        
+            @param qmin: data first q value to consider during the fit
+            @param qmax: data last q value to consider during the fit
             @param function: the function to use during the fit
-            @param params: the list of parameters values to use during the fit
-            
+            @return a: the scale of the function
+            @return b: the other parameter of the function for guinier will be radius
+                    for power_law will be the power value
         """
+        if function.__name__ == "guinier":
+            fit_x = self._data.x * self._data.x
+            qmin = qmin**2
+            qmax = qmax**2
+            fit_y = [math.log(y) for y in self._data.y]
+        elif function.__name__ == "power_law":
+            fit_x = [math.log(x) for x in self._data.x]
+            qmin = math.log(qmin)
+            qmax = math.log(qmax)
+            fit_y = [math.log(y) for y in self._data.y]
+        else:
+            raise ValueError("Unknown function used to fit %s"%function.__name__)
+            
+        fit_data = LoaderData1D(x=fit_x, y=fit_y)
+        fit_data.dxl = self._data.dxl
+        fit_data.dxw = self._data.dxw   
         
+        functor = FitFunctor(data=fit_data, function= function)
+        functor.set_fit_range(qmin=qmin, qmax=qmax)
+        a, b = functor.fit()
+        
+        if function.__name__ == "guinier":
+            # b is the radius value of the guinier function
+            print "b",b
+            b = math.sqrt(-3 * b)
+       
+        # a is the scale of the guinier function
+        a = math.exp(a)
+        return a, math.fabs(b)
+    
+    def _get_qstar(self, data):
+        """
+            Compute invariant for data
+            @param data: data to use to compute invariant.
+              
+        """
+        if data is None:
+            return 0
+        if data.is_slit_smeared():
+            return self._get_qstar_smear(data)
+        else:
+            return self._get_qstar_unsmear(data)
+        
+            
     def get_qstar(self, extrapolation=None):
         """
             Compute the invariant of the local copy of data.
@@ -230,19 +273,42 @@ class InvariantCalculator(object):
                     qstar_0 = self._get_qstar_smear()
                 else:
                     qstar_0 = self._get_qstar_unsmear()
-                    
+                if extrapolation is None:
+                    return qstar_0    
                 if extrapolation==low:
                     return qstar_0 + self._get_qstar_low()
                 elif extrapolation==high:
                     return qstar_0 + self._get_qstar_high()
                 elif extrapolation==both:
                     return qstar_0 + self._get_qstar_low() + self._get_qstar_high()
-                    
+           
+            @param extrapolation: string to apply optional extrapolation    
             @return q_star: invariant of the data within data's q range
+            
+            @warning: When using setting data to Data1D , the user is responsible of
+            checking that the scale and the background are properly apply to the data
+            
+            @warning: if error occur self._get_qstar_low() or self._get_qstar_low()
+            their returned value will be ignored
         """
+        qstar_0 = self._get_qstar(data=self._data)
         
-        
-    def _get_qstar_unsmear(self):
+        if extrapolation is None:
+            self._qstar = qstar_0
+            return self._qstar
+        # Compute invariant plus invaraint of extrapolated data
+        extrapolation = extrapolation.lower()    
+        if extrapolation == "low":
+            self._qstar = qstar_0 + self._get_qstar_low()
+            return self._qstar
+        elif extrapolation == "high":
+            self._qstar = qstar_0 + self._get_qstar_high()
+            return self._qstar
+        elif extrapolation == "both":
+            self._qstar = qstar_0 + self._get_qstar_low() + self._get_qstar_high()
+            return self._qstar
+     
+    def _get_qstar_unsmear(self, data):
         """
             Compute invariant for pinhole data.
             This invariant is given by:
@@ -254,11 +320,33 @@ class InvariantCalculator(object):
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
             dx0 = (x1 - x0)/2
             dxn = xn - xn-1
-
-            @return q_star: invariant value for pinhole data.
+            @param data: the data to use to compute invariant.
+            @return q_star: invariant value for pinhole data. q_star > 0
         """
-        
-    def _get_qstar_smear(self):
+        if len(data.x) <= 1 or len(data.y) <= 1 or len(data.x)!= len(data.y):
+            msg =  "Length x and y must be equal"
+            msg += " and greater than 1; got x=%s, y=%s"%(len(data.x), len(data.y))
+            raise ValueError, msg
+        else:
+            n = len(data.x)- 1
+            #compute the first delta q
+            dx0 = (data.x[1] - data.x[0])/2
+            #compute the last delta q
+            dxn = data.x[n] - data.x[n-1]
+            sum = 0
+            sum += data.x[0] * data.x[0] * data.y[0] * dx0
+            sum += data.x[n] * data.x[n] * data.y[n] * dxn
+            
+            if len(data.x) == 2:
+                return sum
+            else:
+                #iterate between for element different from the first and the last
+                for i in xrange(1, n-1):
+                    dxi = (data.x[i+1] - data.x[i-1])/2
+                    sum += data.x[i] * data.x[i] * data.y[i] * dxi
+                return sum
+            
+    def _get_qstar_smear(self, data):
         """
             Compute invariant for slit-smeared data.
             This invariant is given by:
@@ -272,8 +360,59 @@ class InvariantCalculator(object):
             
             @return q_star: invariant value for slit smeared data.
         """
+        if not data.is_slit_smeared():
+            msg = "_get_qstar_smear need slit smear data "
+            msg += "Hint :dxl= %s , dxw= %s"%(str(data.dxl), str(data.dxw))
+            raise ValueError, msg
+
+        if len(data.x) <= 1 or len(data.y) <= 1 or len(data.x) != len(data.y)\
+              or len(data.x)!= len(data.dxl):
+            msg = "x, dxl, and y must be have the same length and greater than 1"
+            raise ValueError, msg
+        else:
+            n = len(data.x)-1
+            #compute the first delta
+            dx0 = (data.x[1] + data.x[0])/2
+            #compute the last delta
+            dxn = data.x[n] - data.x[n-1]
+            sum = 0
+            sum += data.x[0] * data.dxl[0] * data.y[0] * dx0
+            sum += data.x[n] * data.dxl[n] * data.y[n] * dxn
+            
+            if len(data.x)==2:
+                return sum
+            else:
+                #iterate between for element different from the first and the last
+                for i in xrange(1, n-1):
+                    dxi = (data.x[i+1] - data.x[i-1])/2
+                    sum += data.x[i] * data.dxl[i] * data.y[i] * dxi
+                return sum
         
-    def _get_qstar_unsmear_uncertainty(self):
+    def _get_qstar_uncertainty(self, data=None):
+        """
+            Compute uncertainty of invariant value
+            Implementation:
+                if data is None:
+                    data = self.data
+            
+                if data.slit smear:
+                        return self._get_qstar_smear_uncertainty(data)
+                    else:
+                        return self._get_qstar_unsmear_uncertainty(data)
+          
+            @param: data use to compute the invariant which allow uncertainty
+            computation.
+            @return: uncertainty
+        """
+        if data is None:
+            data = self.data
+    
+        if data.is_slit_smeared():
+            return self._get_qstar_smear_uncertainty(data)
+        else:
+            return self._get_qstar_unsmear_uncertainty(data)
+        
+    def _get_qstar_unsmear_uncertainty(self, data=None):
         """
             Compute invariant uncertainty with with pinhole data.
             This uncertainty is given as follow:
@@ -284,10 +423,42 @@ class InvariantCalculator(object):
             dx0 = x0+ (x1 - x0)/2
             dxn = xn - xn-1
             dyn: error on dy
-            @param data: data of type Data1D where the scale is applied
-                        and the background is subtracted.
+           
+            @param data:
             note: if data doesn't contain dy assume dy= math.sqrt(data.y)
         """
+        if data is None:
+            data = self.data
+            
+        if len(data.x) <= 1 or len(data.y) <= 1 or \
+            len(self.data.x) != len(self.data.y):
+            msg = "Length of data.x and data.y must be equal"
+            msg += " and greater than 1; got x=%s, y=%s"%(len(data.x),
+                                                         len(data.y))
+            raise ValueError, msg
+        else:
+            #Create error for data without dy error
+            if (data.dy is None) or (not data.dy):
+                dy = math.sqrt(y) 
+            else:
+                dy = data.dy
+                
+            n = len(data.x) - 1
+            #compute the first delta
+            dx0 = (data.x[1] - data.x[0])/2
+            #compute the last delta
+            dxn= data.x[n] - data.x[n-1]
+            sum = 0
+            sum += (data.x[0] * data.x[0] * dy[0] * dx0)**2
+            sum += (data.x[n] * data.x[n] * dy[n] * dxn)**2
+            if len(data.x) == 2:
+                return math.sqrt(sum)
+            else:
+                #iterate between for element different from the first and the last
+                for i in xrange(1, n-1):
+                    dxi = (data.x[i+1] - data.x[i-1])/2
+                    sum += (data.x[i] * data.x[i] * dy[i] * dxi)**2
+                return math.sqrt(sum)
         
     def _get_qstar_smear_uncertainty(self):
         """
@@ -306,6 +477,42 @@ class InvariantCalculator(object):
           
             note: if data doesn't contain dy assume dy= math.sqrt(data.y)
         """
+        if data is None:
+            data = self._data
+            
+        if not data.is_slit_smeared():
+            msg = "_get_qstar_smear_uncertainty need slit smear data "
+            msg += "Hint :dxl= %s , dxw= %s"%(str(data.dxl), str(data.dxw))
+            raise ValueError, msg
+
+        if len(data.x) <= 1 or len(data.y) <= 1 or len(data.x) != len(data.y)\
+                or len(data.x) != len(data.dxl):
+            msg = "x, dxl, and y must be have the same length and greater than 1"
+            raise ValueError, msg
+        else:
+            #Create error for data without dy error
+            if (data.dy is None) or (not data.dy):
+                dy = math.sqrt(y)
+            else:
+                dy = data.dy
+                
+            n = len(data.x) - 1
+            #compute the first delta
+            dx0 = (data.x[1] - data.x[0])/2
+            #compute the last delta
+            dxn = data.x[n] - data.x[n-1]
+            sum = 0
+            sum += (data.x[0] * data.dxl[0] * dy[0] * dx0)**2
+            sum += (data.x[n] * data.dxl[n] * dy[n] * dxn)**2
+            
+            if len(data.x) == 2:
+                return math.sqrt(sum)
+            else:
+                #iterate between for element different from the first and the last
+                for i in xrange(1, n-1):
+                    dxi = (data.x[i+1] - data.x[i-1])/2
+                    sum += (data.x[i] * data.dxl[i] * dy[i] * dxi)**2
+                return math.sqrt(sum)
         
     def get_surface(self,contrast, porod_const):
         """
@@ -321,20 +528,30 @@ class InvariantCalculator(object):
             @param porod_const: Porod constant to compute the surface 
             @return: specific surface 
         """
-       
+        #Check whether we have Q star
+        if self._qstar is None:
+            self._qstar = self.get_star()
+        if self._qstar == 0:
+            raise RuntimeError("Cannot compute surface, invariant value is zero")
+        # Compute the volume
+        volume = self.get_volume_fraction(contrast)
+        return 2 * math.pi * volume *(1 - volume) * float(porod_const)/self._qstar
+        
+        
     def get_volume_fraction(self, contrast):
         """
             Compute volume fraction is deduced as follow:
             
             q_star = 2*(pi*contrast)**2* volume( 1- volume)
-            for k = 10^(8)*q_star/(2*(pi*|contrast|)**2)
+            for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
             we get 2 values of volume:
+                 with   1 - 4 * k >= 0
                  volume1 = (1- sqrt(1- 4*k))/2
                  volume2 = (1+ sqrt(1- 4*k))/2
            
             q_star: the invariant value included extrapolation is applied
                          unit  1/A^(3)*1/cm
-                    q_star = self._qstar
+                    q_star = self.get_qstar()
                     
             the result returned will be 0<= volume <= 1
             
@@ -343,7 +560,36 @@ class InvariantCalculator(object):
             @return: volume fraction
             @note: volume fraction must have no unit
         """
+        if contrast < 0:
+            raise ValueError, "contrast must be greater than zero"  
         
+        if self._qstar is None:
+            self._qstar = self.get_qstar()
+        
+        if self._qstar < 0:
+            raise RuntimeError, "invariant must be greater than zero"
+        
+        print "self._qstar",self._qstar
+        # Compute intermediate constant
+        k =  1.e-8 * self._qstar/(2 * (math.pi * math.fabs(float(contrast)))**2)
+        #Check discriminant value
+        discrim = 1 - 4 * k
+        print "discrim",k,discrim
+        # Compute volume fraction
+        if discrim < 0:
+            raise RuntimeError, "could not compute the volume fraction: negative discriminant"
+        elif discrim ==0:
+            return 1/2
+        else:
+            volume1 = 0.5 *(1 - math.sqrt(discrim))
+            volume2 = 0.5 *(1 + math.sqrt(discrim))
+            
+            if 0 <= volume1 and volume1 <= 1:
+                return volume1
+            elif 0 <= volume2 and volume2 <= 1: 
+                return volume2 
+            raise RuntimeError, "could not compute the volume fraction: inconsistent results"
+    
     def _get_qstar_low(self):
         """
             Compute the invariant for extrapolated data at low q range.
@@ -354,6 +600,8 @@ class InvariantCalculator(object):
                 
             @return q_star: the invariant for data extrapolated at low q.
         """
+        data = self._get_extra_data_low()
+        return self._get_qstar(data=data)
         
     def _get_qstar_high(self):
         """
@@ -365,6 +613,8 @@ class InvariantCalculator(object):
                 
             @return q_star: the invariant for data extrapolated at high q.
         """
+        data = self._get_extra_data_high()
+        return self._get_qstar( data=data)
         
     def _get_extra_data_low(self):
         """
@@ -387,7 +637,42 @@ class InvariantCalculator(object):
             
             @return: a new data of type Data1D
         """
+        # Data boundaries for fiiting
+        qmin = self._data.x[0]
+        qmax = self._data.x[self._low_extrapolation_npts]
         
+        try:
+            # fit the data with a model to get the appropriate parameters
+            a, b = self._fit(function=self._low_extrapolation_function,
+                                   qmin=qmin, qmax=qmax)
+        except:
+            raise
+            return None
+       
+        #create new Data1D to compute the invariant
+        new_x = numpy.linspace(start=Q_MINIMUM,
+                               stop=qmin,
+                               num=INTEGRATION_NSTEPS,
+                               endpoint=True)
+        new_y = self._low_extrapolation_function(x=new_x,
+                                                          scale=a, 
+                                                          radius=b)
+        dxl = None
+        dxw = None
+        if self._data.dxl is not None:
+            dxl = numpy.ones(1, INTEGRATION_NSTEPS)
+            dxl = dxl * self._data.dxl[0]
+        if self._data.dxw is not None:
+            dwl = numpy.ones(1, INTEGRATION_NSTEPS)
+            dwl = dwl * self._data.dwl[0]
+            
+        data_min = LoaderData1D(x=new_x, y=new_y)
+        data_min.dxl = dxl
+        data_min.dxw = dxw
+        self._data.clone_without_data( clone= data_min)
+        
+        return data_min
+          
     def _get_extra_data_high(self):
         """
             This method creates a new data from the invariant calculator.
@@ -402,19 +687,58 @@ class InvariantCalculator(object):
             
             @return: a new data of type Data1D
         """
+        # Data boundaries for fiiting
+        x_len = len(self._data.x) - 1
+        qmin = self._data.x[x_len - self._high_extrapolation_npts]
+        qmax = self._data.x[x_len]
         
-    def get_qstar_with_error(self):
+        try:
+            # fit the data with a model to get the appropriate parameters
+            a, b = self._fit(function=self._high_extrapolation_function,
+                                   qmin=qmin, qmax=qmax)
+        except:
+            raise
+            return None
+       
+        #create new Data1D to compute the invariant
+        new_x = numpy.linspace(start=qmax,
+                               stop=Q_MAXIMUM,
+                               num=INTEGRATION_NSTEPS,
+                               endpoint=True)
+        new_y = self._high_extrapolation_function(x=new_x,
+                                                  scale=a, 
+                                                  power=b)
+        dxl = None
+        dxw = None
+        if self._data.dxl is not None:
+            dxl = numpy.ones(1, INTEGRATION_NSTEPS)
+            dxl = dxl * self._data.dxl[0]
+        if self._data.dxw is not None:
+            dwl = numpy.ones(1, INTEGRATION_NSTEPS)
+            dwl = dwl * self._data.dwl[0]
+            
+        data_max = LoaderData1D(x=new_x, y=new_y)
+        data_max.dxl = dxl
+        data_max.dxw = dxw
+        self._data.clone_without_data( clone=data_max)
+        
+        return data_max
+    
+    def get_qstar_with_error(self, extrapolation=None):
         """
             Compute the invariant uncertainty.
             This uncertainty computation depends on whether or not the data is
             smeared.
-            @return dq_star:
-                if slit smear:
-                    return self._get_qstar(), self._get_qstar_smear_uncertainty()
-                else:
-                    return self._get_qstar(), self._get_qstar_unsmear_uncertainty()
+            @return: invariant,  the invariant uncertainty
+                return self._get_qstar(), self._get_qstar_smear_uncertainty()   
         """
-        
+        if self._qstar is None:
+            self._qstar = self.get_qstar(extrapolation=extrapolation)
+        if self._qstar_err is None:
+            self._qstar_err = self._get_qstar_smear_uncertainty()
+            
+        return self._qstar, self._qstar_err
+    
     def get_volume_fraction_with_error(self, contrast):
         """
             Compute uncertainty on volume value as well as the volume fraction
@@ -429,7 +753,22 @@ class InvariantCalculator(object):
             @param contrast: contrast value 
             @return: V, dV = self.get_volume_fraction_with_error(contrast), dV
         """
+        self._qstar, self._qstar_err = self.get_qstar_with_error()
         
+        volume = self.get_volume_fraction(contrast)
+        if self._qstar < 0:
+            raise ValueError, "invariant must be greater than zero"
+        
+        k =  1.e-8 * self._qstar /(2*(math.pi* math.fabs(float(contrast)))**2)
+        #check value inside the sqrt function
+        value = 1 - k * self._qstar
+        if (1 - k * self._qstar) <= 0:
+            raise ValueError, "Cannot compute incertainty on volume"
+        # Compute uncertainty
+        uncertainty = (0.5 * 4 * k * self._qstar_err)/(2 * math.sqrt(1- k * self._qstar))
+        
+        return volume, math.fabs(uncertainty)
+    
     def get_surface_with_error(self, contrast, porod_const):
         """
             Compute uncertainty of the surface value as well as thesurface value
@@ -447,5 +786,11 @@ class InvariantCalculator(object):
             @param porod_const: porod constant value 
             @return S, dS: the surface, with its uncertainty
         """
-        
-    
+        v, dv = self.get_volume_fraction_with_error(contrast)
+        self._qstar, self._qstar_err = self.get_qstar_with_error()
+        if self._qstar <= 0:
+            raise ValueError, "invariant must be greater than zero"
+        ds = porod_const * 2 * math.pi * (( dv - 2 * v * dv)/ self._qstar\
+                 + self._qstar_err * ( v - v**2))
+        s = self.get_surface(contrast=contrast, porod_const=porod_const)
+        return s, ds
