@@ -646,8 +646,7 @@ class InvariantCalculator(object):
             a, b = self._fit(function=self._low_extrapolation_function,
                                    qmin=qmin, qmax=qmax)
         except:
-            raise
-            #return None
+            return None
        
         #create new Data1D to compute the invariant
         new_x = numpy.linspace(start=Q_MINIMUM,
@@ -695,8 +694,7 @@ class InvariantCalculator(object):
             a, b = self._fit(function=self._high_extrapolation_function,
                                    qmin=qmin, qmax=qmax)
         except:
-            raise
-            #return None
+            return None
        
         #create new Data1D to compute the invariant
         new_x = numpy.linspace(start=qmax,
@@ -718,7 +716,7 @@ class InvariantCalculator(object):
         data_max = LoaderData1D(x=new_x, y=new_y)
         data_max.dxl = dxl
         data_max.dxw = dxw
-        self._data.clone_without_data( clone=data_max)
+        self._data.clone_without_data(clone=data_max)
         
         return data_max
     
