@@ -155,10 +155,10 @@ void LogNormalDispersion :: accept_as_destination(DispersionVisitor* visitor, vo
 }
 
 double lognormal_weight(double mean, double sigma, double x) {
-	
-	double sigma2 = pow(sigma, 2);	
+
+	double sigma2 = pow(sigma, 2);
 	return 1/(x*sigma2) * exp( -pow((log(x) -mean), 2) / (2*sigma2));
- 
+
 }
 
 /**
@@ -216,10 +216,12 @@ void SchulzDispersion :: accept_as_destination(DispersionVisitor* visitor, void*
 
 double schulz_weight(double mean, double sigma, double x) {
 	double vary, expo_value;
-    double z = pow(mean/ sigma, 2)-1;	
+    double z = pow(mean/ sigma, 2)-1;
 	double R= x/mean;
 	double zz= z+1;
-	return  pow(zz,zz) * pow(R,z) * exp(-1*R*zz)/((mean) * tgamma(zz)) ;
+	double expo;
+	expo = zz*log(zz)+z*log(R)-R*zz-log(mean)-lgamma(zz);
+	return  exp(expo);
 }
 
 /**
