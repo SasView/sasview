@@ -214,7 +214,7 @@ class InvariantCalculator(object):
             data= self._get_data()
             fx= Functor(data , function)
             y = data.y
-            out, cov_x = linalg.lstsq(y,fx)
+            slope, constant = linalg.lstsq(y,fx)
             @param qmin: data first q value to consider during the fit
             @param qmax: data last q value to consider during the fit
             @param function: the function to use during the fit
@@ -319,7 +319,7 @@ class InvariantCalculator(object):
                             
             where n >= len(data.x)-1
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
-            dx0 = (x1 - x0)/2
+            dx0 = x0 + (x1 - x0)/2
             dxn = xn - xn-1
             @param data: the data to use to compute invariant.
             @return q_star: invariant value for pinhole data. q_star > 0
@@ -331,7 +331,7 @@ class InvariantCalculator(object):
         else:
             n = len(data.x)- 1
             #compute the first delta q
-            dx0 = (data.x[1] - data.x[0])/2
+            dx0 = (data.x[1] + data.x[0])/2
             #compute the last delta q
             dxn = data.x[n] - data.x[n-1]
             sum = 0
@@ -686,7 +686,7 @@ class InvariantCalculator(object):
         """
         # Data boundaries for fiiting
         x_len = len(self._data.x) - 1
-        qmin = self._data.x[x_len - (self._high_extrapolation_npts - 1) ]
+        qmin = self._data.x[x_len - (self._high_extrapolation_npts - 1)]
         qmax = self._data.x[x_len]
         
         try:
@@ -758,7 +758,7 @@ class InvariantCalculator(object):
         k =  1.e-8 * self._qstar /(2 * (math.pi* math.fabs(float(contrast)))**2)
         #check value inside the sqrt function
         value = 1 - k * self._qstar
-        if (1 - k * self._qstar) <= 0:
+        if (value) <= 0:
             raise ValueError, "Cannot compute incertainty on volume"
         # Compute uncertainty
         uncertainty = (0.5 * 4 * k * self._qstar_err)/(2 * math.sqrt(1 - k * self._qstar))
