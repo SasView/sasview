@@ -48,7 +48,7 @@ class FitFunctor:
     """
         compute f(x)
     """
-    def __init__(self,data):
+    def __init__(self, data):
         """
             Determine a and b given a linear equation y = ax + b
             @param Data: data containing x and y  such as  y = ax + b 
