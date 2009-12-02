@@ -147,7 +147,7 @@ class InvariantCalculator(object):
         
         # The data should be private
         self._data = self._get_data(data)
-        
+      
         # Since there are multiple variants of Q*, you should force the
         # user to use the get method and keep Q* a private data member
         self._qstar = None
@@ -206,7 +206,10 @@ class InvariantCalculator(object):
         if not issubclass(data.__class__, LoaderData1D):
             #Process only data that inherited from DataLoader.Data_info.Data1D
             raise ValueError,"Data must be of type DataLoader.Data1D"
-        return self._scale * data - self._background
+        new_data = self._scale * data - self._background
+        new_data.dxl = data.dxl
+        new_data.dxw = data.dxw
+        return new_data
         
     def _fit(self, function, qmin=Q_MINIMUM, qmax=Q_MAXIMUM):
         """
@@ -614,7 +617,7 @@ class InvariantCalculator(object):
             @return q_star: the invariant for data extrapolated at high q.
         """
         data = self._get_extra_data_high()
-        return self._get_qstar( data=data)
+        return self._get_qstar(data=data)
         
     def _get_extra_data_low(self):
         """
@@ -657,10 +660,10 @@ class InvariantCalculator(object):
         dxl = None
         dxw = None
         if self._data.dxl is not None:
-            dxl = numpy.ones(1, INTEGRATION_NSTEPS)
+            dxl = numpy.ones(INTEGRATION_NSTEPS)
             dxl = dxl * self._data.dxl[0]
         if self._data.dxw is not None:
-            dxw = numpy.ones(1, INTEGRATION_NSTEPS)
+            dxw = numpy.ones(INTEGRATION_NSTEPS)
             dxw = dxw * self._data.dxw[0]
             
         data_min = LoaderData1D(x=new_x, y=new_y)
@@ -707,17 +710,17 @@ class InvariantCalculator(object):
         dxl = None
         dxw = None
         if self._data.dxl is not None:
-            dxl = numpy.ones(1, INTEGRATION_NSTEPS)
+            dxl = numpy.ones(INTEGRATION_NSTEPS)
             dxl = dxl * self._data.dxl[0]
         if self._data.dxw is not None:
-            dxw = numpy.ones(1, INTEGRATION_NSTEPS)
+            dxw = numpy.ones(INTEGRATION_NSTEPS)
             dxw = dxw * self._data.dxw[0]
             
         data_max = LoaderData1D(x=new_x, y=new_y)
         data_max.dxl = dxl
         data_max.dxw = dxw
         self._data.clone_without_data(clone=data_max)
-        
+    
         return data_max
     
     def get_qstar_with_error(self, extrapolation=None):
