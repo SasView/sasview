@@ -322,8 +322,8 @@ class InvariantCalculator(object):
                             
             where n >= len(data.x)-1
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
-            dx0 = x0 + (x1 - x0)/2
-            dxn = xn - xn-1
+            dx0 = (x1 - x0)/2
+            dxn = (xn - xn-1)/2
             @param data: the data to use to compute invariant.
             @return q_star: invariant value for pinhole data. q_star > 0
         """
@@ -334,9 +334,9 @@ class InvariantCalculator(object):
         else:
             n = len(data.x)- 1
             #compute the first delta q
-            dx0 = (data.x[1] + data.x[0])/2
+            dx0 = (data.x[1] - data.x[0])/2
             #compute the last delta q
-            dxn = data.x[n] - data.x[n-1]
+            dxn = (data.x[n] - data.x[n-1])/2
             sum = 0
             sum += data.x[0] * data.x[0] * data.y[0] * dx0
             sum += data.x[n] * data.x[n] * data.y[n] * dxn
@@ -358,8 +358,8 @@ class InvariantCalculator(object):
                             + ..+ xn*dxl *yn *dxn 
             where n >= len(data.x)-1
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
-            dx0 = x0+ (x1 - x0)/2
-            dxn = xn - xn-1
+            dx0 = (x1 - x0)/2
+            dxn = (xn - xn-1)/2
             dxl: slit smear value
             
             @return q_star: invariant value for slit smeared data.
@@ -376,9 +376,9 @@ class InvariantCalculator(object):
         else:
             n = len(data.x)-1
             #compute the first delta
-            dx0 = (data.x[1] + data.x[0])/2
+            dx0 = (data.x[1] - data.x[0])/2
             #compute the last delta
-            dxn = data.x[n] - data.x[n-1]
+            dxn = (data.x[n] - data.x[n-1])/2
             sum = 0
             sum += data.x[0] * data.dxl[0] * data.y[0] * dx0
             sum += data.x[n] * data.dxl[n] * data.y[n] * dxn
@@ -424,8 +424,8 @@ class InvariantCalculator(object):
                     (x1**2 *(dy1)*dx1)**2 + ..+ (xn**2 *(dyn)*dxn)**2 ]
             where n >= len(data.x)-1
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
-            dx0 = x0+ (x1 - x0)/2
-            dxn = xn - xn-1
+            dx0 = (x1 - x0)/2
+            dxn = (xn - xn-1)/2
             dyn: error on dy
            
             @param data:
@@ -449,9 +449,9 @@ class InvariantCalculator(object):
                 
             n = len(data.x) - 1
             #compute the first delta
-            dx0 = (data.x[1] + data.x[0])/2
+            dx0 = (data.x[1] - data.x[0])/2
             #compute the last delta
-            dxn= data.x[n] - data.x[n-1]
+            dxn= (data.x[n] - data.x[n-1])/2
             sum = 0
             sum += (data.x[0] * data.x[0] * dy[0] * dx0)**2
             sum += (data.x[n] * data.x[n] * dy[n] * dxn)**2
@@ -472,8 +472,8 @@ class InvariantCalculator(object):
                             + ..+ xn*dxl *dyn *dxn 
             where n >= len(data.x)-1
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
-            dx0 = x0+ (x1 - x0)/2
-            dxn = xn - xn-1
+            dx0 = (x1 - x0)/2
+            dxn = (xn - xn-1)/2
             dxl: slit smearing value
             dyn : error on dy
             @param data: data of type Data1D where the scale is applied
@@ -502,9 +502,9 @@ class InvariantCalculator(object):
                 
             n = len(data.x) - 1
             #compute the first delta
-            dx0 = (data.x[1] + data.x[0])/2
+            dx0 = (data.x[1] - data.x[0])/2
             #compute the last delta
-            dxn = data.x[n] - data.x[n-1]
+            dxn = (data.x[n] - data.x[n-1])/2
             sum = 0
             sum += (data.x[0] * data.dxl[0] * dy[0] * dx0)**2
             sum += (data.x[n] * data.dxl[n] * dy[n] * dxn)**2
@@ -651,8 +651,13 @@ class InvariantCalculator(object):
         except:
             return None
        
+        #q_start point
+        q_start = Q_MINIMUM
+        if Q_MINIMUM >= qmin:
+            q_start = qmin/10
+            
         #create new Data1D to compute the invariant
-        new_x = numpy.linspace(start=Q_MINIMUM,
+        new_x = numpy.linspace(start=q_start,
                                stop=qmin,
                                num=INTEGRATION_NSTEPS,
                                endpoint=True)
