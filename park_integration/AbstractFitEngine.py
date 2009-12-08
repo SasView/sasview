@@ -265,7 +265,7 @@ class FitData2D(Data2D):
         self.set_data(sans_data2d )
         
         
-    def set_data(self, sans_data2d ):
+    def set_data(self, sans_data2d, qmin=None, qmax=None ):
         """
             Determine the correct x_bin and y_bin to fit
         """
@@ -278,8 +278,10 @@ class FitData2D(Data2D):
         y_max = max(sans_data2d.ymin, sans_data2d.ymax)
         
         ## fitting range
-        self.qmin = 1e-16
-        self.qmax = math.sqrt(x_max*x_max +y_max*y_max)
+        if qmin == None:
+            self.qmin = 1e-16
+        if qmax == None:
+            self.qmax = math.sqrt(x_max*x_max +y_max*y_max)
         ## new error image for fitting purpose
         if self.err_data== None or self.err_data ==[]:
             self.res_err_data= numpy.zeros(len(self.y_bins),len(self.x_bins))
@@ -299,7 +301,9 @@ class FitData2D(Data2D):
             self.qmin = qmin            
         if qmax!=None:
             self.qmax= qmax
-      
+            
+        self.radius= numpy.sqrt(self.x_bins_array**2 + self.y_bins_array**2)
+        self.index_model = (self.qmin <= self.radius)&(self.radius<= self.qmax)
         
     def getFitRange(self):
         """
