@@ -59,6 +59,10 @@ typedef struct {
 static void
 CCoreShellCylinderModel_dealloc(CCoreShellCylinderModel* self)
 {
+    Py_DECREF(self->params);
+    Py_DECREF(self->dispersion);
+    Py_DECREF(self->log);
+    delete self->model;
     self->ob_type->tp_free((PyObject*)self);
     
 
