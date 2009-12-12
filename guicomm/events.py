@@ -1,4 +1,4 @@
-import wx.lib
+import wx.lib.newevent
 # plot data
 (NewPlotEvent, EVT_NEW_PLOT) = wx.lib.newevent.NewEvent()
 # print the messages on statusbar
