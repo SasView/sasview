@@ -44,9 +44,6 @@ _corner_image = "images/angles_flat.png"
 _welcome_image = "images/SVwelcome.png"
 _copyright = "(c) 2009, University of Tennessee"
 
-import wx.lib.newevent
-(StatusBarEvent, EVT_STATUS) = wx.lib.newevent.NewEvent()
-
 def printEVT(message):
     if __EVT_DEBUG__:
         print "%g:  %s" % (time.clock(), message)
