@@ -52,7 +52,7 @@ def check_value( item1, item2):
         return flag
     try:    
         maxi = float(format_number(item2.GetValue()))
-        item2.SetBackgroundColour("pink")
+        item2.SetBackgroundColour(wx.WHITE)
         item2.Refresh()
     except:
         flag = False
