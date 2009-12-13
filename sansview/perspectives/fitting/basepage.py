@@ -6,8 +6,8 @@ import time
 import copy 
 import math
 import string
-from sans.guiframe.utils import format_number,check_float
-from sans.guicomm.events import StatusEvent   
+from sans.guiframe.utils import format_number,check_float,check_value 
+from sans.guicomm.events import StatusEvent
 import pagestate
 from pagestate import PageState
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
@@ -162,7 +162,7 @@ class BasicPage(wx.ScrolledWindow):
                      size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.TextCtrlNameStr,
                      kill_focus_callback = None, set_focus_callback  = None,
                      mouse_up_callback   = None, text_enter_callback = None):
-            
+             
             wx.TextCtrl.__init__(self, parent, id, value, pos, size, style, validator, name)
             
             # Bind appropriate events
@@ -207,7 +207,7 @@ class BasicPage(wx.ScrolledWindow):
                     (start, end) = control.GetSelection()
                     if start==end:
                         control.SetSelection(-1,-1)
-                    
+                 
        
     def onContextMenu(self, event): 
         """
@@ -454,7 +454,7 @@ class BasicPage(wx.ScrolledWindow):
                     # it's not lost when we use the model within another thread.
                     #TODO: total hack - fix this
                     self.state.model= self.model.clone()
-                    #if not hasattr(self.model, "_persistency_dict"):
+
                     self.model._persistency_dict = {}
                     self.model._persistency_dict[p] = [self.values, self.weights]
                     self.state.model._persistency_dict[p] = [self.values, self.weights]
@@ -498,16 +498,12 @@ class BasicPage(wx.ScrolledWindow):
             self.state.disp_box = copy.deepcopy(self.disp_box.GetSelection())
 
         self.state.model.name= self.model.name
-        #if not hasattr(self.model, "_persistency_dict"):
-        #self.model._persistency_dict = {}
-        #self.state.model._persistency_dict= copy.deepcopy(self.model._persistency_dict)
         
         #Remember fit engine_type for fit panel
         if self.engine_type == None: 
             self.engine_type = "scipy"
         if self.manager !=None:
             self.manager._on_change_engine(engine=self.engine_type)
-                #self.engine_type = self.manager._return_engine_type()
         
             self.state.engine_type = self.engine_type
 
@@ -819,7 +815,6 @@ class BasicPage(wx.ScrolledWindow):
                         # Set the new model as the dispersion object for the selected parameter
                         self.model.set_dispersion(item, disp_model)
                     
-                        #self.model._persistency_dict = {}
                         self.model._persistency_dict[item] = [state.values, state.weights]
                     
             else:
@@ -924,10 +919,10 @@ class BasicPage(wx.ScrolledWindow):
              model
              use : _check_value_enter 
         """
+        # Flag to register when a parameter has changed.      
+        is_modified = False
         #self._undo.Enable(True)
         if self.model !=None:
-            # Flag to register when a parameter has changed.      
-            is_modified = False
             try:
                 is_modified =self._check_value_enter( self.fittable_param ,is_modified)
                 is_modified =self._check_value_enter( self.fixed_param ,is_modified)
@@ -939,21 +934,23 @@ class BasicPage(wx.ScrolledWindow):
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
-            from sans.guiframe.utils import check_value 
             if check_value( self.qmin, self.qmax):
-                if float(self.qmin.GetValue()) != self.qmin_x:
-                    self.qmin_x = float(self.qmin.GetValue())
+                tempmin = float(self.qmin.GetValue())
+                if tempmin != self.qmin_x:
+                    self.qmin_x = tempmin
                     is_modified = True
-                if float(self.qmax.GetValue()) != self.qmax_x:
-                    self.qmax_x = float(self.qmax.GetValue())
+                tempmax = float(self.qmax.GetValue())
+                if tempmax != self.qmax_x:
+                    self.qmax_x = tempmax
                     is_modified = True
                 self.fitrange = True
             else:
                 self.fitrange = False
             if self.npts != None:
                 if check_float(self.npts):
-                    if float(self.npts.GetValue()) !=  self.num_points:
-                        self.num_points = float(self.npts.GetValue())
+                    temp_npts = float(self.npts.GetValue())
+                    if temp_npts !=  self.num_points:
+                        self.num_points = temp_npts
                         is_modified = True
                 else:
                     msg= "Cannot Plot :Must enter a number!!!  "
@@ -964,14 +961,15 @@ class BasicPage(wx.ScrolledWindow):
             if is_modified:
                 self.state_change= True
                 self._draw_model() 
-            self.Layout()
-            self.Refresh()
-
+                self._sleep4sec()
+                self.Layout()
+                self.Refresh()
+        return is_modified
+    
     def _update_paramv_on_fit(self):
         """
              make sure that update param values just before the fitting
         """
-        from sans.guiframe.utils import check_value 
         #flag for qmin qmax check values
         flag =False
         is_modified = False
@@ -984,19 +982,21 @@ class BasicPage(wx.ScrolledWindow):
             self._check_value_enter( self.parameters ,is_modified)
 
             # If qmin and qmax have been modified, update qmin and qmax and 
+             # Here we should check whether the boundaries have been modified.
+            # If qmin and qmax have been modified, update qmin and qmax and 
+            # set the is_modified flag to True
             if check_value( self.qmin, self.qmax):
-                if float(self.qmin.GetValue()) != self.qmin_x:
-                    self.qmin_x = float(self.qmin.GetValue())
-
-                if float(self.qmax.GetValue()) != self.qmax_x:
-                    self.qmax_x = float(self.qmax.GetValue())
+                tempmin = float(self.qmin.GetValue())
+                if tempmin != self.qmin_x:
+                    self.qmin_x = tempmin
+                tempmax = float(self.qmax.GetValue())
+                if tempmax != self.qmax_x:
+                    self.qmax_x = tempmax
                 flag = True
-                
-            if self.npts != None:
-                if check_float(self.npts):
-                    if float(self.npts.GetValue()) !=  self.num_points:
-                        self.num_points = float(self.npts.GetValue())
+            else:
+                flag = False
         else:
+            flag = False
             msg= "Cannot Fit :Must select a model!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         
@@ -1230,7 +1230,6 @@ class BasicPage(wx.ScrolledWindow):
             if hasattr(self, "enable_smearer"):
                 if self.enable_smearer.GetValue():
                     temp_smear= self.smearer
-           
             self.manager.draw_model(self.model, data=self.data,
                                     smearer= temp_smear,
                                     qmin=float(self.qmin_x), qmax=float(self.qmax_x),
@@ -1399,6 +1398,33 @@ class BasicPage(wx.ScrolledWindow):
                 combobox.Append(name,models)
      
         return 0
+    
+    def _onparamEnter(self,event):
+        """ 
+            when enter value on panel redraw model according to changed
+        """
+        tcrtl= event.GetEventObject()
+        
+        #Clear msg if previously shown.
+        msg= ""
+        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        
+        ## save current state
+        self.save_current_state()
+        if event !=None:
+            #self._undo.Enable(True)
+            event = PageInfoEvent(page = self)
+            wx.PostEvent(self.parent, event)
+              
+        if check_float(tcrtl):
+            
+            self._onparamEnter_helper()
+            event.Skip()
+        else:
+            msg= "Cannot Plot :Must enter a number!!!  "
+            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+            event.Skip()
+            return 
    
    
     def _on_select_model_helper(self): 
@@ -1446,41 +1472,9 @@ class BasicPage(wx.ScrolledWindow):
         self.state.model =self.model
         self.disp_list =self.model.getDispParamList()
         self.state.disp_list = self.disp_list
-        #self.sizer4_4.Layout()
-        self.Layout()
-        #self.SetScrollbars(20,20,25,65)
-        #self.Refresh()
+        self.Layout()     
         
-       
-        
-    def _onparamEnter(self,event):
-        """ 
-            when enter value on panel redraw model according to changed
-        """
-
-        tcrtl= event.GetEventObject()
-        
-        #Clear msg if previously shown.
-        msg= ""
-        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-        
-        ## save current state
-        self.save_current_state()
-        if event !=None:
-            #self._undo.Enable(True)
-            event = PageInfoEvent(page = self)
-            wx.PostEvent(self.parent, event)
               
-        if check_float(tcrtl):
-            
-            self._onparamEnter_helper()
-        
-        else:
-            msg= "Cannot Plot :Must enter a number!!!  "
-            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-            return 
-        
-        
     def _check_value_enter(self, list, modified):
         """
             @param list: model parameter and panel info
@@ -1490,7 +1484,6 @@ class BasicPage(wx.ScrolledWindow):
         is_modified =  modified
         if len(list)==0:
             return is_modified
-        
         for item in list:
             #skip angle parameters for 1D
             if self.data.__class__.__name__ !="Data2D":
@@ -1503,49 +1496,57 @@ class BasicPage(wx.ScrolledWindow):
                 ## check model parameters range             
                 param_min= None
                 param_max= None
-
+               
                 ## check minimun value
                 if item[5]!= None and item[5]!= "":
                     if item[5].GetValue().lstrip().rstrip()!="":
                         try:
+                            
                             param_min = float(item[5].GetValue())
+                            if check_value(item[2],item[5]):
+                                if numpy.isfinite(param_min):
+                                    item[2].SetValue(format_number(param_min))
+                            item[2].SetBackgroundColour(wx.WHITE)        
                         except:
                             msg = "Wrong Fit parameter range entered "
                             wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
                             raise ValueError, msg
                         is_modified = True
                 ## check maximum value
-                if item[6]!= None and item[5]!= "":
+                if item[6]!= None and item[6]!= "":
                     if item[6].GetValue().lstrip().rstrip()!="":
-                        try:
+                        try:                          
                             param_max = float(item[6].GetValue())
+                            if check_value(item[6],item[2]):
+                                if numpy.isfinite(param_max):
+                                    item[2].SetValue(format_number(param_max))  
+                            item[2].SetBackgroundColour(wx.WHITE)               
                         except:
                             msg = "Wrong Fit parameter range entered "
                             wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
                             raise ValueError, msg
                         is_modified = True
-                from sans.guiframe.utils import check_value
+                
 
                 if param_min != None and param_max !=None:
                     if not check_value(item[5], item[6]):
                         msg= "Wrong Fit range entered for parameter "
                         msg+= "name %s of model %s "%(name, self.model.name)
                         wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
-  
+                
                 if name in self.model.details.keys():   
-                    if  param_min != self.model.details[name][1] or param_max != self.model.details[name][2]:
                         self.model.details[name][1:3]= param_min,param_max
                         is_modified = True
-    
+              
                 else:
-                    self.model.details [name] = ["",param_min,param_max] 
-                    is_modified = True
-            
+                        self.model.details [name] = ["",param_min,param_max] 
+                        is_modified = True
+                
             value= float(item[2].GetValue())
   
             # If the value of the parameter has changed,
             # +update the model and set the is_modified flag
-            if value != self.model.getParam(name):
+            if value != self.model.getParam(name) and numpy.isfinite(value):
                 self.model.setParam(name,value)
                 is_modified = True   
 
@@ -1644,11 +1645,8 @@ class BasicPage(wx.ScrolledWindow):
         if len(self.disp_cb_dict)==0:
             self.save_current_state()
             self.sizer4_4.Clear(True)
-            #self.sizer4_4.Layout()
-            #self.sizer4.Layout()
             self.Layout()
-            #self.Refresh()
-            #self.SetScrollbars(20,20,25,65)   
+ 
             return 
         if (len(self.disp_cb_dict)>0) :
             for p in self.disp_cb_dict:
@@ -1662,17 +1660,12 @@ class BasicPage(wx.ScrolledWindow):
                 except:
 
                     pass
-                # Redraw the model
-                #self._draw_model()
+
         ## save state into
         self.save_current_state()
-        #self.sizer4_4.Layout()
-        #self.sizer4.Layout()
-        self.Layout()
-        #self.SetScrollbars(20,20,25,65)    
+        self.Layout()  
         self.Refresh()
-        
-            
+                  
             
     def _on_select_Disp(self,event):
         """
@@ -1682,7 +1675,6 @@ class BasicPage(wx.ScrolledWindow):
         n = self.disp_box.GetCurrentSelection()
         name = self.disp_box.GetValue()
         dispersity= self.disp_box.GetClientData(n)
-        
         self.disp_name = name
         
         if name.lower() == "array":
@@ -1697,11 +1689,9 @@ class BasicPage(wx.ScrolledWindow):
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
         
-        #self.sizer4_4.Layout()
-        #self.sizer4.Layout()
-        #self.Layout()
+        self.sizer4_4.Layout()
+        self.sizer4.Layout()
         self.SetScrollbars(20,20,25,65)
-        #self.Refresh()
         
     def _set_sizer_arraydispersion(self):
         """
@@ -1746,7 +1736,6 @@ class BasicPage(wx.ScrolledWindow):
                 self.disp_cb_dict[p] = wx.RadioButton(self, -1, p, (10, 10))
                 self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
                 self.Bind(wx.EVT_RADIOBUTTON, self.select_disp_angle, id=self.disp_cb_dict[p].GetId())
-                #wx.EVT_RADIOBUTTON(self, self.disp_cb_dict[p].GetId(), self.select_disp_angle)
                 self.sizer4_4.Add(self.disp_cb_dict[p], (iy, ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
         for p in self.model.dispersion.keys():
@@ -1756,23 +1745,16 @@ class BasicPage(wx.ScrolledWindow):
                 self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
                 if not (self.enable2D or self.data.__class__.__name__ =="Data2D"):
                     self.disp_cb_dict[p].Hide()
-                    #self.disp_cb_dict[p].Disable()
                 else:
                     self.disp_cb_dict[p].Show(True)
-                    #self.disp_cb_dict[p].Enable()
                 self.Bind(wx.EVT_RADIOBUTTON, self.select_disp_angle, id=self.disp_cb_dict[p].GetId())
-                #wx.EVT_RADIOBUTTON(self, self.disp_cb_dict[p].GetId(), self.select_disp_angle)
                 self.sizer4_4.Add(self.disp_cb_dict[p], (iy, ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
 
 
         ix =0
         iy +=1 
         self.sizer4_4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)        
-        #self.sizer4_4.Layout()
-        #self.sizer4.Layout()
         self.Layout()
-        #self.SetScrollbars(20,20,25,65)
-        ## save state into
 
         self.state.orientation_params =[]
         self.state.orientation_params_disp =[]
@@ -1814,22 +1796,17 @@ class BasicPage(wx.ScrolledWindow):
             #for MAC
             boxsizer1 = box_sizer
 
-        self.qmin    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER)
+        self.qmin    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER)
         self.qmin.SetValue(str(self.qmin_x))
         self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
-        #self.qmin.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-        #self.qmin.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-        #self.qmin.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
      
-        self.qmax    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER)
+        self.qmax    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER)
         self.qmax.SetValue(str(self.qmax_x))
         self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
-        #self.qmax.Bind(wx.EVT_SET_FOCUS, self.onSetFocus)
-        #self.qmax.Bind(wx.EVT_KILL_FOCUS, self._onparamEnter)
-        #self.qmax.Bind(wx.EVT_TEXT_ENTER, self._onparamEnter)
         
         id = wx.NewId()
         self.reset_qrange =wx.Button(self,id,'Reset',size=(70,23))
+      
         self.reset_qrange.Bind(wx.EVT_BUTTON, self.on_reset_clicked,id=id)
         self.reset_qrange.SetToolTipString("Reset Q range to the default values")
      
@@ -1856,9 +1833,7 @@ class BasicPage(wx.ScrolledWindow):
         #----------------------------------------------------------------
         self.sizer5.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer5.Layout()
-        #self.Layout()
-        #self.SetScrollbars(20,20,25,65)
-    
+
     
     def _fill_save_sizer(self):
         """
@@ -1886,7 +1861,24 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer6.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer6.Layout()
         self.SetScrollbars(20,20,25,65)
-
+        
+    def _lay_out(self):
+        """
+            returns self.Layout
+            Note: Mac seems to like this better when self.Layout is called after fitting.
+        """
+        self._sleep4sec()
+        self.Layout()
+        self._sleep4sec()
+        return 
+    
+    def _sleep4sec(self):
+        """
+        sleep for 0.5 sec only on Mac
+        """
+        if ON_MAC == True:
+            time.sleep(0.5)
+             
     def on_reset_clicked(self,event):
         """
         #On 'Reset' button  for Q range clicked
@@ -1906,7 +1898,8 @@ class BasicPage(wx.ScrolledWindow):
             self.qmax_x = _QMAX_DEFAULT
             self.num_points = _NPTS_DEFAULT            
             self.state.npts = self.num_points
-        
+            
+
         self.state.qmin = self.qmin_x
         self.state.qmax = self.qmax_x
         

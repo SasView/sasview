@@ -89,7 +89,7 @@ class ModelPage(BasicPage):
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
 
         sizer_npts= wx.GridSizer(1, 1,5, 5)    
-        self.npts    = BasicPage.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+        self.npts    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
         self.npts.SetValue(format_number(self.num_points))
         self.npts.SetToolTipString("Number of point to plot.")
         
@@ -185,7 +185,7 @@ class ModelPage(BasicPage):
                                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                         ix = 1
                         value= self.model.getParam(name1)
-                        ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                        ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
                         ctl1.SetValue(str (format_number(value)))
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
@@ -194,7 +194,7 @@ class ModelPage(BasicPage):
                     elif p=="npts":
                             ix =2
                             value= self.model.getParam(name2)
-                            Tctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
                             Tctl1.SetValue(str (format_number(value)))
                             self.sizer4_4.Add(Tctl1, (iy,ix),(1,1),
@@ -204,7 +204,7 @@ class ModelPage(BasicPage):
                     elif p=="nsigmas":
                             ix =3 
                             value= self.model.getParam(name3)
-                            Tctl2 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tctl2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
                             Tctl2.SetValue(str (format_number(value)))
                             self.sizer4_4.Add(Tctl2, (iy,ix),(1,1),
@@ -233,7 +233,7 @@ class ModelPage(BasicPage):
                             name.Show(True)
                         ix = 1
                         value= self.model.getParam(name1)
-                        ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                        ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
                         ctl1.SetValue(str (format_number(value)))
                         if not self.enable2D:
@@ -250,7 +250,7 @@ class ModelPage(BasicPage):
                     elif p=="npts":
                             ix =2
                             value= self.model.getParam(name2)
-                            Tctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
                             Tctl1.SetValue(str (format_number(value)))
                             if not self.enable2D:
@@ -268,7 +268,7 @@ class ModelPage(BasicPage):
                     elif p=="nsigmas":
                             ix =3 
                             value= self.model.getParam(name3)
-                            Tctl2 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tctl2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
                             Tctl2.SetValue(str (format_number(value)))
                             if not self.enable2D:
@@ -411,9 +411,10 @@ class ModelPage(BasicPage):
         self.description_hide.SetValue(True)
         
         self.model_description = wx.Button(self,-1, label="Details", size=(80,23))
+        
         self.model_description.Bind(wx.EVT_BUTTON,self.on_button_clicked)
         self.model_description.SetToolTipString("Click Model Functions in HelpWindow...")
-      
+        self.model_description.SetFocus()
         sizer_selection.Add( self.description_show )
         sizer_selection.Add( (20,20)) 
         sizer_selection.Add( self.description_hide )
@@ -527,7 +528,7 @@ class ModelPage(BasicPage):
 
                 ix += 1
                 value= self.model.getParam(item)
-                ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                     style=wx.TE_PROCESS_ENTER)
                 
                 ctl1.SetValue(str (format_number(value)))
@@ -535,9 +536,9 @@ class ModelPage(BasicPage):
                 sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                 ix +=1
                 # Units
-                try:
+                if self.model.details.has_key(item):
                     units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
-                except:
+                else:
                     units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                 sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ##[cb state, name, value, "+/-", error of fit, min, max , units]
@@ -573,7 +574,7 @@ class ModelPage(BasicPage):
 
                 ix += 1
                 value= self.model.getParam(item)
-                ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                     style=wx.TE_PROCESS_ENTER)
                 
                 ctl1.SetValue(str (format_number(value)))
@@ -587,16 +588,14 @@ class ModelPage(BasicPage):
                 sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                 ix +=1
                 # Units
-                try:
+                if self.model.details.has_key(item):
                     units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
-                except:
+                else:
                     units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                 if not self.enable2D:
                     units.Hide()
-                    #units.Disable()
                 else:
                     units.Show(True)
-                    #units.Enable()
    
                 sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 #Save 2D orient. params
@@ -610,15 +609,11 @@ class ModelPage(BasicPage):
                                         None,None, None, None,None])
                     
         iy+=1
-        #sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
         #Display units text on panel
         for item in keys:   
-            if self.model.details[item][0]!='':
-                self.text2_4.Show()
-                break
-            else:
-                self.text2_4.Hide()
+            self.text2_4.Show()
+
       
         boxsizer1.Add(sizer)
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)

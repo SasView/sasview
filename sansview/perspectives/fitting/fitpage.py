@@ -6,11 +6,12 @@ import wx.lib.newevent
 import numpy
 import copy
 import math
+import time
 from sans.models.dispersion_models import ArrayDispersion, GaussianDispersion
 
 from sans.guicomm.events import StatusEvent   
-from sans.guiframe.utils import format_number,check_float
-
+from sans.guiframe.utils import format_number,check_float,check_value
+ 
 ## event to post model to fit to fitting plugins
 (ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
 
@@ -32,8 +33,10 @@ class FitPage(BasicPage):
         on fit Panel window.
   
     """
+    
     def __init__(self,parent, page_info):
         BasicPage.__init__(self, parent, page_info)
+
         """ 
             Initialization of the Panel
         """
@@ -91,6 +94,7 @@ class FitPage(BasicPage):
                 item[6].Hide()
                 self.text2_min.Hide()
                 self.text2_max.Hide()
+
             else:
                 item[5].Show(True)
                 item[6].Show(True)
@@ -137,8 +141,8 @@ class FitPage(BasicPage):
                     item[5].Show(True)
                     item[6].Show(True)
         self.Layout()
-        
-    
+        self.Refresh()
+
     def _fill_range_sizer(self):
         """
             Fill the sizer containing the plotting range
@@ -187,8 +191,7 @@ class FitPage(BasicPage):
                
         #Set sizer for Fitting section
         self._set_range_sizer( title=title,box_sizer=boxsizer_range, object1=sizer_smearer, object= sizer_fit)
-  
-       
+
     def _fill_datainfo_sizer(self):
         """
             fill sizer 0 with data info
@@ -266,7 +269,6 @@ class FitPage(BasicPage):
         self._set_model_sizer(sizer=sizer, box_sizer=boxsizer1, title="Model",object=self.model_help )   
 
     
-    #def _set_sizer_gaussian(self):
     def _set_sizer_dispersion(self, dispersity):
         """
             draw sizer with gaussian dispersity parameters
@@ -353,7 +355,7 @@ class FitPage(BasicPage):
                                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                         ix = 1
                         value= self.model.getParam(name1)
-                        ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                        ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
                         ctl1.SetValue(str (format_number(value)))
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1),wx.EXPAND)
@@ -372,19 +374,17 @@ class FitPage(BasicPage):
                         ctl2.Hide()
 
                         ix = 4
-                        ctl3 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
+                        ctl3 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                        kill_focus_callback = self._onparamRangeEnter,
-                                                       text_enter_callback = self._onparamRangeEnter,
-                                                       set_focus_callback  = self._onparamRangeEnter)
+                                                       text_enter_callback = self._onparamRangeEnter)
 
                         self.sizer4_4.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                         ctl3.Hide()
                 
                         ix = 5
-                        ctl4 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
+                        ctl4 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                        kill_focus_callback = self._onparamRangeEnter,
-                                                       text_enter_callback = self._onparamRangeEnter,
-                                                       set_focus_callback  = self._onparamRangeEnter)
+                                                       text_enter_callback = self._onparamRangeEnter)
                         self.sizer4_4.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
 
                         ctl4.Hide()
@@ -399,7 +399,7 @@ class FitPage(BasicPage):
                     elif p=="npts":
                             ix = 6
                             value= self.model.getParam(name2)
-                            Tctl = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tctl = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
                             
                             Tctl.SetValue(str (format_number(value)))
@@ -410,7 +410,7 @@ class FitPage(BasicPage):
                     elif p=="nsigmas":
                             ix = 7
                             value= self.model.getParam(name3)
-                            Tct2 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tct2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
                             Tct2.SetValue(str (format_number(value)))
                             self.sizer4_4.Add(Tct2, (iy,ix),(1,1),
@@ -451,7 +451,7 @@ class FitPage(BasicPage):
                             cb.Hide()
                         ix = 1
                         value= self.model.getParam(name1)
-                        ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                        ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
                         ctl1.SetValue(str (format_number(value)))
                         if self.data.__class__.__name__ =="Data2D":
@@ -473,20 +473,18 @@ class FitPage(BasicPage):
                         ctl2.Hide()
                             
                         ix = 4
-                        ctl3 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
+                        ctl3 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                        kill_focus_callback = self._onparamRangeEnter,
-                                                       text_enter_callback = self._onparamRangeEnter,
-                                                       set_focus_callback  = self._onparamRangeEnter)
+                                                       text_enter_callback = self._onparamRangeEnter)
 
                         self.sizer4_4.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
 
                         ctl3.Hide()
                 
                         ix = 5
-                        ctl4 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
+                        ctl4 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                        kill_focus_callback = self._onparamRangeEnter,
-                                                       text_enter_callback = self._onparamRangeEnter,
-                                                       set_focus_callback  = self._onparamRangeEnter)
+                                                       text_enter_callback = self._onparamRangeEnter)
                         self.sizer4_4.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                         ctl4.Hide()
                         #if self.data.__class__.__name__ =="Data2D":
@@ -508,7 +506,7 @@ class FitPage(BasicPage):
                     elif p=="npts":
                             ix = 6
                             value= self.model.getParam(name2)
-                            Tctl = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tctl = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
                             
                             Tctl.SetValue(str (format_number(value)))
@@ -525,7 +523,7 @@ class FitPage(BasicPage):
                     elif p=="nsigmas":
                             ix = 7
                             value= self.model.getParam(name3)
-                            Tct2 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
+                            Tct2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
                             Tct2.SetValue(str (format_number(value)))
                             if self.data.__class__.__name__ =="Data2D":
@@ -535,8 +533,7 @@ class FitPage(BasicPage):
                             self.sizer4_4.Add(Tct2, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             ix +=1
-                            #self.sizer4_4.Add((20,20), (iy,ix),(1,1),
-                                               #wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+
                             self.fixed_param.append([None,name3, Tct2
                                                      ,None,None, None, None,None])    
                                                        
@@ -563,20 +560,16 @@ class FitPage(BasicPage):
                         " Selected Distribution: Gaussian"))   
         ix =0 
         iy +=1 
-        #self.sizer4_4.Layout()
-        #self.sizer4.Layout()
+
         self.Layout()
-        #self.SetScrollbars(20,20,25,65)
-        #self.Refresh()
-     
-        
+
+
     def _onFit(self, event):     
         """
             Allow to fit
         """
-        from sans.guiframe.utils import check_value
-        self.select_param(event =None)
         #make sure all parameter values are updated.
+       
         flag = self._update_paramv_on_fit() #check_value( self.qmin, self.qmax) 
                 
         if not flag:
@@ -588,6 +581,9 @@ class FitPage(BasicPage):
             msg= "Select at least one parameter to fit"
             wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
             return 
+      
+
+        self.select_param(event =None)
         
         #Clear errors if exist from previous fitting
         #self._clear_Err_on_Fit() 
@@ -609,7 +605,7 @@ class FitPage(BasicPage):
         #else:
         #    self.btFit.SetLabel("Fit")
         #    self.btFit.Bind(event= wx.EVT_BUTTON, handler=self._onFit, id=self.btFit.GetId())
-        self.btFit.SetFocus()    
+           
 
         
     def _StopFit(self, event):
@@ -621,11 +617,7 @@ class FitPage(BasicPage):
             self.manager.stop_fit()
         self.btFit.Unbind(event=wx.EVT_BUTTON, id=self.btFit.GetId())
         self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit,id=self.btFit.GetId())
-       
-            
-        #self.btFit.SetFocus()    
-        #self.sizer5.Layout()
-        #self.SetScrollbars(20,20,55,40)    
+        
             
     def _on_select_model(self, event): 
         """
@@ -674,27 +666,30 @@ class FitPage(BasicPage):
         """ 
             when enter value on panel redraw model according to changed
         """
+        flag = False
         tcrtl= event.GetEventObject()
+
         #Clear msg if previously shown.
         msg= ""
         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-        
-        if check_float(tcrtl):
-            self._onparamEnter_helper()
-            temp_smearer = None
-            if self.enable_smearer.GetValue():
-                temp_smearer= self.smearer
-            self.compute_chisqr(smearer= temp_smearer)
 
-            ## new state posted
-            if self.state_change:
-                #self._undo.Enable(True)
-                self.save_current_state()
-                event = PageInfoEvent(page = self)
-                wx.PostEvent(self.parent, event)
+        if check_float(tcrtl):
+            flag = self._onparamEnter_helper()
+            if flag:
+                temp_smearer = None
+                if self.enable_smearer.GetValue():
+                    temp_smearer= self.smearer
+                self.compute_chisqr(smearer= temp_smearer)
+    
+                ## new state posted
+                if self.state_change:
+                    #self._undo.Enable(True)
+                    event = PageInfoEvent(page = self)
+                    wx.PostEvent(self.parent, event)
                 self.state_change= False
- 
+            self.save_current_state()
         else:
+            self.save_current_state()
             msg= "Cannot Plot :Must enter a number!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
             return 
@@ -717,7 +712,6 @@ class FitPage(BasicPage):
                 tcrtl.SetBackgroundColour(wx.WHITE)
                 self._check_value_enter(self.fittable_param ,is_modified)
                 self._check_value_enter(self.parameters ,is_modified) 
-
             except:
                 tcrtl.SetBackgroundColour("pink")
                 msg= "Model Error:wrong value entered : %s"% sys.exc_value
@@ -731,8 +725,9 @@ class FitPage(BasicPage):
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
         self.state_change= False
+        self._sleep4sec()
         self.Layout()
-        self.Refresh()                
+        #self.Refresh()                
 
        
     def _clear_Err_on_Fit(self):
@@ -758,7 +753,7 @@ class FitPage(BasicPage):
                 ## hide textcrtl  for error after fit
                 if item[4]!=None and item[4].IsShown():                   
                     item[4].Hide()
-                    
+  
         if len(self.fittable_param)>0:
             for item in self.fittable_param:
                 #Skip t ifhe angle parameters if 1D data
@@ -773,7 +768,6 @@ class FitPage(BasicPage):
                 ## hide textcrtl  for error after fit
                 if item[4]!=None and item[4].IsShown():
                     item[4].Hide()
-        
         return        
                 
         
@@ -786,9 +780,6 @@ class FitPage(BasicPage):
         self.data =data
         self.state.data= data 
         self._fill_datainfo_sizer()
-
-        #self.SetScrollbars(20,20,25,65)
-        #self.Layout()   
         
     def reset_page(self, state,first=False):
         """
@@ -801,12 +792,11 @@ class FitPage(BasicPage):
    
         if self.engine_type != None:
             self.manager._on_change_engine(engine=self.engine_type)
-        #self.tcChi.SetLabel(str(format_number(self.tcChi.GetLabel())))  
-        # reset param_toFit   
+
         self.select_param(event = None) 
         #Save state_fit
         self.save_current_state_fit()
-        self.Layout()
+        self._lay_out()
         self.Refresh()
         
     def get_range(self):
@@ -814,6 +804,26 @@ class FitPage(BasicPage):
             return the fitting range
         """
         return float(self.qmin_x) , float(self.qmax_x)
+    
+    def get_npts2fit(self):
+        """
+            return numbers of data points within qrange
+            Note: This is for Park where chi2 is not normalized by Npts of fit
+        """
+        npts2fit = 0
+        qmin,qmax = self.get_range()
+        if self.data.__class__.__name__ =="Data2D":
+            for qx in self.data.x_bins:
+                for qy in self.data.y_bins:
+                   if math.sqrt((qx*qx)+(qy*qy)) >= qmin \
+                         and math.sqrt((qx*qx)+(qy*qy)) <= qmax:
+                       npts2fit += 1
+        else:
+            for qx in self.data.x:
+                   if qx >= qmin and qx <= qmax:
+                       npts2fit += 1
+        return npts2fit
+
 
     def get_chi2(self):
         """
@@ -847,10 +857,21 @@ class FitPage(BasicPage):
         
         is_modified = False
         has_error = False    
+        
+        #Hide textctrl boxes of errors.
         self._clear_Err_on_Fit()    
+        
+        #Check if chi2 is finite
+        if chisqr != None or numpy.isfinite(chisqr):
         #format chi2
-        chi2 = format_number(chisqr)
-        self.tcChi.SetLabel(chi2)
+            npt_fit = float(self.get_npts2fit())   
+            if self.engine_type == "park" and npt_fit > 0:   
+                chisqr =chisqr/npt_fit    
+            chi2 = format_number(chisqr)    
+            self.tcChi.SetLabel(chi2)    
+            self.tcChi.Refresh()    
+        else:
+            self.tcChi.SetLabel("-")
         
         #Hide error title
         if self.text2_3.IsShown():
@@ -859,15 +880,16 @@ class FitPage(BasicPage):
         try:
             n = self.disp_box.GetCurrentSelection()
             dispersity= self.disp_box.GetClientData(n)
-            name= dispersity.__name__
-            if name == "GaussianDispersion":
-                if hasattr(self,"text_disp_1" ):
-                    if self.text_disp_1 !=None:
-                        self.text_disp_1.Hide()
+            if dispersity !=None and self.enable_disp.GetValue():
+                name= dispersity.__name__
+                if name == "GaussianDispersion":
+                    if hasattr(self,"text_disp_1" ):
+                        if self.text_disp_1 !=None:
+                            self.text_disp_1.Hide()
         except:
+            dispersty = None
             pass
         #set the panel when fit result are float not list
-
         if out.__class__== numpy.float64:
             self.param_toFit[0][2].SetValue(format_number(out))
             
@@ -876,79 +898,77 @@ class FitPage(BasicPage):
             if cov !=None :
                 self.text2_3.Show(True)
                 try:
-                    name= dispersity.__name__
-                    if name == "GaussianDispersion":
-                        if hasattr(self,"text_disp_1" ):
-                            if self.text_disp_1 !=None:
-                                self.text_disp_1.Show(True)
+                    if dispersity !=None:
+                        name= dispersity.__name__
+                        if name == "GaussianDispersion" and self.enable_disp.GetValue():
+                            if hasattr(self,"text_disp_1" ):
+                                if self.text_disp_1 !=None:
+                                    self.text_disp_1.Show(True)
                 except:
                     pass
 
                 if cov[0]==None or  not numpy.isfinite(cov[0]): 
                     if self.param_toFit[0][3].IsShown:
                         self.param_toFit[0][3].Hide()
-                else:
-                    
-                    self.param_toFit[0][3].Show(True)
-                    self.param_toFit[0][3].Refresh()                 
+                else:                    
+                    self.param_toFit[0][3].Show(True)               
                     self.param_toFit[0][4].Show(True)
                     self.param_toFit[0][4].SetValue(format_number(cov[0]))
-                    self.param_toFit[0][4].Refresh()
                     has_error = True
         else:
 
             i = 0
             #Set the panel when fit result are list
-            for item in self.param_toFit:      
+            for item in self.param_toFit:     
                 if len(item)>5 and item != None:     
                     ## reset error value to initial state
-                    if item[3].IsShown():
-                        item[3].Hide()
-                    if item[4].IsShown():
-                        item[4].Hide()
-  
-                    if len(out)<=len(self.param_toFit):# and i < len(out):
-                        val_out = format_number(self.model.getParam(item[1]))
-                        if item[2] != val_out:
-                            item[2].SetValue(val_out)
-                       
+                    item[3].Hide()
+                    item[4].Hide()
+                    
                     for ind in range(len(out)):
                         
                         if item[1] == p_name[ind]:
                             break        
+                    if len(out)<=len(self.param_toFit) and out[ind] !=None:   
+                        val_out = format_number(out[ind])                  
+                        item[2].SetValue(val_out)
 
-                    if(cov !=None) and len(cov)<=len(self.param_toFit):
+                    if(cov !=None):
                         
                         try:
-                            name= dispersity.__name__
-                            if name == "GaussianDispersion":
-                                if hasattr(self,"text_disp_1" ):
-                                    if self.text_disp_1!=None:
-                                        self.text_disp_1.Show(True)
+                            if dispersity !=None:
+                                name= dispersity.__name__
+                                if name == "GaussianDispersion" and self.enable_disp.GetValue():
+                                    if hasattr(self,"text_disp_1" ):
+                                        if self.text_disp_1!=None:
+                                            if not self.text_disp_1.IsShown():
+                                                self.text_disp_1.Show(True)
                         except:
                             pass    
                    
-                        if cov[ind]!=None and numpy.isfinite(cov[ind]):
-                            val_err = format_number(cov[ind])
-                            item[3].Show(True)
-                            item[4].Show(True)
-                            if val_err != item[4].GetValue():
-                                item[4].SetValue(format_number(cov[ind]))
-                            has_error = True
+                        if cov[ind]!=None :
+                            if numpy.isfinite(float(cov[ind])):
+                                val_err = format_number(cov[ind])
+                                item[3].Show(True)
+                                item[4].Show(True)
+                                item[4].SetValue(val_err)
+
+                                has_error = True
             	    i += 1         
         #Show error title when any errors displayed
         if has_error: 
             if not self.text2_3.IsShown():
                 self.text2_3.Show(True) 
-        try:      
-            ## save current state  
-            self.save_current_state() 
-            self.Layout()
-            self.Refresh()
-        except:
-            raise
-        self.btFit.SetFocus()  
-
+                
+        ## save current state  
+        self.save_current_state()          
+        #plot model
+        self._draw_model()   
+        self._lay_out()      
+        #PostStatusEvent     
+        msg="Fit completed! "
+        wx.PostEvent(self.manager.parent, StatusEvent(status=msg))
+      
 
     def onSmear(self, event):
         """
@@ -994,7 +1014,6 @@ class FitPage(BasicPage):
             self.tcChi.SetLabel(str(format_number(output)))
            
             self.sizer5.Layout()
-            self.sizer5.Refresh()
             self.state.tcChi =self.tcChi
           
         except:
@@ -1005,12 +1024,6 @@ class FitPage(BasicPage):
         """
             Compute chisqr for 1D
         """
-        from sans.guiframe.utils import check_value
-        flag = check_value( self.qmin, self.qmax)
-        
-        if not flag:
-            return 
-        
         try:
             self.qmin_x = float(self.qmin.GetValue())
             self.qmax_x = float(self.qmax.GetValue())
@@ -1042,11 +1055,6 @@ class FitPage(BasicPage):
             compute chi square given a model and data 2D and set the value
             to the tcChi txtcrl
         """
-        from sans.guiframe.utils import check_value
-        flag = check_value( self.qmin, self.qmax)
-        if not flag:
-            return 
-      
         try:
             self.qmin_x = float(self.qmin.GetValue())
             self.qmax_x = float(self.qmax.GetValue())
@@ -1075,7 +1083,6 @@ class FitPage(BasicPage):
             compute chi square given a model and data 1D and set the value
             to the tcChi txtcrl
         """
-        from sans.guiframe.utils import check_value
         flag = check_value( self.qmin, self.qmax)
         if flag== True:
             try:
@@ -1280,7 +1287,7 @@ class FitPage(BasicPage):
                 ## add parameter value
                 ix += 1
                 value= self.model.getParam(item)
-                ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                     style=wx.TE_PROCESS_ENTER)
                 
                 ctl1.SetValue(format_number(value))
@@ -1297,19 +1304,17 @@ class FitPage(BasicPage):
                 ctl2.Hide()
                 
                 ix += 1
-                ctl3 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
+                ctl3 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                kill_focus_callback = self._onparamRangeEnter,
-                                               text_enter_callback = self._onparamRangeEnter,
-                                               set_focus_callback  = self._onparamRangeEnter)
+                                               text_enter_callback = self._onparamRangeEnter)
      
                 sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 ctl3.Hide()
         
                 ix += 1
-                ctl4 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
+                ctl4 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                kill_focus_callback = self._onparamRangeEnter,
-                                               text_enter_callback = self._onparamRangeEnter,
-                                               set_focus_callback  = self._onparamRangeEnter)
+                                               text_enter_callback = self._onparamRangeEnter)
                 sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
       
                 ctl4.Hide()
@@ -1319,9 +1324,9 @@ class FitPage(BasicPage):
                     ctl4.Show(True)
                 ix +=1
                 # Units
-                try:
+                if self.model.details.has_key(item):
                     units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
-                except:
+                else:
                     units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                 sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                     
@@ -1375,7 +1380,7 @@ class FitPage(BasicPage):
                     ## add parameter value
                     ix += 1
                     value= self.model.getParam(item)
-                    ctl1 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                    ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                         style=wx.TE_PROCESS_ENTER)
                     
                     ctl1.SetValue(format_number(value))
@@ -1398,10 +1403,9 @@ class FitPage(BasicPage):
                     
                     
                     ix += 1
-                    ctl3 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
+                    ctl3 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                    kill_focus_callback = self._onparamRangeEnter,
-                                                   text_enter_callback = self._onparamRangeEnter,
-                                                   set_focus_callback  = self._onparamRangeEnter)
+                                                   text_enter_callback = self._onparamRangeEnter)
                
                     sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                     ctl3.Hide()
@@ -1412,10 +1416,9 @@ class FitPage(BasicPage):
                     #    ctl3.Hide()
                 
                     ix += 1
-                    ctl4 = BasicPage.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
+                    ctl4 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                    kill_focus_callback = self._onparamRangeEnter,
-                                                   text_enter_callback = self._onparamRangeEnter,
-                                                   set_focus_callback  = self._onparamRangeEnter)
+                                                   text_enter_callback = self._onparamRangeEnter)
                     sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                    
                     ctl4.Hide()
@@ -1426,9 +1429,9 @@ class FitPage(BasicPage):
                     
                     ix +=1
                     # Units
-                    try:
+                    if self.model.details.has_key(item):
                         units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
-                    except:
+                    else:
                         units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
                     if self.data.__class__.__name__ =="Data2D":
                         units.Show(True)
@@ -1437,8 +1440,7 @@ class FitPage(BasicPage):
                         units.Hide()
                     
                     sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        
-                    
+                                          
                     ##[cb state, name, value, "+/-", error of fit, min, max , units]
                     self.parameters.append([cb,item, ctl1,
                                             text2,ctl2, ctl3, ctl4,units])
@@ -1446,15 +1448,12 @@ class FitPage(BasicPage):
                                             text2,ctl2, ctl3, ctl4,units])
               
         iy+=1
-        #sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
         #Display units text on panel
         for item in keys:   
-            if self.model.details[item][0]!='':
+            if self.model.details.has_key(item):
                 self.text2_4.Show()
-                break
-            else:
-                self.text2_4.Hide()
+
         #self.state.cb1 = self.cb1.GetValue()        
         #self._copy_parameters_state(self.orientation_params,
         #                             self.state.orientation_params)

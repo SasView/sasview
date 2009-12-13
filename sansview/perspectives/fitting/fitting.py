@@ -476,15 +476,18 @@ class Plugin:
         try:
             ## If a thread is already started, stop it
             if self.calc_fit!= None and self.calc_fit.isrunning():
+                return
                 self.calc_fit.stop()
             
             wx.PostEvent(self.parent, StatusEvent(status="Start the computation",
                                         curr_thread=self.calc_fit,type="start"))
+            time.sleep(0.5)
             wx.PostEvent(self.parent, StatusEvent(status="Computing...",
                                         curr_thread=self.calc_fit,type="progress"))
+            time.sleep(0.5)
             ## perform single fit
             if self._fit_engine=="scipy":
-                qmin, qmax= self.current_pg.get_range()
+                #qmin, qmax= self.current_pg.get_range()
                 self.calc_fit=FitThread(parent =self.parent,
                                         fn= self.fitter,
                                        cpage=self.current_pg,
@@ -744,10 +747,7 @@ class Plugin:
             @param qmin: the minimum value of x to replot the model 
             @param qmax: the maximum value of x to replot model
           
-        """
-        wx.PostEvent(self.parent, StatusEvent(status="Single fit \
-        complete! " ))
-      
+        """     
         try:
             if result ==None:
                 msg= "Simple Fitting Stop !!!"
@@ -765,14 +765,9 @@ class Plugin:
             i = 0
             for name in pars:
                 param_name.append(name)
-                if result.pvec.__class__==numpy.float64:
-                    model.setParam(name,result.pvec)
-                else:
-                    if result.pvec[i] != None and numpy.isfinite(result.pvec[i]):
-                        model.setParam(name,result.pvec[i])
-                    i += 1
-            ## Reset values of the current page to fit result
+
             cpage.onsetValues(result.fitness,param_name, result.pvec,result.stderr)
+            """
             ## plot the current model with new param
             metadata =  self.page_finder[cpage].get_fit_data()
             model = self.page_finder[cpage].get_model()
@@ -783,7 +778,7 @@ class Plugin:
             wx.PostEvent(self.parent, StatusEvent(status="%s " % msg))
             self.draw_model( model=model, data= metadata, smearer= smearer,
                              qmin= qmin, qmax= qmax)
-            wx.PostEvent(self.parent, StatusEvent(status=" " , type="stop")) 
+            """
         except:
             msg= "Single Fit completed but Following error occurred:%s"% sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
@@ -797,8 +792,6 @@ class Plugin:
             @param alpha: estimated best alpha
             @param elapsed: computation time
         """
-        wx.PostEvent(self.parent, StatusEvent(status="Simultaneous fit complete "))
-       
         ## fit more than 1 model at the same time 
         try:
             msg = "" 
@@ -815,8 +808,6 @@ class Plugin:
                 """
                 if format_number(result.fitness) == page.get_chi2():
                     #ToDo: Compare parameter inputs with outputs too.
-                    msg= "Simultaneous Fit completed"
-                    msg +=" but chi2 has not been improved..."
                     wx.PostEvent(self.parent, StatusEvent(status="%s " % msg)) 
                     break     
                 """              
@@ -832,27 +823,14 @@ class Plugin:
                         model_name,param_name = self.split_string(p.name)  
                         if model.name == model_name:
                             p_name= model.name+"."+param_name
-                            if p.name == p_name:
-                                small_out.append(p.value )
+                            if p.name == p_name:      
                                 if p.value != None and numpy.isfinite(p.value):
-                                    model.setParam(param_name,p.value) 
-                                small_param_name.append(param_name)
-                                small_cov.append(p.stderr)
-                            else:
-                                value= model.getParam(param_name)
-                                small_out.append(value )
-                                small_param_name.append(param_name)
-                                small_cov.append(None)
+                                    small_out.append(p.value )
+                                    small_param_name.append(param_name)
+                                    small_cov.append(p.stderr)
+
                     # Display result on each page 
                     page.onsetValues(result.fitness, small_param_name,small_out,small_cov)
-                    #Replot models
-                    msg= "Simultaneous Fit completed. plotting... %s:"%model.name
-                    wx.PostEvent(self.parent, StatusEvent(status="%s " % msg))
-                    qmin, qmax= page.get_range()
-                    smearer =self.page_finder[page].get_smearer()
-                    self.draw_model( model=model, data= metadata, smearer=smearer,
-                                     qmin= qmin, qmax= qmax)
-            wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
         except:
              msg= "Simultaneous Fit completed"
              msg +=" but Following error occurred:%s"%sys.exc_value
