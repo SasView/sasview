@@ -27,10 +27,10 @@ import copy
     
 class Gaussian(CGaussian, BaseComponent):
     """ Class that evaluates a Gaussian model. 
-    	This file was auto-generated from ..\c_extensions\gaussian.h.
-    	Refer to that file and the structure it contains
-    	for details of the model.
-    	List of default parameters:
+        This file was auto-generated from ..\c_extensions\gaussian.h.
+        Refer to that file and the structure it contains
+        for details of the model.
+        List of default parameters:
          scale           = 1.0 
          sigma           = 1.0 
          center          = 0.0 
@@ -49,13 +49,13 @@ class Gaussian(CGaussian, BaseComponent):
         ## Model description
         self.description ="""f(x)=scale * 1/(sigma^2*2pi)e^(-(x-mu)^2/2sigma^2)"""
        
-		## Parameter details [units, min, max]
+        ## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
         self.details['sigma'] = ['', None, None]
         self.details['center'] = ['', None, None]
 
-		## fittable parameters
+        ## fittable parameters
         self.fixed=[]
         
         ## parameters with orientation
@@ -64,6 +64,25 @@ class Gaussian(CGaussian, BaseComponent):
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(Gaussian())   
+        
+    def __getstate__(self):
+        """ return object state for pickling and copying """
+        print "__dict__",self.__dict__
+        #self.__dict__['params'] = self.params
+        #self.__dict__['dispersion'] = self.dispersion
+        #self.__dict__['log'] = self.log
+        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
+        
+        return self.__dict__, model_state
+        
+    def __setstate__(self, state):
+        """ create object from pickled state """
+        
+        self.__dict__, model_state = state
+        self.params = model_state['params']
+        self.dispersion = model_state['dispersion']
+        self.log = model_state['log']
+       	
    
     def run(self, x = 0.0):
         """ Evaluate the model

@@ -27,10 +27,10 @@ import copy
     
 class StickyHSStructure(CStickyHSStructure, BaseComponent):
     """ Class that evaluates a StickyHSStructure model. 
-    	This file was auto-generated from ..\c_extensions\StickyHS.h.
-    	Refer to that file and the structure it contains
-    	for details of the model.
-    	List of default parameters:
+        This file was auto-generated from ..\c_extensions\StickyHS.h.
+        Refer to that file and the structure it contains
+        for details of the model.
+        List of default parameters:
          effect_radius   = 50.0 [A]
          volfraction     = 0.1 
          perturb         = 0.05 
@@ -65,14 +65,14 @@ class StickyHSStructure(CStickyHSStructure, BaseComponent):
 		Ref: Menon, S. V. G.,et.al., J. Chem.
 		Phys., 1991, 95(12), 9186-9190."""
        
-		## Parameter details [units, min, max]
+        ## Parameter details [units, min, max]
         self.details = {}
         self.details['effect_radius'] = ['[A]', None, None]
         self.details['volfraction'] = ['', None, None]
         self.details['perturb'] = ['', None, None]
         self.details['stickiness'] = ['', None, None]
 
-		## fittable parameters
+        ## fittable parameters
         self.fixed=['effect_radius.width']
         
         ## parameters with orientation
@@ -81,6 +81,25 @@ class StickyHSStructure(CStickyHSStructure, BaseComponent):
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(StickyHSStructure())   
+        
+    def __getstate__(self):
+        """ return object state for pickling and copying """
+        print "__dict__",self.__dict__
+        #self.__dict__['params'] = self.params
+        #self.__dict__['dispersion'] = self.dispersion
+        #self.__dict__['log'] = self.log
+        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
+        
+        return self.__dict__, model_state
+        
+    def __setstate__(self, state):
+        """ create object from pickled state """
+        
+        self.__dict__, model_state = state
+        self.params = model_state['params']
+        self.dispersion = model_state['dispersion']
+        self.log = model_state['log']
+       	
    
     def run(self, x = 0.0):
         """ Evaluate the model

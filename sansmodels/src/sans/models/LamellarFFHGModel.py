@@ -27,10 +27,10 @@ import copy
     
 class LamellarFFHGModel(CLamellarFFHGModel, BaseComponent):
     """ Class that evaluates a LamellarFFHGModel model. 
-    	This file was auto-generated from ..\c_extensions\lamellarFF_HG.h.
-    	Refer to that file and the structure it contains
-    	for details of the model.
-    	List of default parameters:
+        This file was auto-generated from ..\c_extensions\lamellarFF_HG.h.
+        Refer to that file and the structure it contains
+        for details of the model.
+        List of default parameters:
          scale           = 1.0 
          t_length        = 15.0 [A]
          h_thickness     = 10.0 [A]
@@ -60,7 +60,7 @@ class LamellarFFHGModel(CLamellarFFHGModel, BaseComponent):
 		= 2(h_thickness+ t_length).
 		"""
        
-		## Parameter details [units, min, max]
+        ## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
         self.details['t_length'] = ['[A]', None, None]
@@ -70,7 +70,7 @@ class LamellarFFHGModel(CLamellarFFHGModel, BaseComponent):
         self.details['sld_solvent'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
 
-		## fittable parameters
+        ## fittable parameters
         self.fixed=['t_length.width', 'h_thickness.width']
         
         ## parameters with orientation
@@ -79,6 +79,25 @@ class LamellarFFHGModel(CLamellarFFHGModel, BaseComponent):
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(LamellarFFHGModel())   
+        
+    def __getstate__(self):
+        """ return object state for pickling and copying """
+        print "__dict__",self.__dict__
+        #self.__dict__['params'] = self.params
+        #self.__dict__['dispersion'] = self.dispersion
+        #self.__dict__['log'] = self.log
+        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
+        
+        return self.__dict__, model_state
+        
+    def __setstate__(self, state):
+        """ create object from pickled state """
+        
+        self.__dict__, model_state = state
+        self.params = model_state['params']
+        self.dispersion = model_state['dispersion']
+        self.log = model_state['log']
+       	
    
     def run(self, x = 0.0):
         """ Evaluate the model

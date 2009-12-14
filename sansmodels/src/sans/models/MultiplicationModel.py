@@ -57,7 +57,7 @@ class MultiplicationModel(BaseComponent):
         obj.dispersion = copy.deepcopy(self.dispersion)
         obj.p_model  = self.p_model.clone()
         obj.s_model  = self.s_model.clone()
-        
+        #obj = copy.deepcopy(self)
         return obj
     
     

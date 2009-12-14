@@ -27,10 +27,10 @@ import copy
     
 class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
     """ Class that evaluates a CoreShellCylinderModel model. 
-    	This file was auto-generated from ..\c_extensions\core_shell_cylinder.h.
-    	Refer to that file and the structure it contains
-    	for details of the model.
-    	List of default parameters:
+        This file was auto-generated from ..\c_extensions\core_shell_cylinder.h.
+        Refer to that file and the structure it contains
+        for details of the model.
+        List of default parameters:
          scale           = 1.0 
          radius          = 20.0 [A]
          thickness       = 10.0 [A]
@@ -79,7 +79,7 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
 		theta: axis_theta of the cylinder
 		phi: the axis_phi of the cylinder..."""
        
-		## Parameter details [units, min, max]
+        ## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
         self.details['radius'] = ['[A]', None, None]
@@ -92,7 +92,7 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
         self.details['axis_theta'] = ['[rad]', None, None]
         self.details['axis_phi'] = ['[rad]', None, None]
 
-		## fittable parameters
+        ## fittable parameters
         self.fixed=['axis_phi.width', 'axis_theta.width', 'length.width', 'radius.width', 'thickness.width']
         
         ## parameters with orientation
@@ -101,6 +101,25 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(CoreShellCylinderModel())   
+        
+    def __getstate__(self):
+        """ return object state for pickling and copying """
+        print "__dict__",self.__dict__
+        #self.__dict__['params'] = self.params
+        #self.__dict__['dispersion'] = self.dispersion
+        #self.__dict__['log'] = self.log
+        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
+        
+        return self.__dict__, model_state
+        
+    def __setstate__(self, state):
+        """ create object from pickled state """
+        
+        self.__dict__, model_state = state
+        self.params = model_state['params']
+        self.dispersion = model_state['dispersion']
+        self.log = model_state['log']
+       	
    
     def run(self, x = 0.0):
         """ Evaluate the model

@@ -27,10 +27,10 @@ import copy
     
 class StackedDisksModel(CStackedDisksModel, BaseComponent):
     """ Class that evaluates a StackedDisksModel model. 
-    	This file was auto-generated from ..\c_extensions\stacked_disks.h.
-    	Refer to that file and the structure it contains
-    	for details of the model.
-    	List of default parameters:
+        This file was auto-generated from ..\c_extensions\stacked_disks.h.
+        Refer to that file and the structure it contains
+        for details of the model.
+        List of default parameters:
          scale           = 0.01 
          radius          = 3000.0 [A]
          core_thick      = 10.0 [A]
@@ -66,7 +66,7 @@ class StackedDisksModel(CStackedDisksModel, BaseComponent):
 		sigma_d =  Gaussian STD of d-spacing
 		solvent_sld = the SLD of the solvent"""
        
-		## Parameter details [units, min, max]
+        ## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
         self.details['radius'] = ['[A]', None, None]
@@ -81,7 +81,7 @@ class StackedDisksModel(CStackedDisksModel, BaseComponent):
         self.details['axis_theta'] = ['[rad]', None, None]
         self.details['axis_phi'] = ['[rad]', None, None]
 
-		## fittable parameters
+        ## fittable parameters
         self.fixed=['core_thick.width', 'layer_thick.width', 'radius.width', 'axis_theta.width', 'axis_phi.width']
         
         ## parameters with orientation
@@ -90,6 +90,25 @@ class StackedDisksModel(CStackedDisksModel, BaseComponent):
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(StackedDisksModel())   
+        
+    def __getstate__(self):
+        """ return object state for pickling and copying """
+        print "__dict__",self.__dict__
+        #self.__dict__['params'] = self.params
+        #self.__dict__['dispersion'] = self.dispersion
+        #self.__dict__['log'] = self.log
+        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
+        
+        return self.__dict__, model_state
+        
+    def __setstate__(self, state):
+        """ create object from pickled state """
+        
+        self.__dict__, model_state = state
+        self.params = model_state['params']
+        self.dispersion = model_state['dispersion']
+        self.log = model_state['log']
+       	
    
     def run(self, x = 0.0):
         """ Evaluate the model

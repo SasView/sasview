@@ -27,10 +27,10 @@ import copy
     
 class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
     """ Class that evaluates a [PYTHONCLASS] model. 
-    	This file was auto-generated from [INCLUDE_FILE].
-    	Refer to that file and the structure it contains
-    	for details of the model.
-    	[DEFAULT_LIST]
+        This file was auto-generated from [INCLUDE_FILE].
+        Refer to that file and the structure it contains
+        for details of the model.
+        [DEFAULT_LIST]
     """
         
     def __init__(self):
@@ -45,8 +45,8 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         ## Model description
         self.description ="""[DESCRIPTION]"""
        
-		[PAR_DETAILS]
-		## fittable parameters
+        [PAR_DETAILS]
+        ## fittable parameters
         self.fixed=[FIXED]
         
         ## parameters with orientation
@@ -55,6 +55,21 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
     def clone(self):
         """ Return a identical copy of self """
         return self._clone([PYTHONCLASS]())   
+        
+    def __getstate__(self):
+        """ return object state for pickling and copying """
+        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
+        
+        return self.__dict__, model_state
+        
+    def __setstate__(self, state):
+        """ create object from pickled state """
+        
+        self.__dict__, model_state = state
+        self.params = model_state['params']
+        self.dispersion = model_state['dispersion']
+        self.log = model_state['log']
+       	
    
     def run(self, x = 0.0):
         """ Evaluate the model

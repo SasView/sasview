@@ -27,10 +27,10 @@ import copy
     
 class HayterMSAStructure(CHayterMSAStructure, BaseComponent):
     """ Class that evaluates a HayterMSAStructure model. 
-    	This file was auto-generated from ..\c_extensions\HayterMSA.h.
-    	Refer to that file and the structure it contains
-    	for details of the model.
-    	List of default parameters:
+        This file was auto-generated from ..\c_extensions\HayterMSA.h.
+        Refer to that file and the structure it contains
+        for details of the model.
+        List of default parameters:
          effect_radius   = 20.75 [A]
          charge          = 19.0 
          volfraction     = 0.0192 
@@ -65,7 +65,7 @@ class HayterMSAStructure(CHayterMSAStructure, BaseComponent):
 		Physics 46, 651-656 (1982).
 		"""
        
-		## Parameter details [units, min, max]
+        ## Parameter details [units, min, max]
         self.details = {}
         self.details['effect_radius'] = ['[A]', None, None]
         self.details['charge'] = ['', None, None]
@@ -74,7 +74,7 @@ class HayterMSAStructure(CHayterMSAStructure, BaseComponent):
         self.details['saltconc'] = ['[M]', None, None]
         self.details['dielectconst'] = ['', None, None]
 
-		## fittable parameters
+        ## fittable parameters
         self.fixed=['effect_radius.width']
         
         ## parameters with orientation
@@ -83,6 +83,25 @@ class HayterMSAStructure(CHayterMSAStructure, BaseComponent):
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(HayterMSAStructure())   
+        
+    def __getstate__(self):
+        """ return object state for pickling and copying """
+        print "__dict__",self.__dict__
+        #self.__dict__['params'] = self.params
+        #self.__dict__['dispersion'] = self.dispersion
+        #self.__dict__['log'] = self.log
+        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
+        
+        return self.__dict__, model_state
+        
+    def __setstate__(self, state):
+        """ create object from pickled state """
+        
+        self.__dict__, model_state = state
+        self.params = model_state['params']
+        self.dispersion = model_state['dispersion']
+        self.log = model_state['log']
+       	
    
     def run(self, x = 0.0):
         """ Evaluate the model

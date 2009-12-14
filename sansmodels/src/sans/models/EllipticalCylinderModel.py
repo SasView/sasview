@@ -27,10 +27,10 @@ import copy
     
 class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
     """ Class that evaluates a EllipticalCylinderModel model. 
-    	This file was auto-generated from ..\c_extensions\elliptical_cylinder.h.
-    	Refer to that file and the structure it contains
-    	for details of the model.
-    	List of default parameters:
+        This file was auto-generated from ..\c_extensions\elliptical_cylinder.h.
+        Refer to that file and the structure it contains
+        for details of the model.
+        List of default parameters:
          scale           = 1.0 
          r_minor         = 20.0 [A]
          r_ratio         = 1.5 
@@ -59,7 +59,7 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
 		contrast = SLD of solvent - SLD of the cylinder
 		background = incoherent background"""
        
-		## Parameter details [units, min, max]
+        ## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
         self.details['r_minor'] = ['[A]', None, None]
@@ -71,7 +71,7 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
         self.details['cyl_phi'] = ['[rad]', None, None]
         self.details['cyl_psi'] = ['[rad]', None, None]
 
-		## fittable parameters
+        ## fittable parameters
         self.fixed=['cyl_phi.width', 'cyl_theta.width', 'cyl_psi.width', 'length.width', 'r_minor.width', 'r_ratio.width']
         
         ## parameters with orientation
@@ -80,6 +80,25 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(EllipticalCylinderModel())   
+        
+    def __getstate__(self):
+        """ return object state for pickling and copying """
+        print "__dict__",self.__dict__
+        #self.__dict__['params'] = self.params
+        #self.__dict__['dispersion'] = self.dispersion
+        #self.__dict__['log'] = self.log
+        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
+        
+        return self.__dict__, model_state
+        
+    def __setstate__(self, state):
+        """ create object from pickled state """
+        
+        self.__dict__, model_state = state
+        self.params = model_state['params']
+        self.dispersion = model_state['dispersion']
+        self.log = model_state['log']
+       	
    
     def run(self, x = 0.0):
         """ Evaluate the model

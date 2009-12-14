@@ -27,10 +27,10 @@ import copy
     
 class LamellarModel(CLamellarModel, BaseComponent):
     """ Class that evaluates a LamellarModel model. 
-    	This file was auto-generated from ..\c_extensions\lamellar.h.
-    	Refer to that file and the structure it contains
-    	for details of the model.
-    	List of default parameters:
+        This file was auto-generated from ..\c_extensions\lamellar.h.
+        Refer to that file and the structure it contains
+        for details of the model.
+        List of default parameters:
          scale           = 1.0 
          bi_thick        = 50.0 [A]
          sld_bi          = 1e-006 [1/A^(2)]
@@ -59,7 +59,7 @@ class LamellarModel(CLamellarModel, BaseComponent):
 		scale = scale factor
 		"""
        
-		## Parameter details [units, min, max]
+        ## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
         self.details['bi_thick'] = ['[A]', None, None]
@@ -67,7 +67,7 @@ class LamellarModel(CLamellarModel, BaseComponent):
         self.details['sld_sol'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
 
-		## fittable parameters
+        ## fittable parameters
         self.fixed=[]
         
         ## parameters with orientation
@@ -76,6 +76,25 @@ class LamellarModel(CLamellarModel, BaseComponent):
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(LamellarModel())   
+        
+    def __getstate__(self):
+        """ return object state for pickling and copying """
+        print "__dict__",self.__dict__
+        #self.__dict__['params'] = self.params
+        #self.__dict__['dispersion'] = self.dispersion
+        #self.__dict__['log'] = self.log
+        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
+        
+        return self.__dict__, model_state
+        
+    def __setstate__(self, state):
+        """ create object from pickled state """
+        
+        self.__dict__, model_state = state
+        self.params = model_state['params']
+        self.dispersion = model_state['dispersion']
+        self.log = model_state['log']
+       	
    
     def run(self, x = 0.0):
         """ Evaluate the model

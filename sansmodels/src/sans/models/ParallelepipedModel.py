@@ -27,10 +27,10 @@ import copy
     
 class ParallelepipedModel(CParallelepipedModel, BaseComponent):
     """ Class that evaluates a ParallelepipedModel model. 
-    	This file was auto-generated from ..\c_extensions\parallelepiped.h.
-    	Refer to that file and the structure it contains
-    	for details of the model.
-    	List of default parameters:
+        This file was auto-generated from ..\c_extensions\parallelepiped.h.
+        Refer to that file and the structure it contains
+        for details of the model.
+        List of default parameters:
          scale           = 1.0 
          short_a         = 35.0 [A]
          short_b         = 75.0 [A]
@@ -62,7 +62,7 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
 		contrast: particle_sld - solvent_sld
 		background:Incoherent Background [1/cm]"""
        
-		## Parameter details [units, min, max]
+        ## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
         self.details['short_a'] = ['[A]', None, None]
@@ -74,7 +74,7 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
         self.details['parallel_phi'] = ['[rad]', None, None]
         self.details['parallel_psi'] = ['[rad]', None, None]
 
-		## fittable parameters
+        ## fittable parameters
         self.fixed=['short_a.width', 'short_b.width', 'long_c.width', 'parallel_phi.width', 'parallel_psi.width', 'parallel_theta.width']
         
         ## parameters with orientation
@@ -83,6 +83,25 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(ParallelepipedModel())   
+        
+    def __getstate__(self):
+        """ return object state for pickling and copying """
+        print "__dict__",self.__dict__
+        #self.__dict__['params'] = self.params
+        #self.__dict__['dispersion'] = self.dispersion
+        #self.__dict__['log'] = self.log
+        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
+        
+        return self.__dict__, model_state
+        
+    def __setstate__(self, state):
+        """ create object from pickled state """
+        
+        self.__dict__, model_state = state
+        self.params = model_state['params']
+        self.dispersion = model_state['dispersion']
+        self.log = model_state['log']
+       	
    
     def run(self, x = 0.0):
         """ Evaluate the model

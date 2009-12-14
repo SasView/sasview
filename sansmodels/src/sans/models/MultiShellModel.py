@@ -27,10 +27,10 @@ import copy
     
 class MultiShellModel(CMultiShellModel, BaseComponent):
     """ Class that evaluates a MultiShellModel model. 
-    	This file was auto-generated from ..\c_extensions\multishell.h.
-    	Refer to that file and the structure it contains
-    	for details of the model.
-    	List of default parameters:
+        This file was auto-generated from ..\c_extensions\multishell.h.
+        Refer to that file and the structure it contains
+        for details of the model.
+        List of default parameters:
          scale           = 1.0 
          core_radius     = 60.0 [A]
          s_thickness     = 10.0 [A]
@@ -62,7 +62,7 @@ class MultiShellModel(CMultiShellModel, BaseComponent):
 		n_pairs:number of pairs of water/shell
 		background: incoherent background"""
        
-		## Parameter details [units, min, max]
+        ## Parameter details [units, min, max]
         self.details = {}
         self.details['scale'] = ['', None, None]
         self.details['core_radius'] = ['[A]', None, None]
@@ -73,7 +73,7 @@ class MultiShellModel(CMultiShellModel, BaseComponent):
         self.details['n_pairs'] = ['', None, None]
         self.details['background'] = ['[1/cm]', None, None]
 
-		## fittable parameters
+        ## fittable parameters
         self.fixed=['core_radius.width', 's_thickness.width', 'w_thickness.width']
         
         ## parameters with orientation
@@ -82,6 +82,25 @@ class MultiShellModel(CMultiShellModel, BaseComponent):
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(MultiShellModel())   
+        
+    def __getstate__(self):
+        """ return object state for pickling and copying """
+        print "__dict__",self.__dict__
+        #self.__dict__['params'] = self.params
+        #self.__dict__['dispersion'] = self.dispersion
+        #self.__dict__['log'] = self.log
+        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
+        
+        return self.__dict__, model_state
+        
+    def __setstate__(self, state):
+        """ create object from pickled state """
+        
+        self.__dict__, model_state = state
+        self.params = model_state['params']
+        self.dispersion = model_state['dispersion']
+        self.log = model_state['log']
+       	
    
     def run(self, x = 0.0):
         """ Evaluate the model
