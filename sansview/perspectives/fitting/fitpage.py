@@ -727,7 +727,7 @@ class FitPage(BasicPage):
         self.state_change= False
         self._sleep4sec()
         self.Layout()
-        #self.Refresh()                
+        self.Refresh()                
 
        
     def _clear_Err_on_Fit(self):

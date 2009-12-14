@@ -15,7 +15,7 @@ _STATICBOX_WIDTH = 350
 _SCALE = 1e-6
 
 #SLD panel size 
-if sys.platform.count("win32")>0:
+if sys.platform.count("darwin")==0:
     _STATICBOX_WIDTH = 350
     PANEL_SIZE = 400
     FONT_VARIANT = 0

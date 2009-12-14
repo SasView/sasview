@@ -4,7 +4,7 @@ import wx.lib.newevent
 from sans.guicomm.events import StatusEvent 
    
 #Control panel width 
-if sys.platform.count("win32")>0:
+if sys.platform.count("darwin")==0:
     PANEL_WID = 420
     FONT_VARIANT = 0
 else:
@@ -436,7 +436,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         ctl2.Show(True)
         
         
-        self.sizer2.Layout()
+        #self.sizer2.Layout()
         self.SetScrollbars(20,20,25,65)
         
         

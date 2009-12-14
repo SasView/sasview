@@ -18,7 +18,7 @@ _QMIN_DEFAULT = 0.001
 _QMAX_DEFAULT = 0.13
 _NPTS_DEFAULT = 50
 #Control panel width 
-if sys.platform.count("win32")>0:
+if sys.platform.count("darwin")==0:
     PANEL_WIDTH = 450
     FONT_VARIANT = 0
     ON_MAC = False
@@ -1419,14 +1419,73 @@ class BasicPage(wx.ScrolledWindow):
         if check_float(tcrtl):
             
             self._onparamEnter_helper()
-            event.Skip()
+            #event.Skip()
         else:
             msg= "Cannot Plot :Must enter a number!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-            event.Skip()
+            #event.Skip()
             return 
    
-   
+    def _onQrangeEnter(self, event):
+        """
+            Check validity of value enter in the Q range field
+        """
+        
+        tcrtl= event.GetEventObject()
+        #Clear msg if previously shown.
+        msg= ""
+        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        # Flag to register when a parameter has changed.
+        is_modified = False
+        if tcrtl.GetValue().lstrip().rstrip()!="":
+            try:
+                value = float(tcrtl.GetValue())
+                tcrtl.SetBackgroundColour(wx.WHITE)
+
+                # If qmin and qmax have been modified, update qmin and qmax
+                if check_value( self.qmin, self.qmax):
+                    tempmin = float(self.qmin.GetValue())
+                    if tempmin != self.qmin_x:
+                        self.qmin_x = tempmin
+                    tempmax = float(self.qmax.GetValue())
+                    if tempmax != self.qmax_x:
+                        self.qmax_x = tempmax
+                else:
+                    tcrtl.SetBackgroundColour("pink")
+                    msg= "Model Error:wrong value entered : %s"% sys.exc_value
+                    wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                    return 
+                
+            except:
+                tcrtl.SetBackgroundColour("pink")
+                msg= "Model Error:wrong value entered : %s"% sys.exc_value
+                wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                return 
+            #Check if # of points for theory model are valid(>0).
+            if self.npts != None:
+                if check_float(self.npts):
+                    temp_npts = float(self.npts.GetValue())
+                    if temp_npts !=  self.num_points:
+                        self.num_points = temp_npts
+                        is_modified = True
+                else:
+                    msg= "Cannot Plot :No npts in that Qrange!!!  "
+                    wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+           
+        else:
+           tcrtl.SetBackgroundColour("pink")
+           msg= "Model Error:wrong value entered!!!"
+           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+           
+        #self._undo.Enable(True)
+        self.save_current_state()
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event)
+        self.state_change= False
+        self._sleep4sec()
+        self.Layout()
+        self.Refresh()        
+                   
     def _on_select_model_helper(self): 
         """
              call back for model selection
@@ -1503,10 +1562,13 @@ class BasicPage(wx.ScrolledWindow):
                         try:
                             
                             param_min = float(item[5].GetValue())
-                            if check_value(item[2],item[5]):
+                            if not check_value(item[5],item[2]):
                                 if numpy.isfinite(param_min):
                                     item[2].SetValue(format_number(param_min))
-                            item[2].SetBackgroundColour(wx.WHITE)        
+                            
+                            item[5].SetBackgroundColour(wx.WHITE)
+                            item[2].SetBackgroundColour(wx.WHITE)
+                                           
                         except:
                             msg = "Wrong Fit parameter range entered "
                             wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
@@ -1517,10 +1579,12 @@ class BasicPage(wx.ScrolledWindow):
                     if item[6].GetValue().lstrip().rstrip()!="":
                         try:                          
                             param_max = float(item[6].GetValue())
-                            if check_value(item[6],item[2]):
+                            if not check_value(item[2],item[6]):
                                 if numpy.isfinite(param_max):
                                     item[2].SetValue(format_number(param_max))  
-                            item[2].SetBackgroundColour(wx.WHITE)               
+                            
+                            item[6].SetBackgroundColour(wx.WHITE)
+                            item[2].SetBackgroundColour(wx.WHITE)
                         except:
                             msg = "Wrong Fit parameter range entered "
                             wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
@@ -1541,15 +1605,18 @@ class BasicPage(wx.ScrolledWindow):
                 else:
                         self.model.details [name] = ["",param_min,param_max] 
                         is_modified = True
+            try:     
+                value= float(item[2].GetValue())
+      
+                # If the value of the parameter has changed,
+                # +update the model and set the is_modified flag
+                if value != self.model.getParam(name) and numpy.isfinite(value):
+                    self.model.setParam(name,value)
+                    is_modified = True   
+            except:
+                msg = "Wrong Fit parameter value entered "
+                wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
                 
-            value= float(item[2].GetValue())
-  
-            # If the value of the parameter has changed,
-            # +update the model and set the is_modified flag
-            if value != self.model.getParam(name) and numpy.isfinite(value):
-                self.model.setParam(name,value)
-                is_modified = True   
-
         return is_modified 
         
  
@@ -1796,11 +1863,15 @@ class BasicPage(wx.ScrolledWindow):
             #for MAC
             boxsizer1 = box_sizer
 
-        self.qmin    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER)
+        self.qmin    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER,
+                                            kill_focus_callback = self._onQrangeEnter,
+                                            text_enter_callback = self._onQrangeEnter)
         self.qmin.SetValue(str(self.qmin_x))
         self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
      
-        self.qmax    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER)
+        self.qmax    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER,
+                                            kill_focus_callback = self._onQrangeEnter,
+                                            text_enter_callback = self._onQrangeEnter)
         self.qmax.SetValue(str(self.qmax_x))
         self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
         
