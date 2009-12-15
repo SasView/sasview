@@ -961,8 +961,6 @@ class BasicPage(wx.ScrolledWindow):
             if is_modified:
                 self.state_change= True
                 self._draw_model() 
-                self._sleep4sec()
-                self.Layout()
                 self.Refresh()
         return is_modified
     
@@ -1482,9 +1480,7 @@ class BasicPage(wx.ScrolledWindow):
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
         self.state_change= False
-        self._sleep4sec()
-        self.Layout()
-        self.Refresh()        
+  
                    
     def _on_select_model_helper(self): 
         """
@@ -1940,15 +1936,16 @@ class BasicPage(wx.ScrolledWindow):
         """
         self._sleep4sec()
         self.Layout()
-        self._sleep4sec()
+        #self._sleep4sec()
         return 
     
     def _sleep4sec(self):
         """
-        sleep for 0.5 sec only on Mac
+            sleep for 1 sec only applied on Mac
+            Note: This 1sec helps for Mac not to crash on self.:ayout after self._draw_model
         """
         if ON_MAC == True:
-            time.sleep(0.5)
+            time.sleep(1)
              
     def on_reset_clicked(self,event):
         """

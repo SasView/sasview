@@ -725,11 +725,66 @@ class FitPage(BasicPage):
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
         self.state_change= False
-        self._sleep4sec()
-        self.Layout()
-        self.Refresh()                
 
-       
+                    
+    def _onQrangeEnter(self, event):
+        """
+            Check validity of value enter in the Q range field
+        """
+        
+        tcrtl= event.GetEventObject()
+        #Clear msg if previously shown.
+        msg= ""
+        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        # Flag to register when a parameter has changed.
+        is_modified = False
+        if tcrtl.GetValue().lstrip().rstrip()!="":
+            try:
+                value = float(tcrtl.GetValue())
+                tcrtl.SetBackgroundColour(wx.WHITE)
+
+                # If qmin and qmax have been modified, update qmin and qmax
+                if check_value( self.qmin, self.qmax):
+                    tempmin = float(self.qmin.GetValue())
+                    if tempmin != self.qmin_x:
+                        self.qmin_x = tempmin
+                    tempmax = float(self.qmax.GetValue())
+                    if tempmax != self.qmax_x:
+                        self.qmax_x = tempmax
+                else:
+                    tcrtl.SetBackgroundColour("pink")
+                    msg= "Model Error:wrong value entered : %s"% sys.exc_value
+                    wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                    return 
+                
+            except:
+                tcrtl.SetBackgroundColour("pink")
+                msg= "Model Error:wrong value entered : %s"% sys.exc_value
+                wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                return 
+            #Check if # of points for theory model are valid(>0).
+            if self.npts != None:
+                if check_float(self.npts):
+                    temp_npts = float(self.npts.GetValue())
+                    if temp_npts !=  self.num_points:
+                        self.num_points = temp_npts
+                        is_modified = True
+                else:
+                    msg= "Cannot Plot :No npts in that Qrange!!!  "
+                    wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+           
+        else:
+           tcrtl.SetBackgroundColour("pink")
+           msg= "Model Error:wrong value entered!!!"
+           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        
+        self.compute_chisqr()   
+        #self._undo.Enable(True)
+        self.save_current_state()
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event)
+        self.state_change= False
+
     def _clear_Err_on_Fit(self):
         """
             hide the error text control shown 
@@ -1012,8 +1067,7 @@ class FitPage(BasicPage):
                 output= "-"
 
             self.tcChi.SetLabel(str(format_number(output)))
-           
-            self.sizer5.Layout()
+
             self.state.tcChi =self.tcChi
           
         except:
