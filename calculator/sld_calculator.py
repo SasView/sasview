@@ -24,82 +24,87 @@ class SldCalculator(object):
         self.density = None
         self.length= 0.0
         
-        
-    def setValue(self, user_formula, density, wavelength=6.0):
+    def set_value(self, user_formula, density, wavelength=6.0):
         """
             Store values of density and wavelength into the calculator 
             and compute the volume
         """
         self.wavelength = wavelength
         self.density    = float(density)
-        self.sld_formula = formula(str(user_formula), density= self.density)
-        print self.sld_formula.atoms
-        if self.density==0:
-            raise ZeroDivisionError,"integer division or modulo by zero for density"
+        self.sld_formula = formula(str(user_formula), density=self.density)
+       
+        if self.density == 0:
+            raise ZeroDivisionError("integer division or modulo\
+                         by zero for density")
             return 
-        self.volume = (self.sld_formula.mass /self.density)/avogadro_number*1.0e24   
+        self.volume = (self.sld_formula.mass / self.density) / avogadro_number\
+                                *1.0e24   
         
         
-    def calculateXRaySld(self, element):
+    def calculate_xray_sld(self, element):
         """
             Get an element and compute the corresponding SLD for a given formula
             @param element:  elementis a string of existing atom
         """
-        myformula = formula(str (element))
-        if len(myformula.atoms)!=1:
+        myformula = formula(str(element))
+        if len(myformula.atoms) != 1:
             return 
-        element= myformula.atoms.keys()[0] 
+        element = myformula.atoms.keys()[0] 
         energy = xray_energy(element.K_alpha)
         atom = self.sld_formula.atoms
-        atom_reel, atom_im = xray_sld_from_atoms( atom,
+        atom_reel, atom_im = xray_sld_from_atoms(atom,
                                               density= self.density,
-                                              energy= energy )
+                                              energy= energy)
         return atom_reel, atom_im
       
         
-    def calculateNSld(self):
+    def calculate_neutron_sld(self):
         """
             Compute the neutron SLD for a given molecule
             @return absorp: absorption
             @return coh: coherence cross section
             @return inc: incoherence cross section
         """
-        if self.density ==0:
-            raise ZeroDivisionError,"integer division or modulo by zero for density"
+        if self.density == 0:
+            raise ZeroDivisionError("integer division or modulo\
+                         by zero for density")
             return 
         atom = self.sld_formula.atoms
-        coh,absorp,inc = neutron_sld_from_atoms(atom,self.density,self.wavelength)
+        coh, absorp, inc = neutron_sld_from_atoms(atom, self.density, 
+                                                  self.wavelength)
         #Don't know if value is return in cm or  cm^(-1).assume return in cm
         # to match result of neutron inc of Alan calculator
-        self.incoherence = inc*1/10
+        self.incoherence = inc * 1/10
         #Doesn't match result of Alan calculator for absorption factor of 2
         #multiplication of 100 is going around
-        self.absorption = absorp*2*100
+        self.absorption = absorp * 2 * 100
         self.coherence  = coh
         return self.coherence, self.absorption, self.incoherence
     
     
-    def calculateLength(self):
+    def calculate_length(self):
         """
             Compute the neutron 1/e length
         """
-        self.length= (self.coherence+ self.absorption+ self.incoherence)/self.volume
+        self.length = (self.coherence + self.absorption +\
+                            self.incoherence) / self.volume
         return self.length
         
         
-    def calculateAbsorptionIm(self):
+    def calculate_coherence_im(self):
         """
             Compute imaginary part of the absorption 
         """
         atom = self.sld_formula.atoms 
         #im: imaginary part of neutron SLD
-        im=0
+        im = 0
         for el, count in atom.iteritems():
-            if el.neutron.b_c_i !=None:
-                im += el.neutron.b_c_i*count 
-        if self.volume !=0:
+            if el.neutron.b_c_i is not None:
+                im += el.neutron.b_c_i * count 
+                
+        if self.volume != 0:
             im = im/self.volume
         else:
-            raise ZeroDivisionError,"integer division or modulo by zero for volume"
+            raise ZeroDivisionError("integer division or modulo\
+                                 by zero for volume")
         return im
-        
