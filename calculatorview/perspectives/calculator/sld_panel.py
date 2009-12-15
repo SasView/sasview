@@ -15,7 +15,7 @@ _STATICBOX_WIDTH = 350
 _SCALE = 1e-6
 
 #SLD panel size 
-if sys.platform.count("darwin")==0:
+if sys.platform.count("win32")>0:
     _STATICBOX_WIDTH = 350
     PANEL_SIZE = 400
     FONT_VARIANT = 0
@@ -40,7 +40,7 @@ class SldPanel(wx.Panel):
         self.SetWindowVariant(variant=FONT_VARIANT)
         
         # Object that receive status event
-        self.base= base
+        self.base = base
         self.calculator = SldCalculator()
         self.wavelength = self.calculator.wavelength
         
@@ -55,9 +55,9 @@ class SldPanel(wx.Panel):
         """
         unit_a = '[A]'
         unit_density = '[g/cm^(3)]'
-        unit_sld= '[1/A^(2)]'
-        unit_cm1='[1/cm]'
-        unit_cm='[cm]'
+        unit_sld = '[1/A^(2)]'
+        unit_cm1 ='[1/cm]'
+        unit_cm ='[cm]'
         sizer_input = wx.GridBagSizer(5,5)
         sizer_output = wx.GridBagSizer(5,5)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
@@ -89,20 +89,20 @@ class SldPanel(wx.Panel):
         ix = 0
         sizer_input.Add(density_txt,(iy, ix),(1,1),\
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix +=1
-        sizer_input.Add(self.density_ctl,(iy, ix),(1,1),\
+        ix += 1
+        sizer_input.Add(self.density_ctl, (iy, ix), (1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix +=1
         sizer_input.Add(unit_density_txt,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         iy += 1
         ix = 0
-        sizer_input.Add(wavelength_txt,(iy, ix),(1,1),\
+        sizer_input.Add(wavelength_txt, (iy, ix),(1,1),\
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix +=1
+        ix += 1
         sizer_input.Add(self.wavelength_ctl,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-        ix +=1
+        ix += 1
         sizer_input.Add(unit_a_txt,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         boxsizer1.Add( sizer_input )
@@ -112,7 +112,7 @@ class SldPanel(wx.Panel):
         boxsizer2 = wx.StaticBoxSizer(outputbox, wx.VERTICAL)
         boxsizer2.SetMinSize((_STATICBOX_WIDTH,-1))
         
-        i_complex= '+ i'
+        i_complex = '+ i'
         neutron_sld_txt = wx.StaticText(self, -1, 'Neutron SLD')
         self.neutron_sld_reel_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.neutron_sld_reel_ctl.SetEditable(False)
@@ -161,10 +161,10 @@ class SldPanel(wx.Panel):
         ix = 0
         sizer_output.Add(neutron_sld_txt,(iy, ix),(1,1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix +=1
+        ix += 1
         sizer_output.Add(self.neutron_sld_reel_ctl,(iy, ix),(1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-        ix +=1
+        ix += 1
         sizer_output.Add(wx.StaticText(self, -1, i_complex)
                          ,(iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix +=1
@@ -183,10 +183,10 @@ class SldPanel(wx.Panel):
         ix +=1
         sizer_output.Add(wx.StaticText(self, -1, i_complex)
                          ,(iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix +=1
+        ix += 1
         sizer_output.Add(self.cu_ka_sld_im_ctl
                          ,(iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
-        ix +=1
+        ix += 1
         sizer_output.Add(cu_ka_sld_units_txt
                          ,(iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         iy += 1
@@ -199,7 +199,7 @@ class SldPanel(wx.Panel):
         ix +=1
         sizer_output.Add(wx.StaticText(self, -1, i_complex)
                          ,(iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix +=1
+        ix += 1
         sizer_output.Add(self.mo_ka_sld_im_ctl
                          ,(iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
         ix +=1
@@ -209,34 +209,34 @@ class SldPanel(wx.Panel):
         ix = 0
         sizer_output.Add(neutron_inc_txt,(iy, ix),(1,1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix +=1
+        ix += 1
         sizer_output.Add(self.neutron_inc_ctl,(iy, ix),(1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-        ix +=2
+        ix += 2
         sizer_output.Add(neutron_inc_units_txt,(iy, ix),(1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         iy += 1
         ix = 0
-        sizer_output.Add(neutron_abs_txt,(iy, ix),(1,1),
+        sizer_output.Add(neutron_abs_txt, (iy, ix), (1,1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix +=1
-        sizer_output.Add(self.neutron_abs_ctl,(iy, ix),(1,1),
+        ix += 1
+        sizer_output.Add(self.neutron_abs_ctl, (iy, ix), (1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix +=2
-        sizer_output.Add(neutron_abs_units_txt,(iy, ix),(1,1),
+        sizer_output.Add(neutron_abs_units_txt, (iy, ix), (1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         iy += 1
         ix = 0
-        sizer_output.Add(neutron_length_txt,(iy, ix),(1,1),
+        sizer_output.Add(neutron_length_txt, (iy, ix), (1,1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix +=1
-        sizer_output.Add(self.neutron_length_ctl,(iy, ix),(1,1),
+        sizer_output.Add(self.neutron_length_ctl, (iy, ix), (1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix +=2
-        sizer_output.Add(neutron_length_units_txt,(iy, ix),(1,1),
+        ix += 2
+        sizer_output.Add(neutron_length_units_txt, (iy, ix), (1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
         boxsizer2.Add( sizer_output )
-        sizer2.Add(boxsizer2,0, wx.EXPAND | wx.ALL, 10)
+        sizer2.Add(boxsizer2,0, wx.EXPAND|wx.ALL, 10)
         #-----Button  sizer------------
     
         id = wx.NewId()
@@ -258,32 +258,32 @@ class SldPanel(wx.Panel):
         
     def check_inputs(self):
         """Check validity user inputs"""
-        flag= True
+        flag = True
        
         if check_float(self.density_ctl):
             self.density = float(self.density_ctl.GetValue())
         else:
-            flag=False
+            flag = False
             raise ValueError,"Error for Density value :expect float"
     
-        self.wavelength= self.wavelength_ctl.GetValue()
-        if self.wavelength.lstrip().rstrip()=="":
+        self.wavelength = self.wavelength_ctl.GetValue()
+        if self.wavelength.lstrip().rstrip() == "":
             self.wavelength = self.calculator.wavelength
         else:
             if check_float(self.wavelength_ctl):
-                self.wavelength= float(self.wavelength)
+                self.wavelength = float(self.wavelength)
             else:
                 flag = False
                 raise ValueError,"Error for wavelenth value :expect float"
                 
-        self.formulata_text= self.compound_ctl.GetValue().lstrip().rstrip()
-        if self.formulata_text!="":
+        self.formulata_text = self.compound_ctl.GetValue().lstrip().rstrip()
+        if self.formulata_text != "":
             self.compound_ctl.SetBackgroundColour(wx.WHITE)
             self.compound_ctl.Refresh()
         else:
             self.compound_ctl.SetBackgroundColour("pink")
             self.compound_ctl.Refresh()
-            flag=False
+            flag = False
             raise ValueError, "Enter a formula"
         return flag 
         
@@ -296,41 +296,42 @@ class SldPanel(wx.Panel):
             if self.check_inputs():
                 #get ready to compute
                 try:
-                    self.calculator.setValue(self.formulata_text,self.density,self.wavelength)
+                    self.calculator.set_value(self.formulata_text,
+                                              self.density, self.wavelength)
                 except:
-                    if self.base !=None:
-                        msg= "SLD Calculator: %s" % (sys.exc_value)
-                        wx.PostEvent(self.base, StatusEvent(status= msg ))
+                    if self.base is not None:
+                        msg = "SLD Calculator: %s" %(sys.exc_value)
+                        wx.PostEvent(self.base, StatusEvent(status=msg))
                     else:
                         raise
                     return
                 
                 # Compute the Cu SLD
-                Cu_reel, Cu_im = self.calculator.calculateXRaySld( "Cu")
-                self.cu_ka_sld_reel_ctl.SetValue(format_number(Cu_reel*_SCALE))
-                self.cu_ka_sld_im_ctl.SetValue(format_number(Cu_im*_SCALE))
+                Cu_reel, Cu_im = self.calculator.calculate_xray_sld( "Cu")
+                self.cu_ka_sld_reel_ctl.SetValue(format_number(Cu_reel *_SCALE))
+                self.cu_ka_sld_im_ctl.SetValue(format_number(Cu_im * _SCALE))
                 
                 # Compute the Mo SLD
-                Mo_reel, Mo_im = self.calculator.calculateXRaySld( "Mo")
-                self.mo_ka_sld_reel_ctl.SetValue(format_number(Mo_reel*_SCALE))
-                self.mo_ka_sld_im_ctl.SetValue(format_number(Mo_im*_SCALE))
+                Mo_reel, Mo_im = self.calculator.calculate_xray_sld( "Mo")
+                self.mo_ka_sld_reel_ctl.SetValue(format_number(Mo_reel *_SCALE))
+                self.mo_ka_sld_im_ctl.SetValue(format_number(Mo_im * _SCALE))
                
-                coh,absorp,inc= self.calculator.calculateNSld()
-                im = self.calculator.calculateAbsorptionIm()
-                length = self.calculator.calculateLength()
+                coh,absorp,inc = self.calculator.calculate_neutron_sld()
+                im = self.calculator.calculate_coherence_im()
+                length = self.calculator.calculate_length()
                 # Neutron SLD
-                self.neutron_sld_reel_ctl.SetValue(format_number(coh*_SCALE))
-                self.neutron_sld_im_ctl.SetValue(format_number(im*_SCALE))
-                self.neutron_inc_ctl.SetValue(format_number(inc ))
+                self.neutron_sld_reel_ctl.SetValue(format_number(coh * _SCALE))
+                self.neutron_sld_im_ctl.SetValue(format_number(im * _SCALE))
+                self.neutron_inc_ctl.SetValue(format_number(inc))
                 self.neutron_abs_ctl.SetValue(format_number(absorp))
                 # Neutron length
                 self.neutron_length_ctl.SetValue(format_number(length))
                 # display wavelength
                 self.wavelength_ctl.SetValue(str(self.wavelength))
         except:
-            if self.base !=None:
-                  msg= "SLD Calculator: %s" % (sys.exc_value)
-                  wx.PostEvent(self.base, StatusEvent(status= msg ))
+            if self.base is not None:
+                  msg = "SLD Calculator: %s"%(sys.exc_value)
+                  wx.PostEvent(self.base, StatusEvent(status=msg))
             else:
                 raise
             return   
