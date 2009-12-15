@@ -30,7 +30,7 @@ def guinier(x, scale=1, radius=0.1):
     value = numpy.array([math.exp(-((radius * i)**2/3)) for i in x ]) 
     return scale * value
 
-def power_law(x, scale=1, power=4):
+def power_law(x, scale=1, power=0):
     """
         F(x) = scale* (x)^(-power)
             when power= 4. the model is porod 
@@ -41,6 +41,9 @@ def power_law(x, scale=1, power=4):
         @param scale : scale factor value
         @param F(x)
     """  
+    if power <=0:
+        raise ValueError("Power_law function expected posive power, but got %s"%power)
+    
     value = numpy.array([ math.pow(i, -power) for i in x ])  
     return scale * value
 
@@ -77,7 +80,6 @@ class FitFunctor:
         #get the smear object of data
         self.smearer = smear_selection( self.data )
       
-        
     def set_fit_range(self ,qmin=None, qmax=None):
         """ to set the fit range"""
         if qmin is not None:
@@ -159,43 +161,11 @@ class InvariantCalculator(object):
         # Extrapolation parameters
         self._low_extrapolation_npts = 4
         self._low_extrapolation_function = guinier
-        self._low_extrapolation_power = 4
+        self._low_extrapolation_power = None
    
         self._high_extrapolation_npts = 4
         self._high_extrapolation_function = power_law
-        self._high_extrapolation_power = 4
-        
-        
-    def set_extrapolation(self, range, npts=4, function=None, power=4):
-        """
-            Set the extrapolation parameters for the high or low Q-range.
-            Note that this does not turn extrapolation on or off.
-            @param range: a keyword set the type of extrapolation . type string
-            @param npts: the numbers of q points of data to consider for extrapolation
-            @param function: a keyword to select the function to use for extrapolation.
-                of type string.
-            @param power: an power to apply power_low function
-                
-        """
-        range = range.lower()
-        if range not in ['high', 'low']:
-            raise ValueError, "Extrapolation range should be 'high' or 'low'"
-        function = function.lower()
-        if function not in ['power_law', 'guinier']:
-            raise ValueError, "Extrapolation function should be 'guinier' or 'power_law'"
-        
-        if range == 'high':
-            if function != 'power_law':
-                raise ValueError, "Extrapolation only allows a power law at high Q"
-            self._high_extrapolation_npts  = npts
-            self._high_extrapolation_power = power
-        else:
-            if function == 'power_law':
-                self._low_extrapolation_function = power_law
-            else:
-                self._low_extrapolation_function = guinier
-            self._low_extrapolation_npts  = npts
-            self._low_extrapolation_power = power
+        self._high_extrapolation_power = None
         
     def _get_data(self, data):
         """
@@ -211,7 +181,7 @@ class InvariantCalculator(object):
         new_data.dxw = data.dxw
         return new_data
         
-    def _fit(self, function, qmin=Q_MINIMUM, qmax=Q_MAXIMUM):
+    def _fit(self, function, qmin=Q_MINIMUM, qmax=Q_MAXIMUM, power=None):
         """
             fit data with function using 
             data= self._get_data()
@@ -220,6 +190,7 @@ class InvariantCalculator(object):
             slope, constant = linalg.lstsq(y,fx)
             @param qmin: data first q value to consider during the fit
             @param qmax: data last q value to consider during the fit
+            @param power : power value to consider for power-law 
             @param function: the function to use during the fit
             @return a: the scale of the function
             @return b: the other parameter of the function for guinier will be radius
@@ -231,26 +202,35 @@ class InvariantCalculator(object):
             qmax = qmax**2
             fit_y = numpy.array([math.log(y) for y in self._data.y])
         elif function.__name__ == "power_law":
-            fit_x = numpy.array([math.log(x) for x in self._data.x])
-            qmin = math.log(qmin)
-            qmax = math.log(qmax)
-            fit_y = numpy.array([math.log(y) for y in self._data.y])
+            if power is None:
+                fit_x = numpy.array([math.log(x) for x in self._data.x])
+                qmin = math.log(qmin)
+                qmax = math.log(qmax)
+                fit_y = numpy.array([math.log(y) for y in self._data.y])
         else:
             raise ValueError("Unknown function used to fit %s"%function.__name__)
             
-        fit_data = LoaderData1D(x=fit_x, y=fit_y)
-        fit_data.dxl = self._data.dxl
-        fit_data.dxw = self._data.dxw   
         
-        functor = FitFunctor(data=fit_data)
-        functor.set_fit_range(qmin=qmin, qmax=qmax)
-        b, a = functor.fit()
+        if function.__name__ == "power_law" and  power is None:
+            b = math.fabs(power)
+            fit_x = numpy.array([math.pow(x, -b) for x in self._data.x])
+            fit_y = numpy.array([math.log(y) for y in self._data.y])
+            a = (fit_y - fit_x)/(len(self._data.x))
+        else:
+            fit_data = LoaderData1D(x=fit_x, y=fit_y)
+            fit_data.dxl = self._data.dxl
+            fit_data.dxw = self._data.dxw   
+            functor = FitFunctor(data=fit_data)
+            functor.set_fit_range(qmin=qmin, qmax=qmax)
+            b, a = functor.fit()
         
         if function.__name__ == "guinier":
             # b is the radius value of the guinier function
             b = math.sqrt(-3 * b)
         if function.__name__ == "power_law":
             b = -1 * b
+            if b <= 0:
+                raise ValueError("Power_law fit expected posive power, but got %s"%power)
         # a is the scale of the guinier function
         a = math.exp(a)
         return a, b
@@ -268,50 +248,6 @@ class InvariantCalculator(object):
         else:
             return self._get_qstar_unsmear(data)
         
-            
-    def get_qstar(self, extrapolation=None):
-        """
-            Compute the invariant of the local copy of data.
-            Implementation:
-                if slit smear:
-                    qstar_0 = self._get_qstar_smear()
-                else:
-                    qstar_0 = self._get_qstar_unsmear()
-                if extrapolation is None:
-                    return qstar_0    
-                if extrapolation==low:
-                    return qstar_0 + self._get_qstar_low()
-                elif extrapolation==high:
-                    return qstar_0 + self._get_qstar_high()
-                elif extrapolation==both:
-                    return qstar_0 + self._get_qstar_low() + self._get_qstar_high()
-           
-            @param extrapolation: string to apply optional extrapolation    
-            @return q_star: invariant of the data within data's q range
-            
-            @warning: When using setting data to Data1D , the user is responsible of
-            checking that the scale and the background are properly apply to the data
-            
-            @warning: if error occur self._get_qstar_low() or self._get_qstar_low()
-            their returned value will be ignored
-        """
-        qstar_0 = self._get_qstar(data=self._data)
-        
-        if extrapolation is None:
-            self._qstar = qstar_0
-            return self._qstar
-        # Compute invariant plus invaraint of extrapolated data
-        extrapolation = extrapolation.lower()    
-        if extrapolation == "low":
-            self._qstar = qstar_0 + self._get_qstar_low()
-            return self._qstar
-        elif extrapolation == "high":
-            self._qstar = qstar_0 + self._get_qstar_high()
-            return self._qstar
-        elif extrapolation == "both":
-            self._qstar = qstar_0 + self._get_qstar_low() + self._get_qstar_high()
-            return self._qstar
-     
     def _get_qstar_unsmear(self, data):
         """
             Compute invariant for pinhole data.
@@ -517,82 +453,7 @@ class InvariantCalculator(object):
                     dxi = (data.x[i+1] - data.x[i-1])/2
                     sum += (data.x[i] * data.dxl[i] * dy[i] * dxi)**2
                 return math.sqrt(sum)
-        
-    def get_surface(self,contrast, porod_const):
-        """
-            Compute the surface of the data.
-            
-            Implementation:
-                V= self.get_volume_fraction(contrast)
-        
-              Compute the surface given by:
-                surface = (2*pi *V(1- V)*porod_const)/ q_star
-               
-            @param contrast: contrast value to compute the volume
-            @param porod_const: Porod constant to compute the surface 
-            @return: specific surface 
-        """
-        #Check whether we have Q star
-        if self._qstar is None:
-            self._qstar = self.get_star()
-        if self._qstar == 0:
-            raise RuntimeError("Cannot compute surface, invariant value is zero")
-        # Compute the volume
-        volume = self.get_volume_fraction(contrast)
-        return 2 * math.pi * volume *(1 - volume) * float(porod_const)/self._qstar
-        
-        
-    def get_volume_fraction(self, contrast):
-        """
-            Compute volume fraction is deduced as follow:
-            
-            q_star = 2*(pi*contrast)**2* volume( 1- volume)
-            for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
-            we get 2 values of volume:
-                 with   1 - 4 * k >= 0
-                 volume1 = (1- sqrt(1- 4*k))/2
-                 volume2 = (1+ sqrt(1- 4*k))/2
-           
-            q_star: the invariant value included extrapolation is applied
-                         unit  1/A^(3)*1/cm
-                    q_star = self.get_qstar()
-                    
-            the result returned will be 0<= volume <= 1
-            
-            @param contrast: contrast value provides by the user of type float.
-                     contrast unit is 1/A^(2)= 10^(16)cm^(2)
-            @return: volume fraction
-            @note: volume fraction must have no unit
-        """
-        if contrast < 0:
-            raise ValueError, "contrast must be greater than zero"  
-        
-        if self._qstar is None:
-            self._qstar = self.get_qstar()
-        
-        if self._qstar < 0:
-            raise RuntimeError, "invariant must be greater than zero"
-        
-        # Compute intermediate constant
-        k =  1.e-8 * self._qstar/(2 * (math.pi * math.fabs(float(contrast)))**2)
-        #Check discriminant value
-        discrim = 1 - 4 * k
-        
-        # Compute volume fraction
-        if discrim < 0:
-            raise RuntimeError, "could not compute the volume fraction: negative discriminant"
-        elif discrim == 0:
-            return 1/2
-        else:
-            volume1 = 0.5 * (1 - math.sqrt(discrim))
-            volume2 = 0.5 * (1 + math.sqrt(discrim))
-            
-            if 0 <= volume1 and volume1 <= 1:
-                return volume1
-            elif 0 <= volume2 and volume2 <= 1: 
-                return volume2 
-            raise RuntimeError, "could not compute the volume fraction: inconsistent results"
-    
+   
     def _get_qstar_low(self):
         """
             Compute the invariant for extrapolated data at low q range.
@@ -647,7 +508,9 @@ class InvariantCalculator(object):
         try:
             # fit the data with a model to get the appropriate parameters
             a, b = self._fit(function=self._low_extrapolation_function,
-                                   qmin=qmin, qmax=qmax)
+                              qmin=qmin,
+                              qmax=qmax,
+                              power=self._low_extrapolation_power)
         except:
             return None
        
@@ -700,7 +563,9 @@ class InvariantCalculator(object):
         try:
             # fit the data with a model to get the appropriate parameters
             a, b = self._fit(function=self._high_extrapolation_function,
-                                   qmin=qmin, qmax=qmax)
+                                   qmin=qmin,
+                                    qmax=qmax,
+                                    power=self._high_extrapolation_power)
         except:
             return None
        
@@ -727,6 +592,154 @@ class InvariantCalculator(object):
         self._data.clone_without_data(clone=data_max)
     
         return data_max
+     
+    def set_extrapolation(self, range, npts=4, function=None, power=None):
+        """
+            Set the extrapolation parameters for the high or low Q-range.
+            Note that this does not turn extrapolation on or off.
+            @param range: a keyword set the type of extrapolation . type string
+            @param npts: the numbers of q points of data to consider for extrapolation
+            @param function: a keyword to select the function to use for extrapolation.
+                of type string.
+            @param power: an power to apply power_low function
+                
+        """
+        range = range.lower()
+        if range not in ['high', 'low']:
+            raise ValueError, "Extrapolation range should be 'high' or 'low'"
+        function = function.lower()
+        if function not in ['power_law', 'guinier']:
+            raise ValueError, "Extrapolation function should be 'guinier' or 'power_law'"
+        
+        if range == 'high':
+            if function != 'power_law':
+                raise ValueError, "Extrapolation only allows a power law at high Q"
+            self._high_extrapolation_npts  = npts
+            self._high_extrapolation_power = power
+        else:
+            if function == 'power_law':
+                self._low_extrapolation_function = power_law
+            else:
+                self._low_extrapolation_function = guinier
+            self._low_extrapolation_npts  = npts
+            self._low_extrapolation_power = power
+        
+    def get_qstar(self, extrapolation=None):
+        """
+            Compute the invariant of the local copy of data.
+            Implementation:
+                if slit smear:
+                    qstar_0 = self._get_qstar_smear()
+                else:
+                    qstar_0 = self._get_qstar_unsmear()
+                if extrapolation is None:
+                    return qstar_0    
+                if extrapolation==low:
+                    return qstar_0 + self._get_qstar_low()
+                elif extrapolation==high:
+                    return qstar_0 + self._get_qstar_high()
+                elif extrapolation==both:
+                    return qstar_0 + self._get_qstar_low() + self._get_qstar_high()
+           
+            @param extrapolation: string to apply optional extrapolation    
+            @return q_star: invariant of the data within data's q range
+            
+            @warning: When using setting data to Data1D , the user is responsible of
+            checking that the scale and the background are properly apply to the data
+            
+            @warning: if error occur self._get_qstar_low() or self._get_qstar_low()
+            their returned value will be ignored
+        """
+        qstar_0 = self._get_qstar(data=self._data)
+        
+        if extrapolation is None:
+            self._qstar = qstar_0
+            return self._qstar
+        # Compute invariant plus invaraint of extrapolated data
+        extrapolation = extrapolation.lower()    
+        if extrapolation == "low":
+            self._qstar = qstar_0 + self._get_qstar_low()
+            return self._qstar
+        elif extrapolation == "high":
+            self._qstar = qstar_0 + self._get_qstar_high()
+            return self._qstar
+        elif extrapolation == "both":
+            self._qstar = qstar_0 + self._get_qstar_low() + self._get_qstar_high()
+            return self._qstar
+       
+    def get_surface(self,contrast, porod_const):
+        """
+            Compute the surface of the data.
+            
+            Implementation:
+                V= self.get_volume_fraction(contrast)
+        
+              Compute the surface given by:
+                surface = (2*pi *V(1- V)*porod_const)/ q_star
+               
+            @param contrast: contrast value to compute the volume
+            @param porod_const: Porod constant to compute the surface 
+            @return: specific surface 
+        """
+        #Check whether we have Q star
+        if self._qstar is None:
+            self._qstar = self.get_star()
+        if self._qstar == 0:
+            raise RuntimeError("Cannot compute surface, invariant value is zero")
+        # Compute the volume
+        volume = self.get_volume_fraction(contrast)
+        return 2 * math.pi * volume *(1 - volume) * float(porod_const)/self._qstar
+        
+    def get_volume_fraction(self, contrast):
+        """
+            Compute volume fraction is deduced as follow:
+            
+            q_star = 2*(pi*contrast)**2* volume( 1- volume)
+            for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
+            we get 2 values of volume:
+                 with   1 - 4 * k >= 0
+                 volume1 = (1- sqrt(1- 4*k))/2
+                 volume2 = (1+ sqrt(1- 4*k))/2
+           
+            q_star: the invariant value included extrapolation is applied
+                         unit  1/A^(3)*1/cm
+                    q_star = self.get_qstar()
+                    
+            the result returned will be 0<= volume <= 1
+            
+            @param contrast: contrast value provides by the user of type float.
+                     contrast unit is 1/A^(2)= 10^(16)cm^(2)
+            @return: volume fraction
+            @note: volume fraction must have no unit
+        """
+        if contrast < 0:
+            raise ValueError, "contrast must be greater than zero"  
+        
+        if self._qstar is None:
+            self._qstar = self.get_qstar()
+        
+        if self._qstar < 0:
+            raise RuntimeError, "invariant must be greater than zero"
+        
+        # Compute intermediate constant
+        k =  1.e-8 * self._qstar/(2 * (math.pi * math.fabs(float(contrast)))**2)
+        #Check discriminant value
+        discrim = 1 - 4 * k
+        
+        # Compute volume fraction
+        if discrim < 0:
+            raise RuntimeError, "could not compute the volume fraction: negative discriminant"
+        elif discrim == 0:
+            return 1/2
+        else:
+            volume1 = 0.5 * (1 - math.sqrt(discrim))
+            volume2 = 0.5 * (1 + math.sqrt(discrim))
+            
+            if 0 <= volume1 and volume1 <= 1:
+                return volume1
+            elif 0 <= volume2 and volume2 <= 1: 
+                return volume2 
+            raise RuntimeError, "could not compute the volume fraction: inconsistent results"
     
     def get_qstar_with_error(self, extrapolation=None):
         """
