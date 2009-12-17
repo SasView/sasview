@@ -362,14 +362,22 @@ class TestInvPinholeSmear(unittest.TestCase):
         qstar, qstar_err = inv.get_qstar_with_error(extrapolation='high')
         
         # Get the volume fraction and surface
-        #This calculation should have an error.
-        #v, dv = inv.get_volume_fraction_with_error(contrast=2.6e-6)
-        #s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
+        try:
+            self.assertRaises(RuntimeError,
+                              inv.get_volume_fraction_with_error(contrast=2.6e-6))
+        except RuntimeError, msg:
+            print "test pass : volume fraction is not defined for this data"+ str(msg)
+        else: raise ValueError, "fail to raise exception when expected"
         
+        try:
+            self.assertRaises(RuntimeError,
+                 inv.get_surface_with_error(contrast=2.6e-6, porod_const=2))
+        except RuntimeError, msg:
+            print "test pass : surface is not defined for this data"+ str(msg)
+        else: raise ValueError, "fail to raise exception when expected"
         # Test results
         self.assertAlmostEquals(qstar, 0.0045773,2)
-        #self.assertAlmostEquals(v, 0.127225804)
-        #self.assertAlmostEquals(s+ _ERR_SURFACE, 9.42e+2, 1)
+        
        
     def test_use_case_5(self):
         """
@@ -387,11 +395,19 @@ class TestInvPinholeSmear(unittest.TestCase):
         qstar, qstar_err = inv.get_qstar_with_error(extrapolation='both')
         
         # Get the volume fraction and surface
-        #This calculation should have an error.
-        #v, dv = inv.get_volume_fraction_with_error(contrast=2.6e-6)
-        #s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
+        try:
+            self.assertRaises(RuntimeError,
+                              inv.get_volume_fraction_with_error(contrast=2.6e-6))
+        except RuntimeError, msg:
+            print "test pass : volume fraction is not defined for this data"+ str(msg)
+        else: raise ValueError, "fail to raise exception when expected"
         
+        try:
+            self.assertRaises(RuntimeError,
+                 inv.get_surface_with_error(contrast=2.6e-6, porod_const=2))
+        except RuntimeError, msg:
+            print "test pass : surface is not defined for this data"+ str(msg)
+        else: raise ValueError, "fail to raise exception when expected"
         # Test results
         self.assertAlmostEquals(qstar, 0.00460319,3)
-        #self.assertAlmostEquals(v, 0.202846825)
-        #self.assertAlmostEquals(s+ _ERR_SURFACE, 9.42e+2, 1)
+      
