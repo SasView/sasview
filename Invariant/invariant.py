@@ -114,12 +114,12 @@ class FitFunctor:
         self.idx_unsmeared = (self.data.x >= self._qmin_unsmeared) \
                                 & (self.data.x <= self._qmax_unsmeared)
   
-    def fit(self):
+    def fit(self, power =None):
         """
            Fit data for y = ax + b  return a and b
-           
+           @param power = a fixed, otherwise None
         """
-        
+        power = power
         fx = numpy.zeros(len(self.data.x))
         sigma = numpy.zeros(len(self.data.x))
 
@@ -132,12 +132,18 @@ class FitFunctor:
         ## Smear theory data
         if self.smearer is not None:
             fx = self.smearer(fx, self._first_unsmeared_bin,self._last_unsmeared_bin)
+        
+        ##power is given only for function = power_law    
+        if power != None:
+            a = -math.fabs(power)
+            b = (scipy.sum(fx) - a*scipy.sum(self.data.x[self.idx]/sigma2))/scipy.sum(numpy.ones(len(sigma2))/sigma2)
+            return a, b
+        else:
+            A = numpy.vstack([ self.data.x[self.idx]/sigma2,
+                               numpy.ones(len(self.data.x[self.idx]))/sigma2]).T
     
-        A = numpy.vstack([ self.data.x[self.idx]/sigma2,
-                           numpy.ones(len(self.data.x[self.idx]))/sigma2]).T
-
-        a, b = numpy.linalg.lstsq(A, fx)[0]
-        return a, b
+            a, b = numpy.linalg.lstsq(A, fx)[0]
+            return a, b
 
 class InvariantCalculator(object):
     """
@@ -213,9 +219,8 @@ class InvariantCalculator(object):
             @return b: the other parameter of the function for guinier will be radius
                     for power_law will be the power value
         """
-        if function.__name__ == "guinier":
-            fit_x = numpy.array([x * x for x in self._data.x])
-            
+        fit_x = numpy.array([math.log(x) for x in self._data.x])
+        if function.__name__ == "guinier":        
             qmin = qmin**2
             qmax = qmax**2
             fit_y = numpy.array([math.log(y) for y in self._data.y])
@@ -223,33 +228,24 @@ class InvariantCalculator(object):
             fit_dy = numpy.array([dy for dy in self._data.dy])/fit_dy
 
         elif function.__name__ == "power_law":
-            if power is None:
-                fit_x = numpy.array([math.log(x) for x in self._data.x])
-
-                qmin = math.log(qmin)
-                qmax = math.log(qmax)
+            qmin = math.log(qmin)
+            qmax = math.log(qmax)
             fit_y = numpy.array([math.log(y) for y in self._data.y])
             fit_dy = numpy.array([y for y in self._data.y])
             fit_dy = numpy.array([dy for dy in self._data.dy])/fit_dy
 
         else:
             raise ValueError("Unknown function used to fit %s"%function.__name__)
+       
         
-        if function.__name__ == "power_law" and  power != None:
-            b = math.fabs(power)
-            fit_y = numpy.array([math.log(y) for y in self._data.y])
-            fit_dy = numpy.array([y for y in self._data.y])
-            fit_dy = numpy.array([dy for dy in self._data.dy])/fit_dy
-            sigma2 = fit_dy*fit_dy
-            a = scipy.sum(fit_y/sigma2) - scipy.sum(fit_x/sigma2*b)/scipy.sum(sigma2)
-        else:
-            fit_data = LoaderData1D(x=fit_x, y=fit_y, dy=fit_dy)
-            fit_data.dxl = self._data.dxl
-            fit_data.dxw = self._data.dxw   
-            functor = FitFunctor(data=fit_data)
-            functor.set_fit_range(qmin=qmin, qmax=qmax)
-            b, a = functor.fit()
-        
+        #else:
+        fit_data = LoaderData1D(x=fit_x, y=fit_y, dy=fit_dy)
+        fit_data.dxl = self._data.dxl
+        fit_data.dxw = self._data.dxw   
+        functor = FitFunctor(data=fit_data)
+        functor.set_fit_range(qmin=qmin, qmax=qmax)
+        b, a = functor.fit(power=power)         
+      
                   
         if function.__name__ == "guinier":
             # b is the radius value of the guinier function
@@ -260,13 +256,12 @@ class InvariantCalculator(object):
 
 
         if function.__name__ == "power_law":
-            if power == None:
-                b = -1 * b
+            b = -1 * b
             if b <= 0:
                 raise ValueError("Power_law fit expected posive power, but got %s"%power)
         # a is the scale of the guinier function
         a = math.exp(a)
-        
+
         return a, b
     
     def _get_qstar(self, data):
