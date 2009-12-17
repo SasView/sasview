@@ -341,12 +341,12 @@ class TestInvPinholeSmear(unittest.TestCase):
         qstar, qstar_err = inv.get_qstar_with_error(extrapolation='low')
         # Get the volume fraction and surface
         v, dv = inv.get_volume_fraction_with_error(contrast=2.6e-6)
-        s, ds = inv.get_surface_with_error(contrast=1.0, porod_const=0.08)
+        s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
         
         # Test results
         self.assertAlmostEquals(qstar, 0.00138756,2)
-        self.assertAlmostEquals(v, 0.115352622)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1)
+        self.assertAlmostEquals(v, 0.117226896,2)
+        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42E+02, 1)
       
     def test_use_case_4(self):
         """
