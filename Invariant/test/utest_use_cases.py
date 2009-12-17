@@ -344,7 +344,7 @@ class TestInvPinholeSmear(unittest.TestCase):
         s, ds = inv.get_surface_with_error(contrast=1.0, porod_const=0.08)
         
         # Test results
-        self.assertAlmostEquals(qstar, 0.002037677)
+        self.assertAlmostEquals(qstar, 0.00138756,2)
         self.assertAlmostEquals(v, 0.115352622)
         self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1)
       
@@ -388,6 +388,6 @@ class TestInvPinholeSmear(unittest.TestCase):
         s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
         
         # Test results
-        self.assertAlmostEquals(qstar, 0.0021621, 3)
+        self.assertAlmostEquals(qstar, 0.00460319, 3)
         self.assertAlmostEquals(v, 0.202846825)
         self.assertAlmostEquals(s+ _ERR_SURFACE, 9.42e+2, 1)

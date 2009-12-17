@@ -5,6 +5,7 @@
 
 import math 
 import numpy
+import scipy
 
 from DataLoader.data_info import Data1D as LoaderData1D
 from DataLoader.qsmearing import smear_selection
@@ -19,7 +20,7 @@ Q_MAXIMUM  = 10
 # Number of steps in the extrapolation
 INTEGRATION_NSTEPS = 1000
 
-def guinier(x, scale=1, radius=0.1):
+def guinier(x, scale=1, radius=60):
     """
         Compute a F(x) = scale* e-((radius*x)**2/3).
         @param x: a vector of q values 
@@ -27,10 +28,15 @@ def guinier(x, scale=1, radius=0.1):
         @param radius: the guinier radius value
         @return F(x)
     """   
+    if radius <= 0:
+        raise ValueError("Rg expected positive value, but got %s"%radius)  
     value = numpy.array([math.exp(-((radius * i)**2/3)) for i in x ]) 
+    scale = numpy.sqrt(scale*scale)      
+    if scale == 0:
+        raise ValueError("scale expected positive value, but got %s"%scale) 
     return scale * value
 
-def power_law(x, scale=1, power=0):
+def power_law(x, scale=1, power=4):
     """
         F(x) = scale* (x)^(-power)
             when power= 4. the model is porod 
@@ -42,9 +48,12 @@ def power_law(x, scale=1, power=0):
         @param F(x)
     """  
     if power <=0:
-        raise ValueError("Power_law function expected posive power, but got %s"%power)
+        raise ValueError("Power_law function expected positive power, but got %s"%power)
     
     value = numpy.array([ math.pow(i, -power) for i in x ])  
+    scale = numpy.sqrt(scale*scale)
+    if scale == 0:
+        raise ValueError("scale expected positive value, but got %s"%scale) 
     return scale * value
 
 class FitFunctor:
@@ -110,15 +119,22 @@ class FitFunctor:
            Fit data for y = ax + b  return a and b
            
         """
-        # Compute theory data f(x)
+        
         fx = numpy.zeros(len(self.data.x))
-        fx = self.data.y[self.idx_unsmeared ]
+        sigma = numpy.zeros(len(self.data.x))
+
+        #define dy^2
+        sigma = self.data.dy[self.idx_unsmeared ]
+        sigma2 = sigma*sigma
+
+        # Compute theory data f(x)
+        fx = self.data.y[self.idx_unsmeared ]/sigma2
         ## Smear theory data
         if self.smearer is not None:
             fx = self.smearer(fx, self._first_unsmeared_bin,self._last_unsmeared_bin)
     
-        A = numpy.vstack([ self.data.x[self.idx],
-                           numpy.ones(len(self.data.x[self.idx]))]).T
+        A = numpy.vstack([ self.data.x[self.idx]/sigma2,
+                           numpy.ones(len(self.data.x[self.idx]))/sigma2]).T
 
         a, b = numpy.linalg.lstsq(A, fx)[0]
         return a, b
@@ -177,6 +193,7 @@ class InvariantCalculator(object):
             #Process only data that inherited from DataLoader.Data_info.Data1D
             raise ValueError,"Data must be of type DataLoader.Data1D"
         new_data = self._scale * data - self._background
+        new_data.dy = data.dy
         new_data.dxl = data.dxl
         new_data.dxw = data.dxw
         return new_data
@@ -198,41 +215,58 @@ class InvariantCalculator(object):
         """
         if function.__name__ == "guinier":
             fit_x = numpy.array([x * x for x in self._data.x])
+            
             qmin = qmin**2
             qmax = qmax**2
             fit_y = numpy.array([math.log(y) for y in self._data.y])
+            fit_dy = numpy.array([y for y in self._data.y])
+            fit_dy = numpy.array([dy for dy in self._data.dy])/fit_dy
+
         elif function.__name__ == "power_law":
             if power is None:
                 fit_x = numpy.array([math.log(x) for x in self._data.x])
+
                 qmin = math.log(qmin)
                 qmax = math.log(qmax)
-                fit_y = numpy.array([math.log(y) for y in self._data.y])
+            fit_y = numpy.array([math.log(y) for y in self._data.y])
+            fit_dy = numpy.array([y for y in self._data.y])
+            fit_dy = numpy.array([dy for dy in self._data.dy])/fit_dy
+
         else:
             raise ValueError("Unknown function used to fit %s"%function.__name__)
-            
         
-        if function.__name__ == "power_law" and  power is None:
+        if function.__name__ == "power_law" and  power != None:
             b = math.fabs(power)
-            fit_x = numpy.array([math.pow(x, -b) for x in self._data.x])
             fit_y = numpy.array([math.log(y) for y in self._data.y])
-            a = (fit_y - fit_x)/(len(self._data.x))
+            fit_dy = numpy.array([y for y in self._data.y])
+            fit_dy = numpy.array([dy for dy in self._data.dy])/fit_dy
+            sigma2 = fit_dy*fit_dy
+            a = scipy.sum(fit_y/sigma2) - scipy.sum(fit_x/sigma2*b)/scipy.sum(sigma2)
         else:
-            fit_data = LoaderData1D(x=fit_x, y=fit_y)
+            fit_data = LoaderData1D(x=fit_x, y=fit_y, dy=fit_dy)
             fit_data.dxl = self._data.dxl
             fit_data.dxw = self._data.dxw   
             functor = FitFunctor(data=fit_data)
             functor.set_fit_range(qmin=qmin, qmax=qmax)
             b, a = functor.fit()
         
+                  
         if function.__name__ == "guinier":
             # b is the radius value of the guinier function
-            b = math.sqrt(-3 * b)
+            if b>=0:
+                raise ValueError("Guinier fit was not converged")
+            else:
+                b = math.sqrt(-3 * b)
+
+
         if function.__name__ == "power_law":
-            b = -1 * b
+            if power == None:
+                b = -1 * b
             if b <= 0:
                 raise ValueError("Power_law fit expected posive power, but got %s"%power)
         # a is the scale of the guinier function
         a = math.exp(a)
+        
         return a, b
     
     def _get_qstar(self, data):
@@ -501,6 +535,7 @@ class InvariantCalculator(object):
             
             @return: a new data of type Data1D
         """
+        
         # Data boundaries for fiiting
         qmin = self._data.x[0]
         qmax = self._data.x[self._low_extrapolation_npts - 1]
@@ -513,7 +548,7 @@ class InvariantCalculator(object):
                               power=self._low_extrapolation_power)
         except:
             return None
-       
+        
         #q_start point
         q_start = Q_MINIMUM
         if Q_MINIMUM >= qmin:
@@ -533,12 +568,12 @@ class InvariantCalculator(object):
         if self._data.dxw is not None:
             dxw = numpy.ones(INTEGRATION_NSTEPS)
             dxw = dxw * self._data.dxw[0]
-            
+
         data_min = LoaderData1D(x=new_x, y=new_y)
         data_min.dxl = dxl
         data_min.dxw = dxw
         self._data.clone_without_data( clone= data_min)
-        
+
         return data_min
           
     def _get_extra_data_high(self):
