@@ -17,7 +17,7 @@ class TestLineFit(unittest.TestCase):
     def setUp(self):
         self.data = Loader().load("linefittest.txt")
         
-    def test_fit_line_data_nosigma(self):
+    def test_fit_line_data(self):
         """ 
             Fit_Test_1: test linear fit, ax +b, without fixed
         """
@@ -33,7 +33,7 @@ class TestLineFit(unittest.TestCase):
         self.assertAlmostEquals(b, 0.87833,3)
 
 
-    def test_fit_line_data_sigma(self):
+    def test_fit_line_data_fixed(self):
         """ 
             Fit_Test_2: test linear fit, ax +b, with 'a' fixed
         """
@@ -48,6 +48,44 @@ class TestLineFit(unittest.TestCase):
         self.assertAlmostEquals(a, 4)
         self.assertAlmostEquals(b, -4.0676,3)
         
+class TestLineFitNoweight(unittest.TestCase):
+    """
+        Test Line fit without weight(dy data)
+    """
+    def setUp(self):
+        self.data = Loader().load("linefittest_no_weight.txt")
+        
+    def test_fit_line_data_no_weight(self):
+        """ 
+            Fit_Test_1: test linear fit, ax +b, without fixed
+        """
+        
+        # Create invariant object. Background and scale left as defaults.
+        fit = invariant.FitFunctor(data=self.data)
+        
+        ##Without holding
+        a,b = fit.fit(power=None)
+
+        # Test results
+        self.assertAlmostEquals(a, 2.4727,3)
+        self.assertAlmostEquals(b, 0.6,3)
+
+
+    def test_fit_line_data_fixed_no_weight(self):
+        """ 
+            Fit_Test_2: test linear fit, ax +b, with 'a' fixed
+        """
+        
+        # Create invariant object. Background and scale left as defaults.
+        fit = invariant.FitFunctor(data=self.data)
+        
+        #With holding a = -power =4
+        a,b = fit.fit(power=-4)
+
+        # Test results
+        self.assertAlmostEquals(a, 4)
+        self.assertAlmostEquals(b, -7.8,3)
+                
 class TestInvPolySphere(unittest.TestCase):
     """
         Test unsmeared data for invariant computation
