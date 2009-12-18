@@ -10,6 +10,44 @@ _ERR_SURFACE = 0.3
 class Data1D:
     print "I am not of type Dataloader.Data1D"
     
+class TestLineFit(unittest.TestCase):
+    """
+        Test Line fit 
+    """
+    def setUp(self):
+        self.data = Loader().load("linefittest.txt")
+        
+    def test_fit_line_data_nosigma(self):
+        """ 
+            Fit_Test_1: test linear fit, ax +b, without fixed
+        """
+        
+        # Create invariant object. Background and scale left as defaults.
+        fit = invariant.FitFunctor(data=self.data)
+        
+        ##Without holding
+        a,b = fit.fit(power=None)
+
+        # Test results
+        self.assertAlmostEquals(a, 2.3983,3)
+        self.assertAlmostEquals(b, 0.87833,3)
+
+
+    def test_fit_line_data_sigma(self):
+        """ 
+            Fit_Test_2: test linear fit, ax +b, with 'a' fixed
+        """
+        
+        # Create invariant object. Background and scale left as defaults.
+        fit = invariant.FitFunctor(data=self.data)
+        
+        #With holding a = -power =4
+        a,b = fit.fit(power=-4)
+
+        # Test results
+        self.assertAlmostEquals(a, 4)
+        self.assertAlmostEquals(b, -4.0676,3)
+        
 class TestInvPolySphere(unittest.TestCase):
     """
         Test unsmeared data for invariant computation
