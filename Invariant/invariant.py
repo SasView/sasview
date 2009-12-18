@@ -5,7 +5,6 @@
 
 import math 
 import numpy
-import scipy
 
 from DataLoader.data_info import Data1D as LoaderData1D
 from DataLoader.qsmearing import smear_selection
@@ -136,7 +135,7 @@ class FitFunctor:
         ##power is given only for function = power_law    
         if power != None:
             a = -math.fabs(power)
-            b = (scipy.sum(fx) - a*scipy.sum(self.data.x[self.idx]/sigma2))/scipy.sum(numpy.ones(len(sigma2))/sigma2)
+            b = (numpy.sum(fx) - a*numpy.sum(self.data.x[self.idx]/sigma2))/numpy.sum(numpy.ones(len(sigma2))/sigma2)
             return a, b
         else:
             A = numpy.vstack([ self.data.x[self.idx]/sigma2,
