@@ -120,10 +120,14 @@ class FitFunctor:
         """
         power = power
         fx = numpy.zeros(len(self.data.x))
-        sigma = numpy.zeros(len(self.data.x))
+        one = numpy.ones(len(self.data.x))
 
         #define dy^2
-        sigma = self.data.dy[self.idx_unsmeared ]
+        try:
+            sigma = self.data.dy[self.idx_unsmeared ]
+        except:
+            print "The dy data for Invariant calculation should be prepared before get to FitFunctor.fit()..."
+            sigma = one[self.idx_unsmeared ]
         sigma2 = sigma*sigma
 
         # Compute theory data f(x)
@@ -198,9 +202,17 @@ class InvariantCalculator(object):
             #Process only data that inherited from DataLoader.Data_info.Data1D
             raise ValueError,"Data must be of type DataLoader.Data1D"
         new_data = self._scale * data - self._background
-        new_data.dy = data.dy
-        new_data.dxl = data.dxl
-        new_data.dxw = data.dxw
+        try:
+            #All data should pass here.
+            new_data.dy = data.dy
+            new_data.dxl = data.dxl
+            new_data.dxw = data.dxw        
+        except:
+            #in case...
+            new_data.dy = numpy.ones(len(data.x))
+            new_data.dxl = numpy.zeros(len(data.x))
+            new_data.dxw = numpy.zeros(len(data.x))       
+
         return new_data
         
     def _fit(self, function, qmin=Q_MINIMUM, qmax=Q_MAXIMUM, power=None):
