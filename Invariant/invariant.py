@@ -127,19 +127,19 @@ class FitFunctor:
         sigma2 = sigma*sigma
 
         # Compute theory data f(x)
-        fx = self.data.y[self.idx_unsmeared ]/sigma2
+        fx = self.data.y[self.idx_unsmeared ]/sigma
         ## Smear theory data
         if self.smearer is not None:
             fx = self.smearer(fx, self._first_unsmeared_bin,self._last_unsmeared_bin)
         
         ##power is given only for function = power_law    
         if power != None:
-            a = -math.fabs(power)
-            b = (numpy.sum(fx) - a*numpy.sum(self.data.x[self.idx]/sigma2))/numpy.sum(numpy.ones(len(sigma2))/sigma2)
+            a = -(power)
+            b = (numpy.sum(fx/sigma) - a*numpy.sum(self.data.x[self.idx]/sigma2))/numpy.sum(numpy.ones(len(sigma2))/sigma2)
             return a, b
         else:
-            A = numpy.vstack([ self.data.x[self.idx]/sigma2,
-                               numpy.ones(len(self.data.x[self.idx]))/sigma2]).T
+            A = numpy.vstack([ self.data.x[self.idx]/sigma,
+                               numpy.ones(len(self.data.x[self.idx]))/sigma]).T
     
             a, b = numpy.linalg.lstsq(A, fx)[0]
             return a, b
