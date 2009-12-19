@@ -35,35 +35,6 @@ def check_float(item):
         item.Refresh()
     return flag
 
-
-def check_value(item1, item2):
-    """
-        Check 2 txtcrtl item values if they are in order
-        @param item1: txtcrtl containing value1
-        @param item2: txtcrtl containing value2
-        @return flag=True when value1<value2 
-        Note: item1 backgroundcolour="white" when value1<value2 otherwise "pink"
-    """
-    flag= True
-    flag_item1 = check_float(item1)
-    flag_item2 = check_float(item2)
-    if flag_item1 == False or flag_item2 == False:
-        flag = False
-    else:
-        value_item1 = float(item1.GetValue())
-        value_item2 = float(item2.GetValue())
-        if value_item1 <  value_item2: 
-          #Make sure to set both colours white.  
-          item1.SetBackgroundColour(wx.WHITE)
-          item1.Refresh()
-          item2.SetBackgroundColour(wx.WHITE)
-          item2.Refresh()
-        else:
-            flag = False
-            item1.SetBackgroundColour("pink")
-            item1.Refresh()      
-    return flag
-    
     
 class PanelMenu(wx.Menu):
     plots = None
