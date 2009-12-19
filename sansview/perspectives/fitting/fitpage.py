@@ -10,7 +10,7 @@ import time
 from sans.models.dispersion_models import ArrayDispersion, GaussianDispersion
 
 from sans.guicomm.events import StatusEvent   
-from sans.guiframe.utils import format_number,check_float,check_value
+from sans.guiframe.utils import format_number,check_float
  
 ## event to post model to fit to fitting plugins
 (ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
@@ -570,7 +570,7 @@ class FitPage(BasicPage):
         """
         #make sure all parameter values are updated.
        
-        flag = self._update_paramv_on_fit() #check_value( self.qmin, self.qmax) 
+        flag = self._update_paramv_on_fit() 
                 
         if not flag:
             msg= "Fitting range invalid"
@@ -744,7 +744,7 @@ class FitPage(BasicPage):
                 tcrtl.SetBackgroundColour(wx.WHITE)
 
                 # If qmin and qmax have been modified, update qmin and qmax
-                if check_value( self.qmin, self.qmax):
+                if self._validate_qrange( self.qmin, self.qmax):
                     tempmin = float(self.qmin.GetValue())
                     if tempmin != self.qmin_x:
                         self.qmin_x = tempmin
@@ -1137,7 +1137,7 @@ class FitPage(BasicPage):
             compute chi square given a model and data 1D and set the value
             to the tcChi txtcrl
         """
-        flag = check_value( self.qmin, self.qmax)
+        flag = self._validate_qrange( self.qmin, self.qmax)
         if flag== True:
             try:
                 if hasattr(self.data,"data"):

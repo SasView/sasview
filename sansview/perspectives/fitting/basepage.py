@@ -6,7 +6,7 @@ import time
 import copy 
 import math
 import string
-from sans.guiframe.utils import format_number,check_float,check_value 
+from sans.guiframe.utils import format_number,check_float
 from sans.guicomm.events import StatusEvent
 import pagestate
 from pagestate import PageState
@@ -934,7 +934,7 @@ class BasicPage(wx.ScrolledWindow):
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
-            if check_value( self.qmin, self.qmax):
+            if self._validate_qrange(self.qmin, self.qmax):
                 tempmin = float(self.qmin.GetValue())
                 if tempmin != self.qmin_x:
                     self.qmin_x = tempmin
@@ -983,7 +983,7 @@ class BasicPage(wx.ScrolledWindow):
              # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
-            if check_value( self.qmin, self.qmax):
+            if self._validate_qrange(self.qmin, self.qmax):
                 tempmin = float(self.qmin.GetValue())
                 if tempmin != self.qmin_x:
                     self.qmin_x = tempmin
@@ -1529,7 +1529,38 @@ class BasicPage(wx.ScrolledWindow):
         self.state.disp_list = self.disp_list
         self.Layout()     
         
-              
+    def _validate_qrange(self, qmin_ctrl, qmax_ctrl):
+        """
+            Verify that the Q range controls have valid values
+            and that Qmin < Qmax.
+            
+            @param qmin_ctrl: text control for Qmin
+            @param qmax_ctrl: text control for Qmax
+            @return: True is the Q range is value, False otherwise 
+        """
+        qmin_validity = check_float(qmin_ctrl)
+        qmax_validity = check_float(qmax_ctrl)
+        if not (qmin_validity and qmax_validity):
+            return False
+        else:
+            qmin = float(qmin_ctrl.GetValue())
+            qmax = float(qmax_ctrl.GetValue())
+            if qmin < qmax:
+                #Make sure to set both colours white.  
+                qmin_ctrl.SetBackgroundColour(wx.WHITE)
+                qmin_ctrl.Refresh()
+                qmax_ctrl.SetBackgroundColour(wx.WHITE)
+                qmax_ctrl.Refresh()
+            else:
+                qmin_ctrl.SetBackgroundColour("pink")
+                qmin_ctrl.Refresh()
+                qmax_ctrl.SetBackgroundColour("pink")
+                qmax_ctrl.Refresh()
+                msg= "Invalid Q range: Q min must be smaller than Q max"
+                wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
+                return False
+        return True
+
     def _check_value_enter(self, list, modified):
         """
             @param list: model parameter and panel info
@@ -1589,7 +1620,7 @@ class BasicPage(wx.ScrolledWindow):
                 
 
                 if param_min != None and param_max !=None:
-                    if not check_value(item[5], item[6]):
+                    if not self._validate_qrange(item[5], item[6]):
                         msg= "Wrong Fit range entered for parameter "
                         msg+= "name %s of model %s "%(name, self.model.name)
                         wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
