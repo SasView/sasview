@@ -106,10 +106,6 @@ class Plugin:
         # Central simulation panel
         self.paramPanel = ShapeParameters.ShapeParameterPanel(self.parent, style=wx.RAISED_BORDER)
         
-        # List of shapes
-        #TODO: incorporate this into the main simulation panel
-        self.shapePanel = ShapeParameters.ShapeListPanel(self.parent, style=wx.RAISED_BORDER)
-              
         # Simulation
         self.volCanvas = VolumeCanvas.VolumeCanvas()
         self.volCanvas.setParam('lores_density', 0.1)
@@ -124,17 +120,15 @@ class Plugin:
         self.x = numpy.arange(self.q_min, self.q_max+step*0.01, step)        
         
         # Set the list of panels that are part of the simulation perspective
-        #TODO: modify this so that we have only on parameter panel and on 3D viewer
         self.perspective = []
         self.perspective.append(self.plotPanel.window_name)
         self.perspective.append(self.paramPanel.window_name)
-        self.perspective.append(self.shapePanel.window_name)
         
         # Bind state events
         self.parent.Bind(ShapeParameters.EVT_ADD_SHAPE, self._onAddShape)
         self.parent.Bind(ShapeParameters.EVT_DEL_SHAPE, self._onDelShape)
 
-        return [self.plotPanel, self.paramPanel, self.shapePanel]
+        return [self.plotPanel, self.paramPanel]
 
     def _onAddShape(self, evt):
         """
@@ -244,33 +238,17 @@ class Plugin:
             Create a menu for the plug-in
             
             #TODO: remove this method once:
-                1- the shapes are available as a list on the central simulation panel
-                2- P(r) is plotted with the I(q) simulation result
+                1- P(r) is plotted with the I(q) simulation result
         """
         # Shapes
         shapes = wx.Menu()
-        shape_list = SimCanvas.getShapes()
-        
-        for item in shape_list:
-            shapes.Append(item['id'], item['name'])
-            wx.EVT_MENU(self.parent, item['id'], self._onNewShape)
- 
-        shapes.AppendSeparator()
  
         #TODO: Save P(r) should be replaced by plotting P(r) for each simulation
         id = wx.NewId()
         shapes.Append(id, '&Save P(r) output')
         wx.EVT_MENU(self.parent, id, self._onSavePr)
 
-        return [(id+1, shapes, "Shapes")]
-    
-    def _onNewShape(self, evt):
-        """
-            Process menu event to create a new shape
-        """
-        evt.Skip()
-        shape = SimCanvas.getShapeClass(evt.GetId())()
-        self.paramPanel.editShape(shape)    
+        return [(id+1, shapes, "Save P(r)")]  
     
     def _change_point_density(self, point_density):
         """

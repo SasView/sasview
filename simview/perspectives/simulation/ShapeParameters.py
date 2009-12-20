@@ -49,33 +49,95 @@ class ShapeParameterPanel(wx.Panel):
         # Sizer to hold the shape parameters
         self.shape_sizer = wx.GridBagSizer(5,5)
         
-               
+        ny = 0       
         title = wx.StaticText(self, -1, "[Temporary form]", style=wx.ALIGN_LEFT)
-        self.bck.Add(title, (0,0), (1,2), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
+        self.bck.Add(title, (ny,0), (1,2), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
         
-        self.bck.Add(self.shape_sizer, (1,0), (1,2), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=0)
+        # Shape list
+        shape_text = wx.StaticText(self, -1, "Geometric shape", style=wx.ALIGN_LEFT)
+        self.shape_list = SimCanvas.getShapes()
+        value_list = []
+        for item in self.shape_list:
+            value_list.append(item['name'])
+            
+        self.model_combo = wx.ComboBox(self, -1, value=value_list[0], choices=value_list, style=wx.CB_READONLY)
+        self.model_combo.SetToolTip(wx.ToolTip("select a geometric shape from the drop-down list"))
+        
+        ny+=1
+        self.bck.Add(shape_text, (ny,0), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
+        self.bck.Add(self.model_combo, (ny,1), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
+        wx.EVT_COMBOBOX(self.model_combo,-1, self._on_select_shape)
+   
+        # Placeholder for parameter form
+        ny+=1
+        self.bck.Add(self.shape_sizer, (ny,0), (1,2), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=0)   
         
         # Point density control
         point_density_text = wx.StaticText(self, -1, "Point density", style=wx.ALIGN_LEFT)
-        self.bck.Add(point_density_text, (2,0), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
+        ny+=1
+        self.bck.Add(point_density_text, (ny,0), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
         self.point_density_ctrl = wx.TextCtrl(self, -1, size=(40,20), style=wx.TE_PROCESS_ENTER)
-        self.point_density_ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_density_changed)
-        self.point_density_ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_density_changed)
-        self.bck.Add(self.point_density_ctrl, (2,1), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
+        self.point_density_ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_parameter_changed)
+        self.point_density_ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_parameter_changed)
+        self.bck.Add(self.point_density_ctrl, (ny,1), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
         
+        # Q range
+        q_min_text = wx.StaticText(self, -1, "Q min", style=wx.ALIGN_LEFT)
+        ny+=1
+        self.bck.Add(q_min_text, (ny,0), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
+        self.q_min_ctrl = wx.TextCtrl(self, -1, size=(40,20), style=wx.TE_PROCESS_ENTER)
+        self.q_min_ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_parameter_changed)
+        self.q_min_ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_parameter_changed)
+        self.bck.Add(self.q_min_ctrl, (ny,1), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
         
+        q_max_text = wx.StaticText(self, -1, "Q max", style=wx.ALIGN_LEFT)
+        self.bck.Add(q_max_text, (ny,2), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
+        self.q_max_ctrl = wx.TextCtrl(self, -1, size=(40,20), style=wx.TE_PROCESS_ENTER)
+        self.q_max_ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_parameter_changed)
+        self.q_max_ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_parameter_changed)
+        self.bck.Add(self.q_max_ctrl, (ny,3), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
+        
+        # Shape List
+        # Internal counter of shapes in the listbox
+        self.counter = 0
+        # Buffer filled flag
+        self.buffer_filled = False
+        # Save current flag
+        self.current_saved = False       
+         
+        id = wx.NewId()
+        shape_listbox_text = wx.StaticText(self, -1, "List of shapes on 3D canvas", style=wx.ALIGN_LEFT)
+        self.shape_listbox = wx.ListBox(self, id, wx.DefaultPosition, (295, 200), 
+                                   [], wx.LB_SINGLE | wx.LB_HSCROLL)
+        
+        # Listen to history events
+        self.parent.Bind(EVT_ADD_SHAPE, self._on_add_shape_to_listbox)
+        self.shape_listbox.Bind(wx.EVT_LISTBOX, self._on_select_from_listbox, id=id)
+        self.shape_listbox.Bind(wx.EVT_CONTEXT_MENU, self._on_listbox_context_menu, id=id)
+        
+        ny+=1
+        self.bck.Add(shape_listbox_text, (ny,0), (1,2), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
+        ny+=1
+        self.bck.Add(self.shape_listbox, (ny,0), (1,5), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
         
         self.current_shape = None
         
-        # Bind to Edit events
-        self.parent.Bind(EVT_EDIT_SHAPE, self._onEditShape)
+        # Default shape
+        if type(self.shape_list)==list and len(self.shape_list)>0:
+            shape = SimCanvas.getShapeClassByName(self.shape_list[0]['name'])()
+            self.editShape(shape)                        
 
-    def _on_density_changed(self, event):
+    def _on_select_shape(self, event):
+        shape = SimCanvas.getShapeClassByName(self.shape_list[event.GetEventObject().GetSelection()]['name'])()
+        self.editShape(shape)    
+
+    def _on_parameter_changed(self, event):
         """
             Process event that might mean a change of the simulation point density
         """
-        if self.point_density_ctrl.IsModified():
-            self.point_density_ctrl.SetModified(False)
+        event_obj = event.GetEventObject()
+        if event_obj.IsModified():
+            event_obj.SetModified(False)
             self._simulation_update()
             
     def _simulation_update(self):
@@ -83,6 +145,7 @@ class ShapeParameterPanel(wx.Panel):
             Process an update of the simulation parameters
         """
         #TODO: create an event to pass the parameters to the simulation plug-in for processing
+        print "TODO: Simulation update"
         pass
         
     def _onEditShape(self, evt):
@@ -225,7 +288,10 @@ class ShapeParameterPanel(wx.Panel):
 
         self.shape_sizer.Layout()
         self.shape_sizer.Fit(self)
-        self.parent.GetSizer().Layout()
+        try:
+            self.parent.GetSizer().Layout()
+        except:
+            print "TODO: move the Layout call of editShape up to the caller"
 
     def _readCtrlFloat(self, ctrl):
         if ctrl.IsModified():
@@ -307,108 +373,67 @@ class ShapeParameterPanel(wx.Panel):
         for item in self.parameters:
             self._readCtrlFloat(item[1])
  
-
-
-class ShapeListPanel(wx.Panel):
-    """
-        Panel to show the list of currently displayed shapes
-    """
-    
-    def __init__(self, parent, *args, **kwargs):
-        wx.Panel.__init__(self, parent, *args, **kwargs)
-        self.parent = parent
-
-        self.window_name = "ShapeList"
-        self.window_caption = "Shape list"
-
-        # Listen to history events
-        self.parent.Bind(EVT_ADD_SHAPE, self._onAddShape)
-
-        # Internal counter of history items
-        self.counter = 0
-        
-        # Buffer filled flag
-        self.buffer_filled = False
-        
-        # Set up the layout
-        self._set_layout()
-        
-        # Save current flag
-        self.current_saved = False
-        
-    def _set_layout(self):
+    #-- Methods to support list of shapes --
+    def _on_add_shape_to_listbox(self, event):
         """
-            Set up the layout of the panel
-        """
-        self.sizer = wx.GridBagSizer(0,5)
-        self.sizer.SetMinSize((250,50))
-        
-        title = wx.StaticText(self, -1, "List of shapes", style=wx.ALIGN_LEFT)         
-        self.sizer.Add(title, (0,0), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
-
-        self.view_box = wx.ListBox(self, 101, wx.DefaultPosition, (295, 200), 
-                                   [], wx.LB_SINGLE | wx.LB_HSCROLL)
-        
-        self.sizer.Add(self.view_box, (1,0), flag=wx.TOP, border=0)
-        
-        self.SetSizer(self.sizer)
-        
-        self.Bind(wx.EVT_CONTEXT_MENU, self.onShowPopup, id=101)
-        self.Bind(wx.EVT_LISTBOX, self.onSelect, id=101)
-        
-    def onRemove(self, ev):
-        """
-            Remove an item
-        """
-        indices = self.view_box.GetSelections()
-        if len(indices)>0:
-            name =  self.view_box.GetClientData(indices[0]).name
-            self.view_box.Delete(indices[0])
-            wx.PostEvent(self.parent, DelShapeEvent(id = name))
-        
-    def onRename(self, ev):
-        """
-            Rename an item
-        """
-        indices = self.view_box.GetSelections()
-        if len(indices)>0:
-            print "NOT YET IMPLMENTED"
-            print "renaming", self.view_box.GetString(indices[0])
-        
-    def onShowPopup(self, event):
-        """
-            Popup context menu event
-        """
-        # menu
-        popupmenu = wx.Menu()
-        popupmenu.Append(101, "&Remove Selected")
-        #popupmenu.Append(102, "&Rename Selected")
-        wx.EVT_MENU(self, 101, self.onRemove)
-        #wx.EVT_MENU(self, 102, self.onRename)
-
-        pos = event.GetPosition()
-        pos = self.ScreenToClient(pos)
-        self.PopupMenu(popupmenu, pos)
-
-    def onSelect(self, event):
-        """
-            Process item selection events
-        """
-        index = event.GetSelection()
-        view_name = self.view_box.GetString(index)
-        #view = event.GetClientData()
-
-        wx.PostEvent(self.parent, EditShapeEvent(shape=event.GetClientData()))
-                
-    def _onAddShape(self, event):
-        """
-            Process a new shape
-            
+            Process a new shape            
             @param event: EVT_ADD_SHAPE event
         """
         event.Skip()
         if event.new:
             self.counter += 1
-            self.view_box.Insert("%d: %s" % (self.counter, event.shape.name), 
-                                 self.view_box.GetCount(), event.shape)
+            self.shape_listbox.Insert("%d: %s" % (self.counter, event.shape.name), 
+                                 self.shape_listbox.GetCount(), event.shape)
+
+    def _on_select_from_listbox(self, event):
+        """
+            Process item selection events
+        """
+        index = event.GetSelection()
+        view_name = self.shape_listbox.GetString(index)
+        self.editShape(shape=event.GetClientData(), new=False)
+        # The following event is bound to the SimPanel to highlight the shape in blue
+        #TODO: how come it doesn't work? 
+        wx.PostEvent(self.parent, EditShapeEvent(shape=event.GetClientData()))
+        #TODO: select the shape from the drop down
+        
+    def _on_listbox_context_menu(self, event):
+        """
+            Popup context menu event
+        """
+        # Create context menu
+        popupmenu = wx.Menu()
+        
+        # Create an item to delete the selected shape from the canvas
+        id = wx.NewId()
+        popupmenu.Append(id, "&Remove Selected")
+        wx.EVT_MENU(self, id, self._on_remove_shape_from_listbox)
+        
+        # Create an item to rename a shape to a more user friendly name
+        #id = wx.NewId()
+        #popupmenu.Append(102, "&Rename Selected")
+        #wx.EVT_MENU(self, 102, self.onRename)
+
+        pos = event.GetPosition()
+        pos = self.ScreenToClient(pos)
+        self.PopupMenu(popupmenu, pos)        
+        
+    def _on_remove_shape_from_listbox(self, ev):
+        """
+            Remove an item
+        """
+        indices = self.shape_listbox.GetSelections()
+        if len(indices)>0:
+            name =  self.shape_listbox.GetClientData(indices[0]).name
+            self.shape_listbox.Delete(indices[0])
+            wx.PostEvent(self.parent, DelShapeEvent(id = name))
+        
+    def _on_rename_shape_from_listbox(self, ev):
+        """
+            Rename an item
+        """
+        indices = self.shape_listbox.GetSelections()
+        if len(indices)>0:
+            print "NOT YET IMPLMENTED"
+            print "renaming", self.shape_listbox.GetString(indices[0])
                 

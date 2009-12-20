@@ -647,3 +647,14 @@ def getShapeClass(id):
         return shape[0]['cl']
     return None
     
+def getShapeClassByName(name):
+    """
+        Returns a child class of BaseShape corresponding
+        to the supplied shape name.
+        @param name: shape name
+    """
+    def f(s): return s['name']==name
+    if SHAPE_LIST is not None:
+        shape = filter(f, SHAPE_LIST)
+        return shape[0]['cl']
+    return None
