@@ -1589,7 +1589,7 @@ class BasicPage(wx.ScrolledWindow):
                         try:
                             
                             param_min = float(item[5].GetValue())
-                            if not check_value(item[5],item[2]):
+                            if not self._validate_qrange(item[5],item[2]):
                                 if numpy.isfinite(param_min):
                                     item[2].SetValue(format_number(param_min))
                             
@@ -1606,7 +1606,7 @@ class BasicPage(wx.ScrolledWindow):
                     if item[6].GetValue().lstrip().rstrip()!="":
                         try:                          
                             param_max = float(item[6].GetValue())
-                            if not check_value(item[2],item[6]):
+                            if not self._validate_qrange(item[2],item[6]):
                                 if numpy.isfinite(param_max):
                                     item[2].SetValue(format_number(param_max))  
                             
