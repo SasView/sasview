@@ -784,7 +784,8 @@ class FitPage(BasicPage):
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
         self.state_change= False
-
+        self._draw_model()
+        
     def _clear_Err_on_Fit(self):
         """
             hide the error text control shown 
