@@ -23,6 +23,8 @@ class abs_reader(unittest.TestCase):
         self.assertEqual(len(f.x), 10)
         self.assertEqual(f.x[0],0.002618)
         self.assertEqual(f.x[9],0.0497)
+        self.assertEqual(f.x_unit, '1/A')
+        self.assertEqual(f.y_unit, '1/cm')
         
         self.assertEqual(f.meta_data['loader'],"ASCII")
         

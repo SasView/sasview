@@ -10,18 +10,18 @@
 		<Run name='run name'>1234</Run>
 		<SASdata>
 			<Idata>
-				<Q unit="1/nm">0.002</Q>
-				<I unit="1/nm">1</I>
-				<Idev unit="1/nm">.003</Idev>
-				<Qdev unit="1/nm">0.001</Qdev>
+				<Q unit="1/nm">0.2</Q>
+				<I unit="1/nm">0.0001</I>
+				<Idev unit="1/nm">.0000003</Idev>
+				<Qdev unit="1/nm">0.1</Qdev>
 				<Qmean unit="1/A"><!-- Qmean is optional --></Qmean>
 				<Shadowfactor><!-- Shadowfactor is optional --></Shadowfactor>
 			</Idata>
 			<Idata>
-				<Q unit="1/nm">0.003</Q>
-				<I unit="1/nm">1.001</I>
-				<Idev unit="1/nm">.004</Idev>
-				<Qdev unit="1/nm">0.002</Qdev>
+				<Q unit="1/nm">0.3</Q>
+				<I unit="1/nm">0.0001001</I>
+				<Idev unit="1/nm">.0000004</Idev>
+				<Qdev unit="1/nm">0.2</Qdev>
 				<Qmean unit="1/A"><!-- Qmean is optional --></Qmean>
 				<Shadowfactor><!-- Shadowfactor is optional --></Shadowfactor>
 			</Idata>
