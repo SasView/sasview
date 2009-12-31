@@ -672,6 +672,49 @@ PyObject * pypointsmodelpy_outputPR(PyObject *, PyObject *args)
   return Py_BuildValue("i", 0);
 }
 
+
+//method get_pr()
+char pypointsmodelpy_getPR__name__[] = "get_pr";
+char pypointsmodelpy_getPR__doc__[] = "Return P(r) as a list of points";
+
+PyObject * pypointsmodelpy_getPR(PyObject *, PyObject *args)
+{
+  PyObject *pymodel = 0;
+  char *outfile;
+  int ok = PyArg_ParseTuple(args, "O", &pymodel);
+  if(!ok) return NULL;
+
+  void *temp = PyCObject_AsVoidPtr(pymodel);
+
+  LORESModel * thislores = static_cast<LORESModel *>(temp);
+
+  // Get the P(r) array
+  Array2D<double> pr_ = thislores->GetPr();
+
+  // Create two lists to store the r and P(r) values
+  PyObject* r_list  = PyList_New(0);
+  PyObject* pr_list = PyList_New(0);
+
+  double sum = 0.0;
+  double r_stepsize = 1.0;
+  if (pr_.dim1()>2) r_stepsize = pr_[1][0] - pr_[0][0];
+
+  for (int i = 0;  i < pr_.dim1(); ++i){
+	  sum += pr_[i][1]*r_stepsize;
+  }
+
+  for (int i = 0;  i < pr_.dim1(); ++i){
+	  if (pr_[i][1]==0) continue;
+	  int r_append  = PyList_Append(r_list, Py_BuildValue("d", pr_[i][0]));
+	  int pr_append = PyList_Append(pr_list, Py_BuildValue("d", pr_[i][1]/sum));
+	  if (r_append+pr_append<0) return NULL;
+  }
+
+  return Py_BuildValue("OO", r_list, pr_list);
+}
+
+
+
 //method outputPR_xy(string filename)
 char pypointsmodelpy_outputPR_xy__name__[] = "outputPR_xy";
 char pypointsmodelpy_outputPR_xy__doc__[] = "print out P(R) to a file";

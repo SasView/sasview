@@ -128,9 +128,13 @@ struct PyMethodDef pypointsmodelpy_methods[] = {
     {pypointsmodelpy_get_complex_iq__name__, pypointsmodelpy_get_complex_iq,
      METH_VARARGS, pypointsmodelpy_get_complex_iq__doc__},
 
-    //outputPR
-    {pypointsmodelpy_outputPR__name__, pypointsmodelpy_outputPR,
-     METH_VARARGS, pypointsmodelpy_outputPR__doc__},
+     //outputPR
+     {pypointsmodelpy_outputPR__name__, pypointsmodelpy_outputPR,
+      METH_VARARGS, pypointsmodelpy_outputPR__doc__},
+
+    //getPR
+    {pypointsmodelpy_getPR__name__, pypointsmodelpy_getPR,
+     METH_VARARGS, pypointsmodelpy_getPR__doc__},
 
     //outputPR_xy
     {pypointsmodelpy_outputPR_xy__name__, pypointsmodelpy_outputPR_xy,

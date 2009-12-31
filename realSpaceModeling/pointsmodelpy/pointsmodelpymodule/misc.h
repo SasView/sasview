@@ -199,6 +199,13 @@ extern char pypointsmodelpy_outputPR__doc__[];
 extern "C"
 PyObject * pypointsmodelpy_outputPR(PyObject *, PyObject *);
 
+//method get_pr()
+extern char pypointsmodelpy_getPR__name__[];
+extern char pypointsmodelpy_getPR__doc__[];
+extern "C"
+PyObject * pypointsmodelpy_getPR(PyObject *, PyObject *);
+
+
 // method outputPR_xy
 extern char pypointsmodelpy_outputPR_xy__name__[];
 extern char pypointsmodelpy_outputPR_xy__doc__[];
