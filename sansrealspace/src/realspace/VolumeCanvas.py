@@ -694,6 +694,16 @@ class VolumeCanvas(BaseComponent):
      
         pointsmodelpy.outputPR(self.complex_model, filename)
      
+    def getPrData(self):
+        """
+            Write P(r) to an output file
+            @param filename: file name for P(r) output
+        """   
+        if self.hasPr == False:
+            self.getPr()
+     
+        return pointsmodelpy.get_pr(self.complex_model)
+     
     def getIq(self, q):
         """
             Returns the value of I(q) for a given q-value
