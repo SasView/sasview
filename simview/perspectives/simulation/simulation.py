@@ -70,6 +70,8 @@ DEFAULT_Q_MIN = 0.01
 DEFAULT_Q_MAX = 0.4
 ## Default number of q point for simulation output
 DEFAULT_Q_NPTS = 10
+## Default number of real-space points per Angstrom cube
+DEFAULT_PT_DENSITY = 0.1
    
 class Plugin:
     """
@@ -104,11 +106,16 @@ class Plugin:
         self.plotPanel  = SimCanvas.SimPanel(self.parent, -1, style=wx.RAISED_BORDER)
 
         # Central simulation panel
-        self.paramPanel = ShapeParameters.ShapeParameterPanel(self.parent, style=wx.RAISED_BORDER)
+        self.paramPanel = ShapeParameters.ShapeParameterPanel(self.parent, 
+                                                              q_min = self.q_min,
+                                                              q_max = self.q_max,
+                                                              q_npts = self.q_npts,
+                                                              pt_density = DEFAULT_PT_DENSITY,
+                                                              style=wx.RAISED_BORDER)
         
         # Simulation
         self.volCanvas = VolumeCanvas.VolumeCanvas()
-        self.volCanvas.setParam('lores_density', 0.1)
+        self.volCanvas.setParam('lores_density', DEFAULT_PT_DENSITY)
         self.adapter = ShapeAdapter.ShapeVisitor()
         self._data_1D = None
         self.calc_thread_1D = None
@@ -127,6 +134,8 @@ class Plugin:
         # Bind state events
         self.parent.Bind(ShapeParameters.EVT_ADD_SHAPE, self._onAddShape)
         self.parent.Bind(ShapeParameters.EVT_DEL_SHAPE, self._onDelShape)
+        self.parent.Bind(ShapeParameters.EVT_Q_RANGE, self._on_q_range_changed)
+        self.parent.Bind(ShapeParameters.EVT_PT_DENSITY, self._on_pt_density_changed)
 
         return [self.plotPanel, self.paramPanel]
 
@@ -165,6 +174,34 @@ class Plugin:
         
         # Refresh the 3D viewer
         self._refresh_3D_viewer()   
+        
+    def _on_q_range_changed(self, evt):
+        """
+            Modify the Q range of the simulation output
+        """
+        if evt.q_min is not None:
+            self.q_min = evt.q_min
+        if evt.q_max is not None:
+            self.q_max = evt.q_max
+        if evt.npts is not None:
+            self.q_npts = evt.npts
+        
+        # Q-values for plotting simulated I(Q)
+        step = (self.q_max-self.q_min)/(self.q_npts-1)
+        self.x = numpy.arange(self.q_min, self.q_max+step*0.01, step)    
+         
+        # Compute the simulated I(Q)
+        self._simulate_Iq()
+        
+    def _on_pt_density_changed(self, evt):
+        """
+            Modify the Q range of the simulation output
+        """
+        if evt.npts is not None:
+            self.volCanvas.setParam('lores_density', evt.npts)
+         
+        # Compute the simulated I(Q)
+        self._simulate_Iq()
         
     def _simulate_Iq(self):
         """
@@ -211,11 +248,22 @@ class Plugin:
         """
         # Create the plotting event to pop up the I(Q) plot.
         new_plot = Data1D(x=self.x, y=output, dy=error)
-        new_plot.name = "Simulation"
+        new_plot.name = "I(Q) Simulation"
         new_plot.group_id = "simulation_output"
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Simulation output"))
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Simulation I(Q)"))
+        
+        # Create the plotting event to pop up the P(r) plot.
+        r, pr = self.volCanvas.getPrData()
+        new_plot = Data1D(x=r, y=pr, dy=[0]*len(r))
+        new_plot.name = "P(r) Simulation"
+        new_plot.group_id = "simulated_pr"
+        new_plot.xaxis("\\rm{r}", 'A')
+        new_plot.yaxis("\\rm{P(r)} ","cm^{-3}") 
+        
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Simulated P(r)"))        
+        
         
         # Notify the user of the simlation time and update the basic
         # simulation estimate that will allow us to estimate simulation time
@@ -234,21 +282,9 @@ class Plugin:
     
     def populate_menu(self, id, owner):
         """
-            -- TEMPORARY --
             Create a menu for the plug-in
-            
-            #TODO: remove this method once:
-                1- P(r) is plotted with the I(q) simulation result
         """
-        # Shapes
-        shapes = wx.Menu()
- 
-        #TODO: Save P(r) should be replaced by plotting P(r) for each simulation
-        id = wx.NewId()
-        shapes.Append(id, '&Save P(r) output')
-        wx.EVT_MENU(self.parent, id, self._onSavePr)
-
-        return [(id+1, shapes, "Save P(r)")]  
+        return []  
     
     def _change_point_density(self, point_density):
         """
@@ -256,21 +292,6 @@ class Plugin:
             TODO: refactor this away by writing a single update method for the simulation parameters
         """
         self.volCanvas.setParam('lores_density', point_density)
-    
-    def _onSavePr(self, evt):
-        """
-            Save the current P(r) output to a file
-            TODO: refactor this away once P(r) is plotted
-        """      
-        path = None
-        dlg = wx.FileDialog(None, "Choose a file", self._default_save_location, "", "*.txt", wx.SAVE)
-        if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
-            self._default_save_location = os.path.dirname(path)
-        dlg.Destroy()
-        
-        if not path == None:
-            self.volCanvas.write_pr(path)    
     
     def help(self, evt):
         """

@@ -1,7 +1,7 @@
 UI requirements
-- Allow user to modify q range from main panel
+- Allow user to modify q range from main panel [DONE]
 - Move list of shapes from top menu to central simulation panel
-- Popup P(r) plot and update for each simulation
+- Popup P(r) plot and update for each simulation [DONE]
 - Allow user to choose whether he wants the simulation to be run automatically with each parameter change
   or whether he wants to hit 'simulate' himself when he's done.
 - A shape should be highlighted when clicked

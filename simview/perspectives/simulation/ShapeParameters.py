@@ -13,17 +13,18 @@ import wx.lib.newevent
 from copy import deepcopy
 import SimCanvas
 
-
 (CreateShapeEvent, EVT_ADD_SHAPE) = wx.lib.newevent.NewEvent()
 (EditShapeEvent, EVT_EDIT_SHAPE)  = wx.lib.newevent.NewEvent()
-(DelShapeEvent, EVT_DEL_SHAPE)  = wx.lib.newevent.NewEvent()
+(DelShapeEvent, EVT_DEL_SHAPE)    = wx.lib.newevent.NewEvent()
+(QRangeEvent, EVT_Q_RANGE)        = wx.lib.newevent.NewEvent() 
+(PtDensityEvent, EVT_PT_DENSITY)  = wx.lib.newevent.NewEvent() 
 
 class ShapeParameterPanel(wx.Panel):
     #TODO: show units
     #TODO: order parameters properly
     CENTER_PANE = True
     
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, q_min=0.001, q_max=0.5, q_npts=10, pt_density=0.1, *args, **kwargs):
         wx.Panel.__init__(self, parent, *args, **kwargs)
         
         self.window_name = "ShapeParams"
@@ -61,7 +62,7 @@ class ShapeParameterPanel(wx.Panel):
             value_list.append(item['name'])
             
         self.model_combo = wx.ComboBox(self, -1, value=value_list[0], choices=value_list, style=wx.CB_READONLY)
-        self.model_combo.SetToolTip(wx.ToolTip("select a geometric shape from the drop-down list"))
+        self.model_combo.SetToolTip(wx.ToolTip("Select a geometric shape from the drop-down list"))
         
         ny+=1
         self.bck.Add(shape_text, (ny,0), flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
@@ -77,8 +78,10 @@ class ShapeParameterPanel(wx.Panel):
         ny+=1
         self.bck.Add(point_density_text, (ny,0), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
         self.point_density_ctrl = wx.TextCtrl(self, -1, size=(40,20), style=wx.TE_PROCESS_ENTER)
-        self.point_density_ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_parameter_changed)
-        self.point_density_ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_parameter_changed)
+        self.point_density_ctrl.SetValue(str(pt_density))
+        self.point_density_ctrl.SetToolTip(wx.ToolTip("Enter the number of real-space points per Angstrom cube"))
+        self.point_density_ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_density_changed)
+        self.point_density_ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_density_changed)
         self.bck.Add(self.point_density_ctrl, (ny,1), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
         
         # Q range
@@ -86,16 +89,29 @@ class ShapeParameterPanel(wx.Panel):
         ny+=1
         self.bck.Add(q_min_text, (ny,0), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
         self.q_min_ctrl = wx.TextCtrl(self, -1, size=(40,20), style=wx.TE_PROCESS_ENTER)
-        self.q_min_ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_parameter_changed)
-        self.q_min_ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_parameter_changed)
+        self.q_min_ctrl.SetValue(str(q_min))
+        self.q_min_ctrl.SetToolTip(wx.ToolTip("Enter the minimum Q value to be simulated"))
+        self.q_min_ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_q_range_changed)
+        self.q_min_ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_q_range_changed)
         self.bck.Add(self.q_min_ctrl, (ny,1), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
         
         q_max_text = wx.StaticText(self, -1, "Q max", style=wx.ALIGN_LEFT)
         self.bck.Add(q_max_text, (ny,2), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
         self.q_max_ctrl = wx.TextCtrl(self, -1, size=(40,20), style=wx.TE_PROCESS_ENTER)
-        self.q_max_ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_parameter_changed)
-        self.q_max_ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_parameter_changed)
+        self.q_max_ctrl.SetValue(str(q_max))
+        self.q_min_ctrl.SetToolTip(wx.ToolTip("Enter the maximum Q value to be simulated"))
+        self.q_max_ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_q_range_changed)
+        self.q_max_ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_q_range_changed)
         self.bck.Add(self.q_max_ctrl, (ny,3), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
+        
+        q_npts_text = wx.StaticText(self, -1, "No. of Q pts", style=wx.ALIGN_LEFT)
+        self.bck.Add(q_npts_text, (ny,4), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
+        self.q_npts_ctrl = wx.TextCtrl(self, -1, size=(40,20), style=wx.TE_PROCESS_ENTER)
+        self.q_npts_ctrl.SetValue(str(q_npts))
+        self.q_min_ctrl.SetToolTip(wx.ToolTip("Enter the number of Q points to be simulated"))
+        self.q_npts_ctrl.Bind(wx.EVT_TEXT_ENTER, self._on_q_range_changed)
+        self.q_npts_ctrl.Bind(wx.EVT_KILL_FOCUS, self._on_q_range_changed)
+        self.bck.Add(self.q_npts_ctrl, (ny,5), flag = wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border = 15)
         
         # Shape List
         # Internal counter of shapes in the listbox
@@ -131,23 +147,27 @@ class ShapeParameterPanel(wx.Panel):
         shape = SimCanvas.getShapeClassByName(self.shape_list[event.GetEventObject().GetSelection()]['name'])()
         self.editShape(shape)    
 
-    def _on_parameter_changed(self, event):
+    def _on_density_changed(self, event):
         """
             Process event that might mean a change of the simulation point density
         """
-        event_obj = event.GetEventObject()
-        if event_obj.IsModified():
-            event_obj.SetModified(False)
-            self._simulation_update()
+        npts  = self._readCtrlFloat(self.point_density_ctrl)
+        if npts is not None:
+            event = PtDensityEvent(npts=npts)
+            wx.PostEvent(self.parent, event)
             
-    def _simulation_update(self):
+    def _on_q_range_changed(self, event):
         """
-            Process an update of the simulation parameters
+            Process event that might mean a change in Q range
+            @param event: EVT_Q_RANGE event
         """
-        #TODO: create an event to pass the parameters to the simulation plug-in for processing
-        print "TODO: Simulation update"
-        pass
-        
+        q_min = self._readCtrlFloat(self.q_min_ctrl)
+        q_max = self._readCtrlFloat(self.q_max_ctrl)
+        npts  = self._readCtrlInt(self.q_npts_ctrl)
+        if q_min is not None or q_max is not None or npts is not None:
+            event = QRangeEvent(q_min=q_min, q_max=q_max, npts=npts)
+            wx.PostEvent(self.parent, event)
+            
     def _onEditShape(self, evt):
         """
             Process an EVT_EDIT_SHAPE event 
@@ -294,7 +314,15 @@ class ShapeParameterPanel(wx.Panel):
             print "TODO: move the Layout call of editShape up to the caller"
 
     def _readCtrlFloat(self, ctrl):
+        """
+            Parses a TextCtrl for a float value.
+            Returns None is the value hasn't changed or the value is not a float.
+            The control background turns pink if the value is not a float.
+            
+            @param ctrl: TextCtrl object
+        """
         if ctrl.IsModified():
+            ctrl.SetModified(False)
             str_value = ctrl.GetValue().lstrip().rstrip()
             try:
                 flt_value = float(str_value)
@@ -302,6 +330,28 @@ class ShapeParameterPanel(wx.Panel):
                         wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
                 ctrl.Refresh()
                 return flt_value
+            except:
+                ctrl.SetBackgroundColour("pink")
+                ctrl.Refresh()
+        return None
+
+    def _readCtrlInt(self, ctrl):
+        """
+            Parses a TextCtrl for a float value.
+            Returns None is the value hasn't changed or the value is not a float.
+            The control background turns pink if the value is not a float.
+            
+            @param ctrl: TextCtrl object
+        """
+        if ctrl.IsModified():
+            ctrl.SetModified(False)
+            str_value = ctrl.GetValue().lstrip().rstrip()
+            try:
+                int_value = int(str_value)
+                ctrl.SetBackgroundColour(
+                        wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+                ctrl.Refresh()
+                return int_value
             except:
                 ctrl.SetBackgroundColour("pink")
                 ctrl.Refresh()
