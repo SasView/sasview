@@ -517,7 +517,7 @@ class ViewerFrame(wx.Frame):
             if len(pers)>0:
                 n_panels += 1
        
-        if n_panels>2:
+        if n_panels>5:
             viewmenu = wx.Menu()
             for plug in self.plugins:
                 plugmenu = wx.Menu()
