@@ -101,7 +101,7 @@ class Plugin:
         #keep reference of the simultaneous fit page
         self.sim_page=None
         #dictionary containing data name and error on dy of that data 
-        self.err_dy={}
+        self.err_dy = {}
         
    
         
@@ -135,12 +135,12 @@ class Plugin:
         self.menu1.Append(id1, '&Simultaneous Page',simul_help)
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
         #menu for SLD Calculator
-        self.tool_menu = wx.Menu()
-        id_tool_menu = wx.NewId()
-        sld_id = wx.NewId()
-        sld_help= "Compute the scattering length density of molecules"
-        self.tool_menu.Append(sld_id, "SLD Calculator",sld_help)
-        wx.EVT_MENU(owner,sld_id,  self.onCalculateSld)
+        #self.tool_menu = wx.Menu()
+        #id_tool_menu = wx.NewId()
+        #sld_id = wx.NewId()
+        #sld_help= "Compute the scattering length density of molecules"
+        #self.tool_menu.Append(sld_id, "SLD Calculator",sld_help)
+        #wx.EVT_MENU(owner,sld_id,  self.onCalculateSld)
     
         #menu for model
         menu2 = wx.Menu()
@@ -153,9 +153,9 @@ class Plugin:
         owner.Bind(fitpage.EVT_MODEL_BOX,self._on_model_panel)
       
         #create  menubar items
-        return [(id, self.menu1, "Fitting"),
-                (id_tool_menu, self.tool_menu,"Tools" ),
-                (id2, menu2, "Model")]
+        return [(id, self.menu1, "Fitting")]
+                #(id_tool_menu, self.tool_menu,"Tools" ),
+                #(id2, menu2, "Model")]
        
     
     def on_add_sim_page(self, event):
@@ -177,7 +177,8 @@ class Plugin:
             Show a general help dialog. 
             TODO: replace the text with a nice image
         """
-        from helpPanel import  HelpWindow
+        
+        from help_panel import  HelpWindow
         frame = HelpWindow(None, -1, 'HelpWindow')    
         frame.Show(True)
         
@@ -193,18 +194,19 @@ class Plugin:
                     the fitting option is not allowed
         """
         self.graph = graph
-        fitOption = "Select data for fitting"
-        fitOpenHint =  "Dialog with fitting parameters "
-               
+        fit_option = "Select data for fitting"
+        fit_hint =  "Dialog with fitting parameters "
+        invariant_option = "Compute Invariant"
+        invariant_hint =  "A dialog will appears for further computation"
         for item in graph.plottables:
             if item.__class__.__name__ is "Data2D":
                 
                 if hasattr(item,"is_data"):
                     if item.is_data:
-                        return [[fitOption, fitOpenHint, self._onSelect]]
+                        return [[fit_option, fit_hint, self._onSelect]]
                     else:
                         return [] 
-                return [[fitOption, fitOpenHint, self._onSelect]]
+                return [[fit_option, fit_hint, self._onSelect]]
             else:
                 if item.name==graph.selected_plottable :
                     if item.name !="$I_{obs}(q)$" and item.name !="$P_{fit}(r)$":
@@ -213,11 +215,16 @@ class Plugin:
                             #else it is a data created from a theory model
                             if hasattr(item,"is_data"):
                                 if item.is_data:
-                                    return [[fitOption, fitOpenHint, self._onSelect]]
+                                    return [[fit_option, fit_hint,
+                                              self._onSelect],
+                                            [invariant_option, 
+                                    invariant_hint, self._compute_invariant]]
                                 else:
                                     return [] 
                             else:
-                               return [[fitOption, fitOpenHint, self._onSelect]] 
+                               return [[fit_option, fit_hint, self._onSelect],
+                                       [invariant_option, 
+                                        invariant_hint, self._compute_invariant]]
         return []   
 
 
@@ -547,7 +554,12 @@ class Plugin:
         self.parent._mgr.Update()
                
             
-            
+    def _compute_invariant(self, event):    
+        """
+            Open the invariant panel to invariant computation
+        """
+        
+        
     def _closed_fitpage(self, event):   
         """
             request fitpanel to close a given page when its unique data is removed 
@@ -847,6 +859,7 @@ class Plugin:
         """ 
             set engine to park
         """
+        Plugin.on_perspective(self,event=event)
         self._on_change_engine('park')
        
        
@@ -907,6 +920,7 @@ class Plugin:
             Allow to select the type of engine to perform fit 
             @param engine: the key work of the engine
         """
+       
         ## saving fit engine name
         self._fit_engine = engine
         ## change menu item state
@@ -1089,7 +1103,7 @@ class Plugin:
            
            
             title= new_plot.name
-            
+            new_plot. perspective = self.get_perspective()
             # Pass the reset flag to let the plotting event handler
             # know that we are replacing the whole plot
             if title== None:

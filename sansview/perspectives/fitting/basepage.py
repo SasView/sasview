@@ -1228,9 +1228,11 @@ class BasicPage(wx.ScrolledWindow):
             if hasattr(self, "enable_smearer"):
                 if self.enable_smearer.GetValue():
                     temp_smear= self.smearer
+            
             self.manager.draw_model(self.model, data=self.data,
                                     smearer= temp_smear,
-                                    qmin=float(self.qmin_x), qmax=float(self.qmax_x),
+                                    qmin=float(self.qmin_x), 
+                                    qmax=float(self.qmax_x),
                                     qstep= float(self.num_points),
                                     enable2D=self.enable2D) 
         
@@ -1441,7 +1443,7 @@ class BasicPage(wx.ScrolledWindow):
                 tcrtl.SetBackgroundColour(wx.WHITE)
 
                 # If qmin and qmax have been modified, update qmin and qmax
-                if check_value( self.qmin, self.qmax):
+                if self._validate_qrange( self.qmin, self.qmax):
                     tempmin = float(self.qmin.GetValue())
                     if tempmin != self.qmin_x:
                         self.qmin_x = tempmin
@@ -1480,7 +1482,8 @@ class BasicPage(wx.ScrolledWindow):
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
         self.state_change= False
-  
+        #Draw the model for a different range
+        self._draw_model()
                    
     def _on_select_model_helper(self): 
         """
@@ -2011,7 +2014,7 @@ class BasicPage(wx.ScrolledWindow):
         """
         #On 'More details' button
         """
-        from helpPanel import  HelpWindow
+        from help_panel import  HelpWindow
         
         if self.model == None:
             name = 'FuncHelp'
