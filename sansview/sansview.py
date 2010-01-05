@@ -56,7 +56,23 @@ class SansView():
             self.gui.add_perspective(fitting_plug)
         except:
             logging.error("SansView: could not find P(r) plug-in module") 
-
+         
+        #Calculator perspective   
+        try:
+            import sans.perspectives.calculator as module    
+            calculator_plug = module.Plugin(standalone=False)
+            self.gui.add_perspective(calculator_plug)
+        except:
+            logging.error("SansView: could not find Calculator plug-in module") 
+            
+        # theory perspective
+        try:
+            import sans.perspectives.theory as module    
+            theory_plug = module.Plugin(standalone=False)
+            self.gui.add_perspective(theory_plug)
+        except:
+            raise
+            #logging.error("SansView: could not find theory plug-in module")
         # Fitting perspective
         import perspectives.fitting as module    
         fitting_plug = module.Plugin()
