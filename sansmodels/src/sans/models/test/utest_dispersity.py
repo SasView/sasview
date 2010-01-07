@@ -33,8 +33,8 @@ class TestCylinder(unittest.TestCase):
         self.model.dispersion['radius']['width'] = 5.0
         self.model.dispersion['radius']['npts'] = 100
         
-        self.assertAlmostEqual(self.model.run(0.001), 4527.47250339, 3)
-        self.assertAlmostEqual(self.model.runXY([0.001, 0.001]), 4546.997777604715, 3)
+        self.assertAlmostEqual(self.model.run(0.001), 1.021051*4527.47250339, 3)
+        self.assertAlmostEqual(self.model.runXY([0.001, 0.001]), 1.021048*4546.997777604715, 2)
         
     def test_gaussian(self):
         from sans.models.dispersion_models import GaussianDispersion
@@ -44,8 +44,8 @@ class TestCylinder(unittest.TestCase):
         self.model.dispersion['radius']['npts'] = 100
         self.model.setParam('scale', 10.0)
         
-        self.assertAlmostEqual(self.model.run(0.001), 4723.32213339, 3)
-        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 4743.56, 2)
+        self.assertAlmostEqual(self.model.run(0.001), 1.1804794*4723.32213339, 3)
+        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 1.180454*4743.56, 2)
         
     def test_clone(self):
         from sans.models.dispersion_models import GaussianDispersion
@@ -56,8 +56,8 @@ class TestCylinder(unittest.TestCase):
         self.model.setParam('scale', 10.0)
         
         new_model = self.model.clone()
-        self.assertAlmostEqual(new_model.run(0.001), 4723.32213339, 3)
-        self.assertAlmostEqual(new_model.runXY([0.001,0.001]), 4743.56, 2)
+        self.assertAlmostEqual(new_model.run(0.001), 1.1804794*4723.32213339, 3)
+        self.assertAlmostEqual(new_model.runXY([0.001,0.001]), 1.180454*4743.56, 2)
         
     def test_gaussian_zero(self):
         from sans.models.dispersion_models import GaussianDispersion
@@ -153,8 +153,8 @@ class TestCoreShellCylinder(unittest.TestCase):
         self.model.dispersion['length']['width'] = 50.0
         self.model.dispersion['length']['npts'] = 10
 
-        self.assertAlmostEqual(self.model.run(0.001), 358.44062724936009, 3)
-        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 360.22673635224584, 3)
+        self.assertAlmostEqual(self.model.run(0.001), 1.07832610*358.44062724936009, 3)
+        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 1.07844010*360.22673635224584, 3)
         
 
     def test_array(self):
@@ -234,7 +234,7 @@ class TestCoreShell(unittest.TestCase):
         self.model.dispersion['thickness']['npts'] = 10
 
 
-        self.assertAlmostEqual(self.model.run(0.001), 407.344127907553, 3)
+        self.assertAlmostEqual(self.model.run(0.001), 1.16747510*407.344127907553, 3)
 
         
 class TestEllipsoid(unittest.TestCase):
@@ -285,8 +285,8 @@ class TestEllipsoid(unittest.TestCase):
         self.model.dispersion['radius_b']['npts'] = 10
 
 
-        self.assertAlmostEqual(self.model.run(0.001), 11948.72581312305, 3)
-        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 11811.972359807551, 3)
+        self.assertAlmostEqual(self.model.run(0.001), 1.10650710*11948.72581312305, 3)
+        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 1.105898*11811.972359807551, 2)
 
     def test_array(self):
         """
@@ -338,7 +338,7 @@ class TestSphere(unittest.TestCase):
             the update to C++ underlying class.
         """
         self.assertAlmostEqual(self.model.run(0.001), 90412744456148.094, 3)
-        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 90347660670656.391, 3)
+        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 90347660670656.391, 1)
 
     def test_dispersion(self):
         """
@@ -347,7 +347,7 @@ class TestSphere(unittest.TestCase):
         from sans.models.DisperseModel import DisperseModel
         disp = DisperseModel(self.model, ['radius'], [10])
         disp.setParam('n_pts', 10)
-        self.assertAlmostEqual(disp.run(0.001), 96795008379475.25, 3)
+        self.assertAlmostEqual(disp.run(0.001), 96795008379475.25, 1)
         
     def test_new_disp(self):
         from sans.models.dispersion_models import GaussianDispersion
@@ -356,7 +356,7 @@ class TestSphere(unittest.TestCase):
         self.model.dispersion['radius']['width'] = 10.0
         self.model.dispersion['radius']['npts'] = 10
 
-        self.assertAlmostEqual(self.model.run(0.001), 96795008379475.25, 3)
+        self.assertAlmostEqual(self.model.run(0.001), 1.19864810*96795008379475.25,3)
         
         
         
@@ -414,8 +414,8 @@ class TestEllipticalCylinder(unittest.TestCase):
         self.model.dispersion['length']['width'] = 50.0
         self.model.dispersion['length']['npts'] = 10
 
-        self.assertAlmostEqual(self.model.run(0.001), 711.18048194151925, 3)
-        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 704.63525988095705, 3)
+        self.assertAlmostEqual(self.model.run(0.001), 1.23925910*711.18048194151925, 3)
+        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 1.238955*704.63525988095705, 3)
         
 
     def test_array(self):
