@@ -74,6 +74,7 @@ double CoreShellModel :: operator()(double q) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double vol = 0.0;
 
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
@@ -82,13 +83,22 @@ double CoreShellModel :: operator()(double q) {
 		// Loop over thickness weight points
 		for(int j=0; j<weights_thick.size(); j++) {
 			dp[2] = weights_thick[j].value;
-
+			//Un-normalize SphereForm by volume
 			sum += weights_rad[i].weight
-				* weights_thick[j].weight * CoreShellForm(dp, q);
+				* weights_thick[j].weight * CoreShellForm(dp, q)* pow(weights_rad[i].value+weights_thick[j].value,3);
+
+			//Find average volume
+			vol += weights_rad[i].weight * weights_thick[j].weight
+				* pow(weights_rad[i].value+weights_thick[j].value,3);
 			norm += weights_rad[i].weight
 				* weights_thick[j].weight;
 		}
 	}
+
+	if (vol != 0.0 && norm != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm);}
+
 	return sum/norm + background();
 }
 

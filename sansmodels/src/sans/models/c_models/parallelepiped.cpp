@@ -83,6 +83,7 @@ double ParallelepipedModel :: operator()(double q) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double vol = 0.0;
 
 	// Loop over short_edgeA weight points
 	for(int i=0; i< (int)weights_short_a.size(); i++) {
@@ -95,14 +96,25 @@ double ParallelepipedModel :: operator()(double q) {
 			// Loop over longuest_edgeC weight points
 			for(int k=0; k< (int)weights_long_c.size(); k++) {
 				dp[3] = weights_long_c[k].value;
+				//Un-normalize  by volume
 				sum += weights_short_a[i].weight * weights_short_b[j].weight
-					* weights_long_c[k].weight * Parallelepiped(dp, q);
+					* weights_long_c[k].weight * Parallelepiped(dp, q)
+					* weights_short_a[i].value*weights_short_b[j].value
+					* weights_long_c[k].value;
+				//Find average volume
+				vol += weights_short_a[i].weight * weights_short_b[j].weight
+					* weights_long_c[k].weight
+					* weights_short_a[i].value * weights_short_b[j].value
+					* weights_long_c[k].value;
 
 				norm += weights_short_a[i].weight
 					 * weights_short_b[j].weight * weights_long_c[k].weight;
 			}
 		}
 	}
+	if (vol != 0.0 && norm != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm);}
 
 	return sum/norm + background();
 }
@@ -154,6 +166,8 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double norm_vol = 0.0;
+	double vol = 0.0;
 
 	// Loop over radius weight points
 	for(int i=0; i< (int)weights_short_a.size(); i++) {
@@ -178,18 +192,31 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 						// Average over phi distribution
 						for(int n=0; n< (int)weights_parallel_psi.size(); n++) {
 							dp.parallel_psi = weights_parallel_psi[n].value;
-
+							//Un-normalize by volume
 							double _ptvalue = weights_short_a[i].weight
 								* weights_short_b[j].weight
 								* weights_long_c[k].weight
 								* weights_parallel_theta[l].weight
 								* weights_parallel_phi[m].weight
 								* weights_parallel_psi[n].weight
-								* parallelepiped_analytical_2DXY(&dp, qx, qy);
+								* parallelepiped_analytical_2DXY(&dp, qx, qy)
+								* weights_short_a[i].value*weights_short_b[j].value
+								* weights_long_c[k].value;
+
 							if (weights_parallel_theta.size()>1) {
 								_ptvalue *= sin(weights_parallel_theta[l].value);
 							}
 							sum += _ptvalue;
+							//Find average volume
+							vol += weights_short_a[i].weight
+								* weights_short_b[j].weight
+								* weights_long_c[k].weight
+								* weights_short_a[i].value*weights_short_b[j].value
+								* weights_long_c[k].value;
+							//Find norm for volume
+							norm_vol += weights_short_a[i].weight
+								* weights_short_b[j].weight
+								* weights_long_c[k].weight;
 
 							norm += weights_short_a[i].weight
 								* weights_short_b[j].weight
@@ -208,6 +235,11 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 	// factor to account for the sin(theta) term in the
 	// integration (see documentation).
 	if (weights_parallel_theta.size()>1) norm = norm / asin(1.0);
+
+	if (vol != 0.0 && norm_vol != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm_vol);}
+
 	return sum/norm + background();
 }
 

@@ -88,6 +88,7 @@ double StackedDisksModel :: operator()(double q) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double vol = 0.0;
 
 	// Loop over length weight points
 	for(int i=0; i< (int)weights_radius.size(); i++) {
@@ -100,14 +101,23 @@ double StackedDisksModel :: operator()(double q) {
 			// Loop over thickness weight points
 			for(int k=0; k< (int)weights_layer_thick.size(); k++) {
 				dp[3] = weights_layer_thick[k].value;
-
+				//Un-normalize by volume
 				sum += weights_radius[i].weight
-					* weights_core_thick[j].weight * weights_layer_thick[k].weight* StackedDiscs(dp, q);
+					* weights_core_thick[j].weight * weights_layer_thick[k].weight* StackedDiscs(dp, q)
+					*pow(weights_radius[i].value,2)*(weights_core_thick[j].value+2*weights_layer_thick[k].value);
+				//Find average volume
+				vol += weights_radius[i].weight
+					* weights_core_thick[j].weight * weights_layer_thick[k].weight
+					*pow(weights_radius[i].value,2)*(weights_core_thick[j].value+2*weights_layer_thick[k].value);
 				norm += weights_radius[i].weight
 					* weights_core_thick[j].weight* weights_layer_thick[k].weight;
 			}
 		}
 	}
+	if (vol != 0.0 && norm != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm);}
+
 	return sum/norm + background();
 }
 
@@ -156,6 +166,8 @@ double StackedDisksModel :: operator()(double qx, double qy) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double norm_vol = 0.0;
+	double vol = 0.0;
 
 	// Loop over length weight points
 	for(int i=0; i< (int)weights_core_thick.size(); i++) {
@@ -176,16 +188,25 @@ double StackedDisksModel :: operator()(double qx, double qy) {
 						for(int m=0; m <(int)weights_phi.size(); m++) {
 							dp.axis_phi = weights_phi[m].value;
 
+							//Un-normalize by volume
 							double _ptvalue = weights_core_thick[i].weight
 								* weights_radius[j].weight
 								* weights_layer_thick[k].weight
 								* weights_theta[l].weight
 								* weights_phi[m].weight
-								* stacked_disks_analytical_2DXY(&dp, qx, qy);
+								* stacked_disks_analytical_2DXY(&dp, qx, qy)
+								*pow(weights_radius[j].value,2)*(weights_core_thick[i].value+2*weights_layer_thick[k].value);
 							if (weights_theta.size()>1) {
 								_ptvalue *= sin(weights_theta[l].value);
 							}
 							sum += _ptvalue;
+							//Find average volume
+							vol += weights_radius[j].weight
+								* weights_core_thick[i].weight * weights_layer_thick[k].weight
+								*pow(weights_radius[j].value,2)*(weights_core_thick[i].value+2*weights_layer_thick[k].value);
+							//Find norm for volume
+							norm_vol += weights_radius[j].weight
+								* weights_core_thick[i].weight * weights_layer_thick[k].weight;
 
 							norm += weights_core_thick[i].weight
 								* weights_radius[j].weight
@@ -201,6 +222,9 @@ double StackedDisksModel :: operator()(double qx, double qy) {
 	// factor to account for the sin(theta) term in the
 	// integration (see documentation).
 	if (weights_theta.size()>1) norm = norm / asin(1.0);
+	if (vol != 0.0 && norm_vol != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm_vol);}
 	return sum/norm + background();
 }
 

@@ -80,6 +80,7 @@ double TriaxialEllipsoidModel :: operator()(double q) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double vol = 0.0;
 
 	// Loop over semi axis A weight points
 	for(int i=0; i< (int)weights_semi_axisA.size(); i++) {
@@ -92,14 +93,24 @@ double TriaxialEllipsoidModel :: operator()(double q) {
 			// Loop over semi axis C weight points
 			for(int k=0; k< (int)weights_semi_axisC.size(); k++) {
 				dp[3] = weights_semi_axisC[k].value;
-
+				//Un-normalize  by volume
 				sum += weights_semi_axisA[i].weight
-					* weights_semi_axisB[j].weight * weights_semi_axisC[k].weight* TriaxialEllipsoid(dp, q);
+					* weights_semi_axisB[j].weight * weights_semi_axisC[k].weight* TriaxialEllipsoid(dp, q)
+					* weights_semi_axisA[i].value*weights_semi_axisB[j].value*weights_semi_axisC[k].value;
+				//Find average volume
+				vol += weights_semi_axisA[i].weight
+					* weights_semi_axisB[j].weight * weights_semi_axisC[k].weight
+					* weights_semi_axisA[i].value*weights_semi_axisB[j].value*weights_semi_axisC[k].value;
+
 				norm += weights_semi_axisA[i].weight
 					* weights_semi_axisB[j].weight * weights_semi_axisC[k].weight;
 			}
 		}
 	}
+	if (vol != 0.0 && norm != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm);}
+
 	return sum/norm + background();
 }
 
@@ -149,6 +160,8 @@ double TriaxialEllipsoidModel :: operator()(double qx, double qy) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double norm_vol = 0.0;
+	double vol = 0.0;
 
 	// Loop over semi axis A weight points
 	for(int i=0; i< (int)weights_semi_axisA.size(); i++) {
@@ -172,18 +185,28 @@ double TriaxialEllipsoidModel :: operator()(double qx, double qy) {
 						// Average over psi distribution
 						for(int n=0; n <(int)weights_psi.size(); n++) {
 							dp.axis_psi = weights_psi[n].value;
-
+							//Un-normalize  by volume
 							double _ptvalue = weights_semi_axisA[i].weight
 								* weights_semi_axisB[j].weight
 								* weights_semi_axisC[k].weight
 								* weights_theta[l].weight
 								* weights_phi[m].weight
 								* weights_psi[n].weight
-								* triaxial_ellipsoid_analytical_2DXY(&dp, qx, qy);
+								* triaxial_ellipsoid_analytical_2DXY(&dp, qx, qy)
+								* weights_semi_axisA[i].value*weights_semi_axisB[j].value*weights_semi_axisC[k].value;
 							if (weights_theta.size()>1) {
 								_ptvalue *= sin(weights_theta[k].value);
 							}
 							sum += _ptvalue;
+							//Find average volume
+							vol += weights_semi_axisA[i].weight
+								* weights_semi_axisB[j].weight
+								* weights_semi_axisC[k].weight
+								* weights_semi_axisA[i].value*weights_semi_axisB[j].value*weights_semi_axisC[k].value;
+							//Find norm for volume
+							norm_vol += weights_semi_axisA[i].weight
+								* weights_semi_axisB[j].weight
+								* weights_semi_axisC[k].weight;
 
 							norm += weights_semi_axisA[i].weight
 								* weights_semi_axisB[j].weight
@@ -202,6 +225,11 @@ double TriaxialEllipsoidModel :: operator()(double qx, double qy) {
 	// factor to account for the sin(theta) term in the
 	// integration (see documentation).
 	if (weights_theta.size()>1) norm = norm / asin(1.0);
+
+	if (vol != 0.0 && norm_vol != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm_vol);}
+
 	return sum/norm + background();
 }
 

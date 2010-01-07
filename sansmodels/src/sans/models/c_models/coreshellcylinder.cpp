@@ -81,6 +81,7 @@ double CoreShellCylinderModel :: operator()(double q) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double vol = 0.0;
 
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
@@ -93,17 +94,30 @@ double CoreShellCylinderModel :: operator()(double q) {
 			// Loop over thickness weight points
 			for(int k=0; k<weights_thick.size(); k++) {
 				dp[2] = weights_thick[k].value;
-
+				//Un-normalize by volume
 				sum += weights_rad[i].weight
 					* weights_len[j].weight
 					* weights_thick[k].weight
-					* CoreShellCylinder(dp, q);
+					* CoreShellCylinder(dp, q)
+					* pow(weights_rad[i].value+weights_thick[k].value,2)
+					*(weights_len[j].value+2.0*weights_thick[k].value);
+				//Find average volume
+				vol += weights_rad[i].weight
+					* weights_len[j].weight
+					* weights_thick[k].weight
+					* pow(weights_rad[i].value+weights_thick[k].value,2)
+					*(weights_len[j].value+2.0*weights_thick[k].value);
 				norm += weights_rad[i].weight
 				* weights_len[j].weight
 				* weights_thick[k].weight;
 			}
 		}
 	}
+
+	if (vol != 0.0 && norm != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm);}
+
 	return sum/norm + background();
 }
 
@@ -150,6 +164,8 @@ double CoreShellCylinderModel :: operator()(double qx, double qy) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double norm_vol = 0.0;
+	double vol = 0.0;
 
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
@@ -171,17 +187,31 @@ double CoreShellCylinderModel :: operator()(double qx, double qy) {
 				// Average over phi distribution
 				for(int l=0; l<weights_phi.size(); l++) {
 					dp.axis_phi = weights_phi[l].value;
-
+					//Un-normalize by volume
 					double _ptvalue = weights_rad[i].weight
 						* weights_len[j].weight
 						* weights_thick[m].weight
 						* weights_theta[k].weight
 						* weights_phi[l].weight
-						* core_shell_cylinder_analytical_2DXY(&dp, qx, qy);
+						* core_shell_cylinder_analytical_2DXY(&dp, qx, qy)
+						* pow(weights_rad[i].value+weights_thick[m].value,2)
+						*(weights_len[j].value+2.0*weights_thick[m].value);
+
 					if (weights_theta.size()>1) {
 						_ptvalue *= sin(weights_theta[k].value);
 					}
 					sum += _ptvalue;
+
+					//Find average volume
+					vol += weights_rad[i].weight
+							* weights_len[j].weight
+							* weights_thick[m].weight
+							* pow(weights_rad[i].value+weights_thick[m].value,2)
+							*(weights_len[j].value+2.0*weights_thick[m].value);
+					//Find norm for volume
+					norm_vol += weights_rad[i].weight
+								* weights_len[j].weight
+								* weights_thick[m].weight;
 
 					norm += weights_rad[i].weight
 						* weights_len[j].weight
@@ -198,6 +228,11 @@ double CoreShellCylinderModel :: operator()(double qx, double qy) {
 	// factor to account for the sin(theta) term in the
 	// integration (see documentation).
 	if (weights_theta.size()>1) norm = norm / asin(1.0);
+
+	if (vol != 0.0 && norm_vol != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm_vol);}
+
 	return sum/norm + background();
 }
 

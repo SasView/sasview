@@ -77,6 +77,7 @@ double HollowCylinderModel :: operator()(double q) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double vol = 0.0;
 
 	// Loop over core radius weight points
 	for(int i=0; i< (int)weights_core_radius.size(); i++) {
@@ -89,17 +90,30 @@ double HollowCylinderModel :: operator()(double q) {
 			// Loop over shell radius weight points
 			for(int k=0; k< (int)weights_radius.size(); k++) {
 				dp[2] = weights_radius[k].value;
-
+				//Un-normalize  by volume
 				sum += weights_core_radius[i].weight
 					* weights_length[j].weight
 					* weights_radius[k].weight
-					* HollowCylinder(dp, q);
+					* HollowCylinder(dp, q)
+					* (pow(weights_radius[k].value,2)-pow(weights_core_radius[i].value,2))
+					* weights_length[j].value;
+				//Find average volume
+				vol += weights_core_radius[i].weight
+					* weights_length[j].weight
+					* weights_radius[k].weight
+					* (pow(weights_radius[k].value,2)-pow(weights_core_radius[i].value,2))
+					* weights_length[j].value;
+
 				norm += weights_core_radius[i].weight
-				* weights_length[j].weight
-				* weights_radius[k].weight;
+					* weights_length[j].weight
+					* weights_radius[k].weight;
 			}
 		}
 	}
+	if (vol != 0.0 && norm != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm);}
+
 	return sum/norm + background();
 }
 
@@ -144,6 +158,8 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double norm_vol = 0.0;
+	double vol = 0.0;
 
 	// Loop over core radius weight points
 	for(int i=0; i<(int)weights_core_radius.size(); i++) {
@@ -165,17 +181,29 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 				// Average over phi distribution
 				for(int l=0; l< (int)weights_phi.size(); l++) {
 					dp.axis_phi = weights_phi[l].value;
-
+					//Un-normalize by volume
 					double _ptvalue = weights_core_radius[i].weight
 						* weights_length[j].weight
 						* weights_radius[m].weight
 						* weights_theta[k].weight
 						* weights_phi[l].weight
-						* hollow_cylinder_analytical_2DXY(&dp, qx, qy);
+						* hollow_cylinder_analytical_2DXY(&dp, qx, qy)
+						* (pow(weights_radius[m].value,2)-pow(weights_core_radius[i].value,2))
+						* weights_length[j].value;
 					if (weights_theta.size()>1) {
 						_ptvalue *= sin(weights_theta[k].value);
 					}
 					sum += _ptvalue;
+					//Find average volume
+					vol += weights_core_radius[i].weight
+						* weights_length[j].weight
+						* weights_radius[k].weight
+						* (pow(weights_radius[m].value,2)-pow(weights_core_radius[i].value,2))
+						* weights_length[j].value;
+					//Find norm for volume
+					norm_vol += weights_core_radius[i].weight
+						* weights_length[j].weight
+						* weights_radius[m].weight;
 
 					norm += weights_core_radius[i].weight
 						* weights_length[j].weight
@@ -192,6 +220,9 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 	// factor to account for the sin(theta) term in the
 	// integration (see documentation).
 	if (weights_theta.size()>1) norm = norm / asin(1.0);
+	if (vol != 0.0 && norm_vol != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm_vol);}
 	return sum/norm + background();
 }
 

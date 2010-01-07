@@ -69,10 +69,6 @@ class Schulz(CSchulz, BaseComponent):
         
     def __getstate__(self):
         """ return object state for pickling and copying """
-        print "__dict__",self.__dict__
-        #self.__dict__['params'] = self.params
-        #self.__dict__['dispersion'] = self.dispersion
-        #self.__dict__['log'] = self.log
         model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
         
         return self.__dict__, model_state

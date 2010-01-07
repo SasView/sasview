@@ -90,6 +90,7 @@ double CoreShellEllipsoidModel :: operator()(double q) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double vol = 0.0;
 
 	// Loop over major core weight points
 	for(int i=0; i<(int)weights_equat_core.size(); i++) {
@@ -106,15 +107,24 @@ double CoreShellEllipsoidModel :: operator()(double q) {
 				// Loop over minor shell weight points
 				for(int l=0; l<(int)weights_polar_shell.size(); l++) {
 					dp[4] = weights_polar_shell[l].value;
-
+					//Un-normalize  by volume
 					sum += weights_equat_core[i].weight* weights_polar_core[j].weight * weights_equat_shell[k].weight
-						* weights_polar_shell[l].weight * ProlateForm(dp, q);
+						* weights_polar_shell[l].weight * ProlateForm(dp, q)
+						* pow(weights_equat_shell[k].value,2)*weights_polar_shell[l].value;
+					//Find average volume
+					vol += weights_equat_core[i].weight* weights_polar_core[j].weight
+						* weights_equat_shell[k].weight
+						* weights_polar_shell[l].weight
+						* pow(weights_equat_shell[k].value,2)*weights_polar_shell[l].value;
 					norm += weights_equat_core[i].weight* weights_polar_core[j].weight * weights_equat_shell[k].weight
 							* weights_polar_shell[l].weight;
 				}
 			}
 		}
 	}
+	if (vol != 0.0 && norm != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm);}
 	return sum/norm + background();
 }
 
@@ -193,6 +203,8 @@ double CoreShellEllipsoidModel :: operator()(double qx, double qy) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double norm_vol = 0.0;
+	double vol = 0.0;
 
 	// Loop over major core weight points
 	for(int i=0; i< (int)weights_equat_core.size(); i++) {
@@ -217,16 +229,24 @@ double CoreShellEllipsoidModel :: operator()(double qx, double qy) {
 						// Average over phi distribution
 						for(int n=0; n< (int)weights_phi.size(); n++) {
 							dp.axis_phi = weights_phi[n].value;
-
+							//Un-normalize by volume
 							double _ptvalue = weights_equat_core[i].weight *weights_polar_core[j].weight
 								* weights_equat_shell[k].weight * weights_polar_shell[l].weight
 								* weights_theta[m].weight
 								* weights_phi[n].weight
-								* spheroid_analytical_2DXY(&dp, qx, qy);
+								* spheroid_analytical_2DXY(&dp, qx, qy)
+								* pow(weights_equat_shell[k].value,2)*weights_polar_shell[l].value;
 							if (weights_theta.size()>1) {
 								_ptvalue *= sin(weights_theta[m].value);
 							}
 							sum += _ptvalue;
+							//Find average volume
+							vol += weights_equat_shell[k].weight
+								* weights_polar_shell[l].weight
+								* pow(weights_equat_shell[k].value,2)*weights_polar_shell[l].value;
+							//Find norm for volume
+							norm_vol += weights_equat_shell[k].weight
+								* weights_polar_shell[l].weight;
 
 							norm += weights_equat_core[i].weight *weights_polar_core[j].weight
 								* weights_equat_shell[k].weight * weights_polar_shell[l].weight
@@ -241,6 +261,11 @@ double CoreShellEllipsoidModel :: operator()(double qx, double qy) {
 	// factor to account for the sin(theta) term in the
 	// integration (see documentation).
 	if (weights_theta.size()>1) norm = norm / asin(1.0);
+
+	if (vol != 0.0 && norm_vol != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm_vol);}
+
 	return sum/norm + background();
 }
 

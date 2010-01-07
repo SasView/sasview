@@ -72,6 +72,7 @@ double EllipsoidModel :: operator()(double q) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double vol = 0.0;
 
 	// Loop over radius_a weight points
 	for(int i=0; i<weights_rad_a.size(); i++) {
@@ -80,13 +81,25 @@ double EllipsoidModel :: operator()(double q) {
 		// Loop over radius_b weight points
 		for(int j=0; j<weights_rad_b.size(); j++) {
 			dp[2] = weights_rad_b[j].value;
-
+			//Un-normalize  by volume
 			sum += weights_rad_a[i].weight
-				* weights_rad_b[j].weight * EllipsoidForm(dp, q);
+				* weights_rad_b[j].weight * EllipsoidForm(dp, q)
+				* pow(weights_rad_b[j].value,2) * weights_rad_a[i].value;
+
+			//Find average volume
+			vol += weights_rad_a[i].weight
+				* weights_rad_b[j].weight
+				* pow(weights_rad_b[j].value,2)
+				* weights_rad_a[i].value;
 			norm += weights_rad_a[i].weight
 				* weights_rad_b[j].weight;
 		}
 	}
+
+	if (vol != 0.0 && norm != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm);}
+
 	return sum/norm + background();
 }
 
@@ -126,6 +139,8 @@ double EllipsoidModel :: operator()(double qx, double qy) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double norm_vol = 0.0;
+	double vol = 0.0;
 
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad_a.size(); i++) {
@@ -143,16 +158,24 @@ double EllipsoidModel :: operator()(double qx, double qy) {
 				// Average over phi distribution
 				for(int l=0; l<weights_phi.size(); l++) {
 					dp.axis_phi = weights_phi[l].value;
-
+					//Un-normalize by volume
 					double _ptvalue = weights_rad_a[i].weight
 						* weights_rad_b[j].weight
 						* weights_theta[k].weight
 						* weights_phi[l].weight
-						* ellipsoid_analytical_2DXY(&dp, qx, qy);
+						* ellipsoid_analytical_2DXY(&dp, qx, qy)
+						* pow(weights_rad_b[j].value,2) * weights_rad_a[i].value;
 					if (weights_theta.size()>1) {
 						_ptvalue *= sin(weights_theta[k].value);
 					}
 					sum += _ptvalue;
+					//Find average volume
+					vol += weights_rad_a[i].weight
+						* weights_rad_b[j].weight
+						* pow(weights_rad_b[j].value,2) * weights_rad_a[i].value;
+					//Find norm for volume
+					norm_vol += weights_rad_a[i].weight
+						* weights_rad_b[j].weight;
 
 					norm += weights_rad_a[i].weight
 						* weights_rad_b[j].weight
@@ -167,6 +190,11 @@ double EllipsoidModel :: operator()(double qx, double qy) {
 	// factor to account for the sin(theta) term in the
 	// integration (see documentation).
 	if (weights_theta.size()>1) norm = norm / asin(1.0);
+
+	if (vol != 0.0 && norm_vol != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm_vol);}
+
 	return sum/norm + background();
 }
 

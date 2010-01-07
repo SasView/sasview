@@ -70,6 +70,7 @@ double VesicleModel :: operator()(double q) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double vol = 0.0;
 
 	// Loop over radius weight points
 	for(int i=0; i< (int)weights_radius.size(); i++) {
@@ -77,10 +78,18 @@ double VesicleModel :: operator()(double q) {
 		for(int j=0; j< (int)weights_thickness.size(); j++) {
 			dp[2] = weights_thickness[j].value;
 			sum += weights_radius[i].weight
-				* weights_thickness[j].weight * VesicleForm(dp, q);
+				* weights_thickness[j].weight * VesicleForm(dp, q)
+				*(pow(weights_radius[i].value+weights_thickness[j].value,3)-pow(weights_radius[i].value,3));
+			//Find average volume
+			vol += weights_radius[i].weight * weights_thickness[j].weight
+				*(pow(weights_radius[i].value+weights_thickness[j].value,3)-pow(weights_radius[i].value,3));
 			norm += weights_radius[i].weight * weights_thickness[j].weight;
 		}
 	}
+	if (vol != 0.0 && norm != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm);}
+
 	return sum/norm + background();
 }
 

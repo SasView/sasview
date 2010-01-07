@@ -79,6 +79,7 @@ double MultiShellModel :: operator()(double q) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double vol = 0.0;
 
 	// Loop over radius weight points
 	for(int i=0; i< (int)weights_core_radius.size(); i++) {
@@ -87,14 +88,22 @@ double MultiShellModel :: operator()(double q) {
 			dp[2] = weights_s_thickness[j].value;
 			for(int k=0; k< (int)weights_w_thickness.size(); k++){
 				dp[3] = weights_w_thickness[k].value;
-
+				//Un-normalize SphereForm by volume
 				sum += weights_core_radius[i].weight*weights_s_thickness[j].weight
-					*weights_w_thickness[k].weight* MultiShell(dp, q);
+					*weights_w_thickness[k].weight* MultiShell(dp, q)
+					*pow(weights_core_radius[i].value+dp[6]*weights_s_thickness[j].value+(dp[6]-1)*weights_w_thickness[k].value,3);
+				//Find average volume
+				vol += weights_core_radius[i].weight*weights_s_thickness[j].weight
+					*weights_w_thickness[k].weight
+					*pow(weights_core_radius[i].value+dp[6]*weights_s_thickness[j].value+(dp[6]-1)*weights_w_thickness[k].value,3);
 				norm += weights_core_radius[i].weight*weights_s_thickness[j].weight
 					*weights_w_thickness[k].weight;
 			}
 		}
 	}
+	if (vol != 0.0 && norm != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm);}
 	return sum/norm + background();
 }
 

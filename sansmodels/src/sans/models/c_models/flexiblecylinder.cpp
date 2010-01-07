@@ -78,6 +78,7 @@ double FlexibleCylinderModel :: operator()(double q) {
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
+	double vol = 0.0;
 
 	// Loop over semi axis A weight points
 	for(int i=0; i< (int)weights_len.size(); i++) {
@@ -90,14 +91,24 @@ double FlexibleCylinderModel :: operator()(double q) {
 			// Loop over semi axis C weight points
 			for(int k=0; k< (int)weights_rad.size(); k++) {
 				dp[3] = weights_rad[k].value;
-
+				//Un-normalize by volume
 				sum += weights_len[i].weight
-					* weights_kuhn[j].weight*weights_rad[k].weight * FlexExclVolCyl(dp, q);
+					* weights_kuhn[j].weight*weights_rad[k].weight * FlexExclVolCyl(dp, q)
+					* pow(weights_rad[k].value,2)*weights_len[i].value;
+				//Find average volume
+				vol += weights_rad[k].weight
+					* weights_len[i].weight
+					* weights_kuhn[j].weight
+					*pow(weights_rad[k].value,2)*weights_len[i].value;
 				norm += weights_len[i].weight
 					* weights_kuhn[j].weight*weights_rad[k].weight;
 			}
 		}
 	}
+	if (vol != 0.0 && norm != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm);}
+
 	return sum/norm + background();
 }
 
