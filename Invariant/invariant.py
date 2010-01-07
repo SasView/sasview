@@ -6,7 +6,7 @@
 import math 
 import numpy
 
-from DataLoader.data_info import Data1D as LoaderData1D
+from sans.guiframe.dataFitting import Data1D as LoaderData1D
 from DataLoader.qsmearing import smear_selection
 
 
@@ -113,7 +113,7 @@ class FitFunctor:
         self.idx_unsmeared = (self.data.x >= self._qmin_unsmeared) \
                                 & (self.data.x <= self._qmax_unsmeared)
   
-    def fit(self, power =None):
+    def fit(self, power=None):
         """
            Fit data for y = ax + b  return a and b
            @param power = a fixed, otherwise None
@@ -128,7 +128,7 @@ class FitFunctor:
         except:
             print "The dy data for Invariant calculation should be prepared before get to FitFunctor.fit()..."
             sigma = one[self.idx_unsmeared ]
-        sigma2 = sigma*sigma
+        sigma2 = sigma * sigma
 
         # Compute theory data f(x)
         fx = self.data.y[self.idx_unsmeared ]/sigma
@@ -144,7 +144,7 @@ class FitFunctor:
         else:
             A = numpy.vstack([ self.data.x[self.idx]/sigma,
                                numpy.ones(len(self.data.x[self.idx]))/sigma]).T
-    
+           
             a, b = numpy.linalg.lstsq(A, fx)[0]
             return a, b
 
@@ -230,8 +230,9 @@ class InvariantCalculator(object):
             @return b: the other parameter of the function for guinier will be radius
                     for power_law will be the power value
         """
-        fit_x = numpy.array([math.log(x) for x in self._data.x])
-        if function.__name__ == "guinier":        
+        #fit_x = numpy.array([math.log(x) for x in self._data.x])
+        if function.__name__ == "guinier":   
+            fit_x = numpy.array([x * x for x in self._data.x])     
             qmin = qmin**2
             qmax = qmax**2
             fit_y = numpy.array([math.log(y) for y in self._data.y])
@@ -239,6 +240,7 @@ class InvariantCalculator(object):
             fit_dy = numpy.array([dy for dy in self._data.dy])/fit_dy
 
         elif function.__name__ == "power_law":
+            fit_x = numpy.array([math.log(x) for x in self._data.x])
             qmin = math.log(qmin)
             qmax = math.log(qmax)
             fit_y = numpy.array([math.log(y) for y in self._data.y])
@@ -494,7 +496,7 @@ class InvariantCalculator(object):
                     sum += (data.x[i] * data.dxl[i] * dy[i] * dxi)**2
                 return math.sqrt(sum)
    
-    def _get_qstar_low(self):
+    def get_qstar_low(self):
         """
             Compute the invariant for extrapolated data at low q range.
             
@@ -504,10 +506,10 @@ class InvariantCalculator(object):
                 
             @return q_star: the invariant for data extrapolated at low q.
         """
-        data = self._get_extra_data_low()
+        data = self.get_extra_data_low()
         return self._get_qstar(data=data)
         
-    def _get_qstar_high(self):
+    def get_qstar_high(self):
         """
             Compute the invariant for extrapolated data at high q range.
             
@@ -517,10 +519,10 @@ class InvariantCalculator(object):
                 
             @return q_star: the invariant for data extrapolated at high q.
         """
-        data = self._get_extra_data_high()
+        data = self.get_extra_data_high()
         return self._get_qstar(data=data)
         
-    def _get_extra_data_low(self):
+    def get_extra_data_low(self):
         """
             This method creates a new data set from the invariant calculator.
             
@@ -545,7 +547,6 @@ class InvariantCalculator(object):
         # Data boundaries for fiiting
         qmin = self._data.x[0]
         qmax = self._data.x[self._low_extrapolation_npts - 1]
-        
         try:
             # fit the data with a model to get the appropriate parameters
             a, b = self._fit(function=self._low_extrapolation_function,
@@ -553,6 +554,7 @@ class InvariantCalculator(object):
                               qmax=qmax,
                               power=self._low_extrapolation_power)
         except:
+            #raise
             return None
         
         #q_start point
@@ -582,7 +584,7 @@ class InvariantCalculator(object):
 
         return data_min
           
-    def _get_extra_data_high(self):
+    def get_extra_data_high(self):
         """
             This method creates a new data from the invariant calculator.
             
@@ -676,11 +678,11 @@ class InvariantCalculator(object):
                 if extrapolation is None:
                     return qstar_0    
                 if extrapolation==low:
-                    return qstar_0 + self._get_qstar_low()
+                    return qstar_0 + self.get_qstar_low()
                 elif extrapolation==high:
-                    return qstar_0 + self._get_qstar_high()
+                    return qstar_0 + self.get_qstar_high()
                 elif extrapolation==both:
-                    return qstar_0 + self._get_qstar_low() + self._get_qstar_high()
+                    return qstar_0 + self.get_qstar_low() + self.get_qstar_high()
            
             @param extrapolation: string to apply optional extrapolation    
             @return q_star: invariant of the data within data's q range
@@ -688,7 +690,7 @@ class InvariantCalculator(object):
             @warning: When using setting data to Data1D , the user is responsible of
             checking that the scale and the background are properly apply to the data
             
-            @warning: if error occur self._get_qstar_low() or self._get_qstar_low()
+            @warning: if error occur self.get_qstar_low() or self.get_qstar_low()
             their returned value will be ignored
         """
         qstar_0 = self._get_qstar(data=self._data)
@@ -699,13 +701,13 @@ class InvariantCalculator(object):
         # Compute invariant plus invaraint of extrapolated data
         extrapolation = extrapolation.lower()    
         if extrapolation == "low":
-            self._qstar = qstar_0 + self._get_qstar_low()
+            self._qstar = qstar_0 + self.get_qstar_low()
             return self._qstar
         elif extrapolation == "high":
-            self._qstar = qstar_0 + self._get_qstar_high()
+            self._qstar = qstar_0 + self.get_qstar_high()
             return self._qstar
         elif extrapolation == "both":
-            self._qstar = qstar_0 + self._get_qstar_low() + self._get_qstar_high()
+            self._qstar = qstar_0 + self.get_qstar_low() + self.get_qstar_high()
             return self._qstar
        
     def get_surface(self,contrast, porod_const):
@@ -722,6 +724,8 @@ class InvariantCalculator(object):
             @param porod_const: Porod constant to compute the surface 
             @return: specific surface 
         """
+        if contrast is None or porod_const is None:
+            return 
         #Check whether we have Q star
         if self._qstar is None:
             self._qstar = self.get_star()
@@ -753,6 +757,8 @@ class InvariantCalculator(object):
             @return: volume fraction
             @note: volume fraction must have no unit
         """
+        if contrast is None:
+            return 
         if contrast < 0:
             raise ValueError, "contrast must be greater than zero"  
         
@@ -811,6 +817,8 @@ class InvariantCalculator(object):
             @param contrast: contrast value 
             @return: V, dV = self.get_volume_fraction_with_error(contrast), dV
         """
+        if contrast is None:
+            return 
         self._qstar, self._qstar_err = self.get_qstar_with_error()
         
         volume = self.get_volume_fraction(contrast)
@@ -844,6 +852,8 @@ class InvariantCalculator(object):
             @param porod_const: porod constant value 
             @return S, dS: the surface, with its uncertainty
         """
+        if contrast is None or porod_const is None:
+            return 
         v, dv = self.get_volume_fraction_with_error(contrast)
         self._qstar, self._qstar_err = self.get_qstar_with_error()
         if self._qstar <= 0:

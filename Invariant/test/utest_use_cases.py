@@ -1,12 +1,13 @@
 """
    Implementation of the use-case from a usage perspective. 
-   TODO: check the return values to perform actual unit testing.
+  
 """
 import unittest
 import numpy
 from DataLoader.loader import  Loader
 from sans.invariant import invariant
 _ERR_SURFACE = 0.3
+
 class Data1D:
     print "I am not of type Dataloader.Data1D"
     
