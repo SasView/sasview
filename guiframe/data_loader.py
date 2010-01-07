@@ -6,7 +6,7 @@ from DataLoader.loader import Loader
 
 def choose_data_file(parent, location=None):
     path = None
-    if location==None:
+    if location == None:
         location = os.getcwd()
     
     l = Loader()
@@ -50,7 +50,7 @@ def load_ascii_1D(path):
                     errdy = float(toks[2])
                 else:
                     errdy = 0.0
-                if len(toks)==4:
+                if len(toks) == 4:
                     has_dx = True
                     errdx = float(toks[3])
                 else:
@@ -62,9 +62,9 @@ def load_ascii_1D(path):
             except:
                 print "READ ERROR", line
     
-        if has_dy==False:
+        if has_dy == False:
             file_dy = None
-        if has_dx==False:
+        if has_dx == False:
             file_dx = None
             
         return file_x, file_y, file_dy, file_dx
@@ -99,7 +99,7 @@ def plot_data(parent, path):
     
     # Load data 
     try:
-        output=L.load(path)
+        output = L.load(path)
     except:
         load_error(sys.exc_value)
         return
@@ -111,29 +111,29 @@ def plot_data(parent, path):
   
     filename = os.path.basename(path)
     
-    if not  output.__class__.__name__=="list":
+    if not  output.__class__.__name__ == "list":
         ## Creating a Data2D with output
         if hasattr(output,'data'):
-            new_plot = Data2D(image=None,err_image=None)
+            new_plot = Data2D(image=None, err_image=None)
       
         else:
-            msg="Loading 1D data: "
-            wx.PostEvent(parent, StatusEvent(status= "%s %s"%(msg, output.filename)))
-            new_plot = Data1D(x=[], y=[], dx=None,dy= None)
+            msg = "Loading 1D data: "
+            wx.PostEvent(parent, StatusEvent(status="%s %s"%(msg, output.filename)))
+            new_plot = Data1D(x=[], y=[], dx=None, dy=None)
             
         new_plot.copy_from_datainfo(output) 
         output.clone_without_data(clone=new_plot)      
       
         ## data 's name
-        if output.filename==None or output.filename=="":
+        if output.filename is None or output.filename == "":
             output.filename = str(filename)
         ## name of the data allow to differentiate data when plotted
-        name= output.filename
+        name = output.filename
         if not name in parent.indice_load_data.keys():
-            parent.indice_load_data[name]=0
+            parent.indice_load_data[name] = 0
         else:
             ## create a copy of the loaded data
-            parent.indice_load_data[name]+=1
+            parent.indice_load_data[name] += 1
             name = name +"[%i]"%parent.indice_load_data[name]
        
         new_plot.name = name
@@ -144,28 +144,28 @@ def plot_data(parent, path):
       
         ##group_id specify on which panel to plot this data
         new_plot.group_id = name
-        new_plot.is_data =True
+        new_plot.is_data = True
         ##post data to plot
         if hasattr(new_plot,"title"):
-            title= str(new_plot.title)
-            if title =="":
-                title=str(name)
+            title = str(new_plot.title)
+            if title == "":
+                title = str(name)
         else:
             title = str(name)
-        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title= title ))
+        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=title ))
         
     ## the output of the loader is a list , some xml files contain more than one data
     else:
         i=1
         for item in output:
             try:
-                dx=item.dx
-                dxl=item.dxl
-                dxw=item.dxw
+                dx = item.dx
+                dxl = item.dxl
+                dxw = item.dxw
             except:
-                dx=None
-                dxl=None
-                dxw=None
+                dx = None
+                dxl = None
+                dxw = None
 
             new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy)
             new_plot.copy_from_datainfo(item)
@@ -173,9 +173,9 @@ def plot_data(parent, path):
             new_plot.dxl = dxl
             new_plot.dxw = dxw
            
-            name= str(item.run[0])
+            name = str(item.run[0])
             if not name in parent.indice_load_data.keys():
-                parent.indice_load_data[name]=0
+                parent.indice_load_data[name] = 0
             else:
                 ## create a copy of the loaded data
                 
@@ -184,8 +184,8 @@ def plot_data(parent, path):
                 # What is the requirement for this feature, and are the
                 # counter arguments stronger? Is this feature developed
                 # to please at least 80% of the users or a special few?
-                parent.indice_load_data[name]+=1
-                name = name +"(copy %i)"%parent.indice_load_data[name]
+                parent.indice_load_data[name] += 1
+                name = name + "(copy %i)"%parent.indice_load_data[name]
                 
             new_plot.name = name
             new_plot.interactive = True
@@ -195,11 +195,11 @@ def plot_data(parent, path):
      
             new_plot.is_data =True
             if hasattr(item,"title"):
-                title= item.title
-                if title=="":
-                    title=str(name)
+                title = item.title
+                if title == "":
+                    title = str(name)
             else:
-                title= name
+                title = name
             wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
             i+=1
            
