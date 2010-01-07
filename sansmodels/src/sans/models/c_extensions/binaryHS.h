@@ -37,7 +37,7 @@ typedef struct {
     double vol_frac_ss;
 
 	///	large sphere scattering length density [1/A^(2)]
-    //  [DEFAULT]=ls_sld= 3.5e-6 [1/A^{2}]
+    //  [DEFAULT]=ls_sld= 3.5e-6 [1/A^(2)]
     double ls_sld;
 
 	///	lsmall sphere scattering length density [1/A^(2)]

@@ -35,6 +35,10 @@ class BinaryHSModel(CBinaryHSModel, BaseComponent):
          s_radius        = 25.0 [A]
          vol_frac_ls     = 0.1 
          vol_frac_ss     = 0.2 
+         ls_sld          = 3.5e-006 [1/A^(2)]
+         ss_sld          = 5e-007 [1/A^(2)]
+         solvent_sld     = 6.36e-006 [1/A^(2)]
+         background      = 0.001 [1/cm]
 
     """
         
@@ -63,6 +67,10 @@ class BinaryHSModel(CBinaryHSModel, BaseComponent):
         self.details['s_radius'] = ['[A]', None, None]
         self.details['vol_frac_ls'] = ['', None, None]
         self.details['vol_frac_ss'] = ['', None, None]
+        self.details['ls_sld'] = ['[1/A^(2)]', None, None]
+        self.details['ss_sld'] = ['[1/A^(2)]', None, None]
+        self.details['solvent_sld'] = ['[1/A^(2)]', None, None]
+        self.details['background'] = ['[1/cm]', None, None]
 
         ## fittable parameters
         self.fixed=['l_radius.width', 's_radius.width']
@@ -76,10 +84,6 @@ class BinaryHSModel(CBinaryHSModel, BaseComponent):
         
     def __getstate__(self):
         """ return object state for pickling and copying """
-        print "__dict__",self.__dict__
-        #self.__dict__['params'] = self.params
-        #self.__dict__['dispersion'] = self.dispersion
-        #self.__dict__['log'] = self.log
         model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
         
         return self.__dict__, model_state
