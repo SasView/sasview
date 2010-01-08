@@ -6,7 +6,6 @@ import unittest
 import numpy
 from DataLoader.loader import  Loader
 from sans.invariant import invariant
-_ERR_SURFACE = 0.3
 
 class Data1D:
     print "I am not of type Dataloader.Data1D"
@@ -129,7 +128,7 @@ class TestInvPolySphere(unittest.TestCase):
         # Test results
         self.assertAlmostEquals(qstar, 7.48959e-5,2)
         self.assertAlmostEquals(v, 0.005644689, 4)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1)
+        self.assertAlmostEquals(s , 941.7452, 3)
         
     def test_use_case_2(self):
         """
@@ -150,7 +149,7 @@ class TestInvPolySphere(unittest.TestCase):
         # Test results
         self.assertAlmostEquals(qstar, 7.48959e-5,2)
         self.assertAlmostEquals(v, 0.005644689, 1)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1)
+        self.assertAlmostEquals(s , 941.7452, 3)
        
         
     def test_use_case_3(self):
@@ -186,7 +185,7 @@ class TestInvPolySphere(unittest.TestCase):
         # Test results
         self.assertAlmostEquals(qstar, 7.49e-5, 1)
         self.assertAlmostEquals(v, 0.005648401, 4)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1)
+        self.assertAlmostEquals(s , 941.7452, 3)
             
     def test_use_case_4(self):
         """
@@ -212,7 +211,7 @@ class TestInvPolySphere(unittest.TestCase):
         # Test results
         self.assertAlmostEquals(qstar, 7.49e-5,2)
         self.assertAlmostEquals(v, 0.005952674, 3)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1)
+        self.assertAlmostEquals(s , 941.7452, 3)
         
     def test_use_case_5(self):
         """
@@ -239,7 +238,7 @@ class TestInvPolySphere(unittest.TestCase):
         # Test results
         self.assertAlmostEquals(qstar, 7.88981e-5,2)
         self.assertAlmostEquals(v, 0.005952674, 3)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1)
+        self.assertAlmostEquals(s , 941.7452, 3)
       
 class TestInvSlitSmear(unittest.TestCase):
     """
@@ -265,7 +264,7 @@ class TestInvSlitSmear(unittest.TestCase):
         # Test results
         self.assertAlmostEquals(qstar, 4.1539e-4, 1)
         self.assertAlmostEquals(v, 0.032164596, 3)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1)
+        self.assertAlmostEquals(s, 941.7452, 3)
        
     def test_use_case_2(self):
         """
@@ -282,7 +281,7 @@ class TestInvSlitSmear(unittest.TestCase):
         # Test results
         self.assertAlmostEquals(qstar, 4.1539e-4, 1)
         self.assertAlmostEquals(v, 0.032164596,3)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1)
+        self.assertAlmostEquals(s , 941.7452, 3)
         
     def test_use_case_3(self):
         """
@@ -305,7 +304,7 @@ class TestInvSlitSmear(unittest.TestCase):
         # Test results
         self.assertAlmostEquals(qstar,4.1534e-4,3)
         self.assertAlmostEquals(v, 0.032164596, 3)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1)
+        self.assertAlmostEquals(s , 941.7452, 3)
             
     def test_use_case_4(self):
         """
@@ -331,7 +330,7 @@ class TestInvSlitSmear(unittest.TestCase):
         # Test results
         self.assertAlmostEquals(qstar, 4.1539e-4, 2)
         self.assertAlmostEquals(v, 0.032164596, 3)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1)
+        self.assertAlmostEquals(s , 941.7452, 3)
         
     def test_use_case_5(self):
         """
@@ -358,7 +357,7 @@ class TestInvSlitSmear(unittest.TestCase):
         # Test results
         self.assertAlmostEquals(qstar, 4.1534e-4,3)
         self.assertAlmostEquals(v, 0.032164596, 2)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1)
+        self.assertAlmostEquals(s , 941.7452, 3)
         
   
 class TestInvPinholeSmear(unittest.TestCase):
@@ -384,7 +383,7 @@ class TestInvPinholeSmear(unittest.TestCase):
         # Test results
         self.assertAlmostEquals(qstar, 1.361677e-3, 4)
         self.assertAlmostEquals(v, 0.115352622, 2)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1 )
+        self.assertAlmostEquals(s , 941.7452, 3 )
         
     def test_use_case_2(self):
         """
@@ -402,7 +401,7 @@ class TestInvPinholeSmear(unittest.TestCase):
         # Test results
         self.assertAlmostEquals(qstar, 1.361677e-3, 4)
         self.assertAlmostEquals(v, 0.115352622, 2)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42e+2, 1 )
+        self.assertAlmostEquals(s , 941.7452, 3 )
        
     def test_use_case_3(self):
         """
@@ -423,7 +422,7 @@ class TestInvPinholeSmear(unittest.TestCase):
         # Test results
         self.assertAlmostEquals(qstar, 0.00138756,2)
         self.assertAlmostEquals(v, 0.117226896,2)
-        self.assertAlmostEquals(s + _ERR_SURFACE, 9.42E+02, 1)
+        self.assertAlmostEquals(s ,941.7452, 3)
       
     def test_use_case_4(self):
         """
