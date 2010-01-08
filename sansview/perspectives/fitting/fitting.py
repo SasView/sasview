@@ -134,14 +134,7 @@ class Plugin:
         simul_help = "Allow to edit fit engine with multiple model and data"
         self.menu1.Append(id1, '&Simultaneous Page',simul_help)
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
-        #menu for SLD Calculator
-        #self.tool_menu = wx.Menu()
-        #id_tool_menu = wx.NewId()
-        #sld_id = wx.NewId()
-        #sld_help= "Compute the scattering length density of molecules"
-        #self.tool_menu.Append(sld_id, "SLD Calculator",sld_help)
-        #wx.EVT_MENU(owner,sld_id,  self.onCalculateSld)
-    
+       
         #menu for model
         menu2 = wx.Menu()
         self.menu_mng.populate_menu(menu2, owner)
@@ -154,10 +147,7 @@ class Plugin:
       
         #create  menubar items
         return [(id, self.menu1, "Fitting")]
-                #(id_tool_menu, self.tool_menu,"Tools" ),
-                #(id2, menu2, "Model")]
-       
-    
+               
     def on_add_sim_page(self, event):
         """
             Create a page to access simultaneous fit option
@@ -169,8 +159,6 @@ class Plugin:
             return 
         
         self.sim_page= self.fit_panel.add_sim_page()
-        
-        
         
     def help(self, evt):
         """
@@ -290,7 +278,7 @@ class Plugin:
             and create a new data1D data
             @param return 
         """
-        id=None
+        id = None
         if hasattr(item,"id"):
             id = copy.deepcopy(item.id)
 
@@ -329,8 +317,6 @@ class Plugin:
                 fitproblem= self.page_finder[page]
                 fitproblem.schedule_tofit(value)
           
-                      
-                    
     def get_page_finder(self):
         """ @return self.page_finder used also by simfitpage.py"""  
         return self.page_finder 
@@ -352,9 +338,7 @@ class Plugin:
                 if model.name== modelname:
                     value.set_model_param(names,values)
                     break
-
-   
-                            
+         
     def split_string(self,item): 
         """
             receive a word containing dot and split it. used to split parameterset
@@ -372,7 +356,6 @@ class Plugin:
                 param_name=param_names[1]                    
             return model_name,param_name
         
-   
     def stop_fit(self):
         """
             Stop the fit engine
@@ -382,8 +365,6 @@ class Plugin:
             wx.PostEvent(self.parent, StatusEvent(status="Fitting  \
                 is cancelled" , type="stop"))
             
-    
-      
     def set_smearer(self,smearer, qmin=None, qmax=None):
         """
             Get a smear object and store it to a fit problem
@@ -402,8 +383,6 @@ class Plugin:
             self.draw_model( model=model, data= data, smearer= smear,
                 qmin= qmin, qmax= qmax)
 
-    
-    
     def draw_model(self, model, data= None,smearer= None,
                    enable1D= True, enable2D= False,
                    qmin= DEFAULT_QMIN, qmax= DEFAULT_QMAX, qstep= DEFAULT_NPTS):
@@ -430,9 +409,7 @@ class Plugin:
                            qmin=qmin,
                            qmax=qmax,
                            qstep=qstep)
-        
-  
-                        
+            
     def onFit(self):
         """
             perform fit 
@@ -519,7 +496,6 @@ class Plugin:
             wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
             return 
         
-        
     def ready_fit(self):
         """
         Ready for another fit
@@ -530,15 +506,6 @@ class Plugin:
         else:
             time.sleep(0.4)
              
-    def onCalculateSld(self, event):
-        """
-            Compute the scattering length density of molecula
-        """  
-        from sldPanel import SldWindow
-        frame = SldWindow(base=self.parent)
-        frame.Show(True) 
-      
-          
     def _onEVT_SLICER_PANEL(self, event):
         """
             receive and event telling to update a panel with a name starting with 
@@ -553,13 +520,28 @@ class Plugin:
                 
         self.parent._mgr.Update()
                
-            
     def _compute_invariant(self, event):    
         """
             Open the invariant panel to invariant computation
         """
-        
-        
+        self.panel = event.GetEventObject()
+        Plugin.on_perspective(self,event=event)
+        for plottable in self.panel.graph.plottables:
+            if plottable.name == self.panel.graph.selected_plottable:
+                data = self.copy_data(item= plottable, dy=plottable.dy)
+                
+                print "_compute_invariant",data._yaxis
+                print "_compute_invariant" ,data._yunit
+                from invariant_panel import InvariantWindow
+                frame = InvariantWindow(base=self.parent, data=plottable)   
+                frame.Show(True)
+                #from invariant_panel import InvariantDialog
+                #self.invariant_dlg = InvariantDialog(base=self.parent,
+                #                                     data=plottable)
+                #if self.invariant_dlg.ShowModal() == wx.ID_OK:
+                #    pass
+                #self.invariant_dlg.Destroy()
+                
     def _closed_fitpage(self, event):   
         """
             request fitpanel to close a given page when its unique data is removed 
@@ -1086,7 +1068,6 @@ class Plugin:
         """
             Complete plotting 1D data
         """ 
-       
         try:
             new_plot = Theory1D(x=x, y=y)
             my_info = self._get_plotting_info( data)
@@ -1101,16 +1082,15 @@ class Plugin:
                     new_plot.id += "Model"
                 new_plot.is_data =False 
            
-           
             title= new_plot.name
-            new_plot. perspective = self.get_perspective()
+            #new_plot.perspective = self.get_perspective()
             # Pass the reset flag to let the plotting event handler
             # know that we are replacing the whole plot
             if title== None:
                 title = "Analytical model 1D "
             if data ==None:
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                             title= str(title), reset=True ))
+                             title=str(title), reset=True))
             else:
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                              title= str(title)))
@@ -1122,8 +1102,6 @@ class Plugin:
             wx.PostEvent( self.parent, StatusEvent(status= msg, type="stop"  ))
             return  
                   
-    
-        
     def _update2D(self, output,time=None):
         """
             Update the output of plotting model
@@ -1139,8 +1117,6 @@ class Plugin:
             Complete get the result of modelthread and create model 2D
             that can be plot.
         """
-      
-    
         err_image = numpy.zeros(numpy.shape(image))
        
         theory= Data2D(image= image , err_image= err_image)
