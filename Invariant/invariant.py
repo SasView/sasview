@@ -6,7 +6,7 @@
 import math 
 import numpy
 
-from sans.guiframe.dataFitting import Data1D as LoaderData1D
+from DataLoader.data_info import Data1D as LoaderData1D
 from DataLoader.qsmearing import smear_selection
 
 
@@ -65,28 +65,19 @@ class FitFunctor:
             @param Data: data containing x and y  such as  y = ax + b 
         """
         self.data  = data
-        x_len = len(self.data.x) -1
-        #fitting range 
-        self.qmin =  self.data.x[0]    
-        if self.qmin == 0:
-            self.qmin = Q_MINIMUM 
-    
-        self.qmax = self.data.x[x_len]
-        #Unsmeared q range
-        self._qmin_unsmeared = 0
-        self._qmax_unsmeared = self.data.x[x_len]
         
-        #bin for smear data
-        self._first_unsmeared_bin = 0
-        self._last_unsmeared_bin  = x_len
-        
-        # Identify the bin range for the unsmeared and smeared spaces
-        self.idx = (self.data.x >= self.qmin) & (self.data.x <= self.qmax)
-        self.idx_unsmeared = (self.data.x >= self._qmin_unsmeared) \
-                            & (self.data.x <= self._qmax_unsmeared)
-  
+        # Set qmin as the lowest non-zero value
+        self.qmin = Q_MINIMUM
+        for q_value in self.data.x:
+            if q_value>0: 
+                self.qmin = q_value
+                break
+        self.qmax = max(self.data.x)
+       
         #get the smear object of data
         self.smearer = smear_selection( self.data )
+        # Set the q-range information to allow smearing
+        self.set_fit_range()
       
     def set_fit_range(self ,qmin=None, qmax=None):
         """ to set the fit range"""
@@ -100,10 +91,7 @@ class FitFunctor:
         self._qmin_unsmeared = self.qmin
         self._qmax_unsmeared = self.qmax    
         
-        self._first_unsmeared_bin = 0
-        self._last_unsmeared_bin  = len(self.data.x)-1
-        
-        if self.smearer!=None:
+        if self.smearer is not None:
             self._first_unsmeared_bin, self._last_unsmeared_bin = self.smearer.get_bin_range(self.qmin, self.qmax)
             self._qmin_unsmeared = self.data.x[self._first_unsmeared_bin]
             self._qmax_unsmeared = self.data.x[self._last_unsmeared_bin]
@@ -118,34 +106,31 @@ class FitFunctor:
            Fit data for y = ax + b  return a and b
            @param power = a fixed, otherwise None
         """
-        power = power
         fx = numpy.zeros(len(self.data.x))
-        one = numpy.ones(len(self.data.x))
 
-        #define dy^2
-        try:
-            sigma = self.data.dy[self.idx_unsmeared ]
-        except:
-            print "The dy data for Invariant calculation should be prepared before get to FitFunctor.fit()..."
-            sigma = one[self.idx_unsmeared ]
-        sigma2 = sigma * sigma
+        # Uncertainty
+        if type(self.data.y)==numpy.ndarray and len(self.data.y)==len(self.data.x):
+            sigma = self.data.y
+        else:
+            sigma = numpy.ones(len(self.data.x))
 
         # Compute theory data f(x)
-        fx = self.data.y[self.idx_unsmeared ]/sigma
+        fx[self.idx_unsmeared] = self.data.y[self.idx_unsmeared]/sigma[self.idx_unsmeared]
         ## Smear theory data
         if self.smearer is not None:
             fx = self.smearer(fx, self._first_unsmeared_bin,self._last_unsmeared_bin)
         
         ##power is given only for function = power_law    
         if power != None:
+            sigma2 = sigma * sigma
             a = -(power)
-            b = (numpy.sum(fx/sigma) - a*numpy.sum(self.data.x[self.idx]/sigma2))/numpy.sum(numpy.ones(len(sigma2))/sigma2)
+            b = (numpy.sum(fx[self.idx]/sigma[self.idx]) - a*numpy.sum(self.data.x[self.idx]/sigma2[self.idx]))/numpy.sum(numpy.ones(len(sigma2[self.idx]))/sigma2[self.idx])
             return a, b
         else:
-            A = numpy.vstack([ self.data.x[self.idx]/sigma,
-                               numpy.ones(len(self.data.x[self.idx]))/sigma]).T
+            A = numpy.vstack([ self.data.x[self.idx]/sigma[self.idx],
+                               numpy.ones(len(self.data.x[self.idx]))/sigma[self.idx]]).T
            
-            a, b = numpy.linalg.lstsq(A, fx)[0]
+            a, b = numpy.linalg.lstsq(A, fx[self.idx])[0]
             return a, b
 
 class InvariantCalculator(object):
@@ -164,8 +149,8 @@ class InvariantCalculator(object):
         """
             Initialize variables
             @param data: data must be of type DataLoader.Data1D
-            @param contrast: contrast value of type float
-            @param pConst: Porod Constant of type float
+            @param background: Background value. The data will be corrected before processing
+            @param scale: Scaling factor for I(q). The data will be corrected before processing
         """
         # Background and scale should be private data member if the only way to
         # change them are by instantiating a new object.
@@ -201,17 +186,13 @@ class InvariantCalculator(object):
         if not issubclass(data.__class__, LoaderData1D):
             #Process only data that inherited from DataLoader.Data_info.Data1D
             raise ValueError,"Data must be of type DataLoader.Data1D"
-        new_data = self._scale * data - self._background
-        try:
-            #All data should pass here.
-            new_data.dy = data.dy
-            new_data.dxl = data.dxl
-            new_data.dxw = data.dxw        
-        except:
-            #in case...
-            new_data.dy = numpy.ones(len(data.x))
-            new_data.dxl = numpy.zeros(len(data.x))
-            new_data.dxw = numpy.zeros(len(data.x))       
+            
+        new_data = (self._scale * data) - self._background
+        
+        # Copy data that is not copied by the operations
+        #TODO: fix this in DataLoader
+        new_data.dxl = data.dxl
+        new_data.dxw = data.dxw        
 
         return new_data
         
@@ -409,9 +390,6 @@ class InvariantCalculator(object):
             @param data:
             note: if data doesn't contain dy assume dy= math.sqrt(data.y)
         """
-        if data is None:
-            data = self.data
-            
         if len(data.x) <= 1 or len(data.y) <= 1 or \
             len(self.data.x) != len(self.data.y):
             msg = "Length of data.x and data.y must be equal"
@@ -547,15 +525,13 @@ class InvariantCalculator(object):
         # Data boundaries for fiiting
         qmin = self._data.x[0]
         qmax = self._data.x[self._low_extrapolation_npts - 1]
-        try:
-            # fit the data with a model to get the appropriate parameters
-            a, b = self._fit(function=self._low_extrapolation_function,
-                              qmin=qmin,
-                              qmax=qmax,
-                              power=self._low_extrapolation_power)
-        except:
-            #raise
-            return None
+        
+        # Extrapolate the low-Q data
+        #TODO: this fit fails. Fix it.
+        a, b = self._fit(function=self._low_extrapolation_function,
+                          qmin=qmin,
+                          qmax=qmax,
+                          power=self._low_extrapolation_power)
         
         #q_start point
         q_start = Q_MINIMUM

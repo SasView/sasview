@@ -95,19 +95,9 @@ class TestInvPolySphere(unittest.TestCase):
         
     def test_wrong_data(self):
         """ test receiving Data1D not of type loader"""
-        # That just doesn;t make sense
-        
-        wrong_data= Data1D()
-        invariant.InvariantCalculator(wrong_data)
-        
-        try:
-            self.assertRaises(ValueError,invariant.InvariantCalculator(wrong_data))
-        except ValueError, msg:
-            print "test pass "+ str(msg)
-        else: raise ValueError, "fail to raise exception when expected"
-    
-        print "test"
-        self.assertRaises(ValueError,invariant.InvariantCalculator, wrong_data )
+
+
+        self.assertRaises(ValueError,invariant.InvariantCalculator, Data1D())
         
     def test_use_case_1(self):
         """
