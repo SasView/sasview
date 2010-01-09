@@ -115,10 +115,12 @@ class FitFunctor:
             sigma = numpy.ones(len(self.data.x))
 
         # Compute theory data f(x)
-        fx[self.idx_unsmeared] = self.data.y[self.idx_unsmeared]/sigma[self.idx_unsmeared]
+        fx[self.idx_unsmeared] = self.data.y[self.idx_unsmeared]
         ## Smear theory data
         if self.smearer is not None:
             fx = self.smearer(fx, self._first_unsmeared_bin,self._last_unsmeared_bin)
+        
+        fx[self.idx_unsmeared] = fx[self.idx_unsmeared]/sigma[self.idx_unsmeared]
         
         ##power is given only for function = power_law    
         if power != None:
