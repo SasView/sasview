@@ -8,7 +8,7 @@ from DataLoader.loader import  Loader
 from sans.invariant import invariant
 
 class Data1D:
-    print "I am not of type Dataloader.Data1D"
+    pass
     
 class TestLineFit(unittest.TestCase):
     """
@@ -95,14 +95,19 @@ class TestInvPolySphere(unittest.TestCase):
         
     def test_wrong_data(self):
         """ test receiving Data1D not of type loader"""
+        # That just doesn;t make sense
         
         wrong_data= Data1D()
+        invariant.InvariantCalculator(wrong_data)
+        
         try:
             self.assertRaises(ValueError,invariant.InvariantCalculator(wrong_data))
         except ValueError, msg:
             print "test pass "+ str(msg)
         else: raise ValueError, "fail to raise exception when expected"
     
+        print "test"
+        self.assertRaises(ValueError,invariant.InvariantCalculator, wrong_data )
         
     def test_use_case_1(self):
         """
@@ -438,21 +443,14 @@ class TestInvPinholeSmear(unittest.TestCase):
         qstar, qstar_err = inv.get_qstar_with_error(extrapolation='high')
         
         # Get the volume fraction and surface
-        try:
-            self.assertRaises(RuntimeError,
-                              inv.get_volume_fraction_with_error(contrast=2.6e-6))
-        except RuntimeError, msg:
-            print "test pass : volume fraction is not defined for this data"+ str(msg)
-        else: raise ValueError, "fail to raise exception when expected"
+        self.assertRaises(RuntimeError, inv.get_volume_fraction_with_error, 2.6e-6)
         
-        try:
-            self.assertRaises(RuntimeError,
-                 inv.get_surface_with_error(contrast=2.6e-6, porod_const=2))
-        except RuntimeError, msg:
-            print "test pass : surface is not defined for this data"+ str(msg)
-        else: raise ValueError, "fail to raise exception when expected"
+        # Check that an exception is raised when the 'surface' is not defined
+        self.assertRaises(RuntimeError, inv.get_surface_with_error, 2.6e-6, 2)
+
         # Test results
         self.assertAlmostEquals(qstar, 0.0045773,2)
+        
         
        
     def test_use_case_5(self):
@@ -471,19 +469,9 @@ class TestInvPinholeSmear(unittest.TestCase):
         qstar, qstar_err = inv.get_qstar_with_error(extrapolation='both')
         
         # Get the volume fraction and surface
-        try:
-            self.assertRaises(RuntimeError,
-                              inv.get_volume_fraction_with_error(contrast=2.6e-6))
-        except RuntimeError, msg:
-            print "test pass : volume fraction is not defined for this data"+ str(msg)
-        else: raise ValueError, "fail to raise exception when expected"
+        self.assertRaises(RuntimeError, inv.get_volume_fraction_with_error, 2.6e-6)
+        self.assertRaises(RuntimeError, inv.get_surface_with_error, 2.6e-6, 2)
         
-        try:
-            self.assertRaises(RuntimeError,
-                 inv.get_surface_with_error(contrast=2.6e-6, porod_const=2))
-        except RuntimeError, msg:
-            print "test pass : surface is not defined for this data"+ str(msg)
-        else: raise ValueError, "fail to raise exception when expected"
         # Test results
         self.assertAlmostEquals(qstar, 0.00460319,3)
       
