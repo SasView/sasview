@@ -98,12 +98,12 @@ class Schulz(CSchulz, BaseComponent):
         
         return CSchulz.runXY(self, x)
         
-    def evalDistribition(self, x = []):
+    def evalDistribution(self, x = []):
         """ Evaluate the model in cartesian coordinates
             @param x: input q[], or [qx[], qy[]]
             @return: scattering function P(q[])
         """
-        return CSchulz.evalDistribition(self, x)
+        return CSchulz.evalDistribution(self, x)
         
     def calculate_ER(self):
         """ Calculate the effective radius for P(q)*S(q)

@@ -111,12 +111,12 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
         
         return CHollowCylinderModel.runXY(self, x)
         
-    def evalDistribition(self, x = []):
+    def evalDistribution(self, x = []):
         """ Evaluate the model in cartesian coordinates
             @param x: input q[], or [qx[], qy[]]
             @return: scattering function P(q[])
         """
-        return CHollowCylinderModel.evalDistribition(self, x)
+        return CHollowCylinderModel.evalDistribution(self, x)
         
     def calculate_ER(self):
         """ Calculate the effective radius for P(q)*S(q)

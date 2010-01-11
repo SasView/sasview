@@ -133,12 +133,12 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
         
         return CCoreShellCylinderModel.runXY(self, x)
         
-    def evalDistribition(self, x = []):
+    def evalDistribution(self, x = []):
         """ Evaluate the model in cartesian coordinates
             @param x: input q[], or [qx[], qy[]]
             @return: scattering function P(q[])
         """
-        return CCoreShellCylinderModel.evalDistribition(self, x)
+        return CCoreShellCylinderModel.evalDistribution(self, x)
         
     def calculate_ER(self):
         """ Calculate the effective radius for P(q)*S(q)
