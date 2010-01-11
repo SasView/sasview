@@ -507,14 +507,6 @@ class BasicPage(wx.ScrolledWindow):
             self.state.disp_box = copy.deepcopy(self.disp_box.GetSelection())
 
         self.state.model.name= self.model.name
-        
-        #Remember fit engine_type for fit panel
-        if self.engine_type == None: 
-            self.engine_type = "scipy"
-        if self.manager !=None:
-            self.manager._on_change_engine(engine=self.engine_type)
-        
-            self.state.engine_type = self.engine_type
 
         new_state = self.state.clone()
         new_state.model.name = self.state.model.name
@@ -939,7 +931,6 @@ class BasicPage(wx.ScrolledWindow):
             except:
                 pass
             #if is_modified:
-
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
@@ -972,42 +963,7 @@ class BasicPage(wx.ScrolledWindow):
                 self._draw_model() 
                 self.Refresh()
         return is_modified
-    
-    def _update_paramv_on_fit(self):
-        """
-             make sure that update param values just before the fitting
-        """
-        #flag for qmin qmax check values
-        flag =False
-        is_modified = False
-        ##So make sure that update param values on_Fit.
-        #self._undo.Enable(True)
-        if self.model !=None:           
-            ##Check the values
-            self._check_value_enter( self.fittable_param ,is_modified)
-            self._check_value_enter( self.fixed_param ,is_modified)
-            self._check_value_enter( self.parameters ,is_modified)
-
-            # If qmin and qmax have been modified, update qmin and qmax and 
-             # Here we should check whether the boundaries have been modified.
-            # If qmin and qmax have been modified, update qmin and qmax and 
-            # set the is_modified flag to True
-            if self._validate_qrange(self.qmin, self.qmax):
-                tempmin = float(self.qmin.GetValue())
-                if tempmin != self.qmin_x:
-                    self.qmin_x = tempmin
-                tempmax = float(self.qmax.GetValue())
-                if tempmax != self.qmax_x:
-                    self.qmax_x = tempmax
-                flag = True
-            else:
-                flag = False
-        else:
-            flag = False
-            msg= "Cannot Fit :Must select a model!!!  "
-            wx.PostEvent(self.parent, StatusEvent(status = msg ))
-        
-        return flag                           
+                      
                
     def _is_modified(self, is_modified):
         """
@@ -1584,76 +1540,21 @@ class BasicPage(wx.ScrolledWindow):
             return is_modified
         for item in list:
             #skip angle parameters for 1D
-            if self.data.__class__.__name__ !="Data2D":
+            if not self.enable2D:
                 if item in self.orientation_params:
                     continue
             #try:
             name = str(item[1])
-            
-            if string.find(name,".npts") ==-1 and string.find(name,".nsigmas")==-1:      
-                ## check model parameters range             
-                param_min= None
-                param_max= None
-               
-                ## check minimun value
-                if item[5]!= None and item[5]!= "":
-                    if item[5].GetValue().lstrip().rstrip()!="":
-                        try:
-                            
-                            param_min = float(item[5].GetValue())
-                            if not self._validate_qrange(item[5],item[2]):
-                                if numpy.isfinite(param_min):
-                                    item[2].SetValue(format_number(param_min))
-                            
-                            item[5].SetBackgroundColour(wx.WHITE)
-                            item[2].SetBackgroundColour(wx.WHITE)
-                                           
-                        except:
-                            msg = "Wrong Fit parameter range entered "
-                            wx.PostEvent(self.parent, StatusEvent(status = msg))
-                            raise ValueError, msg
-                        is_modified = True
-                ## check maximum value
-                if item[6]!= None and item[6]!= "":
-                    if item[6].GetValue().lstrip().rstrip()!="":
-                        try:                          
-                            param_max = float(item[6].GetValue())
-                            if not self._validate_qrange(item[2],item[6]):
-                                if numpy.isfinite(param_max):
-                                    item[2].SetValue(format_number(param_max))  
-                            
-                            item[6].SetBackgroundColour(wx.WHITE)
-                            item[2].SetBackgroundColour(wx.WHITE)
-                        except:
-                            msg = "Wrong Fit parameter range entered "
-                            wx.PostEvent(self.parent, StatusEvent(status = msg))
-                            raise ValueError, msg
-                        is_modified = True
-                
 
-                if param_min != None and param_max !=None:
-                    if not self._validate_qrange(item[5], item[6]):
-                        msg= "Wrong Fit range entered for parameter "
-                        msg+= "name %s of model %s "%(name, self.model.name)
-                        wx.PostEvent(self.parent, StatusEvent(status = msg))
-                
-                if name in self.model.details.keys():   
-                        self.model.details[name][1:3]= param_min,param_max
-                        is_modified = True
-              
-                else:
-                        self.model.details [name] = ["",param_min,param_max] 
-                        is_modified = True
             try:     
                 value= float(item[2].GetValue())
-      
                 # If the value of the parameter has changed,
                 # +update the model and set the is_modified flag
                 if value != self.model.getParam(name) and numpy.isfinite(value):
                     self.model.setParam(name,value)
                     is_modified = True   
             except:
-                msg = "Wrong Fit parameter value entered "
+                msg = "Wrong parameter value entered "
                 wx.PostEvent(self.parent, StatusEvent(status = msg))
                 
         return is_modified 
