@@ -90,7 +90,6 @@ class FitFunctor:
         # the smeared Q range
         self._qmin_unsmeared = self.qmin
         self._qmax_unsmeared = self.qmax    
-        
         if self.smearer is not None:
             self._first_unsmeared_bin, self._last_unsmeared_bin = self.smearer.get_bin_range(self.qmin, self.qmax)
             self._qmin_unsmeared = self.data.x[self._first_unsmeared_bin]
@@ -107,10 +106,9 @@ class FitFunctor:
            @param power = a fixed, otherwise None
         """
         fx = numpy.zeros(len(self.data.x))
-
         # Uncertainty
-        if type(self.data.y)==numpy.ndarray and len(self.data.y)==len(self.data.x):
-            sigma = self.data.y
+        if type(self.data.dy)==numpy.ndarray and len(self.data.dy)==len(self.data.x):
+            sigma = self.data.dy
         else:
             sigma = numpy.ones(len(self.data.x))
 
@@ -121,7 +119,7 @@ class FitFunctor:
             fx = self.smearer(fx, self._first_unsmeared_bin,self._last_unsmeared_bin)
         
         fx[self.idx_unsmeared] = fx[self.idx_unsmeared]/sigma[self.idx_unsmeared]
-        
+
         ##power is given only for function = power_law    
         if power != None:
             sigma2 = sigma * sigma
