@@ -9,7 +9,6 @@ import numpy
 from DataLoader.data_info import Data1D as LoaderData1D
 from DataLoader.qsmearing import smear_selection
 
-
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM  = 1e-5
 
@@ -24,46 +23,47 @@ class Transform(object):
         Define interface that need to compute a function or an inverse
         function given some x, y 
     """
-    def set_value(self, a, b):
+    def transform_values(self, a, b):
         """
             set private member
         """
+        return NotImplemented
+    
     def transform_value(self, value):
         """
-            Can use one of the function transform_x2 or transform_logx
-        """
-    def transform_x2(self, value):
-        """
             @param value: float
+            return f(value)
         """
-        return value **2
-    
-    def transform_to_logx(self, value):
-        """
-            @param value: float
-        """
-        return math.log(value)
-        
+        return NotImplemented
+     
     def inverse_transform_value(self, value):
         """
             reverse transform vaalue given a specific function
             return f-1(value)
             @param value : float
         """
+        return NotImplemented
+    
     def get_extrapolated_data(self, data, q_start=Q_MINIMUM, q_end=Q_MAXIMUM):
         """
             @return extrapolate data create from data
         """
+        return NotImplemented
+    
     def transform_data(self, x):
         """
             @param x: vector of float
             @param y : vector of float
             return x, y transform given a specific function
         """
+        return NotImplemented
+    
     def inverse_transform_data(self, x, y):
         """
             reverse transform x, y given a specific function
         """
+        return NotImplemented
+    
     def transform_error(self, y , dy=None):
         if dy is None:
             dy = numpy.array([math.sqrt(j) for j in y])
@@ -95,8 +95,6 @@ class Transform(object):
         data.clone_without_data(clone=result_data)
         result_data.dxl = dxl
         result_data.dxw = dxw
-        
-       
         return result_data
   
 class Guinier(Transform):
@@ -110,34 +108,41 @@ class Guinier(Transform):
         self.radius = radius
     
     def transform_value(self, value):
-        return self.transform_x2(value)
+        """
+            Square input value
+            @param value: of type float
+        """
+        return value * value
     
-    def set_value(self, a, b):
-    	# b is the radius value of the guinier function
-     	if b >=0 :
-     		raise ValueError("Guinier fit was not converged")
-        else:
-        	b = math.sqrt(-3 * b)
+    def transform_values(self, a, b):
+    	"""
+    	   assign new value to the scale and the radius
+    	"""
+     	b = math.sqrt(-3 * b)
         a = math.exp(a)
-    
         self.scale = a
         self.radius = b
+        return a, b
         
     def transform_data(self, x):
         """
-            given a scale and a radius transform x, y using a guinier
-            function
+            return F(x)= scale* e-((radius*x)**2/3)
         """
         return self._guinier(x)
      
     def inverse_transform_data(self, x, y):
         """
-            given a scale and a radius transform x, y using a inverse guinier
-            function
+            this function finds x, y given equation1: y = ax + b
+            and equation2: y1 = scale* e-((radius*x1)**2/3).
+            where equation1, equation2 are equivalent
+            imply:  x = x1*x1
+                    y = ln(y1)
+                    b = math.exp(scale)
+                    a = -radius**2/3
+            @return  x, y
         """
         result_x = numpy.array([i * i for i in x])   
         result_y = numpy.array([math.log(j) for j in y])
-        
         return result_x, result_y 
         
     def _guinier(self, x):
@@ -154,9 +159,7 @@ class Guinier(Transform):
         # a radius of a guinier function
         if self.radius <= 0:
             raise ValueError("Rg expected positive value, but got %s"%self.radius)  
-
         value = numpy.array([math.exp(-((self.radius * i)**2/3)) for i in x ]) 
-       
         return self.scale * value
 
 class PowerLaw(Transform):
@@ -169,24 +172,27 @@ class PowerLaw(Transform):
         self.scale = scale
         self.power = power
         
-    def set_value(self, a, b):
+    def transform_values(self, a, b):
+        """
+            Assign new value to the scale and the power 
+        """
         b = -1 * b
-        if b <= 0:
-        	raise ValueError("Power_law fit expected posive power, but got %s"%power)
         a = math.exp(a)
-        self.scale = a
         self.power = b
+        self.scale = a
+        return a, b
         
-    def transform_data(self, x, a=None, b=None):
+    def transform_value(self, value):
+        """
+            compute log(value)
+        """
+        return math.log(value)
+        
+    def transform_data(self, x):
         """
             given a scale and a radius transform x, y using a power_law
             function
         """
-        if  a is not None:
-            self.scale = a
-        if  b is not None:
-            self.power = b
-            
         return self._power_law(x)
        
     def inverse_transform_data(self, x, y):
@@ -194,7 +200,7 @@ class PowerLaw(Transform):
             given a scale and a radius transform x, y using a inverse power_law
             function
         """
-        result_x = numpy.array([i * i for i in x])   
+        result_x = numpy.array([math.log(i) for i in x])   
         result_y = numpy.array([math.log(j) for j in y])
         
         return result_x, result_y 
@@ -211,7 +217,7 @@ class PowerLaw(Transform):
             @param F(x)
         """
         if self.power <= 0:
-            raise ValueError("Power_law function expected positive power, but got %s"%power)
+            raise ValueError("Power_law function expected positive power, but got %s"%self.power)
         if self.scale <= 0:
             raise ValueError("scale expected positive value, but got %s"%self.scale) 
        
@@ -296,6 +302,7 @@ class Extrapolator:
                                numpy.ones(len(self.data.x[self.idx]))/sigma[self.idx]]).T
            
             a, b = numpy.linalg.lstsq(A, fx[self.idx])[0]
+            
             return a, b
 
 class InvariantCalculator(object):
@@ -351,16 +358,11 @@ class InvariantCalculator(object):
         if not issubclass(data.__class__, LoaderData1D):
             #Process only data that inherited from DataLoader.Data_info.Data1D
             raise ValueError,"Data must be of type DataLoader.Data1D"
-            
-        new_data = (self._scale * data) - self._background
-        
-        # Copy data that is not copied by the operations
-        #TODO: fix this in DataLoader
-        #new_data.dxl = data.dxl
-        #new_data.dxw = data.dxw        
-
-        return new_data
-        
+        new_data = (self._scale * data) - self._background   
+        new_data.dxl = data.dxl
+        new_data.dxw = data.dxw 
+        return  new_data
+     
     def _fit(self, function, qmin=Q_MINIMUM, qmax=Q_MAXIMUM, power=None):
         """
             fit data with function using 
@@ -385,10 +387,11 @@ class InvariantCalculator(object):
         fit_data = LoaderData1D(x=fit_x, y=fit_y, dy=fit_dy)
         fit_data.dxl = self._data.dxl
         fit_data.dxw = self._data.dxw   
-        functor = Extrapolator(data=fit_data)
-        functor.set_fit_range(qmin=qmin, qmax=qmax)
-        b, a = functor.fit(power=power)         
-        return b, a
+        extrapolator = Extrapolator(data=fit_data)
+        extrapolator.set_fit_range(qmin=qmin, qmax=qmax)
+        b, a = extrapolator.fit(power=power) 
+        
+        return function.transform_values(a=a, b=b)
     
     def _get_qstar(self, data):
         """
@@ -501,14 +504,13 @@ class InvariantCalculator(object):
             @return: uncertainty
         """
         if data is None:
-            data = self.data
-    
+            data = self._data
         if data.is_slit_smeared():
             return self._get_qstar_smear_uncertainty(data)
         else:
             return self._get_qstar_unsmear_uncertainty(data)
         
-    def _get_qstar_unsmear_uncertainty(self, data=None):
+    def _get_qstar_unsmear_uncertainty(self, data):
         """
             Compute invariant uncertainty with with pinhole data.
             This uncertainty is given as follow:
@@ -553,7 +555,7 @@ class InvariantCalculator(object):
                     sum += (data.x[i] * data.x[i] * dy[i] * dxi)**2
                 return math.sqrt(sum)
         
-    def _get_qstar_smear_uncertainty(self):
+    def _get_qstar_smear_uncertainty(self, data):
         """
             Compute invariant uncertainty with slit smeared data.
             This uncertainty is given as follow:
@@ -570,9 +572,6 @@ class InvariantCalculator(object):
           
             note: if data doesn't contain dy assume dy= math.sqrt(data.y)
         """
-        #if data is None:
-        #    data = self._data
-            
         if not data.is_slit_smeared():
             msg = "_get_qstar_smear_uncertainty need slit smear data "
             msg += "Hint :dxl= %s , dxw= %s"%(str(data.dxl), str(data.dxw))
@@ -658,24 +657,20 @@ class InvariantCalculator(object):
         # Data boundaries for fiiting
         qmin = self._data.x[0]
         qmax = self._data.x[self._low_extrapolation_npts - 1]
-        
         # Extrapolate the low-Q data
         #TODO: this fit fails. Fix it.
-        b, a = self._fit(function=self._low_extrapolation_function,
+        a, b = self._fit(function=self._low_extrapolation_function,
                           qmin=qmin,
                           qmax=qmax,
                           power=self._low_extrapolation_power)
-        
         #q_start point
         q_start = Q_MINIMUM
         if Q_MINIMUM >= qmin:
             q_start = qmin/10
-            
-        self._low_extrapolation_function.set_value(a= a, b=b)
+        
         data_min = self._low_extrapolation_function.get_extrapolated_data(data=self._data, 
                                             npts=INTEGRATION_NSTEPS,
                               q_start=q_start, q_end=qmin, smear_indice=0)
-       
         return data_min
           
     def get_extra_data_high(self):
@@ -692,23 +687,24 @@ class InvariantCalculator(object):
             
             @return: a new data of type Data1D
         """
-        # Data boundaries for fiiting
+        # Data boundaries for fitting
         x_len = len(self._data.x) - 1
-        q_start = self._data.x[x_len - (self._high_extrapolation_npts - 1)]
+        qmin = self._data.x[x_len - (self._high_extrapolation_npts - 1)]
         qmax = self._data.x[x_len]
-        smear_indice = x_len
+        q_end = Q_MAXIMUM
+        smear_indice = 0
+        if self._data.dxl is not None:
+            smear_indice = len(self._data.dxl) - 1
         
         # fit the data with a model to get the appropriate parameters
-        b, a = self._fit(function=self._high_extrapolation_function,
-                               qmin=q_start,
+        a, b = self._fit(function=self._high_extrapolation_function,
+                               qmin=qmin,
                                 qmax=qmax,
                                 power=self._high_extrapolation_power)
-  
         #create new Data1D to compute the invariant
-        self._high_extrapolation_function.set_value(a=a, b=b)
         data_max = self._high_extrapolation_function.get_extrapolated_data(data=self._data, 
                                             npts=INTEGRATION_NSTEPS,
-                                            q_start=q_start, q_end=qmax,
+                                            q_start=qmax, q_end=q_end,
                                             smear_indice=smear_indice)
         return data_max
      
