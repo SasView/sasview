@@ -2,7 +2,7 @@
     This module implements invariant and its related computations.
     @author: Gervaise B. Alina/UTK
 """
-
+#TODO: Need to decide if/how to use smearing for extrapolation
 import math 
 import numpy
 
@@ -23,80 +23,34 @@ class Transform(object):
         Define interface that need to compute a function or an inverse
         function given some x, y 
     """
-    def transform_values(self, a, b):
+    def linearize_data(self, x, y, dy=None):
+        """
+            Linearize data so that a linear fit can be performed. 
+            Filter out the data that can't be transformed.
+            @param x: array of q values
+            @param y: array of I(q) values
+            @param dy: array of dI(q) values
+        """
+        return NotImplemented
+    
+    def linearize_q_value(self, value):
+        """
+            Transform the input q-value for linearization
+        """
+        return NotImplemented
+
+    def extract_model_parameters(self, a, b):
         """
             set private member
         """
         return NotImplemented
-    
-    def transform_value(self, value):
-        """
-            @param value: float
-            return f(value)
-        """
-        return NotImplemented
      
-    def inverse_transform_value(self, value):
+    def evaluate_model(self, x):
         """
-            reverse transform vaalue given a specific function
-            return f-1(value)
-            @param value : float
+            Returns an array f(x) values where f is the Transform function.
         """
         return NotImplemented
     
-    def get_extrapolated_data(self, data, q_start=Q_MINIMUM, q_end=Q_MAXIMUM):
-        """
-            @return extrapolate data create from data
-        """
-        return NotImplemented
-    
-    def transform_data(self, x):
-        """
-            @param x: vector of float
-            @param y : vector of float
-            return x, y transform given a specific function
-        """
-        return NotImplemented
-    
-    def inverse_transform_data(self, x, y):
-        """
-            reverse transform x, y given a specific function
-        """
-        return NotImplemented
-    
-    def transform_error(self, y , dy=None):
-        if dy is None:
-            dy = numpy.array([math.sqrt(j) for j in y])
-        return dy / y
-    
-    def get_extrapolated_data(self, data, npts=INTEGRATION_NSTEPS,
-                              q_start=Q_MINIMUM, q_end=Q_MAXIMUM, smear_indice=0):
-        """
-            @return extrapolate data create from data
-        """
-        #create new Data1D to compute the invariant
-        new_x = numpy.linspace(start=q_start,
-                               stop=q_end,
-                               num=npts,
-                               endpoint=True)
-        new_y = self.transform_data(x=new_x)
-         
-        dxl = None
-        dxw = None
-        if data.dxl is not None :
-            dxl = numpy.ones(INTEGRATION_NSTEPS)
-            dxl = dxl * data.dxl[smear_indice]
-           
-        if data.dxw is not None :
-            dxw = numpy.ones(INTEGRATION_NSTEPS)
-            dxw = dxw * data.dxw[smear_indice]
-         
-        result_data = LoaderData1D(x=new_x, y=new_y)
-        data.clone_without_data(clone=result_data)
-        result_data.dxl = dxl
-        result_data.dxw = dxw
-        return result_data
-  
 class Guinier(Transform):
     """
         class of type Transform that performs operations related to guinier 
@@ -107,14 +61,41 @@ class Guinier(Transform):
         self.scale = scale
         self.radius = radius
     
-    def transform_value(self, value):
+    def linearize_data(self, x, y, dy=None):
         """
-            Square input value
-            @param value: of type float
+            Linearize data so that a linear fit can be performed. 
+            Filter out the data that can't be transformed.
+            @param x: array of q values
+            @param y: array of I(q) values
+            @param dy: array of dI(q) values
+        """
+        # Check that the vector lengths are equal
+        assert(len(x)==len(y))
+        if dy is not None:
+            assert(len(x)==len(dy))
+        else:
+            dy = numpy.array([math.sqrt(math.fabs(j)) for j in y])
+        
+        data_points = zip(x,y,dy)
+        
+        # Transform the data
+        output_points = [(self.linearize_q_value(p[0]),
+                          math.log(p[1]),
+                          p[2]/p[1]) for p in data_points if p[0]>0 and p[1]>0]
+        
+        x_out, y_out, dy_out = zip(*output_points)
+
+        return numpy.asarray(x_out), numpy.asarray(y_out), numpy.asarray(dy_out)
+    
+    def linearize_q_value(self, value):
+        """
+            Transform the input q-value for linearization
+            @param value: q-value
+            @return: q*q
         """
         return value * value
     
-    def transform_values(self, a, b):
+    def extract_model_parameters(self, a, b):
     	"""
     	   assign new value to the scale and the radius
     	"""
@@ -124,27 +105,12 @@ class Guinier(Transform):
         self.radius = b
         return a, b
         
-    def transform_data(self, x):
+    def evaluate_model(self, x):
         """
             return F(x)= scale* e-((radius*x)**2/3)
         """
         return self._guinier(x)
-     
-    def inverse_transform_data(self, x, y):
-        """
-            this function finds x, y given equation1: y = ax + b
-            and equation2: y1 = scale* e-((radius*x1)**2/3).
-            where equation1, equation2 are equivalent
-            imply:  x = x1*x1
-                    y = ln(y1)
-                    b = math.exp(scale)
-                    a = -radius**2/3
-            @return  x, y
-        """
-        result_x = numpy.array([i * i for i in x])   
-        result_y = numpy.array([math.log(j) for j in y])
-        return result_x, result_y 
-        
+             
     def _guinier(self, x):
         """
             Retrive the guinier function after apply an inverse guinier function
@@ -172,7 +138,41 @@ class PowerLaw(Transform):
         self.scale = scale
         self.power = power
         
-    def transform_values(self, a, b):
+    def linearize_data(self, x, y, dy=None):
+        """
+            Linearize data so that a linear fit can be performed. 
+            Filter out the data that can't be transformed.
+            @param x: array of q values
+            @param y: array of I(q) values
+            @param dy: array of dI(q) values
+        """
+        # Check that the vector lengths are equal
+        assert(len(x)==len(y))
+        if dy is not None:
+            assert(len(x)==len(dy))
+        else:
+            dy = numpy.array([math.sqrt(math.fabs(j)) for j in y])
+        
+        data_points = zip(x,y,dy)
+        
+        # Transform the data
+        output_points = [(self.linearize_q_value(p[0]),
+                          math.log(p[1]),
+                          p[2]/p[1]) for p in data_points if p[0]>0 and p[1]>0]
+        
+        x_out, y_out, dy_out = zip(*output_points)
+
+        return numpy.asarray(x_out), numpy.asarray(y_out), numpy.asarray(dy_out)
+        
+    def linearize_q_value(self, value):
+        """
+            Transform the input q-value for linearization
+            @param value: q-value
+            @return: log(q)
+        """
+        return math.log(value)
+    
+    def extract_model_parameters(self, a, b):
         """
             Assign new value to the scale and the power 
         """
@@ -182,29 +182,13 @@ class PowerLaw(Transform):
         self.scale = a
         return a, b
         
-    def transform_value(self, value):
-        """
-            compute log(value)
-        """
-        return math.log(value)
-        
-    def transform_data(self, x):
+    def evaluate_model(self, x):
         """
             given a scale and a radius transform x, y using a power_law
             function
         """
         return self._power_law(x)
        
-    def inverse_transform_data(self, x, y):
-        """
-            given a scale and a radius transform x, y using a inverse power_law
-            function
-        """
-        result_x = numpy.array([math.log(i) for i in x])   
-        result_y = numpy.array([math.log(j) for j in y])
-        
-        return result_x, result_y 
-    
     def _power_law(self, x):
         """
             F(x) = scale* (x)^(-power)
@@ -226,7 +210,7 @@ class PowerLaw(Transform):
 
 class Extrapolator:
     """
-        compute f(x)
+        Extrapolate I(q) distribution using a given model
     """
     def __init__(self, data):
         """
@@ -248,7 +232,7 @@ class Extrapolator:
         # Set the q-range information to allow smearing
         self.set_fit_range()
       
-    def set_fit_range(self ,qmin=None, qmax=None):
+    def set_fit_range(self, qmin=None, qmax=None):
         """ to set the fit range"""
         if qmin is not None:
             self.qmin = qmin
@@ -304,6 +288,7 @@ class Extrapolator:
             a, b = numpy.linalg.lstsq(A, fx[self.idx])[0]
             
             return a, b
+        
 
 class InvariantCalculator(object):
     """
@@ -363,7 +348,7 @@ class InvariantCalculator(object):
         new_data.dxw = data.dxw 
         return  new_data
      
-    def _fit(self, function, qmin=Q_MINIMUM, qmax=Q_MAXIMUM, power=None):
+    def _fit(self, model, qmin=Q_MINIMUM, qmax=Q_MAXIMUM, power=None):
         """
             fit data with function using 
             data= self._get_data()
@@ -378,12 +363,13 @@ class InvariantCalculator(object):
             @return b: the other parameter of the function for guinier will be radius
                     for power_law will be the power value
         """
-        transform = function
-        fit_x, fit_y = transform.inverse_transform_data(self._data.x, self._data.y)
-        fit_dy = transform.transform_error(y=self._data.y, dy=self._data.dy)
-        qmin = transform.transform_value(value=qmin)
-        qmax = transform.transform_value(value=qmax)
+        # Linearize the data in preparation for fitting
+        fit_x, fit_y, fit_dy = model.linearize_data(self._data.x, self._data.y, self._data.dy)
+      
+        qmin = model.linearize_q_value(qmin)
+        qmax = model.linearize_q_value(qmax)
         
+        # Create a new Data1D object for processing
         fit_data = LoaderData1D(x=fit_x, y=fit_y, dy=fit_dy)
         fit_data.dxl = self._data.dxl
         fit_data.dxw = self._data.dxw   
@@ -391,7 +377,7 @@ class InvariantCalculator(object):
         extrapolator.set_fit_range(qmin=qmin, qmax=qmax)
         b, a = extrapolator.fit(power=power) 
         
-        return function.transform_values(a=a, b=b)
+        return model.extract_model_parameters(a=a, b=b)
     
     def _get_qstar(self, data):
         """
@@ -632,6 +618,45 @@ class InvariantCalculator(object):
         data = self.get_extra_data_high()
         return self._get_qstar(data=data)
         
+    def _get_extrapolated_data(self, model, npts=INTEGRATION_NSTEPS,
+                              q_start=Q_MINIMUM, q_end=Q_MAXIMUM):
+        """
+            @return extrapolate data create from data
+        """
+        #create new Data1D to compute the invariant
+        q = numpy.linspace(start=q_start,
+                               stop=q_end,
+                               num=npts,
+                               endpoint=True)
+        iq = model.evaluate_model(q)
+         
+        # Determine whether we are extrapolating to high or low q-values
+        # If the data is slit smeared, get the index of the slit dimension array entry
+        # that we will use to smear the extrapolated data.
+        dxl = None
+        dxw = None
+
+        if self._data.is_slit_smeared():
+            if q_start<min(self._data.x):
+                smear_index = 0
+            elif q_end>max(self._data.x):
+                smear_index = len(self._data.x)-1
+            else:
+                raise RuntimeError, "Extrapolation can only be evaluated for points outside the data Q range"
+            
+            if self._data.dxl is not None :
+                dxl = numpy.ones(INTEGRATION_NSTEPS)
+                dxl = dxl * self._data.dxl[smear_index]
+               
+            if self._data.dxw is not None :
+                dxw = numpy.ones(INTEGRATION_NSTEPS)
+                dxw = dxw * self._data.dxw[smear_index]
+             
+        result_data = LoaderData1D(x=q, y=iq)
+        result_data.dxl = dxl
+        result_data.dxw = dxw
+        return result_data
+        
     def get_extra_data_low(self):
         """
             This method creates a new data set from the invariant calculator.
@@ -654,23 +679,23 @@ class InvariantCalculator(object):
             @return: a new data of type Data1D
         """
         
-        # Data boundaries for fiiting
+        # Data boundaries for fitting
         qmin = self._data.x[0]
         qmax = self._data.x[self._low_extrapolation_npts - 1]
+        
         # Extrapolate the low-Q data
-        #TODO: this fit fails. Fix it.
-        a, b = self._fit(function=self._low_extrapolation_function,
-                          qmin=qmin,
-                          qmax=qmax,
-                          power=self._low_extrapolation_power)
+        a, b = self._fit(model=self._low_extrapolation_function,
+                         qmin=qmin,
+                         qmax=qmax,
+                         power=self._low_extrapolation_power)
         #q_start point
         q_start = Q_MINIMUM
         if Q_MINIMUM >= qmin:
             q_start = qmin/10
         
-        data_min = self._low_extrapolation_function.get_extrapolated_data(data=self._data, 
-                                            npts=INTEGRATION_NSTEPS,
-                              q_start=q_start, q_end=qmin, smear_indice=0)
+        data_min = self._get_extrapolated_data(model=self._low_extrapolation_function,
+                                               npts=INTEGRATION_NSTEPS,
+                                               q_start=q_start, q_end=qmin)
         return data_min
           
     def get_extra_data_high(self):
@@ -692,20 +717,17 @@ class InvariantCalculator(object):
         qmin = self._data.x[x_len - (self._high_extrapolation_npts - 1)]
         qmax = self._data.x[x_len]
         q_end = Q_MAXIMUM
-        smear_indice = 0
-        if self._data.dxl is not None:
-            smear_indice = len(self._data.dxl) - 1
         
         # fit the data with a model to get the appropriate parameters
-        a, b = self._fit(function=self._high_extrapolation_function,
-                               qmin=qmin,
-                                qmax=qmax,
-                                power=self._high_extrapolation_power)
+        a, b = self._fit(model=self._high_extrapolation_function,
+                         qmin=qmin,
+                         qmax=qmax,
+                         power=self._high_extrapolation_power)
+        
         #create new Data1D to compute the invariant
-        data_max = self._high_extrapolation_function.get_extrapolated_data(data=self._data, 
-                                            npts=INTEGRATION_NSTEPS,
-                                            q_start=qmax, q_end=q_end,
-                                            smear_indice=smear_indice)
+        data_max = self._get_extrapolated_data(model=self._high_extrapolation_function,
+                                               npts=INTEGRATION_NSTEPS,
+                                               q_start=qmax, q_end=q_end)
         return data_max
      
     def set_extrapolation(self, range, npts=4, function=None, power=None):

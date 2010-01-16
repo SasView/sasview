@@ -2,6 +2,7 @@
    Implementation of the use-case from a usage perspective. 
   
 """
+#TODO: there's no test for smeared extrapolation
 import unittest
 import numpy
 from DataLoader.loader import  Loader
@@ -23,7 +24,7 @@ class TestLineFit(unittest.TestCase):
         """
         
         # Create invariant object. Background and scale left as defaults.
-        fit = invariant.FitFunctor(data=self.data)
+        fit = invariant.Extrapolator(data=self.data)
         
         ##Without holding
         a,b = fit.fit(power=None)
@@ -39,7 +40,7 @@ class TestLineFit(unittest.TestCase):
         """
         
         # Create invariant object. Background and scale left as defaults.
-        fit = invariant.FitFunctor(data=self.data)
+        fit = invariant.Extrapolator(data=self.data)
         
         #With holding a = -power =4
         a,b = fit.fit(power=-4)
@@ -61,7 +62,7 @@ class TestLineFitNoweight(unittest.TestCase):
         """
         
         # Create invariant object. Background and scale left as defaults.
-        fit = invariant.FitFunctor(data=self.data)
+        fit = invariant.Extrapolator(data=self.data)
         
         ##Without holding
         a,b = fit.fit(power=None)
@@ -77,7 +78,7 @@ class TestLineFitNoweight(unittest.TestCase):
         """
         
         # Create invariant object. Background and scale left as defaults.
-        fit = invariant.FitFunctor(data=self.data)
+        fit = invariant.Extrapolator(data=self.data)
         
         #With holding a = -power =4
         a,b = fit.fit(power=-4)

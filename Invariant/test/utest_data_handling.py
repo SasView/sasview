@@ -30,7 +30,7 @@ class TestLinearFit(unittest.TestCase):
         """
         
         # Create invariant object. Background and scale left as defaults.
-        fit = invariant.FitFunctor(data=self.data)
+        fit = invariant.Extrapolator(data=self.data)
         a,b = fit.fit()
 
         # Test results
@@ -47,7 +47,7 @@ class TestLinearFit(unittest.TestCase):
             self.data.y[i] = self.data.y[i]+.1*random.random()
             
         # Create invariant object. Background and scale left as defaults.
-        fit = invariant.FitFunctor(data=self.data)
+        fit = invariant.Extrapolator(data=self.data)
         a,b = fit.fit()
 
         # Test results
@@ -112,7 +112,7 @@ class TestGuinierExtrapolation(unittest.TestCase):
             verify that we obtain the scale and rg parameters
         """
         self.scale = 1.5
-        self.rg = 70.0
+        self.rg = 30.0
         x = numpy.arange(0.0001, 0.1, 0.0001)
         y = numpy.asarray([self.scale * math.exp( -(q*self.rg)**2 / 3.0 ) for q in x])
         dy = y*.1
@@ -128,14 +128,14 @@ class TestGuinierExtrapolation(unittest.TestCase):
         inv.set_extrapolation(range='low', npts=20, function='guinier')
         
         self.assertEqual(inv._low_extrapolation_npts, 20)
-        self.assertEqual(inv._low_extrapolation_function.__name__, 'guinier')
+        self.assertEqual(inv._low_extrapolation_function.__class__, invariant.Guinier)
         
         # Data boundaries for fiiting
         qmin = inv._data.x[0]
         qmax = inv._data.x[inv._low_extrapolation_npts - 1]
         
         # Extrapolate the low-Q data
-        a, b = inv._fit(function=inv._low_extrapolation_function,
+        a, b = inv._fit(model=inv._low_extrapolation_function,
                           qmin=qmin,
                           qmax=qmax,
                           power=inv._low_extrapolation_power)
@@ -171,18 +171,38 @@ class TestPowerLawExtrapolation(unittest.TestCase):
         inv.set_extrapolation(range='low', npts=20, function='power_law')
         
         self.assertEqual(inv._low_extrapolation_npts, 20)
-        self.assertEqual(inv._low_extrapolation_function.__name__, 'power_law')
+        self.assertEqual(inv._low_extrapolation_function.__class__, invariant.PowerLaw)
         
         # Data boundaries for fitting
         qmin = inv._data.x[0]
         qmax = inv._data.x[inv._low_extrapolation_npts - 1]
         
         # Extrapolate the low-Q data
-        a, b = inv._fit(function=inv._low_extrapolation_function,
+        a, b = inv._fit(model=inv._low_extrapolation_function,
                           qmin=qmin,
                           qmax=qmax,
                           power=inv._low_extrapolation_power)
         
         self.assertAlmostEqual(self.scale, a, 6)
         self.assertAlmostEqual(self.m, b, 6)
+        
+class TestLinearization(unittest.TestCase):
+    
+    def test_guinier_incompatible_length(self):
+        g = invariant.Guinier()
+        self.assertRaises(AssertionError, g.linearize_data, [1],[1,2],None)
+        self.assertRaises(AssertionError, g.linearize_data, [1,2],[1,2],[1])
+    
+    def test_linearization(self):
+        """
+            Check that the linearization process filters out points
+            that can't be transformed
+        """
+        x = numpy.asarray(numpy.asarray([0,1,2,3]))
+        y = numpy.asarray(numpy.asarray([1,1,1,1]))
+        g = invariant.Guinier()
+        x_out, y_out, dy_out = g.linearize_data(x,y,None)
+        self.assertEqual(len(x_out), 3)
+        self.assertEqual(len(y_out), 3)
+        self.assertEqual(len(dy_out), 3)
     
