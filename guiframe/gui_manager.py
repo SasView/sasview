@@ -517,7 +517,7 @@ class ViewerFrame(wx.Frame):
             if len(pers)>0:
                 n_panels += 1
        
-        if n_panels>5:
+        if n_panels>2:
             viewmenu = wx.Menu()
             for plug in self.plugins:
                 plugmenu = wx.Menu()
@@ -688,38 +688,39 @@ class ViewerFrame(wx.Frame):
     def _check_update(self, event=None): 
         """
             Check with the deployment server whether a new version
-            of the application is available
+            of the application is available.
+            A thread is started for the connecting with the server. The thread calls
+            a call-back method when the current version number has been obtained.
         """
-        import urllib
-        try: 
-            h = urllib.urlopen(config.__update_URL__)
-            lines = h.readlines()
-            line = ''
-            if len(lines)>0:
-                line = lines[0]
-                
-                toks = line.lstrip().rstrip().split('.')
-                toks_current = config.__version__.split('.')
-                update_available = False
-                for i in range(len(toks)):
-                    if len(toks[i].strip())>0:
-                        if int(toks[i].strip())>int(toks_current[i]):
-                            update_available = True
-                if update_available:
-                    #print "Version %s is available" % line.rstrip().lstrip()
-                    self.SetStatusText("Version %s is available! See the Help menu to download it." % line.rstrip().lstrip())
-                    if event != None:
-                        import webbrowser
-                        webbrowser.open(config.__download_page__)
-                else:
-                    if event != None:
-                        self.SetStatusText("You have the latest version of %s" % config.__appname__)
+        import version
+        checker = version.VersionThread(config.__update_URL__, self._process_version, baggage=event==None)
+        checker.start()  
+    
+    def _process_version(self, version, standalone=True):
+        """
+            Call-back method for the process of checking for updates.
+            This methods is called by a VersionThread object once the current
+            version number has been obtained. If the check is being done in the
+            background, the user will not be notified unless there's an update.
+            
+            @param version: version string
+            @param standalone: True of the update is being checked in the background, False otherwise.
+        """
+        try:
+            if cmp(version, config.__version__)>0:
+                self.SetStatusText("Version %s is available! See the Help menu to download it." % version)
+                if not standalone:
+                    import webbrowser
+                    webbrowser.open(config.__download_page__)
+            else:
+                if not standalone:
+                    self.SetStatusText("You have the latest version of %s" % config.__appname__)
         except:
             logging.error("guiframe: could not get latest application version number\n  %s" % sys.exc_value)
-            if event != None:
-                self.SetStatusText("You have the latest version of %s" % config.__appname__)
-            
-            
+            if not standalone:
+                self.SetStatusText("Could not connect to the application server. Please try again later.")
+                    
+        
     def _onAbout(self, evt):
         """
             Pop up the about dialog
