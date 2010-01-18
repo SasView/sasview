@@ -16,6 +16,8 @@ How-to build an application using guiframe:
      - A plug-in should define a class called Plugin. See abstract class below.
 
 """
+#TODO: rewrite the status bar monstrosity
+
 import wx
 import wx.aui
 import os, sys
@@ -59,14 +61,16 @@ class Plugin:
             perspectives/Foo/Foo.py contains the definition of the Plugin
             class for the Foo plug-in. The interface of that Plugin class
             should follow the interface of the class you are looking at.
+            
+        See dummyapp.py for a plugin example.
     """
     
-    def __init__(self):
+    def __init__(self, name="Test_plugin"):
         """
             Abstract class for gui_manager Plugins.
         """
         ## Plug-in name. It will appear on the application menu.
-        self.sub_menu = "Plugin"        
+        self.sub_menu = name     
         
         ## Reference to the parent window. Filled by get_panels() below.
         self.parent = None
@@ -75,7 +79,6 @@ class Plugin:
         #  for your plug-in. This defines your plug-in "perspective"
         self.perspective = []
         
-        raise RuntimeError, "gui_manager.Plugin is an abstract class"
         
     def populate_menu(self, id, parent):
         """
@@ -86,20 +89,7 @@ class Plugin:
             @param parent: parent window
             @return: plug-in menu
         """
-        import wx
-        # Create a menu
-        plug_menu = wx.Menu()
-
-        # Always get event IDs from wx
-        id = wx.NewId()
-        
-        # Fill your menu
-        plug_menu.Append(id, '&Do something')
-        wx.EVT_MENU(owner, id, self._on_do_something)
-    
-        # Returns the menu and a name for it.
-        return [(id, plug_menu, "name of the application menu")]
-    
+        return []
     
     def get_panels(self, parent):
         """
@@ -116,14 +106,15 @@ class Plugin:
         ## Save a reference to the parent
         self.parent = parent
         
-        # Define a panel
-        defaultpanel = DefaultPanel(self.parent, -1)
-        
-        # If needed, add its name to the perspective list
-        self.perspective.append(self.control_panel.window_name)
-
         # Return the list of panels
-        return [defaultpanel]
+        return []
+    
+    def get_tools(self):
+        """
+            Returns a set of menu entries for tools
+        """
+        return []
+        
     
     def get_context_menu(self, graph=None):
         """
@@ -145,9 +136,7 @@ class Plugin:
             @param graph: the Graph object to which we attach the context menu
             @return: a list of menu items with call-back function
         """
-        return [["Menu text", 
-                 "Tool-tip help text", 
-                 self._on_context_do_something]]      
+        return []
     
     def get_perspective(self):
         """
@@ -292,15 +281,6 @@ class ViewerFrame(wx.Frame):
             @return: list of plug-ins
         """
         import imp
-        #print "Looking for plug-ins in %s" % dir
-        # List of plug-in objects
-        
-        #path_exe = os.getcwd()
-        #path_plugs = os.path.join(path_exe, dir)
-        f = open("load.log",'w') 
-        f.write(os.getcwd()+'\n\n')
-        #f.write(str(os.listdir(dir))+'\n')
-        
         
         plugins = []
         # Go through files in panels directory
@@ -319,32 +299,27 @@ class ViewerFrame(wx.Frame):
                     file = None
                     try:
                         if toks[1]=='':
-                            f.write("trying to import \n")
                             mod_path = '.'.join([dir, name])
-                            f.write("mod_path= %s\n" % mod_path)
                             module = __import__(mod_path, globals(), locals(), [name])
-                            f.write(str(module)+'\n')
                         else:
                             (file, path, info) = imp.find_module(name, path)
                             module = imp.load_module( name, file, item, info )
                         if hasattr(module, "PLUGIN_ID"):
                             try:
                                 plugins.append(module.Plugin())
-                                print "Found plug-in: %s" % module.PLUGIN_ID
+                                logging.info("Found plug-in: %s" % module.PLUGIN_ID)
                             except:
                                 config.printEVT("Error accessing PluginPanel in %s\n  %s" % (name, sys.exc_value))
                         
                     except:
                         print sys.exc_value
-                        f.write(str(sys.exc_value)+'\n')
+                        logging.error("ViewerFrame._find_plugins: %s" % sys.exc_value)
                     finally:
                         if not file==None:
                             file.close()
         except:
             # Should raise and catch at a higher level and display error on status bar
             pass   
-        f.write(str(plugins)+'\n')
-        f.close()
         return plugins
     
     def set_welcome_panel(self, panel_class):
@@ -539,7 +514,7 @@ class ViewerFrame(wx.Frame):
 
         # Perspective
         # Attach a menu item for each defined perspective.
-        # Only add the perspective menu if there are more than one perspectves
+        # Only add the perspective menu if there are more than one perspectives
         n_perspectives = 0
         for plug in self.plugins:
             if len(plug.get_perspective()) > 0:
@@ -553,6 +528,21 @@ class ViewerFrame(wx.Frame):
                     p_menu.Append(id, plug.sub_menu, "Switch to %s perspective" % plug.sub_menu)
                     wx.EVT_MENU(self, id, plug.on_perspective)
             menubar.Append(p_menu,   '&Perspective')
+ 
+        # Tools menu
+        # Go through plug-ins and find tools to populate the tools menu
+        toolsmenu = None
+        for item in self.plugins:
+            if hasattr(item, "get_tools"):
+                for tool in item.get_tools():
+                    # Only create a menu if we have at least one tool
+                    if toolsmenu is None:
+                        toolsmenu = wx.Menu()
+                    id = wx.NewId()
+                    toolsmenu.Append(id, tool[0], tool[1])
+                    wx.EVT_MENU(self, id, tool[2])
+        if toolsmenu is not None:
+            menubar.Append(toolsmenu, '&Tools')
  
         # Help menu
         helpmenu = wx.Menu()
@@ -692,9 +682,10 @@ class ViewerFrame(wx.Frame):
             A thread is started for the connecting with the server. The thread calls
             a call-back method when the current version number has been obtained.
         """
-        import version
-        checker = version.VersionThread(config.__update_URL__, self._process_version, baggage=event==None)
-        checker.start()  
+        if hasattr(config, "__update_URL__"):
+            import version
+            checker = version.VersionThread(config.__update_URL__, self._process_version, baggage=event==None)
+            checker.start()  
     
     def _process_version(self, version, standalone=True):
         """
