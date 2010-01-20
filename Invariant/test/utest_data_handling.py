@@ -304,18 +304,6 @@ class TestDataExtraLowSlit(unittest.TestCase):
         #low data . expect the fit engine to have been already called and the guinier
         # to have the radius and the scale fitted
         
-        test_y = numpy.zeros(len(self.data.x))
-        smearer = smear_selection(self.data)
-        first_bin, last_bin = smearer.get_bin_range(min(self.data.x),
-                                                         max(self.data.x))
-        test_y[first_bin:last_bin] = inv._low_extrapolation_function.evaluate_model(self.data.x[first_bin:last_bin])
-        test_y = smearer(test_y, first_bin, last_bin) 
-        
-        for i in range(len(self.data.x)):
-            value  = math.fabs(test_y[i]-reel_y[i])/reel_y[i]
-            self.assert_(value < 0.001)
-            
-        # test data coming out of the invariant 
         test_y = inv._low_extrapolation_function.evaluate_model(x=self.data.x)
         for i in range(len(self.data.x)):
             value  = math.fabs(test_y[i]-reel_y[i])/reel_y[i]
