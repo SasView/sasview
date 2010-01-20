@@ -452,16 +452,16 @@ class Plugin:
                     fproblemId += 1 
                     self.current_pg= page
             except:
-                msg= "%s error: %s" % (engineType,sys.exc_value)
-                wx.PostEvent(self.parent, StatusEvent(status= msg ))
-                return 
+                raise
+                #msg= "%s error: %s" % (engineType,sys.exc_value)
+                #wx.PostEvent(self.parent, StatusEvent(status= msg ))
+                #return 
             
         #Do the simultaneous fit
         try:
             ## If a thread is already started, stop it
-            if self.calc_fit!= None and self.calc_fit.isrunning():
-                return
-                self.calc_fit.stop()
+            #if self.calc_fit!= None and self.calc_fit.isrunning():
+            #    self.calc_fit.stop()
             
             wx.PostEvent(self.parent, StatusEvent(status="Start the computation",
                                         curr_thread=self.calc_fit,type="start"))
@@ -470,38 +470,41 @@ class Plugin:
                                         curr_thread=self.calc_fit,type="progress"))
             time.sleep(0.5)
             ## perform single fit
-            if self._fit_engine=="scipy":
+            if fitproblem_count == 1:
                 #qmin, qmax= self.current_pg.get_range()
-                self.calc_fit=FitThread(parent =self.parent,
+                print "went here fitproblem_count == 1",fitproblem_count == 1
+                calc_fit=FitThread(parent =self.parent,
                                         fn= self.fitter,
                                        cpage=self.current_pg,
                                        pars= pars,
                                        completefn= self._single_fit_completed,
                                        updatefn=self._updateFit)
+                
                       
             else:
                 ## Perform more than 1 fit at the time
-                self.calc_fit=FitThread(parent =self.parent,
+                calc_fit=FitThread(parent =self.parent,
                                         fn= self.fitter,
                                        completefn= self._simul_fit_completed,
                                        updatefn=self._updateFit)
             
-            self.calc_fit.queue()
-            self.ready_fit()
+            calc_fit.queue()
+            self.ready_fit(calc_fit=calc_fit)
             
         except FitAbort:
             print "in pluging"
         except:
-            msg= "%s error: %s" % (engineType,sys.exc_value)
-            wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
-            return 
+            raise
+        #    msg= "%s error: %s" % (engineType,sys.exc_value)
+        #    wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
+        #    return 
         
-    def ready_fit(self):
+    def ready_fit(self, calc_fit):
         """
         Ready for another fit
         """
         if self.fitproblem_count != None and self.fitproblem_count > 1:
-            self.calc_fit.ready(2.5)
+            calc_fit.ready(2.5)
             
         else:
             time.sleep(0.4)
@@ -625,14 +628,15 @@ class Plugin:
             
             self.fitter.set_data(data=metadata,Uid=self.fit_id,
                                  smearer=smearer,qmin= qmin,qmax=qmax )
-           
+            print "self.fitter.set_data"
             self.fitter.select_problem_for_fit(Uid= self.fit_id,
                                                value= value.get_scheduled())
             value.clear_model_param()
         except:
-            msg= title +" error: %s" % sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
-            return
+            raise
+            #msg= title +" error: %s" % sys.exc_value
+            #wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+            #return
        
     def _onSelect(self,event):
         """ 
@@ -774,9 +778,10 @@ class Plugin:
                              qmin= qmin, qmax= qmax)
             """
         except:
-            msg= "Single Fit completed but Following error occurred:%s"% sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
-            return
+            raise
+            #msg= "Single Fit completed but Following error occurred:%s"% sys.exc_value
+            #wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+            #return
        
        
     def _simul_fit_completed(self,result,pars=None,cpage=None, elapsed=None):
@@ -826,10 +831,11 @@ class Plugin:
                     # Display result on each page 
                     page.onsetValues(result.fitness, small_param_name,small_out,small_cov)
         except:
-             msg= "Simultaneous Fit completed"
-             msg +=" but Following error occurred:%s"%sys.exc_value
-             wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
-             return 
+            raise
+             #msg= "Simultaneous Fit completed"
+             #msg +=" but Following error occurred:%s"%sys.exc_value
+             #wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+             #return 
              
                            
         

@@ -154,7 +154,7 @@ class FitThread(CalcThread):
         
         except :
             #Stop on exception during fitting. Todo: need to put some mssg and reset progress bar.
-            msg= " Fit Error occurred... %s"%sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status= msg,type="stop"))
-            #raise
+            #msg= " Fit Error occurred... %s"%sys.exc_value
+            #wx.PostEvent(self.parent, StatusEvent(status= msg,type="stop"))
+            raise
     
