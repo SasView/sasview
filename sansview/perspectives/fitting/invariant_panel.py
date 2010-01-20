@@ -36,7 +36,7 @@ else:
     PANEL_HEIGHT = 700
     FONT_VARIANT = 1
     
-class InvariantPanel(wx.Panel):
+class InvariantPanel(wx.ScrolledWindow):
     """
         Provides the Invariant GUI.
     """
@@ -47,7 +47,7 @@ class InvariantPanel(wx.Panel):
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
     def __init__(self, parent, data=None, base=None):
-        wx.Panel.__init__(self, parent)
+        wx.ScrolledWindow.__init__(self, parent, style= wx.FULL_REPAINT_ON_RESIZE )
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         #Object that receive status event
@@ -60,6 +60,7 @@ class InvariantPanel(wx.Panel):
         self.data = data
         #Draw the panel
         self._do_layout()
+        self.SetScrollbars(20,20,25,65)
         self.SetAutoLayout(True)
         self.Layout()
        
@@ -280,20 +281,22 @@ class InvariantPanel(wx.Panel):
         data_range_txt = wx.StaticText(self, -1, "Range : ")
         data_range_value_txt = wx.StaticText(self, -1, str(data_range))
         
-        background_txt = wx.StaticText(self, -1, 'Background')
+        background_txt = wx.StaticText(self, -1, 'Background (Optional)')
         self.background_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.background_ctl.SetValue(str(BACKGROUND))
         self.background_ctl.SetToolTipString("Background to subtract to data.")
-        scale_txt = wx.StaticText(self, -1, 'Scale')
+        scale_txt = wx.StaticText(self, -1, 'Scale (Optional)')
         self.scale_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.scale_ctl.SetValue(str(SCALE))
         self.scale_ctl.SetToolTipString("Scale to apply to data.")
-        contrast_txt = wx.StaticText(self, -1, 'Contrast')
+        contrast_txt = wx.StaticText(self, -1, 'Contrast (Optional)')
         self.contrast_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.contrast_ctl.SetToolTipString("Contrast in q range.")
-        porod_const_txt = wx.StaticText(self, -1, 'Porod Constant')
+        msg_hint = "Enter a value for the contrast to get the volume fraction"
+        self.contrast_ctl.SetToolTipString(str(msg_hint))
+        porod_const_txt = wx.StaticText(self, -1, 'Porod Constant(Optional)')
         self.porod_const_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.porod_const_ctl.SetToolTipString("Invariant in q range.")
+        msg_hint ="Need both the contrast and surface to get the surface"
+        self.porod_const_ctl.SetToolTipString(str(msg_hint))
        
         sizer_input.Add(data_txt, 0, wx.LEFT, 5)
         sizer_input.Add(data_name_txt)
@@ -334,6 +337,9 @@ class InvariantPanel(wx.Panel):
         npts_low_txt = wx.StaticText(self, -1, 'Npts')
         self.npts_low_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/3, -1))
         self.npts_low_ctl.SetValue(str(NPTS))
+        msg_hint = "the number of first q points to consider"
+        msg_hint +="during the fit for extrapolation at low Q"
+        self.npts_low_ctl.SetToolTipString(msg_hint)
         self.power_low_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/3, -1))
         self.power_low_ctl.SetValue(str(self.power_law_exponant))
         self.power_low_ctl.SetToolTipString(power_hint_txt)
@@ -362,12 +368,16 @@ class InvariantPanel(wx.Panel):
         sizer_high_q = wx.GridBagSizer(5,5)
         self.power_law_high = wx.RadioButton(self, -1, 'Power_law',
                                               (10, 10), style=wx.RB_GROUP)
-        #self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param,
-        #           id=self.power_law_high.GetId())
+        msg_hint ="Check it to extrapolate data to high Q"
+        self.power_law_high.SetToolTipString(msg_hint)
+       
         #MAC needs SetValue
         self.power_law_high.SetValue(True)
         npts_high_txt = wx.StaticText(self, -1, 'Npts')
         self.npts_high_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/3, -1))
+        msg_hint = "the number of last q points to consider"
+        msg_hint += "during the fit for extrapolation high Q"
+        self.npts_high_ctl.SetToolTipString(msg_hint)
         self.npts_high_ctl.SetValue(str(NPTS))
         self.power_high_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/3, -1))
         self.power_high_ctl.SetValue(str(self.power_law_exponant))
@@ -403,11 +413,26 @@ class InvariantPanel(wx.Panel):
         #-------------Enable extrapolation-------
         extra_hint = "Extrapolation Maximum Range: "
         extra_hint_txt= wx.StaticText(self, -1,extra_hint )
-        enable_sizer = wx.BoxSizer(wx.HORIZONTAL)
         extra_range = "[%s - %s]"%(str(Q_MINIMUM), str(Q_MAXIMUM))
         extra_range_value_txt = wx.StaticText(self, -1, str(extra_range))
-        enable_sizer.Add(extra_hint_txt, 0, wx.ALL, 5)
-        enable_sizer.Add(extra_range_value_txt, 0, wx.ALL, 5)
+        extra_enable_hint = "Hint: Check any box to enable a specific extrapolation !"
+        extra_enable_hint_txt= wx.StaticText(self, -1, extra_enable_hint )
+        #enable_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        enable_sizer = wx.GridBagSizer(5,5)
+        #enable_sizer.Add(extra_hint_txt, 0, wx.ALL, 5)
+        #enable_sizer.Add(extra_range_value_txt, 0, wx.ALL, 5)
+        
+        iy = 0
+        ix = 0
+        enable_sizer.Add(extra_hint_txt,(iy, ix),(1,1),
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        enable_sizer.Add(extra_range_value_txt, (iy, ix), (1,1),
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix = 0
+        iy += 1
+        enable_sizer.Add(extra_enable_hint_txt,(iy, ix),(1,1),
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
         type_extrapolation_sizer = wx.BoxSizer(wx.HORIZONTAL)
         type_extrapolation_sizer.Add((10,10))
@@ -441,8 +466,8 @@ class InvariantPanel(wx.Panel):
         invariant_total_txt = wx.StaticText(self, -1, 'Invariant Total')
         self.invariant_total_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_total_ctl.SetEditable(False)
-        self.invariant_total_ctl.SetToolTipString("Invariant in q range and extra\
-                   polated range.")
+        msg_hint = "Invariant in q range and extra polated range."
+        self.invariant_total_ctl.SetToolTipString(msg_hint)
         self.invariant_total_err_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_total_err_ctl.SetEditable(False)
         self.invariant_total_err_ctl.SetToolTipString("Uncertainty on invariant.")
@@ -594,7 +619,7 @@ class InvariantDialog(wx.Dialog):
         self.Show(True)
         
 class InvariantWindow(wx.Frame):
-    def __init__(self, parent=None, id=1,data=None, title="SLD Calculator",base=None):
+    def __init__(self, parent=None, id=1,data=None, title="Invariant",base=None):
         wx.Frame.__init__(self, parent, id, title, size=( PANEL_WIDTH,
                                                              PANEL_HEIGHT))
         
