@@ -21,7 +21,7 @@ class Fit:
         engine.set_data(data,Uid)
         engine.set_param( model,model.name, pars)
         engine.set_model(model,Uid)
-        
+        engine.select_problem_for_fit(Uid,value)
         chisqr1, out1, cov1=engine.fit(pars,qmin,qmax)
     """  
     def __init__(self, engine='scipy'):

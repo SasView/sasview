@@ -1,4 +1,6 @@
 import logging, sys
+import copy
+from copy import deepcopy
 import park,numpy,math, copy
 from DataLoader.data_info import Data1D
 from DataLoader.data_info import Data2D
@@ -78,7 +80,10 @@ class Model(park.Model):
         self.parameterset = park.ParameterSet(sans_model.name,pars=self.parkp)
         self.pars=[]
   
-  
+    def clone(self):
+        model = self.model.clone()
+        model.name = self.model.name
+        return Model(model)
     def getParams(self,fitparams):
         """
             return a list of value of paramter to fit
@@ -336,14 +341,14 @@ class SansAssembly:
     """
          Sans Assembly class a class wrapper to be call in optimizer.leastsq method
     """
-    def __init__(self,paramlist,Model=None , Data=None, curr_thread= None):
+    def __init__(self,paramlist,model=None , data=None, curr_thread= None):
         """
-            @param Model: the model wrapper fro sans -model
-            @param Data: the data wrapper for sans data
+            @param model: the model wrapper for sans -model
+            @param data: the data wrapper for sans data
         """
-        self.model = Model
-        self.data  = Data
-        self.paramlist=paramlist
+        self.model = model.clone()
+        self.data  = deepcopy(data)
+        self.paramlist = deepcopy(paramlist)
         self.curr_thread= curr_thread
         self.res=[]
         self.func_name="Functor"
@@ -456,10 +461,12 @@ class FitEngine:
         """
         if model == None:
             raise ValueError, "AbstractFitEngine: Need to set model to fit"
-        
-        new_model= model
-        if not issubclass(model.__class__, Model):
-            new_model= Model(model)
+        #print "set_model",model.name
+        #new_model= deepcopy(model)
+        new_model = model.clone()
+        new_model.name = model.name
+        if not issubclass(new_model.__class__, Model):
+            new_model= Model(new_model)
         
         if len(constraints)>0:
             for constraint in constraints:
@@ -505,11 +512,12 @@ class FitEngine:
             @param data: data added
             @param Uid: unique key corresponding to a fitArrange object with data
         """
+        #print "set_data",data.__class__.__name__
         if data.__class__.__name__=='Data2D':
             fitdata=FitData2D(sans_data2d=data, data=data.data, err_data= data.err_data)
         else:
             fitdata=FitData1D(x=data.x, y=data.y , dx= data.dx,dy=data.dy,smearer=smearer)
-       
+        
         fitdata.setFitRange(qmin=qmin,qmax=qmax)
         #A fitArrange is already created but contains model only at Uid
         if self.fitArrangeDict.has_key(Uid):
@@ -577,6 +585,7 @@ class FitArrange:
             @param model: the model being set
         """
         self.model = model
+        self.model.name = model.name
         
     def add_data(self,data):
         """ 

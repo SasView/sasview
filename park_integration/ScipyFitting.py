@@ -55,35 +55,45 @@ class ScipyFit(FitEngine):
             Creates a dictionary (self.fitArrangeDict={})of FitArrange elements
             with Uid as keys
         """
-        self.fitArrangeDict={}
-        self.paramList=[]
+        self.fitArrangeDict = {}
+        self.paramList = []
     #def fit(self, *args, **kw):
     #    return profile(self._fit, *args, **kw)
-
-    def fit(self ,q=None,handler=None,curr_thread= None):
-       
-        fitproblem=[]
-        for id ,fproblem in self.fitArrangeDict.iteritems():
-            if fproblem.get_to_fit()==1:
-                fitproblem.append(fproblem)
-        if len(fitproblem)>1 : 
+    def createFunctor(self):
+        fitproblem=None
+        fit_count = 0 
+        #print " self.fitArrangeDict", self.fitArrangeDict
+        for id, fproblem in self.fitArrangeDict.iteritems():
+            if fproblem.get_to_fit() == 1:
+                fitproblem = fproblem
+                fit_count += 1
+        if fit_count > 1 : 
             raise RuntimeError, "Scipy can't fit more than a single fit problem at a time."
             return
-        elif len(fitproblem)==0 : 
+        elif fit_count == 0 : 
             raise RuntimeError, "No Assembly scheduled for Scipy fitting."
             return
     
-        listdata=[]
-        model = fitproblem[0].get_model()
-        listdata = fitproblem[0].get_data()
+        listdata = []
+        model = fitproblem.get_model().clone()
+        data = fitproblem.get_data()
+        
         # Concatenate dList set (contains one or more data)before fitting
         #data=self._concatenateData( listdata)
-        data=listdata
-        self.curr_thread= curr_thread
+        #data = listdata
+        #self.curr_thread= curr_thread
 
         #try:
-        functor= SansAssembly(self.paramList,model,data, curr_thread= self.curr_thread)
-        out, cov_x, info, mesg, success = optimize.leastsq(functor,model.getParams(self.paramList), full_output=1, warning=True)
+        functor = SansAssembly(self.paramList, model, data)#, curr_thread= curr_thread)
+        return functor , model
+
+    def fit(self, q=None, handler=None, curr_thread=None):
+        
+        functor , model = self.createFunctor()
+        
+        out, cov_x, info, mesg, success = optimize.leastsq(functor,
+                                                model.getParams(self.paramList), 
+                                                full_output=1, warning=True)
         
         chisqr = functor.chisq(out)
         
@@ -97,14 +107,14 @@ class ScipyFit(FitEngine):
                 result.stderr  = stderr
                 result.pvec = out
                 result.success = success
-                if q !=None:
+                if q is not None:
                     print "went here"
                     q.put(result)
                     print "get q scipy fit enfine",q.get()
                     return q
                 return result
         else:  
-            raise ValueError, "SVD did not converge"+str(success)
+            raise ValueError, "SVD did not converge" + str(success)
         #except FitAbort:
             ## fit engine is stop
         #    return None
