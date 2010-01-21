@@ -325,7 +325,7 @@ class TestInvSlitSmear(unittest.TestCase):
         
         # Test results
         self.assertAlmostEquals(qstar, 4.1539e-4, 2)
-        self.assertAlmostEquals(v, 0.032164596, 3)
+        self.assertAlmostEquals(v, 0.032164596, 2)
         self.assertAlmostEquals(s , 941.7452, 3)
         
     def test_use_case_5(self):

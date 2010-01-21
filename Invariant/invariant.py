@@ -23,16 +23,59 @@ class Transform(object):
         Define interface that need to compute a function or an inverse
         function given some x, y 
     """
-    def linearize_data(self, x, y, dy=None):
+    
+    def linearize_data(self, data):
         """
             Linearize data so that a linear fit can be performed. 
             Filter out the data that can't be transformed.
-            @param x: array of q values
-            @param y: array of I(q) values
-            @param dy: array of dI(q) values
+            @param data : LoadData1D instance
+        """
+        # Check that the vector lengths are equal
+        assert(len(data.x)==len(data.y))
+        if data.dy is not None:
+            assert(len(data.x)==len(data.dy))
+            dy = data.dy
+        else:
+            dy = numpy.array([math.sqrt(math.fabs(j)) for j in data.y])
+        # Transform smear info 
+        dxl_out = None
+        dxw_out = None
+        dx_out = None
+        first_x = data.x#[0] 
+        #if first_x == 0:
+        #    first_x = data.x[1]
+            
+           
+        data_points = zip(data.x, data.y, dy)
+        
+        # Transform the data
+        output_points = [(self.linearize_q_value(p[0]),
+                          math.log(p[1]),
+                          p[2]/p[1]) for p in data_points if p[0]>0 and p[1]>0]
+        
+        x_out, y_out, dy_out = zip(*output_points)
+       
+        #Transform smear info    
+        if data.dxl is not None  and len(data.dxl)>0:
+            dxl_out = self.linearize_dq_value(x=x_out, dx=data.dxl[:len(x_out)])
+        if data.dxw is not None and len(data.dxw)>0:
+            dxw_out = self.linearize_dq_value(x=x_out, dx=data.dxw[:len(x_out)])
+        if data.dx is not None  and len(data.dx)>0:
+            dx_out = self.linearize_dq_value(x=x_out, dx=data.dx[:len(x_out)])
+        x_out = numpy.asarray(x_out)
+        y_out = numpy.asarray(y_out)
+        dy_out = numpy.asarray(dy_out)
+        linear_data = LoaderData1D(x=x_out, y=y_out, dx=dx_out, dy=dy_out)
+        linear_data.dxl = dxl_out
+        linear_data.dxw = dxw_out
+        
+        return linear_data
+    def linearize_dq_value(self, x, dx):
+        """
+            Transform the input dq-value for linearization
         """
         return NotImplemented
-    
+
     def linearize_q_value(self, value):
         """
             Transform the input q-value for linearization
@@ -60,32 +103,12 @@ class Guinier(Transform):
         Transform.__init__(self)
         self.scale = scale
         self.radius = radius
-    
-    def linearize_data(self, x, y, dy=None):
+        
+    def linearize_dq_value(self, x, dx):
         """
-            Linearize data so that a linear fit can be performed. 
-            Filter out the data that can't be transformed.
-            @param x: array of q values
-            @param y: array of I(q) values
-            @param dy: array of dI(q) values
+            Transform the input dq-value for linearization
         """
-        # Check that the vector lengths are equal
-        assert(len(x)==len(y))
-        if dy is not None:
-            assert(len(x)==len(dy))
-        else:
-            dy = numpy.array([math.sqrt(math.fabs(j)) for j in y])
-        
-        data_points = zip(x,y,dy)
-        
-        # Transform the data
-        output_points = [(self.linearize_q_value(p[0]),
-                          math.log(p[1]),
-                          p[2]/p[1]) for p in data_points if p[0]>0 and p[1]>0]
-        
-        x_out, y_out, dy_out = zip(*output_points)
-
-        return numpy.asarray(x_out), numpy.asarray(y_out), numpy.asarray(dy_out)
+        return numpy.array([2*x[0]*dx[0] for i in xrange(len(x))]) 
     
     def linearize_q_value(self, value):
         """
@@ -137,33 +160,13 @@ class PowerLaw(Transform):
         Transform.__init__(self)
         self.scale = scale
         self.power = power
-        
-    def linearize_data(self, x, y, dy=None):
+   
+    def linearize_dq_value(self, x, dx):
         """
-            Linearize data so that a linear fit can be performed. 
-            Filter out the data that can't be transformed.
-            @param x: array of q values
-            @param y: array of I(q) values
-            @param dy: array of dI(q) values
+            Transform the input dq-value for linearization
         """
-        # Check that the vector lengths are equal
-        assert(len(x)==len(y))
-        if dy is not None:
-            assert(len(x)==len(dy))
-        else:
-            dy = numpy.array([math.sqrt(math.fabs(j)) for j in y])
-        
-        data_points = zip(x,y,dy)
-        
-        # Transform the data
-        output_points = [(self.linearize_q_value(p[0]),
-                          math.log(p[1]),
-                          p[2]/p[1]) for p in data_points if p[0]>0 and p[1]>0]
-        
-        x_out, y_out, dy_out = zip(*output_points)
-
-        return numpy.asarray(x_out), numpy.asarray(y_out), numpy.asarray(dy_out)
-        
+        return  numpy.array([dx[0]/x[0] for i in xrange(len(x))]) 
+    
     def linearize_q_value(self, value):
         """
             Transform the input q-value for linearization
@@ -300,8 +303,6 @@ class InvariantCalculator(object):
                         
         @note: Some computations depends on each others. 
     """
-    
-    
     def __init__(self, data, background=0, scale=1 ):
         """
             Initialize variables
@@ -364,15 +365,10 @@ class InvariantCalculator(object):
                     for power_law will be the power value
         """
         # Linearize the data in preparation for fitting
-        fit_x, fit_y, fit_dy = model.linearize_data(self._data.x, self._data.y, self._data.dy)
-      
+        fit_data = model.linearize_data(self._data)
         qmin = model.linearize_q_value(qmin)
         qmax = model.linearize_q_value(qmax)
-        
-        # Create a new Data1D object for processing
-        fit_data = LoaderData1D(x=fit_x, y=fit_y, dy=fit_dy)
-        fit_data.dxl = self._data.dxl
-        fit_data.dxw = self._data.dxw   
+        # Get coefficient cmoning out of the  fit
         extrapolator = Extrapolator(data=fit_data)
         extrapolator.set_fit_range(qmin=qmin, qmax=qmax)
         b, a = extrapolator.fit(power=power) 
@@ -591,32 +587,6 @@ class InvariantCalculator(object):
                     dxi = (data.x[i+1] - data.x[i-1])/2
                     sum += (data.x[i] * data.dxl[i] * dy[i] * dxi)**2
                 return math.sqrt(sum)
-   
-    def get_qstar_low(self):
-        """
-            Compute the invariant for extrapolated data at low q range.
-            
-            Implementation:
-                data = self.get_extra_data_low()
-                return self._get_qstar()
-                
-            @return q_star: the invariant for data extrapolated at low q.
-        """
-        data = self.get_extra_data_low()
-        return self._get_qstar(data=data)
-        
-    def get_qstar_high(self):
-        """
-            Compute the invariant for extrapolated data at high q range.
-            
-            Implementation:
-                data = self.get_extra_data_high()
-                return self._get_qstar()
-                
-            @return q_star: the invariant for data extrapolated at high q.
-        """
-        data = self.get_extra_data_high()
-        return self._get_qstar(data=data)
         
     def _get_extrapolated_data(self, model, npts=INTEGRATION_NSTEPS,
                               q_start=Q_MINIMUM, q_end=Q_MAXIMUM):
@@ -656,8 +626,8 @@ class InvariantCalculator(object):
         result_data.dxl = dxl
         result_data.dxw = dxw
         return result_data
-        
-    def get_extra_data_low(self):
+    
+    def _get_extra_data_low(self):
         """
             This method creates a new data set from the invariant calculator.
             
@@ -688,8 +658,8 @@ class InvariantCalculator(object):
                          qmin=qmin,
                          qmax=qmax,
                          power=self._low_extrapolation_power)
-        #q_start point
         q_start = Q_MINIMUM
+        #q_start point
         if Q_MINIMUM >= qmin:
             q_start = qmin/10
         
@@ -698,7 +668,7 @@ class InvariantCalculator(object):
                                                q_start=q_start, q_end=qmin)
         return data_min
           
-    def get_extra_data_high(self):
+    def _get_extra_data_high(self):
         """
             This method creates a new data from the invariant calculator.
             
@@ -729,6 +699,156 @@ class InvariantCalculator(object):
                                                npts=INTEGRATION_NSTEPS,
                                                q_start=qmax, q_end=q_end)
         return data_max
+         
+    def get_qstar_low(self):
+        """
+            Compute the invariant for extrapolated data at low q range.
+            
+            Implementation:
+                data = self._get_extra_data_low()
+                return self._get_qstar()
+                
+            @return q_star: the invariant for data extrapolated at low q.
+        """
+        data = self._get_extra_data_low()
+        
+        return self._get_qstar(data=data)
+        
+    def get_qstar_high(self):
+        """
+            Compute the invariant for extrapolated data at high q range.
+            
+            Implementation:
+                data = self._get_extra_data_high()
+                return self._get_qstar()
+                
+            @return q_star: the invariant for data extrapolated at high q.
+        """
+        data = self._get_extra_data_high()
+        return self._get_qstar(data=data)
+    
+    def get_extra_data_low(self, npts_in=None, q_start=Q_MINIMUM, nsteps=INTEGRATION_NSTEPS):
+        """
+            This method creates a new data set from the invariant calculator.
+            
+            It will use the extrapolation parameters kept as private data members.
+            
+            self._low_extrapolation_npts is the number of data points to use in to fit.
+            self._low_extrapolation_function will be used as the fit function.
+            
+            
+            
+            It takes npts first points of data, fits them with a given model
+            then uses the new parameters resulting from the fit to create a new data set.
+            
+            The new data first point is Q_MINIMUM.
+            
+            The last point of the new data is the first point of the original data.
+            the number of q points of this data is INTEGRATION_NSTEPS.
+            
+            @return: a new data of type Data1D
+        """
+        #Create a data from result of the fit for a range outside of the data
+        # at low q range
+        data_out_range = self._get_extra_data_low()
+        
+        if  q_start != Q_MINIMUM or nsteps != INTEGRATION_NSTEPS:
+            qmin = min(self._data.x)
+            if q_start < Q_MINIMUM:
+                q_start = Q_MINIMUM
+            elif q_start >= qmin:
+                q_start = qmin/10
+                
+            #compute the new data with the proper result of the fit for different
+            #boundary and step, outside of data
+            data_out_range = self._get_extrapolated_data(model=self._low_extrapolation_function,
+                                               npts=nsteps,
+                                               q_start=q_start, q_end=qmin)
+        #Create data from the result of the fit for a range inside data q range for
+        #low q
+        if npts_in is None :
+            npts_in = self._low_extrapolation_npts
+
+        x = self._data.x[:npts_in]
+        y = self._low_extrapolation_function.evaluate_model(x=x)
+        dy = None
+        dx = None
+        dxl = None
+        dxw = None
+        if self._data.dx is not None:
+            dx = self._data.dx[:npts_in]
+        if self._data.dy is not None:
+            dy = self._data.dy[:npts_in]
+        if self._data.dxl is not None and len(self._data.dxl)>0:
+            dxl = self._data.dxl[:npts_in]
+        if self._data.dxw is not None and len(self._data.dxw)>0:
+            dxw = self._data.dxw[:npts_in]
+        #Crate new data 
+        data_in_range = LoaderData1D(x=x, y=y, dx=dx, dy=dy)
+        data_in_range.clone_without_data(clone=self._data)
+        data_in_range.dxl = dxl
+        data_in_range.dxw = dxw
+        
+        return data_out_range, data_in_range
+          
+    def get_extra_data_high(self, npts_in=None, q_end=Q_MAXIMUM, nsteps=INTEGRATION_NSTEPS ):
+        """
+            This method creates a new data from the invariant calculator.
+            
+            It takes npts last points of data, fits them with a given model
+            (for this function only power_law will be use), then uses
+            the new parameters resulting from the fit to create a new data set.
+            The first point is the last point of data.
+            The last point of the new data is Q_MAXIMUM.
+            The number of q points of this data is INTEGRATION_NSTEPS.
+
+            
+            @return: a new data of type Data1D
+        """
+        #Create a data from result of the fit for a range outside of the data
+        # at low q range
+        data_out_range = self._get_extra_data_high()
+        qmax = max(self._data.x)
+        if  q_end != Q_MAXIMUM or nsteps != INTEGRATION_NSTEPS:
+            if q_end > Q_MAXIMUM:
+               q_end = Q_MAXIMUM
+            elif q_end <= qmax:
+                q_end = qmax * 10
+                
+            #compute the new data with the proper result of the fit for different
+            #boundary and step, outside of data
+            data_out_range = self._get_extrapolated_data(model=self._high_extrapolation_function,
+                                               npts=nsteps,
+                                               q_start=qmax, q_end=q_end)
+        #Create data from the result of the fit for a range inside data q range for
+        #high q
+        if npts_in is None :
+            npts_in = self._high_extrapolation_npts
+            
+        x_len = len(self._data.x)
+        x = self._data.x[(x_len-npts_in):]
+        y = self._high_extrapolation_function.evaluate_model(x=x)
+        dy = None
+        dx = None
+        dxl = None
+        dxw = None
+        
+        if self._data.dx is not None:
+            dx = self._data.dx[(x_len-npts_in):]
+        if self._data.dy is not None:
+            dy = self._data.dy[(x_len-npts_in):]
+        if self._data.dxl is not None and len(self._data.dxl)>0:
+            dxl = self._data.dxl[(x_len-npts_in):]
+        if self._data.dxw is not None and len(self._data.dxw)>0:
+            dxw = self._data.dxw[(x_len-npts_in):]
+        #Crate new data 
+        data_in_range = LoaderData1D(x=x, y=y, dx=dx, dy=dy)
+        data_in_range.clone_without_data(clone=self._data)
+        data_in_range.dxl = dxl
+        data_in_range.dxw = dxw
+        
+        return data_out_range, data_in_range
+          
      
     def set_extrapolation(self, range, npts=4, function=None, power=None):
         """
