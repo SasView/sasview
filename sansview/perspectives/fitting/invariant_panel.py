@@ -48,13 +48,13 @@ class InvariantPanel(wx.ScrolledWindow):
     window_caption = "Invariant"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
-    def __init__(self, parent, data=None, base=None):
+    def __init__(self, parent, graph, data=None, base=None):
         wx.ScrolledWindow.__init__(self, parent, style= wx.FULL_REPAINT_ON_RESIZE )
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         #Object that receive status event
         self.parent = base
-      
+        self.graph = graph
         #Default power value
         self.power_law_exponant = 4 
         
@@ -83,9 +83,6 @@ class InvariantPanel(wx.ScrolledWindow):
                                       background=float(background),
                                        scale=float(scale))
             
-            low_q = self.enable_low_cbox.GetValue() 
-            high_q = self.enable_high_cbox.GetValue()
-            
             #Get the number of points to extrapolated
             npts_low = self.npts_low_ctl.GetValue()
             if check_float(self.npts_low_ctl):
@@ -111,6 +108,8 @@ class InvariantPanel(wx.ScrolledWindow):
                 function_high = "power_law"
             #check the type of extrapolation
             extrapolation = None
+            low_q = self.enable_low_cbox.GetValue()
+            high_q = self.enable_high_cbox.GetValue()
             if low_q  and not high_q:
                 extrapolation = "low"
             elif not low_q  and high_q:
@@ -137,8 +136,7 @@ class InvariantPanel(wx.ScrolledWindow):
                 #return
             #Compute qstar extrapolated to low q range
             #Clear the previous extrapolated plot
-            self._plot_data( name=self.data.name+" Extra_low_Q")
-            self._plot_data( name=self.data.name+" Extra_high_Q")
+       
             if low_q:
                 try: 
                     qstar_low = inv.get_qstar_low()
@@ -213,17 +211,19 @@ class InvariantPanel(wx.ScrolledWindow):
             wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
             return
         
-    def _plot_data(self, data=None, name="Unknown"):
+    def _plot_data(self, data, name="Unknown"):
         """
             Receive a data and post a NewPlotEvent to parent
             @param data: data created frome xtrapolation to plot
             @param name: Data's name to use for the legend
         """
+        plottable = self.graph.get_plottable(name=name)
+        if plottable is not None:
+            self.graph.delete(plottable)
         # Create a plottable data
         new_plot = Data1D(x=[], y=[], dx=None, dy=None)
-        if data is not None:
-            new_plot.copy_from_datainfo(data) 
-            data.clone_without_data(clone=new_plot) 
+        new_plot.copy_from_datainfo(data) 
+        data.clone_without_data(clone=new_plot) 
             
         new_plot.name = name
         title = self.data.name
@@ -240,11 +240,13 @@ class InvariantPanel(wx.ScrolledWindow):
             @param data: data created frome xtrapolation to plot
             @param name: Data's name to use for the legend
         """
+        plottable = self.graph.get_plottable(name=name)
+        if plottable is not None:
+            self.graph.delete(plottable)
         # Create a plottable data
         new_plot = Theory1D(x=[], y=[], dy=None)
-        if data is not None:
-            new_plot.copy_from_datainfo(data) 
-            data.clone_without_data(clone=new_plot) 
+        new_plot.copy_from_datainfo(data) 
+        data.clone_without_data(clone=new_plot) 
             
         new_plot.name = name
         title = self.data.name
@@ -636,19 +638,22 @@ class InvariantPanel(wx.ScrolledWindow):
         self.SetSizer(vbox)
     
 class InvariantDialog(wx.Dialog):
-    def __init__(self, parent=None, id=1,data=None, title="Invariant",base=None):
+    def __init__(self, parent=None, id=1,graph=None,
+                 data=None, title="Invariant",base=None):
         wx.Dialog.__init__(self, parent, id, title, size=( PANEL_WIDTH,
                                                              PANEL_HEIGHT))
-        self.panel = InvariantPanel(self, data=data, base=base)
+        self.panel = InvariantPanel(self,graph=graph, data=data, base=base)
         self.Centre()
         self.Show(True)
         
 class InvariantWindow(wx.Frame):
-    def __init__(self, parent=None, id=1,data=None, title="Invariant",base=None):
+    def __init__(self, parent=None, id=1,graph=None, 
+                 data=None, title="Invariant",base=None):
+        
         wx.Frame.__init__(self, parent, id, title, size=( PANEL_WIDTH,
                                                              PANEL_HEIGHT))
         
-        self.panel = InvariantPanel(self, data=data, base=base)
+        self.panel = InvariantPanel(self,graph=graph, data=data, base=base)
         self.Centre()
         self.Show(True)
         

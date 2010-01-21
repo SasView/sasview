@@ -523,6 +523,7 @@ class Plugin:
                 
         self.parent._mgr.Update()
                
+  
     def _compute_invariant(self, event):    
         """
             Open the invariant panel to invariant computation
@@ -536,7 +537,7 @@ class Plugin:
                 print "_compute_invariant",data._yaxis
                 print "_compute_invariant" ,data._yunit
                 from invariant_panel import InvariantWindow
-                frame = InvariantWindow(base=self.parent, data=plottable)   
+                frame = InvariantWindow(base=self.parent, data=plottable, graph=self.panel.graph)   
                 frame.Show(True)
                 #from invariant_panel import InvariantDialog
                 #self.invariant_dlg = InvariantDialog(base=self.parent,
