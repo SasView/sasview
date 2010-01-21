@@ -939,7 +939,7 @@ class InvariantCalculator(object):
             @return: specific surface 
         """
         if contrast is None or porod_const is None:
-            return 
+            return None
         #Check whether we have Q star
         if self._qstar is None:
             self._qstar = self.get_star()
@@ -972,7 +972,7 @@ class InvariantCalculator(object):
             @note: volume fraction must have no unit
         """
         if contrast is None:
-            return 
+            return None
         if contrast < 0:
             raise ValueError, "contrast must be greater than zero"  
         
@@ -1032,7 +1032,7 @@ class InvariantCalculator(object):
             @return: V, dV = self.get_volume_fraction_with_error(contrast), dV
         """
         if contrast is None:
-            return 
+            return None, None
         self._qstar, self._qstar_err = self.get_qstar_with_error()
         
         volume = self.get_volume_fraction(contrast)
@@ -1067,7 +1067,7 @@ class InvariantCalculator(object):
             @return S, dS: the surface, with its uncertainty
         """
         if contrast is None or porod_const is None:
-            return 
+            return None, None
         v, dv = self.get_volume_fraction_with_error(contrast)
         self._qstar, self._qstar_err = self.get_qstar_with_error()
         if self._qstar <= 0:
