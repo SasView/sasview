@@ -7,7 +7,7 @@ import wx
 import sys
 
 from sans.invariant import invariant
-from sans.guiframe.dataFitting import Theory1D
+from sans.guiframe.dataFitting import Theory1D, Data1D
 from sans.guiframe.utils import format_number, check_float
 from sans.guicomm.events import NewPlotEvent, StatusEvent
 
@@ -15,6 +15,8 @@ from sans.guicomm.events import NewPlotEvent, StatusEvent
 Q_MINIMUM  = 1e-5
 # The maximum q-value to be used when extrapolating
 Q_MAXIMUM  = 10
+# the maximum value to plot the theory data
+Q_MAXIMUM_PLOT = 2
 # the number of points to consider during fit
 NPTS = 10
 #Default value for background
@@ -143,8 +145,9 @@ class InvariantPanel(wx.ScrolledWindow):
                     self.invariant_low_ctl.SetValue(format_number(qstar_low))
                     check_float(self.invariant_low_ctl)
                     #plot data
-                    low_data = inv.get_extra_data_low()
-                    self._plot_data(data=low_data, name=self.data.name+" Extra_low_Q")
+                    low_out_data, low_in_data = inv.get_extra_data_low()
+                    self._plot_theory(data=low_out_data, name=self.data.name+" Extra_low_Q")
+                    self._plot_data(data=low_in_data, name=self.data.name+"Fitted data for low_Q")
                 except:
                     raise
                     #msg= "Error occurs for low q invariant: %s"%sys.exc_value
@@ -155,8 +158,9 @@ class InvariantPanel(wx.ScrolledWindow):
                     self.invariant_high_ctl.SetValue(format_number(qstar_high))
                     check_float(self.invariant_high_ctl)
                     #plot data
-                    high_data = inv.get_extra_data_high()
-                    self._plot_data(data=high_data, name=self.data.name+" Extra_high_Q")
+                    high_out_data, high_in_data = inv.get_extra_data_high(q_end=Q_MAXIMUM_PLOT)
+                    self._plot_theory(data=high_out_data, name=self.data.name+" Extra_high_Q")
+                    self._plot_data(data=high_in_data, name=self.data.name+"Fitted data for high_Q")
                 except:
                     raise
                     #msg= "Error occurs for high q invariant: %s"%sys.exc_value
@@ -210,6 +214,27 @@ class InvariantPanel(wx.ScrolledWindow):
             return
         
     def _plot_data(self, data=None, name="Unknown"):
+        """
+            Receive a data and post a NewPlotEvent to parent
+            @param data: data created frome xtrapolation to plot
+            @param name: Data's name to use for the legend
+        """
+        # Create a plottable data
+        new_plot = Data1D(x=[], y=[], dx=None, dy=None)
+        if data is not None:
+            new_plot.copy_from_datainfo(data) 
+            data.clone_without_data(clone=new_plot) 
+            
+        new_plot.name = name
+        title = self.data.name
+        new_plot.xaxis(self.data._xaxis, self.data._xunit)
+        new_plot.yaxis(self.data._yaxis, self.data._yunit)
+        new_plot.group_id = self.data.group_id
+        new_plot.id = self.data.id + name
+        ##post data to plot
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
+        
+    def _plot_theory(self, data=None, name="Unknown"):
         """
             Receive a data and post a NewPlotEvent to parent
             @param data: data created frome xtrapolation to plot
