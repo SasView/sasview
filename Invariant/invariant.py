@@ -36,7 +36,8 @@ class Transform(object):
             assert(len(data.x)==len(data.dy))
             dy = data.dy
         else:
-            dy = numpy.array([math.sqrt(math.fabs(j)) for j in data.y])
+            #dy = numpy.array([math.sqrt(math.fabs(j)) for j in data.y])
+            dy = numpy.array([1 for j in data.y])
         # Transform smear info 
         dxl_out = None
         dxw_out = None
@@ -265,7 +266,7 @@ class Extrapolator:
         fx = numpy.zeros(len(self.data.x))
 
          # Uncertainty
-        if type(self.data.dy)==numpy.ndarray and len(self.data.dy)==len(self.data.x):
+        if type(self.data.dy)==numpy.ndarray and len(self.data.dy)==len(self.data.x)and self.data.dy[0] != 0:
             sigma = self.data.dy
         else:
             sigma = numpy.ones(len(self.data.x))
@@ -345,6 +346,7 @@ class InvariantCalculator(object):
             #Process only data that inherited from DataLoader.Data_info.Data1D
             raise ValueError,"Data must be of type DataLoader.Data1D"
         new_data = (self._scale * data) - self._background   
+        new_data.dy[new_data.dy==0] = 1
         new_data.dxl = data.dxl
         new_data.dxw = data.dxw 
         return  new_data
@@ -729,24 +731,18 @@ class InvariantCalculator(object):
     
     def get_extra_data_low(self, npts_in=None, q_start=Q_MINIMUM, nsteps=INTEGRATION_NSTEPS):
         """
-            This method creates a new data set from the invariant calculator.
-            
-            It will use the extrapolation parameters kept as private data members.
-            
-            self._low_extrapolation_npts is the number of data points to use in to fit.
-            self._low_extrapolation_function will be used as the fit function.
-            
-            
-            
-            It takes npts first points of data, fits them with a given model
-            then uses the new parameters resulting from the fit to create a new data set.
-            
-            The new data first point is Q_MINIMUM.
-            
-            The last point of the new data is the first point of the original data.
-            the number of q points of this data is INTEGRATION_NSTEPS.
-            
-            @return: a new data of type Data1D
+           This method generates 2 data sets , the first is a data created during 
+           low extrapolation . its y is generated from x in [ Q_MINIMUM - the minimum of
+           data.x] and the outputs of the extrapolator .
+            (data is the data used to compute invariant) 
+           the second is also data produced during the fit but the x range considered
+           is within the reel range of data x.
+           x uses is in [minimum of data.x up to npts_in points]
+           @param npts_in: the number of first points of data to consider  for computing
+           y's coming out of the fit.
+           @param q_start: is the minimum value to uses for extrapolated data
+           @param npts: the number of point used to create extrapolated data 
+           
         """
         #Create a data from result of the fit for a range outside of the data
         # at low q range
@@ -793,17 +789,18 @@ class InvariantCalculator(object):
           
     def get_extra_data_high(self, npts_in=None, q_end=Q_MAXIMUM, nsteps=INTEGRATION_NSTEPS ):
         """
-            This method creates a new data from the invariant calculator.
-            
-            It takes npts last points of data, fits them with a given model
-            (for this function only power_law will be use), then uses
-            the new parameters resulting from the fit to create a new data set.
-            The first point is the last point of data.
-            The last point of the new data is Q_MAXIMUM.
-            The number of q points of this data is INTEGRATION_NSTEPS.
-
-            
-            @return: a new data of type Data1D
+           This method generates 2 data sets , the first is a data created during 
+           low extrapolation . its y is generated from x in [ the maximum of
+           data.x to  Q_MAXIMUM] and the outputs of the extrapolator .
+            (data is the data used to compute invariant) 
+           the second is also data produced during the fit but the x range considered
+           is within the reel range of data x.
+           x uses is from maximum of data.x up to npts_in points before data.x maximum.
+           @param npts_in: the number of first points of data to consider  for computing
+           y's coming out of the fit.
+           @param q_end: is the maximum value to uses for extrapolated data
+           @param npts: the number of point used to create extrapolated data 
+           
         """
         #Create a data from result of the fit for a range outside of the data
         # at low q range
