@@ -471,9 +471,9 @@ class CircularAverage(object):
                         
                        
                         i_q = int(math.floor((q_value-self.r_min)/self.bin_width)) #- 1    
+
                         if q_value > qmax or q_value < self.r_min:
-                            continue
-                        #print q_value  
+                            continue  
                                                 
                         x[i_q]         += q_value
                         x_counts[i_q]  += 1
@@ -768,11 +768,7 @@ class _Sector:
         y_counts = numpy.zeros(self.nbins)
         x        = numpy.zeros(self.nbins)
         x_counts = numpy.zeros(self.nbins)
-        y_err    = numpy.zeros(self.nbins)
-        
-        
-        center_x=center_x
-        center_y=center_y    
+        y_err    = numpy.zeros(self.nbins)       
         
         # This If finds qmax within ROI defined by sector lines
         temp=0 #to find qmax within ROI or phimax and phimin
@@ -781,7 +777,7 @@ class _Sector:
         for i in range(numpy.size(data,1)):                 
             for j in range(numpy.size(data,0)):
                 #number of sub-bin: default = 2 (ie., 1 bin: no sub-bin)
-                nsubbins = 2
+                nsubbins = 1
 
                 #Sub divide one pixel into nine sub-pixels only for the pixels where the qmax or qmin line crosses over.
                 for x_subbins in range(nsubbins):
@@ -853,7 +849,7 @@ class _Sector:
         for i in range(numpy.size(data,1)):          
             for j in range(numpy.size(data,0)):
                 #number of sub-bin: default = 1 (ie., 1 bin: no sub-bin)
-                nsubbins = 2
+                nsubbins = 1
 
                 #if is_intercept(self.r_max, q_00, q_01, q_10, q_11) \
                 #    or is_intercept(self.r_min, q_00, q_01, q_10, q_11):
@@ -954,15 +950,22 @@ class _Sector:
                                                             
                         # Check which type of averaging we need
                         if run.lower()=='phi': 
-                            i_bin = int(math.ceil(self.nbins*(phi_value-self.phi_min)/(self.phi_max-self.phi_min))) - 1
+                            i_bin = int(math.floor(self.nbins*(phi_value-self.phi_min)/(self.phi_max-self.phi_min)))
                         else:
                             # If we don't need this pixel, skip the rest of the work
                             #TODO: an improvement here would be to compute the average
                             # Q for the pixel from the part that is covered by
                             # the ring defined by q_min/q_max rather than the complete
                             # pixel 
-                            i_bin = int(math.ceil(self.nbins*(q_value-qmin)/(qmax-qmin))) - 1
-                                   
+                            i_bin = int(math.floor(self.nbins*(q_value-qmin)/(qmax-qmin)))
+                            
+                        #Make sure that no out of bound happens
+                        #This is needed because of a numerical error in math.ceil().
+                        if i_bin >= self.nbins:
+                            i_bin = self.nbins - 1
+                        elif i_bin < 0:
+                            i_bin = 0
+                                  
                         try:
                             y[i_bin] += frac * data[j][i]
                         except:
