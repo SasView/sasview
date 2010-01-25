@@ -103,6 +103,7 @@ class _Slab(object):
         x  = numpy.zeros(nbins)
         y  = numpy.zeros(nbins)
         err_y = numpy.zeros(nbins)
+        x_counts = numpy.zeros(nbins)
         y_counts = numpy.zeros(nbins)
                                                 
         for i in range(numpy.size(data2D.data,1)):
@@ -159,18 +160,20 @@ class _Slab(object):
                     if i_q<0 or i_q>=nbins:
                         continue
             
-                x[i_q]          = q_value
+                x[i_q]          += q_value
                 y[i_q]         += frac * data2D.data[j][i]
                 if data2D.err_data == None or data2D.err_data[j][i]==0.0:
                     err_y[i_q] += frac * frac * math.fabs(data2D.data[j][i])
                 else:
                     err_y[i_q] += frac * frac * data2D.err_data[j][i] * data2D.err_data[j][i]
+                x_counts[i_q] += 1
                 y_counts[i_q]  += frac
                 
         # Average the sums
         for i in range(nbins):
-            if y_counts[i]>0:
+            if x_counts[i]>0 and y_counts[i]>0:
                 err_y[i] = math.sqrt(err_y[i])/y_counts[i]
+                x[i]     = x[i]/x_counts[i]
                 y[i]     = y[i]/y_counts[i]
         
         return Data1D(x=x, y=y, dy=err_y)
@@ -355,7 +358,7 @@ class CircularAverage(object):
         The data returned is the distribution of counts
         as a function of Q
     """
-    def __init__(self, r_min=0.0, r_max=0.0, bin_width=0.001):
+    def __init__(self, r_min=0.0, r_max=0.0, bin_width=0.0005):
         # Minimum radius included in the average [A-1]
         self.r_min = r_min
         # Maximum radius included in the average [A-1]
@@ -377,8 +380,8 @@ class CircularAverage(object):
         pixel_width_y = data2D.detector[0].pixel_size.y
         det_dist    = data2D.detector[0].distance
         wavelength  = data2D.source.wavelength
-        center_x    = data2D.detector[0].beam_center.x/pixel_width_x+0.5
-        center_y    = data2D.detector[0].beam_center.y/pixel_width_y+0.5
+        center_x    = data2D.detector[0].beam_center.x/pixel_width_x
+        center_y    = data2D.detector[0].beam_center.y/pixel_width_y
         
         # Find out the maximum Q range
         xwidth = (numpy.size(data2D.data,1))*pixel_width_x
@@ -392,27 +395,26 @@ class CircularAverage(object):
             dy_max = ywidth-dy_max
         
         qmax = get_q(dx_max, dy_max, det_dist, wavelength)
-        
+
         # Build array of Q intervals
         nbins = int(math.ceil((qmax-self.r_min)/self.bin_width))
         qbins = self.bin_width*numpy.arange(nbins)+self.r_min
         
         x  = numpy.zeros(nbins)
+        x_counts  = numpy.zeros(nbins)
         y  = numpy.zeros(nbins)
         err_y = numpy.zeros(nbins)
         y_counts = numpy.zeros(nbins)
-        
+
         for i in range(numpy.size(data2D.data,1)):
-            dx = pixel_width_x*(i+0.5 - center_x)
+            
             
             # Min and max x-value for the pixel
             minx = pixel_width_x*(i - center_x)
             maxx = pixel_width_x*(i+1.0 - center_x)
             
             for j in range(numpy.size(data2D.data,0)):
-                dy = pixel_width_y*(j+0.5 - center_y)
-            
-                q_value = get_q(dx, dy, det_dist, wavelength)
+                
             
                 # Min and max y-value for the pixel
                 miny = pixel_width_y*(j - center_y)
@@ -425,38 +427,75 @@ class CircularAverage(object):
                 q_10 = get_q(maxx, miny, det_dist, wavelength)
                 q_11 = get_q(maxx, maxy, det_dist, wavelength)
                 
-                # Look for intercept between each side of the pixel
-                # and the constant-q ring for qmax
-                frac_max = get_pixel_fraction(self.r_max, q_00, q_01, q_10, q_11)
-                
-                # Look for intercept between each side of the pixel
-                # and the constant-q ring for qmin
-                frac_min = get_pixel_fraction(self.r_min, q_00, q_01, q_10, q_11)
-                
-                # We are interested in the region between qmin and qmax
-                # therefore the fraction of the surface of the pixel
-                # that we will use to calculate the number of counts to 
-                # include is given by:
-                frac = frac_max - frac_min
+                #number of sub-bin: default = 1 (ie., 1 bin: no sub-bin)
+                nsubbins = 2
 
-                i_q = int(math.ceil((q_value-self.r_min)/self.bin_width)) - 1
-                if q_value > qmax or q_value < self.r_min:
-                    continue
-                    
-                x[i_q]          = q_value
-                y[i_q]         += frac * data2D.data[j][i]
-                if data2D.err_data == None or data2D.err_data[j][i]==0.0:
-                    err_y[i_q] += frac * frac * math.fabs(data2D.data[j][i])
-                else:
-                    err_y[i_q] += frac * frac * data2D.err_data[j][i] * data2D.err_data[j][i]
-                y_counts[i_q]  += frac
+                #if is_intercept(self.r_max, q_00, q_01, q_10, q_11) \
+                #    or is_intercept(self.r_min, q_00, q_01, q_10, q_11):
+                #    # Number of sub-bins near the boundary of ROI in x-direction
+                #    nsubbins = 3
                 
+                #Sub divide one pixel into nine sub-pixels only for the pixels where the qmax or qmin line crosses over.
+                for x_subbins in range(nsubbins):
+                    for y_subbins in range(nsubbins):
+                        
+                        dx = pixel_width_x*(i+(x_subbins)/nsubbins - center_x)
+                        dy = pixel_width_y*(j+(y_subbins)/nsubbins - center_y)
+                        
+                        q_value = get_q(dx, dy, det_dist, wavelength)
+                        # Min and max x-value for the subpixel
+                        minx = pixel_width_x*(i+(-0.5+x_subbins)/nsubbins - center_x)
+                        maxx = pixel_width_x*(i+(0.5 +x_subbins)/nsubbins - center_x)
+                        # Min and max y-value for the subpixel
+                        miny = pixel_width_y*(j+(-0.5+y_subbins)/nsubbins - center_y)
+                        maxy = pixel_width_y*(j+(0.5 +y_subbins)/nsubbins - center_y)
+                        # Look for intercept between each side of the pixel
+                        # and the constant-q ring for qmax
+                        # Calculate the q-value for each corner of sub pixel
+                        # q_[x min or max][y min or max]
+                        q_00 = get_q(minx, miny, det_dist, wavelength)
+                        q_01 = get_q(minx, maxy, det_dist, wavelength)
+                        q_10 = get_q(maxx, miny, det_dist, wavelength)
+                        q_11 = get_q(maxx, maxy, det_dist, wavelength)
+                        frac_max = get_pixel_fraction(self.r_max, q_00, q_01, q_10, q_11)/(nsubbins*nsubbins)
+                
+                        # Look for intercept between each side of the pixel
+                        # and the constant-q ring for qmin
+                        frac_min = get_pixel_fraction(self.r_min, q_00, q_01, q_10, q_11)/(nsubbins*nsubbins)
+                
+                        # We are interested in the region between qmin and qmax
+                        # therefore the fraction of the surface of the pixel
+                        # that we will use to calculate the number of counts to 
+                        # include is given by:
+                        frac = (frac_max - frac_min) #??? Todo: What if frac_max - fracmin <0?
+                        
+                       
+                        i_q = int(math.floor((q_value-self.r_min)/self.bin_width)) #- 1    
+                        if q_value > qmax or q_value < self.r_min:
+                            continue
+                        #print q_value  
+                                                
+                        x[i_q]         += q_value
+                        x_counts[i_q]  += 1
+        
+                        y[i_q]         += frac * data2D.data[j][i]
+        
+                        if data2D.err_data == None or data2D.err_data[j][i]==0.0:
+                            err_y[i_q] += frac * frac * math.fabs(data2D.data[j][i])
+                        else:
+                            err_y[i_q] += frac * frac * data2D.err_data[j][i] * data2D.err_data[j][i]
+                        y_counts[i_q]  += frac
+                                                     
         # Average the sums
         nzero = 0
+        
         for i in range(nbins):
-            if y_counts[i]>0:
+            #print x_counts[i],x[i],y[i]
+            if y_counts[i]>0 and x_counts[i]>0:
                 err_y[i] = math.sqrt(err_y[i])/y_counts[i]
                 y[i]     = y[i]/y_counts[i]
+                x[i] = (qmax-self.r_min)/nbins*(1.0*i + 0.5)+ self.r_min#x[i]/x_counts[i]
+
             else:
                 nzero += 1
         ## Get rid of NULL points        
@@ -465,12 +504,13 @@ class CircularAverage(object):
         terr_y = numpy.zeros(nbins-nzero)
         j=0
         for i in range(nbins):
-            if err_y[i] != 0 :
-                tx[j]  = x[i]
-                ty[j]  = y[i]
-                terr_y[j] = err_y[i]
-                j+=1
-                
+            if err_y[i] != 0 and y_counts[i]>0 and x_counts[i]>0:
+                #Make sure wintin range
+                if x[i] <= self.r_max and x[i] >= self.r_min:
+                    tx[j]  = x[i]
+                    ty[j]  = y[i]
+                    terr_y[j] = err_y[i]
+                    j+=1       
         return Data1D(x=tx, y=ty, dy=terr_y)
     
 
@@ -596,7 +636,7 @@ def get_pixel_fraction(qmax, q_00, q_01, q_10, q_11):
                     |              |
                     |              |
         y=0         +--------------+
-                q_00                q_01
+                q_00                q_10
         
                     x=0            x=1
         
@@ -650,7 +690,7 @@ def get_pixel_fraction(qmax, q_00, q_01, q_10, q_11):
     # to know if we have to include it or exclude it.
     elif (q_00+q_01+q_10+q_11)/4.0 < qmax:
         frac_max = 1.0
-   
+
     return frac_max
              
 def get_intercept(q, q_0, q_1):
@@ -682,132 +722,7 @@ def get_intercept(q, q_0, q_1):
         if (q > q_1 and q <= q_0):
             return (q-q_1)/(q_0 - q_1)
     return None
-    
-#This class can be removed.
-class _Sectorold:
-    """
-        Defines a sector region on a 2D data set.
-        The sector is defined by r_min, r_max, phi_min, phi_max,
-        and the position of the center of the ring.         
-        Phi is defined between 0 and 2pi
-    """
-    def __init__(self, r_min, r_max, phi_min, phi_max,nbins=20):
-        self.r_min = r_min
-        self.r_max = r_max
-        self.phi_min = phi_min
-        self.phi_max = phi_max
-        self.nbins = nbins
-        
-    def _agv(self, data2D, run='phi'):
-        """
-            Perform sector averaging.
-            
-            @param data2D: Data2D object
-            @param run:  define the varying parameter ('phi' or 'q')
-            @return: Data1D object
-        """
-        if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
-            raise RuntimeError, "Ring averaging only take plottable_2D objects"
-                   
-        data = data2D.data      
-        qmax = self.r_max
-        qmin = self.r_min
-        
-        if len(data2D.detector) != 1:
-            raise RuntimeError, "Ring averaging: invalid number of detectors: %g" % len(data2D.detector)
-        pixel_width_x = data2D.detector[0].pixel_size.x
-        pixel_width_y = data2D.detector[0].pixel_size.y
-        det_dist      = data2D.detector[0].distance
-        wavelength    = data2D.source.wavelength
-        center_x      = data2D.detector[0].beam_center.x/pixel_width_x
-        center_y      = data2D.detector[0].beam_center.y/pixel_width_y
-        
-        y        = numpy.zeros(self.nbins)
-        y_counts = numpy.zeros(self.nbins)
-        x        = numpy.zeros(self.nbins)
-        y_err    = numpy.zeros(self.nbins)
-        
-        for i in range(numpy.size(data,1)):
-            dx = pixel_width_x*(i+0.5 - center_x)
-            
-            # Min and max x-value for the pixel
-            minx = pixel_width_x*(i - center_x)
-            maxx = pixel_width_x*(i+1.0 - center_x)
-            
-            for j in range(numpy.size(data,0)):
-                dy = pixel_width_y*(j+0.5 - center_y)
-            
-                q_value = get_q(dx, dy, det_dist, wavelength)
-
-                # Min and max y-value for the pixel
-                miny = pixel_width_y*(j - center_y)
-                maxy = pixel_width_y*(j+1.0 - center_y)
-                
-                # Calculate the q-value for each corner
-                # q_[x min or max][y min or max]
-                q_00 = get_q(minx, miny, det_dist, wavelength)
-                q_01 = get_q(minx, maxy, det_dist, wavelength)
-                q_10 = get_q(maxx, miny, det_dist, wavelength)
-                q_11 = get_q(maxx, maxy, det_dist, wavelength)
-                
-                # Look for intercept between each side of the pixel
-                # and the constant-q ring for qmax
-                frac_max = get_pixel_fraction(qmax, q_00, q_01, q_10, q_11)
-                
-                # Look for intercept between each side of the pixel
-                # and the constant-q ring for qmin
-                frac_min = get_pixel_fraction(qmin, q_00, q_01, q_10, q_11)
-                
-                # We are interested in the region between qmin and qmax
-                # therefore the fraction of the surface of the pixel
-                # that we will use to calculate the number of counts to 
-                # include is given by:
-                
-                frac = frac_max - frac_min
-
-                # Compute phi and check whether it's within the limits
-                phi_value=math.atan2(dy,dx)+math.pi
- #               if phi_value<self.phi_min or phi_value>self.phi_max:                
-                if phi_value<self.phi_min or phi_value>self.phi_max:
-                    continue
-                                                    
-                # Check which type of averaging we need
-                if run.lower()=='phi': 
-                    i_bin = int(math.ceil(self.nbins*(phi_value-self.phi_min)/(self.phi_max-self.phi_min))) - 1
-                else:
-                    # If we don't need this pixel, skip the rest of the work
-                    #TODO: an improvement here would be to compute the average
-                    # Q for the pixel from the part that is covered by
-                    # the ring defined by q_min/q_max rather than the complete
-                    # pixel 
-                    if q_value<self.r_min or q_value>self.r_max:
-                        continue
-                    i_bin = int(math.ceil(self.nbins*(q_value-self.r_min)/(self.r_max-self.r_min))) - 1
-            
-                try:
-                    y[i_bin] += frac * data[j][i]
-                except:
-                    import sys
-                    print sys.exc_value
-                    print i_bin, frac
-                
-                if data2D.err_data == None or data2D.err_data[j][i]==0.0:
-                    y_err[i_bin] += frac * frac * math.fabs(data2D.data[j][i])
-                else:
-                    y_err[i_bin] += frac * frac * data2D.err_data[j][i] * data2D.err_data[j][i]
-                y_counts[i_bin] += frac
-        
-        for i in range(self.nbins):
-            y[i] = y[i] / y_counts[i]
-            y_err[i] = math.sqrt(y_err[i]) / y_counts[i]
-            # Check which type of averaging we need
-            if run.lower()=='phi':
-                x[i] = (self.phi_max-self.phi_min)/self.nbins*(1.0*i + 0.5)+self.phi_min
-            else:
-                x[i] = (self.r_max-self.r_min)/self.nbins*(1.0*i + 0.5)+self.r_min
-            
-        return Data1D(x=x, y=y, dy=y_err)
-        
+     
 class _Sector:
     """
         Defines a sector region on a 2D data set.
@@ -852,66 +767,79 @@ class _Sector:
         y        = numpy.zeros(self.nbins)
         y_counts = numpy.zeros(self.nbins)
         x        = numpy.zeros(self.nbins)
+        x_counts = numpy.zeros(self.nbins)
         y_err    = numpy.zeros(self.nbins)
+        
+        
+        center_x=center_x
+        center_y=center_y    
         
         # This If finds qmax within ROI defined by sector lines
         temp=0 #to find qmax within ROI or phimax and phimin
         temp0=1000000
         temp1=0
-        for i in range(numpy.size(data,1)):  
-            dx = pixel_width_x*(i+0.5 - center_x)                  
+        for i in range(numpy.size(data,1)):                 
             for j in range(numpy.size(data,0)):
-                    
-                dy = pixel_width_y*(j+0.5 - center_y)
-                q_value = get_q(dx, dy, det_dist, wavelength)
-                # Compute phi and check whether it's within the limits
-                phi_value=math.atan2(dy,dx)+math.pi
-                if self.phi_max>2*math.pi:
-                    self.phi_max=self.phi_max-2*math.pi
-                if self.phi_min<0:
-                    self.phi_max=self.phi_max+2*math.pi
-                
-                #In case of two ROI (symmetric major and minor wings)(for 'q2')
-                if run.lower()=='q2':
-                    if ((self.phi_max>=0 and self.phi_max<math.pi)and (self.phi_min>=0 and self.phi_min<math.pi)):
-                        temp_max=self.phi_max+math.pi
-                        temp_min=self.phi_min+math.pi
-                    else:
-                        temp_max=self.phi_max
-                        temp_min=self.phi_min
-                       
-                    if ((temp_max>=math.pi and temp_max<2*math.pi)and (temp_min>=math.pi and temp_min<2*math.pi)):
-                        if (phi_value<temp_min  or phi_value>temp_max):
-                             if (phi_value<temp_min-math.pi  or phi_value>temp_max-math.pi):
-                                 continue
-                    if (self.phi_max<self.phi_min):
-                        tmp_max=self.phi_max+math.pi
-                        tmp_min=self.phi_min-math.pi
-                    else:
-                        tmp_max=self.phi_max
-                        tmp_min=self.phi_min
-                    if (tmp_min<math.pi and tmp_max>math.pi):
-                        if((phi_value>tmp_max and phi_value<tmp_min+math.pi)or (phi_value>tmp_max-math.pi and phi_value<tmp_min)):
-                            continue
-                #In case of one ROI (major only)(i.e.,for 'q')and do nothing for 'phi'.
-                elif run.lower()=='q': 
-                    if (self.phi_max>=self.phi_min):
-                        if (phi_value<self.phi_min  or phi_value>self.phi_max):
-                            continue
-                    else:
-                        if (phi_value<self.phi_min and phi_value>self.phi_max):
-                            continue   
-                if q_value<qmin or q_value>qmax:
-                        continue                    
+                #number of sub-bin: default = 2 (ie., 1 bin: no sub-bin)
+                nsubbins = 2
+
+                #Sub divide one pixel into nine sub-pixels only for the pixels where the qmax or qmin line crosses over.
+                for x_subbins in range(nsubbins):
+                    for y_subbins in range(nsubbins):
                         
-                if run.lower()=='phi':
-                    if temp1<phi_value:
-                        temp1=phi_value
-                    if temp0>phi_value:
-                        temp0=phi_value   
-                                                                                         
-                elif temp<q_value:
-                    temp=q_value
+                        dx = pixel_width_x*(i+(x_subbins)/nsubbins - center_x)
+                        dy = pixel_width_y*(j+(y_subbins)/nsubbins - center_y)
+                        
+                        q_value = get_q(dx, dy, det_dist, wavelength)
+
+                        # Compute phi and check whether it's within the limits
+                        phi_value=math.atan2(dy,dx)+math.pi
+                        if self.phi_max>2*math.pi:
+                            self.phi_max=self.phi_max-2*math.pi
+                        if self.phi_min<0:
+                            self.phi_max=self.phi_max+2*math.pi
+                        
+                        #In case of two ROI (symmetric major and minor wings)(for 'q2')
+                        if run.lower()=='q2':
+                            if ((self.phi_max>=0 and self.phi_max<math.pi)and (self.phi_min>=0 and self.phi_min<math.pi)):
+                                temp_max=self.phi_max+math.pi
+                                temp_min=self.phi_min+math.pi
+                            else:
+                                temp_max=self.phi_max
+                                temp_min=self.phi_min
+                               
+                            if ((temp_max>=math.pi and temp_max<2*math.pi)and (temp_min>=math.pi and temp_min<2*math.pi)):
+                                if (phi_value<temp_min  or phi_value>temp_max):
+                                     if (phi_value<temp_min-math.pi  or phi_value>temp_max-math.pi):
+                                         continue
+                            if (self.phi_max<self.phi_min):
+                                tmp_max=self.phi_max+math.pi
+                                tmp_min=self.phi_min-math.pi
+                            else:
+                                tmp_max=self.phi_max
+                                tmp_min=self.phi_min
+                            if (tmp_min<math.pi and tmp_max>math.pi):
+                                if((phi_value>tmp_max and phi_value<tmp_min+math.pi)or (phi_value>tmp_max-math.pi and phi_value<tmp_min)):
+                                    continue
+                        #In case of one ROI (major only)(i.e.,for 'q')and do nothing for 'phi'.
+                        elif run.lower()=='q': 
+                            if (self.phi_max>=self.phi_min):
+                                if (phi_value<self.phi_min  or phi_value>self.phi_max):
+                                    continue
+                            else:
+                                if (phi_value<self.phi_min and phi_value>self.phi_max):
+                                    continue   
+                        if q_value<qmin or q_value>qmax:
+                                continue                    
+                                
+                        if run.lower()=='phi':
+                            if temp1<phi_value:
+                                temp1=phi_value
+                            if temp0>phi_value:
+                                temp0=phi_value   
+                                                                                                 
+                        elif temp<q_value:
+                            temp=q_value
                     
         if run.lower()=='phi':
             self.phi_max=temp1
@@ -920,113 +848,135 @@ class _Sector:
             qmax=temp
         #Beam center is already corrected, but the calculation below assumed it was not.
         # Thus Beam center shifted back to uncorrected value. ToDo: cleanup the mess.
-        center_x=center_x+0.5 
-        center_y=center_y+0.5         
-        for i in range(numpy.size(data,1)):
-            dx = pixel_width_x*(i+0.5 - center_x)
-            
-            # Min and max x-value for the pixel
-            minx = pixel_width_x*(i - center_x)
-            maxx = pixel_width_x*(i+1.0 - center_x)
-            
+        #center_x=center_x+0.5 
+        #center_y=center_y+0.5         
+        for i in range(numpy.size(data,1)):          
             for j in range(numpy.size(data,0)):
-                dy = pixel_width_y*(j+0.5 - center_y)
+                #number of sub-bin: default = 1 (ie., 1 bin: no sub-bin)
+                nsubbins = 2
+
+                #if is_intercept(self.r_max, q_00, q_01, q_10, q_11) \
+                #    or is_intercept(self.r_min, q_00, q_01, q_10, q_11):
+                #    # Number of sub-bins near the boundary of ROI in x-direction
+                #    nsubbins = 3
+                
+                #Sub divide one pixel into nine sub-pixels only for the pixels where the qmax or qmin line crosses over.
+                for x_subbins in range(nsubbins):
+                    for y_subbins in range(nsubbins):
+                        
+                        dx = pixel_width_x*(i+(x_subbins)/nsubbins - center_x)
+                        dy = pixel_width_y*(j+(y_subbins)/nsubbins - center_y)
+                        
+                        q_value = get_q(dx, dy, det_dist, wavelength)
+                        # Min and max x-value for the subpixel
+                        minx = pixel_width_x*(i+(-0.5+x_subbins)/nsubbins - center_x)
+                        maxx = pixel_width_x*(i+(0.5 +x_subbins)/nsubbins - center_x)
+                        # Min and max y-value for the subpixel
+                        miny = pixel_width_y*(j+(-0.5+y_subbins)/nsubbins - center_y)
+                        maxy = pixel_width_y*(j+(0.5 +y_subbins)/nsubbins - center_y)
             
-                q_value = get_q(dx, dy, det_dist, wavelength)
-
-                # Min and max y-value for the pixel
-                miny = pixel_width_y*(j - center_y)
-                maxy = pixel_width_y*(j+1.0 - center_y)
                 
-                # Calculate the q-value for each corner
-                # q_[x min or max][y min or max]
-                q_00 = get_q(minx, miny, det_dist, wavelength)
-                q_01 = get_q(minx, maxy, det_dist, wavelength)
-                q_10 = get_q(maxx, miny, det_dist, wavelength)
-                q_11 = get_q(maxx, maxy, det_dist, wavelength)
-                
-                # Compute phi and check whether it's within the limits
-                phi_value=math.atan2(dy,dx)+math.pi
-                if self.phi_max>2*math.pi:
-                    self.phi_max=self.phi_max-2*math.pi
-                if self.phi_min<0:
-                    self.phi_max=self.phi_max+2*math.pi
-                    
-                # Look for intercept between each side of the pixel
-                # and the constant-q ring for qmax
-                frac_max = get_pixel_fraction(qmax, q_00, q_01, q_10, q_11)
-                
-                # Look for intercept between each side of the pixel
-                # and the constant-q ring for qmin
-                frac_min = get_pixel_fraction(qmin, q_00, q_01, q_10, q_11)
-                
-                # We are interested in the region between qmin and qmax
-                # therefore the fraction of the surface of the pixel
-                # that we will use to calculate the number of counts to 
-                # include is given by:
-                
-                frac = frac_max - frac_min
-
-                #In case of two ROI (symmetric major and minor regions)(for 'q2')
-                if run.lower()=='q2':
-                    if ((self.phi_max>=0 and self.phi_max<math.pi)and (self.phi_min>=0 and self.phi_min<math.pi)):
-                        temp_max=self.phi_max+math.pi
-                        temp_min=self.phi_min+math.pi
-                    else:
-                        temp_max=self.phi_max
-                        temp_min=self.phi_min
-                       
-                    if ((temp_max>=math.pi and temp_max<2*math.pi)and (temp_min>=math.pi and temp_min<2*math.pi)):
-                        if (phi_value<temp_min  or phi_value>temp_max):
-                            if (phi_value<temp_min-math.pi  or phi_value>temp_max-math.pi):
-                                continue
-                    if (self.phi_max<self.phi_min):
-                        tmp_max=self.phi_max+math.pi
-                        tmp_min=self.phi_min-math.pi
-                    else:
-                        tmp_max=self.phi_max
-                        tmp_min=self.phi_min
-                    if (tmp_min<math.pi and tmp_max>math.pi):
-                        if((phi_value>tmp_max and phi_value<tmp_min+math.pi)or (phi_value>tmp_max-math.pi and phi_value<tmp_min)):
-                            continue
-                #In case of one ROI (major only)(i.e.,for 'q' and 'phi')
-                else: 
-                    if (self.phi_max>=self.phi_min):
-                        if (phi_value<self.phi_min  or phi_value>self.phi_max):
-                            continue
+                        # Calculate the q-value for each corner
+                        # q_[x min or max][y min or max]
+                        q_00 = get_q(minx, miny, det_dist, wavelength)
+                        q_01 = get_q(minx, maxy, det_dist, wavelength)
+                        q_10 = get_q(maxx, miny, det_dist, wavelength)
+                        q_11 = get_q(maxx, maxy, det_dist, wavelength)
+                        
+                        # Compute phi and check whether it's within the limits
+                        phi_value=math.atan2(dy,dx)+math.pi
+                        if self.phi_max>2*math.pi:
+                            self.phi_max=self.phi_max-2*math.pi
+                        if self.phi_min<0:
+                            self.phi_max=self.phi_max+2*math.pi
                             
-                    else:
-                        if (phi_value<self.phi_min and phi_value>self.phi_max):
-                            continue
-                #print "qmax=",qmax,qmin       
-
-                if q_value<qmin or q_value>qmax:
-                    continue
-                                                    
-                # Check which type of averaging we need
-                if run.lower()=='phi': 
-                    i_bin = int(math.ceil(self.nbins*(phi_value-self.phi_min)/(self.phi_max-self.phi_min))) - 1
-                else:
-                    # If we don't need this pixel, skip the rest of the work
-                    #TODO: an improvement here would be to compute the average
-                    # Q for the pixel from the part that is covered by
-                    # the ring defined by q_min/q_max rather than the complete
-                    # pixel 
-                    i_bin = int(math.ceil(self.nbins*(q_value-qmin)/(qmax-qmin))) - 1
-                           
-                try:
-                    y[i_bin] += frac * data[j][i]
-                except:
-                    import sys
-                    print sys.exc_value
-                    print i_bin, frac
-                
-                if data2D.err_data == None or data2D.err_data[j][i]==0.0:
-                    y_err[i_bin] += frac * frac * math.fabs(data2D.data[j][i])
-                else:
-                    y_err[i_bin] += frac * frac * data2D.err_data[j][i] * data2D.err_data[j][i]
-                y_counts[i_bin] += frac
+                        # Look for intercept between each side of the pixel
+                        # and the constant-q ring for qmax
+                        frac_max = get_pixel_fraction(qmax, q_00, q_01, q_10, q_11)
+                        
+                        # Look for intercept between each side of the pixel
+                        # and the constant-q ring for qmin
+                        frac_min = get_pixel_fraction(qmin, q_00, q_01, q_10, q_11)
+                        
+                        # We are interested in the region between qmin and qmax
+                        # therefore the fraction of the surface of the pixel
+                        # that we will use to calculate the number of counts to 
+                        # include is given by:
+                        
+                        frac = frac_max - frac_min
         
+                        #In case of two ROI (symmetric major and minor regions)(for 'q2')
+                        if run.lower()=='q2':
+                            if ((self.phi_max>=0 and self.phi_max<math.pi)and (self.phi_min>=0 and self.phi_min<math.pi)):
+                                temp_max=self.phi_max+math.pi
+                                temp_min=self.phi_min+math.pi
+                            else:
+                                temp_max=self.phi_max
+                                temp_min=self.phi_min
+                               
+                            if ((temp_max>=math.pi and temp_max<2*math.pi)and (temp_min>=math.pi and temp_min<2*math.pi)):
+                                if (phi_value<temp_min  or phi_value>temp_max):
+                                    if (phi_value<temp_min-math.pi  or phi_value>temp_max-math.pi):
+                                        continue
+                            if (self.phi_max<self.phi_min):
+                                tmp_max=self.phi_max+math.pi
+                                tmp_min=self.phi_min-math.pi
+                            else:
+                                tmp_max=self.phi_max
+                                tmp_min=self.phi_min
+                            if (tmp_min<math.pi and tmp_max>math.pi):
+                                if((phi_value>tmp_max and phi_value<tmp_min+math.pi)or (phi_value>tmp_max-math.pi and phi_value<tmp_min)):
+                                    continue
+                        #In case of one ROI (major only)(i.e.,for 'q' and 'phi')
+                        else: 
+                            if (self.phi_max>=self.phi_min):
+                                if (phi_value<self.phi_min  or phi_value>self.phi_max):
+                                    continue
+                                                              
+                                # Check which type of averaging we need
+                                if run.lower()=='phi': 
+                                    i_bin = int(math.floor(self.nbins*(phi_value-self.phi_min)/(self.phi_max-self.phi_min))) 
+                                else:
+                                    # If we don't need this pixel, skip the rest of the work
+                                    #TODO: an improvement here would be to compute the average
+                                    # Q for the pixel from the part that is covered by
+                                    # the ring defined by q_min/q_max rather than the complete
+                                    # pixel 
+                                    i_bin = int(math.floor(self.nbins*(q_value-qmin)/(qmax-qmin)))
+                                    
+                            else:
+                                if (phi_value<self.phi_min and phi_value>self.phi_max):
+                                    continue
+                        #print "qmax=",qmax,qmin       
+        
+                        if q_value<qmin or q_value>qmax:
+                            continue
+                                                            
+                        # Check which type of averaging we need
+                        if run.lower()=='phi': 
+                            i_bin = int(math.ceil(self.nbins*(phi_value-self.phi_min)/(self.phi_max-self.phi_min))) - 1
+                        else:
+                            # If we don't need this pixel, skip the rest of the work
+                            #TODO: an improvement here would be to compute the average
+                            # Q for the pixel from the part that is covered by
+                            # the ring defined by q_min/q_max rather than the complete
+                            # pixel 
+                            i_bin = int(math.ceil(self.nbins*(q_value-qmin)/(qmax-qmin))) - 1
+                                   
+                        try:
+                            y[i_bin] += frac * data[j][i]
+                        except:
+                            import sys
+                            print sys.exc_value
+                            print i_bin, frac
+                        
+                        if data2D.err_data == None or data2D.err_data[j][i]==0.0:
+                            y_err[i_bin] += frac * frac * math.fabs(data2D.data[j][i])
+                        else:
+                            y_err[i_bin] += frac * frac * data2D.err_data[j][i] * data2D.err_data[j][i]
+                        y_counts[i_bin] += frac
+        
+
         for i in range(self.nbins):
             y[i] = y[i] / y_counts[i]
             y_err[i] = math.sqrt(y_err[i]) / y_counts[i]
@@ -1057,23 +1007,6 @@ class SectorPhi(_Sector):
             @return: Data1D object
         """
         return self._agv(data2D, 'phi')
-
-class SectorQold(_Sector):
-    """
-        Sector average as a function of Q.
-        I(Q) is return and the data is averaged over phi.
-        
-        A sector is defined by r_min, r_max, phi_min, phi_max.
-        The number of bin in Q also has to be defined.
-    """
-    def __call__(self, data2D):
-        """
-            Perform sector average and return I(Q).
-            
-            @param data2D: Data2D object
-            @return: Data1D object
-        """
-        return self._agv(data2D, 'q')
     
 class SectorQ(_Sector):
     """
