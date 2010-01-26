@@ -169,8 +169,8 @@ class FitPanel(wx.aui.AuiNotebook):
         
         #add default page
         from hint_fitpage import HintFitPage
-        panel = HintFitPage(self) 
-        self.AddPage(page=panel, caption="Hint")
+        self.hint_page = HintFitPage(self) 
+        self.AddPage(page=self.hint_page, caption="Hint")
         # increment number for model name
         self.count=0
         #updating the panel
@@ -183,8 +183,11 @@ class FitPanel(wx.aui.AuiNotebook):
              close page and remove all references to the closed page
         """
         selected_page = self.GetPage(self.GetSelection())
+        #remove hint page
+        if selected_page == self.hint_page:
+            return
         ## removing sim_page
-        if selected_page == self.sim_page:
+        if selected_page == self.sim_page :
             self.manager.sim_page=None 
             return
         
