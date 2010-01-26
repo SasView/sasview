@@ -24,6 +24,10 @@ class ModelPanel(BasicPage):
     """
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
+    ## Internal name for the AUI manager
+    window_name = "Theory model"
+    ## Title to appear on top of the window
+    window_caption = "Theory Model"
     def __init__(self,parent, page_info, model_list_box):
         BasicPage.__init__(self, parent, page_info , model_list_box)
         """ 
