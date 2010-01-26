@@ -458,10 +458,9 @@ class Plugin:
                     fproblemId += 1 
                     self.current_pg= page
             except:
-                raise
-                #msg= "%s error: %s" % (engineType,sys.exc_value)
-                #wx.PostEvent(self.parent, StatusEvent(status= msg ))
-                #return 
+                msg= "%s error: %s" % (engineType,sys.exc_value)
+                wx.PostEvent(self.parent, StatusEvent(status= msg ))
+                return 
             
         #Do the simultaneous fit
         try:
@@ -500,10 +499,9 @@ class Plugin:
         except FitAbort:
             print "in pluging"
         except:
-            raise
-        #    msg= "%s error: %s" % (engineType,sys.exc_value)
-        #    wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
-        #    return 
+            msg= "%s error: %s" % (engineType,sys.exc_value)
+            wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
+            return 
         
     def ready_fit(self, calc_fit):
         """
@@ -640,10 +638,9 @@ class Plugin:
                                                value= value.get_scheduled())
             value.clear_model_param()
         except:
-            raise
-            #msg= title +" error: %s" % sys.exc_value
-            #wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
-            #return
+            msg= title +" error: %s" % sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+            return
        
     def _onSelect(self,event):
         """ 
@@ -775,10 +772,9 @@ class Plugin:
             cpage.onsetValues(result.fitness,param_name, result.pvec,result.stderr)
            
         except:
-            raise
-            #msg= "Single Fit completed but Following error occurred:%s"% sys.exc_value
-            #wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
-            #return
+            msg= "Single Fit completed but Following error occurred:%s"% sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+            return
        
        
     def _simul_fit_completed(self,result,pars=None,cpage=None, elapsed=None):
@@ -828,11 +824,10 @@ class Plugin:
                     # Display result on each page 
                     page.onsetValues(result.fitness, small_param_name,small_out,small_cov)
         except:
-            raise
-             #msg= "Simultaneous Fit completed"
-             #msg +=" but Following error occurred:%s"%sys.exc_value
-             #wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
-             #return 
+             msg= "Simultaneous Fit completed"
+             msg +=" but Following error occurred:%s"%sys.exc_value
+             wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+             return 
              
                            
         
@@ -1204,11 +1199,10 @@ class Plugin:
             self.calc_2D.queue()
             
         except:
-            raise
-            #msg= " Error occurred when drawing %s Model 2D: "%model.name
-            #msg+= " %s"%sys.exc_value
-            #wx.PostEvent( self.parent, StatusEvent(status= msg ))
-            #return  
+            msg= " Error occurred when drawing %s Model 2D: "%model.name
+            msg+= " %s"%sys.exc_value
+            wx.PostEvent( self.parent, StatusEvent(status= msg ))
+            return  
    
     def _draw_model1D(self, model, data=None, smearer= None,
                 qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep= DEFAULT_NPTS,enable1D= True):

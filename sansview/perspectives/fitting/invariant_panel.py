@@ -130,13 +130,12 @@ class InvariantPanel(wx.ScrolledWindow):
                 check_float(self.invariant_ctl)
                 check_float(self.invariant_err_ctl)
             except:
-                raise
-                #msg= "Error occurs for invariant: %s"%sys.exc_value
-                #wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
-                #return
+                msg= "Error occurs for invariant: %s"%sys.exc_value
+                wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+                return
             #Compute qstar extrapolated to low q range
             #Clear the previous extrapolated plot
-            print "low_q, high_q",low_q, high_q
+            #print "low_q, high_q",low_q, high_q
             if low_q:
                 try: 
                     qstar_low = inv.get_qstar_low()
@@ -147,9 +146,8 @@ class InvariantPanel(wx.ScrolledWindow):
                     self._plot_theory(data=low_out_data, name=self.data.name+" Extra_low_Q")
                     self._plot_data(data=low_in_data, name=self.data.name+"Fitted data for low_Q")
                 except:
-                    raise
-                    #msg= "Error occurs for low q invariant: %s"%sys.exc_value
-                    #wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+                    msg= "Error occurs for low q invariant: %s"%sys.exc_value
+                    wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
             if high_q:
                 try: 
                     qstar_high = inv.get_qstar_high()
@@ -160,9 +158,8 @@ class InvariantPanel(wx.ScrolledWindow):
                     self._plot_theory(data=high_out_data, name=self.data.name+" Extra_high_Q")
                     self._plot_data(data=high_in_data, name=self.data.name+"Fitted data for high_Q")
                 except:
-                    raise
-                    #msg= "Error occurs for high q invariant: %s"%sys.exc_value
-                    #wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+                    msg= "Error occurs for high q invariant: %s"%sys.exc_value
+                    wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
             try:
                 qstar_total, qstar_total_err = inv.get_qstar_with_error(extrapolation)
                 self.invariant_total_ctl.SetValue(format_number(qstar_total))
@@ -170,9 +167,8 @@ class InvariantPanel(wx.ScrolledWindow):
                 check_float(self.invariant_total_ctl)
                 check_float(self.invariant_total_err_ctl)
             except:
-                raise
-                #msg= "Error occurs for total invariant: %s"%sys.exc_value
-                #wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+                msg= "Error occurs for total invariant: %s"%sys.exc_value
+                wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
                 
             contrast = self.contrast_ctl.GetValue().lstrip().rstrip()
             if not check_float(self.contrast_ctl):
@@ -191,9 +187,8 @@ class InvariantPanel(wx.ScrolledWindow):
                 check_float(self.volume_ctl)
                 check_float(self.volume_err_ctl)
             except:
-                raise
-                #msg= "Error occurs for volume fraction: %s"%sys.exc_value
-                #wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+                msg= "Error occurs for volume fraction: %s"%sys.exc_value
+                wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
             try:
                 s, ds = inv.get_surface_with_error(contrast=contrast,
                                         porod_const=porod_const)
@@ -202,9 +197,8 @@ class InvariantPanel(wx.ScrolledWindow):
                 check_float(self.surface_ctl)
                 check_float(self.surface_err_ctl)
             except:
-                raise
-                #msg= "Error occurs for surface: %s"%sys.exc_value
-                #wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+                msg= "Error occurs for surface: %s"%sys.exc_value
+                wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
                 
         else:
             msg= "invariant: Need float for background and scale"
@@ -217,11 +211,11 @@ class InvariantPanel(wx.ScrolledWindow):
             @param data: data created frome xtrapolation to plot
             @param name: Data's name to use for the legend
         """
-        print "went here "
+        #print "went here "
         plottable = self.graph.get_plottable(name=name)
         if plottable is not None:
             self.graph.delete(plottable)
-        print "name--->",name
+        #print "name--->",name
         # Create a plottable data
         new_plot = Data1D(x=[], y=[], dx=None, dy=None)
         new_plot.copy_from_datainfo(data) 
