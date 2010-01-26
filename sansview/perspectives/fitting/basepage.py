@@ -1235,7 +1235,9 @@ class BasicPage(wx.ScrolledWindow):
                                     qmax=float(self.qmax_x),
                                     qstep= float(self.num_points),
                                     enable2D=self.enable2D) 
-        
+        print "_draw_model"
+        for name in self.model.getParamList():
+            print name , self.model.getParam(name)
         
     def _set_model_sizer(self,sizer, box_sizer, title="", object=None):
         """

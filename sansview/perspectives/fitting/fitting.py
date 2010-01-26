@@ -260,8 +260,7 @@ class Plugin:
             has changed.
         """
         self.parent.set_perspective(self.perspective)
-    
-    
+   
     def post_init(self):
         """
             Post initialization call back to close the loose ends
@@ -271,7 +270,14 @@ class Plugin:
         #self.parent.set_perspective(self.perspective)
         pass
 
-
+    def get_tools(self):
+        """
+            Returns a set of menu entries for tools
+        """
+        id = wx.NewId()
+        sld_help = "Provides computation related to Scattering Length density"
+        return [("SLD Calculator", sld_help, self.on_calculate_sld)]
+        
     def copy_data(self, item, dy=None):
         """
             receive a data 1D and the list of errors on dy
@@ -509,6 +515,16 @@ class Plugin:
         else:
             time.sleep(0.4)
              
+    def on_calculate_sld(self, event):
+        """
+            Compute the scattering length density of molecula
+        """  
+       
+        import  sld_panel 
+        frame = sld_panel.SldWindow(base=self.parent)
+        frame.Show(True) 
+      
+          
     def _onEVT_SLICER_PANEL(self, event):
         """
             receive and event telling to update a panel with a name starting with 
@@ -523,7 +539,6 @@ class Plugin:
                 
         self.parent._mgr.Update()
                
-  
     def _compute_invariant(self, event):    
         """
             Open the invariant panel to invariant computation
@@ -533,26 +548,17 @@ class Plugin:
         for plottable in self.panel.graph.plottables:
             if plottable.name == self.panel.graph.selected_plottable:
                 data = self.copy_data(item= plottable, dy=plottable.dy)
-                
-                print "_compute_invariant",data._yaxis
-                print "_compute_invariant" ,data._yunit
+               
                 from invariant_panel import InvariantWindow
                 frame = InvariantWindow(base=self.parent, data=plottable, graph=self.panel.graph)   
                 frame.Show(True)
-                #from invariant_panel import InvariantDialog
-                #self.invariant_dlg = InvariantDialog(base=self.parent,
-                #                                     data=plottable)
-                #if self.invariant_dlg.ShowModal() == wx.ID_OK:
-                #    pass
-                #self.invariant_dlg.Destroy()
-                
+              
     def _closed_fitpage(self, event):   
         """
             request fitpanel to close a given page when its unique data is removed 
             from the plot
         """    
         self.fit_panel._close_fitpage(event.data) 
-        
         
     def _add_page_onmenu(self, name,fitproblem=None):
         """
@@ -711,8 +717,9 @@ class Plugin:
                  item.__class__.__name__ is "Data2D":
                 try:
                     page = self.fit_panel.add_fit_page(data)
+                    page.set_data(data)
                     # add data associated to the page created
-                    if page !=None:   
+                    if page != None:   
                         #create a fitproblem storing all link to data,model,page creation
                         if not page in self.page_finder.keys():
                             self.page_finder[page]= FitProblem()
@@ -766,18 +773,7 @@ class Plugin:
                 param_name.append(name)
 
             cpage.onsetValues(result.fitness,param_name, result.pvec,result.stderr)
-            """
-            ## plot the current model with new param
-            metadata =  self.page_finder[cpage].get_fit_data()
-            model = self.page_finder[cpage].get_model()
-            qmin, qmax= self.page_finder[cpage].get_range()
-            smearer =self.page_finder[cpage].get_smearer()
-            #Replot models
-            msg= "Single Fit completed. plotting... %s:"%model.name
-            wx.PostEvent(self.parent, StatusEvent(status="%s " % msg))
-            self.draw_model( model=model, data= metadata, smearer= smearer,
-                             qmin= qmin, qmax= qmax)
-            """
+           
         except:
             raise
             #msg= "Single Fit completed but Following error occurred:%s"% sys.exc_value
@@ -938,7 +934,7 @@ class Plugin:
         """
         model = evt.model
         
-        if model ==None:
+        if model == None:
             return
         model.origin_name = model.name
         self.current_pg = self.fit_panel.get_current_page() 

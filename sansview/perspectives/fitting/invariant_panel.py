@@ -136,7 +136,7 @@ class InvariantPanel(wx.ScrolledWindow):
                 #return
             #Compute qstar extrapolated to low q range
             #Clear the previous extrapolated plot
-       
+            print "low_q, high_q",low_q, high_q
             if low_q:
                 try: 
                     qstar_low = inv.get_qstar_low()
@@ -217,9 +217,11 @@ class InvariantPanel(wx.ScrolledWindow):
             @param data: data created frome xtrapolation to plot
             @param name: Data's name to use for the legend
         """
+        print "went here "
         plottable = self.graph.get_plottable(name=name)
         if plottable is not None:
             self.graph.delete(plottable)
+        print "name--->",name
         # Create a plottable data
         new_plot = Data1D(x=[], y=[], dx=None, dy=None)
         new_plot.copy_from_datainfo(data) 

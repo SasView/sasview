@@ -166,7 +166,11 @@ class FitPanel(wx.aui.AuiNotebook):
         self.Bind(basepage.EVT_PAGE_INFO, self._onGetstate)
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
         self.Bind(basepage.EVT_NEXT_STATE, self._onRedo)
-       
+        
+        #add default page
+        from hint_fitpage import HintFitPage
+        panel = HintFitPage(self) 
+        self.AddPage(page=panel, caption="Hint")
         # increment number for model name
         self.count=0
         #updating the panel

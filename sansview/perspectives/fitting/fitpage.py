@@ -19,7 +19,7 @@ from sans.guiframe.utils import format_number,check_float
 (FitterTypeEvent, EVT_FITTER_TYPE)   = wx.lib.newevent.NewEvent()
 (FitStopEvent, EVT_FIT_STOP)   = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 76
-
+_DATA_BOX_WIDTH = 300
 import basepage
 from basepage import BasicPage
 from basepage import PageInfoEvent
@@ -196,56 +196,63 @@ class FitPage(BasicPage):
         """
             fill sizer 0 with data info
         """
-        self.sizer0.Clear(True)
         ## no loaded data , don't fill the sizer
-        if self.data== None:
-            self.sizer0.Layout()
-            return
+        if self.data is None:
+            data_min = ""
+            data_max = ""
+            data_name = ""
+        else:
+            data_name = self.data.name
+            #set maximum range for x in linear scale
+            if not hasattr(self.data,"data"): #Display only for 1D data fit
+                # Minimum value of data   
+                data_min = min(self.data.x)
+                # Maximum value of data  
+                data_max = max(self.data.x)
+            else:
+                ## Minimum value of data 
+                data_min = 0
+                x = max(math.fabs(self.data.xmin), math.fabs(self.data.xmax)) 
+                y = max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
+                ## Maximum value of data  
+                data_max = math.sqrt(x*x + y*y)
         
         box_description= wx.StaticBox(self, -1, 'Data')
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #----------------------------------------------------------
-        sizer_data = wx.GridSizer(3, 3,5, 5)
+        sizer_data = wx.BoxSizer(wx.HORIZONTAL)
         #Filling the sizer containing data related fields
-        DataSource  =wx.StaticText(self, -1,str(self.data.name))
-
+        #self.dataSource = wx.StaticText(self, -1,str(self.data.name))
+        self.dataSource = wx.TextCtrl(self, -1)
+        self.dataSource.SetValue(str(data_name))
+        self.dataSource.SetEditable(False)
+        self.dataSource.SetMinSize((_DATA_BOX_WIDTH, -1))
         sizer_data.Add(wx.StaticText(self, -1, 'Source Name : '))
-        sizer_data.Add(DataSource )
+        sizer_data.Add(self.dataSource )
         sizer_data.Add( (0,5) )
         
         #---------sizer 2 draw--------------------------------
-        #set maximum range for x in linear scale
-        if not hasattr(self.data,"data"): #Display only for 1D data fit
-            # Minimum value of data   
-            data_min = min(self.data.x)
-            # Maximum value of data  
-            data_max = max(self.data.x)
-            text4_3 = wx.StaticText(self, -1, 'Total Q Range (1/A)',
-                                     style=wx.ALIGN_LEFT)
-            sizer_data.Add( text4_3 )
-            sizer_data.Add(wx.StaticText(self, -1, "Min : %s"%str(data_min)))
-            sizer_data.Add(wx.StaticText(self, -1, "Max : %s"%str(data_max)))
-            
-        else:
-            ## Minimum value of data 
-            data_min= 0
-            x= max(math.fabs(self.data.xmin), math.fabs(self.data.xmax)) 
-            y= max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
-            ## Maximum value of data  
-            data_max = math.sqrt(x*x + y*y)
-          
-            #For qmin and qmax, do not use format_number
-            #.(If do, qmin and max could be different from what is in the data.)
-            text4_3 = wx.StaticText(self, -1, "Total Q Range (1/A)",
-                                     style=wx.ALIGN_LEFT)
-            sizer_data.Add( text4_3 )
-            sizer_data.Add(wx.StaticText(self, -1, "Min : %s"%str(data_min)))
-            sizer_data.Add(wx.StaticText(self, -1, "Max : %s"%str(data_max)))
-        ## set q range to plot
-        self.qmin_x= data_min
-        self.qmax_x= data_max
+        text4_3 = wx.StaticText(self, -1, 'Total Q Range (1/A)',
+                                 style=wx.ALIGN_LEFT)
+        sizer_range = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_range.Add( text4_3 ,0, wx.RIGHT, 10)
+        self.minimum_q = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20))
+        self.minimum_q.SetValue(str(data_min))
+        self.minimum_q.SetEditable(False)
+        self.maximum_q = wx.TextCtrl(self, -1,size=(_BOX_WIDTH,20))
+        self.maximum_q.SetValue(str(data_max))
+        self.maximum_q.SetEditable(False)
+        sizer_range.Add(wx.StaticText(self, -1, "Min: "),0, wx.LEFT, 10)
+        sizer_range.Add(self.minimum_q,0, wx.LEFT, 10)
+        sizer_range.Add(wx.StaticText(self, -1, "Max: "),0, wx.LEFT, 10)
+        sizer_range.Add(self.maximum_q,0, wx.LEFT, 10)
 
-        boxsizer1.Add(sizer_data)
+        ## set q range to plot
+        self.qmin_x = data_min
+        self.qmax_x = data_max
+
+        boxsizer1.Add(sizer_data,0, wx.ALL, 10)
+        boxsizer1.Add(sizer_range, 0 , wx.LEFT, 10)
         #------------------------------------------------------------
         self.sizer0.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer0.Layout()
@@ -632,7 +639,7 @@ class FitPage(BasicPage):
             self.set_dispers_sizer()
         except:
             pass
-        if self.model !=None:
+        if self.model != None:
             try:
                 temp_smear= None
                 if self.enable_smearer.GetValue():
@@ -641,8 +648,9 @@ class FitPage(BasicPage):
             except:
                 ## error occured on chisqr computation
                 pass
-            ## set smearing value whether or not the data contain the smearing info
-            self.manager.set_smearer(smearer=temp_smear, qmin= float(self.qmin_x),
+            if self.data is not None:
+                ## set smearing value whether or not the data contain the smearing info
+                self.manager.set_smearer(smearer=temp_smear, qmin= float(self.qmin_x),
                                      qmax= float(self.qmax_x)) 
             evt = ModelEventbox(model=self.model)
             wx.PostEvent(self.event_owner, evt)  
@@ -827,15 +835,38 @@ class FitPage(BasicPage):
         return        
                 
         
-    def set_data(self, data ):
+    def set_data(self, data):
         """
             reset the current data 
         """
-        if data ==None:
-            return 
-        self.data =data
-        self.state.data= data 
-        self._fill_datainfo_sizer()
+        self.data = data
+        if self.data is None:
+            data_min = ""
+            data_max = ""
+            data_name = ""
+        else:
+            data_name = self.data.name
+            #set maximum range for x in linear scale
+            if not hasattr(self.data,"data"): #Display only for 1D data fit
+                # Minimum value of data   
+                data_min = min(self.data.x)
+                # Maximum value of data  
+                data_max = max(self.data.x)
+            else:
+                ## Minimum value of data 
+                data_min = 0
+                x = max(math.fabs(self.data.xmin), math.fabs(self.data.xmax)) 
+                y = max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
+                ## Maximum value of data  
+                data_max = math.sqrt(x*x + y*y)
+        
+        self.dataSource.SetValue(data_name)
+        self.minimum_q.SetValue(str(data_min))
+        self.maximum_q.SetValue(str(data_max))
+        self.qmin_x = data_min
+        self.qmax_x = data_max
+        self.state.data = data, data_max
+        print "set_data",data_min
         
     def reset_page(self, state,first=False):
         """
@@ -1022,7 +1053,7 @@ class FitPage(BasicPage):
         self._draw_model()   
         self._lay_out()      
         #PostStatusEvent     
-        msg="Fit completed! "
+        msg = "Fit completed! "
         wx.PostEvent(self.manager.parent, StatusEvent(status=msg))
       
 
