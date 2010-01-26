@@ -653,10 +653,11 @@ class FitPage(BasicPage):
             except:
                 ## error occured on chisqr computation
                 pass
-            if self.data is not None:
+            if self.data is not None and self.data.__class__.__name__ !="Data2D":
                 ## set smearing value whether or not the data contain the smearing info
                 self.manager.set_smearer(smearer=temp_smear, qmin= float(self.qmin_x),
                                      qmax= float(self.qmax_x)) 
+           
             evt = ModelEventbox(model=self.model)
             wx.PostEvent(self.event_owner, evt)  
             

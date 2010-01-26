@@ -1342,12 +1342,13 @@ class BasicPage(wx.ScrolledWindow):
             self.formfactorbox.SetValue(self.model.name)
            
         self.structurebox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
+        
+        self.initialize_combox()
+             
         wx.EVT_COMBOBOX(self.formfactorbox,-1, self._on_select_model)
         wx.EVT_COMBOBOX(self.structurebox,-1, self._on_select_model)
         
        
-        self.initialize_combox()
-             
         ## check model type to show sizer
         if self.model !=None:
             self._set_model_sizer_selection( self.model )
