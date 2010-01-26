@@ -97,11 +97,11 @@ class PageInfo(object):
         a fitpage or model page need to be initialized.
     """
     data = None
-    model= None
-    manager= None
+    model =  None
+    manager = None
     event_owner= None
     model_list_box = None
-    name=None
+    name = None
     ## Internal name for the AUI manager
     window_name = "Page"
     ## Title to appear on top of the window
@@ -156,12 +156,14 @@ class FitPanel(wx.aui.AuiNotebook):
         self.list_fitpage_name=[]
     
         #model page info
-        self.model_page_number=None
+        self.model_page_number = None
         ## fit page number for model plot
-        self.fit_page1D_number=None
-        self.fit_page2D_number=None
-        self.model_page=None
-        self.sim_page=None
+        self.fit_page1D_number = None
+        self.fit_page2D_number = None
+        self.model_page = None
+        self.sim_page = None
+        self.default_page = None
+        self.check_first_data = False
         ## get the state of a page
         self.Bind(basepage.EVT_PAGE_INFO, self._onGetstate)
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
@@ -171,6 +173,9 @@ class FitPanel(wx.aui.AuiNotebook):
         from hint_fitpage import HintFitPage
         self.hint_page = HintFitPage(self) 
         self.AddPage(page=self.hint_page, caption="Hint")
+        #Add the first fit page
+        self.default_page = self.add_fit_page(data=None)
+        
         # increment number for model name
         self.count=0
         #updating the panel
@@ -242,7 +247,7 @@ class FitPanel(wx.aui.AuiNotebook):
         """
         self.event_owner = owner
     
-    def set_model_list(self,dict):
+    def set_model_list(self, dict):
          """ 
              copy a dictionary of model into its own dictionary
              @param dict: dictionnary made of model name as key and model class
@@ -269,20 +274,21 @@ class FitPanel(wx.aui.AuiNotebook):
         self.sim_page.set_manager(self.manager)
         return self.sim_page
         
-    def add_fit_page( self,data, reset=False ):
+        
+    def add_fit_page( self,data=None, reset=False ):
         """ 
             Add a fitting page on the notebook contained by fitpanel
             @param data: data to fit
             @return panel : page just added for further used. is used by fitting module
-        """     
-        if data.is_data:
-            name = data.name 
-        else:
-            if data.__class__.__name__=="Data2D":
-                name = 'Model 2D Fit'
+        """    
+        if data is not None:
+            if data.is_data:
+                name = data.name 
             else:
-                name = 'Model 1D Fit'
-        if not name in self.list_fitpage_name:
+                if data.__class__.__name__=="Data2D":
+                    name = 'Model 2D Fit'
+                else:
+                    name = 'Model 1D Fit'
             myinfo = PageInfo( data=data, name=name )
             myinfo.model_list_box = self.model_list_box.get_list()
             myinfo.event_owner = self.event_owner 
@@ -290,25 +296,42 @@ class FitPanel(wx.aui.AuiNotebook):
             myinfo.window_name = name
             myinfo.window_caption = name
         
-            #if not name in self.fit_page_name :
-            from fitpage import FitPage
-            panel = FitPage(parent= self, page_info=myinfo)
-            
-            self.AddPage(page=panel, caption=name, select=True)
-            if name == 'Model 1D Fit':
-                self.fit_page1D_number= self.GetPageIndex(panel)
-            if name =='Model 2D Fit':
-                self.fit_page2D_number= self.GetPageIndex(panel)
-                
-            self.list_fitpage_name.append(name)
-            if reset:
-                if name in self.fit_page_name.keys():
-                    memento= self.fit_page_name[name][0]
-                    panel.reset_page(memento)
+        else :
+            name = "Fit Page" 
+            myinfo = PageInfo( data=data, name=name )
+        
+        if not name in self.list_fitpage_name:
+            # the first data loading
+            if not self.check_first_data and self.default_page is not None:
+                page_number = self.GetPageIndex(self.default_page)
+                self.SetPageText(page_number , name)
+                self.default_page.set_data(data)
+                self.default_page.set_page_info(page_info=myinfo)
+                self.default_page.initialize_combox()
+                if  data is not None:
+                    self.check_first_data = True
+                panel = self.default_page
             else:
-                self.fit_page_name[name]=ListOfState()
+                #if not name in self.fit_page_name :
+                from fitpage import FitPage
+                panel = FitPage(parent=self, page_info=myinfo)
                 
-                #self.fit_page_name[name].appendItem(panel.createMemento())
+                self.AddPage(page=panel, caption=name, select=True)
+                if name == 'Model 1D Fit':
+                    self.fit_page1D_number= self.GetPageIndex(panel)
+                if name =='Model 2D Fit':
+                    self.fit_page2D_number= self.GetPageIndex(panel)
+                    
+                self.list_fitpage_name.append(name)
+                if data is not None:
+                    if reset:
+                        if name in self.fit_page_name.keys():
+                            memento= self.fit_page_name[name][0]
+                            panel.reset_page(memento)
+                        else:
+                            self.fit_page_name[name]=ListOfState()
+                    
+                    #self.fit_page_name[name].appendItem(panel.createMemento())
             #GetPage(self, page_idx) 
             return panel 
         elif name =='Model 1D Fit':

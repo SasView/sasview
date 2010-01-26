@@ -42,21 +42,21 @@ class BasicPage(wx.ScrolledWindow):
         #Set window's font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         ##window_name
-        self.window_name = page_info.window_name
-        ##window_caption
-        self.window_caption = page_info.window_caption
+       
         ## parent of the page
         self.parent = parent
         ## manager is the fitting plugin
-        self.manager= page_info.manager
+        self.manager= None
         ## owner of the page (fitting plugin)
-        self.event_owner= page_info.event_owner
+        self.event_owner= None
          ## current model
-        self.model = page_info.model
+        self.model = None
         ## data
-        self.data = page_info.data
+        self.data = None
+        self.state = PageState(parent=parent)
         ## dictionary containing list of models
-        self.model_list_box = page_info.model_list_box
+        self.model_list_box = None
+        self.set_page_info(page_info=page_info)
         ## Data member to store the dispersion object created
         self._disp_obj_dict = {}
         ## selected parameters to apply dispersion
@@ -78,6 +78,7 @@ class BasicPage(wx.ScrolledWindow):
         ##list of dispersion parameters
         self.disp_list=[]
         self.disp_name=""
+        
         ## list of orientation parameters
         self.orientation_params=[]
         self.orientation_params_disp=[]
@@ -208,7 +209,27 @@ class BasicPage(wx.ScrolledWindow):
                     if start==end:
                         control.SetSelection(-1,-1)
                  
-       
+    def set_page_info(self, page_info):
+        """
+            set some page important information at once
+        """
+       ##window_name
+        self.window_name = page_info.window_name
+        ##window_caption
+        self.window_caption = page_info.window_caption
+        ## manager is the fitting plugin
+        self.manager= page_info.manager
+        ## owner of the page (fitting plugin)
+        self.event_owner= page_info.event_owner
+         ## current model
+        self.model = page_info.model
+        ## data
+        self.data = page_info.data
+        ## dictionary containing list of models
+        self.model_list_box = page_info.model_list_box
+        ## Data member to store the dispersion object created
+        self.populate_box(dict=self.model_list_box)
+        
     def onContextMenu(self, event): 
         """
             Retrieve the state selected state
@@ -311,9 +332,33 @@ class BasicPage(wx.ScrolledWindow):
         """
         self.model_list_box = dict
         self.state.model_list_box = self.model_list_box
-            
-    
         
+    def initialize_combox(self): 
+        """
+            put default value in the combobox 
+        """  
+        ## fill combox box
+        if self.model_list_box is None:
+            return
+        if len(self.model_list_box)>0:
+            self._populate_box( self.formfactorbox,self.model_list_box["Shapes"])
+       
+        if len(self.model_list_box)>0:
+            self._populate_box( self.structurebox,
+                                self.model_list_box["Structure Factors"])
+            self.structurebox.Insert("None", 0,None)
+            self.structurebox.SetSelection(0)
+            self.structurebox.Hide()
+            self.text2.Hide()
+            self.structurebox.Disable()
+            self.text2.Disable()
+             
+            if self.model.__class__ in self.model_list_box["P(Q)*S(Q)"]:
+                self.structurebox.Show()
+                self.text2.Show()
+                self.structurebox.Enable()
+                self.text2.Enable()            
+                
     def set_dispers_sizer(self):
         """
             fill sizer containing dispersity info
@@ -727,7 +772,16 @@ class BasicPage(wx.ScrolledWindow):
         self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
     
-               
+          
+    def check_invalid_panel(self):  
+        """
+            check if the user can already perform some action with this panel
+        """ 
+        flag = False
+        if self.data is None and self.model is None:
+            msg = "Please load a Data to start"
+            wx.MessageBox(msg, 'Info')
+            return  True
     def reset_page_helper(self, state):
         """
             Use page_state and change the state of existing page
@@ -880,6 +934,8 @@ class BasicPage(wx.ScrolledWindow):
         """
             Reset the plotting range to a given state
         """
+        if self.check_invalid_panel():
+            return
         self.qmin.SetValue(str(state.qmin))
         self.qmax.SetValue(str(state.qmax)) 
         if self.state.npts!=None:
@@ -1223,6 +1279,8 @@ class BasicPage(wx.ScrolledWindow):
             
             [Note to coder: This way future changes will be done in only one place.] 
         """
+        if self.check_invalid_panel():
+            return
         if self.model !=None:
             temp_smear=None
             if hasattr(self, "enable_smearer"):
@@ -1235,9 +1293,7 @@ class BasicPage(wx.ScrolledWindow):
                                     qmax=float(self.qmax_x),
                                     qstep= float(self.num_points),
                                     enable2D=self.enable2D) 
-        print "_draw_model"
-        for name in self.model.getParamList():
-            print name , self.model.getParam(name)
+       
         
     def _set_model_sizer(self,sizer, box_sizer, title="", object=None):
         """
@@ -1282,35 +1338,16 @@ class BasicPage(wx.ScrolledWindow):
         
         
         self.formfactorbox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
-        if self.model!=None:
+        if self.model!= None:
             self.formfactorbox.SetValue(self.model.name)
-            
-            
+           
         self.structurebox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
         wx.EVT_COMBOBOX(self.formfactorbox,-1, self._on_select_model)
         wx.EVT_COMBOBOX(self.structurebox,-1, self._on_select_model)
         
-    
-        ## fill combox box
-        if len(self.model_list_box)>0:
-            self._populate_box( self.formfactorbox,self.model_list_box["Shapes"])
        
-        if len(self.model_list_box)>0:
-            self._populate_box( self.structurebox,
-                                self.model_list_box["Structure Factors"])
-            self.structurebox.Insert("None", 0,None)
-            self.structurebox.SetSelection(0)
-            self.structurebox.Hide()
-            self.text2.Hide()
-            self.structurebox.Disable()
-            self.text2.Disable()
+        self.initialize_combox()
              
-            if self.model.__class__ in self.model_list_box["P(Q)*S(Q)"]:
-                self.structurebox.Show()
-                self.text2.Show()
-                self.structurebox.Enable()
-                self.text2.Enable()            
-        
         ## check model type to show sizer
         if self.model !=None:
             self._set_model_sizer_selection( self.model )
@@ -1341,6 +1378,9 @@ class BasicPage(wx.ScrolledWindow):
         """
             Show combox box associate with type of model selected
         """
+        if self.check_invalid_panel():
+            return
+
         ## Don't want to populate combo box again if the event comes from check box
         if self.shape_rbutton.GetValue()and\
              event.GetEventObject()==self.shape_rbutton:
@@ -1660,7 +1700,8 @@ class BasicPage(wx.ScrolledWindow):
             when the user selects No,the combo box disappears.
             Redraw the model with the default dispersity (Gaussian)
         """
-        
+        if self.check_invalid_panel():
+            return 
         self._reset_dispersity()
     
         if self.model ==None:
@@ -1987,6 +2028,8 @@ class BasicPage(wx.ScrolledWindow):
         """
         #On 'Reset' button  for Q range clicked
         """
+        if self.check_invalid_panel():
+            return
         ##For 3 different cases: Data2D, Data1D, and theory
         if self.data.__class__.__name__ == "Data2D":
             data_min= 0

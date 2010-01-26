@@ -54,7 +54,10 @@ class FitPage(BasicPage):
  
         self._fill_range_sizer() 
         #self._on_select_model(event=None)
-        if self.data !=None:
+        if self.data is None:
+            self.formfactorbox.Disable()
+            self.structurebox.Disable()
+        else:
             self.smearer = smear_selection( self.data )
             if self.smearer ==None:
                 self.enable_smearer.Disable()
@@ -63,6 +66,7 @@ class FitPage(BasicPage):
         ## to update the panel according to the fit engine type selected
         self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
         self.Bind(EVT_FIT_STOP,self._on_fit_complete)
+        
 
     def _on_fit_complete(self, event):
         """
@@ -576,7 +580,8 @@ class FitPage(BasicPage):
             Allow to fit
         """
         #make sure all parameter values are updated.
-       
+        if self.check_invalid_panel():
+            return
         flag = self._update_paramv_on_fit() 
                 
         if not flag:
@@ -707,7 +712,8 @@ class FitPage(BasicPage):
         """
             Check validity of value enter in the parameters range field
         """
-        
+        if self.check_invalid_panel():
+            return
         tcrtl= event.GetEventObject()
         #Clear msg if previously shown.
         msg= ""
@@ -739,7 +745,8 @@ class FitPage(BasicPage):
         """
             Check validity of value enter in the Q range field
         """
-        
+        if self.check_invalid_panel():
+            return
         tcrtl= event.GetEventObject()
         #Clear msg if previously shown.
         msg= ""
@@ -844,7 +851,11 @@ class FitPage(BasicPage):
             data_min = ""
             data_max = ""
             data_name = ""
+            self.formfactorbox.Disable()
+            self.structurebox.Disable()
         else:
+            self.formfactorbox.Enable()
+            self.structurebox.Enable()
             data_name = self.data.name
             #set maximum range for x in linear scale
             if not hasattr(self.data,"data"): #Display only for 1D data fit
@@ -861,12 +872,18 @@ class FitPage(BasicPage):
                 data_max = math.sqrt(x*x + y*y)
         
         self.dataSource.SetValue(data_name)
-        self.minimum_q.SetValue(str(data_min))
-        self.maximum_q.SetValue(str(data_max))
         self.qmin_x = data_min
         self.qmax_x = data_max
-        self.state.data = data, data_max
-        print "set_data",data_min
+        self.minimum_q.SetValue(str(data_min))
+        self.maximum_q.SetValue(str(data_max))
+        self.qmin.SetValue(str(data_min))
+        self.qmax.SetValue(str(data_max))
+        self.qmin.SetBackgroundColour("white")
+        self.qmax.SetBackgroundColour("white")
+        self.state.data = data
+        self.state.qmin = self.qmin_x
+        self.state.qmax = self.qmax_x
+        
         
     def reset_page(self, state,first=False):
         """
@@ -1062,6 +1079,8 @@ class FitPage(BasicPage):
             Create a smear object that will change the way residuals
             are compute when fitting
         """
+        if self.check_invalid_panel():
+            return
         if self.model ==None:
             msg="Need model and data to smear plot"
             wx.PostEvent(self.manager.parent, StatusEvent(status=\
