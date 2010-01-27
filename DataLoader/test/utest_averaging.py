@@ -2,9 +2,75 @@
 import unittest
 
 from DataLoader.loader import  Loader
-from DataLoader.manipulations import Ring, CircularAverage
+from DataLoader.manipulations import Ring, CircularAverage, SectorPhi, get_q
  
 import os.path
+import numpy, math
+import DataLoader.data_info as data_info
+
+class Averaging(unittest.TestCase):
+    """
+        Test averaging manipulations on a flat distribution
+    """
+    def setUp(self):
+        """
+            Create a flat 2D distribution. All averaging results
+            should return the predefined height of the distribution (1.0).
+        """
+        x_0  = numpy.ones([100,100])
+        dx_0 = numpy.ones([100,100])
+        self.data = data_info.Data2D(x_0, dx_0)
+        detector = data_info.Detector()
+        detector.distance = 1000.0
+        detector.pixel_size.x = 1.0
+        detector.pixel_size.y = 1.0
+        detector.beam_center.x = 50
+        detector.beam_center.y = 50
+        self.data.detector.append(detector)
+        
+        source = data_info.Source()
+        source.wavelength = 10.0
+        self.data.source = source
+        
+        self.qmin = get_q(1.0, 1.0, 1000.0, 10.0)
+        
+    def test_ring_flat_distribution(self):
+        """
+            Test ring averaging
+        """
+        r = Ring(r_min=2*self.qmin, r_max=5*self.qmin, 
+                 center_x=self.data.detector[0].beam_center.x, 
+                 center_y=self.data.detector[0].beam_center.y)
+        r.nbins_phi = 20
+        
+        o = r(self.data)
+        for i in range(20):
+            self.assertEqual(o.y[i], 1.0)
+            
+    def test_sectorphi_full(self):
+        """
+            Test sector averaging
+        """
+        r = SectorPhi(r_min=self.qmin, r_max=3*self.qmin, phi_min=0, phi_max=math.pi*2.0)
+        r.nbins_phi = 20
+        o = r(self.data)
+        for i in range(20):
+            self.assertEqual(o.y[i], 1.0)
+            
+            
+    def test_sectorphi_partial(self):
+        """
+        """
+        phi_max = 1.5
+        r = SectorPhi(r_min=self.qmin, r_max=3*self.qmin, phi_min=0, phi_max=phi_max)
+        self.assertEqual(r.phi_max, phi_max)
+        r.nbins_phi = 20
+        o = r(self.data)
+        self.assertEqual(r.phi_max, phi_max)
+        for i in range(20):
+            self.assertEqual(o.y[i], 1.0)
+            
+            
 
 class data_info_tests(unittest.TestCase):
     
