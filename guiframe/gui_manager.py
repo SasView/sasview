@@ -328,6 +328,7 @@ class ViewerFrame(wx.Frame):
            @param panel_class: class of the welcome panel to be instantiated
         """
         self.defaultPanel    = panel_class(self, -1, style=wx.RAISED_BORDER)
+        self.defaultPanel.set_manager(manager=self.app_manager)
       
     def _load_panels(self):
         """
@@ -335,7 +336,7 @@ class ViewerFrame(wx.Frame):
         """
         
         # Look for plug-in panels
-        panels = []        
+        panels = []    
         for item in self.plugins:
             if hasattr(item, "get_panels"):
                 ps = item.get_panels(self)
@@ -505,8 +506,6 @@ class ViewerFrame(wx.Frame):
                         if panel.window_name in pers:
                             plugmenu.Append(int(item), panel.window_caption, "Show %s window" % panel.window_caption)
                            
-                            
-                            
                             wx.EVT_MENU(self, int(item), self._on_view)
                     
                     viewmenu.AppendMenu(wx.NewId(), plug.sub_menu, plugmenu, plug.sub_menu)
@@ -539,6 +538,7 @@ class ViewerFrame(wx.Frame):
                     if toolsmenu is None:
                         toolsmenu = wx.Menu()
                     id = wx.NewId()
+                    
                     toolsmenu.Append(id, tool[0], tool[1])
                     wx.EVT_MENU(self, id, tool[2])
         if toolsmenu is not None:
@@ -546,7 +546,12 @@ class ViewerFrame(wx.Frame):
  
         # Help menu
         helpmenu = wx.Menu()
-
+        # add the welcome panel menu item
+        id = wx.NewId()
+        helpmenu.Append(id,'&Welcome', '')
+        helpmenu.AppendSeparator()
+        wx.EVT_MENU(self, id, self.show_welcome_panel)
+        
         # Look for help item in plug-ins 
         for item in self.plugins:
             if hasattr(item, "help"):
@@ -601,7 +606,28 @@ class ViewerFrame(wx.Frame):
             @param evt: menu event
         """
         self.show_panel(evt.GetId())
-
+        
+    def on_close_welcome_panel(self ):
+        """
+            Close the welcome panel
+        """
+        self._mgr.GetPane(self.panels["default"].window_name).Hide()
+        self._mgr.Update()
+       
+        
+    def show_welcome_panel(self, event):
+        """    
+            Display the welcome panel
+        """
+        for id in self.panels.keys():
+            if self._mgr.GetPane(self.panels[id].window_name).IsShown():
+                self._mgr.GetPane(self.panels[id].window_name).Hide()
+        # Show default panel
+        if not self._mgr.GetPane(self.panels["default"].window_name).IsShown():
+            self._mgr.GetPane(self.panels["default"].window_name).Show()
+        
+        self._mgr.Update()
+        
     def show_panel(self, uid):
         """
             Shows the panel with the given id
@@ -773,7 +799,7 @@ class ViewerFrame(wx.Frame):
             else:
                 if self._mgr.GetPane(self.panels[item].window_name).IsShown():
                     self._mgr.GetPane(self.panels[item].window_name).Hide()
-                 
+    
         self._mgr.Update()
         
     def choose_file(self, path=None):
