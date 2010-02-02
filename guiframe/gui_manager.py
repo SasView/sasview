@@ -547,10 +547,11 @@ class ViewerFrame(wx.Frame):
         # Help menu
         helpmenu = wx.Menu()
         # add the welcome panel menu item
-        id = wx.NewId()
-        helpmenu.Append(id,'&Welcome', '')
-        helpmenu.AppendSeparator()
-        wx.EVT_MENU(self, id, self.show_welcome_panel)
+        if self.defaultPanel is not None:
+            id = wx.NewId()
+            helpmenu.Append(id,'&Welcome', '')
+            helpmenu.AppendSeparator()
+            wx.EVT_MENU(self, id, self.show_welcome_panel)
         
         # Look for help item in plug-ins 
         for item in self.plugins:
@@ -611,6 +612,8 @@ class ViewerFrame(wx.Frame):
         """
             Close the welcome panel
         """
+        if self.defaultPanel is None:
+            return 
         self._mgr.GetPane(self.panels["default"].window_name).Hide()
         self._mgr.Update()
        
@@ -619,6 +622,8 @@ class ViewerFrame(wx.Frame):
         """    
             Display the welcome panel
         """
+        if self.defaultPanel is None:
+            return 
         for id in self.panels.keys():
             if self._mgr.GetPane(self.panels[id].window_name).IsShown():
                 self._mgr.GetPane(self.panels[id].window_name).Hide()
