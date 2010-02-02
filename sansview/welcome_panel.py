@@ -12,6 +12,7 @@ copyright 2009, University of Tennessee
 """
 
 import wx
+import wx.aui
 import wx.lib.hyperlink
 import os.path
 import os, sys
@@ -22,8 +23,53 @@ if sys.platform.count("win32")>0:
     FONT_VARIANT = 0
 else:
     FONT_VARIANT = 1 
+ 
+class WelcomePanel(wx.aui.AuiNotebook):
+    """
+        Panel created like about box  as a welcome page
+        Shows product name, current version, authors, and link to the product page.
+    """
+    ## Internal nickname for the window, used by the AUI manager
+    window_name = "default"
+    ## Name to appear on the window title bar
+    window_caption = "Welcome panel"
+    ## Flag to tell the AUI manager to put this panel in the center pane
+    CENTER_PANE = True
+   
     
-class WelcomePanel(wx.Panel):
+    def __init__(self,parent,manager=None, *args, **kwds):
+        
+        kwds["style"] = wx.aui.AUI_NB_DEFAULT_STYLE
+        
+        wx.aui.AuiNotebook.__init__(self, parent, *args, **kwds)
+        #For sansview the parent is guiframe
+        self.parent = parent
+        #For sansview the manager is sansview application
+        self.manager = manager
+        welcome_page = WelcomePage(self)
+        self.AddPage(page=welcome_page, caption="Welcome")
+        
+        pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
+        self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_page)
+        self.Center()
+    
+    def set_manager(self, manager):
+        """
+            the manager of the panel in this case the application itself
+        """
+        self.manager = manager
+        
+    def on_close_page(self, event):
+        """
+            
+        """
+        if self.parent is not None:
+            self.parent.on_close_welcome_panel()
+        if self.manager is not None:
+            self.manager.on_close_welcome_panel()
+        event.Veto() 
+   
+class WelcomePage(wx.Panel):
     """
         Panel created like about box  as a welcome page
         Shows product name, current version, authors, and link to the product page.

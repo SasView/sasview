@@ -477,7 +477,7 @@ class Plugin:
             ## perform single fit
             if fitproblem_count == 1:
                 #qmin, qmax= self.current_pg.get_range()
-                print "went here fitproblem_count == 1",fitproblem_count == 1
+                #print "went here fitproblem_count == 1",fitproblem_count == 1
                 calc_fit=FitThread(parent =self.parent,
                                         fn= self.fitter,
                                        cpage=self.current_pg,
@@ -633,7 +633,7 @@ class Plugin:
             
             self.fitter.set_data(data=metadata,Uid=self.fit_id,
                                  smearer=smearer,qmin= qmin,qmax=qmax )
-            print "self.fitter.set_data"
+            #print "self.fitter.set_data"
             self.fitter.select_problem_for_fit(Uid= self.fit_id,
                                                value= value.get_scheduled())
             value.clear_model_param()

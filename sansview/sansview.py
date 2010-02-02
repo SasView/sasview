@@ -41,7 +41,8 @@ class SansView():
         """
         #from gui_manager import ViewApp
         self.gui = SansViewApp(0) 
-        
+        # Set the application manager for the GUI
+        self.gui.set_manager(self)
         # Add perspectives to the basic application
         # Additional perspectives can still be loaded
         # dynamically
@@ -52,8 +53,8 @@ class SansView():
         # P(r) perspective
         try:
             import sans.perspectives.pr as module    
-            fitting_plug = module.Plugin(standalone=False)
-            self.gui.add_perspective(fitting_plug)
+            self.fitting_plug = module.Plugin(standalone=False)
+            self.gui.add_perspective(self.fitting_plug)
         except:
             logging.error("SansView: could not find P(r) plug-in module") 
          
@@ -75,21 +76,26 @@ class SansView():
             #logging.error("SansView: could not find theory plug-in module")
         # Fitting perspective
         import perspectives.fitting as module    
-        fitting_plug = module.Plugin()
-        self.gui.add_perspective(fitting_plug)
-      
+        self.fitting_plug = module.Plugin()
+        self.gui.add_perspective(self.fitting_plug)
+        
         # Add welcome page
         self.gui.set_welcome_panel(WelcomePanel)
       
         # Build the GUI
         self.gui.build_gui()
         
-        # Set the application manager for the GUI
-        self.gui.set_manager(self)
-        
         # Start the main loop
         self.gui.MainLoop()  
         
+    def on_close_welcome_panel(self):
+        """
+            When closing the welcome panel, set to the default perspective
+        """
+        default_perspective = self.fitting_plug.get_perspective()
+        return
+        self.fitting_plug.on_perspective(event=None)
+    
 
 if __name__ == "__main__": 
     sansview = SansView()
