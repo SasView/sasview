@@ -242,6 +242,7 @@ class Plugin:
         
         #Send the fitting panel to guiframe
         self.mypanels.append(self.fit_panel)
+       
         return self.mypanels
 
         
@@ -261,6 +262,15 @@ class Plugin:
         """
         self.parent.set_perspective(self.perspective)
    
+    def set_default_perspective(self):
+        """
+           Call back method that True to notify the parent that the current plug-in
+           can be set as default  perspective.
+           when returning False, the plug-in is not candidate for an automatic 
+           default perspective setting
+        """
+        return True
+    
     def post_init(self):
         """
             Post initialization call back to close the loose ends
