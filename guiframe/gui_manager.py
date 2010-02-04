@@ -158,7 +158,15 @@ class Plugin:
             Post initialization call back to close the loose ends
         """
         pass
-
+    
+    def set_default_perspective(self):
+        """
+           Call back method that True to notify the parent that the current plug-in
+           can be set as default  perspective.
+           when returning False, the plug-in is not candidate for an automatic 
+           default perspective setting
+        """
+        return False
 
 class ViewerFrame(wx.Frame):
     """
@@ -328,8 +336,7 @@ class ViewerFrame(wx.Frame):
            @param panel_class: class of the welcome panel to be instantiated
         """
         self.defaultPanel    = panel_class(self, -1, style=wx.RAISED_BORDER)
-        self.defaultPanel.set_manager(manager=self.app_manager)
-      
+        
     def _load_panels(self):
         """
             Load all panels in the panels directory
@@ -389,8 +396,7 @@ class ViewerFrame(wx.Frame):
                                   Hide())
                                   #BestSize(wx.Size(550,600)))
                                   #MinSize(wx.Size(500,500)))                 
-                
-        
+      
     def get_context_menu(self, graph=None):
         """
             Get the context menu items made available 
@@ -608,7 +614,7 @@ class ViewerFrame(wx.Frame):
         """
         self.show_panel(evt.GetId())
         
-    def on_close_welcome_panel(self ):
+    def on_close_welcome_panel(self):
         """
             Close the welcome panel
         """
@@ -616,7 +622,8 @@ class ViewerFrame(wx.Frame):
             return 
         self._mgr.GetPane(self.panels["default"].window_name).Hide()
         self._mgr.Update()
-       
+        # set a default perspective
+        self.set_default_perspective()
         
     def show_welcome_panel(self, event):
         """    
@@ -784,6 +791,18 @@ class ViewerFrame(wx.Frame):
             if hasattr(item, "post_init"):
                 item.post_init()
         
+    def set_default_perspective(self):
+        """
+            Choose among the plugin the first plug-in that has 
+            "set_default_perspective" method and its return value is True will be
+            as a default perspective when the welcome page is closed
+        """
+        for item in self.plugins:
+            if hasattr(item, "set_default_perspective"):
+                if item.set_default_perspective():
+                    item.on_perspective(event=None)
+                    return 
+            
     def set_perspective(self, panels):
         """
             Sets the perspective of the GUI.
