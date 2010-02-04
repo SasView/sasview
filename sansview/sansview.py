@@ -92,9 +92,8 @@ class SansView():
         """
             When closing the welcome panel, set to the default perspective
         """
-        default_perspective = self.fitting_plug.get_perspective()
-        return
-        self.fitting_plug.on_perspective(event=None)
+        self.gui.set_default_perspective()
+       
     
 
 if __name__ == "__main__": 

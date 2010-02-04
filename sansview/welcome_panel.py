@@ -37,15 +37,14 @@ class WelcomePanel(wx.aui.AuiNotebook):
     CENTER_PANE = True
    
     
-    def __init__(self,parent,manager=None, *args, **kwds):
+    def __init__(self,parent, *args, **kwds):
         
         kwds["style"] = wx.aui.AUI_NB_DEFAULT_STYLE
         
         wx.aui.AuiNotebook.__init__(self, parent, *args, **kwds)
         #For sansview the parent is guiframe
         self.parent = parent
-        #For sansview the manager is sansview application
-        self.manager = manager
+       
         welcome_page = WelcomePage(self)
         self.AddPage(page=welcome_page, caption="Welcome")
         
@@ -65,8 +64,6 @@ class WelcomePanel(wx.aui.AuiNotebook):
         """
         if self.parent is not None:
             self.parent.on_close_welcome_panel()
-        if self.manager is not None:
-            self.manager.on_close_welcome_panel()
         event.Veto() 
    
 class WelcomePage(wx.Panel):
