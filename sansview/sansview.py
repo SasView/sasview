@@ -87,14 +87,7 @@ class SansView():
         
         # Start the main loop
         self.gui.MainLoop()  
-        
-    def on_close_welcome_panel(self):
-        """
-            When closing the welcome panel, set to the default perspective
-        """
-        self.gui.set_default_perspective()
        
-    
 
 if __name__ == "__main__": 
     sansview = SansView()
