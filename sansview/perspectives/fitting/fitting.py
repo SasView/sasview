@@ -527,9 +527,13 @@ class Plugin:
         """
             Compute the scattering length density of molecula
         """  
-       
-        import  sld_panel 
-        frame = sld_panel.SldWindow(base=self.parent)
+        try:
+            import sans.perspectives.calculator as sld
+        except:
+            msg= "Couldn't import Sld module"
+            wx.PostEvent(self.parent, StatusEvent(status= msg))
+            return 
+        frame = sld.sld_panel.SldWindow(base=self.parent)
         frame.Show(True) 
       
           
