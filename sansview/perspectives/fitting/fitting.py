@@ -280,14 +280,6 @@ class Plugin:
         #self.parent.set_perspective(self.perspective)
         pass
 
-    def get_tools(self):
-        """
-            Returns a set of menu entries for tools
-        """
-        id = wx.NewId()
-        sld_help = "Provides computation related to Scattering Length density"
-        return [("SLD Calculator", sld_help, self.on_calculate_sld)]
-        
     def copy_data(self, item, dy=None):
         """
             receive a data 1D and the list of errors on dy
@@ -522,20 +514,7 @@ class Plugin:
             
         else:
             time.sleep(0.4)
-             
-    def on_calculate_sld(self, event):
-        """
-            Compute the scattering length density of molecula
-        """  
-        try:
-            import sans.perspectives.calculator as sld
-        except:
-            msg= "Couldn't import Sld module"
-            wx.PostEvent(self.parent, StatusEvent(status= msg))
-            return 
-        frame = sld.sld_panel.SldWindow(base=self.parent)
-        frame.Show(True) 
-      
+   
           
     def _onEVT_SLICER_PANEL(self, event):
         """
