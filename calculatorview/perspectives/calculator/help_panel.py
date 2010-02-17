@@ -99,29 +99,21 @@ class HelpWindow(wx.Frame):
         self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER, 
                                      size=(500,-1))
         path = os.getcwd()
-        path= os.path.join(os.path.split(path)[0],"calculatorview",
+        self.path= os.path.join(os.path.split(path)[0],"calculatorview",
                             "doc","sld_calculator_help.html")
        
-        page1="""<html>
-            <body>
-             <p>Select topic on Menu</p>
-            </body>
-            </html>"""
+        self.rhelp.LoadPage(self.path)
         page="""<html>
             <body>
             <ul>
             <li><a href =%s target ="showframe">SLD Calculator</a><br></li>
             </ul>
             </body>
-            </html>"""%path
-        self.rhelp.SetPage(page1)
+            </html>"""%self.path
+        
         self.lhelp.SetPage(page)
         self.lhelp.Bind(wx.html.EVT_HTML_LINK_CLICKED,self.OnLinkClicked )
         
-        #open the help frame a the current page
-        if  pageToOpen!= None:
-            self.rhelp.LoadPage(str( pageToOpen))
-            
         vbox.Add(self.rhelp,1, wx.EXPAND)
         vboxl.Add(self.lhelp, 1, wx.EXPAND)
         rpanel.SetSizer(vbox)
@@ -142,8 +134,7 @@ class HelpWindow(wx.Frame):
         """
             Function to diplay html page related to the hyperlinktext selected
         """
-        link= event.GetLinkInfo().GetHref()
-        self.rhelp.LoadPage(link)
+        self.rhelp.LoadPage(self.path)
 
 class ViewApp(wx.App):
     def OnInit(self):

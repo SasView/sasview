@@ -57,31 +57,22 @@ class Plugin:
         self.sld_panel= SldPanel(self.parent, -1)
         
         # If needed, add its name to the perspective list
-        self.perspective.append(self.sld_panel.window_name)
+        #self.perspective.append(self.sld_panel.window_name)
 
         # Return the list of panels
         return [self.sld_panel]
+       
     
     def help(self, evt):
         """
             Show a general help dialog. 
             TODO: replace the text with a nice image
-        """
-        
-        """
             provide more hint on the SLD calculator
         """
         from help_panel import  HelpWindow
-        frame = HelpWindow(None, -1, pageToOpen="doc/sld_calculator_help.html")    
+        frame = HelpWindow(None, -1)    
         frame.Show(True)
-        name = "SLD_calculator"
-        if frame.rhelp.HasAnchor(name):
-            frame.rhelp.ScrollToAnchor(name)
-        else:
-           msg= "Cannot find SLD Calculator description "
-           msg +="Please.Search in the Help window"
-           wx.PostEvent(self.parent, StatusEvent(status = msg )) 
-        
+      
     def get_context_menu(self, graph=None):
         """
             This method is optional.
@@ -109,7 +100,25 @@ class Plugin:
             Get the list of panel names for this perspective
         """
         return self.perspective
+        
     
+    def get_tools(self):
+        """
+            Returns a set of menu entries for tools
+        """
+        id = wx.NewId()
+        sld_help = "Provides computation related to Scattering Length density"
+        return [("SLD Calculator", sld_help, self.on_calculate_sld)]
+              
+    def on_calculate_sld(self, event):
+        """
+            Compute the scattering length density of molecula
+        """
+        from sld_panel import SldWindow
+        frame = SldWindow(base=self.parent)
+        frame.Show(True) 
+      
+        
     def on_perspective(self, event):
         """
             Call back function for the perspective menu item.
@@ -118,9 +127,13 @@ class Plugin:
             @param event: menu event
         """
         self.parent.set_perspective(self.perspective)
+       
     
     def post_init(self):
         """
             Post initialization call back to close the loose ends
         """
         pass
+    
+  
+    
