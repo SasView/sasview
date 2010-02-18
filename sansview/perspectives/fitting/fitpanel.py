@@ -137,7 +137,9 @@ class FitPanel(wx.aui.AuiNotebook):
     
     def __init__(self, parent, *args, **kwargs):
         wx.aui.AuiNotebook.__init__(self,parent,-1,
-                    style= wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_DEFAULT_STYLE|wx.CLIP_CHILDREN  )
+                    style= wx.aui.AUI_NB_WINDOWLIST_BUTTON|
+                    wx.aui.AUI_NB_DEFAULT_STYLE|
+                    wx.CLIP_CHILDREN)
     
         self.manager=None
         self.parent=parent
@@ -187,7 +189,15 @@ class FitPanel(wx.aui.AuiNotebook):
         """
              close page and remove all references to the closed page
         """
+        nbr_page = self.GetPageCount()
+        if nbr_page == 1:
+            event.Veto()
+            return 
         selected_page = self.GetPage(self.GetSelection())
+        #remove default page 
+        if selected_page == self.default_page:
+            self.default_page = None
+            return 
         #remove hint page
         if selected_page == self.hint_page:
             return
