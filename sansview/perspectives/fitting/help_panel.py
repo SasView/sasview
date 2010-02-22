@@ -105,14 +105,14 @@ class HelpWindow(wx.Frame):
         page="""<html>
             <body>
             <ul>
-            <li><a href ="doc/change_scale_help.html" target ="showframe">Change scale</a><br></li>
-            <li><a href ="doc/reset_Graph_help.html" target ="showframe">Graph Help</a><br></li>
-            <li><a href ="doc/load_data_help.html" target ="showframe">Load a File</a><br></li>
-            <li><a href ="doc/simultaneous_fit_help.html" target ="showframe">Simultaneous Fit</a><br></li>
-            <li><a href ="doc/single_fit_help.html" target ="showframe">Single Fit</a><br></li>
-            <li><a href ="doc/model_use_help.html" target ="showframe">Visualize Model</a><br></li>
-            <li><a href ="doc/averaging_help.html" target ="showframe">Data Averaging</a><br></li>
-            <li><a href ="doc/model_functions.html" target ="showframe">Model Functions</a><br></li>
+            <li><a href ="media/change_scale_help.html" target ="showframe">Change scale</a><br></li>
+            <li><a href ="media/reset_Graph_help.html" target ="showframe">Graph Help</a><br></li>
+            <li><a href ="media/load_data_help.html" target ="showframe">Load a File</a><br></li>
+            <li><a href ="media/simultaneous_fit_help.html" target ="showframe">Simultaneous Fit</a><br></li>
+            <li><a href ="media/single_fit_help.html" target ="showframe">Single Fit</a><br></li>
+            <li><a href ="media/model_use_help.html" target ="showframe">Visualize Model</a><br></li>
+            <li><a href ="media/averaging_help.html" target ="showframe">Data Averaging</a><br></li>
+            <li><a href ="media/model_functions.html" target ="showframe">Model Functions</a><br></li>
             </ul>
             </body>
             </html>"""
@@ -143,8 +143,8 @@ class HelpWindow(wx.Frame):
         """
             Function to diplay html page related to the hyperlinktext selected
         """
-        #link= "doc/modelfunction.html"
-        self.rhelp.LoadPage("doc/modelfunction.html")
+        #link= "media/modelfunction.html"
+        self.rhelp.LoadPage("media/modelfunction.html")
         
     def OnLinkClicked(self, event):
         """

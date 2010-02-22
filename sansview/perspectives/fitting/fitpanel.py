@@ -4,7 +4,7 @@ import string
 import wx
 import wx.aui
 import wx.lib
-import wx.lib.agw.aui.auibook as agw_aui
+from wx.aui import AuiNotebook 
 
 
 import basepage
@@ -123,7 +123,7 @@ class PageInfo(object):
         self.window_name = "Page"
         self.window_caption = "Page"
     
-class FitPanel(agw_aui.AuiNotebook):    
+class FitPanel(AuiNotebook):    
 
     """
         FitPanel class contains fields allowing to fit  models and  data
@@ -138,18 +138,17 @@ class FitPanel(agw_aui.AuiNotebook):
     CENTER_PANE = True
     
     def __init__(self, parent, *args, **kwargs):
-        agw_aui.AuiNotebook.__init__(self,parent,-1,
-                    style= agw_aui.AUI_NB_WINDOWLIST_BUTTON|
-                    agw_aui.AUI_NB_DEFAULT_STYLE|
-                    wx.CLIP_CHILDREN|
-                    agw_aui.AUI_NB_HIDE_ON_SINGLE_TAB)
+        AuiNotebook.__init__(self,parent,-1,
+                    style= wx.aui.AUI_NB_WINDOWLIST_BUTTON|
+                    wx.aui.AUI_NB_DEFAULT_STYLE|
+                    wx.CLIP_CHILDREN)
     
         self.manager=None
         self.parent=parent
         self.event_owner=None
         
-        pageClosedEvent = agw_aui.EVT_AUINOTEBOOK_PAGE_CLOSE
-        self.Bind(agw_aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.onClosePage)
+        pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
+        self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.onClosePage)
        
         #dictionary of miodel {model class name, model class}
         self.model_list_box={}
