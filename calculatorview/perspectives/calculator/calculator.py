@@ -52,15 +52,8 @@ class Plugin:
         """
         ## Save a reference to the parent
         self.parent = parent
-        
-        # Define a panel
-        self.sld_panel= SldPanel(self.parent, -1)
-        
-        # If needed, add its name to the perspective list
-        #self.perspective.append(self.sld_panel.window_name)
-
-        # Return the list of panels
-        return [self.sld_panel]
+       
+        return []
        
     
     def help(self, evt):
