@@ -100,7 +100,7 @@ class HelpWindow(wx.Frame):
                                      size=(500,-1))
         path = os.getcwd()
         self.path= os.path.join(os.path.split(path)[0],"calculatorview",
-                            "doc","sld_calculator_help.html")
+                            "media","sld_calculator_help.html")
        
         self.rhelp.LoadPage(self.path)
         page="""<html>
