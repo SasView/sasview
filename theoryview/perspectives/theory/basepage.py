@@ -420,6 +420,7 @@ class BasicPage(wx.ScrolledWindow):
                     # If nothing was selected, just return
                     if path is None:
                         self.disp_cb_dict[p].SetValue(False)
+                        self.noDisper_rbox.SetValue(True)
                         return
                     try:
                         self._default_save_location = os.path.dirname(path)
