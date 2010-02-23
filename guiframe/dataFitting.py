@@ -10,7 +10,7 @@ from DataLoader.data_info import Data2D as LoadData2D
 
 import copy
 
-class Data1D(PlotData1D,LoadData1D):
+class Data1D(PlotData1D, LoadData1D):
     
     def __init__(self,x=[],y=[],dx=None,dy=None):
         PlotData1D.__init__(self, x, y, dx, dy)
@@ -32,7 +32,14 @@ class Data1D(PlotData1D,LoadData1D):
     
         self.xaxis(data1d._xaxis,data1d._xunit)
         self.yaxis(data1d._yaxis,data1d._yunit)
-    
+        
+    def __str__(self):
+        """
+            print data
+        """
+        _str = "%s\n" % LoadData1D.__str__(self)
+      
+        return _str 
 class Theory1D(PlotTheory1D,LoadData1D):
     
     def __init__(self,x=[],y=[],dy=None):
@@ -52,6 +59,13 @@ class Theory1D(PlotTheory1D,LoadData1D):
    
         self.xaxis(data1d._xaxis,data1d._xunit)
         self.yaxis(data1d._yaxis,data1d._yunit)
+    def __str__(self):
+        """
+            print data
+        """
+        _str = "%s\n" % LoadData1D.__str__(self)
+      
+        return _str 
       
 class Data2D(PlotData2D,LoadData2D):
     def __init__(self,image=None,err_image=None,xmin=None,xmax=None,ymin=None,ymax=None,zmin=None,zmax=None):
@@ -78,5 +92,11 @@ class Data2D(PlotData2D,LoadData2D):
         self.xaxis(data2d._xaxis,data2d._xunit)
         self.yaxis(data2d._yaxis,data2d._yunit)
         
-        
+    def __str__(self):
+        """
+            print data
+        """
+        _str = "%s\n" % LoadData2D.__str__(self)
+      
+        return _str 
         

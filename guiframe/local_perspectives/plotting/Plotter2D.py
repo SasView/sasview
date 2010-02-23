@@ -515,17 +515,4 @@ class ModelPanel2D( ModelPanel1D):
             # Post slicer None event
             event = self._getEmptySlicerEvent()
             wx.PostEvent(self, event)
-          
-    
-    def _onToggleScale(self, event):
-        """
-            toggle scale and replot image
-        """
-        if self.scale == 'log':
-            self.scale = 'linear'
-        else:
-            self.scale = 'log'
-        self.image(self.data2D.data,self.xmin_2D,self.xmax_2D,self.ymin_2D,
-                   self.ymax_2D,self.zmin_2D ,self.zmax_2D )
-        
-        self.subplot.figure.canvas.draw_idle()
+   
