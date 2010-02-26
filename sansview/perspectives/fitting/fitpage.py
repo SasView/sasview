@@ -550,11 +550,8 @@ class FitPage(BasicPage):
                                                        
                             self.orientation_params_disp.append([None,name3, Tct2
                                                      ,None,None, None, None,None])
-        """
-        #Display units text on panel
-        for item in self.model.dispersion.keys(): 
-            name = item +".width"  
-        """
+       
+
         self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)  
           
         self.state.model = self.model.clone()  
@@ -569,9 +566,9 @@ class FitPage(BasicPage):
 
         wx.PostEvent(self.parent, StatusEvent(status=\
                         " Selected Distribution: Gaussian"))   
-        ix =0 
-        iy +=1 
-
+        #Fill the list of fittable parameters
+        self.select_all_param(event=None)
+        
         self.Layout()
 
 
@@ -1222,16 +1219,16 @@ class FitPage(BasicPage):
                         if not item in self.orientation_params:
                             item[0].SetValue(True)
                             self.param_toFit.append(item )
-                if len(self.fittable_param)>0:
-                    for item in self.fittable_param:
-                        if self.data.__class__.__name__=="Data2D":
+                #if len(self.fittable_param)>0:
+                for item in self.fittable_param:
+                    if self.data.__class__.__name__=="Data2D":
+                        item[0].SetValue(True)
+                        self.param_toFit.append(item )
+                    else:
+                        ## for 1D all parameters except orientation
+                        if not item in self.orientation_params_disp:
                             item[0].SetValue(True)
                             self.param_toFit.append(item )
-                        else:
-                            ## for 1D all parameters except orientation
-                            if not item in self.orientation_params_disp:
-                                item[0].SetValue(True)
-                                self.param_toFit.append(item )
             else:
                 for item in self.parameters:
                     item[0].SetValue(False)
@@ -1240,6 +1237,7 @@ class FitPage(BasicPage):
                 self.param_toFit=[]
            
         self.save_current_state_fit()  
+       
         if event !=None:
             #self._undo.Enable(True)
             ## post state to fit panel
@@ -1340,9 +1338,10 @@ class FitPage(BasicPage):
     
         iy = 0
         ix = 0
-        self.cb1 = wx.CheckBox(self, -1,"Select all", (10, 10))
+        select_text = "Uncheck all to fix"
+        self.cb1 = wx.CheckBox(self, -1,str(select_text), (10, 10))
         wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_param)
-        self.cb1.SetValue(False)
+        self.cb1.SetValue(True)
         
         sizer.Add(self.cb1,(iy, ix),(1,1),\
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
@@ -1385,7 +1384,7 @@ class FitPage(BasicPage):
                 ix = 0
                 ## add parameters name with checkbox for selecting to fit
                 cb = wx.CheckBox(self, -1, item )
-                cb.SetValue(False)
+                cb.SetValue(True)
                 wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                 sizer.Add( cb,( iy, ix),(1,1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
@@ -1515,12 +1514,7 @@ class FitPage(BasicPage):
                
                     sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                     ctl3.Hide()
-                    #if self.data.__class__.__name__ =="Data2D":
-                    #    ctl3.Show(True)
-                     
-                    #else:
-                    #    ctl3.Hide()
-                
+                 
                     ix += 1
                     ctl4 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                    kill_focus_callback = self._onparamRangeEnter,
@@ -1559,16 +1553,9 @@ class FitPage(BasicPage):
         for item in keys:   
             if self.model.details.has_key(item):
                 self.text2_4.Show()
+        #Fill the list of fittable parameters
+        self.select_all_param(event=None)
 
-        #self.state.cb1 = self.cb1.GetValue()        
-        #self._copy_parameters_state(self.orientation_params,
-        #                             self.state.orientation_params)
-        #self._copy_parameters_state(self.orientation_params_disp,
-        #                             self.state.orientation_params_disp)
-        #self._copy_parameters_state(self.parameters, self.state.parameters)
-        #self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
-        #self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
- 
         self.save_current_state_fit()
         boxsizer1.Add(sizer)
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)

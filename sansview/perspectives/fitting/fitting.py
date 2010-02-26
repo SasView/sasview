@@ -184,8 +184,7 @@ class Plugin:
         self.graph = graph
         fit_option = "Select data for fitting"
         fit_hint =  "Dialog with fitting parameters "
-        invariant_option = "Compute Invariant"
-        invariant_hint =  "A dialog will appears for further computation"
+       
         for item in graph.plottables:
             if item.__class__.__name__ is "Data2D":
                 
@@ -204,15 +203,11 @@ class Plugin:
                             if hasattr(item,"is_data"):
                                 if item.is_data:
                                     return [[fit_option, fit_hint,
-                                              self._onSelect],
-                                            [invariant_option, 
-                                    invariant_hint, self._compute_invariant]]
+                                              self._onSelect]]
                                 else:
                                     return [] 
                             else:
-                               return [[fit_option, fit_hint, self._onSelect],
-                                       [invariant_option, 
-                                        invariant_hint, self._compute_invariant]]
+                               return [[fit_option, fit_hint, self._onSelect]]
         return []   
 
 
@@ -523,26 +518,12 @@ class Plugin:
             @param event: contains type of slicer , paramaters for updating the panel
             and panel_name to find the slicer 's panel concerned.
         """
-        
         for item in self.parent.panels:
             if self.parent.panels[item].window_caption.startswith(event.panel_name):
                 self.parent.panels[item].set_slicer(event.type, event.params)
                 
         self.parent._mgr.Update()
-               
-    def _compute_invariant(self, event):    
-        """
-            Open the invariant panel to invariant computation
-        """
-        self.panel = event.GetEventObject()
-        Plugin.on_perspective(self,event=event)
-        for plottable in self.panel.graph.plottables:
-            if plottable.name == self.panel.graph.selected_plottable:
-                data = self.copy_data(item= plottable, dy=plottable.dy)
-               
-                from invariant_panel import InvariantWindow
-                frame = InvariantWindow(base=self.parent, data=plottable, graph=self.panel.graph)   
-                frame.Show(True)
+   
               
     def _closed_fitpage(self, event):   
         """
@@ -664,15 +645,12 @@ class Plugin:
                 ## put the errors values back to the model if the errors were hiden
                 ## before sending them to the fit engine
                 if len(self.err_dy)>0:
+                    dy = item.dy
                     if item.name in  self.err_dy.iterkeys():
-                        dy= self.err_dy[item.name]
-                        data= self.copy_data(item, dy)
-                        data.is_data= item.is_data
-                    else:
-                        data= self.copy_data(item, item.dy)
-                        data.is_data= item.is_data
-                        
-                       
+                        dy = self.err_dy[item.name]
+                    data = self.copy_data(item, dy)
+                    data.is_data= item.is_data
+                
                 else:
                     if item.dy==None:
                         dy= numpy.zeros(len(item.y))
@@ -1142,7 +1120,7 @@ class Plugin:
             receives and event from plotting plu-gins to store the data name and 
             their errors of y coordinates for 1Data hide and show error
         """
-        self.err_dy= event.err_dy
+        self.err_dy = event.err_dy
         
          
     def _draw_model2D(self,model,data=None,description=None, enable2D=False,
