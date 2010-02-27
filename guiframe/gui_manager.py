@@ -373,7 +373,7 @@ class ViewerFrame(wx.Frame):
             
             # Check whether we need to put this panel
             # in the center pane
-            if hasattr(p, "CENTER_PANE"):
+            if hasattr(p, "CENTER_PANE") and p.CENTER_PANE:
                 if p.CENTER_PANE:
                     self.panels[str(id)] = p
                     self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
@@ -486,36 +486,28 @@ class ViewerFrame(wx.Frame):
         # Add sub menus
         menubar.Append(self.filemenu,  '&File')
         
-        # Plot menu
+        # Window menu
         # Attach a menu item for each panel in our
         # panel list that also appears in a plug-in.
-        # TODO: clean this up. We should just identify
-        # plug-in panels and add them all.
         
-        # Only add the panel menu if there is more than two panels
-        n_panels = 0
-        for plug in self.plugins:
+        # Only add the panel menu if there is only one perspective and
+        # it has more than two panels.
+        # Note: the first plug-in is always the plotting plug-in. The first application
+        # plug-in is always the second one in the list.
+        if len(self.plugins)==2:
+            plug = self.plugins[1]
             pers = plug.get_perspective()
-            if len(pers)>0:
-                n_panels += 1
        
-        if n_panels>2:
-            viewmenu = wx.Menu()
-            for plug in self.plugins:
-                plugmenu = wx.Menu()
-                pers = plug.get_perspective()
-                if len(pers)>0:
-                    for item in self.panels:
-                        if item == 'default':
-                            continue
-                        panel = self.panels[item]
-                        if panel.window_name in pers:
-                            plugmenu.Append(int(item), panel.window_caption, "Show %s window" % panel.window_caption)
-                           
-                            wx.EVT_MENU(self, int(item), self._on_view)
-                    
-                    viewmenu.AppendMenu(wx.NewId(), plug.sub_menu, plugmenu, plug.sub_menu)
-            menubar.Append(viewmenu, '&Panel')
+            if len(pers)>1:
+                viewmenu = wx.Menu()
+                for item in self.panels:
+                    if item == 'default':
+                        continue
+                    panel = self.panels[item]
+                    if panel.window_name in pers:
+                        viewmenu.Append(int(item), panel.window_caption, "Show %s window" % panel.window_caption)
+                        wx.EVT_MENU(self, int(item), self._on_view)
+                menubar.Append(viewmenu, '&Window')
 
         # Perspective
         # Attach a menu item for each defined perspective.
