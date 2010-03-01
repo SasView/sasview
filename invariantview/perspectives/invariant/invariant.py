@@ -7,6 +7,7 @@ See the license text in license.txt
 
 copyright 2009, University of Tennessee
 """
+import wx
 from sans.invariant import invariant
 
 from DataLoader.data_info import Data1D as LoaderData1D
@@ -62,7 +63,7 @@ class Plugin:
         ## Save a reference to the parent
         self.parent = parent
         #add error back to the data
-        self.parent.Bind( ERR_DATA, self._on_data_error)
+        self.parent.Bind(ERR_DATA, self._on_data_error)
         from invariant_panel import InvariantPanel
         self.invariant_panel = InvariantPanel(parent=self.parent)
         self.invariant_panel.set_manager(manager=self)
@@ -187,16 +188,11 @@ class Plugin:
                     data = self.copy_data(plottable, dy)
                 else:
                     data = plottable
-                self.invariant_panel.set_data_name(data_name=data.name)
-                data_qmin = min (data.x)
-                data_qmax = max (data.x)
-                data_range = "[%s - %s]"%(str(data_qmin), str(data_qmax))
-                self.invariant_panel.set_range(data_range=data_range)
-                #set an invariant calculator for the panel
-                inv = invariant.InvariantCalculator(data=data)
-                self.invariant_panel.set_invariant(inv)
+                #set the data for the panel
+                self.invariant_panel.set_data(data=data)
                
-    def _plot_data(self, data, name="Unknown"):
+               
+    def _plot_data(self, reel_data, extra_data, name="Unknown"):
         """
             Receive a data and post a NewPlotEvent to parent
             @param data: data created frome xtrapolation to plot
@@ -210,9 +206,11 @@ class Plugin:
             self.graph.delete(plottable)
         # Create a plottable data
         new_plot = Data1D(x=[], y=[], dx=None, dy=None)
-        self._plot_helper(new_plot=new_plot, data=data)
+        self._plot_helper(new_plot=new_plot,
+                          reel_data=reel_data, 
+                          extra_data=extra_data, name=name)
         
-    def _plot_theory(self, data=None, name="Unknown"):
+    def _plot_theory(self, reel_data, extra_data, name="Unknown"):
         """
             Receive a data and post a NewPlotEvent to parent
             @param data: data created frome xtrapolation to plot
@@ -225,22 +223,27 @@ class Plugin:
             self.graph.delete(plottable)
         # Create a plottable data
         new_plot = Theory1D(x=[], y=[], dy=None)
-        self._plot_helper(new_plot=new_plot, data=data)
+        self._plot_helper(new_plot=new_plot,
+                          reel_data=reel_data,
+                           extra_data=extra_data, name=name)
         
-    def _plot_helper(self, new_plot, data):
+    def _plot_helper(self, new_plot, reel_data, extra_data, name):
         """
-            Complete information for the new plottable given a previous plottable
-            and set to plot
+            Put value of extra_data (created data) into a new plottable
+            (new_plot) and assign value of a plotpael of the reel data to 
+            the new plottable so that the new plottable is plot on the sama panel 
+            of the data used for invariant.
         """
-        new_plot.copy_from_datainfo(data) 
-        data.clone_without_data(clone=new_plot) 
+        
+        new_plot.copy_from_datainfo(extra_data) 
+        extra_data.clone_without_data(clone=new_plot) 
             
         new_plot.name = name
-        title = self.data.name
-        new_plot.xaxis(self.data._xaxis, self.data._xunit)
-        new_plot.yaxis(self.data._yaxis, self.data._yunit)
-        new_plot.group_id = self.data.group_id
-        new_plot.id = self.data.id + name
+        title = reel_data.name
+        new_plot.xaxis(reel_data._xaxis, reel_data._xunit)
+        new_plot.yaxis(reel_data._yaxis, reel_data._yunit)
+        new_plot.group_id = reel_data.group_id
+        new_plot.id = reel_data.id + name
         ##post data to plot
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
         

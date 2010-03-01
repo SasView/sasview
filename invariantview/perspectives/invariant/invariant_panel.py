@@ -6,6 +6,8 @@
 import wx
 import sys
 
+from sans.invariant import invariant
+
 from sans.guiframe.utils import format_number, check_float
 from sans.guicomm.events import NewPlotEvent, StatusEvent
 
@@ -46,64 +48,49 @@ class InvariantPanel(wx.ScrolledWindow):
     window_caption = "Invariant"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
-    def __init__(self, parent, manager=None, invariant=None):
+    def __init__(self, parent, data=None, manager=None):
         wx.ScrolledWindow.__init__(self, parent, style= wx.FULL_REPAINT_ON_RESIZE )
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         #Object that receive status event
         self.parent = parent
-        self.manager = manager
-        self.invariant = invariant
+        #plug-in using this panel
+        self._manager = manager 
         #Default power value
         self.power_law_exponant = 4 
-        #Name of the data to display
-        self.data_name = ""
+        #Data uses for computation
+        self._data = data
         #Draw the panel
         self._do_layout()
         self.SetScrollbars(20,20,25,65)
         self.SetAutoLayout(True)
         self.Layout()
-       
-    def set_invariant(self, invariant):
-        """
-            set the value of the invariant 
-        """
-        self.invariant = invariant
-        
-    def set_range(self, data_range ="[? - ?]"):
-        """
-            Display the range of data
-        """
-        self.data_range_value_txt.SetLabel(str(data_range))
-        
-    def set_data_name(self, data_name=""):
-        """
-            set value for data
-        """
-        self.data_name = str(data_name)
-        self.data_name_txt.SetLabel("Data : "+self.data_name)
-        
-    def get_data(self):
-        """
-            return data
-        """
-        return self.data 
     
+    def set_data(self, data):
+        """
+            Set the data
+        """
+        self._data = data
+        #edit the panel
+        if self._data is not None:
+            data_name = self._data.name
+            data_qmin = min (self._data.x)
+            data_qmax = max (self._data.x)
+            data_range = "[%s - %s]"%(str(data_qmin), str(data_qmax))
+            
+        self.data_name_txt.SetLabel('Data : '+str(data_name))
+        self.data_range_value_txt.SetLabel(str(data_range))
+       
     def set_manager(self, manager):
         """
-            Define the manager of this panel 
+            set value for the manager
         """
-        self.manager = manager 
+        self._manager = manager 
         
     def compute_invariant(self, event):
         """
             compute invariant 
         """
-        #check if the panel has an invariant calculator
-        if self.invariant is None:
-            msg = "No invariant calculator available! Hint: Add data?"
-            wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
-            return 
         #clear outputs textctrl 
         self._reset_output()
         background = self.background_ctl.GetValue().lstrip().rstrip()
@@ -113,7 +100,10 @@ class InvariantPanel(wx.ScrolledWindow):
         if scale == "":
             scale = 1
         if check_float(self.background_ctl) and check_float(self.scale_ctl):
-           
+            inv = invariant.InvariantCalculator(data=self._data,
+                                      background=float(background),
+                                       scale=float(scale))
+            
             #Get the number of points to extrapolated
             npts_low = self.npts_low_ctl.GetValue()
             if check_float(self.npts_low_ctl):
@@ -149,103 +139,95 @@ class InvariantPanel(wx.ScrolledWindow):
                 extrapolation = "both"
                 
             #Set the invariant calculator
-            self.invariant.set_extrapolation(range="low", npts=npts_low,
+            inv.set_extrapolation(range="low", npts=npts_low,
                                        function=function_low, power=power_low)
-            self.invariant.set_extrapolation(range="high", npts=npts_high,
+            inv.set_extrapolation(range="high", npts=npts_high,
                                        function=function_high, power=power_high)
             #Compute invariant
             try:
-                qstar, qstar_err = self.invariant.get_qstar_with_error()
+                qstar, qstar_err = inv.get_qstar_with_error()
                 self.invariant_ctl.SetValue(format_number(qstar))
                 self.invariant_err_ctl.SetValue(format_number(qstar))
-                check_float(self.invariant_ctl)
-                check_float(self.invariant_err_ctl)
             except:
                 msg= "Error occurs for invariant: %s"%sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
                 return
             #Compute qstar extrapolated to low q range
             #Clear the previous extrapolated plot
-           
             if low_q:
                 try: 
-                    qstar_low = self.invariant.get_qstar_low()
+                    qstar_low = inv.get_qstar_low()
                     self.invariant_low_ctl.SetValue(format_number(qstar_low))
-                    check_float(self.invariant_low_ctl)
                     #plot data
-                    low_out_data, low_in_data = self.invariant.get_extra_data_low()
-                    theory_name_low = self.data_name+" Extra_low_Q"
-                    self.manager._plot_theory(data=low_out_data,
-                                               name=theory_name_low)
-                    data_name_low = self.data_name+"Fitted data for low_Q"
-                    self.manager._plot_data(data=low_in_data,
-                                            name=data_name_low)
+                    low_out_data, low_in_data = inv.get_extra_data_low()
+                    self._manager._plot_theory(reel_data=self._data,
+                                               extra_data=low_out_data,
+                                     name=self._data.name+" Extra_low_Q")
+                    self._manager._plot_data(reel_data=self._data,
+                                             extra_data=low_in_data, 
+                                name=self._data.name+"Fitted data for low_Q")
                 except:
                     msg= "Error occurs for low q invariant: %s"%sys.exc_value
-                    wx.PostEvent(self.parent, StatusEvent(status= msg,
-                                                           type="stop"))
+                    wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
             if high_q:
                 try: 
-                    qstar_high = self.invariant.get_qstar_high()
+                    qstar_high = inv.get_qstar_high()
                     self.invariant_high_ctl.SetValue(format_number(qstar_high))
-                    check_float(self.invariant_high_ctl)
                     #plot data
-                    high_out_data, high_in_data = self.invariant.get_extra_data_high(q_end=Q_MAXIMUM_PLOT)
-                    theory_name_high = self.data_name + " Extra_high_Q"
-                    self.manager._plot_theory(data=high_out_data,
-                                                name=theory_name_high)
-                    data_name_low = self.data_name + "Fitted data for high_Q"
-                    self.manager._plot_data(data=high_in_data,
-                                         name=data_name_low)
+                    high_out_data, high_in_data = inv.get_extra_data_high(q_end=Q_MAXIMUM_PLOT)
+                    self._manager._plot_theory(reel_data=self._data,
+                                               extra_data=high_out_data,
+                                     name=self._data.name+" Extra_high_Q")
+                    self._manager._plot_data(reel_data=self._data,
+                                             extra_data=high_in_data,
+                                 name=self._data.name+"Fitted data for high_Q")
                 except:
                     msg= "Error occurs for high q invariant: %s"%sys.exc_value
                     wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
             try:
-                qstar_total, qstar_total_err = self.invariant.get_qstar_with_error(extrapolation)
+                qstar_total, qstar_total_err = inv.get_qstar_with_error(extrapolation)
                 self.invariant_total_ctl.SetValue(format_number(qstar_total))
                 self.invariant_total_err_ctl.SetValue(format_number(qstar_total))
                 check_float(self.invariant_total_ctl)
                 check_float(self.invariant_total_err_ctl)
             except:
                 msg= "Error occurs for total invariant: %s"%sys.exc_value
-                wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
-                
-            contrast = self.contrast_ctl.GetValue().lstrip().rstrip()
-            if not check_float(self.contrast_ctl):
-                contrast = None
-            else:
-                contrast = float(contrast)
+                wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))  
+            
             porod_const = self.porod_const_ctl.GetValue().lstrip().rstrip()
-            if not check_float(self.porod_const_ctl):
+            if porod_const == "":
                 porod_const = None
-            else:
-                porod_const = float(porod_const)
-            try:
-                v, dv = self.invariant.get_volume_fraction_with_error(contrast=contrast)
-                self.volume_ctl.SetValue(format_number(v))
-                self.volume_err_ctl.SetValue(format_number(dv))
-                check_float(self.volume_ctl)
-                check_float(self.volume_err_ctl)
-            except:
-                msg= "Error occurs for volume fraction: %s"%sys.exc_value
-                wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
-            try:
-                s, ds = self.invariant.get_surface_with_error(contrast=contrast,
-                                        porod_const=porod_const)
-                self.surface_ctl.SetValue(format_number(s))
-                self.surface_err_ctl.SetValue(format_number(ds))
-                check_float(self.surface_ctl)
-                check_float(self.surface_err_ctl)
-            except:
-                msg= "Error occurs for surface: %s"%sys.exc_value
-                wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
-                
+            if not (porod_const is None):
+                if check_float(self.porod_const_ctl):
+                    porod_const = float(porod_const)
+                    try:
+                        v, dv = inv.get_volume_fraction_with_error(contrast=contrast)
+                        self.volume_ctl.SetValue(format_number(v))
+                        self.volume_err_ctl.SetValue(format_number(dv))
+                    except:
+                        msg= "Error occurs for volume fraction: %s"%sys.exc_value
+                        wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+            contrast = self.contrast_ctl.GetValue().lstrip().rstrip()
+            if contrast == "":
+                contrast = None
+            if not (contrast is None):
+                if check_float(self.contrast_ctl):
+                    contrast = float(contrast)
+                    try:
+                        if not (porod_const is None):
+                            s, ds = inv.get_surface_with_error(contrast=contrast,
+                                                    porod_const=porod_const)
+                            self.surface_ctl.SetValue(format_number(s))
+                            self.surface_err_ctl.SetValue(format_number(ds))
+                    except:
+                        msg= "Error occurs for surface: %s"%sys.exc_value
+                        wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+                        
         else:
             msg= "invariant: Need float for background and scale"
             wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
             return
-        
-    
+  
     def _reset_output(self):
         """
             clear outputs textcrtl
@@ -284,10 +266,15 @@ class InvariantPanel(wx.ScrolledWindow):
         sizer2.SetMinSize((_STATICBOX_WIDTH, -1))
         sizer3.SetMinSize((_STATICBOX_WIDTH, -1))
         #---------inputs----------------
-        
-        self.data_name = ""
+        data_name = ""
         data_range = "[? - ?]"
-        self.data_name_txt = wx.StaticText(self, -1,"Data : "+str(self.data_name))
+        if self._data is not None:
+            data_name = self._data.name
+            data_qmin = min (self._data.x)
+            data_qmax = max (self._data.x)
+            data_range = "[%s - %s]"%(str(data_qmin), str(data_qmax))
+            
+        self.data_name_txt = wx.StaticText(self, -1, 'Data : '+str(data_name))
         data_range_txt = wx.StaticText(self, -1, "Range : ")
         self.data_range_value_txt = wx.StaticText(self, -1, str(data_range))
         
@@ -308,9 +295,8 @@ class InvariantPanel(wx.ScrolledWindow):
         msg_hint ="Need both the contrast and surface to get the surface"
         self.porod_const_ctl.SetToolTipString(str(msg_hint))
        
-        
-        sizer_input.Add(self.data_name_txt, wx.LEFT, 5)
-        sizer_input.Add((20,20))
+        sizer_input.Add(self.data_name_txt, 0, wx.LEFT, 5)
+        sizer_input.Add((10,10), 0, wx.LEFT, 5)
         sizer_input.Add(data_range_txt, 0, wx.LEFT, 10)
         sizer_input.Add(self.data_range_value_txt)
         sizer_input.Add(background_txt, 0, wx.ALL, 5)
@@ -338,11 +324,6 @@ class InvariantPanel(wx.ScrolledWindow):
         self.guinier = wx.RadioButton(self, -1, 'Guinier',
                                          (10, 10),style=wx.RB_GROUP)
         self.power_law_low = wx.RadioButton(self, -1, 'Power_law', (10, 10))
-        #self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param,
-        #           id=self.guinier.GetId())
-        #self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param,
-        #           id=self.power_law_law.GetId())
-        #MAC needs SetValue
         self.guinier.SetValue(True)
         
         npts_low_txt = wx.StaticText(self, -1, 'Npts')
@@ -428,11 +409,9 @@ class InvariantPanel(wx.ScrolledWindow):
         extra_range_value_txt = wx.StaticText(self, -1, str(extra_range))
         extra_enable_hint = "Hint: Check any box to enable a specific extrapolation !"
         extra_enable_hint_txt= wx.StaticText(self, -1, extra_enable_hint )
-        #enable_sizer = wx.BoxSizer(wx.HORIZONTAL)
+       
         enable_sizer = wx.GridBagSizer(5,5)
-        #enable_sizer.Add(extra_hint_txt, 0, wx.ALL, 5)
-        #enable_sizer.Add(extra_range_value_txt, 0, wx.ALL, 5)
-        
+       
         iy = 0
         ix = 0
         enable_sizer.Add(extra_hint_txt,(iy, ix),(1,1),
@@ -623,21 +602,21 @@ class InvariantPanel(wx.ScrolledWindow):
     
 class InvariantDialog(wx.Dialog):
     def __init__(self, parent=None, id=1,graph=None,
-                 data=None, title="Invariant"):
-        wx.Dialog.__init__(self, parent, id, title, size=( PANEL_WIDTH,
+                 data=None, title="Invariant",base=None):
+        wx.Dialog.__init__(self, parent, id, title, size=(PANEL_WIDTH,
                                                              PANEL_HEIGHT))
-        self.panel = InvariantPanel(self,invariant=None)
+        self.panel = InvariantPanel(self)
         self.Centre()
         self.Show(True)
         
 class InvariantWindow(wx.Frame):
-    def __init__(self, parent=None, id=1, 
-                 data=None, title="Invariant",):
+    def __init__(self, parent=None, id=1,graph=None, 
+                 data=None, title="Invariant",base=None):
         
-        wx.Frame.__init__(self, parent, id, title, size=( PANEL_WIDTH,
+        wx.Frame.__init__(self, parent, id, title, size=(PANEL_WIDTH,
                                                              PANEL_HEIGHT))
         
-        self.panel = InvariantPanel(self,invariant=None)
+        self.panel = InvariantPanel(self)
         self.Centre()
         self.Show(True)
         
@@ -649,13 +628,7 @@ class MyApp(wx.App):
         self.SetTopWindow(frame)
         
         return True
-        #wx.InitAllImageHandlers()
-        #dialog = InvariantDialog(None)
-        #if dialog.ShowModal() == wx.ID_OK:
-        #    pass
-        #dialog.Destroy()
-        #return 1
-   
+      
 # end of class MyApp
 
 if __name__ == "__main__":
