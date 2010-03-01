@@ -356,25 +356,7 @@ class InvariantCalculator(object):
         self._high_extrapolation_npts = 4
         self._high_extrapolation_function = PowerLaw()
         self._high_extrapolation_power = None
-    
-    def set_data(self, data):
-        """
-            the data from where the invariant is computed
-        """
-        self._data = data 
         
-    def set_background(self, background=0):
-        """
-            given a value to the background
-        """
-        self._background = background
-        
-    def set_scale(self, scale=1):
-        """
-            Given a value to the scale
-        """
-        self._scale = scale
-    
     def _get_data(self, data):
         """
             @note this function must be call before computing any type
