@@ -265,6 +265,17 @@ class InvariantPanel(wx.ScrolledWindow):
         sizer1.SetMinSize((_STATICBOX_WIDTH, -1))
         sizer2.SetMinSize((_STATICBOX_WIDTH, -1))
         sizer3.SetMinSize((_STATICBOX_WIDTH, -1))
+        
+        ## Box sizers must be defined first before defining buttons/textctrls (MAC).
+        vbox  = wx.BoxSizer(wx.VERTICAL)
+        inputbox = wx.StaticBox(self, -1, "Input")
+        extrapolation_box = wx.StaticBox(self, -1, "Extrapolation")
+        boxsizer1 = wx.StaticBoxSizer(inputbox, wx.VERTICAL)
+        high_q_box = wx.StaticBox(self, -1, "High Q")
+        boxsizer_high_q = wx.StaticBoxSizer(high_q_box, wx.VERTICAL)   
+        low_q_box = wx.StaticBox(self, -1, "Low Q")
+        boxsizer_low_q = wx.StaticBoxSizer(low_q_box, wx.VERTICAL)
+        
         #---------inputs----------------
         data_name = ""
         data_range = "[? - ?]"
@@ -393,13 +404,8 @@ class InvariantPanel(wx.ScrolledWindow):
         ix = 0
         sizer_high_q.Add(self.enable_high_cbox,(iy, ix),(1,1),
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        
-        high_q_box = wx.StaticBox(self, -1, "High Q")
-        boxsizer_high_q = wx.StaticBoxSizer(high_q_box, wx.VERTICAL)
-        boxsizer_high_q.Add(sizer_high_q)
-        
-        low_q_box = wx.StaticBox(self, -1, "Low Q")
-        boxsizer_low_q = wx.StaticBoxSizer(low_q_box, wx.VERTICAL)
+              
+        boxsizer_high_q.Add(sizer_high_q)               
         boxsizer_low_q.Add(sizer_low_q)
         
         #-------------Enable extrapolation-------
@@ -430,14 +436,11 @@ class InvariantPanel(wx.ScrolledWindow):
         type_extrapolation_sizer.Add((20,20))
         type_extrapolation_sizer.Add(boxsizer_high_q, 0, wx.ALL, 10)
         type_extrapolation_sizer.Add((10,10))
-        
-        extrapolation_box = wx.StaticBox(self, -1, "Extrapolation")
+               
         boxsizer_extra = wx.StaticBoxSizer(extrapolation_box, wx.VERTICAL)
         boxsizer_extra.Add(enable_sizer, 0, wx.ALL, 10)
         boxsizer_extra.Add(type_extrapolation_sizer)
-    
-        inputbox = wx.StaticBox(self, -1, "Input")
-        boxsizer1 = wx.StaticBoxSizer(inputbox, wx.VERTICAL)
+            
         boxsizer1.SetMinSize((_STATICBOX_WIDTH,-1))
         boxsizer1.Add(sizer_input)
         boxsizer1.Add(boxsizer_extra, 0, wx.ALL, 10)
@@ -593,7 +596,7 @@ class InvariantPanel(wx.ScrolledWindow):
         sizer_button.Add(button_calculate, 0, wx.RIGHT|wx.ADJUST_MINSIZE,20)
         sizer3.Add(sizer_button)
         #---------layout----------------
-        vbox  = wx.BoxSizer(wx.VERTICAL)
+        
         vbox.Add(sizer1)
         vbox.Add(sizer2)
         vbox.Add(sizer3)
