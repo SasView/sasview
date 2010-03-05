@@ -27,7 +27,7 @@ class Plugin:
             Abstract class for gui_manager Plugins.
         """
         ## Plug-in name. It will appear on the application menu.
-        self.sub_menu = "invariant"
+        self.sub_menu = "Invariant"
         
         ## Reference to the parent window. Filled by get_panels() below.
         self.parent = None

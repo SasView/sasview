@@ -156,7 +156,7 @@ class InvariantPanel(wx.ScrolledWindow):
             #Clear the previous extrapolated plot
             if low_q:
                 try: 
-                    qstar_low = inv.get_qstar_low()
+                    qstar_low, qstar_low_err = inv.get_qstar_low()
                     self.invariant_low_ctl.SetValue(format_number(qstar_low))
                     #plot data
                     low_out_data, low_in_data = inv.get_extra_data_low()
@@ -171,7 +171,7 @@ class InvariantPanel(wx.ScrolledWindow):
                     wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
             if high_q:
                 try: 
-                    qstar_high = inv.get_qstar_high()
+                    qstar_high, qstar_high_err = inv.get_qstar_high()
                     self.invariant_high_ctl.SetValue(format_number(qstar_high))
                     #plot data
                     high_out_data, high_in_data = inv.get_extra_data_high(q_end=Q_MAXIMUM_PLOT)
@@ -194,34 +194,35 @@ class InvariantPanel(wx.ScrolledWindow):
                 msg= "Error occurs for total invariant: %s"%sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))  
             
-            porod_const = self.porod_const_ctl.GetValue().lstrip().rstrip()
-            if porod_const == "":
-                porod_const = None
-            if not (porod_const is None):
-                if check_float(self.porod_const_ctl):
-                    porod_const = float(porod_const)
-                    try:
-                        v, dv = inv.get_volume_fraction_with_error(contrast=contrast)
-                        self.volume_ctl.SetValue(format_number(v))
-                        self.volume_err_ctl.SetValue(format_number(dv))
-                    except:
-                        msg= "Error occurs for volume fraction: %s"%sys.exc_value
-                        wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
-            contrast = self.contrast_ctl.GetValue().lstrip().rstrip()
-            if contrast == "":
-                contrast = None
-            if not (contrast is None):
-                if check_float(self.contrast_ctl):
-                    contrast = float(contrast)
-                    try:
-                        if not (porod_const is None):
-                            s, ds = inv.get_surface_with_error(contrast=contrast,
-                                                    porod_const=porod_const)
-                            self.surface_ctl.SetValue(format_number(s))
-                            self.surface_err_ctl.SetValue(format_number(ds))
-                    except:
-                        msg= "Error occurs for surface: %s"%sys.exc_value
-                        wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+            # Parse additional parameters
+            par_str = self.porod_const_ctl.GetValue().strip()
+            porod_const = None
+            if len(par_str)>0 and check_float(self.porod_const_ctl):
+                porod_const = float(par_str)
+                    
+            par_str = self.contrast_ctl.GetValue().strip()
+            contrast = None
+            if len(par_str)>0 and check_float(self.contrast_ctl):
+                contrast = float(par_str)
+                
+            if contrast is not None:
+                try:
+                    v, dv = inv.get_volume_fraction_with_error(contrast=contrast)
+                    self.volume_ctl.SetValue(format_number(v))
+                    self.volume_err_ctl.SetValue(format_number(dv))
+                except:
+                    msg= "Error occurs for volume fraction: %s"%sys.exc_value
+                    wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+
+            if contrast is not None and porod_const is not None:
+                try:
+                    s, ds = inv.get_surface_with_error(contrast=contrast,
+                                            porod_const=porod_const)
+                    self.surface_ctl.SetValue(format_number(s))
+                    self.surface_err_ctl.SetValue(format_number(ds))
+                except:
+                    msg= "Error occurs for surface: %s"%sys.exc_value
+                    wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
                         
         else:
             msg= "invariant: Need float for background and scale"
