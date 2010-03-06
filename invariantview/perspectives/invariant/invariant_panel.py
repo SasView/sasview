@@ -203,7 +203,8 @@ class InvariantPanel(wx.ScrolledWindow):
                 
             if contrast is not None:
                 try:
-                    v, dv = inv.get_volume_fraction_with_error(contrast=contrast)
+                    v, dv = inv.get_volume_fraction_with_error(contrast=contrast, 
+                                                               extrapolation=extrapolation)
                     self.volume_ctl.SetValue(format_number(v))
                     self.volume_err_ctl.SetValue(format_number(dv))
                 except:
@@ -213,7 +214,8 @@ class InvariantPanel(wx.ScrolledWindow):
             if contrast is not None and porod_const is not None:
                 try:
                     s, ds = inv.get_surface_with_error(contrast=contrast,
-                                            porod_const=porod_const)
+                                            porod_const=porod_const,
+                                            extrapolation=extrapolation)
                     self.surface_ctl.SetValue(format_number(s))
                     self.surface_err_ctl.SetValue(format_number(ds))
                 except:
