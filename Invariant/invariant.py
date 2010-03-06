@@ -1,4 +1,14 @@
 """
+This software was developed by the University of Tennessee as part of the
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+project funded by the US National Science Foundation. 
+
+See the license text in license.txt
+
+copyright 2010, University of Tennessee
+"""
+
+"""
     This module implements invariant and its related computations.
     @author: Gervaise B. Alina/UTK
     
@@ -6,7 +16,6 @@
     TODO: 
         - intro / documentation
         - add unit tests for sufrace/volume computation with and without extrapolation.
-        - replace the get_extra_data_* methods
 """
 import math 
 import numpy
@@ -357,6 +366,9 @@ class InvariantCalculator(object):
         self._high_extrapolation_function = PowerLaw()
         self._high_extrapolation_power = None
         
+        # Extrapolation range
+        self._low_q_limit = Q_MINIMUM
+        
     def _get_data(self, data):
         """
             @note this function must be call before computing any type
@@ -519,19 +531,19 @@ class InvariantCalculator(object):
                          power=self._low_extrapolation_power)
         
         # Distribution starting point
-        q_start = Q_MINIMUM
+        self._low_q_limit = Q_MINIMUM
         if Q_MINIMUM >= qmin:
-            q_start = qmin/10
+            self._low_q_limit = qmin/10
         
         data = self._get_extrapolated_data(model=self._low_extrapolation_function,
                                                npts=INTEGRATION_NSTEPS,
-                                               q_start=q_start, q_end=qmin)
+                                               q_start=self._low_q_limit, q_end=qmin)
         
         # Systematic error
         # If we have smearing, the shape of the I(q) distribution at low Q will
         # may not be a Guinier or simple power law. The following is a conservative
         # estimation for the systematic error.
-        err = qmin*qmin*math.fabs((qmin-q_start)*(data.y[0] - data.y[INTEGRATION_NSTEPS-1]))
+        err = qmin*qmin*math.fabs((qmin-self._low_q_limit)*(data.y[0] - data.y[INTEGRATION_NSTEPS-1]))
         return self._get_qstar(data), self._get_qstar_uncertainty(data)+err
         
     def get_qstar_high(self):
@@ -548,7 +560,6 @@ class InvariantCalculator(object):
         x_len = len(self._data.x) - 1
         qmin = self._data.x[x_len - (self._high_extrapolation_npts - 1)]
         qmax = self._data.x[x_len]
-        q_end = Q_MAXIMUM
         
         # fit the data with a model to get the appropriate parameters
         self._fit(model=self._high_extrapolation_function,
@@ -559,92 +570,64 @@ class InvariantCalculator(object):
         #create new Data1D to compute the invariant
         data = self._get_extrapolated_data(model=self._high_extrapolation_function,
                                            npts=INTEGRATION_NSTEPS,
-                                           q_start=qmax, q_end=q_end)        
+                                           q_start=qmax, q_end=Q_MAXIMUM)        
         
         return self._get_qstar(data), self._get_qstar_uncertainty(data)
     
-    def get_extra_data_low(self, npts_in=None, q_start=Q_MINIMUM, nsteps=INTEGRATION_NSTEPS):
+    def get_extra_data_low(self, npts_in=None, q_start=None, nsteps=20):
         """
-           This method generates 2 data sets , the first is a data created during 
-           low extrapolation . its y is generated from x in [ Q_MINIMUM - the minimum of
-           data.x] and the outputs of the extrapolator .
-            (data is the data used to compute invariant) 
-           the second is also data produced during the fit but the x range considered
-           is within the reel range of data x.
-           x uses is in [minimum of data.x up to npts_in points]
-           @param npts_in: the number of first points of data to consider  for computing
-           y's coming out of the fit.
-           @param q_start: is the minimum value to uses for extrapolated data
-           @param npts: the number of point used to create extrapolated data 
+            Returns the extrapolated data used for the loew-Q invariant calculation.
+            By default, the distribution will cover the data points used for the 
+            extrapolation. The number of overlap points is a parameter (npts_in).
+            By default, the maximum q-value of the distribution will be  
+            the minimum q-value used when extrapolating for the purpose of the 
+            invariant calculation. 
+            
+            @param npts_in: number of data points for which the extrapolated data overlap
+            @param q_start: is the minimum value to uses for extrapolated data
+            @param npts: the number of points in the extrapolated distribution
            
         """
-        # Create a data from result of the fit for a range outside of the data
-        # at low q range
-        q_start = max(Q_MINIMUM, q_start)
-        qmin = min(self._data.x)
-        
-        if q_start < qmin:
-            data_out_range = self._get_extrapolated_data(model=self._low_extrapolation_function,
-                                                         npts=nsteps,
-                                                         q_start=q_start, q_end=qmin)
-        else:
-            data_out_range = LoaderData1D(x=numpy.zeros(0), y=numpy.zeros(0))
+        # Get extrapolation range
+        if q_start is None:
+            q_start = self._low_q_limit
             
-        # Create data from the result of the fit for a range inside data q range for
-        # low q
-        if npts_in is None :
+        if npts_in is None:
             npts_in = self._low_extrapolation_npts
+        q_end = self._data.x[max(0, npts_in-1)]
+        
+        if q_start >= q_end:
+            return numpy.zeros(0), numpy.zeros(0)
 
-        x = self._data.x[:npts_in]
-        y = self._low_extrapolation_function.evaluate_model(x=x)
-        data_in_range = LoaderData1D(x=x, y=y)
-        
-        return data_out_range, data_in_range
+        return self._get_extrapolated_data(model=self._low_extrapolation_function,
+                                           npts=nsteps,
+                                           q_start=q_start, q_end=q_end)
           
-    def get_extra_data_high(self, npts_in=None, q_end=Q_MAXIMUM, nsteps=INTEGRATION_NSTEPS ):
+    def get_extra_data_high(self, npts_in=None, q_end=Q_MAXIMUM, npts=20):
         """
-           This method generates 2 data sets , the first is a data created during 
-           low extrapolation . its y is generated from x in [ the maximum of
-           data.x to  Q_MAXIMUM] and the outputs of the extrapolator .
-            (data is the data used to compute invariant) 
-           the second is also data produced during the fit but the x range considered
-           is within the reel range of data x.
-           x uses is from maximum of data.x up to npts_in points before data.x maximum.
-           @param npts_in: the number of first points of data to consider  for computing
-           y's coming out of the fit.
-           @param q_end: is the maximum value to uses for extrapolated data
-           @param npts: the number of point used to create extrapolated data 
-           
-        """
-        #Create a data from result of the fit for a range outside of the data
-        # at low q range
-        qmax = max(self._data.x)
-        if  q_end != Q_MAXIMUM or nsteps != INTEGRATION_NSTEPS:
-            if q_end > Q_MAXIMUM:
-               q_end = Q_MAXIMUM
-            elif q_end <= qmax:
-                q_end = qmax * 10
-                
-            #compute the new data with the proper result of the fit for different
-            #boundary and step, outside of data
-            data_out_range = self._get_extrapolated_data(model=self._high_extrapolation_function,
-                                               npts=nsteps,
-                                               q_start=qmax, q_end=q_end)
-        else:
-            data_out_range = LoaderData1D(x=numpy.zeros(0), y=numpy.zeros(0))
-        
-        #Create data from the result of the fit for a range inside data q range for
-        #high q
-        if npts_in is None :
-            npts_in = self._high_extrapolation_npts
+            Returns the extrapolated data used for the high-Q invariant calculation.
+            By default, the distribution will cover the data points used for the 
+            extrapolation. The number of overlap points is a parameter (npts_in).
+            By default, the maximum q-value of the distribution will be Q_MAXIMUM, 
+            the maximum q-value used when extrapolating for the purpose of the 
+            invariant calculation. 
             
-        x_len = len(self._data.x)
-        x = self._data.x[(x_len-npts_in):]
-        y = self._high_extrapolation_function.evaluate_model(x=x)
-        data_in_range = LoaderData1D(x=x, y=y)
+            @param npts_in: number of data points for which the extrapolated data overlap
+            @param q_end: is the maximum value to uses for extrapolated data
+            @param npts: the number of points in the extrapolated distribution
+        """
+        # Get extrapolation range
+        if npts_in is None:
+            npts_in = self._high_extrapolation_npts
+        npts = len(self._data.x)
+        q_start = self._data.x[min(npts, npts-npts_in+1)]
         
-        return data_out_range, data_in_range
-          
+        if q_start >= q_end:
+            return numpy.zeros(0), numpy.zeros(0)
+        
+        return self._get_extrapolated_data(model=self._high_extrapolation_function,
+                                           npts=npts,
+                                           q_start=q_start, q_end=q_end)
      
     def set_extrapolation(self, range, npts=4, function=None, power=None):
         """
@@ -715,7 +698,7 @@ class InvariantCalculator(object):
        
     def get_surface(self, contrast, porod_const, extrapolation=None):
         """
-            Compute the surface of the data.
+            Compute the specific surface from the data.
             
             Implementation:
               V=  self.get_volume_fraction(contrast, extrapolation)
