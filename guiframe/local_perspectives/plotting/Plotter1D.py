@@ -113,14 +113,15 @@ class ModelPanel1D(PlotPanel):
             # If the plottable is empty, just remove the plottable from the graph
             if is_empty:
                 self.graph.delete(self.plots[event.plot.name])
-                
-            # Check whether the class of plottable changed
-            if not event.plot.__class__==self.plots[event.plot.name].__class__:
-                #overwrite a plottable using the same name
-                self.graph.delete(self.plots[event.plot.name])
-            else:
-                # plottable is already draw on the panel
-                is_new = False
+                del self.plots[event.plot.name]
+            else:  
+                # Check whether the class of plottable changed
+                if not event.plot.__class__==self.plots[event.plot.name].__class__:
+                    #overwrite a plottable using the same name
+                    self.graph.delete(self.plots[event.plot.name])              
+                else:
+                    # plottable is already draw on the panel
+                    is_new = False
         
         if not is_empty:
             if is_new:
