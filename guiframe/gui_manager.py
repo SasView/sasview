@@ -221,7 +221,7 @@ class ViewerFrame(wx.Frame):
         self.defaultPanel = None
 
         # Check for update
-        self._check_update(None)
+        #self._check_update(None)
         ## maximum number of opened files' paths to store
         self.n_maxfileopen =  2
         ## number of file open
@@ -248,7 +248,7 @@ class ViewerFrame(wx.Frame):
         
         #self.Fit()
         
-        self._check_update(None)
+        #self._check_update(None)
              
     def _setup_layout(self):
         """
@@ -562,12 +562,14 @@ class ViewerFrame(wx.Frame):
             id = wx.NewId()
             helpmenu.Append(id,'&About', 'Software information')
             wx.EVT_MENU(self, id, self._onAbout)
-        id = wx.NewId()
-        helpmenu.Append(id,'&Check for update', 'Check for the latest version of %s' % config.__appname__)
-        wx.EVT_MENU(self, id, self._check_update)
-        
-        
-        
+            
+        # Checking for updates needs major refactoring to work with py2exe
+        # We need to make sure it doesn't hang the application if the server
+        # is not up. We also need to make sure there's a proper executable to
+        # run if we spawn a new background process.
+        #id = wx.NewId()
+        #helpmenu.Append(id,'&Check for update', 'Check for the latest version of %s' % config.__appname__)
+        #wx.EVT_MENU(self, id, self._check_update)
         
         # Look for plug-in menus
         # Add available plug-in sub-menus. 
