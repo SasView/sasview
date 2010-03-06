@@ -15,7 +15,7 @@ copyright 2010, University of Tennessee
     
     TODO: 
         - intro / documentation
-        - add unit tests for sufrace/volume computation with and without extrapolation.
+
 """
 import math 
 import numpy
@@ -574,7 +574,7 @@ class InvariantCalculator(object):
         
         return self._get_qstar(data), self._get_qstar_uncertainty(data)
     
-    def get_extra_data_low(self, npts_in=None, q_start=None, nsteps=20):
+    def get_extra_data_low(self, npts_in=None, q_start=None, npts=20):
         """
             Returns the extrapolated data used for the loew-Q invariant calculation.
             By default, the distribution will cover the data points used for the 
@@ -600,7 +600,7 @@ class InvariantCalculator(object):
             return numpy.zeros(0), numpy.zeros(0)
 
         return self._get_extrapolated_data(model=self._low_extrapolation_function,
-                                           npts=nsteps,
+                                           npts=npts,
                                            q_start=q_start, q_end=q_end)
           
     def get_extra_data_high(self, npts_in=None, q_end=Q_MAXIMUM, npts=20):
@@ -619,8 +619,8 @@ class InvariantCalculator(object):
         # Get extrapolation range
         if npts_in is None:
             npts_in = self._high_extrapolation_npts
-        npts = len(self._data.x)
-        q_start = self._data.x[min(npts, npts-npts_in+1)]
+        _npts = len(self._data.x)
+        q_start = self._data.x[min(_npts, _npts-npts_in)]
         
         if q_start >= q_end:
             return numpy.zeros(0), numpy.zeros(0)
@@ -834,7 +834,8 @@ class InvariantCalculator(object):
         #   which computes Qstar and dQstar
         v, dv = self.get_volume_fraction_with_error(contrast, extrapolation)
 
-        s = self.get_surface(contrast=contrast, porod_const=porod_const)
+        s = self.get_surface(contrast=contrast, porod_const=porod_const, 
+                             extrapolation=extrapolation)
         ds = porod_const * 2 * math.pi * (( dv - 2 * v * dv)/ self._qstar\
                  + self._qstar_err * ( v - v**2))
 

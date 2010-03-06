@@ -280,6 +280,37 @@ class TestInvariantCalculator(unittest.TestCase):
         # Check that the two results are consistent within errors
         self.assertTrue(math.fabs(qs_extr-qstar)<dqs_extr)
         
+        def _check_values(to_check, reference, tolerance=0.05):
+            self.assertTrue( math.fabs(to_check-reference)/reference < tolerance, msg="Tested value = "+str(to_check) )
+            
+        # The following values should be replaced by values pulled from IGOR
+        # Volume Fraction:
+        v, dv = inv.get_volume_fraction_with_error(1, None)
+        _check_values(v, 1.88737914186e-15)
+
+        v_l, dv_l = inv.get_volume_fraction_with_error(1, 'low')
+        _check_values(v_l, 1.94289029309e-15)
+
+        v_h, dv_h = inv.get_volume_fraction_with_error(1, 'high')
+        _check_values(v_h, 6.99440505514e-15)
+        
+        v_b, dv_b = inv.get_volume_fraction_with_error(1, 'both')
+        _check_values(v_b, 6.99440505514e-15)
+        
+        # Specific Surface:
+        s, ds = inv.get_surface_with_error(1, 1, None)
+        _check_values(s, 3.1603095786e-09)
+
+        s_l, ds_l = inv.get_surface_with_error(1, 1, 'low')
+        _check_values(s_l, 3.1603095786e-09)
+
+        s_h, ds_h = inv.get_surface_with_error(1, 1, 'high')
+        _check_values(s_h, 3.1603095786e-09)
+        
+        s_b, ds_b = inv.get_surface_with_error(1, 1, 'both')
+        _check_values(s_b, 3.1603095786e-09)
+        
+        
     def test_bad_parameter_name(self):
         """
             The set_extrapolation method checks that the name of the extrapolation
@@ -460,16 +491,15 @@ class TestDataExtraLow(unittest.TestCase):
         self.assertAlmostEqual(self.rg, inv._low_extrapolation_function.radius, 6)
         
         qstar = inv.get_qstar(extrapolation='low')
-        reel_y = self.data.y
         test_y = inv._low_extrapolation_function.evaluate_model(x=self.data.x)
         for i in range(len(self.data.x)):
-            value  = math.fabs(test_y[i]-reel_y[i])/reel_y[i]
+            value  = math.fabs(test_y[i]-self.data.y[i])/self.data.y[i]
             self.assert_(value < 0.001)
             
 class TestDataExtraLowSlitGuinier(unittest.TestCase):
     """
         for a smear data, test that the fitting go through 
-        reel data for atleast the 2 first points
+        real data for atleast the 2 first points
     """
     
     def setUp(self):
@@ -482,9 +512,7 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
         x = numpy.arange(0.0001, 0.1, 0.0001)
         y = numpy.asarray([self.scale * math.exp( -(q*self.rg)**2 / 3.0 ) for q in x])
         dy = y*.1
-        dxl = 0.117 * numpy.ones(len(x))
         self.data = Data1D(x=x, y=y, dy=dy)
-        self.data.dxl = dxl
         self.npts = len(x)-10
         
     def test_low_q(self):
@@ -511,15 +539,12 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
       
         
         qstar = inv.get_qstar(extrapolation='low')
-        reel_y = self.data.y
-        #Compution the y 's coming out of the invariant when computing extrapolated
-        #low data . expect the fit engine to have been already called and the guinier
-        # to have the radius and the scale fitted
+
         test_y = inv._low_extrapolation_function.evaluate_model(x=self.data.x[:inv._low_extrapolation_npts])
-        self.assert_(len(test_y))== len(reel_y[:inv._low_extrapolation_npts])
+        self.assert_(len(test_y) == len(self.data.y[:inv._low_extrapolation_npts]))
         
         for i in range(inv._low_extrapolation_npts):
-            value  = math.fabs(test_y[i]-reel_y[i])/reel_y[i]
+            value  = math.fabs(test_y[i]-self.data.y[i])/self.data.y[i]
             self.assert_(value < 0.001)
             
     def test_low_data(self):
@@ -546,32 +571,22 @@ class TestDataExtraLowSlitGuinier(unittest.TestCase):
       
         
         qstar = inv.get_qstar(extrapolation='low')
-        reel_y = self.data.y
         #Compution the y 's coming out of the invariant when computing extrapolated
         #low data . expect the fit engine to have been already called and the guinier
         # to have the radius and the scale fitted
-        data_out_range, data_in_range= inv.get_extra_data_low() 
+        data_in_range = inv.get_extra_data_low(q_start=self.data.x[0], 
+                                               npts = inv._low_extrapolation_npts) 
         test_y = data_in_range.y
-        self.assert_(len(test_y))== len(reel_y[:inv._low_extrapolation_npts])
+        self.assert_(len(test_y) == len(self.data.y[:inv._low_extrapolation_npts]))
         for i in range(inv._low_extrapolation_npts):
-            value  = math.fabs(test_y[i]-reel_y[i])/reel_y[i]
+            value  = math.fabs(test_y[i]-self.data.y[i])/self.data.y[i]
             self.assert_(value < 0.001)    
-                    
-        data_out_range, data_in_range= inv.get_extra_data_low(npts_in= 2, nsteps=10,
-                                                               q_start= 1e-4) 
-        test_y = data_in_range.y
-        self.assert_(len(test_y))== len(reel_y[:2])
-        for i in range(2):
-            value  = math.fabs(test_y[i]-reel_y[i])/reel_y[i]
-            self.assert_(value < 0.001) 
-        #test the data out of range          
-        test_out_y = data_out_range.y
-        #self.assertEqual(len(test_out_y), 10)             
+       
             
 class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
     """
         for a smear data, test that the fitting go through 
-        reel data for atleast the 2 first points
+        real data for atleast the 2 first points
     """
     
     def setUp(self):
@@ -585,8 +600,6 @@ class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
         y = numpy.asarray([self.scale * math.pow(q ,-1.0*self.m) for q in x])                
         dy = y*.1
         self.data = Data1D(x=x, y=y, dy=dy)
-        dxl = 0.117 * numpy.ones(len(x))
-        self.data.dxl = dxl
         self.npts = 20
         
     def test_high_q(self):
@@ -615,17 +628,12 @@ class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
       
         
         qstar = inv.get_qstar(extrapolation='high')
-        reel_y = self.data.y
-        #Compution the y 's coming out of the invariant when computing extrapolated
-        #low data . expect the fit engine to have been already called and the power law
-        # to have the radius and the scale fitted
-       
         
         test_y = inv._high_extrapolation_function.evaluate_model(x=self.data.x[start: ])
-        self.assert_(len(test_y))== len(reel_y[start:])
+        self.assert_(len(test_y) == len(self.data.y[start:]))
         
         for i in range(len(self.data.x[start:])):
-            value  = math.fabs(test_y[i]-reel_y[start+i])/reel_y[start+i]
+            value  = math.fabs(test_y[i]-self.data.y[start+i])/self.data.y[start+i]
             self.assert_(value < 0.001)
             
     def test_high_data(self):
@@ -653,31 +661,14 @@ class TestDataExtraHighSlitPowerLaw(unittest.TestCase):
                           power=inv._high_extrapolation_power)
       
         qstar = inv.get_qstar(extrapolation='high')
-        reel_y = self.data.y
-        #Compution the y 's coming out of the invariant when computing extrapolated
-        #low data . expect the fit engine to have been already called and the power law
-        # to have the radius and the scale fitted
        
-        data_out_range, data_in_range= inv.get_extra_data_high() 
+        data_in_range= inv.get_extra_data_high(q_end = max(self.data.x),
+                                               npts = inv._high_extrapolation_npts) 
         test_y = data_in_range.y
-        self.assert_(len(test_y))== len(reel_y[start:])
-        temp = reel_y[start:]
+        self.assert_(len(test_y) == len(self.data.y[start:]))
+        temp = self.data.y[start:]
         
         for i in range(len(self.data.x[start:])):
             value  = math.fabs(test_y[i]- temp[i])/temp[i]
-            self.assert_(value < 0.001)    
-                    
-        data_out_range, data_in_range= inv.get_extra_data_high(npts_in=5, nsteps=10,
-                                                               q_end= 2) 
-        test_y = data_in_range.y
-        self.assert_(len(test_y)==5)
-        temp = reel_y[start:start+5]
-        
-        for i in range(len(self.data.x[start:start+5])):
-          
-            value  = math.fabs(test_y[i]- temp[i])/temp[i]
-            self.assert_(value < 0.06)    
-        #test the data out of range          
-        test_out_y = data_out_range.y
-        self.assertEqual(len(test_out_y), 10)             
+            self.assert_(value < 0.001)                
                       
