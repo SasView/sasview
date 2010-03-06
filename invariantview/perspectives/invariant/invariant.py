@@ -188,62 +188,27 @@ class Plugin:
                     data = self.copy_data(plottable, dy)
                 else:
                     data = plottable
-                #set the data for the panel
+                # Store reference to data
+                self.__data = data
+                # Set the data set to be user for invariant calculation
                 self.invariant_panel.set_data(data=data)
-               
-               
-    def _plot_data(self, reel_data, extra_data, name="Unknown"):
+        
+    def plot_theory(self, data=None, name=None):
         """
-            Receive a data and post a NewPlotEvent to parent
-            @param data: data created frome xtrapolation to plot
+            Receive a data set and post a NewPlotEvent to parent.
+            @param data: extrapolated data to be plotted
             @param name: Data's name to use for the legend
         """
-        if self.graph is None:
-            return
-        #print "went here "
-        plottable = self.graph.get_plottable(name=name)
-        if plottable is not None:
-            self.graph.delete(plottable)
-        # Create a plottable data
-        new_plot = Data1D(x=[], y=[], dx=None, dy=None)
-        self._plot_helper(new_plot=new_plot,
-                          reel_data=reel_data, 
-                          extra_data=extra_data, name=name)
-        
-    def _plot_theory(self, reel_data, extra_data, name="Unknown"):
-        """
-            Receive a data and post a NewPlotEvent to parent
-            @param data: data created frome xtrapolation to plot
-            @param name: Data's name to use for the legend
-        """
-        if self.graph is None:
-            return
-        plottable = self.graph.get_plottable(name=name)
-        if plottable is not None:
-            self.graph.delete(plottable)
-        # Create a plottable data
-        new_plot = Theory1D(x=[], y=[], dy=None)
-        self._plot_helper(new_plot=new_plot,
-                          reel_data=reel_data,
-                           extra_data=extra_data, name=name)
-        
-    def _plot_helper(self, new_plot, reel_data, extra_data, name):
-        """
-            Put value of extra_data (created data) into a new plottable
-            (new_plot) and assign value of a plotpael of the reel data to 
-            the new plottable so that the new plottable is plot on the sama panel 
-            of the data used for invariant.
-        """
-        
-        new_plot.copy_from_datainfo(extra_data) 
-        extra_data.clone_without_data(clone=new_plot) 
-            
+        if data is None:
+            new_plot = Theory1D(x=[], y=[], dy=None)
+        else:
+            new_plot = Theory1D(x=data.x, y=data.y, dy=None)
         new_plot.name = name
-        title = reel_data.name
-        new_plot.xaxis(reel_data._xaxis, reel_data._xunit)
-        new_plot.yaxis(reel_data._yaxis, reel_data._yunit)
-        new_plot.group_id = reel_data.group_id
-        new_plot.id = reel_data.id + name
-        ##post data to plot
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
+        new_plot.xaxis(self.__data._xaxis, self.__data._xunit)
+        new_plot.yaxis(self.__data._yaxis, self.__data._yunit)
+        new_plot.group_id = self.__data.group_id
+        new_plot.id = self.__data.id + name
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=self.__data.name))
+
+
         

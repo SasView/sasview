@@ -149,7 +149,7 @@ class InvariantPanel(wx.ScrolledWindow):
                 self.invariant_ctl.SetValue(format_number(qstar))
                 self.invariant_err_ctl.SetValue(format_number(qstar))
             except:
-                msg= "Error occurs for invariant: %s"%sys.exc_value
+                msg= "Error occurred computing invariant: %s"%sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
                 return
             #Compute qstar extrapolated to low q range
@@ -158,32 +158,28 @@ class InvariantPanel(wx.ScrolledWindow):
                 try: 
                     qstar_low, qstar_low_err = inv.get_qstar_low()
                     self.invariant_low_ctl.SetValue(format_number(qstar_low))
-                    #plot data
-                    low_out_data, low_in_data = inv.get_extra_data_low()
-                    self._manager._plot_theory(reel_data=self._data,
-                                               extra_data=low_out_data,
-                                     name=self._data.name+" Extra_low_Q")
-                    self._manager._plot_data(reel_data=self._data,
-                                             extra_data=low_in_data, 
-                                name=self._data.name+"Fitted data for low_Q")
+                    extrapolated_data = inv.get_extra_data_low(npts_in=npts_low)   
+                    self._manager.plot_theory(data=extrapolated_data,
+                                               name="Low-Q extrapolation")
                 except:
-                    msg= "Error occurs for low q invariant: %s"%sys.exc_value
+                    msg= "Error occurred computing low-Q invariant: %s"%sys.exc_value
                     wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+            else:
+                self._manager.plot_theory(name="Low-Q extrapolation")
+                
             if high_q:
                 try: 
                     qstar_high, qstar_high_err = inv.get_qstar_high()
                     self.invariant_high_ctl.SetValue(format_number(qstar_high))
-                    #plot data
-                    high_out_data, high_in_data = inv.get_extra_data_high(q_end=Q_MAXIMUM_PLOT)
-                    self._manager._plot_theory(reel_data=self._data,
-                                               extra_data=high_out_data,
-                                     name=self._data.name+" Extra_high_Q")
-                    self._manager._plot_data(reel_data=self._data,
-                                             extra_data=high_in_data,
-                                 name=self._data.name+"Fitted data for high_Q")
+                    high_out_data = inv.get_extra_data_high(q_end=Q_MAXIMUM_PLOT)
+                    self._manager.plot_theory(data=high_out_data,
+                                               name="High-Q extrapolation")
                 except:
-                    msg= "Error occurs for high q invariant: %s"%sys.exc_value
+                    msg= "Error occurred computing high-Q invariant: %s"%sys.exc_value
                     wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+            else:
+                self._manager.plot_theory(name="High-Q extrapolation")
+                
             try:
                 qstar_total, qstar_total_err = inv.get_qstar_with_error(extrapolation)
                 self.invariant_total_ctl.SetValue(format_number(qstar_total))
@@ -191,7 +187,7 @@ class InvariantPanel(wx.ScrolledWindow):
                 check_float(self.invariant_total_ctl)
                 check_float(self.invariant_total_err_ctl)
             except:
-                msg= "Error occurs for total invariant: %s"%sys.exc_value
+                msg= "Error occurred computing invariant using extrapolation: %s"%sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))  
             
             # Parse additional parameters
@@ -211,7 +207,7 @@ class InvariantPanel(wx.ScrolledWindow):
                     self.volume_ctl.SetValue(format_number(v))
                     self.volume_err_ctl.SetValue(format_number(dv))
                 except:
-                    msg= "Error occurs for volume fraction: %s"%sys.exc_value
+                    msg= "Error occurred computing volume fraction: %s"%sys.exc_value
                     wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
 
             if contrast is not None and porod_const is not None:
@@ -221,11 +217,11 @@ class InvariantPanel(wx.ScrolledWindow):
                     self.surface_ctl.SetValue(format_number(s))
                     self.surface_err_ctl.SetValue(format_number(ds))
                 except:
-                    msg= "Error occurs for surface: %s"%sys.exc_value
+                    msg= "Error occurred computing specific surface: %s"%sys.exc_value
                     wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
                         
         else:
-            msg= "invariant: Need float for background and scale"
+            msg= "A float value is required for background and scale"
             wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
             return
   
@@ -290,21 +286,21 @@ class InvariantPanel(wx.ScrolledWindow):
         data_range_txt = wx.StaticText(self, -1, "Range : ")
         self.data_range_value_txt = wx.StaticText(self, -1, str(data_range))
         
-        background_txt = wx.StaticText(self, -1, 'Background (Optional)')
+        background_txt = wx.StaticText(self, -1, 'Background')
         self.background_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.background_ctl.SetValue(str(BACKGROUND))
-        self.background_ctl.SetToolTipString("Background to subtract to data.")
-        scale_txt = wx.StaticText(self, -1, 'Scale (Optional)')
+        self.background_ctl.SetToolTipString("Background to be subtracted from data.")
+        scale_txt = wx.StaticText(self, -1, 'Scale')
         self.scale_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.scale_ctl.SetValue(str(SCALE))
-        self.scale_ctl.SetToolTipString("Scale to apply to data.")
+        self.scale_ctl.SetToolTipString("Scaling factor to be applied to data.")
         contrast_txt = wx.StaticText(self, -1, 'Contrast (Optional)')
         self.contrast_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        msg_hint = "Enter a value for the contrast to get the volume fraction"
+        msg_hint = "Enter a value for the contrast to compute the volume fraction"
         self.contrast_ctl.SetToolTipString(str(msg_hint))
-        porod_const_txt = wx.StaticText(self, -1, 'Porod Constant(Optional)')
+        porod_const_txt = wx.StaticText(self, -1, 'Porod Constant (Optional)')
         self.porod_const_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        msg_hint ="Need both the contrast and surface to get the surface"
+        msg_hint ="Enter a Porod constant value to compute the specific surface"
         self.porod_const_ctl.SetToolTipString(str(msg_hint))
        
         sizer_input.Add(self.data_name_txt, 0, wx.LEFT, 5)
@@ -328,38 +324,47 @@ class InvariantPanel(wx.ScrolledWindow):
         #-------------Extrapolation sizer----------------
         sizer_low_q = wx.GridBagSizer(5,5)
         
-        self.enable_low_cbox = wx.CheckBox(self, -1, "Enable low Q")
+        self.enable_low_cbox = wx.CheckBox(self, -1, "Extrapolate low-Q")
         self.enable_low_cbox.SetValue(False)
-        self.enable_high_cbox = wx.CheckBox(self, -1, "Enable High Q")
+        self.enable_high_cbox = wx.CheckBox(self, -1, "Extrapolate high-Q")
         self.enable_high_cbox.SetValue(False)
         
         self.guinier = wx.RadioButton(self, -1, 'Guinier',
                                          (10, 10),style=wx.RB_GROUP)
-        self.power_law_low = wx.RadioButton(self, -1, 'Power_law', (10, 10))
+        self.power_law_low = wx.RadioButton(self, -1, 'Power Law', (10, 10))
         self.guinier.SetValue(True)
         
         npts_low_txt = wx.StaticText(self, -1, 'Npts')
         self.npts_low_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/3, -1))
         self.npts_low_ctl.SetValue(str(NPTS))
-        msg_hint = "the number of first q points to consider"
-        msg_hint +="during the fit for extrapolation at low Q"
+        msg_hint = "Number of Q points to consider"
+        msg_hint +="while extrapolating the low-Q region"
         self.npts_low_ctl.SetToolTipString(msg_hint)
+        npts_exp_txt = wx.StaticText(self, -1, 'Power')
         self.power_low_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/3, -1))
         self.power_low_ctl.SetValue(str(self.power_law_exponant))
         self.power_low_ctl.SetToolTipString(power_hint_txt)
         iy = 0
         ix = 0
-        sizer_low_q.Add(self.guinier,(iy, ix),(1,1),
+        sizer_low_q.Add(self.guinier,(iy, ix),(1,2),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         iy += 1
         ix = 0
-        sizer_low_q.Add(self.power_law_low,(iy, ix),(1,1),
+        
+        sizer_low_q.Add(self.power_law_low,(iy, ix),(1,2),
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        
+        # Parameter controls for power law
+        ix = 1
+        iy += 1
+        sizer_low_q.Add(npts_exp_txt,(iy, ix),(1,1),
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        
         ix += 1
         sizer_low_q.Add(self.power_low_ctl, (iy, ix), (1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
-        ix = 0
+        ix = 1
         sizer_low_q.Add(npts_low_txt,(iy, ix),(1,1),
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
@@ -367,20 +372,21 @@ class InvariantPanel(wx.ScrolledWindow):
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
-        sizer_low_q.Add(self.enable_low_cbox,(iy, ix),(1,1),
+        sizer_low_q.Add(self.enable_low_cbox,(iy, ix),(1,5),
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         sizer_high_q = wx.GridBagSizer(5,5)
-        self.power_law_high = wx.RadioButton(self, -1, 'Power_law',
+        self.power_law_high = wx.RadioButton(self, -1, 'Power Law',
                                               (10, 10), style=wx.RB_GROUP)
-        msg_hint ="Check it to extrapolate data to high Q"
+        msg_hint ="Check to extrapolate data at high-Q"
         self.power_law_high.SetToolTipString(msg_hint)
        
         #MAC needs SetValue
         self.power_law_high.SetValue(True)
         npts_high_txt = wx.StaticText(self, -1, 'Npts')
+        npts_high_exp_txt = wx.StaticText(self, -1, 'Power')
         self.npts_high_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/3, -1))
-        msg_hint = "the number of last q points to consider"
-        msg_hint += "during the fit for extrapolation high Q"
+        msg_hint = "Number of Q points to consider"
+        msg_hint += "while extrapolating the high-Q region"
         self.npts_high_ctl.SetToolTipString(msg_hint)
         self.npts_high_ctl.SetValue(str(NPTS))
         self.power_high_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/3, -1))
@@ -389,13 +395,18 @@ class InvariantPanel(wx.ScrolledWindow):
         
         iy = 1
         ix = 0
-        sizer_high_q.Add(self.power_law_high,(iy, ix),(1,1),
+        sizer_high_q.Add(self.power_law_high,(iy, ix),(1,2),
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix = 1
+        iy += 1
+        sizer_high_q.Add(npts_high_exp_txt,(iy, ix),(1,1),
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        
         ix += 1
         sizer_high_q.Add(self.power_high_ctl, (iy, ix), (1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
-        ix = 0
+        ix = 1
         sizer_high_q.Add(npts_high_txt,(iy, ix),(1,1),
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
@@ -403,7 +414,7 @@ class InvariantPanel(wx.ScrolledWindow):
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
-        sizer_high_q.Add(self.enable_high_cbox,(iy, ix),(1,1),
+        sizer_high_q.Add(self.enable_high_cbox,(iy, ix),(1,5),
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
               
         boxsizer_high_q.Add(sizer_high_q)               
@@ -451,16 +462,16 @@ class InvariantPanel(wx.ScrolledWindow):
         invariant_txt = wx.StaticText(self, -1, 'Invariant')
         self.invariant_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_ctl.SetEditable(False)
-        self.invariant_ctl.SetToolTipString("Invariant in q range.")
+        self.invariant_ctl.SetToolTipString("Invariant in the data set's Q range.")
         self.invariant_err_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_err_ctl.SetEditable(False)
-        self.invariant_err_ctl.SetToolTipString("Uncertainty on invariant.")
+        self.invariant_err_ctl.SetToolTipString("Uncertainty on the invariant.")
         invariant_units_txt = wx.StaticText(self, -1, unit_invariant)
         
         invariant_total_txt = wx.StaticText(self, -1, 'Invariant Total')
         self.invariant_total_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_total_ctl.SetEditable(False)
-        msg_hint = "Invariant in q range and extra polated range."
+        msg_hint = "Total invariant, including extrapolated regions."
         self.invariant_total_ctl.SetToolTipString(msg_hint)
         self.invariant_total_err_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_total_err_ctl.SetEditable(False)
@@ -470,31 +481,31 @@ class InvariantPanel(wx.ScrolledWindow):
         volume_txt = wx.StaticText(self, -1, 'Volume Fraction')
         self.volume_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.volume_ctl.SetEditable(False)
-        self.volume_ctl.SetToolTipString("volume fraction.")
+        self.volume_ctl.SetToolTipString("Volume fraction.")
         self.volume_err_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.volume_err_ctl.SetEditable(False)
-        self.volume_err_ctl.SetToolTipString("Uncertainty of volume fraction.")
+        self.volume_err_ctl.SetToolTipString("Uncertainty on the volume fraction.")
         volume_units_txt = wx.StaticText(self, -1, unit_volume)
         
-        surface_txt = wx.StaticText(self, -1, 'Surface')
+        surface_txt = wx.StaticText(self, -1, 'Specific surface')
         self.surface_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.surface_ctl.SetEditable(False)
-        self.surface_ctl.SetToolTipString("Surface.")
+        self.surface_ctl.SetToolTipString("Specific surface value.")
         self.surface_err_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.surface_err_ctl.SetEditable(False)
-        self.surface_err_ctl.SetToolTipString("Uncertainty of surface.")
+        self.surface_err_ctl.SetToolTipString("Uncertainty on the specific surface.")
         surface_units_txt = wx.StaticText(self, -1, unit_surface)
         
-        invariant_low_txt = wx.StaticText(self, -1, 'Invariant in low Q')
+        invariant_low_txt = wx.StaticText(self, -1, 'Invariant in low-Q region')
         self.invariant_low_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_low_ctl.SetEditable(False)
-        self.invariant_low_ctl.SetToolTipString("Invariant compute in low Q")
+        self.invariant_low_ctl.SetToolTipString("Invariant computed with the extrapolated low-Q data.")
         invariant_low_units_txt = wx.StaticText(self, -1,  unit_invariant)
         
-        invariant_high_txt = wx.StaticText(self, -1, 'Invariant in high Q')
+        invariant_high_txt = wx.StaticText(self, -1, 'Invariant in high-Q region')
         self.invariant_high_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_high_ctl.SetEditable(False)
-        self.invariant_high_ctl.SetToolTipString("Invariant compute in high Q")
+        self.invariant_high_ctl.SetToolTipString("Invariant computed with the extrapolated high-Q data")
         invariant_high_units_txt = wx.StaticText(self, -1,  unit_invariant)
        
         iy = 0
@@ -590,7 +601,7 @@ class InvariantPanel(wx.ScrolledWindow):
         #-----Button  sizer------------
         id = wx.NewId()
         button_calculate = wx.Button(self, id, "Compute")
-        button_calculate.SetToolTipString("Compute SlD of neutrons.")
+        button_calculate.SetToolTipString("Compute invariant")
         self.Bind(wx.EVT_BUTTON, self.compute_invariant, id = id)   
         
         sizer_button.Add((250, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
