@@ -105,8 +105,15 @@ class ModelPanel1D(PlotPanel):
         if hasattr(event, "reset"):
             self._reset()
         
+        # Check whether the plottable is empty
+        is_empty = len(event.plot.x)==0
+                
         is_new = True
         if event.plot.name in self.plots.keys():
+            # If the plottable is empty, just remove the plottable from the graph
+            if is_empty:
+                self.graph.delete(self.plots[event.plot.name])
+                
             # Check whether the class of plottable changed
             if not event.plot.__class__==self.plots[event.plot.name].__class__:
                 #overwrite a plottable using the same name
@@ -115,22 +122,23 @@ class ModelPanel1D(PlotPanel):
                 # plottable is already draw on the panel
                 is_new = False
         
-        if is_new:
-            # a new plottable overwrites a plotted one  using the same id
-            for plottable in self.plots.itervalues():
-                if hasattr(event.plot,"id") and hasattr(plottable, "id"):
-                    if event.plot.id==plottable.id :
-                        self.graph.delete(plottable)
-            
-            self.plots[event.plot.name] = event.plot
-            self.graph.add(self.plots[event.plot.name])
-        else:
-            #replot the graph
-            self.plots[event.plot.name].x = event.plot.x    
-            self.plots[event.plot.name].y = event.plot.y    
-            self.plots[event.plot.name].dy = event.plot.dy  
-            if hasattr(event.plot, 'dx') and hasattr(self.plots[event.plot.name], 'dx'):
-                self.plots[event.plot.name].dx = event.plot.dx    
+        if not is_empty:
+            if is_new:
+                # a new plottable overwrites a plotted one  using the same id
+                for plottable in self.plots.itervalues():
+                    if hasattr(event.plot,"id") and hasattr(plottable, "id"):
+                        if event.plot.id==plottable.id :
+                            self.graph.delete(plottable)
+                
+                self.plots[event.plot.name] = event.plot
+                self.graph.add(self.plots[event.plot.name])
+            else:
+                #replot the graph
+                self.plots[event.plot.name].x = event.plot.x    
+                self.plots[event.plot.name].y = event.plot.y    
+                self.plots[event.plot.name].dy = event.plot.dy  
+                if hasattr(event.plot, 'dx') and hasattr(self.plots[event.plot.name], 'dx'):
+                    self.plots[event.plot.name].dx = event.plot.dx    
           
         #TODO: Should re-factor this
         ## for all added plot the option to hide error show be displayed first
