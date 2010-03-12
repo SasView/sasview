@@ -204,7 +204,7 @@ class SectorInteractor(_BaseInteractor):
         event.params = self.get_params()
         ## Send slicer paramers to plotter2D
         wx.PostEvent(self.base, event)
-        self._post_data()
+        #self._post_data()
             
             
     def restore(self):
