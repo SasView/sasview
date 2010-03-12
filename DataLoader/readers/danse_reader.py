@@ -22,6 +22,7 @@ import copy
 import numpy
 import logging
 from DataLoader.data_info import Data2D, Detector
+from DataLoader.manipulations import reader2D_converter
 
 # Look for unit converter
 has_converter = True
@@ -277,6 +278,7 @@ class Reader:
             
             # Store loading process information
             output.meta_data['loader'] = self.type_name    
+            output = reader2D_converter(output)
             return output
         
         return None

@@ -20,6 +20,7 @@ import os, sys
 import numpy
 import math, logging
 from DataLoader.data_info import Data2D, Detector
+from DataLoader.manipulations import reader2D_converter
 
 # Look for unit converter
 has_converter = True
@@ -150,9 +151,10 @@ class Reader:
             if isCenter:
                 isCenter = False                
                 line_toks = line.split()
-                # Center in bin number
-                center_x = float(line_toks[0])
-                center_y = float(line_toks[1])
+                
+                # Center in bin number: Must substrate 1 because the index starts from 1
+                center_x = float(line_toks[0])-1
+                center_y = float(line_toks[1])-1
 
             if line.count("BCENT")>0:
                 isCenter = True
@@ -291,6 +293,8 @@ class Reader:
     
         # Store loading process information
         output.meta_data['loader'] = self.type_name
+        output = reader2D_converter(output)
+
         return output
     
 if __name__ == "__main__": 
