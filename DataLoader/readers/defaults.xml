@@ -6,6 +6,7 @@
 	
 	<FileType extension='.xml' reader='cansas_reader'/>
 	<FileType extension='.asc' reader='IgorReader'/>
+	<FileType extension='.dat' reader='red2d_reader'/>
 	<FileType extension='.tif' reader='tiff_reader'/>
 	<FileType extension='.tiff' reader='tiff_reader'/>
 	<FileType extension='.sans' reader='danse_reader'/>
