@@ -200,7 +200,8 @@ class SectorInteractor(_BaseInteractor):
         #event.params = self.get_params()
         #print "main moveend ", event.params
         #wx.PostEvent(self.base.parent, event)
-        self._post_data()
+        #self._post_data()
+        pass
             
     def restore(self):
         """

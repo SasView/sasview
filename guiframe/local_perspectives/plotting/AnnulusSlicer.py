@@ -116,7 +116,7 @@ class AnnulusInteractor(_BaseInteractor):
         if data == None:
             return
         
-        from DataLoader.manipulations import SectorPhi
+        from DataLoader.manipulations import Ring
     
         rmin= min(math.fabs(self.inner_circle.get_radius()),
                   math.fabs(self.outer_circle.get_radius()))
@@ -129,8 +129,7 @@ class AnnulusInteractor(_BaseInteractor):
         else:
             self.nbins = nbins
         ## create the data1D Q average of data2D    
-        sect = SectorPhi(r_min=rmin , r_max= rmax,
-                          phi_min=0, phi_max=2*math.pi , nbins=self.nbins)
+        sect = Ring(r_min=rmin , r_max= rmax, nbins=self.nbins)
         sector = sect(self.base.data2D)
         
         
@@ -143,10 +142,10 @@ class AnnulusInteractor(_BaseInteractor):
         else:
             dxw= None
        
-        new_plot = Data1D(x=sector.x,y=sector.y,dy=sector.dy)
+        new_plot = Data1D(x=(sector.x-math.pi)*180/math.pi,y=sector.y,dy=sector.dy)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
-        new_plot.name = "SectorPhi" +"("+ self.base.data2D.name+")"
+        new_plot.name = "AnnulusPhi" +"("+ self.base.data2D.name+")"
         
         new_plot.source=self.base.data2D.source
         #new_plot.info=self.base.data2D.info
@@ -156,14 +155,14 @@ class AnnulusInteractor(_BaseInteractor):
         # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{\phi}", 'degrees')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-        new_plot.group_id = "SectorPhi"+self.base.data2D.name
-        new_plot.id= "SectorPhi"+self.base.data2D.name
+        new_plot.group_id = "AnnulusPhi"+self.base.data2D.name
+        new_plot.id= "AnnulusPhi"+self.base.data2D.name
         #new_plot.is_data= True
         
         new_plot.xtransform="x"
         new_plot.ytransform="y"
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
-                                                 title="SectorPhi" ))
+                                                 title="AnnulusPhi" ))
         
          
     def moveend(self, ev):
@@ -180,7 +179,7 @@ class AnnulusInteractor(_BaseInteractor):
         event.params = self.get_params()
         wx.PostEvent(self.base, event)
         # create a 1D data plot
-        self._post_data()
+        #self._post_data()
             
     def restore(self):
         """
