@@ -107,15 +107,15 @@ class igor_reader(unittest.TestCase):
         self.assertEqual(self.data.sample.transmission, 0.84357)
         
         self.assertEqual(self.data.detector[0].beam_center_unit, 'mm')
-        center_x = 68.76*5.0
-        center_y = 62.47*5.0
+        center_x = (68.76-1)*5.0
+        center_y = (62.47-1)*5.0
         self.assertEqual(self.data.detector[0].beam_center.x, center_x)
         self.assertEqual(self.data.detector[0].beam_center.y, center_y)
         
         self.assertEqual(self.data.I_unit, '1/cm')
-        self.assertEqual(self.data.data[0][0], 0.279783)
-        self.assertEqual(self.data.data[0][1], 0.28951)
-        self.assertEqual(self.data.data[0][2], 0.167634)
+        self.assertEqual(self.data.data[0], 0.279783)
+        self.assertEqual(self.data.data[1], 0.28951)
+        self.assertEqual(self.data.data[2], 0.167634)
         
 class danse_reader(unittest.TestCase):
     
@@ -146,13 +146,13 @@ class danse_reader(unittest.TestCase):
         self.assertEqual(self.data.detector[0].beam_center.y, center_y)
         
         self.assertEqual(self.data.I_unit, '1/cm')
-        self.assertEqual(self.data.data[0][0], 1.57831)
-        self.assertEqual(self.data.data[0][1], 2.70983)
-        self.assertEqual(self.data.data[0][2], 3.83422)
+        self.assertEqual(self.data.data[0], 1.57831)
+        self.assertEqual(self.data.data[1], 2.70983)
+        self.assertEqual(self.data.data[2], 3.83422)
 
-        self.assertEqual(self.data.err_data[0][0], 1.37607)
-        self.assertEqual(self.data.err_data[0][1], 1.77569)
-        self.assertEqual(self.data.err_data[0][2], 2.06313)
+        self.assertEqual(self.data.err_data[0], 1.37607)
+        self.assertEqual(self.data.err_data[1], 1.77569)
+        self.assertEqual(self.data.err_data[2], 2.06313)
 
  
 class cansas_reader(unittest.TestCase):

@@ -2,7 +2,7 @@
 import unittest
 
 from DataLoader.loader import  Loader
-from DataLoader.manipulations import Ring, CircularAverage, SectorPhi, get_q
+from DataLoader.manipulations import Ring, CircularAverage, SectorPhi, get_q,reader2D_converter
  
 import os.path
 import numpy, math
@@ -19,21 +19,40 @@ class Averaging(unittest.TestCase):
         """
         x_0  = numpy.ones([100,100])
         dx_0 = numpy.ones([100,100])
-        self.data = data_info.Data2D(x_0, dx_0)
+        
+        self.data = data_info.Data2D(data=x_0, err_data=dx_0)
         detector = data_info.Detector()
-        detector.distance = 1000.0
-        detector.pixel_size.x = 1.0
-        detector.pixel_size.y = 1.0
-        detector.beam_center.x = 50
-        detector.beam_center.y = 50
+        detector.distance = 1000.0  #mm
+        detector.pixel_size.x = 1.0 #mm
+        detector.pixel_size.y = 1.0 #mm
+        
+        # center in pixel position = (len(x_0)-1)/2
+        detector.beam_center.x = (len(x_0)-1)/2 #pixel number
+        detector.beam_center.y = (len(x_0)-1)/2 #pixel number
         self.data.detector.append(detector)
         
         source = data_info.Source()
-        source.wavelength = 10.0
+        source.wavelength = 10.0 #A
         self.data.source = source
         
-        self.qmin = get_q(1.0, 1.0, 1000.0, 10.0)
+        # get_q(dx, dy, det_dist, wavelength) where units are mm,mm,mm,and A respectively.
+        self.qmin = get_q(1.0, 1.0, detector.distance, source.wavelength)
+
+        self.qmax = get_q(49.5, 49.5, detector.distance, source.wavelength)
         
+        self.qstep = len(x_0)
+        x=  numpy.linspace(start= -1*self.qmax,
+                               stop= self.qmax,
+                               num= self.qstep,
+                               endpoint=True )  
+        y = numpy.linspace(start= -1*self.qmax,
+                               stop= self.qmax,
+                               num= self.qstep,
+                               endpoint=True )
+        self.data.x_bins=x
+        self.data.y_bins=y
+        self.data = reader2D_converter(self.data)
+            
     def test_ring_flat_distribution(self):
         """
             Test ring averaging
