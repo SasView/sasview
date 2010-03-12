@@ -76,7 +76,13 @@ class plottable_2D:
     ymin = None
     ymax = None
     data = None
-    err_data = None
+    qx_data     = None
+    qy_data     = None
+    q_data      = None
+    err_data    = None
+    dqx_data    = None
+    dqy_data    = None
+    mask        = None
     
     # Units
     _xaxis = ''
@@ -86,10 +92,16 @@ class plottable_2D:
     _zaxis = ''
     _zunit = ''
     
-    def __init__(self, data=None, err_data=None):
+    def __init__(self, data=None, err_data=None, qx_data=None, qy_data=None, q_data=None,mask=None, dqx_data=None, dqy_data=None):
         self.data = numpy.asarray(data)
+        self.qx_data = numpy.asarray(qx_data)
+        self.qy_data = numpy.asarray(qy_data)
+        self.q_data = numpy.asarray(q_data)
+        self.mask = numpy.asarray(mask)
         self.err_data = numpy.asarray(err_data)
-        
+        if dqx_data is not None: self.dqx_data = numpy.asarray(dqx_data) 
+        if dqy_data is not None: self.dqy_data = numpy.asarray(dqy_data) 
+               
     def xaxis(self, label, unit):
         self._xaxis = label
         self._xunit = unit
@@ -687,11 +699,11 @@ class Data2D(plottable_2D, DataInfo):
     y_bins = None
     
     
-    def __init__(self, data=None, err_data=None):
+    def __init__(self, data=None, err_data=None, qx_data=None, qy_data=None, q_data=None, mask=None, dqx_data=None, dqy_data=None):
         self.y_bins = []
         self.x_bins = []
         DataInfo.__init__(self)
-        plottable_2D.__init__(self, data, err_data)
+        plottable_2D.__init__(self, data, err_data, qx_data, qy_data, q_data,mask, dqx_data, dqy_data)
         if len(self.detector)>0:
             raise RuntimeError, "Data2D: Detector bank already filled at init"
 
@@ -704,8 +716,8 @@ class Data2D(plottable_2D, DataInfo):
         _str += "   Z-axis:       %s\t[%s]\n" % (self._zaxis, self._zunit)
         leny = 0
         if len(self.data)>0:
-            leny = len(self.data[0])
-        _str += "   Length:       %g x %g\n" % (len(self.data), leny)
+            leny = len(self.data)
+        _str += "   Length:       %g \n" % (len(self.data))
         
         return _str
   
@@ -723,8 +735,14 @@ class Data2D(plottable_2D, DataInfo):
         if clone is None or not issubclass(clone.__class__, Data2D):  
             data     = numpy.zeros(length) 
             err_data = numpy.zeros(length) 
-            clone = Data2D(data, err_data)
-            
+            qx_data = numpy.zeros(length)
+            qy_data = numpy.zeros(length)
+            q_data = numpy.zeros(length)
+            mask = numpy.zeros(length)
+            dqx_data = None
+            dqy_data = None
+            clone = Data2D(data, err_data, qx_data, qy_data, q_data,mask, dqx_data=dqx_data, dqy_data=dqy_data)
+
         clone.title       = self.title
         clone.run         = self.run
         clone.filename    = self.filename
