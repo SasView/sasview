@@ -256,26 +256,24 @@ class FitData2D(Data2D):
             Data can be initital with a data (sans plottable)
             or with vectors.
         """
-        self.x_bins_array = []
-        self.y_bins_array = []
         self.res_err_image=[]
         self.index_model=[]
         self.qmin= None
         self.qmax= None
         self.set_data(sans_data2d )
         
-        
     def set_data(self, sans_data2d, qmin=None, qmax=None ):
         """
-            Determine the correct x_bin and y_bin to fit
+            Determine the correct qx_data and qy_data within range to fit
         """
-        self.x_bins_array= numpy.reshape(sans_data2d.x_bins,
-                                         [1,len(sans_data2d.x_bins)])
-        self.y_bins_array = numpy.reshape(sans_data2d.y_bins,
-                                          [len(sans_data2d.y_bins),1])
-        
-        x_max = max(sans_data2d.xmin, sans_data2d.xmax)
-        y_max = max(sans_data2d.ymin, sans_data2d.ymax)
+        self.data     = sans_data2d.data
+        self.err_data = sans_data2d.err_data
+        self.qx_data = sans_data2d.qx_data
+        self.qy_data = sans_data2d.qy_data
+        self.mask       = sans_data2d.mask
+
+        x_max = max(math.fabs(sans_data2d.xmin), math.fabs(sans_data2d.xmax))
+        y_max = max(math.fabs(sans_data2d.ymin), math.fabs(sans_data2d.ymax))
         
         ## fitting range
         if qmin == None:
@@ -284,15 +282,17 @@ class FitData2D(Data2D):
             self.qmax = math.sqrt(x_max*x_max +y_max*y_max)
         ## new error image for fitting purpose
         if self.err_data== None or self.err_data ==[]:
-            self.res_err_data= numpy.zeros(len(self.y_bins),len(self.x_bins))
+            self.res_err_data= numpy.zeros(len(self.data))
         else:
             self.res_err_data = copy.deepcopy(self.err_data)
-        self.res_err_data[self.res_err_data==0]=1
+        self.res_err_data[self.res_err_data==0]=numpy.sqrt(self.data[self.res_err_data==0])
         
-        self.radius= numpy.sqrt(self.x_bins_array**2 + self.y_bins_array**2)
-        self.index_model = (self.qmin <= self.radius)&(self.radius<= self.qmax)
-       
-       
+        self.radius= numpy.sqrt(self.qx_data**2 + self.qy_data**2)
+        
+        # Note: mask = True: for MASK while mask = False for NOT to mask
+        self.index_model = ((self.qmin <= self.radius)&(self.radius<= self.qmax))
+        self.mask = (self.index_model) & (self.mask)
+           
     def setFitRange(self,qmin=None,qmax=None):
         """ to set the fit range"""
         if qmin==0.0:
@@ -300,10 +300,11 @@ class FitData2D(Data2D):
         elif qmin!=None:                       
             self.qmin = qmin            
         if qmax!=None:
-            self.qmax= qmax
-            
-        self.radius= numpy.sqrt(self.x_bins_array**2 + self.y_bins_array**2)
-        self.index_model = (self.qmin <= self.radius)&(self.radius<= self.qmax)
+            self.qmax= qmax        
+        self.radius= numpy.sqrt(self.qx_data**2 + self.qy_data**2)
+        self.index_model = ((self.qmin <= self.radius)&(self.radius<= self.qmax))
+        self.mask = (self.index_model) &(self.mask)
+        
         
     def getFitRange(self):
         """
@@ -312,10 +313,13 @@ class FitData2D(Data2D):
         return self.qmin, self.qmax
      
     def residuals(self, fn): 
-        
-        res=self.index_model*(self.data - fn([self.x_bins_array,
-                             self.y_bins_array]))/self.res_err_data
-        return res.ravel() 
+        """
+            @return the residuals
+        """        
+        # use only the data point within ROI range
+        res=(self.data[self.mask] - fn([self.qx_data[self.mask],
+                             self.qy_data[self.mask]]))/self.res_err_data[self.mask]
+        return res
         
  
     def residuals_deriv(self, model, pars=[]):
