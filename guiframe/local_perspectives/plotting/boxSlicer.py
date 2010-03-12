@@ -41,6 +41,8 @@ class BoxInteractor(_BaseInteractor):
                         self.base.data2D.ymax,self.base.data2D.ymin )   
         ## Number of points on the plot
         self.nbins = 30
+        ## If True, I(|Q|) will be return, otherwise, negative q-values are allowed
+        self.fold = True        
         ## reference of the current  Slab averaging
         self.averager=None
         ## Create vertical and horizaontal lines for the rectangle
@@ -134,11 +136,12 @@ class BoxInteractor(_BaseInteractor):
         pass
         
     
-    def post_data(self,new_slab=None , nbins=None):
+    def post_data(self,new_slab=None , nbins=None, direction =None):
         """
              post data averaging in Qx or Qy given new_slab type
              @param new_slab: slicer that determine with direction to average
              @param nbins: the number of points plotted when averaging
+             @param direction: the direction of averaging
         """
         x_min= -1*math.fabs(self.vertical_lines.x)
         x_max= math.fabs(self.vertical_lines.x)
@@ -152,11 +155,18 @@ class BoxInteractor(_BaseInteractor):
             if new_slab ==None:
                 raise ValueError,"post data:cannot average , averager is empty"
             self.averager= new_slab
-        bin_width= (x_max + math.fabs(x_min))/self.nbins
+        if direction == "X":
+            if self.fold: x_low = 0
+            else: x_low = math.fabs(x_min)
+            bin_width= (x_max + x_low)/self.nbins
+        else:
+            if self.fold: y_low = 0
+            else: y_low = math.fabs(y_min)
+            bin_width= (y_max + y_low)/self.nbins
         ## Average data2D given Qx or Qy
         box = self.averager( x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
                          bin_width=bin_width)
-        
+        box.fold = self.fold
         boxavg = box(self.base.data2D)
         #3 Create Data1D to plot
         
@@ -540,7 +550,7 @@ class BoxInteractorX(BoxInteractor):
              Post data creating by averaging in Qx direction
         """
         from DataLoader.manipulations import SlabX
-        self.post_data(SlabX )   
+        self.post_data(SlabX, direction ="X")   
         
 
 class BoxInteractorY(BoxInteractor):
@@ -558,6 +568,6 @@ class BoxInteractorY(BoxInteractor):
              Post data creating by averaging in Qy direction
         """
         from DataLoader.manipulations import SlabY
-        self.post_data(SlabY )   
+        self.post_data(SlabY, direction ="Y")   
         
         
