@@ -55,15 +55,21 @@ class TestEvalPythonMethods(unittest.TestCase):
         
         qx = numpy.asarray(qx_values)
         qy = numpy.asarray(qy_values)
-        
-        qx_prime = numpy.reshape(qx, [3,1])
-        qy_prime = numpy.reshape(qy, [1,3])
+                     
+        new_x = numpy.tile(qx, (len(qy),1))
+        new_y = numpy.tile(qy, (len(qx),1))
+        new_y = new_y.swapaxes(0,1)
+    
+        #iq is 1d array now (since 03-12-2010)
+        qx_prime = new_x.flatten()
+        qy_prime = new_y.flatten()
         
         iq = self.model.evalDistribution([qx_prime, qy_prime])
 
         for i in range(3):
             for j in range(3):
-                self.assertAlmostEquals(iq[i][j], expected[i][j])
+                k = i+len(qx)*j
+                self.assertAlmostEquals(iq[k], expected[i][j])
 
     def test_rectangle_methods(self):
         """
@@ -91,15 +97,21 @@ class TestEvalPythonMethods(unittest.TestCase):
         
         qx = numpy.asarray(qx_values)
         qy = numpy.asarray(qy_values)
-        
-        qx_prime = numpy.reshape(qx, [3,1])
-        qy_prime = numpy.reshape(qy, [1,2])
+                     
+        new_x = numpy.tile(qx, (len(qy),1))
+        new_y = numpy.tile(qy, (len(qx),1))
+        new_y = new_y.swapaxes(0,1)
+    
+        #iq is 1d array now (since 03-12-2010)
+        qx_prime = new_x.flatten()
+        qy_prime = new_y.flatten()
         
         iq = self.model.evalDistribution([qx_prime, qy_prime])
         
         for i in range(3):
             for j in range(2):
-                self.assertAlmostEquals(iq[i][j], expected[i][j])
+                k = i+len(qx)*j
+                self.assertAlmostEquals(iq[k], expected[i][j])
 
 
                 
@@ -150,15 +162,22 @@ class TestEvalMethods(unittest.TestCase):
         
         qx = numpy.asarray(qx_values)
         qy = numpy.asarray(qy_values)
-        
-        qx_prime = numpy.reshape(qx, [3,1])
-        qy_prime = numpy.reshape(qy, [1,3])
+              
+        new_x = numpy.tile(qx, (len(qy),1))
+        new_y = numpy.tile(qy, (len(qx),1))
+        new_y = new_y.swapaxes(0,1)
+    
+        #iq is 1d array now (since 03-12-2010)
+        qx_prime = new_x.flatten()
+        qy_prime = new_y.flatten()
         
         iq = self.model.evalDistribution([qx_prime, qy_prime])
         
         for i in range(3):
             for j in range(3):
-                self.assertAlmostEquals(iq[i][j], expected[i][j])
+                # convert index into 1d array
+                k = i+len(qx)*j
+                self.assertAlmostEquals(iq[k], expected[i][j])
                 
 
 if __name__ == '__main__':
