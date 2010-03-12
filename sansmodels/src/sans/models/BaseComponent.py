@@ -67,31 +67,18 @@ class BaseComponent:
             where q is a numpy array.
             
             
-            * For 2D, a list of numpy arrays are expected: [qx_prime,qy_prime].
+            * For 2D, a list of numpy arrays are expected: [qx_prime,qy_prime],
+            where 1D arrays,
             
-            For the following matrix of q_values [qx,qy], we will have:
-                      +--------+--------+--------+
-            qy[2]     |        |        |        | 
-                      +--------+--------+--------+
-            qy[1]     |        |        |        |
-                      +--------+--------+--------+            
-            qy[0]     |        |        |        | 
-                      +--------+--------+--------+
-                        qx[0]    qx[1]    qx[2]
-
-
-            The q-values must be stored in numpy arrays.
-            The qxprime and qyprime are 2D arrays. From the two lists of q-values 
-            above, numpy arrays must be created the following way:
-
-            qx_prime = numpy.reshape(qx, [1,3])
-            qy_prime = numpy.reshape(qy, [3,1])
+            qx_prime = [ qx[0], qx[1], qx[2], ....]
+            and
+            qy_prime = [ qy[0], qy[1], qy[2], ....] 
             
             The method is then called the following way:
             
             evalDistribution([qx_prime, qy_prime])
             
-            @param qdist: ndarray of scalar q-values or list [qx,qy] where qx,qy are 2D ndarrays 
+            @param qdist: ndarray of scalar q-values or list [qx,qy] where qx,qy are 1D ndarrays 
         """
         if qdist.__class__.__name__ == 'list':
             # Check whether we have a list of ndarrays [qx,qy]
@@ -105,11 +92,10 @@ class BaseComponent:
             qy = qdist[1]
             
             # Create output array
-            iq_array = numpy.zeros([qx.shape[1], qy.shape[0]])
-             
-            for j in range(qy.shape[0]):
-                for i in range(qx.shape[1]):
-                    iq_array[j][i] = self.runXY([qx[0][i],qy[j][0]])
+            iq_array = numpy.zeros((len(qx)))
+            
+            for i in range(len(qx)):
+                    iq_array[i] = self.runXY([qx[i],qy[i]])
             return iq_array
                 
         elif qdist.__class__.__name__ == 'ndarray':

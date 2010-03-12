@@ -188,11 +188,11 @@ static PyObject *evaluateOneDim(EllipsoidModel* model, PyArrayObject *q){
                               PyArrayObject *x, PyArrayObject *y)
  {
     PyArrayObject *result;
-    int i,j, x_len, y_len, dims[2];
+    int i,j, x_len, y_len, dims[1];
     //check validity of input vectors
-    if (x->nd != 2 || x->descr->type_num != PyArray_DOUBLE
-        || y->nd != 2 || y->descr->type_num != PyArray_DOUBLE
-        || y->dimensions[1] != x->dimensions[0]){
+    if (x->nd != 1 || x->descr->type_num != PyArray_DOUBLE
+        || y->nd != 1 || y->descr->type_num != PyArray_DOUBLE
+        || y->dimensions[0] != x->dimensions[0]){
         const char * message= "evaluateTwoDimXY  expect 2 numpy arrays";
         PyErr_SetString(PyExc_ValueError , message); 
         return NULL;
@@ -200,11 +200,11 @@ static PyObject *evaluateOneDim(EllipsoidModel* model, PyArrayObject *q){
    
 	if (PyArray_Check(x) && PyArray_Check(y)) {
 		
-	    x_len = dims[1]= x->dimensions[1];
+	    x_len = dims[0]= x->dimensions[0];
         y_len = dims[0]= y->dimensions[0];
 	    
 	    // Make a new double matrix of same dims
-        result=(PyArrayObject *) PyArray_FromDims(2,dims,NPY_DOUBLE);
+        result=(PyArrayObject *) PyArray_FromDims(1,dims,NPY_DOUBLE);
         if (result == NULL){
 	    const char * message= "Could not create result ";
         PyErr_SetString(PyExc_RuntimeError , message);
@@ -212,15 +212,13 @@ static PyObject *evaluateOneDim(EllipsoidModel* model, PyArrayObject *q){
 	    }
        
         /* Do the calculation. */
-        for ( j=0; j< y_len; j++) {
-            for ( i=0; i< x_len; i++) {
-                double x_value = *(double *)(x->data + i*x->strides[1]);
-      		    double y_value = *(double *)(y->data + j*y->strides[0]);
-      			double *result_value = (double *)(result->data +
-      			      j*result->strides[0] + i*result->strides[1]);
-      			*result_value = (*model)(x_value, y_value);
-            }           
-        }
+        for ( i=0; i< x_len; i++) {
+            double x_value = *(double *)(x->data + i*x->strides[0]);
+  		    double y_value = *(double *)(y->data + i*y->strides[0]);
+  			double *result_value = (double *)(result->data +
+  			      i*result->strides[0]);
+  			*result_value = (*model)(x_value, y_value);
+        }           
         return PyArray_Return(result); 
         
         }else{
