@@ -197,6 +197,7 @@ class Plugin:
                                stop= qmax,
                                num= qstep,
                                endpoint=True )
+         
         ## use data info instead
         if data !=None:
             ## check if data2D to plot
@@ -204,7 +205,7 @@ class Plugin:
                 enable2D = True
                 x= data.x_bins
                 y= data.y_bins
-            
+
         if not enable2D:
             return
         try:
@@ -297,48 +298,80 @@ class Plugin:
         from DataLoader.data_info import Detector, Source
         
         detector = Detector()
-        theory.detector.append(detector) 
-            
-        theory.detector[0].distance=1e+32
+        theory.detector.append(detector)         
         theory.source= Source()
-        theory.source.wavelength=2*math.pi/1e+32
-      
-        ## Create detector for Model 2D
-        xmax=2*theory.detector[0].distance*math.atan(\
-                            qmax/(4*math.pi/theory.source.wavelength))
         
-        theory.detector[0].pixel_size.x= xmax/(qstep/2-0.5)
-        theory.detector[0].pixel_size.y= xmax/(qstep/2-0.5)
+        ## Default values    
+        theory.detector[0].distance= 8000   # mm        
+        theory.source.wavelength= 6         # A      
+        theory.detector[0].pixel_size.x= 5  # mm
+        theory.detector[0].pixel_size.y= 5  # mm
+        
         theory.detector[0].beam_center.x= qmax
         theory.detector[0].beam_center.y= qmax
+        
+        
         ## create x_bins and y_bins of the model 2D
-        distance   = theory.detector[0].distance
-        pixel      = qstep/2-1
-        theta      = pixel / distance / qstep#100.0
-        wavelength = theory.source.wavelength
         pixel_width_x = theory.detector[0].pixel_size.x
         pixel_width_y = theory.detector[0].pixel_size.y
         center_x      = theory.detector[0].beam_center.x/pixel_width_x
         center_y      = theory.detector[0].beam_center.y/pixel_width_y
+
+        # theory default: assume the beam center is located at the center of sqr detector
+        xmax = qmax
+        xmin = -qmax
+        ymax = qmax
+        ymin = -qmax
         
+        x=  numpy.linspace(start= -1*qmax,
+                               stop= qmax,
+                               num= qstep,
+                               endpoint=True )  
+        y = numpy.linspace(start= -1*qmax,
+                               stop= qmax,
+                               num= qstep,
+                               endpoint=True )
+         
+        ## use data info instead
+        new_x = numpy.tile(x, (len(y),1))
+        new_y = numpy.tile(y, (len(x),1))
+        new_y = new_y.swapaxes(0,1)
         
-        size_x, size_y= numpy.shape(theory.data)
-        for i_x in range(size_x):
-            theta = (i_x-center_x)*pixel_width_x / distance 
-            qx = 4.0*math.pi/wavelength * math.tan(theta/2.0)
-            theory.x_bins.append(qx)    
-        for i_y in range(size_y):
-            theta = (i_y-center_y)*pixel_width_y / distance 
-            qy =4.0*math.pi/wavelength * math.tan(theta/2.0)
-            theory.y_bins.append(qy)
-           
+        # all data reuire now in 1d array
+        qx_data = new_x.flatten()
+        qy_data = new_y.flatten()
+        
+        q_data = numpy.sqrt(qx_data*qx_data+qy_data*qy_data)
+        # set all True (standing for unmasked) as default
+        mask    = numpy.ones(len(qx_data), dtype = bool)
+        
+        # calculate the range of qx and qy: this way, it is a little more independent
+        x_size = xmax- xmin
+        y_size = ymax -ymin
+        
+        # store x and y bin centers in q space
+        x_bins  = x
+        y_bins  = y 
+        # bin size: x- & y-directions
+        xstep = x_size/len(x_bins-1)
+        ystep = y_size/len(y_bins-1)
+        
+        #theory.data = numpy.zeros(len(mask))
+        theory.err_data = numpy.zeros(len(mask))
+        theory.qx_data = qx_data 
+        theory.qy_data = qy_data  
+        theory.q_data = q_data 
+        theory.mask = mask            
+        theory.x_bins = x_bins  
+        theory.y_bins = y_bins   
+        
+        # max and min taking account of the bin sizes
+        theory.xmin= xmin - xstep/2
+        theory.xmax= xmax + xstep/2
+        theory.ymin= ymin - ystep/2
+        theory.ymax= ymax + ystep/2
         theory.group_id ="Model"
         theory.id ="Model"
-        ## determine plot boundaries
-        theory.xmin= -qmax
-        theory.xmax= qmax
-        theory.ymin= -qmax
-        theory.ymax= qmax
         
         
     def _get_plotting_info(self, data=None):
@@ -420,13 +453,11 @@ class Plugin:
             Complete get the result of modelthread and create model 2D
             that can be plot.
         """
-      
-    
         err_image = numpy.zeros(numpy.shape(image))
        
         theory= Data2D(image= image , err_image= err_image)
         theory.name= model.name
-        
+
         if data ==None:
             self._fill_default_model2D(theory= theory, qmax=qmax,qstep=qstep, qmin= qmin)
         
@@ -438,12 +469,16 @@ class Plugin:
             theory.detector= data.detector
             theory.source= data.source
             theory.is_data =False 
+            theory.qx_data = data.qx_data
+            theory.qy_data = data.qy_data
+            theory.q_data = data.q_data
+            theory.err_data = data.err_data
+            theory.mask = data.mask
             ## plot boundaries
             theory.ymin= data.ymin
             theory.ymax= data.ymax
             theory.xmin= data.xmin
             theory.xmax= data.xmax
-      
        
         ## plot
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
