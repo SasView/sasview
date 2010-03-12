@@ -83,6 +83,7 @@ def register_readers(registry_function):
     import danse_reader
     import hfir1d_reader
     import IgorReader
+    import red2d_reader
     import tiff_reader
 
     registry_function(abs_reader)
@@ -92,6 +93,7 @@ def register_readers(registry_function):
     registry_function(danse_reader)
     registry_function(hfir1d_reader)
     registry_function(IgorReader)
+    registry_function(red2d_reader)
     registry_function(tiff_reader)
     
     return True            
