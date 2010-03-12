@@ -24,14 +24,9 @@ class Calc2D(CalcThread):
         self.qmin= qmin
         self.qmax= qmax
         self.qstep= qstep
-        # Reshape dimensions of x and y to call evalDistribution
-        #self.x_array = numpy.reshape(x,[len(x),1])
-        #self.y_array = numpy.reshape(y,[1,len(y)])
-        self.x_array = numpy.reshape(x,[1,len(x)])
-        self.y_array = numpy.reshape(y,[len(y),1])
-        # Numpy array of dimensions 1 used for model.run method
-        self.x= numpy.array(x)
-        self.y= numpy.array(y)
+
+        self.x = x
+        self.y = y
         self.data= data
         # the model on to calculate
         self.model = model
@@ -50,31 +45,56 @@ class Calc2D(CalcThread):
                 newx= math.pow(max(math.fabs(self.data.xmax),math.fabs(self.data.xmin)),2)
                 newy= math.pow(max(math.fabs(self.data.ymax),math.fabs(self.data.ymin)),2)
                 self.qmax=math.sqrt( newx + newy )
-        # Define matrix where data will be plotted        
-        radius= numpy.sqrt( self.x_array**2 + self.y_array**2 )
-        index_data= (self.qmin<= radius)
-        index_model = (self.qmin <= radius)&(radius<= self.qmax)
-       
-        output = numpy.zeros((len(self.x),len(self.y)))
-     
-        ## receive only list of 2 numpy array 
-        ## One must reshape to vertical and the other to horizontal
-        value = self.model.evalDistribution([self.x_array,self.y_array] )
-        ## for data ignore the qmax 
-        if self.data == None:
+        
+        if self.data != None:
+            self.qx_data = self.data.qx_data
+            self.qy_data = self.data.qy_data
+            self.mask    = self.data.mask
+        else:          
+            xbin =  numpy.linspace(start= -1*self.qmax,
+                                   stop= self.qmax,
+                                   num= self.qstep,
+                                   endpoint=True )  
+            ybin = numpy.linspace(start= -1*self.qmax,
+                                   stop= self.qmax,
+                                   num= self.qstep,
+                                   endpoint=True )            
+            
+            new_xbin = numpy.tile(xbin, (len(ybin),1))
+            new_ybin = numpy.tile(ybin, (len(xbin),1))
+            new_ybin = new_ybin.swapaxes(0,1)
+            new_xbin = new_xbin.flatten()
+            new_ybin = new_ybin.flatten()
+            self.qy_data = new_ybin
+            self.qx_data = new_xbin
+           
+            self.mask = numpy.ones(len(self.qx_data),dtype=bool)
+            
+        # Define matrix where data will be plotted    
+        radius= numpy.sqrt( self.qx_data*self.qx_data + self.qy_data*self.qy_data )
+        index_data= (self.qmin<= radius)&(self.mask)
+        
+        # For theory, qmax is based on 1d qmax 
+        # so that must be mulitified by sqrt(2) to get actual max for 2d
+        index_model = ((self.qmin <= radius)&(radius<= self.qmax))
+        self.mask = (index_model)&(self.mask)
+        
+        if self.data ==None:
             # Only qmin value will be consider for the detector
-            output = value *index_data  
-        else:
-            # The user can define qmin and qmax for the detector
-            output = index_model*value
-      
+            self.mask = index_data  
+             
+        value = self.model.evalDistribution([self.qx_data[self.mask],self.qy_data[self.mask]] )
+
+        output = numpy.zeros(len(self.mask))
+        output[self.mask] = value 
+
         elapsed = time.time()-self.starttime
         self.complete( image = output,
                        data = self.data , 
                        model = self.model,
                        elapsed = elapsed,
                        qmin = self.qmin,
-                       qmax =self.qmax,
+                       qmax = self.qmax,
                        qstep = self.qstep )
         
    

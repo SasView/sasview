@@ -53,6 +53,7 @@ class BasicPage(wx.ScrolledWindow):
         self.model = None
         ## data
         self.data = None
+        self.mask = None
         self.state = PageState(parent=parent)
         ## dictionary containing list of models
         self.model_list_box = None

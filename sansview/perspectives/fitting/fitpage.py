@@ -915,11 +915,7 @@ class FitPage(BasicPage):
         npts2fit = 0
         qmin,qmax = self.get_range()
         if self.data.__class__.__name__ =="Data2D":
-            for qx in self.data.x_bins:
-                for qy in self.data.y_bins:
-                   if math.sqrt((qx*qx)+(qy*qy)) >= qmin \
-                         and math.sqrt((qx*qx)+(qy*qy)) <= qmax:
-                       npts2fit += 1
+            npts2fit = len(self.data[self.mask])
         else:
             for qx in self.data.x:
                    if qx >= qmin and qx <= qmax:
@@ -965,9 +961,9 @@ class FitPage(BasicPage):
         
         #Check if chi2 is finite
         if chisqr != None or numpy.isfinite(chisqr):
-        #format chi2
-            npt_fit = float(self.get_npts2fit())   
-            if self.engine_type == "park" and npt_fit > 0:   
+        #format chi2  
+            if self.engine_type == "park" and npt_fit > 0:  
+                npt_fit = float(self.get_npts2fit()) 
                 chisqr =chisqr/npt_fit    
             chi2 = format_number(chisqr)    
             self.tcChi.SetLabel(chi2)    
@@ -1056,7 +1052,7 @@ class FitPage(BasicPage):
                                 item[4].SetValue(val_err)
 
                                 has_error = True
-            	    i += 1         
+                    i += 1         
         #Show error title when any errors displayed
         if has_error: 
             if not self.text2_3.IsShown():
@@ -1085,6 +1081,9 @@ class FitPage(BasicPage):
                             "Smear: %s"%msg))
             return
         temp_smearer = None
+        # make sure once more if it is smearer
+        self.smearer = smear_selection(self.data)
+
         if self.enable_smearer.GetValue():
             temp_smearer= self.smearer
             if hasattr(self.data,"dxl"):
