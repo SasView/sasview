@@ -147,6 +147,8 @@ class ModelPanel2D( ModelPanel1D):
             self.plots[event.plot.name].ymin = event.plot.ymin
             self.plots[event.plot.name].ymax = event.plot.ymax
             self.plots[event.plot.name].data = event.plot.data
+            self.plots[event.plot.name].qx_data = event.plot.qx_data
+            self.plots[event.plot.name].qy_data = event.plot.qy_data
             self.plots[event.plot.name].err_data = event.plot.err_data
             # update qmax with the new xmax of data plotted
             self.qmax= event.plot.xmax
@@ -296,6 +298,8 @@ class ModelPanel2D( ModelPanel1D):
         dialog.Destroy()
         ## Redraw the current image
         self.image(data= self.data2D.data,
+                   qx_data=self.data2D.qx_data,
+                   qy_data=self.data2D.qy_data,
                    xmin= self.data2D.xmin,
                    xmax= self.data2D.xmax,
                    ymin= self.data2D.ymin,

@@ -73,13 +73,17 @@ class Data2D(PlotData2D,LoadData2D):
         PlotData2D.__init__(self, image=image, err_image=err_image,xmin=xmin, xmax=xmax,
                             ymin=ymin, ymax=ymax)
         
-        LoadData2D.__init__(self,data=image, err_data=err_image)
+        LoadData2D.__init__(self,data=image, err_data=err_image, qx_data=None,qy_data=None,q_data=None,mask=None)
         
     def copy_from_datainfo(self, data2d):
         """
             copy value of Data2D of type DataLoader.data_info
         """
         self.data     =  copy.deepcopy(data2d.data)
+        self.qx_data     =  copy.deepcopy(data2d.qx_data)
+        self.qy_data     =  copy.deepcopy(data2d.qy_data)
+        self.q_data     =  copy.deepcopy(data2d.q_data)
+        self.mask     =  copy.deepcopy(data2d.mask)
         self.err_data =  copy.deepcopy(data2d.err_data)
         self.x_bins     = copy.deepcopy(data2d.x_bins)
         self.y_bins     = copy.deepcopy(data2d.y_bins)
