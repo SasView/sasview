@@ -162,7 +162,7 @@ class Reader:
                 if len(line_toks) == 0:
                     #empty line
                     continue
-                elif len(line_toks) < 2: 
+                elif len(line_toks) < 3: 
                     #Q-map 2d require 3 or more columns of data          
                     raise ValueError,"Igor_Qmap_Reader: Can't read this file: Not a proper file format"
 
@@ -216,12 +216,15 @@ class Reader:
                 # default data
                 if qz_value == None or not numpy.isfinite(qz_value): 
                     qz_value = 0  
-                if not numpy.isfinite(mask_value)or mask_value ==0 : 
+                if not numpy.isfinite(mask_value): 
                     mask_value = 1             
                 q_data  = numpy.append(q_data,numpy.sqrt(qx_value**2+qy_value**2+qz_value**2))
-                # Note: For convenience, mask = False stands for masked while mask = True for unmasked
+                # Note: For convenience, mask = False stands for masked, while mask = True for unmasked
                 mask    = numpy.append(mask,(mask_value>=1))
                 
+        # If all mask elements are False, put all True
+        if not mask.any(): mask[mask==False] = True   
+  
         # Store limits of the image in q space
         xmin    = numpy.min(qx_data)
         xmax    = numpy.max(qx_data)
