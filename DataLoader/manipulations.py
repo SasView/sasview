@@ -131,11 +131,11 @@ class _Slab(object):
             raise RuntimeError, "_Slab._avg: invalid number of detectors: %g" % len(data2D.detector)
         
         # Get data 
-        data = data2D.data 
-        q_data = data2D.q_data 
-        err_data = data2D.err_data
-        qx_data = data2D.qx_data  
-        qy_data = data2D.qy_data 
+        data = data2D.data[numpy.isfinite(data2D.data)]
+        q_data = data2D.q_data[numpy.isfinite(data2D.data)]
+        err_data = data2D.err_data[numpy.isfinite(data2D.data)]
+        qx_data = data2D.qx_data[numpy.isfinite(data2D.data)] 
+        qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
              
         # Build array of Q intervals
         if maj=='x':
@@ -194,7 +194,8 @@ class _Slab(object):
             y[i_q]         += frac * data[npts]
             
             if err_data == None or err_data[npts]==0.0:
-                err_y[i_q] += frac * frac * math.fabs(data[npts])
+                if data[npts] <0: data[npts] = -data[npts]
+                err_y[i_q] += frac * frac * data[npts]
             else:
                 err_y[i_q] += frac * frac * err_data[npts] * err_data[npts]
             y_counts[i_q]  += frac
@@ -279,11 +280,11 @@ class Boxsum(object):
             raise RuntimeError, "Circular averaging: invalid number of detectors: %g" % len(data2D.detector)
         
         # Get data 
-        data = data2D.data 
-        q_data = data2D.q_data 
-        err_data = data2D.err_data
-        qx_data = data2D.qx_data  
-        qy_data = data2D.qy_data 
+        data = data2D.data[numpy.isfinite(data2D.data)]
+        q_data = data2D.q_data[numpy.isfinite(data2D.data)]
+        err_data = data2D.err_data[numpy.isfinite(data2D.data)]
+        qx_data = data2D.qx_data[numpy.isfinite(data2D.data)] 
+        qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
    
         y  = 0.0
         err_y = 0.0
@@ -311,7 +312,8 @@ class Boxsum(object):
 
             y += frac * data[npts]
             if err_data == None or err_data[npts]==0.0:
-                err_y += frac * frac * math.fabs(data[npts])
+                if data[npts] <0: data[npts] = -data[npts]
+                err_y += frac * frac * data[npts]
             else:
                 err_y += frac * frac * err_data[npts] * err_data[npts]
             y_counts += frac
@@ -388,9 +390,9 @@ class CircularAverage(object):
             @return: Data1D object
         """
         # Get data
-        data = data2D.data 
-        err_data = data2D.err_data 
-        q_data = data2D.q_data 
+        data = data2D.data[numpy.isfinite(data2D.data)]
+        q_data = data2D.q_data[numpy.isfinite(data2D.data)]
+        err_data = data2D.err_data[numpy.isfinite(data2D.data)]
    
         q_data_max = numpy.max(q_data)
 
@@ -431,7 +433,8 @@ class CircularAverage(object):
             y[i_q] += frac * data_n
 
             if err_data == None or err_data[npt]==0.0:
-                err_y[i_q] += frac * frac * math.fabs(data_n)
+                if data_n <0: data_n = -data_n
+                err_y[i_q] += frac * frac * data_n
             else:
                 err_y[i_q] += frac * frac * err_data[npt] * err_data[npt]
             y_counts[i_q]  += frac
@@ -441,6 +444,7 @@ class CircularAverage(object):
         
         # Average the sums       
         for n in range(nbins):
+            if err_y[n] <0: err_y[n] = -err_y[n]
             err_y[n] = math.sqrt(err_y[n])
                       
         err_y = err_y/y_counts
@@ -494,12 +498,12 @@ class Ring(object):
         Pi = math.pi
  
         # Get data
-        data = data2D.data 
-        err_data = data2D.err_data 
-        q_data = data2D.q_data 
-        qx_data = data2D.qx_data
-        qy_data = data2D.qy_data  
-     
+        data = data2D.data[numpy.isfinite(data2D.data)]
+        q_data = data2D.q_data[numpy.isfinite(data2D.data)]
+        err_data = data2D.err_data[numpy.isfinite(data2D.data)]
+        qx_data = data2D.qx_data[numpy.isfinite(data2D.data)] 
+        qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
+        
         q_data_max = numpy.max(q_data)
         
         # Set space for 1d outputs
@@ -533,6 +537,7 @@ class Ring(object):
             phi_bins[i_phi] += frac * data[npt]
             
             if err_data == None or err_data[npt] ==0.0:
+                if data_n <0: data_n = -data_n
                 phi_err[i_phi] += frac * frac * math.fabs(data_n)
             else:
                 phi_err[i_phi] += frac * frac *err_data[npt]*err_data[npt]
@@ -679,13 +684,13 @@ class _Sector:
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
             raise RuntimeError, "Ring averaging only take plottable_2D objects"
         Pi = math.pi
-         
+
         # Get the all data & info
-        data = data2D.data 
-        err_data = data2D.err_data
-        qx_data = data2D.qx_data  
-        qy_data = data2D.qy_data 
-        q_data = data2D.q_data 
+        data = data2D.data[numpy.isfinite(data2D.data)]
+        q_data = data2D.q_data[numpy.isfinite(data2D.data)]
+        err_data = data2D.err_data[numpy.isfinite(data2D.data)]
+        qx_data = data2D.qx_data[numpy.isfinite(data2D.data)] 
+        qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
         
         #set space for 1d outputs
         x        = numpy.zeros(self.nbins)
@@ -756,7 +761,8 @@ class _Sector:
                 y[i_bin] += frac * data_n
 
                 if err_data == None or err_data[n] ==0.0:
-                    y_err[i_bin] += frac * frac * math.fabs(data_n)
+                    if data_n<0: data_n= -data_n
+                    y_err[i_bin] += frac * frac * data_n
                 else:
                     y_err[i_bin] += frac * frac * err_data[n]*err_data[n]
                 y_counts[i_bin] += frac
@@ -796,6 +802,7 @@ class SectorPhi(_Sector):
             @param data2D: Data2D object
             @return: Data1D object
         """
+
         return self._agv(data2D, 'phi')
     
 class SectorQ(_Sector):
@@ -815,6 +822,114 @@ class SectorQ(_Sector):
             @return: Data1D object
         """
         return self._agv(data2D, 'q2')
+
+class Boxcut(object):
+    """
+        Find a rectangular 2D region of interest.
+    """
+    def __init__(self, x_min=0.0, x_max=0.0, y_min=0.0, y_max=0.0):
+        # Minimum Qx value [A-1]
+        self.x_min = x_min
+        # Maximum Qx value [A-1]
+        self.x_max = x_max
+        # Minimum Qy value [A-1]
+        self.y_min = y_min
+        # Maximum Qy value [A-1]
+        self.y_max = y_max
+
+    def __call__(self, data2D):
+        """
+           Find a rectangular 2D region of interest.
+             
+           @param data2D: Data2D object
+           @return: mask, 1d array (len = len(data)) 
+               with Trues where the data points are inside ROI, otherwise False
+        """
+        mask = self._find(data2D)
+        
+        return mask
+        
+    def _find(self, data2D):
+        """
+             Find a rectangular 2D region of interest. 
+             @param data2D: Data2D object
+             @return: out, 1d array (length = len(data)) 
+               with Trues where the data points are inside ROI, otherwise Falses
+        """
+        if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
+            raise RuntimeError, "Boxcut take only plottable_2D objects"
+        # Get qx_ and qy_data 
+        qx_data = data2D.qx_data
+        qy_data = data2D.qy_data
+        
+        # check whether or not the data point is inside ROI
+        outx = [self.x_min <= qx_data & self.x_max > qx_data]
+        outy = [self.y_min <= qy_data & self.y_max > qy_data]
+
+        return (outx & outy)
+
+class Sectorcut(object):
+    """
+        Defines a sector (major + minor) region on a 2D data set.
+        The sector is defined by phi_min, phi_max,
+        where phi_min and phi_max are defined by the right and left lines wrt central line. 
+       
+        Phi_min and phi_max are given in units of radian 
+        and (phi_max-phi_min) should not be larger than pi
+    """
+    def __init__(self,phi_min=0, phi_max=math.pi):
+        self.phi_min = phi_min
+        self.phi_max = phi_max
+              
+    def __call__(self, data2D):
+        """
+           Perform sector averaging.
+            
+           @param data2D: Data2D object
+           @return: mask, 1d array (len = len(data)) 
+               with Trues where the data points are inside ROI, otherwise False
+        """
+        mask = self._find(data2D)
+        
+        return mask
+        
+    def _find(self, data2D):
+        """
+             Find a rectangular 2D region of interest. 
+             @param data2D: Data2D object
+             @return: out, 1d array (length = len(data)) 
+               with Trues where the data points are inside ROI, otherwise Falses
+        """
+        if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
+            raise RuntimeError, "Sectorcut take only plottable_2D objects" 
+        Pi = math.pi
+        # Get data 
+        qx_data = data2D.qx_data
+        qy_data = data2D.qy_data        
+        phi_data = numpy.zeros(len(qx_data))
+
+        # get phi from data
+        phi_data = numpy.arctan2(qy_data, qy_data)
+        # check for major sector
+        if self.phi_min > self.phi_max:
+            out_major = (self.phi_min <= phi_data) or (self.phi_max > phi_data)
+        else:
+            out_major = (self.phi_min <= phi_data) & (self.phi_max > phi_data)
+            
+        # minor sector
+        # Get the min and max into the region: -pi <= phi < Pi
+        phi_min_minor = flip_phi(self.phi_min)-Pi
+        phi_max_minor = flip_phi(self.phi_max)-Pi
+              
+        # check for minor sector
+        if phi_min_minor > phi_max_minor:
+            out_minor= (phi_min_minor <= phi_data) or (phi_max_minor> phi_data) 
+        else:
+            out_minor = (phi_min_minor <= phi_data) & (phi_max_minor > phi_data) 
+        out = out_major + out_minor
+
+        return out
+
 if __name__ == "__main__": 
 
     from loader import Loader
