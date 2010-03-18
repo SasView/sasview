@@ -334,6 +334,8 @@ class InvariantPanel(wx.ScrolledWindow):
         """
             compute invariant 
         """
+        msg= ""
+        wx.PostEvent(self.parent, StatusEvent(status= msg))
         if self._data is None:
             return
         #clear outputs textctrl 
@@ -352,8 +354,13 @@ class InvariantPanel(wx.ScrolledWindow):
         inv = invariant.InvariantCalculator(data=self._data,
                                             background=background,
                                             scale=scale)
-        inv, npts_low = self.set_extrapolation_low(inv=inv, low_q=low_q)
-        inv, npts_high = self.set_extrapolation_high(inv=inv, high_q=high_q)
+        try:
+            inv, npts_low = self.set_extrapolation_low(inv=inv, low_q=low_q)
+            inv, npts_high = self.set_extrapolation_high(inv=inv, high_q=high_q)
+        except:
+            msg= "Error occurred computing invariant: %s"%sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+            return
         #check the type of extrapolation
         extrapolation = self.get_extrapolation_type(low_q=low_q, high_q=high_q)
         #prepare a new container to put result of invariant
@@ -520,7 +527,8 @@ class InvariantPanel(wx.ScrolledWindow):
         """
             Draw widgets related to extrapolation at low q range
         """
-        self.enable_low_cbox = wx.CheckBox(self, -1, "Extrapolate Low Q")
+        self.enable_low_cbox = wx.CheckBox(self, -1, "Enable Extrapolate Low Q")
+        self.enable_low_cbox.SetForegroundColour('red')
         self.enable_low_cbox.SetValue(False)
         self.fit_low_cbox = wx.CheckBox(self, -1, "Check to Fit Power")
         self.fit_low_cbox.SetValue(False)
@@ -578,7 +586,8 @@ class InvariantPanel(wx.ScrolledWindow):
         """
             Draw widgets related to extrapolation at high q range
         """
-        self.enable_high_cbox = wx.CheckBox(self, -1, "Extrapolate high-Q")
+        self.enable_high_cbox = wx.CheckBox(self, -1, "Enable Extrapolate high-Q")
+        self.enable_high_cbox.SetForegroundColour('red')
         self.enable_high_cbox.SetValue(False)
         self.fit_high_cbox = wx.CheckBox(self, -1, "Check to Fit Power")
         self.fit_high_cbox.SetValue(False)
