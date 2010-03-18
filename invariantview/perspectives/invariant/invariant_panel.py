@@ -782,7 +782,7 @@ class InvariantPanel(wx.ScrolledWindow):
         self.Bind(wx.EVT_BUTTON, self.compute_invariant, id=id)   
         #detail button
         id = wx.NewId()
-        self.button_ok = wx.Button(self, id, "Ok")
+        self.button_ok = wx.Button(self, id, "Details?")
         self.button_ok.SetToolTipString("Give Details on Computation")
         self.Bind(wx.EVT_BUTTON, self.display_details, id=id)
         self.button_ok.Disable()
