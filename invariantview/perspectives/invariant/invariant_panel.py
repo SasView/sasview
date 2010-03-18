@@ -381,11 +381,20 @@ class InvariantPanel(wx.ScrolledWindow):
         # Parse additional parameters
         porod_const = self.get_porod_const()        
         contrast = self.get_contrast()
-        #Compute volume and set value to txtcrtl
-        self.get_volume(inv=inv, contrast=contrast, extrapolation=extrapolation)
-        #compute surface and set value to txtcrtl
-        self.get_surface(inv=inv, contrast=contrast, porod_const=porod_const, 
+        try:
+            #Compute volume and set value to txtcrtl
+            self.get_volume(inv=inv, contrast=contrast, extrapolation=extrapolation)
+            #compute surface and set value to txtcrtl
+        except:
+            msg= "Error occurred computing invariant: %s"%sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status= msg))
+        try:
+            self.get_surface(inv=inv, contrast=contrast, porod_const=porod_const, 
                                     extrapolation=extrapolation)
+        except:
+            msg= "Error occurred computing invariant: %s"%sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status= msg))
+      
         #enable the button_ok for more details
         self.button_ok.Enable()
         
