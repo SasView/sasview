@@ -361,10 +361,12 @@ class InvariantCalculator(object):
         self._low_extrapolation_npts = 4
         self._low_extrapolation_function = Guinier()
         self._low_extrapolation_power = None
+        self._low_extrapolation_power_fitted = None
    
         self._high_extrapolation_npts = 4
         self._high_extrapolation_function = PowerLaw()
         self._high_extrapolation_power = None
+        self._high_extrapolation_power_fitted = None
         
         # Extrapolation range
         self._low_q_limit = Q_MINIMUM
@@ -390,7 +392,7 @@ class InvariantCalculator(object):
         
         return  new_data
      
-    def _fit(self, model, qmin=Q_MINIMUM, qmax=Q_MAXIMUM, power=None):
+    def _fit(self, model, qmin=Q_MINIMUM, qmax=Q_MAXIMUM, power=None, range=None):
         """
             fit data with function using 
             data= self._get_data()
@@ -407,6 +409,10 @@ class InvariantCalculator(object):
         """
         extrapolator = Extrapolator(data=self._data, model=model)
         p, dp = extrapolator.fit(power=power, qmin=qmin, qmax=qmax) 
+        if range is not None and range == 'low':
+            self._low_extrapolation_power_fitted = -1*p[0]
+        if range is not None and range == 'high':
+            self._high_extrapolation_power_fitted = -1*p[0]
         
         return model.extract_model_parameters(constant=p[1], slope=p[0], dconstant=dp[1], dslope=dp[0])
     
@@ -510,6 +516,14 @@ class InvariantCalculator(object):
         result_data = LoaderData1D(x=q, y=iq, dy=diq)
         return result_data
     
+    def get_extrapolation_power(self, range='high'):
+        """
+            return the fitted power for power law function at a givenr ange
+        """
+        if range == 'low':
+            return self._low_extrapolation_power_fitted
+        return self._high_extrapolation_power_fitted
+    
     def get_qstar_low(self):
         """
             Compute the invariant for extrapolated data at low q range.
@@ -528,7 +542,8 @@ class InvariantCalculator(object):
         self._fit(model=self._low_extrapolation_function,
                          qmin=qmin,
                          qmax=qmax,
-                         power=self._low_extrapolation_power)
+                         power=self._low_extrapolation_power,
+                         range='low')
         
         # Distribution starting point
         self._low_q_limit = Q_MINIMUM
@@ -565,7 +580,8 @@ class InvariantCalculator(object):
         self._fit(model=self._high_extrapolation_function,
                          qmin=qmin,
                          qmax=qmax,
-                         power=self._high_extrapolation_power)
+                         power=self._high_extrapolation_power,
+                         range='high')
         
         #create new Data1D to compute the invariant
         data = self._get_extrapolated_data(model=self._high_extrapolation_function,
@@ -652,6 +668,7 @@ class InvariantCalculator(object):
                 raise ValueError, "Extrapolation only allows a power law at high Q"
             self._high_extrapolation_npts  = npts
             self._high_extrapolation_power = power
+            self._high_extrapolation_power_fitted = power
         else:
             if function == 'power_law':
                 self._low_extrapolation_function = PowerLaw()
@@ -659,6 +676,7 @@ class InvariantCalculator(object):
                 self._low_extrapolation_function = Guinier()
             self._low_extrapolation_npts  = npts
             self._low_extrapolation_power = power
+            self._low_extrapolation_power_fitted = power
         
     def get_qstar(self, extrapolation=None):
         """

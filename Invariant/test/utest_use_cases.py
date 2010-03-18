@@ -236,7 +236,32 @@ class TestInvPolySphere(unittest.TestCase):
         self.assertAlmostEquals(v, 0.005952674, 3)
         self.assertAlmostEquals(s , 941.7452, 3)
       
-  
+    def test_use_case_6(self):
+        """
+            Invariant with high-Q extrapolation
+        """
+        # Create invariant object. Background and scale left as defaults.
+        inv = invariant.InvariantCalculator(data=self.data)
+        
+        # Set the extrapolation parameters for the high-Q range
+        inv.set_extrapolation(range='low', npts=10, function='power_law', power=4)
+        
+        # The version of the call without error
+        # The function parameter defaults to None, then is picked to be 'power_law' for extrapolation='high'
+        qstar = inv.get_qstar(extrapolation='low')
+        
+        # The version of the call with error
+        qstar, qstar_err = inv.get_qstar_with_error(extrapolation='low')
+
+        # Get the volume fraction and surface
+        v, dv = inv.get_volume_fraction_with_error(contrast=2.6e-6)
+        s, ds = inv.get_surface_with_error(contrast=2.6e-6, porod_const=2)
+        
+        # Test results
+        self.assertAlmostEquals(qstar, 7.49e-5,2)
+        self.assertAlmostEquals(v, 0.005952674, 3)
+        self.assertAlmostEquals(s , 941.7452, 3)
+        
 class TestInvPinholeSmear(unittest.TestCase):
     """
         Test pinhole smeared data for invariant computation
