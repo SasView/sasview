@@ -15,3 +15,5 @@ import wx.lib.newevent
 (ErrorDataEvent, ERR_DATA) = wx.lib.newevent.NewEvent()
 ## event that that destroy a page associate with Data1D removed from the graph
 (RemoveDataEvent, EVT_REMOVE_DATA)   = wx.lib.newevent.NewEvent()
+##event that allow to add more that to the same plot
+(AddManyDataEvent, EVT_ADD_MANY_DATA)   = wx.lib.newevent.NewEvent()
