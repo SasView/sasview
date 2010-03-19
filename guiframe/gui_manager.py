@@ -39,7 +39,7 @@ except:
     
 from sans.guicomm.events import EVT_STATUS
 from sans.guicomm.events import EVT_NEW_PLOT,EVT_SLICER_PARS_UPDATE
-
+from sans.guicomm.events import EVT_ADD_MANY_DATA
 import warnings
 warnings.simplefilter("ignore")
 
@@ -219,7 +219,8 @@ class ViewerFrame(wx.Frame):
 
         # Welcome panel
         self.defaultPanel = None
-
+        #panel on focus
+        self.panel_on_focus = None
         # Check for update
         #self._check_update(None)
         ## maximum number of opened files' paths to store
@@ -237,7 +238,14 @@ class ViewerFrame(wx.Frame):
         wx.EVT_CLOSE(self, self._onClose)
         # Register to status events
         self.Bind(EVT_STATUS, self._on_status_event)
-    
+        #Register add extra data on the same panel event on load
+        self.Bind(EVT_ADD_MANY_DATA, self.set_panel_on_focus)
+        
+    def set_panel_on_focus(self, event):
+        """
+            Store reference to the last panel on focus
+        """
+        self.panel_on_focus = event.panel
         
     def build_gui(self):
         # Set up the layout

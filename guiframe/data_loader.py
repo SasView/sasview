@@ -21,6 +21,22 @@ def choose_data_file(parent, location=None):
     
     return path
 
+def append_data_to_existing_panel(panel_name, data_name):
+    """
+        Pop up an error message.
+        
+        @param panel_name: the name of the current panel
+        @param data_name: the name of the current data
+    """
+    message = " Do you want to append %s data\n in "%(str(data_name))
+    message += " %s panel?\n\n"%(str(panel_name))
+    dial = wx.MessageDialog(None, message, 'Question',
+                       wx.YES_NO|wx.NO_DEFAULT|wx.ICON_QUESTION)
+    if dial.ShowModal() == wx.ID_YES:
+        return True
+    else:
+        return False
+   
 
 def load_ascii_1D(path):
     """
@@ -141,18 +157,27 @@ def plot_data(parent, path):
         new_plot.interactive = True
         ## when 2 data have the same id override the 1 st plotted
         new_plot.id = name
-      
         ##group_id specify on which panel to plot this data
         new_plot.group_id = name
         new_plot.is_data = True
         ##post data to plot
+        title = output.filename
         if hasattr(new_plot,"title"):
-            title = str(new_plot.title)
+            title = str(new_plot.title.lstrip().rstrip())
             if title == "":
                 title = str(name)
         else:
             title = str(name)
-        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=title ))
+        if hasattr(parent, "panel_on_focus") and not(parent.panel_on_focus is None):
+                existing_panel  = parent.panel_on_focus
+                panel_name = existing_panel.window_caption
+                data_name = new_plot.name
+                if existing_panel.__class__.__name__ == "ModelPanel1D"\
+                    and existing_panel.group_id is not None:
+                    if append_data_to_existing_panel(panel_name, data_name):
+                        #add this plot the an existing panel
+                        new_plot.group_id = existing_panel.group_id
+        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=title))
         
     ## the output of the loader is a list , some xml files contain more than one data
     else:
@@ -189,17 +214,25 @@ def plot_data(parent, path):
                 
             new_plot.name = name
             new_plot.interactive = True
-         
             new_plot.group_id = name
             new_plot.id = name
-     
-            new_plot.is_data =True
+            new_plot.is_data = True
+        
             if hasattr(item,"title"):
-                title = item.title
+                title = item.title.lstrip().rstrip()
                 if title == "":
                     title = str(name)
             else:
                 title = name
+            if hasattr(parent, "panel_on_focus") and not(parent.panel_on_focus is None):
+                existing_panel  = parent.panel_on_focus
+                panel_name = existing_panel.window_caption
+                data_name = new_plot.name
+                if existing_panel.__class__.__name__ == "ModelPanel1D"\
+                    and existing_panel.group_id is not None:
+                    if append_data_to_existing_panel(panel_name, data_name):
+                        #add this plot the an existing panel
+                        new_plot.group_id = existing_panel.group_id
             wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
             i+=1
            

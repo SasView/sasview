@@ -23,7 +23,7 @@ from danse.common.plottools.plottables import Graph
 from sans.guiframe import dataFitting 
 from sans.guicomm.events import EVT_NEW_PLOT
 from sans.guicomm.events import StatusEvent ,NewPlotEvent,SlicerEvent,ErrorDataEvent
-from sans.guicomm.events import RemoveDataEvent
+from sans.guicomm.events import RemoveDataEvent, AddManyDataEvent
 from sans.guiframe.utils import PanelMenu
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Theory1D
@@ -78,8 +78,18 @@ class ModelPanel1D(PlotPanel):
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
         self.graph.render(self)
-   
-   
+        
+    def on_kill_focus(self, event):
+        """
+            reset the panel color and post even just after the panel has been on 
+            focus to make sure the group_id is filled after _onEVT_1DREPLOT
+            is called
+        """
+        self.SetColor(None)
+        self.draw()
+        #post nd event to notify guiframe that this panel is on focus
+        wx.PostEvent(self.parent, AddManyDataEvent(panel=self))
+        
     def _reset(self):
         """
             Resets internal data and graph
@@ -87,7 +97,6 @@ class ModelPanel1D(PlotPanel):
         self.graph.reset()
         self.plots      = {}
         self.action_ids = {}
-    
     
     def _onEVT_1DREPLOT(self, event):
         """
@@ -156,7 +165,6 @@ class ModelPanel1D(PlotPanel):
             self._on_remove_errors(evt=None)
         else:
             self._on_add_errors( evt=None)
-        return
     
     def onLeftDown(self,event): 
         """ 
@@ -168,8 +176,7 @@ class ModelPanel1D(PlotPanel):
         if ax != None:
             position = "x: %8.3g    y: %8.3g" % (event.xdata, event.ydata)
             wx.PostEvent(self.parent, StatusEvent(status=position))
-
-
+     
     def _onRemove(self, event):
         """
             Remove a plottable from the graph and render the graph 
