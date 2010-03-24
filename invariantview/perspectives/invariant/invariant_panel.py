@@ -90,7 +90,23 @@ class InvariantPanel(wx.ScrolledWindow):
         self.inv_container = None
         #Draw the panel
         self._do_layout()
+        if self.parent is not None:
+            msg = ""
+            wx.PostEvent(self.parent, StatusEvent(status= msg))
        
+    def err_check_on_data(self):
+        """
+            Check if data is valid for further computation
+        """
+        flag = False
+        #edit the panel
+        if self._data is not None:
+            if len(self._data.x[self._data.x==0]) > 0:
+                flag = True
+                msg = "Invariant: one of your q-values is zero. Delete that entry before proceeding"
+                wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop")) 
+        return flag
+    
     def set_data(self, data):
         """
             Set the data
@@ -98,6 +114,7 @@ class InvariantPanel(wx.ScrolledWindow):
         self._data = data
         #edit the panel
         if self._data is not None:
+            self.err_check_on_data()
             data_name = self._data.name
             data_qmin = min (self._data.x)
             data_qmax = max (self._data.x)
@@ -341,8 +358,9 @@ class InvariantPanel(wx.ScrolledWindow):
         """
         msg= ""
         wx.PostEvent(self.parent, StatusEvent(status= msg))
-        if self._data is None:
+        if self._data is None or self.err_check_on_data():
             return
+    
         #clear outputs textctrl 
         self._reset_output()
         try:
@@ -369,8 +387,7 @@ class InvariantPanel(wx.ScrolledWindow):
             return
         #check the type of extrapolation
         extrapolation = self.get_extrapolation_type(low_q=low_q, high_q=high_q)
-        #prepare a new container to put result of invariant
-        self.inv_container = InvariantContainer()
+       
         #Compute invariant
         try:
             self.get_qstar(inv=inv)
@@ -414,6 +431,8 @@ class InvariantPanel(wx.ScrolledWindow):
         self.volume_err_tcl.Clear()
         self.surface_tcl.Clear()
         self.surface_err_tcl.Clear()
+        #prepare a new container to put result of invariant
+        self.inv_container = InvariantContainer()
         
     def _define_structure(self):
         """
