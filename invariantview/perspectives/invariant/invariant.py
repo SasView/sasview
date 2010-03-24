@@ -103,12 +103,13 @@ class Plugin:
         invariant_hint = "Will displays the invariant panel for futher computation"
        
         for item in self.graph.plottables:
-            if issubclass(item.__class__,LoaderData1D):
-       
-                if item.name !="$I_{obs}(q)$" and item.name !="$P_{fit}(r)$":
-                    if hasattr(item, "group_id"):
-                        return [[invariant_option, 
-                                    invariant_hint, self._compute_invariant]]
+            if item.name == graph.selected_plottable :
+                if issubclass(item.__class__,LoaderData1D):
+           
+                    if item.name !="$I_{obs}(q)$" and item.name !="$P_{fit}(r)$":
+                        if hasattr(item, "group_id"):
+                            return [[invariant_option, 
+                                        invariant_hint, self._compute_invariant]]
         return []   
 
     

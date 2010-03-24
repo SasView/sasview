@@ -4,6 +4,7 @@ import sys
 import colorsys
 import numpy
 from sans.guiframe.utils import format_number, check_float
+from invariant_widgets import OutputTextCtrl
 # Dimensions related to chart
 RECTANGLE_WIDTH  = 400.0  
 RECTANGLE_HEIGHT = 20
@@ -92,29 +93,23 @@ class InvariantDetailsPanel(wx.ScrolledWindow):
         unit_invariant = '[1/cm][1/A]'
      
         invariant_txt = wx.StaticText(self, -1, 'Invariant')
-        self.invariant_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_tcl.SetEditable(False)
+        self.invariant_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_tcl.SetToolTipString("Invariant in the data set's Q range.")
-        self.invariant_err_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_err_tcl.SetEditable(False)
+        self.invariant_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_err_tcl.SetToolTipString("Uncertainty on the invariant.")
         invariant_units_txt = wx.StaticText(self, -1, unit_invariant)
        
         invariant_low_txt = wx.StaticText(self, -1, 'Invariant in low-Q region')
-        self.invariant_low_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_low_tcl.SetEditable(False)
+        self.invariant_low_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_low_tcl.SetToolTipString("Invariant computed with the extrapolated low-Q data.")
-        self.invariant_low_err_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_low_err_tcl.SetEditable(False)
+        self.invariant_low_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_low_err_tcl.SetToolTipString("Uncertainty on the invariant.")
         invariant_low_units_txt = wx.StaticText(self, -1,  unit_invariant)
         
         invariant_high_txt = wx.StaticText(self, -1, 'Invariant in high-Q region')
-        self.invariant_high_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_high_tcl.SetEditable(False)
+        self.invariant_high_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_high_tcl.SetToolTipString("Invariant computed with the extrapolated high-Q data")
-        self.invariant_high_err_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_high_err_tcl.SetEditable(False)
+        self.invariant_high_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_high_err_tcl.SetToolTipString("Uncertainty on the invariant.")
         invariant_high_units_txt = wx.StaticText(self, -1,  unit_invariant)
    

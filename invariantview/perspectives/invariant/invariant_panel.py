@@ -10,6 +10,7 @@ from sans.invariant import invariant
 from sans.guiframe.utils import format_number, check_float
 from sans.guicomm.events import NewPlotEvent, StatusEvent
 from invariant_details import InvariantDetailsWindow
+from invariant_widgets import OutputTextCtrl, InvTextCtrl
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM  = 1e-5
 # The maximum q-value to be used when extrapolating
@@ -200,11 +201,10 @@ class InvariantPanel(wx.ScrolledWindow):
         try:
             qstar_total, qstar_total_err = inv.get_qstar_with_error(extrapolation)
             self.invariant_total_tcl.SetValue(format_number(qstar_total))
-            self.invariant_total_err_tcl.SetValue(format_number(qstar_total))
+            self.invariant_total_err_tcl.SetValue(format_number(qstar_total_err))
             self.inv_container.qstar_total = qstar_total
             self.inv_container.qstar_total_err = qstar_total_err
-            check_float(self.invariant_total_tcl)
-            check_float(self.invariant_total_err_tcl)
+         
         except:
             msg= "Error occurred computing invariant using extrapolation: %s"%sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))  
@@ -219,7 +219,8 @@ class InvariantPanel(wx.ScrolledWindow):
                 self.inv_container.qstar_low_err = qstar_low_err
                 extrapolated_data = inv.get_extra_data_low(npts_in=npts_low) 
                 power_low = inv.get_extrapolation_power(range='low')  
-                self.power_low_tcl.SetValue(str(power_low))
+                if self.power_law_low.GetValue():
+                    self.power_low_tcl.SetValue(str(power_low))
                 self._manager.plot_theory(data=extrapolated_data,
                                            name="Low-Q extrapolation")
             except:
@@ -236,7 +237,7 @@ class InvariantPanel(wx.ScrolledWindow):
                 qstar_high, qstar_high_err = inv.get_qstar_high()
                 self.inv_container.qstar_high = qstar_high
                 self.inv_container.qstar_high_err = qstar_high_err
-                power_high = inv.get_extrapolation_power(range='high')  
+                power_high = inv.get_extrapolation_power(range='high') 
                 self.power_high_tcl.SetValue(str(power_high))
                 high_out_data = inv.get_extra_data_high(q_end=Q_MAXIMUM_PLOT)
                 self._manager.plot_theory(data=high_out_data,
@@ -262,10 +263,10 @@ class InvariantPanel(wx.ScrolledWindow):
         if self.guinier.GetValue():
             function_low = "guinier"
         # get the function
-        power_low = None
+        power_low = None #2.0/3.0
         if self.power_law_low.GetValue():
             function_low = "power_law"
-            if self.fit_low_cbox.GetValue():
+            if self.fit_enable_low.GetValue():
                 #set value of power_low to none to allow fitting
                 power_low = None
             else:
@@ -277,7 +278,7 @@ class InvariantPanel(wx.ScrolledWindow):
                         #Raise error only when qstar at low q is requested
                         msg = "Expect float for power at low q , got %s"%(power_low)
                         raise ValueError, msg
-                          
+       
         #Get the number of points to extrapolated
         npts_low = self.npts_low_tcl.GetValue().lstrip().rstrip()   
         if check_float(self.npts_low_tcl):
@@ -299,7 +300,7 @@ class InvariantPanel(wx.ScrolledWindow):
         power_high = None
         if self.power_law_high.GetValue():
             function_high = "power_law"
-            if self.fit_high_cbox.GetValue():
+            if self.fit_enable_high.GetValue():
                 #set value of power_high to none to allow fitting
                 power_high = None
             else:
@@ -358,8 +359,9 @@ class InvariantPanel(wx.ScrolledWindow):
             inv, npts_low = self.set_extrapolation_low(inv=inv, low_q=low_q)
             inv, npts_high = self.set_extrapolation_high(inv=inv, high_q=high_q)
         except:
-            msg= "Error occurred computing invariant: %s"%sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+            raise
+            #msg= "Error occurred computing invariant: %s"%sys.exc_value
+            #wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
             return
         #check the type of extrapolation
         extrapolation = self.get_extrapolation_type(low_q=low_q, high_q=high_q)
@@ -468,20 +470,18 @@ class InvariantPanel(wx.ScrolledWindow):
         #Data name [string]
         data_name_txt = wx.StaticText(self, -1, 'Data : ')  
        
-        self.data_name_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH*5, 20), style=0) 
+        self.data_name_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH*5, 20), style=0) 
         self.data_name_tcl.SetToolTipString("Data's name.")
         self.data_name_sizer.AddMany([(data_name_txt, 0, wx.LEFT|wx.RIGHT, 10),
                                        (self.data_name_tcl, 0, wx.EXPAND)])
         #Data range [string]
         data_range_txt = wx.StaticText(self, -1, 'Total Q Range (1/A): ') 
         data_min_txt = wx.StaticText(self, -1, 'Min : ')  
-        self.data_min_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
+        self.data_min_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
         self.data_min_tcl.SetToolTipString("The minimum value of q range.")
-        self.data_min_tcl.SetEditable(False) 
         data_max_txt = wx.StaticText(self, -1, 'Max : ') 
-        self.data_max_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0) 
+        self.data_max_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0) 
         self.data_max_tcl.SetToolTipString("The maximum value of q range.")
-        self.data_max_tcl.SetEditable(False) 
         self.data_range_sizer.AddMany([(data_range_txt, 0, wx.RIGHT, 10),
                                        (data_min_txt, 0, wx.RIGHT, 10),
                                        (self.data_min_tcl, 0, wx.RIGHT, 10),
@@ -496,16 +496,22 @@ class InvariantPanel(wx.ScrolledWindow):
             Draw widgets related to background
         """
         background_txt = wx.StaticText(self, -1, 'Background : ')  
-        self.background_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0) 
+        self.background_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0) 
         self.background_tcl.SetValue(str(BACKGROUND))
+        background_hint_txt = "background"
+        self.background_tcl.SetToolTipString(background_hint_txt)
+        background_unit_txt = wx.StaticText(self, -1, '[1/cm]')  
         self.background_sizer.AddMany([(background_txt, 0, wx.LEFT|wx.RIGHT, 10),
-                                       (self.background_tcl)])
+                                       (self.background_tcl, 0, wx.RIGHT, 10),
+                                       (background_unit_txt)])
     def _layout_scale(self):
         """
             Draw widgets related to scale
         """
         scale_txt = wx.StaticText(self, -1, 'Scale : ')  
-        self.scale_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
+        self.scale_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
+        scale_hint_txt = "Scale"
+        self.scale_tcl.SetToolTipString(scale_hint_txt)
         self.scale_tcl.SetValue(str(SCALE)) 
         self.scale_sizer.AddMany([(scale_txt, 0, wx.LEFT|wx.RIGHT, 10),
                                        (self.scale_tcl, 0, wx.LEFT, 30)])
@@ -515,23 +521,73 @@ class InvariantPanel(wx.ScrolledWindow):
             Draw widgets related to contrast
         """
         contrast_txt = wx.StaticText(self, -1, 'Contrast : ')  
-        self.contrast_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
+        self.contrast_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
         self.contrast_tcl.SetValue(str(CONTRAST)) 
+        contrast_hint_txt = "Contrast"
+        self.contrast_tcl.SetToolTipString(contrast_hint_txt)
+        contrast_unit_txt = wx.StaticText(self, -1, '[1/A^(2)]')  
         self.contrast_sizer.AddMany([(contrast_txt, 0, wx.LEFT|wx.RIGHT, 10),
-                                       (self.contrast_tcl, 0, wx.LEFT, 15)])
+                                       (self.contrast_tcl, 0, wx.LEFT, 15),
+                                       (contrast_unit_txt, 0, wx.LEFT, 10)])
     
     def _layout_porod_constant(self):
         """
             Draw widgets related to porod constant
         """
         porod_const_txt = wx.StaticText(self, -1, 'Porod Constant:')  
-        self.porod_constant_tcl = wx.TextCtrl(self, -1, 
+        self.porod_constant_tcl = InvTextCtrl(self, -1, 
                                               size=(_BOX_WIDTH, 20), style=0) 
+        porod_const_hint_txt = "Porod Constant"
+        self.porod_constant_tcl.SetToolTipString(porod_const_hint_txt)
         optional_txt = wx.StaticText(self, -1, '(Optional)')  
         self.porod_constant_sizer.AddMany([(porod_const_txt, 0, wx.LEFT, 10),
                                        (self.porod_constant_tcl, 0, wx.LEFT, 0),
                                        (optional_txt, 0, wx.LEFT, 10)])
         
+    def _enable_fit_power_law_low(self, event=None):
+        """
+            Enable and disable the power value editing
+        """
+        if self.fix_enable_low.IsEnabled():
+            if self.fix_enable_low.GetValue():
+                self.power_low_tcl.Enable()
+            else:
+                self.power_low_tcl.Disable()
+            
+    def _enable_low_q_section(self, event=None):
+        """
+            Disable or enable some button if the user enable low q extrapolation
+        """
+        if self.enable_low_cbox.GetValue():
+            self.npts_low_tcl.Enable()
+            self.fix_enable_low.Enable()
+            self.fit_enable_low.Enable()
+            self.guinier.Enable()
+            self.power_law_low.Enable()
+
+        else:
+            self.npts_low_tcl.Disable()
+            self.fix_enable_low.Disable()
+            self.fit_enable_low.Disable()
+            self.guinier.Disable()
+            self.power_law_low.Disable()
+        self._enable_power_law_low()
+        self._enable_fit_power_law_low()
+    
+    def _enable_power_law_low(self, event=None):
+        """
+            Enable editing power law section at low q range
+        """
+        if self.guinier.GetValue():
+            self.fix_enable_low.Disable()
+            self.fit_enable_low.Disable()
+            self.power_low_tcl.Disable()
+        else:
+            self.fix_enable_low.Enable()
+            self.fit_enable_low.Enable()
+            self.power_low_tcl.Enable()
+        self._enable_fit_power_law_low()
+            
     def _layout_extrapolation_low(self):
         """
             Draw widgets related to extrapolation at low q range
@@ -539,45 +595,43 @@ class InvariantPanel(wx.ScrolledWindow):
         self.enable_low_cbox = wx.CheckBox(self, -1, "Enable Extrapolate Low Q")
         self.enable_low_cbox.SetForegroundColour('red')
         self.enable_low_cbox.SetValue(False)
-        self.fit_low_cbox = wx.CheckBox(self, -1, "Check to Fit Power")
-        self.fit_low_cbox.SetValue(False)
+        wx.EVT_CHECKBOX(self, self.enable_low_cbox.GetId(),
+                                         self._enable_low_q_section)
+        self.fix_enable_low = wx.RadioButton(self, -1, 'Fix',
+                                         (10, 10),style=wx.RB_GROUP)
+        self.fix_enable_low.SetValue(True)
+        self.fit_enable_low = wx.RadioButton(self, -1, 'Fit', (10, 10))
+        self.Bind(wx.EVT_RADIOBUTTON, self._enable_fit_power_law_low,
+                                     id=self.fix_enable_low.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self._enable_fit_power_law_low, 
+                                        id=self.fit_enable_low.GetId())
         self.guinier = wx.RadioButton(self, -1, 'Guinier',
                                          (10, 10),style=wx.RB_GROUP)
         self.guinier.SetValue(True)
         self.power_law_low = wx.RadioButton(self, -1, 'Power Law', (10, 10))
+        self.Bind(wx.EVT_RADIOBUTTON, self._enable_power_law_low,
+                                     id=self.guinier.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self._enable_power_law_low, 
+                                        id=self.power_law_low.GetId())
+        
         npts_low_txt = wx.StaticText(self, -1, 'Npts')
-        self.npts_low_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
+        self.npts_low_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH*2/3, -1))
         self.npts_low_tcl.SetValue(str(NPTS))
         msg_hint = "Number of Q points to consider"
         msg_hint +="while extrapolating the low-Q region"
         self.npts_low_tcl.SetToolTipString(msg_hint)
         power_txt = wx.StaticText(self, -1, 'Power')
-        self.power_low_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
+        self.power_low_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH*2/3, -1))
         self.power_low_tcl.SetValue(str(self.power_law_exponant))
+        self.power_low_tcl.Disable()
         power_hint_txt = "Exponent to apply to the Power_law function."
         self.power_low_tcl.SetToolTipString(power_hint_txt)
         iy = 0
         ix = 0
-        self.low_q_sizer.Add(self.guinier,(iy, ix),(1,2),
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        self.low_q_sizer.Add(self.enable_low_cbox,(iy, ix),(1,5),
+                            wx.TOP|wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         iy += 1
         ix = 0
-        self.low_q_sizer.Add(self.power_law_low,(iy, ix),(1,2),
-                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        # Parameter controls for power law
-        ix = 1
-        iy += 1
-        self.low_q_sizer.Add(self.fit_low_cbox,(iy, ix),(1,3),
-                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix = 1
-        iy += 1
-        self.low_q_sizer.Add(power_txt,(iy, ix),(1,1),
-                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix += 1
-        self.low_q_sizer.Add(self.power_low_tcl, (iy, ix), (1,1),
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        iy += 1
-        ix = 1
         self.low_q_sizer.Add(npts_low_txt,(iy, ix),(1,1),
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
@@ -585,12 +639,60 @@ class InvariantPanel(wx.ScrolledWindow):
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
-        self.low_q_sizer.Add(self.enable_low_cbox,(iy, ix),(1,5),
+        self.low_q_sizer.Add(self.guinier,(iy, ix),(1,2),
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        iy += 1
+        ix = 0
+        self.low_q_sizer.Add(self.power_law_low,(iy, ix),(1,2),
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+       
+        # Parameter controls for power law
+        ix = 1
+        iy += 1
+        self.low_q_sizer.Add(self.fix_enable_low,(iy, ix),(1,1),
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.low_q_sizer.Add(self.fit_enable_low,(iy, ix),(1,1),
+                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix = 1
+        iy += 1
+        self.low_q_sizer.Add(power_txt,(iy, ix),(1,1),
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.low_q_sizer.Add(self.power_low_tcl, (iy, ix), (1,1),
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        #Change the state of txtcrtl to enable/disable
+        self._enable_low_q_section()
         self.low_extrapolation_sizer.AddMany([(self.low_q_sizer, 0,
                                                 wx.BOTTOM|wx.RIGHT, 10)])
+    def _enable_fit_power_law_high(self, event=None):
+        """
+            Enable and disable the power value editing
+        """
+        if self.fix_enable_high.IsEnabled():
+            if self.fix_enable_high.GetValue():
+                self.power_high_tcl.Enable()
+            else:
+                self.power_high_tcl.Disable()
         
-           
+    def _enable_high_q_section(self, event=None):
+        """
+            Disable or enable some button if the user enable high q extrapolation
+        """
+        if self.enable_high_cbox.GetValue():
+            self.npts_high_tcl.Enable()
+            self.power_law_high.Enable()
+            self.power_high_tcl.Enable()
+            self.fix_enable_high.Enable()
+            self.fit_enable_high.Enable()
+        else:
+            self.npts_high_tcl.Disable()
+            self.power_law_high.Disable()
+            self.power_high_tcl.Disable()
+            self.fix_enable_high.Disable()
+            self.fit_enable_high.Disable()
+        self._enable_fit_power_law_high()
+  
     def _layout_extrapolation_high(self):
         """
             Draw widgets related to extrapolation at high q range
@@ -598,32 +700,58 @@ class InvariantPanel(wx.ScrolledWindow):
         self.enable_high_cbox = wx.CheckBox(self, -1, "Enable Extrapolate high-Q")
         self.enable_high_cbox.SetForegroundColour('red')
         self.enable_high_cbox.SetValue(False)
-        self.fit_high_cbox = wx.CheckBox(self, -1, "Check to Fit Power")
-        self.fit_high_cbox.SetValue(False)
+        wx.EVT_CHECKBOX(self, self.enable_high_cbox.GetId(),
+                                         self._enable_high_q_section)
+      
+        self.fix_enable_high = wx.RadioButton(self, -1, 'Fix',
+                                         (10, 10),style=wx.RB_GROUP)
+        self.fix_enable_high.SetValue(True)
+        self.fit_enable_high = wx.RadioButton(self, -1, 'Fit', (10, 10))
+        self.Bind(wx.EVT_RADIOBUTTON, self._enable_fit_power_law_high,
+                                     id=self.fix_enable_high.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self._enable_fit_power_law_high, 
+                                        id=self.fit_enable_high.GetId())
+        
         self.power_law_high = wx.RadioButton(self, -1, 'Power Law',
                                               (10, 10), style=wx.RB_GROUP)
         msg_hint ="Check to extrapolate data at high-Q"
         self.power_law_high.SetToolTipString(msg_hint)
         self.power_law_high.SetValue(True)
         npts_high_txt = wx.StaticText(self, -1, 'Npts')
-        self.npts_high_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
+        self.npts_high_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH*2/3, -1))
         msg_hint = "Number of Q points to consider"
         msg_hint += "while extrapolating the high-Q region"
         self.npts_high_tcl.SetToolTipString(msg_hint)
         self.npts_high_tcl.SetValue(str(NPTS))
         power_txt = wx.StaticText(self, -1, 'Power')
-        self.power_high_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
+        self.power_high_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH*2/3, -1))
         self.power_high_tcl.SetValue(str(self.power_law_exponant))
         power_hint_txt = "Exponent to apply to the Power_law function."
         self.power_high_tcl.SetToolTipString(power_hint_txt)
-        iy = 1
+        iy = 0
+        ix = 0
+        self.high_q_sizer.Add(self.enable_high_cbox,(iy, ix),(1,5),
+                            wx.TOP|wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        iy += 1
+        ix = 0
+        self.high_q_sizer.Add(npts_high_txt,(iy, ix),(1,1),
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        self.high_q_sizer.Add(self.npts_high_tcl, (iy, ix), (1,1),
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        iy += 2
         ix = 0
         self.high_q_sizer.Add(self.power_law_high,(iy, ix),(1,2),
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+       
+        # Parameter controls for power law
         ix = 1
         iy += 1
-        self.high_q_sizer.Add(self.fit_high_cbox,(iy, ix),(1,3),
-                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        self.high_q_sizer.Add(self.fix_enable_high,(iy, ix),(1,1),
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        ix += 1
+        self.high_q_sizer.Add(self.fit_enable_high,(iy, ix),(1,1),
+                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix = 1
         iy += 1
         self.high_q_sizer.Add(power_txt,(iy, ix),(1,1),
@@ -631,38 +759,27 @@ class InvariantPanel(wx.ScrolledWindow):
         ix += 1
         self.high_q_sizer.Add(self.power_high_tcl, (iy, ix), (1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        iy += 1
-        ix = 1
-        self.high_q_sizer.Add(npts_high_txt,(iy, ix),(1,1),
-                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix += 1
-        self.high_q_sizer.Add(self.npts_high_tcl, (iy, ix), (1,1),
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        iy += 1
-        ix = 0
-        self.high_q_sizer.Add(self.enable_high_cbox,(iy, ix),(1,5),
-                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        #Change the state of txtcrtl to enable/disable
+        self._enable_high_q_section()
         self.high_extrapolation_sizer.AddMany([(self.high_q_sizer, 0, wx.RIGHT, 10)])
         
     def _layout_extrapolation(self):
         """
             Draw widgets related to extrapolation
         """
-        extra_hint = "Extrapolation Maximum Range: "
+        extra_hint = "Extrapolation Maximum Q Range [1/A]: "
         extra_hint_txt = wx.StaticText(self, -1, extra_hint)
         #Extrapolation range [string]
         extrapolation_min_txt = wx.StaticText(self, -1, 'Min : ')  
-        self.extrapolation_min_tcl = wx.TextCtrl(self, -1, 
+        self.extrapolation_min_tcl = OutputTextCtrl(self, -1, 
                                                 size=(_BOX_WIDTH, 20), style=0)
         self.extrapolation_min_tcl.SetValue(str(Q_MINIMUM))
         self.extrapolation_min_tcl.SetToolTipString("The minimum extrapolated q value.")
-        self.extrapolation_min_tcl.SetEditable(False) 
         extrapolation_max_txt = wx.StaticText(self, -1, 'Max : ') 
-        self.extrapolation_max_tcl = wx.TextCtrl(self, -1,
+        self.extrapolation_max_tcl = OutputTextCtrl(self, -1,
                                                   size=(_BOX_WIDTH, 20), style=0) 
         self.extrapolation_max_tcl.SetValue(str(Q_MAXIMUM))
         self.extrapolation_max_tcl.SetToolTipString("The maximum extrapolated q value.")
-        self.extrapolation_max_tcl.SetEditable(False) 
         self.extrapolation_range_sizer.AddMany([(extra_hint_txt, 0, wx.LEFT, 10),
                                                 (extrapolation_min_txt, 0, wx.LEFT, 10),
                                                 (self.extrapolation_min_tcl,
@@ -696,20 +813,16 @@ class InvariantPanel(wx.ScrolledWindow):
         unit_surface = ''
         uncertainty = "+/-" 
         volume_txt = wx.StaticText(self, -1, 'Volume Fraction')
-        self.volume_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.volume_tcl.SetEditable(False)
+        self.volume_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.volume_tcl.SetToolTipString("Volume fraction.")
-        self.volume_err_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.volume_err_tcl.SetEditable(False)
+        self.volume_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.volume_err_tcl.SetToolTipString("Uncertainty on the volume fraction.")
         volume_units_txt = wx.StaticText(self, -1, unit_volume)
         
         surface_txt = wx.StaticText(self, -1, 'Specific surface')
-        self.surface_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.surface_tcl.SetEditable(False)
+        self.surface_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.surface_tcl.SetToolTipString("Specific surface value.")
-        self.surface_err_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.surface_err_tcl.SetEditable(False)
+        self.surface_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.surface_err_tcl.SetToolTipString("Uncertainty on the specific surface.")
         surface_units_txt = wx.StaticText(self, -1, unit_surface)
         iy = 0
@@ -752,12 +865,10 @@ class InvariantPanel(wx.ScrolledWindow):
         uncertainty = "+/-" 
         unit_invariant = '[1/cm][1/A]'
         invariant_total_txt = wx.StaticText(self, -1, 'Invariant Total')
-        self.invariant_total_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_total_tcl.SetEditable(False)
+        self.invariant_total_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         msg_hint = "Total invariant, including extrapolated regions."
         self.invariant_total_tcl.SetToolTipString(msg_hint)
-        self.invariant_total_err_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_total_err_tcl.SetEditable(False)
+        self.invariant_total_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_total_err_tcl.SetToolTipString("Uncertainty on invariant.")
         invariant_total_units_txt = wx.StaticText(self, -1, unit_invariant)
     
