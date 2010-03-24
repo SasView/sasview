@@ -26,13 +26,13 @@ else:
     FONT_VARIANT = 1
     
     
-class InvariantDetailsPanel(wx.ScrolledWindow):
+class InvariantDetailsPanel(wx.Dialog):
     """
         This panel describes proportion of invariants 
     """
-    def __init__(self, parent, qstar_container=None):
-        wx.ScrolledWindow.__init__(self, parent, 
-                                    style=wx.FULL_REPAINT_ON_RESIZE)
+    def __init__(self, parent=None, id=-1, qstar_container=None, title="",
+                 size=(PANEL_WIDTH +100, 450)):
+        wx.Dialog.__init__(self, parent, id=id, title=title, size=size)
        
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
@@ -199,8 +199,7 @@ class InvariantDetailsPanel(wx.ScrolledWindow):
                                   (self.warning_sizer, 0, wx.ALL, 10),
                                   (self.button_sizer, 0, wx.ALL, 10)])
         self.SetSizer(self.main_sizer)
-        self.SetScrollbars(20,20,25,65)
-        self.SetAutoLayout(True)
+       
         
     def set_values(self):
         """
@@ -274,8 +273,7 @@ class InvariantDetailsPanel(wx.ScrolledWindow):
             Close the current window
         """
         self.Close()
-        self.parent.Close()
-        
+     
     def on_paint(self, event):
         """
             Draw the chart
@@ -342,7 +340,25 @@ class InvariantDetailsPanel(wx.ScrolledWindow):
         gc.DrawPath(path)
         gc.PopState()
         
-class InvariantDetailsWindow(wx.Frame):
+class InvariantDetailsWindow(wx.Dialog):
+    def __init__(self, parent, qstar_container=None, *args, **kwds):
+        kwds["size"]= (PANEL_WIDTH +100, 450)
+        wx.Dialog.__init__(self, parent, *args, **kwds)
+        self.container = qstar_container
+        if self.container is None:
+            from invariant_panel import InvariantContainer
+            self.container = InvariantContainer()
+            self.container.qstar_total = 1
+            self.container.qstar = 0.75
+            self.container.qstar_low = 0.60
+            self.container.qstar_high = 0.0049
+        self.panel = InvariantDetailsPanel(parent=self, 
+                                           qstar_container=self.container)
+        self.Centre()
+        self.ShowModal()
+        self.Destroy()
+
+class InvariantDetailsTest(wx.Frame):
     def __init__(self, parent, qstar_container=None, *args, **kwds):
         kwds["size"]= (PANEL_WIDTH +100, 450)
         wx.Frame.__init__(self, parent, *args, **kwds)
@@ -354,12 +370,22 @@ class InvariantDetailsWindow(wx.Frame):
             self.container.qstar = 0.75
             self.container.qstar_low = 0.60
             self.container.qstar_high = 0.0049
+        
         self.panel = InvariantDetailsPanel(parent=self, 
                                            qstar_container=self.container)
-      
+        self.panel.ShowModal()
+        self.panel.Destroy()
         self.Show()
    
 if __name__ =="__main__":
     app  = wx.App()
-    window = InvariantDetailsWindow(parent=None, title="Source Editor")
+    from invariant_panel import InvariantContainer
+    container = InvariantContainer()
+    container.qstar_total = 1
+    container.qstar = 0.75
+    container.qstar_low = 0.60
+    container.qstar_high = 0.0049
+    window = InvariantDetailsTest(parent=None, id=-1,qstar_container=container,
+                                    title="Source Editor")
+    window.Show()
     app.MainLoop()

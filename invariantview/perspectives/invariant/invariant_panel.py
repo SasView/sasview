@@ -9,7 +9,7 @@ import sys
 from sans.invariant import invariant
 from sans.guiframe.utils import format_number, check_float
 from sans.guicomm.events import NewPlotEvent, StatusEvent
-from invariant_details import InvariantDetailsWindow
+from invariant_details import InvariantDetailsPanel
 from invariant_widgets import OutputTextCtrl, InvTextCtrl
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM  = 1e-5
@@ -328,8 +328,12 @@ class InvariantPanel(wx.ScrolledWindow):
         """
             open another panel for more details on invariant calculation
         """
-        panel = InvariantDetailsWindow(parent=self.parent,
-                                       qstar_container=self.inv_container)
+        #panel = InvariantDetailsWindow(parent=self.parent,
+        #                               qstar_container=self.inv_container)
+        panel = InvariantDetailsPanel(parent=self, 
+                                           qstar_container=self.inv_container)
+        panel.ShowModal()
+        panel.Destroy()
         
     def compute_invariant(self, event):
         """
