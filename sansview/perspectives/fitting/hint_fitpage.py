@@ -37,6 +37,9 @@ class HintFitPage(wx.ScrolledWindow):
         self.SetScrollbars(20,20,25,65)
         self.Layout()
         
+    def createMemento(self):
+        return 
+        
 class HelpWindow(wx.Frame):
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(570, 400))

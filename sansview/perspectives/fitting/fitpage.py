@@ -53,12 +53,13 @@ class FitPage(BasicPage):
         self._fill_model_sizer( self.sizer1)
  
         self._fill_range_sizer() 
-        #self._on_select_model(event=None)
+        self.enable_smearer.Disable()
+        self.disable_smearer.Disable()
         if self.data is None:
             self.formfactorbox.Disable()
             self.structurebox.Disable()
         else:
-            self.smearer = smear_selection( self.data )
+            self.smearer = smear_selection(self.data)
             if self.smearer ==None:
                 self.enable_smearer.Disable()
                 self.disable_smearer.Disable()
@@ -852,6 +853,14 @@ class FitPage(BasicPage):
             self.formfactorbox.Disable()
             self.structurebox.Disable()
         else:
+            self.smearer = smear_selection( self.data )
+            if self.smearer == None:
+                self.enable_smearer.Disable()
+                self.disable_smearer.Disable()
+            else:
+                self.enable_smearer.Enable()
+                self.disable_smearer.Enable()
+                
             self.formfactorbox.Enable()
             self.structurebox.Enable()
             data_name = self.data.name
@@ -1081,9 +1090,7 @@ class FitPage(BasicPage):
                             "Smear: %s"%msg))
             return
         temp_smearer = None
-        # make sure once more if it is smearer
-        self.smearer = smear_selection(self.data)
-
+      
         if self.enable_smearer.GetValue():
             temp_smearer= self.smearer
             if hasattr(self.data,"dxl"):
