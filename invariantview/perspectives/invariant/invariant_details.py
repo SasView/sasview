@@ -31,7 +31,7 @@ class InvariantDetailsPanel(wx.Dialog):
         This panel describes proportion of invariants 
     """
     def __init__(self, parent=None, id=-1, qstar_container=None, title="",
-                 size=(PANEL_WIDTH +100, 450)):
+                 size=(PANEL_WIDTH, 450)):
         wx.Dialog.__init__(self, parent, id=id, title=title, size=size)
        
         #Font size 
@@ -67,13 +67,13 @@ class InvariantDetailsPanel(wx.Dialog):
         #Sizer related to chart
         chart_box = wx.StaticBox(self, -1, "Invariant Chart")
         self.chart_sizer = wx.StaticBoxSizer(chart_box, wx.VERTICAL)
-        self.chart_sizer.SetMinSize((PANEL_WIDTH,-1))
+        self.chart_sizer.SetMinSize((PANEL_WIDTH - 50,-1))
         #Sizer related to invariant values
         self.invariant_sizer =  wx.GridBagSizer(4, 4)
         #Sizer related to warning message
         warning_box = wx.StaticBox(self, -1, "Warning")
         self.warning_sizer = wx.StaticBoxSizer(warning_box, wx.VERTICAL)
-        self.warning_sizer.SetMinSize((PANEL_WIDTH,-1))
+        self.warning_sizer.SetMinSize((PANEL_WIDTH-50,-1))
         #Sizer related to button
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
       
@@ -183,7 +183,7 @@ class InvariantDetailsPanel(wx.Dialog):
         button_ok = wx.Button(self, id, "Ok")
         button_ok.SetToolTipString("Give Details on Computation")
         self.Bind(wx.EVT_BUTTON, self.on_close, id=id)
-        self.button_sizer.AddMany([((20,20), 0 , wx.LEFT, 400),
+        self.button_sizer.AddMany([((20,20), 0 , wx.LEFT, 350),
                                    (button_ok, 0 , wx.RIGHT, 10)])
     def _do_layout(self):
         """
@@ -360,7 +360,7 @@ class InvariantDetailsWindow(wx.Dialog):
 
 class InvariantDetailsTest(wx.Frame):
     def __init__(self, parent, qstar_container=None, *args, **kwds):
-        kwds["size"]= (PANEL_WIDTH +100, 450)
+        kwds["size"]= (PANEL_WIDTH , 450)
         wx.Frame.__init__(self, parent, *args, **kwds)
         self.container = qstar_container
         if self.container is None:
