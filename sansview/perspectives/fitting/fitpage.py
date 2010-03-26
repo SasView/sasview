@@ -314,7 +314,7 @@ class FitPage(BasicPage):
         
         # get smear_selection
         self.current_smearer= smear_selection( self.data )
-        print "self.current_smearer",self.current_smearer,self.data.__class__.__name__
+
         # Show only the relevant smear messages, etc
         if self.current_smearer == None:
             if self.data.__class__.__name__ != 'Data2D':
