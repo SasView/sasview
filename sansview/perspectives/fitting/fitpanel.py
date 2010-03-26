@@ -48,9 +48,7 @@ class StateIterator(object):
         if value >=0:
             self._current = int(value)
         
-        
     
-  
 class ListOfState(list):     
     def __init__(self, *args, **kw):
         list.__init__(self, *args, **kw)
@@ -88,11 +86,8 @@ class ListOfState(list):
         
     def getCurrentPosition(self):
         return self.iterator.currentPosition()
-        
+          
 
-        
-        
-        
 class PageInfo(object):
     """
         this class contains the minimum numbers of data members
@@ -108,9 +103,10 @@ class PageInfo(object):
     window_name = "Page"
     ## Title to appear on top of the window
     window_caption = "Page"
-    
-    def __init__(self, model=None,data=None, manager=None,
-                  event_owner=None,model_list_box=None , name=None):
+    #type of page can be real data , theory 1D or therory2D
+    type = "Data"
+    def __init__(self, model=None, data=None, manager=None,
+                  event_owner=None, model_list_box=None, name=None):
         """
             Initialize data members
         """
@@ -122,7 +118,8 @@ class PageInfo(object):
         self.name=None
         self.window_name = "Page"
         self.window_caption = "Page"
-    
+        self.type = "Data"
+        
 class FitPanel(AuiNotebook):    
 
     """
@@ -148,26 +145,16 @@ class FitPanel(AuiNotebook):
         self.event_owner=None
         
         pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
-        self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.onClosePage)
+        self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_page)
        
         #dictionary of miodel {model class name, model class}
-        self.model_list_box={}
-        ##dictionary of page info
-        self.page_info_dict={}
+        self.model_list_box = {}
         ## save the title of the last page tab added
-        self.fit_page_name={}
+        self.fit_page_name = {}
         ## list of existing fit page
-        self.list_fitpage_name=[]
-    
-        #model page info
-        self.model_page_number = None
-        ## fit page number for model plot
-        self.fit_page1D_number = None
-        self.fit_page2D_number = None
-        self.model_page = None
+        self.opened_pages = {}
+        #page of simultaneous fit 
         self.sim_page = None
-        self.default_page = None
-        self.check_first_data = False
         ## get the state of a page
         self.Bind(basepage.EVT_PAGE_INFO, self._onGetstate)
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
@@ -178,16 +165,15 @@ class FitPanel(AuiNotebook):
         self.hint_page = HintFitPage(self) 
         self.AddPage(page=self.hint_page, caption="Hint")
         #Add the first fit page
-        self.default_page = self.add_fit_page(data=None)
+        self.add_empty_page()
         
         # increment number for model name
         self.count=0
         #updating the panel
         self.Update()
         self.Center()
-        
-        
-    def onClosePage(self, event):
+  
+    def on_close_page(self, event):
         """
              close page and remove all references to the closed page
         """
@@ -196,53 +182,20 @@ class FitPanel(AuiNotebook):
             event.Veto()
             return 
         selected_page = self.GetPage(self.GetSelection())
-        #remove default page 
-        if selected_page == self.default_page:
-            self.default_page = None
-            return 
-        #remove hint page
-        if selected_page == self.hint_page:
-            return
-        ## removing sim_page
-        if selected_page == self.sim_page :
-            self.manager.sim_page=None 
-            return
+        self._close_helper(selected_page=selected_page)
         
-        ## closing other pages
-        state = selected_page.createMemento()
-        page_name = selected_page.window_name
-        page_finder = self.manager.get_page_finder() 
-        fitproblem = None
-        ## removing model page
-        if selected_page == self.model_page:
-            #fitproblem = selected_page.model.clone()
-            self.model_page = None
-            self.count =0
-            ## page on menu
-            #self.manager._add_page_onmenu(page_name, fitproblem)
-        else:
-            if selected_page in page_finder:
-       
-                #fitproblem= page_finder[selected_page].clone()
-                if self.GetPageIndex(selected_page)==self.fit_page1D_number:
-                    self.fit_page1D_number=None
-                if self.GetPageIndex(selected_page)==self.fit_page2D_number:
-                    self.fit_page2D_number=None
-                ## page on menu
-                #self.manager._add_page_onmenu(page_name, fitproblem)
-                del page_finder[selected_page]
-            ##remove the check box link to the model name of this page (selected_page)
-            try:
-                self.sim_page.draw_page()
-            except:
-                ## that page is already deleted no need to remove check box on
-                ##non existing page
-                pass
-                
-        #Delete the name of the page into the list of open page
-        if selected_page.window_name in self.list_fitpage_name:
-            self.list_fitpage_name.remove(selected_page.window_name)
-            
+    def close_page_with_data(self, deleted_data):
+        """
+            close a fit page when its data is completely remove from the graph
+        """
+        for index in range(self.GetPageCount()):
+            selected_page = self.GetPage(index) 
+            if hasattr(selected_page,"get_data"):
+                data = selected_page.get_data()
+                if data.name == deleted_data.name:
+                    self._close_helper(selected_page)
+                    self.DeletePage(index)
+                    break
         
     def set_manager(self, manager):
         """
@@ -286,142 +239,122 @@ class FitPanel(AuiNotebook):
         self.sim_page.set_manager(self.manager)
         return self.sim_page
         
+    def get_page_info(self, data=None):
+        """
+            fill information required to add a page in the fit panel
+        """
+        name = "Fit Page"
+        type = 'empty'
+        if data is not None:
+            if data.is_data:
+                name = data.name 
+                type = 'Data'
+            else:
+                if data.__class__.__name__ == "Data2D":
+                    name = 'Model 2D Fit'
+                    type = 'Theory2D'
+                else:
+                    name = 'Model 1D Fit'
+                    type = 'Theory1D'
+        page_info = PageInfo(data=data, name=name)
+        page_info.event_owner = self.event_owner 
+        page_info.manager = self.manager
+        page_info.window_name = name
+        page_info.window_caption = name
+        page_info.type = type
+        return page_info
+   
+    def add_empty_page(self):
+        """
+            add an empty page
+        """
+        page_info = self.get_page_info()
+        from fitpage import FitPage
+        panel = FitPage(parent=self, page_info=page_info)
+        self.AddPage(page=panel, caption=page_info.window_name, select=True)
+        self.opened_pages[page_info.type] = [page_info.window_name, panel]
+        return panel 
+    
+    def add_page(self, page_info):
+        """
+            add a new page
+        """
+        from fitpage import FitPage
+        panel = FitPage(parent=self, page_info=page_info)
+        self.AddPage(page=panel, caption=page_info.window_name, select=True)
+        index = self.GetPageIndex(panel)
+        self.change_page_content(data=page_info.data, index=index)
+        return panel
+    
+    def change_page_content(self, data, index):
+        """
+            replace the contains of an existing page
+        """
+        page_info = self.get_page_info(data=data)
+        self.SetPageText(index, page_info.window_name)
+        panel = self.GetPage(index)
+        panel.set_data(data)
+        if panel.model_list_box is None or len(panel.model_list_box) == 0: 
+            page_info.model_list_box = self.model_list_box.get_list()
+            panel.populate_box(dict=page_info.model_list_box)
+            panel.initialize_combox()
+        panel.set_page_info(page_info=page_info)
+        self.opened_pages[page_info.type] = [page_info.window_name, panel]
+        return panel
+    
+    def replace_page(self, index, page_info, type):
+        """
+            replace an existing page
+        """
+        self.DeletePage(index)
+        del self.opened_pages[type]
+        return self.add_page(page_info=page_info)
         
-    def add_fit_page( self,data=None, reset=False ):
+    def add_fit_page(self, data, reset=False):
         """ 
             Add a fitting page on the notebook contained by fitpanel
             @param data: data to fit
             @return panel : page just added for further used. is used by fitting module
-        """    
-        if data is not None:
-            if data.is_data:
-                name = data.name 
-            else:
-                if data.__class__.__name__=="Data2D":
-                    name = 'Model 2D Fit'
-                else:
-                    name = 'Model 1D Fit'
-            myinfo = PageInfo( data=data, name=name )
-            myinfo.model_list_box = self.model_list_box.get_list()
-            myinfo.event_owner = self.event_owner 
-            myinfo.manager = self.manager
-            myinfo.window_name = name
-            myinfo.window_caption = name
-        
-        else :
-            name = "Fit Page" 
-            myinfo = PageInfo( data=data, name=name )
-        
-        if not name in self.list_fitpage_name:
-            # the first data loading
-            if not self.check_first_data and self.default_page is not None:
-                page_number = self.GetPageIndex(self.default_page)
-                self.SetPageText(page_number , name)
-                self.default_page.set_data(data)
-                self.default_page.set_page_info(page_info=myinfo)
-                self.default_page.initialize_combox()
-                if  data is not None:
-                    self.check_first_data = True
-                panel = self.default_page
-            else:
-                #if not name in self.fit_page_name :
-                from fitpage import FitPage
-                panel = FitPage(parent=self, page_info=myinfo)
-                
-                self.AddPage(page=panel, caption=name, select=True)
-                if name == 'Model 1D Fit':
-                    self.fit_page1D_number= self.GetPageIndex(panel)
-                if name =='Model 2D Fit':
-                    self.fit_page2D_number= self.GetPageIndex(panel)
-                    
-                self.list_fitpage_name.append(name)
-                if data is not None:
-                    if reset:
-                        if name in self.fit_page_name.keys():
-                            memento= self.fit_page_name[name][0]
-                            panel.reset_page(memento)
-                        else:
-                            self.fit_page_name[name]=ListOfState()
-                    
-                    #self.fit_page_name[name].appendItem(panel.createMemento())
-            #GetPage(self, page_idx) 
-            return panel 
-        elif name =='Model 1D Fit':
-            if self.fit_page1D_number!=None:
-                panel =self.GetPage(self.fit_page1D_number) 
-                #self.fit_page_name[name]=[]
-                self.fit_page_name[name]= ListOfState()
-                #self.fit_page_name[name].insert(0,panel.createMemento())
-                #self.fit_page_name[name].append(panel.createMemento())
-                return panel
+        """
+        if data is None:
             return None
-        elif name =='Model 2D Fit':
-            if self.fit_page2D_number!=None:
-                panel =self.GetPage(self.fit_page2D_number) 
-                self.fit_page_name[name]=ListOfState()
-                #self.fit_page_name[name].append(panel.createMemento())
+        page_info = self.get_page_info(data=data)
+        type = page_info.type
+        npages = len(self.opened_pages.keys())
+        #check if only and empty page is opened
+        if len(self.opened_pages.keys()) > 0:
+            first_page_type = self.opened_pages.keys()[0]
+            if npages == 1 and first_page_type in ['empty']:
+                #replace the first empty page
+                name, panel = self.opened_pages[first_page_type]
+                index = self.GetPageIndex(panel)
+                panel = self.change_page_content(data=data, index=index)
+                del self.opened_pages[first_page_type]
                 return panel
-            return None
-        return None
-        
-   
-    def add_model_page(self,model,page_title="Model", qmin=0.0001, qmax=0.13,
-                        npts=50, topmenu=False, reset=False):
-        """
-            Add a model page only one  to display any model selected from the menu or the page combo box.
-            when this page is closed than the user will be able to open a new one
-            
-            @param model: the model for which paramters will be changed
-            @param page_title: the name of the page
-            @param page_info: contains info about the state of the page
-            @param qmin: mimimum Q
-            @param qmax: maximum Q
-            @param npts: number of Q points
-        """
-        if topmenu==True:
-            ##first time to open model page
-            if self.count==0 :
-                #if not page_title in self.list_fitpage_name :
-                self._help_add_model_page(model=model, page_title=page_title,
-                                qmin=qmin, qmax=qmax, npts=npts, reset=reset)
-                self.count +=1
+        if type in self.opened_pages.keys():
+            #this type of page is already created but it is a theory
+            # meaning the same page is just to fit different data
+            if not type.lower() in ['data']:
+                #delete the previous theory page and add a new one
+                name, panel = self.opened_pages[type]
+                self.manager.reset_plot_panel(panel.get_data())
+                #delete the existing page and replace it
+                index = self.GetPageIndex(panel)
+                panel = self.replace_page(index=index, page_info=page_info, type=type)
+                return panel 
             else:
-                self.model_page.select_model(model)
-                self.fit_page_name[page_title]=ListOfState()
-                #self.fit_page_name[page_title].insert(0,self.model_page.createMemento())
-      
-      
-      
-    def _close_fitpage(self,data):
-        """
-            close a fit page when its data is completely remove from the graph
-        """
-        name = data.name
-        for index in range(self.GetPageCount()):
-            if self.GetPageText(index)== name:
-                selected_page = self.GetPage(index) 
+                for name, panel in self.opened_pages.values():
+                    #Don't return any panel is the exact same page is created
+                    if name == page_info.window_name:
+                        return None
+                    else:
+                        panel = self.add_page(page_info=page_info)
+                        return panel        
+        else:
+            #a new type of page is created
+            panel = self.add_page(page_info=page_info)
+            return panel
     
-                if index ==self.fit_page1D_number:
-                    self.fit_page1D_number=None
-                if index ==self.fit_page2D_number:
-                    self.fit_page2D_number=None
-                if selected_page in self.manager.page_finder:
-                    del self.manager.page_finder[selected_page]
-                ##remove the check box link to the model name of this page (selected_page)
-                try:
-                    self.sim_page.draw_page()
-                except:
-                    ## that page is already deleted no need to remove check box on
-                    ##non existing page
-                    pass
-                
-                #Delete the name of the page into the list of open page
-                if selected_page.window_name in self.list_fitpage_name:
-                    self.list_fitpage_name.remove(selected_page.window_name)
-                self.DeletePage(index)
-                break
-        
-        
     def  _onGetstate(self, event):
         """
             copy the state of a page
@@ -443,7 +376,7 @@ class FitPanel(AuiNotebook):
                 page._redo.Enable(True)
             page.reset_page(state)
         
-    def _onRedo(self, event ): 
+    def _onRedo(self, event): 
         """
             return the next state available
         """       
@@ -457,41 +390,51 @@ class FitPanel(AuiNotebook):
             else:
                 state = self.fit_page_name[page.window_name].getNextItem()
             page.reset_page(state)  
-                
-    def _help_add_model_page(self,model,page_title="Model", qmin=0.0001, 
-                             qmax=0.13, npts=50,reset= False):
+                 
+    def _close_helper(self, selected_page):
         """
-            #TODO: fill in description
-            
-            @param qmin: mimimum Q
-            @param qmax: maximum Q
-            @param npts: number of Q points
+            Delete the given page from the notebook
         """
-        ## creating object that contaning info about model 
-        myinfo = PageInfo(model= model ,name= page_title)
-        myinfo.model_list_box = self.model_list_box.get_list()
-        myinfo.event_owner = self.event_owner 
-        myinfo.manager = self.manager
-        myinfo.window_name = page_title
-        myinfo.window_caption = page_title
-      
-        from modelpage import ModelPage
-        panel = ModelPage(self,myinfo)
+        #remove hint page
+        if selected_page == self.hint_page:
+            return
+        ## removing sim_page
+        if selected_page == self.sim_page :
+            self.manager.sim_page=None 
+            return
         
-        self.AddPage(page=panel, caption=page_title, select=True)
-
-        self.model_page_number=self.GetSelection()
-        self.model_page=self.GetPage(self.GetSelection())
+        ## closing other pages
+        state = selected_page.createMemento()
+        page_name = selected_page.window_name
+        page_finder = self.manager.get_page_finder() 
+        fitproblem = None
+        ## removing fit page
+        if selected_page in page_finder:
+            #Delete the name of the page into the list of open page
+            for type, list in self.opened_pages.iteritems():
+                #Don't return any panel is the exact same page is created
+                name = str(list[0])
+                if selected_page.window_name == name:
+                    if type.lower() in ['theory1d', 'theory2d']:
+                        self.manager.remove_plot(selected_page, theory=True)
+                    else:
+                        self.manager.remove_plot(selected_page, theory=False)
+                    break 
+            del page_finder[selected_page]
+        ##remove the check box link to the model name of this page (selected_page)
+        try:
+            self.sim_page.draw_page()
+        except:
+            ## that page is already deleted no need to remove check box on
+            ##non existing page
+            pass
+                
+        #Delete the name of the page into the list of open page
+        for type, list in self.opened_pages.iteritems():
+            #Don't return any panel is the exact same page is created
+            name = str(list[0])
+            if selected_page.window_name == name:
+                del self.opened_pages[type]
+                break 
      
-        ##resetting page
-        if reset:
-            if page_title in self.fit_page_name.keys():
-
-                memento= self.fit_page_name[page_title][0]
-                panel.reset_page(memento)
-        else:
-            self.fit_page_name[page_title]=ListOfState()
-            #self.fit_page_name[page_title]=[]
-            #self.fit_page_name[page_title].insert(0,panel.createMemento())
-       
   

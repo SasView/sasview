@@ -509,8 +509,33 @@ class Plugin:
             
         else:
             time.sleep(0.4)
-   
-          
+            
+    def remove_plot(self, page, theory=False):
+        """
+            remove model plot when a fit page is closed
+        """
+        fitproblem = self.page_finder[page]
+        data = fitproblem.get_fit_data()
+        model = fitproblem.get_model()
+        if model is not None:
+            name = model.name
+            new_plot = Theory1D(x=[], y=[], dy=None)
+            new_plot.name = name
+            new_plot.xaxis(data._xaxis, data._xunit)
+            new_plot.yaxis(data._yaxis, data._yunit)
+            new_plot.group_id = data.group_id
+            new_plot.id = data.id + name
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=data.name))
+        if theory:
+            new_plot_data = Data1D(x=[], y=[], dx=None, dy=None)
+            new_plot_data.name = data.name
+            new_plot_data.xaxis(data._xaxis, data._xunit)
+            new_plot_data.yaxis(data._yaxis, data._yunit)
+            new_plot_data.group_id = data.group_id
+            new_plot_data.id = data.id 
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot_data,
+                                                    title=data.name))
+        
     def _onEVT_SLICER_PANEL(self, event):
         """
             receive and event telling to update a panel with a name starting with 
@@ -530,7 +555,7 @@ class Plugin:
             request fitpanel to close a given page when its unique data is removed 
             from the plot
         """    
-        self.fit_panel._close_fitpage(event.data) 
+        self.fit_panel.close_page_with_data(event.data) 
         
     def _add_page_onmenu(self, name,fitproblem=None):
         """
@@ -625,19 +650,20 @@ class Plugin:
         Plugin.on_perspective(self,event=event)
         for plottable in self.panel.graph.plottables:
             if plottable.name == self.panel.graph.selected_plottable:
-                #if not hasattr(plottable, "is_data"):
-                    
                 if  plottable.__class__.__name__=="Theory1D":
                     dy=numpy.zeros(len(plottable.y))
                     if hasattr(plottable, "dy"):
                         dy= copy.deepcopy(plottable.dy)
                         
-                    item= self.copy_data(plottable, dy)
+                    item = self.copy_data(plottable, dy)
                     item.group_id += "data1D"
                     item.id +="data1D"
-                    item.is_data= False
+                    item.is_data = False
                     title = item.name
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=item, title=str(title)))
+                    title = 'Data created from Theory'
+                    wx.PostEvent(self.parent, NewPlotEvent(plot=item,
+                                                            title=str(title),
+                                                           reset=True))
                 else:
                     item= self.copy_data(plottable, plottable.dy)  
                     item.is_data=True
@@ -697,8 +723,9 @@ class Plugin:
                     else:
                         wx.PostEvent(self.parent, StatusEvent(status="Page was already Created"))
                 except:
-                    wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
-                    %sys.exc_value))
+                    raise
+                    #wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
+                    #%sys.exc_value))
                     return
                 
                 

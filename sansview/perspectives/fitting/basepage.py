@@ -318,6 +318,11 @@ class BasicPage(wx.ScrolledWindow):
         self.event_owner = owner    
         self.state.event_owner = owner
   
+    def get_data(self):
+        """
+            return the current data 
+        """
+        return self.data
     def set_manager(self, manager):
         """
              set panel manager

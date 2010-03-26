@@ -15,6 +15,7 @@ class FitProblem:
         self.fit_data=None
         ## the current model
         self.model = None
+        self.model_index = None
         ## if 1 this fit problem will be selected to fit , if 0 
         ## it will not be selected for fit
         self.schedule=0
@@ -84,7 +85,18 @@ class FitProblem:
         """ @return: saved model """
         return self.model
   
-  
+    def set_index(self, index):
+        """
+            set index of the model name
+        """
+        self.model_index = index
+        
+    def get_index(self):
+        """
+            get index of the model name
+        """
+        return self.model_index
+    
     def add_plotted_data(self,data):
         """ 
             save a copy of the data select to fit
