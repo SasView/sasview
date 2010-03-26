@@ -321,7 +321,6 @@ class FitPage(BasicPage):
                 self.smear_description_none.Show(True)
                 self.enable_smearer.Disable()  
             else:
-                print "2dl"
                 self.smear_description_2d.Show(True) 
                 self.pinhole_smearer.Disable() 
                 self.slit_smearer.Disable()   
@@ -830,7 +829,7 @@ class FitPage(BasicPage):
                 elif self.pinhole_smearer.GetValue():
                     flag1 = self.update_pinhole_smear()
                     flag = flag or flag1
-            else:
+            elif self.data.__class__.__name__ !="Data2D":
                 self.manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
                                                          qmax= float(self.qmax_x)) 
             if flag:   
@@ -1172,7 +1171,7 @@ class FitPage(BasicPage):
         npts2fit = 0
         qmin,qmax = self.get_range()
         if self.data.__class__.__name__ =="Data2D":
-            npts2fit = len(self.data[self.mask])
+            npts2fit = len(self.data.data[self.mask])
         else:
             for qx in self.data.x:
                    if qx >= qmin and qx <= qmax:
