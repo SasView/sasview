@@ -171,7 +171,7 @@ class BasicPage(wx.ScrolledWindow):
             self._on_set_focus_callback = parent.onSetFocus \
                       if set_focus_callback is None else set_focus_callback
             self.Bind(wx.EVT_SET_FOCUS, self._on_set_focus)
-            self.Bind(wx.EVT_KILL_FOCUS, parent._onparamEnter \
+            self.Bind(wx.EVT_KILL_FOCUS, self._silent_kill_focus \
                       if kill_focus_callback is None else kill_focus_callback)                
             self.Bind(wx.EVT_TEXT_ENTER, parent._onparamEnter \
                       if text_enter_callback is None else text_enter_callback)
@@ -209,7 +209,14 @@ class BasicPage(wx.ScrolledWindow):
                     (start, end) = control.GetSelection()
                     if start==end:
                         control.SetSelection(-1,-1)
-                 
+                        
+        def _silent_kill_focus(self,event):
+            """
+               do nothing to kill focus
+            """
+            event.Skip()
+            pass
+    
     def set_page_info(self, page_info):
         """
             set some page important information at once
@@ -317,12 +324,13 @@ class BasicPage(wx.ScrolledWindow):
         """
         self.event_owner = owner    
         self.state.event_owner = owner
-  
+        
     def get_data(self):
         """
             return the current data 
         """
-        return self.data
+        return self.data  
+    
     def set_manager(self, manager):
         """
              set panel manager
@@ -663,7 +671,10 @@ class BasicPage(wx.ScrolledWindow):
         if hasattr(self,"enable_smearer"):
             self.state.enable_smearer = copy.deepcopy(self.enable_smearer.GetValue())
             self.state.disable_smearer = copy.deepcopy(self.disable_smearer.GetValue())
-            
+
+        self.state.pinhole_smearer = copy.deepcopy(self.pinhole_smearer.GetValue())
+        self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())  
+                  
         if hasattr(self,"disp_box"):
             self.state.disp_box = self.disp_box.GetCurrentSelection()
 
@@ -743,6 +754,9 @@ class BasicPage(wx.ScrolledWindow):
         if hasattr(self,"enable_smearer"):
             self.state.enable_smearer = copy.deepcopy(self.enable_smearer.GetValue())
             self.state.disable_smearer = copy.deepcopy(self.disable_smearer.GetValue())
+            
+        self.state.pinhole_smearer = copy.deepcopy(self.pinhole_smearer.GetValue())
+        self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())  
             
         if hasattr(self,"disp_box"):
             self.state.disp_box = self.disp_box.GetCurrentSelection()
@@ -896,6 +910,11 @@ class BasicPage(wx.ScrolledWindow):
             self.enable_smearer.SetValue(state.enable_smearer)
             self.disable_smearer.SetValue(state.disable_smearer)
             self.onSmear(event=None)           
+        self.pinhole_smearer.SetValue(state.pinhole_smearer)
+        self.slit_smearer.SetValue(state.slit_smearer)
+        ## we have two more options for smearing
+        if self.pinhole_smearer.GetValue(): self.onPinholeSmear(event=None)
+        elif self.slit_smearer.GetValue(): self.onSlitSmear(event=None)
        
         ## reset state of checkbox,textcrtl  and dispersity parameters value
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
@@ -1032,7 +1051,7 @@ class BasicPage(wx.ScrolledWindow):
              make sure that update param values just before the fitting
         """
         #flag for qmin qmax check values
-        flag =False
+        flag = True
         is_modified = False
         ##So make sure that update param values on_Fit.
         #self._undo.Enable(True)
@@ -1053,14 +1072,30 @@ class BasicPage(wx.ScrolledWindow):
                 tempmax = float(self.qmax.GetValue())
                 if tempmax != self.qmax_x:
                     self.qmax_x = tempmax
-                flag = True
-            else:
-                flag = False
-        else:
+                if tempmax == tempmin:
+                    flag = False    
+                temp_smearer = None
+                if not self.disable_smearer.GetValue():
+                    temp_smearer= self.current_smearer
+                    if self.slit_smearer.GetValue():
+                        flag = self.update_slit_smear()
+                    elif self.pinhole_smearer.GetValue():
+                        flag = self.update_pinhole_smear()
+                    else:
+                        self.manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
+                                                 qmax= float(self.qmax_x))
+                elif self.data.__class__.__name__ !="Data2D":
+                    self.manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
+                                                 qmax= float(self.qmax_x))
+            else: flag = False
+        else: 
             flag = False
-            msg= "Cannot Fit :Must select a model!!!  "
-            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         
+        if not flag:
+            msg= "Cannot Fit :Must select a model or Fitting range is not valid!!!  "
+            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+            
+        self.save_current_state()
         return flag                           
                
     def _is_modified(self, is_modified):
@@ -1291,8 +1326,8 @@ class BasicPage(wx.ScrolledWindow):
         if self.model !=None:
             temp_smear=None
             if hasattr(self, "enable_smearer"):
-                if self.enable_smearer.GetValue():
-                    temp_smear= self.smearer
+                if not self.disable_smearer.GetValue():
+                    temp_smear= self.current_smearer
             
             self.manager.draw_model(self.model, data=self.data,
                                     smearer= temp_smear,
@@ -1448,10 +1483,11 @@ class BasicPage(wx.ScrolledWindow):
                 combobox.Append(name,models)
      
         return 0
-    
-    def _onparamEnter(self,event):
+
+    #def _onparamEnter(self,event):
         """ 
-            when enter value on panel redraw model according to changed
+        #when enter value on panel redraw model according to changed
+        """
         """
         tcrtl= event.GetEventObject()
         
@@ -1475,7 +1511,7 @@ class BasicPage(wx.ScrolledWindow):
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
             #event.Skip()
             return 
-   
+       """
     def _onQrangeEnter(self, event):
         """
             Check validity of value enter in the Q range field
@@ -1598,7 +1634,7 @@ class BasicPage(wx.ScrolledWindow):
         else:
             qmin = float(qmin_ctrl.GetValue())
             qmax = float(qmax_ctrl.GetValue())
-            if qmin < qmax:
+            if qmin <= qmax:
                 #Make sure to set both colours white.  
                 qmin_ctrl.SetBackgroundColour(wx.WHITE)
                 qmin_ctrl.Refresh()
@@ -1945,14 +1981,12 @@ class BasicPage(wx.ScrolledWindow):
             boxsizer1 = box_sizer
 
         self.qmin    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER,
-                                            kill_focus_callback = self._onQrangeEnter,
-                                            text_enter_callback = self._onQrangeEnter)
+                                            text_enter_callback = self._onparamEnter)
         self.qmin.SetValue(str(self.qmin_x))
         self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
      
         self.qmax    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER,
-                                            kill_focus_callback = self._onQrangeEnter,
-                                            text_enter_callback = self._onQrangeEnter)
+                                            text_enter_callback = self._onparamEnter)
         self.qmax.SetValue(str(self.qmax_x))
         self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
         
@@ -2036,6 +2070,7 @@ class BasicPage(wx.ScrolledWindow):
         """
         #On 'Reset' button  for Q range clicked
         """
+        flag = True
         if self.check_invalid_panel():
             return
         ##For 3 different cases: Data2D, Data1D, and theory
@@ -2048,13 +2083,27 @@ class BasicPage(wx.ScrolledWindow):
         elif self.data.__class__.__name__ == "Data1D":
             self.qmin_x = min(self.data.x)
             self.qmax_x = max(self.data.x)
+            # check smearing
+            if not self.disable_smearer.GetValue():
+                temp_smearer= self.current_smearer
+                ## set smearing value whether or not the data contain the smearing info
+                if self.slit_smearer.GetValue():
+                    flag = self.update_slit_smear()
+                elif self.pinhole_smearer.GetValue():
+                    flag = self.update_pinhole_smear()
+                else:
+                    flag = True
         else:
             self.qmin_x = _QMIN_DEFAULT
             self.qmax_x = _QMAX_DEFAULT
             self.num_points = _NPTS_DEFAULT            
             self.state.npts = self.num_points
             
-
+        if flag == False:
+            msg= "Cannot Plot :Must enter a number!!!  "
+            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+            
+        self.save_current_state()
         self.state.qmin = self.qmin_x
         self.state.qmax = self.qmax_x
         

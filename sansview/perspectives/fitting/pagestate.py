@@ -50,6 +50,10 @@ class PageState(object):
         self.orientation_params_disp=[]
         ## smearer info
         self.smearer=None
+        self.smear_type = None
+        self.dq_l = None
+        self.dq_r = None
+
         #list of dispersion paramaters
         self.disp_list =[]
         if self.model !=None:
@@ -84,6 +88,8 @@ class PageState(object):
         ## enable smearering state
         self.enable_smearer = False
         self.disable_smearer = True
+        self.pinhole_smearer = False
+        self.slit_smearer   = False
         ## disperity selection
         self.enable_disp= False
         self.disable_disp= True
@@ -137,6 +143,12 @@ class PageState(object):
         obj.weights = copy.deepcopy(self.weights)
         obj.enable_smearer = copy.deepcopy(self.enable_smearer)
         obj.disable_smearer = copy.deepcopy(self.disable_smearer)
+        obj.pinhole_smearer = copy.deepcopy(self.pinhole_smearer)
+        obj.slit_smearer = copy.deepcopy(self.slit_smearer)
+        obj.smear_type = copy.deepcopy(self.smear_type)
+        obj.dq_l = copy.deepcopy(self.dq_l)
+        obj.dq_r = copy.deepcopy(self.dq_r)
+
        
         obj.disp_box = copy.deepcopy(self.disp_box)
         obj.qmin = copy.deepcopy(self.qmin)
