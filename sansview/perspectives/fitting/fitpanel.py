@@ -409,12 +409,17 @@ class FitPanel(AuiNotebook):
         page_finder = self.manager.get_page_finder() 
         fitproblem = None
         ## removing fit page
+        data = selected_page.get_data()
+        #Don' t remove plot for 2D
+        flag = True
+        if data.__class__.__name__ == 'Data2D':
+            flag = False
         if selected_page in page_finder:
             #Delete the name of the page into the list of open page
             for type, list in self.opened_pages.iteritems():
                 #Don't return any panel is the exact same page is created
                 name = str(list[0])
-                if selected_page.window_name == name:
+                if flag and selected_page.window_name == name:
                     if type.lower() in ['theory1d', 'theory2d']:
                         self.manager.remove_plot(selected_page, theory=True)
                     else:

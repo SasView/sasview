@@ -697,8 +697,8 @@ class Plugin:
                     data = item
                     wx.PostEvent(self.parent, NewPlotEvent(plot=item, title=str(title)))
                 else:
-                    item= copy.deepcopy(plottable )
-                    data= copy.deepcopy(plottable )
+                    item= copy.deepcopy(plottable)
+                    data= copy.deepcopy(plottable)
                     item.is_data=True
                     data.is_data=True
                 
@@ -708,9 +708,9 @@ class Plugin:
                  item.__class__.__name__ is "Data2D":
                 try:
                     page = self.fit_panel.add_fit_page(data)
-                    page.set_data(data)
                     # add data associated to the page created
-                    if page != None:   
+                    if page != None:  
+                        page.set_data(data) 
                         #create a fitproblem storing all link to data,model,page creation
                         if not page in self.page_finder.keys():
                             self.page_finder[page]= FitProblem()
