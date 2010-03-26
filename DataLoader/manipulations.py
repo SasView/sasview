@@ -80,10 +80,13 @@ def reader2D_converter(data2d=None):
     new_y = new_y.swapaxes(0,1)
 
     new_data = data2d.data.flatten()
-    new_err_data = data2d.err_data.flatten()
     qx_data = new_x.flatten()
     qy_data = new_y.flatten()
     q_data = numpy.sqrt(qx_data*qx_data+qy_data*qy_data)
+    if data2d.err_data == None or numpy.any(data2d.err_data<=0): 
+        new_err_data = numpy.sqrt(numpy.fabs(new_data))
+    else:
+        new_err_data = data2d.err_data.flatten()
     mask    = numpy.ones(len(new_data), dtype = bool)
 
     output = Data2D()
