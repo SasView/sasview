@@ -173,7 +173,8 @@ def plot_data(parent, path):
                 panel_name = existing_panel.window_caption
                 data_name = new_plot.name
                 if existing_panel.__class__.__name__ == "ModelPanel1D"\
-                    and existing_panel.group_id is not None:
+                    and existing_panel.group_id is not None and \
+                        not hasattr(new_plot, 'data'):
                     if append_data_to_existing_panel(panel_name, data_name):
                         #add this plot the an existing panel
                         new_plot.group_id = existing_panel.group_id
@@ -229,7 +230,8 @@ def plot_data(parent, path):
                 panel_name = existing_panel.window_caption
                 data_name = new_plot.name
                 if existing_panel.__class__.__name__ == "ModelPanel1D"\
-                    and existing_panel.group_id is not None:
+                    and existing_panel.group_id is not None and \
+                    not hasattr(new_plot, 'data'):
                     if append_data_to_existing_panel(panel_name, data_name):
                         #add this plot the an existing panel
                         new_plot.group_id = existing_panel.group_id
