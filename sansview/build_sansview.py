@@ -182,6 +182,36 @@ def checkout(release=False):
     else:
         install_pkg(".", "pr_inversion", "svn://danse.us/sans/trunk/pr_inversion")
     
+    os.chdir(wd)
+    if release:
+        pass
+    else:
+        install_pkg(".", "Invariant", "svn://danse.us/sans/trunk/Invariant")
+    
+    os.chdir(wd)
+    if release:
+        pass
+    else:
+        install_pkg(".", "invariantview", "svn://danse.us/sans/trunk/invariantview")
+    
+    os.chdir(wd)
+    if release:
+        pass
+    else:
+        install_pkg(".", "calculatorview", "svn://danse.us/sans/trunk/calculatorview")
+    
+    os.chdir(wd)
+    if release:
+        pass
+    else:
+        install_pkg(".", "calculator", "svn://danse.us/sans/trunk/calculator")
+    
+    os.chdir(wd)
+    if release:
+        pass
+    else:
+        install_pkg(".", "theoryview", "svn://danse.us/sans/trunk/theoryview")
+
     #TODO: need a release version of PARK
     os.chdir(wd)
     if release:
