@@ -86,7 +86,7 @@ for f in findall('images'):
         data_files.append((os.path.split(f)[0], [f]))
 
 # Copying the HTML help docs
-for f in findall('doc'):
+for f in findall('media'):
     if os.path.split(f)[0].count('.svn')==0:
         data_files.append((os.path.split(f)[0], [f]))
 
