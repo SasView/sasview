@@ -6,8 +6,10 @@ from sans.models.pluginmodel import Model1DPlugin
 class MultiplicationModel(BaseComponent):
     """
         Use for P(Q)*S(Q); function call must be in the order of P(Q) and then S(Q):
-        The model parameters are combined from both models, P(Q) and S(Q), except 'effective_radius' of S(Q)
-        which will be calculated from P(Q) via calculate_ER().
+        The model parameters are combined from both models, P(Q) and S(Q), except 1) 'effect_radius' of S(Q)
+        which will be calculated from P(Q) via calculate_ER(), 
+        and 2) 'scale' in P model which is synchronized w/ volfraction in S 
+        then P*S is multiplied by a new param, 'scale_factor'.
         The polydispersion is applicable only to P(Q), not to S(Q).
         Note: P(Q) refers to 'form factor' model while S(Q) does to 'structure factor'.
     """
@@ -23,7 +25,13 @@ class MultiplicationModel(BaseComponent):
         self.name = p_model.name +" * "+ s_model.name
         self.description= self.name+"\n"
         self.fill_description(p_model, s_model)
-                        
+
+        ## Define parameters
+        self.params = {}
+
+        ## Parameter details [units, min, max]
+        self.details = {}
+                     
         ##models 
         self.p_model= p_model
         self.s_model= s_model
@@ -33,8 +41,13 @@ class MultiplicationModel(BaseComponent):
         self._set_dispersion()
         ## Define parameters
         self._set_params()
+        ## New parameter:Scaling factor
+        self.params['scale_factor'] = 1
+        
         ## Parameter details [units, min, max]
         self._set_details()
+        self.details['scale_factor'] = ['',     None, None]
+        
         #list of parameter that can be fitted
         self._set_fixed_params()  
         ## parameters with orientation
@@ -77,12 +90,18 @@ class MultiplicationModel(BaseComponent):
         """
 
         for name , value in self.p_model.params.iteritems():
-            self.params[name]= value
+            if not name in self.params.keys() and name != 'scale':
+                self.params[name]= value
             
         for name , value in self.s_model.params.iteritems():
             #Remove the effect_radius from the (P*S) model parameters.
             if not name in self.params.keys() and name != 'effect_radius':
                 self.params[name]= value
+                
+        # Set "scale and effec_radius to P and S model as initializing
+        # since run P*S comes from P and S separately.
+        self._set_scale_factor()
+        self._set_effect_radius()       
             
     def _set_details(self):
         """
@@ -90,11 +109,30 @@ class MultiplicationModel(BaseComponent):
             this model details 
         """
         for name ,detail in self.p_model.details.iteritems():
-            self.details[name]= detail
+            if name != 'scale':
+                self.details[name]= detail
             
         for name , detail in self.s_model.details.iteritems():
-            if not name in self.details.keys():
+            if not name in self.details.keys() or name != 'effect_radius':
                 self.details[name]= detail
+    
+    def _set_scale_factor(self):
+        """
+            Set scale=volfraction to P model
+        """
+        value = self.params['volfraction']
+        if value != None: 
+            self.p_model.setParam( 'scale', value)
+            
+            
+    def _set_effect_radius(self):
+        """
+            Set effective radius to S(Q) model
+        """
+        effective_radius = self.p_model.calculate_ER()
+        #Reset the effective_radius of s_model just before the run
+        if effective_radius != None and effective_radius != NotImplemented:
+            self.s_model.setParam('effect_radius',effective_radius)
                 
     def setParam(self, name, value):
         """ 
@@ -103,16 +141,24 @@ class MultiplicationModel(BaseComponent):
             @param name: name of the parameter
             @param value: value of the parameter
         """
-
+        # set param to P*S model
         self._setParamHelper( name, value)
-
-        if name in self.p_model.getParamList():
+        
+        ## setParam to p model 
+        # set 'scale' in P(Q) equal to volfraction 
+        if name == 'volfraction':
+            self._set_scale_factor()
+        elif name in self.p_model.getParamList():
             self.p_model.setParam( name, value)
-
+        
+        ## setParam to s model 
+        # This is a little bit abundant: Todo: find better way         
+        self._set_effect_radius()
         if name in self.s_model.getParamList():
             self.s_model.setParam( name, value)
+            
 
-        self._setParamHelper( name, value)
+        #self._setParamHelper( name, value)
         
     def _setParamHelper(self, name, value):
         """
@@ -152,24 +198,20 @@ class MultiplicationModel(BaseComponent):
             @param x: input q-value (float or [float, float] as [r, theta])
             @return: (DAB value)
         """
-
-        effective_radius = self.p_model.calculate_ER()
-        #Reset the effective_radius of s_model just before the run
-        if effective_radius != None and effective_radius != NotImplemented:
-            self.s_model.setParam('effect_radius',effective_radius)                       
-        return self.p_model.run(x)*self.s_model.run(x)
+        # set effective radius and scaling factor before run
+        self._set_effect_radius()
+        self._set_scale_factor()
+        return self.params['scale_factor']*self.p_model.run(x)*self.s_model.run(x)
 
     def runXY(self, x = 0.0):
         """ Evaluate the model
             @param x: input q-value (float or [float, float] as [qx, qy])
             @return: DAB value
-        """
-        
-        effective_radius = self.p_model.calculate_ER()
-        #Reset the effective_radius of s_model just before the run
-        if effective_radius != None and effective_radius != NotImplemented:
-            self.s_model.setParam('effect_radius',effective_radius)          
-        return self.p_model.runXY(x)* self.s_model.runXY(x)
+        """  
+        # set effective radius and scaling factor before run
+        self._set_effect_radius()
+        self._set_scale_factor()
+        return self.params['scale_factor']*self.p_model.runXY(x)* self.s_model.runXY(x)
 
     def set_dispersion(self, parameter, dispersion):
         """

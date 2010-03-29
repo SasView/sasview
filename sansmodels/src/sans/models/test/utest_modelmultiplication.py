@@ -46,19 +46,23 @@ class TestsphereSuareW(unittest.TestCase):
         list3= self.model3.getParamList()
 
         for item in self.model.getParamList():
-            self.assert_(item in list3)
+            if not 'scale' in item: 
+                self.assert_(item in list3)
         for item in self.model2.getParamList():
             #model3 parameters should not include effect_radius*
             if not 'effect_radius' in item:  
                 self.assert_(item in list3)
             
         ## test set value for parameters and get paramaters
-        self.model3.setParam("scale", 15)
-        self.assertEqual(self.model3.getParam("scale"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
         self.model3.setParam("radius", 20)
         self.assertEqual(self.model3.getParam("radius"), 20)
         self.model3.setParam("radius.width", 15)
         self.assertEqual(self.model3.getParam("radius.width"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
+        self.assertEqual(self.model3.getParam("volfraction"), self.model.getParam("scale"))
         
         ## Dispersity 
         list3= self.model3.getDispParamList()
@@ -125,19 +129,23 @@ class TestsphereHardS(unittest.TestCase):
         list3= self.model3.getParamList()
 
         for item in self.model.getParamList():
-            self.assert_(item in list3)
+            if not 'scale' in item: 
+                self.assert_(item in list3)
         for item in self.model2.getParamList():
             #model3 parameters should not include effect_radius*
             if not 'effect_radius' in item:  
                 self.assert_(item in list3)
             
         ## test set value for parameters and get paramaters
-        self.model3.setParam("scale", 15)
-        self.assertEqual(self.model3.getParam("scale"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
         self.model3.setParam("radius", 20)
         self.assertEqual(self.model3.getParam("radius"), 20)
         self.model3.setParam("radius.width", 15)
         self.assertEqual(self.model3.getParam("radius.width"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
+        self.assertEqual(self.model3.getParam("volfraction"), self.model.getParam("scale"))
         
         ## Dispersity 
         list3= self.model3.getDispParamList()
@@ -203,19 +211,23 @@ class TestsphereSHS(unittest.TestCase):
         list3= self.model3.getParamList()
 
         for item in self.model.getParamList():
-            self.assert_(item in list3)
+            if not 'scale' in item: 
+                self.assert_(item in list3)
         for item in self.model2.getParamList():
             #model3 parameters should not include effect_radius*
             if not 'effect_radius' in item:  
                 self.assert_(item in list3)
             
         ## test set value for parameters and get paramaters
-        self.model3.setParam("scale", 15)
-        self.assertEqual(self.model3.getParam("scale"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
         self.model3.setParam("radius", 20)
         self.assertEqual(self.model3.getParam("radius"), 20)
         self.model3.setParam("radius.width", 15)
         self.assertEqual(self.model3.getParam("radius.width"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
+        self.assertEqual(self.model3.getParam("volfraction"), self.model.getParam("scale"))
         
         ## Dispersity 
         list3= self.model3.getDispParamList()
@@ -282,19 +294,23 @@ class TestsphereHayterM(unittest.TestCase):
         list3= self.model3.getParamList()
 
         for item in self.model.getParamList():
-            self.assert_(item in list3)
+            if not 'scale' in item: 
+                self.assert_(item in list3)
         for item in self.model2.getParamList():
             #model3 parameters should not include effect_radius*
             if not 'effect_radius' in item:  
                 self.assert_(item in list3)
             
         ## test set value for parameters and get paramaters
-        self.model3.setParam("scale", 15)
-        self.assertEqual(self.model3.getParam("scale"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
         self.model3.setParam("radius", 20)
         self.assertEqual(self.model3.getParam("radius"), 20)
         self.model3.setParam("radius.width", 15)
         self.assertEqual(self.model3.getParam("radius.width"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
+        self.assertEqual(self.model3.getParam("volfraction"), self.model.getParam("scale"))
         
         ## Dispersity 
         list3= self.model3.getDispParamList()
@@ -364,19 +380,23 @@ class TestcylinderSuareW(unittest.TestCase):
         list3= self.model3.getParamList()
 
         for item in self.model.getParamList():
-            self.assert_(item in list3)
+            if not 'scale' in item: 
+                self.assert_(item in list3)
         for item in self.model2.getParamList():
             #model3 parameters should not include effect_radius*
             if not 'effect_radius' in item:  
                 self.assert_(item in list3)
             
         ## test set value for parameters and get paramaters
-        self.model3.setParam("scale", 15)
-        self.assertEqual(self.model3.getParam("scale"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
         self.model3.setParam("radius", 20)
         self.assertEqual(self.model3.getParam("radius"), 20)
         self.model3.setParam("radius.width", 15)
         self.assertEqual(self.model3.getParam("radius.width"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
+        self.assertEqual(self.model3.getParam("volfraction"), self.model.getParam("scale"))
         
         ## Dispersity 
         list3= self.model3.getDispParamList()
@@ -442,19 +462,26 @@ class TestcylinderHardS(unittest.TestCase):
         list3= self.model3.getParamList()
 
         for item in self.model.getParamList():
-            self.assert_(item in list3)
+            #model3 parameters should not include scale*
+            if not 'scale' in item: 
+                self.assert_(item in list3)
         for item in self.model2.getParamList():
             #model3 parameters should not include effect_radius*
             if not 'effect_radius' in item:  
                 self.assert_(item in list3)
             
         ## test set value for parameters and get paramaters
-        self.model3.setParam("scale", 15)
-        self.assertEqual(self.model3.getParam("scale"), 15)
+        #self.model3.setParam("scale", 15)
+        #self.assertEqual(self.model3.getParam("scale"), 15)
+        self.model3.setParam("scale_factor", 0.1)
+        self.assertEqual(self.model3.getParam("scale_factor"), 0.1)
         self.model3.setParam("radius", 20)
         self.assertEqual(self.model3.getParam("radius"), 20)
         self.model3.setParam("radius.width", 15)
         self.assertEqual(self.model3.getParam("radius.width"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
+        self.assertEqual(self.model3.getParam("volfraction"), self.model.getParam("scale"))
         
         ## Dispersity 
         list3= self.model3.getDispParamList()
@@ -520,19 +547,23 @@ class TestcylinderSHS(unittest.TestCase):
         list3= self.model3.getParamList()
 
         for item in self.model.getParamList():
-            self.assert_(item in list3)
+            if not 'scale' in item: 
+                self.assert_(item in list3)
         for item in self.model2.getParamList():
             #model3 parameters should not include effect_radius*
             if not 'effect_radius' in item:  
                 self.assert_(item in list3)
             
         ## test set value for parameters and get paramaters
-        self.model3.setParam("scale", 15)
-        self.assertEqual(self.model3.getParam("scale"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
         self.model3.setParam("radius", 20)
         self.assertEqual(self.model3.getParam("radius"), 20)
         self.model3.setParam("radius.width", 15)
         self.assertEqual(self.model3.getParam("radius.width"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
+        self.assertEqual(self.model3.getParam("volfraction"), self.model.getParam("scale"))
         
         ## Dispersity 
         list3= self.model3.getDispParamList()
@@ -598,19 +629,25 @@ class TestcylinderHayterM(unittest.TestCase):
         list3= self.model3.getParamList()
 
         for item in self.model.getParamList():
-            self.assert_(item in list3)
+            if not 'scale' in item:  
+                self.assert_(item in list3)
         for item in self.model2.getParamList():
             #model3 parameters should not include effect_radius*
             if not 'effect_radius' in item:  
                 self.assert_(item in list3)
             
         ## test set value for parameters and get paramaters
-        self.model3.setParam("scale", 15)
-        self.assertEqual(self.model3.getParam("scale"), 15)
+        #self.model3.setParam("scale", 15)
+        #self.assertEqual(self.model3.getParam("scale"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
         self.model3.setParam("radius", 20)
         self.assertEqual(self.model3.getParam("radius"), 20)
         self.model3.setParam("radius.width", 15)
         self.assertEqual(self.model3.getParam("radius.width"), 15)
+        self.model3.setParam("scale_factor", 15)
+        self.assertEqual(self.model3.getParam("scale_factor"), 15)
+        self.assertEqual(self.model3.getParam("volfraction"), self.model.getParam("scale"))
         
         ## Dispersity 
         list3= self.model3.getDispParamList()
