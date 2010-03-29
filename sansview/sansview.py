@@ -82,10 +82,10 @@ class SansView():
         except:
             logging.error("SansView: could not find theory plug-in module")
             
-            # Fitting perspective
-            import perspectives.fitting as module    
-            fitting_plug = module.Plugin()
-            self.gui.add_perspective(fitting_plug)
+        # Fitting perspective
+        import perspectives.fitting as module    
+        fitting_plug = module.Plugin()
+        self.gui.add_perspective(fitting_plug)
        
         # Add welcome page
         self.gui.set_welcome_panel(WelcomePanel)
