@@ -192,9 +192,7 @@ class FitPage(BasicPage):
         self.btFit.SetToolTipString("Perform fit.")
       
         
-        sizer_fit.Add((5,5),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)        
-        sizer_fit.Add(self.btFit,0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 63) 
-        sizer_fit.Layout()
+
         self.sizer_set_smearer = wx.BoxSizer(wx.VERTICAL)
         sizer_smearer = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer_new_smear= wx.BoxSizer(wx.HORIZONTAL)
@@ -305,9 +303,13 @@ class FitPage(BasicPage):
         sizer_chi2.Add(sizer_smearer_box)
         sizer_chi2.Add((-1,5))
         self.sizer_set_masking.Add((305,-1))
-        self.sizer_set_masking.Add(boxsizer1,0, wx.RIGHT, 10)
+        #self.sizer_set_masking.Add(boxsizer1,0, wx.RIGHT, 10)
         sizer_chi2.Add(self.sizer_set_masking )
-
+          
+        sizer_fit.Add(boxsizer1,0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 63)
+        #sizer_fit.Add((-1,1),0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 1) 
+        sizer_fit.Add(self.btFit,0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 63) 
+        sizer_fit.Layout()
         #sizer_smearer_box.Add(sizer_chi2)
         # hide all smear messages and textctrl
         self._hide_all_smear_info()
@@ -1096,6 +1098,7 @@ class FitPage(BasicPage):
             self.structurebox.Disable()
         else:
             self.smearer = smear_selection( self.data )
+            self.disable_smearer.SetValue(True)
             if self.smearer == None:
                 self.enable_smearer.Disable()
             else:
@@ -1107,6 +1110,7 @@ class FitPage(BasicPage):
                 self.smear_description_2d.Show(True)
                 self.pinhole_smearer.Disable()
                 self.slit_smearer.Disable()
+                
                 
             self.formfactorbox.Enable()
             self.structurebox.Enable()
@@ -1349,6 +1353,8 @@ class FitPage(BasicPage):
                 is_new_pinhole = True
             else:
                 is_new_pinhole = self._is_changed_pinhole()
+        else:
+            is_new_pinhole = self._is_changed_pinhole()
         # if any value is changed
         if is_new_pinhole:
             msg = self._set_pinhole_smear()
@@ -1486,6 +1492,8 @@ class FitPage(BasicPage):
                 is_new_slit = True
             else:
                 is_new_slit = self._is_changed_slit()
+        else:
+            is_new_slit = self._is_changed_slit()
                 
         # if any value is changed
         if is_new_slit:
