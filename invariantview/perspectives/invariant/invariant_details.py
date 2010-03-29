@@ -90,7 +90,7 @@ class InvariantDetailsPanel(wx.Dialog):
             Draw widgets related to invariant
         """
         uncertainty = "+/-" 
-        unit_invariant = '[1/cm][1/A]'
+        unit_invariant = '[1/cm 1/A]'
      
         invariant_txt = wx.StaticText(self, -1, 'Invariant')
         self.invariant_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
@@ -172,7 +172,8 @@ class InvariantDetailsPanel(wx.Dialog):
         #Warning [string]
         self.warning_msg_txt = wx.StaticText(self, -1,self.warning_msg)  
         self.warning_msg_txt.SetForegroundColour('red') 
-        self.warning_sizer.AddMany([(self.warning_msg_txt, 0, wx.EXPAND)])
+        self.warning_sizer.AddMany([(self.warning_msg_txt, 0,
+                                     wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)])
         
     def _layout_button(self):
         """
