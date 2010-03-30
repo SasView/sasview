@@ -27,6 +27,14 @@ double LamellarFF(double dp[], double q);
 double LamellarFF_HG(double dp[], double q);
 double LamellarPS(double dp[], double q);
 double LamellarPS_HG(double dp[], double q);
+double Lamellar_ParaCrystal(double dp[], double q);
+double Spherocylinder(double dp[], double q);
+double ConvexLens(double dp[], double q);
+double Dumbbell(double dp[], double q);
+double CappedCylinder(double dp[], double q);
+double Barbell(double dp[], double q);
+double PolyCoreBicelle(double dp[], double q);
+double CSParallelepiped(double dp[], double q);
 
 /* internal functions */
 double CylKernel(double qq, double rr,double h, double theta);
@@ -48,6 +56,14 @@ double EllipticalCross_fn(double qq, double a, double b);
 double CScyl(double qq, double rad, double radthick, double facthick, double rhoc, double rhos, double rhosolv, double length, double dum);
 double CSCylIntegration(double qq, double rad, double radthick, double facthick, double rhoc, double rhos, double rhosolv, double length);
 double Stackdisc_kern(double qq, double rcore, double rhoc, double rhol, double rhosolv, double length, double thick, double dum, double gsd, double d, double N);
+double paraCryst_sn(double ww, double qval, double davg, long nl, double an);
+double paraCryst_an(double ww, double qval, double davg, long nl);
+double SphCyl_kernel(double w[], double x, double tt, double Theta);
+double ConvLens_kernel(double w[], double x, double tt, double theta);
+double Dumb_kernel(double w[], double x, double tt, double theta);
+double BicelleKernel(double qq, double rad, double radthick, double facthick, double rhoc, double rhoh, double rhor, double rhosolv, double length, double dum);
+double BicelleIntegration(double qq, double rad, double radthick, double facthick, double rhoc, double rhoh, double rhor, double rhosolv, double length);
+double CSPPKernel(double dp[], double mu, double uu);
 
 /////////functions for WRC implementation of flexible cylinders
 static double Sk_WR(double q, double L, double b);

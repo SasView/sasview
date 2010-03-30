@@ -13,6 +13,14 @@ double OneLevel(double dp[], double q);
 double TwoLevel(double dp[], double q);
 double ThreeLevel(double dp[], double q);
 double FourLevel(double dp[], double q);
+double BroadPeak(double dp[], double q);
+double CorrLength(double dp[], double q);
+double TwoLorentzian(double dp[], double q);
+double TwoPowerLaw(double dp[], double q);
+double PolyGaussCoil(double dp[], double q);
+double GaussLorentzGel(double dp[], double q);
+double GaussianShell(double dp[], double q);
+
 
 /* internal functions */
 static double gammln(double xx);

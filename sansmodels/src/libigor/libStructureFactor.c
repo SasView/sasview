@@ -6,6 +6,8 @@ The fitting function is a simple polynomial. It works but is of no practical use
 
 #include "StandardHeaders.h"			// Include ANSI headers, Mac headers, IgorXOP.h, XOP.h and XOPSupport.h
 #include "libStructureFactor.h"
+
+
 //Hard Sphere Structure Factor
 //
 double
@@ -14,7 +16,7 @@ HardSphereStruct(double dp[], double q)
 	double denom,dnum,alpha,beta,gamm,a,asq,ath,afor,rca,rsa;
 	double calp,cbeta,cgam,prefac,c,vstruc;
 	double r,phi,struc;
-
+	
 	r = dp[0];
 	phi = dp[1];
 	//  compute constants
@@ -25,7 +27,7 @@ HardSphereStruct(double dp[], double q)
 	gamm = 0.50*phi*dnum/denom;
 	//
 	//  calculate the structure factor
-	//
+	//     
 	a = 2.0*q*r;
 	asq = a*a;
 	ath = asq*a;
@@ -39,7 +41,7 @@ HardSphereStruct(double dp[], double q)
 	c = prefac*(calp + cbeta + cgam);
 	vstruc = 1.0/(1.0-c);
 	struc = vstruc;
-
+	
 	return(struc);
 }
 
@@ -53,15 +55,15 @@ StickyHS_Struct(double dp[], double q)
 	double sig,aa,etam1,qa,qb,qc,radic;
 	double lam,lam2,test,mu,alpha,beta;
 	double kk,k2,k3,ds,dc,aq1,aq2,aq3,aq,bq1,bq2,bq3,bq,sq;
-
+	
 	qv= q;
 	rad = dp[0];
 	phi = dp[1];
 	eps = dp[2];
 	tau = dp[3];
-
+	
 	eta = phi/(1.0-eps)/(1.0-eps)/(1.0-eps);
-
+	
 	sig = 2.0 * rad;
 	aa = sig/(1.0 - eps);
 	etam1 = 1.0 - eta;
@@ -113,7 +115,7 @@ StickyHS_Struct(double dp[], double q)
 	bq = 12.0*eta*(bq1+bq2-bq3);
 	//
 	sq = 1.0/(aq*aq +bq*bq);
-
+	
 	return(sq);
 }
 
@@ -131,14 +133,14 @@ SquareWellStruct(double dp[], double q)
 	double req,phis,edibkb,lambda,struc;
 	double sigma,eta,eta2,eta3,eta4,etam1,etam14,alpha,beta,gamm;
 	double x,sk,sk2,sk3,sk4,t1,t2,t3,t4,ck;
-
+	
 	x= q;
-
+	
 	req = dp[0];
 	phis = dp[1];
 	edibkb = dp[2];
 	lambda = dp[3];
-
+	
 	sigma = req*2.;
 	eta = phis;
 	eta2 = eta*eta;
@@ -151,7 +153,7 @@ SquareWellStruct(double dp[], double q)
 	gamm = 0.5*eta*( pow((1. + 2.*eta),2) + eta3*(eta-4.) )/etam14;
 	//
 	//  calculate the structure factor
-
+	
 	sk = x*sigma;
 	sk2 = sk*sk;
 	sk3 = sk*sk2;
@@ -164,11 +166,11 @@ SquareWellStruct(double dp[], double q)
 	t4 = -edibkb*sk3*(sin(lambda*sk) - lambda*sk*cos(lambda*sk)+ sk*cos(sk) - sin(sk) );
 	ck =  -24.0*eta*( t1 + t2 + t3 + t4 )/sk3/sk3;
 	struc  = 1./(1.-ck);
-
+	
 	return(struc);
 }
 
-// Hayter-Penfold (rescaled) MSA structure factor for screened Coulomb interactions
+// Hayter-Penfold (rescaled) MSA structure factor for screened Coulomb interactions 
 //
 double
 HayterPenfoldMSA(double dp[], double q)
@@ -181,11 +183,11 @@ HayterPenfoldMSA(double dp[], double q)
 	double dialec, Perm, Beta, Temp, zz, charge;
 	double pi;
 	int ierr;
-
+	
 	pi = 4.0*atan(1.);
 	QQ= q;
 
-	diam=dp[0];		//in dp[0] coming from python is radius : cahnged on Mar. 30, 2009
+	diam=dp[0];		//in A
 	zz = dp[1];		//# of charges
 	VolFrac=dp[2];
 	Temp=dp[3];		//in degrees Kelvin
@@ -201,31 +203,31 @@ HayterPenfoldMSA(double dp[], double q)
 	SIdiam = diam*1E-10;		//in m
 	Vp=4.0*pi/3.0*(SIdiam/2.0)*(SIdiam/2.0)*(SIdiam/2.0);	//in m^3
 	cs=csalt*6.022E23*1E3;	//# salt molecules/m^3
-
+	
 	//         Compute the derived values of :
-	//			 Ionic strength IonSt (in C^2/m^3)
+	//			 Ionic strength IonSt (in C^2/m^3)  
 	// 			Kappa (Debye-Huckel screening length in m)
 	//	and		gamma Exp(-k)
 	IonSt=0.5 * Elcharge*Elcharge*(zz*VolFrac/Vp+2.0*cs);
 	Kappa=sqrt(2*Beta*IonSt/Perm);     //Kappa calc from Ionic strength
 									   //	Kappa=2/SIdiam					// Use to compare with HP paper
 	gMSAWave[5]=Beta*charge*charge/(pi*Perm*SIdiam*pow((2.0+Kappa*SIdiam),2));
-
-	//         Finally set up dimensionless parameters
+	
+	//         Finally set up dimensionless parameters 
 	Qdiam=QQ*diam;
 	gMSAWave[6] = Kappa*SIdiam;
 	gMSAWave[4] = VolFrac;
-
+	
 	//Function sqhpa(qq)  {this is where Hayter-Penfold program began}
-
+	
 	//       FIRST CALCULATE COUPLING
-
+	
 	ss=pow(gMSAWave[4],(1.0/3.0));
 	gMSAWave[9] = 2.0*ss*gMSAWave[5]*exp(gMSAWave[6]-gMSAWave[6]/ss);
-
+	
 	//        CALCULATE COEFFICIENTS, CHECK ALL IS WELL
 	//        AND IF SO CALCULATE S(Q*SIG)
-
+	
 	ierr=0;
 	ierr=sqcoef(ierr);
 	if (ierr>=0) {
@@ -236,7 +238,7 @@ HayterPenfoldMSA(double dp[], double q)
 		//	print "Error Level = ",ierr
 		//      print "Please report HPMSA problem with above error code"
 	}
-
+	
 	return(SofQ);
 }
 
@@ -266,14 +268,14 @@ HayterPenfoldMSA(double dp[], double q)
 //
 int
 sqcoef(int ir)
-{
+{	
 	int itm=40,ix,ig,ii;
 	double acc=5.0E-6,del,e1,e2,f1,f2;
-
+	
 	//      WAVE gMSAWave = $"root:HayPenMSA:gMSAWave"
 	f1=0;		//these were never properly initialized...
 	f2=0;
-
+	
 	ig=1;
 	if (gMSAWave[6]>=(1.0+8.0*gMSAWave[4])) {
 		ig=0;
@@ -289,12 +291,12 @@ sqcoef(int ir)
 	}
 	gMSAWave[10]=fmin(gMSAWave[4],0.20);
 	if ((ig!=1) || ( gMSAWave[9]>=0.15)) {
-		ii=0;
+		ii=0;                             
 		do {
 			ii=ii+1;
 			if(ii>itm) {
 				ir=-1;
-				return ir;
+				return ir;		
 			}
 			if (gMSAWave[10]<=0.0) {
 			    gMSAWave[10]=gMSAWave[4]/ii;
@@ -346,7 +348,7 @@ sqcoef(int ir)
 
 int
 sqfun(int ix, int ir)
-{
+{	
 	double acc=1.0e-6;
 	double reta,eta2,eta21,eta22,eta3,eta32,eta2d,eta2d2,eta3d,eta6d,e12,e24,rgek;
 	double rak,ak1,ak2,dak,dak2,dak4,d,d2,dd2,dd4,dd45,ex1,ex2,sk,ck,ckma,skma;
@@ -364,10 +366,10 @@ sqfun(int ix, int ir)
 	v3=0;
 	p2=0;
 	p3=0;
-
+	
 	//     CALCULATE CONSTANTS; NOTATION IS HAYTER PENFOLD (1981)
-
-	reta = gMSAWave[16];
+	
+	reta = gMSAWave[16];                                                
 	eta2 = reta*reta;
 	eta3 = eta2*reta;
 	e12 = 12.0*reta;
@@ -378,7 +380,7 @@ sqfun(int ix, int ir)
 	if (( gMSAWave[12]>15.0) && (ix==1)) {
 		ibig=1;
 	}
-
+    
 	gMSAWave[11] = gMSAWave[5]*gMSAWave[13]*exp(gMSAWave[6]- gMSAWave[12]);
 	rgek =  gMSAWave[11];
 	rak =  gMSAWave[12];
@@ -399,42 +401,42 @@ sqfun(int ix, int ir)
 	eta2d2 = eta2d*eta2d;
 	eta21 = 2.0*reta+1.0;
 	eta22 = eta21*eta21;
-
+	
 	//     ALPHA(I)
-
+	
 	al1 = -eta21*dak;
 	al2 = (14.0*eta2-4.0*reta-1.0)*dak2;
 	al3 = 36.0*eta2*dak4;
-
+	
 	//      BETA(I)
-
+	
 	be1 = -(eta2+7.0*reta+1.0)*dak;
 	be2 = 9.0*reta*(eta2+4.0*reta-2.0)*dak2;
 	be3 = 12.0*reta*(2.0*eta2+8.0*reta-1.0)*dak4;
-
+	
 	//      NU(I)
-
+	
 	vu1 = -(eta3+3.0*eta2+45.0*reta+5.0)*dak;
 	vu2 = (eta32+3.0*eta2+42.0*reta-2.0e1)*dak2;
 	vu3 = (eta32+3.0e1*reta-5.0)*dak4;
 	vu4 = vu1+e24*rak*vu3;
 	vu5 = eta6d*(vu2+4.0*vu3);
-
+	
 	//      PHI(I)
-
+	
 	ph1 = eta6d/rak;
 	ph2 = d-e12*dak2;
-
+	
 	//      TAU(I)
-
+	
 	ta1 = (reta+5.0)/(5.0*rak);
 	ta2 = eta2d*dak2;
 	ta3 = -e12*rgek*(ta1+ta2);
 	ta4 = eta3d*ak2*(ta1*ta1-ta2*ta2);
 	ta5 = eta3d*(reta+8.0)*1.0e-1-2.0*eta22*dak2;
-
+	
 	//     double PRECISION SINH(K), COSH(K)
-
+	
 	ex1 = exp(rak);
 	ex2 = 0.0;
 	if ( gMSAWave[12]<20.0) {
@@ -444,34 +446,34 @@ sqfun(int ix, int ir)
 	ck = 0.5*(ex1+ex2);
 	ckma = ck-1.0-rak*sk;
 	skma = sk-rak*ck;
-
+	
 	//      a(I)
-
+	
 	a1 = (e24*rgek*(al1+al2+ak1*al3)-eta22)*dd4;
 	if (ibig==0) {
 		a2 = e24*(al3*skma+al2*sk-al1*ck)*dd4;
 		a3 = e24*(eta22*dak2-0.5*d2+al3*ckma-al1*sk+al2*ck)*dd4;
 	}
-
+	
 	//      b(I)
-
+	
 	b1 = (1.5*reta*eta2d2-e12*rgek*(be1+be2+ak1*be3))*dd4;
 	if (ibig==0) {
 		b2 = e12*(-be3*skma-be2*sk+be1*ck)*dd4;
 		b3 = e12*(0.5*d2*eta2d-eta3d*eta2d2*dak2-be3*ckma+be1*sk-be2*ck)*dd4;
 	}
-
+	
 	//      V(I)
-
+	
 	v1 = (eta21*(eta2-2.0*reta+1.0e1)*2.5e-1-rgek*(vu4+vu5))*dd45;
 	if (ibig==0) {
 		v2 = (vu4*ck-vu5*sk)*dd45;
 		v3 = ((eta3-6.0*eta2+5.0)*d-eta6d*(2.0*eta3-3.0*eta2+18.0*reta+1.0e1)*dak2+e24*vu3+vu4*sk-vu5*ck)*dd45;
 	}
-
-
+	
+	
 	//       P(I)
-
+	
 	pp1 = ph1*ph1;
 	pp2 = ph2*ph2;
 	pp = pp1+pp2;
@@ -481,14 +483,14 @@ sqfun(int ix, int ir)
 		p2 = (pp*sk+p1p2*ck)*dd2;
 		p3 = (pp*ck+p1p2*sk+pp1-pp2)*dd2;
 	}
-
+	
 	//       T(I)
-
+	
 	t1 = ta3+ta4*a1+ta5*b1;
 	if (ibig!=0) {
-
+		
 		//		VERY LARGE SCREENING:  ASYMPTOTIC SOLUTION
-
+		
   		v3 = ((eta3-6.0*eta2+5.0)*d-eta6d*(2.0*eta3-3.0*eta2+18.0*reta+1.0e1)*dak2+e24*vu3)*dd45;
 		t3 = ta4*a3+ta5*b3+e12*ta2 - 4.0e-1*reta*(reta+1.0e1)-1.0;
 		p3 = (pp1-pp2)*dd2;
@@ -515,21 +517,21 @@ sqfun(int ix, int ir)
 			gMSAWave[15] = 0.0;
 		}
 		gMSAWave[10] = gMSAWave[16];
-
+		
 	} else {
-
+        
 		t2 = ta4*a2+ta5*b2+e12*(ta1*ck-ta2*sk);
 		t3 = ta4*a3+ta5*b3+e12*(ta1*sk-ta2*(ck-1.0))-4.0e-1*reta*(reta+1.0e1)-1.0;
-
+		
 		//		MU(i)
-
+		
 		um1 = t2*a2-e12*v2*v2;
 		um2 = t1*a2+t2*a1-e24*v1*v2;
 		um3 = t2*a3+t3*a2-e24*v2*v3;
 		um4 = t1*a1-e12*v1*v1;
 		um5 = t1*a3+t3*a1-e24*v1*v3;
 		um6 = t3*a3-e12*v3*v3;
-
+		
 		//			GILLAN CONDITION ?
 		//
 		//			YES - G(X=1+) = 0
@@ -537,30 +539,30 @@ sqfun(int ix, int ir)
 		//			COEFFICIENTS AND FUNCTION VALUE
 		//
 		if ((ix==1) || (ix==3)) {
-
+			
 			//			NO - CALCULATE REMAINING COEFFICIENTS.
-
+			
 			//			LAMBDA(I)
-
+			
 			al1 = e12*p2*p2;
 			al2 = e24*p1*p2-b2-b2;
 			al3 = e24*p2*p3;
 			al4 = e12*p1*p1-b1-b1;
 			al5 = e24*p1*p3-b3-b3-ak2;
 			al6 = e12*p3*p3;
-
+			
 			//			OMEGA(I)
-
+			
 			w16 = um1*al6-al1*um6;
 			w15 = um1*al5-al1*um5;
 			w14 = um1*al4-al1*um4;
 			w13 = um1*al3-al1*um3;
 			w12 = um1*al2-al1*um2;
-
+			
 			w26 = um2*al6-al2*um6;
 			w25 = um2*al5-al2*um5;
 			w24 = um2*al4-al2*um4;
-
+			
 			w36 = um3*al6-al3*um6;
 			w35 = um3*al5-al3*um5;
 			w34 = um3*al4-al3*um4;
@@ -570,17 +572,17 @@ sqfun(int ix, int ir)
 			w56 = um5*al6-al5*um6;
 			w3526 = w35+w26;
 			w3425 = w34+w25;
-
+			
 			//			QUARTIC COEFFICIENTS
-
+			
 			w4 = w16*w16-w13*w36;
 			w3 = 2.0*w16*w15-w13*w3526-w12*w36;
 			w2 = w15*w15+2.0*w16*w14-w13*w3425-w12*w3526;
 			w1 = 2.0*w15*w14-w13*w24-w12*w3425;
 			w0 = w14*w14-w12*w24;
-
+			
 			//			ESTIMATE THE STARTING VALUE OF f
-
+			
 			if (ix==1) {
 				//				LARGE K
 				fap = (w14-w34-w46)/(w12-w15+w35-w26+w56-w32);
@@ -599,7 +601,7 @@ sqfun(int ix, int ir)
 				ca = -ca/(ak2*p2+2.0*(b3*p2-b2*p3));
 				fap = -(pg+p2*ca)/p3;
 			}
-
+			
 			//			AND REFINE IT ACCORDING TO NEWTON
 			ii=0;
 			do {
@@ -615,7 +617,7 @@ sqfun(int ix, int ir)
 				fap = fa-fun/fund;
 				del=fabs((fap-fa)/fa);
 			} while (del>acc);
-
+			
 			ir = ir+ii;
 			fa = fap;
 			ca = -(w16*fa*fa+w15*fa+w14)/(w13*fa+w12);
@@ -648,13 +650,13 @@ sqfun(int ix, int ir)
 }
 
 // called as DiamCyl(hcyl,rcyl)
-//modified from Igor NIST package XOP
 double
 DiamCyl(double hcyl, double rcyl)
 {
+	
 	double diam,a,b,t1,t2,ddd;
 	double pi;
-
+	
 	pi = 4.0*atan(1.0);
 	if (rcyl == 0 || hcyl == 0) {
 		return 0.0;
@@ -662,10 +664,10 @@ DiamCyl(double hcyl, double rcyl)
 	a = rcyl;
 	b = hcyl/2.0;
 	t1 = a*a*2.0*b/2.0;
-	t2 = 1.0 + (b/a)*(1.0+a/b/2)*(1.0+pi*a/b/2.0);
+	t2 = 1.0 + (b/a)*(1.0+a/b/2.0)*(1.0+pi*a/b/2.0);
 	ddd = 3.0*t1*t2;
 	diam = pow(ddd,(1.0/3.0));
-
+	
 	return(diam);
 }
 
@@ -676,44 +678,43 @@ DiamCyl(double hcyl, double rcyl)
 // A. Isihara, J. Chem. Phys. 18, 1446 (1950)
 //returns DIAMETER
 // called as DiamEllip(aa,bb)
-
-//modified from Igor NIST package XOP
 double
 DiamEllip(double aa, double bb)
 {
+	
 	double ee,e1,bd,b1,bL,b2,del,ddd,diam;
 
 	if (aa == 0 || bb == 0) {
 		return 0.0;
 	}
 	if (aa == bb) {
-		return 2*aa;
+		return 2.0*aa;
 	}
 	if(aa>bb) {
 		ee = (aa*aa - bb*bb)/(aa*aa);
 	}else{
 		ee = (bb*bb - aa*aa)/(bb*bb);
 	}
-
+	
 	bd = 1.0-ee;
 	e1 = sqrt(ee);
 	b1 = 1.0 + asin(e1)/(e1*sqrt(bd));
 	bL = (1.0+e1)/(1.0-e1);
 	b2 = 1.0 + bd/2/e1*log(bL);
 	del = 0.75*b1*b2;
-
+	
 	ddd = 2.0*(del+1.0)*aa*bb*bb;		//volume is always calculated correctly
 	diam = pow(ddd,(1.0/3.0));
-
+	
 	return(diam);
 }
 
 double
 sqhcal(double qq)
-{
-    double SofQ,etaz,akz,gekz,e24,x1,x2,ck,sk,ak2,qk,q2k,qk2,qk3,qqk,sink,cosk,asink,qcosk,aqk,inter;
+{      	
+    double SofQ,etaz,akz,gekz,e24,x1,x2,ck,sk,ak2,qk,q2k,qk2,qk3,qqk,sink,cosk,asink,qcosk,aqk,inter; 		
 	//	WAVE gMSAWave = $"root:HayPenMSA:gMSAWave"
-
+	
 	etaz = gMSAWave[10];
 	akz =  gMSAWave[12];
 	gekz =  gMSAWave[11];
@@ -726,7 +727,7 @@ sqhcal(double qq)
 	ck = 0.5*(x1+x2);
 	sk = 0.5*(x1-x2);
 	ak2 = akz*akz;
-
+	
 	if (qq<=0.0) {
 		SofQ = -1.0/gMSAWave[0];
 	} else {
