@@ -7,12 +7,6 @@ See the license text in license.txt
 
 copyright 2009, University of Tennessee
 """
-
-"""
-    Text controls for input/output of the main Invariant panel
-    @author: Dr. Mahtieu Doucet
-"""
-
 import wx
 import os
 
