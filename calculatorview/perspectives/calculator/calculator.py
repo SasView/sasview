@@ -105,9 +105,11 @@ class Plugin:
         """
             Returns a set of menu entries for tools
         """
-        id = wx.NewId()
         sld_help = "Provides computation related to Scattering Length density"
-        return [("SLD Calculator", sld_help, self.on_calculate_sld)]
+        slit_length_help = "Provides computation related to Scattering Length density"
+        return [("SLD Calculator", sld_help, self.on_calculate_sld),
+                ("Slit Side Calculator", slit_length_help,
+                     self.on_calculate_slit_size)]
               
     def on_calculate_sld(self, event):
         """
@@ -116,7 +118,14 @@ class Plugin:
         from sld_panel import SldWindow
         frame = SldWindow(base=self.parent)
         frame.Show(True) 
-      
+    
+    def on_calculate_slit_size(self, event):
+        """
+            Compute the slit size a given data
+        """
+        from slit_length_calculator_panel import SlitLengthCalculatorWindow
+        frame = SlitLengthCalculatorWindow(parent=self.parent)    
+        frame.Show(True)
         
     def on_perspective(self, event):
         """
