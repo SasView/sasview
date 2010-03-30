@@ -71,6 +71,8 @@ class SlitLengthCalculatorPanel(wx.Panel):
         """
         data_name_txt = wx.StaticText(self, -1, 'Data: ')
         self.data_name_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH*4,-1))
+        data_hint = "Loaded data"
+        self.data_name_tcl.SetToolTipString(data_hint)
         #control that triggers importing data
         id = wx.NewId()
         self.browse_button = wx.Button(self, id, "Browse")
@@ -86,11 +88,11 @@ class SlitLengthCalculatorPanel(wx.Panel):
         """
         slit_size_txt = wx.StaticText(self, -1, 'Full Slit Size: ')
         self.slit_size_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        slit_size_hint = " Estimated slit size"
+        slit_size_hint = " Estimated full slit size"
         self.slit_size_tcl.SetToolTipString(slit_size_hint)
         slit_size_unit_txt = wx.StaticText(self, -1, 'Unit: ')
         self.slit_size_unit_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1)) 
-        slit_size_unit_hint = "Slit size's unit"
+        slit_size_unit_hint = "Full slit size's unit"
         self.slit_size_unit_tcl.SetToolTipString(slit_size_unit_hint)
         self.slit_size_sizer.AddMany([(slit_size_txt, 0, wx.LEFT, 15),
                                       (self.slit_size_tcl, 0, wx.LEFT, 10),
