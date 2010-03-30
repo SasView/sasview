@@ -54,7 +54,8 @@ class InputTextCtrl(wx.TextCtrl):
                 if start==end:
                     control.SetSelection(-1,-1)
 
-class OutputTextCtrl(wx.TextCtrl):
+    
+class InterActiveOutputTextCtrl(wx.TextCtrl):
     """
         Text control used to display outputs.
         No editing allowed. The background is 
@@ -62,6 +63,17 @@ class OutputTextCtrl(wx.TextCtrl):
     """
     def __init__(self, *args, **kwds):
         wx.TextCtrl.__init__(self, *args, **kwds)
+        self.SetEditable(False)
+        self.SetBackgroundColour(self.GetParent().GetBackgroundColour())
+        
+class OutputTextCtrl(InterActiveOutputTextCtrl):
+    """
+        Text control used to display outputs.
+        No editing allowed. The background is 
+        grayed out. User can't select text.
+    """
+    def __init__(self, *args, **kwds):
+        InterActiveOutputTextCtrl.__init__(self, *args, **kwds)
         self.SetEditable(False)
         self.SetBackgroundColour(self.GetParent().GetBackgroundColour())
         
@@ -76,4 +88,5 @@ class OutputTextCtrl(wx.TextCtrl):
             by not calling Skip().
         """ 
         pass
- 
+
+      

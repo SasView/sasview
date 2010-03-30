@@ -15,7 +15,7 @@ import os
 from DataLoader.readers.ascii_reader import Reader
 from sans.guicomm.events import StatusEvent  
 from sans.calculator.slit_length_calculator import SlitlengthCalculator  
-from calculator_widgets import OutputTextCtrl
+from calculator_widgets import OutputTextCtrl, InterActiveOutputTextCtrl
 
 _BOX_WIDTH = 76
 #Slit length panel size 
@@ -27,8 +27,7 @@ else:
     PANEL_WIDTH = 530
     PANEL_HEIGHT = 230
     FONT_VARIANT = 1
-    
-
+ 
 class SlitLengthCalculatorPanel(wx.Panel):
     """
         Provides the slit length calculator GUI.
@@ -87,7 +86,7 @@ class SlitLengthCalculatorPanel(wx.Panel):
             Fill the sizer containing slit size information
         """
         slit_size_txt = wx.StaticText(self, -1, 'Full Slit Size: ')
-        self.slit_size_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
+        self.slit_size_tcl = InterActiveOutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         slit_size_hint = " Estimated full slit size"
         self.slit_size_tcl.SetToolTipString(slit_size_hint)
         slit_size_unit_txt = wx.StaticText(self, -1, 'Unit: ')
