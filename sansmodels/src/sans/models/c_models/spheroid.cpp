@@ -42,7 +42,8 @@ CoreShellEllipsoidModel :: CoreShellEllipsoidModel() {
 	equat_shell.set_min(0.0);
 	polar_shell    = Parameter(30.0, true);
 	polar_shell.set_min(0.0);
-	contrast   = Parameter(1e-6);
+	sld_core   = Parameter(2e-6);
+	sld_shell  = Parameter(1e-6);
 	sld_solvent = Parameter(6.3e-6);
 	background = Parameter(0.0);
 	axis_theta  = Parameter(0.0, true);
@@ -57,7 +58,7 @@ CoreShellEllipsoidModel :: CoreShellEllipsoidModel() {
  * @return: function value
  */
 double CoreShellEllipsoidModel :: operator()(double q) {
-	double dp[8];
+	double dp[9];
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
@@ -66,9 +67,10 @@ double CoreShellEllipsoidModel :: operator()(double q) {
 	dp[2] = polar_core();
 	dp[3] = equat_shell();
 	dp[4] = polar_shell();
-	dp[5] = contrast();
-	dp[6] = sld_solvent();
-	dp[7] = 0.0;
+	dp[5] = sld_core();
+	dp[6] = sld_shell();
+	dp[7] = sld_solvent();
+	dp[8] = 0.0;
 
 	// Get the dispersion points for the major core
 	vector<WeightPoint> weights_equat_core;
@@ -109,7 +111,7 @@ double CoreShellEllipsoidModel :: operator()(double q) {
 					dp[4] = weights_polar_shell[l].value;
 					//Un-normalize  by volume
 					sum += weights_equat_core[i].weight* weights_polar_core[j].weight * weights_equat_shell[k].weight
-						* weights_polar_shell[l].weight * ProlateForm(dp, q)
+						* weights_polar_shell[l].weight * OblateForm(dp, q)
 						* pow(weights_equat_shell[k].value,2)*weights_polar_shell[l].value;
 					//Find average volume
 					vol += weights_equat_core[i].weight* weights_polar_core[j].weight
@@ -169,7 +171,8 @@ double CoreShellEllipsoidModel :: operator()(double qx, double qy) {
 	dp.polar_core = polar_core();
 	dp.equat_shell = equat_shell();
 	dp.polar_shell = polar_shell();
-	dp.contrast = contrast();
+	dp.sld_core = sld_core();
+	dp.sld_shell = sld_shell();
 	dp.sld_solvent = sld_solvent();
 	dp.background = 0.0;
 	dp.axis_theta = axis_theta();

@@ -40,7 +40,8 @@ EllipticalCylinderModel :: EllipticalCylinderModel() {
 	r_ratio.set_min(0.0);
 	length     = Parameter(400.0, true);
 	length.set_min(0.0);
-	contrast   = Parameter(3.e-6);
+	sldCyl   = Parameter(4.e-6);
+	sldSolv   = Parameter(1.e-6);
 	background = Parameter(0.0);
 	cyl_theta  = Parameter(1.57, true);
 	cyl_phi    = Parameter(0.0, true);
@@ -54,14 +55,15 @@ EllipticalCylinderModel :: EllipticalCylinderModel() {
  * @return: function value
  */
 double EllipticalCylinderModel :: operator()(double q) {
-	double dp[6];
+	double dp[7];
 
 	dp[0] = scale();
 	dp[1] = r_minor();
 	dp[2] = r_ratio();
 	dp[3] = length();
-	dp[4] = contrast();
-	dp[5] = 0.0;
+	dp[4] = sldCyl();
+	dp[5] = sldSolv();
+	dp[6] = 0.0;
 
 	// Get the dispersion points for the r_minor
 	vector<WeightPoint> weights_rad;
@@ -131,7 +133,8 @@ double EllipticalCylinderModel :: operator()(double qx, double qy) {
 	dp.r_minor    = r_minor();
 	dp.r_ratio    = r_ratio();
 	dp.length     = length();
-	dp.contrast   = contrast();
+	dp.sldCyl   = sldCyl();
+	dp.sldSolv   = sldSolv();
 	dp.background = 0.0;
 	dp.cyl_theta  = cyl_theta();
 	dp.cyl_phi    = cyl_phi();

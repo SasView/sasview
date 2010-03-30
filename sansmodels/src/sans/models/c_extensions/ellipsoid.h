@@ -8,8 +8,8 @@
  */
  //[PYTHONCLASS] = EllipsoidModel
  //[DISP_PARAMS] = radius_a, radius_b, axis_theta, axis_phi
- //[DESCRIPTION] = <text>"P(q.alpha)= scale*f(q)^(2)+ bkg, where f(q)= 3*(scatter_sld
- //		- scatter_solvent)*V*[sin(q*r(Ra,Rb,alpha))
+ //[DESCRIPTION] = <text>"P(q.alpha)= scale*f(q)^(2)+ bkg, where f(q)= 3*(sld_ell
+ //		- sld_solvent)*V*[sin(q*r(Ra,Rb,alpha))
  //		-q*r*cos(qr(Ra,Rb,alpha))]
  //		/[qr(Ra,Rb,alpha)]^(3)"
  //
@@ -18,8 +18,8 @@
  //
  //		scatter_sld: SLD of the scatter
  //		solvent_sld: SLD of the solvent
- //     contrast: SLD difference between scatter
- //		and solvent
+ //     sldEll: SLD of ellipsoid
+ //		sldSolv: SLD of solvent
  //		V: volune of the Eliipsoid
  //		Ra: radius along the rotation axis
  //		of the Ellipsoid
@@ -45,9 +45,13 @@ typedef struct {
     //  [DEFAULT]=radius_b=400 [A]
     double radius_b;
 
-    ///	Contrast [1/A^(2)]
-    //  [DEFAULT]=contrast=3.0e-6 [1/A^(2)]
-    double contrast;
+    ///	sldEll [1/A^(2)]
+    //  [DEFAULT]=sldEll=4.0e-6 [1/A^(2)]
+    double sldEll;
+
+    ///	sld of solvent [1/A^(2)]
+    //  [DEFAULT]=sldSolv=1.0e-6 [1/A^(2)]
+    double sldSolv;
 
 	/// Incoherent Background [1/cm]
 	//  [DEFAULT]=background=0 [1/cm]

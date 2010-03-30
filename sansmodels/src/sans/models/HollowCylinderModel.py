@@ -35,7 +35,8 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
          core_radius     = 20.0 [A]
          radius          = 30.0 [A]
          length          = 400.0 [A]
-         contrast        = 5.3e-006 [1/A^(2)]
+         sldCyl          = 6.3e-006 [1/A^(2)]
+         sldSolv         = 1e-006 [1/A^(2)]
          background      = 0.01 [1/cm]
          axis_theta      = 1.57 [rad]
          axis_phi        = 0.0 [rad]
@@ -56,7 +57,8 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
 		core_radius = the radius of core
 		radius = the radius of shell
 		length = the total length of the cylinder
-		contrast = SLD of solvent - SLD of shell
+		sldCyl = SLD of the shell
+		sldSolv = SLD of the solvent
 		background = incoherent background"""
        
         ## Parameter details [units, min, max]
@@ -65,7 +67,8 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
         self.details['core_radius'] = ['[A]', None, None]
         self.details['radius'] = ['[A]', None, None]
         self.details['length'] = ['[A]', None, None]
-        self.details['contrast'] = ['[1/A^(2)]', None, None]
+        self.details['sldCyl'] = ['[1/A^(2)]', None, None]
+        self.details['sldSolv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['axis_theta'] = ['[rad]', None, None]
         self.details['axis_phi'] = ['[rad]', None, None]

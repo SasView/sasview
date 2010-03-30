@@ -38,7 +38,8 @@ LamellarPSModel :: LamellarPSModel() {
 	spacing.set_min(0.0);
 	delta     = Parameter(30.0);
 	delta.set_min(0.0);
-	contrast   = Parameter(5.3e-6);
+	sld_bi   = Parameter(6.3e-6);
+	sld_sol   = Parameter(1.0e-6);
 	n_plates     = Parameter(20.0);
 	caille = Parameter(0.1);
 	background = Parameter(0.0);
@@ -52,17 +53,18 @@ LamellarPSModel :: LamellarPSModel() {
  * @return: function value
  */
 double LamellarPSModel :: operator()(double q) {
-	double dp[7];
+	double dp[8];
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
 	dp[0] = scale();
 	dp[1] = spacing();
 	dp[2] = delta();
-	dp[3] = contrast();
-	dp[4] = n_plates();
-	dp[5] = caille();
-	dp[6] = 0.0;
+	dp[3] = sld_bi();
+	dp[4] = sld_sol();
+	dp[5] = n_plates();
+	dp[6] = caille();
+	dp[7] = 0.0;
 
 
 	// Get the dispersion points for spacing and delta (thickness)

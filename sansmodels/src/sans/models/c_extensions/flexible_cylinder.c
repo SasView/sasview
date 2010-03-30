@@ -17,15 +17,16 @@
  * @return: function value
  */
 double flexible_cylinder_analytical_1D(FlexibleCylinderParameters *pars, double q) {
-	double dp[6];
+	double dp[7];
 
 	// Fill paramater array
 	dp[0] = pars->scale;
 	dp[1] = pars->length;
 	dp[2] = pars->kuhn_length;
 	dp[3] = pars->radius;
-	dp[4] = pars->contrast;
-	dp[5] = pars->background;
+	dp[4] = pars->sldCyl;
+	dp[5] = pars->sldSolv;
+	dp[6] = pars->background;
 
 	// Call library function to evaluate model
 	return FlexExclVolCyl(dp, q);

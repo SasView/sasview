@@ -43,13 +43,14 @@ double kernel(double q, double r_small, double r_long, double angle) {
  * @return: function value
  */
 double ellipsoid_analytical_1D(EllipsoidParameters *pars, double q) {
-	double dp[5];
+	double dp[6];
 
 	dp[0] = pars->scale;
 	dp[1] = pars->radius_a;
 	dp[2] = pars->radius_b;
-	dp[3] = pars->contrast;
-	dp[4] = pars->background;
+	dp[3] = pars->sldEll;
+	dp[4] = pars->sldSolv;
+	dp[5] = pars->background;
 
 	return EllipsoidForm(dp, q);
 }
@@ -116,7 +117,7 @@ double ellipsoid_analytical_2D_scaled(EllipsoidParameters *pars, double q, doubl
 	answer = EllipsoidKernel(q, pars->radius_b, pars->radius_a, cos_val);
 
 	// Multiply by contrast^2
-	answer *= pars->contrast*pars->contrast;
+	answer *= (pars->sldEll - pars->sldSolv) * (pars->sldEll - pars->sldSolv);
 
 	//normalize by cylinder volume
     vol = 4.0/3.0 * acos(-1.0) * pars->radius_b * pars->radius_b * pars->radius_a;

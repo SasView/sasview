@@ -7,7 +7,8 @@
  * [DESCRIPTION] = <text> Model parameters: r_minor = the radius of minor axis of the cross section
 r_ratio = the ratio of (r_major /r_minor >= 1)
 length = the length of the cylinder
-contrast = SLD of solvent - SLD of the cylinder
+sldCyl = SLD of the cylinder
+sldSolv = SLD of solvent -
 background = incoherent background
   *</text>
  * [FIXED]= <text> cyl_phi.width;
@@ -30,9 +31,12 @@ typedef struct {
     /// Length of the cylinder [A]
     //  [DEFAULT]=length=400.0 [A]
     double length;
-    /// Contrast [1/A^(2)]
-    //  [DEFAULT]=contrast=3.0e-6 [1/A^(2)]
-    double contrast;
+    /// SLD of cylinder [1/A^(2)]
+    //  [DEFAULT]=sldCyl=4.0e-6 [1/A^(2)]
+    double sldCyl;
+    /// SLD of solvent [1/A^(2)]
+    //  [DEFAULT]=sldSolv=1.0e-6 [1/A^(2)]
+    double sldSolv;
 	/// Incoherent Background [1/cm] 0.000
 	//  [DEFAULT]=background=0 [1/cm]
 	double background;

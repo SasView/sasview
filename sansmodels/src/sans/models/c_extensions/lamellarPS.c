@@ -18,12 +18,12 @@
 double
 LamellarPS_kernel(double dp[], double q)
 {
-	double scale,dd,del,contr,NN,Cp,bkg;		//local variables of coefficient wave
+	double scale,dd,del,sld_bi,sld_sol,contr,NN,Cp,bkg;		//local variables of coefficient wave
 	double inten, qval,Pq,Sq,alpha,temp,t1,t2,t3,dQ;
 	double Pi,Euler,dQDefault,fii;
 	int ii,NNint;
 	Euler = 0.5772156649;		// Euler's constant
-	dQDefault = 0.0;//0.0025;		//[=] 1/A, q-resolution, default value
+	dQDefault = 0.0;		//[=] 1/A, q-resolution, default value
 	dQ = dQDefault;
 
 	Pi = 4.0*atan(1.0);
@@ -32,10 +32,13 @@ LamellarPS_kernel(double dp[], double q)
 	scale = dp[0];
 	dd = dp[1];
 	del = dp[2];
-	contr = dp[3];
-	NN = trunc(dp[4]);		//be sure that NN is an integer
-	Cp = dp[5];
-	bkg = dp[6];
+	sld_bi = dp[3];
+	sld_sol = dp[4];
+	NN = trunc(dp[5]);		//be sure that NN is an integer
+	Cp = dp[6];
+	bkg = dp[7];
+
+	contr = sld_bi - sld_sol;
 
 	Pq = 2.0*contr*contr/qval/qval*(1.0-cos(qval*del));
 
@@ -77,16 +80,17 @@ LamellarPS_kernel(double dp[], double q)
  * @return: function value
  */
 double lamellarPS_analytical_1D(LamellarPSParameters *pars, double q) {
-	double dp[7];
+	double dp[8];
 
 	// Fill paramater array
 	dp[0] = pars->scale;
 	dp[1] = pars->spacing;
 	dp[2] = pars->delta;
-	dp[3] = pars->contrast;
-	dp[4] = pars->n_plates;
-	dp[5] = pars->caille;
-	dp[6] = pars->background;
+	dp[3] = pars->sld_bi;
+	dp[4] = pars->sld_sol;
+	dp[5] = pars->n_plates;
+	dp[6] = pars->caille;
+	dp[7] = pars->background;
 
 	// Call library function to evaluate model
 	return LamellarPS_kernel(dp, q);

@@ -10,7 +10,8 @@
  //					core_radius = the radius of core
  //				radius = the radius of shell
  // 			length = the total length of the cylinder
- //				contrast = SLD of solvent - SLD of shell
+ //				sldCyl = SLD of the shell
+ //				sldSolv = SLD of the solvent
  //				background = incoherent background
  //	</text>
  //[FIXED]= <text> axis_phi.width; axis_theta.width; length.width;core_radius.width; radius</text>
@@ -34,9 +35,13 @@ typedef struct {
     //  [DEFAULT]=length=400.0 [A]
     double length;
 
-    /// Contrast  [1/A^(2)]
-    //  [DEFAULT]=contrast=5.3e-6 [1/A^(2)]
-    double contrast;
+    /// SLD_cylinder  [1/A^(2)]
+    //  [DEFAULT]=sldCyl=6.3e-6 [1/A^(2)]
+    double sldCyl;
+
+    /// SLD_solvent  [1/A^(2)]
+    //  [DEFAULT]=sldSolv=1.0e-6 [1/A^(2)]
+    double sldSolv;
 
 	/// Incoherent Background [1/cm]
 	//  [DEFAULT]=background=0.01 [1/cm]

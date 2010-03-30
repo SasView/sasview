@@ -93,11 +93,12 @@ CParallelepipedModel_init(CParallelepipedModel *self, PyObject *args, PyObject *
         PyDict_SetItemString(self->params,"short_b",Py_BuildValue("d",75.000000));
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
         PyDict_SetItemString(self->params,"long_c",Py_BuildValue("d",400.000000));
+        PyDict_SetItemString(self->params,"sldPipe",Py_BuildValue("d",0.000006));
         PyDict_SetItemString(self->params,"parallel_psi",Py_BuildValue("d",0.000000));
         PyDict_SetItemString(self->params,"parallel_phi",Py_BuildValue("d",0.000000));
         PyDict_SetItemString(self->params,"parallel_theta",Py_BuildValue("d",0.000000));
+        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.000001));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000005));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
@@ -252,11 +253,12 @@ static PyObject * evalDistribution(CParallelepipedModel *self, PyObject *args){
     self->model->short_b = PyFloat_AsDouble( PyDict_GetItemString(self->params, "short_b") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
     self->model->long_c = PyFloat_AsDouble( PyDict_GetItemString(self->params, "long_c") );
+    self->model->sldPipe = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldPipe") );
     self->model->parallel_psi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_psi") );
     self->model->parallel_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_phi") );
     self->model->parallel_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_theta") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -338,11 +340,12 @@ static PyObject * run(CParallelepipedModel *self, PyObject *args) {
     self->model->short_b = PyFloat_AsDouble( PyDict_GetItemString(self->params, "short_b") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
     self->model->long_c = PyFloat_AsDouble( PyDict_GetItemString(self->params, "long_c") );
+    self->model->sldPipe = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldPipe") );
     self->model->parallel_psi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_psi") );
     self->model->parallel_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_phi") );
     self->model->parallel_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_theta") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -411,11 +414,12 @@ static PyObject * calculate_ER(CParallelepipedModel *self) {
     self->model->short_b = PyFloat_AsDouble( PyDict_GetItemString(self->params, "short_b") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
     self->model->long_c = PyFloat_AsDouble( PyDict_GetItemString(self->params, "long_c") );
+    self->model->sldPipe = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldPipe") );
     self->model->parallel_psi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_psi") );
     self->model->parallel_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_phi") );
     self->model->parallel_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_theta") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -453,11 +457,12 @@ static PyObject * runXY(CParallelepipedModel *self, PyObject *args) {
     self->model->short_b = PyFloat_AsDouble( PyDict_GetItemString(self->params, "short_b") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
     self->model->long_c = PyFloat_AsDouble( PyDict_GetItemString(self->params, "long_c") );
+    self->model->sldPipe = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldPipe") );
     self->model->parallel_psi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_psi") );
     self->model->parallel_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_phi") );
     self->model->parallel_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "parallel_theta") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();

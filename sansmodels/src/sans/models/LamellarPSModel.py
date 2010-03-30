@@ -34,7 +34,8 @@ class LamellarPSModel(CLamellarPSModel, BaseComponent):
          scale           = 1.0 
          spacing         = 400.0 [A]
          delta           = 30.0 [A]
-         contrast        = 5.3e-006 [1/A^(2)]
+         sld_bi          = 6.3e-006 [1/A^(2)]
+         sld_sol         = 1e-006 [1/A^(2)]
          n_plates        = 20.0 
          caille          = 0.1 
          background      = 0.0 [1/cm]
@@ -64,7 +65,8 @@ class LamellarPSModel(CLamellarPSModel, BaseComponent):
 		in the structure factor of this model.
 		*Parameters: spacing = repeat spacing,
 		delta = bilayer thickness,
-		contrast = SLD_solvent - SLD_bilayer
+		sld_bi = SLD_bilayer
+		sld_sol = SLD_solvent
 		n_plate = # of Lamellar plates
 		caille = Caille parameter (<0.8 or <1)
 		background = incoherent bgd
@@ -75,7 +77,8 @@ class LamellarPSModel(CLamellarPSModel, BaseComponent):
         self.details['scale'] = ['', None, None]
         self.details['spacing'] = ['[A]', None, None]
         self.details['delta'] = ['[A]', None, None]
-        self.details['contrast'] = ['[1/A^(2)]', None, None]
+        self.details['sld_bi'] = ['[1/A^(2)]', None, None]
+        self.details['sld_sol'] = ['[1/A^(2)]', None, None]
         self.details['n_plates'] = ['', None, None]
         self.details['caille'] = ['', None, None]
         self.details['background'] = ['[1/cm]', None, None]

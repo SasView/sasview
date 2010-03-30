@@ -35,7 +35,8 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
          r_minor         = 20.0 [A]
          r_ratio         = 1.5 
          length          = 400.0 [A]
-         contrast        = 3e-006 [1/A^(2)]
+         sldCyl          = 4e-006 [1/A^(2)]
+         sldSolv         = 1e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
          cyl_theta       = 1.57 [rad]
          cyl_phi         = 0.0 [rad]
@@ -56,7 +57,8 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
         self.description =""" Model parameters: r_minor = the radius of minor axis of the cross section
 		r_ratio = the ratio of (r_major /r_minor >= 1)
 		length = the length of the cylinder
-		contrast = SLD of solvent - SLD of the cylinder
+		sldCyl = SLD of the cylinder
+		sldSolv = SLD of solvent -
 		background = incoherent background"""
        
         ## Parameter details [units, min, max]
@@ -65,7 +67,8 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
         self.details['r_minor'] = ['[A]', None, None]
         self.details['r_ratio'] = ['', None, None]
         self.details['length'] = ['[A]', None, None]
-        self.details['contrast'] = ['[1/A^(2)]', None, None]
+        self.details['sldCyl'] = ['[1/A^(2)]', None, None]
+        self.details['sldSolv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['cyl_theta'] = ['[rad]', None, None]
         self.details['cyl_phi'] = ['[rad]', None, None]

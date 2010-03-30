@@ -41,7 +41,8 @@ FlexibleCylinderModel :: FlexibleCylinderModel() {
 	kuhn_length.set_min(0.0);
 	radius  = Parameter(20.0, true);
 	radius.set_min(0.0);
-	contrast   = Parameter(5.3e-6);
+	sldCyl   = Parameter(6.3e-6);
+	sldSolv   = Parameter(1.0e-6);
 	background = Parameter(0.0001);
 }
 
@@ -52,7 +53,7 @@ FlexibleCylinderModel :: FlexibleCylinderModel() {
  * @return: function value
  */
 double FlexibleCylinderModel :: operator()(double q) {
-	double dp[6];
+	double dp[7];
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
@@ -60,8 +61,9 @@ double FlexibleCylinderModel :: operator()(double q) {
 	dp[1] = length();
 	dp[2] = kuhn_length();
 	dp[3] = radius();
-	dp[4] = contrast();
-	dp[5] = 0.0;
+	dp[4] = sldCyl();
+	dp[5] = sldSolv();
+	dp[6] = 0.0;
 
 	// Get the dispersion points for the length
 	vector<WeightPoint> weights_len;

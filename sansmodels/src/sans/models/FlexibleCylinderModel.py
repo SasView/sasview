@@ -35,7 +35,8 @@ class FlexibleCylinderModel(CFlexibleCylinderModel, BaseComponent):
          length          = 1000.0 [A]
          kuhn_length     = 100.0 [A]
          radius          = 20.0 [A]
-         contrast        = 5.3e-006 [1/A^(2)]
+         sldCyl          = 6.3e-006 [1/A^(2)]
+         sldSolv         = 1e-006 [1/A^(2)]
          background      = 0.0001 [1/cm]
 
     """
@@ -61,7 +62,8 @@ class FlexibleCylinderModel(CFlexibleCylinderModel, BaseComponent):
         self.details['length'] = ['[A]', None, None]
         self.details['kuhn_length'] = ['[A]', None, None]
         self.details['radius'] = ['[A]', None, None]
-        self.details['contrast'] = ['[1/A^(2)]', None, None]
+        self.details['sldCyl'] = ['[1/A^(2)]', None, None]
+        self.details['sldSolv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
 
         ## fittable parameters

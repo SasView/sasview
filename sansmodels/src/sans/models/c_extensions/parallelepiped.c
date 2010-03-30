@@ -17,15 +17,16 @@
  * @return: function value
  */
 double parallelepiped_analytical_1D(ParallelepipedParameters *pars, double q) {
-	double dp[6];
+	double dp[7];
 
 	// Fill paramater array
 	dp[0] = pars->scale;
 	dp[1] = pars->short_a;
 	dp[2] = pars->short_b;
 	dp[3] = pars->long_c;
-	dp[4] = pars->contrast;
-	dp[5] = pars->background;
+	dp[4] = pars->sldPipe;
+	dp[5] = pars->sldSolv;
+	dp[6] = pars->background;
 
 	// Call library function to evaluate model
 	return Parallelepiped(dp, q);
@@ -148,7 +149,7 @@ double parallelepiped_analytical_2D_scaled(ParallelepipedParameters *pars, doubl
 	answer = pkernel( q*edgeA, q*edgeB, q*edgeC, sin(alpha)*cos_val_a,sin(alpha)*cos_val_b,cos_val_c);
 
 	// Multiply by contrast^2
-	answer *= pars->contrast*pars->contrast;
+	answer *= (pars->sldPipe - pars->sldSolv) * (pars->sldPipe - pars->sldSolv);
 
 	//normalize by cylinder volume
 	//NOTE that for this (Fournet) definition of the integral, one must MULTIPLY by Vparallel

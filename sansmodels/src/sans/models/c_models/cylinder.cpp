@@ -38,7 +38,8 @@ CylinderModel :: CylinderModel() {
 	radius.set_min(0.0);
 	length     = Parameter(400.0, true);
 	length.set_min(0.0);
-	contrast   = Parameter(3.e-6);
+	sldCyl   = Parameter(4.e-6);
+	sldSolv   = Parameter(1.e-6);
 	background = Parameter(0.0);
 	cyl_theta  = Parameter(0.0, true);
 	cyl_phi    = Parameter(0.0, true);
@@ -51,15 +52,16 @@ CylinderModel :: CylinderModel() {
  * @return: function value
  */
 double CylinderModel :: operator()(double q) {
-	double dp[5];
+	double dp[6];
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
 	dp[0] = scale();
 	dp[1] = radius();
 	dp[2] = length();
-	dp[3] = contrast();
-	dp[4] = 0.0;
+	dp[3] = sldCyl();
+	dp[4] = sldSolv();
+	dp[5] = 0.0;
 
 	// Get the dispersion points for the radius
 	vector<WeightPoint> weights_rad;
@@ -112,7 +114,8 @@ double CylinderModel :: operator()(double qx, double qy) {
 	dp.scale      = scale();
 	dp.radius     = radius();
 	dp.length     = length();
-	dp.contrast   = contrast();
+	dp.sldCyl   = sldCyl();
+	dp.sldSolv   = sldSolv();
 	dp.background = 0.0;
 	dp.cyl_theta  = cyl_theta();
 	dp.cyl_phi    = cyl_phi();

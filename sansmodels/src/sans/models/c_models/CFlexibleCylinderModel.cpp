@@ -90,11 +90,12 @@ CFlexibleCylinderModel_init(CFlexibleCylinderModel *self, PyObject *args, PyObje
         
         // Initialize parameter dictionary
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
+        PyDict_SetItemString(self->params,"sldCyl",Py_BuildValue("d",0.000006));
         PyDict_SetItemString(self->params,"length",Py_BuildValue("d",1000.000000));
-        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",20.000000));
+        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.000001));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000100));
+        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",20.000000));
         PyDict_SetItemString(self->params,"kuhn_length",Py_BuildValue("d",100.000000));
-        PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000005));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
@@ -237,11 +238,12 @@ static PyObject * evalDistribution(CFlexibleCylinderModel *self, PyObject *args)
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sldCyl = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldCyl") );
     self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
-    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->kuhn_length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "kuhn_length") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -314,11 +316,12 @@ static PyObject * run(CFlexibleCylinderModel *self, PyObject *args) {
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sldCyl = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldCyl") );
     self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
-    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->kuhn_length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "kuhn_length") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -378,11 +381,12 @@ static PyObject * calculate_ER(CFlexibleCylinderModel *self) {
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sldCyl = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldCyl") );
     self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
-    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->kuhn_length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "kuhn_length") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -411,11 +415,12 @@ static PyObject * runXY(CFlexibleCylinderModel *self, PyObject *args) {
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sldCyl = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldCyl") );
     self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
-    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->radius = PyFloat_AsDouble( PyDict_GetItemString(self->params, "radius") );
     self->model->kuhn_length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "kuhn_length") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();

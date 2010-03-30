@@ -6,15 +6,13 @@
  */
  //[PYTHONCLASS] = SphereModel
  //[DISP_PARAMS] = radius
- //[DESCRIPTION] =<text>P(q)=(scale/V)*[3V(scatter_sld-solvent_sld)*(sin(qR)-qRcos(qR))
+ //[DESCRIPTION] =<text>P(q)=(scale/V)*[3V(sldSph-sldSolv)*(sin(qR)-qRcos(qR))
  //						/(qR)^3]^(2)+bkg
  //
  //				bkg:background, R: radius of sphere
  //				V:The volume of the scatter
- //				contrast:SLD difference between
- //				scatter and solvent
- //				scatter_sld: the SLD of the scatter
- //				solvent_sld: the SLD of the solvent
+ //				sldSph: the SLD of the sphere
+ //				sldSolv: the SLD of the solvent
  //
  //		</text>
  //[FIXED]=  radius.width
@@ -29,9 +27,13 @@ typedef struct {
     //  [DEFAULT]=radius=60.0 [A]
     double radius;
 
-    ///	Contrast [1/A^(2)]
-    //  [DEFAULT]=contrast= 1.0e-6 [1/A^(2)]
-    double contrast;
+    ///	sldSph [1/A^(2)]
+    //  [DEFAULT]=sldSph= 2.0e-6 [1/A^(2)]
+    double sldSph;
+
+    ///	sldSolv [1/A^(2)]
+    //  [DEFAULT]=sldSolv= 1.0e-6 [1/A^(2)]
+    double sldSolv;
 
 	/// Incoherent Background [1/cm]
 	//  [DEFAULT]=background=0 [1/cm]

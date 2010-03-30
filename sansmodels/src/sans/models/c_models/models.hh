@@ -31,7 +31,8 @@ public:
 	Parameter radius;
 	Parameter scale;
 	Parameter length;
-	Parameter contrast;
+	Parameter sldCyl;
+	Parameter sldSolv;
 	Parameter background;
 	Parameter cyl_theta;
 	Parameter cyl_phi;
@@ -54,7 +55,8 @@ public:
 	Parameter short_a;
 	Parameter short_b;
 	Parameter long_c;
-	Parameter contrast;
+	Parameter sldPipe;
+	Parameter sldSolv;
 	Parameter background;
 	Parameter parallel_theta;
 	Parameter parallel_phi;
@@ -76,7 +78,8 @@ public:
 	// Model parameters
 	Parameter radius;
 	Parameter scale;
-	Parameter contrast;
+	Parameter sldSph;
+	Parameter sldSolv;
 	Parameter background;
 
 	// Constructor
@@ -244,7 +247,8 @@ public:
 	Parameter radius_a;
 	Parameter scale;
 	Parameter radius_b;
-	Parameter contrast;
+	Parameter sldEll;
+	Parameter sldSolv;
 	Parameter background;
 	Parameter axis_theta;
 	Parameter axis_phi;
@@ -266,7 +270,8 @@ public:
 	Parameter scale;
 	Parameter r_ratio;
 	Parameter length;
-	Parameter contrast;
+	Parameter sldCyl;
+	Parameter sldSolv;
 	Parameter background;
 	Parameter cyl_theta;
 	Parameter cyl_phi;
@@ -311,7 +316,8 @@ public:
 	Parameter length;
 	Parameter kuhn_length;
 	Parameter radius;
-	Parameter contrast;
+	Parameter sldCyl;
+	Parameter sldSolv;
 	Parameter background;
 	Parameter axis_theta;
 	Parameter axis_phi;
@@ -402,7 +408,8 @@ public:
 	Parameter scale;
 	Parameter spacing;
 	Parameter delta;
-	Parameter contrast;
+	Parameter sld_bi;
+	Parameter sld_sol;
 	Parameter n_plates;
 	Parameter caille;
 	Parameter background;
@@ -449,7 +456,8 @@ public:
 	Parameter polar_core;
 	Parameter equat_shell;
 	Parameter polar_shell;
-	Parameter contrast;
+	Parameter sld_core;
+	Parameter sld_shell;
 	Parameter sld_solvent;
 	Parameter background;
 	Parameter axis_theta;
@@ -472,7 +480,8 @@ public:
 	Parameter core_radius;
 	Parameter radius;
 	Parameter length;
-	Parameter contrast;
+	Parameter sldCyl;
+	Parameter sldSolv;
 	Parameter background;
 	Parameter axis_theta;
 	Parameter axis_phi;

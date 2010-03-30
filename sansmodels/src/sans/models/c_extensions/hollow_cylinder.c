@@ -16,14 +16,15 @@
  * @return: function value
  */
 double hollow_cylinder_analytical_1D(HollowCylinderParameters *pars, double q) {
-	double dp[6];
+	double dp[7];
 
 	dp[0] = pars->scale;
 	dp[1] = pars->core_radius;
 	dp[2] = pars->radius;
 	dp[3] = pars->length;
-	dp[4] = pars->contrast;
-	dp[5] = pars->background;
+	dp[4] = pars->sldCyl;
+	dp[5] = pars->sldSolv;
+	dp[6] = pars->background;
 
 	return HollowCylinder(dp, q);
 }
@@ -88,10 +89,13 @@ double hollow_cylinder_analytical_2D_scaled(HollowCylinderParameters *pars, doub
 	// Call the IGOR library function to get the kernel
 	answer = HolCylKernel(q, pars->core_radius, pars->radius, pars->length, cos_val);
 
+	// Multiply by contrast^2
+	answer *= (pars->sldCyl - pars->sldSolv)*(pars->sldCyl - pars->sldSolv);
+
 	//normalize by cylinder volume
-	vol=acos(-1.0)*((pars->core_radius *pars->core_radius)-(pars->radius*pars->radius))
+	vol=acos(-1.0)*((pars->radius*pars->radius)-(pars->core_radius *pars->core_radius))
 			*(pars->length);
-	answer /= vol;
+	answer *= vol;
 
 	//convert to [cm-1]
 	answer *= 1.0e8;

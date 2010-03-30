@@ -3,7 +3,7 @@
 /** Structure definition for cylinder parameters
  * [PYTHONCLASS] = CylinderModel
  * [DISP_PARAMS] = radius, length, cyl_theta, cyl_phi
-   [DESCRIPTION] = <text> f(q)= 2*(scatter_sld - solvent_sld)*V*sin(qLcos(alpha/2))
+   [DESCRIPTION] = <text> f(q)= 2*(sldCyl - sldSolv)*V*sin(qLcos(alpha/2))
 				/[qLcos(alpha/2)]*J1(qRsin(alpha/2))/[qRsin(alpha)]
 
 		P(q,alpha)= scale/V*f(q)^(2)+bkg
@@ -33,8 +33,11 @@ typedef struct {
     //  [DEFAULT]=length=400.0 [A]
     double length;
     /// Contrast [1/A^(2)]
-    //  [DEFAULT]=contrast=3.0e-6 [1/A^(2)]
-    double contrast;
+    //  [DEFAULT]=sldCyl=4.0e-6 [1/A^(2)]
+    double sldCyl;
+    /// sldCyl [1/A^(2)]
+    //  [DEFAULT]=sldSolv=1.0e-6 [1/A^(2)]
+    double sldSolv;
 	/// Incoherent Background [1/cm] 0.00
 	//  [DEFAULT]=background=0.0 [1/cm]
 	double background;

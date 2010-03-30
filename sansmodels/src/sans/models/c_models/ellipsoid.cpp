@@ -38,7 +38,8 @@ EllipsoidModel :: EllipsoidModel() {
 	radius_a.set_min(0.0);
 	radius_b   = Parameter(400.0, true);
 	radius_b.set_min(0.0);
-	contrast   = Parameter(3.e-6);
+	sldEll   = Parameter(4.e-6);
+	sldSolv   = Parameter(1.e-6);
 	background = Parameter(0.0);
 	axis_theta  = Parameter(1.57, true);
 	axis_phi    = Parameter(0.0, true);
@@ -51,15 +52,16 @@ EllipsoidModel :: EllipsoidModel() {
  * @return: function value
  */
 double EllipsoidModel :: operator()(double q) {
-	double dp[5];
+	double dp[6];
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
 	dp[0] = scale();
 	dp[1] = radius_a();
 	dp[2] = radius_b();
-	dp[3] = contrast();
-	dp[4] = 0.0;
+	dp[3] = sldEll();
+	dp[4] = sldSolv();
+	dp[5] = 0.0;
 
 	// Get the dispersion points for the radius_a
 	vector<WeightPoint> weights_rad_a;
@@ -115,7 +117,8 @@ double EllipsoidModel :: operator()(double qx, double qy) {
 	dp.scale      = scale();
 	dp.radius_a   = radius_a();
 	dp.radius_b   = radius_b();
-	dp.contrast   = contrast();
+	dp.sldEll   = sldEll();
+	dp.sldSolv   = sldSolv();
 	dp.background = 0.0;
 	dp.axis_theta = axis_theta();
 	dp.axis_phi   = axis_phi();

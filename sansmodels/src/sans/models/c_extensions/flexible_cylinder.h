@@ -30,9 +30,12 @@ typedef struct {
 	/// Radius of the flexible cylinder [A]
     //  [DEFAULT]=radius=20.0 [A]
     double radius;
-    /// Contrast [1/A^(2)]
-    //  [DEFAULT]=contrast=5.3e-6 [1/A^(2)]
-    double contrast;
+    /// SLD of cylinder [1/A^(2)]
+    //  [DEFAULT]=sldCyl=6.3e-6 [1/A^(2)]
+    double sldCyl;
+    /// SLD of solvent [1/A^(2)]
+    //  [DEFAULT]=sldSolv=1.0e-6 [1/A^(2)]
+    double sldSolv;
 	/// Incoherent Background [1/cm]
 	//  [DEFAULT]=background=0.0001 [1/cm]
 	double background;

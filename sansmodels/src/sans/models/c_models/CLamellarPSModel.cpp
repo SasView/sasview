@@ -91,11 +91,12 @@ CLamellarPSModel_init(CLamellarPSModel *self, PyObject *args, PyObject *kwds)
         // Initialize parameter dictionary
         PyDict_SetItemString(self->params,"n_plates",Py_BuildValue("d",20.000000));
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
+        PyDict_SetItemString(self->params,"sld_sol",Py_BuildValue("d",0.000001));
+        PyDict_SetItemString(self->params,"delta",Py_BuildValue("d",30.000000));
         PyDict_SetItemString(self->params,"spacing",Py_BuildValue("d",400.000000));
         PyDict_SetItemString(self->params,"caille",Py_BuildValue("d",0.100000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"delta",Py_BuildValue("d",30.000000));
-        PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000005));
+        PyDict_SetItemString(self->params,"sld_bi",Py_BuildValue("d",0.000006));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
@@ -236,11 +237,12 @@ static PyObject * evalDistribution(CLamellarPSModel *self, PyObject *args){
 	    // Reader parameter dictionary
     self->model->n_plates = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_plates") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sld_sol = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_sol") );
+    self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
     self->model->spacing = PyFloat_AsDouble( PyDict_GetItemString(self->params, "spacing") );
     self->model->caille = PyFloat_AsDouble( PyDict_GetItemString(self->params, "caille") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    self->model->sld_bi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_bi") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -312,11 +314,12 @@ static PyObject * run(CLamellarPSModel *self, PyObject *args) {
 	    // Reader parameter dictionary
     self->model->n_plates = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_plates") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sld_sol = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_sol") );
+    self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
     self->model->spacing = PyFloat_AsDouble( PyDict_GetItemString(self->params, "spacing") );
     self->model->caille = PyFloat_AsDouble( PyDict_GetItemString(self->params, "caille") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    self->model->sld_bi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_bi") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -375,11 +378,12 @@ static PyObject * calculate_ER(CLamellarPSModel *self) {
 	    // Reader parameter dictionary
     self->model->n_plates = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_plates") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sld_sol = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_sol") );
+    self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
     self->model->spacing = PyFloat_AsDouble( PyDict_GetItemString(self->params, "spacing") );
     self->model->caille = PyFloat_AsDouble( PyDict_GetItemString(self->params, "caille") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    self->model->sld_bi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_bi") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -407,11 +411,12 @@ static PyObject * runXY(CLamellarPSModel *self, PyObject *args) {
 	    // Reader parameter dictionary
     self->model->n_plates = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_plates") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sld_sol = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_sol") );
+    self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
     self->model->spacing = PyFloat_AsDouble( PyDict_GetItemString(self->params, "spacing") );
     self->model->caille = PyFloat_AsDouble( PyDict_GetItemString(self->params, "caille") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->delta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "delta") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    self->model->sld_bi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_bi") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();

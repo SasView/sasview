@@ -41,7 +41,8 @@ ParallelepipedModel :: ParallelepipedModel() {
 	short_b.set_min(1.0);
 	long_c     = Parameter(400.0, true);
 	long_c.set_min(1.0);
-	contrast   = Parameter(53.e-7);
+	sldPipe   = Parameter(6.3e-6);
+	sldSolv   = Parameter(1.0e-6);
 	background = Parameter(0.0);
 	parallel_theta  = Parameter(0.0, true);
 	parallel_phi    = Parameter(0.0, true);
@@ -55,7 +56,7 @@ ParallelepipedModel :: ParallelepipedModel() {
  * @return: function value
  */
 double ParallelepipedModel :: operator()(double q) {
-	double dp[6];
+	double dp[7];
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
@@ -63,8 +64,9 @@ double ParallelepipedModel :: operator()(double q) {
 	dp[1] = short_a();
 	dp[2] = short_b();
 	dp[3] = long_c();
-	dp[4] = contrast();
-	dp[5] = 0.0;
+	dp[4] = sldPipe();
+	dp[5] = sldSolv();
+	dp[6] = 0.0;
 
 	// Get the dispersion points for the short_edgeA
 	vector<WeightPoint> weights_short_a;
@@ -131,7 +133,8 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 	dp.short_a   = short_a();
 	dp.short_b   = short_b();
 	dp.long_c  = long_c();
-	dp.contrast   = contrast();
+	dp.sldPipe   = sldPipe();
+	dp.sldSolv   = sldSolv();
 	dp.background = 0.0;
 	//dp.background = background();
 	dp.parallel_theta  = parallel_theta();

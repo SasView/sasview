@@ -40,7 +40,8 @@ HollowCylinderModel :: HollowCylinderModel() {
 	radius.set_min(0.0);
 	length     = Parameter(400.0, true);
 	length.set_min(0.0);
-	contrast  = Parameter(5.3e-6);
+	sldCyl  = Parameter(6.3e-6);
+	sldSolv  = Parameter(1.0e-6);
 	background = Parameter(0.0);
 	axis_theta = Parameter(0.0, true);
 	axis_phi   = Parameter(0.0, true);
@@ -53,14 +54,15 @@ HollowCylinderModel :: HollowCylinderModel() {
  * @return: function value
  */
 double HollowCylinderModel :: operator()(double q) {
-	double dp[6];
+	double dp[7];
 
 	dp[0] = scale();
 	dp[1] = core_radius();
 	dp[2] = radius();
 	dp[3] = length();
-	dp[4] = contrast();
-	dp[5] = 0.0;
+	dp[4] = sldCyl();
+	dp[5] = sldSolv();
+	dp[6] = 0.0;
 
 	// Get the dispersion points for the core radius
 	vector<WeightPoint> weights_core_radius;
@@ -112,7 +114,7 @@ double HollowCylinderModel :: operator()(double q) {
 	}
 	if (vol != 0.0 && norm != 0.0) {
 		//Re-normalize by avg volume
-		sum = sum/(vol/norm);}
+		sum = sum*(vol/norm);}
 
 	return sum/norm + background();
 }
@@ -130,7 +132,8 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 	dp.core_radius     = core_radius();
 	dp.radius  = radius();
 	dp.length     = length();
-	dp.contrast   = contrast();
+	dp.sldCyl   = sldCyl();
+	dp.sldSolv  = sldSolv();
 	dp.background = 0.0;
 	dp.axis_theta = axis_theta();
 	dp.axis_phi   = axis_phi();
@@ -222,7 +225,7 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 	if (weights_theta.size()>1) norm = norm / asin(1.0);
 	if (vol != 0.0 && norm_vol != 0.0) {
 		//Re-normalize by avg volume
-		sum = sum/(vol/norm_vol);}
+		sum = sum*(vol/norm_vol);}
 	return sum/norm + background();
 }
 

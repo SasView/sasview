@@ -35,7 +35,8 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
          short_a         = 35.0 [A]
          short_b         = 75.0 [A]
          long_c          = 400.0 [A]
-         contrast        = 5.3e-006 [1/A^(2)]
+         sldPipe         = 6.3e-006 [1/A^(2)]
+         sldSolv         = 1e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
          parallel_theta  = 0.0 [rad]
          parallel_phi    = 0.0 [rad]
@@ -59,7 +60,8 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
 		short_a: length of short edge  [A]
 		short_b: length of another short edge [A]
 		long_c: length of long edge  of the parallelepiped [A]
-		contrast: particle_sld - solvent_sld
+		sldPipe: Pipe_sld
+		sldSolv: solvent_sld
 		background:Incoherent Background [1/cm]"""
        
         ## Parameter details [units, min, max]
@@ -68,7 +70,8 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
         self.details['short_a'] = ['[A]', None, None]
         self.details['short_b'] = ['[A]', None, None]
         self.details['long_c'] = ['[A]', None, None]
-        self.details['contrast'] = ['[1/A^(2)]', None, None]
+        self.details['sldPipe'] = ['[1/A^(2)]', None, None]
+        self.details['sldSolv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['parallel_theta'] = ['[rad]', None, None]
         self.details['parallel_phi'] = ['[rad]', None, None]

@@ -34,7 +34,8 @@ class CylinderModel(CCylinderModel, BaseComponent):
          scale           = 1.0 
          radius          = 20.0 [A]
          length          = 400.0 [A]
-         contrast        = 3e-006 [1/A^(2)]
+         sldCyl          = 4e-006 [1/A^(2)]
+         sldSolv         = 1e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
          cyl_theta       = 1.0 [rad]
          cyl_phi         = 1.0 [rad]
@@ -51,7 +52,7 @@ class CylinderModel(CCylinderModel, BaseComponent):
         ## Name of the model
         self.name = "CylinderModel"
         ## Model description
-        self.description =""" f(q)= 2*(scatter_sld - solvent_sld)*V*sin(qLcos(alpha/2))
+        self.description =""" f(q)= 2*(sldCyl - sldSolv)*V*sin(qLcos(alpha/2))
 		/[qLcos(alpha/2)]*J1(qRsin(alpha/2))/[qRsin(alpha)]
 		
 		P(q,alpha)= scale/V*f(q)^(2)+bkg
@@ -70,7 +71,8 @@ class CylinderModel(CCylinderModel, BaseComponent):
         self.details['scale'] = ['', None, None]
         self.details['radius'] = ['[A]', None, None]
         self.details['length'] = ['[A]', None, None]
-        self.details['contrast'] = ['[1/A^(2)]', None, None]
+        self.details['sldCyl'] = ['[1/A^(2)]', None, None]
+        self.details['sldSolv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['cyl_theta'] = ['[rad]', None, None]
         self.details['cyl_phi'] = ['[rad]', None, None]

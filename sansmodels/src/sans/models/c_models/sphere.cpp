@@ -34,7 +34,8 @@ SphereModel :: SphereModel() {
 	scale      = Parameter(1.0);
 	radius     = Parameter(20.0, true);
 	radius.set_min(0.0);
-	contrast   = Parameter(3.e-6);
+	sldSph   = Parameter(4.0e-6);
+	sldSolv   = Parameter(1.0e-6);
 	background = Parameter(0.0);
 }
 
@@ -45,14 +46,15 @@ SphereModel :: SphereModel() {
  * @return: function value
  */
 double SphereModel :: operator()(double q) {
-	double dp[4];
+	double dp[5];
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
 	dp[0] = scale();
 	dp[1] = radius();
-	dp[2] = contrast();
-	dp[3] = 0.0;
+	dp[2] = sldSph();
+	dp[3] = sldSolv();
+	dp[4] = 0.0;
 
 	// Get the dispersion points for the radius
 	vector<WeightPoint> weights_rad;
@@ -113,7 +115,8 @@ double SphereModel :: calculate_ER() {
 	SphereParameters dp;
 	dp.scale = scale();
 	dp.radius = radius();
-	dp.contrast = contrast();
+	dp.sldSph = sldSph();
+	dp.sldSolv = sldSolv();
 	dp.background = background();
 	double rad_out = 0.0;
 

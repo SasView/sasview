@@ -34,7 +34,8 @@ class EllipsoidModel(CEllipsoidModel, BaseComponent):
          scale           = 1.0 
          radius_a        = 20.0 [A]
          radius_b        = 400.0 [A]
-         contrast        = 3e-006 [1/A^(2)]
+         sldEll          = 4e-006 [1/A^(2)]
+         sldSolv         = 1e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
          axis_theta      = 1.57 [rad]
          axis_phi        = 0.0 [rad]
@@ -51,8 +52,8 @@ class EllipsoidModel(CEllipsoidModel, BaseComponent):
         ## Name of the model
         self.name = "EllipsoidModel"
         ## Model description
-        self.description =""""P(q.alpha)= scale*f(q)^(2)+ bkg, where f(q)= 3*(scatter_sld
-		- scatter_solvent)*V*[sin(q*r(Ra,Rb,alpha))
+        self.description =""""P(q.alpha)= scale*f(q)^(2)+ bkg, where f(q)= 3*(sld_ell
+		- sld_solvent)*V*[sin(q*r(Ra,Rb,alpha))
 		-q*r*cos(qr(Ra,Rb,alpha))]
 		/[qr(Ra,Rb,alpha)]^(3)"
 		
@@ -61,8 +62,8 @@ class EllipsoidModel(CEllipsoidModel, BaseComponent):
 		
 		scatter_sld: SLD of the scatter
 		solvent_sld: SLD of the solvent
-		contrast: SLD difference between scatter
-		and solvent
+		sldEll: SLD of ellipsoid
+		sldSolv: SLD of solvent
 		V: volune of the Eliipsoid
 		Ra: radius along the rotation axis
 		of the Ellipsoid
@@ -74,7 +75,8 @@ class EllipsoidModel(CEllipsoidModel, BaseComponent):
         self.details['scale'] = ['', None, None]
         self.details['radius_a'] = ['[A]', None, None]
         self.details['radius_b'] = ['[A]', None, None]
-        self.details['contrast'] = ['[1/A^(2)]', None, None]
+        self.details['sldEll'] = ['[1/A^(2)]', None, None]
+        self.details['sldSolv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['axis_theta'] = ['[rad]', None, None]
         self.details['axis_phi'] = ['[rad]', None, None]

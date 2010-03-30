@@ -20,7 +20,8 @@
 		in the structure factor of this model.
 		*Parameters: spacing = repeat spacing,
 		delta = bilayer thickness,
-		contrast = SLD_solvent - SLD_bilayer
+		sld_bi = SLD_bilayer
+		sld_sol = SLD_solvent
 		n_plate = # of Lamellar plates
 		caille = Caille parameter (<0.8 or <1)
 		background = incoherent bgd
@@ -40,9 +41,12 @@ typedef struct {
 	/// bilayer thicknes [A]
     //  [DEFAULT]=delta=30 [A]
     double delta;
-    /// Contrast [1/A^(2)]
-    //  [DEFAULT]=contrast=5.3e-6 [1/A^(2)]
-    double contrast;
+    /// SLD of bilayer [1/A^(2)]
+    //  [DEFAULT]=sld_bi=6.3e-6 [1/A^(2)]
+    double sld_bi;
+    /// SLD of solvent [1/A^(2)]
+    //  [DEFAULT]=sld_sol=1.0e-6 [1/A^(2)]
+    double sld_sol;
 	 /// Number of lamellar plates
     //  [DEFAULT]=n_plates=20
     double n_plates;

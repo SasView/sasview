@@ -90,6 +90,7 @@ CCoreShellEllipsoidModel_init(CCoreShellEllipsoidModel *self, PyObject *args, Py
         
         // Initialize parameter dictionary
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
+        PyDict_SetItemString(self->params,"sld_core",Py_BuildValue("d",0.000002));
         PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",0.000000));
         PyDict_SetItemString(self->params,"polar_shell",Py_BuildValue("d",30.000000));
         PyDict_SetItemString(self->params,"sld_solvent",Py_BuildValue("d",0.000006));
@@ -98,7 +99,7 @@ CCoreShellEllipsoidModel_init(CCoreShellEllipsoidModel *self, PyObject *args, Py
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000));
         PyDict_SetItemString(self->params,"equat_core",Py_BuildValue("d",200.000000));
         PyDict_SetItemString(self->params,"polar_core",Py_BuildValue("d",20.000000));
-        PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000001));
+        PyDict_SetItemString(self->params,"sld_shell",Py_BuildValue("d",0.000001));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
@@ -250,6 +251,7 @@ static PyObject * evalDistribution(CCoreShellEllipsoidModel *self, PyObject *arg
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sld_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core") );
     self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
     self->model->polar_shell = PyFloat_AsDouble( PyDict_GetItemString(self->params, "polar_shell") );
     self->model->sld_solvent = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_solvent") );
@@ -258,7 +260,7 @@ static PyObject * evalDistribution(CCoreShellEllipsoidModel *self, PyObject *arg
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->equat_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "equat_core") );
     self->model->polar_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "polar_core") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    self->model->sld_shell = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_shell") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -337,6 +339,7 @@ static PyObject * run(CCoreShellEllipsoidModel *self, PyObject *args) {
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sld_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core") );
     self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
     self->model->polar_shell = PyFloat_AsDouble( PyDict_GetItemString(self->params, "polar_shell") );
     self->model->sld_solvent = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_solvent") );
@@ -345,7 +348,7 @@ static PyObject * run(CCoreShellEllipsoidModel *self, PyObject *args) {
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->equat_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "equat_core") );
     self->model->polar_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "polar_core") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    self->model->sld_shell = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_shell") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -411,6 +414,7 @@ static PyObject * calculate_ER(CCoreShellEllipsoidModel *self) {
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sld_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core") );
     self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
     self->model->polar_shell = PyFloat_AsDouble( PyDict_GetItemString(self->params, "polar_shell") );
     self->model->sld_solvent = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_solvent") );
@@ -419,7 +423,7 @@ static PyObject * calculate_ER(CCoreShellEllipsoidModel *self) {
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->equat_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "equat_core") );
     self->model->polar_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "polar_core") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    self->model->sld_shell = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_shell") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -454,6 +458,7 @@ static PyObject * runXY(CCoreShellEllipsoidModel *self, PyObject *args) {
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sld_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core") );
     self->model->axis_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_theta") );
     self->model->polar_shell = PyFloat_AsDouble( PyDict_GetItemString(self->params, "polar_shell") );
     self->model->sld_solvent = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_solvent") );
@@ -462,7 +467,7 @@ static PyObject * runXY(CCoreShellEllipsoidModel *self, PyObject *args) {
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->equat_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "equat_core") );
     self->model->polar_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "polar_core") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    self->model->sld_shell = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_shell") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();

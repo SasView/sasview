@@ -13,7 +13,8 @@
 		short_a: length of short edge  [A]
 		short_b: length of another short edge [A]
 		long_c: length of long edge  of the parallelepiped [A]
-		contrast: particle_sld - solvent_sld
+		sldPipe: Pipe_sld
+		sldSolv: solvent_sld
 		background:Incoherent Background [1/cm]
 		</text>
 	[FIXED]= <text>short_a.width; short_b.width; long_c.width;parallel_phi.width;parallel_psi.width; parallel_theta.width</text>
@@ -34,9 +35,12 @@ typedef struct {
 	/// Length of long edge of the parallelepiped [A]
     //  [DEFAULT]=long_c=400 [A]
     double long_c;
-    /// Contrast [1/A^(2)]
-    //  [DEFAULT]=contrast=53e-7 [1/A^(2)]
-    double contrast;
+    /// SLD_Pipe [1/A^(2)]
+    //  [DEFAULT]=sldPipe=6.3e-6 [1/A^(2)]
+    double sldPipe;
+    /// sldSolv [1/A^(2)]
+    //  [DEFAULT]=sldSolv=1.0e-6 [1/A^(2)]
+    double sldSolv;
 	/// Incoherent Background [1/cm]
 	//  [DEFAULT]=background=0.0 [1/cm]
 	double background;

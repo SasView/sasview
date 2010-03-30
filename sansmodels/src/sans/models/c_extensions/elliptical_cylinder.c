@@ -16,15 +16,16 @@
  * @return: function value
  */
 double elliptical_cylinder_analytical_1D(EllipticalCylinderParameters *pars, double q) {
-	double dp[6];
+	double dp[7];
 
 	// Fill paramater array
 	dp[0] = pars->scale;
 	dp[1] = pars->r_minor;
 	dp[2] = pars->r_ratio;
 	dp[3] = pars->length;
-	dp[4] = pars->contrast;
-	dp[5] = pars->background;
+	dp[4] = pars->sldCyl;
+	dp[5] = pars->sldSolv;
+	dp[6] = pars->background;
 
 	// Call library function to evaluate model
 	return EllipCyl20(dp, q);
@@ -144,7 +145,7 @@ double elliptical_cylinder_analytical_2D_scaled(EllipticalCylinderParameters *pa
 	answer = elliptical_cylinder_kernel(pars, q, alpha,nu);
 
 	// Multiply by contrast^2
-	answer *= pars->contrast*pars->contrast;
+	answer *= (pars->sldCyl - pars->sldSolv) * (pars->sldCyl - pars->sldSolv);
 
 	//normalize by cylinder volume
 	//NOTE that for this (Fournet) definition of the integral, one must MULTIPLY by Vcyl

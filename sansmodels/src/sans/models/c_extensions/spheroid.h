@@ -14,7 +14,8 @@
 			polar_core = polar radius of core,
 			equat_shell = equatorial radius of shell,
 			polar_shell = polar radius (revolution axis) of shell,
-			contrast = SLD_core - SLD_shell
+			sld_core = SLD_core
+			sld_shell = SLD_shell
 			sld_solvent = SLD_solvent
 			background = Incoherent bkg
 			scale =scale
@@ -44,9 +45,12 @@ typedef struct {
 	/// polar radius of shell [A]
     //  [DEFAULT]=polar_shell=30.0 [A]
     double polar_shell;
-    ///  Scattering contrast [1/A^(2)]
-    //  [DEFAULT]=contrast=1.0e-6 [1/A^(2)]
-    double contrast;
+    ///  Core scattering length density [1/A^(2)]
+    //  [DEFAULT]=sld_core=2.0e-6 [1/A^(2)]
+    double sld_core;
+    ///  Shell scattering length density [1/A^(2)]
+    //  [DEFAULT]=sld_shell=1.0e-6 [1/A^(2)]
+    double sld_shell;
 	/// Solvent scattering length density  [1/A^(2)]
     //  [DEFAULT]=sld_solvent=6.3e-6 [1/A^(2)]
     double sld_solvent;

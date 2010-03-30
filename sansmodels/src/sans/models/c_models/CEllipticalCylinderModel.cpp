@@ -90,13 +90,14 @@ CEllipticalCylinderModel_init(CEllipticalCylinderModel *self, PyObject *args, Py
         
         // Initialize parameter dictionary
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
+        PyDict_SetItemString(self->params,"sldCyl",Py_BuildValue("d",0.000004));
         PyDict_SetItemString(self->params,"cyl_psi",Py_BuildValue("d",0.000000));
         PyDict_SetItemString(self->params,"length",Py_BuildValue("d",400.000000));
         PyDict_SetItemString(self->params,"r_minor",Py_BuildValue("d",20.000000));
-        PyDict_SetItemString(self->params,"cyl_theta",Py_BuildValue("d",1.570000));
+        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.000001));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000));
+        PyDict_SetItemString(self->params,"cyl_theta",Py_BuildValue("d",1.570000));
         PyDict_SetItemString(self->params,"r_ratio",Py_BuildValue("d",1.500000));
-        PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000003));
         PyDict_SetItemString(self->params,"cyl_phi",Py_BuildValue("d",0.000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
@@ -249,13 +250,14 @@ static PyObject * evalDistribution(CEllipticalCylinderModel *self, PyObject *arg
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sldCyl = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldCyl") );
     self->model->cyl_psi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_psi") );
     self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
     self->model->r_minor = PyFloat_AsDouble( PyDict_GetItemString(self->params, "r_minor") );
-    self->model->cyl_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_theta") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->cyl_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_theta") );
     self->model->r_ratio = PyFloat_AsDouble( PyDict_GetItemString(self->params, "r_ratio") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     self->model->cyl_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_phi") );
     // Read in dispersion parameters
     PyObject* disp_dict;
@@ -335,13 +337,14 @@ static PyObject * run(CEllipticalCylinderModel *self, PyObject *args) {
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sldCyl = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldCyl") );
     self->model->cyl_psi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_psi") );
     self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
     self->model->r_minor = PyFloat_AsDouble( PyDict_GetItemString(self->params, "r_minor") );
-    self->model->cyl_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_theta") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->cyl_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_theta") );
     self->model->r_ratio = PyFloat_AsDouble( PyDict_GetItemString(self->params, "r_ratio") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     self->model->cyl_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_phi") );
     // Read in dispersion parameters
     PyObject* disp_dict;
@@ -408,13 +411,14 @@ static PyObject * calculate_ER(CEllipticalCylinderModel *self) {
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sldCyl = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldCyl") );
     self->model->cyl_psi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_psi") );
     self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
     self->model->r_minor = PyFloat_AsDouble( PyDict_GetItemString(self->params, "r_minor") );
-    self->model->cyl_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_theta") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->cyl_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_theta") );
     self->model->r_ratio = PyFloat_AsDouble( PyDict_GetItemString(self->params, "r_ratio") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     self->model->cyl_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_phi") );
     // Read in dispersion parameters
     PyObject* disp_dict;
@@ -450,13 +454,14 @@ static PyObject * runXY(CEllipticalCylinderModel *self, PyObject *args) {
 	
 	    // Reader parameter dictionary
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sldCyl = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldCyl") );
     self->model->cyl_psi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_psi") );
     self->model->length = PyFloat_AsDouble( PyDict_GetItemString(self->params, "length") );
     self->model->r_minor = PyFloat_AsDouble( PyDict_GetItemString(self->params, "r_minor") );
-    self->model->cyl_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_theta") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->cyl_theta = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_theta") );
     self->model->r_ratio = PyFloat_AsDouble( PyDict_GetItemString(self->params, "r_ratio") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
     self->model->cyl_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "cyl_phi") );
     // Read in dispersion parameters
     PyObject* disp_dict;

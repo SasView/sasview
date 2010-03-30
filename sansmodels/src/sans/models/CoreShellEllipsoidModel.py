@@ -36,7 +36,8 @@ class CoreShellEllipsoidModel(CCoreShellEllipsoidModel, BaseComponent):
          polar_core      = 20.0 [A]
          equat_shell     = 250.0 [A]
          polar_shell     = 30.0 [A]
-         contrast        = 1e-006 [1/A^(2)]
+         sld_core        = 2e-006 [1/A^(2)]
+         sld_shell       = 1e-006 [1/A^(2)]
          sld_solvent     = 6.3e-006 [1/A^(2)]
          background      = 0.001 [1/cm]
          axis_theta      = 0.0 [rad]
@@ -65,7 +66,8 @@ class CoreShellEllipsoidModel(CCoreShellEllipsoidModel, BaseComponent):
 		polar_core = polar radius of core,
 		equat_shell = equatorial radius of shell,
 		polar_shell = polar radius (revolution axis) of shell,
-		contrast = SLD_core - SLD_shell
+		sld_core = SLD_core
+		sld_shell = SLD_shell
 		sld_solvent = SLD_solvent
 		background = Incoherent bkg
 		scale =scale
@@ -81,7 +83,8 @@ class CoreShellEllipsoidModel(CCoreShellEllipsoidModel, BaseComponent):
         self.details['polar_core'] = ['[A]', None, None]
         self.details['equat_shell'] = ['[A]', None, None]
         self.details['polar_shell'] = ['[A]', None, None]
-        self.details['contrast'] = ['[1/A^(2)]', None, None]
+        self.details['sld_core'] = ['[1/A^(2)]', None, None]
+        self.details['sld_shell'] = ['[1/A^(2)]', None, None]
         self.details['sld_solvent'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['axis_theta'] = ['[rad]', None, None]
