@@ -1596,7 +1596,9 @@ class BasicPage(wx.ScrolledWindow):
             self.text2.Show()
             self.structurebox.Enable()
             self.text2.Enable()
-           
+        if self.data.__class__.__name__ =="Data2D":
+            self.smear_description_2d.Show(True)
+            
         s_id = self.structurebox.GetCurrentSelection()
         struct_factor = self.structurebox.GetClientData( s_id )
        
