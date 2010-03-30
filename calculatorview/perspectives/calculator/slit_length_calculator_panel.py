@@ -21,11 +21,11 @@ _BOX_WIDTH = 76
 #Slit length panel size 
 if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 500
-    PANEL_HEIGHT = 190
+    PANEL_HEIGHT = 200
     FONT_VARIANT = 0
 else:
     PANEL_WIDTH = 530
-    PANEL_HEIGHT = 220
+    PANEL_HEIGHT = 230
     FONT_VARIANT = 1
     
 
@@ -34,9 +34,9 @@ class SlitLengthCalculatorPanel(wx.Panel):
         Provides the slit length calculator GUI.
     """
     ## Internal nickname for the window, used by the AUI manager
-    window_name = "Slit Length Calculator"
+    window_name = "Slit Size Calculator"
     ## Name to appear on the window title bar
-    window_caption = "Slit Length Calculator"
+    window_caption = "Slit Size Calculator"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
     
@@ -62,6 +62,7 @@ class SlitLengthCalculatorPanel(wx.Panel):
                                                     wx.VERTICAL)
         self.data_name_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.slit_size_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.hint_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
        
     def _layout_data_name(self):
@@ -83,7 +84,7 @@ class SlitLengthCalculatorPanel(wx.Panel):
         """
             Fill the sizer containing slit size information
         """
-        slit_size_txt = wx.StaticText(self, -1, 'Slit Size: ')
+        slit_size_txt = wx.StaticText(self, -1, 'Full Slit Size: ')
         self.slit_size_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         slit_size_hint = " Estimated slit size"
         self.slit_size_tcl.SetToolTipString(slit_size_hint)
@@ -96,13 +97,21 @@ class SlitLengthCalculatorPanel(wx.Panel):
                                       (slit_size_unit_txt, 0, wx.LEFT, 10),
                                       (self.slit_size_unit_tcl, 0, wx.LEFT, 10)])
     
+    def _layout_hint(self):
+        """
+            Fill the sizer containing hint 
+        """
+        hint_msg = "This calculation works only for  SAXSess beam profile data."
+        self.hint_txt = wx.StaticText(self, -1, hint_msg)
+        self.hint_sizer.AddMany([(self.hint_txt, 0, wx.LEFT, 15)])
+    
     def _layout_button(self):  
         """
             Do the layout for the button widgets
         """ 
         self.bt_close = wx.Button(self, wx.ID_CANCEL,'Close')
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
-        self.bt_close.SetToolTipString("Apply current changes to the source.")
+        self.bt_close.SetToolTipString("Close this window.")
         self.button_sizer.AddMany([(self.bt_close, 0, wx.LEFT, 390)])
         
     def _do_layout(self):
@@ -112,15 +121,17 @@ class SlitLengthCalculatorPanel(wx.Panel):
         self._define_structure()
         self._layout_data_name()
         self._layout_slit_size()
+        self._layout_hint()
         self._layout_button()
         self.boxsizer_source.AddMany([(self.data_name_sizer, 0,
                                           wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
                                    (self.slit_size_sizer, 0,
+                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                     (self.hint_sizer, 0,
                                      wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
         self.main_sizer.AddMany([(self.boxsizer_source, 0, wx.ALL, 10),
                                   (self.button_sizer, 0,
                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
-        
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
         
@@ -202,7 +213,7 @@ class SlitLengthCalculatorPanel(wx.Panel):
         except:
             if self.parent.parent is None:
                 return 
-            msg = "Slit Length Calculator: %s"%(sys.exc_value)
+            msg = "Slit Size Calculator: %s"%(sys.exc_value)
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg, type='stop'))
             return 
         self.slit_size_tcl.SetValue(str(slit_length))
@@ -214,7 +225,7 @@ class SlitLengthCalculatorPanel(wx.Panel):
         wx.PostEvent(self.parent.parent, StatusEvent(status=msg, type='stop'))
     
 class SlitLengthCalculatorWindow(wx.Frame):
-    def __init__(self, parent=None, id=1, title="Slit Length Calculator"):
+    def __init__(self, parent=None, id=1, title="Slit Size Calculator"):
         wx.Frame.__init__(self, parent, id, title, size=(PANEL_WIDTH,PANEL_HEIGHT))
         self.parent = parent
         self.panel = SlitLengthCalculatorPanel(parent=self)

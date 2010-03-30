@@ -108,7 +108,7 @@ class Plugin:
         sld_help = "Provides computation related to Scattering Length density"
         slit_length_help = "Provides computation related to Scattering Length density"
         return [("SLD Calculator", sld_help, self.on_calculate_sld),
-                ("Slit Side Calculator", slit_length_help,
+                ("Slit Size Calculator", slit_length_help,
                      self.on_calculate_slit_size)]
               
     def on_calculate_sld(self, event):
