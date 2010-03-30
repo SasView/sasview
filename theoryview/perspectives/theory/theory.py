@@ -366,10 +366,10 @@ class Plugin:
         theory.y_bins = y_bins   
         
         # max and min taking account of the bin sizes
-        theory.xmin= xmin - xstep/2
-        theory.xmax= xmax + xstep/2
-        theory.ymin= ymin - ystep/2
-        theory.ymax= ymax + ystep/2
+        theory.xmin= xmin 
+        theory.xmax= xmax 
+        theory.ymin= ymin
+        theory.ymax= ymax 
         theory.group_id ="Model"
         theory.id ="Model"
         

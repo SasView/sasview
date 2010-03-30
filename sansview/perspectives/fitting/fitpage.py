@@ -1106,8 +1106,9 @@ class FitPage(BasicPage):
 
             # more disables for 2D
             if self.data.__class__.__name__ =="Data2D":
+                if self.model != None:
+                    self.smear_description_2d.Show(True)
                 self.smear_description_none.Hide()
-                self.smear_description_2d.Show(True)
                 self.pinhole_smearer.Disable()
                 self.slit_smearer.Disable()
                 

@@ -46,6 +46,7 @@ class Calc2D(CalcThread):
                 self.qmax=math.sqrt( newx + newy )
         
         if self.data != None:
+            self.I_data = self.data.data
             self.qx_data = self.data.qx_data
             self.qy_data = self.data.qy_data
             self.mask    = self.data.mask
@@ -66,7 +67,9 @@ class Calc2D(CalcThread):
             new_ybin = new_ybin.flatten()
             self.qy_data = new_ybin
             self.qx_data = new_xbin
-           
+            # fake data
+            self.I_data = numpy.ones(len(self.qx_data))
+            
             self.mask = numpy.ones(len(self.qx_data),dtype=bool)
             
         # Define matrix where data will be plotted    
@@ -77,7 +80,7 @@ class Calc2D(CalcThread):
         # so that must be mulitified by sqrt(2) to get actual max for 2d
         index_model = ((self.qmin <= radius)&(radius<= self.qmax))
         self.mask = (index_model)&(self.mask)
-        
+        self.mask = (self.mask)&(numpy.isfinite(self.I_data))
         if self.data ==None:
             # Only qmin value will be consider for the detector
             self.mask = index_data  
@@ -85,6 +88,11 @@ class Calc2D(CalcThread):
         value = self.model.evalDistribution([self.qx_data[self.mask],self.qy_data[self.mask]] )
 
         output = numpy.zeros(len(self.mask))
+                
+        # output default is None
+        # This method is to distinguish between masked point and data point = 0.
+        output = output/output
+        # set value for self.mask==True, else still None to Plottools
         output[self.mask] = value 
 
         elapsed = time.time()-self.starttime
