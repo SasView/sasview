@@ -11,7 +11,7 @@ class DataReader(CalcThread):
     """
             Load a data given a filename
     """
-    def __init__(self, path, filename='',completefn=None,
+    def __init__(self, path, completefn=None,
                  updatefn   = None,
                  yieldtime  = 0.01,
                  worktime   = 0.01
@@ -20,7 +20,6 @@ class DataReader(CalcThread):
                  updatefn,
                  yieldtime,
                  worktime)
-        self.filename = filename
         self.path = path
         #Instantiate a loader 
         self.loader = Loader()
@@ -44,7 +43,7 @@ class DataReader(CalcThread):
         try:
             data =  self.loader.load(self.path)
             elapsed = time.time() - self.starttime
-            self.complete(data=data, filename=self.filename)
+            self.complete(data=data)
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...

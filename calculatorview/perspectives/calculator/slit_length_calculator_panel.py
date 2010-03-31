@@ -150,7 +150,7 @@ class SlitLengthCalculatorPanel(wx.Panel):
             filename = os.path.basename(path)
         dlg.Destroy()
         
-        return path, filename
+        return path
 
     def on_close(self, event):
         """
@@ -161,12 +161,12 @@ class SlitLengthCalculatorPanel(wx.Panel):
     def on_load_data(self, event):
         """
             Open a file dialog to allow the user to select a given file.
-            The user can allow load file with extension .DAT or .dat.
+            The user is only allow to load file with extension .DAT or .dat.
             Display the slit size corresponding to the loaded data.
         """
-        path, filename = self.choose_data_file(location=self._default_save_location)
+        path = self.choose_data_file(location=self._default_save_location)
         
-        if path is None or filename == '':
+        if path is None:
             return 
         self._default_save_location = path
         try:
@@ -179,7 +179,6 @@ class SlitLengthCalculatorPanel(wx.Panel):
                 wx.PostEvent(self.parent.parent, StatusEvent(status="Loading...",
                                 type="progress"))
             self.reader = DataReader(path=path,
-                                     filename=filename,
                                     completefn=self.complete_loading,
                                     updatefn=None)
             self.reader.queue()
@@ -194,13 +193,13 @@ class SlitLengthCalculatorPanel(wx.Panel):
         """
             Complete the loading and compute the slit size
         """
-        if data is not None and data.__class__.__name__ == 'Data2D':
+        if data is None or data.__class__.__name__ == 'Data2D':
             if self.parent.parent is None:
                 return 
             msg = "Slit Length cannot be computed for 2D Data"
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg, type='stop'))
             return 
-        self.data_name_tcl.SetValue(str(filename))
+        self.data_name_tcl.SetValue(str(data.filename))
         #compute the slit size
         try:
             x = data.x
