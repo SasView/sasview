@@ -12,7 +12,7 @@ class DABModel(BaseComponent):
     """
         Class that evaluates a DAB model.
         
-        F(x) = scale/( 1 + (x*L)^2 )^(2) + background
+        F(x) = scale*(L^3)/( 1 + (x*L)^2 )^(2) + background
         
         The model has three parameters: 
             L             =  Correlation Length
@@ -28,7 +28,7 @@ class DABModel(BaseComponent):
         
         ## Name of the model
         self.name = "DAB_Model"
-        self.description="""F(x) = scale/( 1 + (x*L)^2 )^(2) + background
+        self.description="""F(x) = scale*(L^3)/( 1 + (x*L)^2 )^(2) + background
         
         The model has three parameters: 
         L             =  Correlation Length
@@ -49,10 +49,11 @@ class DABModel(BaseComponent):
         self.fixed= []      
     def _DAB(self, x):
         """
-            Evaluate  F(x) = scale/( 1 + (x*L)^2 )^(2) + background
+            Evaluate  F(x) = (scale*L^3)/( 1 + (x*L)^2 )^(2) + background
            
         """
-        return self.params['scale']/math.pow(( 1 + math.pow(x * self.params['length'],2)),2) \
+        # According to SRK (Igor/NIST code: 6 JUL 2009  changed definition of 'scale' to be uncorrelated with 'length')
+        return self.params['scale']*math.pow(self.params['length'],3)/math.pow(( 1 + math.pow(x * self.params['length'],2)),2) \
          + self.params['background']
        
    
