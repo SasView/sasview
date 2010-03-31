@@ -420,6 +420,11 @@ class InvariantPanel(wx.ScrolledWindow):
       
         #enable the button_ok for more details
         self.button_ok.Enable()
+    
+    def reset_panel(self):
+        """
+            set the panel at its initial state.
+        """
         
     def _reset_output(self):
         """
