@@ -222,6 +222,7 @@ class Reader:
                 # Note: For convenience, mask = False stands for masked, while mask = True for unmasked
                 mask    = numpy.append(mask,(mask_value>=1))
                 
+        f.close()        
         # If all mask elements are False, put all True
         if not mask.any(): mask[mask==False] = True   
   

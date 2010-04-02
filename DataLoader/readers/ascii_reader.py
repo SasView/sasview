@@ -273,7 +273,7 @@ class Reader:
                         pass
                     
     
-                     
+                input_f.close()     
                 # Sanity check
                 if has_error_dy == True and not len(y) == len(dy):
                     raise RuntimeError, "ascii_reader: y and dy have different length"
