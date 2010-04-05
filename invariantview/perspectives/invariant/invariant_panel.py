@@ -115,7 +115,6 @@ class InvariantPanel(wx.ScrolledWindow):
                 msg = "For more information, click on Details button."
                 self.hint_msg_txt.SetForegroundColour("black")
             self.hint_msg_txt.SetLabel(msg)
-            wx.PostEvent(self.parent, StatusEvent(status=msg))
         self.data_name_boxsizer.Layout()
        
     def set_manager(self, manager):
@@ -190,7 +189,6 @@ class InvariantPanel(wx.ScrolledWindow):
                 self.volume_tcl.SetValue(format_number(v))
                 self.volume_err_tcl.SetValue(format_number(dv))
             except:
-                raise
                 msg= "Error occurred computing volume fraction: %s"%sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
                
@@ -205,7 +203,7 @@ class InvariantPanel(wx.ScrolledWindow):
                 self.surface_tcl.SetValue(format_number(s))
                 self.surface_err_tcl.SetValue(format_number(ds))
             except:
-                msg= "Error occurred computing specific surface: %s"%sys.exc_value
+                msg = "Error occurred computing specific surface: %s"%sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
                 
     def get_total_qstar(self, inv, extrapolation):
@@ -403,13 +401,13 @@ class InvariantPanel(wx.ScrolledWindow):
             self.get_volume(inv=inv, contrast=contrast, extrapolation=extrapolation)
             #compute surface and set value to txtcrtl
         except:
-            msg= "Error occurred computing invariant: %s"%sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status= msg))
+            msg = "Error occurred computing invariant: %s"%sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg))
         try:
             self.get_surface(inv=inv, contrast=contrast, porod_const=porod_const, 
                                     extrapolation=extrapolation)
         except:
-            msg= "Error occurred computing invariant: %s"%sys.exc_value
+            msg = "Error occurred computing invariant: %s"%sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status= msg))
             
         #compute percentage of each invariant
@@ -426,7 +424,8 @@ class InvariantPanel(wx.ScrolledWindow):
         """
         self.background_tcl.SetValue(str(BACKGROUND))
         self.scale_tcl.SetValue(str(SCALE)) 
-        self.contrast_tcl.SetValue(str(CONTRAST)) 
+        self.contrast_tcl.SetValue(str(CONTRAST))
+        self.porod_constant_tcl.SetValue('') 
         self.npts_low_tcl.SetValue(str(NPTS))
         self.enable_low_cbox.SetValue(False)
         self.fix_enable_low.SetValue(True)
