@@ -9,7 +9,7 @@ import sys
 from sans.invariant import invariant
 from sans.guiframe.utils import format_number, check_float
 from sans.guicomm.events import NewPlotEvent, StatusEvent
-from invariant_details import InvariantDetailsPanel
+from invariant_details import InvariantDetailsPanel, InvariantContainer
 from invariant_widgets import OutputTextCtrl, InvTextCtrl
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM  = 1e-5
@@ -25,10 +25,10 @@ BACKGROUND = 0.0
 SCALE = 1.0
 #default value of the contrast
 CONTRAST = 1.0
+#default value of the power used for power law
+POWER = 4.0
 #Invariant panel size 
 _BOX_WIDTH = 76
-#scale to use for a bar of value zero
-RECTANGLE_SCALE  = 0.0001
 
 if sys.platform.count("win32")>0:
     _STATICBOX_WIDTH = 450
@@ -40,30 +40,8 @@ else:
     PANEL_WIDTH = 530
     PANEL_HEIGHT = 700
     FONT_VARIANT = 1
-    
-class InvariantContainer(wx.Object):
-    def __init__(self):
-        #invariant at low range
-        self.qstar_low = None
-        #invariant at low range error
-        self.qstar_low_err = None
-        #invariant 
-        self.qstar = None
-        #invariant error
-        self.qstar_err = None
-        #invariant at high range
-        self.qstar_high = None
-        #invariant at high range error
-        self.qstar_high_err = None
-        #invariant total
-        self.qstar_total = None
-        #invariant error
-        self.qstar_total_err = None
-        #scale
-        self.qstar_low_scale = RECTANGLE_SCALE
-        self.qstar_scale = RECTANGLE_SCALE
-        self.qstar_high_scale = RECTANGLE_SCALE
- 
+
+
 class InvariantPanel(wx.ScrolledWindow):
     """
         Provides the Invariant GUI.
@@ -82,14 +60,13 @@ class InvariantPanel(wx.ScrolledWindow):
         self.parent = parent
         #plug-in using this panel
         self._manager = manager 
-        #Default power value
-        self.power_law_exponant = 4 
         #Data uses for computation
         self._data = data
         #container of invariant value
         self.inv_container = None
         #Draw the panel
         self._do_layout()
+        self.reset_panel()
         if self.parent is not None:
             msg = ""
             wx.PostEvent(self.parent, StatusEvent(status= msg))
@@ -122,7 +99,25 @@ class InvariantPanel(wx.ScrolledWindow):
             self.data_min_tcl.SetLabel(str(data_qmin))
             self.data_max_tcl.SetLabel(str(data_qmax))
             self.hint_msg_txt.SetLabel('')
-        
+            self.reset_panel()
+            self.compute_invariant(event=None)
+            
+    def set_message(self):
+        """
+            Display warning message if available
+        """
+        if self.inv_container is not None:
+            if self.inv_container.existing_warning:
+                msg = "Warning! Computations on invariant require your "
+                msg += "attention.\n Please click on Details button."
+                self.hint_msg_txt.SetForegroundColour("red")
+            else:
+                msg = "For more information, click on Details button."
+                self.hint_msg_txt.SetForegroundColour("black")
+            self.hint_msg_txt.SetLabel(msg)
+            wx.PostEvent(self.parent, StatusEvent(status=msg))
+        self.data_name_boxsizer.Layout()
+       
     def set_manager(self, manager):
         """
             set value for the manager
@@ -238,7 +233,7 @@ class InvariantPanel(wx.ScrolledWindow):
                 extrapolated_data = inv.get_extra_data_low(npts_in=npts_low) 
                 power_low = inv.get_extrapolation_power(range='low')  
                 if self.power_law_low.GetValue():
-                    self.power_low_tcl.SetValue(str(power_low))
+                    self.power_low_tcl.SetValue(format_number(power_low))
                 self._manager.plot_theory(data=extrapolated_data,
                                            name="Low-Q extrapolation")
             except:
@@ -256,7 +251,7 @@ class InvariantPanel(wx.ScrolledWindow):
                 self.inv_container.qstar_high = qstar_high
                 self.inv_container.qstar_high_err = qstar_high_err
                 power_high = inv.get_extrapolation_power(range='high') 
-                self.power_high_tcl.SetValue(str(power_high))
+                self.power_high_tcl.SetValue(format_number(power_high))
                 high_out_data = inv.get_extra_data_high(q_end=Q_MAXIMUM_PLOT)
                 self._manager.plot_theory(data=high_out_data,
                                            name="High-Q extrapolation")
@@ -345,14 +340,13 @@ class InvariantPanel(wx.ScrolledWindow):
         """
             open another panel for more details on invariant calculation
         """
-        #panel = InvariantDetailsWindow(parent=self.parent,
-        #                               qstar_container=self.inv_container)
         panel = InvariantDetailsPanel(parent=self, 
                                            qstar_container=self.inv_container)
         panel.ShowModal()
         panel.Destroy()
+        self.button_calculate.SetFocus()
         
-    def compute_invariant(self, event):
+    def compute_invariant(self, event=None):
         """
             compute invariant 
         """
@@ -417,14 +411,39 @@ class InvariantPanel(wx.ScrolledWindow):
         except:
             msg= "Error occurred computing invariant: %s"%sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status= msg))
-      
+            
+        #compute percentage of each invariant
+        self.inv_container.compute_percentage()
+        #display a message
+        self.set_message()
         #enable the button_ok for more details
-        self.button_ok.Enable()
+        self.button_details.Enable()
+        self.button_details.SetFocus()
     
     def reset_panel(self):
         """
             set the panel at its initial state.
         """
+        self.background_tcl.SetValue(str(BACKGROUND))
+        self.scale_tcl.SetValue(str(SCALE)) 
+        self.contrast_tcl.SetValue(str(CONTRAST)) 
+        self.npts_low_tcl.SetValue(str(NPTS))
+        self.enable_low_cbox.SetValue(False)
+        self.fix_enable_low.SetValue(True)
+        self.power_low_tcl.SetValue(str(POWER))
+        self.guinier.SetValue(True)
+        self.power_low_tcl.Disable()
+        self.enable_high_cbox.SetValue(False)
+        self.fix_enable_high.SetValue(True)
+        self.power_high_tcl.SetValue(str(POWER))
+        self.npts_high_tcl.SetValue(str(NPTS))
+        self.button_details.Disable()
+        #Change the state of txtcrtl to enable/disable
+        self._enable_low_q_section()
+        #Change the state of txtcrtl to enable/disable
+        self._enable_high_q_section()
+        self._reset_output()
+        self.button_calculate.SetFocus()
         
     def _reset_output(self):
         """
@@ -456,19 +475,18 @@ class InvariantPanel(wx.ScrolledWindow):
         self.hint_msg_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.data_name_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.data_range_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        #Sizer related to background
-        self.background_sizer = wx.BoxSizer(wx.HORIZONTAL) 
-        #Sizer related to scale
-        self.scale_sizer = wx.BoxSizer(wx.HORIZONTAL) 
-        #Sizer related to contrast
-        self.contrast_sizer = wx.BoxSizer(wx.HORIZONTAL) 
-        #Sizer related to Porod Constant
-        self.porod_constant_sizer = wx.BoxSizer(wx.HORIZONTAL) 
+        #Sizer related to background and scale
+        self.bkg_scale_sizer = wx.BoxSizer(wx.HORIZONTAL) 
+        #Sizer related to contrast and porod constant
+        self.contrast_porod_sizer = wx.BoxSizer(wx.HORIZONTAL) 
+        #Sizer related to inputs
+        inputs_box = wx.StaticBox(self, -1, "Customized Inputs")
+        self.inputs_sizer = wx.StaticBoxSizer(inputs_box, wx.VERTICAL)
+        #Sizer related to extrapolation
         extrapolation_box = wx.StaticBox(self, -1, "Extrapolation")
         self.extrapolation_sizer = wx.StaticBoxSizer(extrapolation_box,
                                                         wx.VERTICAL)
         self.extrapolation_sizer.SetMinSize((PANEL_WIDTH,-1))
-        self.extrapolation_hint_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.extrapolation_range_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.extrapolation_low_high_sizer = wx.BoxSizer(wx.HORIZONTAL)
         #Sizer related to extrapolation at low q range
@@ -519,56 +537,44 @@ class InvariantPanel(wx.ScrolledWindow):
                                          (self.data_name_sizer, 0 , wx.RIGHT, 10),
                                          (self.data_range_sizer, 0 , wx.ALL, 10)])
     
-    def _layout_background(self):
+    def _layout_bkg_scale(self):
         """
-            Draw widgets related to background
+            Draw widgets related to background and scale
         """
         background_txt = wx.StaticText(self, -1, 'Background : ')  
         self.background_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0) 
-        self.background_tcl.SetValue(str(BACKGROUND))
         background_hint_txt = "background"
         self.background_tcl.SetToolTipString(background_hint_txt)
         background_unit_txt = wx.StaticText(self, -1, '[1/cm]')  
-        self.background_sizer.AddMany([(background_txt, 0, wx.LEFT, 10),
-                                       (self.background_tcl, 0, wx.LEFT, 15),
-                                       (background_unit_txt, 0, wx.LEFT, 10)])
-    def _layout_scale(self):
-        """
-            Draw widgets related to scale
-        """
         scale_txt = wx.StaticText(self, -1, 'Scale : ')  
         self.scale_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
         scale_hint_txt = "Scale"
         self.scale_tcl.SetToolTipString(scale_hint_txt)
-        self.scale_tcl.SetValue(str(SCALE)) 
-        self.scale_sizer.AddMany([(scale_txt, 0, wx.LEFT|wx.RIGHT, 10),
-                                       (self.scale_tcl, 0, wx.LEFT, 35)])
-        
-    def _layout_contrast(self):
+        self.bkg_scale_sizer.AddMany([(background_txt, 0, wx.LEFT, 10),
+                                       (self.background_tcl, 0, wx.LEFT, 5),
+                                       (background_unit_txt, 0, wx.LEFT, 10),
+                                       (scale_txt, 0, wx.LEFT, 70),
+                                       (self.scale_tcl, 0, wx.LEFT, 40)])
+ 
+    def _layout_contrast_porod(self):
         """
-            Draw widgets related to contrast
+            Draw widgets related to porod constant and contrast
         """
         contrast_txt = wx.StaticText(self, -1, 'Contrast : ')  
         self.contrast_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
-        self.contrast_tcl.SetValue(str(CONTRAST)) 
         contrast_hint_txt = "Contrast"
         self.contrast_tcl.SetToolTipString(contrast_hint_txt)
         contrast_unit_txt = wx.StaticText(self, -1, '[1/A^(2)]')  
-        self.contrast_sizer.AddMany([(contrast_txt, 0, wx.LEFT|wx.RIGHT, 10),
-                                       (self.contrast_tcl, 0, wx.LEFT, 18),
-                                       (contrast_unit_txt, 0, wx.LEFT, 10)])
-    
-    def _layout_porod_constant(self):
-        """
-            Draw widgets related to porod constant
-        """
         porod_const_txt = wx.StaticText(self, -1, 'Porod Constant:')  
         self.porod_constant_tcl = InvTextCtrl(self, -1, 
                                               size=(_BOX_WIDTH, 20), style=0) 
         porod_const_hint_txt = "Porod Constant"
         self.porod_constant_tcl.SetToolTipString(porod_const_hint_txt)
         optional_txt = wx.StaticText(self, -1, '(Optional)')  
-        self.porod_constant_sizer.AddMany([(porod_const_txt, 0, wx.LEFT, 10),
+        self.contrast_porod_sizer.AddMany([(contrast_txt, 0, wx.LEFT, 10),
+                                           (self.contrast_tcl, 0, wx.LEFT, 20),
+                                           (contrast_unit_txt, 0, wx.LEFT, 10),
+                                           (porod_const_txt, 0, wx.LEFT, 50),
                                        (self.porod_constant_tcl, 0, wx.LEFT, 0),
                                        (optional_txt, 0, wx.LEFT, 10)])
         
@@ -601,6 +607,7 @@ class InvariantPanel(wx.ScrolledWindow):
             self.power_law_low.Disable()
         self._enable_power_law_low()
         self._enable_fit_power_law_low()
+        self.button_calculate.SetFocus()
     
     def _enable_power_law_low(self, event=None):
         """
@@ -621,12 +628,10 @@ class InvariantPanel(wx.ScrolledWindow):
             Draw widgets related to extrapolation at low q range
         """
         self.enable_low_cbox = wx.CheckBox(self, -1, "Enable Extrapolate Low Q")
-        self.enable_low_cbox.SetValue(False)
         wx.EVT_CHECKBOX(self, self.enable_low_cbox.GetId(),
                                          self._enable_low_q_section)
         self.fix_enable_low = wx.RadioButton(self, -1, 'Fix',
                                          (10, 10),style=wx.RB_GROUP)
-        self.fix_enable_low.SetValue(True)
         self.fit_enable_low = wx.RadioButton(self, -1, 'Fit', (10, 10))
         self.Bind(wx.EVT_RADIOBUTTON, self._enable_fit_power_law_low,
                                      id=self.fix_enable_low.GetId())
@@ -634,7 +639,6 @@ class InvariantPanel(wx.ScrolledWindow):
                                         id=self.fit_enable_low.GetId())
         self.guinier = wx.RadioButton(self, -1, 'Guinier',
                                          (10, 10),style=wx.RB_GROUP)
-        self.guinier.SetValue(True)
         self.power_law_low = wx.RadioButton(self, -1, 'Power Law', (10, 10))
         self.Bind(wx.EVT_RADIOBUTTON, self._enable_power_law_low,
                                      id=self.guinier.GetId())
@@ -643,14 +647,12 @@ class InvariantPanel(wx.ScrolledWindow):
         
         npts_low_txt = wx.StaticText(self, -1, 'Npts')
         self.npts_low_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH*2/3, -1))
-        self.npts_low_tcl.SetValue(str(NPTS))
         msg_hint = "Number of Q points to consider"
         msg_hint +="while extrapolating the low-Q region"
         self.npts_low_tcl.SetToolTipString(msg_hint)
         power_txt = wx.StaticText(self, -1, 'Power')
         self.power_low_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH*2/3, -1))
-        self.power_low_tcl.SetValue(str(self.power_law_exponant))
-        self.power_low_tcl.Disable()
+       
         power_hint_txt = "Exponent to apply to the Power_law function."
         self.power_low_tcl.SetToolTipString(power_hint_txt)
         iy = 0
@@ -688,10 +690,9 @@ class InvariantPanel(wx.ScrolledWindow):
         ix += 1
         self.low_q_sizer.Add(self.power_low_tcl, (iy, ix), (1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        #Change the state of txtcrtl to enable/disable
-        self._enable_low_q_section()
         self.low_extrapolation_sizer.AddMany([(self.low_q_sizer, 0,
-                                                wx.BOTTOM|wx.RIGHT, 10)])
+                                                wx.BOTTOM|wx.RIGHT, 15)])
+        
     def _enable_fit_power_law_high(self, event=None):
         """
             Enable and disable the power value editing
@@ -719,19 +720,18 @@ class InvariantPanel(wx.ScrolledWindow):
             self.fix_enable_high.Disable()
             self.fit_enable_high.Disable()
         self._enable_fit_power_law_high()
+        self.button_calculate.SetFocus()
   
     def _layout_extrapolation_high(self):
         """
             Draw widgets related to extrapolation at high q range
         """
         self.enable_high_cbox = wx.CheckBox(self, -1, "Enable Extrapolate high-Q")
-        self.enable_high_cbox.SetValue(False)
         wx.EVT_CHECKBOX(self, self.enable_high_cbox.GetId(),
                                          self._enable_high_q_section)
       
         self.fix_enable_high = wx.RadioButton(self, -1, 'Fix',
                                          (10, 10),style=wx.RB_GROUP)
-        self.fix_enable_high.SetValue(True)
         self.fit_enable_high = wx.RadioButton(self, -1, 'Fit', (10, 10))
         self.Bind(wx.EVT_RADIOBUTTON, self._enable_fit_power_law_high,
                                      id=self.fix_enable_high.GetId())
@@ -739,17 +739,15 @@ class InvariantPanel(wx.ScrolledWindow):
                                         id=self.fit_enable_high.GetId())
         
         self.power_law_high = wx.StaticText(self, -1, 'Power Law')
-        #msg_hint ="Check to extrapolate data at high-Q"
-        #self.power_law_high.SetToolTipString(msg_hint)
+        msg_hint ="Check to extrapolate data at high-Q"
+        self.power_law_high.SetToolTipString(msg_hint)
         npts_high_txt = wx.StaticText(self, -1, 'Npts')
         self.npts_high_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH*2/3, -1))
         msg_hint = "Number of Q points to consider"
         msg_hint += "while extrapolating the high-Q region"
         self.npts_high_tcl.SetToolTipString(msg_hint)
-        self.npts_high_tcl.SetValue(str(NPTS))
         power_txt = wx.StaticText(self, -1, 'Power')
         self.power_high_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH*2/3, -1))
-        self.power_high_tcl.SetValue(str(self.power_law_exponant))
         power_hint_txt = "Exponent to apply to the Power_law function."
         self.power_high_tcl.SetToolTipString(power_hint_txt)
         iy = 0
@@ -783,9 +781,8 @@ class InvariantPanel(wx.ScrolledWindow):
         ix += 1
         self.high_q_sizer.Add(self.power_high_tcl, (iy, ix), (1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        #Change the state of txtcrtl to enable/disable
-        self._enable_high_q_section()
-        self.high_extrapolation_sizer.AddMany([(self.high_q_sizer, 0, wx.RIGHT, 10)])
+        self.high_extrapolation_sizer.AddMany([(self.high_q_sizer, 0, 
+                                                wx.BOTTOM|wx.RIGHT, 10)])
         
     def _layout_extrapolation(self):
         """
@@ -812,10 +809,6 @@ class InvariantPanel(wx.ScrolledWindow):
                                                 (self.extrapolation_max_tcl,
                                                             0, wx.LEFT, 10),
                                                 ])
-        extra_enable_hint = "Hint: Check any box to enable a specific extrapolation !"
-        extra_enable_hint_txt = wx.StaticText(self, -1, extra_enable_hint )
-        self.extrapolation_hint_sizer.AddMany([(extra_enable_hint_txt, 0, wx.LEFT, 0)
-                                               ])
         self._layout_extrapolation_low()
         self._layout_extrapolation_high()
         self.extrapolation_low_high_sizer.AddMany([(self.low_extrapolation_sizer,
@@ -824,8 +817,6 @@ class InvariantPanel(wx.ScrolledWindow):
                                                     0, wx.ALL, 10)])
         self.extrapolation_sizer.AddMany([(self.extrapolation_range_sizer, 0,
                                             wx.RIGHT, 10),
-                                         (self.extrapolation_hint_sizer, 0,
-                                           wx.ALL, 10),
                                         (self.extrapolation_low_high_sizer, 0,
                                            wx.ALL, 10)])
         
@@ -914,6 +905,15 @@ class InvariantPanel(wx.ScrolledWindow):
         self.invariant_sizer.Add(invariant_total_units_txt,(iy, ix), (1,1),
                           wx.EXPAND|wx.ADJUST_MINSIZE, 10)
  
+    def _layout_inputs_sizer(self):
+        """
+            Draw widgets related to inputs
+        """
+        self._layout_bkg_scale()
+        self._layout_contrast_porod()
+        self.inputs_sizer.AddMany([(self.bkg_scale_sizer, 0, wx.ALL, 5),
+                                    (self.contrast_porod_sizer, 0, wx.ALL, 5)])
+        
     def _layout_outputs_sizer(self):
         """
             Draw widgets related to outputs
@@ -930,21 +930,21 @@ class InvariantPanel(wx.ScrolledWindow):
         """ 
         #compute button
         id = wx.NewId()
-        button_calculate = wx.Button(self, id, "Compute")
-        button_calculate.SetToolTipString("Compute invariant")
+        self.button_calculate = wx.Button(self, id, "Compute")
+        self.button_calculate.SetToolTipString("Compute invariant")
         self.Bind(wx.EVT_BUTTON, self.compute_invariant, id=id)   
         #detail button
         id = wx.NewId()
-        self.button_ok = wx.Button(self, id, "Details?")
-        self.button_ok.SetToolTipString("Give Details on Computation")
+        self.button_details = wx.Button(self, id, "Details?")
+        self.button_details.SetToolTipString("Give Details on Computation")
         self.Bind(wx.EVT_BUTTON, self.display_details, id=id)
-        self.button_ok.Disable()
         details = "Details on Invariant Total Calculations"
         details_txt = wx.StaticText(self, -1, details)
-        self.button_sizer.AddMany([((20,20), 0 , wx.LEFT, 100),
-                                   (details_txt, 0 , wx.ALL, 10),
-                                   (self.button_ok, 0 , wx.ALL, 10),
-                        (button_calculate, 0 , wx.RIGHT|wx.TOP|wx.BOTTOM, 10)])
+        self.button_sizer.AddMany([((10,10), 0 , wx.LEFT,0),
+                                   (details_txt, 0 , 
+                                    wx.RIGHT|wx.BOTTOM|wx.TOP, 10),
+                                   (self.button_details, 0 , wx.ALL, 10),
+                        (self.button_calculate, 0 , wx.RIGHT|wx.TOP|wx.BOTTOM, 10)])
         
     def _do_layout(self):
         """
@@ -952,27 +952,18 @@ class InvariantPanel(wx.ScrolledWindow):
         """
         self._define_structure()
         self._layout_data_name()
-        self._layout_background()
-        self._layout_scale()
-        self._layout_contrast()
-        self._layout_porod_constant()
         self._layout_extrapolation()
+        self._layout_inputs_sizer()
         self._layout_outputs_sizer()
         self._layout_button()
-        self.main_sizer.AddMany([(self.data_name_boxsizer, 0, wx.ALL, 10),
-                                 (self.background_sizer, 0,
-                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
-                                 (self.scale_sizer, 0,
-                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
-                                 (self.contrast_sizer, 0,
-                                  wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
-                                  (self.porod_constant_sizer, 0,
-                                  wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
-                                  (self.extrapolation_sizer, 0,
-                                  wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
+        self.main_sizer.AddMany([(self.data_name_boxsizer, 1, wx.ALL, 10),
                                   (self.outputs_sizer, 0,
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
                                   (self.button_sizer, 0,
+                                  wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
+                                 (self.inputs_sizer, 0,
+                                  wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
+                                  (self.extrapolation_sizer, 0,
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)])
         self.SetSizer(self.main_sizer)
         self.SetScrollbars(20,20,25,65)
