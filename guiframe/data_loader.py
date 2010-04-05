@@ -1,9 +1,22 @@
 import os, sys,numpy
 import wx
+import re
 from dataFitting import Data1D
 from dataFitting import Data2D
 from DataLoader.loader import Loader
 
+def parse_name(name, expression):
+    """
+        remove "_" in front of a name
+    """
+    if re.match(expression, name) is not None:
+        word = re.split(expression, name, 1)
+        for item in word:           
+            if item.lstrip().rstrip() != '':
+                return item
+    else:
+        return name
+    
 def choose_data_file(parent, location=None):
     path = None
     if location == None:
@@ -144,7 +157,7 @@ def plot_data(parent, path):
         if output.filename is None or output.filename == "":
             output.filename = str(filename)
         ## name of the data allow to differentiate data when plotted
-        name = output.filename
+        name = parse_name(name=output.filename, expression="_")
         if not name in parent.indice_load_data.keys():
             parent.indice_load_data[name] = 0
         else:
@@ -199,7 +212,7 @@ def plot_data(parent, path):
             new_plot.dxl = dxl
             new_plot.dxw = dxw
            
-            name = str(item.run[0])
+            name = parse_name(name=str(item.run[0]), expression="_")
             if not name in parent.indice_load_data.keys():
                 parent.indice_load_data[name] = 0
             else:
