@@ -3,9 +3,6 @@ import numpy
 import string 
 import wx
 import wx.aui
-import wx.lib
-from wx.aui import AuiNotebook 
-
 
 import basepage
 
@@ -120,7 +117,7 @@ class PageInfo(object):
         self.window_caption = "Page"
         self.type = "Data"
         
-class FitPanel(AuiNotebook):    
+class FitPanel(wx.aui.AuiNotebook):    
 
     """
         FitPanel class contains fields allowing to fit  models and  data
@@ -135,7 +132,7 @@ class FitPanel(AuiNotebook):
     CENTER_PANE = True
     
     def __init__(self, parent, *args, **kwargs):
-        AuiNotebook.__init__(self,parent,-1,
+        wx.aui.AuiNotebook.__init__(self, parent, -1,
                     style= wx.aui.AUI_NB_WINDOWLIST_BUTTON|
                     wx.aui.AUI_NB_DEFAULT_STYLE|
                     wx.CLIP_CHILDREN)
