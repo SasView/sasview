@@ -108,39 +108,36 @@ class InvariantDetailsPanel(wx.Dialog):
     def __init__(self, parent=None, id=-1, qstar_container=None, 
                                     title="Invariant Details",
                                     size=(PANEL_WIDTH, PANEL_HEIGHT)):
-        try:
-            wx.Dialog.__init__(self, parent=parent, id=id,title=title,size=size)
-            
-            #Font size 
-            self.SetWindowVariant(variant=FONT_VARIANT)
-            self.parent = parent
-            #self.qstar_container
-            self.qstar_container = qstar_container
-            #warning message
-            self.warning_msg = self.qstar_container.warning_msg
-       
-            #Define scale of each bar
-            self.low_inv_percent = self.qstar_container.qstar_low_percent
-            self.low_scale = self.get_scale(percentage=self.low_inv_percent,
-                                             scale_name="Extrapolated at Low Q")
-            self.inv_percent = self.qstar_container.qstar_percent
-            self.inv_scale = self.get_scale(percentage=self.inv_percent, 
-                                                scale_name="Inv in Q range")
-            self.high_inv_percent = self.qstar_container.qstar_high_percent
-            self.high_scale = self.get_scale(percentage=self.high_inv_percent,
-                                             scale_name="Extrapolated at High Q")
-            
-            #Default color the extrapolation bar is grey
-            self.extrapolation_color_low = wx.Colour(169,  169, 168, 128)
-            self.extrapolation_color_high = wx.Colour(169,  169, 168, 128)
-            #change color of high and low bar when necessary
-            self.set_color_bar()
-            #draw the panel itself
-            self._do_layout()
-            self.set_values()
-        except:
-            print "error", sys.exc_value()
+        wx.Dialog.__init__(self, parent=parent, id=id,title=title,size=size)
+        
+        #Font size 
+        self.SetWindowVariant(variant=FONT_VARIANT)
+        self.parent = parent
+        #self.qstar_container
+        self.qstar_container = qstar_container
+        #warning message
+        self.warning_msg = self.qstar_container.warning_msg
    
+        #Define scale of each bar
+        self.low_inv_percent = self.qstar_container.qstar_low_percent
+        self.low_scale = self.get_scale(percentage=self.low_inv_percent,
+                                         scale_name="Extrapolated at Low Q")
+        self.inv_percent = self.qstar_container.qstar_percent
+        self.inv_scale = self.get_scale(percentage=self.inv_percent, 
+                                            scale_name="Inv in Q range")
+        self.high_inv_percent = self.qstar_container.qstar_high_percent
+        self.high_scale = self.get_scale(percentage=self.high_inv_percent,
+                                         scale_name="Extrapolated at High Q")
+        
+        #Default color the extrapolation bar is grey
+        self.extrapolation_color_low = wx.Colour(169,  169, 168, 128)
+        self.extrapolation_color_high = wx.Colour(169,  169, 168, 128)
+        #change color of high and low bar when necessary
+        self.set_color_bar()
+        #draw the panel itself
+        self._do_layout()
+        self.set_values()
+  
     def _define_structure(self):
         """
             Define main sizers needed for this panel
