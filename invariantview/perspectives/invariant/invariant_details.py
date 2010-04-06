@@ -1,7 +1,7 @@
 
 import wx
 import sys
-import colorsys
+
 import numpy
 from sans.guiframe.utils import format_number, check_float
 from invariant_widgets import OutputTextCtrl
@@ -29,6 +29,11 @@ else:
   
     
 class InvariantContainer(wx.Object):
+    """
+        This class stores some values resulting resulting from invariant
+        calculations. Given the value of total invariant, this class can also 
+        determine the percentage of invariants resulting from extrapolation.
+    """
     def __init__(self):
         #invariant at low range
         self.qstar_low = 0.0
@@ -100,37 +105,41 @@ class InvariantDetailsPanel(wx.Dialog):
     """
         This panel describes proportion of invariants 
     """
-    def __init__(self, parent=None, id=-1, qstar_container=None, title="",
-                 size=(PANEL_WIDTH, PANEL_HEIGHT)):
-        wx.Dialog.__init__(self, parent, id=id, title=title, size=size)
-        
-        #Font size 
-        self.SetWindowVariant(variant=FONT_VARIANT)
-        self.parent = parent
-        #self.qstar_container
-        self.qstar_container = qstar_container
-        #warning message
-        self.warning_msg = self.qstar_container.warning_msg
-   
-        #Define scale of each bar
-        self.low_inv_percent = self.qstar_container.qstar_low_percent
-        self.low_scale = self.get_scale(percentage=self.low_inv_percent,
-                                         scale_name="Extrapolated at Low Q")
-        self.inv_percent = self.qstar_container.qstar_percent
-        self.inv_scale = self.get_scale(percentage=self.inv_percent, 
-                                            scale_name="Inv in Q range")
-        self.high_inv_percent = self.qstar_container.qstar_high_percent
-        self.high_scale = self.get_scale(percentage=self.high_inv_percent,
-                                         scale_name="Extrapolated at High Q")
-        
-        #Default color the extrapolation bar is grey
-        self.extrapolation_color_low = wx.Colour(169,  169, 168, 128)
-        self.extrapolation_color_high = wx.Colour(169,  169, 168, 128)
-        #change color of high and low bar when necessary
-        self.set_color_bar()
-        #draw the panel itself
-        self._do_layout()
-        self.set_values()
+    def __init__(self, parent=None, id=-1, qstar_container=None, 
+                                    title="Invariant Details",
+                                    size=(PANEL_WIDTH, PANEL_HEIGHT)):
+        try:
+            wx.Dialog.__init__(self, parent=parent, id=id,title=title,size=size)
+            
+            #Font size 
+            self.SetWindowVariant(variant=FONT_VARIANT)
+            self.parent = parent
+            #self.qstar_container
+            self.qstar_container = qstar_container
+            #warning message
+            self.warning_msg = self.qstar_container.warning_msg
+       
+            #Define scale of each bar
+            self.low_inv_percent = self.qstar_container.qstar_low_percent
+            self.low_scale = self.get_scale(percentage=self.low_inv_percent,
+                                             scale_name="Extrapolated at Low Q")
+            self.inv_percent = self.qstar_container.qstar_percent
+            self.inv_scale = self.get_scale(percentage=self.inv_percent, 
+                                                scale_name="Inv in Q range")
+            self.high_inv_percent = self.qstar_container.qstar_high_percent
+            self.high_scale = self.get_scale(percentage=self.high_inv_percent,
+                                             scale_name="Extrapolated at High Q")
+            
+            #Default color the extrapolation bar is grey
+            self.extrapolation_color_low = wx.Colour(169,  169, 168, 128)
+            self.extrapolation_color_high = wx.Colour(169,  169, 168, 128)
+            #change color of high and low bar when necessary
+            self.set_color_bar()
+            #draw the panel itself
+            self._do_layout()
+            self.set_values()
+        except:
+            print "error", sys.exc_value()
    
     def _define_structure(self):
         """
@@ -402,53 +411,16 @@ class InvariantDetailsPanel(wx.Dialog):
         gc.Scale(self.high_scale, 1.0)  
         gc.DrawPath(path)
         gc.PopState()
-        
-class InvariantDetailsWindow(wx.Dialog):
-    def __init__(self, parent, qstar_container=None, *args, **kwds):
-        kwds["size"]= (PANEL_WIDTH +100, 450)
-        wx.Dialog.__init__(self, parent, *args, **kwds)
-        self.container = qstar_container
-        if self.container is None:
-            self.container = InvariantContainer()
-            self.container.qstar_total = 1.0
-            self.container.qstar = 0.75
-            self.container.qstar_low = 0.60
-            self.container.qstar_high = 0.0049
-        self.panel = InvariantDetailsPanel(parent=self, 
-                                           qstar_container=self.container)
-        self.Centre()
-        self.ShowModal()
-        self.Destroy()
 
-class InvariantDetailsTest(wx.Frame):
-    def __init__(self, parent, qstar_container=None, *args, **kwds):
-        kwds["size"]= (PANEL_WIDTH , PANEL_HEIGHT)
-        wx.Frame.__init__(self, parent, *args, **kwds)
-        self.container = qstar_container
-        if self.container is None:
-            self.container = InvariantContainer()
-            self.container.qstar_total = 1.0
-            self.container.qstar = 0.75
-            self.container.qstar_low = 0.60
-            self.container.qstar_high = 0.0049
-        
-        self.panel = InvariantDetailsPanel(parent=self, 
-                                           qstar_container=self.container)
-        self.panel.ShowModal()
-        self.panel.Destroy()
-        self.Show()
-   
+
 if __name__ =="__main__":
     app  = wx.App()
-
     container = InvariantContainer()
     container.qstar_total = 100.0
     container.qstar = 15.0
     container.qstar_low = 0.001
     container.qstar_high = 100.0
     container.compute_percentage()
-   
-    window = InvariantDetailsTest(parent=None, id=-1,qstar_container=container,
-                                    title="Invariant Details")
-    window.Show()
+    dlg = InvariantDetailsPanel(qstar_container=container)
+    dlg.ShowModal()
     app.MainLoop()
