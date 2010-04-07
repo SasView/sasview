@@ -30,7 +30,7 @@ from sans.fit.AbstractFitEngine import FitAbort
 
 
 from fitproblem import FitProblem
-from fitpanel import FitPanel
+from fitting_panel import FitPanel
 from fit_thread import FitThread
 import models
 import fitpage
