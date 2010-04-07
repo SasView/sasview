@@ -878,9 +878,9 @@ class InvariantPanel(wx.ScrolledWindow):
         """
         uncertainty = "+/-" 
         unit_invariant = '[1/(cm * A)]'
-        invariant_total_txt = wx.StaticText(self, -1, 'Invariant Total')
+        invariant_total_txt = wx.StaticText(self, -1, 'Invariant Total [Q*]')
         self.invariant_total_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        msg_hint = "Total invariant, including extrapolated regions."
+        msg_hint = "Total invariant [Q*], including extrapolated regions."
         self.invariant_total_tcl.SetToolTipString(msg_hint)
         self.invariant_total_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_total_err_tcl.SetToolTipString("Uncertainty on invariant.")

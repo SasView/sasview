@@ -36,25 +36,25 @@ class InvariantContainer(wx.Object):
     """
     def __init__(self):
         #invariant at low range
-        self.qstar_low = 0.0
+        self.qstar_low = None
         #invariant at low range error
-        self.qstar_low_err = 0.0
+        self.qstar_low_err = None
         #invariant 
-        self.qstar = 0.0
+        self.qstar = None
         #invariant error
-        self.qstar_err = 0.0
+        self.qstar_err = None
         #invariant at high range
-        self.qstar_high = 0.0
+        self.qstar_high = None
         #invariant at high range error
-        self.qstar_high_err = 0.0
+        self.qstar_high_err = None
         #invariant total
         self.qstar_total = None
         #invariant error
         self.qstar_total_err = None
         #scale
-        self.qstar_low_percent = 0.0
-        self.qstar_high_percent = 0.0
-        self.qstar_percent = 0.0
+        self.qstar_low_percent = None
+        self.qstar_high_percent = None
+        self.qstar_percent = None
         # warning message
         self.existing_warning = False
         self.warning_msg = "No Details on calculations available...\n"
@@ -63,36 +63,74 @@ class InvariantContainer(wx.Object):
         """
             Compute percentage of each invariant
         """
-        if self.qstar_total is not None and self.qstar_total != 0:
-            #compute invariant percentage
-            if self.qstar is None:
-                self.qstar = 0.0
-            self.qstar_percent = self.qstar/self.qstar_total
-            #compute low q invariant percentage
-            if self.qstar_low is None:
-                self.qstar_low = 0.0
-            self.qstar_low_percent = self.qstar_low/self.qstar_total
-            #compute high q invariant percentage
-            if self.qstar_high is None:
-                self.qstar_high = 0.0
-            self.qstar_high_percent = self.qstar_high/self.qstar_total
+        if self.qstar_total is None:
+            self.qstar_percent = None
+            self.qstar_low = None
+            self.qstar_high = None
+            self.check_values()
+            return 
+        
+        #compute invariant percentage
+        if self.qstar is None:
+            self.qstar_percent = None
+        else:
+            try:
+                self.qstar_percent = float(self.qstar)/float(self.qstar_total)
+            except:
+                self.qstar_percent = 'error'
+        #compute low q invariant percentage
+        if self.qstar_low is None:
+            self.qstar_low_percent = None
+        else:
+            try:
+                self.qstar_low_percent = float(self.qstar_low)/float(self.qstar_total)
+            except:
+                self.qstar_low_percent = 'error'
+        #compute high q invariant percentage
+        if self.qstar_high is None:
+            self.qstar_high_percent = None
+        else:
+            try:
+                self.qstar_high_percent = float(self.qstar_high)/float(self.qstar_total)
+            except:
+                self.qstar_high_percent = 'error'
         self.check_values()
    
     def check_values(self):
         """
             check the validity if invariant
         """
+        if self.qstar_total is None and self.qstar is None:
+            self.warning_msg = "Invariant not calculated.\n"
+            return 
+        if self.qstar_total == 0:
+             self.existing_warning = True
+             self.warning_msg = "Invariant is zero. \n"
+             self.warning_msg += "The calculations are likely to be unreliable!\n"
+             return 
         #warning to the user when the extrapolated invariant is greater than %5
         msg = ''
-        if self.qstar_low_percent >= 0.05:
+        if self.qstar_percent == 'error':
+            self.existing_warning = True
+            msg = 'Error occurred when computing invariant from data.\n '
+      
+        if self.qstar_low_percent == 'error':
+            self.existing_warning = True
+            msg = 'Error occurred when computing extrapolated invariant at low-Q region.\n'
+        elif self.qstar_low_percent is not None and self.qstar_low_percent >= 0.05:
             self.existing_warning = True
             msg += "Extrapolated contribution at Low Q is higher "
             msg += "than 5% of the invariant.\n"
-        if self.qstar_high_percent >= 0.05:
+        if self.qstar_high_percent == 'error':
+            self.existing_warning = True
+            msg += 'Error occurred when computing extrapolated invariant at high-Q region.\n'
+        elif self.qstar_high_percent is not None and self.qstar_high_percent >= 0.05:
             self.existing_warning = True
             msg += "Extrapolated contribution at High Q is higher "
             msg += "than 5% of the invariant.\n"
-        if self.qstar_low_percent + self.qstar_high_percent >= 0.05:
+        if (self.qstar_low_percent not in [None, "error"]) and \
+            (self.qstar_high_percent not in [None, "error"])\
+            and self.qstar_low_percent + self.qstar_high_percent >= 0.05:
             self.existing_warning = True
             msg += "The sum of all extrapolated contributions is higher "
             msg += "than 5% of the invariant.\n"
@@ -131,7 +169,7 @@ class InvariantDetailsPanel(wx.Dialog):
         self.high_inv_percent = self.qstar_container.qstar_high_percent
         self.high_scale = self.get_scale(percentage=self.high_inv_percent,
                                          scale_name="Extrapolated at High Q")
-        
+       
         #Default color the extrapolation bar is grey
         self.extrapolation_color_low = wx.Colour(169,  169, 168, 128)
         self.extrapolation_color_high = wx.Colour(169,  169, 168, 128)
@@ -180,26 +218,32 @@ class InvariantDetailsPanel(wx.Dialog):
         uncertainty = "+/-" 
         unit_invariant = '[1/(cm * A)]'
      
-        invariant_txt = wx.StaticText(self, -1, 'Invariant')
+        invariant_txt = wx.StaticText(self, -1, 'Q* from Data ')
+        invariant_txt.SetToolTipString("Invariant in the data set's Q range.")
         self.invariant_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.invariant_tcl.SetToolTipString("Invariant in the data set's Q range.")
         self.invariant_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_err_tcl.SetToolTipString("Uncertainty on the invariant.")
+        self.invariant_err_tcl.SetToolTipString("Uncertainty on the invariant from data's range.")
         invariant_units_txt = wx.StaticText(self, -1, unit_invariant)
+        invariant_units_txt.SetToolTipString("Unit of the invariant from data's Q range")
        
-        invariant_low_txt = wx.StaticText(self, -1, 'Invariant in low-Q region')
+        invariant_low_txt = wx.StaticText(self, -1, 'Q* from Low-Q')
+        invariant_low_txt.SetToolTipString("Extrapolated invariant from low-Q range.")
         self.invariant_low_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_low_tcl.SetToolTipString("Invariant computed with the extrapolated low-Q data.")
+        self.invariant_low_tcl.SetToolTipString("Extrapolated invariant from low-Q range.")
         self.invariant_low_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_low_err_tcl.SetToolTipString("Uncertainty on the invariant.")
+        self.invariant_low_err_tcl.SetToolTipString("Uncertainty on the invariant from low-Q range.")
         invariant_low_units_txt = wx.StaticText(self, -1,  unit_invariant)
+        invariant_low_units_txt.SetToolTipString("Unit of the extrapolated invariant from  low-Q range")
         
-        invariant_high_txt = wx.StaticText(self, -1, 'Invariant in high-Q region')
+        invariant_high_txt = wx.StaticText(self, -1, 'Q* from High-Q')
+        invariant_high_txt.SetToolTipString("Extrapolated invariant from  high-Q range")
         self.invariant_high_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_high_tcl.SetToolTipString("Invariant computed with the extrapolated high-Q data")
+        self.invariant_high_tcl.SetToolTipString("Extrapolated invariant from  high-Q range")
         self.invariant_high_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_high_err_tcl.SetToolTipString("Uncertainty on the invariant.")
+        self.invariant_high_err_tcl.SetToolTipString("Uncertainty on the invariant from high-Q range.")
         invariant_high_units_txt = wx.StaticText(self, -1,  unit_invariant)
+        invariant_high_units_txt.SetToolTipString("Unit of the extrapolated invariant from  high-Q range")
    
         #Invariant low
         iy = 0
@@ -307,15 +351,17 @@ class InvariantDetailsPanel(wx.Dialog):
         """
             Check scale receive in this panel. 
         """
+        scale = RECTANGLE_SCALE
         try: 
-            if percentage is None or percentage == 0.0:
-                 percentage = RECTANGLE_SCALE
-            percentage = float(percentage) 
+            if percentage in [None, 0.0, "error"]:
+                 scale = RECTANGLE_SCALE
+                 return scale
+            scale = float(percentage) 
         except:
-            percentage = RECTANGLE_SCALE
+            scale = RECTANGLE_SCALE
             self.warning_msg += "Receive an invalid scale for %s\n"
             self.warning_msg += "check this value : %s\n"%(str(scale_name),str(percentage))
-        return  percentage
+        return  scale
     
     def set_color_bar(self):
         """
@@ -356,7 +402,7 @@ class InvariantDetailsPanel(wx.Dialog):
         y_origine = 15
         #Draw low rectangle
         gc.PushState()        
-        label = "Q* At Low-Q"
+        label = "Q* from Low-Q"
         PathFunc = gc.DrawPath
         w, h = gc.GetTextExtent(label)
         gc.DrawText(label, x_origine, y_origine)
@@ -366,7 +412,12 @@ class InvariantDetailsPanel(wx.Dialog):
         gc.Translate(x_center, y_center)    
         gc.SetPen(wx.Pen("black", 1))
         gc.SetBrush(wx.Brush(self.extrapolation_color_low))
-        low_percent = format_number(self.low_inv_percent*100)+ '%'
+        if self.low_inv_percent is None:
+            low_percent = 'Not Computed'
+        elif self.low_inv_percent == 'error':
+            low_percent = 'Error'
+        else:
+            low_percent = format_number(self.low_inv_percent*100)+ '%'
         x_center = 20
         y_center = -h
         gc.DrawText(low_percent, x_center, y_center)
@@ -377,7 +428,7 @@ class InvariantDetailsPanel(wx.Dialog):
         #Draw rectangle for invariant   
         gc.PushState()    # save it again
         y_origine += 20         
-        gc.DrawText("Q* In range", x_origine, y_origine)
+        gc.DrawText("Q* from Data", x_origine, y_origine)
         # offset to the lower part of the window
         x_center = x_origine + RECTANGLE_WIDTH * self.inv_scale/2 + w + 10
         y_center = y_origine + h
@@ -385,7 +436,12 @@ class InvariantDetailsPanel(wx.Dialog):
         # 128 == half transparent
         gc.SetBrush(wx.Brush(wx.Colour(67,  208,  128, 128))) 
         # Increase width by self.inv_scale
-        inv_percent = format_number(self.inv_percent*100)+ '%'
+        if self.inv_percent is None:
+            inv_percent = 'Not Computed'
+        elif self.inv_percent == 'error':
+            inv_percent = 'Error'
+        else:
+            inv_percent = format_number(self.inv_percent*100)+ '%'
         x_center = 20 
         y_center = -h
         gc.DrawText(inv_percent, x_center, y_center)
@@ -396,14 +452,19 @@ class InvariantDetailsPanel(wx.Dialog):
         #Draw rectangle for high invariant
         gc.PushState() 
         y_origine += 20 
-        gc.DrawText("Q* At High-Q", x_origine, y_origine) 
+        gc.DrawText("Q* from High-Q", x_origine, y_origine) 
         #define the position of the new rectangle
         x_center = x_origine + RECTANGLE_WIDTH * self.high_scale/2 + w + 10
         y_center = y_origine + h
         gc.Translate(x_center, y_center)
         gc.SetBrush(wx.Brush(self.extrapolation_color_high)) 
         # increase scale by self.high_scale
-        high_percent = format_number(self.high_inv_percent*100)+ '%'
+        if self.high_inv_percent is None:
+            high_percent = 'Not Computed'
+        elif self.high_inv_percent == 'error':
+            high_percent = 'Error'
+        else:
+            high_percent = format_number(self.high_inv_percent*100)+ '%'
         x_center = 20
         y_center = -h
         gc.DrawText(high_percent, x_center, y_center)
@@ -417,10 +478,11 @@ if __name__ =="__main__":
     app  = wx.App()
     container = InvariantContainer()
     container.qstar_total = 100.0
-    container.qstar = 15.0
-    container.qstar_low = 0.001
-    container.qstar_high = 100.0
+    container.qstar = 50
+    container.qstar_low = None
+    container.qstar_high = "alina"
     container.compute_percentage()
+   
     dlg = InvariantDetailsPanel(qstar_container=container)
     dlg.ShowModal()
     app.MainLoop()
