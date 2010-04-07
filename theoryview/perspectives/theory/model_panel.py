@@ -440,7 +440,7 @@ class ModelPanel(BasicPage):
             name = 'FuncHelp'
         else:
             name = self.model.name
-        frame = HelpWindow(None, -1,  pageToOpen="doc/model_functions.html")    
+        frame = HelpWindow(None, -1,  pageToOpen="media/model_functions.html")    
         frame.Show(True)
         if frame.rhelp.HasAnchor(name):
             frame.rhelp.ScrollToAnchor(name)
