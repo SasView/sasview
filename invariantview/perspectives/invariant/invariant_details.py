@@ -83,20 +83,23 @@ class InvariantContainer(wx.Object):
             check the validity if invariant
         """
         #warning to the user when the extrapolated invariant is greater than %5
+        msg = ''
         if self.qstar_low_percent >= 0.05:
             self.existing_warning = True
-            self.warning_msg += "Extrapolated contribution at Low Q is higher "
-            self.warning_msg += "than 5% of the invariant.\n"
+            msg += "Extrapolated contribution at Low Q is higher "
+            msg += "than 5% of the invariant.\n"
         if self.qstar_high_percent >= 0.05:
             self.existing_warning = True
-            self.warning_msg += "Extrapolated contribution at High Q is higher "
-            self.warning_msg += "than 5% of the invariant.\n"
+            msg += "Extrapolated contribution at High Q is higher "
+            msg += "than 5% of the invariant.\n"
         if self.qstar_low_percent + self.qstar_high_percent >= 0.05:
             self.existing_warning = True
-            self.warning_msg += "The sum of all extrapolated contributions is higher "
-            self.warning_msg += "than 5% of the invariant.\n"
+            msg += "The sum of all extrapolated contributions is higher "
+            msg += "than 5% of the invariant.\n"
             
         if self.existing_warning:
+            self.warning_msg = ''
+            self.warning_msg += msg 
             self.warning_msg += "The calculations are likely to be unreliable!\n"
         else:
             self.warning_msg = "No Details on calculations available...\n"
@@ -256,7 +259,7 @@ class InvariantDetailsPanel(wx.Dialog):
             Draw widgets related to warning
         """
         #Warning [string]
-        self.warning_msg_txt = wx.StaticText(self, -1,self.warning_msg)  
+        self.warning_msg_txt = wx.StaticText(self, -1, self.warning_msg)  
         if self.qstar_container.existing_warning:
             self.warning_msg_txt.SetForegroundColour('red') 
         self.warning_sizer.AddMany([(self.warning_msg_txt, 0,
