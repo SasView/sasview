@@ -289,7 +289,7 @@ class Plugin:
         data= Data1D(x=item.x, y=item.y,dx=None, dy=None)
         data.copy_from_datainfo(item)
         item.clone_without_data(clone=data)    
-        data.dy = dy
+        data.dy = deepcopy(dy)
         data.name = item.name
         ## allow to highlight data when plotted
         data.interactive = deepcopy(item.interactive)
@@ -585,10 +585,6 @@ class Plugin:
         if len(self.err_dy) > 0:
             if data.name in  self.err_dy.iterkeys():
                 dy = self.err_dy[data.name]   
-               
-        if data.dy is None or data.dy == []:
-            dy = numpy.zeros(len(data.y))
-        #print "dy ====", dy 
         if data.__class__.__name__ == "Theory1D":
             new_data = self.copy_data(data, dy)
             new_data.group_id = str(new_data.group_id)+"data1D"
