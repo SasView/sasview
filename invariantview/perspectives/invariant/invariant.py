@@ -8,6 +8,7 @@ See the license text in license.txt
 copyright 2009, University of Tennessee
 """
 import wx
+from copy import deepcopy
 from sans.invariant import invariant
 
 from DataLoader.data_info import Data1D as LoaderData1D
@@ -151,7 +152,7 @@ class Plugin:
         """
         id = None
         if hasattr(item,"id"):
-            id = copy.deepcopy(item.id)
+            id = deepcopy(item.id)
 
         data = Data1D(x=item.x, y=item.y, dx=None, dy=None)
         data.copy_from_datainfo(item)
@@ -159,7 +160,7 @@ class Plugin:
         data.dy = dy
         data.name = item.name
         ## allow to highlight data when plotted
-        data.interactive = copy.deepcopy(item.interactive)
+        data.interactive = deepcopy(item.interactive)
         ## when 2 data have the same id override the 1 st plotted
         data.id = id
         data.group_id = item.group_id
