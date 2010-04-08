@@ -17,7 +17,6 @@ import math
 import numpy
 import time
 
-from copy import deepcopy
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph
@@ -299,14 +298,12 @@ class ModelPanel1D(PlotPanel):
             ## store existing dy
             name =self.plots[self.graph.selected_plottable].name
             dy = self.plots[self.graph.selected_plottable].dy
-            self.err_dy[name]= deepcopy(dy)
+            self.err_dy[name]= dy
             ## Create a new dy for a new plottable
-           
-            dy = numpy.zeros(len(self.plots[self.graph.selected_plottable].y))
+            import numpy
+            dy= numpy.zeros(len(self.plots[self.graph.selected_plottable].y))
             selected_plot= self.plots[self.graph.selected_plottable]
-            #post the removed error to the parent
-            event = ErrorDataEvent(err_dy= deepcopy(self.err_dy))
-            wx.PostEvent(self.parent, event)
+            
             if selected_plot.__class__.__name__=="Data1D":
                 # Make sure that we can pass a basic Data1D
                 dxl = None
@@ -347,11 +344,14 @@ class ModelPanel1D(PlotPanel):
             self._onEVT_FUNC_PROPERTY()
             ## save the plot 
             self.plots[self.graph.selected_plottable]=new_plot
-          
             ## Render the graph
             self.graph.render(self)
             self.subplot.figure.canvas.draw_idle() 
             
+            event = ErrorDataEvent(err_dy=self.err_dy)
+            wx.PostEvent(self.parent, event)
+    
+    
     def _on_add_errors(self, evt):
         """
             create a new data1D witht the errors saved in self.err_dy
@@ -360,6 +360,8 @@ class ModelPanel1D(PlotPanel):
             errors and transorm the plottable to a Data1D
             @param evt: Menu event
         """
+       
+        
         if not self.graph.selected_plottable == None \
             and self.graph.selected_plottable in self.plots.keys():
             ##Reset the flag to display the hide option on the context menu
@@ -371,7 +373,7 @@ class ModelPanel1D(PlotPanel):
             selected_plot= self.plots[self.graph.selected_plottable]
             
             try:
-                dy = deepcopy(self.err_dy[selected_plot.name])
+                dy = self.err_dy[selected_plot.name]
                
             except:
                 #for i in range(length):
