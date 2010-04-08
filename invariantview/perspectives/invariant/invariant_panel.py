@@ -829,7 +829,7 @@ class InvariantPanel(wx.ScrolledWindow):
         unit_volume = ''
         unit_surface = ''
         uncertainty = "+/-" 
-        volume_txt = wx.StaticText(self, -1, 'Volume Fraction')
+        volume_txt = wx.StaticText(self, -1, 'Volume Fraction      ')
         self.volume_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.volume_tcl.SetToolTipString("Volume fraction.")
         self.volume_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
@@ -896,7 +896,7 @@ class InvariantPanel(wx.ScrolledWindow):
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.invariant_sizer.Add(self.invariant_total_tcl, (iy, ix), (1,1),
-                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
+                          wx.EXPAND|wx.ADJUST_MINSIZE, 10)
         ix += 1
         self.invariant_sizer.Add( wx.StaticText(self, -1, uncertainty),
                          (iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 10) 
