@@ -7,12 +7,14 @@ See the license text in license.txt
 
 copyright 2009, University of Tennessee
 """
-import  re,copy
+import  re
 import sys, wx, logging
 import string, numpy, math
 import time
 import thread
-#from danse.common.plottools.plottables import Theory1D
+
+from copy import deepcopy
+from DataLoader.data_info import Data1D as LoaderData1D
 from danse.common.plottools.PlotPanel import PlotPanel
 
 from sans.guiframe.dataFitting import Data2D
@@ -229,7 +231,7 @@ class Plugin:
         self.index_model = 0
         self.index_theory= 0
         self.parent.Bind(EVT_SLICER_PANEL, self._on_slicer_event)
-        self.parent.Bind( ERR_DATA, self._on_data_error)
+        self.parent.Bind(ERR_DATA, self._on_data_error)
         self.parent.Bind(EVT_REMOVE_DATA, self._closed_fitpage)
         self.parent.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PANEL)
         self.parent._mgr.Bind(wx.aui.EVT_AUI_PANE_CLOSE,self._onclearslicer)    
@@ -283,7 +285,7 @@ class Plugin:
         """
         id = None
         if hasattr(item,"id"):
-            id = copy.deepcopy(item.id)
+            id = item.id
 
         data= Data1D(x=item.x, y=item.y,dx=None, dy=None)
         data.copy_from_datainfo(item)
@@ -291,7 +293,7 @@ class Plugin:
         data.dy=dy
         data.name = item.name
         ## allow to highlight data when plotted
-        data.interactive = copy.deepcopy(item.interactive)
+        data.interactive = deepcopy(item.interactive)
         ## when 2 data have the same id override the 1 st plotted
         data.id = id
         data.group_id = item.group_id
@@ -376,7 +378,7 @@ class Plugin:
         self.current_pg=self.fit_panel.get_current_page()
         self.page_finder[self.current_pg].set_smearer(smearer)
         ## draw model 1D with smeared data
-        data =  self.page_finder[self.current_pg].get_plotted_data()
+        data =  self.page_finder[self.current_pg].get_fit_data()
         model = self.page_finder[self.current_pg].get_model()
         ## if user has already selected a model to plot
         ## redraw the model with data smeared
@@ -535,7 +537,86 @@ class Plugin:
             new_plot_data.id = data.id 
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot_data,
                                                     title=data.name))
+    def create_fittable_data2D(self, data):
+        """
+            check if the current data is a data 2d and add dy to that data
+            @return Data2D
+        """
+        if data.__class__.__name__ != "Data2D":
+            raise Valueerror, " create_fittable_data2D expects a Data2D"
+        ## Data2D case
+        new_data = deepcopy(data)
+        if not hasattr(data, "is_data"):
+            new_data.group_id += "data2D"
+            new_data.id +="data2D"
+            new_data.is_data = False
+            title = new_data.name
+            title += " Fit"
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_data,
+                                                    title=str(title)))
+        else:
+            new_data.is_data = True
+        return new_data
         
+    def create_fittable_data1D(self, data):
+        """
+            check if the current data is a theory 1d and add dy to that data
+            @return Data1D
+        """
+        if not issubclass(data.__class__, LoaderData1D):
+            raise ValueError, "create_fittable_data1D expects Data1D"
+        #get the appropriate dy 
+        dy = deepcopy(data.dy)
+        if len(self.err_dy) > 0:
+            if data.name in  self.err_dy.iterkeys():
+                dy = self.err_dy[data.name]   
+                print "err_dy ====", dy 
+        if data.dy is None or data.dy == []:
+            dy = numpy.zeros(len(data.y))
+        print "dy ====", dy 
+        if data.__class__.__name__ == "Theory1D":
+            
+            new_data = self.copy_data(data, dy)
+            new_data.group_id += "data1D"
+            new_data.id +="data1D"
+            new_data.is_data = False
+            title = new_data.name
+            title = 'Data created from Theory'
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_data,
+                                                    title=str(title),
+                                                   reset=True))
+        else:
+            new_data = self.copy_data(data, dy)  
+            new_data.is_data = True
+        return new_data
+           
+    def add_fit_page(self, data):
+        """
+            given a data, ask to the fitting panel to create a new fitting page,
+            get this page and store it into the page_finder of this plug-in
+        """
+        try:
+            page = self.fit_panel.add_fit_page(data)
+            # add data associated to the page created
+            if page != None:  
+                page.set_data(data) 
+                #create a fitproblem storing all link to data,model,page creation
+                if not page in self.page_finder.keys():
+                    self.page_finder[page]= FitProblem()
+                ## item is almost the same as data but contains
+                ## axis info for plotting 
+                #self.page_finder[page].add_plotted_data(item)
+                self.page_finder[page].add_fit_data(data)
+
+                wx.PostEvent(self.parent, StatusEvent(status="Page Created"))
+            else:
+                wx.PostEvent(self.parent, StatusEvent(status="Page was already Created"))
+        except:
+            raise
+            #wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
+            #%sys.exc_value))
+            return
+    
     def _onEVT_SLICER_PANEL(self, event):
         """
             receive and event telling to update a panel with a name starting with 
@@ -649,86 +730,15 @@ class Plugin:
         self.panel = event.GetEventObject()
         Plugin.on_perspective(self,event=event)
         for plottable in self.panel.graph.plottables:
-            if plottable.name == self.panel.graph.selected_plottable:
-                if  plottable.__class__.__name__=="Theory1D":
-                    dy=numpy.zeros(len(plottable.y))
-                    if hasattr(plottable, "dy"):
-                        dy= copy.deepcopy(plottable.dy)
-                        
-                    item = self.copy_data(plottable, dy)
-                    item.group_id += "data1D"
-                    item.id +="data1D"
-                    item.is_data = False
-                    title = item.name
-                    title = 'Data created from Theory'
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=item,
-                                                            title=str(title),
-                                                           reset=True))
-                else:
-                    item= self.copy_data(plottable, plottable.dy)  
-                    item.is_data=True
-                    
-                ## put the errors values back to the model if the errors were hiden
-                ## before sending them to the fit engine
-                if len(self.err_dy)>0:
-                    dy = item.dy
-                    if item.name in  self.err_dy.iterkeys():
-                        dy = self.err_dy[item.name]
-                    data = self.copy_data(item, dy)
-                    data.is_data= item.is_data
-                
-                else:
-                    if item.dy==None:
-                        dy= numpy.zeros(len(item.y))
-                        data= self.copy_data(item, dy)
-                        data.is_data=item.is_data
-                    else:
-                        data= self.copy_data(item,item.dy)
-                        data.is_data=item.is_data
-            else:
-                ## Data2D case
-                if not hasattr(plottable, "is_data"):
-                    item= copy.deepcopy(plottable)
-                    item.group_id += "data2D"
-                    item.id +="data2D"
-                    item.is_data= False
-                    title = item.name
-                    title += " Fit"
-                    data = item
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=item, title=str(title)))
-                else:
-                    item= copy.deepcopy(plottable)
-                    data= copy.deepcopy(plottable)
-                    item.is_data=True
-                    data.is_data=True
-                
-               
-            ## create anew page                   
-            if item.name == self.panel.graph.selected_plottable or\
-                 item.__class__.__name__ is "Data2D":
-                try:
-                    page = self.fit_panel.add_fit_page(data)
-                    # add data associated to the page created
-                    if page != None:  
-                        page.set_data(data) 
-                        #create a fitproblem storing all link to data,model,page creation
-                        if not page in self.page_finder.keys():
-                            self.page_finder[page]= FitProblem()
-                        ## item is almost the same as data but contains
-                        ## axis info for plotting 
-                        self.page_finder[page].add_plotted_data(item)
-                        self.page_finder[page].add_fit_data(data)
-
-                        wx.PostEvent(self.parent, StatusEvent(status="Page Created"))
-                    else:
-                        wx.PostEvent(self.parent, StatusEvent(status="Page was already Created"))
-                except:
-                    raise
-                    #wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
-                    #%sys.exc_value))
+            if issubclass(plottable.__class__, LoaderData1D):
+                if plottable.name == self.panel.graph.selected_plottable:
+                    data = self.create_fittable_data1D(data=plottable)
+                    self.add_fit_page(data=data)
                     return
-                
-                
+            else:
+                data = self.create_fittable_data2D(data=plottable)
+                self.add_fit_page(data=data)
+
     def _updateFit(self):
         """
             Is called when values of result are available
@@ -800,7 +810,7 @@ class Plugin:
                 """              
                 if value.get_scheduled()==1:
                     model = value.get_model()
-                    metadata =  value.get_plotted_data()
+                    data =  value.get_fit_data()
                     small_param_name = []
                     small_out = []
                     small_cov = []
@@ -934,12 +944,12 @@ class Plugin:
            
             if self.page_finder[self.current_pg].get_model()== None :
                 
-                model.name="M"+str(self.index_model)
+                model.name = "M"+str(self.index_model)
                 self.index_model += 1  
             else:
                 model.name= self.page_finder[self.current_pg].get_model().name
                 
-            metadata = self.page_finder[self.current_pg].get_plotted_data()
+            data = self.page_finder[self.current_pg].get_fit_data()
             
             # save the name containing the data name with the appropriate model
             self.page_finder[self.current_pg].set_model(model)
@@ -947,14 +957,12 @@ class Plugin:
             self.page_finder[self.current_pg].set_range(qmin=qmin, qmax=qmax)
             smearer=  self.page_finder[self.current_pg].get_smearer()
             # save model name
-            self.draw_model( model=model,smearer=smearer, 
-                             data= metadata, qmin=qmin, qmax=qmax)
+            self.draw_model( model=model, smearer=smearer, 
+                             data=data, qmin=qmin, qmax=qmax)
             
             if self.sim_page!=None:
                 self.sim_page.draw_page()
         
-        
-  
     def _on_model_menu(self, evt):
         """
             Plot a theory from a model selected from the menu
@@ -1182,7 +1190,7 @@ class Plugin:
             their errors of y coordinates for 1Data hide and show error
         """
         self.err_dy = event.err_dy
-        
+        print "receiving error dy",self.err_dy
          
     def _draw_model2D(self,model,data=None,description=None, enable2D=False,
                       qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
