@@ -604,70 +604,15 @@ class ModelPanel(BasicPage):
                 self.parameters.append([None,item, ctl1,
                                         None,None, None, None,None])
                 self.orientation_params.append([None,item, ctl1,
-                                        None,None, None, None,None])
-                    
-        iy+=1
+                                        None,None, None, None,None])  
+        iy += 1
         
         #Display units text on panel
         for item in keys:   
             self.text2_4.Show()
 
-      
         boxsizer1.Add(sizer)
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer3.Layout()
         self.SetScrollbars(20,20,25,65)
-    
- 
-
-                
-        
-class HelpWindow(wx.Frame):
-    def __init__(self, parent, id, title):
-        wx.Frame.__init__(self, parent, id, title, size=(570, 400))
-       
-        from sans.models.CylinderModel import CylinderModel
-        model = CylinderModel()
-        #from sans.models.LineModel import LineModel
-        #model = LineModel()
-        from fitpanel import PageInfo
-        myinfo = PageInfo(self,model)
-        from models import ModelList
-        mylist= ModelList()
-        
-        from sans.models.SphereModel import SphereModel
-        from sans.models.SquareWellStructure import SquareWellStructure
-        from sans.models.DebyeModel import DebyeModel
-        from sans.models.LineModel import LineModel
-        name= "shapes"
-        list1= [SphereModel]
-        mylist.set_list( name, list1)
-        
-        name= "Shape-independent"
-        list1= [DebyeModel]
-        mylist.set_list( name, list1)
-        
-        name= "Structure Factors"
-        list1= [SquareWellStructure]
-        mylist.set_list( name, list1)
-        
-        name= "Added models"
-        list1= [LineModel]
-        mylist.set_list( name, list1)
-        
-        myinfo.model_list_box = mylist.get_list()
-        
-        self.page = ModelPage(self, myinfo) 
-        
-        
-        
-        self.Centre()
-        self.Show(True)
-
-
-   
-if __name__=="__main__":
-    app = wx.App()
-    HelpWindow(None, -1, 'HelpWindow')
-    app.MainLoop()
                 

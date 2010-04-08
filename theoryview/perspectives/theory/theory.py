@@ -274,12 +274,10 @@ class Plugin:
             self.calc_1D.queue()
             
         except:
-            raise
-            #msg= " Error occurred when drawing %s Model 1D: "%model.name
-            #msg+= " %s"%sys.exc_value
-            #wx.PostEvent( self.parent, StatusEvent(status= msg ))
-            #return  
-        
+            msg = " Error occurred when drawing %s Model 1D: "%model.name
+            msg += " %s"%sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg))
+            
     def _update1D(self,x, output):
         """
             Update the output of plotting model 1D
