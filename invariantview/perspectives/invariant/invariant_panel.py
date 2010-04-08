@@ -508,9 +508,12 @@ class InvariantPanel(wx.ScrolledWindow):
             Draw widgets related to data's name
         """
         #Sizer hint 
-        hint_msg = "Load Data then right click to add the data on this panel! "
+        hint_msg = "First open data file from 'File' menu.  Then Highlight and right click on the data plot. \n"
+        hint_msg += "Finally, select 'Compute Invariant'. \n"
         self.hint_msg_txt = wx.StaticText(self, -1, hint_msg)  
         self.hint_msg_txt.SetForegroundColour("red")
+        msg = "Highlight = mouse the mouse's cursor on the data until the plot's color changes to yellow"
+        self.hint_msg_txt.SetToolTipString(msg)
         self.hint_msg_sizer.Add(self.hint_msg_txt)
         #Data name [string]
         data_name_txt = wx.StaticText(self, -1, 'Data : ')  
