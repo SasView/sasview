@@ -12,15 +12,15 @@ import sys, wx, logging
 import string, numpy, math
 import time
 import thread
-
 from copy import deepcopy
+
 from DataLoader.data_info import Data1D as LoaderData1D
 from danse.common.plottools.PlotPanel import PlotPanel
 
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Theory1D
-from sans.guiframe import dataFitting 
+
 from sans.guiframe.utils import format_number
 
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
@@ -290,7 +290,7 @@ class Plugin:
         data= Data1D(x=item.x, y=item.y,dx=None, dy=None)
         data.copy_from_datainfo(item)
         item.clone_without_data(clone=data)    
-        data.dy=dy
+        data.dy = dy
         data.name = item.name
         ## allow to highlight data when plotted
         data.interactive = deepcopy(item.interactive)
@@ -543,7 +543,7 @@ class Plugin:
             @return Data2D
         """
         if data.__class__.__name__ != "Data2D":
-            raise Valueerror, " create_fittable_data2D expects a Data2D"
+            raise ValueError, " create_fittable_data2D expects a Data2D"
         ## Data2D case
         new_data = deepcopy(data)
         if not hasattr(data, "is_data"):
@@ -563,22 +563,34 @@ class Plugin:
             check if the current data is a theory 1d and add dy to that data
             @return Data1D
         """
-        if not issubclass(data.__class__, LoaderData1D):
+        class_name = data.__class__.__name__
+        if not class_name in ["Data1D", "Theory1D"]:
             raise ValueError, "create_fittable_data1D expects Data1D"
+        #For prview the theory is not a subclass of DataLoader.Data1D
+        if not issubclass(data.__class__, LoaderData1D):
+            if class_name == 'Theory1D':
+                temp_data = Theory1D(x=data.x, y=data.y, dy=data.y)
+                temp_data.copy_from_datainfo(data1d=data)
+                temp_data.name = data.name
+            if class_name == 'Data1D':
+                temp_data = Data1D(x=data.x, y=data.y, dx=data.dx, dy=data.y)
+                temp_data.copy_from_datainfo(data=data)
+                temp_data.name = data.name
+            data = temp_data
+        
         #get the appropriate dy 
         dy = deepcopy(data.dy)
         if len(self.err_dy) > 0:
             if data.name in  self.err_dy.iterkeys():
                 dy = self.err_dy[data.name]   
-                print "err_dy ====", dy 
+               
         if data.dy is None or data.dy == []:
             dy = numpy.zeros(len(data.y))
-        print "dy ====", dy 
+        #print "dy ====", dy 
         if data.__class__.__name__ == "Theory1D":
-            
             new_data = self.copy_data(data, dy)
-            new_data.group_id += "data1D"
-            new_data.id +="data1D"
+            new_data.group_id = str(new_data.group_id)+"data1D"
+            new_data.id = str(new_data.id)+"data1D"
             new_data.is_data = False
             title = new_data.name
             title = 'Data created from Theory'
@@ -730,7 +742,7 @@ class Plugin:
         self.panel = event.GetEventObject()
         Plugin.on_perspective(self,event=event)
         for plottable in self.panel.graph.plottables:
-            if issubclass(plottable.__class__, LoaderData1D):
+            if plottable.__class__.__name__ in ["Data1D", "Theory1D"]:
                 if plottable.name == self.panel.graph.selected_plottable:
                     data = self.create_fittable_data1D(data=plottable)
                     self.add_fit_page(data=data)
