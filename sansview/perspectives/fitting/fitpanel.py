@@ -334,7 +334,7 @@ class FitPanel(wx.aui.AuiNotebook):
             if not type.lower() in ['data']:
                 #delete the previous theory page and add a new one
                 name, panel = self.opened_pages[type]
-                self.manager.reset_plot_panel(panel.get_data())
+                #self.manager.reset_plot_panel(panel.get_data())
                 #delete the existing page and replace it
                 index = self.GetPageIndex(panel)
                 panel = self.replace_page(index=index, page_info=page_info, type=type)

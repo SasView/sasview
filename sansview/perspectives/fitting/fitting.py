@@ -14,7 +14,6 @@ import time
 import thread
 from copy import deepcopy
 
-from DataLoader.data_info import Data1D as LoaderData1D
 from danse.common.plottools.PlotPanel import PlotPanel
 
 from sans.guiframe.dataFitting import Data2D
@@ -567,16 +566,19 @@ class Plugin:
         if not class_name in ["Data1D", "Theory1D"]:
             raise ValueError, "create_fittable_data1D expects Data1D"
         #For prview the theory is not a subclass of DataLoader.Data1D
-        if not issubclass(data.__class__, LoaderData1D):
+        #if not issubclass(data.__class__, LoaderData1D): must be used 
+        #for checking
+        if not hasattr(data, "is_data"):
             if class_name == 'Theory1D':
                 temp_data = Theory1D(x=data.x, y=data.y, dy=data.y)
                 temp_data.copy_from_datainfo(data1d=data)
                 temp_data.name = data.name
+                data = temp_data
             if class_name == 'Data1D':
                 temp_data = Data1D(x=data.x, y=data.y, dx=data.dx, dy=data.y)
-                temp_data.copy_from_datainfo(data=data)
+                temp_data.copy_from_datainfo(data1d=data)
                 temp_data.name = data.name
-            data = temp_data
+                data = temp_data
         
         #get the appropriate dy 
         dy = deepcopy(data.dy)
