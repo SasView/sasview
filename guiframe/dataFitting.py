@@ -1,6 +1,9 @@
 """
     Adapters for fitting module
 """
+import copy
+import numpy
+
 from danse.common.plottools.plottables import Data1D as PlotData1D
 from danse.common.plottools.plottables import Data2D as PlotData2D
 from danse.common.plottools.plottables import Theory1D as PlotTheory1D
@@ -8,11 +11,9 @@ from danse.common.plottools.plottables import Theory1D as PlotTheory1D
 from DataLoader.data_info import Data1D as LoadData1D
 from DataLoader.data_info import Data2D as LoadData2D
 
-import copy
-
 class Data1D(PlotData1D, LoadData1D):
     
-    def __init__(self,x=[],y=[],dx=None,dy=None):
+    def __init__(self, x=[], y=[], dx=None, dy=None):
         PlotData1D.__init__(self, x, y, dx, dy)
         LoadData1D.__init__(self, x, y, dx, dy)
         self.id= None
@@ -24,11 +25,15 @@ class Data1D(PlotData1D, LoadData1D):
             copy values of Data1D of type DataLaoder.Data_info
         """
         self.x  = copy.deepcopy(data1d.x)
-        self.dx = copy.deepcopy(data1d.dx)
         self.y  = copy.deepcopy(data1d.y)
         self.dy = copy.deepcopy(data1d.dy)
-        self.dxl = copy.deepcopy(data1d.dxl)
-        self.dxw = copy.deepcopy(data1d.dxw)
+        
+        if hasattr(data1d, "dx"):
+            self.dx = copy.deepcopy(data1d.dx)    
+        if hasattr(data1d, "dxl"):
+            self.dxl = copy.deepcopy(data1d.dxl)
+        if hasattr(data1d, "dxw"):
+            self.dxw = copy.deepcopy(data1d.dxw)
     
         self.xaxis(data1d._xaxis,data1d._xunit)
         self.yaxis(data1d._yaxis,data1d._yunit)
@@ -46,7 +51,7 @@ class Theory1D(PlotTheory1D,LoadData1D):
         PlotTheory1D.__init__(self, x, y, dy)
         LoadData1D.__init__(self, x, y, dy)
         self.id= None
-        self.group_id =None
+        self.group_id = None
         self.is_data = True
     
     def copy_from_datainfo(self, data1d):
@@ -56,9 +61,15 @@ class Theory1D(PlotTheory1D,LoadData1D):
         self.x  = copy.deepcopy(data1d.x)
         self.y  = copy.deepcopy(data1d.y)
         self.dy = copy.deepcopy(data1d.dy)
-   
+        if hasattr(data1d, "dx"):
+            self.dx = copy.deepcopy(data1d.dx) 
+        if hasattr(data1d, "dxl"):
+            self.dxl = copy.deepcopy(data1d.dxl)
+        if hasattr(data1d, "dxw"):
+            self.dxw = copy.deepcopy(data1d.dxw)    
         self.xaxis(data1d._xaxis,data1d._xunit)
         self.yaxis(data1d._yaxis,data1d._yunit)
+        
     def __str__(self):
         """
             print data
