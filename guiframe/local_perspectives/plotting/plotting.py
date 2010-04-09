@@ -44,6 +44,10 @@ class Plugin:
             @param parent: parent window
         """
         self.menu = wx.Menu()
+        
+        self.menu.Append(wx.NewId(), "No plot available", 
+                             "No plot available")
+        self.menu.FindItemByPosition(0).Enable(False)
         return [(id, self.menu, "Plot")]
     
         
@@ -157,6 +161,10 @@ class Plugin:
                 new_panel.window_name = event.title
                
             event_id = self.parent.popup_panel(new_panel)
+            #remove the default item in the menu
+            if len(self.plot_panels) == 0:
+                self.menu.RemoveItem(self.menu.FindItemByPosition(0))
+                
             self.menu.Append(event_id, new_panel.window_caption, 
                              "Show %s plot panel" % new_panel.window_caption)
             # Set UID to allow us to reference the panel later
