@@ -78,18 +78,7 @@ class ModelPanel1D(PlotPanel):
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
         self.graph.render(self)
-        
-    def on_kill_focus(self, event):
-        """
-            reset the panel color and post even just after the panel has been on 
-            focus to make sure the group_id is filled after _onEVT_1DREPLOT
-            is called
-        """
-        self.SetColor(None)
-        self.draw()
-        #post nd event to notify guiframe that this panel is on focus
-        wx.PostEvent(self.parent, AddManyDataEvent(panel=self))
-        
+   
     def _reset(self):
         """
             Resets internal data and graph
@@ -176,7 +165,10 @@ class ModelPanel1D(PlotPanel):
         if ax != None:
             position = "x: %8.3g    y: %8.3g" % (event.xdata, event.ydata)
             wx.PostEvent(self.parent, StatusEvent(status=position))
-     
+            
+        #post nd event to notify guiframe that this panel is on focus
+        wx.PostEvent(self.parent, AddManyDataEvent(panel=self))
+        
     def _onRemove(self, event):
         """
             Remove a plottable from the graph and render the graph 
