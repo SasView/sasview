@@ -931,22 +931,29 @@ class Plugin:
             @param evt: wx.combobox event
         """
         model = evt.model
-        
         if model == None:
             return
-        model.origin_name = model.name
+        smearer = None
+        qmin = None
+        qmax = None
+        if hasattr(evt, "qmin"):
+            qmin = evt.qmin
+        if hasattr(evt, "qmax"):
+            qmax = evt.qmax
+        if hasattr(evt, "smearer"):
+            smearer = evt.smearer
+        #model.origin_name = model.name
         self.current_pg = self.fit_panel.get_current_page() 
         ## make sure nothing is done on self.sim_page
         ## example trying to call set_panel on self.sim_page
         if self.current_pg != self.sim_page :
-           
             if self.page_finder[self.current_pg].get_model()== None :
                 
                 model.name = "M"+str(self.index_model)
                 self.index_model += 1  
             else:
                 model.name= self.page_finder[self.current_pg].get_model().name
-                
+            
             data = self.page_finder[self.current_pg].get_fit_data()
             
             # save the name containing the data name with the appropriate model
@@ -955,8 +962,7 @@ class Plugin:
             self.page_finder[self.current_pg].set_range(qmin=qmin, qmax=qmax)
             smearer=  self.page_finder[self.current_pg].get_smearer()
             # save model name
-            self.draw_model( model=model, smearer=smearer, 
-                             data=data, qmin=qmin, qmax=qmax)
+            self.set_smearer(smearer=smearer, qmin=qmin, qmax=qmax)
             
             if self.sim_page!=None:
                 self.sim_page.draw_page()
@@ -1123,8 +1129,7 @@ class Plugin:
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                              title=str(title), reset=True))
             else:
-                wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                             title= str(title)))
+                wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,title= str(title)))
             msg = "Plot 1D  complete !"
             wx.PostEvent( self.parent, StatusEvent( status= msg , type="stop" ))
         except:
@@ -1188,7 +1193,7 @@ class Plugin:
             their errors of y coordinates for 1Data hide and show error
         """
         self.err_dy = event.err_dy
-        print "receiving error dy",self.err_dy
+        #print "receiving error dy",self.err_dy
          
     def _draw_model2D(self,model,data=None,description=None, enable2D=False,
                       qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
@@ -1298,8 +1303,8 @@ def profile(fn, *args, **kw):
         call_result = fn(*args, **kw)
     cProfile.runctx('call()', dict(call=call), {}, 'profile.out')
     stats = pstats.Stats('profile.out')
-    stats.sort_stats('time')
-    #stats.sort_stats('calls')
+    #stats.sort_stats('time')
+    stats.sort_stats('calls')
     stats.print_stats()
     os.unlink('profile.out')
     return call_result

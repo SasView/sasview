@@ -764,7 +764,7 @@ class FitPage(BasicPage):
     def _on_select_model(self, event): 
         """
              call back for model selection
-        """    
+        """  
         self._on_select_model_helper() 
         self.set_model_param_sizer(self.model)                   
         
@@ -774,6 +774,15 @@ class FitPage(BasicPage):
             self.set_dispers_sizer()
         except:
             pass
+        self.btFit.SetFocus() 
+        self.state.enable_disp = self.enable_disp.GetValue()
+        self.state.disable_disp = self.disable_disp.GetValue()
+        self.state.pinhole_smearer = self.pinhole_smearer.GetValue()
+        self.state.slit_smearer = self.slit_smearer.GetValue()
+    
+        self.state.structurecombobox = self.structurebox.GetCurrentSelection()
+        self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
+      
         if self.model != None:
             try:
                 temp_smear= None
@@ -785,22 +794,14 @@ class FitPage(BasicPage):
                 pass
             if self.data is not None and self.data.__class__.__name__ !="Data2D":
                 ## set smearing value whether or not the data contain the smearing info
-                self.manager.set_smearer(smearer=temp_smear, qmin= float(self.qmin_x),
+                evt = ModelEventbox(model=self.model, 
+                                        smearer=temp_smear, 
+                                        qmin= float(self.qmin_x),
                                      qmax= float(self.qmax_x)) 
-           
-            evt = ModelEventbox(model=self.model)
+            else:   
+                 evt = ModelEventbox(model=self.model)
             wx.PostEvent(self.event_owner, evt)  
             
-        self.btFit.SetFocus() 
-        self.state.enable_disp = self.enable_disp.GetValue()
-        self.state.disable_disp = self.disable_disp.GetValue()
-        self.state.pinhole_smearer = self.pinhole_smearer.GetValue()
-        self.state.slit_smearer = self.slit_smearer.GetValue()
-    
-        self.state.structurecombobox = self.structurebox.GetCurrentSelection()
-        self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
-      
-       
         if event !=None:
             #self._undo.Enable(True)
             ## post state to fit panel
