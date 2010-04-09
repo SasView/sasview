@@ -196,19 +196,20 @@ class Plugin:
                         return [] 
                 return [[fit_option, fit_hint, self._onSelect]]
             else:
-                if item.name==graph.selected_plottable :
-                    if item.name !="$I_{obs}(q)$" and item.name !="$P_{fit}(r)$":
-                        if hasattr(item, "group_id"):
-                            # if is_data is true , this in an actual data loaded
-                            #else it is a data created from a theory model
-                            if hasattr(item,"is_data"):
-                                if item.is_data:
-                                    return [[fit_option, fit_hint,
-                                              self._onSelect]]
-                                else:
-                                    return [] 
+                if item.name == graph.selected_plottable :
+                    if item.name in ["$I_{obs}(q)$","$I_{fit}(q)$","$P_{fit}(r)$"]:
+                        return [] 
+                    if hasattr(item, "group_id"):
+                        # if is_data is true , this in an actual data loaded
+                        #else it is a data created from a theory model
+                        if hasattr(item,"is_data"):
+                            if item.is_data:
+                                return [[fit_option, fit_hint,
+                                          self._onSelect]]
                             else:
-                               return [[fit_option, fit_hint, self._onSelect]]
+                                return [] 
+                        else:
+                           return [[fit_option, fit_hint, self._onSelect]]
         return []   
 
 
@@ -565,21 +566,7 @@ class Plugin:
         class_name = data.__class__.__name__
         if not class_name in ["Data1D", "Theory1D"]:
             raise ValueError, "create_fittable_data1D expects Data1D"
-        #For prview the theory is not a subclass of DataLoader.Data1D
-        #if not issubclass(data.__class__, LoaderData1D): must be used 
-        #for checking
-        if not hasattr(data, "is_data"):
-            if class_name == 'Theory1D':
-                temp_data = Theory1D(x=data.x, y=data.y, dy=data.y)
-                temp_data.copy_from_datainfo(data1d=data)
-                temp_data.name = data.name
-                data = temp_data
-            if class_name == 'Data1D':
-                temp_data = Data1D(x=data.x, y=data.y, dx=data.dx, dy=data.y)
-                temp_data.copy_from_datainfo(data1d=data)
-                temp_data.name = data.name
-                data = temp_data
-        
+      
         #get the appropriate dy 
         dy = deepcopy(data.dy)
         if len(self.err_dy) > 0:
@@ -596,7 +583,8 @@ class Plugin:
                                                     title=str(title),
                                                    reset=True))
         else:
-            new_data = self.copy_data(data, dy)  
+            new_data = self.copy_data(data, dy) 
+            new_data.id = data.id 
             new_data.is_data = True
         return new_data
            
