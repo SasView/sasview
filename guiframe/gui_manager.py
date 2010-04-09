@@ -45,6 +45,21 @@ warnings.simplefilter("ignore")
 
 import logging
 
+
+
+def quit_guiframe(parent=None):
+    """
+        Pop up message to make sure the user wants to quit the application
+    """
+    message = "Do you really want to quit \n"
+    message += "this application?"
+    dial = wx.MessageDialog(parent, message, 'Question',
+                       wx.YES_NO|wx.NO_DEFAULT|wx.ICON_QUESTION)
+    if dial.ShowModal() == wx.ID_YES:
+        return True
+    else:
+        return False
+    
 class Plugin:
     """
         This class defines the interface for a Plugin class
@@ -483,7 +498,7 @@ class ViewerFrame(wx.Frame):
         self.filemenu = wx.Menu()
         
         id = wx.NewId()
-        self.filemenu.Append(id, '&Open', 'Open a file')
+        self.filemenu.Append(id, '&Load Data', 'Load data file into the application')
         wx.EVT_MENU(self, id, self._on_open)
         #self.filemenu.AppendSeparator()
         
@@ -709,12 +724,13 @@ class ViewerFrame(wx.Frame):
         """
             Quit the application
         """
-        import sys
-        wx.Frame.Close(self)
-        wx.Exit()
-        sys.exit()
+        flag = quit_guiframe(parent=self)
+        if flag:
+            import sys
+            wx.Frame.Close(self)
+            wx.Exit()
+            sys.exit()
 
-  
     def _check_update(self, event=None): 
         """
             Check with the deployment server whether a new version
