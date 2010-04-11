@@ -4,8 +4,9 @@
 """
 
 import wx
-import sys
 
+import sys
+from wx.lib.scrolledpanel import ScrolledPanel
 from sans.invariant import invariant
 from sans.guiframe.utils import format_number, check_float
 from sans.guicomm.events import NewPlotEvent, StatusEvent
@@ -42,7 +43,7 @@ else:
     FONT_VARIANT = 1
 
 
-class InvariantPanel(wx.ScrolledWindow):
+class InvariantPanel(ScrolledPanel):
     """
         Provides the Invariant GUI.
     """
@@ -53,7 +54,8 @@ class InvariantPanel(wx.ScrolledWindow):
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
     def __init__(self, parent, data=None, manager=None):
-        wx.ScrolledWindow.__init__(self, parent, style= wx.FULL_REPAINT_ON_RESIZE )
+        ScrolledPanel.__init__(self, parent)
+        self.SetupScrolling()
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         #Object that receive status event
@@ -417,7 +419,8 @@ class InvariantPanel(wx.ScrolledWindow):
         #enable the button_ok for more details
         self.button_details.Enable()
         self.button_details.SetFocus()
-    
+        self.Layout()
+        
     def reset_panel(self):
         """
             set the panel at its initial state.
@@ -456,6 +459,7 @@ class InvariantPanel(wx.ScrolledWindow):
         self.surface_err_tcl.Clear()
         #prepare a new container to put result of invariant
         self.inv_container = InvariantContainer()
+        self.Layout()
         
     def _define_structure(self):
         """
@@ -968,7 +972,6 @@ class InvariantPanel(wx.ScrolledWindow):
                                   (self.extrapolation_sizer, 0,
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)])
         self.SetSizer(self.main_sizer)
-        self.SetScrollbars(20,20,25,65)
         self.SetAutoLayout(True)
     
 class InvariantDialog(wx.Dialog):
