@@ -55,7 +55,6 @@ class InvariantPanel(ScrolledPanel):
     CENTER_PANE = True
     def __init__(self, parent, data=None, manager=None):
         ScrolledPanel.__init__(self, parent)
-        self.SetupScrolling()
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         #Object that receive status event
@@ -71,7 +70,8 @@ class InvariantPanel(ScrolledPanel):
         self.reset_panel()
         if self.parent is not None:
             msg = ""
-            wx.PostEvent(self.parent, StatusEvent(status= msg))
+            wx.PostEvent(self.parent, StatusEvent(status=msg))
+        self.SetupScrolling()
        
     def err_check_on_data(self):
         """
@@ -103,7 +103,7 @@ class InvariantPanel(ScrolledPanel):
             self.hint_msg_txt.SetLabel('')
             self.reset_panel()
             self.compute_invariant(event=None)
-            
+             
     def set_message(self):
         """
             Display warning message if available
@@ -419,7 +419,6 @@ class InvariantPanel(ScrolledPanel):
         #enable the button_ok for more details
         self.button_details.Enable()
         self.button_details.SetFocus()
-        self.Layout()
         
     def reset_panel(self):
         """
@@ -459,8 +458,7 @@ class InvariantPanel(ScrolledPanel):
         self.surface_err_tcl.Clear()
         #prepare a new container to put result of invariant
         self.inv_container = InvariantContainer()
-        self.Layout()
-        
+       
     def _define_structure(self):
         """
             Define main sizers needed for this panel
@@ -727,7 +725,7 @@ class InvariantPanel(ScrolledPanel):
             self.fit_enable_high.Disable()
         self._enable_fit_power_law_high()
         self.button_calculate.SetFocus()
-  
+ 
     def _layout_extrapolation_high(self):
         """
             Draw widgets related to extrapolation at high q range
@@ -972,7 +970,7 @@ class InvariantPanel(ScrolledPanel):
                                   (self.extrapolation_sizer, 0,
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)])
         self.SetSizer(self.main_sizer)
-        self.SetAutoLayout(True)
+        #self.SetAutoLayout(True)
     
 class InvariantDialog(wx.Dialog):
     def __init__(self, parent=None, id=1,graph=None,
