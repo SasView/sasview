@@ -34,10 +34,8 @@ class StatusBar(wxStatusB):
          self.gauge.Hide()
          
          #status bar icon
-         icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR)
          self.bitmap_bt_warning = wx.BitmapButton(self, -1, size=(BUTTON_SIZE,-1),
                                                   style=wx.NO_BORDER)
-         self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
          rect = self.GetFieldRect(ICON_POSITION)
          self.bitmap_bt_warning.SetPosition((rect.x+5, rect.y-2))
         
@@ -74,7 +72,7 @@ class StatusBar(wxStatusB):
         while(count <= 100):
             count += 1
         self.timer_stop.Stop() 
-        self.clear_gauge(msg="Complete")
+        self.clear_gauge(msg="")
        
     def OnTimer(self, evt): 
         """Update the progress bar while the timer is running 
@@ -106,7 +104,7 @@ class StatusBar(wxStatusB):
         """
             Hide the gauge
         """
-        self.SetStatusText(str(msg), MSG_POSITION)
+        #self.SetStatusText(str(msg), MSG_POSITION)
         self.progress = 0
         self.gauge.SetValue(0)
         self.gauge.Hide() 

@@ -676,12 +676,14 @@ class ViewerFrame(wx.Frame):
             self._mgr.Update()
    
     def _on_open(self, event):
-   
-        from data_loader import plot_data
+        """
+        """
+        print "_on_open"
         path = self.choose_file()
-
-        if path ==None:
+        if path is None:
             return
+        
+        from data_loader import plot_data
         if path and os.path.isfile(path):
             plot_data(self, path)
            

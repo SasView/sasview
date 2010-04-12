@@ -1,9 +1,15 @@
+
 import os, sys,numpy
 import wx
 import re
+
 from dataFitting import Data1D
 from dataFitting import Data2D
 from DataLoader.loader import Loader
+from load_thread import DataReader
+
+from sans.guicomm.events import NewPlotEvent, StatusEvent
+
 
 def parse_name(name, expression):
     """
@@ -115,29 +121,37 @@ def load_error(error=None):
     dial = wx.MessageDialog(None, message, 'Error Loading File', wx.OK | wx.ICON_EXCLAMATION)
     dial.ShowModal()    
 
+def on_load_error(parent):
+    """
+    """
+    wx.PostEvent(parent, StatusEvent(status="Load cancel..", info="warning",
+                                                type="stop"))
 def plot_data(parent, path):
     """
         Use the DataLoader loader to created data to plot.
         @param path: the path of the data to load
     """
-    from sans.guicomm.events import NewPlotEvent, StatusEvent
-    from DataLoader.loader import  Loader
+    #Load data
+    from load_thread import DataReader
+    if parent is not None:
+        wx.PostEvent(parent, StatusEvent(status="Loading...", info="info",
+                                            type="progress"))
+        reader = DataReader(path=path,
+                             parent=parent,
+                             err_fct=load_error,
+                             msg_fct=on_load_error,
+                            completefn=complete_loading)
+        reader.queue()
    
-    # Instantiate a loader 
-    L = Loader()
-    
-    # Load data 
-    try:
-        output = L.load(path)
-    except:
-        load_error(sys.exc_value)
-        return
-    
+def complete_loading(output, path, parent):
     # Notify user if the loader completed the load but no data came out
     if output == None:
-        load_error("The data file appears to be empty.")
+        msg = "The data file appears to be empty."
+        load_error(msg)
+        wx.PostEvent(parent, StatusEvent(status=msg, info="warning",
+                                            type="stop"))
         return
-  
+    
     filename = os.path.basename(path)
     
     if not  output.__class__.__name__ == "list":
@@ -146,8 +160,8 @@ def plot_data(parent, path):
             new_plot = Data2D(image=None, err_image=None)
       
         else:
-            msg = "Loading 1D data: "
-            wx.PostEvent(parent, StatusEvent(status="%s %s"%(msg, output.filename)))
+            msg = "Loading 1D data: %s"%output.filename
+            wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
             new_plot = Data1D(x=[], y=[], dx=None, dy=None)
             
         new_plot.copy_from_datainfo(output) 
@@ -197,6 +211,8 @@ def plot_data(parent, path):
     else:
         i=1
         for item in output:
+            msg = "Loading 1D data: %s"%str(item.run[0])
+            wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
             try:
                 dx = item.dx
                 dxl = item.dxl
