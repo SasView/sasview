@@ -157,6 +157,8 @@ def complete_loading(output, path, parent):
     if not  output.__class__.__name__ == "list":
         ## Creating a Data2D with output
         if hasattr(output,'data'):
+            msg = "Loading 2D data: %s"%output.filename
+            wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
             new_plot = Data2D(image=None, err_image=None)
       
         else:

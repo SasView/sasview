@@ -40,6 +40,9 @@ class StatusBar(wxStatusB):
          self.bitmap_bt_warning.SetPosition((rect.x+5, rect.y-2))
         
          ## Current progress value of the bar 
+         self.nb_start = 0
+         self.nb_progress = 0
+         self.nb_stop = 0
          self.progress = 0      
          self.timer = wx.Timer(self, -1) 
          self.timer_stop = wx.Timer(self, -1) 
@@ -56,6 +59,8 @@ class StatusBar(wxStatusB):
         """
         """
         wxStatusB.SetStatusText(self, text, MSG_POSITION)
+        icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR)
+        self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
         
     def PopStatusText(self, *args, **kwds):
         wxStatusB.PopStatusText(self, field=MSG_POSITION)
@@ -63,6 +68,14 @@ class StatusBar(wxStatusB):
     def PushStatusText(self, *args, **kwds):
         wxStatusB.PushStatusText(self, field=MSG_POSITION,string=string)
         
+    def enable_clear_gauge(self):
+        """
+        """
+        flag = False
+        if (self.nb_start <= self.nb_stop) or (self.nb_progress <= self.nb_stop):
+            flag = True
+        return flag
+    
     def OnTimer_stop(self, evt): 
         """Clear the progress bar
         @param evt: wx.EVT_TIMER 
@@ -73,6 +86,9 @@ class StatusBar(wxStatusB):
             count += 1
         self.timer_stop.Stop() 
         self.clear_gauge(msg="")
+        self.nb_progress = 0 
+        self.nb_start = 0 
+        self.nb_stop = 0
        
     def OnTimer(self, evt): 
         """Update the progress bar while the timer is running 
@@ -82,29 +98,11 @@ class StatusBar(wxStatusB):
         # Check stop flag that can be set from non main thread 
         if self.timer.IsRunning(): 
             self.gauge.Pulse()
-    """   
-    def set_progress(self): 
-        #Set the gauge value given the status of a thread
-        self.gauge.Show(True)
-        if self.timer.IsRunning(): 
-            while(self.thread.isrunning()):
-                self.progress += 1
-                # Update the progress value if it is less than the range 
-                if self.progress < self.gauge.GetRange()-20: 
-                    self.gauge.SetValue(int(self.progress)) 
-                else:
-                    self.gauge.SetValue(70) 
-                    self.progress = 0
-                    self.timer.Stop()
-            self.timer.Stop()
-            self.gauge.SetValue(90) 
-            self.progress =0
-    """        
+   
     def clear_gauge(self, msg=""):
         """
             Hide the gauge
         """
-        #self.SetStatusText(str(msg), MSG_POSITION)
         self.progress = 0
         self.gauge.SetValue(0)
         self.gauge.Hide() 
@@ -143,6 +141,7 @@ class StatusBar(wxStatusB):
         type = event.type
         self.gauge.Show(True)
         if type.lower()=="start":
+            self.nb_start += 1
             self.timer.Stop()
             self.progress += 10
             self.gauge.SetValue(int(self.progress)) 
@@ -150,6 +149,7 @@ class StatusBar(wxStatusB):
             if self.progress < self.gauge.GetRange()-20:
                 self.gauge.SetValue(int(self.progress)) 
         if type.lower()=="progress":
+            self.nb_progress += 1
             self.timer.Start(100)
             self.gauge.Pulse()
         if type.lower()=="update":
@@ -158,11 +158,14 @@ class StatusBar(wxStatusB):
             if self.progress < self.gauge.GetRange()-20:
                 self.gauge.SetValue(int(self.progress))   
         if type.lower()=="stop":
+            self.nb_stop += 1
             self.gauge.Show(True)
-            self.timer.Stop()
-            self.progress = 0
-            self.gauge.SetValue(90) 
-            self.timer_stop.Start(3) 
+            print "self.enable_clear_gauge()",self.enable_clear_gauge()
+            if self.enable_clear_gauge():
+                self.timer.Stop()
+                self.progress = 0
+                self.gauge.SetValue(90) 
+                self.timer_stop.Start(3) 
                     
     def set_status(self, event):
         """
