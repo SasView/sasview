@@ -458,7 +458,8 @@ class Plugin:
                     self.current_pg= page
             except:
                 msg= "%s error: %s" % (engineType,sys.exc_value)
-                wx.PostEvent(self.parent, StatusEvent(status= msg ))
+                wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+                                                      type="stop"))
                 return 
             
         #Do the simultaneous fit
@@ -499,7 +500,8 @@ class Plugin:
             print "in pluging"
         except:
             msg= "%s error: %s" % (engineType,sys.exc_value)
-            wx.PostEvent(self.parent, StatusEvent(status= msg ,type="stop"))
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+                                                    type="stop"))
             return 
         
     def ready_fit(self, calc_fit):
@@ -606,13 +608,14 @@ class Plugin:
                 #self.page_finder[page].add_plotted_data(item)
                 self.page_finder[page].add_fit_data(data)
 
-                wx.PostEvent(self.parent, StatusEvent(status="Page Created"))
+                wx.PostEvent(self.parent, StatusEvent(status="Page Created",
+                                                                info="info"))
             else:
-                wx.PostEvent(self.parent, StatusEvent(status="Page was already Created"))
+                msg = "Page was already Created"
+                wx.PostEvent(self.parent, StatusEvent(status=msg, info="warning"))
         except:
-            raise
-            #wx.PostEvent(self.parent, StatusEvent(status="Creating Fit page: %s"\
-            #%sys.exc_value))
+            msg = "Creating Fit page: %s"%sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
             return
     
     def _onEVT_SLICER_PANEL(self, event):
@@ -757,7 +760,8 @@ class Plugin:
         try:
             if result ==None:
                 msg= "Simple Fitting Stop !!!"
-                wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+                wx.PostEvent(self.parent, StatusEvent(status=msg,info="warning",
+                                                      type="stop"))
                 return
             if not numpy.isfinite(result.fitness) or numpy.any(result.pvec ==None )or not numpy.all(numpy.isfinite(result.pvec) ):
                 msg= "Single Fitting did not converge!!!"
@@ -776,7 +780,8 @@ class Plugin:
            
         except:
             msg= "Single Fit completed but Following error occurred:%s"% sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+                                                  type="stop"))
             return
        
        
