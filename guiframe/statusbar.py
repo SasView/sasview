@@ -2,13 +2,57 @@ import wx
 from wx import StatusBar as wxStatusB
 import wx.lib
 from wx.lib import newevent
+(MessageEvent, EVT_MESSAGE) = wx.lib.newevent.NewEvent()
 #numner of fields of the status bar 
-NB_FIELDS = 3
+NB_FIELDS = 4
 #position of the status bar's fields
 ICON_POSITION = 0
 MSG_POSITION  = 1
 GAUGE_POSITION  = 2
+CONSOLE_POSITION  = 3
 BUTTON_SIZE = 40
+
+CONSOLE_WIDTH = 340
+CONSOLE_HEIGHT = 240
+
+class ConsolePanel(wx.Panel):
+    def __init__(self, parent, *args, **kwargs):
+        wx.Panel.__init__(self, parent=parent,*args, **kwargs)
+        self.parent = parent
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.msg_txt = wx.TextCtrl(self, size=(CONSOLE_WIDTH-40,
+                                                CONSOLE_HEIGHT-60), 
+                                        style=wx.TE_MULTILINE)
+        self.msg_txt.SetValue('No message available')
+        self.sizer.Add(self.msg_txt, 1, wx.EXPAND|wx.ALL, 10)
+        self.SetSizer(self.sizer)
+        
+    def set_message(self, status=""):  
+        msg = status+ "\n"  
+        self.msg_txt.AppendText(str(msg))
+        
+class Console(wx.Frame):
+    def __init__(self, parent=None, status="", *args, **kwds):
+        kwds["size"] = (CONSOLE_WIDTH, CONSOLE_HEIGHT)
+        kwds["title"] = "Console"
+        wx.Frame.__init__(self, parent=parent, *args, **kwds)
+        self.panel = ConsolePanel(self)
+        self.panel.set_message(status=status)
+        self.Bind(EVT_MESSAGE, self.set_message)
+        self.Show(True)
+        
+    def set_multiple_messages(self, messages=[]):
+        """
+        """
+        if messages:
+            for status in messages:
+                self.panel.set_message(status)
+                
+    def set_message(self, event):
+        """
+        """
+        self.panel.set_message(event.status)
+        
 class StatusBar(wxStatusB):
     def __init__(self, parent, *args, **kargs):
          wxStatusB.__init__(self, parent, *args, **kargs)
@@ -20,7 +64,7 @@ class StatusBar(wxStatusB):
        
          #Layout of status bar
          self.SetFieldsCount(NB_FIELDS) 
-         self.SetStatusWidths([BUTTON_SIZE, -2, -1])
+         self.SetStatusWidths([BUTTON_SIZE, -2, -1,BUTTON_SIZE])
          
          #display default message
          self.msg_position = MSG_POSITION 
@@ -38,11 +82,22 @@ class StatusBar(wxStatusB):
                                                   style=wx.NO_BORDER)
          rect = self.GetFieldRect(ICON_POSITION)
          self.bitmap_bt_warning.SetPosition((rect.x+5, rect.y-2))
-        
+         
+         console_bmp =  wx.ArtProvider.GetBitmap(wx.ART_TIP, wx.ART_TOOLBAR)
+         self.bitmap_bt_console = wx.BitmapButton(self, -1, 
+                                                size=(BUTTON_SIZE-5, height-4))
+         self.bitmap_bt_console.SetBitmapLabel(console_bmp)
+         self.bitmap_bt_console.Bind(wx.EVT_BUTTON, self._onMonitor,
+                                            id=self.bitmap_bt_console.GetId())
+         rect = self.GetFieldRect(CONSOLE_POSITION)
+         self.bitmap_bt_console.SetPosition((rect.x+5, rect.y-2))
          ## Current progress value of the bar 
          self.nb_start = 0
          self.nb_progress = 0
          self.nb_stop = 0
+         
+         self.frame = None
+         self.list_msg = []
          self.progress = 0      
          self.timer = wx.Timer(self, -1) 
          self.timer_stop = wx.Timer(self, -1) 
@@ -59,9 +114,17 @@ class StatusBar(wxStatusB):
         """
         """
         wxStatusB.SetStatusText(self, text, MSG_POSITION)
+        self.list_msg.append(text)
         icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR)
         self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
-        
+        try:
+            if self.frame is not None and self.frame.IsShown():
+                event = MessageEvent()
+                event.status = text
+                wx.PostEvent(self.frame, event)
+        except:
+            return
+            
     def PopStatusText(self, *args, **kwds):
         wxStatusB.PopStatusText(self, field=MSG_POSITION)
       
@@ -178,6 +241,14 @@ class StatusBar(wxStatusB):
         self.set_icon(event=event)
         self.set_message(event=event)
         self.set_gauge(event=event)
+    
+    def _onMonitor(self, event):
+        """
+        """
+        self.frame = Console(parent=self)
+        self.frame.set_multiple_messages(self.list_msg)
+        self.frame.Show(True)
+        
         
 if __name__ == "__main__":
      app = wx.PySimpleApp()
@@ -185,8 +256,8 @@ if __name__ == "__main__":
      statusBar = StatusBar(frame, wx.ID_ANY)
      frame.SetStatusBar(statusBar)
      frame.Show(True)
-     (NewPlotEvent, EVT_NEW_PLOT) = wx.lib.newevent.NewEvent()
-     event = NewPlotEvent()
+     
+     event = MessageEvent()
      event.type = "progress"
      event.status  = "statusbar...."
      event.info = "info"
