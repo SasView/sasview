@@ -225,7 +225,6 @@ class StatusBar(wxStatusB):
         if type.lower()=="stop":
             self.nb_stop += 1
             self.gauge.Show(True)
-            print "self.enable_clear_gauge()",self.enable_clear_gauge()
             if self.enable_clear_gauge():
                 self.timer.Stop()
                 self.progress = 0
@@ -248,6 +247,7 @@ class StatusBar(wxStatusB):
         """
         """
         self.frame = Console(parent=self)
+        
         self.frame.set_multiple_messages(self.list_msg)
         self.frame.Show(True)
         
