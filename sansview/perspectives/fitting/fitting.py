@@ -1136,11 +1136,11 @@ class Plugin:
             else:
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,title= str(title)))
             msg = "Plot 1D  complete !"
-            wx.PostEvent( self.parent, StatusEvent( status= msg , type="stop" ))
+            wx.PostEvent( self.parent, StatusEvent(status=msg , type="stop" ))
         except:
             msg= " Error occurred when drawing %s Model 1D: "%new_plot.name
             msg+= " %s"%sys.exc_value
-            wx.PostEvent( self.parent, StatusEvent(status= msg, type="stop"  ))
+            wx.PostEvent( self.parent, StatusEvent(status= msg, type="stop"))
             return  
                   
     def _update2D(self, output,time=None):
