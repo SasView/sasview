@@ -89,13 +89,13 @@ CCoreShellModel_init(CCoreShellModel *self, PyObject *args, PyObject *kwds)
         self->model = new CoreShellModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"core_sld",Py_BuildValue("d",0.000001));
-        PyDict_SetItemString(self->params,"thickness",Py_BuildValue("d",10.000000));
-        PyDict_SetItemString(self->params,"solvent_sld",Py_BuildValue("d",0.000003));
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
-        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",60.000000));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"shell_sld",Py_BuildValue("d",0.000002));
+        PyDict_SetItemString(self->params,"core_sld",Py_BuildValue("d",0.00000100));
+        PyDict_SetItemString(self->params,"thickness",Py_BuildValue("d",10.00000000));
+        PyDict_SetItemString(self->params,"solvent_sld",Py_BuildValue("d",0.00000300));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
+        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",60.00000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00000000));
+        PyDict_SetItemString(self->params,"shell_sld",Py_BuildValue("d",0.00000200));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

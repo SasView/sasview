@@ -89,18 +89,18 @@ CStackedDisksModel_init(CStackedDisksModel *self, PyObject *args, PyObject *kwds
         self->model = new StackedDisksModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"core_sld",Py_BuildValue("d",0.000004));
-        PyDict_SetItemString(self->params,"core_thick",Py_BuildValue("d",10.000000));
-        PyDict_SetItemString(self->params,"layer_thick",Py_BuildValue("d",15.000000));
-        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"layer_sld",Py_BuildValue("d",-0.000000));
-        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"solvent_sld",Py_BuildValue("d",0.000005));
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",0.010000));
-        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",3000.000000));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000));
-        PyDict_SetItemString(self->params,"sigma_d",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"n_stacking",Py_BuildValue("d",1.000000));
+        PyDict_SetItemString(self->params,"core_sld",Py_BuildValue("d",0.00000400));
+        PyDict_SetItemString(self->params,"core_thick",Py_BuildValue("d",10.00000000));
+        PyDict_SetItemString(self->params,"layer_thick",Py_BuildValue("d",15.00000000));
+        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",0.00000000));
+        PyDict_SetItemString(self->params,"layer_sld",Py_BuildValue("d",-0.00000040));
+        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",0.00000000));
+        PyDict_SetItemString(self->params,"solvent_sld",Py_BuildValue("d",0.00000500));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",0.01000000));
+        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",3000.00000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00100000));
+        PyDict_SetItemString(self->params,"sigma_d",Py_BuildValue("d",0.00000000));
+        PyDict_SetItemString(self->params,"n_stacking",Py_BuildValue("d",1.00000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

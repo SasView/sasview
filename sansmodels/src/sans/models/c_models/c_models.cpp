@@ -14,16 +14,19 @@ void addCCylinderModel(PyObject *module);
 void addCTriaxialEllipsoidModel(PyObject *module);
 void addCParallelepipedModel(PyObject *module);
 void addCSphereModel(PyObject *module);
+void addCFuzzySphereModel(PyObject *module);
 void addCHardsphereStructure(PyObject *module);
 void addCStickyHSStructure(PyObject *module);
 void addCSquareWellStructure(PyObject *module);
 void addCHayterMSAStructure(PyObject *module);
 void addCCoreShellModel(PyObject *module);
+void addCCoreFourShellModel(PyObject *module);
 void addCCoreShellCylinderModel(PyObject *module);
 void addCEllipsoidModel(PyObject *module);
 void addCEllipticalCylinderModel(PyObject *module);
 void addCTriaxialEllipsoidModel(PyObject *module);
 void addCFlexibleCylinderModel(PyObject *module);
+void addCFlexCylEllipXModel(PyObject *module);
 void addCStackedDisksModel(PyObject *module);
 void addCLamellarPSModel(PyObject *module);
 void addCLamellarPSHGModel(PyObject *module);
@@ -39,6 +42,9 @@ void addCHollowCylinderModel(PyObject *module);
 void addCMultiShellModel(PyObject *module);
 void addCVesicleModel(PyObject *module);
 void addCBinaryHSModel(PyObject *module);
+//void addCPolymerExclVolModel(PyObject *module);
+void addCFractalModel(PyObject *module);
+void addCPoly_GaussCoil(PyObject *module);
 
 
 extern "C" {
@@ -212,8 +218,10 @@ initc_models(void)
 	addCParallelepipedModel(m);
 	addCCoreShellCylinderModel(m);
 	addCCoreShellModel(m);
+	addCCoreFourShellModel(m);
 	addCEllipsoidModel(m);
 	addCSphereModel(m);
+	addCFuzzySphereModel(m);
 	addCHardsphereStructure(m);
 	addCStickyHSStructure(m);
 	addCSquareWellStructure(m);
@@ -221,6 +229,7 @@ initc_models(void)
 	addCEllipticalCylinderModel(m);
 	addCTriaxialEllipsoidModel(m);
 	addCFlexibleCylinderModel(m);
+	addCFlexCylEllipXModel(m);
 	addCStackedDisksModel(m);
 	addCLamellarPSModel(m);
 	addCLamellarPSHGModel(m);
@@ -241,5 +250,7 @@ initc_models(void)
 	addCLogNormal(m);
 	addCLorentzian(m);
 	addCVesicleModel(m);
-
+	addCPoly_GaussCoil(m);
+	addCFractalModel(m);
+//	addCPolymerExclVolModel(m);
 }

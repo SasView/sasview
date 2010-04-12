@@ -89,12 +89,12 @@ CHayterMSAStructure_init(CHayterMSAStructure *self, PyObject *args, PyObject *kw
         self->model = new HayterMSAStructure();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"temperature",Py_BuildValue("d",318.160000));
-        PyDict_SetItemString(self->params,"saltconc",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"dielectconst",Py_BuildValue("d",71.080000));
-        PyDict_SetItemString(self->params,"volfraction",Py_BuildValue("d",0.019200));
-        PyDict_SetItemString(self->params,"charge",Py_BuildValue("d",19.000000));
-        PyDict_SetItemString(self->params,"effect_radius",Py_BuildValue("d",20.750000));
+        PyDict_SetItemString(self->params,"temperature",Py_BuildValue("d",318.16000000));
+        PyDict_SetItemString(self->params,"saltconc",Py_BuildValue("d",0.00000000));
+        PyDict_SetItemString(self->params,"dielectconst",Py_BuildValue("d",71.08000000));
+        PyDict_SetItemString(self->params,"volfraction",Py_BuildValue("d",0.01920000));
+        PyDict_SetItemString(self->params,"charge",Py_BuildValue("d",19.00000000));
+        PyDict_SetItemString(self->params,"effect_radius",Py_BuildValue("d",20.75000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

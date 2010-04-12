@@ -89,16 +89,16 @@ CParallelepipedModel_init(CParallelepipedModel *self, PyObject *args, PyObject *
         self->model = new ParallelepipedModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"short_a",Py_BuildValue("d",35.000000));
-        PyDict_SetItemString(self->params,"short_b",Py_BuildValue("d",75.000000));
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
-        PyDict_SetItemString(self->params,"long_c",Py_BuildValue("d",400.000000));
-        PyDict_SetItemString(self->params,"sldPipe",Py_BuildValue("d",0.000006));
-        PyDict_SetItemString(self->params,"parallel_psi",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"parallel_phi",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"parallel_theta",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.000001));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000));
+        PyDict_SetItemString(self->params,"short_a",Py_BuildValue("d",35.00000000));
+        PyDict_SetItemString(self->params,"short_b",Py_BuildValue("d",75.00000000));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
+        PyDict_SetItemString(self->params,"long_c",Py_BuildValue("d",400.00000000));
+        PyDict_SetItemString(self->params,"sldPipe",Py_BuildValue("d",0.00000630));
+        PyDict_SetItemString(self->params,"parallel_psi",Py_BuildValue("d",0.00000000));
+        PyDict_SetItemString(self->params,"parallel_phi",Py_BuildValue("d",0.00000000));
+        PyDict_SetItemString(self->params,"parallel_theta",Py_BuildValue("d",0.00000000));
+        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.00000100));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

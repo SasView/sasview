@@ -89,16 +89,16 @@ CEllipticalCylinderModel_init(CEllipticalCylinderModel *self, PyObject *args, Py
         self->model = new EllipticalCylinderModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
-        PyDict_SetItemString(self->params,"sldCyl",Py_BuildValue("d",0.000004));
-        PyDict_SetItemString(self->params,"cyl_psi",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"length",Py_BuildValue("d",400.000000));
-        PyDict_SetItemString(self->params,"r_minor",Py_BuildValue("d",20.000000));
-        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.000001));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"cyl_theta",Py_BuildValue("d",1.570000));
-        PyDict_SetItemString(self->params,"r_ratio",Py_BuildValue("d",1.500000));
-        PyDict_SetItemString(self->params,"cyl_phi",Py_BuildValue("d",0.000000));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
+        PyDict_SetItemString(self->params,"sldCyl",Py_BuildValue("d",0.00000400));
+        PyDict_SetItemString(self->params,"cyl_psi",Py_BuildValue("d",0.00000000));
+        PyDict_SetItemString(self->params,"length",Py_BuildValue("d",400.00000000));
+        PyDict_SetItemString(self->params,"r_minor",Py_BuildValue("d",20.00000000));
+        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.00000100));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00000000));
+        PyDict_SetItemString(self->params,"cyl_theta",Py_BuildValue("d",1.57000000));
+        PyDict_SetItemString(self->params,"r_ratio",Py_BuildValue("d",1.50000000));
+        PyDict_SetItemString(self->params,"cyl_phi",Py_BuildValue("d",0.00000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

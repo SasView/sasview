@@ -89,14 +89,14 @@ CBinaryHSModel_init(CBinaryHSModel *self, PyObject *args, PyObject *kwds)
         self->model = new BinaryHSModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"vol_frac_ls",Py_BuildValue("d",0.100000));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000));
-        PyDict_SetItemString(self->params,"vol_frac_ss",Py_BuildValue("d",0.200000));
-        PyDict_SetItemString(self->params,"solvent_sld",Py_BuildValue("d",0.000006));
-        PyDict_SetItemString(self->params,"ls_sld",Py_BuildValue("d",0.000003));
-        PyDict_SetItemString(self->params,"ss_sld",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"s_radius",Py_BuildValue("d",25.000000));
-        PyDict_SetItemString(self->params,"l_radius",Py_BuildValue("d",100.000000));
+        PyDict_SetItemString(self->params,"vol_frac_ls",Py_BuildValue("d",0.10000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00100000));
+        PyDict_SetItemString(self->params,"vol_frac_ss",Py_BuildValue("d",0.20000000));
+        PyDict_SetItemString(self->params,"solvent_sld",Py_BuildValue("d",0.00000636));
+        PyDict_SetItemString(self->params,"ls_sld",Py_BuildValue("d",0.00000350));
+        PyDict_SetItemString(self->params,"ss_sld",Py_BuildValue("d",0.00000050));
+        PyDict_SetItemString(self->params,"s_radius",Py_BuildValue("d",25.00000000));
+        PyDict_SetItemString(self->params,"l_radius",Py_BuildValue("d",100.00000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

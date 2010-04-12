@@ -89,14 +89,14 @@ CMultiShellModel_init(CMultiShellModel *self, PyObject *args, PyObject *kwds)
         self->model = new MultiShellModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"core_sld",Py_BuildValue("d",0.000006));
-        PyDict_SetItemString(self->params,"core_radius",Py_BuildValue("d",60.000000));
-        PyDict_SetItemString(self->params,"n_pairs",Py_BuildValue("d",2.000000));
-        PyDict_SetItemString(self->params,"w_thickness",Py_BuildValue("d",10.000000));
-        PyDict_SetItemString(self->params,"s_thickness",Py_BuildValue("d",10.000000));
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000));
-        PyDict_SetItemString(self->params,"shell_sld",Py_BuildValue("d",0.000000));
+        PyDict_SetItemString(self->params,"core_sld",Py_BuildValue("d",0.00000640));
+        PyDict_SetItemString(self->params,"core_radius",Py_BuildValue("d",60.00000000));
+        PyDict_SetItemString(self->params,"n_pairs",Py_BuildValue("d",2.00000000));
+        PyDict_SetItemString(self->params,"w_thickness",Py_BuildValue("d",10.00000000));
+        PyDict_SetItemString(self->params,"s_thickness",Py_BuildValue("d",10.00000000));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00000000));
+        PyDict_SetItemString(self->params,"shell_sld",Py_BuildValue("d",0.00000040));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

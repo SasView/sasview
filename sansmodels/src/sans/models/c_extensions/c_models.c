@@ -25,14 +25,16 @@ initc_models(void)
 
     m = Py_InitModule3("c_models", module_methods,
                        "C extension module for SANS scattering models.");
-	
+
 	import_array();
 	addCCylinderModel(m);
 	addCParallelepipedModel(m);
 	addCCoreShellCylinderModel(m);
 	addCCoreShellModel(m);
+	addCCoreFourShellModel(m);
 	addCEllipsoidModel(m);
 	addCSphereModel(m);
+	addCFuzzySphereModel(m);
 	addCHardsphereStructure(m);
 	addCStickyHSStructure(m);
 	addCHayterMSAStructure(m);
@@ -42,6 +44,7 @@ initc_models(void)
 	addCEllipticalCylinderModel(m);
 	addCTriaxialEllipsoidModel(m);
 	addCFlexibleCylinderModel(m);
+	addCFlexCylEllipXModel(m);
 	addCStackedDisksModel(m);
 	addCLamellarPSModel(m);
 	addCLamellarPSHGModel(m);
@@ -59,5 +62,7 @@ initc_models(void)
 	addCVesicleModel(m);
 	addCBinaryHSModel(m);
 	addCBinaryHSPSF11Model(m);
+	addCPoly_GaussCoil(m);
+	addCFractalModel(m);
 
 }

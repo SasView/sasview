@@ -89,10 +89,10 @@ CSquareWellStructure_init(CSquareWellStructure *self, PyObject *args, PyObject *
         self->model = new SquareWellStructure();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"welldepth",Py_BuildValue("d",1.500000));
-        PyDict_SetItemString(self->params,"effect_radius",Py_BuildValue("d",50.000000));
-        PyDict_SetItemString(self->params,"volfraction",Py_BuildValue("d",0.040000));
-        PyDict_SetItemString(self->params,"wellwidth",Py_BuildValue("d",1.200000));
+        PyDict_SetItemString(self->params,"welldepth",Py_BuildValue("d",1.50000000));
+        PyDict_SetItemString(self->params,"effect_radius",Py_BuildValue("d",50.00000000));
+        PyDict_SetItemString(self->params,"volfraction",Py_BuildValue("d",0.04000000));
+        PyDict_SetItemString(self->params,"wellwidth",Py_BuildValue("d",1.20000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

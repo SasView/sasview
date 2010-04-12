@@ -35,7 +35,6 @@ HayterMSAStructure :: HayterMSAStructure() {
 	effect_radius      = Parameter(20.75, true);
 	effect_radius.set_min(0.0);
 	charge      = Parameter(19.0, true);
-	charge.set_min(0.0);
 	volfraction = Parameter(0.0192, true);
 	volfraction.set_min(0.0);
 	temperature = Parameter(318.16, true);
@@ -56,7 +55,7 @@ double HayterMSAStructure :: operator()(double q) {
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
 	dp[0] = 2.0*effect_radius();
-	dp[1] = charge();
+	dp[1] = fabs(charge());
 	dp[2] = volfraction();
 	dp[3] = temperature();
 	dp[4] = saltconc();

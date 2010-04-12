@@ -21,6 +21,8 @@ extern "C" {
 	#include "parallelepiped.h"
 	#include "lamellarPS.h"
 	#include "lamellar.h"
+	#include "fuzzysphere.h"
+	#include "polyexclvol.h"
 }
 
 using namespace std;
@@ -84,6 +86,26 @@ public:
 
 	// Constructor
 	SphereModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
+class FuzzySphereModel{
+public:
+	// Model parameters
+	Parameter radius;
+	Parameter scale;
+	Parameter fuzziness;
+	Parameter sldSph;
+	Parameter sldSolv;
+	Parameter background;
+
+	// Constructor
+	FuzzySphereModel();
 
 	// Operators to get I(Q)
 	double operator()(double q);
@@ -217,6 +239,33 @@ public:
 	double evaluate_rphi(double q, double phi);
 };
 
+class CoreFourShellModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter rad_core;
+	Parameter sld_core;
+	Parameter thick_shell1;
+	Parameter sld_shell1;
+	Parameter thick_shell2;
+	Parameter sld_shell2;
+	Parameter thick_shell3;
+	Parameter sld_shell3;
+	Parameter thick_shell4;
+	Parameter sld_shell4;
+	Parameter sld_solv;
+	Parameter background;
+
+	// Constructor
+	CoreFourShellModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
 class CoreShellCylinderModel{
 public:
 	// Model parameters
@@ -319,11 +368,31 @@ public:
 	Parameter sldCyl;
 	Parameter sldSolv;
 	Parameter background;
-	Parameter axis_theta;
-	Parameter axis_phi;
 
 	// Constructor
 	FlexibleCylinderModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
+class FlexCylEllipXModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter length;
+	Parameter kuhn_length;
+	Parameter radius;
+	Parameter axis_ratio;
+	Parameter sldCyl;
+	Parameter sldSolv;
+	Parameter background;
+
+	// Constructor
+	FlexCylEllipXModel();
 
 	// Operators to get I(Q)
 	double operator()(double q);
@@ -582,4 +651,62 @@ public:
 	double evaluate_rphi(double q, double phi);
 };
 
+class Poly_GaussCoil{
+public:
+	// Model parameters
+	Parameter rg;
+	Parameter scale;
+	Parameter poly_m;
+	Parameter background;
+
+	// Constructor
+	Poly_GaussCoil();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
+class FractalModel{
+public:
+	// Model parameters
+	Parameter radius;
+	Parameter scale;
+	Parameter fractal_dim;
+	Parameter cor_length;
+	Parameter sldBlock;
+	Parameter sldSolv;
+	Parameter background;
+
+	// Constructor
+	FractalModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
+/***
+class PolymerExclVolModel{
+public:
+	// Model parameters
+	Parameter rg;
+	Parameter scale;
+	Parameter m;
+	Parameter background;
+
+	// Constructor
+	PolymerExclVolModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+***/
 #endif

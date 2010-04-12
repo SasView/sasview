@@ -297,7 +297,7 @@ class WrapperGenerator:
             # Dictionary initialization
             param_str = "// Initialize parameter dictionary\n"            
             for par in self.params:
-                param_str += "        PyDict_SetItemString(self->params,\"%s\",Py_BuildValue(\"d\",%f));\n" % \
+                param_str += "        PyDict_SetItemString(self->params,\"%s\",Py_BuildValue(\"d\",%10.8f));\n" % \
                     (par, self.params[par])
 
             param_str += "        // Initialize dispersion / averaging parameter dict\n"

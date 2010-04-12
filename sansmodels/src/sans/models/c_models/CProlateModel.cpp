@@ -89,14 +89,14 @@ CProlateModel_init(CProlateModel *self, PyObject *args, PyObject *kwds)
         self->model = new ProlateModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"major_core",Py_BuildValue("d",100.000000));
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000));
-        PyDict_SetItemString(self->params,"minor_core",Py_BuildValue("d",50.000000));
-        PyDict_SetItemString(self->params,"sld_solvent",Py_BuildValue("d",0.000006));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000));
-        PyDict_SetItemString(self->params,"major_shell",Py_BuildValue("d",110.000000));
-        PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000001));
-        PyDict_SetItemString(self->params,"minor_shell",Py_BuildValue("d",60.000000));
+        PyDict_SetItemString(self->params,"major_core",Py_BuildValue("d",100.00000000));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
+        PyDict_SetItemString(self->params,"minor_core",Py_BuildValue("d",50.00000000));
+        PyDict_SetItemString(self->params,"sld_solvent",Py_BuildValue("d",0.00000630));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00100000));
+        PyDict_SetItemString(self->params,"major_shell",Py_BuildValue("d",110.00000000));
+        PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.00000100));
+        PyDict_SetItemString(self->params,"minor_shell",Py_BuildValue("d",60.00000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

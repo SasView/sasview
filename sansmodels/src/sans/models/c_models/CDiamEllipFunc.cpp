@@ -89,8 +89,8 @@ CDiamEllipFunc_init(CDiamEllipFunc *self, PyObject *args, PyObject *kwds)
         self->model = new DiamEllipFunc();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"radius_b",Py_BuildValue("d",400.000000));
-        PyDict_SetItemString(self->params,"radius_a",Py_BuildValue("d",20.000000));
+        PyDict_SetItemString(self->params,"radius_b",Py_BuildValue("d",400.00000000));
+        PyDict_SetItemString(self->params,"radius_a",Py_BuildValue("d",20.00000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

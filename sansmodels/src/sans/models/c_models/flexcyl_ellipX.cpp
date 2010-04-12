@@ -17,8 +17,6 @@
  * The classes use the IGOR library found in
  *   sansmodels/src/libigor
  *
- *	TODO: refactor so that we pull in the old sansmodels.c_extensions
- *	TODO: add 2d
  */
 
 #include <math.h>
@@ -30,10 +28,10 @@ using namespace std;
 extern "C" {
 	#include "libCylinder.h"
 	#include "libStructureFactor.h"
-	#include "flexible_cylinder.h"
+	#include "flexcyl_ellipX.h"
 }
 
-FlexibleCylinderModel :: FlexibleCylinderModel() {
+FlexCylEllipXModel :: FlexCylEllipXModel() {
 	scale      = Parameter(1.0);
 	length     = Parameter(1000.0, true);
 	length.set_min(0.0);
@@ -41,6 +39,8 @@ FlexibleCylinderModel :: FlexibleCylinderModel() {
 	kuhn_length.set_min(0.0);
 	radius  = Parameter(20.0, true);
 	radius.set_min(0.0);
+	axis_ratio = Parameter(1.5);
+	axis_ratio.set_min(0.0);
 	sldCyl   = Parameter(1.0e-6);
 	sldSolv   = Parameter(6.3e-6);
 	background = Parameter(0.0001);
@@ -52,8 +52,8 @@ FlexibleCylinderModel :: FlexibleCylinderModel() {
  * @param q: q-value
  * @return: function value
  */
-double FlexibleCylinderModel :: operator()(double q) {
-	double dp[7];
+double FlexCylEllipXModel :: operator()(double q) {
+	double dp[8];
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
@@ -61,9 +61,10 @@ double FlexibleCylinderModel :: operator()(double q) {
 	dp[1] = length();
 	dp[2] = kuhn_length();
 	dp[3] = radius();
-	dp[4] = sldCyl();
-	dp[5] = sldSolv();
-	dp[6] = 0.0;
+	dp[4] = axis_ratio();
+	dp[5] = sldCyl();
+	dp[6] = sldSolv();
+	dp[7] = 0.0;
 
 	// Get the dispersion points for the length
 	vector<WeightPoint> weights_len;
@@ -77,33 +78,41 @@ double FlexibleCylinderModel :: operator()(double q) {
 	vector<WeightPoint> weights_rad;
 	radius.get_weights(weights_rad);
 
+	// Get the dispersion points for the axis_ratio
+	vector<WeightPoint> weights_ratio;
+	axis_ratio.get_weights(weights_ratio);
+
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
 	double vol = 0.0;
 
-	// Loop over semi axis A weight points
+	// Loop over length weight points
 	for(int i=0; i< (int)weights_len.size(); i++) {
 		dp[1] = weights_len[i].value;
 
-		// Loop over semi axis B weight points
+		// Loop over kuhn_length weight points
 		for(int j=0; j< (int)weights_kuhn.size(); j++) {
 			dp[2] = weights_kuhn[j].value;
 
-			// Loop over semi axis C weight points
+			// Loop over radius weight points
 			for(int k=0; k< (int)weights_rad.size(); k++) {
 				dp[3] = weights_rad[k].value;
-				//Un-normalize by volume
-				sum += weights_len[i].weight
-					* weights_kuhn[j].weight*weights_rad[k].weight * FlexExclVolCyl(dp, q)
-					* pow(weights_rad[k].value,2.0)*weights_len[i].value;
-				//Find average volume
-				vol += weights_rad[k].weight
-					* weights_len[i].weight
-					* weights_kuhn[j].weight
-					*pow(weights_rad[k].value,2.0)*weights_len[i].value;
-				norm += weights_len[i].weight
-					* weights_kuhn[j].weight*weights_rad[k].weight;
+				// Loop over axis_ratio weight points
+				for(int l=0; l< (int)weights_ratio.size(); l++) {
+					dp[4] = weights_ratio[l].value;
+
+					//Un-normalize by volume
+					sum += weights_len[i].weight * weights_kuhn[j].weight*weights_rad[k].weight
+						* weights_ratio[l].weight * FlexCyl_Ellip(dp, q)
+						* (pow(weights_rad[k].value,2.0) * weights_ratio[l].value * weights_len[i].value);
+					//Find weighted volume
+					vol += weights_rad[k].weight * weights_kuhn[j].weight
+						* weights_len[i].weight * weights_ratio[l].weight
+						*pow(weights_rad[k].value,2.0)* weights_ratio[l].weight*weights_len[i].value;
+					norm += weights_len[i].weight * weights_kuhn[j].weight
+						*weights_rad[k].weight* weights_ratio[l].weight;
+				}
 			}
 		}
 	}
@@ -120,7 +129,7 @@ double FlexibleCylinderModel :: operator()(double q) {
  * @param q_y: value of Q along y
  * @return: function value
  */
-double FlexibleCylinderModel :: operator()(double qx, double qy) {
+double FlexCylEllipXModel :: operator()(double qx, double qy) {
 	double q = sqrt(qx*qx + qy*qy);
 	return (*this).operator()(q);
 }
@@ -132,7 +141,7 @@ double FlexibleCylinderModel :: operator()(double qx, double qy) {
  * @param phi: angle phi
  * @return: function value
  */
-double FlexibleCylinderModel :: evaluate_rphi(double q, double phi) {
+double FlexCylEllipXModel :: evaluate_rphi(double q, double phi) {
 	//double qx = q*cos(phi);
 	//double qy = q*sin(phi);
 	return (*this).operator()(q);
@@ -141,35 +150,45 @@ double FlexibleCylinderModel :: evaluate_rphi(double q, double phi) {
  * Function to calculate effective radius
  * @return: effective radius value
  */
-double FlexibleCylinderModel :: calculate_ER() {
-	FlexibleCylinderParameters dp;
+double FlexCylEllipXModel :: calculate_ER() {
+	FlexCyl_EllipXParameters dp;
 
 	dp.radius  = radius();
 	dp.length     = length();
+	dp.axis_ratio  = axis_ratio();
 
 	double rad_out = 0.0;
-
+	double suf_rad = sqrt(dp.radius*dp.radius*dp.axis_ratio );
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 	double norm = 0.0;
 
-	// Get the dispersion points for the major shell
+	// Get the dispersion points for the total length
 	vector<WeightPoint> weights_length;
 	length.get_weights(weights_length);
 
-	// Get the dispersion points for the minor shell
+	// Get the dispersion points for minor radius
 	vector<WeightPoint> weights_radius ;
 	radius.get_weights(weights_radius);
+
+	// Get the dispersion points for axis ratio = major_radius/minor_radius
+	vector<WeightPoint> weights_ratio ;
+	axis_ratio.get_weights(weights_ratio);
 
 	// Loop over major shell weight points
 	for(int i=0; i< (int)weights_length.size(); i++) {
 		dp.length = weights_length[i].value;
 		for(int k=0; k< (int)weights_radius.size(); k++) {
 			dp.radius = weights_radius[k].value;
-			//Note: output of "DiamCyl(dp.length,dp.radius)" is DIAMETER.
-			sum +=weights_length[i].weight
-				* weights_radius[k].weight*DiamCyl(dp.length,dp.radius)/2.0;
-			norm += weights_length[i].weight* weights_radius[k].weight;
+			// Loop over axis_ratio weight points
+			for(int l=0; l< (int)weights_ratio.size(); l++) {
+				dp.axis_ratio = weights_ratio[l].value;
+				suf_rad = sqrt(dp.radius  * dp.radius  * dp.axis_ratio);
+				//Note: output of "DiamCyl(dp.length,dp.radius)" is DIAMETER.
+				sum +=weights_length[i].weight * weights_radius[k].weight
+						* weights_ratio[l].weight *DiamCyl(dp.length,suf_rad)/2.0;
+				norm += weights_length[i].weight* weights_radius[k].weight* weights_ratio[l].weight;
+			}
 		}
 	}
 	if (norm != 0){
@@ -178,7 +197,7 @@ double FlexibleCylinderModel :: calculate_ER() {
 	else{
 		//return normal value
 		//Note: output of "DiamCyl(dp.length,dp.radius)" is DIAMETER.
-		rad_out = DiamCyl(dp.length,dp.radius)/2.0;}
+		rad_out = DiamCyl(dp.length,suf_rad)/2.0;}
 
 	return rad_out;
 }
