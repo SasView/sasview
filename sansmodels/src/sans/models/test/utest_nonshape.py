@@ -473,11 +473,11 @@ class TestFractalModel(unittest.TestCase):
         self.bck = 1.0
         
         self.model.setParam('scale', self.phi) 
-        self.model.setParam('Radius', self.r0) 
+        self.model.setParam('radius', self.r0) 
         self.model.setParam('fractal_dim',self.Df)
-        self.model.setParam('corr_length', self.corr)
-        self.model.setParam('block_sld', self.sldp) 
-        self.model.setParam('solvent_sld', self.sldm) 
+        self.model.setParam('cor_length', self.corr)
+        self.model.setParam('sldBlock', self.sldp) 
+        self.model.setParam('sldSolv', self.sldm) 
         self.model.setParam('background', self.bck)
         
     def _func(self, x):

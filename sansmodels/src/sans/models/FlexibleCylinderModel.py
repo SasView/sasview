@@ -35,8 +35,8 @@ class FlexibleCylinderModel(CFlexibleCylinderModel, BaseComponent):
          length          = 1000.0 [A]
          kuhn_length     = 100.0 [A]
          radius          = 20.0 [A]
-         sldCyl          = 6.3e-006 [1/A^(2)]
-         sldSolv         = 1e-006 [1/A^(2)]
+         sldCyl          = 1e-006 [1/A^(2)]
+         sldSolv         = 6.3e-006 [1/A^(2)]
          background      = 0.0001 [1/cm]
 
     """
@@ -51,7 +51,7 @@ class FlexibleCylinderModel(CFlexibleCylinderModel, BaseComponent):
         ## Name of the model
         self.name = "FlexibleCylinderModel"
         ## Model description
-        self.description =""" Note : 'scale' and 'contrast' are both multiplicative factors in the
+        self.description =""" Note : scale and contrast=sldCyl-sldSolv are both multiplicative factors in the
 		model and are perfectly correlated. One or
 		both of these parameters must be held fixed
 		during model fitting."""
