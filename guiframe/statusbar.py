@@ -24,8 +24,7 @@ class StatusBar(wxStatusB):
          
          #display default message
          self.msg_position = MSG_POSITION 
-         self.SetStatusText(text="No Message available...")
-         
+       
          #save the position of the gauge
          width, height = self.GetSize()
          self.gauge = wx.Gauge(self, size=(width/10,height-3),
@@ -72,11 +71,10 @@ class StatusBar(wxStatusB):
   
         """ 
         count = 0
-        if count <= 10:
+        while(count <= 100):
             count += 1
         self.timer_stop.Stop() 
-        self.gauge.Hide()
-        #self.SetStatusText( "", GAUGE_POSITION)
+        self.clear_gauge(msg="Complete")
        
     def OnTimer(self, evt): 
         """Update the progress bar while the timer is running 
