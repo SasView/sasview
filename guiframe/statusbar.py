@@ -23,6 +23,7 @@ class ConsolePanel(wx.Panel):
         self.msg_txt = wx.TextCtrl(self, size=(CONSOLE_WIDTH-40,
                                                 CONSOLE_HEIGHT-60), 
                                         style=wx.TE_MULTILINE)
+        self.msg_txt.SetEditable(False)
         self.msg_txt.SetValue('No message available')
         self.sizer.Add(self.msg_txt, 1, wx.EXPAND|wx.ALL, 10)
         self.SetSizer(self.sizer)
@@ -218,7 +219,6 @@ class StatusBar(wxStatusB):
             self.timer.Start(100)
             self.gauge.Pulse()
         if type.lower()=="update":
-            self.timer.Stop()
             self.progress += 10
             if self.progress < self.gauge.GetRange()-20:
                 self.gauge.SetValue(int(self.progress))   
