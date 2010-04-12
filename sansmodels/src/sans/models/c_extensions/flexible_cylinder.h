@@ -7,7 +7,7 @@
 /** Structure definition for Flexible cylinder parameters
  * [PYTHONCLASS] = FlexibleCylinderModel
  * [DISP_PARAMS] = length, kuhn_length, radius
-   [DESCRIPTION] = <text> Note : 'scale' and 'contrast' are both multiplicative factors in the
+   [DESCRIPTION] = <text> Note : scale and contrast=sldCyl-sldSolv are both multiplicative factors in the
 		model and are perfectly correlated. One or
 		both of these parameters must be held fixed
 		during model fitting.
@@ -31,10 +31,10 @@ typedef struct {
     //  [DEFAULT]=radius=20.0 [A]
     double radius;
     /// SLD of cylinder [1/A^(2)]
-    //  [DEFAULT]=sldCyl=6.3e-6 [1/A^(2)]
+    //  [DEFAULT]=sldCyl=1.0e-6 [1/A^(2)]
     double sldCyl;
     /// SLD of solvent [1/A^(2)]
-    //  [DEFAULT]=sldSolv=1.0e-6 [1/A^(2)]
+    //  [DEFAULT]=sldSolv=6.3e-6 [1/A^(2)]
     double sldSolv;
 	/// Incoherent Background [1/cm]
 	//  [DEFAULT]=background=0.0001 [1/cm]
