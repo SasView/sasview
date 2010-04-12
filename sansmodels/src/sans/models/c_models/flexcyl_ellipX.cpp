@@ -151,7 +151,7 @@ double FlexCylEllipXModel :: evaluate_rphi(double q, double phi) {
  * @return: effective radius value
  */
 double FlexCylEllipXModel :: calculate_ER() {
-	FlexCyl_EllipXParameters dp;
+	FlexCylEXParameters dp;
 
 	dp.radius  = radius();
 	dp.length     = length();
