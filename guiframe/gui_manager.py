@@ -22,6 +22,7 @@ import wx
 import wx.aui
 import os, sys
 import xml
+
 try:
     # Try to find a local config
     import imp
@@ -44,8 +45,6 @@ import warnings
 warnings.simplefilter("ignore")
 
 import logging
-
-
 
 def quit_guiframe(parent=None):
     """
@@ -278,8 +277,8 @@ class ViewerFrame(wx.Frame):
             Set up the layout
         """
         # Status bar
-        from statusbar import MyStatusBar
-        self.sb = MyStatusBar(self,wx.ID_ANY)
+        from statusbar import StatusBar
+        self.sb = StatusBar(self, wx.ID_ANY)
         self.SetStatusBar(self.sb)
 
         # Add panel
@@ -290,6 +289,18 @@ class ViewerFrame(wx.Frame):
         self._load_panels()
         
         self._mgr.Update()
+        
+    def SetStatusText(self, *args, **kwds):
+        number = self.sb.get_msg_position()
+        wx.Frame.SetStatusText(number=number, *args, **kwds)
+        
+    def PopStatusText(self, *args, **kwds):
+        field = self.sb.get_msg_position()
+        wx.Frame.PopStatusText(field=field)
+        
+    def PushStatusText(self, *args, **kwds):
+        field = self.sb.get_msg_position()
+        wx.Frame.PushStatusText(self, field=field,string=string)
 
     def add_perspective(self, plugin):
         """
@@ -612,17 +623,8 @@ class ViewerFrame(wx.Frame):
         """
             Display status message
         """
-        #self.sb.clear_gauge( msg="")
-        mythread=None
-        mytype= None
-        if hasattr(evt, "curr_thread"):
-            mythread= evt.curr_thread
-        if hasattr(evt, "type"):
-            mytype= evt.type
-        self.sb.set_status( type=mytype,msg=str(evt.status),thread=mythread)
+        self.sb.set_status(event=evt)
        
-
-        
     def _on_view(self, evt):
         """
             A panel was selected to be shown. If it's not already
