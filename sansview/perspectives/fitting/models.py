@@ -165,9 +165,17 @@ class ModelManager:
         self.shape_list.append(SphereModel)
         self.multiplication_factor.append(SphereModel)
         
+        from sans.models.FuzzySphereModel import FuzzySphereModel
+        self.shape_list.append(FuzzySphereModel)
+        self.multiplication_factor.append(FuzzySphereModel)
+        
         from sans.models.CoreShellModel import CoreShellModel
         self.shape_list.append(CoreShellModel)
         self.multiplication_factor.append(CoreShellModel)
+
+        from sans.models.CoreFourShellModel import CoreFourShellModel
+        self.shape_list.append(CoreFourShellModel)
+        self.multiplication_factor.append(CoreFourShellModel)
         
         from sans.models.VesicleModel import VesicleModel
         self.shape_list.append(VesicleModel)
@@ -195,6 +203,8 @@ class ModelManager:
         from sans.models.FlexibleCylinderModel import FlexibleCylinderModel
         self.shape_list.append(FlexibleCylinderModel)
 
+        from sans.models.FlexCylEllipXModel import FlexCylEllipXModel
+        self.shape_list.append(FlexCylEllipXModel)
         
         from sans.models.StackedDisksModel import StackedDisksModel
         self.shape_list.append(StackedDisksModel)
@@ -247,20 +257,28 @@ class ModelManager:
         
         
         ##shape-independent models
+            
+        from sans.models.PowerLawAbsModel import PowerLawAbsModel
+        self.shape_indep_list.append( PowerLawAbsModel )
+        
         from sans.models.BEPolyelectrolyte import BEPolyelectrolyte
         self.shape_indep_list.append(BEPolyelectrolyte )
         self.form_factor_dict[str(wx.NewId())] =  [SphereModel]
+
         from sans.models.DABModel import DABModel
         self.shape_indep_list.append(DABModel )
-        
-        from sans.models.GuinierModel import GuinierModel
-        self.shape_indep_list.append(GuinierModel )
         
         from sans.models.DebyeModel import DebyeModel
         self.shape_indep_list.append(DebyeModel )
         
-        from sans.models.PorodModel import PorodModel
-        self.shape_indep_list.append(PorodModel )
+        from sans.models.GuinierModel import GuinierModel
+        self.shape_indep_list.append(GuinierModel )
+        
+        from sans.models.FractalModel import FractalModel
+        self.shape_indep_list.append(FractalModel )
+        
+        from sans.models.LorentzModel import LorentzModel
+        self.shape_indep_list.append( LorentzModel) 
         
         from sans.models.PeakGaussModel import PeakGaussModel
         self.shape_indep_list.append(PeakGaussModel)
@@ -268,20 +286,23 @@ class ModelManager:
         from sans.models.PeakLorentzModel import PeakLorentzModel
         self.shape_indep_list.append(PeakLorentzModel)
         
-        from sans.models.FractalAbsModel import FractalAbsModel
-        self.shape_indep_list.append(FractalAbsModel)
+        from sans.models.Poly_GaussCoil import Poly_GaussCoil
+        self.shape_indep_list.append(Poly_GaussCoil)
+                 
+        from sans.models.PorodModel import PorodModel
+        self.shape_indep_list.append(PorodModel )
         
-        from sans.models.LorentzModel import LorentzModel
-        self.shape_indep_list.append( LorentzModel) 
-            
-        from sans.models.PowerLawAbsModel import PowerLawAbsModel
-        self.shape_indep_list.append( PowerLawAbsModel )
+        
+        #FractalModel (a c-model)will be used.
+        #from sans.models.FractalAbsModel import FractalAbsModel
+        #self.shape_indep_list.append(FractalAbsModel)
         
         from sans.models.TeubnerStreyModel import TeubnerStreyModel
         self.shape_indep_list.append(TeubnerStreyModel )
         
         from sans.models.LineModel import LineModel
         self.shape_indep_list.append(LineModel)
+
     
         #Looking for plugins
         self.plugins = findModels()
