@@ -22,7 +22,6 @@ extern "C" {
 	#include "lamellarPS.h"
 	#include "lamellar.h"
 	#include "fuzzysphere.h"
-	#include "polyexclvol.h"
 }
 
 using namespace std;
