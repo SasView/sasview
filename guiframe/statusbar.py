@@ -87,6 +87,8 @@ class StatusBar(wxStatusB):
          self.bitmap_bt_console = wx.BitmapButton(self, -1, 
                                                 size=(BUTTON_SIZE-5, height-4))
          self.bitmap_bt_console.SetBitmapLabel(console_bmp)
+         console_hint = "History of status bar messages"
+         self.bitmap_bt_console.SetToolTipString(console_hint)
          self.bitmap_bt_console.Bind(wx.EVT_BUTTON, self._onMonitor,
                                             id=self.bitmap_bt_console.GetId())
          rect = self.GetFieldRect(CONSOLE_POSITION)
