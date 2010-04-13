@@ -28,7 +28,7 @@ from sans.guicomm.events import EVT_SLICER_PARS_UPDATE
 
 from sans.fit.AbstractFitEngine import Model
 from sans.fit.AbstractFitEngine import FitAbort
-
+from console import ConsoleUpdate
 
 from fitproblem import FitProblem
 from fitpanel import FitPanel
@@ -461,49 +461,31 @@ class Plugin:
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                       type="stop"))
                 return 
-            
-        #Do the simultaneous fit
-        try:
-            ## If a thread is already started, stop it
-            #if self.calc_fit!= None and self.calc_fit.isrunning():
-            #    self.calc_fit.stop()
-            
-            wx.PostEvent(self.parent, StatusEvent(status="Start the computation",
-                                        curr_thread=self.calc_fit,type="start"))
-            time.sleep(0.5)
-            wx.PostEvent(self.parent, StatusEvent(status="Computing...",
-                                        curr_thread=self.calc_fit,type="progress"))
-            time.sleep(0.5)
-            ## perform single fit
-            if fitproblem_count == 1:
-                #qmin, qmax= self.current_pg.get_range()
-                #print "went here fitproblem_count == 1",fitproblem_count == 1
-                calc_fit=FitThread(parent =self.parent,
-                                        fn= self.fitter,
-                                       cpage=self.current_pg,
-                                       pars= pars,
-                                       completefn= self._single_fit_completed,
-                                       updatefn=self._updateFit)
-                
-                      
-            else:
-                ## Perform more than 1 fit at the time
-                calc_fit=FitThread(parent =self.parent,
-                                        fn= self.fitter,
-                                       completefn= self._simul_fit_completed,
-                                       updatefn=self._updateFit)
-            
-            calc_fit.queue()
-            self.ready_fit(calc_fit=calc_fit)
-            
-        except FitAbort:
-            print "in pluging"
-        except:
-            msg= "%s error: %s" % (engineType,sys.exc_value)
-            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
-                                                    type="stop"))
-            return 
+        ## If a thread is already started, stop it
+        #if self.calc_fit!= None and self.calc_fit.isrunning():
+        #    self.calc_fit.stop()
+         #Handler used for park engine displayed message
+        handler = ConsoleUpdate(parent=self.parent,improvement_delta=0.1)
+        ## perform single fit
+        if fitproblem_count == 1:
+            calc_fit=FitThread(parent =self.parent,
+                                    handler = handler,
+                                    fn= self.fitter,
+                                   cpage=self.current_pg,
+                                   pars= pars,
+                                   updatefn=handler.update_fit,
+                                   completefn= self._single_fit_completed)
+        else:
+            ## Perform more than 1 fit at the time
+            calc_fit=FitThread(parent=self.parent,
+                                handler=handler,
+                                    fn= self.fitter,
+                                   completefn= self._simul_fit_completed,
+                                  updatefn=handler.update_fit)
         
+        calc_fit.queue()
+        self.ready_fit(calc_fit=calc_fit)
+      
     def ready_fit(self, calc_fit):
         """
         Ready for another fit
@@ -739,13 +721,6 @@ class Plugin:
             else:
                 data = self.create_fittable_data2D(data=plottable)
                 self.add_fit_page(data=data)
-
-    def _updateFit(self):
-        """
-            Is called when values of result are available
-        """
-        ##Sending a progess message to the status bar
-        wx.PostEvent(self.parent, StatusEvent(status="Computing..."))
             
     def _single_fit_completed(self,result,pars,cpage, elapsed=None):
         """
