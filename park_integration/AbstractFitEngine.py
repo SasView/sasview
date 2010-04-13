@@ -340,17 +340,21 @@ class SansAssembly:
     """
          Sans Assembly class a class wrapper to be call in optimizer.leastsq method
     """
-    def __init__(self,paramlist,Model=None , Data=None, curr_thread= None):
+    def __init__(self, paramlist, model=None , data=None, fitresult=None,
+                 handler=None, curr_thread=None):
         """
             @param Model: the model wrapper fro sans -model
             @param Data: the data wrapper for sans data
         """
-        self.model = Model
-        self.data  = Data
-        self.paramlist=paramlist
-        self.curr_thread= curr_thread
-        self.res=[]
-        self.func_name="Functor"
+        self.model = model
+        self.data  = data
+        self.paramlist = paramlist
+        self.curr_thread = curr_thread
+        self.handler = handler
+        self.fitresult = fitresult
+        self.res = []
+        self.func_name = "Functor"
+        
     def chisq(self, params):
         """
             Calculates chi^2
@@ -372,6 +376,11 @@ class SansAssembly:
         #import thread
         self.model.setParams(self.paramlist,params)
         self.res= self.data.residuals(self.model.eval)
+        if self.fitresult is not None and  self.handler is not None:
+            self.fitresult.set_model(model=self.model)
+            self.handler.set_result(result=self.fitresult)
+            self.handler.update_fit()
+        
         #if self.curr_thread != None :
         #    try:
         #        self.curr_thread.isquit()
