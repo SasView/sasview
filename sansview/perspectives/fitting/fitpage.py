@@ -80,11 +80,7 @@ class FitPage(BasicPage):
             if self.data.__class__.__name__ =="Data2D":
                 if self.model != None:
                     self.smear_description_2d.Show(True)
-                    self.npts = len(self.data.data)
-            else:
-                self.npts = len(self.data.x)
-                
-
+                    
         self.disp_cb_dict = {}
         ## to update the panel according to the fit engine type selected
         self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
@@ -192,10 +188,6 @@ class FitPage(BasicPage):
         smear_message_pinhole_max_title = "dQ_max[1/A]:"
         smear_message_slit_height_title = "Slit height[1/A]:"
         smear_message_slit_width_title = "Slit width[1/A]:"
-        #Fit button
-        self.btFit = wx.Button(self,wx.NewId(),'Fit', size=(88,25))
-        self.btFit.Bind(wx.EVT_BUTTON, self._onFit,id= self.btFit.GetId())
-        self.btFit.SetToolTipString("Start fitting.")
         
         self._get_smear_info()
         
@@ -210,6 +202,12 @@ class FitPage(BasicPage):
         smear_set_box= wx.StaticBox(self, -1,'Set Instrumental Smearing')
         sizer_smearer_box = wx.StaticBoxSizer(smear_set_box, wx.HORIZONTAL)
         sizer_smearer_box.SetMinSize((_DATA_BOX_WIDTH,85))
+        sizer_fit = wx.GridSizer(2, 4,2,6)
+        
+        #Fit button
+        self.btFit = wx.Button(self,wx.NewId(),'Fit', size=(88,25))
+        self.btFit.Bind(wx.EVT_BUTTON, self._onFit,id= self.btFit.GetId())
+        self.btFit.SetToolTipString("Start fitting.")
         
         #textcntrl for new resolution
         self.smear_pinhole_max = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH-20,20),style=wx.TE_PROCESS_ENTER,
@@ -261,14 +259,13 @@ class FitPage(BasicPage):
         self.Npts_fit    =  BGTextCtrl(self, -1, "-", size=(75,20), style=0)
         self.Npts_fit.SetToolTipString(" Npts : number of points selected for fitting")
         self.Npts_total  =  BGTextCtrl(self, -1, "-", size=(75,20), style=0)
-        self.Npts_total.SetValue(str(self.npts))
         self.Npts_total.SetToolTipString(" Total Npts : total number of data points")
         box_description_1= wx.StaticText(self, -1,'    Chi2/Npts')
         box_description_2= wx.StaticText(self, -1,'  Npts')
         box_description_3= wx.StaticText(self, -1,'  Total Npts')
         box_description_4= wx.StaticText(self, -1,' ')
         
-        sizer_fit = wx.GridSizer(2, 4,2,6)
+        
         sizer_fit.Add(box_description_1,0,0)
         sizer_fit.Add(box_description_2,0,0)
         sizer_fit.Add(box_description_3,0,0)       
@@ -839,7 +836,8 @@ class FitPage(BasicPage):
         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
 
         if check_float(tcrtl):
-            flag = self._onparamEnter_helper()  
+            flag = self._onparamEnter_helper() 
+            self.set_npts2fit() 
             if self.fitrange:             
                 temp_smearer = None
                 if not self.disable_smearer.GetValue():
@@ -1267,7 +1265,7 @@ class FitPage(BasicPage):
         """
             return the current chi2
         """
-        return self.tcChi.GetLabel()
+        return self.tcChi.GetValue()
         
     def get_param_list(self):
         """
@@ -1307,10 +1305,10 @@ class FitPage(BasicPage):
                 if npt_fit > 0:
                     chisqr =chisqr/npt_fit    
             chi2 = format_number(chisqr)    
-            self.tcChi.SetLabel(chi2)    
+            self.tcChi.SetValue(chi2)    
             self.tcChi.Refresh()    
         else:
-            self.tcChi.SetLabel("-")
+            self.tcChi.SetValue("-")
         
         #Hide error title
         if self.text2_3.IsShown():
@@ -1769,7 +1767,7 @@ class FitPage(BasicPage):
             if output ==None:
                 output= "-"
 
-            self.tcChi.SetLabel(str(format_number(output)))
+            self.tcChi.SetValue(str(format_number(output)))
 
             self.state.tcChi =self.tcChi
           
