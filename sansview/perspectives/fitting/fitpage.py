@@ -1992,10 +1992,11 @@ class FitPage(BasicPage):
     
         iy = 0
         ix = 0
-        select_text = "Uncheck all to fix"
+        select_text = "Select All"
         self.cb1 = wx.CheckBox(self, -1,str(select_text), (10, 10))
         wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_param)
-        self.cb1.SetValue(True)
+        self.cb1.SetToolTipString("To check/uncheck all the boxes below.")
+        #self.cb1.SetValue(True)
         
         sizer.Add(self.cb1,(iy, ix),(1,1),\
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
@@ -2037,9 +2038,11 @@ class FitPage(BasicPage):
                 iy += 1
                 ix = 0
                 ## add parameters name with checkbox for selecting to fit
-                cb = wx.CheckBox(self, -1, item )
-                cb.SetValue(True)
+                cb = wx.CheckBox(self, -1, item )              
+                cb.SetToolTipString(" Check/uncheck to fit/fix the parameter.")
+                #cb.SetValue(True)
                 wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
+                
                 sizer.Add( cb,( iy, ix),(1,1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
                 
