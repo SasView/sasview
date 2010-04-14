@@ -84,7 +84,7 @@ def reader2D_converter(data2d=None):
     qy_data = new_y.flatten()
     q_data = numpy.sqrt(qx_data*qx_data+qy_data*qy_data)
     if data2d.err_data == None or numpy.any(data2d.err_data<=0): 
-        new_err_data = numpy.sqrt(numpy.fabs(new_data))
+        new_err_data = numpy.sqrt(numpy.abs(new_data))
     else:
         new_err_data = data2d.err_data.flatten()
     mask    = numpy.ones(len(new_data), dtype = bool)
@@ -826,6 +826,52 @@ class SectorQ(_Sector):
         """
         return self._agv(data2D, 'q2')
 
+class Ringcut(object):
+    """
+        Defines a ring on a 2D data set.
+        The ring is defined by r_min, r_max, and
+        the position of the center of the ring.
+        
+        The data returned is the region inside the ring
+        
+        Phi_min and phi_max should be defined between 0 and 2*pi 
+        in anti-clockwise starting from the x- axis on the left-hand side
+    """
+    def __init__(self, r_min=0, r_max=0, center_x=0, center_y=0 ):
+        # Minimum radius
+        self.r_min = r_min
+        # Maximum radius
+        self.r_max = r_max
+        # Center of the ring in x
+        self.center_x = center_x
+        # Center of the ring in y
+        self.center_y = center_y
+
+        
+    def __call__(self, data2D):
+        """
+            Apply the ring to the data set.
+            Returns the angular distribution for a given q range
+            
+            @param data2D: Data2D object
+            @return: index array in the range
+        """
+        if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
+            raise RuntimeError, "Ring cut only take plottable_2D objects"
+
+        # Get data
+        qx_data = data2D.qx_data 
+        qy_data = data2D.qy_data
+        mask = data2D.mask
+        q_data = numpy.sqrt(qx_data*qx_data+qy_data*qy_data)
+        #q_data_max = numpy.max(q_data)
+
+        # check whether or not the data point is inside ROI
+        out = (self.r_min <= q_data) & (self.r_max >= q_data)
+
+        return (out)
+        
+
 class Boxcut(object):
     """
         Find a rectangular 2D region of interest.
@@ -864,10 +910,11 @@ class Boxcut(object):
         # Get qx_ and qy_data 
         qx_data = data2D.qx_data
         qy_data = data2D.qy_data
+        mask = data2D.mask
         
         # check whether or not the data point is inside ROI
-        outx = [self.x_min <= qx_data & self.x_max > qx_data]
-        outy = [self.y_min <= qy_data & self.y_max > qy_data]
+        outx = (self.x_min <= qx_data) & (self.x_max > qx_data)
+        outy = (self.y_min <= qy_data) & (self.y_max > qy_data)
 
         return (outx & outy)
 
@@ -886,7 +933,7 @@ class Sectorcut(object):
               
     def __call__(self, data2D):
         """
-           Perform sector averaging.
+           Find a rectangular 2D region of interest.
             
            @param data2D: Data2D object
            @return: mask, 1d array (len = len(data)) 
@@ -912,13 +959,17 @@ class Sectorcut(object):
         phi_data = numpy.zeros(len(qx_data))
 
         # get phi from data
-        phi_data = numpy.arctan2(qy_data, qy_data)
+        phi_data = numpy.arctan2(qy_data, qx_data)
+        
+        # Get the min and max into the region: -pi <= phi < Pi
+        phi_min_major = flip_phi(self.phi_min+Pi)-Pi
+        phi_max_major = flip_phi(self.phi_max+Pi)-Pi  
         # check for major sector
-        if self.phi_min > self.phi_max:
-            out_major = (self.phi_min <= phi_data) or (self.phi_max > phi_data)
+        if phi_min_major > phi_max_major:
+            out_major = (phi_min_major <= phi_data) + (phi_max_major > phi_data)
         else:
-            out_major = (self.phi_min <= phi_data) & (self.phi_max > phi_data)
-            
+            out_major = (phi_min_major <= phi_data) & (phi_max_major > phi_data)
+          
         # minor sector
         # Get the min and max into the region: -pi <= phi < Pi
         phi_min_minor = flip_phi(self.phi_min)-Pi
@@ -926,11 +977,11 @@ class Sectorcut(object):
               
         # check for minor sector
         if phi_min_minor > phi_max_minor:
-            out_minor= (phi_min_minor <= phi_data) or (phi_max_minor> phi_data) 
+            out_minor= (phi_min_minor <= phi_data) + (phi_max_minor>= phi_data) 
         else:
-            out_minor = (phi_min_minor <= phi_data) & (phi_max_minor > phi_data) 
+            out_minor = (phi_min_minor <= phi_data) & (phi_max_minor >= phi_data) 
         out = out_major + out_minor
-
+        
         return out
 
 if __name__ == "__main__": 
