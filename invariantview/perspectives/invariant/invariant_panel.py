@@ -33,7 +33,7 @@ _BOX_WIDTH = 76
 
 if sys.platform.count("win32")>0:
     _STATICBOX_WIDTH = 450
-    PANEL_WIDTH = 500
+    PANEL_WIDTH = 500 
     PANEL_HEIGHT = 700
     FONT_VARIANT = 0
 else:
@@ -53,8 +53,9 @@ class InvariantPanel(ScrolledPanel):
     window_caption = "Invariant"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
-    def __init__(self, parent, data=None, manager=None):
-        ScrolledPanel.__init__(self, parent)
+    def __init__(self, parent, data=None, manager=None,*args, **kwds):
+        kwds["size"]=(PANEL_WIDTH, PANEL_HEIGHT)
+        ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         #Object that receive status event
@@ -960,17 +961,17 @@ class InvariantPanel(ScrolledPanel):
         self._layout_inputs_sizer()
         self._layout_outputs_sizer()
         self._layout_button()
-        self.main_sizer.AddMany([(self.data_name_boxsizer, 1, wx.ALL, 10),
+        self.main_sizer.AddMany([(self.data_name_boxsizer,0, wx.ALL, 10),
                                   (self.outputs_sizer, 0,
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
-                                  (self.button_sizer, 0,
+                                  (self.button_sizer,0,
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
                                  (self.inputs_sizer, 0,
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
                                   (self.extrapolation_sizer, 0,
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)])
         self.SetSizer(self.main_sizer)
-        #self.SetAutoLayout(True)
+        self.SetAutoLayout(True)
     
 class InvariantDialog(wx.Dialog):
     def __init__(self, parent=None, id=1,graph=None,
