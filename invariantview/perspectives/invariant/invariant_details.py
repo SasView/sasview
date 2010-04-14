@@ -188,7 +188,7 @@ class InvariantDetailsPanel(wx.Dialog):
         #Sizer related to chart
         chart_box = wx.StaticBox(self, -1, "Invariant Chart")
         self.chart_sizer = wx.StaticBoxSizer(chart_box, wx.VERTICAL)
-        self.chart_sizer.SetMinSize((PANEL_WIDTH - 50,100))
+        self.chart_sizer.SetMinSize((PANEL_WIDTH - 50,110))
         #Sizer related to invariant values
         self.invariant_sizer =  wx.GridBagSizer(4, 4)
         invariant_box = wx.StaticBox(self, -1, "Numerical Values")
