@@ -11,7 +11,7 @@ class SectorMask(_BaseInteractor):
     """
          Draw a sector slicer.Allow to find the data 2D inside of the sector lines
     """
-    def __init__(self,base,axes,color='black', zorder=3, side = False):
+    def __init__(self,base,axes,color='gray', zorder=3, side = False):
         
         _BaseInteractor.__init__(self, base, axes, color=color)
         ## Class initialization
@@ -37,13 +37,13 @@ class SectorMask(_BaseInteractor):
                                            theta= self.theta2)
         self.main_line.qmax = self.qmax
         ## Right Side line
-        self.right_line= SideInteractor(self, self.base.subplot,color='black', zorder=zorder,
+        self.right_line= SideInteractor(self, self.base.subplot,color='gray', zorder=zorder,
                                      r=self.qmax,
                                            phi= -1*self.phi,
                                            theta2=self.theta2)
         self.right_line.qmax = self.qmax
         ## Left Side line 
-        self.left_line= SideInteractor(self, self.base.subplot,color='black', zorder=zorder,
+        self.left_line= SideInteractor(self, self.base.subplot,color='gray', zorder=zorder,
                                      r=self.qmax,
                                            phi= self.phi,
                                            theta2=self.theta2)

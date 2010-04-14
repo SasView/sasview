@@ -401,7 +401,7 @@ class CircularMask(_BaseInteractor):
          @param r: the radius of the ring
          @param sign: the direction of motion the the marker 
     """
-    def __init__(self,base,axes,color='black', zorder=3, side=None):
+    def __init__(self,base,axes,color='grey', zorder=3, side=None):
         
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
@@ -421,7 +421,7 @@ class CircularMask(_BaseInteractor):
             self.sign=-1
                  
         # Inner circle
-        self.outer_circle = RingInteractor(self, self.base.subplot, zorder=zorder+1, r=self.qmax/1.8,sign=self.sign)
+        self.outer_circle = RingInteractor(self, self.base.subplot, 'blue', zorder=zorder+1, r=self.qmax/1.8,sign=self.sign)
         self.outer_circle.qmax = self.qmax*1.2
        
         self.update()

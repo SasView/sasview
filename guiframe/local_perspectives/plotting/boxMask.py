@@ -61,7 +61,7 @@ class BoxMask(_BaseInteractor):
                                     center_y= self.center_y)
         self.horizontal_lines.qmax = self.qmax
         
-        self.vertical_lines= VerticalDoubleLine(self, self.base.subplot,color='black',
+        self.vertical_lines= VerticalDoubleLine(self, self.base.subplot,color='grey',
                                                       zorder=zorder,
                                     y= self.ymax,
                                     x= self.xmax,
