@@ -922,7 +922,7 @@ class Plugin:
             qmax = evt.qmax
         if hasattr(evt, "smearer"):
             smearer = evt.smearer
-        #model.origin_name = model.name
+        model.origin_name = model.name
         self.current_pg = self.fit_panel.get_current_page() 
         ## make sure nothing is done on self.sim_page
         ## example trying to call set_panel on self.sim_page
