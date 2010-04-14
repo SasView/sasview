@@ -54,7 +54,7 @@ class InvariantPanel(ScrolledPanel):
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
     def __init__(self, parent, data=None, manager=None,*args, **kwds):
-        kwds["size"]=(PANEL_WIDTH, PANEL_HEIGHT)
+        kwds["style"]= wx.FULL_REPAINT_ON_RESIZE
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
@@ -84,7 +84,9 @@ class InvariantPanel(ScrolledPanel):
             if len(self._data.x[self._data.x==0]) > 0:
                 flag = True
                 msg = "Invariant: one of your q-values is zero. Delete that entry before proceeding"
+                self.hint_msg_txt.SetLabel(msg)
                 wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop")) 
+        self.hint_msg_txt.SetLabel('')
         return flag
     
     def set_data(self, data):
@@ -101,7 +103,6 @@ class InvariantPanel(ScrolledPanel):
             self.data_name_tcl.SetValue(str(data_name))
             self.data_min_tcl.SetLabel(str(data_qmin))
             self.data_max_tcl.SetLabel(str(data_qmax))
-            self.hint_msg_txt.SetLabel('')
             self.reset_panel()
             self.compute_invariant(event=None)
              
