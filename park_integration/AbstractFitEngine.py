@@ -378,6 +378,8 @@ class SansAssembly:
         self.res= self.data.residuals(self.model.eval)
         if self.fitresult is not None and  self.handler is not None:
             self.fitresult.set_model(model=self.model)
+            fitness = self.chisq(params=params)
+            self.fitresult.set_fitness(fitness=fitness)
             self.handler.set_result(result=self.fitresult)
             self.handler.update_fit()
         

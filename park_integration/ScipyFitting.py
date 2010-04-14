@@ -30,6 +30,9 @@ class fitresult(object):
     def set_model(self, model):
         self.model = model
         
+    def set_fitness(self, fitness):
+        self.fitness = fitness
+        
     def __str__(self):
         if self.pvec == None and self.model is None and self.paramList is None:
             return "No results"
