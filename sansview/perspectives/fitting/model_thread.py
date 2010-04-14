@@ -80,22 +80,21 @@ class Calc2D(CalcThread):
         # For theory, qmax is based on 1d qmax 
         # so that must be mulitified by sqrt(2) to get actual max for 2d
         index_model = ((self.qmin <= radius)&(radius<= self.qmax))
-        self.mask = (index_model)&(self.mask)
-        self.mask = (self.mask)&(numpy.isfinite(self.I_data))
+        index_model = (index_model)&(self.mask)
+        index_model = (index_model)&(numpy.isfinite(self.I_data))
         if self.data ==None:
             # Only qmin value will be consider for the detector
-            self.mask = index_data  
+            index_model = index_data  
              
-        value = self.model.evalDistribution([self.qx_data[self.mask],self.qy_data[self.mask]] )
+        value = self.model.evalDistribution([self.qx_data[index_model],self.qy_data[index_model]] )
 
-        output = numpy.zeros(len(self.mask))
+        output = numpy.zeros(len(self.qx_data))
         
         # output default is None
         # This method is to distinguish between masked point and data point = 0.
         output = output/output
         # set value for self.mask==True, else still None to Plottools
-        output[self.mask] = value 
-
+        output[index_model] = value 
         elapsed = time.time()-self.starttime
         self.complete( image = output,
                        data = self.data , 

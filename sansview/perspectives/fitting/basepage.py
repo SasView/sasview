@@ -1001,9 +1001,14 @@ class BasicPage(wx.ScrolledWindow):
              model
              use : _check_value_enter 
         """
-        # Flag to register when a parameter has changed.      
+        # Flag to register when a parameter has changed.   
         is_modified = False
+        self.fitrange =True
+        is_2Ddata = False
         #self._undo.Enable(True)
+        # check if 2d data
+        if self.data.__class__.__name__ !="Data1D":
+            is_2Ddata = True
         if self.model !=None:
             try:
                 is_modified =self._check_value_enter( self.fittable_param ,is_modified)
@@ -1025,22 +1030,23 @@ class BasicPage(wx.ScrolledWindow):
                 if tempmax != self.qmax_x:
                     self.qmax_x = tempmax
                     is_modified = True
-                self.fitrange = True
-            else:
-                self.fitrange = False
-            if self.npts != None:
-                if check_float(self.npts):
-                    temp_npts = float(self.npts.GetValue())
-                    if temp_npts !=  self.num_points:
-                        self.num_points = temp_npts
-                        is_modified = True
-                else:
-                    msg= "Cannot Plot :Must enter a number!!!  "
-                    wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-                
             
+                if is_2Ddata:
+                    # set mask   
+                    is_modified = self._validate_Npts()
+
+            else:
+                self.fitrange = False    
+
             ## if any value is modify draw model with new value
-            if is_modified:
+            if not self.fitrange:
+                self.btFit.Disable()
+                if is_2Ddata: self.btEditMask.Disable()
+            else:
+                self.btFit.Enable(True)
+                if is_2Ddata: self.btEditMask.Enable(True)
+
+            if is_modified and self.fitrange:
                 self.state_change= True
                 self._draw_model() 
                 self.Refresh()
@@ -1052,7 +1058,14 @@ class BasicPage(wx.ScrolledWindow):
         """
         #flag for qmin qmax check values
         flag = True
+        self.fitrange = True
         is_modified = False
+        is_2Ddata = False
+
+        # check if 2d data
+        if self.data.__class__.__name__ !="Data1D":
+            is_2Ddata = True
+        
         ##So make sure that update param values on_Fit.
         #self._undo.Enable(True)
         if self.model !=None:           
@@ -1065,7 +1078,8 @@ class BasicPage(wx.ScrolledWindow):
              # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
-            if self._validate_qrange(self.qmin, self.qmax):
+            self.fitrange = self._validate_qrange(self.qmin, self.qmax)
+            if self.fitrange:
                 tempmin = float(self.qmin.GetValue())
                 if tempmin != self.qmin_x:
                     self.qmin_x = tempmin
@@ -1084,18 +1098,36 @@ class BasicPage(wx.ScrolledWindow):
                     else:
                         self.manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
                                                  qmax= float(self.qmax_x))
-                elif self.data.__class__.__name__ !="Data2D":
+                elif not is_2Ddata:
                     self.manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
                                                  qmax= float(self.qmax_x))
+                    index_data = ((self.qmin_x <= self.data.x)&(self.data.x <= self.qmax_x))
+                    self.Npts_fit.SetValue(str(len(self.data.x[index_data==True])))
+                    flag = True
+                if is_2Ddata:
+                    # only 2D case set mask   
+                    flag = self._validate_Npts()
+                    if not flag:
+                        return flag
             else: flag = False
         else: 
             flag = False
+
+        #For invalid q range, disable the mask editor and fit button, vs.    
+        if not self.fitrange:
+            self.btFit.Disable()
+            self.btEditMask.Disable()
+        else:
+            self.btFit.Enable(True)
+            self.btEditMask.Enable(True)
+
         
         if not flag:
-            msg= "Cannot Fit :Must select a model or Fitting range is not valid!!!  "
+            msg= "Cannot Plot or Fit :Must select a model or Fitting range is not valid!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-            
+        
         self.save_current_state()
+            
         return flag                           
                
     def _is_modified(self, is_modified):
@@ -1596,7 +1628,7 @@ class BasicPage(wx.ScrolledWindow):
             self.text2.Show()
             self.structurebox.Enable()
             self.text2.Enable()
-        if self.data.__class__.__name__ =="Data2D":
+        if self.data.__class__.__name__ !="Data1D":
             self.smear_description_2d.Show(True)
             
         s_id = self.structurebox.GetCurrentSelection()
@@ -1651,7 +1683,38 @@ class BasicPage(wx.ScrolledWindow):
                 wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
                 return False
         return True
+    
+    def _validate_Npts(self):  
+        """
+            Validate the number of points for fitting is more than 10 points.
+            If valid, setvalues Npts_fit otherwise post msg.
+        """
+        #default flag
+        flag = True
 
+        # q value from qx and qy
+        radius= numpy.sqrt( self.data.qx_data*self.data.qx_data + self.data.qy_data*self.data.qy_data )
+        #get unmasked index
+        index_data = (float(self.qmin.GetValue()) <= radius)&(radius<= float(self.qmax.GetValue()))
+        index_data = (index_data)&(self.data.mask) 
+        index_data = (index_data)&(numpy.isfinite(self.data.data))
+
+        if len(index_data[index_data]) < 10:
+            # change the color pink.
+            self.qmin.SetBackgroundColour("pink")
+            self.qmin.Refresh()
+            self.qmax.SetBackgroundColour("pink")
+            self.qmax.Refresh()
+            msg= "Cannot Plot :No or too little npts in that data range!!!  "
+            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+            self.fitrange = False
+            flag = False
+        else:
+            self.Npts_fit.SetValue(str(len(self.data.mask[index_data==True])))
+            self.fitrange = True
+            
+        return flag
+    
     def _check_value_enter(self, list, modified):
         """
             @param list: model parameter and panel info
@@ -1663,7 +1726,7 @@ class BasicPage(wx.ScrolledWindow):
             return is_modified
         for item in list:
             #skip angle parameters for 1D
-            if self.data.__class__.__name__ !="Data2D":
+            if self.data.__class__.__name__ !="Data1D":
                 if item in self.orientation_params:
                     continue
             #try:
@@ -1929,7 +1992,7 @@ class BasicPage(wx.ScrolledWindow):
                 ix+=1 
                 self.disp_cb_dict[p] = wx.RadioButton(self, -1, p, (10, 10))
                 self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
-                if not (self.enable2D or self.data.__class__.__name__ =="Data2D"):
+                if not (self.enable2D or self.data.__class__.__name__ !="Data1D"):
                     self.disp_cb_dict[p].Hide()
                 else:
                     self.disp_cb_dict[p].Show(True)
@@ -1973,6 +2036,13 @@ class BasicPage(wx.ScrolledWindow):
         """
             Fill the Q range sizer
         """
+        #2D data? default
+        is_2Ddata = False
+        
+        #check if it is 2D data
+        if self.data.__class__.__name__ != 'Data1D':
+            is_2Ddata = True
+            
         self.sizer5.Clear(True)
         #--------------------------------------------------------------
         if box_sizer == None:
@@ -1993,29 +2063,40 @@ class BasicPage(wx.ScrolledWindow):
         self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
         
         id = wx.NewId()
-        self.reset_qrange =wx.Button(self,id,'Reset',size=(70,23))
+        self.reset_qrange =wx.Button(self,id,'Reset',size=(77,20))
       
         self.reset_qrange.Bind(wx.EVT_BUTTON, self.on_reset_clicked,id=id)
         self.reset_qrange.SetToolTipString("Reset Q range to the default values")
      
         sizer_horizontal=wx.BoxSizer(wx.HORIZONTAL)
-        sizer= wx.GridSizer(3, 3,2, 5)
-        
+        sizer= wx.GridSizer(2, 4,2, 6)
+
+        self.btEditMask = wx.Button(self,wx.NewId(),'Editor', size=(88,23))
+        self.btEditMask.Bind(wx.EVT_BUTTON, self._onMask,id= self.btEditMask.GetId())
+        self.btEditMask.SetToolTipString("Edit Mask.")
+        self.EditMask_title = wx.StaticText(self, -1, ' Masking(2D)')
+
         sizer.Add(wx.StaticText(self, -1, '    Q range'))     
-        sizer.Add(wx.StaticText(self, -1, ' Min'))
-        sizer.Add(wx.StaticText(self, -1, ' Max'))
+        sizer.Add(wx.StaticText(self, -1, ' Min[1/A]'))
+        sizer.Add(wx.StaticText(self, -1, ' Max[1/A]'))
+        sizer.Add(self.EditMask_title)
         sizer.Add(self.reset_qrange)   
-             
+        
         sizer.Add(self.qmin)
         sizer.Add(self.qmax)
-        sizer_horizontal.Add(sizer)
-        if object!=None:
-            sizer_horizontal.Add(object)
-        
+        sizer.Add(self.btEditMask)
+       
         if object1!=None:
-           boxsizer1.Add(object1) 
-           boxsizer1.Add((10,10))
-        boxsizer1.Add(sizer_horizontal)
+            
+            boxsizer1.Add(object1) 
+            boxsizer1.Add((10,10))
+        boxsizer1.Add(sizer)
+        if object!=None:
+            boxsizer1.Add((10,15))
+            boxsizer1.Add(object)
+        if not is_2Ddata:
+            self.btEditMask.Disable()  
+            self.EditMask_title.Disable()   
         ## save state
         self.save_current_state()
         #----------------------------------------------------------------
@@ -2076,7 +2157,7 @@ class BasicPage(wx.ScrolledWindow):
         if self.check_invalid_panel():
             return
         ##For 3 different cases: Data2D, Data1D, and theory
-        if self.data.__class__.__name__ == "Data2D":
+        if self.data.__class__.__name__ != "Data1D":
             data_min= 0
             x= max(math.fabs(self.data.xmin), math.fabs(self.data.xmax)) 
             y= max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
@@ -2104,6 +2185,15 @@ class BasicPage(wx.ScrolledWindow):
         if flag == False:
             msg= "Cannot Plot :Must enter a number!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        else:
+            # set relative text ctrs.
+            self.qmin.SetValue(str(self.qmin_x))
+            self.qmax.SetValue(str(self.qmax_x))
+            self.set_npts2fit()
+            # At this point, some button and variables satatus (disabled?) should be checked 
+            # such as color that should be reset to white in case that it was pink.
+            self._onparamEnter_helper()
+
             
         self.save_current_state()
         self.state.qmin = self.qmin_x
