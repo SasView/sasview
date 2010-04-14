@@ -178,7 +178,7 @@ class FitPage(BasicPage):
         is_2Ddata = False
         
         # Check if data is 2D
-        if self.data.__class__.__name__ != 'Data1D':
+        if self.data.__class__.__name__ == 'Data2D':
             is_2Ddata = True
             
         title = "Fitting"

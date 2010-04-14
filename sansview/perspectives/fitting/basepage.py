@@ -1007,7 +1007,7 @@ class BasicPage(wx.ScrolledWindow):
         is_2Ddata = False
         #self._undo.Enable(True)
         # check if 2d data
-        if self.data.__class__.__name__ !="Data1D":
+        if self.data.__class__.__name__ =="Data2D":
             is_2Ddata = True
         if self.model !=None:
             try:
@@ -1063,7 +1063,7 @@ class BasicPage(wx.ScrolledWindow):
         is_2Ddata = False
 
         # check if 2d data
-        if self.data.__class__.__name__ !="Data1D":
+        if self.data.__class__.__name__ =="Data2D":
             is_2Ddata = True
         
         ##So make sure that update param values on_Fit.
@@ -1628,7 +1628,7 @@ class BasicPage(wx.ScrolledWindow):
             self.text2.Show()
             self.structurebox.Enable()
             self.text2.Enable()
-        if self.data.__class__.__name__ !="Data1D":
+        if self.data.__class__.__name__ =="Data2D":
             self.smear_description_2d.Show(True)
             
         s_id = self.structurebox.GetCurrentSelection()
@@ -1726,7 +1726,7 @@ class BasicPage(wx.ScrolledWindow):
             return is_modified
         for item in list:
             #skip angle parameters for 1D
-            if self.data.__class__.__name__ !="Data1D":
+            if self.data.__class__.__name__ !="Data2D":
                 if item in self.orientation_params:
                     continue
             #try:
@@ -1992,7 +1992,7 @@ class BasicPage(wx.ScrolledWindow):
                 ix+=1 
                 self.disp_cb_dict[p] = wx.RadioButton(self, -1, p, (10, 10))
                 self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
-                if not (self.enable2D or self.data.__class__.__name__ !="Data1D"):
+                if not (self.enable2D or self.data.__class__.__name__ =="Data2D"):
                     self.disp_cb_dict[p].Hide()
                 else:
                     self.disp_cb_dict[p].Show(True)
@@ -2040,7 +2040,7 @@ class BasicPage(wx.ScrolledWindow):
         is_2Ddata = False
         
         #check if it is 2D data
-        if self.data.__class__.__name__ != 'Data1D':
+        if self.data.__class__.__name__ == 'Data2D':
             is_2Ddata = True
             
         self.sizer5.Clear(True)
@@ -2157,13 +2157,13 @@ class BasicPage(wx.ScrolledWindow):
         if self.check_invalid_panel():
             return
         ##For 3 different cases: Data2D, Data1D, and theory
-        if self.data.__class__.__name__ != "Data1D":
+        if self.data.__class__.__name__ == "Data2D":
             data_min= 0
             x= max(math.fabs(self.data.xmin), math.fabs(self.data.xmax)) 
             y= max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
             self.qmin_x = data_min
             self.qmax_x = math.sqrt(x*x + y*y)
-        elif self.data.__class__.__name__ == "Data1D":
+        elif self.data.__class__.__name__ != "Data2D":
             self.qmin_x = min(self.data.x)
             self.qmax_x = max(self.data.x)
             # check smearing
