@@ -282,16 +282,17 @@ class FitData2D(Data2D):
             self.qmax = math.sqrt(x_max*x_max +y_max*y_max)
         ## new error image for fitting purpose
         if self.err_data== None or self.err_data ==[]:
-            self.res_err_data= numpy.zeros(len(self.data))
+            self.res_err_data= numpy.ones(len(self.data))
         else:
             self.res_err_data = copy.deepcopy(self.err_data)
-        self.res_err_data[self.res_err_data==0]=numpy.sqrt(self.data[self.res_err_data==0])
+        self.res_err_data[self.res_err_data==0]=1
         
         self.radius= numpy.sqrt(self.qx_data**2 + self.qy_data**2)
         
         # Note: mask = True: for MASK while mask = False for NOT to mask
         self.index_model = ((self.qmin <= self.radius)&(self.radius<= self.qmax))
-        self.mask = (self.index_model) & (self.mask)
+        self.index_model = (self.index_model) & (self.mask)
+        self.index_model = (self.index_model) & (numpy.isfinite(self.data))
            
     def setFitRange(self,qmin=None,qmax=None):
         """ to set the fit range"""
@@ -303,8 +304,8 @@ class FitData2D(Data2D):
             self.qmax= qmax        
         self.radius= numpy.sqrt(self.qx_data**2 + self.qy_data**2)
         self.index_model = ((self.qmin <= self.radius)&(self.radius<= self.qmax))
-        self.mask = (self.index_model) &(self.mask)
-        
+        self.index_model = (self.index_model) &(self.mask)
+        self.index_model = (self.index_model) & (numpy.isfinite(self.data))
         
     def getFitRange(self):
         """
@@ -317,8 +318,8 @@ class FitData2D(Data2D):
             @return the residuals
         """        
         # use only the data point within ROI range
-        res=(self.data[self.mask] - fn([self.qx_data[self.mask],
-                             self.qy_data[self.mask]]))/self.res_err_data[self.mask]
+        res=(self.data[self.index_model] - fn([self.qx_data[self.index_model],
+                             self.qy_data[self.index_model]]))/self.res_err_data[self.index_model]
         return res
         
  
