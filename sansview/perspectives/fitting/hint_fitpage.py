@@ -25,8 +25,10 @@ class HintFitPage(wx.ScrolledWindow):
         name="Hint"
         box_description= wx.StaticBox(self, -1,name)
         boxsizer = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-        msg = "Load data, then right click on the data, when highlighted,\n"
-        msg += "select option to fit for further analysis"
+        msg  = "    How to link data to the control panel: \n \n"
+        msg += "    First load data file from 'File' menu. \n"
+        msg += "    Then Highlight and right click on the data plot. \n"
+        msg += "    Finally, select 'Select data for fitting' in the pop-up menu. \n"
         self.hint_txt = wx.StaticText(self, -1, msg, style=wx.ALIGN_LEFT)
         boxsizer.Add(self.hint_txt, wx.ALL|wx.EXPAND, 20)
         self.vbox = wx.BoxSizer(wx.VERTICAL)
