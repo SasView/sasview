@@ -1182,6 +1182,8 @@ class FitPage(BasicPage):
                 self.Npts_total.SetValue(str(len(self.data.x)))
                 #default:number of data points selected to fit
                 self.Npts_fit.SetValue(str(len(self.data.x)))
+                self.btEditMask.Disable()  
+                self.EditMask_title.Disable()
             else:
                 ## Minimum value of data 
                 data_min = 0
@@ -1193,6 +1195,9 @@ class FitPage(BasicPage):
                 self.Npts_total.SetValue(str(len(self.data.data)))
                 #default:number of data points selected to fit
                 self.Npts_fit.SetValue(str(len(self.data.data)))
+                self.btEditMask.Enable()  
+                self.EditMask_title.Enable() 
+
             
         self.dataSource.SetValue(data_name)
         self.qmin_x = data_min

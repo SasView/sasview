@@ -2094,9 +2094,12 @@ class BasicPage(wx.ScrolledWindow):
         if object!=None:
             boxsizer1.Add((10,15))
             boxsizer1.Add(object)
-        if not is_2Ddata:
+        if is_2Ddata:
+            self.btEditMask.Enable()  
+            self.EditMask_title.Enable() 
+        else:
             self.btEditMask.Disable()  
-            self.EditMask_title.Disable()   
+            self.EditMask_title.Disable()
         ## save state
         self.save_current_state()
         #----------------------------------------------------------------
