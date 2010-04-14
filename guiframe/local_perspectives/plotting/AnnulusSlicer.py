@@ -394,4 +394,175 @@ class RingInteractor(_BaseInteractor):
         x = params["radius"] 
         self.set_cursor(x, self._inner_mouse_y)
         
+class CircularMask(_BaseInteractor):
+    """
+         Draw a ring Given a radius 
+         @param: the color of the line that defined the ring
+         @param r: the radius of the ring
+         @param sign: the direction of motion the the marker 
+    """
+    def __init__(self,base,axes,color='black', zorder=3, side=None):
         
+        _BaseInteractor.__init__(self, base, axes, color=color)
+        self.markers = []
+        self.axes = axes
+        self.base= base
+        self.is_inside = side
+        self.qmax = min(math.fabs(self.base.data.xmax),math.fabs(self.base.data.xmin))  #must be positive
+        self.connect = self.base.connect
+        
+        #Cursor position of Rings (Left(-1) or Right(1))
+        self.xmaxd=self.base.data.xmax
+        self.xmind=self.base.data.xmin
+
+        if (self.xmaxd+self.xmind)>0:
+            self.sign=1
+        else:
+            self.sign=-1
+                 
+        # Inner circle
+        self.outer_circle = RingInteractor(self, self.base.subplot, zorder=zorder+1, r=self.qmax/1.8,sign=self.sign)
+        self.outer_circle.qmax = self.qmax*1.2
+       
+        self.update()
+        self._post_data()
+        
+        # Bind to slice parameter events
+        #self.base.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
+        
+        
+
+    def _onEVT_SLICER_PARS(self, event):
+        """
+            receive an event containing parameters values to reset the slicer
+            @param event: event of type SlicerParameterEvent with params as 
+            attribute
+        """
+        wx.PostEvent(self.base, StatusEvent(status="AnnulusSlicer._onEVT_SLICER_PARS"))
+        event.Skip()
+        if event.type == self.__class__.__name__:
+            self.set_params(event.params)
+            self.base.update()
+
+    def set_layer(self, n):
+        """
+             Allow adding plot to the same panel
+             @param n: the number of layer
+        """
+        self.layernum = n
+        self.update()
+        
+    def clear(self):
+        """
+            Clear the slicer and all connected events related to this slicer
+        """
+        self.clear_markers()
+        self.outer_circle.clear()
+        self.base.connect.clearall()
+        #self.base.Unbind(EVT_SLICER_PARS)
+        
+        
+    def update(self):
+        """
+            Respond to changes in the model by recalculating the profiles and
+            resetting the widgets.
+        """
+        # Update locations        
+        self.outer_circle.update()
+        #if self.is_inside != None:
+        out = self._post_data()
+        return out
+
+    def save(self, ev):
+        """
+            Remember the roughness for this layer and the next so that we
+            can restore on Esc.
+        """
+        self.base.freeze_axes()
+        self.outer_circle.save(ev)
+
+    def _post_data(self):
+        """
+            Uses annulus parameters to plot averaged data into 1D data.
+            @param nbins: the number of points to plot 
+        """
+        #Data to average
+        data = self.base.data
+              
+        # If we have no data, just return
+        if data == None:
+            return
+        mask = data.mask  
+        from DataLoader.manipulations import Ringcut
+    
+        rmin= 0
+        rmax = math.fabs(self.outer_circle.get_radius())
+
+        ## create the data1D Q average of data2D    
+        mask = Ringcut(r_min=rmin , r_max= rmax)
+
+        if self.is_inside:
+            out = (mask(data)==False)
+        else:
+            out = (mask(data))
+        #self.base.data.mask=out
+        return out                    
+
+         
+    def moveend(self, ev):
+        """
+            Called when any dragging motion ends.
+            Post an event (type =SlicerParameterEvent)
+            to plotter 2D with a copy  slicer parameters
+            Call  _post_data method
+        """
+        self.base.thaw_axes()
+        # create a 1D data plot
+        self._post_data()
+            
+    def restore(self):
+        """
+        Restore the roughness for this layer.
+        """
+        self.outer_circle.restore()
+
+    def move(self, x, y, ev):
+        """
+        Process move to a new position, making sure that the move is allowed.
+        """
+        pass
+        
+    def set_cursor(self, x, y):
+        pass
+        
+    def get_params(self):
+        """
+            Store a copy of values of parameters of the slicer into a dictionary.
+            @return params: the dictionary created
+        """
+        params = {}
+        params["outer_radius"] = math.fabs(self.outer_circle._inner_mouse_x)
+        return params
+    
+    def set_params(self, params):
+        """
+            Receive a dictionary and reset the slicer with values contained 
+            in the values of the dictionary.
+            @param params: a dictionary containing name of slicer parameters and 
+            values the user assigned to the slicer.
+        """
+        outer = math.fabs(params["outer_radius"] )
+        ## Update the picture
+        self.outer_circle.set_cursor(outer, self.outer_circle._inner_mouse_y)
+        ## Post the data given the nbins entered by the user 
+        self._post_data()
+        
+    def freeze_axes(self):
+        self.base.freeze_axes()
+        
+    def thaw_axes(self):
+        self.base.thaw_axes()
+
+    def draw(self):
+        self.base.update()
+              
