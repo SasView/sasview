@@ -678,7 +678,6 @@ class ViewerFrame(wx.Frame):
     def _on_open(self, event):
         """
         """
-        print "_on_open"
         path = self.choose_file()
         if path is None:
             return
