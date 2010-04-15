@@ -1034,8 +1034,6 @@ class BasicPage(wx.ScrolledWindow):
                 if is_2Ddata:
                     # set mask   
                     is_modified = self._validate_Npts()
-                    #reset npts for fitting textctrl.
-                    self.set_npt2fit()
 
             else:
                 self.fitrange = False    
