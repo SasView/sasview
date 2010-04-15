@@ -1034,16 +1034,16 @@ class BasicPage(wx.ScrolledWindow):
                 if is_2Ddata:
                     # set mask   
                     is_modified = self._validate_Npts()
-
+                    
             else:
                 self.fitrange = False    
 
             ## if any value is modify draw model with new value
             if not self.fitrange:
-                self.btFit.Disable()
+                #self.btFit.Disable()
                 if is_2Ddata: self.btEditMask.Disable()
             else:
-                self.btFit.Enable(True)
+                #self.btFit.Enable(True)
                 if is_2Ddata: self.btEditMask.Enable(True)
 
             if is_modified and self.fitrange:
@@ -1115,10 +1115,10 @@ class BasicPage(wx.ScrolledWindow):
 
         #For invalid q range, disable the mask editor and fit button, vs.    
         if not self.fitrange:
-            self.btFit.Disable()
+            #self.btFit.Disable()
             self.btEditMask.Disable()
         else:
-            self.btFit.Enable(True)
+            #self.btFit.Enable(True)
             self.btEditMask.Enable(True)
 
         
