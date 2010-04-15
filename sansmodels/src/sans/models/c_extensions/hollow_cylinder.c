@@ -95,7 +95,7 @@ double hollow_cylinder_analytical_2D_scaled(HollowCylinderParameters *pars, doub
 	//normalize by cylinder volume
 	vol=acos(-1.0)*((pars->radius*pars->radius)-(pars->core_radius *pars->core_radius))
 			*(pars->length);
-	answer *= vol;
+	answer /= vol;
 
 	//convert to [cm-1]
 	answer *= 1.0e8;

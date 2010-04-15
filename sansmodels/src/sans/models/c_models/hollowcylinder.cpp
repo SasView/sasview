@@ -114,7 +114,7 @@ double HollowCylinderModel :: operator()(double q) {
 	}
 	if (vol != 0.0 && norm != 0.0) {
 		//Re-normalize by avg volume
-		sum = sum*(vol/norm);}
+		sum = sum/(vol/norm);}
 
 	return sum/norm + background();
 }
@@ -225,7 +225,7 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 	if (weights_theta.size()>1) norm = norm / asin(1.0);
 	if (vol != 0.0 && norm_vol != 0.0) {
 		//Re-normalize by avg volume
-		sum = sum*(vol/norm_vol);}
+		sum = sum/(vol/norm_vol);}
 	return sum/norm + background();
 }
 
