@@ -96,8 +96,9 @@ CTriaxialEllipsoidModel_init(CTriaxialEllipsoidModel *self, PyObject *args, PyOb
         PyDict_SetItemString(self->params,"semi_axisB",Py_BuildValue("d",100.00000000));
         PyDict_SetItemString(self->params,"semi_axisC",Py_BuildValue("d",400.00000000));
         PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",1.00000000));
+        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.00000630));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00000000));
-        PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.00000530));
+        PyDict_SetItemString(self->params,"sldEll",Py_BuildValue("d",0.00000100));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
@@ -246,8 +247,9 @@ static PyObject * evalDistribution(CTriaxialEllipsoidModel *self, PyObject *args
     self->model->semi_axisB = PyFloat_AsDouble( PyDict_GetItemString(self->params, "semi_axisB") );
     self->model->semi_axisC = PyFloat_AsDouble( PyDict_GetItemString(self->params, "semi_axisC") );
     self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    self->model->sldEll = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldEll") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -326,8 +328,9 @@ static PyObject * run(CTriaxialEllipsoidModel *self, PyObject *args) {
     self->model->semi_axisB = PyFloat_AsDouble( PyDict_GetItemString(self->params, "semi_axisB") );
     self->model->semi_axisC = PyFloat_AsDouble( PyDict_GetItemString(self->params, "semi_axisC") );
     self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    self->model->sldEll = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldEll") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -393,8 +396,9 @@ static PyObject * calculate_ER(CTriaxialEllipsoidModel *self) {
     self->model->semi_axisB = PyFloat_AsDouble( PyDict_GetItemString(self->params, "semi_axisB") );
     self->model->semi_axisC = PyFloat_AsDouble( PyDict_GetItemString(self->params, "semi_axisC") );
     self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    self->model->sldEll = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldEll") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
@@ -429,8 +433,9 @@ static PyObject * runXY(CTriaxialEllipsoidModel *self, PyObject *args) {
     self->model->semi_axisB = PyFloat_AsDouble( PyDict_GetItemString(self->params, "semi_axisB") );
     self->model->semi_axisC = PyFloat_AsDouble( PyDict_GetItemString(self->params, "semi_axisC") );
     self->model->axis_phi = PyFloat_AsDouble( PyDict_GetItemString(self->params, "axis_phi") );
+    self->model->sldSolv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldSolv") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
-    self->model->contrast = PyFloat_AsDouble( PyDict_GetItemString(self->params, "contrast") );
+    self->model->sldEll = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldEll") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();

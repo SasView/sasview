@@ -341,7 +341,8 @@ public:
 	Parameter semi_axisA;
 	Parameter semi_axisB;
 	Parameter semi_axisC;
-	Parameter contrast;
+	Parameter sldEll;
+	Parameter sldSolv;
 	Parameter background;
 	Parameter axis_theta;
 	Parameter axis_phi;

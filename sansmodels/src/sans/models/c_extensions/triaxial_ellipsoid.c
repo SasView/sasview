@@ -17,15 +17,16 @@
  * @return: function value
  */
 double triaxial_ellipsoid_analytical_1D(TriaxialEllipsoidParameters *pars, double q) {
-	double dp[6];
+	double dp[7];
 
 	// Fill paramater array
 	dp[0] = pars->scale;
 	dp[1] = pars->semi_axisA;
 	dp[2] = pars->semi_axisB;
 	dp[3] = pars->semi_axisC;
-	dp[4] = pars->contrast;
-	dp[5] = pars->background;
+	dp[4] = pars->sldEll;
+	dp[5] = pars->sldSolv;
+	dp[6] = pars->background;
 
 	// Call library function to evaluate model
 	return TriaxialEllipsoid(dp, q);
@@ -132,7 +133,7 @@ double triaxial_ellipsoid_analytical_2D_scaled(TriaxialEllipsoidParameters *pars
 	answer = triaxial_ellipsoid_kernel(pars, q, alpha, nu);
 
 	// Multiply by contrast^2
-	answer *= pars->contrast*pars->contrast;
+	answer *= (pars->sldEll- pars->sldSolv)*(pars->sldEll- pars->sldSolv);
 
 	//normalize by cylinder volume
 	//NOTE that for this (Fournet) definition of the integral, one must MULTIPLY by Vcyl

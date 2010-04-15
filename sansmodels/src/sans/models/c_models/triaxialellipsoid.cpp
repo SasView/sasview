@@ -40,7 +40,8 @@ TriaxialEllipsoidModel :: TriaxialEllipsoidModel() {
 	semi_axisB.set_min(0.0);
 	semi_axisC  = Parameter(400.0, true);
 	semi_axisC.set_min(0.0);
-	contrast   = Parameter(5.3e-6);
+	sldEll   = Parameter(1.0e-6);
+	sldSolv   = Parameter(6.3e-6);
 	background = Parameter(0.0);
 	axis_theta  = Parameter(1.0, true);
 	axis_phi    = Parameter(1.0, true);
@@ -54,7 +55,7 @@ TriaxialEllipsoidModel :: TriaxialEllipsoidModel() {
  * @return: function value
  */
 double TriaxialEllipsoidModel :: operator()(double q) {
-	double dp[6];
+	double dp[7];
 
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
@@ -62,8 +63,9 @@ double TriaxialEllipsoidModel :: operator()(double q) {
 	dp[1] = semi_axisA();
 	dp[2] = semi_axisB();
 	dp[3] = semi_axisC();
-	dp[4] = contrast();
-	dp[5] = 0.0;
+	dp[4] = sldEll();
+	dp[5] = sldSolv();
+	dp[6] = 0.0;
 
 	// Get the dispersion points for the semi axis A
 	vector<WeightPoint> weights_semi_axisA;
@@ -127,7 +129,8 @@ double TriaxialEllipsoidModel :: operator()(double qx, double qy) {
 	dp.semi_axisA   = semi_axisA();
 	dp.semi_axisB     = semi_axisB();
 	dp.semi_axisC     = semi_axisC();
-	dp.contrast   = contrast();
+	dp.sldEll   = sldEll();
+	dp.sldSolv   = sldSolv();
 	dp.background = 0.0;
 	dp.axis_theta  = axis_theta();
 	dp.axis_phi    = axis_phi();
