@@ -54,6 +54,7 @@ class InvariantPanel(ScrolledPanel):
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
     def __init__(self, parent, data=None, manager=None,*args, **kwds):
+        kwds["size"]= (PANEL_WIDTH, PANEL_HEIGHT)
         kwds["style"]= wx.FULL_REPAINT_ON_RESIZE
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
         #Font size 
