@@ -72,7 +72,7 @@ class InvariantPanel(ScrolledPanel):
         self.reset_panel()
         if self.parent is not None:
             msg = ""
-            wx.PostEvent(self.parent, StatusEvent(status=msg))
+            wx.PostEvent(self.parent,StatusEvent(status=msg, info="info"))
         self.SetupScrolling()
        
     def err_check_on_data(self):
@@ -80,14 +80,16 @@ class InvariantPanel(ScrolledPanel):
             Check if data is valid for further computation
         """
         flag = False
+        self.hint_msg_txt.SetLabel('')
         #edit the panel
         if self._data is not None:
             if len(self._data.x[self._data.x==0]) > 0:
                 flag = True
                 msg = "Invariant: one of your q-values is zero. Delete that entry before proceeding"
                 self.hint_msg_txt.SetLabel(msg)
-                wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop")) 
-        self.hint_msg_txt.SetLabel('')
+                wx.PostEvent(self.parent, StatusEvent(status=msg,
+                                                      info="warning",
+                                                      type="stop")) 
         return flag
     
     def set_data(self, data):
@@ -195,7 +197,9 @@ class InvariantPanel(ScrolledPanel):
                 self.volume_err_tcl.SetValue(format_number(dv))
             except:
                 msg= "Error occurred computing volume fraction: %s"%sys.exc_value
-                wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+                wx.PostEvent(self.parent, StatusEvent(status=msg,
+                                                      info="error",
+                                                      type="stop"))
                
     def get_surface(self, inv, contrast, porod_const, extrapolation):
         """
@@ -209,7 +213,8 @@ class InvariantPanel(ScrolledPanel):
                 self.surface_err_tcl.SetValue(format_number(ds))
             except:
                 msg = "Error occurred computing specific surface: %s"%sys.exc_value
-                wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+                wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+                                                       type="stop"))
                 
     def get_total_qstar(self, inv, extrapolation):
         """
@@ -354,7 +359,7 @@ class InvariantPanel(ScrolledPanel):
             compute invariant 
         """
         msg= ""
-        wx.PostEvent(self.parent, StatusEvent(status= msg))
+        wx.PostEvent(self.parent, StatusEvent(status=msg))
         if self._data is None or self.err_check_on_data():
             return
     
@@ -378,9 +383,9 @@ class InvariantPanel(ScrolledPanel):
             inv, npts_low = self.set_extrapolation_low(inv=inv, low_q=low_q)
             inv, npts_high = self.set_extrapolation_high(inv=inv, high_q=high_q)
         except:
-            raise
-            #msg= "Error occurred computing invariant: %s"%sys.exc_value
-            #wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+            msg = "Error occurred computing invariant: %s"%sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg,
+                                                 info="warning",type="stop"))
             return
         #check the type of extrapolation
         extrapolation = self.get_extrapolation_type(low_q=low_q, high_q=high_q)
@@ -390,7 +395,8 @@ class InvariantPanel(ScrolledPanel):
             self.get_qstar(inv=inv)
         except:
             msg= "Error occurred computing invariant: %s"%sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
+            wx.PostEvent(self.parent, StatusEvent(status=msg, 
+                                                  info="warning",type="stop"))
             return
         #Compute qstar extrapolated to low q range 
         self.get_low_qstar(inv=inv, npts_low=npts_low, low_q=low_q)
@@ -407,13 +413,15 @@ class InvariantPanel(ScrolledPanel):
             #compute surface and set value to txtcrtl
         except:
             msg = "Error occurred computing invariant: %s"%sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status=msg))
+            wx.PostEvent(self.parent, StatusEvent(status=msg,
+                                                  info="warning",type="stop"))
         try:
             self.get_surface(inv=inv, contrast=contrast, porod_const=porod_const, 
                                     extrapolation=extrapolation)
         except:
             msg = "Error occurred computing invariant: %s"%sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status= msg))
+            wx.PostEvent(self.parent, StatusEvent(status=msg,
+                                                  info="warning",type="stop"))
             
         #compute percentage of each invariant
         self.inv_container.compute_percentage()
