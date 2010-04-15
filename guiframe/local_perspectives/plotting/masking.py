@@ -561,8 +561,8 @@ class SANSplotpanel(PlotPanel):
             Default context menu for a plot panel
         """
         # Slicer plot popup menu
+        slicerpop = wx.Menu()
         #id = wx.NewId()
-        #slicerpop = wx.Menu()
         #slicerpop.Append(id,'&Save image', 'Save image as PNG')
         #wx.EVT_MENU(self, id, self.onSaveImage)
         
