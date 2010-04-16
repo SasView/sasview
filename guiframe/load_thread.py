@@ -48,7 +48,6 @@ class DataReader(CalcThread):
             elapsed = time.time() - self.starttime
             self.complete(output=output, parent=self.parent, path=self.path)
         except RuntimeError:
-            print "went here"
             self.err_fct()
             self.msg_fct(parent=self.parent)
             return
