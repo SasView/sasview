@@ -6,14 +6,14 @@
  */
  //[PYTHONCLASS] = Poly_GaussCoil
  //[DISP_PARAMS] = rg
- //[DESCRIPTION] =<text>I(q)=(scale)*2*[(1+U*x)^(-1/U)+x-1]/[(1+U)*x^2]
- //						+ background
- //				where x = [rg^2*q^2] and the polydispersity is
+ //[DESCRIPTION] =<text>I(q)=(scale)*2*[(1+U*x)^(-1/U)+x-1]/[(1+U)*x^2] + background
+ //				where x = [rg^2*q^2]
+ //					and the polydispersity is
  //					U = [M_w/M_n]-1.
  //				scale = scale factor * volume fraction
- //				rg: radius of gyration
+ //				rg = radius of gyration
  //				poly_m = polydispersity of molecular weight
- //				background:incoherent background
+ //				background = incoherent background
  //		</text>
  //[FIXED]=
  //[ORIENTATION_PARAMS]= <text> </text>

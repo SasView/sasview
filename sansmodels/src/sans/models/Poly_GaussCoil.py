@@ -48,14 +48,14 @@ class Poly_GaussCoil(CPoly_GaussCoil, BaseComponent):
         ## Name of the model
         self.name = "Poly_GaussCoil"
         ## Model description
-        self.description ="""I(q)=(scale)*2*[(1+U*x)^(-1/U)+x-1]/[(1+U)*x^2]
-		+ background
-		where x = [rg^2*q^2] and the polydispersity is
+        self.description ="""I(q)=(scale)*2*[(1+U*x)^(-1/U)+x-1]/[(1+U)*x^2] + background
+		where x = [rg^2*q^2]
+		and the polydispersity is
 		U = [M_w/M_n]-1.
 		scale = scale factor * volume fraction
-		rg: radius of gyration
+		rg = radius of gyration
 		poly_m = polydispersity of molecular weight
-		background:incoherent background"""
+		background = incoherent background"""
        
         ## Parameter details [units, min, max]
         self.details = {}
