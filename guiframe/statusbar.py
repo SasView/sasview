@@ -239,8 +239,8 @@ class StatusBar(wxStatusB):
             @param msg: the message itself  as string
             @param thread: if updatting using a thread status 
         """
-        self.set_icon(event=event)
         self.set_message(event=event)
+        self.set_icon(event=event)
         self.set_gauge(event=event)
     
     def _onMonitor(self, event):
@@ -262,7 +262,7 @@ if __name__ == "__main__":
      event = MessageEvent()
      event.type = "progress"
      event.status  = "statusbar...."
-     event.info = "info"
+     event.info = "error"
      statusBar.set_status(event=event)
      app.MainLoop()
 
