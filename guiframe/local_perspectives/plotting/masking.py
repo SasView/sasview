@@ -11,11 +11,13 @@ following sentence:
 
 copyright 2008, University of Tennessee
 """
+##Todo: cleaning up, improving the maskplotpanel initialization, and testing.
 import wx
 import sys
 
 import copy,numpy
 from danse.common.plottools.PlotPanel import PlotPanel
+from danse.common.plottools.plottables import Graph
 from binder import BindArtist
 from sans.guiframe.dataFitting import Data2D
 from boxMask import BoxMask
@@ -78,7 +80,7 @@ class MaskPanel(wx.Dialog):
             self.name = self.data.name
 
             # Panel for 2D plot
-            self.plotpanel    = SANSplotpanel(self, -1, style=wx.TRANSPARENT_WINDOW)
+            self.plotpanel    = Maskplotpanel(self, -1, style=wx.TRANSPARENT_WINDOW)
             self.cmap = DEFAULT_CMAP
             ## Create Artist and bind it
             self.subplot = self.plotpanel.subplot
@@ -207,8 +209,6 @@ class MaskPanel(wx.Dialog):
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)
         self.update()
         self.slicer_mask = self.slicer.update()
-
-        #wx.PostEvent(self, InternalEvent(slicer= BoxMask))
         
     
     def onOuterBoxMask(self,event=None):
@@ -227,7 +227,6 @@ class MaskPanel(wx.Dialog):
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)
         self.update()
         self.slicer_mask = self.slicer.update()
-        #wx.PostEvent(self, InternalEvent(slicer= BoxMask))
 
         
     def onInnerSectorMask(self,event=None):
@@ -244,10 +243,9 @@ class MaskPanel(wx.Dialog):
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)   
 
-        #mask = self.slicer.update()   
         self.update()
         self.slicer_mask = self.slicer.update() 
-        #wx.PostEvent(self, InternalEvent(slicer= SectorMask))
+
         
     def onOuterSectorMask(self,event=None):
         """
@@ -265,7 +263,7 @@ class MaskPanel(wx.Dialog):
 
         self.update()     
         self.slicer_mask = self.slicer.update()   
-        #wx.PostEvent(self, InternalEvent(slicer= SectorMask))
+
         
     def onInnerRingMask(self, event=None):
         """
@@ -280,11 +278,10 @@ class MaskPanel(wx.Dialog):
         self.slicer = CircularMask(self,self.subplot, zorder=self.slicer_z, side=True)
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)   
-        #mask = self.slicer.update()   
+
         self.update()
         self.slicer_mask = self.slicer.update() 
- 
-        #wx.PostEvent(self, InternalEvent(slicer= AnnulusInteractor))
+
         
     def onOuterRingMask(self, event=None):
         """
@@ -313,9 +310,6 @@ class MaskPanel(wx.Dialog):
             data.mask = self.data.mask & self.slicer_mask
 
             self._check_display_mask(data.mask, event)
-            # Post slicer None event
-            #event = self._getEmptySlicerEvent()
-            #wx.PostEvent(self, event)
             
     def _check_display_mask(self, mask, event):
         """
@@ -334,8 +328,6 @@ class MaskPanel(wx.Dialog):
             mask = self.data.mask
             mask[self.slicer_mask==False] = True
 
-            #event = self._getEmptySlicerEvent()
-            #wx.PostEvent(self, event)
             self._check_display_mask(mask, event)
             
     def onResetMask(self, event):
@@ -351,9 +343,6 @@ class MaskPanel(wx.Dialog):
         mask = copy.deepcopy(self.default_mask)
         self.data.mask = mask
 
-        # Post slicer None event
-        #event = self._getEmptySlicerEvent()
-        #wx.PostEvent(self, event)
         # update mask plot
         self._check_display_mask(mask, event)
         
@@ -369,10 +358,7 @@ class MaskPanel(wx.Dialog):
         #mask = copy.deepcopy(self.default_mask)
         mask = numpy.ones(len(self.data.mask), dtype=bool)
         self.data.mask = mask
-        
-        # Post slicer None event
-        #event = self._getEmptySlicerEvent()
-        #wx.PostEvent(self, event)
+
         # update mask plot
         self._check_display_mask(mask, event)
         
@@ -384,10 +370,6 @@ class MaskPanel(wx.Dialog):
             self.slicer.clear()
             self.subplot.figure.canvas.draw()
             self.slicer = None
-        
-            # Post slicer None event
-            #event = self._getEmptySlicerEvent()
-            #wx.PostEvent(self, event)
 
             
     def _setSlicer(self):
@@ -463,7 +445,11 @@ class MaskPanel(wx.Dialog):
         wx.PostEvent(self, event)
         
         #replot
-        
+        ##This method not alway updating the plot(?): use manual plot 
+        #self.newplot=Data2D(image=temp_data.data)
+        #self.newplot.setValues(temp_data)
+        #self.plotpanel.add_image(self.newplot)
+        #use this method
         plot = self.plotpanel.image(data= temp_mask,
                        qx_data=self.data.qx_data,
                        qy_data=self.data.qy_data,
@@ -514,7 +500,7 @@ class MaskPanel(wx.Dialog):
     def onWheel(self, event):
         pass  
            
-class SANSplotpanel(PlotPanel):
+class Maskplotpanel(PlotPanel):
     
     def __init__(self, parent, id = -1, color = None,\
         dpi = None, **kwargs):
@@ -526,6 +512,7 @@ class SANSplotpanel(PlotPanel):
         # Internal list of plottable names (because graph 
         # doesn't have a dictionary of handles for the plottables)
         self.plots = {}
+        self.graph = Graph()
         
     def add_toolbar(self):
         """ 
@@ -543,13 +530,17 @@ class SANSplotpanel(PlotPanel):
          
     def add_image(self, plot):
         self.plots[plot.name] = plot
-        
+        #init graph
+        self.gaph = Graph()
+        #add plot
         self.graph.add(plot)
+        #add axes
         self.graph.xaxis('\\rm{Q}_{x} ', 'A^{-1}')
         self.graph.yaxis('\\rm{Q}_{y} ', 'A^{-1}')
+        #draw
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
-        #self.onResetGraph(None)
+        
     def onMouseMotion(self, event):
         """
             Disable dragging 2D image
@@ -574,22 +565,6 @@ class SANSplotpanel(PlotPanel):
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
 
-
-
-
-from DataLoader.readers.IgorReader import Reader
-        
-class ViewApp(wx.App):
-    def OnInit(self):
-        frame = MaskPanel(None, -1, 'Mask Editor') 
-        data = Data2D()
-        data = Reader().read('/test/MAR07232_rest.ASC')
-        panel = frame(self, data=data)  
-        panel.Show(True)
-        self.SetTopWindow(panel)
-        
-        return True
-        
 
 if __name__ == "__main__": 
     app = ViewApp(0)
