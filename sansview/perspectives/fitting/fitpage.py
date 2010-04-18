@@ -1439,7 +1439,7 @@ class FitPage(BasicPage):
             else:
                 is_new_pinhole = self._is_changed_pinhole()
         else:
-            is_new_pinhole = self._is_changed_pinhole()
+            is_new_pinhole = True 
         # if any value is changed
         if is_new_pinhole:
             msg = self._set_pinhole_smear()
@@ -1578,7 +1578,7 @@ class FitPage(BasicPage):
             else:
                 is_new_slit = self._is_changed_slit()
         else:
-            is_new_slit = self._is_changed_slit()
+            is_new_slit = True 
                 
         # if any value is changed
         if is_new_slit:
