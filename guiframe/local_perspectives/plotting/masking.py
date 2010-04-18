@@ -449,7 +449,16 @@ class MaskPanel(wx.Dialog):
         #self.newplot=Data2D(image=temp_data.data)
         #self.newplot.setValues(temp_data)
         #self.plotpanel.add_image(self.newplot)
-        #use this method
+        
+        ##use this method
+        #set zmax and zmin to plot: Fix it w/ data.
+        if self.plotpanel.scale == 'log':
+            zmax = math.log(max(self.data.data[self.data.data>0]))
+            zmin = math.log(min(self.data.data[self.data.data>0]))
+        else:
+            zmax = max(self.data.data)
+            zmin = min(self.data.data)
+        #plot    
         plot = self.plotpanel.image(data= temp_mask,
                        qx_data=self.data.qx_data,
                        qy_data=self.data.qy_data,
@@ -457,8 +466,8 @@ class MaskPanel(wx.Dialog):
                        xmax= self.data.xmax,
                        ymin= self.data.ymin,
                        ymax= self.data.ymax,
-                       zmin= self.data.zmin,
-                       zmax= self.data.zmax,
+                       zmin= zmin,
+                       zmax= zmax,
                        cmap= self.cmap,
                        color=0,symbol=0,label=self.data.name)
         
@@ -508,7 +517,7 @@ class Maskplotpanel(PlotPanel):
         
         # Keep track of the parent Frame
         self.parent = parent
-       
+        self.scale = "log"
         # Internal list of plottable names (because graph 
         # doesn't have a dictionary of handles for the plottables)
         self.plots = {}
