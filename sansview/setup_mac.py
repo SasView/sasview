@@ -20,7 +20,7 @@ DATA_FILES = periodictable.data_files()
 RESOURCES_FILES.append(os.path.join(DataLoader.readers.get_data_path(),'defaults.xml'))
 
 APP = ['sansview.py']
-DATA_FILES = ['images','test','plugins','doc']
+DATA_FILES = ['images','test','plugins','media']
 OPTIONS = {'argv_emulation': True,
            'packages': ['lxml','periodictable'],
            'iconfile': 'images/ball.icns',
