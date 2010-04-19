@@ -49,6 +49,16 @@ class Plugin:
         """
         return []
     
+    def help(self, evt):
+        """
+            Show a general help dialog. 
+            TODO: replace the text with a nice image
+            provide more hint on the SLD calculator
+        """
+        from help_panel import  HelpWindow
+        frame = HelpWindow(None, -1)    
+        frame.Show(True)
+        
     def get_panels(self, parent):
         """
             Create and return the list of wx.Panels for your plug-in.
