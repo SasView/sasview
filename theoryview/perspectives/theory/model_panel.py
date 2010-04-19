@@ -154,11 +154,11 @@ class ModelPanel(BasicPage):
             
         ix=0
         iy=1
-        disp = wx.StaticText(self, -1, 'Names')
+        disp = wx.StaticText(self, -1, ' ')
         self.sizer4_4.Add(disp,( iy, ix),(1,1), 
                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1 
-        values = wx.StaticText(self, -1, 'Sigmas (STD)')
+        values = wx.StaticText(self, -1, 'Sigma (STD)')
         self.sizer4_4.Add(values,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
        
         ix += 1 
