@@ -39,7 +39,7 @@ class HelpDialog(wx.Dialog):
 
 class HelpWindow(wx.Frame):
     def __init__(self, parent, id, title= 'HelpWindow', pageToOpen=None):
-        wx.Frame.__init__(self, parent, id, title, size=(700, 450))
+        wx.Frame.__init__(self, parent, id, title, size=(820, 450))
         """
              contains help info
         """

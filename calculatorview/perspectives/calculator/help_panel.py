@@ -2,6 +2,7 @@
 import wx
 import wx.html as html
 from wx.lib.splitter import MultiSplitterWindow
+import sans.perspectives.calculator as calculator
 import os
 def help():
     """
@@ -98,25 +99,24 @@ class HelpWindow(wx.Frame):
         self.lhelp = html.HtmlWindow(lpanel, -1, style=wx.NO_BORDER)
         self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER, 
                                      size=(500,-1))
-        import sans.perspectives.calculator as calculator
-        path = calculator.get_data_path(media='media')
-        self.path= os.path.join(path,"sld_calculator_help.html")
+        
+        self.path = calculator.get_data_path(media='media')
        
-        self.rhelp.LoadPage(self.path)
+       
         page1="""<html>
             <body>
              <p>Select topic on Menu</p>
             </body>
             </html>"""
-        #self.rhelp.SetPage(page1)
+        self.rhelp.SetPage(page1)
         page="""<html>
             <body>
             <ul>
-            <li><a href =%s target ="showframe">SLD Calculator</a><br></li>
-            <li><a href ="media/slit_calculator_help.html" target ="showframe">Slit Size Calculator</a><br></li>
+            <li><a href ="sld_calculator_help.html" target ="showframe">SLD Calculator</a><br></li>
+            <li><a href ="slit_calculator_help.html" target ="showframe">Slit Size Calculator</a><br></li>
             </ul>
             </body>
-            </html>"""%self.path
+            </html>"""
 
         self.lhelp.SetPage(page)
         self.lhelp.Bind(wx.html.EVT_HTML_LINK_CLICKED,self.OnLinkClicked )
@@ -141,9 +141,11 @@ class HelpWindow(wx.Frame):
         """
             Function to diplay html page related to the hyperlinktext selected
         """
-        #self.rhelp.LoadPage(self.path)
+       
         link= event.GetLinkInfo().GetHref()
+        link = os.path.join(self.path,link)
         self.rhelp.LoadPage(link)
+        
 class ViewApp(wx.App):
     def OnInit(self):
         frame = HelpWindow(None, -1, 'HelpWindow')    
