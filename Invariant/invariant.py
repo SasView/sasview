@@ -384,6 +384,7 @@ class InvariantCalculator(object):
         if not issubclass(data.__class__, LoaderData1D):
             #Process only data that inherited from DataLoader.Data_info.Data1D
             raise ValueError,"Data must be of type DataLoader.Data1D"
+        #from copy import deepcopy
         new_data = (self._scale * data) - self._background   
         
         # Check that the vector lengths are equal
@@ -515,6 +516,12 @@ class InvariantCalculator(object):
          
         result_data = LoaderData1D(x=q, y=iq, dy=diq)
         return result_data
+    
+    def get_data(self):
+        """
+            @return self._data
+        """
+        return self._data
     
     def get_extrapolation_power(self, range='high'):
         """

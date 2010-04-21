@@ -12,6 +12,7 @@ from sans.guiframe.utils import format_number, check_float
 from sans.guicomm.events import NewPlotEvent, StatusEvent
 from invariant_details import InvariantDetailsPanel, InvariantContainer
 from invariant_widgets import OutputTextCtrl, InvTextCtrl
+
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM  = 1e-5
 # The maximum q-value to be used when extrapolating
@@ -65,6 +66,8 @@ class InvariantPanel(ScrolledPanel):
         self._manager = manager 
         #Data uses for computation
         self._data = data
+        self._scale = SCALE 
+        self._background = BACKGROUND
         #container of invariant value
         self.inv_container = None
         #Draw the panel
@@ -150,9 +153,13 @@ class InvariantPanel(ScrolledPanel):
         if scale == "":
             raise ValueError, "Need a background"
         if check_float(self.scale_tcl):
+            if float(scale)<= 0.0:
+                self.scale_tcl.SetBackgroundColour("pink")
+                self.scale_tcl.Refresh()
+                raise ValueError, "Receive invalid value for scale: %s"%(scale)
             return float(scale)
         else:
-            raise ValueError, "Receive invalid value for background : %s"%(scale)
+            raise ValueError, "Receive invalid value for scale : %s"%(scale)
         
     def get_contrast(self):
         """
@@ -391,8 +398,13 @@ class InvariantPanel(ScrolledPanel):
         extrapolation = self.get_extrapolation_type(low_q=low_q, high_q=high_q)
        
         #Compute invariant
+        bkg_changed = False
+        scale_changed = False
         try:
             self.get_qstar(inv=inv)
+            #if scale_changed or bkg_changed:
+            self._manager.plot_data(data=inv.get_data())
+            
         except:
             msg= "Error occurred computing invariant: %s"%sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, 

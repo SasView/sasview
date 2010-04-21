@@ -8,7 +8,7 @@ See the license text in license.txt
 copyright 2009, University of Tennessee
 """
 import wx
-from copy import deepcopy
+
 from sans.invariant import invariant
 
 from DataLoader.data_info import Data1D as LoaderData1D
@@ -162,7 +162,7 @@ class Plugin:
         """
         id = None
         if hasattr(item,"id"):
-            id = deepcopy(item.id)
+            id = item.id
 
         data = Data1D(x=item.x, y=item.y, dx=None, dy=None)
         data.copy_from_datainfo(item)
@@ -170,7 +170,7 @@ class Plugin:
         data.dy = dy
         data.name = item.name
         ## allow to highlight data when plotted
-        data.interactive = deepcopy(item.interactive)
+        data.interactive = item.interactive
         ## when 2 data have the same id override the 1 st plotted
         data.id = id
         data.group_id = item.group_id
@@ -221,6 +221,15 @@ class Plugin:
         new_plot.group_id = self.__data.group_id
         new_plot.id = self.__data.id + name
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=self.__data.name))
-
-
+        
+    def plot_data(self, data):
+        """
+            replot the current data if the user enters a new scale or background
+        """
+        new_plot = self.copy_data(item=self.__data, dy=self.__data.dy)
+        new_plot.x = data.x
+        new_plot.y = data.y
+        new_plot.dx = data.dx
+        new_plot.dy = data.dy
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=new_plot.name))
         
