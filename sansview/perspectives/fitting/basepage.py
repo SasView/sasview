@@ -1116,10 +1116,10 @@ class BasicPage(wx.ScrolledWindow):
         #For invalid q range, disable the mask editor and fit button, vs.    
         if not self.fitrange:
             #self.btFit.Disable()
-            self.btEditMask.Disable()
+            if is_2Ddata:self.btEditMask.Disable()
         else:
             #self.btFit.Enable(True)
-            self.btEditMask.Enable(True)
+            if is_2Ddata:self.btEditMask.Enable(True)
 
         
         if not flag:
