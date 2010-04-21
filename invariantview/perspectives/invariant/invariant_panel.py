@@ -121,9 +121,12 @@ class InvariantPanel(ScrolledPanel):
                 msg = "Warning! Computations on invariant require your "
                 msg += "attention.\n Please click on Details button."
                 self.hint_msg_txt.SetForegroundColour("red")
+    
+                wx.PostEvent(self.parent,StatusEvent(status=msg,info="warning"))
             else:
                 msg = "For more information, click on Details button."
                 self.hint_msg_txt.SetForegroundColour("black")
+                wx.PostEvent(self.parent,StatusEvent(status=msg,info="info"))
             self.hint_msg_txt.SetLabel(msg)
         self.data_name_boxsizer.Layout()
        
