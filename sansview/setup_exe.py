@@ -14,7 +14,7 @@
 # See for example the 'images' directory below.
 
 import os, sys
-    
+
 from distutils.core import setup
 from distutils.filelist import findall
 import matplotlib
@@ -66,9 +66,13 @@ data_files = []
 # Copying SLD data
 import periodictable
 import logging
-
 data_files += periodictable.data_files()
 
+import sans.perspectives.calculator as calculator
+data_files += calculator.data_files()
+
+import sans.perspectives.invariant as invariant
+data_files += invariant.data_files()
 
 for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])

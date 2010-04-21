@@ -77,10 +77,10 @@ class HelpWindow(wx.Frame):
         self.lhelp = html.HtmlWindow(lpanel, -1, style=wx.NO_BORDER)
         self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER, 
                                      size=(500,-1))
-        path = os.getcwd()
-        self.path= os.path.join(os.path.split(path)[0],"invariantview",
-                            "media","invariant_help.html")
-       
+        import sans.perspectives.invariant as invariant
+        path = invariant.get_data_path(media='media')
+        self.path= os.path.join(path,"invariant_help.html")
+     
         self.rhelp.LoadPage(self.path)
         page="""<html>
             <body>
