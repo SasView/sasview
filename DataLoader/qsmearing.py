@@ -189,7 +189,7 @@ class _SlitSmearer(_BaseSmearer):
         ## Number of Q bins 
         self.nbins  = nbins
         ## Number of points used in the smearing computation
-        self.npts   = 10000
+        self.npts   = 1000
         ## Smearing matrix
         self._weights = None
         self.qvalues  = None
