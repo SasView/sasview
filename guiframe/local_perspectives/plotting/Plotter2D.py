@@ -44,7 +44,7 @@ class NavigationToolBar2D(NavigationToolBar):
         #delete reset button
         self.DeleteToolByPos(0) 
         #delete dragging
-        self.DeleteToolByPos(3) 
+        self.DeleteToolByPos(2) 
         #delete unwanted button that configures subplot parameters
         self.DeleteToolByPos(4)
         
