@@ -3,8 +3,7 @@
 """
 
 import os
-
-    
+  
 from distutils.core import setup
 from distutils.sysconfig import get_python_lib
 from distutils.filelist import findall
@@ -16,6 +15,7 @@ for f in findall(path):
         data_files.append((new_path, [f]))
 setup(
     name="calculator",
+    version = "0.1",
     description="calculator perspective for SansView",
     package_dir={"sans.perspectives":"perspectives",
                    "sans.perspectives.calculator":"perspectives/calculator"},
