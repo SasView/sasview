@@ -922,7 +922,7 @@ class BasicPage(wx.ScrolledWindow):
         
         ## draw the model with previous parameters value
         self._onparamEnter_helper()
-
+        
         ## reset context menu items
         self._reset_context_menu()
     
@@ -2204,6 +2204,7 @@ class BasicPage(wx.ScrolledWindow):
         
         #reset the q range values
         self._reset_plotting_range(self.state)
+        self.compute_chisqr(smearer=self.current_smearer)
         #Re draw plot
         self._draw_model()
 
