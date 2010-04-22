@@ -78,7 +78,7 @@ print "Installing SANS models"
 
 setup(
     name="models",
-    version = "0.1",
+    version = "0.4",
     description = "Python module for SANS scattering models",
     author = "Mathieu Doucet",
     author_email = "doucet@nist.gov",
