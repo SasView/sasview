@@ -12,7 +12,12 @@ from sans.guicomm.events import StatusEvent ,NewPlotEvent
 import matplotlib 
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as Canvas
 from matplotlib import pyplot, mpl, pylab
-
+#FONT size 
+if sys.platform.count("win32")>0:
+    FONT_VARIANT = 0
+else:
+    FONT_VARIANT = 1
+    
 DEFAULT_CMAP= pylab.cm.jet
 class DetectorDialog(wx.Dialog):
     """
@@ -24,7 +29,8 @@ class DetectorDialog(wx.Dialog):
 
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self,parent,id=1, *args, **kwds)
-    
+        
+        self.SetWindowVariant(variant=FONT_VARIANT)
         self.parent=base
         self.dpi = dpi
         self.cmap = cmap
