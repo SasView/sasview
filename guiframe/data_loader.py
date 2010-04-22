@@ -10,6 +10,18 @@ from load_thread import DataReader
 
 from sans.guicomm.events import NewPlotEvent, StatusEvent
 
+def enable_add_data(existing_panel, new_plot):
+    """
+        Enable append data on a plot panel
+    """
+    is_theory = len(existing_panel.plots)<= 1 and \
+        existing_panel.plots.values()[0].__class__.__name__=="Theory1D"
+        
+    is_data2d = hasattr(new_plot, 'data')
+    is_data1d = existing_panel.__class__.__name__ == "ModelPanel1D"\
+        and existing_panel.group_id is not None
+   
+    return is_data1d and not is_data2d and not is_theory
 
 def parse_name(name, expression):
     """
@@ -40,7 +52,7 @@ def choose_data_file(parent, location=None):
     
     return path
 
-def append_data_to_existing_panel(panel_name, data_name):
+def open_dialog_append_data(panel_name, data_name):
     """
         Pop up an error message.
         
@@ -201,10 +213,8 @@ def complete_loading(output, path, parent):
                 existing_panel  = parent.panel_on_focus
                 panel_name = existing_panel.window_caption
                 data_name = new_plot.name
-                if existing_panel.__class__.__name__ == "ModelPanel1D"\
-                    and existing_panel.group_id is not None and \
-                        not hasattr(new_plot, 'data'):
-                    if append_data_to_existing_panel(panel_name, data_name):
+                if enable_add_data(existing_panel, new_plot):
+                    if open_dialog_append_data(panel_name, data_name):
                         #add this plot the an existing panel
                         new_plot.group_id = existing_panel.group_id
         wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=title))
@@ -260,10 +270,8 @@ def complete_loading(output, path, parent):
                 existing_panel  = parent.panel_on_focus
                 panel_name = existing_panel.window_caption
                 data_name = new_plot.name
-                if existing_panel.__class__.__name__ == "ModelPanel1D"\
-                    and existing_panel.group_id is not None and \
-                    not hasattr(new_plot, 'data'):
-                    if append_data_to_existing_panel(panel_name, data_name):
+                if enable_add_data(existing_panel, new_plot):
+                    if open_dialog_append_data(panel_name, data_name):
                         #add this plot the an existing panel
                         new_plot.group_id = existing_panel.group_id
             wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
