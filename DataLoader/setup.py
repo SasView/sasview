@@ -10,14 +10,13 @@ from numpy.distutils.misc_util import get_numpy_include_dirs
 numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
 setup(
     name="DataLoader",
-    version = "0.1",
+    version = "0.2",
     description = "Python module for loading",
     author = "University of Tennessee",
     url = "http://danse.chem.utk.edu",
     
     package_dir = {"DataLoader":".",
                    "DataLoader.extensions":"extensions"},
-    
     data_files=[(os.path.join(get_python_lib(),"DataLoader","readers"), ["readers/defaults.xml"])],
     packages = ["DataLoader","DataLoader.readers","DataLoader.extensions"],
     
