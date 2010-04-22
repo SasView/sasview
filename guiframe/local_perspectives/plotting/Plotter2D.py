@@ -32,11 +32,36 @@ DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001
 DEFAULT_BEAM = 0.005
 BIN_WIDTH = 1.0
+from danse.common.plottools.toolbar import NavigationToolBar
+class NavigationToolBar2D(NavigationToolBar):
+    def __init__(self, canvas, parent=None):
+        NavigationToolBar.__init__(self, canvas=canvas, parent=parent)
+        
+    def delete_option(self):
+        """
+            remove default toolbar item
+        """
+        #delete reset button
+        self.DeleteToolByPos(0) 
+        #delete dragging
+        self.DeleteToolByPos(3) 
+        #delete unwanted button that configures subplot parameters
+        self.DeleteToolByPos(4)
+        
+    def add_option(self):
+        """
+            add item to the toolbar
+        """
+        #add print button
+        id_print = wx.NewId()
+        print_bmp =  wx.ArtProvider.GetBitmap(wx.ART_PRINT, wx.ART_TOOLBAR)
+        self.AddSimpleTool(id_print, print_bmp,
+                           'Print', 'Activate printing')
+        wx.EVT_TOOL(self, id_print, self.on_print)
+        
+        
 
-
-
-
-class ModelPanel2D( ModelPanel1D):
+class ModelPanel2D(ModelPanel1D):
     """
         Plot panel for use with the GUI manager
     """
@@ -92,7 +117,27 @@ class ModelPanel2D( ModelPanel1D):
         ## store default value of zmin and zmax 
         self.default_zmin_ctl = self.zmin_2D
         self.default_zmax_ctl = self.zmax_2D
+       
+    def add_toolbar(self):
+        """
+            add toolbar
+        """
+        self.enable_toolbar = True
         
+        self.toolbar = NavigationToolBar2D(parent=self,canvas=self.canvas)
+        self.toolbar.Realize()
+      
+        # On Windows platform, default window size is incorrect, so set
+        # toolbar width to figure width.
+        tw, th = self.toolbar.GetSizeTuple()
+        fw, fh = self.canvas.GetSizeTuple()
+      
+        self.toolbar.SetSize(wx.Size(fw, th))
+        self.sizer.Add(self.toolbar, 0, wx.LEFT | wx.EXPAND)
+        
+        # update the axes menu on the toolbar
+        self.toolbar.update()
+         
     def _onEVT_1DREPLOT(self, event):
         """
             Data is ready to be displayed
