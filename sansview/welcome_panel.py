@@ -96,7 +96,7 @@ class WelcomePage(wx.Panel):
         
         self.hyperlink_license = wx.StaticText(self, -1, "Comments? Bugs? Requests?")
         self.hyperlink_paper = wx.lib.hyperlink.HyperLinkCtrl(self, -1,
-                                         "Send us a ticket",URL=config._license)
+                                         "Send us a ticket at:  sansdanse@gmail.com",URL=config._license)
         
         verwords = config.__version__.split('.')
         version = '.'.join(verwords[:-1])
