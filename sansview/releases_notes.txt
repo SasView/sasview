@@ -19,6 +19,7 @@ Package name: None
 	- Added a slit size calculator.
 	- Support more format options to save a graph.
 	- Enable to display multiple data sets in one graph by loading a data into the graph.
+	- Added a tool bar in a plot panel.
 	
  	- Previous Versions
  	
