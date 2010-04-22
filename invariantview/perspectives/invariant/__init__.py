@@ -14,20 +14,19 @@ def get_data_path(media):
 
     # Check for data path next to exe/zip file.
     # If we are inside a py2exe zip file, we need to go up
-    # two levels to get to the directory containing the exe
-    # We will check if the exe and the xsf are in the same
-    # directory.
-    path= os.path.dirname(__file__)
-    n_dir = 4
+    # to get to the directory containing 
+    # the media for thsi module
+    path = os.path.dirname(__file__)
+    n_dir = 12
     for i in range(n_dir):
-        path,_ = os.path.split(path)
-
-    path = os.path.join(path, '', media,'invariant_media' )
-    if os.path.isdir(path):
-        return path
-    path = os.path.join(path, '', media)
-    if os.path.isdir(path):
-        return path
+        path, _ = os.path.split(path)
+        media_path = os.path.join(path, media)
+        if os.path.isdir(media_path):
+             module_media_path = os.path.join(media_path,'invariant_media' )
+             if os.path.isdir(module_media_path):
+                 return module_media_path
+             return media_path
+   
     raise RuntimeError('Could not find invariant media files')
 
 def data_files():
