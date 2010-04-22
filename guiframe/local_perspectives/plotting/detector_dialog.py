@@ -162,17 +162,17 @@ class DetectorDialog(wx.Dialog):
             @param zmax:  the value to get the maximum color
             @param sym:
         """
-        self.xnpts_ctl.SetLabel(str(float(xnpts)))
-        self.ynpts_ctl.SetLabel(str(float(ynpts)))
-        self.qmax_ctl.SetLabel(str(float(qmax)))
-        self.beam_ctl.SetLabel(str(float(beam)))
+        self.xnpts_ctl.SetLabel(str(format_number(xnpts)))
+        self.ynpts_ctl.SetLabel(str(format_number(ynpts)))
+        self.qmax_ctl.SetLabel(str(format_number(qmax)))
+        self.beam_ctl.SetLabel(str(format_number(beam)))
         
     
        
         if zmin !=None:
-            self.zmin_ctl.SetValue(str(float(zmin)))
+            self.zmin_ctl.SetValue(str(format_number(zmin)))
         if zmax !=None:
-            self.zmax_ctl.SetValue(str(float(zmax)))
+            self.zmax_ctl.SetValue(str(format_number(zmax)))
 
     def getContent(self):
         """
