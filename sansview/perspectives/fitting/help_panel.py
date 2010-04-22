@@ -105,8 +105,9 @@ class HelpWindow(wx.Frame):
         page="""<html>
             <body>
             <ul>
-            <li><a href ="media/change_scale_help.html" target ="showframe">Change scale</a><br></li>
+            <li><a href ="media/change_scale_help.html" target ="showframe">Change Scale</a><br></li>
             <li><a href ="media/reset_Graph_help.html" target ="showframe">Graph Help</a><br></li>
+            <li><a href ="media/status_bar_help.html" target ="showframe">Status Bar Help</a><br></li>
             <li><a href ="media/load_data_help.html" target ="showframe">Load a File</a><br></li>
             <li><a href ="media/simultaneous_fit_help.html" target ="showframe">Simultaneous Fit</a><br></li>
             <li><a href ="media/single_fit_help.html" target ="showframe">Single Fit</a><br></li>
