@@ -124,7 +124,7 @@ class ScipyFit(FitEngine):
                 result.stderr  = stderr
                 result.pvec = out
                 result.success = success
-                print result
+                #print result
                 if q is not  None:
                     #print "went here"
                     q.put(result)
