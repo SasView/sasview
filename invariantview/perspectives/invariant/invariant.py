@@ -230,6 +230,6 @@ class Plugin:
         new_plot.x = data.x
         new_plot.y = data.y
         new_plot.dx = data.dx
-        new_plot.dy = data.dy
+        new_plot.dy = self.__data.dy
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=new_plot.name))
         
