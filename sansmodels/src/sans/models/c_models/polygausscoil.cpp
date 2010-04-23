@@ -55,13 +55,13 @@ double Poly_GaussCoil :: operator()(double q) {
 	dp[3] = 0.0;
 
 	// Get the dispersion points for the radius
-	//vector<WeightPoint> weights_rad;
-	//rg.get_weights(weights_rad);
+	vector<WeightPoint> weights_rad;
+	rg.get_weights(weights_rad);
 
 	// Perform the computation, with all weight points
 	double sum = 0.0;
 
-	/**** No rg polydispersion is applied
+
 	double norm = 0.0;
 	double vol = 0.0;
 
@@ -83,7 +83,7 @@ double Poly_GaussCoil :: operator()(double q) {
 		//Re-normalize by avg volume
 		sum = sum/(vol/norm);}
 	return sum/norm + background();
-	****/
+
 
 	sum = PolyGaussCoil(dp, q);
 	return sum + background();
