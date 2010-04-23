@@ -66,7 +66,7 @@ class StatusBar(wxStatusB):
          #Layout of status bar
          self.SetFieldsCount(NB_FIELDS) 
          self.SetStatusWidths([BUTTON_SIZE, -2, -1,BUTTON_SIZE])
-         
+        
          #display default message
          self.msg_position = MSG_POSITION 
        
@@ -74,26 +74,21 @@ class StatusBar(wxStatusB):
          width, height = self.GetSize()
          self.gauge = wx.Gauge(self, size=(width/10,height-3),
                                style= wx.GA_HORIZONTAL)
-         rect = self.GetFieldRect(GAUGE_POSITION)
-         self.gauge.SetPosition((rect.x+5, rect.y-2))
+         
          self.gauge.Hide()
          
          #status bar icon
          self.bitmap_bt_warning = wx.BitmapButton(self, -1, size=(BUTTON_SIZE,-1),
                                                   style=wx.NO_BORDER)
-         rect = self.GetFieldRect(ICON_POSITION)
-         self.bitmap_bt_warning.SetPosition((rect.x+5, rect.y-2))
-         
          console_bmp =  wx.ArtProvider.GetBitmap(wx.ART_TIP, wx.ART_TOOLBAR)
          self.bitmap_bt_console = wx.BitmapButton(self, -1, 
-                                                size=(BUTTON_SIZE-5, height-4))
+                                 size=(BUTTON_SIZE-5, height-4))
          self.bitmap_bt_console.SetBitmapLabel(console_bmp)
          console_hint = "History of status bar messages"
          self.bitmap_bt_console.SetToolTipString(console_hint)
          self.bitmap_bt_console.Bind(wx.EVT_BUTTON, self._onMonitor,
                                             id=self.bitmap_bt_console.GetId())
-         rect = self.GetFieldRect(CONSOLE_POSITION)
-         self.bitmap_bt_console.SetPosition((rect.x+5, rect.y-2))
+         self.reposition()
          ## Current progress value of the bar 
          self.nb_start = 0
          self.nb_progress = 0
@@ -107,6 +102,27 @@ class StatusBar(wxStatusB):
          self.thread = None
          self.Bind(wx.EVT_TIMER,self.OnTimer, self.timer) 
          self.Bind(wx.EVT_TIMER,self.OnTimer_stop, self.timer_stop) 
+         self.Bind(wx.EVT_SIZE, self.OnSize)
+         self.Bind(wx.EVT_IDLE, self.OnIdle)
+        
+    def reposition(self):
+        """
+        """
+        rect = self.GetFieldRect(GAUGE_POSITION)
+        self.gauge.SetPosition((rect.x+5, rect.y-2))
+        rect = self.GetFieldRect(ICON_POSITION)
+        self.bitmap_bt_warning.SetPosition((rect.x+5, rect.y-2))
+        rect = self.GetFieldRect(CONSOLE_POSITION)
+        self.bitmap_bt_console.SetPosition((rect.x-5, rect.y-2))
+        self.sizeChanged = False
+        
+    def OnIdle(self, event):
+        if self.sizeChanged:
+            self.reposition()
+            
+    def OnSize(self, evt):
+        self.reposition() 
+        self.sizeChanged = True
         
     def get_msg_position(self):
         """
