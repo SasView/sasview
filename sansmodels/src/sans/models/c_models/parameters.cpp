@@ -82,9 +82,9 @@ void DispersionModel :: set_weights(int npoints, double* values, double* weights
  */
 
 GaussianDispersion :: GaussianDispersion() {
-	npts  = 1;
+	npts  = 21;
 	width = 0.0;
-	nsigmas = 2;
+	nsigmas = 3;
 };
 
 void GaussianDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -142,9 +142,9 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
  */
 
 LogNormalDispersion :: LogNormalDispersion() {
-	npts  = 1;
+	npts  = 21;
 	width = 0.0;
-	nsigmas = 2;
+	nsigmas = 3;
 };
 
 void LogNormalDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -202,9 +202,9 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
  */
 
 SchulzDispersion :: SchulzDispersion() {
-	npts  = 1;
+	npts  = 21;
 	width = 0.0;
-	nsigmas = 2;
+	nsigmas = 3;
 };
 
 void SchulzDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -283,9 +283,10 @@ void ArrayDispersion :: operator() (void *param, vector<WeightPoint> &weights) {
 		weights.insert(weights.end(), WeightPoint(value, 1.0));
 	} else {
 		for(int i=0; i<npts; i++) {
-			if ( ((*par).has_min==false || _values[i]>(*par).min)
-			  && ((*par).has_max==false || _values[i]<(*par).max)  )
-				weights.insert(weights.end(), WeightPoint(_values[i], _weights[i]));
+			double val = _values[i]; //+ value;  //ToDo: Talk to Paul and put back the 'value'.
+			if ( ((*par).has_min==false || val>(*par).min)
+			  && ((*par).has_max==false || val<(*par).max)  )
+				weights.insert(weights.end(), WeightPoint(val, _weights[i]));
 		}
 	}
 }
