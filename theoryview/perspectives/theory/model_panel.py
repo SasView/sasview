@@ -159,13 +159,16 @@ class ModelPanel(BasicPage):
                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1 
         values = wx.StaticText(self, -1, 'Sigma (STD)')
+        values.SetToolTipString("Polydispersity multiplied by the value of the original parameter.")
         self.sizer4_4.Add(values,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
        
         ix += 1 
         npts = wx.StaticText(self, -1, 'Npts')
+        npts.SetToolTipString("Number of points for weighting.")
         self.sizer4_4.Add(npts,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 1 
         nsigmas = wx.StaticText(self, -1, 'Nsigmas')
+        nsigmas.SetToolTipString("Number of sigmas between which the range of the distribution function will be used for weighting. The value '3' covers 99.5% for Gaussian distribution function.")
         self.sizer4_4.Add(nsigmas,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
         for item in self.model.dispersion.keys():
@@ -185,7 +188,7 @@ class ModelPanel(BasicPage):
                         value= self.model.getParam(name1)
                         ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
-                        ctl1.SetToolTipString("Polydispersity multiflied by the value of '%s'."%item)
+                        ctl1.SetToolTipString("Polydispersity multiplied by the value of the '%s'."%item)
                         ctl1.SetValue(str (format_number(value)))
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                         self.fittable_param.append([None,name1,ctl1,None,
@@ -195,7 +198,7 @@ class ModelPanel(BasicPage):
                             value= self.model.getParam(name2)
                             Tctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tctl1.SetToolTipString("Number of points for weighting.")
+                            
                             Tctl1.SetValue(str (format_number(value)))
                             self.sizer4_4.Add(Tctl1, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -206,7 +209,7 @@ class ModelPanel(BasicPage):
                             value= self.model.getParam(name3)
                             Tctl2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tctl2.SetToolTipString("Number of sigmas between which the range of the distribution function will be used for weighting. The value '3' covers 99.5% for Gaussian distribution function.")
+                            
                             Tctl2.SetValue(str (format_number(value)))
                             self.sizer4_4.Add(Tctl2, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -236,7 +239,7 @@ class ModelPanel(BasicPage):
                         value= self.model.getParam(name1)
                         ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
-                        ctl1.SetToolTipString("Polydispersity multiflied by the value of '%s'."%item)
+                        ctl1.SetToolTipString("Polydispersity multiplied by the value of '%s'."%item)
                         ctl1.SetValue(str (format_number(value)))
                         if not self.enable2D:
                             ctl1.Hide()
@@ -254,7 +257,7 @@ class ModelPanel(BasicPage):
                             value= self.model.getParam(name2)
                             Tctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tctl1.SetToolTipString("Number of points for weighting.")
+
                             Tctl1.SetValue(str (format_number(value)))
                             if not self.enable2D:
                                 Tctl1.Hide()
@@ -273,7 +276,7 @@ class ModelPanel(BasicPage):
                             value= self.model.getParam(name3)
                             Tctl2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tctl2.SetToolTipString("Number of sigmas between which the range of the distribution function will be used for weighting. The value '3' covers 99.5% for Gaussian distribution function.")
+                            
                             Tctl2.SetValue(str (format_number(value)))
                             if not self.enable2D:
                                 Tctl2.Hide()

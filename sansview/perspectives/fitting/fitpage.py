@@ -463,6 +463,7 @@ class FitPage(BasicPage):
                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1 
         values = wx.StaticText(self, -1, 'Sigma (STD)')
+        values.SetToolTipString("Polydispersity multiplied by the value of the original parameter.")
         self.sizer4_4.Add(values,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix +=2 
         self.text_disp_1 = wx.StaticText(self, -1, '')
@@ -485,9 +486,11 @@ class FitPage(BasicPage):
         
         ix += 1 
         npts = wx.StaticText(self, -1, 'Npts')
+        npts.SetToolTipString("Number of points for weighting.")
         self.sizer4_4.Add(npts,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 1 
         nsigmas = wx.StaticText(self, -1, 'Nsigmas')
+        nsigmas.SetToolTipString("Number of sigmas between which the range of the distribution function will be used for weighting. The value '3' covers 99.5% for Gaussian distribution function.")
         self.sizer4_4.Add(nsigmas,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
         if self.engine_type=="park":
@@ -518,7 +521,7 @@ class FitPage(BasicPage):
                         value= self.model.getParam(name1)
                         ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
-                        ctl1.SetToolTipString("Polydispersity multiflied by the value of '%s'."%item)
+                        ctl1.SetToolTipString("Polydispersity multiplied by the value of '%s'."%item)
                         ctl1.SetValue(str (format_number(value)))
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1),wx.EXPAND)
                         ## text to show error sign
@@ -562,7 +565,7 @@ class FitPage(BasicPage):
                             value= self.model.getParam(name2)
                             Tctl = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tctl.SetToolTipString("Number of points for weighting.")
+                            
                             Tctl.SetValue(str (format_number(value)))
                             self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -573,7 +576,7 @@ class FitPage(BasicPage):
                             value= self.model.getParam(name3)
                             Tct2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tct2.SetToolTipString("Number of sigmas between which the range of the distribution function will be used for weighting. The value '3' covers 99.5% for Gaussian distribution function.")
+                            
                             Tct2.SetValue(str (format_number(value)))
                             self.sizer4_4.Add(Tct2, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -616,7 +619,7 @@ class FitPage(BasicPage):
                         value= self.model.getParam(name1)
                         ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
-                        ctl1.SetToolTipString("Polydispersity multiflied by the value of '%s'."%item)
+                        ctl1.SetToolTipString("Polydispersity multiplied by the value of '%s'."%item)
                         ctl1.SetValue(str (format_number(value)))
                         if self.data.__class__.__name__ =="Data2D":
                             ctl1.Show(True)
@@ -670,7 +673,7 @@ class FitPage(BasicPage):
                             value= self.model.getParam(name2)
                             Tctl = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tctl.SetToolTipString("Number of points for weighting.")
+                            
                             Tctl.SetValue(str (format_number(value)))
                             if self.data.__class__.__name__ =="Data2D":
                                 Tctl.Show(True)
@@ -687,7 +690,7 @@ class FitPage(BasicPage):
                             value= self.model.getParam(name3)
                             Tct2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tct2.SetToolTipString("Number of sigmas between which the range of the distribution function will be used for weighting. The value '3' covers 99.5% for Gaussian distribution function.")
+                            
                             Tct2.SetValue(str (format_number(value)))
                             if self.data.__class__.__name__ =="Data2D":
                                 Tct2.Show(True)
@@ -2063,7 +2066,7 @@ class FitPage(BasicPage):
                 value= self.model.getParam(item)
                 ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                     style=wx.TE_PROCESS_ENTER)
-                
+                ctl1.SetToolTipString("Hit 'Enter' after typing.")
                 ctl1.SetValue(format_number(value))
                 sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                 ## text to show error sign
@@ -2155,6 +2158,7 @@ class FitPage(BasicPage):
                     value= self.model.getParam(item)
                     ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                         style=wx.TE_PROCESS_ENTER)
+                    ctl1.SetToolTipString("Hit 'Enter' after typing.")
                     ctl1.SetValue(format_number(value))
                     if self.data.__class__.__name__ =="Data2D":
                         ctl1.Show(True)
