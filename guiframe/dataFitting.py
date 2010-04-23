@@ -162,8 +162,10 @@ class Data2D(PlotData2D,LoadData2D):
         self.xmax       = data2d.xmax
         self.ymin       = data2d.ymin
         self.ymax       = data2d.ymax
-        self.zmin       = data2d.zmin
-        self.zmax       = data2d.zmax
+        if hasattr(data2d, "zmin"):
+            self.zmin       = data2d.zmin
+        if hasattr(data2d, "zmax"):
+            self.zmax      = data2d.zmax
         
         self.xaxis(data2d._xaxis, data2d._xunit)
         self.yaxis(data2d._yaxis, data2d._yunit)
