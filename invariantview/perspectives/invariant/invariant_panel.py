@@ -406,7 +406,7 @@ class InvariantPanel(ScrolledPanel):
         try:
             self.get_qstar(inv=inv)
             #if scale_changed or bkg_changed:
-            self._manager.plot_data(data=inv.get_data())
+            self._manager.plot_data(scale=scale, background=background)
             
         except:
             msg= "Error occurred computing invariant: %s"%sys.exc_value

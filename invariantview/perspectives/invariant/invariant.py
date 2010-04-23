@@ -222,14 +222,13 @@ class Plugin:
         new_plot.id = self.__data.id + name
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=self.__data.name))
         
-    def plot_data(self, data):
+    def plot_data(self, scale, background):
         """
             replot the current data if the user enters a new scale or background
         """
-        new_plot = self.copy_data(item=self.__data, dy=self.__data.dy)
-        new_plot.x = data.x
-        new_plot.y = data.y
-        new_plot.dx = data.dx
-        new_plot.dy = self.__data.dy
+        new_plot = scale * self.__data - background
+        new_plot.name = self.__data.name
+        new_plot.group_id = self.__data.group_id
+        new_plot.id = self.__data.id 
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=new_plot.name))
         
