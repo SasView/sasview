@@ -126,7 +126,8 @@ class ModelPanel1D(PlotPanel):
                 # a new plottable overwrites a plotted one  using the same id
                 for plottable in self.plots.itervalues():
                     if hasattr(event.plot,"id") and hasattr(plottable, "id"):
-                        if event.plot.id==plottable.id :
+                        #remove the existing plot and same id and same name
+                        if event.plot.id==plottable.id and event.plot.name== plottable.name:
                             self.graph.delete(plottable)
                 
                 self.plots[event.plot.name] = event.plot
@@ -150,10 +151,10 @@ class ModelPanel1D(PlotPanel):
         ## render the graph
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
-        if self.errors_hide:
-            self._on_remove_errors(evt=None)
-        else:
-            self._on_add_errors( evt=None)
+        #if self.errors_hide:
+        #    self._on_remove_errors(evt=None)
+        #else:
+        #    self._on_add_errors( evt=None)
     
     def onLeftDown(self,event): 
         """ 
@@ -248,6 +249,7 @@ class ModelPanel1D(PlotPanel):
             selected_plot= self.plots[self.graph.selected_plottable]
             #if self.plots[self.graph.selected_plottable].name in self.err_dy.iterkeys()\
             #    and self.errors_hide:
+            """
             if selected_plot.__class__.__name__=="Data1D":
                 if numpy.all(selected_plot.dy==0):
                     id = wx.NewId()
@@ -257,7 +259,7 @@ class ModelPanel1D(PlotPanel):
                     id = wx.NewId()
                     slicerpop.Append(id, '&Hide Error bars')
                     wx.EVT_MENU(self, id, self._on_remove_errors)
-            
+            """
             id = wx.NewId()
             slicerpop.Append(id, '&Linear fit')
             wx.EVT_MENU(self, id, self.onFitting)
