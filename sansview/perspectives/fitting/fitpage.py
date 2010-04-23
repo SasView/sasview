@@ -562,7 +562,7 @@ class FitPage(BasicPage):
                             value= self.model.getParam(name2)
                             Tctl = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tctl.SetToolTipString("Npts for averaging over the distribution function.")
+                            Tctl.SetToolTipString("Number of points for weighting.")
                             Tctl.SetValue(str (format_number(value)))
                             self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -573,7 +573,7 @@ class FitPage(BasicPage):
                             value= self.model.getParam(name3)
                             Tct2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tct2.SetToolTipString("Only the range between +-(Nsigmas times Sigma) of the distribution function will be weighted for the calculation.")
+                            Tct2.SetToolTipString("Number of sigmas between which the range of the distribution function will be used for weighting. The value '3' covers 99.5% for Gaussian distribution function.")
                             Tct2.SetValue(str (format_number(value)))
                             self.sizer4_4.Add(Tct2, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -670,7 +670,7 @@ class FitPage(BasicPage):
                             value= self.model.getParam(name2)
                             Tctl = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tctl.SetToolTipString("Npts for averaging over the distribution function.")
+                            Tctl.SetToolTipString("Number of points for weighting.")
                             Tctl.SetValue(str (format_number(value)))
                             if self.data.__class__.__name__ =="Data2D":
                                 Tctl.Show(True)
@@ -687,7 +687,7 @@ class FitPage(BasicPage):
                             value= self.model.getParam(name3)
                             Tct2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            Tct2.SetToolTipString("Only the range between +-(Nsigmas times Sigma) of the distribution function will be weighted for the calculation.")
+                            Tct2.SetToolTipString("Number of sigmas between which the range of the distribution function will be used for weighting. The value '3' covers 99.5% for Gaussian distribution function.")
                             Tct2.SetValue(str (format_number(value)))
                             if self.data.__class__.__name__ =="Data2D":
                                 Tct2.Show(True)
