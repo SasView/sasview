@@ -206,6 +206,8 @@ class InvariantPanel(ScrolledPanel):
                 self.volume_tcl.SetValue(format_number(v))
                 self.volume_err_tcl.SetValue(format_number(dv))
             except:
+                self.volume_tcl.SetValue(format_number(None))
+                self.volume_err_tcl.SetValue(format_number(None))
                 msg= "Error occurred computing volume fraction: %s"%sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                       info="error",
@@ -222,6 +224,8 @@ class InvariantPanel(ScrolledPanel):
                 self.surface_tcl.SetValue(format_number(s))
                 self.surface_err_tcl.SetValue(format_number(ds))
             except:
+                self.surface_tcl.SetValue(format_number(None))
+                self.surface_err_tcl.SetValue(format_number(None))
                 msg = "Error occurred computing specific surface: %s"%sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                        type="stop"))
@@ -231,12 +235,17 @@ class InvariantPanel(ScrolledPanel):
         """
         try:
             qstar_total, qstar_total_err = inv.get_qstar_with_error(extrapolation)
+            
             self.invariant_total_tcl.SetValue(format_number(qstar_total))
             self.invariant_total_err_tcl.SetValue(format_number(qstar_total_err))
             self.inv_container.qstar_total = qstar_total
             self.inv_container.qstar_total_err = qstar_total_err
          
         except:
+            self.inv_container.qstar_total = "Error"
+            self.inv_container.qstar_total_err = "Error"
+            self.invariant_total_tcl.SetValue(format_number(None))
+            self.invariant_total_err_tcl.SetValue(format_number(None))
             msg= "Error occurred computing invariant using extrapolation: %s"%sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))  
             
@@ -255,6 +264,9 @@ class InvariantPanel(ScrolledPanel):
                 self._manager.plot_theory(data=extrapolated_data,
                                            name="Low-Q extrapolation")
             except:
+                self.inv_container.qstar_low = "ERROR"
+                self.inv_container.qstar_low_err = "ERROR"
+                self._manager.plot_theory(name="Low-Q extrapolation")
                 msg= "Error occurred computing low-Q invariant: %s"%sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
         else:
@@ -274,6 +286,9 @@ class InvariantPanel(ScrolledPanel):
                 self._manager.plot_theory(data=high_out_data,
                                            name="High-Q extrapolation")
             except:
+                self.inv_container.qstar_high = "ERROR"
+                self.inv_container.qstar_high_err = "ERROR"
+                self._manager.plot_theory(name="High-Q extrapolation")
                 msg= "Error occurred computing high-Q invariant: %s"%sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
         else:
@@ -413,6 +428,7 @@ class InvariantPanel(ScrolledPanel):
             wx.PostEvent(self.parent, StatusEvent(status=msg, 
                                                   info="warning",type="stop"))
             return
+       
         #Compute qstar extrapolated to low q range 
         self.get_low_qstar(inv=inv, npts_low=npts_low, low_q=low_q)
         #Compute qstar extrapolated to high q range 
