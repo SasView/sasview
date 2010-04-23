@@ -510,6 +510,7 @@ class FitPage(BasicPage):
                     if p=="width":
                         ix = 0
                         cb = wx.CheckBox(self, -1, name1, (10, 10))
+                        cb.SetToolTipString("Check for fitting")
                         wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                         self.sizer4_4.Add( cb,( iy, ix),(1,1),  
                                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -517,6 +518,7 @@ class FitPage(BasicPage):
                         value= self.model.getParam(name1)
                         ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
+                        ctl1.SetToolTipString("Polydispersity multiflied by the value of '%s'."%item)
                         ctl1.SetValue(str (format_number(value)))
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1),wx.EXPAND)
                         ## text to show error sign
@@ -536,13 +538,14 @@ class FitPage(BasicPage):
                         ix = 4
                         ctl3 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                        text_enter_callback = self._onparamRangeEnter)
-
+                        
                         self.sizer4_4.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                         ctl3.Hide()
                 
                         ix = 5
                         ctl4 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                        text_enter_callback = self._onparamRangeEnter)
+                        
                         self.sizer4_4.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
 
                         ctl4.Hide()
@@ -559,7 +562,7 @@ class FitPage(BasicPage):
                             value= self.model.getParam(name2)
                             Tctl = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            
+                            Tctl.SetToolTipString("Npts for averaging over the distribution function.")
                             Tctl.SetValue(str (format_number(value)))
                             self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -570,6 +573,7 @@ class FitPage(BasicPage):
                             value= self.model.getParam(name3)
                             Tct2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
+                            Tct2.SetToolTipString("Only the range between +-(Nsigmas times Sigma) of the distribution function will be weighted for the calculation.")
                             Tct2.SetValue(str (format_number(value)))
                             self.sizer4_4.Add(Tct2, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -600,6 +604,7 @@ class FitPage(BasicPage):
                     if p=="width":
                         ix = 0
                         cb = wx.CheckBox(self, -1, name1, (10, 10))
+                        cb.SetToolTipString("Check for fitting")
                         wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                         self.sizer4_4.Add( cb,( iy, ix),(1,1),  
                                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -611,6 +616,7 @@ class FitPage(BasicPage):
                         value= self.model.getParam(name1)
                         ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
+                        ctl1.SetToolTipString("Polydispersity multiflied by the value of '%s'."%item)
                         ctl1.SetValue(str (format_number(value)))
                         if self.data.__class__.__name__ =="Data2D":
                             ctl1.Show(True)
@@ -664,7 +670,7 @@ class FitPage(BasicPage):
                             value= self.model.getParam(name2)
                             Tctl = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
-                            
+                            Tctl.SetToolTipString("Npts for averaging over the distribution function.")
                             Tctl.SetValue(str (format_number(value)))
                             if self.data.__class__.__name__ =="Data2D":
                                 Tctl.Show(True)
@@ -681,6 +687,7 @@ class FitPage(BasicPage):
                             value= self.model.getParam(name3)
                             Tct2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
+                            Tct2.SetToolTipString("Only the range between +-(Nsigmas times Sigma) of the distribution function will be weighted for the calculation.")
                             Tct2.SetValue(str (format_number(value)))
                             if self.data.__class__.__name__ =="Data2D":
                                 Tct2.Show(True)
@@ -2134,6 +2141,7 @@ class FitPage(BasicPage):
                     ## add parameters name with checkbox for selecting to fit
                     cb = wx.CheckBox(self, -1, item )
                     cb.SetValue(False)
+                    cb.SetToolTipString("Check for fitting")
                     wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                     if self.data.__class__.__name__ =="Data2D":
                         cb.Show(True)
@@ -2147,7 +2155,6 @@ class FitPage(BasicPage):
                     value= self.model.getParam(item)
                     ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                         style=wx.TE_PROCESS_ENTER)
-                    
                     ctl1.SetValue(format_number(value))
                     if self.data.__class__.__name__ =="Data2D":
                         ctl1.Show(True)
@@ -2162,7 +2169,6 @@ class FitPage(BasicPage):
                     text2.Hide() 
                     ix += 1
                     ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0)
-                    
                     sizer.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                     ctl2.Hide()
                     
@@ -2170,7 +2176,7 @@ class FitPage(BasicPage):
                     ix += 1
                     ctl3 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
                                                    text_enter_callback = self._onparamRangeEnter)
-               
+                    
                     sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                     ctl3.Hide()
                  

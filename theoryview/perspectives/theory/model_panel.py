@@ -185,6 +185,7 @@ class ModelPanel(BasicPage):
                         value= self.model.getParam(name1)
                         ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
+                        ctl1.SetToolTipString("Polydispersity multiflied by the value of '%s'."%item)
                         ctl1.SetValue(str (format_number(value)))
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                         self.fittable_param.append([None,name1,ctl1,None,
@@ -194,6 +195,7 @@ class ModelPanel(BasicPage):
                             value= self.model.getParam(name2)
                             Tctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
+                            Tctl1.SetToolTipString("Npts for averaging over the distribution function.")
                             Tctl1.SetValue(str (format_number(value)))
                             self.sizer4_4.Add(Tctl1, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -204,6 +206,7 @@ class ModelPanel(BasicPage):
                             value= self.model.getParam(name3)
                             Tctl2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
+                            Tctl2.SetToolTipString("Only the range between +-(Nsigmas times Sigma) of the distribution function will be weighted for the calculation.")
                             Tctl2.SetValue(str (format_number(value)))
                             self.sizer4_4.Add(Tctl2, (iy,ix),(1,1),
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -233,6 +236,7 @@ class ModelPanel(BasicPage):
                         value= self.model.getParam(name1)
                         ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
+                        ctl1.SetToolTipString("Polydispersity multiflied by the value of '%s'."%item)
                         ctl1.SetValue(str (format_number(value)))
                         if not self.enable2D:
                             ctl1.Hide()
@@ -250,6 +254,7 @@ class ModelPanel(BasicPage):
                             value= self.model.getParam(name2)
                             Tctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
+                            Tctl1.SetToolTipString("Npts for averaging over the distribution function.")
                             Tctl1.SetValue(str (format_number(value)))
                             if not self.enable2D:
                                 Tctl1.Hide()
@@ -268,6 +273,7 @@ class ModelPanel(BasicPage):
                             value= self.model.getParam(name3)
                             Tctl2 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20),
                                                 style=wx.TE_PROCESS_ENTER)
+                            Tctl2.SetToolTipString("Only the range between +-(Nsigmas times Sigma) of the distribution function will be weighted for the calculation.")
                             Tctl2.SetValue(str (format_number(value)))
                             if not self.enable2D:
                                 Tctl2.Hide()
