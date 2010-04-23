@@ -2044,7 +2044,7 @@ class FitPage(BasicPage):
                 ix = 0
                 ## add parameters name with checkbox for selecting to fit
                 cb = wx.CheckBox(self, -1, item )              
-                cb.SetToolTipString(" Check/uncheck to fit/fix the parameter.")
+                cb.SetToolTipString(" Check for fitting.")
                 #cb.SetValue(True)
                 wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                 
