@@ -617,9 +617,14 @@ class Plugin:
     def _closed_fitpage(self, event):   
         """
             request fitpanel to close a given page when its unique data is removed 
-            from the plot
+            from the plot. close fitpage only when the a loaded data is removed
         """    
-        self.fit_panel.close_page_with_data(event.data) 
+        if event is None or event.data is None:
+            return
+       
+        if hasattr(event.data,"is_data"):
+            if not event.data.is_data or event.data.__class__.__name__=="Data1D":
+                self.fit_panel.close_page_with_data(event.data) 
         
     def _add_page_onmenu(self, name,fitproblem=None):
         """
@@ -696,7 +701,7 @@ class Plugin:
             
             self.fitter.set_data(data=metadata,Uid=self.fit_id,
                                  smearer=smearer,qmin= qmin,qmax=qmax )
-            #print "self.fitter.set_data"
+           
             self.fitter.select_problem_for_fit(Uid= self.fit_id,
                                                value= value.get_scheduled())
             value.clear_model_param()

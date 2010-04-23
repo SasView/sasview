@@ -185,10 +185,16 @@ class FitPanel(wx.aui.AuiNotebook):
         """
             close a fit page when its data is completely remove from the graph
         """
+        if deleted_data is None:
+            return
         for index in range(self.GetPageCount()):
             selected_page = self.GetPage(index) 
             if hasattr(selected_page,"get_data"):
                 data = selected_page.get_data()
+                if data is None:
+                    #the fitpanel exists and only the initial fit page is open 
+                    #with no selected data
+                    return
                 if data.name == deleted_data.name:
                     self._close_helper(selected_page)
                     self.DeletePage(index)
