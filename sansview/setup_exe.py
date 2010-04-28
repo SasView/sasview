@@ -15,6 +15,16 @@
 
 import os, sys
 
+# When using the SansView build script, we need to be able to pass
+# an extra path to be added to the python path.
+try:
+        if sys.argv.count('--extrapath'):
+                path_flag_idx = sys.argv.index('--extrapath')
+                extra_path = sys.argv[path_flag_idx+1]
+                sys.path.insert(0, extra_path)
+except:
+        print "Error processing extra python path needed to build SansView"
+
 from distutils.core import setup
 from distutils.filelist import findall
 import matplotlib
