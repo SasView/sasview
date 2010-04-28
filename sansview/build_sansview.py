@@ -33,14 +33,16 @@ import logging
 # Installation folder
 import time
 timestamp = int(time.time())
+CWD    = os.getcwd()
+
 INSTALL_FOLDER = "install_%s" % str(timestamp)
+LIB_FOLDER = "%s\%s" % (CWD, INSTALL_FOLDER)
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     filename='build_%s.log' % str(timestamp),
                     filemode='w')
 
-CWD    = os.getcwd()
 
 # On Windows, the python executable is not always on the path.
 # Use its most frequent location as the default.
@@ -52,18 +54,24 @@ else:
 SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 
-# Release version 1.0.0
-SANSMODELS = "0.4.5"
-DATALOADER = "0.2.5"
-GUICOMM    = "0.1.3"
-GUIFRAME   = "0.1.8"
-SANSVIEW   = "1.0.0"
-PLOTTOOLS  = "0.1.7"
-UTIL       = "0.1.3"
-PARK       = "1.2"
-PARK_INTEG = "0.1.3"
+# Release version 1.3.0
+SANSMODELS = "0.4.6"
+DATALOADER = "0.2.6"
+GUICOMM    = "0.1.4"
+GUIFRAME   = "0.1.9"
+SANSVIEW   = "1.3.0"
+PLOTTOOLS  = "0.1.8"
+UTIL       = "0.1.4"
+PARK       = "1.2" # May need update
+PARK_INTEG = "0.1.4"
 PRVIEW     = "0.3.1"
-PR_INV     = "0.2.3"
+PR_INV     = "0.2.4"
+CALCULATOR = "0.1.0"
+CALC_VIEW  = "0.1.0"
+INVARIANT  = "0.1.0"
+INV_VIEW   = "0.1.0"
+THEORY_VIEW= "0.1.0"
+ELEMENTS = "1.0.2"
 
 # URLs for SVN repos
 SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
@@ -77,7 +85,12 @@ PARK_INTEG_URL = "svn://danse.us/sans/releases/park_integration-%s" % PARK_INTEG
 PARK_URL = "svn://danse.us/park/releases/park-%s" % PARK
 PRVIEW_URL = "svn://danse.us/sans/releases/prview-%s" % PRVIEW
 PR_INV_URL = "svn://danse.us/sans/releases/pr_inversion-%s" % PR_INV
-
+CALC_URL = "svn://danse.us/sans/releases/calculator-%s" % CALCULATOR
+CALC_VIEW_URL = "svn://danse.us/sans/releases/calculatorview-%s" % CALC_VIEW
+INV_URL = "svn://danse.us/sans/releases/Invariant-%s" % INVARIANT
+INV_VIEW_URL = "svn://danse.us/sans/releases/invariantview-%s" % INV_VIEW
+THEO_VIEW_URL = "svn://danse.us/sans/releases/theoryview-%s" % THEORY_VIEW
+ELEMENTS_URL = "svn://danse.us/common/elements/releases/elements-%s" % ELEMENTS
 
 def check_system():
     """
@@ -114,13 +127,23 @@ def install_pkg(install_dir, setup_dir, url):
         @param setup_dir: relative location of the setup.py script
         @param url: URL of the SVN repo
     """
-    if not os.path.isdir(install_dir):
-        os.mkdir(install_dir)
-    os.chdir(install_dir)   
-    os.system("%s checkout -q %s" % (SVN, url))        
-    os.chdir(setup_dir)
-    os.system("%s setup.py -q build -cmingw32" % PYTHON)
-    os.system("%s setup.py -q install" % PYTHON)
+    logging.info("Installing %s" % url)
+    try:
+        if not os.path.isdir(install_dir):
+            os.mkdir(install_dir)
+        os.chdir(install_dir)   
+        os.system("%s checkout -q %s" % (SVN, url))        
+        os.chdir(setup_dir)
+        if sys.platform == 'win32':
+            os.system("%s setup.py -q build -cmingw32" % PYTHON)
+        else:
+            os.system("%s setup.py -q build" % PYTHON)
+        os.system("%s setup.py -q install --root \"%s\"" % (PYTHON, LIB_FOLDER))
+    except:
+        logging.error("Install failed for %s" % url)
+        logging.error(sys.exc_value)
+        raw_input("Press enter to continue\n")
+        sys.exit()
     
 def checkout(release=False):
     """
@@ -184,35 +207,41 @@ def checkout(release=False):
     
     os.chdir(wd)
     if release:
-        pass
+        install_pkg(".", "Invariant-%s" % INVARIANT, INV_URL)
     else:
         install_pkg(".", "Invariant", "svn://danse.us/sans/trunk/Invariant")
     
     os.chdir(wd)
     if release:
-        pass
+        install_pkg(".", "invariantview-%s" % INV_VIEW, INV_VIEW_URL)
     else:
         install_pkg(".", "invariantview", "svn://danse.us/sans/trunk/invariantview")
     
     os.chdir(wd)
     if release:
-        pass
+        install_pkg(".", "calculatorview-%s" % CALC_VIEW, CALC_VIEW_URL)
     else:
         install_pkg(".", "calculatorview", "svn://danse.us/sans/trunk/calculatorview")
     
     os.chdir(wd)
     if release:
-        pass
+        install_pkg(".", "calculator-%s" % CALCULATOR, CALC_URL)
     else:
         install_pkg(".", "calculator", "svn://danse.us/sans/trunk/calculator")
     
     os.chdir(wd)
     if release:
-        pass
+        install_pkg(".", "theoryview-%s" % THEORY_VIEW, THEO_VIEW_URL)
     else:
         install_pkg(".", "theoryview", "svn://danse.us/sans/trunk/theoryview")
 
-    #TODO: need a release version of PARK
+    os.chdir(wd)
+    if release:
+        #install_pkg(".", "elements-%s" % ELEMENTS, ELEMENTS_URL)
+        install_pkg("elements", "trunk", "svn://danse.us/common/elements/trunk")
+    else:
+        install_pkg("elements", "trunk", "svn://danse.us/common/elements/trunk")
+
     os.chdir(wd)
     if release:
         install_pkg(".", "park-1.2", PARK_URL)
@@ -228,10 +257,13 @@ def checkout(release=False):
 def prepare(wipeout = False):
     """
         Prepare the build
+        
+        @param wipeout: If True, the DANSE modules in the standard site-packages will be
+        removed to avoid conflicts.
     """
     # Remove existing libraries
     if wipeout == True:
-        print "Deleting old modules"
+        logging.info("Deleting DANSES modules in site-packages")
         from distutils.sysconfig import get_python_lib
         libdir = get_python_lib()
         old_dirs = [os.path.join(libdir, 'danse'),
@@ -325,9 +357,10 @@ if __name__ == "__main__":
                 if sys.platform=='win32':
                     logging.info("Building installer from release version")
                     os.chdir("sansview-%s" % (SANSVIEW))
-                    os.system("%s setup_exe.py -q py2exe" % PYTHON)
+                    os.system("%s setup_exe.py -q py2exe --extrapath \"%s\python25\lib\site-packages\"" % (PYTHON, LIB_FOLDER))
                     os.system("%s/Q installer.iss" % INNO)
                     shutil.copy2(os.path.join("Output","setupSansView.exe"), 
                                  os.path.join(CWD, "setupSansView_%s.exe" % str(timestamp)))
                     
+    raw_input("Press enter to continue\n")
     
