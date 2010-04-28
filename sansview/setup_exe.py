@@ -16,14 +16,18 @@
 import os, sys
 
 # When using the SansView build script, we need to be able to pass
-# an extra path to be added to the python path.
+# an extra path to be added to the python path. The extra arguments
+# should be removed from the list so that the setup processing doesn't
+# fail.
 try:
-        if sys.argv.count('--extrapath'):
-                path_flag_idx = sys.argv.index('--extrapath')
-                extra_path = sys.argv[path_flag_idx+1]
-                sys.path.insert(0, extra_path)
+    if sys.argv.count('--extrapath'):
+        path_flag_idx = sys.argv.index('--extrapath')
+        extra_path = sys.argv[path_flag_idx+1]
+        sys.path.insert(0, extra_path)
+        del sys.argv[path_flag_idx+1]
+        sys.argv.remove('--extrapath')
 except:
-        print "Error processing extra python path needed to build SansView"
+    print "Error processing extra python path needed to build SansView\n  %s" % sys.exc_value
 
 from distutils.core import setup
 from distutils.filelist import findall
