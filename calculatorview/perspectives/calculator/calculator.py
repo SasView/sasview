@@ -105,12 +105,23 @@ class Plugin:
         """
             Returns a set of menu entries for tools
         """
-        sld_help = "Provides computation related to Scattering Length density"
-        slit_length_help = "Provides computation related to Scattering Length density"
+        sld_help = "Provides computation related to Scattering Length Density"
+        slit_length_help = "Provides computation related to Slit Length Density"
+        data_editor_help = "Meta Data Editor"
         return [("SLD Calculator", sld_help, self.on_calculate_sld),
                 ("Slit Size Calculator", slit_length_help,
-                     self.on_calculate_slit_size)]
+                                self.on_calculate_slit_size),
+                ("Data Editor", data_editor_help,
+                     self.on_edit_data)]
               
+    def on_edit_data(self, event):
+        """
+            Edit meta data 
+        """
+        from data_editor import DataEditorWindow
+        frame = DataEditorWindow(parent=self.parent, data=[], title="Data Editor")
+        frame.Show(True)
+        
     def on_calculate_sld(self, event):
         """
             Compute the scattering length density of molecula
