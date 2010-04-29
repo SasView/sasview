@@ -61,8 +61,8 @@ GUICOMM    = "0.1.4"
 GUIFRAME   = "0.1.9"
 SANSVIEW   = "1.3.0"
 PLOTTOOLS  = "0.1.8"
-UTIL       = "0.1.4"
-PARK       = "1.2" # May need update
+UTIL       = "0.1.5"
+PARK       = "1.2.1" 
 PARK_INTEG = "0.1.4"
 PRVIEW     = "0.3.1"
 PR_INV     = "0.2.4"
@@ -71,7 +71,7 @@ CALC_VIEW  = "0.1.0"
 INVARIANT  = "0.1.0"
 INV_VIEW   = "0.1.0"
 THEORY_VIEW= "0.1.0"
-ELEMENTS = "1.0.2"
+ELEMENTS = "1.2"
 
 # URLs for SVN repos
 SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
@@ -237,8 +237,7 @@ def checkout(release=False):
 
     os.chdir(wd)
     if release:
-        #install_pkg(".", "elements-%s" % ELEMENTS, ELEMENTS_URL)
-        install_pkg("elements", "trunk", "svn://danse.us/common/elements/trunk")
+        install_pkg(".", "elements-%s" % ELEMENTS, ELEMENTS_URL)
     else:
         install_pkg("elements", "trunk", "svn://danse.us/common/elements/trunk")
 
