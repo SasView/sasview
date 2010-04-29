@@ -243,7 +243,7 @@ def checkout(release=False):
 
     os.chdir(wd)
     if release:
-        install_pkg(".", "park-1.2", PARK_URL)
+        install_pkg(".", "park-%s" % PARK, PARK_URL)
     else:
         install_pkg(".", "park-1.2", "svn://danse.us/park/branches/park-1.2")
     
@@ -360,6 +360,9 @@ if __name__ == "__main__":
                     os.system("%s/Q installer.iss" % INNO)
                     shutil.copy2(os.path.join("Output","setupSansView.exe"), 
                                  os.path.join(CWD, "setupSansView_%s.exe" % str(timestamp)))
+                elif sys.platform=='darwin':
+                    #TODO: bundle a Mac app
+                    pass
                     
     raw_input("Press enter to continue\n")
     
