@@ -214,7 +214,17 @@ class Plugin:
         if data is None:
             new_plot = Theory1D(x=[], y=[], dy=None)
         else:
-            new_plot = Theory1D(x=data.x, y=data.y, dy=None)
+            scale =self.invariant_panel.get_scale()
+            background = self.invariant_panel.get_background()
+            
+            if scale != 0:
+                # Put back the sacle and bkg for plotting
+                data.y = (data.y )/scale
+                new_plot = Theory1D(x=data.x, y=data.y, dy=None)
+            else:
+                msg = "Scale can not be zero."
+                raise ValueError, msg
+
         new_plot.name = name
         new_plot.xaxis(self.__data._xaxis, self.__data._xunit)
         new_plot.yaxis(self.__data._yaxis, self.__data._yunit)
