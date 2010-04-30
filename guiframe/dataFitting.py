@@ -157,7 +157,8 @@ class Data2D(PlotData2D,LoadData2D):
         self.err_data =  copy.deepcopy(data2d.err_data)
         self.x_bins     = copy.deepcopy(data2d.x_bins)
         self.y_bins     = copy.deepcopy(data2d.y_bins)
-        
+        if data2d.dqx_data is not None: self.dqx_data = copy.deepcopy(data2d.dqx_data)
+        if data2d.dqy_data is not None: self.dqy_data = copy.deepcopy(data2d.dqy_data)
         self.xmin       = data2d.xmin
         self.xmax       = data2d.xmax
         self.ymin       = data2d.ymin
