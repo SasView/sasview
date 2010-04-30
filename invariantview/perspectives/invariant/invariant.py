@@ -219,7 +219,7 @@ class Plugin:
             
             if scale != 0:
                 # Put back the sacle and bkg for plotting
-                data.y = (data.y )/scale
+                data.y = (data.y + background)/scale
                 new_plot = Theory1D(x=data.x, y=data.y, dy=None)
             else:
                 msg = "Scale can not be zero."
