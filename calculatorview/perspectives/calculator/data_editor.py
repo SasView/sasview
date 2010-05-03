@@ -477,10 +477,9 @@ class DataEditorPanel(wx.ScrolledWindow):
         run = []
         data, data_name, position = self.get_current_data()
         for i in range(self.data_run_tcl.GetNumberOfLines()):
-            run.append(self.data_run_tcl.GetLineText(i).lstrip().rstrip())
-        #Change data's name
-        #run = self.data_run_tcl.GetValue().lstrip().rstrip()
-       
+            text = self.data_run_tcl.GetLineText(i).lstrip().rstrip()
+            if text != "":
+                run.append(text)
         if data.run != run:
             self._notes += "Change data 's "
             self._notes += "run from %s to %s \n"%(data.run, str(run))
