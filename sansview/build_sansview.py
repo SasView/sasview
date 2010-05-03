@@ -17,7 +17,9 @@
 #   - mingw must be installed
 #
 # On Mac:
-#   - Macholib must be installed to use py2app
+#   - py2app must be installed
+#   - macholib must be installed to use py2app
+#   - modulegraph must be installed to use py2app
 #
 # Usage:
 # python build_sansview [command]
