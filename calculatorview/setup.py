@@ -1,12 +1,8 @@
 """
      Installation script for DANSE calculator perspective for SansView
 """
-
 import os
-  
 from distutils.core import setup
-from distutils.sysconfig import get_python_lib
-from distutils.filelist import findall
 
 setup(
     name="calculator",
