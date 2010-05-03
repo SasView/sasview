@@ -124,8 +124,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         """
         data_run_txt = wx.StaticText(self, -1, 'Run : ') 
         data_run_txt.SetToolTipString('') 
-        self.data_run_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH*3/5, -1)) 
-        self.data_run_tcl.Bind(wx.EVT_TEXT_ENTER, self.on_change_run)
+        self.data_run_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH*3/5, -1), style=wx.TE_MULTILINE)
         hint_run = "Data's run."
         self.data_run_tcl.SetToolTipString(hint_run)
         self.run_sizer.AddMany([(data_run_txt, 0, wx.LEFT, 15),
@@ -253,18 +252,22 @@ class DataEditorPanel(wx.ScrolledWindow):
             return
         self.data_cbox.Clear()
         for data in self._data:
-            pos = self.data_cbox.Append(str(data.filename))
+            name = data.title
+            if data.run:
+                name = data.run[0]
+            if name.lstrip().rstrip() =="":
+                name = data.filename
+            pos = self.data_cbox.Append(str(name))
             self.data_cbox.SetClientData(pos, data)
             self.data_cbox.SetSelection(pos)
-            self.data_cbox.SetStringSelection(str(data.filename)) 
-           
-            
+            self.data_cbox.SetStringSelection(str(name)) 
+       
     def reset_panel(self):
         """
         """
         self.enable_data_cbox()
-        self.data_run_tcl.SetValue("")
         self.data_title_tcl.SetValue("")
+        self.data_run_tcl.SetValue("")
         
     def on_select_data(self, event=None):
         """
@@ -274,14 +277,15 @@ class DataEditorPanel(wx.ScrolledWindow):
         if data is None:
             return
         self.data_title_tcl.SetValue(str(data.title))
-        for item in data.run:
-            self.data_run_tcl.AppendText(str(item))
+        text = ""
+        if data.run:
+            for item in data.run:
+                text += item+"\n"
+        self.data_run_tcl.SetValue(str(text))
             
     def get_current_data(self):
         """
         """
-        if not self.data_cbox.IsEnabled():
-            return None, None, None
         position = self.data_cbox.GetSelection() 
         if position == wx.NOT_FOUND:
             return None, None, None
@@ -403,7 +407,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         dlg.set_manager(self)
         dlg.ShowModal()
         
-    def choose_data_file(parent, location=None):
+    def choose_data_file(self, location=None):
         """
             Open a file dialog to allow loading a file
         """
@@ -415,46 +419,44 @@ class DataEditorPanel(wx.ScrolledWindow):
         cards = l.get_wildcards()
         wlist = '|'.join(cards)
         
-        dlg = wx.FileDialog(parent, "Choose a file", location, "", wlist, wx.OPEN)
+        dlg = wx.FileDialog(self, "Choose a file", location, "", wlist, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             mypath = os.path.basename(path)
         dlg.Destroy()
         return path
     
+    
     def complete_loading(self, data=None, filename=''):
         """
             Complete the loading and compute the slit size
         """
+        self.done = True
         self._data = []
         if data is None:
             msg = "Couldn't load data"
-            wx.PostEvent(self.parent.parent, StatusEvent(status=msg, type='stop'))
+            wx.PostEvent(self.parent.parent, StatusEvent(status=msg, info="warning",type='stop'))
             return 
         if not  data.__class__.__name__ == "list":
             self._data.append(data)
             self._reset_data.append(deepcopy(data))
         else:
-            self._data = data
+            self._data = deepcopy(data)
             self._reset_data = deepcopy(data)
-        # set data field
-        self.reset_panel()
         self.set_values()
-        
         if self.parent.parent is None:
             return 
         msg = "Load Complete"
-        wx.PostEvent(self.parent.parent, StatusEvent(status=msg, type='stop'))
+        wx.PostEvent(self.parent.parent, StatusEvent(status=msg,info="info",type='stop'))
   
     def set_values(self):
         """
             take the aperture values of the current data and display them
             through the panel
         """
-        if self._data == []:
-            return 
-        self.fill_data_combox()
-        self.on_select_data(event=None)
+        if self._data:
+            self.fill_data_combox()
+            self.on_select_data(event=None)
         
     def get_data(self):
         """
@@ -472,15 +474,17 @@ class DataEditorPanel(wx.ScrolledWindow):
         """
             Change run
         """
+        run = []
         data, data_name, position = self.get_current_data()
+        for i in range(self.data_run_tcl.GetNumberOfLines()):
+            run.append(self.data_run_tcl.GetLineText(i).lstrip().rstrip())
         #Change data's name
-        run = self.data_run_tcl.GetValue().lstrip().rstrip()
-        if run == "":
-            run = []
+        #run = self.data_run_tcl.GetValue().lstrip().rstrip()
+       
         if data.run != run:
             self._notes += "Change data 's "
             self._notes += "run from %s to %s \n"%(data.run, str(run))
-            data.run = [run]
+            data.run = run
             
     def on_change_title(self, event=None):
         """
@@ -501,9 +505,13 @@ class DataEditorPanel(wx.ScrolledWindow):
             Display the loaded data if available.
         """
         path = self.choose_data_file(location=self._default_save_location)
-        
         if path is None:
             return 
+        if self.parent.parent is not None:
+            wx.PostEvent(self.parent.parent, StatusEvent(status="Loading...",info="info",
+                                type="progress"))
+        
+        self.done = False
         self._default_save_location = path
         try:
             #Load data
@@ -511,9 +519,6 @@ class DataEditorPanel(wx.ScrolledWindow):
             ## If a thread is already started, stop it
             if self.reader is not None and self.reader.isrunning():
                 self.reader.stop()
-            if self.parent.parent is not None:
-                wx.PostEvent(self.parent.parent, StatusEvent(status="Loading...",
-                                type="progress"))
             self.reader = DataReader(path=path,
                                     completefn=self.complete_loading,
                                     updatefn=None)
