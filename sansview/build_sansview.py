@@ -16,6 +16,9 @@
 #
 #   - mingw must be installed
 #
+# On Mac:
+#   - Macholib must be installed to use py2app
+#
 # Usage:
 # python build_sansview [command]
 # [command] can be any of the following:
@@ -34,22 +37,20 @@ import logging
 import time
 timestamp = int(time.time())
 CWD    = os.getcwd()
-
 INSTALL_FOLDER = "install_%s" % str(timestamp)
-LIB_FOLDER = "%s\%s" % (CWD, INSTALL_FOLDER)
-
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename='build_%s.log' % str(timestamp),
-                    filemode='w')
-
 
 # On Windows, the python executable is not always on the path.
 # Use its most frequent location as the default.
 if sys.platform == 'win32':
     PYTHON = "c:\python25\python"
+    LIB_FOLDER = "%s/%s" % (CWD, INSTALL_FOLDER)
 else:
     PYTHON = 'python'
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    filename='build_%s.log' % str(timestamp),
+                    filemode='w')
 
 SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
@@ -136,9 +137,10 @@ def install_pkg(install_dir, setup_dir, url):
         os.chdir(setup_dir)
         if sys.platform == 'win32':
             os.system("%s setup.py -q build -cmingw32" % PYTHON)
+            os.system("%s setup.py -q install --root \"%s\"" % (PYTHON, LIB_FOLDER))
         else:
-            os.system("%s setup.py -q build" % PYTHON)
-        os.system("%s setup.py -q install --root \"%s\"" % (PYTHON, LIB_FOLDER))
+            os.system("%s setup.py build" % PYTHON)
+            os.system("%s setup.py install --prefix ~/.local" % PYTHON)
     except:
         logging.error("Install failed for %s" % url)
         logging.error(sys.exc_value)
@@ -153,15 +155,15 @@ def checkout(release=False):
     
     os.chdir(wd)
     if release:
-        install_pkg(".", "sansmodels-%s/src" % SANSMODELS, SANSMODELS_URL)
-    else:
-        install_pkg(".", "sansmodels/src", "svn://danse.us/sans/trunk/sansmodels")
-    
-    os.chdir(wd)
-    if release:
         install_pkg(".", "DataLoader-%s" % DATALOADER, DATALOADER_URL)
     else:
         install_pkg(".", "DataLoader", "svn://danse.us/sans/trunk/DataLoader")
+    
+    os.chdir(wd)
+    if release:
+        install_pkg(".", "sansmodels-%s/src" % SANSMODELS, SANSMODELS_URL)
+    else:
+        install_pkg(".", "sansmodels/src", "svn://danse.us/sans/trunk/sansmodels")
     
     os.chdir(wd)
     if release:
@@ -354,15 +356,16 @@ if __name__ == "__main__":
                 logging.info("Building release version")
                 checkout(True)
                 if sys.platform=='win32':
-                    logging.info("Building installer from release version")
+                    logging.info("Building Windows installer from release version")
                     os.chdir("sansview-%s" % (SANSVIEW))
-                    os.system("%s setup_exe.py -q py2exe --extrapath \"%s\python25\lib\site-packages\"" % (PYTHON, LIB_FOLDER))
+                    os.system("%s setup_exe.py py2exe --extrapath \"%s\python25\lib\site-packages\"" % (PYTHON, LIB_FOLDER))
                     os.system("%s/Q installer.iss" % INNO)
                     shutil.copy2(os.path.join("Output","setupSansView.exe"), 
                                  os.path.join(CWD, "setupSansView_%s.exe" % str(timestamp)))
                 elif sys.platform=='darwin':
-                    #TODO: bundle a Mac app
-                    pass
+                    logging.info("Building Mac application from release version")
+                    os.chdir("sansview-%s" % (SANSVIEW))
+                    os.system("%s setup_mac.py py2app" % PYTHON)                    
                     
     raw_input("Press enter to continue\n")
     
