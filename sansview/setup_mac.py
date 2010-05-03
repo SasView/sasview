@@ -25,12 +25,22 @@ DATA_FILES += invariant.data_files()
 #CANSAxml reader data files
 RESOURCES_FILES.append(os.path.join(DataLoader.readers.get_data_path(),'defaults.xml'))
 
+# Locate libxml2 library
+lib_locs = ['/usr/local/lib', '/usr/lib']
+libxml_path = None
+for item in lib_locs:
+    libxml_path = '%s/libxml2.dylib' % item
+    if os.path.isfile(libxml_path): 
+        break
+if libxml_path == None:
+    raise RuntimeError, "Could not find libxml2 on the system"
+
 APP = ['sansview.py']
 DATA_FILES += ['images','test','plugins','media']
 OPTIONS = {'argv_emulation': True,
            'packages': ['lxml','periodictable'],
            'iconfile': 'images/ball.icns',
-           'frameworks':['/usr/local/lib/libxml2.2.dylib'], ##This dir path could be /usr/lib/yourlibxmlfile depending on the system.
+           'frameworks':[libxml_path],
            'resources': RESOURCES_FILES
            }
 
