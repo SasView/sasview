@@ -29,9 +29,9 @@ RESOURCES_FILES.append(os.path.join(DataLoader.readers.get_data_path(),'defaults
 lib_locs = ['/usr/local/lib', '/usr/lib']
 libxml_path = None
 for item in lib_locs:
-    libxml_path = '%s/libxml2.dylib' % item
-    if os.path.isfile(libxml_path): 
-        break
+    libxml_path_test = '%s/libxml2.dylib' % item
+    if os.path.isfile(libxml_path_test): 
+        libxml_path = libxml_path_test
 if libxml_path == None:
     raise RuntimeError, "Could not find libxml2 on the system"
 
