@@ -228,6 +228,7 @@ class CollimationDialog(wx.Dialog):
         self.collimation_cbox.SetSelection(position) 
         self.enable_collimation() 
         self.bt_add_aperture.Enable()
+        self.set_values()
         
     def remove_collimation(self, event):
         """
@@ -245,9 +246,16 @@ class CollimationDialog(wx.Dialog):
                     if position > 0:
                         position -= 1 
                     self.collimation_cbox.SetSelection(position)
-                   
+        if not self._collimation and self.collimation_cbox.GetCount() == 0:       
+            self.bt_add_aperture.Disable()  
+            self.name_tcl.Clear()
+            self.length_tcl.Clear()
+            self.length_unit_tcl.Clear()
+            self.aperture_cbox.Clear()
+            self.aperture_cbox.Disable()
         #disable or enable the combo box when necessary
         self.enable_collimation()
+        self.enable_aperture()
         
     def enable_collimation(self):
         """
@@ -265,7 +273,6 @@ class CollimationDialog(wx.Dialog):
         else:
             self.collimation_cbox.Disable()
             self.bt_remove_collimation.Disable()
-            self.bt_add_aperture.Disable()
             collimation_hint_txt = 'No collimation is available for this data.'
         self.collimation_txt.SetLabel(collimation_hint_txt)
            
@@ -503,7 +510,6 @@ class CollimationDialog(wx.Dialog):
 if __name__ =="__main__":
 
     app  = wx.App()
- 
     dlg = CollimationDialog(collimation=[Collimation()])
     dlg.ShowModal()
     app.MainLoop()
