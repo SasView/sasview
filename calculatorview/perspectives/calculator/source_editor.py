@@ -2,7 +2,6 @@
 import wx
 import sys
 from copy import deepcopy
-from DataLoader.loader import Loader
 from sans.guiframe.utils import check_float
 _BOX_WIDTH = 60
 
@@ -13,14 +12,14 @@ if sys.platform.count("win32")>0:
     FONT_VARIANT = 0
 else:
     _STATICBOX_WIDTH = 480
-    PANEL_WIDTH = 530
+    PANEL_WIDTH = 550
     PANEL_HEIGHT = 430
     FONT_VARIANT = 1
     
 class SourceDialog(wx.Dialog):
     def __init__(self, parent=None, manager=None, source=None, *args, **kwds):
         kwds['title'] = "Source Editor"
-        kwds['size'] =(PANEL_WIDTH, PANEL_HEIGHT)
+        kwds['size'] = (PANEL_WIDTH, PANEL_HEIGHT)
         wx.Dialog.__init__(self, parent=parent, *args, **kwds)
         
         self.parent = parent
@@ -496,11 +495,9 @@ class SourceDialog(wx.Dialog):
     
 if __name__ =="__main__":
     app  = wx.App()
-    # Instantiate a loader 
-    loader = Loader()
-    # Load data 
-    data = loader.load("MAR07232_rest.ASC")
-    dlg = SourceDialog(source=data.source)
+    from DataLoader.data_info import Source
+    source = Source()
+    dlg = SourceDialog(source=source)
     dlg.ShowModal()
     app.MainLoop()
  

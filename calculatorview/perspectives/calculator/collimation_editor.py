@@ -10,12 +10,12 @@ from sans.guiframe.utils import check_float
 _BOX_WIDTH = 60
 
 if sys.platform.count("win32")>0:
-    _STATICBOX_WIDTH = 450
+    _STATICBOX_WIDTH = 500
     PANEL_WIDTH = 530
     PANEL_HEIGHT = 430
     FONT_VARIANT = 0
 else:
-    _STATICBOX_WIDTH = 480
+    _STATICBOX_WIDTH = 550
     PANEL_WIDTH = 600
     PANEL_HEIGHT = 480
     FONT_VARIANT = 1
@@ -23,21 +23,20 @@ else:
 class CollimationDialog(wx.Dialog):
     def __init__(self, parent=None, manager=None,
                  collimation=[], *args, **kwds):
-        try:
-            kwds['size'] =(PANEL_WIDTH, PANEL_HEIGHT)
-            kwds['title'] = "Collimation Editor"
-            wx.Dialog.__init__(self, parent=parent, *args, **kwds)
-            self.parent = parent
-            self.manager = manager 
-            self._collimation = collimation
-            self._reset_collimation = deepcopy(collimation)
-            self._notes = ""
-            self._description = "Edit collimation"
-            self._do_layout()
-            self.set_values()
-        except:
-            print "error", sys.exc_value
-        
+        """
+        """
+        kwds['size'] =(PANEL_WIDTH, PANEL_HEIGHT)
+        kwds['title'] = "Collimation Editor"
+        wx.Dialog.__init__(self, parent=parent, *args, **kwds)
+        self.parent = parent
+        self.manager = manager 
+        self._collimation = collimation
+        self._reset_collimation = deepcopy(collimation)
+        self._notes = ""
+        self._description = "Edit collimation"
+        self._do_layout()
+        self.set_values()
+ 
     def _define_structure(self):
         """
             define initial sizer 
@@ -48,6 +47,7 @@ class CollimationDialog(wx.Dialog):
         
         collimation_box = wx.StaticBox(self, -1, "Edit Number of Collimations")
         self.collimation_sizer = wx.StaticBoxSizer(collimation_box, wx.VERTICAL)
+        self.collimation_sizer.SetMinSize((_STATICBOX_WIDTH, -1))
         self.collimation_button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.collimation_hint_sizer = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -227,13 +227,14 @@ class CollimationDialog(wx.Dialog):
         self.collimation_cbox.SetClientData(position, collimation)
         self.collimation_cbox.SetSelection(position) 
         self.enable_collimation() 
+        self.bt_add_aperture.Enable()
         
     def remove_collimation(self, event):
         """
             Remove collimation to data's list of collimation
         """
         if self.collimation_cbox.IsEnabled():
-            if self.collimation_cbox.GetCount() > 1:
+            if self.collimation_cbox.GetCount() > 0:
                 position = self.collimation_cbox.GetCurrentSelection()
                 collimation = self.collimation_cbox.GetClientData(position)
                 if collimation in self._collimation:
@@ -257,13 +258,14 @@ class CollimationDialog(wx.Dialog):
             self.bt_remove_collimation.Enable()
             n_collimation = self.collimation_cbox.GetCount()
             collimation_hint_txt = 'collimations available: %s '%str(n_collimation)
-            if len(self._collimation) > 1:
+            if len(self._collimation) > 0:
                 self.bt_remove_collimation.Enable()
             else:
                 self.bt_remove_collimation.Disable()
         else:
             self.collimation_cbox.Disable()
             self.bt_remove_collimation.Disable()
+            self.bt_add_aperture.Disable()
             collimation_hint_txt = 'No collimation is available for this data.'
         self.collimation_txt.SetLabel(collimation_hint_txt)
            
@@ -312,7 +314,7 @@ class CollimationDialog(wx.Dialog):
         """
             Remove aperture to data's list of aperture
         """
-        if self._collimation is None:
+        if self._collimation is None or not self._collimation:
             return
         collimation, _, _ = self.get_current_collimation()
         if self.aperture_cbox.IsEnabled():
@@ -335,7 +337,7 @@ class CollimationDialog(wx.Dialog):
         """
             set aperture for data
         """
-        if self._collimation is None:
+        if self._collimation is None or not self._collimation:
             return
         collimation, _, _ = self.get_current_collimation()
         if collimation.aperture:
@@ -344,6 +346,7 @@ class CollimationDialog(wx.Dialog):
                     item = aperture
                     self.reset_aperture_combobox(edited_aperture=aperture)
                     return
+                
     def enable_aperture(self):
         """
             Enable /disable widgets crelated to aperture
@@ -405,6 +408,10 @@ class CollimationDialog(wx.Dialog):
         """
         collimation, _, _ = self.get_current_collimation()
         if collimation is None:
+            self.bt_add_aperture.Disable()
+            self.length_tcl.SetValue("")
+            self.name_tcl.SetValue("")
+            self.length_unit_tcl.SetValue("")
             return
         #Name
         self.name_tcl.SetValue(str(collimation.name))
@@ -487,7 +494,7 @@ class CollimationDialog(wx.Dialog):
         """
             leave the collimation as it is and close
         """
-        self.reset_collimation()
+        self._collimation = deepcopy(self._reset_collimation)
         self.set_values()
         if self.manager is not None:
              self.manager.set_collimation(self._collimation)
@@ -496,11 +503,8 @@ class CollimationDialog(wx.Dialog):
 if __name__ =="__main__":
 
     app  = wx.App()
-    # Instantiate a loader 
-    loader = Loader()
-    # Load data 
-    data = loader.load("MAR07232_rest.ASC")
-    dlg = CollimationDialog(collimation=data.collimation)
+ 
+    dlg = CollimationDialog(collimation=[Collimation()])
     dlg.ShowModal()
     app.MainLoop()
  

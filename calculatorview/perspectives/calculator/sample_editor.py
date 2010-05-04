@@ -2,7 +2,6 @@
 import wx
 import sys
 from copy import deepcopy
-from DataLoader.loader import Loader
 from sans.guiframe.utils import check_float
 
 _BOX_WIDTH = 60
@@ -13,7 +12,7 @@ if sys.platform.count("win32")>0:
     FONT_VARIANT = 0
 else:
     _STATICBOX_WIDTH = 480
-    PANEL_WIDTH = 530
+    PANEL_WIDTH = 550
     PANEL_HEIGHT = 430
     FONT_VARIANT = 1
     
@@ -518,13 +517,9 @@ class SampleDialog(wx.Dialog):
 if __name__ =="__main__":
     
     app  = wx.App()
-    # Instantiate a loader 
-    loader = Loader()
-    # Load data 
-    data = loader.load("MAR07232_rest.ASC")
-    #print output
-    dlg = SampleDialog(sample=data.sample)
+    from DataLoader.data_info import Sample
+    sample = Sample()
+    dlg = SampleDialog(sample=sample)
     dlg.ShowModal()
-    #print dlg.get_sample()
     app.MainLoop()
  

@@ -19,21 +19,21 @@ else:
     
 class ApertureDialog(wx.Dialog):
     def __init__(self, parent=None, manager=None,aperture=None, *args, **kwds):
-        try:
-            kwds['size'] =(PANEL_WIDTH, PANEL_HEIGHT)
-            kwds['title'] = "Aperture Editor"
-            wx.Dialog.__init__(self, parent=parent, *args, **kwds)
-            self.parent = parent
-            self.manager = manager
-            self._aperture = aperture
-            self._reset_aperture = deepcopy(aperture)
-            self._notes = ""
-            self_description = "Edit aperture"
-            self._do_layout()
-            self.set_values()
-        except:
-            print "error", sys.exc_value
-        
+        """
+            Dialog allows to enter values for aperture
+        """
+        kwds['size'] =(PANEL_WIDTH, PANEL_HEIGHT)
+        kwds['title'] = "Aperture Editor"
+        wx.Dialog.__init__(self, parent=parent, *args, **kwds)
+        self.parent = parent
+        self.manager = manager
+        self._aperture = aperture
+        self._reset_aperture = deepcopy(aperture)
+        self._notes = ""
+        self_description = "Edit aperture"
+        self._do_layout()
+        self.set_values()
+      
     def _define_structure(self):
         """
             define initial sizer 
@@ -315,7 +315,7 @@ class ApertureDialog(wx.Dialog):
                     self._notes += "Change z of aperture size from "
                     self._notes += "%s to %s \n"%(self._aperture.size.z,
                                                    z_aperture_size)
-                    self._aperture.aperture_size.z  = float(z_aperture_size)
+                    self._aperture.size.z  = float(z_aperture_size)
             else:
                 self._notes += "Error: Expected a float for the offset 's x "
                 self._notes += "won't changes z aperture size from "
@@ -355,20 +355,9 @@ if __name__ =="__main__":
     # Instantiate a loader 
     loader = Loader()
     # Load data 
-    data = loader.load("MAR07232_rest.ASC")
-   
-    if len(data.collimation) == 0:
-        from DataLoader.data_info import Collimation
-        collimation = Collimation()
-        from DataLoader.data_info import Aperture
-        aperture = Aperture()
-        dlg = ApertureDialog(aperture=aperture)
-        dlg.ShowModal()
-    else:
-        for collimation in data.collimation:
-            for aperture in collimation:
-                dlg = ApertureDialog(aperture=aperture)
-                dlg.ShowModal()
-                break
+    from DataLoader.data_info import Aperture
+    aperture = Aperture()
+    dlg = ApertureDialog(aperture=aperture)
+    dlg.ShowModal()
     app.MainLoop()
  
