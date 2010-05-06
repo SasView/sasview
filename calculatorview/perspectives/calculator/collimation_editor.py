@@ -68,6 +68,7 @@ class CollimationDialog(wx.Dialog):
         hint_collimation_txt = 'Current available collimation.'
         collimation_name_txt.SetToolTipString(hint_collimation_txt) 
         self.collimation_cbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        wx.EVT_COMBOBOX(self.collimation_cbox, -1, self.on_select_collimation) 
         hint_collimation_name_txt = 'Name of collimations.'
         self.collimation_cbox.SetToolTipString(hint_collimation_name_txt) 
    
@@ -228,6 +229,8 @@ class CollimationDialog(wx.Dialog):
         self.collimation_cbox.SetSelection(position) 
         self.enable_collimation() 
         self.bt_add_aperture.Enable()
+        self.fill_aperture_combox()
+        self.enable_aperture()
         self.set_values()
         
     def remove_collimation(self, event):
@@ -257,6 +260,14 @@ class CollimationDialog(wx.Dialog):
         self.enable_collimation()
         self.enable_aperture()
         
+    def on_select_collimation(self, event):
+        """
+           fill the control on the panel according to the current  selected collimation 
+        """
+        self.set_values()
+        self.fill_aperture_combox()
+        self.enable_aperture()
+    
     def enable_collimation(self):
         """
             Enable /disable widgets related to collimation
@@ -365,7 +376,7 @@ class CollimationDialog(wx.Dialog):
             self.bt_remove_aperture.Enable()
             n_aperture = self.aperture_cbox.GetCount()
             aperture_hint_txt = 'apertures available: %s '%str(n_aperture)
-            if len(collimation.aperture) > 1:
+            if len(collimation.aperture) > 0:
                 self.bt_remove_aperture.Enable()
             else:
                 self.bt_remove_aperture.Disable()
@@ -392,10 +403,10 @@ class CollimationDialog(wx.Dialog):
         """
             fill the current combobox with the available aperture
         """
+        self.aperture_cbox.Clear()
         collimation, _, _ = self.get_current_collimation()
         if collimation is None or not collimation.aperture:
             return
-        
         for aperture in collimation.aperture:
             pos = self.aperture_cbox.Append(str(aperture.name))
             self.aperture_cbox.SetClientData(pos, aperture)

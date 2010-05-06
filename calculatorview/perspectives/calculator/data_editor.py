@@ -13,7 +13,7 @@ from console import ConsoleDialog
 from sans.guiframe.utils import check_float
 from sans.guicomm.events import StatusEvent
 
-_BOX_WIDTH = 76
+
 _QMIN_DEFAULT = 0.001
 _QMAX_DEFAULT = 0.13
 _NPTS_DEFAULT = 50
@@ -22,8 +22,10 @@ if sys.platform.count("darwin")==0:
     PANEL_WIDTH = 500
     PANEL_HEIGTH = 350
     FONT_VARIANT = 0
+    _BOX_WIDTH = 51
     ON_MAC = False
 else:
+    _BOX_WIDTH = 76
     PANEL_WIDTH = 550
     PANEL_HEIGTH = 400
     FONT_VARIANT = 1
@@ -193,23 +195,23 @@ class DataEditorPanel(wx.ScrolledWindow):
         """
             Do the layout for the button widgets
         """ 
-        self.bt_summary = wx.Button(self, -1, "View", size=(_BOX_WIDTH*2/3,-1))
+        self.bt_summary = wx.Button(self, -1, "View", size=(_BOX_WIDTH,-1))
         self.bt_summary.SetToolTipString("View final changes on data.")
         self.bt_summary.Bind(wx.EVT_BUTTON, self.on_click_view)
         
-        self.bt_save = wx.Button(self, -1, "Save As", size=(_BOX_WIDTH*2/3,-1))
+        self.bt_save = wx.Button(self, -1, "Save As", size=(_BOX_WIDTH,-1))
         self.bt_save.SetToolTipString("Save changes in a file.")
         self.bt_save.Bind(wx.EVT_BUTTON, self.on_click_save)
         
-        self.bt_apply = wx.Button(self, -1, "Apply", size=(_BOX_WIDTH*2/3,-1))
+        self.bt_apply = wx.Button(self, -1, "Apply", size=(_BOX_WIDTH,-1))
         self.bt_apply.SetToolTipString("Save changes into the imported data.")
         self.bt_apply.Bind(wx.EVT_BUTTON, self.on_click_apply)
       
-        self.bt_reset = wx.Button(self, -1,'Reset', size=(_BOX_WIDTH*2/3,-1))
+        self.bt_reset = wx.Button(self, -1,'Reset', size=(_BOX_WIDTH,-1))
         self.bt_reset.Bind(wx.EVT_BUTTON, self.on_click_reset)
         self.bt_reset.SetToolTipString("Reset data to its initial state.")
         
-        self.bt_close = wx.Button(self, -1,'Close', size=(_BOX_WIDTH*2/3,-1))
+        self.bt_close = wx.Button(self, -1,'Close', size=(_BOX_WIDTH,-1))
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
         self.bt_close.SetToolTipString("Close this panel.")
         
@@ -554,37 +556,35 @@ class DataEditorPanel(wx.ScrolledWindow):
         """
             Save change into a file
         """
-        data, data_name, position = self.get_current_data()
-        if data is None:
+        if not self._data:
             return
         self.on_change_run(event=None)
         self.on_change_title(event=None)
-        
-        if issubclass(data.__class__, Data2D):
-            msg = "No conventional writing format for \n\n"
-            msg += "Data2D at this time.\n"
-            dlg = wx.MessageDialog(None, msg, 'Error Loading File',
-                                         wx.OK | wx.ICON_EXCLAMATION)
-            dlg.ShowModal()   
-            return 
-            
         path = None
         wildcard = "CanSAS 1D files(*.xml)|*.xml" 
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location, "",wildcard , wx.SAVE)
        
-        if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
-            mypath = os.path.basename(path)
-            loader = Loader() 
-            format = ".xml"
-            if os.path.splitext(mypath)[1].lower() ==format:
-                loader.save( path, data, format)
-            try:
-                self._default_save_location = os.path.dirname(path)
-            except:
-                pass    
-        dlg.Destroy()
+        for data in self._data:
+            if issubclass(data.__class__, Data2D):
+                msg = "No conventional writing format for \n\n"
+                msg += "Data2D at this time.\n"
+                dlg = wx.MessageDialog(None, msg, 'Error Loading File',
+                                             wx.OK | wx.ICON_EXCLAMATION)
+                dlg.ShowModal()   
+            else:
+                if dlg.ShowModal() == wx.ID_OK:
+                    path = dlg.GetPath()
+                    mypath = os.path.basename(path)
+                    loader = Loader() 
+                    format = ".xml"
+                    if os.path.splitext(mypath)[1].lower() ==format:
+                        loader.save( path, data, format)
+                    try:
+                        self._default_save_location = os.path.dirname(path)
+                    except:
+                        pass    
+                    dlg.Destroy()
         
     def on_click_view(self, event):
         """
