@@ -58,6 +58,7 @@ class InvariantPanel(ScrolledPanel):
         kwds["size"]= (PANEL_WIDTH, PANEL_HEIGHT)
         kwds["style"]= wx.FULL_REPAINT_ON_RESIZE
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
+        self.SetupScrolling()
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         #Object that receive status event
@@ -76,8 +77,7 @@ class InvariantPanel(ScrolledPanel):
         if self.parent is not None:
             msg = ""
             wx.PostEvent(self.parent,StatusEvent(status=msg, info="info"))
-        self.SetupScrolling()
-       
+
     def err_check_on_data(self):
         """
             Check if data is valid for further computation
