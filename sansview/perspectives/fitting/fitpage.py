@@ -1436,7 +1436,8 @@ class FitPage(BasicPage):
             wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Smear: %s"%msg))
             return
-        
+        # Need update param values
+        self._update_paramv_on_fit()
         # msg default
         msg = None
         if event != None:
@@ -1575,6 +1576,8 @@ class FitPage(BasicPage):
             wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Smear: %s"%msg))
             return
+        # Need update param values
+        self._update_paramv_on_fit()
         # msg default
         msg = None
         # for event given
@@ -1728,6 +1731,9 @@ class FitPage(BasicPage):
             wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Smear: %s"%msg))
             return
+        # Need update param values
+        self._update_paramv_on_fit()
+        
         temp_smearer = None
         self._get_smear_info()
         
