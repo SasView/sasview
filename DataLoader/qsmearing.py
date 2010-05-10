@@ -12,6 +12,7 @@ import DataLoader.extensions.smearer as smearer
 import numpy
 import math
 import logging, sys
+from DataLoader.smearing_2d import Smearer2D
 
 def smear_selection(data1D):
     """
@@ -33,7 +34,11 @@ def smear_selection(data1D):
     # Sanity check. If we are not dealing with a SANS Data1D
     # object, just return None
     if  data1D.__class__.__name__ != 'Data1D':
-        return None
+        if data1D == None:
+            return None
+        elif data1D.dqx_data == None or data1D.dqy_data == None:
+            return None
+        return Smearer2D(data1D)
     
     if  not hasattr(data1D, "dx") and not hasattr(data1D, "dxl") and not hasattr(data1D, "dxw"):
         return None

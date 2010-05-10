@@ -260,7 +260,9 @@ class FitData2D(Data2D):
         self.index_model=[]
         self.qmin= None
         self.qmax= None
+        self.smearer = None
         self.set_data(sans_data2d )
+
         
     def set_data(self, sans_data2d, qmin=None, qmax=None ):
         """
@@ -293,7 +295,17 @@ class FitData2D(Data2D):
         self.index_model = ((self.qmin <= self.radius)&(self.radius<= self.qmax))
         self.index_model = (self.index_model) & (self.mask)
         self.index_model = (self.index_model) & (numpy.isfinite(self.data))
-           
+        
+    def set_smearer(self,smearer):  
+        """
+            Set smearer
+        """
+        if smearer == None:
+            return
+        self.smearer = smearer
+        self.smearer.set_index(self.index_model)
+        self.smearer.get_data()
+
     def setFitRange(self,qmin=None,qmax=None):
         """ to set the fit range"""
         if qmin==0.0:
@@ -316,10 +328,17 @@ class FitData2D(Data2D):
     def residuals(self, fn): 
         """
             @return the residuals
-        """        
+        """ 
+        if self.smearer != None:
+            fn.set_index(self.index_model)
+            # Get necessary data from self.data and set the data for smearing
+            fn.get_data()
+
+            gn = fn.get_value()  
+        else:
+            gn = fn([self.qx_data[self.index_model],self.qy_data[self.index_model]])
         # use only the data point within ROI range
-        res=(self.data[self.index_model] - fn([self.qx_data[self.index_model],
-                             self.qy_data[self.index_model]]))/self.res_err_data[self.index_model]
+        res=(self.data[self.index_model] - gn)/self.res_err_data[self.index_model]
         return res
         
  

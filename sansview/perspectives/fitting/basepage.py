@@ -13,6 +13,7 @@ from pagestate import PageState
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
 (PreviousStateEvent, EVT_PREVIOUS_STATE)   = wx.lib.newevent.NewEvent()
 (NextStateEvent, EVT_NEXT_STATE)   = wx.lib.newevent.NewEvent()
+
 _BOX_WIDTH = 76
 _QMIN_DEFAULT = 0.001
 _QMAX_DEFAULT = 0.13
@@ -54,6 +55,7 @@ class BasicPage(wx.ScrolledWindow):
         ## data
         self.data = None
         self.mask = None
+        self.theory = None
         self.state = PageState(parent=parent)
         ## dictionary containing list of models
         self.model_list_box = None
@@ -135,7 +137,7 @@ class BasicPage(wx.ScrolledWindow):
         ## save initial state on context menu
         #self.onSave(event=None)
         self.Bind(wx.EVT_CONTEXT_MENU, self.onContextMenu)
-        
+
         ## create the basic structure of the panel with empty sizer
         self.define_page_structure()
         ## drawing Initial dispersion parameters sizer 
@@ -1096,7 +1098,7 @@ class BasicPage(wx.ScrolledWindow):
                     elif self.pinhole_smearer.GetValue():
                         flag = self.update_pinhole_smear()
                     else:
-                        self.manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
+                        self.manager.set_smearer_nodraw(smearer=temp_smearer, qmin= float(self.qmin_x),
                                                  qmax= float(self.qmax_x))
                 elif not is_2Ddata:
                     self.manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
@@ -1361,13 +1363,13 @@ class BasicPage(wx.ScrolledWindow):
                 if not self.disable_smearer.GetValue():
                     temp_smear= self.current_smearer
             
-            self.manager.draw_model(self.model, data=self.data,
+            self.manager.draw_model(self.model, 
+                                    data=self.data,
                                     smearer= temp_smear,
                                     qmin=float(self.qmin_x), 
                                     qmax=float(self.qmax_x),
                                     qstep= float(self.num_points),
-                                    enable2D=self.enable2D) 
-       
+                                    enable2D=self.enable2D)
         
     def _set_model_sizer(self,sizer, box_sizer, title="", object=None):
         """
@@ -1506,6 +1508,7 @@ class BasicPage(wx.ScrolledWindow):
             @param list: contains item to fill the combox
             item must model class
         """
+        st = time.time()
         for models in list:
             model= models()
             name = model.__class__.__name__
@@ -1513,7 +1516,7 @@ class BasicPage(wx.ScrolledWindow):
                 if hasattr(model, "name"):
                     name = model.name
                 combobox.Append(name,models)
-     
+
         return 0
 
     #def _onparamEnter(self,event):
@@ -1628,8 +1631,8 @@ class BasicPage(wx.ScrolledWindow):
             self.text2.Show()
             self.structurebox.Enable()
             self.text2.Enable()
-        if self.data.__class__.__name__ =="Data2D":
-            self.smear_description_2d.Show(True)
+        #if self.data.__class__.__name__ =="Data2D":
+            #self.smear_description_2d.Show(True)
             
         s_id = self.structurebox.GetCurrentSelection()
         struct_factor = self.structurebox.GetClientData( s_id )
@@ -2151,7 +2154,8 @@ class BasicPage(wx.ScrolledWindow):
         """
         if ON_MAC == True:
             time.sleep(1)
-             
+            
+
     def on_reset_clicked(self,event):
         """
         #On 'Reset' button  for Q range clicked
@@ -2166,6 +2170,14 @@ class BasicPage(wx.ScrolledWindow):
             y= max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
             self.qmin_x = data_min
             self.qmax_x = math.sqrt(x*x + y*y)
+            # check smearing
+            if not self.disable_smearer.GetValue():
+                temp_smearer= self.current_smearer
+                ## set smearing value whether or not the data contain the smearing info
+                if self.pinhole_smearer.GetValue():
+                    flag = self.update_pinhole_smear()
+                else:
+                    flag = True
         elif self.data.__class__.__name__ != "Data2D":
             self.qmin_x = min(self.data.x)
             self.qmax_x = max(self.data.x)
@@ -2204,7 +2216,7 @@ class BasicPage(wx.ScrolledWindow):
         
         #reset the q range values
         self._reset_plotting_range(self.state)
-        self.compute_chisqr(smearer=self.current_smearer)
+        #self.compute_chisqr(smearer=self.current_smearer)
         #Re draw plot
         self._draw_model()
 

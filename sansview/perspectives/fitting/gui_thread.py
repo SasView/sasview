@@ -9,7 +9,7 @@ import wx
 
 from data_util.calcthread import CalcThread
 from sans.fit.AbstractFitEngine import FitData2D, FitData1D, SansAssembly
-
+from DataLoader.smearing_2d import Smearer2D
 
 class CalcChisqr1D(CalcThread):
     """
@@ -86,6 +86,7 @@ class CalcChisqr2D(CalcThread):
     """
     
     def __init__(self,data2d, model,
+                 smearer,
                  qmin,
                  qmax,
                  completefn = None,
@@ -104,12 +105,12 @@ class CalcChisqr2D(CalcThread):
         if data2d.__class__.__name__ !="Data2D":
             msg= str(data2d.__class__.__name__)
             raise ValueError, "need Data2D to compute chisqr. Current class %s"%msg
-       
+        self.smearer = smearer
         self.fitdata = FitData2D(sans_data2d=data2d ,data=data2d.data, err_data=data2d.err_data)
         self.fitdata.setFitRange(qmin=qmin,qmax=qmax)
      
         self.model = model
-      
+
         self.starttime = 0  
         
     def isquit(self):
@@ -127,11 +128,21 @@ class CalcChisqr2D(CalcThread):
             Compute the data given a model function
         """
         self.starttime = time.time()
-       
+        
         output= None
         res=[]
         try:
-            res = self.fitdata.residuals(self.model.evalDistribution)
+            if self.smearer == None:
+                fn = self.model.evalDistribution
+            else:
+                # Set model in smearer
+                self.smearer.set_model(self.model)
+                # set fn
+                fn = self.smearer
+                # set self.smearer != None in fitdata
+                self.fitdata.set_smearer(fn)
+
+            res = self.fitdata.residuals(fn)
             sum=0
             for item in res:
                 # Check whether we need to bail out

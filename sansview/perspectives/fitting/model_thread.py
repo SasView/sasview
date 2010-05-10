@@ -2,7 +2,8 @@ import time
 from data_util.calcthread import CalcThread
 import sys
 import numpy,math
-
+from DataLoader.smearing_2d import Smearer2D
+import fitpage
 class Calc2D(CalcThread):
     """
         Compute 2D model
@@ -11,7 +12,7 @@ class Calc2D(CalcThread):
         and I(qx, qy) = I(-qx, -qy) is assumed.
     """
     
-    def __init__(self, x, y, data,model,qmin, qmax,qstep,
+    def __init__(self, x, y, data,model,smearer,qmin, qmax,qstep,
                  completefn = None,
                  updatefn   = None,
                  yieldtime  = 0.01,
@@ -30,6 +31,7 @@ class Calc2D(CalcThread):
         self.data= data
         # the model on to calculate
         self.model = model
+        self.smearer = smearer#(data=self.data,model=self.model)
         self.starttime = 0  
         
     def compute(self):
@@ -50,6 +52,8 @@ class Calc2D(CalcThread):
             self.I_data = self.data.data
             self.qx_data = self.data.qx_data
             self.qy_data = self.data.qy_data
+            self.dqx_data = self.data.dqx_data
+            self.dqy_data = self.data.dqy_data
             self.mask    = self.data.mask
         else:          
             xbin =  numpy.linspace(start= -1*self.qmax,
@@ -85,27 +89,39 @@ class Calc2D(CalcThread):
         if self.data ==None:
             # Only qmin value will be consider for the detector
             index_model = index_data  
-             
-        value = self.model.evalDistribution([self.qx_data[index_model],self.qy_data[index_model]] )
+
+        if self.smearer != None:
+            # Set smearer w/ data, model and index.
+            fn = self.smearer
+            fn.set_model(self.model)
+            fn.set_index(index_model)
+            # Get necessary data from self.data and set the data for smearing
+            fn.get_data()
+            # Calculate smeared Intensity (by Gaussian averaging): DataLoader/smearing2d/Smearer2D()
+            value = fn.get_value()
+
+        else:    
+            # calculation w/o smearing
+            value =  self.model.evalDistribution([self.qx_data[index_model],self.qy_data[index_model]])
 
         output = numpy.zeros(len(self.qx_data))
         
         # output default is None
-        # This method is to distinguish between masked point and data point = 0.
+        # This method is to distinguish between masked point(nan) and data point = 0.
         output = output/output
         # set value for self.mask==True, else still None to Plottools
         output[index_model] = value 
+
         elapsed = time.time()-self.starttime
         self.complete( image = output,
                        data = self.data , 
                        model = self.model,
                        elapsed = elapsed,
+                       index = index_model,
                        qmin = self.qmin,
                        qmax = self.qmax,
                        qstep = self.qstep )
         
-   
-    
 
 class Calc1D(CalcThread):
     """Compute 1D data"""
@@ -152,9 +168,14 @@ class Calc1D(CalcThread):
         elapsed = time.time()-self.starttime
        
         self.complete(x= self.x[index], y= output[index], 
-                      elapsed=elapsed, model= self.model, data=self.data)
+                      elapsed=elapsed,index=index, model= self.model, data=self.data)
+
         
- 
+    def results(self):
+        """
+            Send resuts of the computation
+        """
+        return [self.out, self.index]
                 
 class CalcCommandline:
     def __init__(self, n=20000):

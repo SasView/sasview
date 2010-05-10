@@ -43,7 +43,7 @@ DEFAULT_NPTS = 50
 
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
 
-
+from fitpage import Chi2UpdateEvent
 class PlotInfo:
     """
         store some plotting field
@@ -103,7 +103,7 @@ class Plugin:
         self.sim_page=None
         #dictionary containing data name and error on dy of that data 
         self.err_dy = {}
-        
+        self.theory_data = None      
    
         
     def populate_menu(self, id, owner):
@@ -145,7 +145,7 @@ class Plugin:
         self.fit_panel.set_owner(owner)
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
         owner.Bind(fitpage.EVT_MODEL_BOX,self._on_model_panel)
-      
+
         #create  menubar items
         return [(id, self.menu1, "Fitting")]
                
@@ -369,6 +369,21 @@ class Plugin:
             self.calc_fit.stop()
             wx.PostEvent(self.parent, StatusEvent(status="Fitting  \
                 is cancelled" , type="stop"))
+           
+    def set_smearer_nodraw(self,smearer, qmin=None, qmax=None):
+        """
+            Get a smear object and store it to a fit problem
+            @param smearer: smear object to allow smearing data
+        """  
+        self.current_pg=self.fit_panel.get_current_page()
+        self.page_finder[self.current_pg].set_smearer(smearer)
+        ## draw model 1D with smeared data
+        data =  self.page_finder[self.current_pg].get_fit_data()
+        model = self.page_finder[self.current_pg].get_model()
+        ## if user has already selected a model to plot
+        ## redraw the model with data smeared
+        
+        smear =self.page_finder[self.current_pg].get_smearer()   
             
     def set_smearer(self,smearer, qmin=None, qmax=None):
         """
@@ -382,7 +397,7 @@ class Plugin:
         model = self.page_finder[self.current_pg].get_model()
         ## if user has already selected a model to plot
         ## redraw the model with data smeared
-        
+
         smear =self.page_finder[self.current_pg].get_smearer()
         if model!= None:
             self.draw_model( model=model, data= data, smearer= smear,
@@ -404,16 +419,22 @@ class Plugin:
              @param qstep: number of step to divide the x and y-axis
              
         """
-        ## draw model 1D with no loaded data
-        self._draw_model1D( model= model, data= data,enable1D=enable1D, smearer= smearer,
-                           qmin= qmin, qmax= qmax, qstep= qstep )
-        ## draw model 2D with no initial data
-        self._draw_model2D(model=model,
-                           data = data,
-                           enable2D= enable2D,
-                           qmin=qmin,
-                           qmax=qmax,
-                           qstep=qstep)
+
+        if data.__class__.__name__ !="Data2D":    
+            ## draw model 1D with no loaded data
+            self._draw_model1D( model= model, data= data,
+                                                    enable1D=enable1D, 
+                                                    smearer= smearer,
+                                                    qmin= qmin, qmax= qmax, qstep= qstep )
+        else:     
+            ## draw model 2D with no initial data
+             self._draw_model2D(model=model,
+                                      data = data,
+                                      enable2D= enable2D,
+                                      smearer= smearer,
+                                      qmin=qmin,
+                                      qmax=qmax,
+                                      qstep=qstep)
             
     def onFit(self):
         """
@@ -599,7 +620,8 @@ class Plugin:
             msg = "Creating Fit page: %s"%sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
             return
-    
+
+        
     def _onEVT_SLICER_PANEL(self, event):
         """
             receive and event telling to update a panel with a name starting with 
@@ -1086,7 +1108,7 @@ class Plugin:
         return my_info
                 
                 
-    def _complete1D(self, x,y, elapsed,model,data=None):
+    def _complete1D(self, x,y, elapsed,index,model,data=None):
         """
             Complete plotting 1D data
         """ 
@@ -1105,6 +1127,8 @@ class Plugin:
                 new_plot.is_data =False 
            
             title= new_plot.name
+            # x, y are only in range of index 
+            self.theory_data = new_plot
             #new_plot.perspective = self.get_perspective()
             # Pass the reset flag to let the plotting event handler
             # know that we are replacing the whole plot
@@ -1115,6 +1139,9 @@ class Plugin:
                              title=str(title), reset=True))
             else:
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,title= str(title)))
+            # Chisqr in fitpage
+            current_pg=self.fit_panel.get_current_page()
+            wx.PostEvent(current_pg,Chi2UpdateEvent(output=self._cal_chisqr(data=data,index=index)))
             msg = "Plot 1D  complete !"
             wx.PostEvent( self.parent, StatusEvent(status=msg , type="stop" ))
         except:
@@ -1133,7 +1160,7 @@ class Plugin:
         #self.calc_thread.ready(0.01)
         
         
-    def _complete2D(self, image,data, model,  elapsed,qmin, qmax,qstep=DEFAULT_NPTS):
+    def _complete2D(self, image,data, model,  elapsed,index,qmin, qmax,qstep=DEFAULT_NPTS):
         """
             Complete get the result of modelthread and create model 2D
             that can be plot.
@@ -1164,23 +1191,25 @@ class Plugin:
             theory.ymax= data.ymax
             theory.xmin= data.xmin
             theory.xmax= data.xmax
-      
-       
+            
+        self.theory_data = theory
         ## plot
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
                          title="Analytical model 2D ", reset=True ))
+        # Chisqr in fitpage
+        current_pg=self.fit_panel.get_current_page()
+        wx.PostEvent(current_pg,Chi2UpdateEvent(output=self._cal_chisqr(data=data,index=index)))
         msg = "Plot 2D complete !"
         wx.PostEvent( self.parent, StatusEvent( status= msg , type="stop" ))
-         
+     
     def _on_data_error(self, event):
         """
             receives and event from plotting plu-gins to store the data name and 
             their errors of y coordinates for 1Data hide and show error
         """
         self.err_dy = event.err_dy
-        #print "receiving error dy",self.err_dy
          
-    def _draw_model2D(self,model,data=None,description=None, enable2D=False,
+    def _draw_model2D(self,model,data=None, smearer= None,description=None, enable2D=False,
                       qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
         """
             draw model in 2D
@@ -1207,30 +1236,32 @@ class Plugin:
                 enable2D = True
                 x= data.x_bins
                 y= data.y_bins
-                
+               
         if not enable2D:
-            return
+            return None,None
         try:
             from model_thread import Calc2D
             ## If a thread is already started, stop it
             if self.calc_2D != None and self.calc_2D.isrunning():
                 self.calc_2D.stop()
+
             self.calc_2D = Calc2D(  x= x,
                                     y= y,
                                     model= model, 
                                     data = data,
+                                    smearer = smearer,
                                     qmin= qmin,
                                     qmax= qmax,
                                     qstep= qstep,
                                     completefn= self._complete2D,
                                     updatefn= self._update2D )
             self.calc_2D.queue()
-            
+
         except:
             msg= " Error occurred when drawing %s Model 2D: "%model.name
             msg+= " %s"%sys.exc_value
             wx.PostEvent( self.parent, StatusEvent(status= msg ))
-            return  
+
    
     def _draw_model1D(self, model, data=None, smearer= None,
                 qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep= DEFAULT_NPTS,enable1D= True):
@@ -1256,7 +1287,7 @@ class Plugin:
            
         
         if not enable1D:
-            return
+            return 
     
         try:
             from model_thread import Calc1D
@@ -1272,14 +1303,44 @@ class Plugin:
                                   completefn = self._complete1D,
                                   updatefn = self._update1D  )
             self.calc_1D.queue()
-            
+
         except:
             msg= " Error occurred when drawing %s Model 1D: "%model.name
             msg+= " %s"%sys.exc_value
             wx.PostEvent( self.parent, StatusEvent(status= msg ))
-            return  
-            
 
+    def _cal_chisqr(self, data=None, index=None): 
+        """
+            Get handy Chisqr using the output from draw1D and 2D, 
+            instead of calling expansive CalcChisqr in guithread
+        """
+        # default chisqr
+        chisqr = None
+        # return None if data == None
+        if data == None: return chisqr
+
+        # Get data: data I, theory I, and data dI in order
+        if data.__class__.__name__ =="Data2D":
+            if index == None: index = numpy.ones(len(data.data),ntype=bool)
+            fn = data.data[index] 
+            gn = self.theory_data.data[index]
+            en = data.err_data[index]
+        else:
+            # 1 d theory from model_thread is only in the range of index
+            if index == None: index = numpy.ones(len(data.y),ntype=bool)
+            
+            fn = data.y[index] 
+            gn = self.theory_data.y
+            en = data.dy[index]
+
+        # residual
+        res = (fn - gn)/en
+        # get chisqr only w/finite
+        chisqr = numpy.average(res[numpy.isfinite(res)]*res[numpy.isfinite(res)])
+
+        return chisqr
+    
+    
 def profile(fn, *args, **kw):
     import cProfile, pstats, os
     global call_result
