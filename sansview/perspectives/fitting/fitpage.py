@@ -23,7 +23,7 @@ from sans.guiframe.utils import format_number,check_float
 _BOX_WIDTH = 76
 _DATA_BOX_WIDTH = 300
 SMEAR_SIZE_L = 0.005
-SMEAR_SIZE_H = 0.01
+SMEAR_SIZE_H = 0.006
 
 import basepage
 from basepage import BasicPage
@@ -882,7 +882,8 @@ class FitPage(BasicPage):
         self.fitrange = True
         #get event object
         tcrtl= event.GetEventObject()
-
+        wx.PostEvent(self.manager.parent, StatusEvent(status=" \
+                                updating ... ",type="update"))
         #Clear msg if previously shown.
         msg= ""
         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
@@ -1213,16 +1214,20 @@ class FitPage(BasicPage):
             Select an accuracy in 2D custom smear: Xhigh, High, Med, or Low
         """
         #event.Skip()
-        accuracy = event.GetEventObject()
         
-        self.smear2d_accuracy = accuracy.GetValue()
+        # Check if the accuracy is same as before
+        # Mac does not get the GetEventObject; use the line below
+        #self.smear2d_accuracy = event.GetEventObject().GetValue()
+        self.smear2d_accuracy = self.smear_accuracy.GetValue()
         if self.pinhole_smearer.GetValue():
             self.onPinholeSmear(event=None)
-        
-        else:    self.onSmear(event=None)
-        if self.current_smearer !=None:
+        else:    
+            self.onSmear(event=None)
+            if self.current_smearer != None:
                 self.current_smearer.set_accuracy(accuracy = self.smear2d_accuracy)
+               
         event.Skip()
+        
     def _onMask(self, event):     
         """
             Build a panel to allow to edit Mask
@@ -1527,6 +1532,7 @@ class FitPage(BasicPage):
         """
             Create a custom pinhole smear object that will change the way residuals
             are compute when fitting
+            @ accuracy: given by strings'High','Med', 'Low' FOR 2d,  None for 1D
         """
 
         if self.check_invalid_panel():
@@ -1657,6 +1663,9 @@ class FitPage(BasicPage):
                 if self._is_2D(): data.dqy_data[data.dqy_data==0] = self.dx_max
                 else: data.dx[data.dx==0] = self.dx_max          
             self.current_smearer = smear_selection(data)
+            # 2D need to set accuracy
+            if self._is_2D(): 
+                self.current_smearer.set_accuracy(accuracy = self.smear2d_accuracy)
 
         if msg != None:
             wx.PostEvent(self.manager.parent, StatusEvent(status = msg ))
@@ -1665,7 +1674,6 @@ class FitPage(BasicPage):
             get_pin_max.SetBackgroundColour("white")
         ## set smearing value whether or not the data contain the smearing info
         self.manager.set_smearer(smearer=self.current_smearer, qmin= float(self.qmin_x),qmax= float(self.qmax_x))
- 
         return msg
         
     def update_pinhole_smear(self):

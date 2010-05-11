@@ -1062,12 +1062,10 @@ class BasicPage(wx.ScrolledWindow):
         flag = True
         self.fitrange = True
         is_modified = False
-        is_2Ddata = False
 
-        # check if 2d data
-        if self.data.__class__.__name__ =="Data2D":
-            is_2Ddata = True
-        
+        wx.PostEvent(self.manager.parent, StatusEvent(status=" \
+        updating ... ",type="update"))
+
         ##So make sure that update param values on_Fit.
         #self._undo.Enable(True)
         if self.model !=None:           
@@ -1100,13 +1098,13 @@ class BasicPage(wx.ScrolledWindow):
                     else:
                         self.manager.set_smearer_nodraw(smearer=temp_smearer, qmin= float(self.qmin_x),
                                                  qmax= float(self.qmax_x))
-                elif not is_2Ddata:
+                elif not self._is_2D():
                     self.manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
                                                  qmax= float(self.qmax_x))
                     index_data = ((self.qmin_x <= self.data.x)&(self.data.x <= self.qmax_x))
                     self.Npts_fit.SetValue(str(len(self.data.x[index_data==True])))
                     flag = True
-                if is_2Ddata:
+                if self._is_2D():
                     # only 2D case set mask   
                     flag = self._validate_Npts()
                     if not flag:
@@ -1118,10 +1116,10 @@ class BasicPage(wx.ScrolledWindow):
         #For invalid q range, disable the mask editor and fit button, vs.    
         if not self.fitrange:
             #self.btFit.Disable()
-            if is_2Ddata:self.btEditMask.Disable()
+            if self._is_2D():self.btEditMask.Disable()
         else:
             #self.btFit.Enable(True)
-            if is_2Ddata:self.btEditMask.Enable(True)
+            if self._is_2D():self.btEditMask.Enable(True)
 
         
         if not flag:
