@@ -1096,7 +1096,7 @@ class FitPage(BasicPage):
         elif self.data.__class__.__name__ == 'Data2D':  
             if data.dqx_data == None or  data.dqy_data ==None: 
                 return
-            elif self.smearer != None and all(data.dqx_data !=0)and all(data.dqy_data !=0): 
+            elif self.smearer != None and (data.dqx_data.any()!=0) and (data.dqx_data.any()!=0): 
                 self.smear_type = "Pinhole2d"
                 self.dq_l = format_number(numpy.average(data.dqx_data)) 
                 self.dq_r = format_number(numpy.average(data.dqy_data))  
