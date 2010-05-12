@@ -281,11 +281,12 @@ class Reader:
         # Store the sample to detector distance
         detector.distance = distance
         
-        # optional data: if any of dq data == 0, do not pass to output
-        if len(dqx_data) == len(qx_data):
-            output.dqx_data = dqx_data
-        if len(dqy_data) == len(qy_data):
-            output.dqy_data = dqy_data
+        # optional data: if all of dq data == 0, do not pass to output
+        if len(dqx_data) == len(qx_data) and dqx_data.any()!=0: 
+            # if no dqx_data, do not pass dqy_data.(1 axis dq is not supported yet).
+            if len(dqy_data) == len(qy_data) and dqy_data.any()!=0:
+                output.dqx_data = dqx_data
+                output.dqy_data = dqy_data
         
         # Units of axes
         if data_conv_q is not None:
