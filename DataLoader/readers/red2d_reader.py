@@ -42,11 +42,11 @@ class Reader:
         if not os.path.isfile(filename):
             raise ValueError, \
             "Specified file %s is not a regular file" % filename
-        
+
         # Read file
         f = open(filename,'r')
         buf = f.read()
-        
+        f.close()     
         # Instantiate data object
         output = Data2D()
         output.filename = os.path.basename(filename)
@@ -93,17 +93,18 @@ class Reader:
             # Test it
             data_conv_i(1.0, output.I_unit)            
         
-        #Set the space for data
-        data = numpy.zeros(0)
-        qx_data = numpy.zeros(0)
-        qy_data = numpy.zeros(0)
-        q_data = numpy.zeros(0)
-        dqx_data = numpy.zeros(0)
-        dqy_data = numpy.zeros(0)
-        mask = numpy.zeros(0,dtype=bool)
-        
-        #Read Header and 2D data
+              
+        # Remove the last lines before the for loop if the lines are empty
+        # to calculate the exact number of data points
+        count = 0
+        while (len(lines[len(lines)-(count+1)].lstrip().rstrip()) < 1):
+            del lines[len(lines)-(count+1)]
+            count = count + 1
+
+        #Read Header and find the dimensions of 2D data
+        line_num = 0
         for line in lines:      
+            line_num += 1
             ## Reading the header applies only to IGOR/NIST 2D q_map data files
             # Find setup info line
             if isInfo:
@@ -158,71 +159,64 @@ class Reader:
 
             ## Read and get data.   
             if dataStarted == True:
-                line_toks = line.split()               
+                line_toks = line.split()              
                 if len(line_toks) == 0:
                     #empty line
                     continue
-                elif len(line_toks) < 3: 
-                    #Q-map 2d require 3 or more columns of data          
-                    raise ValueError,"Igor_Qmap_Reader: Can't read this file: Not a proper file format"
+                # the number of columns must be stayed same 
+                col_num = len(line_toks)
+                break
 
-                # defaults 
-                dqx_value  = None
-                dqy_value  = None
-                qz_value   = None
-                mask_value = 0
-                
-                ##Read and get data values
-                qx_value =  float(line_toks[0])
-                qy_value =  float(line_toks[1])
-                value    =  float(line_toks[2])
-                
-                try:
-                    #Read qz_value if exist on 4th column
-                    qz_value = float(line_toks[3])                    
-                except:
-                    # Found a non-float entry, skip it: Not required.
-                    pass                            
-                try:
-                    #Read qz_value if exist on 5th column
-                    dqx_value = float(line_toks[4])
-                except:
-                    # Found a non-float entry, skip it: Not required.
-                    pass
-                try:
-                    #Read qz_value if exist on 6th column
-                    dqy_value = float(line_toks[5])
-                except:
-                    # Found a non-float entry, skip it: Not required.
-                    pass                
-                try:
-                    #Read beam block mask if exist on 7th column
-                    mask_value = float(line_toks[6])
-                except:
-                    # Found a non-float entry, skip it
-                    pass 
-                                             
-                # get data  
-                data    = numpy.append(data, value)
-                qx_data = numpy.append(qx_data, qx_value)
-                qy_data = numpy.append(qy_data, qy_value)
-                
-                # optional data
-                if dqx_value != None and numpy.isfinite(dqx_value):               
-                    dqx_data = numpy.append(dqx_data, dqx_value)
-                if dqy_value != None and numpy.isfinite(dqy_value): 
-                    dqy_data = numpy.append(dqy_data, dqy_value) 
-                    
-                # default data
-                if qz_value == None or not numpy.isfinite(qz_value): 
-                    qz_value = 0  
-                if not numpy.isfinite(mask_value): 
-                    mask_value = 1             
-                q_data  = numpy.append(q_data,numpy.sqrt(qx_value**2+qy_value**2+qz_value**2))
-                # Note: For convenience, mask = False stands for masked, while mask = True for unmasked
-                mask    = numpy.append(mask,(mask_value>=1))
-                
-        f.close()        
+        
+        # Make numpy array to remove header lines using index
+        lines_array = numpy.array(lines)
+
+        # index for lines_array
+        lines_index = numpy.arange(len(lines))
+        
+        # get the data lines
+        data_lines = lines_array[lines_index>=(line_num-1)]
+        # Now we get the total number of rows (i.e., # of data points)
+        row_num = len(data_lines)
+        # make it as list again to control the separators
+        data_list = " ".join(data_lines.tolist())
+        # split all data to one big list w/" "separator
+        data_list = data_list.split()
+ 
+        # Check if the size is consistent with data, otherwise try the tab(\t) separator
+        # (this may be removed once get the confidence the former working all cases).
+        if len(data_list) != (len(data_lines)) * col_num:
+            data_list = "\t".join(data_lines.tolist())
+            data_list = data_list.split()
+            
+        # Change it(string) into float
+        data_list = map(float,data_list)
+        # numpy array form
+        data_array = numpy.array(data_list)
+
+        # Redimesion based on the row_num and col_num, otherwise raise an error.
+        try:
+            data_point = data_array.reshape(row_num,col_num).transpose()
+        except:
+            raise ValueError, "red2d_reader: Can't read this file: Not a proper file format"
+        
+        ## Get the all data: Let's HARDcoding; Todo find better way
+        # Defaults
+        dqx_data = numpy.zeros(0)
+        dqy_data = numpy.zeros(0)
+        qz_data = numpy.zeros(row_num)
+        mask = numpy.ones(row_num,dtype=bool)
+        # Get from the array
+        qx_data = data_point[0]
+        qy_data = data_point[1]
+        data = data_point[2]
+        if col_num >3: qz_data = data_point[3]
+        if col_num >4: dqx_data = data_point[4]
+        if col_num >5: dqy_data = data_point[5]
+        if col_num >6: mask[data_point[6]<1] = False
+        q_data = numpy.sqrt(qx_data*qx_data+qy_data*qy_data+qz_data*qz_data)
+           
+        # Extra protection(it is needed for some data files): 
         # If all mask elements are False, put all True
         if not mask.any(): mask[mask==False] = True   
   
@@ -314,3 +308,4 @@ if __name__ == "__main__":
     reader = Reader()
     print reader.read("../test/exp18_14_igor_2dqxqy.dat") 
         
+
