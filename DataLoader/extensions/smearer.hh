@@ -60,7 +60,7 @@ class SlitSmearer : public BaseSmearer {
 
 protected:
     // Number of points used in the smearing computation
-    static const int npts   = 10000;
+    static const int npts   = 1000;
 
 public:
     // Slit width in Q units
