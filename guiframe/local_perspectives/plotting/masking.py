@@ -452,6 +452,16 @@ class MaskPanel(wx.Dialog):
         
        
         ##use this method
+        #set zmax and zmin to plot: Fix it w/ data.
+        if self.plotpanel.scale == 'log':
+            zmax = math.log(max(self.data.data[self.data.data>0]))
+            if min(self.data.data) == 0:
+                zmin = 0
+            else:
+                zmin = math.log(min(self.data.data[self.data.data>0]))
+        else:
+            zmax = max(self.data.data[self.data.data>0])
+            zmin = min(self.data.data[self.data.data>0])
         #plot    
         plot = self.plotpanel.image(data= temp_mask,
                        qx_data=self.data.qx_data,
@@ -460,8 +470,8 @@ class MaskPanel(wx.Dialog):
                        xmax= self.data.xmax,
                        ymin= self.data.ymin,
                        ymax= self.data.ymax,
-                       zmin= None,
-                       zmax= None,
+                       zmin= zmin,
+                       zmax= zmax,
                        cmap= self.cmap,
                        color=0,symbol=0,label=self.data.name)
         
@@ -567,7 +577,29 @@ class Maskplotpanel(PlotPanel):
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
 
+class ViewerFrame(wx.Frame):
+    """
+        Add comment
+    """
+    def __init__(self, parent, id, title):
+        """
+            comment
+            @param parent: parent panel/container
+        """
+        # Initialize the Frame object
+        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, wx.Size(950,850))
+        
+        # Panel for 1D plot
+        self.plotpanel    = Maskplotpanel(self, -1, style=wx.RAISED_BORDER)
 
+class ViewApp(wx.App):
+    def OnInit(self):
+        frame = ViewerFrame(None, -1, 'testView')    
+        frame.Show(True)
+        self.SetTopWindow(frame)
+        
+        return True
+               
 if __name__ == "__main__": 
     app = ViewApp(0)
     app.MainLoop()     
