@@ -1316,9 +1316,10 @@ class Plugin:
         """
         # default chisqr
         chisqr = None
+        
         # return None if data == None
         if data == None: return chisqr
-
+        
         # Get data: data I, theory I, and data dI in order
         if data.__class__.__name__ =="Data2D":
             if index == None: index = numpy.ones(len(data.data),ntype=bool)
@@ -1328,7 +1329,10 @@ class Plugin:
         else:
             # 1 d theory from model_thread is only in the range of index
             if index == None: index = numpy.ones(len(data.y),ntype=bool)
-            
+            if data.dy== None or data.dy ==[]:
+                data.dy= numpy.ones(len(data.y))
+            else:
+                data.dy[data.dy==0]=1  ## Set consitently w/AbstractFitengine: But this should be corrected later.
             fn = data.y[index] 
             gn = self.theory_data.y
             en = data.dy[index]
