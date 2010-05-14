@@ -455,10 +455,7 @@ class MaskPanel(wx.Dialog):
         #set zmax and zmin to plot: Fix it w/ data.
         if self.plotpanel.scale == 'log':
             zmax = math.log(max(self.data.data[self.data.data>0]))
-            if min(self.data.data) == 0:
-                zmin = 0
-            else:
-                zmin = math.log(min(self.data.data[self.data.data>0]))
+            zmin = math.log(min(self.data.data[self.data.data>0]))
         else:
             zmax = max(self.data.data[self.data.data>0])
             zmin = min(self.data.data[self.data.data>0])
