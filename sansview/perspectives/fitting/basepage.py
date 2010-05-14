@@ -553,6 +553,8 @@ class BasicPage(wx.ScrolledWindow):
             save history of the data and model
         """
         if self.model==None:
+            msg="Can not bookmark; Please select Data and Model first..."
+            wx.MessageBox(msg, 'Info')
             return 
         if hasattr(self,"enable_disp"):
             self.state.enable_disp = copy.deepcopy(self.enable_disp.GetValue())
@@ -801,8 +803,10 @@ class BasicPage(wx.ScrolledWindow):
             check if the user can already perform some action with this panel
         """ 
         flag = False
-        if self.data is None and self.model is None:
-            msg = "Please load a Data to start"
+        if self.data is None:
+            self.disable_smearer.SetValue(True)
+            self.disable_disp.SetValue(True)
+            msg = "Please load Data and select Model to start..."
             wx.MessageBox(msg, 'Info')
             return  True
     def reset_page_helper(self, state):
@@ -1127,7 +1131,7 @@ class BasicPage(wx.ScrolledWindow):
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         
         self.save_current_state()
-            
+   
         return flag                           
                
     def _is_modified(self, is_modified):
@@ -1454,6 +1458,7 @@ class BasicPage(wx.ScrolledWindow):
             Show combox box associate with type of model selected
         """
         if self.check_invalid_panel():
+            self.shape_rbutton.SetValue(True)
             return
 
         ## Don't want to populate combo box again if the event comes from check box
@@ -1812,6 +1817,15 @@ class BasicPage(wx.ScrolledWindow):
         """
         if self.check_invalid_panel():
             return 
+        ## On selction if no model exists.
+        if self.model ==None:
+            self.disable_disp.SetValue(True)
+            msg="Please select a Model first..."
+            wx.MessageBox(msg, 'Info')
+            wx.PostEvent(self.manager.parent, StatusEvent(status=\
+                            "Polydispersion: %s"%msg))
+            return
+
         self._reset_dispersity()
     
         if self.model ==None:

@@ -776,6 +776,13 @@ class FitPage(BasicPage):
         #make sure all parameter values are updated.
         if self.check_invalid_panel():
             return
+        if self.model ==None:
+            msg="Please select a Model first..."
+            wx.MessageBox(msg, 'Info')
+            wx.PostEvent(self.manager.parent, StatusEvent(status=\
+                            "Fit: %s"%msg))
+            return
+
         flag = self._update_paramv_on_fit() 
                 
         if not flag:
@@ -850,6 +857,7 @@ class FitPage(BasicPage):
         if self.model != None:
             try:
                 temp_smear= None
+                self.disable_smearer.SetValue(True)
                 if self.enable_smearer.GetValue():
                     temp_smear= self.smearer
                 #self.compute_chisqr(temp_smear)
@@ -877,6 +885,13 @@ class FitPage(BasicPage):
         """ 
             when enter value on panel redraw model according to changed
         """
+        if self.model ==None:
+            msg="Please select a Model first..."
+            wx.MessageBox(msg, 'Info')
+            #wx.PostEvent(self.manager.parent, StatusEvent(status=\
+            #                "Parameters: %s"%msg))
+            return
+
         #default flag
         flag = False
         self.fitrange = True
@@ -1216,7 +1231,7 @@ class FitPage(BasicPage):
         #event.Skip()
         
         # Check if the accuracy is same as before
-        # Mac does not get the GetEventObject; use the line below
+        
         #self.smear2d_accuracy = event.GetEventObject().GetValue()
         self.smear2d_accuracy = self.smear_accuracy.GetValue()
         if self.pinhole_smearer.GetValue():
@@ -1538,11 +1553,13 @@ class FitPage(BasicPage):
         if self.check_invalid_panel():
             return
         if self.model ==None:
-            msg="Need model and data to smear plot"
+            self.disable_smearer.SetValue(True)
+            msg="Please select a Model first..."
+            wx.MessageBox(msg, 'Info')
             wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Smear: %s"%msg))
             return
-        
+
         # Need update param values
         self._update_paramv_on_fit()     
 
@@ -1700,15 +1717,19 @@ class FitPage(BasicPage):
             Create a custom slit smear object that will change the way residuals
             are compute when fitting
         """
-
-               
+ 
         if self.check_invalid_panel():
             return
+
         if self.model ==None:
-            msg="Need model and data to smear plot"
+            self.disable_smearer.SetValue(True)
+            
+            msg="Please select a Model first..."
+            wx.MessageBox(msg, 'Info')
             wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Smear: %s"%msg))
             return
+
         # Need update param values
         self._update_paramv_on_fit()
 
@@ -1726,10 +1747,11 @@ class FitPage(BasicPage):
                 is_new_slit = self._is_changed_slit()
         else:
             is_new_slit = True 
-                
+        
         # if any value is changed
         if is_new_slit:
             msg = self._set_slit_smear()
+            
         # hide all silt sizer
         self._hide_all_smear_info()        
         ##Calculate chi2
@@ -1738,7 +1760,7 @@ class FitPage(BasicPage):
         self._show_smear_sizer()
         self.sizer_set_smearer.Layout()
         self.Layout()
-        
+
         if event != None:
             event.Skip()     
         #self._undo.Enable(True)
@@ -1748,12 +1770,13 @@ class FitPage(BasicPage):
         if msg != None:
             wx.PostEvent(self.manager.parent, StatusEvent(status = msg))
 
-            
+
     def _is_changed_slit(self):  
         """
             check if any of slit lengths is changed
             return: True or False
         """
+        
         # get the values
         width = self.smear_slit_width.GetValue()
         height = self.smear_slit_height.GetValue()
@@ -1786,6 +1809,7 @@ class FitPage(BasicPage):
                 return True
         if self.dxl != dxl:
             return True
+
         return False
     
     def _set_slit_smear(self):
@@ -1824,7 +1848,7 @@ class FitPage(BasicPage):
                 msg = "Wrong Fit value entered... "
             else:
                 self.smear_slit_width.SetBackgroundColour(wx.WHITE)
-                
+              
         self.current_smearer = smear_selection(data)
         #temp_smearer = self.current_smearer
         ## set smearing value whether or not the data contain the smearing info
@@ -1863,7 +1887,9 @@ class FitPage(BasicPage):
         if self.check_invalid_panel():
             return
         if self.model ==None:
-            msg="Need model and data to smear plot"
+            self.disable_smearer.SetValue(True)
+            msg="Please select a Model first..."
+            wx.MessageBox(msg, 'Info')
             wx.PostEvent(self.manager.parent, StatusEvent(status=\
                             "Smear: %s"%msg))
             return
