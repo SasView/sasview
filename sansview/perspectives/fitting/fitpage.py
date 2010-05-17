@@ -857,7 +857,6 @@ class FitPage(BasicPage):
         if self.model != None:
             try:
                 temp_smear= None
-                self.disable_smearer.SetValue(True)
                 if self.enable_smearer.GetValue():
                     temp_smear= self.smearer
                 #self.compute_chisqr(temp_smear)
