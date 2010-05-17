@@ -138,32 +138,31 @@ def on_load_error(parent):
     """
     wx.PostEvent(parent, StatusEvent(status="Load cancel..", info="warning",
                                                 type="stop"))
+    
 def plot_data(parent, path):
     """
         Use the DataLoader loader to created data to plot.
         @param path: the path of the data to load
     """
-    #Load data
-    from load_thread import DataReader
-    if parent is not None:
-        wx.PostEvent(parent, StatusEvent(status="Loading...", info="info",
-                                            type="progress"))
-        reader = DataReader(path=path,
-                             parent=parent,
-                             err_fct=load_error,
-                             msg_fct=on_load_error,
-                            completefn=complete_loading)
-        reader.queue()
+    from sans.guicomm.events import NewPlotEvent, StatusEvent
+    from DataLoader.loader import  Loader
    
-def complete_loading(output, path, parent):
-    # Notify user if the loader completed the load but no data came out
-    if output == None:
-        msg = "The data file appears to be empty."
-        load_error(msg)
-        wx.PostEvent(parent, StatusEvent(status=msg, info="warning",
-                                            type="stop"))
+    # Instantiate a loader 
+    L = Loader()
+    
+    # Load data 
+    try:
+        output = L.load(path)
+    except:
+        load_error(sys.exc_value)
         return
     
+    # Notify user if the loader completed the load but no data came out
+    if output == None:
+        load_error("The data file appears to be empty.")
+        return
+  
+     
     filename = os.path.basename(path)
     
     if not  output.__class__.__name__ == "list":
@@ -276,5 +275,4 @@ def complete_loading(output, path, parent):
                         new_plot.group_id = existing_panel.group_id
             wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
             i+=1
-           
-            
+         
