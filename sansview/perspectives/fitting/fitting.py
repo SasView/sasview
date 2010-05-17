@@ -1323,6 +1323,7 @@ class Plugin:
         # Get data: data I, theory I, and data dI in order
         if data.__class__.__name__ =="Data2D":
             if index == None: index = numpy.ones(len(data.data),ntype=bool)
+            index = index & (data.err_data !=0 )   # get rid of zero error points
             fn = data.data[index] 
             gn = self.theory_data.data[index]
             en = data.err_data[index]

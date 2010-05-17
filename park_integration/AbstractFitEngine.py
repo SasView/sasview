@@ -287,7 +287,7 @@ class FitData2D(Data2D):
             self.res_err_data= numpy.ones(len(self.data))
         else:
             self.res_err_data = copy.deepcopy(self.err_data)
-        self.res_err_data[self.res_err_data==0]=1
+        #self.res_err_data[self.res_err_data==0]=1
         
         self.radius= numpy.sqrt(self.qx_data**2 + self.qy_data**2)
         
@@ -318,7 +318,7 @@ class FitData2D(Data2D):
         self.index_model = ((self.qmin <= self.radius)&(self.radius<= self.qmax))
         self.index_model = (self.index_model) &(self.mask)
         self.index_model = (self.index_model) & (numpy.isfinite(self.data))
-        
+        self.index_model = (self.index_model) & (self.res_err_data!=0)
     def getFitRange(self):
         """
             @return the range of data.x to fit
