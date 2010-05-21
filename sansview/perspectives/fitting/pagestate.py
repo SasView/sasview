@@ -13,13 +13,13 @@ from DataLoader.readers.cansas_reader import get_content
 FITTING_NODE_NAME = 'fitting_plug_in'
 CANSAS_NS = "cansas1d/1.0"
 
-list_of_state_attributes = [["is_data", "is_data", "bool"],
+list_of_data_attributes = [["is_data", "is_data", "bool"],
                       ["group_id", "data_group_id", "string"],
                       ["data_name", "data_name", "string"],
                       ["data_id", "data_id", "string"],
                       ["name", "name", "string"],
-                      ["data_name", "data_name", "string"],
-                      ["qmin", "qmin", "float"],
+                      ["data_name", "data_name", "string"]]
+list_of_state_attributes = [["qmin", "qmin", "float"],
                       ["qmax", "qmax", "float"],
                       ["npts", "npts", "float"],
                       ["shape_rbutton", "shape_rbutton", "bool"],
@@ -28,7 +28,17 @@ list_of_state_attributes = [["is_data", "is_data", "bool"],
                       ["struct_rbutton", "struct_rbutton", "bool"],
                       ["formfactorcombobox", "formfactorcombobox", "bool"],
                       ["structurecombobox", "structurecombobox", "bool"],
-                      ["disp_box", "disp_box"]]
+                      ["disp_box", "disp_box"],
+                      ["enable_smearer","enable_smearer","bool"],
+                      ["disable_smearer","disable_smearer","bool"],
+                      ["pinhole_smearer","pinhole_smearer","bool"],
+                      ["slit_smearer","slit_smearer","bool"],
+                      ["enable_disp","enable_disp","bool"],
+                      ["disable_disp","disable_disp","bool"],
+                      ["slit_smearer","slit_smearer","bool"],
+                      ["enable2D","enable2D","bool"],
+                      ["cb1","cb1","bool"],
+                      ["tcChi","tcChi","float"]]
 list_of_state_parameters = [["parameters", "parameters"] ,                     
                             ["orientation_parameters", "orientation_params"],
                             ["dispersity_parameters", "orientation_params_disp"],
@@ -333,10 +343,15 @@ class PageState(object):
         if self.data is not None and hasattr(self.data, "id"):
             self.data_id = self.data.id
        
-        for item in list_of_state_attributes:
+        for item in list_of_data_attributes:
             exec "element.setAttribute(item[0], str(self.%s))"%(item[1])
         inputs.appendChild(element)   
-       
+        
+        for item in list_of_state_attributes:
+            element = newdoc.createElement(item[0])
+            exec "element.setAttribute(item[0], str(self.%s))"%(item[1])
+            inputs.appendChild(element)
+        
         for item in list_of_state_parameters:
             element = newdoc.createElement(item[0])
             exec "self._toXML_helper(list=self.%s, element=element, newdoc=newdoc)"%item[1]                       
