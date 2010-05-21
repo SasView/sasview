@@ -38,7 +38,12 @@ list_of_state_attributes = [["qmin", "qmin", "float"],
                       ["slit_smearer","slit_smearer","bool"],
                       ["enable2D","enable2D","bool"],
                       ["cb1","cb1","bool"],
-                      ["tcChi","tcChi","float"]]
+                      ["tcChi","tcChi","float"],
+                     ["smearer", "smearer", "float"],
+                     ["smear_type","smear_type", "string"],
+                     ["dq_l", "dq_l", "string"],
+                     ["dq_r","dq_r", "string"]]
+
 list_of_state_parameters = [["parameters", "parameters"] ,                     
                             ["orientation_parameters", "orientation_params"],
                             ["dispersity_parameters", "orientation_params_disp"],
@@ -55,7 +60,6 @@ class PageState(object):
             Initialize the current state
         """
         self.file = None
-        #TODO: remove this once the inheritence is cleaned up
         ## Data member to store the dispersion object created
         self._disp_obj_dict = {}
         #------------------------
