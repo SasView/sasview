@@ -8,19 +8,21 @@ See the license text in license.txt
 copyright 2009, University of Tennessee
 """
 import  re
-import sys, wx, logging
-import string, numpy, math
+import sys
+import wx
+import logging
+import numpy
+import math
+import string
 import time
 import thread
 from copy import deepcopy
 
-from danse.common.plottools.PlotPanel import PlotPanel
+from DataLoader import Loader
 
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Theory1D
-
-from sans.guiframe.utils import format_number
 
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
 from sans.guicomm.events import EVT_SLICER_PANEL,ERR_DATA,EVT_REMOVE_DATA
@@ -806,13 +808,7 @@ class Plugin:
                 wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
                 return
               
-            for page, value in self.page_finder.iteritems():
-                """
-                if format_number(result.fitness) == page.get_chi2():
-                    #ToDo: Compare parameter inputs with outputs too.
-                    wx.PostEvent(self.parent, StatusEvent(status="%s " % msg)) 
-                    break     
-                """              
+            for page, value in self.page_finder.iteritems():   
                 if value.get_scheduled()==1:
                     model = value.get_model()
                     data =  value.get_fit_data()
