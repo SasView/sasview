@@ -247,11 +247,8 @@ class Plugin:
         loader.associate_file_reader(".fitv", self.state_reader)
         #Send the fitting panel to guiframe
         self.mypanels.append(self.fit_panel)
-       
         return self.mypanels
-
-        
-      
+    
     def get_perspective(self):
         """
             Get the list of panel names for this perspective
