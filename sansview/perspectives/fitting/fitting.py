@@ -21,7 +21,7 @@ from copy import deepcopy
 import models
 import fitpage
 
-from DataLoader import Loader
+from DataLoader.loader import Loader
 
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.dataFitting import Data1D
