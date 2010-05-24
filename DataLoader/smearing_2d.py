@@ -25,7 +25,7 @@ class Smearer2D:
      
     def __init__(self, data=None,model=None,index=None,limit=LIMIT,accuracy='Low'):
         """
-            Assumption: equally spaced bins of increasing q-values.
+            Assumption: equally spaced bins in dq_r, dq_phi space.
             
             @param data: 2d data used to set the smearing parameters
             @param model: model function
@@ -101,8 +101,8 @@ class Smearer2D:
     
     def get_value(self):
         """
-            Over sampling of r_nbins times phi_nbins, calculate Gaussian weights, then find semared intensity
-            # For the default vaues, this is equivalent (but speed optimized by a factor of ten)to the following:
+            Over sampling of r_nbins times phi_nbins, calculate Gaussian weights, then find smeared intensity
+            # For the default values, this is equivalent (but speed optimized by a factor of ten)to the following:
             =====================================================================================
             ## Remove the singular points if exists
             self.dqx_data[self.dqx_data==0]=SIGMA_ZERO
@@ -111,14 +111,15 @@ class Smearer2D:
                 for r in range(0,5):
                     n = (phi)*5+(r)
                     r = r+0.25
-                    dphi = phi*2.0*math.pi/4.0 + numpy.arctan(self.qy_data[index_model]/self.qx_data[index_model])
+                    dphi = phi*2.0*math.pi/4.0 + numpy.arctan(self.qy_data[index_model]/self.dqy_data[index_model]/self.qx_data[index_model]*/self.dqx_data[index_model])
                     dq = r*numpy.sqrt( self.dqx_data[index_model]*self.dqx_data[index_model] \
                         + self.dqy_data[index_model]*self.dqy_data[index_model] )
-                    #integrant of r*math.exp(-0.5*r*r) dr at each bins
+                    #integrant of math.exp(-0.5*r*r) r dr at each bins : The integration may not need.
                     weight_res[n] = math.exp(-0.5*((r-0.25)*(r-0.25)))-math.exp(-0.5*((r-0.25)*(r-0.25)))
                     #if phi !=0 and r != 0:
                     qx_res=numpy.append(qx_res,self.qx_data[index_model]+ dq*math.cos(dphi))
                     qy_res=numpy.append(qy_res,self.qy_data[index_model]+ dq*math.sin(dphi))
+            ## Then compute I(qx_res,qy_res) and do weighted averaging. 
             =====================================================================================
         """
         valid = self.get_data()
@@ -144,9 +145,9 @@ class Smearer2D:
         phi = numpy.arange(nphi)
         dphi = phi*2.0*math.pi/nphi
         dphi = dphi.repeat(nr)
-        ## Transform to polar coordinate and set dphi at each data points ; 1d array
+        ## Transform to polar coordinate, and set dphi at each data points ; 1d array
         dphi = dphi.repeat(len_data)+numpy.arctan(self.qy_data*self.dqx_data/self.qx_data/self.dqy_data).repeat(n_bins).reshape(len_data,n_bins).transpose().flatten()
-        ## Find Gaussian weight for each dq bins: The weight depends only on r-direction
+        ## Find Gaussian weight for each dq bins: The weight depends only on r-direction (The integration may not need)
         weight_res = numpy.exp(-0.5*((r-bin_size/2.0)*(r-bin_size/2.0)))-numpy.exp(-0.5*((r+bin_size/2.0)*(r+bin_size/2.0)))
         weight_res = weight_res.repeat(nphi).reshape(nr,nphi).transpose().flatten()
         
