@@ -129,7 +129,7 @@ class BasicPage(wx.ScrolledWindow):
         self._keep = wx.MenuItem(self.popUpMenu,id,"BookMark"," Keep the panel status to recall it later")
         self.popUpMenu.AppendItem(self._keep)
         self._keep.Enable(True)
-        wx.EVT_MENU(self, id, self.onSave)
+        wx.EVT_MENU(self, id, self.on_bookmark)
         self.popUpMenu.AppendSeparator()
     
         ## Default locations
@@ -547,8 +547,12 @@ class BasicPage(wx.ScrolledWindow):
             previous_state = self.saved_states[name]
             ## reset state of checkbox,textcrtl  and  regular parameters value
             self.reset_page(previous_state)      
-                  
-    def onSave(self, event):
+         
+    def on_save_state(self, event):   
+        """
+            Save the current state into file
+        """      
+    def on_bookmark(self, event):
         """
             save history of the data and model
         """
@@ -731,8 +735,9 @@ class BasicPage(wx.ScrolledWindow):
             self.disp_list= self.model.getDispParamList()
             self.state.disp_list= copy.deepcopy(self.disp_list)
             self.state.model = self.model.clone()
-        #if hasattr(self,self.engine_type)> 0:
-            #self.state.engine_type = self.engine_type.clone() 
+        if hasattr(self, "engine_type"):
+            self.state.engine_type = copy.deepcopy(self.engine_type)
+            
         self.state.enable2D = copy.deepcopy(self.enable2D)
         self.state.values= copy.deepcopy(self.values)
         self.state.weights = copy.deepcopy( self.weights)
@@ -824,7 +829,7 @@ class BasicPage(wx.ScrolledWindow):
         self.data = state.data
         if self.data !=None:
             from DataLoader.qsmearing import smear_selection
-            self.smearer= smear_selection( self.data )
+            self.smearer= smear_selection(self.data)
         self.enable2D= state.enable2D
         self.engine_type = state.engine_type
 
@@ -2136,7 +2141,7 @@ class BasicPage(wx.ScrolledWindow):
         
         self.btSave_title = wx.StaticText(self, -1, 'Save the current Model')
         self.btSave = wx.Button(self,wx.NewId(),'Save')
-        self.btSave.Bind(wx.EVT_BUTTON, self.onSave,id= self.btSave.GetId())
+        self.btSave.Bind(wx.EVT_BUTTON, self.on_save_state,id= self.btSave.GetId())
         self.btSave.SetToolTipString("Save the current Model")
         
         sizer_save.Add(self.btSave_title)  
