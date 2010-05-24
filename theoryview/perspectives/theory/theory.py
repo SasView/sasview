@@ -355,7 +355,7 @@ class Plugin:
         ystep = y_size/len(y_bins-1)
         
         #theory.data = numpy.zeros(len(mask))
-        theory.err_data = numpy.zeros(len(mask))
+        theory.err_data = numpy.ones(len(mask))
         theory.qx_data = qx_data 
         theory.qy_data = qy_data  
         theory.q_data = q_data 
