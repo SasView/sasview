@@ -1,15 +1,26 @@
-import time, os, sys
+"""
+This software was developed by the University of Tennessee as part of the
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+project funded by the US National Science Foundation. 
+
+See the license text in license.txt
+
+copyright 2009, University of Tennessee
+"""
+import time
+import os
+import sys
+import copy
 import logging
-import DataLoader
+
 from xml.dom.minidom import parse
 from lxml import etree
 
-
-import copy
-
+import DataLoader
 from DataLoader.readers.cansas_reader import Reader as CansasReader
 from DataLoader.readers.cansas_reader import get_content
 
+#Information to read/write state as xml
 FITTING_NODE_NAME = 'fitting_plug_in'
 CANSAS_NS = "cansas1d/1.0"
 
@@ -44,6 +55,9 @@ list_of_state_attributes = [["qmin", "qmin", "float"],
                      ["dq_l", "dq_l", "string"],
                      ["dq_r","dq_r", "string"]]
 
+list_of_model_attributes = [["values", "values"],
+                            ["weights", "weights"]]
+
 list_of_state_parameters = [["parameters", "parameters"] ,                     
                             ["orientation_parameters", "orientation_params"],
                             ["dispersity_parameters", "orientation_params_disp"],
@@ -52,14 +66,18 @@ list_of_state_parameters = [["parameters", "parameters"] ,
 
 class PageState(object):
     """
-        Contains information to reconstruct a page of the fitpanel
+        Contains information to reconstruct a page of the fitpanel.
     """
     def __init__(self, parent=None, model=None, data=None):
         
         """ 
             Initialize the current state
+            @param model: a selected model within a page
+            @param data: 
         """
         self.file = None
+        #Time of state creation
+        self.timestamp = time.time()
         ## Data member to store the dispersion object created
         self._disp_obj_dict = {}
         #------------------------
@@ -154,8 +172,7 @@ class PageState(object):
         ## disperity selection
         self.enable_disp = False
         self.disable_disp = True
-        ## plot 2D data
-        self.enable2D = False
+       
         ## state of selected all check button
         self.cb1 = False
         ## store value of chisqr
@@ -233,6 +250,7 @@ class PageState(object):
     
     def _repr_helper(self, list, rep):
         """
+            Helper method to print a state
         """
         for item in list:
             rep += "parameter name: %s \n"%str(item[1])
@@ -248,34 +266,41 @@ class PageState(object):
         return rep
     
     def __repr__(self):
-        """ output string for printing"""
-        rep = "\n\nState name: %s\n"%self.name
-        rep += "\n\nState form factor combobox selection: %s\n"%self.formfactorcombobox
-        rep += "\n\nState structure factor combobox selection: %s\n"%self.structurecombobox
-        rep += "\n\n is data : %s\n"%self.is_data
-        rep += "\n\n data's name : %s\n"%self.data_name
-        rep += "\n\n data's id : %s\n"%self.data_id
-        rep += "\n\n model type (form factor) selected: %s\n"%self.shape_rbutton 
-        rep += "\n\n model type (shape independent) selected: %s\n "%self.shape_indep_rbutton
-        rep += "\n\n model type (structure factor) selected: %s\n"%self.struct_rbutton
-        rep += "\n\n model type (plug-in ) selected: %s\n"%self.plugin_rbutton
-        #rep +="data : %s\n"% str(self.data)
-        #rep += "Plotting Range: min: %s, max: %s, steps: %s\n"%(str(self.qmin),
-        #                                        str(self.qmax),str(self.npts))
-        #rep +="model  : %s\n\n"% str(self.model)
-        #rep +="number parameters(self.parameters): %s\n"%len(self.parameters)
-        #rep += self._repr_helper( list=self.parameters, rep=rep)
-        #rep +="number orientation parameters"
-        #rep +="(self.orientation_params): %s\n"%len(self.orientation_params)
-        #rep += self._repr_helper( list=self.orientation_params, rep=rep)
-        #rep +="number dispersity parameters"
-        #rep +="(self.orientation_params_disp): %s\n"%len(self.orientation_params_disp)
-        #rep += self._repr_helper( list=self.orientation_params_disp, rep=rep)
-       
+        """ 
+            output string for printing
+        """
+        rep = "\nState name: %s\n"%self.file
+        t = time.localtime(self.timestamp)
+        time_str = time.strftime("%b %d %H:%M", t)
+        rep += "State created on : %s\n"%time_str
+        rep += "State form factor combobox selection: %s\n"%self.formfactorcombobox
+        rep += "State structure factor combobox selection: %s\n"%self.structurecombobox
+        rep += "is data : %s\n"%self.is_data
+        rep += "data's name : %s\n"%self.data_name
+        rep += "data's id : %s\n"%self.data_id
+        rep += "model type (form factor) selected: %s\n"%self.shape_rbutton 
+        rep += "model type (shape independent) selected: %s\n"%self.shape_indep_rbutton
+        rep += "model type (structure factor) selected: %s\n"%self.struct_rbutton
+        rep += "model type (plug-in ) selected: %s\n"%self.plugin_rbutton
+        rep += "data : %s\n"% str(self.data)
+        rep += "Plotting Range: min: %s, max: %s, steps: %s\n"%(str(self.qmin),
+                                                str(self.qmax),str(self.npts))
+        """
+        rep += "model  : %s\n\n"% str(self.model)
+        rep += "number parameters(self.parameters): %s\n"%len(self.parameters)
+        rep += self._repr_helper( list=self.parameters, rep=rep)
+        rep += "number orientation parameters"
+        rep += "(self.orientation_params): %s\n"%len(self.orientation_params)
+        rep += self._repr_helper( list=self.orientation_params, rep=rep)
+        rep += "number dispersity parameters"
+        rep += "(self.orientation_params_disp): %s\n"%len(self.orientation_params_disp)
+        rep += self._repr_helper( list=self.orientation_params_disp, rep=rep)
+        """
         return rep
    
     def _toXML_helper(self, list, element, newdoc):
         """
+            Helper method to create xml file for saving state
         """
         for item in list:
             sub_element = newdoc.createElement('parameter')
@@ -291,7 +316,6 @@ class PageState(object):
             sub_element.setAttribute('unit', str(item[7]))
             element.appendChild(sub_element)
         
-           
     def toXML(self, file="fitting_state.fitv", doc=None, entry_node=None):
         """
             Writes the state of the InversionControl panel to file, as XML.
@@ -332,7 +356,13 @@ class PageState(object):
         else:
             element.appendChild(newdoc.createTextNode(str(file)))
         top_element.appendChild(element)
-    
+        
+        element = newdoc.createElement("timestamp")
+        element.appendChild(newdoc.createTextNode(time.ctime(self.timestamp)))
+        attr = newdoc.createAttribute("epoch")
+        attr.nodeValue = str(self.timestamp)
+        element.setAttributeNode(attr)
+        top_element.appendChild(element)
         # Inputs
         inputs = newdoc.createElement("Attributes")
         top_element.appendChild(inputs)
@@ -355,7 +385,14 @@ class PageState(object):
             element = newdoc.createElement(item[0])
             exec "element.setAttribute(item[0], str(self.%s))"%(item[1])
             inputs.appendChild(element)
-        
+            
+        for item in list_of_model_attributes:
+            element = newdoc.createElement(item[0])
+            exec "list = self.%s"%item[1]
+            for item in list:
+                exec "element.appendChild(newdoc.createTextNode(str(%s)))" % item
+            inputs.appendChild(element)
+            
         for item in list_of_state_parameters:
             element = newdoc.createElement(item[0])
             exec "self._toXML_helper(list=self.%s, element=element, newdoc=newdoc)"%item[1]                       
@@ -372,6 +409,7 @@ class PageState(object):
         
     def _fromXML_helper(self, node, list):
         """
+            Helper function to write state to xml
         """
         for item in node:
             name = item.get('name')
@@ -396,16 +434,27 @@ class PageState(object):
         """
       
         if file is not None:
-            raise RuntimeError, "PageState no longer supports non-CanSAS format for fitting files"
+            msg = "PageState no longer supports non-CanSAS"
+            msg += " format for fitting files"
+            raise RuntimeError, msg
             
-        if node.get('version')\
-            and node.get('version') == '1.0':
+        if node.get('version')and node.get('version') == '1.0':
             
             # Get file name
             entry = get_content('ns:filename', node)
             if entry is not None:
                 self.file = entry.text.strip()
-        
+                
+            # Get time stamp
+            entry = get_content('ns:timestamp', node)
+            if entry is not None and entry.get('epoch'):
+                try:
+                    self.timestamp = float(entry.get('epoch'))
+                except:
+                    msg = "PageState.fromXML: Could not"
+                    msg += " read timestamp\n %s" % sys.exc_value
+                    logging.error(msg)
+            
             # Parse fitting attributes
             entry = get_content('ns:Attributes', node)
             if entry is not None:
@@ -424,10 +473,20 @@ class PageState(object):
                                 exec "self.%s = float(field.get(%s))"%(item[1], item[0])
                             except:
                                 exec "self.%s = None"%item[1]
-               
+                for item in list_of_model_attributes:
+                    node = get_content("ns:%s"%item[0], entry)
+                    list = []
+                    for value in node:
+                        try:
+                            list.append(float(value)) 
+                        except:
+                            list.append(None)
+                        
+                    exec "self.%s = list"%item[1]
+                    
                 for item in list_of_state_parameters:
-                    field = get_content("ns:%s"%item[0], entry)
-                    self._fromXML_helper(node=field, list=self.parameters)
+                    node = get_content("ns:%s"%item[0], entry)
+                    self._fromXML_helper(node=node, list=self.parameters)
                 
 
 class Reader(CansasReader):
@@ -724,14 +783,26 @@ class Reader(CansasReader):
             elif len(output)==1:
                 # Call back to post the new state
                 state = output[0].meta_data['fitstate']
+                t = time.localtime(state.timestamp)
+                time_str = time.strftime("%b %d %H:%M", t)
+                # Check that no time stamp is already appended
+                max_char = state.file.find("[")
+                if max_char < 0:
+                    max_char = len(state.file)
+                state.file = state.file[0:max_char] +' [' + time_str + ']'
+               
+                    
                 if state is not None and state.is_data is not None:
                     exec 'output[0].is_data = state.is_data' 
                  
-                output[0].filename = state.data_name
+                output[0].filename = state.file
+                #output[0].filename = state.data_name
                 state.data = output[0]
                 state.data.name = state.data_name
                 state.data.id = state.data_id
-                state.data.group_id = state.data_group_id
+                #state.data.group_id = state.data_group_id
+                state.data.group_id = output[0].filename
+              
                 self.call_back(state=state, datainfo=output[0])
                 return output[0]
             else:
@@ -772,4 +843,4 @@ class Reader(CansasReader):
 if __name__ == "__main__":
     state = PageState(parent=None)
     state.toXML()
-  
+    print "state", state
