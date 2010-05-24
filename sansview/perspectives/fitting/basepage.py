@@ -290,7 +290,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer3.SetMinSize((PANEL_WIDTH,-1))
         self.sizer4.SetMinSize((PANEL_WIDTH,-1))
         self.sizer5.SetMinSize((PANEL_WIDTH,-1))
-        #self.sizer6.SetMinSize((375,-1))
+        self.sizer6.SetMinSize((PANEL_WIDTH,-1))
         
         self.vbox.Add(self.sizer0)
         self.vbox.Add(self.sizer1)
@@ -298,8 +298,7 @@ class BasicPage(wx.ScrolledWindow):
         self.vbox.Add(self.sizer3)
         self.vbox.Add(self.sizer4)
         self.vbox.Add(self.sizer5)
-        #self.vbox.Add(self.sizer6)
-        
+        self.vbox.Add(self.sizer6)
         
     def set_layout(self):
         """
@@ -2131,9 +2130,6 @@ class BasicPage(wx.ScrolledWindow):
         """
             Draw the layout for saving option
         """
-        # Skipping save state functionality for release 0.9.0
-        return
-    
         self.sizer6.Clear(True)
         box_description= wx.StaticBox(self, -1,"Save Model")
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
@@ -2145,7 +2141,7 @@ class BasicPage(wx.ScrolledWindow):
         self.btSave.SetToolTipString("Save the current Model")
         
         sizer_save.Add(self.btSave_title)  
-        sizer_save.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,45)  
+        sizer_save.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,80)  
              
         sizer_save.Add(self.btSave)     
         
@@ -2161,7 +2157,6 @@ class BasicPage(wx.ScrolledWindow):
         """
         self._sleep4sec()
         self.Layout()
-        #self._sleep4sec()
         return 
     
     def _sleep4sec(self):
@@ -2172,7 +2167,6 @@ class BasicPage(wx.ScrolledWindow):
         if ON_MAC == True:
             time.sleep(1)
             
-
     def on_reset_clicked(self,event):
         """
         #On 'Reset' button  for Q range clicked
