@@ -169,7 +169,27 @@ class FitPanel(wx.aui.AuiNotebook):
         #updating the panel
         self.Update()
         self.Center()
-  
+        
+    def set_state(self, state):
+        """
+            Restore state of the panel
+        """
+        page_is_opened = False
+        if state is not None:
+            page_info = self.get_page_info(data=state.data)
+            for name, panel in self.opened_pages.values():
+                #Don't return any panel is the exact same page is created
+                if name == page_info.window_name:
+                    # the page is still opened
+                    panel.reset_page(state=state)
+                    page_is_opened = True
+            if not page_is_opened:
+                panel = self.add_fit_page(data=state.data)
+                # add data associated to the page created
+                if panel is not None:  
+                    self.manager.store_page(page=panel, data=state.data)
+                    panel.reset_page(state=state)
+                    
     def on_close_page(self, event):
         """
              close page and remove all references to the closed page

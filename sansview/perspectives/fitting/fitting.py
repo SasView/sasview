@@ -616,6 +616,17 @@ class Plugin:
             new_data.is_data = True
         return new_data
            
+    def store_page(self, page, data):
+        """
+            Helper to save page reference into the plug-in
+            @param page: page to store
+        """
+        page.set_data(data) 
+        #create a fitproblem storing all link to data,model,page creation
+        if not page in self.page_finder.keys():
+            self.page_finder[page] = FitProblem()
+        self.page_finder[page].add_fit_data(data)
+        
     def add_fit_page(self, data):
         """
             given a data, ask to the fitting panel to create a new fitting page,
@@ -625,26 +636,16 @@ class Plugin:
             page = self.fit_panel.add_fit_page(data)
             # add data associated to the page created
             if page != None:  
-                page.set_data(data) 
-                #create a fitproblem storing all link to data,model,page creation
-                if not page in self.page_finder.keys():
-                    self.page_finder[page]= FitProblem()
-                ## item is almost the same as data but contains
-                ## axis info for plotting 
-                #self.page_finder[page].add_plotted_data(item)
-                self.page_finder[page].add_fit_data(data)
-
+                self.store_page(page=page, data=data)
                 wx.PostEvent(self.parent, StatusEvent(status="Page Created",
-                                                                info="info"))
+                                               info="info"))
             else:
                 msg = "Page was already Created"
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="warning"))
         except:
             msg = "Creating Fit page: %s"%sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
-            return
-
-        
+       
     def _onEVT_SLICER_PANEL(self, event):
         """
             receive and event telling to update a panel with a name starting with 
