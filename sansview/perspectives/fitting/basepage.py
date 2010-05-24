@@ -2142,9 +2142,7 @@ class BasicPage(wx.ScrolledWindow):
         
         sizer_save.Add(self.btSave_title)  
         sizer_save.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,80)  
-             
         sizer_save.Add(self.btSave)     
-        
         boxsizer1.Add(sizer_save)
         self.sizer6.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer6.Layout()

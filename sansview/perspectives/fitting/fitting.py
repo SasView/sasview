@@ -18,6 +18,9 @@ import time
 import thread
 from copy import deepcopy
 
+import models
+import fitpage
+
 from DataLoader import Loader
 
 from sans.guiframe.dataFitting import Data2D
@@ -35,8 +38,7 @@ from console import ConsoleUpdate
 from fitproblem import FitProblem
 from fitpanel import FitPanel
 from fit_thread import FitThread
-import models
-import fitpage
+from pagestate import Reader
 
 DEFAULT_BEAM = 0.005
 DEFAULT_QMIN = 0.001
@@ -75,11 +77,11 @@ class Plugin:
         ## List of panels for the simulation perspective (names)
         self.perspective = []
         #list of panel to send to guiframe
-        self.mypanels=[]
+        self.mypanels = []
         # reference to the current running thread
-        self.calc_2D= None
-        self.calc_1D= None
-        self.calc_fit= None
+        self.calc_2D = None
+        self.calc_1D = None
+        self.calc_fit = None
         
         # Start with a good default
         self.elapsed = 0.022
@@ -88,25 +90,29 @@ class Plugin:
         #let fit ready
         self.fitproblem_count = None
         #Flag to let the plug-in know that it is running stand alone
-        self.standalone=True
+        self.standalone = True
         ## dictionary of page closed and id 
-        self.closed_page_dict ={}
+        self.closed_page_dict = {}
         ## Fit engine
         self._fit_engine = 'scipy'
         #List of selected data
-        self.selected_data_list=[]
+        self.selected_data_list = []
         ## list of slicer panel created to display slicer parameters and results
-        self.slicer_panels=[]
-        # Log startup
-        logging.info("Fitting plug-in started")   
+        self.slicer_panels = []
         # model 2D view
-        self.model2D_id=None
+        self.model2D_id = None
         #keep reference of the simultaneous fit page
-        self.sim_page=None
+        self.sim_page = None
         #dictionary containing data name and error on dy of that data 
         self.err_dy = {}
-        self.theory_data = None      
-   
+        self.theory_data = None  
+        #Create a reader for fit page's state
+        self.state_reader = Reader(self.set_state)   
+        #append that reader to list of available reader 
+        loader = Loader()
+        loader.associate_file_reader(".fitv", self.state_reader)
+        # Log startup
+        logging.info("Fitting plug-in started") 
         
     def populate_menu(self, id, owner):
         """
@@ -274,11 +280,29 @@ class Plugin:
         """
             Post initialization call back to close the loose ends
         """
-        # Do not show the fitting perspective immediately and 
-        # let the application show the Welcome Page.
-        #self.parent.set_perspective(self.perspective)
         pass
-
+    
+    def set_state(self, state, datainfo=None):
+        """
+            Call-back method for the fit page state reader.
+            This method is called when a .fitv file is loaded.
+            @param state: PageState object
+        """
+        try: 
+            # Load fitting state
+            page = self.fit_panel.set_state(state)   
+            # Make sure the user sees the fitting panel after loading
+            self.parent.set_perspective(self.perspective)   
+                   
+        except:
+            raise
+        
+    def save_fit_state(self, filepath, fitstate):  
+        """
+            save fit page state into file
+        """
+        self.state_reader.write(filename=filepath, fitstate=fitstate)
+        
     def copy_data(self, item, dy=None):
         """
             receive a data 1D and the list of errors on dy
