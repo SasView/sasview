@@ -107,10 +107,7 @@ class Plugin:
         self.err_dy = {}
         self.theory_data = None  
         #Create a reader for fit page's state
-        self.state_reader = Reader(self.set_state)   
-        #append that reader to list of available reader 
-        loader = Loader()
-        loader.associate_file_reader(".fitv", self.state_reader)
+        self.state_reader = None 
         # Log startup
         logging.info("Fitting plug-in started") 
         
@@ -243,8 +240,11 @@ class Plugin:
         self.parent.Bind(EVT_REMOVE_DATA, self._closed_fitpage)
         self.parent.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PANEL)
         self.parent._mgr.Bind(wx.aui.EVT_AUI_PANE_CLOSE,self._onclearslicer)    
-
-        
+        #Create reader when fitting panel are created
+        self.state_reader = Reader(self.set_state)   
+        #append that reader to list of available reader 
+        loader = Loader()
+        loader.associate_file_reader(".fitv", self.state_reader)
         #Send the fitting panel to guiframe
         self.mypanels.append(self.fit_panel)
        
