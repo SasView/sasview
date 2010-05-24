@@ -1331,12 +1331,14 @@ class Plugin:
             # 1 d theory from model_thread is only in the range of index
             if index == None: index = numpy.ones(len(data.y),ntype=bool)
             if data.dy== None or data.dy ==[]:
-                data.dy= numpy.ones(len(data.y))
+                dy = numpy.ones(len(data.y))
             else:
-                data.dy[data.dy==0]=1  ## Set consitently w/AbstractFitengine: But this should be corrected later.
+                ## Set consitently w/AbstractFitengine: But this should be corrected later.
+                dy = data.dy
+                dy[dy==0] = 1  
             fn = data.y[index] 
             gn = self.theory_data.y
-            en = data.dy[index]
+            en = dy[index]
 
         # residual
         res = (fn - gn)/en
