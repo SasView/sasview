@@ -185,7 +185,7 @@ class PageState(object):
         model = None
         if self.model is not None:
             model = self.model.clone()
-        
+            model.name = self.model.name
         obj = PageState(self.parent, model=model)
         obj.file = copy.deepcopy(self.file)
         obj.data = copy.deepcopy(self.data)

@@ -550,7 +550,22 @@ class BasicPage(wx.ScrolledWindow):
     def on_save_state(self, event):   
         """
             Save the current state into file
-        """      
+        """  
+        self.save_current_state()
+        new_state = self.state.clone()
+        # Ask the user the location of the file to write to.
+        path = None
+        dlg = wx.FileDialog(self, "Choose a file", self._default_save_location,
+                                                 "", "*.fitv", wx.SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            self._default_save_location = os.path.dirname(path)
+        else:
+            return None
+        #the manager write the state into file
+        self.manager.save_fit_state(filepath=path, fitstate=new_state)
+        return new_state  
+      
     def on_bookmark(self, event):
         """
             save history of the data and model

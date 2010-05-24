@@ -285,6 +285,8 @@ class Plugin:
             This method is called when a .fitv file is loaded.
             @param state: PageState object
         """
+        #working on reading state
+        return 
         try: 
             # Load fitting state
             page = self.fit_panel.set_state(state)   
