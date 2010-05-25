@@ -18,7 +18,7 @@ from lxml import etree
 
 import DataLoader
 from DataLoader.readers.cansas_reader import Reader as CansasReader
-from DataLoader.readers.cansas_reader import get_content
+from DataLoader.readers.cansas_reader import get_content, write_node
 
 #Information to read/write state as xml
 FITTING_NODE_NAME = 'fitting_plug_in'
@@ -63,6 +63,24 @@ list_of_state_parameters = [["parameters", "parameters"] ,
                             ["dispersity_parameters", "orientation_params_disp"],
                             ["fixed_param", "fixed_param"],                      
                             ["fittable_param","fittable_param"]]
+list_of_data_2d_attr = [["xmin", "xmin"],
+                        ["xmax","xmax"],
+                        ["ymin","ymin"],
+                        ["ymax","ymax"],
+                        ["_xaxis","_xaxis"],
+                        ["_xunit", "_xunit"],
+                        ["_yaxis","_yaxis"],
+                        ["_yunit","_yunit"],
+                        ["_zaxis","_zaxis"],
+                        ["_zunit","_zunit"]]
+list_of_data2d_values = [["qx_data","qx_data"],
+                         ["qy_data","qy_data"],
+                         ["qdx_data","qdx_data"],
+                         ["qdy_data","qdy_data"],
+                         ["data","data"],
+                         ["q_data","q_data"],
+                         ["err_data","err_data"],
+                         ["mask","mask"],]
 
 class PageState(object):
     """
@@ -389,8 +407,8 @@ class PageState(object):
         for item in list_of_model_attributes:
             element = newdoc.createElement(item[0])
             exec "list = self.%s"%item[1]
-            for item in list:
-                exec "element.appendChild(newdoc.createTextNode(str(%s)))" % item
+            for value in list:
+                exec "element.appendChild(newdoc.createTextNode(str(%s)))" % value
             inputs.appendChild(element)
             
         for item in list_of_state_parameters:
@@ -522,12 +540,10 @@ class Reader(CansasReader):
             @param path: file path
             @return: None
         """
-        if self.cansas==True:
+        if self.cansas == True:
             return self._read_cansas(path)
-        else:
-            return self._read_standalone(path)
-        
-    def _data2d_to_xml_doc(self):
+     
+    def _data2d_to_xml_doc(self, datainfo):
         """
             Create an XML document to contain the content of a Data2D
             
@@ -552,23 +568,20 @@ class Reader(CansasReader):
             if datainfo.run_name.has_key(item) and len(str(datainfo.run_name[item]))>1:
                 runname = {'name': datainfo.run_name[item] }
             write_node(doc, entry_node, "Run", item, runname)
-        
         # Data info
         node = doc.createElement("SASdata")
         entry_node.appendChild(node)
-        
-        for i in range(len(datainfo.x)):
-            pt = doc.createElement("Idata")
-            node.appendChild(pt)
-            write_node(doc, pt, "Q", datainfo.x[i], {'unit':datainfo.x_unit})
-            if len(datainfo.y)>=i:
-                write_node(doc, pt, "I", datainfo.y[i], {'unit':datainfo.y_unit})
-            if datainfo.dx !=None and len(datainfo.dx)>=i:
-                write_node(doc, pt, "Qdev", datainfo.dx[i], {'unit':datainfo.x_unit})
-            if datainfo.dy !=None and len(datainfo.dy)>=i:
-                write_node(doc, pt, "Idev", datainfo.dy[i], {'unit':datainfo.y_unit})
-
-        
+        for item in list_of_data_2d_attr:
+            element = doc.createElement(item[0])
+            exec "element.setAttribute(item[0], str(datainfo.%s))"%(item[1])
+            entry_node.appendChild(element)
+        for item in list_of_data2d_values:
+            element = doc.createElement(item[0])
+            exec "temp_list = self.%s"%item[1]
+            for value in temp_list:
+                exec "element.appendChild(doc.createTextNode(str(%s)))" % value
+            entry_node.appendChild(element)
+      
         # Sample info
         sample = doc.createElement("SASsample")
         if datainfo.sample.name is not None:
@@ -689,7 +702,6 @@ class Reader(CansasReader):
             if written == True:
                 det.appendChild(ori)
                 
-        
         # Processes info
         for item in datainfo.process:
             node = doc.createElement("SASprocess")
@@ -708,21 +720,7 @@ class Reader(CansasReader):
         # Return the document, and the SASentry node associated with
         # the data we just wrote
         return doc, entry_node
-    
-    def _read_standalone(self, path):
-        """ 
-            Load a new P(r) inversion state from file.
-            The P(r) node is assumed to be the top element.
-            
-            @param path: file path
-            @return: None
-        """
-        # Read the new state from file
-        state = PageState()
-        state.fromXML(file=path)
-        # Call back to post the new state
-        self.call_back(state)
-        return None
+   
     
     def _parse_state(self, entry):
         """
@@ -741,6 +739,342 @@ class Reader(CansasReader):
             
         return state
     
+    def _parse_entry_2d(self, dom):
+        """
+            Parse a SASentry
+            
+            @param node: SASentry node
+            @return: Data2D object
+        """
+      
+        data_info = Data2D()
+        
+        # Look up title      
+        self._store_content('ns:Title', dom, 'title', data_info)
+        
+        # Look up run number   
+        nodes = dom.xpath('ns:Run', namespaces={'ns': CANSAS_NS})
+        for item in nodes:    
+            if item.text is not None:
+                value = item.text.strip()
+                if len(value) > 0:
+                    data_info.run.append(value)
+                    if item.get('name') is not None:
+                        data_info.run_name[value] = item.get('name')
+                           
+        # Look up instrument name              
+        self._store_content('ns:SASinstrument/ns:name', dom, 'instrument', data_info)
+
+        # Notes
+        note_list = dom.xpath('ns:SASnote', namespaces={'ns': CANSAS_NS})
+        for note in note_list:
+            try:
+                if note.text is not None:
+                    note_value = note.text.strip()
+                    if len(note_value) > 0:
+                        data_info.notes.append(note_value)
+            except:
+                err_mess = "cansas_reader.read: error processing entry notes\n  %s" % sys.exc_value
+                self.errors.append(err_mess)
+                logging.error(err_mess)
+        
+        # Sample info ###################
+        entry = get_content('ns:SASsample', dom)
+        if entry is not None:
+            data_info.sample.name = entry.get('name')
+            
+        self._store_content('ns:SASsample/ns:ID', 
+                     dom, 'ID', data_info.sample)                    
+        self._store_float('ns:SASsample/ns:thickness', 
+                     dom, 'thickness', data_info.sample)
+        self._store_float('ns:SASsample/ns:transmission', 
+                     dom, 'transmission', data_info.sample)
+        self._store_float('ns:SASsample/ns:temperature', 
+                     dom, 'temperature', data_info.sample)
+        
+        nodes = dom.xpath('ns:SASsample/ns:details', namespaces={'ns': CANSAS_NS})
+        for item in nodes:
+            try:
+                if item.text is not None:
+                    detail_value = item.text.strip()
+                    if len(detail_value) > 0:
+                        data_info.sample.details.append(detail_value)
+            except:
+                err_mess = "cansas_reader.read: error processing sample details\n  %s" % sys.exc_value
+                self.errors.append(err_mess)
+                logging.error(err_mess)
+        
+        # Position (as a vector)
+        self._store_float('ns:SASsample/ns:position/ns:x', 
+                     dom, 'position.x', data_info.sample)          
+        self._store_float('ns:SASsample/ns:position/ns:y', 
+                     dom, 'position.y', data_info.sample)          
+        self._store_float('ns:SASsample/ns:position/ns:z', 
+                     dom, 'position.z', data_info.sample)          
+        
+        # Orientation (as a vector)
+        self._store_float('ns:SASsample/ns:orientation/ns:roll', 
+                     dom, 'orientation.x', data_info.sample)          
+        self._store_float('ns:SASsample/ns:orientation/ns:pitch', 
+                     dom, 'orientation.y', data_info.sample)          
+        self._store_float('ns:SASsample/ns:orientation/ns:yaw', 
+                     dom, 'orientation.z', data_info.sample)          
+       
+        # Source info ###################
+        entry = get_content('ns:SASinstrument/ns:SASsource', dom)
+        if entry is not None:
+            data_info.source.name = entry.get('name')
+        
+        self._store_content('ns:SASinstrument/ns:SASsource/ns:radiation', 
+                     dom, 'radiation', data_info.source)                    
+        self._store_content('ns:SASinstrument/ns:SASsource/ns:beam_shape', 
+                     dom, 'beam_shape', data_info.source)                    
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength', 
+                     dom, 'wavelength', data_info.source)          
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_min', 
+                     dom, 'wavelength_min', data_info.source)          
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_max', 
+                     dom, 'wavelength_max', data_info.source)          
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_spread', 
+                     dom, 'wavelength_spread', data_info.source)    
+        
+        # Beam size (as a vector)   
+        entry = get_content('ns:SASinstrument/ns:SASsource/ns:beam_size', dom)
+        if entry is not None:
+            data_info.source.beam_size_name = entry.get('name')
+            
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:x', 
+                     dom, 'beam_size.x', data_info.source)    
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:y', 
+                     dom, 'beam_size.y', data_info.source)    
+        self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:z', 
+                     dom, 'beam_size.z', data_info.source)    
+        
+        # Collimation info ###################
+        nodes = dom.xpath('ns:SASinstrument/ns:SAScollimation', namespaces={'ns': CANSAS_NS})
+        for item in nodes:
+            collim = Collimation()
+            if item.get('name') is not None:
+                collim.name = item.get('name')
+            self._store_float('ns:length', item, 'length', collim)  
+            
+            # Look for apertures
+            apert_list = item.xpath('ns:aperture', namespaces={'ns': CANSAS_NS})
+            for apert in apert_list:
+                aperture =  Aperture()
+                
+                # Get the name and type of the aperture
+                aperture.name = apert.get('name')
+                aperture.type = apert.get('type')
+                    
+                self._store_float('ns:distance', apert, 'distance', aperture)    
+                
+                entry = get_content('ns:size', apert)
+                if entry is not None:
+                    aperture.size_name = entry.get('name')
+                
+                self._store_float('ns:size/ns:x', apert, 'size.x', aperture)    
+                self._store_float('ns:size/ns:y', apert, 'size.y', aperture)    
+                self._store_float('ns:size/ns:z', apert, 'size.z', aperture)
+                
+                collim.aperture.append(aperture)
+                
+            data_info.collimation.append(collim)
+        
+        # Detector info ######################
+        nodes = dom.xpath('ns:SASinstrument/ns:SASdetector', namespaces={'ns': CANSAS_NS})
+        for item in nodes:
+            
+            detector = Detector()
+            
+            self._store_content('ns:name', item, 'name', detector)
+            self._store_float('ns:SDD', item, 'distance', detector)    
+            
+            # Detector offset (as a vector)
+            self._store_float('ns:offset/ns:x', item, 'offset.x', detector)    
+            self._store_float('ns:offset/ns:y', item, 'offset.y', detector)    
+            self._store_float('ns:offset/ns:z', item, 'offset.z', detector)    
+            
+            # Detector orientation (as a vector)
+            self._store_float('ns:orientation/ns:roll',  item, 'orientation.x', detector)    
+            self._store_float('ns:orientation/ns:pitch', item, 'orientation.y', detector)    
+            self._store_float('ns:orientation/ns:yaw',   item, 'orientation.z', detector)    
+            
+            # Beam center (as a vector)
+            self._store_float('ns:beam_center/ns:x', item, 'beam_center.x', detector)    
+            self._store_float('ns:beam_center/ns:y', item, 'beam_center.y', detector)    
+            self._store_float('ns:beam_center/ns:z', item, 'beam_center.z', detector)    
+            
+            # Pixel size (as a vector)
+            self._store_float('ns:pixel_size/ns:x', item, 'pixel_size.x', detector)    
+            self._store_float('ns:pixel_size/ns:y', item, 'pixel_size.y', detector)    
+            self._store_float('ns:pixel_size/ns:z', item, 'pixel_size.z', detector)    
+            
+            self._store_float('ns:slit_length', item, 'slit_length', detector)
+            
+            data_info.detector.append(detector)    
+
+        # Processes info ######################
+        nodes = dom.xpath('ns:SASprocess', namespaces={'ns': CANSAS_NS})
+        for item in nodes:
+            process = Process()
+            self._store_content('ns:name', item, 'name', process)
+            self._store_content('ns:date', item, 'date', process)
+            self._store_content('ns:description', item, 'description', process)
+            
+            term_list = item.xpath('ns:term', namespaces={'ns': CANSAS_NS})
+            for term in term_list:
+                try:
+                    term_attr = {}
+                    for attr in term.keys():
+                        term_attr[attr] = term.get(attr).strip()
+                    if term.text is not None:
+                        term_attr['value'] = term.text.strip()
+                        process.term.append(term_attr)
+                except:
+                    err_mess = "cansas_reader.read: error processing process term\n  %s" % sys.exc_value
+                    self.errors.append(err_mess)
+                    logging.error(err_mess)
+            
+            note_list = item.xpath('ns:SASprocessnote', namespaces={'ns': CANSAS_NS})
+            for note in note_list:
+                if note.text is not None:
+                    process.notes.append(note.text.strip())
+            
+            data_info.process.append(process)
+            
+            
+        # Data info ######################
+        nodes = dom.xpath('ns:SASdata', namespaces={'ns': CANSAS_NS})
+        if len(nodes)>1:
+            raise RuntimeError, "CanSAS reader is not compatible with multiple SASdata entries"
+        
+        nodes = dom.xpath('ns:SASdata/ns:Idata', namespaces={'ns': CANSAS_NS})
+
+        for item in nodes:
+            _x, attr = get_float('ns:Q', item)
+            _dx, attr_d = get_float('ns:Qdev', item)
+            _dxl, attr_l = get_float('ns:dQl', item)
+            _dxw, attr_w = get_float('ns:dQw', item)
+            if _dx == None:
+                _dx = 0.0
+            if _dxl == None:
+                _dxl = 0.0
+            if _dxw == None:
+                _dxw = 0.0
+                
+            if attr.has_key('unit') and attr['unit'].lower() != data_info.x_unit.lower():
+                if has_converter==True:
+                    try:
+                        data_conv_q = Converter(attr['unit'])
+                        _x = data_conv_q(_x, units=data_info.x_unit)
+                    except:
+                        raise ValueError, "CanSAS reader: could not convert Q unit [%s]; expecting [%s]\n  %s" \
+                        % (attr['unit'], data_info.x_unit, sys.exc_value)
+                else:
+                    raise ValueError, "CanSAS reader: unrecognized Q unit [%s]; expecting [%s]" \
+                        % (attr['unit'], data_info.x_unit)
+            # Error in Q
+            if attr_d.has_key('unit') and attr_d['unit'].lower() != data_info.x_unit.lower():
+                if has_converter==True:
+                    try:
+                        data_conv_q = Converter(attr_d['unit'])
+                        _dx = data_conv_q(_dx, units=data_info.x_unit)
+                    except:
+                        raise ValueError, "CanSAS reader: could not convert dQ unit [%s]; expecting [%s]\n  %s" \
+                        % (attr['unit'], data_info.x_unit, sys.exc_value)
+                else:
+                    raise ValueError, "CanSAS reader: unrecognized dQ unit [%s]; expecting [%s]" \
+                        % (attr['unit'], data_info.x_unit)
+            # Slit length
+            if attr_l.has_key('unit') and attr_l['unit'].lower() != data_info.x_unit.lower():
+                if has_converter==True:
+                    try:
+                        data_conv_q = Converter(attr_l['unit'])
+                        _dxl = data_conv_q(_dxl, units=data_info.x_unit)
+                    except:
+                        raise ValueError, "CanSAS reader: could not convert dQl unit [%s]; expecting [%s]\n  %s" \
+                        % (attr['unit'], data_info.x_unit, sys.exc_value)
+                else:
+                    raise ValueError, "CanSAS reader: unrecognized dQl unit [%s]; expecting [%s]" \
+                        % (attr['unit'], data_info.x_unit)
+            # Slit width
+            if attr_w.has_key('unit') and attr_w['unit'].lower() != data_info.x_unit.lower():
+                if has_converter==True:
+                    try:
+                        data_conv_q = Converter(attr_w['unit'])
+                        _dxw = data_conv_q(_dxw, units=data_info.x_unit)
+                    except:
+                        raise ValueError, "CanSAS reader: could not convert dQw unit [%s]; expecting [%s]\n  %s" \
+                        % (attr['unit'], data_info.x_unit, sys.exc_value)
+                else:
+                    raise ValueError, "CanSAS reader: unrecognized dQw unit [%s]; expecting [%s]" \
+                        % (attr['unit'], data_info.x_unit)
+                    
+            _y, attr = get_float('ns:I', item)
+            _dy, attr_d = get_float('ns:Idev', item)
+            if _dy == None:
+                _dy = 0.0
+            if attr.has_key('unit') and attr['unit'].lower() != data_info.y_unit.lower():
+                if has_converter==True:
+                    try:
+                        data_conv_i = Converter(attr['unit'])
+                        _y = data_conv_i(_y, units=data_info.y_unit)
+                    except:
+                        raise ValueError, "CanSAS reader: could not convert I(q) unit [%s]; expecting [%s]\n  %s" \
+                        % (attr['unit'], data_info.y_unit, sys.exc_value)
+                else:
+                    raise ValueError, "CanSAS reader: unrecognized I(q) unit [%s]; expecting [%s]" \
+                        % (attr['unit'], data_info.y_unit)
+            if attr_d.has_key('unit') and attr_d['unit'].lower() != data_info.y_unit.lower():
+                if has_converter==True:
+                    try:
+                        data_conv_i = Converter(attr_d['unit'])
+                        _dy = data_conv_i(_dy, units=data_info.y_unit)
+                    except:
+                        raise ValueError, "CanSAS reader: could not convert dI(q) unit [%s]; expecting [%s]\n  %s" \
+                        % (attr_d['unit'], data_info.y_unit, sys.exc_value)
+                else:
+                    raise ValueError, "CanSAS reader: unrecognized dI(q) unit [%s]; expecting [%s]" \
+                        % (attr_d['unit'], data_info.y_unit)
+                
+            if _x is not None and _y is not None:
+                exec "item = numpy.append(x, _x)"
+    
+        for item in list_of_model_attributes:
+            node = get_content("ns:%s"%item[0], entry)
+            list = []
+            for value in node:
+                try:
+                    list.append(float(value)) 
+                except:
+                    list.append(None)
+                
+            exec "self.%s = list"%item[1]
+        data_conv_q = None
+        data_conv_i = None
+        
+        if has_converter == True and data_info.x_unit != '1/A':
+            data_conv_q = Converter('1/A')
+            # Test it
+            data_conv_q(1.0, output.Q_unit)
+            
+        if has_converter == True and data_info.y_unit != '1/cm':
+            data_conv_i = Converter('1/cm')
+            # Test it
+            data_conv_i(1.0, output.I_unit)                    
+                
+        if data_conv_q is not None:
+            data_info.xaxis("\\rm{%s}"%str(_xaxis), data_info.x_unit)
+        else:
+            data_info.xaxis("\\rm{%s}"%str(_xaxis), 'A^{-1}')
+        if data_conv_i is not None:
+            data_info.yaxis("\\rm{%s}"%str(_yaxis), data_info.y_unit)
+        else:
+            data_info.yaxis("\\rm{%s}"%str(_yaxis),"cm^{-1}")
+        
+        return data_info
+
     def _read_cansas(self, path):
         """ 
             Load data and P(r) information from a CanSAS XML file.
@@ -768,7 +1102,10 @@ class Reader(CansasReader):
                     root = tree.getroot()
                     entry_list = root.xpath('/ns:SASroot/ns:SASentry', namespaces={'ns': CANSAS_NS})
                     for entry in entry_list:
-                        sas_entry = self._parse_entry(entry)
+                        try:
+                            sas_entry = self._parse_entry(entry)
+                        except:
+                            sas_entry = self._parse_entry_2d(entry)
                         fitstate = self._parse_state(entry)
                         sas_entry.meta_data['fitstate'] = fitstate
                         sas_entry.filename = fitstate.file
@@ -831,7 +1168,7 @@ class Reader(CansasReader):
                 else:
                     data = fitstate.data
                     doc, sasentry = self._data2d_to_xml_doc(data)
-                fitstate.toXML(doc=doc, entry_node=sasentry)
+                fitstate.toXML(doc=doc, file=data.name, entry_node=sasentry)
             # Write the XML document
             fd = open(filename, 'w')
             fd.write(doc.toprettyxml())
