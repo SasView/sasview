@@ -13,12 +13,14 @@ import sys
 import copy
 import logging
 
+import xml.dom.minidom
 from xml.dom.minidom import parse
 from lxml import etree
 
 import DataLoader
 from DataLoader.readers.cansas_reader import Reader as CansasReader
 from DataLoader.readers.cansas_reader import get_content, write_node
+from DataLoader.data_info import Data2D
 
 #Information to read/write state as xml
 FITTING_NODE_NAME = 'fitting_plug_in'
@@ -75,8 +77,8 @@ list_of_data_2d_attr = [["xmin", "xmin"],
                         ["_zunit","_zunit"]]
 list_of_data2d_values = [["qx_data","qx_data"],
                          ["qy_data","qy_data"],
-                         ["qdx_data","qdx_data"],
-                         ["qdy_data","qdy_data"],
+                         ["dqx_data","dqx_data"],
+                         ["dqy_data","dqy_data"],
                          ["data","data"],
                          ["q_data","q_data"],
                          ["err_data","err_data"],
@@ -577,9 +579,12 @@ class Reader(CansasReader):
             entry_node.appendChild(element)
         for item in list_of_data2d_values:
             element = doc.createElement(item[0])
-            exec "temp_list = self.%s"%item[1]
-            for value in temp_list:
-                exec "element.appendChild(doc.createTextNode(str(%s)))" % value
+            exec "temp_list = datainfo.%s"%item[1]
+            if temp_list is None or len(temp_list)== 0:
+                exec "element.appendChild(doc.createTextNode(str(%s)))"%temp_list
+            else:
+                for value in temp_list:
+                    exec "element.appendChild(doc.createTextNode(str(%s)))"%value
             entry_node.appendChild(element)
       
         # Sample info
