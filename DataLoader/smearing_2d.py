@@ -102,7 +102,8 @@ class Smearer2D:
     def get_value(self):
         """
             Over sampling of r_nbins times phi_nbins, calculate Gaussian weights, then find smeared intensity
-            # For the default values, this is equivalent (but speed optimized by a factor of ten)to the following:
+            # For the default values, this is equivalent (but by using numpy array 
+            # the speed optimized by a factor of ten)to the following:
             =====================================================================================
             ## Remove the singular points if exists
             self.dqx_data[self.dqx_data==0]=SIGMA_ZERO
@@ -176,9 +177,44 @@ class Smearer2D:
         ## Return the smeared values in the range of self.index
         return value
     
-    
 if __name__ == '__main__':
-    ## Test
+    ## Test w/ 2D linear function
+    x = 0.001*numpy.arange(1,11)
+    dx = numpy.ones(len(x))*0.001
+    y = 0.001*numpy.arange(1,11)
+    dy = numpy.ones(len(x))*0.001
+    z = numpy.ones(10)
+    dz = numpy.sqrt(z)
+    
+    from DataLoader import Data2D
+    #for i in range(10): print i, 0.001 + i*0.008/9.0 
+    #for i in range(100): print i, int(math.floor( (i/ (100/9.0)) )) 
+    out = Data2D()
+    out.data = z
+    out.qx_data = x
+    out.qy_data = y
+    out.dqx_data = dx
+    out.dqy_data = dy
+    index = numpy.ones(len(x), dtype = bool)
+    out.mask = index
+    from sans.models.LineModel import LineModel
+    model = LineModel()
+    model.setParam("A", 0)
+
+    smear = Smearer2D(out,model,index)
+    #smear.set_accuracy('Xhigh')
+    value = smear.get_value()
+    ## All data are ones, so the smeared should also be ones.
+    print "Data length =",len(value)
+    print " 2D linear function, I = 0 + 1*qx*qy"
+    print " Gaussian weighted averaging on a 2D linear function will provides the results same as without the averaging."
+    print "qx_data", "qy_data", "I_nonsmear", "I_smeared"
+    for ind in range(len(value)):
+        print x[ind],y[ind],model.evalDistribution([x,y])[ind], value[ind]
+  
+"""    
+if __name__ == '__main__':
+    ## Another Test w/ constant function
     x = 0.001*numpy.arange(1,11)
     dx = numpy.ones(len(x))*0.001
     y = 0.001*numpy.arange(1,11)
@@ -201,6 +237,6 @@ if __name__ == '__main__':
     model = Constant()
 
     value = Smearer2D(out,model,index).get_value()
-    ## All data are ones, so the smeared should also be ones.
+    ## All data are ones, so the smeared values should also be ones.
     print "Data length =",len(value), ", Data=",value
-    
+"""    
