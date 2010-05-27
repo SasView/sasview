@@ -212,6 +212,18 @@ class MultiplicationModel(BaseComponent):
         self._set_effect_radius()
         self._set_scale_factor()
         return self.params['scale_factor']*self.p_model.runXY(x)* self.s_model.runXY(x)
+    
+    ## Now (May27,10) directly uses the model eval function 
+    ## instead of the for-loop in Base Component.
+    def evalDistribution(self, x = []):
+        """ Evaluate the model in cartesian coordinates
+            @param x: input q[], or [qx[], qy[]]
+            @return: scattering function P(q[])
+        """
+        # set effective radius and scaling factor before run
+        self._set_effect_radius()
+        self._set_scale_factor()
+        return self.params['scale_factor']*self.p_model.evalDistribution(x)* self.s_model.evalDistribution(x)
 
     def set_dispersion(self, parameter, dispersion):
         """
