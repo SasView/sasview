@@ -74,9 +74,18 @@ class BaseComponent:
             and
             qy_prime = [ qy[0], qy[1], qy[2], ....] 
             
+            Then get
+            q = numpy.sqrt(qx_prime^2+qy_prime^2)
+            
+            that is a qr in 1D array;
+            q = [q[0], q[1], q[2], ....] 
+            Note: Due to 2D speed issue, no anisotropic scattering is supported for python models, 
+            thus C-models should have their own evalDistribution methods.
+            
             The method is then called the following way:
             
-            evalDistribution([qx_prime, qy_prime])
+            evalDistribution(q)
+            where q is a numpy array.
             
             @param qdist: ndarray of scalar q-values or list [qx,qy] where qx,qy are 1D ndarrays 
         """
@@ -91,24 +100,28 @@ class BaseComponent:
             qx = qdist[0]
             qy = qdist[1]
             
-            # Create output array
-            iq_array = numpy.zeros((len(qx)))
-            
-            for i in range(len(qx)):
-                    iq_array[i] = self.runXY([qx[i],qy[i]])
+            # calculate q_r component for 2D isotropic
+            q = numpy.sqrt(qx**2+qy**2)
+            # vectorize the model function runXY
+            v_model = numpy.vectorize(self.runXY,otypes=[float])
+            # calculate the scattering
+            iq_array = v_model(q)
+
             return iq_array
                 
         elif qdist.__class__.__name__ == 'ndarray':
                 # We have a simple 1D distribution of q-values
-                iq_array = numpy.zeros(len(qdist))
-                for i in range(len(qdist)):
-                    iq_array[i] = self.runXY(qdist[i])
+                v_model = numpy.vectorize(self.runXY,otypes=[float])
+                iq_array = v_model(qdist)
+
                 return iq_array
             
         else:
             mesg = "evalDistribution is expecting an ndarray of scalar q-values"
             mesg += " or a list [qx,qy] where qx,qy are 2D ndarrays."
             raise RuntimeError, mesg
+        
+    
     
     def clone(self):
         """ Returns a new object identical to the current object """
