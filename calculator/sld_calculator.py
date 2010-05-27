@@ -1,6 +1,7 @@
 """
-    This module intends to compute the neutron scattering length density of molecule
-    @author: Gervaise B. Alina
+    This module intends to compute the neutron scattering length density 
+    of a molecule. It uses methods of the periodictable package to provide 
+    easy user interface for  Sld calculator applications.
 """
 
 import periodictable
@@ -12,7 +13,8 @@ neutron_sld_from_atoms= periodictable.nsf.neutron_sld_from_atoms
 
 class SldCalculator(object):
     """
-        compute neutron SLD and related parameters
+    Given a molecule, a density and a wavelength, this class 
+    determine scattering length density.
     """
     def __init__(self):
         self.wavelength  = 6.0
@@ -26,8 +28,8 @@ class SldCalculator(object):
         
     def set_value(self, user_formula, density, wavelength=6.0):
         """
-            Store values of density and wavelength into the calculator 
-            and compute the volume
+        Store values into the sld calculator and compute the corresponding
+        volume.
         """
         self.wavelength = wavelength
         self.density    = float(density)
@@ -36,15 +38,14 @@ class SldCalculator(object):
         if self.density == 0:
             raise ZeroDivisionError("integer division or modulo\
                          by zero for density")
-            return 
         self.volume = (self.sld_formula.mass / self.density) / avogadro_number\
                                 *1.0e24   
         
         
     def calculate_xray_sld(self, element):
         """
-            Get an element and compute the corresponding SLD for a given formula
-            @param element:  elementis a string of existing atom
+        Get an element and compute the corresponding SLD for a given formula
+        @param element:  elementis a string of existing atom
         """
         myformula = formula(str(element))
         if len(myformula.atoms) != 1:
@@ -60,10 +61,10 @@ class SldCalculator(object):
         
     def calculate_neutron_sld(self):
         """
-            Compute the neutron SLD for a given molecule
-            @return absorp: absorption
-            @return coh: coherence cross section
-            @return inc: incoherence cross section
+        Compute the neutron SLD for a given molecule
+        @return absorp: absorption
+        return coh: coherence cross section
+        @return inc: incoherence cross section
         """
         if self.density == 0:
             raise ZeroDivisionError("integer division or modulo\
@@ -74,17 +75,15 @@ class SldCalculator(object):
                                                   self.wavelength)
         #Don't know if value is return in cm or  cm^(-1).assume return in cm
         # to match result of neutron inc of Alan calculator
-        self.incoherence = inc * 1/10
-        #Doesn't match result of Alan calculator for absorption factor of 2
-        #multiplication of 100 is going around
-        self.absorption = absorp * 2 * 100
+        self.incoherence = inc
+        self.absorption = absorp 
         self.coherence  = coh
         return self.coherence, self.absorption, self.incoherence
     
     
     def calculate_length(self):
         """
-            Compute the neutron 1/e length
+        Compute the neutron 1/e length
         """
         self.length = (self.coherence + self.absorption +\
                             self.incoherence) / self.volume
@@ -93,7 +92,7 @@ class SldCalculator(object):
         
     def calculate_coherence_im(self):
         """
-            Compute imaginary part of the absorption 
+        Compute imaginary part of the absorption 
         """
         atom = self.sld_formula.atoms 
         #im: imaginary part of neutron SLD
