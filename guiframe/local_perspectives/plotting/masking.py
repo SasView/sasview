@@ -471,11 +471,10 @@ class MaskPanel(wx.Dialog):
                        zmax= zmax,
                        cmap= self.cmap,
                        color=0,symbol=0,label=self.data.name)
+        # axis labels
+        self.plotpanel.axes[0].set_xlabel('$\\rm{Q}_{x}(\\AA^{-1})$')
+        self.plotpanel.axes[0].set_ylabel('$\\rm{Q}_{y}(\\AA^{-1})$')
         
-        
-        #self.plotpanel.add_image(temp_data)
-        self.plotpanel.xaxis('Qx ', '1/A')
-        self.plotpanel.yaxis('Qy ', '1/A')
         self.plotpanel.render()
         self.plotpanel.subplot.figure.canvas.draw_idle()
         
