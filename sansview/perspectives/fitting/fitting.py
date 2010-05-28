@@ -1204,7 +1204,7 @@ class Plugin:
             theory.qx_data = data.qx_data
             theory.qy_data = data.qy_data
             theory.q_data = data.q_data
-            theory.err_data = data.err_data
+            theory.err_data = err_image#numpy.zeros(len(data.err_data))#data.err_data
             theory.mask = data.mask
             ## plot boundaries
             theory.ymin= data.ymin
