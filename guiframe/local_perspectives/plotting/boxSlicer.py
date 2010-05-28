@@ -188,7 +188,7 @@ class BoxInteractor(_BaseInteractor):
         new_plot.interactive = True
         new_plot.detector =self.base.data2D.detector
         # If the data file does not tell us what the axes are, just assume...
-        new_plot.xaxis("\\rm{Q}", 'rad')
+        new_plot.xaxis("\\rm{Q}", '\\AA^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.group_id = str(self.averager.__name__)+self.base.data2D.name
         new_plot.id = str(self.averager.__name__)
