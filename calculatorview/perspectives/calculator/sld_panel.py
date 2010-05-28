@@ -145,25 +145,19 @@ class SldPanel(wx.Panel):
         self.neutron_inc_ctl.SetEditable(False)
         self.neutron_inc_ctl.SetToolTipString("Neutron Inc. Xs")
         neutron_inc_units_txt = wx.StaticText(self, -1,  unit_cm1)
-        neutron_inc_txt.Hide()
-        self.neutron_inc_ctl.Hide()
-        neutron_inc_units_txt.Hide()
+       
         neutron_abs_txt = wx.StaticText(self, -1, 'Neutron Abs. Xs')     
         self.neutron_abs_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.neutron_abs_ctl.SetEditable(False)
         self.neutron_abs_ctl.SetToolTipString("Neutron Abs. Xs")
         neutron_abs_units_txt = wx.StaticText(self, -1,  unit_cm1)
-        neutron_abs_txt.Hide()
-        self.neutron_abs_ctl.Hide()
-        neutron_abs_units_txt.Hide()
+        
         neutron_length_txt = wx.StaticText(self, -1, 'Neutron 1/e length')
         self.neutron_length_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.neutron_length_ctl.SetEditable(False)
         self.neutron_length_ctl.SetToolTipString("Neutron 1/e length")
         neutron_length_units_txt = wx.StaticText(self, -1,  unit_cm)
-        neutron_length_txt.Hide()
-        self.neutron_length_ctl.Hide()
-        neutron_length_units_txt.Hide()
+      
         iy = 0
         ix = 0
         sizer_output.Add(neutron_sld_txt,(iy, ix),(1,1),
@@ -323,12 +317,14 @@ class SldPanel(wx.Panel):
                 self.mo_ka_sld_reel_ctl.SetValue(format_number(Mo_reel *_SCALE))
                 self.mo_ka_sld_im_ctl.SetValue(format_number(Mo_im * _SCALE))
                
-                coh,absorp,inc = self.calculator.calculate_neutron_sld()
-                im = self.calculator.calculate_coherence_im()
+                sld_real, sld_im, inc = self.calculator.calculate_neutron_sld()
                 length = self.calculator.calculate_length()
                 # Neutron SLD
-                self.neutron_sld_reel_ctl.SetValue(format_number(coh * _SCALE))
-                self.neutron_sld_im_ctl.SetValue(format_number(im * _SCALE))
+                #need to be compute by element package
+                absorp = 1.0 
+                length = 1.0
+                self.neutron_sld_reel_ctl.SetValue(format_number(sld_real * _SCALE))
+                self.neutron_sld_im_ctl.SetValue(format_number(sld_im * _SCALE))
                 self.neutron_inc_ctl.SetValue(format_number(inc))
                 self.neutron_abs_ctl.SetValue(format_number(absorp))
                 # Neutron length

@@ -209,7 +209,7 @@ class SlitLengthCalculatorPanel(wx.Panel):
                  raise ValueError, msg
             slit_length_calculator = SlitlengthCalculator()
             slit_length_calculator.set_data(x=x, y=y)
-            slit_length = slit_length_calculator.get_slit_length()
+            slit_length = slit_length_calculator.calculate_slit_length()
         except:
             if self.parent.parent is None:
                 return 
