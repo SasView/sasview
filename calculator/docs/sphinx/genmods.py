@@ -53,6 +53,7 @@ def genfiles(package, package_name, modules, dir='api'):
 
 modules=[
     ('sld_calculator', 'Sld Calculator'),
+    ('slit_length_calculator', 'Slit Length Calculator'),
 ]
 package='sans.calculator'
 package_name='Reference'

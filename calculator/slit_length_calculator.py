@@ -1,18 +1,13 @@
 """
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
-
-See the license text in license.txt
-
-copyright 2008, 2009, University of Tennessee
+This module is a small tool to allow user to quickly
+determine the slit length value of data.
 """
 from numpy import *
 
 class SlitlengthCalculator(object):
     """
-        compute slit length from SAXSess beam profile (1st col. Q , 2nd col. I , and 3rd col. dI.: don't need the 3rd)
-        @object: data where are data.y and data.x
+    compute slit length from SAXSess beam profile (1st col. Q , 2nd col. I ,
+    and 3rd col. dI.: don't need the 3rd)
     """
     def __init__(self):
         
@@ -30,22 +25,19 @@ class SlitlengthCalculator(object):
     
     def set_data(self, x=None, y=None):
         """
-            set data
-            @ Param x, y: x array and y array
+        set data
+        :param x, y: x array and y array
         """
         self.x = x
         self.y = y
         
-        
     def calculate_slit_length(self):
         """
-            Calculate slit length using 10 max point
-            ToDo: Near future, it should be re-factored in better method.
+        Calculate slit length.
         """
         # None data do nothing
         if self.y == None or self.x == None:
             return
-        
         # set local variable
         y = self.y
         x = self.x
@@ -95,16 +87,10 @@ class SlitlengthCalculator(object):
         
         # set slit_length
         self.slit_length = slit_length
-   
-    def get_slit_length(self): 
-        """
-            Calculate and return the slit length
-        """
-        self.calculate_slit_length()
         return self.slit_length
-        
+  
     def get_slit_length_unit(self): 
         """
-            return the slit length unit
+        return the slit length unit.
         """
         return self.slit_length_unit

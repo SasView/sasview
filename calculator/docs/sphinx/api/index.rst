@@ -14,3 +14,4 @@
 .. toctree::
 
    sld_calculator.rst
+   slit_length_calculator.rst

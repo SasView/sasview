@@ -24,6 +24,7 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="calculator v0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="Slit Length Calculator" href="slit_length_calculator.html" />
     <link rel="prev" title="Reference" href="index.html" /> 
   </head>
   <body>
@@ -36,6 +37,9 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="slit_length_calculator.html" title="Slit Length Calculator"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Reference"
              accesskey="P">previous</a> |</li>
@@ -53,18 +57,28 @@
 <h1>Sld Calculator<a class="headerlink" href="#sld-calculator" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-sans.calculator.sld_calculator">
 <span id="sans-calculator-sld-calculator"></span><h2><a class="reference internal" href="#module-sans.calculator.sld_calculator"><tt class="xref py py-mod docutils literal"><span class="pre">sans.calculator.sld_calculator</span></tt></a><a class="headerlink" href="#module-sans.calculator.sld_calculator" title="Permalink to this headline">¶</a></h2>
-<p>This module intends to compute the neutron scattering length density of molecule
-&#64;author: Gervaise B. Alina</p>
+<p>This module intends to compute the neutron scattering length density 
+of a molecule.It uses methods of the periodictable package to provide 
+easy user interface for  Sld calculator applications.</p>
 <dl class="class">
 <dt id="sans.calculator.sld_calculator.SldCalculator">
 <em class="property">class </em><tt class="descclassname">sans.calculator.sld_calculator.</tt><tt class="descname">SldCalculator</tt><a class="headerlink" href="#sans.calculator.sld_calculator.SldCalculator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
-<p>compute neutron SLD and related parameters</p>
-<dl class="method">
-<dt id="sans.calculator.sld_calculator.SldCalculator.calculate_coherence_im">
-<tt class="descname">calculate_coherence_im</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.sld_calculator.SldCalculator.calculate_coherence_im" title="Permalink to this definition">¶</a></dt>
-<dd>Compute imaginary part of the absorption</dd></dl>
-
+<p>Given a molecule, a density and a wavelength, this class 
+determine scattering length density.</p>
+<p>Example: To get the sld value and the length 1/e the following 
+methods need to be called in this later order:</p>
+<div class="highlight-python"><pre>formula = "H2O"
+density = 1.0
+wavelength = 6.0
+sld_calculator = SldCalculator()
+sld_calculator.set_value(formula, density, wavelength) 
+sld_real, sld_im, _ = sld_calculator.calculate_neutron_sld()
+result : sld = sld_real +i sld_im</pre>
+</div>
+<p>Note: <strong>set_value()</strong> and <strong>calculate_neutron_sld()</strong> methods must
+be called in this order prior calling <strong>calculate_length()</strong> to get 
+the proper result.</p>
 <dl class="method">
 <dt id="sans.calculator.sld_calculator.SldCalculator.calculate_length">
 <tt class="descname">calculate_length</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.sld_calculator.SldCalculator.calculate_length" title="Permalink to this definition">¶</a></dt>
@@ -74,8 +88,8 @@
 <dt id="sans.calculator.sld_calculator.SldCalculator.calculate_neutron_sld">
 <tt class="descname">calculate_neutron_sld</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.sld_calculator.SldCalculator.calculate_neutron_sld" title="Permalink to this definition">¶</a></dt>
 <dd>Compute the neutron SLD for a given molecule
-&#64;return absorp: absorption
-&#64;return coh: coherence cross section
+&#64;return sld_real : real part of the sld value
+&#64;return sld_im: imaginary part of the sld value
 &#64;return inc: incoherence cross section</dd></dl>
 
 <dl class="method">
@@ -86,9 +100,9 @@
 
 <dl class="method">
 <dt id="sans.calculator.sld_calculator.SldCalculator.set_value">
-<tt class="descname">set_value</tt><big>(</big><em>user_formula</em>, <em>density</em>, <em>wavelength=6.0</em><big>)</big><a class="headerlink" href="#sans.calculator.sld_calculator.SldCalculator.set_value" title="Permalink to this definition">¶</a></dt>
-<dd>Store values of density and wavelength into the calculator 
-and compute the volume</dd></dl>
+<tt class="descname">set_value</tt><big>(</big><em>formula</em>, <em>density</em>, <em>wavelength=6.0</em><big>)</big><a class="headerlink" href="#sans.calculator.sld_calculator.SldCalculator.set_value" title="Permalink to this definition">¶</a></dt>
+<dd>Store values into the sld calculator and compute the corresponding
+volume.</dd></dl>
 
 </dd></dl>
 
@@ -112,6 +126,9 @@ and compute the volume</dd></dl>
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
                         title="previous chapter">Reference</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="slit_length_calculator.html"
+                        title="next chapter">Slit Length Calculator</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../_sources/api/sld_calculator.txt"
@@ -143,6 +160,9 @@ and compute the volume</dd></dl>
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="slit_length_calculator.html" title="Slit Length Calculator"
+             >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Reference"
              >previous</a> |</li>
