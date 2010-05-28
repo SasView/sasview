@@ -25,8 +25,11 @@ class SlitlengthCalculator(object):
     
     def set_data(self, x=None, y=None):
         """
-        set data
-        :param x, y: x array and y array
+         Receive two vector x, y and prepare the slit calculator for 
+         computation.
+        
+        :param x: array
+        :param y: array
         """
         self.x = x
         self.y = y
@@ -34,6 +37,8 @@ class SlitlengthCalculator(object):
     def calculate_slit_length(self):
         """
         Calculate slit length.
+        
+        :return: the slit length calculated value.
         """
         # None data do nothing
         if self.y == None or self.x == None:
@@ -91,6 +96,6 @@ class SlitlengthCalculator(object):
   
     def get_slit_length_unit(self): 
         """
-        return the slit length unit.
+        :return: the slit length unit.
         """
         return self.slit_length_unit

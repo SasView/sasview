@@ -1,6 +1,10 @@
 """
     Setup for Calculator plug-in
 """
+import sys
+if len(sys.argv) == 1:
+    sys.argv.append('install')
+    
 from distutils.core import setup
 
 setup(
