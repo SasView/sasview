@@ -1,17 +1,21 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
 
-copyright 2009, University of Tennessee
-"""
+############################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#If you use DANSE applications to do scientific research that leads to 
+#publication, we ask that you acknowledge the use of the software with the 
+#following sentence:
+#This work benefited from DANSE software developed under NSF award DMR-0520547. 
+#copyright 2009, University of Tennessee
+#############################################################################
+
 
 """
-    Module to associate default readers to file extensions.
-    The module reads an xml file to get the readers for each file extension.
-    The readers are tried in order they appear when reading a file.
+Module to associate default readers to file extensions.
+The module reads an xml file to get the readers for each file extension.
+The readers are tried in order they appear when reading a file.
 """
 
 import os, sys
@@ -25,11 +29,11 @@ VERSION = 'sansloader/1.0'
 
 def read_associations(loader, settings='defaults.xml'):
     """
-        Read the specified settings file to associate
-        default readers to file extension.
-        
-        @param loader: Loader object
-        @param settings: path to the XML settings file [string]
+    Read the specified settings file to associate
+    default readers to file extension.
+    
+    :param loader: Loader object
+    :param settings: path to the XML settings file [string]
     """
     reader_dir = os.path.dirname(__file__)
     path = os.path.join(reader_dir, settings)
@@ -68,12 +72,12 @@ def read_associations(loader, settings='defaults.xml'):
          
 def register_readers(registry_function):
     """
-        Function called by the registry/loader object to register
-        all default readers using a call back function.
-        
-        WARNING: this method is now obsolete
+    Function called by the registry/loader object to register
+    all default readers using a call back function.
     
-        @param registry_function: function to be called to register each reader
+    :WARNING: this method is now obsolete
+
+    :param registry_function: function to be called to register each reader
     """
     logging.info("register_readers is now obsolete: use read_associations()")
     import abs_reader

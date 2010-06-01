@@ -1,18 +1,19 @@
+
+#####################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#See the license text in license.txt
+#copyright 2008, University of Tennessee
+######################################################################
+
 """
     Data manipulations for 2D data sets.
     Using the meta data information, various types of averaging
     are performed in Q-space 
 """
 
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
-
-copyright 2008, University of Tennessee
-"""
 #TODO: copy the meta data from the 2D object to the resulting 1D object
 
 from data_info import plottable_2D, Data1D
@@ -21,9 +22,10 @@ import numpy
 
 def get_q(dx, dy, det_dist, wavelength):
     """
-        @param dx: x-distance from beam center [mm]
-        @param dy: y-distance from beam center [mm]
-        @return: q-value at the given position
+    :param dx: x-distance from beam center [mm]
+    :param dy: y-distance from beam center [mm]
+    
+    :return: q-value at the given position
     """
     # Distance from beam center in the plane of detector
     plane_dist = math.sqrt(dx*dx + dy*dy)
@@ -32,8 +34,10 @@ def get_q(dx, dy, det_dist, wavelength):
     return (4.0*math.pi/wavelength)*math.sin(theta)
 
 def get_q_compo(dx, dy, det_dist, wavelength,compo=None):
-    #This reduces tiny error at very large q.
-    #Implementation of this func is not started yet.<--ToDo
+    """
+    This reduces tiny error at very large q.
+    Implementation of this func is not started yet.<--ToDo
+    """
     if dy==0:
         if dx>=0:
             angle_xy=0
@@ -52,8 +56,9 @@ def get_q_compo(dx, dy, det_dist, wavelength,compo=None):
 
 def flip_phi(phi):
     """
-        Correct phi to within the 0 <= to <= 2pi range
-        @return: phi in >=0 and <=2Pi
+    Correct phi to within the 0 <= to <= 2pi range
+    
+    :return: phi in >=0 and <=2Pi
     """
     Pi = math.pi
     if phi < 0:
@@ -66,9 +71,12 @@ def flip_phi(phi):
 
 def reader2D_converter(data2d=None):
     """
-        convert old 2d format opened by IhorReader or danse_reader to new Data2D format
-        @param data2d: 2d array of Data2D object
-        @return: 1d arrays of Data2D object
+    convert old 2d format opened by IhorReader or danse_reader to new Data2D format
+    
+    :param data2d: 2d array of Data2D object
+    
+    :return: 1d arrays of Data2D object
+    
     """
     if data2d.data==None or data2d.x_bins==None or data2d.y_bins==None:
         raise ValueError,"Can't convert this data: data=None..."
@@ -102,7 +110,7 @@ def reader2D_converter(data2d=None):
 
 class _Slab(object):
     """
-        Compute average I(Q) for a region of interest
+    Compute average I(Q) for a region of interest
     """
     def __init__(self, x_min=0.0, x_max=0.0, y_min=0.0, y_max=0.0, bin_width=0.001):
         # Minimum Qx value [A-1]
@@ -122,13 +130,14 @@ class _Slab(object):
         
     def _avg(self, data2D, maj):
         """
-             Compute average I(Q_maj) for a region of interest.
-             The major axis is defined as the axis of Q_maj.
-             The minor axis is the axis that we average over.
-             
-             @param data2D: Data2D object
-             @param maj_min: min value on the major axis
-             @return: Data1D object
+        Compute average I(Q_maj) for a region of interest.
+        The major axis is defined as the axis of Q_maj.
+        The minor axis is the axis that we average over.
+         
+        :param data2D: Data2D object
+        :param maj_min: min value on the major axis
+        
+        :return: Data1D object
         """
         if len(data2D.detector) != 1:
             raise RuntimeError, "_Slab._avg: invalid number of detectors: %g" % len(data2D.detector)
@@ -220,33 +229,36 @@ class _Slab(object):
         
 class SlabY(_Slab):
     """
-        Compute average I(Qy) for a region of interest
+    Compute average I(Qy) for a region of interest
     """
     def __call__(self, data2D):
         """
-             Compute average I(Qy) for a region of interest
-             
-             @param data2D: Data2D object
-             @return: Data1D object
+        Compute average I(Qy) for a region of interest
+         
+        :param data2D: Data2D object
+        
+        :return: Data1D object
         """
         return self._avg(data2D, 'y')
         
 class SlabX(_Slab):
     """
-        Compute average I(Qx) for a region of interest
+    Compute average I(Qx) for a region of interest
     """
     def __call__(self, data2D):
         """
-             Compute average I(Qx) for a region of interest
-             
-             @param data2D: Data2D object
-             @return: Data1D object
+        Compute average I(Qx) for a region of interest
+         
+        :param data2D: Data2D object
+        
+        :return: Data1D object
+        
         """
         return self._avg(data2D, 'x') 
         
 class Boxsum(object):
     """
-        Perform the sum of counts in a 2D region of interest.
+    Perform the sum of counts in a 2D region of interest.
     """
     def __init__(self, x_min=0.0, x_max=0.0, y_min=0.0, y_max=0.0):
         # Minimum Qx value [A-1]
@@ -260,10 +272,12 @@ class Boxsum(object):
 
     def __call__(self, data2D):
         """
-             Perform the sum in the region of interest 
-             
-             @param data2D: Data2D object
-             @return: number of counts, error on number of counts
+        Perform the sum in the region of interest 
+         
+        :param data2D: Data2D object
+        
+        :return: number of counts, error on number of counts
+        
         """
         y, err_y, y_counts = self._sum(data2D)
         
@@ -275,9 +289,12 @@ class Boxsum(object):
         
     def _sum(self, data2D):
         """
-             Perform the sum in the region of interest 
-             @param data2D: Data2D object
-             @return: number of counts, error on number of counts, number of entries summed
+        Perform the sum in the region of interest 
+        
+        :param data2D: Data2D object
+        
+        :return: number of counts, error on number of counts, number of entries summed
+        
         """
         if len(data2D.detector) != 1:
             raise RuntimeError, "Circular averaging: invalid number of detectors: %g" % len(data2D.detector)
@@ -327,17 +344,19 @@ class Boxsum(object):
       
 class Boxavg(Boxsum):
     """
-        Perform the average of counts in a 2D region of interest.
+    Perform the average of counts in a 2D region of interest.
     """
     def __init__(self, x_min=0.0, x_max=0.0, y_min=0.0, y_max=0.0):
         super(Boxavg, self).__init__(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
 
     def __call__(self, data2D):
         """
-             Perform the sum in the region of interest 
-             
-             @param data2D: Data2D object
-             @return: average counts, error on average counts
+        Perform the sum in the region of interest 
+         
+        :param data2D: Data2D object
+        
+        :return: average counts, error on average counts
+        
         """
         y, err_y, y_counts = self._sum(data2D)
         
@@ -349,18 +368,20 @@ class Boxavg(Boxsum):
         
 def get_pixel_fraction_square(x, xmin, xmax):
     """
-         Return the fraction of the length 
-         from xmin to x. 
-         
-             A            B
-         +-----------+---------+
-         xmin        x         xmax
-         
-         @param x: x-value
-         @param xmin: minimum x for the length considered
-         @param xmax: minimum x for the length considered
-         @return: (x-xmin)/(xmax-xmin) when xmin < x < xmax
-         
+    Return the fraction of the length 
+    from xmin to x.::
+   
+     
+           A            B
+       +-----------+---------+
+       xmin        x         xmax
+     
+    :param x: x-value
+    :param xmin: minimum x for the length considered
+    :param xmax: minimum x for the length considered
+    
+    :return: (x-xmin)/(xmax-xmin) when xmin < x < xmax
+    
     """
     if x<=xmin:
         return 0.0
@@ -372,10 +393,10 @@ def get_pixel_fraction_square(x, xmin, xmax):
 
 class CircularAverage(object):
     """
-        Perform circular averaging on 2D data
-        
-        The data returned is the distribution of counts
-        as a function of Q
+    Perform circular averaging on 2D data
+    
+    The data returned is the distribution of counts
+    as a function of Q
     """
     def __init__(self, r_min=0.0, r_max=0.0, bin_width=0.0005):
         # Minimum radius included in the average [A-1]
@@ -387,10 +408,11 @@ class CircularAverage(object):
 
     def __call__(self, data2D):
         """
-            Perform circular averaging on the data
-            
-            @param data2D: Data2D object
-            @return: Data1D object
+        Perform circular averaging on the data
+        
+        :param data2D: Data2D object
+        
+        :return: Data1D object
         """
         # Get data
         data = data2D.data[numpy.isfinite(data2D.data)]
@@ -464,15 +486,15 @@ class CircularAverage(object):
 
 class Ring(object):
     """
-        Defines a ring on a 2D data set.
-        The ring is defined by r_min, r_max, and
-        the position of the center of the ring.
-        
-        The data returned is the distribution of counts
-        around the ring as a function of phi.
-        
-        Phi_min and phi_max should be defined between 0 and 2*pi 
-        in anti-clockwise starting from the x- axis on the left-hand side
+    Defines a ring on a 2D data set.
+    The ring is defined by r_min, r_max, and
+    the position of the center of the ring.
+    
+    The data returned is the distribution of counts
+    around the ring as a function of phi.
+    
+    Phi_min and phi_max should be defined between 0 and 2*pi 
+    in anti-clockwise starting from the x- axis on the left-hand side
     """
     #Todo: remove center.
     def __init__(self, r_min=0, r_max=0, center_x=0, center_y=0,nbins=20 ):
@@ -489,11 +511,12 @@ class Ring(object):
         
     def __call__(self, data2D):
         """
-            Apply the ring to the data set.
-            Returns the angular distribution for a given q range
-            
-            @param data2D: Data2D object
-            @return: Data1D object
+        Apply the ring to the data set.
+        Returns the angular distribution for a given q range
+        
+        :param data2D: Data2D object
+        
+        :return: Data1D object
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
             raise RuntimeError, "Ring averaging only take plottable_2D objects"
@@ -561,10 +584,10 @@ class Ring(object):
     
 def get_pixel_fraction(qmax, q_00, q_01, q_10, q_11):
     """
-        Returns the fraction of the pixel defined by
-        the four corners (q_00, q_01, q_10, q_11) that 
-        has q < qmax.
-        
+    Returns the fraction of the pixel defined by
+    the four corners (q_00, q_01, q_10, q_11) that 
+    has q < qmax.::
+    
                 q_01                q_11
         y=1         +--------------+
                     |              |
@@ -574,7 +597,7 @@ def get_pixel_fraction(qmax, q_00, q_01, q_10, q_11):
                 q_00                q_10
         
                     x=0            x=1
-        
+    
     """
     
     # y side for x = minx
@@ -630,23 +653,18 @@ def get_pixel_fraction(qmax, q_00, q_01, q_10, q_11):
              
 def get_intercept(q, q_0, q_1):
     """
-        Returns the fraction of the side at which the
-        q-value intercept the pixel, None otherwise.
-        The values returned is the fraction ON THE SIDE
-        OF THE LOWEST Q.
-        
-        
-        
-                A        B    
-         +-----------+--------+
-         0                    1     <--- pixel size
-         
-        Q_0 -------- Q ----- Q_1    <--- equivalent Q range
-        
-        
+    Returns the fraction of the side at which the
+    q-value intercept the pixel, None otherwise.
+    The values returned is the fraction ON THE SIDE
+    OF THE LOWEST Q. ::
+    
+    
+            A           B    
+        +-----------+--------+    <--- pixel size
+        0                    1     
+        Q_0 -------- Q ----- Q_1   <--- equivalent Q range
         if Q_1 > Q_0, A is returned
         if Q_1 < Q_0, B is returned
-        
         if Q is outside the range of [Q_0, Q_1], None is returned
          
     """
@@ -660,13 +678,13 @@ def get_intercept(q, q_0, q_1):
      
 class _Sector:
     """
-        Defines a sector region on a 2D data set.
-        The sector is defined by r_min, r_max, phi_min, phi_max,
-        and the position of the center of the ring 
-        where phi_min and phi_max are defined by the right and left lines wrt central line
-        and phi_max could be less than phi_min. 
-       
-        Phi is defined between 0 and 2*pi in anti-clockwise starting from the x- axis on the left-hand side
+    Defines a sector region on a 2D data set.
+    The sector is defined by r_min, r_max, phi_min, phi_max,
+    and the position of the center of the ring 
+    where phi_min and phi_max are defined by the right and left lines wrt central line
+    and phi_max could be less than phi_min. 
+   
+    Phi is defined between 0 and 2*pi in anti-clockwise starting from the x- axis on the left-hand side
     """
     def __init__(self, r_min, r_max, phi_min=0, phi_max=2*math.pi,nbins=20):
         self.r_min = r_min
@@ -678,11 +696,12 @@ class _Sector:
     
     def _agv(self, data2D, run='phi'):
         """
-            Perform sector averaging.
-            
-            @param data2D: Data2D object
-            @param run:  define the varying parameter ('phi' , 'q' , or 'q2')
-            @return: Data1D object
+        Perform sector averaging.
+        
+        :param data2D: Data2D object
+        :param run:  define the varying parameter ('phi' , 'q' , or 'q2')
+        
+        :return: Data1D object
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
             raise RuntimeError, "Ring averaging only take plottable_2D objects"
@@ -792,50 +811,51 @@ class _Sector:
                 
 class SectorPhi(_Sector):
     """
-        Sector average as a function of phi.
-        I(phi) is return and the data is averaged over Q.
-        
-        A sector is defined by r_min, r_max, phi_min, phi_max.
-        The number of bin in phi also has to be defined.
+    Sector average as a function of phi.
+    I(phi) is return and the data is averaged over Q.
+    
+    A sector is defined by r_min, r_max, phi_min, phi_max.
+    The number of bin in phi also has to be defined.
     """
     def __call__(self, data2D):
         """
-            Perform sector average and return I(phi).
-            
-            @param data2D: Data2D object
-            @return: Data1D object
+        Perform sector average and return I(phi).
+        
+        :param data2D: Data2D object
+        :return: Data1D object
         """
 
         return self._agv(data2D, 'phi')
     
 class SectorQ(_Sector):
     """
-        Sector average as a function of Q for both symatric wings.
-        I(Q) is return and the data is averaged over phi.
-        
-        A sector is defined by r_min, r_max, phi_min, phi_max.
-        r_min, r_max, phi_min, phi_max >0.  
-        The number of bin in Q also has to be defined.
+    Sector average as a function of Q for both symatric wings.
+    I(Q) is return and the data is averaged over phi.
+    
+    A sector is defined by r_min, r_max, phi_min, phi_max.
+    r_min, r_max, phi_min, phi_max >0.  
+    The number of bin in Q also has to be defined.
     """
     def __call__(self, data2D):
         """
-            Perform sector average and return I(Q).
-            
-            @param data2D: Data2D object
-            @return: Data1D object
+        Perform sector average and return I(Q).
+        
+        :param data2D: Data2D object
+        
+        :return: Data1D object
         """
         return self._agv(data2D, 'q2')
 
 class Ringcut(object):
     """
-        Defines a ring on a 2D data set.
-        The ring is defined by r_min, r_max, and
-        the position of the center of the ring.
-        
-        The data returned is the region inside the ring
-        
-        Phi_min and phi_max should be defined between 0 and 2*pi 
-        in anti-clockwise starting from the x- axis on the left-hand side
+    Defines a ring on a 2D data set.
+    The ring is defined by r_min, r_max, and
+    the position of the center of the ring.
+    
+    The data returned is the region inside the ring
+    
+    Phi_min and phi_max should be defined between 0 and 2*pi 
+    in anti-clockwise starting from the x- axis on the left-hand side
     """
     def __init__(self, r_min=0, r_max=0, center_x=0, center_y=0 ):
         # Minimum radius
@@ -850,11 +870,12 @@ class Ringcut(object):
         
     def __call__(self, data2D):
         """
-            Apply the ring to the data set.
-            Returns the angular distribution for a given q range
-            
-            @param data2D: Data2D object
-            @return: index array in the range
+        Apply the ring to the data set.
+        Returns the angular distribution for a given q range
+        
+        :param data2D: Data2D object
+        
+        :return: index array in the range
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
             raise RuntimeError, "Ring cut only take plottable_2D objects"
@@ -874,7 +895,7 @@ class Ringcut(object):
 
 class Boxcut(object):
     """
-        Find a rectangular 2D region of interest.
+    Find a rectangular 2D region of interest.
     """
     def __init__(self, x_min=0.0, x_max=0.0, y_min=0.0, y_max=0.0):
         # Minimum Qx value [A-1]
@@ -888,11 +909,11 @@ class Boxcut(object):
 
     def __call__(self, data2D):
         """
-           Find a rectangular 2D region of interest.
-             
-           @param data2D: Data2D object
-           @return: mask, 1d array (len = len(data)) 
-               with Trues where the data points are inside ROI, otherwise False
+       Find a rectangular 2D region of interest.
+         
+       :param data2D: Data2D object
+       :return: mask, 1d array (len = len(data)) 
+           with Trues where the data points are inside ROI, otherwise False
         """
         mask = self._find(data2D)
         
@@ -900,10 +921,12 @@ class Boxcut(object):
         
     def _find(self, data2D):
         """
-             Find a rectangular 2D region of interest. 
-             @param data2D: Data2D object
-             @return: out, 1d array (length = len(data)) 
-               with Trues where the data points are inside ROI, otherwise Falses
+        Find a rectangular 2D region of interest. 
+        
+        :param data2D: Data2D object
+        
+        :return: out, 1d array (length = len(data)) 
+           with Trues where the data points are inside ROI, otherwise Falses
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
             raise RuntimeError, "Boxcut take only plottable_2D objects"
@@ -920,12 +943,12 @@ class Boxcut(object):
 
 class Sectorcut(object):
     """
-        Defines a sector (major + minor) region on a 2D data set.
-        The sector is defined by phi_min, phi_max,
-        where phi_min and phi_max are defined by the right and left lines wrt central line. 
-       
-        Phi_min and phi_max are given in units of radian 
-        and (phi_max-phi_min) should not be larger than pi
+    Defines a sector (major + minor) region on a 2D data set.
+    The sector is defined by phi_min, phi_max,
+    where phi_min and phi_max are defined by the right and left lines wrt central line. 
+   
+    Phi_min and phi_max are given in units of radian 
+    and (phi_max-phi_min) should not be larger than pi
     """
     def __init__(self,phi_min=0, phi_max=math.pi):
         self.phi_min = phi_min
@@ -933,11 +956,13 @@ class Sectorcut(object):
               
     def __call__(self, data2D):
         """
-           Find a rectangular 2D region of interest.
-            
-           @param data2D: Data2D object
-           @return: mask, 1d array (len = len(data)) 
-               with Trues where the data points are inside ROI, otherwise False
+        Find a rectangular 2D region of interest.
+        
+        :param data2D: Data2D object
+        
+        :return: mask, 1d array (len = len(data)) 
+        
+        with Trues where the data points are inside ROI, otherwise False
         """
         mask = self._find(data2D)
         
@@ -945,10 +970,13 @@ class Sectorcut(object):
         
     def _find(self, data2D):
         """
-             Find a rectangular 2D region of interest. 
-             @param data2D: Data2D object
-             @return: out, 1d array (length = len(data)) 
-               with Trues where the data points are inside ROI, otherwise Falses
+        Find a rectangular 2D region of interest. 
+        
+        :param data2D: Data2D object
+        
+        :return: out, 1d array (length = len(data)) 
+        
+        with Trues where the data points are inside ROI, otherwise Falses
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
             raise RuntimeError, "Sectorcut take only plottable_2D objects" 

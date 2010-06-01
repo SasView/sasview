@@ -1,12 +1,11 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
-
-copyright 2008, University of Tennessee
-"""
+#####################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#See the license text in license.txt
+#copyright 2008, University of Tennessee
+######################################################################
 
 import numpy
 import os
@@ -21,7 +20,7 @@ except:
 
 class Reader(object):
     """
-        Class to load HFIR 1D 4-column files
+    Class to load HFIR 1D 4-column files
     """
     ## File type
     type_name = "HFIR 1D"   
@@ -32,12 +31,14 @@ class Reader(object):
     
     def read(self, path):
         """ 
-            Load data file
-            
-            @param path: file path
-            @return: Data1D object, or None
-            @raise RuntimeError: when the file can't be opened
-            @raise ValueError: when the length of the data vectors are inconsistent
+        Load data file
+        
+        :param path: file path
+        
+        :return: Data1D object, or None
+        
+        :raise RuntimeError: when the file can't be opened
+        :raise ValueError: when the length of the data vectors are inconsistent
         """
         if os.path.isfile(path):
             basename  = os.path.basename(path)

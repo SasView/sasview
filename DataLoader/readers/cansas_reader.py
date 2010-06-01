@@ -1,12 +1,16 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
 
-copyright 2008, 2009, University of Tennessee
-"""
+############################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#If you use DANSE applications to do scientific research that leads to 
+#publication, we ask that you acknowledge the use of the software with the 
+#following sentence:
+#This work benefited from DANSE software developed under NSF award DMR-0520547. 
+#copyright 2008,2009 University of Tennessee
+#############################################################################
+
 # Known issue: reader not compatible with multiple SASdata entries
 # within a single SASentry. Will raise a runtime error.
 
@@ -36,12 +40,13 @@ CANSAS_NS = "cansas1d/1.0"
 
 def write_node(doc, parent, name, value, attr={}):
     """
-        @param doc: document DOM
-        @param parent: parent node
-        @param name: tag of the element
-        @param value: value of the child text node
-        @param attr: attribute dictionary
-        @return: True if something was appended, otherwise False
+    :param doc: document DOM
+    :param parent: parent node
+    :param name: tag of the element
+    :param value: value of the child text node
+    :param attr: attribute dictionary
+    
+    :return: True if something was appended, otherwise False
     """
     if value is not None:
         node = doc.createElement(name)
@@ -54,11 +59,12 @@ def write_node(doc, parent, name, value, attr={}):
 
 def get_content(location, node):
     """
-        Get the first instance of the content of a xpath location
-        
-        @param location: xpath location
-        @param node: node to start at
-        @return: Element, or None
+    Get the first instance of the content of a xpath location.
+    
+    :param location: xpath location
+    :param node: node to start at
+    
+    :return: Element, or None
     """
     nodes = node.xpath(location, namespaces={'ns': CANSAS_NS})
     
@@ -69,10 +75,10 @@ def get_content(location, node):
 
 def get_float(location, node):
     """
-        Get the content of a node as a float 
-        
-        @param location: xpath location
-        @param node: node to start at
+    Get the content of a node as a float 
+    
+    :param location: xpath location
+    :param node: node to start at
     """
     nodes = node.xpath(location, namespaces={'ns': CANSAS_NS})
     
@@ -95,10 +101,10 @@ def get_float(location, node):
 
 class Reader:
     """
-        Class to load cansas 1D XML files
-        
-        Dependencies:
-            The CanSas reader requires PyXML 0.8.4 or later.
+    Class to load cansas 1D XML files
+    
+    :Dependencies:
+        The CanSas reader requires PyXML 0.8.4 or later.
     """
     ## CanSAS version
     version = '1.0'
@@ -115,14 +121,16 @@ class Reader:
     
     def read(self, path):
         """ 
-            Load data file
-            
-            @param path: file path
-            @return: Data1D object if a single SASentry was found, 
-                        or a list of Data1D objects if multiple entries were found,
-                        or None of nothing was found
-            @raise RuntimeError: when the file can't be opened
-            @raise ValueError: when the length of the data vectors are inconsistent
+        Load data file
+        
+        :param path: file path
+        
+        :return: Data1D object if a single SASentry was found, 
+                    or a list of Data1D objects if multiple entries were found,
+                    or None of nothing was found
+                    
+        :raise RuntimeError: when the file can't be opened
+        :raise ValueError: when the length of the data vectors are inconsistent
         """
         output = []
         
@@ -161,10 +169,11 @@ class Reader:
                 
     def _parse_entry(self, dom):
         """
-            Parse a SASentry
-            
-            @param node: SASentry node
-            @return: Data1D object
+        Parse a SASentry
+        
+        :param node: SASentry node
+        
+        :return: Data1D object
         """
         x = numpy.zeros(0)
         y = numpy.zeros(0)
@@ -509,9 +518,9 @@ class Reader:
 
     def _to_xml_doc(self, datainfo):
         """
-            Create an XML document to contain the content of a Data1D
-            
-            @param datainfo: Data1D object
+        Create an XML document to contain the content of a Data1D
+        
+        :param datainfo: Data1D object
         """
         
         if not issubclass(datainfo.__class__, Data1D):
@@ -695,10 +704,10 @@ class Reader:
             
     def write(self, filename, datainfo):
         """
-            Write the content of a Data1D as a CanSAS XML file
-            
-            @param filename: name of the file to write
-            @param datainfo: Data1D object
+        Write the content of a Data1D as a CanSAS XML file
+        
+        :param filename: name of the file to write
+        :param datainfo: Data1D object
         """
         # Create XML document
         doc, sasentry = self._to_xml_doc(datainfo)
@@ -709,21 +718,21 @@ class Reader:
         
     def _store_float(self, location, node, variable, storage, optional=True):
         """
-            Get the content of a xpath location and store
-            the result. Check that the units are compatible
-            with the destination. The value is expected to
-            be a float.
-            
-            The xpath location might or might not exist.
-            If it does not exist, nothing is done
-            
-            @param location: xpath location to fetch
-            @param node: node to read the data from
-            @param variable: name of the data member to store it in [string]
-            @param storage: data object that has the 'variable' data member
-            @param optional: if True, no exception will be raised if unit conversion can't be done
-    
-            @raise ValueError: raised when the units are not recognized
+        Get the content of a xpath location and store
+        the result. Check that the units are compatible
+        with the destination. The value is expected to
+        be a float.
+        
+        The xpath location might or might not exist.
+        If it does not exist, nothing is done
+        
+        :param location: xpath location to fetch
+        :param node: node to read the data from
+        :param variable: name of the data member to store it in [string]
+        :param storage: data object that has the 'variable' data member
+        :param optional: if True, no exception will be raised if unit conversion can't be done
+
+        :raise ValueError: raised when the units are not recognized
         """
         entry = get_content(location, node)
         try:
@@ -766,17 +775,18 @@ class Reader:
                 
     def _store_content(self, location, node, variable, storage):
         """
-            Get the content of a xpath location and store
-            the result. The value is treated as a string.
-            
-            The xpath location might or might not exist.
-            If it does not exist, nothing is done
-            
-            @param location: xpath location to fetch
-            @param node: node to read the data from
-            @param variable: name of the data member to store it in [string]
-            @param storage: data object that has the 'variable' data member
-            @return: return a list of errors
+        Get the content of a xpath location and store
+        the result. The value is treated as a string.
+        
+        The xpath location might or might not exist.
+        If it does not exist, nothing is done
+        
+        :param location: xpath location to fetch
+        :param node: node to read the data from
+        :param variable: name of the data member to store it in [string]
+        :param storage: data object that has the 'variable' data member
+        
+        :return: return a list of errors
         """
         entry = get_content(location, node)
         if entry is not None and entry.text is not None:

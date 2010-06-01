@@ -8,19 +8,16 @@
     http://www.smallangles.net/wgwiki/index.php/cansas1d_documentation
 """
 
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-If you use DANSE applications to do scientific research that leads to 
-publication, we ask that you acknowledge the use of the software with the 
-following sentence:
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#If you use DANSE applications to do scientific research that leads to 
+#publication, we ask that you acknowledge the use of the software with the 
+#following sentence:
+#This work benefited from DANSE software developed under NSF award DMR-0520547.
+#copyright 2008, University of Tennessee
 
-"This work benefited from DANSE software developed under NSF award DMR-0520547." 
-
-copyright 2008, University of Tennessee
-"""
 
 #TODO: Keep track of data manipulation in the 'process' data structure.
 #TODO: This module should be independent of plottables. We should write
@@ -33,7 +30,7 @@ import math
 
 class plottable_1D:
     """
-        Data1D is a place holder for 1D plottables.
+    Data1D is a place holder for 1D plottables.
     """
     # The presence of these should be mutually exclusive with the presence of Qdev (dx)
     x = None
@@ -69,7 +66,7 @@ class plottable_1D:
 
 class plottable_2D:
     """
-        Data2D is a place holder for 2D plottables.
+    Data2D is a place holder for 2D plottables.
     """
     xmin = None
     xmax = None
@@ -117,7 +114,7 @@ class plottable_2D:
             
 class Vector:
     """
-        Vector class to hold multi-dimensional objects
+    Vector class to hold multi-dimensional objects
     """
     ## x component
     x = None
@@ -128,12 +125,13 @@ class Vector:
     
     def __init__(self, x=None, y=None, z=None):
         """
-            Initialization. Components that are not
-            set a set to None by default.
-            
-            @param x: x component
-            @param y: y component
-            @param z: z component
+        Initialization. Components that are not
+        set a set to None by default.
+        
+        :param x: x component
+        :param y: y component
+        :param z: z component
+        
         """
         self.x = x
         self.y = y
@@ -145,7 +143,7 @@ class Vector:
 
 class Detector:
     """
-        Class to hold detector information
+    Class to hold detector information
     """
     ## Name of the instrument [string]
     name = None
@@ -170,7 +168,9 @@ class Detector:
     
     def __init__(self):
         """
-            Initialize class attribute that are objects...
+        
+        Initialize class attribute that are objects...
+        
         """
         self.offset      = Vector()
         self.orientation = Vector()
@@ -214,7 +214,7 @@ class Aperture:
     
 class Collimation:
     """
-        Class to hold collimation information
+    Class to hold collimation information
     """
     ## Name
     name = None
@@ -240,7 +240,7 @@ class Collimation:
 
 class Source:
     """
-        Class to hold source information
+    Class to hold source information
     """  
     ## Name
     name = None
@@ -288,7 +288,7 @@ class Source:
     
     
 """ 
-    Definitions of radiation types
+Definitions of radiation types
 """
 NEUTRON  = 'neutron'
 XRAY     = 'x-ray'
@@ -297,7 +297,7 @@ ELECTRON = 'electron'
     
 class Sample:
     """
-        Class to hold the sample description
+    Class to hold the sample description
     """
     ## Short name for sample
     name = ''
@@ -346,8 +346,8 @@ class Sample:
   
 class Process:
     """
-        Class that holds information about the processes
-        performed on the data.
+    Class that holds information about the processes
+    performed on the data.
     """
     name = ''
     date = ''
@@ -373,10 +373,10 @@ class Process:
   
 class DataInfo:
     """
-        Class to hold the data read from a file.
-        It includes four blocks of data for the
-        instrument description, the sample description,
-        the data itself and any other meta data.
+    Class to hold the data read from a file.
+    It includes four blocks of data for the
+    instrument description, the sample description,
+    the data itself and any other meta data.
     """
     ## Title 
     title      = ''
@@ -407,7 +407,7 @@ class DataInfo:
             
     def __init__(self):
         """
-            Initialization
+        Initialization
         """
         ## Title 
         self.title      = ''
@@ -437,7 +437,7 @@ class DataInfo:
         
     def __str__(self):
         """
-            Nice printout
+        Nice printout
         """
         _str =  "File:            %s\n" % self.filename
         _str += "Title:           %s\n" % self.title
@@ -463,95 +463,115 @@ class DataInfo:
 
     def __add__(self, other):
         """
-            Add two data sets
-            
-            @param other: data set to add to the current one
-            @return: new data set
-            @raise ValueError: raised when two data sets are incompatible
+        Add two data sets
+        
+        :param other: data set to add to the current one
+        :return: new data set
+        :raise ValueError: raised when two data sets are incompatible
         """
         def operation(a, b): return a+b
         return self._perform_operation(other, operation)
         
     def __radd__(self, other):
         """
-            Add two data sets
-            
-            @param other: data set to add to the current one
-            @return: new data set
-            @raise ValueError: raised when two data sets are incompatible
+        Add two data sets
+        
+        :param other: data set to add to the current one
+        
+        :return: new data set
+        
+        :raise ValueError: raised when two data sets are incompatible
+        
         """
         def operation(a, b): return b+a
         return self._perform_operation(other, operation)
         
     def __sub__(self, other):
         """
-            Subtract two data sets
-            
-            @param other: data set to subtract from the current one
-            @return: new data set
-            @raise ValueError: raised when two data sets are incompatible
+        Subtract two data sets
+        
+        :param other: data set to subtract from the current one
+        
+        :return: new data set
+        
+        :raise ValueError: raised when two data sets are incompatible
+        
         """
         def operation(a, b): return a-b
         return self._perform_operation(other, operation)
         
     def __rsub__(self, other):
         """
-            Subtract two data sets
-            
-            @param other: data set to subtract from the current one
-            @return: new data set
-            @raise ValueError: raised when two data sets are incompatible
+        Subtract two data sets
+        
+        :param other: data set to subtract from the current one
+        
+        :return: new data set
+        
+        :raise ValueError: raised when two data sets are incompatible
+        
         """
         def operation(a, b): return b-a
         return self._perform_operation(other, operation)
         
     def __mul__(self, other):
         """
-            Multiply two data sets
-            
-            @param other: data set to subtract from the current one
-            @return: new data set
-            @raise ValueError: raised when two data sets are incompatible
+        Multiply two data sets
+        
+        :param other: data set to subtract from the current one
+        
+        :return: new data set
+        
+        :raise ValueError: raised when two data sets are incompatible
+        
         """
         def operation(a, b): return a*b
         return self._perform_operation(other, operation)
         
     def __rmul__(self, other):
         """
-            Multiply two data sets
-            
-            @param other: data set to subtract from the current one
-            @return: new data set
-            @raise ValueError: raised when two data sets are incompatible
+        Multiply two data sets
+        
+        :param other: data set to subtract from the current one
+        
+        :return: new data set
+        
+        :raise ValueError: raised when two data sets are incompatible
         """
         def operation(a, b): return b*a
         return self._perform_operation(other, operation)
         
     def __div__(self, other):
         """
-            Divided a data set by another
-            
-            @param other: data set that the current one is divided by
-            @return: new data set
-            @raise ValueError: raised when two data sets are incompatible
+        Divided a data set by another
+        
+        :param other: data set that the current one is divided by
+        
+        :return: new data set
+        
+        :raise ValueError: raised when two data sets are incompatible
+        
         """
         def operation(a, b): return a/b
         return self._perform_operation(other, operation)
         
     def __rdiv__(self, other):
         """
-            Divided a data set by another
-            
-            @param other: data set that the current one is divided by
-            @return: new data set
-            @raise ValueError: raised when two data sets are incompatible
+        Divided a data set by another
+        
+        :param other: data set that the current one is divided by
+        
+        :return: new data set
+        
+        :raise ValueError: raised when two data sets are incompatible
+        
         """
         def operation(a, b): return b/a
         return self._perform_operation(other, operation)            
             
 class Data1D(plottable_1D, DataInfo):
     """
-        1D data class
+    1D data class
     """
     x_unit = '1/A'
     y_unit = '1/cm'
@@ -563,7 +583,7 @@ class Data1D(plottable_1D, DataInfo):
         
     def __str__(self):
         """
-            Nice printout
+        Nice printout
         """
         _str =  "%s\n" % DataInfo.__str__(self)
     
@@ -577,9 +597,10 @@ class Data1D(plottable_1D, DataInfo):
 
     def is_slit_smeared(self):
         """
-            Check whether the data has slit smearing information
-            
-            @return: True is slit smearing info is present, False otherwise
+        Check whether the data has slit smearing information
+        
+        :return: True is slit smearing info is present, False otherwise
+        
         """
         def _check(v):            
             if (v.__class__==list or v.__class__==numpy.ndarray) \
@@ -592,12 +613,12 @@ class Data1D(plottable_1D, DataInfo):
         
     def clone_without_data(self, length=0, clone=None):
         """
-            Clone the current object, without copying the data (which
-            will be filled out by a subsequent operation).
-            The data arrays will be initialized to zero.
-            
-            @param length: length of the data array to be initialized
-            @param clone: if provided, the data will be copied to clone
+        Clone the current object, without copying the data (which
+        will be filled out by a subsequent operation).
+        The data arrays will be initialized to zero.
+        
+        :param length: length of the data array to be initialized
+        :param clone: if provided, the data will be copied to clone
         """
         from copy import deepcopy
         
@@ -624,15 +645,18 @@ class Data1D(plottable_1D, DataInfo):
 
     def _validity_check(self, other):
         """
-            Checks that the data lengths are compatible.
-            Checks that the x vectors are compatible.
-            Returns errors vectors equal to original
-            errors vectors if they were present or vectors
-            of zeros when none was found.
-            
-            @param other: other data set for operation
-            @return: dy for self, dy for other [numpy arrays]
-            @raise ValueError: when lengths are not compatible
+        Checks that the data lengths are compatible.
+        Checks that the x vectors are compatible.
+        Returns errors vectors equal to original
+        errors vectors if they were present or vectors
+        of zeros when none was found.
+        
+        :param other: other data set for operation
+        
+        :return: dy for self, dy for other [numpy arrays]
+        
+        :raise ValueError: when lengths are not compatible
+        
         """
         dy_other = None
         if isinstance(other, Data1D):
@@ -684,7 +708,7 @@ class Data1D(plottable_1D, DataInfo):
         
 class Data2D(plottable_2D, DataInfo):
     """
-        2D data class
+    2D data class
     """
     ## Units for Q-values
     Q_unit = '1/A'
@@ -723,12 +747,12 @@ class Data2D(plottable_2D, DataInfo):
   
     def clone_without_data(self, length=0, clone=None):
         """
-            Clone the current object, without copying the data (which
-            will be filled out by a subsequent operation).
-            The data arrays will be initialized to zero.
-            
-            @param length: length of the data array to be initialized
-            @param clone: if provided, the data will be copied to clone
+        Clone the current object, without copying the data (which
+        will be filled out by a subsequent operation).
+        The data arrays will be initialized to zero.
+        
+        :param length: length of the data array to be initialized
+        :param clone: if provided, the data will be copied to clone
         """
         from copy import deepcopy
         
@@ -760,15 +784,18 @@ class Data2D(plottable_2D, DataInfo):
   
     def _validity_check(self, other):
         """
-            Checks that the data lengths are compatible.
-            Checks that the x vectors are compatible.
-            Returns errors vectors equal to original
-            errors vectors if they were present or vectors
-            of zeros when none was found.
-            
-            @param other: other data set for operation
-            @return: dy for self, dy for other [numpy arrays]
-            @raise ValueError: when lengths are not compatible
+        Checks that the data lengths are compatible.
+        Checks that the x vectors are compatible.
+        Returns errors vectors equal to original
+        errors vectors if they were present or vectors
+        of zeros when none was found.
+        
+        :param other: other data set for operation
+        
+        :return: dy for self, dy for other [numpy arrays]
+        
+        :raise ValueError: when lengths are not compatible
+        
         """
         err_other = None
         if isinstance(other, Data2D):
@@ -796,10 +823,11 @@ class Data2D(plottable_2D, DataInfo):
   
     def _perform_operation(self, other, operation):
         """
-            Perform 2D operations between data sets
-            
-            @param other: other data set
-            @param operation: function defining the operation
+        Perform 2D operations between data sets
+        
+        :param other: other data set
+        :param operation: function defining the operation
+        
         """
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)

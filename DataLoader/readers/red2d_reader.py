@@ -1,20 +1,16 @@
+
+#####################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#See the license text in license.txt
+#copyright 2008, University of Tennessee
+######################################################################
+
 """
     TXT/IGOR 2D Q Map file reader
 """
 
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
-
-If you use DANSE applications to do scientific research that leads to 
-publication, we ask that you acknowledge the use of the software with the 
-following sentence:
-
-"This work benefited from DANSE software developed under NSF award DMR-0520547." 
-
-copyright 2008, University of Tennessee
-"""
 
 import os, sys
 import numpy

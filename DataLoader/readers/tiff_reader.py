@@ -1,16 +1,17 @@
+
+
+#####################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#See the license text in license.txt
+#copyright 2008, University of Tennessee
+######################################################################
 """
     Image reader. Untested. 
 """
 
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
-
-copyright 2008, University of Tennessee
-"""
 #TODO: load and check data and orientation of the image (needs rendering)
 
 import math, logging, os
@@ -19,7 +20,7 @@ from DataLoader.data_info import Data2D
     
 class Reader:
     """
-        Example data manipulation
+    Example data manipulation
     """
     ## File type
     type_name = "TIF"   
@@ -32,8 +33,9 @@ class Reader:
         
     def read(self, filename=None):
         """
-            Open and read the data in a file
-            @param file: path of the file
+        Open and read the data in a file
+        
+        :param file: path of the file
         """
         try:
             import Image

@@ -1,0 +1,161 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ascii_reader &mdash; DataLoader v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="DataLoader v0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Readers" href="index.html" />
+    <link rel="next" title="associations" href="associations.html" />
+    <link rel="prev" title="abs_reader" href="abs_reader.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="associations.html" title="associations"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="abs_reader.html" title="abs_reader"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Readers</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="ascii-reader">
+<h1>ascii_reader<a class="headerlink" href="#ascii-reader" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-DataLoader.readers.ascii_reader">
+<span id="dataloader-readers-ascii-reader"></span><h2><a class="reference internal" href="#module-DataLoader.readers.ascii_reader"><tt class="xref py py-mod docutils literal"><span class="pre">DataLoader.readers.ascii_reader</span></tt></a><a class="headerlink" href="#module-DataLoader.readers.ascii_reader" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="DataLoader.readers.ascii_reader.Reader">
+<em class="property">class </em><tt class="descclassname">DataLoader.readers.ascii_reader.</tt><tt class="descname">Reader</tt><a class="headerlink" href="#DataLoader.readers.ascii_reader.Reader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to load ascii files (2, 3 or 4 columns).</p>
+<dl class="method">
+<dt id="DataLoader.readers.ascii_reader.Reader.read">
+<tt class="descname">read</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#DataLoader.readers.ascii_reader.Reader.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load data file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> &#8211; file path</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Data1D object, or None</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><strong>RuntimeError</strong> &#8211; when the file can&#8217;t be opened</li>
+<li><strong>ValueError</strong> &#8211; when the length of the data vectors are inconsistent</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ascii_reader</a><ul>
+<li><a class="reference internal" href="#module-DataLoader.readers.ascii_reader"><tt class="docutils literal"><span class="pre">DataLoader.readers.ascii_reader</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="abs_reader.html"
+                        title="previous chapter">abs_reader</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="associations.html"
+                        title="next chapter">associations</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api/readers/ascii_reader.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="associations.html" title="associations"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="abs_reader.html" title="abs_reader"
+             >previous</a> |</li>
+        <li><a href="../../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Readers</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b1.
+    </div>
+  </body>
+</html>

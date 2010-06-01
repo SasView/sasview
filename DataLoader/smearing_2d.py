@@ -1,12 +1,11 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
+#####################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#See the license text in license.txt
+#copyright 2008, University of Tennessee
+######################################################################
 
-See the license text in license.txt
-
-copyright 2009, University of Tennessee
-"""
 ## TODO: Need test,and check Gaussian averaging
 import numpy, math,time
 ## Singular point
@@ -20,18 +19,19 @@ PHI_BIN ={'Xhigh':20.0,'High':12.0,'Med':6.0,'Low':4.0}
 
 class Smearer2D:
     """
-        Gaussian Q smearing class for SANS 2d data
+    Gaussian Q smearing class for SANS 2d data
     """
      
-    def __init__(self, data=None,model=None,index=None,limit=LIMIT,accuracy='Low'):
+    def __init__(self, data=None, model=None, index=None, 
+                 limit=LIMIT, accuracy='Low'):
         """
-            Assumption: equally spaced bins in dq_r, dq_phi space.
-            
-            @param data: 2d data used to set the smearing parameters
-            @param model: model function
-            @param index: 1d array with len(data) to define the range of the calculation: elements are given as True or False
-            @param nr: number of bins in dq_r-axis
-            @param nphi: number of bins in dq_phi-axis
+        Assumption: equally spaced bins in dq_r, dq_phi space.
+        
+        :param data: 2d data used to set the smearing parameters
+        :param model: model function
+        :param index: 1d array with len(data) to define the range of the calculation: elements are given as True or False
+        :param nr: number of bins in dq_r-axis
+        :param nphi: number of bins in dq_phi-axis
         """
         ## data
         self.data = data
@@ -51,7 +51,7 @@ class Smearer2D:
         
     def get_data(self):   
         """
-            get qx_data, qy_data, dqx_data,dqy_data,and calculate phi_data=arctan(qx_data/qy_data)
+        get qx_data, qy_data, dqx_data,dqy_data,and calculate phi_data=arctan(qx_data/qy_data)
         """
         if self.data == None or self.data.__class__.__name__ == 'Data1D':
             return None
@@ -67,61 +67,74 @@ class Smearer2D:
         self.dqy_data[self.dqy_data<SIGMA_ZERO]=SIGMA_ZERO
         return True
     
-    def set_accuracy(self,accuracy='Low'):   
+    def set_accuracy(self, accuracy='Low'):   
         """
-            Set accuracy:  string
+        Set accuracy.
+        
+        :param accuracy:  string
         """
         self.accuracy = accuracy
 
-    def set_smearer(self,smearer = True):
+    def set_smearer(self, smearer=True):
         """
-            Set whether or not smearer will be used
+        Set whether or not smearer will be used
+        
+        :param smearer: smear object
+        
         """
         self.smearer = smearer
         
-    def set_data(self,data=None):   
+    def set_data(self, data=None):   
         """
-            Set data:  1d arrays
+        Set data.
+        
+        :param data: DataLoader.Data_info type
         """
         self.data = data
   
             
-    def set_model(self,model=None):   
+    def set_model(self, model=None):   
         """
-            Set model
+        Set model.
+        
+        :param model: sans.models instance
         """
         self.model = model  
            
-    def set_index(self,index=None):   
+    def set_index(self, index=None):   
         """
-            Set index: 1d arrays
+        Set index.
+        
+        :param index: 1d arrays
         """
-
         self.index = index       
     
     def get_value(self):
         """
-            Over sampling of r_nbins times phi_nbins, calculate Gaussian weights, then find smeared intensity
-            # For the default values, this is equivalent (but by using numpy array 
-            # the speed optimized by a factor of ten)to the following:
-            =====================================================================================
-            ## Remove the singular points if exists
+        Over sampling of r_nbins times phi_nbins, calculate Gaussian weights, then find smeared intensity
+        For the default values, this is equivalent (but by using numpy array 
+        the speed optimized by a factor of ten)to the following: ::
+       
+       
+            Remove the singular points if exists
             self.dqx_data[self.dqx_data==0]=SIGMA_ZERO
             self.dqy_data[self.dqy_data==0]=SIGMA_ZERO
+            
             for phi in range(0,4):
                 for r in range(0,5):
                     n = (phi)*5+(r)
                     r = r+0.25
                     dphi = phi*2.0*math.pi/4.0 + numpy.arctan(self.qy_data[index_model]/self.dqy_data[index_model]/self.qx_data[index_model]*/self.dqx_data[index_model])
-                    dq = r*numpy.sqrt( self.dqx_data[index_model]*self.dqx_data[index_model] \
+                    dq = r*sqrt( self.dqx_data[index_model]*self.dqx_data[index_model] \
                         + self.dqy_data[index_model]*self.dqy_data[index_model] )
-                    #integrant of math.exp(-0.5*r*r) r dr at each bins : The integration may not need.
-                    weight_res[n] = math.exp(-0.5*((r-0.25)*(r-0.25)))-math.exp(-0.5*((r-0.25)*(r-0.25)))
-                    #if phi !=0 and r != 0:
-                    qx_res=numpy.append(qx_res,self.qx_data[index_model]+ dq*math.cos(dphi))
-                    qy_res=numpy.append(qy_res,self.qy_data[index_model]+ dq*math.sin(dphi))
-            ## Then compute I(qx_res,qy_res) and do weighted averaging. 
-            =====================================================================================
+                    #integrant of exp(-0.5*r*r) r dr at each bins : The integration may not need.
+                    weight_res[n] = e^{(-0.5*((r-0.25)*(r-0.25)))}- e^{(-0.5*((r-0.25)*(r-0.25)))}
+                    #if phi != 0 and r != 0:
+                    qx_res = numpy.append(qx_res,self.qx_data[index_model]+ dq * cos(dphi))
+                    qy_res = numpy.append(qy_res,self.qy_data[index_model]+ dq * sin(dphi))
+                    
+        Then compute I(qx_res,qy_res) and do weighted averaging. 
+        
         """
         valid = self.get_data()
         if valid == None:

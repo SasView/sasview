@@ -1,12 +1,11 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
-
-copyright 2009, University of Tennessee
-"""
+#####################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#See the license text in license.txt
+#copyright 2008, University of Tennessee
+######################################################################
 
 import DataLoader.extensions.smearer as smearer
 import numpy
@@ -16,20 +15,20 @@ from DataLoader.smearing_2d import Smearer2D
 
 def smear_selection(data1D):
     """
-        Creates the right type of smearer according 
-        to the data.
+    Creates the right type of smearer according 
+    to the data.
+
+    The canSAS format has a rule that either
+    slit smearing data OR resolution smearing data
+    is available. 
     
-        The canSAS format has a rule that either
-        slit smearing data OR resolution smearing data
-        is available. 
-        
-        For the present purpose, we choose the one that
-        has none-zero data. If both slit and resolution
-        smearing arrays are filled with good data 
-        (which should not happen), then we choose the
-        resolution smearing data. 
-        
-        @param data1D: Data1D object
+    For the present purpose, we choose the one that
+    has none-zero data. If both slit and resolution
+    smearing arrays are filled with good data 
+    (which should not happen), then we choose the
+    resolution smearing data. 
+    
+    :param data1D: Data1D object
     """
     # Sanity check. If we are not dealing with a SANS Data1D
     # object, just return None
@@ -93,9 +92,9 @@ class _BaseSmearer(object):
         
     def __deepcopy__(self, memo={}):
         """
-            Return a valid copy of self.
-            Avoid copying the _smearer C object and force a matrix recompute
-            when the copy is used.  
+        Return a valid copy of self.
+        Avoid copying the _smearer C object and force a matrix recompute
+        when the copy is used.  
         """
         result = _BaseSmearer()
         result.nbins = self.nbins
@@ -106,8 +105,10 @@ class _BaseSmearer(object):
 
     def get_bin_range(self, q_min=None, q_max=None):
         """
-            @param q_min: minimum q-value to smear
-            @param q_max: maximum q-value to smear 
+        
+        :param q_min: minimum q-value to smear
+        :param q_max: maximum q-value to smear
+         
         """
         # If this is the first time we call for smearing,
         # initialize the C++ smearer object first
@@ -142,7 +143,7 @@ class _BaseSmearer(object):
 
     def __call__(self, iq_in, first_bin=0, last_bin=None):
         """
-            Perform smearing
+        Perform smearing
         """
         # If this is the first time we call for smearing,
         # initialize the C++ smearer object first
@@ -169,18 +170,19 @@ class _BaseSmearer(object):
     
 class _SlitSmearer(_BaseSmearer):
     """
-        Slit smearing for I(q) array
+    Slit smearing for I(q) array
     """
     
     def __init__(self, nbins=None, width=None, height=None, min=None, max=None):
         """
-            Initialization
+        Initialization
             
-            @param iq: I(q) array [cm-1]
-            @param width: slit width [A-1]
-            @param height: slit height [A-1]
-            @param min: Q_min [A-1]
-            @param max: Q_max [A-1]
+        :param iq: I(q) array [cm-1]
+        :param width: slit width [A-1]
+        :param height: slit height [A-1]
+        :param min: Q_min [A-1]
+        :param max: Q_max [A-1]
+        
         """
         _BaseSmearer.__init__(self)
         ## Slit width in Q units
@@ -201,8 +203,8 @@ class _SlitSmearer(_BaseSmearer):
         
     def _initialize_smearer(self):
         """
-            Initialize the C++ smearer object.
-            This method HAS to be called before smearing
+        Initialize the C++ smearer object.
+        This method HAS to be called before smearing
         """
         #self._smearer = smearer.new_slit_smearer(self.width, self.height, self.min, self.max, self.nbins)
         self._smearer = smearer.new_slit_smearer_with_q(self.width, self.height, self.qvalues)
@@ -210,8 +212,8 @@ class _SlitSmearer(_BaseSmearer):
 
     def get_unsmeared_range(self, q_min, q_max):
         """
-            Determine the range needed in unsmeared-Q to cover
-            the smeared Q range
+        Determine the range needed in unsmeared-Q to cover
+        the smeared Q range
         """
         # Range used for input to smearing
         _qmin_unsmeared = q_min
@@ -225,13 +227,13 @@ class _SlitSmearer(_BaseSmearer):
 
 class SlitSmearer(_SlitSmearer):
     """
-        Adaptor for slit smearing class and SANS data
+    Adaptor for slit smearing class and SANS data
     """
     def __init__(self, data1D):
         """
-            Assumption: equally spaced bins of increasing q-values.
-            
-            @param data1D: data used to set the smearing parameters
+        Assumption: equally spaced bins of increasing q-values.
+        
+        :param data1D: data used to set the smearing parameters
         """
         # Initialization from parent class
         super(SlitSmearer, self).__init__()
@@ -266,17 +268,17 @@ class SlitSmearer(_SlitSmearer):
 
 class _QSmearer(_BaseSmearer):
     """
-        Perform Gaussian Q smearing
+    Perform Gaussian Q smearing
     """
         
     def __init__(self, nbins=None, width=None, min=None, max=None):
         """
-            Initialization
-            
-            @param nbins: number of Q bins
-            @param width: array standard deviation in Q [A-1]
-            @param min: Q_min [A-1]
-            @param max: Q_max [A-1]
+        Initialization
+        
+        :param nbins: number of Q bins
+        :param width: array standard deviation in Q [A-1]
+        :param min: Q_min [A-1]
+        :param max: Q_max [A-1]
         """
         _BaseSmearer.__init__(self)
         ## Standard deviation in Q [A-1]
@@ -293,8 +295,8 @@ class _QSmearer(_BaseSmearer):
         
     def _initialize_smearer(self):
         """
-            Initialize the C++ smearer object.
-            This method HAS to be called before smearing
+        Initialize the C++ smearer object.
+        This method HAS to be called before smearing
         """
         #self._smearer = smearer.new_q_smearer(numpy.asarray(self.width), self.min, self.max, self.nbins)
         self._smearer = smearer.new_q_smearer_with_q(numpy.asarray(self.width), self.qvalues)
@@ -302,9 +304,9 @@ class _QSmearer(_BaseSmearer):
         
     def get_unsmeared_range(self, q_min, q_max):
         """
-            Determine the range needed in unsmeared-Q to cover
-            the smeared Q range
-            Take 3 sigmas as the offset between smeared and unsmeared space
+        Determine the range needed in unsmeared-Q to cover
+        the smeared Q range
+        Take 3 sigmas as the offset between smeared and unsmeared space
         """
         # Range used for input to smearing
         _qmin_unsmeared = q_min
@@ -317,17 +319,16 @@ class _QSmearer(_BaseSmearer):
             logging.error("_QSmearer.get_bin_range: %s" % sys.exc_value)
         return _qmin_unsmeared, _qmax_unsmeared
         
-        
-        
+    
 class QSmearer(_QSmearer):
     """
-        Adaptor for Gaussian Q smearing class and SANS data
+    Adaptor for Gaussian Q smearing class and SANS data
     """
     def __init__(self, data1D):
         """
-            Assumption: equally spaced bins of increasing q-values.
-            
-            @param data1D: data used to set the smearing parameters
+        Assumption: equally spaced bins of increasing q-values.
+        
+        :param data1D: data used to set the smearing parameters
         """
         # Initialization from parent class
         super(QSmearer, self).__init__()

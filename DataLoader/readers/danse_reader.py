@@ -1,19 +1,18 @@
+
+
+############################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#If you use DANSE applications to do scientific research that leads to 
+#publication, we ask that you acknowledge the use of the software with the 
+#following sentence:
+#This work benefited from DANSE software developed under NSF award DMR-0520547. 
+#copyright 2008, University of Tennessee
+#############################################################################
+
 """
     DANSE/SANS file reader
-"""
-
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
-
-If you use DANSE applications to do scientific research that leads to 
-publication, we ask that you acknowledge the use of the software with the 
-following sentence:
-
-"This work benefited from DANSE software developed under NSF award DMR-0520547." 
-
-copyright 2008, University of Tennessee
 """
 
 import math
@@ -33,7 +32,7 @@ except:
 
 class Reader:
     """
-        Example data manipulation
+    Example data manipulation
     """
     ## File type
     type_name = "DANSE"   
@@ -44,8 +43,8 @@ class Reader:
         
     def read(self, filename=None):
         """
-            Open and read the data in a file
-            @param file: path of the file
+        Open and read the data in a file
+        @param file: path of the file
         """
         
         read_it = False
@@ -214,7 +213,7 @@ class Reader:
                     #output.err_data[size_y-1-i_y][i_x] = error[i_pt]
                 
                 
-            # Store all data ######################################
+            # Store all data 
             # Store wavelength
             if has_converter==True and output.source.wavelength_unit != 'A':
                 conv = Converter('A')
