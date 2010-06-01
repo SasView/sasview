@@ -1,20 +1,17 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
-
-See the license text in license.txt
-
-copyright 2010, University of Tennessee
-"""
+#####################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#See the license text in license.txt
+#copyright 2010, University of Tennessee
+######################################################################
 
 """
-    This module implements invariant and its related computations.
-    @author: Gervaise B. Alina/UTK
-    
-    
-    TODO: 
-        - intro / documentation
+This module implements invariant and its related computations.
+
+:author: Gervaise B. Alina/UTK
+:author: Mathieu Doucet/UTK
+:author: Jae Cho/UTK
 
 """
 import math 
@@ -33,15 +30,17 @@ INTEGRATION_NSTEPS = 1000
 
 class Transform(object):
     """
-        Define interface that need to compute a function or an inverse
-        function given some x, y 
+    Define interface that need to compute a function or an inverse
+    function given some x, y 
     """
     
     def linearize_data(self, data):
         """
-            Linearize data so that a linear fit can be performed. 
-            Filter out the data that can't be transformed.
-            @param data : LoadData1D instance
+        Linearize data so that a linear fit can be performed. 
+        Filter out the data that can't be transformed.
+        
+        :param data: LoadData1D instance
+        
         """
         # Check that the vector lengths are equal
         assert(len(data.x)==len(data.y))
@@ -70,41 +69,41 @@ class Transform(object):
     
     def get_allowed_bins(self, data):
         """
-            Goes through the data points and returns a list of boolean values
-            to indicate whether each points is allowed by the model or not.
-            
-            @param data: Data1D object
+        Goes through the data points and returns a list of boolean values
+        to indicate whether each points is allowed by the model or not.
+        
+        :param data: Data1D object
         """
         return [p[0]>0 and p[1]>0 and p[2]>0 for p in zip(data.x, data.y, data.dy)]
         
     def linearize_q_value(self, value):
         """
-            Transform the input q-value for linearization
+        Transform the input q-value for linearization
         """
         return NotImplemented
 
     def extract_model_parameters(self, constant, slope, dconstant=0, dslope=0):
         """
-            set private member
+        set private member
         """
         return NotImplemented
      
     def evaluate_model(self, x):
         """
-            Returns an array f(x) values where f is the Transform function.
+        Returns an array f(x) values where f is the Transform function.
         """
         return NotImplemented
     
     def evaluate_model_errors(self, x):
         """
-            Returns an array of I(q) errors
+        Returns an array of I(q) errors
         """
         return NotImplemented
     
 class Guinier(Transform):
     """
-        class of type Transform that performs operations related to guinier 
-        function
+    class of type Transform that performs operations related to guinier 
+    function
     """
     def __init__(self, scale=1, radius=60):
         Transform.__init__(self)
@@ -117,15 +116,17 @@ class Guinier(Transform):
         
     def linearize_q_value(self, value):
         """
-            Transform the input q-value for linearization
-            @param value: q-value
-            @return: q*q
+        Transform the input q-value for linearization
+        
+        :param value: q-value
+        
+        :return: q*q
         """
         return value * value
     
     def extract_model_parameters(self, constant, slope, dconstant=0, dslope=0):
-    	"""
-    	   assign new value to the scale and the radius
+        """
+	    assign new value to the scale and the radius
     	"""
         self.scale = math.exp(constant)
         self.radius = math.sqrt(-3 * slope)
@@ -138,14 +139,15 @@ class Guinier(Transform):
         
     def evaluate_model(self, x):
         """
-            return F(x)= scale* e-((radius*x)**2/3)
+        return F(x)= scale* e-((radius*x)**2/3)
         """
         return self._guinier(x)
              
     def evaluate_model_errors(self, x):
         """
-            Returns the error on I(q) for the given array of q-values
-            @param x: array of q-values
+        Returns the error on I(q) for the given array of q-values
+        
+        :param x: array of q-values
         """
         p1 = numpy.array([self.dscale * math.exp(-((self.radius * q)**2/3)) for q in x])
         p2 = numpy.array([self.scale * math.exp(-((self.radius * q)**2/3)) * (-(q**2/3)) * 2 * self.radius * self.dradius for q in x])
@@ -154,13 +156,15 @@ class Guinier(Transform):
              
     def _guinier(self, x):
         """
-            Retrive the guinier function after apply an inverse guinier function
-            to x
-            Compute a F(x) = scale* e-((radius*x)**2/3).
-            @param x: a vector of q values 
-            @param scale: the scale value
-            @param radius: the guinier radius value
-            @return F(x)
+        Retrive the guinier function after apply an inverse guinier function
+        to x
+        Compute a F(x) = scale* e-((radius*x)**2/3).
+        
+        :param x: a vector of q values 
+        :param scale: the scale value
+        :param radius: the guinier radius value
+        
+        :return: F(x)
         """   
         # transform the radius of coming from the inverse guinier function to a 
         # a radius of a guinier function
@@ -171,8 +175,8 @@ class Guinier(Transform):
 
 class PowerLaw(Transform):
     """
-        class of type transform that perform operation related to power_law 
-        function
+    class of type transform that perform operation related to power_law 
+    function
     """
     def __init__(self, scale=1, power=4):
         Transform.__init__(self)
@@ -181,15 +185,17 @@ class PowerLaw(Transform):
    
     def linearize_q_value(self, value):
         """
-            Transform the input q-value for linearization
-            @param value: q-value
-            @return: log(q)
+        Transform the input q-value for linearization
+        
+        :param value: q-value
+        
+        :return: log(q)
         """
         return math.log(value)
     
     def extract_model_parameters(self, constant, slope, dconstant=0, dslope=0):
         """
-            Assign new value to the scale and the power 
+        Assign new value to the scale and the power 
         """
         self.power = -slope
         self.scale = math.exp(constant)
@@ -202,15 +208,15 @@ class PowerLaw(Transform):
         
     def evaluate_model(self, x):
         """
-            given a scale and a radius transform x, y using a power_law
-            function
+        given a scale and a radius transform x, y using a power_law
+        function
         """
         return self._power_law(x)
     
     def evaluate_model_errors(self, x):
         """
-            Returns the error on I(q) for the given array of q-values
-            @param x: array of q-values
+        Returns the error on I(q) for the given array of q-values
+        :param x: array of q-values
         """
         p1 = numpy.array([self.dscale * math.pow(q, -self.power) for q in x])
         p2 = numpy.array([self.scale * self.power * math.pow(q, -self.power-1) * self.dpower for q in x])
@@ -219,14 +225,16 @@ class PowerLaw(Transform):
        
     def _power_law(self, x):
         """
-            F(x) = scale* (x)^(-power)
-                when power= 4. the model is porod 
-                else power_law
-            The model has three parameters: 
-            @param x: a vector of q values
-            @param power: power of the function
-            @param scale : scale factor value
-            @param F(x)
+        F(x) = scale* (x)^(-power)
+            when power= 4. the model is porod 
+            else power_law
+        The model has three parameters: ::
+            1. x: a vector of q values
+            2. power: power of the function
+            3. scale : scale factor value
+        
+        :param x: array
+        :return: F(x)
         """
         if self.power <= 0:
             raise ValueError("Power_law function expected positive power, but got %s"%self.power)
@@ -238,17 +246,17 @@ class PowerLaw(Transform):
 
 class Extrapolator:
     """
-        Extrapolate I(q) distribution using a given model
+    Extrapolate I(q) distribution using a given model
     """
     def __init__(self, data, model=None):
         """
-            Determine a and b given a linear equation y = ax + b
-            
-            If a model is given, it will be used to linearize the data before 
-            the extrapolation is performed. If None, a simple linear fit will be done.
-            
-            @param data: data containing x and y  such as  y = ax + b 
-            @param model: optional Transform object 
+        Determine a and b given a linear equation y = ax + b
+        
+        If a model is given, it will be used to linearize the data before 
+        the extrapolation is performed. If None, a simple linear fit will be done.
+        
+        :param data: data containing x and y  such as  y = ax + b 
+        :param model: optional Transform object 
         """
         self.data  = data
         self.model = model
@@ -263,10 +271,11 @@ class Extrapolator:
              
     def fit(self, power=None, qmin=None, qmax=None):
         """
-           Fit data for y = ax + b  return a and b
-           @param power: a fixed, otherwise None
-           @param qmin: Minimum Q-value
-           @param qmax: Maximum Q-value
+        Fit data for y = ax + b  return a and b
+       
+        :param power: a fixed, otherwise None
+        :param qmin: Minimum Q-value
+        :param qmax: Maximum Q-value
         """
         if qmin is None:
             qmin = self.qmin
@@ -330,20 +339,22 @@ class Extrapolator:
 
 class InvariantCalculator(object):
     """
-        Compute invariant if data is given.
-        Can provide volume fraction and surface area if the user provides
-        Porod constant  and contrast values.
-        @precondition:  the user must send a data of type DataLoader.Data1D
-                        the user provide background and scale values.
-                        
-        @note: Some computations depends on each others. 
+    Compute invariant if data is given.
+    Can provide volume fraction and surface area if the user provides
+    Porod constant  and contrast values.
+    
+    :precondition:  the user must send a data of type DataLoader.Data1D
+                    the user provide background and scale values.
+                    
+    :note: Some computations depends on each others. 
     """
     def __init__(self, data, background=0, scale=1 ):
         """
-            Initialize variables
-            @param data: data must be of type DataLoader.Data1D
-            @param background: Background value. The data will be corrected before processing
-            @param scale: Scaling factor for I(q). The data will be corrected before processing
+        Initialize variables.
+        
+        :param data: data must be of type DataLoader.Data1D
+        :param background: Background value. The data will be corrected before processing
+        :param scale: Scaling factor for I(q). The data will be corrected before processing
         """
         # Background and scale should be private data member if the only way to
         # change them are by instantiating a new object.
@@ -377,9 +388,10 @@ class InvariantCalculator(object):
         
     def _get_data(self, data):
         """
-            @note this function must be call before computing any type
-             of invariant
-            @return data= self._scale *data - self._background
+        :note: this function must be call before computing any type
+         of invariant
+         
+        :return: new data = self._scale *data - self._background
         """
         if not issubclass(data.__class__, LoaderData1D):
             #Process only data that inherited from DataLoader.Data_info.Data1D
@@ -399,18 +411,20 @@ class InvariantCalculator(object):
      
     def _fit(self, model, qmin=Q_MINIMUM, qmax=Q_MAXIMUM, power=None):
         """
-            fit data with function using 
-            data= self._get_data()
-            fx= Functor(data , function)
-            y = data.y
-            slope, constant = linalg.lstsq(y,fx)
-            @param qmin: data first q value to consider during the fit
-            @param qmax: data last q value to consider during the fit
-            @param power : power value to consider for power-law 
-            @param function: the function to use during the fit
-            @return a: the scale of the function
-            @return b: the other parameter of the function for guinier will be radius
-                    for power_law will be the power value
+        fit data with function using 
+        data = self._get_data()
+        fx = Functor(data , function)
+        y = data.y
+        slope, constant = linalg.lstsq(y,fx)
+        
+        :param qmin: data first q value to consider during the fit
+        :param qmax: data last q value to consider during the fit
+        :param power : power value to consider for power-law 
+        :param function: the function to use during the fit
+        
+        :return a: the scale of the function
+        :return b: the other parameter of the function for guinier will be radius
+                for power_law will be the power value
         """
         extrapolator = Extrapolator(data=self._data, model=model)
         p, dp = extrapolator.fit(power=power, qmin=qmin, qmax=qmax) 
@@ -419,18 +433,20 @@ class InvariantCalculator(object):
     
     def _get_qstar(self, data):
         """
-            Compute invariant for pinhole data.
-            This invariant is given by:
-        
-                q_star = x0**2 *y0 *dx0 +x1**2 *y1 *dx1 
-                            + ..+ xn**2 *yn *dxn 
-                            
+        Compute invariant for pinhole data.
+        This invariant is given by: ::
+    
+            q_star = x0**2 *y0 *dx0 +x1**2 *y1 *dx1 
+                        + ..+ xn**2 *yn *dxn 
+                        
             where n >= len(data.x)-1
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
             dx0 = (x1 - x0)/2
             dxn = (xn - xn-1)/2
-            @param data: the data to use to compute invariant.
-            @return q_star: invariant value for pinhole data. q_star > 0
+            
+        :param data: the data to use to compute invariant.
+        
+        :return q_star: invariant value for pinhole data. q_star > 0
         """
         if len(data.x) <= 1 or len(data.y) <= 1 or len(data.x)!= len(data.y):
             msg =  "Length x and y must be equal"
@@ -457,18 +473,19 @@ class InvariantCalculator(object):
             
     def _get_qstar_uncertainty(self, data):
         """
-            Compute invariant uncertainty with with pinhole data.
-            This uncertainty is given as follow:
-               dq_star = math.sqrt[(x0**2*(dy0)*dx0)**2 +
-                    (x1**2 *(dy1)*dx1)**2 + ..+ (xn**2 *(dyn)*dxn)**2 ]
-            where n >= len(data.x)-1
-            dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
-            dx0 = (x1 - x0)/2
-            dxn = (xn - xn-1)/2
-            dyn: error on dy
-           
-            @param data:
-            note: if data doesn't contain dy assume dy= math.sqrt(data.y)
+        Compute invariant uncertainty with with pinhole data.
+        This uncertainty is given as follow: ::
+        
+           dq_star = math.sqrt[(x0**2*(dy0)*dx0)**2 +
+                (x1**2 *(dy1)*dx1)**2 + ..+ (xn**2 *(dyn)*dxn)**2 ]
+        where n >= len(data.x)-1
+        dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
+        dx0 = (x1 - x0)/2
+        dxn = (xn - xn-1)/2
+        dyn: error on dy
+       
+        :param data:
+        :note: if data doesn't contain dy assume dy= math.sqrt(data.y)
         """          
         if len(data.x) <= 1 or len(data.y) <= 1 or \
             len(data.x) != len(data.y) or \
@@ -504,7 +521,7 @@ class InvariantCalculator(object):
     def _get_extrapolated_data(self, model, npts=INTEGRATION_NSTEPS,
                               q_start=Q_MINIMUM, q_end=Q_MAXIMUM):
         """
-            @return extrapolate data create from data
+        :return: extrapolate data create from data
         """
         #create new Data1D to compute the invariant
         q = numpy.linspace(start=q_start,
@@ -519,13 +536,13 @@ class InvariantCalculator(object):
     
     def get_data(self):
         """
-            @return self._data
+        :return: self._data
         """
         return self._data
     
     def get_extrapolation_power(self, range='high'):
         """
-            return the fitted power for power law function for a given extrapolation range
+        :return: the fitted power for power law function for a given extrapolation range
         """
         if range == 'low':
             return self._low_extrapolation_power_fitted
@@ -533,13 +550,13 @@ class InvariantCalculator(object):
     
     def get_qstar_low(self):
         """
-            Compute the invariant for extrapolated data at low q range.
+        Compute the invariant for extrapolated data at low q range.
+        
+        Implementation:
+            data = self._get_extra_data_low()
+            return self._get_qstar()
             
-            Implementation:
-                data = self._get_extra_data_low()
-                return self._get_qstar()
-                
-            @return q_star: the invariant for data extrapolated at low q.
+        :return q_star: the invariant for data extrapolated at low q.
         """
         # Data boundaries for fitting
         qmin = self._data.x[0]
@@ -570,13 +587,13 @@ class InvariantCalculator(object):
         
     def get_qstar_high(self):
         """
-            Compute the invariant for extrapolated data at high q range.
+        Compute the invariant for extrapolated data at high q range.
+        
+        Implementation:
+            data = self._get_extra_data_high()
+            return self._get_qstar()
             
-            Implementation:
-                data = self._get_extra_data_high()
-                return self._get_qstar()
-                
-            @return q_star: the invariant for data extrapolated at high q.
+        :return q_star: the invariant for data extrapolated at high q.
         """
         # Data boundaries for fitting
         x_len = len(self._data.x) - 1
@@ -599,16 +616,16 @@ class InvariantCalculator(object):
     
     def get_extra_data_low(self, npts_in=None, q_start=None, npts=20):
         """
-            Returns the extrapolated data used for the loew-Q invariant calculation.
-            By default, the distribution will cover the data points used for the 
-            extrapolation. The number of overlap points is a parameter (npts_in).
-            By default, the maximum q-value of the distribution will be  
-            the minimum q-value used when extrapolating for the purpose of the 
-            invariant calculation. 
-            
-            @param npts_in: number of data points for which the extrapolated data overlap
-            @param q_start: is the minimum value to uses for extrapolated data
-            @param npts: the number of points in the extrapolated distribution
+        Returns the extrapolated data used for the loew-Q invariant calculation.
+        By default, the distribution will cover the data points used for the 
+        extrapolation. The number of overlap points is a parameter (npts_in).
+        By default, the maximum q-value of the distribution will be  
+        the minimum q-value used when extrapolating for the purpose of the 
+        invariant calculation. 
+        
+        :param npts_in: number of data points for which the extrapolated data overlap
+        :param q_start: is the minimum value to uses for extrapolated data
+        :param npts: the number of points in the extrapolated distribution
            
         """
         # Get extrapolation range
@@ -628,16 +645,16 @@ class InvariantCalculator(object):
           
     def get_extra_data_high(self, npts_in=None, q_end=Q_MAXIMUM, npts=20):
         """
-            Returns the extrapolated data used for the high-Q invariant calculation.
-            By default, the distribution will cover the data points used for the 
-            extrapolation. The number of overlap points is a parameter (npts_in).
-            By default, the maximum q-value of the distribution will be Q_MAXIMUM, 
-            the maximum q-value used when extrapolating for the purpose of the 
-            invariant calculation. 
-            
-            @param npts_in: number of data points for which the extrapolated data overlap
-            @param q_end: is the maximum value to uses for extrapolated data
-            @param npts: the number of points in the extrapolated distribution
+        Returns the extrapolated data used for the high-Q invariant calculation.
+        By default, the distribution will cover the data points used for the 
+        extrapolation. The number of overlap points is a parameter (npts_in).
+        By default, the maximum q-value of the distribution will be Q_MAXIMUM, 
+        the maximum q-value used when extrapolating for the purpose of the 
+        invariant calculation. 
+        
+        :param npts_in: number of data points for which the extrapolated data overlap
+        :param q_end: is the maximum value to uses for extrapolated data
+        :param npts: the number of points in the extrapolated distribution
         """
         # Get extrapolation range
         if npts_in is None:
@@ -654,13 +671,14 @@ class InvariantCalculator(object):
      
     def set_extrapolation(self, range, npts=4, function=None, power=None):
         """
-            Set the extrapolation parameters for the high or low Q-range.
-            Note that this does not turn extrapolation on or off.
-            @param range: a keyword set the type of extrapolation . type string
-            @param npts: the numbers of q points of data to consider for extrapolation
-            @param function: a keyword to select the function to use for extrapolation.
-                of type string.
-            @param power: an power to apply power_low function
+        Set the extrapolation parameters for the high or low Q-range.
+        Note that this does not turn extrapolation on or off.
+        
+        :param range: a keyword set the type of extrapolation . type string
+        :param npts: the numbers of q points of data to consider for extrapolation
+        :param function: a keyword to select the function to use for extrapolation.
+            of type string.
+        :param power: an power to apply power_low function
                 
         """
         range = range.lower()
@@ -687,13 +705,15 @@ class InvariantCalculator(object):
         
     def get_qstar(self, extrapolation=None):
         """
-            Compute the invariant of the local copy of data.
+        Compute the invariant of the local copy of data.
+       
+        :param extrapolation: string to apply optional extrapolation 
            
-            @param extrapolation: string to apply optional extrapolation    
-            @return q_star: invariant of the data within data's q range
-            
-            @warning: When using setting data to Data1D , the user is responsible of
+        :return q_star: invariant of the data within data's q range
+        
+        :warning: When using setting data to Data1D , the user is responsible of
             checking that the scale and the background are properly apply to the data
+        
         """
         self._qstar = self._get_qstar(self._data)
         self._qstar_err = self._get_qstar_uncertainty(self._data)
@@ -723,18 +743,20 @@ class InvariantCalculator(object):
        
     def get_surface(self, contrast, porod_const, extrapolation=None):
         """
-            Compute the specific surface from the data.
-            
-            Implementation:
-              V=  self.get_volume_fraction(contrast, extrapolation)
+        Compute the specific surface from the data.
         
-              Compute the surface given by:
-                surface = (2*pi *V(1- V)*porod_const)/ q_star
-               
-            @param contrast: contrast value to compute the volume
-            @param porod_const: Porod constant to compute the surface 
-            @param extrapolation: string to apply optional extrapolation
-            @return: specific surface 
+        Implementation::
+        
+          V =  self.get_volume_fraction(contrast, extrapolation)
+    
+          Compute the surface given by:
+            surface = (2*pi *V(1- V)*porod_const)/ q_star
+           
+        :param contrast: contrast value to compute the volume
+        :param porod_const: Porod constant to compute the surface 
+        :param extrapolation: string to apply optional extrapolation
+        
+        :return: specific surface 
         """
         # Compute the volume
         volume = self.get_volume_fraction(contrast, extrapolation)
@@ -742,8 +764,8 @@ class InvariantCalculator(object):
         
     def get_volume_fraction(self, contrast, extrapolation=None):
         """
-            Compute volume fraction is deduced as follow:
-            
+        Compute volume fraction is deduced as follow: ::
+        
             q_star = 2*(pi*contrast)**2* volume( 1- volume)
             for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
             we get 2 values of volume:
@@ -756,12 +778,14 @@ class InvariantCalculator(object):
                     q_star = self.get_qstar()
                     
             the result returned will be 0 <= volume <= 1
-            
-            @param contrast: contrast value provides by the user of type float.
-                     contrast unit is 1/A^(2)= 10^(16)cm^(2)
-            @param extrapolation: string to apply optional extrapolation
-            @return: volume fraction
-            @note: volume fraction must have no unit
+        
+        :param contrast: contrast value provides by the user of type float.
+                 contrast unit is 1/A^(2)= 10^(16)cm^(2)
+        :param extrapolation: string to apply optional extrapolation
+        
+        :return: volume fraction
+        
+        :note: volume fraction must have no unit
         """
         if contrast <= 0:
             raise ValueError, "The contrast parameter must be greater than zero"  
@@ -794,20 +818,22 @@ class InvariantCalculator(object):
     
     def get_qstar_with_error(self, extrapolation=None):
         """
-            Compute the invariant uncertainty.
-            This uncertainty computation depends on whether or not the data is
-            smeared.
-            
-            @param extrapolation: string to apply optional extrapolation
-            @return: invariant, the invariant uncertainty
+        Compute the invariant uncertainty.
+        This uncertainty computation depends on whether or not the data is
+        smeared.
+        
+        :param extrapolation: string to apply optional extrapolation
+        
+        :return: invariant, the invariant uncertainty
         """    
         self.get_qstar(extrapolation)
         return self._qstar, self._qstar_err
     
     def get_volume_fraction_with_error(self, contrast, extrapolation=None):
         """
-            Compute uncertainty on volume value as well as the volume fraction
-            This uncertainty is given by the following equation:
+        Compute uncertainty on volume value as well as the volume fraction
+        This uncertainty is given by the following equation: ::
+        
             dV = 0.5 * (4*k* dq_star) /(2* math.sqrt(1-k* q_star))
                                  
             for k = 10^(-8)*q_star/(2*(pi*|contrast|)**2)
@@ -815,12 +841,13 @@ class InvariantCalculator(object):
             q_star: the invariant value including extrapolated value if existing
             dq_star: the invariant uncertainty
             dV: the volume uncertainty
-            
-            The uncertainty will be set to -1 if it can't be computed.
-            
-            @param contrast: contrast value 
-            @param extrapolation: string to apply optional extrapolation
-            @return: V, dV = volume fraction, error on volume fraction
+        
+        The uncertainty will be set to -1 if it can't be computed.
+        
+        :param contrast: contrast value 
+        :param extrapolation: string to apply optional extrapolation
+        
+        :return: V, dV = volume fraction, error on volume fraction
         """
         volume = self.get_volume_fraction(contrast, extrapolation)
         
@@ -837,9 +864,9 @@ class InvariantCalculator(object):
     
     def get_surface_with_error(self, contrast, porod_const, extrapolation=None):
         """
-            Compute uncertainty of the surface value as well as the surface value.
-            The uncertainty is given as follow:
-            
+        Compute uncertainty of the surface value as well as the surface value.
+        The uncertainty is given as follow: ::
+        
             dS = porod_const *2*pi[( dV -2*V*dV)/q_star
                  + dq_star(v-v**2)
                  
@@ -847,11 +874,12 @@ class InvariantCalculator(object):
             dq_star: the invariant uncertainty
             V: the volume fraction value
             dV: the volume uncertainty
-            
-            @param contrast: contrast value
-            @param porod_const: porod constant value 
-            @param extrapolation: string to apply optional extrapolation
-            @return S, dS: the surface, with its uncertainty
+        
+        :param contrast: contrast value
+        :param porod_const: porod constant value 
+        :param extrapolation: string to apply optional extrapolation
+        
+        :return S, dS: the surface, with its uncertainty
         """
         # We get the volume fraction, with error
         #   get_volume_fraction_with_error calls get_volume_fraction
