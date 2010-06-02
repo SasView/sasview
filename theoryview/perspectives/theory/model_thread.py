@@ -5,10 +5,11 @@ import numpy,math
 
 class Calc2D(CalcThread):
     """
-        Compute 2D model
-        This calculation assumes a 2-fold symmetry of the model
-        where points are computed for one half of the detector
-        and I(qx, qy) = I(-qx, -qy) is assumed.
+    Compute 2D model
+    This calculation assumes a 2-fold symmetry of the model
+    where points are computed for one half of the detector
+    and I(qx, qy) = I(-qx, -qy) is assumed.
+    
     """
     
     def __init__(self, x, y, data,model,qmin, qmax,qstep,
@@ -33,7 +34,8 @@ class Calc2D(CalcThread):
         
     def compute(self):
         """
-            Compute the data given a model function
+        Compute the data given a model function
+        
         """
         self.starttime = time.time()
         # Determine appropriate q range
@@ -104,11 +106,11 @@ class Calc2D(CalcThread):
                        qmax = self.qmax,
                        qstep = self.qstep )
         
-   
-    
-
 class Calc1D(CalcThread):
-    """Compute 1D data"""
+    """
+    Compute 1D data
+    
+    """
     
     def __init__(self, x, model,
                  data=None,
@@ -134,7 +136,8 @@ class Calc1D(CalcThread):
         
     def compute(self):
         """
-            Compute model 1d value given qmin , qmax , x value 
+        Compute model 1d value given qmin , qmax , x value 
+        
         """
         
         self.starttime = time.time()
@@ -153,17 +156,16 @@ class Calc1D(CalcThread):
        
         self.complete(x= self.x[index], y= output[index], 
                       elapsed=elapsed, model= self.model, data=self.data)
-        
- 
-                
+"""
+Example of use of Calc2D ::
+
 class CalcCommandline:
+    
     def __init__(self, n=20000):
         #print thread.get_ident()
         from sans.models.CylinderModel import CylinderModel
         
         model = CylinderModel()
-        
-         
         print model.runXY([0.01, 0.02])
         
         qmax = 0.01
@@ -172,7 +174,6 @@ class CalcCommandline:
         
         x = numpy.arange(-qmax, qmax+qstep*0.01, qstep)
         y = numpy.arange(-qmax, qmax+qstep*0.01, qstep)
-    
     
         calc_thread_2D = Calc2D(x, y, None, model.clone(),-qmax, qmax,qstep,
                                         completefn=self.complete,
@@ -195,3 +196,5 @@ class CalcCommandline:
 if __name__ == "__main__":
     CalcCommandline()
    
+"""  
+

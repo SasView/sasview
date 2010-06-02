@@ -17,9 +17,10 @@ from basepage import PageInfoEvent
 
 class ModelPanel(BasicPage):
     """
-        FitPanel class contains fields allowing to display results when
-        fitting  a model and one data
-        @note: For Fit to be performed the user should check at least 
+    FitPanel class contains fields allowing to display results when
+    fitting  a model and one data
+    
+    :note: For Fit to be performed the user should check at least 
         one parameter on fit Panel window.
     """
     ## Flag to tell the AUI manager to put this panel in the center pane
@@ -31,7 +32,7 @@ class ModelPanel(BasicPage):
     def __init__(self,parent, page_info, model_list_box):
         BasicPage.__init__(self, parent, page_info , model_list_box)
         """ 
-            Initialization of the Panel
+        Initialization of the Panel
         """
         self._fill_model_sizer( self.sizer1)  
         self._fill_range_sizer()
@@ -47,8 +48,10 @@ class ModelPanel(BasicPage):
             
     def _on_display_description(self, event):
         """
-            Show or Hide description
-            @param event: wx.EVT_RADIOBUTTON
+        Show or Hide description
+        
+        :param event: wx.EVT_RADIOBUTTON
+        
         """
         self._on_display_description_helper()
         
@@ -57,8 +60,10 @@ class ModelPanel(BasicPage):
 
     def _on_display_description_helper(self):
         """
-            Show or Hide description
-            @param event: wx.EVT_RADIOBUTTON
+        Show or Hide description
+        
+        :param event: wx.EVT_RADIOBUTTON
+        
         """
         ## Show description
         if self.description_hide.GetValue():
@@ -78,8 +83,9 @@ class ModelPanel(BasicPage):
     
     def _fill_range_sizer(self):
         """
-            Fill the sizer containing the plotting range
-            add  access to npts
+        Fill the sizer containing the plotting range
+        add  access to npts
+        
         """
         ##The following 3 lines are for Mac. Let JHC know before modifying..
         title = "Plotted Q Range"
@@ -99,7 +105,8 @@ class ModelPanel(BasicPage):
        
     def _on_select_model(self, event): 
         """
-             call back for model selection
+        call back for model selection
+        
         """    
         self._on_select_model_helper() 
         #Reset dispersity that was not done in _on_select_model_helper() 
@@ -109,7 +116,8 @@ class ModelPanel(BasicPage):
        
     def _fill_model_sizer(self, sizer):
         """
-            fill sizer containing model info
+        fill sizer containing model info
+        
         """
         ##The following 3 lines are for Mac. Let JHC know before modifying..
         title = "Model"
@@ -128,7 +136,8 @@ class ModelPanel(BasicPage):
     #def _set_sizer_gaussian(self):
     def _set_sizer_dispersion(self, dispersity):
         """
-            draw sizer with gaussian, log or schulz dispersity parameters
+        draw sizer with gaussian, log or schulz dispersity parameters
+        
         """
         self.fittable_param=[]
         self.fixed_param=[]
@@ -307,7 +316,8 @@ class ModelPanel(BasicPage):
  
     def _onModel2D(self, event):
         """
-         call manager to plot model in 2D
+        call manager to plot model in 2D
+        
         """
         # If the 2D display is not currently enabled, plot the model in 2D 
         # and set the enable2D flag.
@@ -355,15 +365,18 @@ class ModelPanel(BasicPage):
                 
     def reset_page(self, state):
         """
-            reset the state
+        reset the state
+        
         """
         self.reset_page_helper(state)
         
         
     def select_model(self, model):
         """
-            Select a new model
-            @param model: model object 
+        Select a new model
+        
+        :param model: model object 
+        
         """
         self.model = model
         if self.model !=None:
@@ -389,9 +402,11 @@ class ModelPanel(BasicPage):
     
     def set_model_description(self,description,sizer):
         """
-            fill a sizer with description
-            @param description: of type string
-            @param sizer: wx.BoxSizer()
+        fill a sizer with description
+        
+        :param description: of type string
+        :param sizer: wx.BoxSizer()
+        
         """
     
         sizer.Clear(True)
@@ -441,7 +456,7 @@ class ModelPanel(BasicPage):
    
     def on_button_clicked(self,event):
         """
-        #On 'More details' button
+        On 'More details' button
         """
         from help_panel import  HelpWindow
         
@@ -458,32 +473,31 @@ class ModelPanel(BasicPage):
            msg +="Please.Search in the Help window"
            wx.PostEvent(self.parent, StatusEvent(status = msg ))
                      
-            
-            
     def set_range(self, qmin_x, qmax_x, npts):
         """
-            Set the range for the plotted models
-            @param qmin: minimum Q
-            @param qmax: maximum Q
-            @param npts: number of Q bins
+        Set the range for the plotted models
+        
+        :param qmin: minimum Q
+        :param qmax: maximum Q
+        :param npts: number of Q bins
+        
         """
         # Set the data members
         self.qmin_x = qmin_x
         self.qmax_x = qmax_x
         self.num_points = npts
-        
         # Set the controls
         #For qmin and qmax, do not use format_number.(If do, qmin and max could be different from what is in the data.)
-       
         self.qmin.SetValue(str(self.qmin_x))
         self.qmax.SetValue(str(self.qmax_x))
         self.npts.SetValue(format_number(self.num_points))
         
-        
     def set_model_param_sizer(self, model):
         """
-            Build the panel from the model content
-            @param model: the model selected in combo box for fitting purpose
+        Build the panel from the model content
+        
+        :param model: the model selected in combo box for fitting purpose
+        
         """
         self.sizer3.Clear(True)
         self.parameters = []

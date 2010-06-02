@@ -19,7 +19,8 @@ DEFAULT_NPTS = 50
 
 class PlotInfo:
     """
-        store some plotting field
+    store some plotting field
+    
     """
     _xunit = 'A^{-1}'
     _xaxis= "\\rm{Q}"
@@ -32,13 +33,15 @@ class PlotInfo:
     
 class Plugin:
     """
-        This class defines the interface for a Plugin class
-        for calculator perspective
+    This class defines the interface for a Plugin class
+    for calculator perspective
+    
     """
     
     def __init__(self, standalone=True):
         """
-            Abstract class for gui_manager Plugins.
+        Abstract class for gui_manager Plugins.
+        
         """
         ## Plug-in name. It will appear on the application menu.
         self.sub_menu = "Theory"        
@@ -60,26 +63,28 @@ class Plugin:
         
     def populate_menu(self, id, owner):
         """
-            Create and return the list of application menu
-            items for the plug-in. 
-            
-            @param id: deprecated. Un-used.
-            @param parent: parent window
-            @return: plug-in menu
+        Create and return the list of application menu
+        items for the plug-in. 
+        
+        :param id: deprecated. Un-used.
+        :param parent: parent window
+        
+        :return: plug-in menu
         """
         return []
       
     def get_panels(self, parent):
         """
-            Create and return the list of wx.Panels for your plug-in.
-            Define the plug-in perspective.
-            
-            Panels should inherit from DefaultPanel defined below,
-            or should present the same interface. They must define
-            "window_caption" and "window_name".
-            
-            @param parent: parent window
-            @return: list of panels
+        Create and return the list of wx.Panels for your plug-in.
+        Define the plug-in perspective.
+        
+        Panels should inherit from DefaultPanel defined below,
+        or should present the same interface. They must define
+        "window_caption" and "window_name".
+        
+        :param parent: parent window
+        
+        :return: list of panels
         """
         ## Save a reference to the parent
         self.parent = parent
@@ -87,7 +92,6 @@ class Plugin:
         self.model_panel= ModelPanel(self.parent, page_info =None,
                 model_list_box= self.menu_mng.get_model_list().get_list())
         self.model_panel.set_manager(self)
-       
         # If needed, add its name to the perspective list
         self.perspective.append(self.model_panel.window_name)
         self.parent.Bind(model_panel.EVT_MODEL_BOX,self._on_model_panel)
@@ -96,44 +100,50 @@ class Plugin:
     
     def get_context_menu(self, graph=None):
         """
-            This method is optional.
+        This method is optional.
+    
+        When the context menu of a plot is rendered, the 
+        get_context_menu method will be called to give you a 
+        chance to add a menu item to the context menu.
         
-            When the context menu of a plot is rendered, the 
-            get_context_menu method will be called to give you a 
-            chance to add a menu item to the context menu.
-            
-            A ref to a Graph object is passed so that you can
-            investigate the plot content and decide whether you
-            need to add items to the context menu.  
-            
-            This method returns a list of menu items.
-            Each item is itself a list defining the text to 
-            appear in the menu, a tool-tip help text, and a
-            call-back method.
-            
-            @param graph: the Graph object to which we attach the context menu
-            @return: a list of menu items with call-back function
+        A ref to a Graph object is passed so that you can
+        investigate the plot content and decide whether you
+        need to add items to the context menu.  
+        
+        This method returns a list of menu items.
+        Each item is itself a list defining the text to 
+        appear in the menu, a tool-tip help text, and a
+        call-back method.
+        
+        :param graph: the Graph object to which we attach the context menu
+        
+        :return: a list of menu items with call-back function
+        
         """
         return []    
     
     def get_perspective(self):
         """
-            Get the list of panel names for this perspective
+        Get the list of panel names for this perspective
+        
         """
         return self.perspective
     
     def on_perspective(self, event):
         """
-            Call back function for the perspective menu item.
-            We notify the parent window that the perspective
-            has changed.
-            @param event: menu event
+        Call back function for the perspective menu item.
+        We notify the parent window that the perspective
+        has changed.
+        
+        :param event: menu event
+        
         """
         self.parent.set_perspective(self.perspective)
     
     def post_init(self):
         """
-            Post initialization call back to close the loose ends
+        Post initialization call back to close the loose ends
+        
         """
         pass
             
@@ -141,16 +151,17 @@ class Plugin:
                    enable1D= True, enable2D= False,
                    qmin= DEFAULT_QMIN, qmax= DEFAULT_QMAX, qstep= DEFAULT_NPTS):
         """
-             Draw model.
-             @param model: the model to draw
-             @param name: the name of the model to draw
-             @param data: the data on which the model is based to be drawn
-             @param description: model's description
-             @param enable1D: if true enable drawing model 1D
-             @param enable2D: if true enable drawing model 2D
-             @param qmin:  Range's minimum value to draw model
-             @param qmax:  Range's maximum value to draw model
-             @param qstep: number of step to divide the x and y-axis
+        Draw model.
+         
+        :param model: the model to draw
+        :param name: the name of the model to draw
+        :param data: the data on which the model is based to be drawn
+        :param description: model's description
+        :param enable1D: if true enable drawing model 1D
+        :param enable2D: if true enable drawing model 2D
+        :param qmin:  Range's minimum value to draw model
+        :param qmax:  Range's maximum value to draw model
+        :param qstep: number of step to divide the x and y-axis
              
         """
         ## draw model 1D with no loaded data
@@ -166,8 +177,10 @@ class Plugin:
         
     def _on_model_panel(self, evt):
         """
-            react to model selection on any combo box or model menu.plot the model  
-            @param evt: wx.combobox event
+        react to model selection on any combo box or model menu.plot the model 
+         
+        :param evt: wx.combobox event
+        
         """
         model = evt.model
         qmin = evt.qmin
@@ -181,13 +194,14 @@ class Plugin:
     def _draw_model2D(self,model,data=None, enable2D=False,
                       qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
         """
-            draw model in 2D
-            @param model: instance of the model to draw
-            @param enable2D: when True allows to draw model 2D
-            @param qmin: the minimum value to  draw model 2D
-            @param qmax: the maximum value to draw model 2D
-            @param qstep: the number of division of Qx and Qy of the model to draw
-            
+        draw model in 2D
+        
+        :param model: instance of the model to draw
+        :param enable2D: when True allows to draw model 2D
+        :param qmin: the minimum value to  draw model 2D
+        :param qmax: the maximum value to draw model 2D
+        :param qstep: the number of division of Qx and Qy of the model to draw
+        
         """
         x=  numpy.linspace(start= -1*qmax,
                                stop= qmax,
@@ -235,9 +249,11 @@ class Plugin:
                 qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep= DEFAULT_NPTS,
                 enable1D= True):
         """
-            Draw model 1D from loaded data1D
-            @param data: loaded data
-            @param model: the model to plot
+        Draw model 1D from loaded data1D
+        
+        :param data: loaded data
+        :param model: the model to plot
+        
         """
         x=  numpy.linspace(start= qmin,
                            stop= qmax,
@@ -280,18 +296,20 @@ class Plugin:
             
     def _update1D(self,x, output):
         """
-            Update the output of plotting model 1D
+        Update the output of plotting model 1D
+        
         """
         wx.PostEvent(self.parent, StatusEvent(status="Plot \
         #updating ... ",type="update"))
         self.ready_fit()
         #self.calc_thread.ready(0.01)
-    
-    
+
     def _fill_default_model2D(self, theory, qmax,qstep, qmin=None):
         """
-            fill Data2D with default value 
-            @param theory: Data2D to fill
+        fill Data2D with default value 
+        
+        :param theory: Data2D to fill
+        
         """
         from DataLoader.data_info import Detector, Source
         
@@ -368,14 +386,14 @@ class Plugin:
         theory.xmax= xmax 
         theory.ymin= ymin
         theory.ymax= ymax 
-        theory.group_id ="Model"
-        theory.id ="Model"
-        
+        theory.group_id = "Model"
+        theory.id = "Model"
         
     def _get_plotting_info(self, data=None):
         """
-            get plotting info from data if data !=None
-            else use some default
+        get plotting info from data if data !=None
+        else use some default
+        
         """
         my_info = PlotInfo()
         if data !=None:
@@ -396,10 +414,10 @@ class Plugin:
         
         return my_info
                 
-                
     def _complete1D(self, x,y, elapsed,model,data=None):
         """
-            Complete plotting 1D data
+        Complete plotting 1D data
+        
         """ 
        
         try:
@@ -434,22 +452,21 @@ class Plugin:
             wx.PostEvent( self.parent, StatusEvent(status= msg, type="stop"  ))
             return  
                   
-    
-        
     def _update2D(self, output,time=None):
         """
-            Update the output of plotting model
+        Update the output of plotting model
+        
         """
         wx.PostEvent(self.parent, StatusEvent(status="Plot \
         #updating ... ",type="update"))
         self.ready_fit()
         #self.calc_thread.ready(0.01)
         
-        
     def _complete2D(self, image,data, model,  elapsed,qmin, qmax,qstep=DEFAULT_NPTS):
         """
-            Complete get the result of modelthread and create model 2D
-            that can be plot.
+        Complete get the result of modelthread and create model 2D
+        that can be plot.
+        
         """
         err_image = numpy.zeros(numpy.shape(image))
        
@@ -483,5 +500,4 @@ class Plugin:
                          title="Analytical model 2D ", reset=True ))
         msg = "Plot 2D complete !"
         wx.PostEvent( self.parent, StatusEvent( status= msg , type="stop" ))
-         
-            
+     

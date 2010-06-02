@@ -1,10 +1,9 @@
-#TODO: add comments to document this module
-#TODO: clean-up the exception handling.
 
-#TODO: clean-up the FractalAbsModel and PowerLawAbsModel menu items. Those
-#      model definitions do not belong here. They belong with the rest of the
-#      models.
+"""
+This module collects models from sans.models packages and orders theses models 
+by categories that GUI application understands and uses.
 
+"""
 import wx
 import wx.lib.newevent
 import imp
@@ -22,11 +21,15 @@ import time
 from sans.models.pluginmodel import Model1DPlugin
     
 def log(message):
+    """
+    """
     out = open("plugins.log", 'a')
     out.write("%10g:  %s\n" % (time.clock(), message))
     out.close()
 
 def findModels():
+    """
+    """
     log("looking for models in: %s/plugins" % os.getcwd())
     if os.path.isdir('plugins'):
         return _findModels('plugins')
@@ -34,10 +37,13 @@ def findModels():
     
 def _check_plugin(model, name):
     """
-        Do some checking before model adding plugins in the list
-        @param model: class model to add into the plugin list
-        @param name:name of the module plugin
-        @return model: model if valid model or None if not valid
+    Do some checking before model adding plugins in the list
+    
+    :param model: class model to add into the plugin list
+    :param name: name of the module plugin
+    
+    :return model: model if valid model or None if not valid
+    
     """
     #Check is the plugin is of type Model1DPlugin
     if not issubclass(model, Model1DPlugin):
@@ -73,6 +79,8 @@ def _check_plugin(model, name):
   
   
 def _findModels(dir):
+    """
+    """
     # List of plugin objects
     plugins = []
     # Go through files in plug-in directory
@@ -113,15 +121,18 @@ def _findModels(dir):
 
 class ModelList(object):
     """
-        Contains dictionary of model and their type
+    Contains dictionary of model and their type
+    
     """
     def __init__(self):
         self.mydict={}
         
     def set_list(self, name, mylist):
         """
-            @param name: the type of the list
-            @param mylist: the list to add
+        
+        :param name: the type of the list
+        :param mylist: the list to add
+        
         """
         if name not in self.mydict.keys():
             self.mydict[name] = mylist
@@ -129,11 +140,16 @@ class ModelList(object):
             
     def get_list(self):
         """
-         return all the list stored in a dictionary object
+        return all the list stored in a dictionary object
         """
         return self.mydict
         
 class ModelManager:
+    """
+    ModelManager collected model classes object of available into a 
+    dictionary of models' names and models' classes.
+    
+    """
     ## external dict for models
     model_combobox = ModelList()
     ## Dictionary of form models
@@ -155,10 +171,11 @@ class ModelManager:
     
     def _getModelList(self):
         """
-            List of models we want to make available by default
-            for this application
+        Fill up lists of models available by default
+        for the current application
+    
+        :return: the next free event ID following the new menu events
         
-            @return: the next free event ID following the new menu events
         """
         ## form factor
         from sans.models.SphereModel import SphereModel
@@ -292,7 +309,6 @@ class ModelManager:
         from sans.models.PorodModel import PorodModel
         self.shape_indep_list.append(PorodModel )
         
-        
         #FractalModel (a c-model)will be used.
         #from sans.models.FractalAbsModel import FractalAbsModel
         #self.shape_indep_list.append(FractalAbsModel)
@@ -308,9 +324,11 @@ class ModelManager:
        
         return 0
 
-  
     def get_model_list(self):    
-        """ @ return dictionary of models for fitpanel use """
+        """ 
+        :return: dictionary of models for fitpanel use 
+        
+        """
         self._getModelList()
         self.model_combobox.set_list("Shapes", self.shape_list)
         self.model_combobox.set_list("Shape-Independent", self.shape_indep_list)
@@ -318,11 +336,5 @@ class ModelManager:
         self.model_combobox.set_list("Customized Models", self.plugins)
         self.model_combobox.set_list("P(Q)*S(Q)", self.multiplication_factor)
         self.model_combobox.set_list("multiplication", self.multiplication_factor)
-       
         return self.model_combobox
-    
-  
-        
-    
-    
-  
+ 

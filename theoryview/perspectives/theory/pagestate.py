@@ -4,12 +4,14 @@ import copy
 
 class PageState(object):
     """
-        Contains info to reconstruct a page
+    Contains info to reconstruct a page
+    
     """
     def __init__(self, parent,model=None, data=None):
         
         """ 
-            Initialization of the Panel
+        Initialization of the Panel
+        
         """
         #TODO: remove this once the inheritence is cleaned up
         ## Data member to store the dispersion object created
@@ -95,6 +97,8 @@ class PageState(object):
         self.tcChi= None
     
     def clone(self):
+        """
+        """
         model=None
         if self.model !=None:
             model = self.model.clone()
@@ -153,7 +157,10 @@ class PageState(object):
 
       
     def old__repr__(self):
-        """ output string for printing"""
+        """
+        output string for printing
+        
+        """
         rep = "\n\nState name: %s\n"%self.name
         rep +="data : %s\n"% str(self.data)
         rep += "Plotting Range: min: %s, max: %s, steps: %s\n"%(str(self.qmin),
@@ -197,9 +204,5 @@ class PageState(object):
             rep += "maximum displayed : %s \n"%str(item[6][0])
             rep += "maximum value : %s \n"%str(item[6][1])
             rep += "parameter unit: %s\n\n"%str(item[7])
-        
         return rep
-
-        
-       
-       
+  
