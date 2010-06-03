@@ -1,7 +1,7 @@
 """
-    @organization: Class Fit contains ScipyFit and ParkFit methods declaration
-    allows to create instance of type ScipyFit or ParkFit to perform either
-    a park fit or a scipy fit.
+Class Fit contains ScipyFit and ParkFit methods declaration
+allows to create instance of type ScipyFit or ParkFit to perform either
+a park fit or a scipy fit.
 """
 
 from scipy import optimize
@@ -11,9 +11,9 @@ from ParkFitting import ParkFit
 
 class Fit:
     """ 
-        Wrap class that allows to select the fitting type.this class 
-        can be used as follow :
-        
+    Wrap class that allows to select the fitting type.this class 
+    can be used as follow : ::
+    
         from sans.fit.Fitting import Fit
         fitter= Fit()
         fitter.fit_engine('scipy') or fitter.fit_engine('park')
@@ -23,21 +23,24 @@ class Fit:
         engine.set_model(model,Uid)
         
         chisqr1, out1, cov1=engine.fit(pars,qmin,qmax)
+        
     """  
     def __init__(self, engine='scipy'):
         """
-            self._engine will contain an instance of ScipyFit or ParkFit
         """
+        #self._engine will contain an instance of ScipyFit or ParkFit
         self._engine = None
         self.set_engine(engine)
           
-          
     def set_engine(self,word):
         """
-            Select the type of Fit 
-            @param word: the keyword to select the fit type 
-            @raise: if the user does not enter 'scipy' or 'park',
-             a valueError is rase
+        Select the type of Fit 
+        
+        :param word: the keyword to select the fit type 
+        
+        :raise: if the user does not enter 'scipy' or 'park',
+             a valueError is raised 
+             
         """
         if word=="scipy":
             self._engine=ScipyFit()
@@ -45,16 +48,13 @@ class Fit:
             self._engine=ParkFit()
         else:
             raise ValueError, "enter the keyword scipy or park"
-        
-   
-    
-    def fit(self,q=None,handler=None, curr_thread=None):
+
+    def fit(self, q=None, handler=None, curr_thread=None):
         """Perform the fit """
         try:
             return self._engine.fit(q,handler, curr_thread= curr_thread)
         except:
             raise
-    
     
     def set_model(self,model,Uid,pars=[],constraints=[]):
         """
@@ -65,11 +65,13 @@ class Fit:
    
     def set_data(self,data,Uid,smearer=None,qmin=None, qmax=None):
         """
-            Store data to fit at the psotion Uid of the fit engine
-            @param data: data to fit
-            @param smearer: smearerobject to smear data
-            @param qmin: the minimum q range to fit 
-            @param qmax: the minimum q range to fit
+        Store data to fit at the psotion Uid of the fit engine
+        
+        :param data: data to fit
+        :param smearer: smearerobject to smear data
+        :param qmin: the minimum q range to fit 
+        :param qmax: the minimum q range to fit
+        
         """
         self._engine.set_data(data,Uid,smearer,qmin, qmax)
         
@@ -80,22 +82,26 @@ class Fit:
 
 
     def remove_Fit_Problem(self,Uid):
-        """remove   fitarrange in Uid"""
+        """remove fitarrange in Uid"""
         self._engine.remove_Fit_Problem(Uid)
         
         
     def select_problem_for_fit(self,Uid,value):
         """
-            select a couple of model and data at the Uid position in dictionary
-            and set in self.selected value to value
-            @param value: the value to allow fitting. can only have the value one or zero
+        select a couple of model and data at the Uid position in dictionary
+        and set in self.selected value to value
+        
+        :param value: the value to allow fitting.
+             can only have the value one or zero
         """
         self._engine.select_problem_for_fit(Uid,value)
         
         
     def get_problem_to_fit(self,Uid):
         """
-            return the self.selected value of the fit problem of Uid
-           @param Uid: the Uid of the problem
+        return the self.selected value of the fit problem of Uid
+           
+        :param Uid: the Uid of the problem
+        
         """
         return self._engine.get_problem_to_fit(Uid)

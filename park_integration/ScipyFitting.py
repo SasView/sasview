@@ -1,7 +1,9 @@
+
+
 """
-    @organization: ScipyFitting module contains FitArrange , ScipyFit,
-    Parameter classes.All listed classes work together to perform a 
-    simple fit with scipy optimizer.
+ScipyFitting module contains FitArrange , ScipyFit,
+Parameter classes.All listed classes work together to perform a 
+simple fit with scipy optimizer.
 """
 
 import numpy 
@@ -11,7 +13,7 @@ from AbstractFitEngine import FitEngine, SansAssembly,FitAbort
 
 class fitresult(object):
     """
-        Storing fit result
+    Storing fit result
     """
     def __init__(self, model=None, paramList=None):
         self.calls     = None
@@ -28,12 +30,18 @@ class fitresult(object):
         self.paramList = paramList
      
     def set_model(self, model):
+        """
+        """
         self.model = model
         
     def set_fitness(self, fitness):
+        """
+        """
         self.fitness = fitness
         
     def __str__(self):
+        """
+        """
         if self.pvec == None and self.model is None and self.paramList is None:
             return "No results"
         n = len(self.model.parameterset)
@@ -44,37 +52,41 @@ class fitresult(object):
         return "\n".join(L)
     
     def print_summary(self):
+        """
+        """
         print self   
 
 class ScipyFit(FitEngine):
     """ 
-        ScipyFit performs the Fit.This class can be used as follow:
-        #Do the fit SCIPY
-        create an engine: engine = ScipyFit()
-        Use data must be of type plottable
-        Use a sans model
-        
-        Add data with a dictionnary of FitArrangeDict where Uid is a key and data
-        is saved in FitArrange object.
-        engine.set_data(data,Uid)
-        
-        Set model parameter "M1"= model.name add {model.parameter.name:value}.
-        @note: Set_param() if used must always preceded set_model()
-             for the fit to be performed.In case of Scipyfit set_param is called in
-             fit () automatically.
-        engine.set_param( model,"M1", {'A':2,'B':4})
-        
-        Add model with a dictionnary of FitArrangeDict{} where Uid is a key and model
-        is save in FitArrange object.
-        engine.set_model(model,Uid)
-        
-        engine.fit return chisqr,[model.parameter 1,2,..],[[err1....][..err2...]]
-        chisqr1, out1, cov1=engine.fit({model.parameter.name:value},qmin,qmax)
+    ScipyFit performs the Fit.This class can be used as follow:
+    #Do the fit SCIPY
+    create an engine: engine = ScipyFit()
+    Use data must be of type plottable
+    Use a sans model
+    
+    Add data with a dictionnary of FitArrangeDict where Uid is a key and data
+    is saved in FitArrange object.
+    engine.set_data(data,Uid)
+    
+    Set model parameter "M1"= model.name add {model.parameter.name:value}.
+    
+    :note: Set_param() if used must always preceded set_model()
+         for the fit to be performed.In case of Scipyfit set_param is called in
+         fit () automatically.
+    
+    engine.set_param( model,"M1", {'A':2,'B':4})
+    
+    Add model with a dictionnary of FitArrangeDict{} where Uid is a key and model
+    is save in FitArrange object.
+    engine.set_model(model,Uid)
+    
+    engine.fit return chisqr,[model.parameter 1,2,..],[[err1....][..err2...]]
+    chisqr1, out1, cov1=engine.fit({model.parameter.name:value},qmin,qmax)
     """
     def __init__(self):
         """
-            Creates a dictionary (self.fitArrangeDict={})of FitArrange elements
-            with Uid as keys
+        Creates a dictionary (self.fitArrangeDict={})of FitArrange elements
+        with Uid as keys
         """
         self.fitArrangeDict={}
         self.paramList=[]
@@ -82,7 +94,8 @@ class ScipyFit(FitEngine):
     #    return profile(self._fit, *args, **kw)
 
     def fit(self, q=None, handler=None, curr_thread=None):
-       
+        """
+        """
         fitproblem=[]
         for id ,fproblem in self.fitArrangeDict.iteritems():
             if fproblem.get_to_fit()==1:

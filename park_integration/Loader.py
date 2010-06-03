@@ -3,7 +3,7 @@ import wx
 import string,numpy
 class Load:
     """
-        This class is loading values from given file or value giving by the user
+    This class is loading values from given file or value giving by the user
     """
     
     def _init_(self,x=None,y=None,dx=None,dy=None):
@@ -16,9 +16,11 @@ class Load:
         
     def set_filename(self,path=None):
         """
-            Store path into a variable.If the user doesn't give a path as a parameter a pop-up
-            window appears to select the file.
-            @param path: the path given by the user
+        Store path into a variable.If the user doesn't give a path as a parameter a pop-up
+        window appears to select the file.
+        
+        :param path: the path given by the user
+        
         """
         self.filename = path
        
@@ -28,7 +30,7 @@ class Load:
         return self.filename
     
     def set_values(self):
-        """ Store the values loaded from file in local variables """
+        """ Store the values loaded from file in local variables"""
         if not self.filename == None:
             input_f =  open(self.filename,'r')
             buff = input_f.read()
@@ -60,11 +62,11 @@ class Load:
             
             
     def get_values(self):
-        """ Return x, y, dx, dy """
+        """ Return x, y, dx, dy"""
         return self.x,self.y,self.dx,self.dy
     
     def load_data(self,data):
-        """ Return plottable """
+        """ Return plottable"""
         #load data
         data.x = self.x
         data.y = self.y

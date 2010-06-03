@@ -1,0 +1,247 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Fitting &mdash; park_integration v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="park_integration v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="ParkFitting" href="ParkFitting.html" />
+    <link rel="prev" title="AbstractFitEngine" href="AbstractFitEngine.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ParkFitting.html" title="ParkFitting"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="AbstractFitEngine.html" title="AbstractFitEngine"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">park_integration v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="fitting">
+<h1>Fitting<a class="headerlink" href="#fitting" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.fit.Fitting">
+<span id="mod-sans-fit-fitting"></span><h2>:mod:` sans.fit.Fitting`<a class="headerlink" href="#module-sans.fit.Fitting" title="Permalink to this headline">¶</a></h2>
+<p>Class Fit contains ScipyFit and ParkFit methods declaration
+allows to create instance of type ScipyFit or ParkFit to perform either
+a park fit or a scipy fit.</p>
+<dl class="class">
+<dt id="sans.fit.Fitting.Fit">
+<em class="property">class </em><tt class="descclassname">sans.fit.Fitting.</tt><tt class="descname">Fit</tt><big>(</big><em>engine='scipy'</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrap class that allows to select the fitting type.this class 
+can be used as follow :</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sans.fit.Fitting</span> <span class="kn">import</span> <span class="n">Fit</span>
+<span class="n">fitter</span><span class="o">=</span> <span class="n">Fit</span><span class="p">()</span>
+<span class="n">fitter</span><span class="o">.</span><span class="n">fit_engine</span><span class="p">(</span><span class="s">&#39;scipy&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">fitter</span><span class="o">.</span><span class="n">fit_engine</span><span class="p">(</span><span class="s">&#39;park&#39;</span><span class="p">)</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">fitter</span><span class="o">.</span><span class="n">returnEngine</span><span class="p">()</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">Uid</span><span class="p">)</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span> <span class="n">model</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pars</span><span class="p">)</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">set_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">Uid</span><span class="p">)</span>
+
+<span class="n">chisqr1</span><span class="p">,</span> <span class="n">out1</span><span class="p">,</span> <span class="n">cov1</span><span class="o">=</span><span class="n">engine</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span><span class="n">qmin</span><span class="p">,</span><span class="n">qmax</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="sans.fit.Fitting.Fit.fit">
+<tt class="descname">fit</tt><big>(</big><em>q=None</em>, <em>handler=None</em>, <em>curr_thread=None</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.fit" title="Permalink to this definition">¶</a></dt>
+<dd>Perform the fit</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.Fitting.Fit.get_model">
+<tt class="descname">get_model</tt><big>(</big><em>Uid</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.get_model" title="Permalink to this definition">¶</a></dt>
+<dd>return list of data</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.Fitting.Fit.get_problem_to_fit">
+<tt class="descname">get_problem_to_fit</tt><big>(</big><em>Uid</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.get_problem_to_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the self.selected value of the fit problem of Uid</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Uid</strong> &#8211; the Uid of the problem</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.Fitting.Fit.remove_Fit_Problem">
+<tt class="descname">remove_Fit_Problem</tt><big>(</big><em>Uid</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.remove_Fit_Problem" title="Permalink to this definition">¶</a></dt>
+<dd>remove fitarrange in Uid</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.Fitting.Fit.select_problem_for_fit">
+<tt class="descname">select_problem_for_fit</tt><big>(</big><em>Uid</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.select_problem_for_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>select a couple of model and data at the Uid position in dictionary
+and set in self.selected value to value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>value</strong> &#8211; the value to allow fitting.
+can only have the value one or zero</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.Fitting.Fit.set_data">
+<tt class="descname">set_data</tt><big>(</big><em>data</em>, <em>Uid</em>, <em>smearer=None</em>, <em>qmin=None</em>, <em>qmax=None</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.set_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store data to fit at the psotion Uid of the fit engine</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> &#8211; data to fit</li>
+<li><strong>smearer</strong> &#8211; smearerobject to smear data</li>
+<li><strong>qmin</strong> &#8211; the minimum q range to fit</li>
+<li><strong>qmax</strong> &#8211; the minimum q range to fit</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.Fitting.Fit.set_engine">
+<tt class="descname">set_engine</tt><big>(</big><em>word</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.set_engine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select the type of Fit</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>word</strong> &#8211; the keyword to select the fit type</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Raise :</th><td class="field-body"><p class="first last">if the user does not enter &#8216;scipy&#8217; or &#8216;park&#8217;,
+a valueError is raised</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.Fitting.Fit.set_model">
+<tt class="descname">set_model</tt><big>(</big><em>model</em>, <em>Uid</em>, <em>pars=</em><span class="optional">[</span><span class="optional">]</span>, <em>constraints=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.set_model" title="Permalink to this definition">¶</a></dt>
+<dd>store a model model to fit at the position Uid of the fit engine</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Fitting</a><ul>
+<li><a class="reference internal" href="#module-sans.fit.Fitting">:mod:` sans.fit.Fitting`</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="AbstractFitEngine.html"
+                        title="previous chapter">AbstractFitEngine</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ParkFitting.html"
+                        title="next chapter">ParkFitting</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/Fitting.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ParkFitting.html" title="ParkFitting"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="AbstractFitEngine.html" title="AbstractFitEngine"
+             >previous</a> |</li>
+        <li><a href="../index.html">park_integration v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b1.
+    </div>
+  </body>
+</html>

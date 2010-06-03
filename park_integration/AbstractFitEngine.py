@@ -1,17 +1,21 @@
+
+
 import logging, sys
 import park,numpy,math, copy
 from DataLoader.data_info import Data1D
 from DataLoader.data_info import Data2D
+
 class SansParameter(park.Parameter):
     """
-        SANS model parameters for use in the PARK fitting service.
-        The parameter attribute value is redirected to the underlying
-        parameter value in the SANS model.
+    SANS model parameters for use in the PARK fitting service.
+    The parameter attribute value is redirected to the underlying
+    parameter value in the SANS model.
     """
     def __init__(self, name, model):
         """
-            @param name: the name of the model parameter
-            @param model: the sans model to wrap as a park model
+        :param name: the name of the model parameter
+        :param model: the sans model to wrap as a park model
+        
         """
         self._model, self._name = model,name
         #set the value for the parameter of the given name
@@ -19,15 +23,19 @@ class SansParameter(park.Parameter):
          
     def _getvalue(self):
         """
-            override the _getvalue of park parameter
-            @return value the parameter associates with self.name
+        override the _getvalue of park parameter
+        
+        :return value the parameter associates with self.name
+        
         """
         return self._model.getParam(self.name)
     
     def _setvalue(self,value):
         """
-            override the _setvalue pf park parameter
-            @param value: the value to set on a given parameter
+        override the _setvalue pf park parameter
+        
+        :param value: the value to set on a given parameter
+        
         """
         self._model.setParam(self.name, value)
         
@@ -35,8 +43,8 @@ class SansParameter(park.Parameter):
     
     def _getrange(self):
         """
-            Override _getrange of park parameter
-            return the range of parameter
+        Override _getrange of park parameter
+        return the range of parameter
         """
         #if not  self.name in self._model.getDispParamList():
         lo,hi = self._model.details[self.name][1:3]
@@ -53,19 +61,22 @@ class SansParameter(park.Parameter):
     
     def _setrange(self,r):
         """
-            override _setrange of park parameter
-            @param r: the value of the range to set
+        override _setrange of park parameter
+        
+        :param r: the value of the range to set
+        
         """
         self._model.details[self.name][1:3] = r
     range = property(_getrange,_setrange)
     
 class Model(park.Model):
     """
-        PARK wrapper for SANS models.
+    PARK wrapper for SANS models.
     """
     def __init__(self, sans_model, **kw):
         """
-            @param sans_model: the sans model to wrap using park interface
+        :param sans_model: the sans model to wrap using park interface
+        
         """
         park.Model.__init__(self, **kw)
         self.model = sans_model
@@ -78,11 +89,12 @@ class Model(park.Model):
         self.parameterset = park.ParameterSet(sans_model.name,pars=self.parkp)
         self.pars=[]
   
-  
     def getParams(self,fitparams):
         """
-            return a list of value of paramter to fit
-            @param fitparams: list of paramaters name to fit
+        return a list of value of paramter to fit
+        
+        :param fitparams: list of paramaters name to fit
+        
         """
         list=[]
         self.pars=[]
@@ -93,11 +105,12 @@ class Model(park.Model):
                      list.append(element.value)
         return list
     
-    
     def setParams(self,paramlist, params):
         """
-            Set value for parameters to fit
-            @param params: list of value for parameters to fit 
+        Set value for parameters to fit
+        
+        :param params: list of value for parameters to fit 
+        
         """
         try:
             for i in range(len(self.parkp)):
@@ -110,8 +123,10 @@ class Model(park.Model):
   
     def eval(self,x):
         """
-            override eval method of park model. 
-            @param x: the x value used to compute a function
+        override eval method of park model. 
+        
+        :param x: the x value used to compute a function
+        
         """
         try:
             return self.model.evalDistribution(x)
@@ -121,29 +136,28 @@ class Model(park.Model):
     
 class FitData1D(Data1D):
     """ 
-        Wrapper class  for SANS data 
-        FitData1D inherits from DataLoader.data_info.Data1D. Implements 
-        a way to get residuals from data.
+    Wrapper class  for SANS data 
+    FitData1D inherits from DataLoader.data_info.Data1D. Implements 
+    a way to get residuals from data.
     """
     def __init__(self,x, y,dx= None, dy=None, smearer=None):
         Data1D.__init__(self, x=numpy.array(x), y=numpy.array(y), dx=dx, dy=dy)
         """
-            @param smearer: is an object of class QSmearer or SlitSmearer
-            that will smear the theory data (slit smearing or resolution 
-            smearing) when set.
-            
-            The proper way to set the smearing object would be to
-            do the following:
-            
+        :param smearer: is an object of class QSmearer or SlitSmearer
+           that will smear the theory data (slit smearing or resolution 
+           smearing) when set.
+        
+        The proper way to set the smearing object would be to
+        do the following: ::
+        
             from DataLoader.qsmearing import smear_selection
             smearer = smear_selection(some_data)
             fitdata1d = FitData1D( x= [1,3,..,], 
                                     y= [3,4,..,8], 
                                     dx=None,
                                     dy=[1,2...], smearer= smearer)
-           
-            Note that some_data _HAS_ to be of class DataLoader.data_info.Data1D
-            
+       
+        :Note: that some_data _HAS_ to be of class DataLoader.data_info.Data1D
             Setting it back to None will turn smearing off.
             
         """
@@ -209,19 +223,21 @@ class FitData1D(Data1D):
         
     def getFitRange(self):
         """
-            @return the range of data.x to fit
+        return the range of data.x to fit
         """
         return self.qmin, self.qmax
         
     def residuals(self, fn):
         """ 
-            Compute residuals.
-            
-            If self.smearer has been set, use if to smear
-            the data before computing chi squared.
-            
-            @param fn: function that return model value
-            @return residuals
+        Compute residuals.
+        
+        If self.smearer has been set, use if to smear
+        the data before computing chi squared.
+        
+        :param fn: function that return model value
+        
+        :return: residuals
+        
         """
         # Compute theory data f(x)
         fx= numpy.zeros(len(self.x))
@@ -238,12 +254,12 @@ class FitData1D(Data1D):
                                                                               
         return (self.y[self.idx]-fx[self.idx])/self.dy[self.idx]
      
-  
-        
     def residuals_deriv(self, model, pars=[]):
         """ 
-            @return residuals derivatives .
-            @note: in this case just return empty array
+        :return: residuals derivatives .
+        
+        :note: in this case just return empty array
+        
         """
         return []
     
@@ -253,8 +269,8 @@ class FitData2D(Data2D):
     def __init__(self,sans_data2d ,data=None, err_data=None):
         Data2D.__init__(self, data= data, err_data= err_data)
         """
-            Data can be initital with a data (sans plottable)
-            or with vectors.
+        Data can be initital with a data (sans plottable)
+        or with vectors.
         """
         self.res_err_image=[]
         self.index_model=[]
@@ -266,7 +282,7 @@ class FitData2D(Data2D):
         
     def set_data(self, sans_data2d, qmin=None, qmax=None ):
         """
-            Determine the correct qx_data and qy_data within range to fit
+        Determine the correct qx_data and qy_data within range to fit
         """
         self.data     = sans_data2d.data
         self.err_data = sans_data2d.err_data
@@ -298,7 +314,7 @@ class FitData2D(Data2D):
         
     def set_smearer(self,smearer):  
         """
-            Set smearer
+        Set smearer
         """
         if smearer == None:
             return
@@ -319,15 +335,16 @@ class FitData2D(Data2D):
         self.index_model = (self.index_model) &(self.mask)
         self.index_model = (self.index_model) & (numpy.isfinite(self.data))
         self.index_model = (self.index_model) & (self.res_err_data!=0)
+        
     def getFitRange(self):
         """
-            @return the range of data.x to fit
+        return the range of data.x to fit
         """
         return self.qmin, self.qmax
      
     def residuals(self, fn): 
         """
-            @return the residuals
+        return the residuals
         """ 
         if self.smearer != None:
             fn.set_index(self.index_model)
@@ -341,30 +358,32 @@ class FitData2D(Data2D):
         res=(self.data[self.index_model] - gn)/self.res_err_data[self.index_model]
         return res
         
- 
     def residuals_deriv(self, model, pars=[]):
         """ 
-            @return residuals derivatives .
-            @note: in this case just return empty array
+        :return: residuals derivatives .
+        
+        :note: in this case just return empty array
+        
         """
         return []
     
 class FitAbort(Exception):
     """
-        Exception raise to stop the fit
+    Exception raise to stop the fit
     """
-    print"Creating fit abort Exception"
+    #print"Creating fit abort Exception"
 
 
 class SansAssembly:
     """
-         Sans Assembly class a class wrapper to be call in optimizer.leastsq method
+    Sans Assembly class a class wrapper to be call in optimizer.leastsq method
     """
     def __init__(self, paramlist, model=None , data=None, fitresult=None,
                  handler=None, curr_thread=None):
         """
-            @param Model: the model wrapper fro sans -model
-            @param Data: the data wrapper for sans data
+        :param Model: the model wrapper fro sans -model
+        :param Data: the data wrapper for sans data
+        
         """
         self.model = model
         self.data  = data
@@ -377,9 +396,12 @@ class SansAssembly:
         
     def chisq(self, params):
         """
-            Calculates chi^2
-            @param params: list of parameter values
-            @return: chi^2
+        Calculates chi^2
+        
+        :param params: list of parameter values
+        
+        :return: chi^2
+        
         """
         sum = 0
         for item in self.res:
@@ -390,8 +412,10 @@ class SansAssembly:
     
     def __call__(self,params):
         """
-            Compute residuals
-            @param params: value of parameters to fit
+        Compute residuals
+        
+        :param params: value of parameters to fit
+        
         """
         #import thread
         self.model.setParams(self.paramlist,params)
@@ -413,7 +437,7 @@ class SansAssembly:
 class FitEngine:
     def __init__(self):
         """
-            Base class for scipy and park fit engine
+        Base class for scipy and park fit engine
         """
         #List of parameter names to fit
         self.paramList=[]
@@ -422,13 +446,18 @@ class FitEngine:
         
     def _concatenateData(self, listdata=[]):
         """  
-            _concatenateData method concatenates each fields of all data contains ins listdata.
-            @param listdata: list of data 
-            @return Data: Data is wrapper class for sans plottable. it is created with all parameters
-             of data concatenanted
-            @raise: if listdata is empty  will return None
-            @raise: if data in listdata don't contain dy field ,will create an error
+        _concatenateData method concatenates each fields of all data 
+        contains ins listdata.
+        
+        :param listdata: list of data 
+        
+        :return Data: Data is wrapper class for sans plottable. it is created with all parameters
+            of data concatenanted
+            
+        :raise: if listdata is empty  will return None
+        :raise: if data in listdata don't contain dy field ,will create an error
             during fitting
+            
         """
         #TODO: we have to refactor the way we handle data.
         # We should move away from plottables and move towards the Data1D objects
@@ -473,21 +502,26 @@ class FitEngine:
             return data
         
         
-    def set_model(self,model,Uid,pars=[], constraints=[]):
+    def set_model(self, model, Uid, pars=[], constraints=[]):
         """
-            set a model on a given uid in the fit engine.
-            @param model: sans.models type 
-            @param Uid :is the key of the fitArrange dictionnary where model is saved as a value
-            @param pars: the list of parameters to fit 
-            @param constraints: list of 
-                tuple (name of parameter, value of parameters)
-                the value of parameter must be a string to constraint 2 different
-                parameters.
-                Example:
-                we want to fit 2 model M1 and M2 both have parameters A and B.
-                constraints can be:
-                 constraints = [(M1.A, M2.B+2), (M1.B= M2.A *5),...,]
-            @note : pars must contains only name of existing model's paramaters
+        set a model on a given uid in the fit engine.
+        
+        :param model: sans.models type 
+        :param Uid: is the key of the fitArrange dictionary where model is 
+                saved as a value
+        :param pars: the list of parameters to fit 
+        :param constraints: list of 
+            tuple (name of parameter, value of parameters)
+            the value of parameter must be a string to constraint 2 different
+            parameters.
+            Example:  
+            we want to fit 2 model M1 and M2 both have parameters A and B.
+            constraints can be:
+             constraints = [(M1.A, M2.B+2), (M1.B= M2.A *5),...,]
+            
+             
+        :note: pars must contains only name of existing model's parameters
+        
         """
         if model == None:
             raise ValueError, "AbstractFitEngine: Need to set model to fit"
@@ -534,11 +568,14 @@ class FitEngine:
             raise ValueError, "park_integration:missing parameters"
     
     def set_data(self,data,Uid,smearer=None,qmin=None,qmax=None):
-        """ Receives plottable, creates a list of data to fit,set data
-            in a FitArrange object and adds that object in a dictionary 
-            with key Uid.
-            @param data: data added
-            @param Uid: unique key corresponding to a fitArrange object with data
+        """ 
+        Receives plottable, creates a list of data to fit,set data
+        in a FitArrange object and adds that object in a dictionary 
+        with key Uid.
+        
+        :param data: data added
+        :param Uid: unique key corresponding to a fitArrange object with data
+        
         """
         if data.__class__.__name__=='Data2D':
             fitdata=FitData2D(sans_data2d=data, data=data.data, err_data= data.err_data)
@@ -557,9 +594,12 @@ class FitEngine:
    
     def get_model(self,Uid):
         """ 
-            @param Uid: Uid is key in the dictionary containing the model to return
-            @return  a model at this uid or None if no FitArrange element was created
+        
+        :param Uid: Uid is key in the dictionary containing the model to return
+        
+        :return:  a model at this uid or None if no FitArrange element was created
             with this Uid
+            
         """
         if self.fitArrangeDict.has_key(Uid):
             return self.fitArrangeDict[Uid].get_model()
@@ -573,18 +613,22 @@ class FitEngine:
             
     def select_problem_for_fit(self,Uid,value):
         """
-            select a couple of model and data at the Uid position in dictionary
-            and set in self.selected value to value
-            @param value: the value to allow fitting. can only have the value one or zero
+        select a couple of model and data at the Uid position in dictionary
+        and set in self.selected value to value
+        
+        :param value: the value to allow fitting. 
+                can only have the value one or zero
+                
         """
         if self.fitArrangeDict.has_key(Uid):
              self.fitArrangeDict[Uid].set_to_fit( value)
              
-             
     def get_problem_to_fit(self,Uid):
         """
-            return the self.selected value of the fit problem of Uid
-           @param Uid: the Uid of the problem
+        return the self.selected value of the fit problem of Uid
+        
+        :param Uid: the Uid of the problem
+        
         """
         if self.fitArrangeDict.has_key(Uid):
              self.fitArrangeDict[Uid].get_to_fit()
@@ -592,11 +636,12 @@ class FitEngine:
 class FitArrange:
     def __init__(self):
         """
-            Class FitArrange contains a set of data for a given model
-            to perform the Fit.FitArrange must contain exactly one model
-            and at least one data for the fit to be performed.
-            model: the model selected by the user
-            Ldata: a list of data what the user wants to fit
+        Class FitArrange contains a set of data for a given model
+        to perform the Fit.FitArrange must contain exactly one model
+        and at least one data for the fit to be performed.
+        
+        model: the model selected by the user
+        Ldata: a list of data what the user wants to fit
             
         """
         self.model = None
@@ -608,44 +653,61 @@ class FitArrange:
         
     def set_model(self,model):
         """ 
-            set_model save a copy of the model
-            @param model: the model being set
+        set_model save a copy of the model
+        
+        :param model: the model being set
+        
         """
         self.model = model
         
     def add_data(self,data):
         """ 
-            add_data fill a self.dList with data to fit
-            @param data: Data to add in the list  
+        add_data fill a self.dList with data to fit
+        
+        :param data: Data to add in the list  
+        
         """
         if not data in self.dList:
             self.dList.append(data)
             
     def get_model(self):
-        """ @return: saved model """
+        """ 
+        
+        :return: saved model 
+        
+        """
         return self.model   
      
     def get_data(self):
-        """ @return:  list of data dList"""
+        """ 
+        
+        :return: list of data dList
+        
+        """
         #return self.dList 
         return self.dList[0] 
       
     def remove_data(self,data):
         """
-            Remove one element from the list
-            @param data: Data to remove from dList
+        Remove one element from the list
+        
+        :param data: Data to remove from dList
+        
         """
         if data in self.dList:
             self.dList.remove(data)
+            
     def set_to_fit (self, value=0):
         """
-           set self.selected to 0 or 1  for other values raise an exception
-           @param value: integer between 0 or 1
+        set self.selected to 0 or 1  for other values raise an exception
+        
+        :param value: integer between 0 or 1
+        
         """
         self.selected= value
         
     def get_to_fit(self):
         """
-            @return self.selected value
+        return self.selected value
         """
         return self.selected

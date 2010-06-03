@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ParkFitting &mdash; park_integration v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="park_integration v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="ScipyFitting" href="ScipyFitting.html" />
+    <link rel="prev" title="Fitting" href="Fitting.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ScipyFitting.html" title="ScipyFitting"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Fitting.html" title="Fitting"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">park_integration v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="parkfitting">
+<h1>ParkFitting<a class="headerlink" href="#parkfitting" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.fit.ParkFitting">
+<span id="mod-sans-fit-parkfitting"></span><h2>:mod:` sans.fit.ParkFitting`<a class="headerlink" href="#module-sans.fit.ParkFitting" title="Permalink to this headline">¶</a></h2>
+<p>ParkFitting module contains SansParameter,Model,Data
+FitArrange, ParkFit,Parameter classes.All listed classes work together to perform a 
+simple fit with park optimizer.</p>
+<dl class="class">
+<dt id="sans.fit.ParkFitting.ParkFit">
+<em class="property">class </em><tt class="descclassname">sans.fit.ParkFitting.</tt><tt class="descname">ParkFit</tt><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="AbstractFitEngine.html#sans.fit.AbstractFitEngine.FitEngine" title="sans.fit.AbstractFitEngine.FitEngine"><tt class="xref py py-class docutils literal"><span class="pre">sans.fit.AbstractFitEngine.FitEngine</span></tt></a></p>
+<p>ParkFit performs the Fit.This class can be used as follow:
+#Do the fit Park
+create an engine: engine = ParkFit()
+Use data must be of type plottable
+Use a sans model</p>
+<p>Add data with a dictionnary of FitArrangeList where Uid is a key and data
+is saved in FitArrange object.
+engine.set_data(data,Uid)</p>
+<p>Set model parameter &#8220;M1&#8221;= model.name add {model.parameter.name:value}.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Note :</th><td class="field-body">Set_param() if used must always preceded set_model()
+for the fit to be performed.</td>
+</tr>
+</tbody>
+</table>
+<p>engine.set_param( model,&#8221;M1&#8221;, {&#8216;A&#8217;:2,&#8217;B&#8217;:4})</p>
+<p>Add model with a dictionnary of FitArrangeList{} where Uid is a key and model
+is save in FitArrange object.
+engine.set_model(model,Uid)</p>
+<p>engine.fit return chisqr,[model.parameter 1,2,..],[[err1....][..err2...]]
+chisqr1, out1, cov1=engine.fit({model.parameter.name:value},qmin,qmax)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Note :</th><td class="field-body">{model.parameter.name:value} is ignored in fit function since 
+the user should make sure to call set_param himself.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.createAssembly">
+<tt class="descname">createAssembly</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.createAssembly" title="Permalink to this definition">¶</a></dt>
+<dd>Extract sansmodel and sansdata from self.FitArrangelist ={Uid:FitArrange}
+Create parkmodel and park data ,form a list couple of parkmodel and parkdata
+create an assembly self.problem=  park.Assembly([(parkmodel,parkdata)])</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.fit">
+<tt class="descname">fit</tt><big>(</big><em>q=None</em>, <em>handler=None</em>, <em>curr_thread=None</em><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs fit with park.fit module.It can  perform fit with one model
+and a set of data, more than two fit of  one model and sets of data or 
+fit with more than two model associated with their set of data and constraints</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pars</strong> &#8211; Dictionary of parameter names for the model and their values.</li>
+<li><strong>qmin</strong> &#8211; The minimum value of data&#8217;s range to be fit</li>
+<li><strong>qmax</strong> &#8211; The maximum value of data&#8217;s range to be fit</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Note :</th><td class="field-body"><p class="first">all parameter are ignored most of the time.Are just there to keep ScipyFit
+and ParkFit interface the same.</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">result.fitness Value of the goodness of fit metric</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">result.pvec list of parameter with the best value found during fitting</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">result.cov Covariance matrix</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.get_model">
+<tt class="descname">get_model</tt><big>(</big><em>Uid</em><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Uid</strong> &#8211; Uid is key in the dictionary containing the model to return</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a model at this uid or None if no FitArrange element was created
+with this Uid</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.get_problem_to_fit">
+<tt class="descname">get_problem_to_fit</tt><big>(</big><em>Uid</em><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.get_problem_to_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the self.selected value of the fit problem of Uid</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Uid</strong> &#8211; the Uid of the problem</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.remove_Fit_Problem">
+<tt class="descname">remove_Fit_Problem</tt><big>(</big><em>Uid</em><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.remove_Fit_Problem" title="Permalink to this definition">¶</a></dt>
+<dd>remove   fitarrange in Uid</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.select_problem_for_fit">
+<tt class="descname">select_problem_for_fit</tt><big>(</big><em>Uid</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.select_problem_for_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>select a couple of model and data at the Uid position in dictionary
+and set in self.selected value to value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>value</strong> &#8211; the value to allow fitting. 
+can only have the value one or zero</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.set_data">
+<tt class="descname">set_data</tt><big>(</big><em>data</em>, <em>Uid</em>, <em>smearer=None</em>, <em>qmin=None</em>, <em>qmax=None</em><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.set_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives plottable, creates a list of data to fit,set data
+in a FitArrange object and adds that object in a dictionary 
+with key Uid.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> &#8211; data added</li>
+<li><strong>Uid</strong> &#8211; unique key corresponding to a fitArrange object with data</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.set_model">
+<tt class="descname">set_model</tt><big>(</big><em>model</em>, <em>Uid</em>, <em>pars=</em><span class="optional">[</span><span class="optional">]</span>, <em>constraints=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.set_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>set a model on a given uid in the fit engine.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>model</strong> &#8211; sans.models type</li>
+<li><strong>Uid</strong> &#8211; is the key of the fitArrange dictionary where model is 
+saved as a value</li>
+<li><strong>pars</strong> &#8211; the list of parameters to fit</li>
+<li><strong>constraints</strong> &#8211; <p>list of 
+tuple (name of parameter, value of parameters)
+the value of parameter must be a string to constraint 2 different
+parameters.
+Example:  
+we want to fit 2 model M1 and M2 both have parameters A and B.
+constraints can be:</p>
+<blockquote>
+constraints = [(M1.A, M2.B+2), (M1.B= M2.A <a href="#id1"><span class="problematic" id="id2">*</span></a>5),...,]</blockquote>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Note :</th><td class="field-body"><p class="first last">pars must contains only name of existing model&#8217;s parameters</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ParkFitting</a><ul>
+<li><a class="reference internal" href="#module-sans.fit.ParkFitting">:mod:` sans.fit.ParkFitting`</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Fitting.html"
+                        title="previous chapter">Fitting</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ScipyFitting.html"
+                        title="next chapter">ScipyFitting</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/ParkFitting.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ScipyFitting.html" title="ScipyFitting"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Fitting.html" title="Fitting"
+             >previous</a> |</li>
+        <li><a href="../index.html">park_integration v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b1.
+    </div>
+  </body>
+</html>

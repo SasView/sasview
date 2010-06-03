@@ -1,7 +1,7 @@
 """
-    This file is intended to be a temporary file to communicate in-progress code 
-    to the developers. 
-    This file should be removed after its content has been used by the team.
+This file is intended to be a temporary file to communicate in-progress code 
+to the developers. 
+This file should be removed after its content has been used by the team.
 """
 
 
@@ -9,10 +9,10 @@
 class FitData1D:
     def setFitRange(self,qmin=None,qmax=None):
         """ 
-            Change the fit range.
-            Take into account the fact that if smearing is applied, 
-            a wider range in unsmeared Q might be necessary to cover
-            the smeared (observed) Q range.        
+        Change the fit range.
+        Take into account the fact that if smearing is applied, 
+        a wider range in unsmeared Q might be necessary to cover
+        the smeared (observed) Q range.        
         """
         
         # Skip Q=0 point, (especially for y(q=0)=None at x[0]).
@@ -48,18 +48,20 @@ class FitData1D:
 
     def residuals(self, fn):
         """ 
-            Compute residuals.
-            
-            If self.smearer has been set, use if to smear
-            the data before computing chi squared.
-            
-            This is a version based on the current version of residuals.
-            
-            It takes into account the fact that the unsmearing range
-            might need to be wider than the smeared (observed) range.
-            
-            @param fn: function that return model value
-            @return residuals
+        Compute residuals.
+        
+        If self.smearer has been set, use if to smear
+        the data before computing chi squared.
+        
+        This is a version based on the current version of residuals.
+        
+        It takes into account the fact that the unsmearing range
+        might need to be wider than the smeared (observed) range.
+        
+        :param fn: function that return model value
+        
+        :return: residuals
+        
         """
         x,y = [numpy.asarray(v) for v in (self.x,self.y)]
         if self.dy ==None or self.dy==[]:
@@ -110,25 +112,27 @@ class FitData1D:
      
     def residuals_alt(self, fn):
         """ 
-            Compute residuals.
-            
-            If self.smearer has been set, use if to smear
-            the data before computing chi squared.
-            
-            This is a more streamlined version of the above. To use this version,
-            the _BaseSmearer class below needs to be modified to have its __call__
-            method have the following signature:
-            
-            __call__(self, iq, first_bin, last_bin)
-            
-            This is because we are storing results in arrays of a length
-            corresponding to the full Q-range.
-            
-            It takes into account the fact that the unsmearing range
-            might need to be wider than the smeared (observed) range.            
-            
-            @param fn: function that return model value
-            @return residuals
+        Compute residuals.
+        
+        If self.smearer has been set, use if to smear
+        the data before computing chi squared.
+        
+        This is a more streamlined version of the above. To use this version,
+        the _BaseSmearer class below needs to be modified to have its __call__
+        method have the following signature:
+        
+        __call__(self, iq, first_bin, last_bin)
+        
+        This is because we are storing results in arrays of a length
+        corresponding to the full Q-range.
+        
+        It takes into account the fact that the unsmearing range
+        might need to be wider than the smeared (observed) range.            
+        
+        :param fn: function that return model value
+        
+        :return: residuals
+        
         """
         # Make sure the arrays are numpy arrays, which are
         # expected by the fitter.
@@ -186,13 +190,15 @@ class _BaseSmearer(object):
 
     def __call__(self, iq, first_bin=0):
         """
-            Return the smeared I(q) value at the given q.
-            The smeared I(q) is computed using a predetermined 
-            smearing matrix for a particular binning.
+        Return the smeared I(q) value at the given q.
+        The smeared I(q) is computed using a predetermined 
+        smearing matrix for a particular binning.
+    
+        :param q: I(q) array
+        :param first_bin: first bin of the given iq array if shorter than full data length
         
-            @param q: I(q) array
-            @param first_bin: first bin of the given iq array if shorter than full data length
-            @return: smeared I(q)
+        :return: smeared I(q)
+        
         """
         # Sanity check
         if len(iq)+first_bin > self.nbins:
