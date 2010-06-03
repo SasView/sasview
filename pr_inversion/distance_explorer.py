@@ -1,30 +1,34 @@
-"""
-    Module to explore the P(r) inversion results for a range
-    of D_max value. User picks a number of points and a range of
-    distances, then get a series of outputs as a function of D_max
-    over that range.
-    
-    This software was developed by the University of Tennessee as part of the
-    Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-    project funded by the US National Science Foundation. 
 
-    See the license text in license.txt
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2009, University of Tennessee
+################################################################################
 
-    copyright 2009, University of Tennessee
 """
+Module to explore the P(r) inversion results for a range
+of D_max value. User picks a number of points and a range of
+distances, then get a series of outputs as a function of D_max
+over that range.
+"""
+
 import numpy
 import math
 import sys
 
 class Results:
     """
-        Class to hold the inversion output parameters
-        as a function of D_max
+    Class to hold the inversion output parameters
+    as a function of D_max
     """
     def __init__(self):
         """
-            Initialization. Create empty arrays
-            and dictionary of labels.
+        Initialization. Create empty arrays
+        and dictionary of labels.
         """
         # Array of output for each inversion
         self.chi2 = []
@@ -40,14 +44,15 @@ class Results:
         
 class DistExplorer(object):
     """
-        The explorer class
+    The explorer class
     """
     
     def __init__(self, pr_state):
         """
-            Initialization.
-            
-            @param pr_state: sans.pr.invertor.Invertor object
+        Initialization.
+        
+        :param pr_state: sans.pr.invertor.Invertor object
+        
         """
         self.pr_state  = pr_state
         self._default_min = 0.8*self.pr_state.d_max
@@ -56,11 +61,12 @@ class DistExplorer(object):
         
     def __call__(self, dmin=None, dmax=None, npts=10):
         """
-            Compute the outputs as a function of D_max.
-            
-            @param dmin: minimum value for D_max
-            @param dmax: maximum value for D_max
-            @param npts: number of points for D_max
+        Compute the outputs as a function of D_max.
+        
+        :param dmin: minimum value for D_max
+        :param dmax: maximum value for D_max
+        :param npts: number of points for D_max
+        
         """
         # Take care of the defaults if needed
         if dmin is None:

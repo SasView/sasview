@@ -1,6 +1,6 @@
 """
-    Module to perform P(r) inversion.
-    The module contains the Invertor class.
+Module to perform P(r) inversion.
+The module contains the Invertor class.
 """
 from sans.pr.core.pr_inversion import Cinvertor
 import numpy
@@ -10,8 +10,8 @@ from numpy.linalg import lstsq
 
 def help():
     """
-        Provide general online help text
-        Future work: extend this function to allow topic selection
+    Provide general online help text
+    Future work: extend this function to allow topic selection
     """
     info_txt  = "The inversion approach is based on Moore, J. Appl. Cryst. (1980) 13, 168-175.\n\n"
     info_txt += "P(r) is set to be equal to an expansion of base functions of the type "
@@ -34,35 +34,35 @@ def help():
 
 class Invertor(Cinvertor):
     """
-        Invertor class to perform P(r) inversion
+    Invertor class to perform P(r) inversion
+    
+    The problem is solved by posing the problem as  Ax = b,
+    where x is the set of coefficients we are looking for.
+    
+    Npts is the number of points.
+    
+    In the following i refers to the ith base function coefficient.
+    The matrix has its entries j in its first Npts rows set to
+        A[j][i] = (Fourier transformed base function for point j) 
         
-        The problem is solved by posing the problem as  Ax = b,
-        where x is the set of coefficients we are looking for.
+    We them choose a number of r-points, n_r, to evaluate the second
+    derivative of P(r) at. This is used as our regularization term.
+    For a vector r of length n_r, the following n_r rows are set to
+        A[j+Npts][i] = (2nd derivative of P(r), d**2(P(r))/d(r)**2, evaluated at r[j])
         
-        Npts is the number of points.
+    The vector b has its first Npts entries set to
+        b[j] = (I(q) observed for point j)
         
-        In the following i refers to the ith base function coefficient.
-        The matrix has its entries j in its first Npts rows set to
-            A[j][i] = (Fourier transformed base function for point j) 
-            
-        We them choose a number of r-points, n_r, to evaluate the second
-        derivative of P(r) at. This is used as our regularization term.
-        For a vector r of length n_r, the following n_r rows are set to
-            A[j+Npts][i] = (2nd derivative of P(r), d**2(P(r))/d(r)**2, evaluated at r[j])
-            
-        The vector b has its first Npts entries set to
-            b[j] = (I(q) observed for point j)
-            
-        The following n_r entries are set to zero.
-        
-        The result is found by using scipy.linalg.basic.lstsq to invert
-        the matrix and find the coefficients x.
-        
-        Methods inherited from Cinvertor:
-        - get_peaks(pars): returns the number of P(r) peaks
-        - oscillations(pars): returns the oscillation parameters for the output P(r)
-        - get_positive(pars): returns the fraction of P(r) that is above zero
-        - get_pos_err(pars): returns the fraction of P(r) that is 1-sigma above zero
+    The following n_r entries are set to zero.
+    
+    The result is found by using scipy.linalg.basic.lstsq to invert
+    the matrix and find the coefficients x.
+    
+    Methods inherited from Cinvertor:
+    - get_peaks(pars): returns the number of P(r) peaks
+    - oscillations(pars): returns the oscillation parameters for the output P(r)
+    - get_positive(pars): returns the fraction of P(r) that is above zero
+    - get_pos_err(pars): returns the fraction of P(r) that is 1-sigma above zero
     """
     ## Chisqr of the last computation
     chi2  = 0
@@ -87,9 +87,9 @@ class Invertor(Cinvertor):
         
     def __setattr__(self, name, value):
         """
-            Set the value of an attribute.
-            Access the parent class methods for
-            x, y, err, d_max, q_min, q_max and alpha
+        Set the value of an attribute.
+        Access the parent class methods for
+        x, y, err, d_max, q_min, q_max and alpha
         """
         if   name=='x':
             if 0.0 in value:
@@ -128,7 +128,7 @@ class Invertor(Cinvertor):
     
     def __getattr__(self, name):
         """
-           Return the value of an attribute
+        Return the value of an attribute
         """
         import numpy
         if   name=='x':
@@ -173,7 +173,7 @@ class Invertor(Cinvertor):
     
     def clone(self):
         """
-            Return a clone of this instance
+        Return a clone of this instance
         """
         import copy
         
@@ -199,33 +199,34 @@ class Invertor(Cinvertor):
     
     def invert(self, nfunc=10, nr=20):
         """
-            Perform inversion to P(r)
+        Perform inversion to P(r)
+        
+        The problem is solved by posing the problem as  Ax = b,
+        where x is the set of coefficients we are looking for.
+        
+        Npts is the number of points.
+        
+        In the following i refers to the ith base function coefficient.
+        The matrix has its entries j in its first Npts rows set to
+            A[i][j] = (Fourier transformed base function for point j) 
             
-            The problem is solved by posing the problem as  Ax = b,
-            where x is the set of coefficients we are looking for.
+        We them choose a number of r-points, n_r, to evaluate the second
+        derivative of P(r) at. This is used as our regularization term.
+        For a vector r of length n_r, the following n_r rows are set to
+            A[i+Npts][j] = (2nd derivative of P(r), d**2(P(r))/d(r)**2, evaluated at r[j])
             
-            Npts is the number of points.
+        The vector b has its first Npts entries set to
+            b[j] = (I(q) observed for point j)
             
-            In the following i refers to the ith base function coefficient.
-            The matrix has its entries j in its first Npts rows set to
-                A[i][j] = (Fourier transformed base function for point j) 
-                
-            We them choose a number of r-points, n_r, to evaluate the second
-            derivative of P(r) at. This is used as our regularization term.
-            For a vector r of length n_r, the following n_r rows are set to
-                A[i+Npts][j] = (2nd derivative of P(r), d**2(P(r))/d(r)**2, evaluated at r[j])
-                
-            The vector b has its first Npts entries set to
-                b[j] = (I(q) observed for point j)
-                
-            The following n_r entries are set to zero.
-            
-            The result is found by using scipy.linalg.basic.lstsq to invert
-            the matrix and find the coefficients x.
-            
-            @param nfunc: number of base functions to use.
-            @param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
-            @return: c_out, c_cov - the coefficients with covariance matrix 
+        The following n_r entries are set to zero.
+        
+        The result is found by using scipy.linalg.basic.lstsq to invert
+        the matrix and find the coefficients x.
+        
+        :param nfunc: number of base functions to use.
+        :param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
+        :return: c_out, c_cov - the coefficients with covariance matrix 
+        
         """
         # Reset the background value before proceeding
         self.background = 0.0
@@ -233,24 +234,28 @@ class Invertor(Cinvertor):
     
     def iq(self, out, q):
         """
-            Function to call to evaluate the scattering intensity
-            @param args: c-parameters, and q
-            @return: I(q)
+        Function to call to evaluate the scattering intensity
+        
+        :param args: c-parameters, and q
+        :return: I(q)
+        
         """
         return Cinvertor.iq(self, out, q)+self.background
     
     def invert_optimize(self, nfunc=10, nr=20):
         """
-            Slower version of the P(r) inversion that uses scipy.optimize.leastsq.
-            
-            This probably produce more reliable results, but is much slower.
-            The minimization function is set to sum_i[ (I_obs(q_i) - I_theo(q_i))/err**2 ] + alpha * reg_term,
-            where the reg_term is given by Svergun: it is the integral of the square of the first derivative
-            of P(r), d(P(r))/dr, integrated over the full range of r.
-            
-            @param nfunc: number of base functions to use.
-            @param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
-            @return: c_out, c_cov - the coefficients with covariance matrix 
+        Slower version of the P(r) inversion that uses scipy.optimize.leastsq.
+        
+        This probably produce more reliable results, but is much slower.
+        The minimization function is set to sum_i[ (I_obs(q_i) - I_theo(q_i))/err**2 ] + alpha * reg_term,
+        where the reg_term is given by Svergun: it is the integral of the square of the first derivative
+        of P(r), d(P(r))/dr, integrated over the full range of r.
+        
+        :param nfunc: number of base functions to use.
+        :param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
+        
+        :return: c_out, c_cov - the coefficients with covariance matrix 
+        
         """
         
         from scipy import optimize
@@ -280,11 +285,11 @@ class Invertor(Cinvertor):
     
     def pr_fit(self, nfunc=5):
         """
-            This is a direct fit to a given P(r). It assumes that the y data
-            is set to some P(r) distribution that we are trying to reproduce
-            with a set of base functions.
-            
-            This method is provided as a test. 
+        This is a direct fit to a given P(r). It assumes that the y data
+        is set to some P(r) distribution that we are trying to reproduce
+        with a set of base functions.
+        
+        This method is provided as a test. 
         """
         from scipy import optimize
         
@@ -311,19 +316,21 @@ class Invertor(Cinvertor):
     
     def pr_err(self, c, c_cov, r):
         """    
-            Returns the value of P(r) for a given r, and base function
-            coefficients, with error.
-            
-            @param c: base function coefficients
-            @param c_cov: covariance matrice of the base function coefficients
-            @param r: r-value to evaluate P(r) at
-            @return: P(r)
+        Returns the value of P(r) for a given r, and base function
+        coefficients, with error.
+        
+        :param c: base function coefficients
+        :param c_cov: covariance matrice of the base function coefficients
+        :param r: r-value to evaluate P(r) at
+        
+        :return: P(r)
+        
         """
         return self.get_pr_err(c, c_cov, r)
        
     def _accept_q(self, q):
         """
-            Check q-value against user-defined range
+        Check q-value against user-defined range
         """
         if not self.q_min==None and q<self.q_min:
             return False
@@ -333,33 +340,33 @@ class Invertor(Cinvertor):
        
     def lstsq(self, nfunc=5, nr=20):
         """
-            The problem is solved by posing the problem as  Ax = b,
-            where x is the set of coefficients we are looking for.
+        The problem is solved by posing the problem as  Ax = b,
+        where x is the set of coefficients we are looking for.
+        
+        Npts is the number of points.
+        
+        In the following i refers to the ith base function coefficient.
+        The matrix has its entries j in its first Npts rows set to
+            A[i][j] = (Fourier transformed base function for point j) 
             
-            Npts is the number of points.
+        We them choose a number of r-points, n_r, to evaluate the second
+        derivative of P(r) at. This is used as our regularization term.
+        For a vector r of length n_r, the following n_r rows are set to
+            A[i+Npts][j] = (2nd derivative of P(r), d**2(P(r))/d(r)**2, evaluated at r[j])
             
-            In the following i refers to the ith base function coefficient.
-            The matrix has its entries j in its first Npts rows set to
-                A[i][j] = (Fourier transformed base function for point j) 
-                
-            We them choose a number of r-points, n_r, to evaluate the second
-            derivative of P(r) at. This is used as our regularization term.
-            For a vector r of length n_r, the following n_r rows are set to
-                A[i+Npts][j] = (2nd derivative of P(r), d**2(P(r))/d(r)**2, evaluated at r[j])
-                
-            The vector b has its first Npts entries set to
-                b[j] = (I(q) observed for point j)
-                
-            The following n_r entries are set to zero.
+        The vector b has its first Npts entries set to
+            b[j] = (I(q) observed for point j)
             
-            The result is found by using scipy.linalg.basic.lstsq to invert
-            the matrix and find the coefficients x.
-            
-            @param nfunc: number of base functions to use.
-            @param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
+        The following n_r entries are set to zero.
+        
+        The result is found by using scipy.linalg.basic.lstsq to invert
+        the matrix and find the coefficients x.
+        
+        :param nfunc: number of base functions to use.
+        :param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
 
-            If the result does not allow us to compute the covariance matrix,
-            a matrix filled with zeros will be returned.
+        If the result does not allow us to compute the covariance matrix,
+        a matrix filled with zeros will be returned.
 
         """
         # Note: To make sure an array is contiguous:
@@ -444,13 +451,15 @@ class Invertor(Cinvertor):
         
     def estimate_numterms(self, isquit_func=None):
         """
-            Returns a reasonable guess for the
-            number of terms
-            @param isquit_func: reference to thread function to call to 
-                                check whether the computation needs to
-                                be stopped.
-            
-            @return: number of terms, alpha, message
+        Returns a reasonable guess for the
+        number of terms
+        
+        :param isquit_func: reference to thread function to call to 
+                            check whether the computation needs to
+                            be stopped.
+        
+        :return: number of terms, alpha, message
+        
         """
         from num_term import Num_terms
         estimator = Num_terms(self.clone())
@@ -464,15 +473,16 @@ class Invertor(Cinvertor):
                     
     def estimate_alpha(self, nfunc):
         """
-            Returns a reasonable guess for the
-            regularization constant alpha
-            
-            @param nfunc: number of terms to use in the expansion.
-            @return: alpha, message, elapsed
-            
-            where alpha is the estimate for alpha,
-            message is a message for the user,
-            elapsed is the computation time
+        Returns a reasonable guess for the
+        regularization constant alpha
+        
+        :param nfunc: number of terms to use in the expansion.
+        
+        :return: alpha, message, elapsed
+        
+        where alpha is the estimate for alpha,
+        message is a message for the user,
+        elapsed is the computation time
         """
         import time
         try:            
@@ -548,10 +558,12 @@ class Invertor(Cinvertor):
         
     def to_file(self, path, npts=100):
         """
-            Save the state to a file that will be readable
-            by SliceView.
-            @param path: path of the file to write
-            @param npts: number of P(r) points to be written
+        Save the state to a file that will be readable
+        by SliceView.
+        
+        :param path: path of the file to write
+        :param npts: number of P(r) points to be written
+        
         """
         file = open(path, 'w')
         file.write("#d_max=%g\n" % self.d_max)
@@ -585,10 +597,12 @@ class Invertor(Cinvertor):
         
     def from_file(self, path):
         """
-            Load the state of the Invertor from a file,
-            to be able to generate P(r) from a set of
-            parameters.
-            @param path: path of the file to load
+        Load the state of the Invertor from a file,
+        to be able to generate P(r) from a set of
+        parameters.
+        
+        :param path: path of the file to load
+        
         """
         import os
         import re

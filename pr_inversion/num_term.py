@@ -2,49 +2,60 @@ import unittest, math, numpy, sys, string
 from sans.pr.invertor import Invertor
 
 class Num_terms():    
-    
-     def __init__(self, invertor):
-         self.invertor = invertor
-         self.nterm_min = 10
-         self.nterm_max = len(self.invertor.x)
-         if self.nterm_max>50:
-             self.nterm_max=50
-         self.isquit_func = None
+    """
+    """
+    def __init__(self, invertor):
+        """
+        """
+        self.invertor = invertor
+        self.nterm_min = 10
+        self.nterm_max = len(self.invertor.x)
+        if self.nterm_max>50:
+            self.nterm_max=50
+        self.isquit_func = None
          
-         self.osc_list = []
-         self.err_list = []
-         self.alpha_list = []
-         self.mess_list = []
+        self.osc_list = []
+        self.err_list = []
+        self.alpha_list = []
+        self.mess_list = []
          
-         self.dataset = []
+        self.dataset = []
      
-     def is_odd(self, n):
-         return bool(n%2)
+    def is_odd(self, n):
+        """
+        """
+        return bool(n%2)
 
-     def sort_osc(self):
-         import copy
-         osc = copy.deepcopy(self.dataset)
-         lis = []
-         for i in range(len(osc)):
-             osc.sort()
-             re = osc.pop(0)
-             lis.append(re)
-         return lis
+    def sort_osc(self):
+        """
+        """
+        import copy
+        osc = copy.deepcopy(self.dataset)
+        lis = []
+        for i in range(len(osc)):
+            osc.sort()
+            re = osc.pop(0)
+            lis.append(re)
+        return lis
            
-     def median_osc(self):
-         osc = self.sort_osc()
-         dv = len(osc)
-         med = float(dv) / 2.0
-         odd = self.is_odd(dv)
-         medi = 0
-         for i in range(dv):
-             if odd == True:
-                 medi = osc[int(med)]
-             else:
-                 medi = osc[int(med) - 1]
-         return medi
+    def median_osc(self):
+        """
+        """
+        osc = self.sort_osc()
+        dv = len(osc)
+        med = float(dv) / 2.0
+        odd = self.is_odd(dv)
+        medi = 0
+        for i in range(dv):
+            if odd == True:
+                medi = osc[int(med)]
+            else:
+                medi = osc[int(med) - 1]
+        return medi
 
-     def get0_out(self):
+    def get0_out(self):
+        """
+        """ 
         inver = self.invertor
         self.osc_list = []
         self.err_list = []
@@ -95,7 +106,9 @@ class Num_terms():
         #print "dataset", self.dataset
         return self.dataset
         
-     def ls_osc(self):
+    def ls_osc(self):
+        """
+        """
         # Generate data
         ls_osc = self.get0_out()
         med = self.median_osc()
@@ -108,7 +121,9 @@ class Num_terms():
                 ls.append(ls_osc[i])
         return ls
 
-     def compare_err(self):
+    def compare_err(self):
+        """
+        """
         ls = self.ls_osc()
         #print "ls", ls
         nt_ls = []
@@ -121,60 +136,62 @@ class Num_terms():
         #print "nt list", nt_ls
         return nt_ls
 
-     def num_terms(self, isquit_func=None):
-         try:
-             self.isquit_func = isquit_func
-             #self.nterm_max = len(self.invertor.x)
-             #self.nterm_max = 32
-             nts = self.compare_err()
-             #print "nts", nts
-             div = len(nts)
-             tem = float(div)/2.0
-             odd = self.is_odd(div)
-             if odd == True:
-                 nt = nts[int(tem)]
-             else:
-                 nt = nts[int(tem) - 1]
-             return nt, self.alpha_list[nt - 10], self.mess_list[nt-10]
-         except:
-             return self.nterm_min, self.alpha_list[10], self.mess_list[10]
+    def num_terms(self, isquit_func=None):
+        """
+        """
+        try:
+            self.isquit_func = isquit_func
+            #self.nterm_max = len(self.invertor.x)
+            #self.nterm_max = 32
+            nts = self.compare_err()
+            #print "nts", nts
+            div = len(nts)
+            tem = float(div)/2.0
+            odd = self.is_odd(div)
+            if odd == True:
+                nt = nts[int(tem)]
+            else:
+                nt = nts[int(tem) - 1]
+            return nt, self.alpha_list[nt - 10], self.mess_list[nt-10]
+        except:
+            return self.nterm_min, self.alpha_list[10], self.mess_list[10]
 
 #For testing
 def load(path):
-        import numpy, math, sys
-        # Read the data from the data file
-        data_x   = numpy.zeros(0)
-        data_y   = numpy.zeros(0)
-        data_err = numpy.zeros(0)
-        scale    = None
-        min_err  = 0.0
-        if not path == None:
-            input_f = open(path,'r')
-            buff    = input_f.read()
-            lines   = buff.split('\n')
-            for line in lines:
-                try:
-                    toks = line.split()
-                    x = float(toks[0])
-                    y = float(toks[1])
-                    if len(toks)>2:
-                        err = float(toks[2])
-                    else:
-                        if scale==None:
-                            scale = 0.05*math.sqrt(y)
-                            #scale = 0.05/math.sqrt(y)
-                            min_err = 0.01*y
-                        err = scale*math.sqrt(y)+min_err
-                        #err = 0
-                        
-                    data_x = numpy.append(data_x, x)
-                    data_y = numpy.append(data_y, y)
-                    data_err = numpy.append(data_err, err)
-                except:
-                    pass
-                   
-        return data_x, data_y, data_err
-    
+    import numpy, math, sys
+    # Read the data from the data file
+    data_x   = numpy.zeros(0)
+    data_y   = numpy.zeros(0)
+    data_err = numpy.zeros(0)
+    scale    = None
+    min_err  = 0.0
+    if not path == None:
+        input_f = open(path,'r')
+        buff    = input_f.read()
+        lines   = buff.split('\n')
+        for line in lines:
+            try:
+                toks = line.split()
+                x = float(toks[0])
+                y = float(toks[1])
+                if len(toks)>2:
+                    err = float(toks[2])
+                else:
+                    if scale==None:
+                        scale = 0.05*math.sqrt(y)
+                        #scale = 0.05/math.sqrt(y)
+                        min_err = 0.01*y
+                    err = scale*math.sqrt(y)+min_err
+                    #err = 0
+                    
+                data_x = numpy.append(data_x, x)
+                data_y = numpy.append(data_y, y)
+                data_err = numpy.append(data_err, err)
+            except:
+                pass
+               
+    return data_x, data_y, data_err
+
 
 if __name__ == "__main__":
     i = Invertor()
