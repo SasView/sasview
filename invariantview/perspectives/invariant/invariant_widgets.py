@@ -1,19 +1,24 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
 
-copyright 2009, University of Tennessee
-"""
+
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2009, University of Tennessee
+################################################################################
+
+
 import wx
 import os
 
 class InvTextCtrl(wx.TextCtrl):
     """
-        Text control for model and fit parameters.
-        Binds the appropriate events for user interactions.
+    Text control for model and fit parameters.
+    Binds the appropriate events for user interactions.
     """
     def __init__(self, *args, **kwds):
         
@@ -29,17 +34,21 @@ class InvTextCtrl(wx.TextCtrl):
 
     def _on_set_focus(self, event):
         """
-            Catch when the text control is set in focus to highlight the whole
-            text if necessary
-            @param event: mouse event
+        Catch when the text control is set in focus to highlight the whole
+        text if necessary
+        
+        :param event: mouse event
+        
         """
         event.Skip()
         self.full_selection = True
         
     def _highlight_text(self, event):
         """
-            Highlight text of a TextCtrl only of no text has be selected
-            @param event: mouse event
+        Highlight text of a TextCtrl only of no text has be selected
+        
+        :param event: mouse event
+        
         """
         # Make sure the mouse event is available to other listeners
         event.Skip()
@@ -56,9 +65,9 @@ class InvTextCtrl(wx.TextCtrl):
 
 class OutputTextCtrl(wx.TextCtrl):
     """
-        Text control used to display outputs.
-        No editing allowed. The background is 
-        grayed out. User can't select text.
+    Text control used to display outputs.
+    No editing allowed. The background is 
+    grayed out. User can't select text.
     """
     def __init__(self, *args, **kwds):
         wx.TextCtrl.__init__(self, *args, **kwds)
@@ -72,8 +81,8 @@ class OutputTextCtrl(wx.TextCtrl):
         
     def _click(self, event):
         """
-            Prevent further handling of the mouse event
-            by not calling Skip().
+        Prevent further handling of the mouse event
+        by not calling Skip().
         """ 
         pass
  

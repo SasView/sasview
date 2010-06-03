@@ -30,9 +30,9 @@ else:
     
 class InvariantContainer(wx.Object):
     """
-        This class stores some values resulting resulting from invariant
-        calculations. Given the value of total invariant, this class can also 
-        determine the percentage of invariants resulting from extrapolation.
+    This class stores some values resulting resulting from invariant
+    calculations. Given the value of total invariant, this class can also 
+    determine the percentage of invariants resulting from extrapolation.
     """
     def __init__(self):
         #invariant at low range
@@ -61,7 +61,7 @@ class InvariantContainer(wx.Object):
         
     def compute_percentage(self):
         """
-            Compute percentage of each invariant
+        Compute percentage of each invariant
         """
         if self.qstar_total is None:
             self.qstar_percent = None
@@ -98,7 +98,7 @@ class InvariantContainer(wx.Object):
    
     def check_values(self):
         """
-            check the validity if invariant
+        check the validity if invariant
         """
         if self.qstar_total is None and self.qstar is None:
             self.warning_msg = "Invariant not calculated.\n"
@@ -144,7 +144,7 @@ class InvariantContainer(wx.Object):
             
 class InvariantDetailsPanel(wx.Dialog):
     """
-        This panel describes proportion of invariants 
+    This panel describes proportion of invariants 
     """
     def __init__(self, parent=None, id=-1, qstar_container=None, 
                                     title="Invariant Details",
@@ -181,7 +181,7 @@ class InvariantDetailsPanel(wx.Dialog):
   
     def _define_structure(self):
         """
-            Define main sizers needed for this panel
+        Define main sizers needed for this panel
         """
         #Box sizers must be defined first before defining buttons/textctrls (MAC).
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -205,7 +205,7 @@ class InvariantDetailsPanel(wx.Dialog):
       
     def _layout_shart(self):
         """
-            Draw widgets related to chart
+        Draw widgets related to chart
         """
         self.panel_chart = wx.Panel(self)
         self.panel_chart.Bind(wx.EVT_PAINT, self.on_paint)
@@ -213,7 +213,7 @@ class InvariantDetailsPanel(wx.Dialog):
         
     def _layout_invariant(self):
         """
-            Draw widgets related to invariant
+        Draw widgets related to invariant
         """
         uncertainty = "+/-" 
         unit_invariant = '[1/(cm * A)]'
@@ -300,7 +300,7 @@ class InvariantDetailsPanel(wx.Dialog):
        
     def _layout_warning(self):
         """
-            Draw widgets related to warning
+        Draw widgets related to warning
         """
         #Warning [string]
         self.warning_msg_txt = wx.StaticText(self, -1, self.warning_msg)  
@@ -311,7 +311,7 @@ class InvariantDetailsPanel(wx.Dialog):
         
     def _layout_button(self):
         """
-            Draw widgets related to button
+        Draw widgets related to button
         """
         #Close button
         id = wx.NewId()
@@ -322,7 +322,7 @@ class InvariantDetailsPanel(wx.Dialog):
                                    (button_ok, 0 , wx.RIGHT, 10)])
     def _do_layout(self):
         """
-            Draw window content
+        Draw window content
         """
         self._define_structure()
         self._layout_shart()
@@ -338,7 +338,7 @@ class InvariantDetailsPanel(wx.Dialog):
         
     def set_values(self):
         """
-            Set value of txtcrtl
+        Set value of txtcrtl
         """
         self.invariant_tcl.SetValue(format_number(self.qstar_container.qstar))
         self.invariant_err_tcl.SetValue(format_number(self.qstar_container.qstar_err)) 
@@ -349,7 +349,7 @@ class InvariantDetailsPanel(wx.Dialog):
 
     def get_scale(self, percentage, scale_name='scale'):
         """
-            Check scale receive in this panel. 
+        Check scale receive in this panel. 
         """
         scale = RECTANGLE_SCALE
         try: 
@@ -365,7 +365,7 @@ class InvariantDetailsPanel(wx.Dialog):
     
     def set_color_bar(self):
         """
-            Change the color for low and high bar when necessary
+        Change the color for low and high bar when necessary
         """
         #warning to the user when the extrapolated invariant is greater than %5
         if self.low_scale >= 0.05:
@@ -375,13 +375,13 @@ class InvariantDetailsPanel(wx.Dialog):
             
     def on_close(self, event):
         """
-            Close the current window
+        Close the current window
         """
         self.Close()
      
     def on_paint(self, event):
         """
-            Draw the chart
+        Draw the chart
         """
         dc = wx.PaintDC(self.panel_chart)
         try:

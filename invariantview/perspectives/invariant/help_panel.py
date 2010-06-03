@@ -6,12 +6,14 @@ import os
 
     
 class HelpDialog(wx.Dialog):
+    """
+    """
     def __init__(self, parent, id):
-      
+        """
+        """
         wx.Dialog.__init__(self, parent, id, size=(400, 420))
         self.SetTitle("Invariant help") 
         
-
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         explanation = help()
@@ -38,10 +40,12 @@ class HelpDialog(wx.Dialog):
         self.Centre()
 
 class HelpWindow(wx.Frame):
+    """
+    """
     def __init__(self, parent, id, title= 'HelpWindow', pageToOpen=None):
         wx.Frame.__init__(self, parent, id, title, size=(820, 450))
         """
-             contains help info
+        contains help info
         """
       
         splitter = MultiSplitterWindow(self, style=wx.SP_LIVE_UPDATE)
@@ -111,7 +115,7 @@ class HelpWindow(wx.Frame):
         
     def OnLinkClicked(self, event):
         """
-            Function to diplay html page related to the hyperlinktext selected
+        Function to diplay html page related to the hyperlinktext selected
         """
         self.rhelp.LoadPage(self.path)
 
