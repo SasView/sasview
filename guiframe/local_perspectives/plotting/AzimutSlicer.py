@@ -18,10 +18,11 @@ from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,E
 
 class SectorInteractor(_BaseInteractor):
     """
-         Select an annulus through a 2D plot
+    Select an annulus through a 2D plot
     """
     def __init__(self,base,axes,color='black', zorder=3):
-        
+        """
+        """
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
@@ -60,21 +61,18 @@ class SectorInteractor(_BaseInteractor):
         # Bind to slice parameter events
         self.base.parent.Bind(EVT_SLICER_PARS, self._onEVT_SLICER_PARS)
 
-
     def _onEVT_SLICER_PARS(self, event):
+        """
+        """
         #printEVT("AnnulusSlicer._onEVT_SLICER_PARS")
         event.Skip()
         if event.type == self.__class__.__name__:
             self.set_params(event.params)
             self.base.update()
 
-    """
-    def update_and_post(self):
-        self.update()
-        self._post_data()
-
-    """
     def save_data(self, path, image, x, y):
+        """
+        """
         output = open(path, 'w')
         
         data_x, data_y = self.get_data(image, x, y)
@@ -85,10 +83,14 @@ class SectorInteractor(_BaseInteractor):
         output.close()
 
     def set_layer(self, n):
+        """
+        """
         self.layernum = n
         self.update()
         
     def clear(self):
+        """
+        """
         self.clear_markers()
         self.outer_circle.clear()
         self.inner_circle.clear()
@@ -104,26 +106,26 @@ class SectorInteractor(_BaseInteractor):
         """
         # Update locations   
         if self.inner_circle.has_move:    
-            print "inner circle has moved" 
+            #print "inner circle has moved" 
             self.inner_circle.update()
             r1=self.inner_circle.get_radius()
             r2=self.outer_circle.get_radius()
             self.right_edge.update(r1,r2)
             self.left_edge.update(r1,r2)
         if self.outer_circle.has_move:    
-            print "outer circle has moved" 
+            #print "outer circle has moved" 
             self.outer_circle.update()
             r1=self.inner_circle.get_radius()
             r2=self.outer_circle.get_radius()
             self.left_edge.update(r1,r2)
             self.right_edge.update(r1,r2)
         if self.right_edge.has_move:
-            print "right edge has moved"
+            #print "right edge has moved"
             self.right_edge.update()
             self.inner_circle.update(theta1=self.right_edge.get_angle(), theta2=None)
             self.outer_circle.update(theta1=self.right_edge.get_angle(), theta2=None)
         if  self.left_edge.has_move:
-            print "left Edge has moved"
+            #print "left Edge has moved"
             self.left_edge.update()
             self.inner_circle.update(theta1=None, theta2=self.left_edge.get_angle())
             self.outer_circle.update(theta1=None, theta2=self.left_edge.get_angle())
@@ -219,9 +221,13 @@ class SectorInteractor(_BaseInteractor):
         pass
         
     def set_cursor(self, x, y):
+        """
+        """
         pass
         
     def get_params(self):
+        """
+        """
         params = {}
         params["r_min"] = self.inner_circle.get_radius()
         params["r_max"] = self.outer_circle.get_radius()
@@ -231,13 +237,14 @@ class SectorInteractor(_BaseInteractor):
         return params
     
     def set_params(self, params):
-        print "setparams on main slicer ",params
+        """
+        """
+        #print "setparams on main slicer ",params
         inner = params["r_min"] 
         outer = params["r_max"] 
         phi_min= params["phi_min"]
         phi_max=params["phi_max"]
         self.nbins = int(params["nbins"])
-        
         
         self.inner_circle.set_cursor(inner, phi_min, phi_max,self.nbins)
         self.outer_circle.set_cursor(outer,  phi_min, phi_max, self.nbins)
@@ -246,30 +253,50 @@ class SectorInteractor(_BaseInteractor):
         self._post_data()
         
     def freeze_axes(self):
+        """
+        """
         self.base.freeze_axes()
         
     def thaw_axes(self):
+        """
+        """
         self.base.thaw_axes()
 
     def draw(self):
+        """
+        """
         self.base.draw()
 
 class SectorInteractorQ(SectorInteractor):
+    """
+    """
     def __init__(self,base,axes,color='black', zorder=3):
+        """
+        """
         SectorInteractor.__init__(self, base, axes, color=color)
         self.base=base
         self._post_data()
+        
     def _post_data(self):
+        """
+        """
         from DataLoader.manipulations import SectorQ
         self.post_data(SectorQ )   
         
 
 class SectorInteractorPhi(SectorInteractor):
+    """
+    """
     def __init__(self,base,axes,color='black', zorder=3):
+        """
+        """
         SectorInteractor.__init__(self, base, axes, color=color)
         self.base=base
         self._post_data()
+        
     def _post_data(self):
+        """
+        """
         from DataLoader.manipulations import SectorPhi
         self.post_data(SectorPhi )   
         

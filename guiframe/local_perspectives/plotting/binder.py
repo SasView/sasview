@@ -79,6 +79,7 @@ class BindArtist:
             Remove connections for artists h1, h2, ...
             
         Use clearall() to reset all connections.
+        
         """
 
         for h in artists:
@@ -161,18 +162,19 @@ class BindArtist:
         sure it applies.  E.g., the callback for 'press' might be:
             if event.button == 1 and event.shift: process Shift-click
 
-        TODO: Only receive events with the correct modifiers (e.g., S-click,
-        TODO:   or *-click for any modifiers).
-        TODO: Only receive button events for the correct button (e.g., click1
-        TODO:   release3, or dclick* for any button)
-        TODO: Support virtual artist, so that and artist can be flagged as
-        TODO:   having a tag list and receive the correct events
-        TODO: Support virtual events for binding to button-3 vs shift button-1
-        TODO:   without changing callback code
-        TODO: Attach multiple callbacks to the same event?
-        TODO: Clean up interaction with toolbar modes
-        TODO: push/pushclear/pop context so that binding changes for the duration
-        TODO:   e.g., to support ? context sensitive help
+        :TODO: Only receive events with the correct modifiers (e.g., S-click,
+        :TODO:   or *-click for any modifiers).
+        :TODO: Only receive button events for the correct button (e.g., click1
+        :TODO:   release3, or dclick* for any button)
+        :TODO: Support virtual artist, so that and artist can be flagged as
+        :TODO:   having a tag list and receive the correct events
+        :TODO: Support virtual events for binding to button-3 vs shift button-1
+        :TODO:   without changing callback code
+        :TODO: Attach multiple callbacks to the same event?
+        :TODO: Clean up interaction with toolbar modes
+        :TODO: push/pushclear/pop context so that binding changes for the duration
+        :TODO:   e.g., to support ? context sensitive help
+        
         """
         # Check that the trigger is valid
         if trigger not in self._actions:

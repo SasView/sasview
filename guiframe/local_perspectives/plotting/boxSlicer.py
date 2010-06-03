@@ -1,13 +1,5 @@
-#TODO: the line slicer should listen to all 2DREFRESH events, get the data and slice it
-#      before pushing a new 1D data update.
-
-#
-#TODO: NEED MAJOR REFACTOR
-#
 
 
-# Debug printout
-#from config import printEVT
 import wx
 import copy
 from copy import deepcopy
@@ -23,8 +15,8 @@ import SlicerParameters
 
 class BoxInteractor(_BaseInteractor):
     """
-         BoxInteractor define a rectangle that return data1D average of Data2D
-         in a rectangle area defined by -x, x ,y, -y
+    BoxInteractor define a rectangle that return data1D average of Data2D
+    in a rectangle area defined by -x, x ,y, -y
     """
     def __init__(self,base,axes,color='black', zorder=3):
         _BaseInteractor.__init__(self, base, axes, color=color)
@@ -67,8 +59,9 @@ class BoxInteractor(_BaseInteractor):
 
     def _onEVT_SLICER_PARS(self, event):
         """
-            receive an event containing parameters values to reset the slicer
-            @param event: event of type SlicerParameterEvent with params as 
+        receive an event containing parameters values to reset the slicer
+        
+        :param event: event of type SlicerParameterEvent with params as 
             attribute
         """
         wx.PostEvent(self.base.parent, StatusEvent(status="BoxSlicer._onEVT_SLICER_PARS"))
@@ -80,24 +73,24 @@ class BoxInteractor(_BaseInteractor):
 
     def update_and_post(self):
         """
-            Update the slicer and plot the resulting data
+        Update the slicer and plot the resulting data
         """
         self.update()
         self._post_data()
-
-
+        
     def set_layer(self, n):
         """
-             Allow adding plot to the same panel
-             @param n: the number of layer
+        Allow adding plot to the same panel
+        
+        :param n: the number of layer
+        
         """
         self.layernum = n
         self.update()
         
-        
     def clear(self):
         """
-            Clear the slicer and all connected events related to this slicer
+        Clear the slicer and all connected events related to this slicer
         """
         self.averager=None
         self.clear_markers()
@@ -121,8 +114,7 @@ class BoxInteractor(_BaseInteractor):
         if self.vertical_lines.has_move:
             self.vertical_lines.update()
             self.horizontal_lines.update(x=self.vertical_lines.x)
-               
-            
+                 
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
@@ -135,13 +127,14 @@ class BoxInteractor(_BaseInteractor):
     def _post_data(self):
         pass
         
-    
     def post_data(self,new_slab=None , nbins=None, direction =None):
         """
-             post data averaging in Qx or Qy given new_slab type
-             @param new_slab: slicer that determine with direction to average
-             @param nbins: the number of points plotted when averaging
-             @param direction: the direction of averaging
+        post data averaging in Qx or Qy given new_slab type
+        
+        :param new_slab: slicer that determine with direction to average
+        :param nbins: the number of points plotted when averaging
+        :param direction: the direction of averaging
+        
         """
         x_min= -1*math.fabs(self.vertical_lines.x)
         x_max= math.fabs(self.vertical_lines.x)
@@ -196,14 +189,12 @@ class BoxInteractor(_BaseInteractor):
         
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
                                                  title=str(self.averager.__name__) ))
-    
-              
-                                       
+          
     def moveend(self, ev):
         """
-            Called after a dragging event.
-            Post the slicer new parameters and creates a new Data1D 
-            corresponding to the new average
+        Called after a dragging event.
+        Post the slicer new parameters and creates a new Data1D 
+        corresponding to the new average
         """
         self.base.thaw_axes()
         # Post paramters
@@ -214,7 +205,6 @@ class BoxInteractor(_BaseInteractor):
         # create the new data1D
         self._post_data()
             
-            
     def restore(self):
         """
         Restore the roughness for this layer.
@@ -222,22 +212,21 @@ class BoxInteractor(_BaseInteractor):
         self.horizontal_lines.restore()
         self.vertical_lines.restore()
        
-
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
         """
         pass
         
-        
     def set_cursor(self, x, y):
         pass
         
-        
     def get_params(self):
         """
-            Store a copy of values of parameters of the slicer into a dictionary.
-            @return params: the dictionary created
+        Store a copy of values of parameters of the slicer into a dictionary.
+        
+        :return params: the dictionary created
+        
         """
         params = {}
         params["x_max"]= math.fabs(self.vertical_lines.x)
@@ -247,9 +236,10 @@ class BoxInteractor(_BaseInteractor):
     
     def set_params(self, params):
         """
-            Receive a dictionary and reset the slicer with values contained 
-            in the values of the dictionary.
-            @param params: a dictionary containing name of slicer parameters and 
+        Receive a dictionary and reset the slicer with values contained 
+        in the values of the dictionary.
+        
+        :param params: a dictionary containing name of slicer parameters and 
             values the user assigned to the slicer.
         """
         self.x = float(math.fabs(params["x_max"]))
@@ -260,23 +250,26 @@ class BoxInteractor(_BaseInteractor):
         self.vertical_lines.update(x= self.x, y=  self.y)
         self.post_data( nbins=None)
         
-        
     def freeze_axes(self):
+        """
+        """
         self.base.freeze_axes()
         
-        
     def thaw_axes(self):
+        """
+        """
         self.base.thaw_axes()
 
-
     def draw(self):
+        """
+        """
         self.base.draw()
 
 
 class HorizontalLines(_BaseInteractor):
     """
-         Draw 2 Horizontal lines centered on (0,0) that can move 
-         on the x- direction and in opposite direction
+     Draw 2 Horizontal lines centered on (0,0) that can move 
+     on the x- direction and in opposite direction
     """
     def __init__(self,base,axes,color='black', zorder=5,x=0.5, y=0.5):
         
@@ -330,8 +323,10 @@ class HorizontalLines(_BaseInteractor):
 
     def set_layer(self, n):
         """
-            Allow adding plot to the same panel
-            @param n: the number of layer
+        Allow adding plot to the same panel
+        
+        :param n: the number of layer
+        
         """
         self.layernum = n
         self.update()
@@ -339,7 +334,7 @@ class HorizontalLines(_BaseInteractor):
         
     def clear(self):
         """
-            Clear this slicer  and its markers
+        Clear this slicer  and its markers
         """
         self.clear_markers()
         try:
@@ -354,9 +349,11 @@ class HorizontalLines(_BaseInteractor):
    
     def update(self,x=None,y=None):
         """
-            Draw the new roughness on the graph.
-            @param x: x-coordinates to reset current class x
-            @param y: y-coordinates to reset current class y
+        Draw the new roughness on the graph.
+        
+        :param x: x-coordinates to reset current class x
+        :param y: y-coordinates to reset current class y
+        
         """
         ## Reset x, y- coordinates if send as parameters
         if x!=None:
@@ -370,7 +367,6 @@ class HorizontalLines(_BaseInteractor):
         self.bottom_line.set(xdata=[self.x,-self.x],
                        ydata=[-self.y, -self.y])
         
-        
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
@@ -380,16 +376,14 @@ class HorizontalLines(_BaseInteractor):
         self.save_y= self.y
         self.base.freeze_axes()
 
-
     def moveend(self, ev):
         """
-            Called after a dragging this edge and set self.has_move to False
-            to specify the end of dragging motion
+        Called after a dragging this edge and set self.has_move to False
+        to specify the end of dragging motion
         """
         self.has_move=False
         self.base.moveend(ev)
-           
-            
+             
     def restore(self):
         """
         Restore the roughness for this layer.
@@ -397,7 +391,6 @@ class HorizontalLines(_BaseInteractor):
         self.x = self.save_x
         self.y = self.save_y
         
-
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
@@ -409,7 +402,7 @@ class HorizontalLines(_BaseInteractor):
   
 class VerticalLines(_BaseInteractor):
     """
-         Select an annulus through a 2D plot
+    Select an annulus through a 2D plot
     """
     def __init__(self,base,axes,color='black',zorder=5,x=0.5, y=0.5):
         
@@ -455,16 +448,17 @@ class VerticalLines(_BaseInteractor):
 
     def set_layer(self, n):
         """
-            Allow adding plot to the same panel
-            @param n: the number of layer
+        Allow adding plot to the same panel
+        
+        :param n: the number of layer
+        
         """
         self.layernum = n
         self.update()
         
-        
     def clear(self):
         """
-            Clear this slicer  and its markers
+        Clear this slicer  and its markers
         """
         self.clear_markers()
         try:
@@ -476,12 +470,13 @@ class VerticalLines(_BaseInteractor):
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
 
-
     def update(self,x=None,y=None):
         """
-            Draw the new roughness on the graph.
-            @param x: x-coordinates to reset current class x
-            @param y: y-coordinates to reset current class y
+        Draw the new roughness on the graph.
+        
+        :param x: x-coordinates to reset current class x
+        :param y: y-coordinates to reset current class y
+        
         """
         ## reset x, y -coordinates if given as parameters
         if x!=None:
@@ -495,27 +490,23 @@ class VerticalLines(_BaseInteractor):
         self.right_line.set(xdata=[self.x,self.x],
                        ydata=[self.y,-self.y]) 
     
-        
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
         can restore on Esc.
         """
-        self.save_x= self.x
-        self.save_y= self.y
-        
+        self.save_x = self.x
+        self.save_y = self.y
         self.base.freeze_axes()
-
-
+        
     def moveend(self, ev):
         """
-            Called after a dragging this edge and set self.has_move to False
-            to specify the end of dragging motion
+        Called after a dragging this edge and set self.has_move to False
+        to specify the end of dragging motion
         """
         self.has_move=False
         self.base.moveend(ev)
-            
-            
+               
     def restore(self):
         """
         Restore the roughness for this layer.
@@ -523,7 +514,6 @@ class VerticalLines(_BaseInteractor):
         self.x = self.save_x
         self.y = self.save_y
       
-        
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
@@ -533,11 +523,9 @@ class VerticalLines(_BaseInteractor):
         self.base.base.update()
         
    
-        
-
 class BoxInteractorX(BoxInteractor):
     """
-        Average in Qx direction
+    Average in Qx direction
     """
     def __init__(self,base,axes,color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, color=color)
@@ -547,7 +535,7 @@ class BoxInteractorX(BoxInteractor):
         
     def _post_data(self):
         """
-             Post data creating by averaging in Qx direction
+        Post data creating by averaging in Qx direction
         """
         from DataLoader.manipulations import SlabX
         self.post_data(SlabX, direction ="X")   
@@ -555,17 +543,16 @@ class BoxInteractorX(BoxInteractor):
 
 class BoxInteractorY(BoxInteractor):
     """
-         Average in Qy direction
+    Average in Qy direction
     """
     def __init__(self,base,axes,color='black', zorder=3):
         BoxInteractor.__init__(self, base, axes, color=color)
         self.base=base
         self._post_data()
         
-        
     def _post_data(self):
         """
-             Post data creating by averaging in Qy direction
+        Post data creating by averaging in Qy direction
         """
         from DataLoader.manipulations import SlabY
         self.post_data(SlabY, direction ="Y")   

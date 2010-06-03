@@ -11,14 +11,16 @@ from sans.guicomm.events import SlicerParamUpdateEvent
 
 class BoxMask(_BaseInteractor):
     """
-        BoxMask Class: determine 2 rectangular area to find the pixel of
-        a Data inside of box. 
-        Uses PointerInteractor , VerticalDoubleLine,HorizontalDoubleLine.
-        @param zorder:  Artists with lower zorder values are drawn first.
-        @param x_min: the minimum value of the x coordinate
-        @param x_max: the maximum value of the x coordinate
-        @param y_min: the minimum value of the y coordinate
-        @param y_max: the maximum value of the y coordinate
+    BoxMask Class: determine 2 rectangular area to find the pixel of
+    a Data inside of box. 
+    
+    Uses PointerInteractor , VerticalDoubleLine,HorizontalDoubleLine.
+    
+    :param zorder:  Artists with lower zorder values are drawn first.
+    :param x_min: the minimum value of the x coordinate
+    :param x_max: the maximum value of the x coordinate
+    :param y_min: the minimum value of the y coordinate
+    :param y_max: the maximum value of the y coordinate
 
     """
     def __init__(self,base,axes,color='black', zorder=3, side=None, 
@@ -82,7 +84,7 @@ class BoxMask(_BaseInteractor):
         
     def clear(self):
         """
-            Clear the slicer and all connected events related to this slicer
+        Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
         self.horizontal_lines.clear()
@@ -90,14 +92,12 @@ class BoxMask(_BaseInteractor):
         self.center.clear()
         self.base.connect.clearall()
         #self.base.Unbind(EVT_SLICER_PARS)
-        
-
+    
     def update(self):
         """
-            Respond to changes in the model by recalculating the profiles and
-            resetting the widgets.
+        Respond to changes in the model by recalculating the profiles and
+        resetting the widgets.
         """
-
         ## check if the center point has moved and update the figure accordingly 
         if self.center.has_move:
             self.center.update()
@@ -131,8 +131,8 @@ class BoxMask(_BaseInteractor):
         
     def _post_data(self):
         """
-            Get the limits of the boxsum and compute the sum of the pixel
-            contained in that region and the error on that sum
+        Get the limits of the boxsum and compute the sum of the pixel
+        contained in that region and the error on that sum
         """
         from DataLoader.manipulations import Boxcut
         ## Data 2D for which the pixel will be summed
@@ -150,11 +150,12 @@ class BoxMask(_BaseInteractor):
         else:
             out = (mask(data))
         #self.base.data.mask=out
-        return out            
+        return out  
+              
     def moveend(self, ev):
         """
-            After a dragging motion this function is called to compute
-            the error and the sum of pixel of a given data 2D 
+        After a dragging motion this function is called to compute
+        the error and the sum of pixel of a given data 2D 
         """
         self.base.thaw_axes()
         ## post
@@ -168,46 +169,43 @@ class BoxMask(_BaseInteractor):
         self.vertical_lines.restore()
         self.center.restore()
         
-        
     def move(self, x, y, ev):
         """
         Process move to a new position, making sure that the move is allowed.
         """
         pass
     
-    
     def set_cursor(self, x, y):
         pass
         
-        
     def get_params(self):
         """
-            Store a copy of values of parameters of the slicer into a dictionary.
-            @return params: the dictionary created
+        Store a copy of values of parameters of the slicer into a dictionary.
+        
+        :return params: the dictionary created
+        
         """
         params = {}
         params["Width"] = math.fabs(self.vertical_lines.half_width)*2
         params["Height"] = math.fabs(self.horizontal_lines.half_height)*2 
         params["center_x"] = self.center.x
         params["center_y"] =self.center.y
-
         return params
     
-  
     def get_mask(self):
         """
-            return mask as a result of boxcut
+        return mask as a result of boxcut
         """
         mask = self.mask
         return mask
     
-        
     def set_params(self, params):
         """
-            Receive a dictionary and reset the slicer with values contained 
-            in the values of the dictionary.
-            @param params: a dictionary containing name of slicer parameters and 
-            values the user assigned to the slicer.
+        Receive a dictionary and reset the slicer with values contained 
+        in the values of the dictionary.
+        
+        :param params: a dictionary containing name of slicer parameters and 
+           values the user assigned to the slicer.
         """
         x_max = math.fabs(params["Width"] )/2
         y_max = math.fabs(params["Height"] )/2
@@ -225,10 +223,8 @@ class BoxMask(_BaseInteractor):
         #compute the new error and sum given values of params
         self._post_data()
                
-        
     def freeze_axes(self):
         self.base.freeze_axes()
-        
         
     def thaw_axes(self):
         self.base.thaw_axes()

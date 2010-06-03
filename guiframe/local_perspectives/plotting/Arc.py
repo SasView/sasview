@@ -9,7 +9,7 @@ from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,E
  
 class ArcInteractor(_BaseInteractor):
     """
-         Select an annulus through a 2D plot
+    Select an annulus through a 2D plot
     """
     def __init__(self,base,axes,color='black', zorder=5, r=1.0,theta1=math.pi/8,
                  theta2=math.pi/4):
@@ -37,10 +37,14 @@ class ArcInteractor(_BaseInteractor):
         self.update()
 
     def set_layer(self, n):
+        """
+        """
         self.layernum = n
         self.update()
         
     def clear(self):
+        """
+        """
         self.clear_markers()
         try:
             self.marker.remove()
@@ -50,9 +54,9 @@ class ArcInteractor(_BaseInteractor):
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
         
-        
-        
     def get_radius(self):
+        """
+        """
         radius =math.sqrt(math.pow(self._mouse_x, 2)+math.pow(self._mouse_y, 2))
         return radius
         
@@ -71,11 +75,6 @@ class ArcInteractor(_BaseInteractor):
         while self.theta2 < self.theta1: self.theta2 += 2*math.pi
         while self.theta2 >= self.theta1+2*math.pi: self.theta2 -= 2*math.pi
 
-        """
-        if nbins!=None:
-            self.npts =nbins
-        else:
-        """
         npts = int((self.theta2 - self.theta1)/(math.pi/120))  
              
         if r ==None:
@@ -110,6 +109,8 @@ class ArcInteractor(_BaseInteractor):
         self.base.freeze_axes()
 
     def moveend(self, ev):
+        """
+        """
         self.has_move= False
         
         event = SlicerParameterEvent()
@@ -138,13 +139,16 @@ class ArcInteractor(_BaseInteractor):
         self.base.base.update()
         
     def set_cursor(self,radius, phi_min, phi_max,nbins):
-        
+        """
+        """
         self.theta1= phi_min
         self.theta2= phi_max
         self.update(nbins=nbins, r=radius)
         
         
     def get_params(self):
+        """
+        """
         params = {}
         params["radius"] = self.radius
         params["theta1"] = self.theta1
@@ -152,7 +156,8 @@ class ArcInteractor(_BaseInteractor):
         return params
     
     def set_params(self, params):
-
+        """
+        """
         x = params["radius"] 
         self.set_cursor(x, self._mouse_y)
         

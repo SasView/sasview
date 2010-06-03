@@ -37,27 +37,41 @@ class _BaseInteractor:
         axes  - axes holding the interactor
         color - color of the interactor in non-active state
         markers - list of handles for the interactor
+        
     """
     def __init__(self,base,axes,color='black'):
+        """
+        """
         self.base = base
         self.axes = axes
         self.color = color
         
     def clear_markers(self):
-        '''
+        """
         Clear old markers and interfaces.
-        '''
+        """
         for h in self.markers: h.remove()
         if self.markers: self.base.connect.clear(*self.markers)
         self.markers = []
 
     def save(self, ev):
+        """
+        """
         pass
+    
     def restore(self, ev):
+        """
+        """
         pass
+    
     def move(self, x, y, ev):
+        """
+        """
         pass
+    
     def moveend(self, ev):
+        """
+        """
         pass
 
     def connect_markers(self,markers):
@@ -101,6 +115,8 @@ class _BaseInteractor:
         return True
 
     def onRelease(self, ev):
+        """
+        """
         self.moveend(ev)
         return True
 
@@ -119,12 +135,12 @@ class _BaseInteractor:
         return True
     
     def onKey(self, ev):
-        '''
+        """
         Respond to keyboard events.  Arrow keys move the widget.  Escape
         restores it to the position before the last click.
         
         Calls move() to update the state.  Calls restore() on escape.
-        '''
+        """
         if ev.key == 'escape':
             self.restore()
         elif ev.key in ['up', 'down', 'right', 'left']:
@@ -140,12 +156,12 @@ class _BaseInteractor:
         return True
 
     def dpixel(self,x,y,nudge=False):
-        '''
+        """
         Return the step size in data coordinates for a small
         step in screen coordinates.  If nudge is False (default)
         the step size is one pixel.  If nudge is True, the step
         size is 0.2 pixels.
-        '''
+        """
         ax = self.axes
         px,py = ax.transData.inverse_xy_tup((x,y))
         if nudge:
