@@ -1,5 +1,5 @@
 """
-    Adapters for fitting module
+Adapters for fitting module
 """
 import copy
 import numpy
@@ -13,8 +13,11 @@ from DataLoader.data_info import Data1D as LoadData1D
 from DataLoader.data_info import Data2D as LoadData2D
 
 class Data1D(PlotData1D, LoadData1D):
-    
+    """
+    """
     def __init__(self, x=[], y=[], dx=None, dy=None):
+        """
+        """
         PlotData1D.__init__(self, x, y, dx, dy)
         LoadData1D.__init__(self, x, y, dx, dy)
         self.id = None
@@ -23,7 +26,7 @@ class Data1D(PlotData1D, LoadData1D):
     
     def copy_from_datainfo(self, data1d):
         """
-            copy values of Data1D of type DataLaoder.Data_info
+        copy values of Data1D of type DataLaoder.Data_info
         """
         self.x  = copy.deepcopy(data1d.x)
         self.y  = copy.deepcopy(data1d.y)
@@ -41,7 +44,7 @@ class Data1D(PlotData1D, LoadData1D):
         
     def __str__(self):
         """
-            print data
+        print data
         """
         _str = "%s\n" % LoadData1D.__str__(self)
       
@@ -73,8 +76,11 @@ class Data1D(PlotData1D, LoadData1D):
         return result
     
 class Theory1D(PlotTheory1D,LoadData1D):
-    
+    """
+    """
     def __init__(self, x=[], y=[], dy=None):
+        """
+        """
         PlotTheory1D.__init__(self, x, y, dy)
         LoadData1D.__init__(self, x, y, dy)
         self.id = None
@@ -83,7 +89,7 @@ class Theory1D(PlotTheory1D,LoadData1D):
     
     def copy_from_datainfo(self, data1d):
         """
-            copy values of Data1D of type DataLaoder.Data_info
+        copy values of Data1D of type DataLaoder.Data_info
         """
         self.x  = copy.deepcopy(data1d.x)
         self.y  = copy.deepcopy(data1d.y)
@@ -99,7 +105,7 @@ class Theory1D(PlotTheory1D,LoadData1D):
         
     def __str__(self):
         """
-            print data
+        print data
         """
         _str = "%s\n" % LoadData1D.__str__(self)
       
@@ -130,11 +136,14 @@ class Theory1D(PlotTheory1D,LoadData1D):
     
       
 class Data2D(PlotData2D,LoadData2D):
+    """
+    """
     def __init__(self, image=None, err_image=None,
                  xmin=None, xmax=None, ymin=None, ymax=None,
                  zmin=None, zmax=None, qx_data=None, qy_data=None,
                  q_data=None, mask=None, dqx_data=None, dqy_data=None):
-        
+        """
+        """
         PlotData2D.__init__(self, image=image, err_image=err_image,
                             xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax,
                             zmin=zmin, zmax=zmax, qx_data=qx_data, 
@@ -147,7 +156,7 @@ class Data2D(PlotData2D,LoadData2D):
         
     def copy_from_datainfo(self, data2d):
         """
-            copy value of Data2D of type DataLoader.data_info
+        copy value of Data2D of type DataLoader.data_info
         """
         self.data     =  copy.deepcopy(data2d.data)
         self.qx_data  =  copy.deepcopy(data2d.qx_data)
@@ -173,7 +182,7 @@ class Data2D(PlotData2D,LoadData2D):
         
     def __str__(self):
         """
-            print data
+        print data
         """
         _str = "%s\n" % LoadData2D.__str__(self)
       
@@ -181,10 +190,11 @@ class Data2D(PlotData2D,LoadData2D):
     
     def _perform_operation(self, other, operation):
         """
-            Perform 2D operations between data sets
-            
-            @param other: other data set
-            @param operation: function defining the operation
+        Perform 2D operations between data sets
+        
+        :param other: other data set
+        :param operation: function defining the operation
+        
         """
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)

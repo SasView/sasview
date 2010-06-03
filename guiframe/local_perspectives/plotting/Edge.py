@@ -11,7 +11,7 @@ from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,E
        
 class RadiusInteractor(_BaseInteractor):
     """
-         Select an annulus through a 2D plot
+    Select an annulus through a 2D plot
     """
     def __init__(self,base,axes,color='black', zorder=5, arc1=None,arc2=None,
                  theta=math.pi/8):
@@ -48,10 +48,14 @@ class RadiusInteractor(_BaseInteractor):
         
         
     def set_layer(self, n):
+        """
+        """
         self.layernum = n
         self.update()
         
     def clear(self):
+        """
+        """
         self.clear_markers()
         try:
             self.line.remove()
@@ -60,24 +64,24 @@ class RadiusInteractor(_BaseInteractor):
             # Old version of matplotlib
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
-        
-        
-        
+    
     def get_angle(self):
+        """
+        """
         return self.theta
         
     def update(self,r1=None, r2=None, theta=None):
         """
         Draw the new roughness on the graph.
         """
-        if r1 !=None:
-            self.r1=r1
-        if r2!=None:
-            self.r2=r2
+        if r1 != None:
+            self.r1 = r1
+        if r2 != None:
+            self.r2 = r2
         if theta !=None:
             self.theta= theta
        
-        print "in the edge r1, r2",self.r1,self.r2,math.degrees(self.theta)
+        #print "in the edge r1, r2",self.r1,self.r2,math.degrees(self.theta)
         x1= self.r1*math.cos(self.theta)
         y1= self.r1*math.sin(self.theta)
         x2= self.r2*math.cos(self.theta)
@@ -96,6 +100,8 @@ class RadiusInteractor(_BaseInteractor):
         self.base.freeze_axes()
    
     def moveend(self, ev):
+        """
+        """
         self.has_move= False
         self.base.moveend(ev)
             
@@ -109,20 +115,21 @@ class RadiusInteractor(_BaseInteractor):
         """
         Process move to a new position, making sure that the move is allowed.
         """
-        
         self.theta= math.atan2(y,x)
         self.has_move= True
-            
         self.base.base.update()
         
     def set_cursor(self,r_min, r_max, theta):
+        """
+        """
         self.theta= theta
         self.r1= r_min
         self.r2=r_max
         self.update()
         
-        
     def get_params(self):
+        """
+        """
         params = {}
         params["radius1"] = self.r1
         params["radius2"] = self.r2
@@ -130,8 +137,9 @@ class RadiusInteractor(_BaseInteractor):
         return params
     
     def set_params(self, params):
-        print "when here set curcor arc"
-
+        """
+        """
+        #print "when here set curcor arc"
         x1 = params["radius1"] 
         x2 = params["radius2"] 
         theta= params["theta"]

@@ -1,6 +1,6 @@
 """
-    Dummy application.
-    Allows the user to set an external data manager
+Dummy application.
+Allows the user to set an external data manager
 """
 import gui_manager
 
@@ -8,12 +8,14 @@ class TestPlugin(gui_manager.Plugin):
     
     def populate_menu(self, id, parent):
         """
-            Create and return the list of application menu
-            items for the plug-in. 
-            
-            @param id: deprecated. Un-used.
-            @param parent: parent window
-            @return: plug-in menu
+        Create and return the list of application menu
+        items for the plug-in. 
+        
+        :param id: deprecated. Un-used.
+        :param parent: parent window
+        
+        :return: plug-in menu
+        
         """
         import wx
         # Create a menu
@@ -33,15 +35,17 @@ class TestPlugin(gui_manager.Plugin):
     
     def get_panels(self, parent):
         """
-            Create and return the list of wx.Panels for your plug-in.
-            Define the plug-in perspective.
-            
-            Panels should inherit from DefaultPanel defined below,
-            or should present the same interface. They must define
-            "window_caption" and "window_name".
-            
-            @param parent: parent window
-            @return: list of panels
+        Create and return the list of wx.Panels for your plug-in.
+        Define the plug-in perspective.
+        
+        Panels should inherit from DefaultPanel defined below,
+        or should present the same interface. They must define
+        "window_caption" and "window_name".
+        
+        :param parent: parent window
+        
+        :return: list of panels
+        
         """
         ## Save a reference to the parent
         self.parent = parent
@@ -58,7 +62,7 @@ class TestPlugin(gui_manager.Plugin):
     
     def get_tools(self):
         """
-            Returns a set of menu entries for tools
+        Returns a set of menu entries for tools
         """
         def _test_dialog(event):
             import wx
@@ -69,23 +73,24 @@ class TestPlugin(gui_manager.Plugin):
 
     def get_context_menu(self, graph=None):
         """
-            This method is optional.
+        This method is optional.
+    
+        When the context menu of a plot is rendered, the 
+        get_context_menu method will be called to give you a 
+        chance to add a menu item to the context menu.
         
-            When the context menu of a plot is rendered, the 
-            get_context_menu method will be called to give you a 
-            chance to add a menu item to the context menu.
-            
-            A ref to a Graph object is passed so that you can
-            investigate the plot content and decide whether you
-            need to add items to the context menu.  
-            
-            This method returns a list of menu items.
-            Each item is itself a list defining the text to 
-            appear in the menu, a tool-tip help text, and a
-            call-back method.
-            
-            @param graph: the Graph object to which we attach the context menu
-            @return: a list of menu items with call-back function
+        A ref to a Graph object is passed so that you can
+        investigate the plot content and decide whether you
+        need to add items to the context menu.  
+        
+        This method returns a list of menu items.
+        Each item is itself a list defining the text to 
+        appear in the menu, a tool-tip help text, and a
+        call-back method.
+        
+        :param graph: the Graph object to which we attach the context menu
+        
+        :return: a list of menu items with call-back function
         """
         return [["Menu text", 
                  "Tool-tip help text", 
@@ -95,7 +100,7 @@ class SansView():
     
     def __init__(self):
         """
-            Initialization
+        Initialization
         """
         self.gui = gui_manager.ViewApp(0)
         

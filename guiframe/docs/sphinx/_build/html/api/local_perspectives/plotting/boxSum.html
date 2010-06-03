@@ -1,0 +1,644 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>boxSum &mdash; guiframe v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="guiframe v0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Local Perspective: Plotting" href="index.html" />
+    <link rel="next" title="detector_dialog" href="detector_dialog.html" />
+    <link rel="prev" title="boxSlicer" href="boxSlicer.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="detector_dialog.html" title="detector_dialog"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="boxSlicer.html" title="boxSlicer"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Local Perspective: Plotting</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="boxsum">
+<h1>boxSum<a class="headerlink" href="#boxsum" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.guiframe.local_perspectives.plotting.boxSum">
+<span id="sans-guiframe-local-perspectives-plotting-boxsum"></span><h2><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.boxSum"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.boxSum</span></tt></a><a class="headerlink" href="#module-sans.guiframe.local_perspectives.plotting.boxSum" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum">
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSum.</tt><tt class="descname">BoxSum</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='black'</em>, <em>zorder=3</em>, <em>x_min=0.0080000000000000002</em>, <em>x_max=0.0080000000000000002</em>, <em>y_min=0.0025000000000000001</em>, <em>y_max=0.0025000000000000001</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></p>
+<p>Boxsum Class: determine 2 rectangular area to compute the sum of pixel of
+a Data. 
+Uses PointerInteractor , VerticalDoubleLine,HorizontalDoubleLine.
+&#64;param zorder:  Artists with lower zorder values are drawn first.
+&#64;param x_min: the minimum value of the x coordinate
+&#64;param x_max: the maximum value of the x coordinate
+&#64;param y_min: the minimum value of the y coordinate
+&#64;param y_max: the maximum value of the y coordinate</p>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.clear" title="Permalink to this definition">¶</a></dt>
+<dd>Clear the slicer and all connected events related to this slicer</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.clear_markers">
+<tt class="descname">clear_markers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.clear_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Clear old markers and interfaces.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.connect_markers">
+<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.connect_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Connect markers to callbacks</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.dpixel">
+<tt class="descname">dpixel</tt><big>(</big><em>x</em>, <em>y</em>, <em>nudge=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.dpixel" title="Permalink to this definition">¶</a></dt>
+<dd>Return the step size in data coordinates for a small
+step in screen coordinates.  If nudge is False (default)
+the step size is one pixel.  If nudge is True, the step
+size is 0.2 pixels.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.draw">
+<tt class="descname">draw</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.freeze_axes">
+<tt class="descname">freeze_axes</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.freeze_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.get_params">
+<tt class="descname">get_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.get_params" title="Permalink to this definition">¶</a></dt>
+<dd>Store a copy of values of parameters of the slicer into a dictionary.
+&#64;return params: the dictionary created</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.get_result">
+<tt class="descname">get_result</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.get_result" title="Permalink to this definition">¶</a></dt>
+<dd>return the result of box summation</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.move">
+<tt class="descname">move</tt><big>(</big><em>x</em>, <em>y</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.move" title="Permalink to this definition">¶</a></dt>
+<dd>Process move to a new position, making sure that the move is allowed.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.moveend">
+<tt class="descname">moveend</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.moveend" title="Permalink to this definition">¶</a></dt>
+<dd>After a dragging motion this function is called to compute
+the error and the sum of pixel of a given data 2D</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.onClick">
+<tt class="descname">onClick</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.onClick" title="Permalink to this definition">¶</a></dt>
+<dd>Prepare to move the artist.  Calls save() to preserve the state for
+later restore().</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.onDrag">
+<tt class="descname">onDrag</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.onDrag" title="Permalink to this definition">¶</a></dt>
+<dd>Move the artist.  Calls move() to update the state, or restore() if
+the mouse leaves the window.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.onHilite">
+<tt class="descname">onHilite</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.onHilite" title="Permalink to this definition">¶</a></dt>
+<dd>Hilite the artist reporting the event, indicating that it is
+ready to receive a click.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.onKey">
+<tt class="descname">onKey</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.onKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Respond to keyboard events.  Arrow keys move the widget.  Escape
+restores it to the position before the last click.</p>
+<p>Calls move() to update the state.  Calls restore() on escape.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.onLeave">
+<tt class="descname">onLeave</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.onLeave" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the artist to the original colour when the cursor leaves.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.onRelease">
+<tt class="descname">onRelease</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.onRelease" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.restore">
+<tt class="descname">restore</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.restore" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the roughness for this layer.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.save">
+<tt class="descname">save</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.save" title="Permalink to this definition">¶</a></dt>
+<dd>Remember the roughness for this layer and the next so that we
+can restore on Esc.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.set_cursor">
+<tt class="descname">set_cursor</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.set_cursor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.set_layer">
+<tt class="descname">set_layer</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.set_layer" title="Permalink to this definition">¶</a></dt>
+<dd>Allow adding plot to the same panel
+&#64;param n: the number of layer</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.set_panel_name">
+<tt class="descname">set_panel_name</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.set_panel_name" title="Permalink to this definition">¶</a></dt>
+<dd>Store the name of the panel associated to this slicer
+&#64;param name: the name of this panel</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.set_params">
+<tt class="descname">set_params</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.set_params" title="Permalink to this definition">¶</a></dt>
+<dd>Receive a dictionary and reset the slicer with values contained 
+in the values of the dictionary.
+&#64;param params: a dictionary containing name of slicer parameters and 
+values the user assigned to the slicer.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.thaw_axes">
+<tt class="descname">thaw_axes</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.thaw_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.update">
+<tt class="descname">update</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.BoxSum.update" title="Permalink to this definition">¶</a></dt>
+<dd>Respond to changes in the model by recalculating the profiles and
+resetting the widgets.</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine">
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSum.</tt><tt class="descname">HorizontalDoubleLine</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='black'</em>, <em>zorder=5</em>, <em>x=0.5</em>, <em>y=0.5</em>, <em>center_x=0.0</em>, <em>center_y=0.0</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></p>
+<p>Select an annulus through a 2D plot</p>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.clear" title="Permalink to this definition">¶</a></dt>
+<dd>Clear this figure and its markers</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.clear_markers">
+<tt class="descname">clear_markers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.clear_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Clear old markers and interfaces.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.connect_markers">
+<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.connect_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Connect markers to callbacks</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.dpixel">
+<tt class="descname">dpixel</tt><big>(</big><em>x</em>, <em>y</em>, <em>nudge=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.dpixel" title="Permalink to this definition">¶</a></dt>
+<dd>Return the step size in data coordinates for a small
+step in screen coordinates.  If nudge is False (default)
+the step size is one pixel.  If nudge is True, the step
+size is 0.2 pixels.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.get_params">
+<tt class="descname">get_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.get_params" title="Permalink to this definition">¶</a></dt>
+<dd>Store a copy of values of parameters of the slicer into a dictionary.
+&#64;return params: the dictionary created</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.move">
+<tt class="descname">move</tt><big>(</big><em>x</em>, <em>y</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.move" title="Permalink to this definition">¶</a></dt>
+<dd>Process move to a new position, making sure that the move is allowed.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.moveend">
+<tt class="descname">moveend</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.moveend" title="Permalink to this definition">¶</a></dt>
+<dd>After a dragging motion reset the flag self.has_move to False</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.onClick">
+<tt class="descname">onClick</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.onClick" title="Permalink to this definition">¶</a></dt>
+<dd>Prepare to move the artist.  Calls save() to preserve the state for
+later restore().</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.onDrag">
+<tt class="descname">onDrag</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.onDrag" title="Permalink to this definition">¶</a></dt>
+<dd>Move the artist.  Calls move() to update the state, or restore() if
+the mouse leaves the window.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.onHilite">
+<tt class="descname">onHilite</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.onHilite" title="Permalink to this definition">¶</a></dt>
+<dd>Hilite the artist reporting the event, indicating that it is
+ready to receive a click.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.onKey">
+<tt class="descname">onKey</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.onKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Respond to keyboard events.  Arrow keys move the widget.  Escape
+restores it to the position before the last click.</p>
+<p>Calls move() to update the state.  Calls restore() on escape.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.onLeave">
+<tt class="descname">onLeave</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.onLeave" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the artist to the original colour when the cursor leaves.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.onRelease">
+<tt class="descname">onRelease</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.onRelease" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.restore">
+<tt class="descname">restore</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.restore" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the roughness for this layer.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.save">
+<tt class="descname">save</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.save" title="Permalink to this definition">¶</a></dt>
+<dd>Remember the roughness for this layer and the next so that we
+can restore on Esc.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.set_cursor">
+<tt class="descname">set_cursor</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.set_cursor" title="Permalink to this definition">¶</a></dt>
+<dd>Update the figure given x and y</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.set_layer">
+<tt class="descname">set_layer</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.set_layer" title="Permalink to this definition">¶</a></dt>
+<dd>Allow adding plot to the same panel
+&#64;param n: the number of layer</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.set_params">
+<tt class="descname">set_params</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.set_params" title="Permalink to this definition">¶</a></dt>
+<dd>Receive a dictionary and reset the slicer with values contained 
+in the values of the dictionary.
+&#64;param params: a dictionary containing name of slicer parameters and 
+values the user assigned to the slicer.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.update">
+<tt class="descname">update</tt><big>(</big><em>x1=None</em>, <em>x2=None</em>, <em>y1=None</em>, <em>y2=None</em>, <em>width=None</em>, <em>height=None</em>, <em>center=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.HorizontalDoubleLine.update" title="Permalink to this definition">¶</a></dt>
+<dd>Draw the new roughness on the graph.
+&#64;param x1: new maximum value of x coordinates
+&#64;param x2: new minimum value of x coordinates
+&#64;param y1: new maximum value of y coordinates
+&#64;param y2: new minimum value of y coordinates
+&#64;param width: is the width of the new rectangle
+&#64;param height: is the height of the new rectangle
+&#64;param center: provided x, y  coordinates of the center point</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor">
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSum.</tt><tt class="descname">PointInteractor</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='black'</em>, <em>zorder=5</em>, <em>center_x=0.0</em>, <em>center_y=0.0</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></p>
+<p>Draw a point that can be dragged with the marker.
+this class controls the motion the center of the BoxSum</p>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.clear" title="Permalink to this definition">¶</a></dt>
+<dd>Clear this figure and its markers</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.clear_markers">
+<tt class="descname">clear_markers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.clear_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Clear old markers and interfaces.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.connect_markers">
+<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.connect_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Connect markers to callbacks</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.dpixel">
+<tt class="descname">dpixel</tt><big>(</big><em>x</em>, <em>y</em>, <em>nudge=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.dpixel" title="Permalink to this definition">¶</a></dt>
+<dd>Return the step size in data coordinates for a small
+step in screen coordinates.  If nudge is False (default)
+the step size is one pixel.  If nudge is True, the step
+size is 0.2 pixels.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.get_params">
+<tt class="descname">get_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.get_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.move">
+<tt class="descname">move</tt><big>(</big><em>x</em>, <em>y</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.move" title="Permalink to this definition">¶</a></dt>
+<dd>Process move to a new position, making sure that the move is allowed.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.moveend">
+<tt class="descname">moveend</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.moveend" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.onClick">
+<tt class="descname">onClick</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.onClick" title="Permalink to this definition">¶</a></dt>
+<dd>Prepare to move the artist.  Calls save() to preserve the state for
+later restore().</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.onDrag">
+<tt class="descname">onDrag</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.onDrag" title="Permalink to this definition">¶</a></dt>
+<dd>Move the artist.  Calls move() to update the state, or restore() if
+the mouse leaves the window.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.onHilite">
+<tt class="descname">onHilite</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.onHilite" title="Permalink to this definition">¶</a></dt>
+<dd>Hilite the artist reporting the event, indicating that it is
+ready to receive a click.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.onKey">
+<tt class="descname">onKey</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.onKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Respond to keyboard events.  Arrow keys move the widget.  Escape
+restores it to the position before the last click.</p>
+<p>Calls move() to update the state.  Calls restore() on escape.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.onLeave">
+<tt class="descname">onLeave</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.onLeave" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the artist to the original colour when the cursor leaves.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.onRelease">
+<tt class="descname">onRelease</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.onRelease" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.restore">
+<tt class="descname">restore</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.restore" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the roughness for this layer.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.save">
+<tt class="descname">save</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.save" title="Permalink to this definition">¶</a></dt>
+<dd>Remember the roughness for this layer and the next so that we
+can restore on Esc.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.set_cursor">
+<tt class="descname">set_cursor</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.set_cursor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.set_layer">
+<tt class="descname">set_layer</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.set_layer" title="Permalink to this definition">¶</a></dt>
+<dd>Allow adding plot to the same panel
+&#64;param n: the number of layer</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.set_params">
+<tt class="descname">set_params</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.set_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.update">
+<tt class="descname">update</tt><big>(</big><em>center_x=None</em>, <em>center_y=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.PointInteractor.update" title="Permalink to this definition">¶</a></dt>
+<dd>Draw the new roughness on the graph.</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine">
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSum.</tt><tt class="descname">VerticalDoubleLine</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='black'</em>, <em>zorder=5</em>, <em>x=0.5</em>, <em>y=0.5</em>, <em>center_x=0.0</em>, <em>center_y=0.0</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></p>
+<p>Draw 2 vertical lines moving in opposite direction and centered on 
+a point (PointInteractor)</p>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.clear" title="Permalink to this definition">¶</a></dt>
+<dd>Clear this slicer  and its markers</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.clear_markers">
+<tt class="descname">clear_markers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.clear_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Clear old markers and interfaces.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.connect_markers">
+<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.connect_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Connect markers to callbacks</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.dpixel">
+<tt class="descname">dpixel</tt><big>(</big><em>x</em>, <em>y</em>, <em>nudge=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.dpixel" title="Permalink to this definition">¶</a></dt>
+<dd>Return the step size in data coordinates for a small
+step in screen coordinates.  If nudge is False (default)
+the step size is one pixel.  If nudge is True, the step
+size is 0.2 pixels.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.get_params">
+<tt class="descname">get_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.get_params" title="Permalink to this definition">¶</a></dt>
+<dd>Store a copy of values of parameters of the slicer into a dictionary.
+&#64;return params: the dictionary created</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.move">
+<tt class="descname">move</tt><big>(</big><em>x</em>, <em>y</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.move" title="Permalink to this definition">¶</a></dt>
+<dd>Process move to a new position, making sure that the move is allowed.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.moveend">
+<tt class="descname">moveend</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.moveend" title="Permalink to this definition">¶</a></dt>
+<dd>After a dragging motion reset the flag self.has_move to False</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.onClick">
+<tt class="descname">onClick</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.onClick" title="Permalink to this definition">¶</a></dt>
+<dd>Prepare to move the artist.  Calls save() to preserve the state for
+later restore().</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.onDrag">
+<tt class="descname">onDrag</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.onDrag" title="Permalink to this definition">¶</a></dt>
+<dd>Move the artist.  Calls move() to update the state, or restore() if
+the mouse leaves the window.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.onHilite">
+<tt class="descname">onHilite</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.onHilite" title="Permalink to this definition">¶</a></dt>
+<dd>Hilite the artist reporting the event, indicating that it is
+ready to receive a click.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.onKey">
+<tt class="descname">onKey</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.onKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Respond to keyboard events.  Arrow keys move the widget.  Escape
+restores it to the position before the last click.</p>
+<p>Calls move() to update the state.  Calls restore() on escape.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.onLeave">
+<tt class="descname">onLeave</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.onLeave" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the artist to the original colour when the cursor leaves.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.onRelease">
+<tt class="descname">onRelease</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.onRelease" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.restore">
+<tt class="descname">restore</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.restore" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the roughness for this layer.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.save">
+<tt class="descname">save</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.save" title="Permalink to this definition">¶</a></dt>
+<dd>Remember the roughness for this layer and the next so that we
+can restore on Esc.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.set_cursor">
+<tt class="descname">set_cursor</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.set_cursor" title="Permalink to this definition">¶</a></dt>
+<dd>Update the figure given x and y</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.set_layer">
+<tt class="descname">set_layer</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.set_layer" title="Permalink to this definition">¶</a></dt>
+<dd>Allow adding plot to the same panel
+&#64;param n: the number of layer</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.set_params">
+<tt class="descname">set_params</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.set_params" title="Permalink to this definition">¶</a></dt>
+<dd>Receive a dictionary and reset the slicer with values contained 
+in the values of the dictionary.
+&#64;param params: a dictionary containing name of slicer parameters and 
+values the user assigned to the slicer.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.update">
+<tt class="descname">update</tt><big>(</big><em>x1=None</em>, <em>x2=None</em>, <em>y1=None</em>, <em>y2=None</em>, <em>width=None</em>, <em>height=None</em>, <em>center=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSum.VerticalDoubleLine.update" title="Permalink to this definition">¶</a></dt>
+<dd>Draw the new roughness on the graph.
+&#64;param x1: new maximum value of x coordinates
+&#64;param x2: new minimum value of x coordinates
+&#64;param y1: new maximum value of y coordinates
+&#64;param y2: new minimum value of y coordinates
+&#64;param width: is the width of the new rectangle
+&#64;param height: is the height of the new rectangle
+&#64;param center: provided x, y  coordinates of the center point</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">boxSum</a><ul>
+<li><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.boxSum"><tt class="docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.boxSum</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="boxSlicer.html"
+                        title="previous chapter">boxSlicer</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="detector_dialog.html"
+                        title="next chapter">detector_dialog</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/local_perspectives/plotting/boxSum.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="detector_dialog.html" title="detector_dialog"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="boxSlicer.html" title="boxSlicer"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Local Perspective: Plotting</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b1.
+    </div>
+  </body>
+</html>

@@ -16,6 +16,8 @@ CONSOLE_WIDTH = 340
 CONSOLE_HEIGHT = 240
 
 class ConsolePanel(wx.Panel):
+    """
+    """
     def __init__(self, parent, *args, **kwargs):
         wx.Panel.__init__(self, parent=parent,*args, **kwargs)
         self.parent = parent
@@ -33,6 +35,8 @@ class ConsolePanel(wx.Panel):
         self.msg_txt.AppendText(str(msg))
         
 class Console(wx.Frame):
+    """
+    """
     def __init__(self, parent=None, status="", *args, **kwds):
         kwds["size"] = (CONSOLE_WIDTH, CONSOLE_HEIGHT)
         kwds["title"] = "Console"
@@ -55,10 +59,12 @@ class Console(wx.Frame):
         self.panel.set_message(event.status)
         
 class StatusBar(wxStatusB):
+    """
+    """
     def __init__(self, parent, *args, **kargs):
          wxStatusB.__init__(self, parent, *args, **kargs)
          """
-             Implement statusbar functionalities 
+        Implement statusbar functionalities 
          """
          self.parent= parent
          self.parent.SetStatusBarPane(MSG_POSITION)
@@ -145,9 +151,13 @@ class StatusBar(wxStatusB):
             return
             
     def PopStatusText(self, *args, **kwds):
+        """
+        """
         wxStatusB.PopStatusText(self, field=MSG_POSITION)
       
     def PushStatusText(self, *args, **kwds):
+        """
+        """
         wxStatusB.PushStatusText(self, field=MSG_POSITION,string=string)
         
     def enable_clear_gauge(self):
@@ -159,8 +169,10 @@ class StatusBar(wxStatusB):
         return flag
     
     def OnTimer_stop(self, evt): 
-        """Clear the progress bar
-        @param evt: wx.EVT_TIMER 
+        """
+        Clear the progress bar
+        
+        :param evt: wx.EVT_TIMER 
   
         """ 
         count = 0
@@ -173,8 +185,10 @@ class StatusBar(wxStatusB):
         self.nb_stop = 0
        
     def OnTimer(self, evt): 
-        """Update the progress bar while the timer is running 
-        @param evt: wx.EVT_TIMER 
+        """
+        Update the progress bar while the timer is running 
+        
+        :param evt: wx.EVT_TIMER 
   
         """ 
         # Check stop flag that can be set from non main thread 
@@ -183,7 +197,7 @@ class StatusBar(wxStatusB):
    
     def clear_gauge(self, msg=""):
         """
-            Hide the gauge
+        Hide the gauge
         """
         self.progress = 0
         self.gauge.SetValue(0)
@@ -191,8 +205,8 @@ class StatusBar(wxStatusB):
          
     def set_icon(self, event):
         """
-            display icons related to the type of message sent to the statusbar
-            when available
+        display icons related to the type of message sent to the statusbar
+        when available
         """
         if not hasattr(event, "info"):
             return 
@@ -209,14 +223,14 @@ class StatusBar(wxStatusB):
     
     def set_message(self, event):
         """
-            display received message on the statusbar
+        display received message on the statusbar
         """
         if hasattr(event, "status"):
             self.SetStatusText(str(event.status))
             
     def set_gauge(self, event):
         """
-            change the state of the gauge according the state of the current job
+        change the state of the gauge according the state of the current job
         """
         if not hasattr(event, "type"):
             return
@@ -249,11 +263,13 @@ class StatusBar(wxStatusB):
                     
     def set_status(self, event):
         """
-            Update the status bar .
-            @param type: type of message send.
+        Update the status bar .
+        
+        :param type: type of message send.
             type  must be in ["start","progress","update","stop"]
-            @param msg: the message itself  as string
-            @param thread: if updatting using a thread status 
+        :param msg: the message itself  as string
+        :param thread: if updatting using a thread status 
+        
         """
         self.set_message(event=event)
         self.set_icon(event=event)

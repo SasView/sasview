@@ -8,7 +8,7 @@ from DataLoader.loader import Loader
 
 class DataReader(CalcThread):
     """
-            Load a data given a filename
+    Load a data given a filename
     """
     def __init__(self, path, err_fct, msg_fct, parent=None,
                  completefn=None,
@@ -30,7 +30,7 @@ class DataReader(CalcThread):
         
     def isquit(self):
         """
-             @raise KeyboardInterrupt: when the thread is interrupted
+        :raise KeyboardInterrupt: when the thread is interrupted
         """
         try:
             CalcThread.isquit(self)
@@ -40,7 +40,7 @@ class DataReader(CalcThread):
         
     def compute(self):
         """
-            read some data
+        read some data
         """
         self.starttime = time.time()
         try:

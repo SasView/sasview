@@ -1,12 +1,14 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2010, University of Tennessee
+################################################################################
 
-copyright 2010, University of Tennessee
-"""
 
 import sys, time
 import subprocess, os
@@ -20,14 +22,14 @@ VERSION_FILE  = '.current_version'
 
 class VersionChecker(object):
     """
-        Class of objects used to obtain the current version of an application
-        from the deployment server. 
-        A sub process is started to read the URL associated with the version number.
-        The version number is written on file locally before the reading process
-        ends, then read when the version number is requested.    
-        
-        The reading of the URL is put in a separate process so that it doesn't 
-        affect the performance of the application and can be managed and stopped at any time.
+    Class of objects used to obtain the current version of an application
+    from the deployment server. 
+    A sub process is started to read the URL associated with the version number.
+    The version number is written on file locally before the reading process
+    ends, then read when the version number is requested.    
+    
+    The reading of the URL is put in a separate process so that it doesn't 
+    affect the performance of the application and can be managed and stopped at any time.
     """
     ## Process used to obtain the current application version from the server
     _process = None
@@ -36,17 +38,17 @@ class VersionChecker(object):
     
     def __init__(self, version_url):
         """
-            Start the sub-process used to read the version URL
+        Start the sub-process used to read the version URL
         """
         self._process = subprocess.Popen([sys.executable, __file__, '-g', '-u%s' % version_url])
         self._t_0 = time.time()
         
     def is_complete(self):
         """
-            Method used to poll the reading process. The process will be killed
-            if the wait time is longer than a predefined maximum.
-            This method should always be called before get_version() to ensure
-            accuracy of the version number that is returned.
+        Method used to poll the reading process. The process will be killed
+        if the wait time is longer than a predefined maximum.
+        This method should always be called before get_version() to ensure
+        accuracy of the version number that is returned.
         """
         if(time.time()-self._t_0<MAX_WAIT_TIME):
             if self._process.poll() is not None:
@@ -58,7 +60,7 @@ class VersionChecker(object):
     
     def get_version(self):
         """
-            Returns the last version number that was read from the server.
+        Returns the last version number that was read from the server.
         """
         try:
             f = open(VERSION_FILE, 'r')
@@ -68,12 +70,12 @@ class VersionChecker(object):
 
 class VersionThread(Thread):
     """
-       Thread used to start the process of reading the current version of an
-       application from the deployment server. 
-       
-       The VersionChecker is user in a Thread to allow the main application
-       to continue dealing with UI requests from the user. The main application
-       provides a call-back method for when the version number is obtained. 
+    Thread used to start the process of reading the current version of an
+    application from the deployment server. 
+   
+    The VersionChecker is user in a Thread to allow the main application
+    to continue dealing with UI requests from the user. The main application
+    provides a call-back method for when the version number is obtained. 
     """
     def __init__ (self, url, call_back=None, baggage=None):
         Thread.__init__(self)
@@ -83,7 +85,7 @@ class VersionThread(Thread):
       
     def run(self):
         """
-            Execute the process of reading the current application version number.
+        Execute the process of reading the current application version number.
         """
         checker = VersionChecker(self._url)
         while(not checker.is_complete()):
@@ -92,8 +94,8 @@ class VersionThread(Thread):
             
 def write_version(version, filename=VERSION_FILE):
     """
-        Store the version number
-        This could be put into a DB if the application has one.
+    Store the version number
+    This could be put into a DB if the application has one.
     """
     f = open(filename, 'w')
     f.write(version)
@@ -101,10 +103,11 @@ def write_version(version, filename=VERSION_FILE):
         
 def _get_version_from_server(url):
     """
-        Method executed in the independent process used to read the 
-        current version number from the server.
-        
-        @param url: URL to read the version number from
+    Method executed in the independent process used to read the 
+    current version number from the server.
+    
+    :param url: URL to read the version number from
+    
     """
     import urllib, re
     try: 

@@ -1,12 +1,13 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
-
-copyright 2008, University of Tennessee
-"""
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2008, University of Tennessee
+################################################################################
 
 
 import wx
@@ -33,13 +34,16 @@ DEFAULT_QSTEP = 0.001
 DEFAULT_BEAM = 0.005
 BIN_WIDTH = 1.0
 from danse.common.plottools.toolbar import NavigationToolBar
+
 class NavigationToolBar2D(NavigationToolBar):
+    """
+    """
     def __init__(self, canvas, parent=None):
         NavigationToolBar.__init__(self, canvas=canvas, parent=parent)
         
     def delete_option(self):
         """
-            remove default toolbar item
+        remove default toolbar item
         """
         #delete reset button
         self.DeleteToolByPos(0) 
@@ -50,7 +54,7 @@ class NavigationToolBar2D(NavigationToolBar):
         
     def add_option(self):
         """
-            add item to the toolbar
+        add item to the toolbar
         """
         #add print button
         id_print = wx.NewId()
@@ -60,10 +64,9 @@ class NavigationToolBar2D(NavigationToolBar):
         wx.EVT_TOOL(self, id_print, self.on_print)
         
         
-
 class ModelPanel2D(ModelPanel1D):
     """
-        Plot panel for use with the GUI manager
+    Plot panel for use with the GUI manager
     """
     
     ## Internal name for the AUI manager
@@ -80,7 +83,7 @@ class ModelPanel2D(ModelPanel1D):
     def __init__(self, parent, id = -1,data2d=None, color = None,\
         dpi = None, style = wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
         """
-            Initialize the panel
+        Initialize the panel
         """
         ModelPanel1D.__init__(self, parent, id = id, style = style, **kwargs)
         
@@ -120,7 +123,7 @@ class ModelPanel2D(ModelPanel1D):
        
     def add_toolbar(self):
         """
-            add toolbar
+        add toolbar
         """
         self.enable_toolbar = True
         
@@ -140,13 +143,13 @@ class ModelPanel2D(ModelPanel1D):
          
     def _onEVT_1DREPLOT(self, event):
         """
-            Data is ready to be displayed
-            
-            #TODO: this name should be changed to something more appropriate
-            # Don't forget that changing this name will mean changing code
-            # in plotting.py
-             
-            @param event: data event
+        Data is ready to be displayed
+        
+        :TODO: this name should be changed to something more appropriate
+             Don't forget that changing this name will mean changing code
+             in plotting.py
+         
+        :param event: data event
         """
         ## Update self.data2d with the current plot
         self.data2D = event.plot
@@ -223,10 +226,11 @@ class ModelPanel2D(ModelPanel1D):
 
     def onContextMenu(self, event):
         """
-            2D plot context menu
-            @param event: wx context event
-        """
+        2D plot context menu
         
+        :param event: wx context event
+        
+        """
         slicerpop = PanelMenu()
         slicerpop.set_plots(self.plots)
         slicerpop.set_graph(self.graph)
@@ -312,8 +316,10 @@ class ModelPanel2D(ModelPanel1D):
    
     def _onEditDetector(self, event):
         """
-            Allow to view and edits  detector parameters
-            @param event: wx.menu event
+        Allow to view and edits  detector parameters
+        
+        :param event: wx.menu event
+        
         """
         
         import detector_dialog
@@ -358,44 +364,57 @@ class ModelPanel2D(ModelPanel1D):
         
   
     def freeze_axes(self):
+        """
+        """
         self.axes_frozen = True
         
     def thaw_axes(self):
+        """
+        """
         self.axes_frozen = False
         
     def onMouseMotion(self,event):
+        """
+        """
         pass
+    
     def onWheel(self, event):
+        """
+        """
         pass  
       
     def update(self, draw=True):
         """
-            Respond to changes in the model by recalculating the 
-            profiles and resetting the widgets.
+        Respond to changes in the model by recalculating the 
+        profiles and resetting the widgets.
         """
         self.draw()
         
-        
     def _getEmptySlicerEvent(self):
         """
-            create an empty slicervent 
+        create an empty slicervent 
         """
         return SlicerEvent(type=None,
                            params=None,
                            obj_class=None)
+        
     def _onEVT_INTERNAL(self, event):
         """
-            Draw the slicer
-            @param event: wx.lib.newevent (SlicerEvent) containing slicer
+        Draw the slicer
+        
+        :param event: wx.lib.newevent (SlicerEvent) containing slicer
             parameter
+            
         """
         self._setSlicer(event.slicer)
             
     def _setSlicer(self, slicer):
         """
-            Clear the previous slicer and create a new one.Post an internal
-            event.
-            @param slicer: slicer class to create
+        Clear the previous slicer and create a new one.Post an internal
+        event.
+        
+        :param slicer: slicer class to create
+        
         """
         
         ## Clear current slicer
@@ -422,8 +441,10 @@ class ModelPanel2D(ModelPanel1D):
 
     def onCircular(self, event):
         """
-            perform circular averaging on Data2D
-            @param event: wx.menu event
+        perform circular averaging on Data2D
+        
+        :param event: wx.menu event
+        
         """
         
         from DataLoader.manipulations import CircularAverage
@@ -461,16 +482,16 @@ class ModelPanel2D(ModelPanel1D):
         new_plot.group_id = "Circ avg "+ self.data2D.name
         new_plot.id = "Circ avg "+ self.data2D.name
         new_plot.is_data= True
-        
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=new_plot.name))
-       
        
     def _onEditSlicer(self, event):
         """
-            Is available only when a slicer is drawn.Create a dialog 
-            window where the user can enter value to reset slicer
-            parameters.
-            @param event: wx.menu event
+        Is available only when a slicer is drawn.Create a dialog 
+        window where the user can enter value to reset slicer
+        parameters.
+        
+        :param event: wx.menu event
+        
         """
         if self.slicer !=None:
             from SlicerParameters import SlicerParameterPanel
@@ -480,10 +501,9 @@ class ModelPanel2D(ModelPanel1D):
             if dialog.ShowModal() == wx.ID_OK:
                 dialog.Destroy() 
         
-        
     def onSectorQ(self, event):
         """
-            Perform sector averaging on Q and draw sector slicer
+        Perform sector averaging on Q and draw sector slicer
         """
         from SectorSlicer import SectorInteractor
         self.onClearSlicer(event)
@@ -491,13 +511,15 @@ class ModelPanel2D(ModelPanel1D):
         
     def onSectorPhi(self, event):
         """
-            Perform sector averaging on Phi and draw annulus slicer
+        Perform sector averaging on Phi and draw annulus slicer
         """
         from AnnulusSlicer import AnnulusInteractor
         self.onClearSlicer(event)
         wx.PostEvent(self, InternalEvent(slicer= AnnulusInteractor))
         
-    def onBoxSum(self,event):
+    def onBoxSum(self, event):
+        """
+        """
         from boxSum import BoxSum
         self.onClearSlicer(event)
                     
@@ -529,32 +551,32 @@ class ModelPanel2D(ModelPanel1D):
         wx.PostEvent(self.parent, SlicerPanelEvent (panel= self.panel_slicer,
                                                     main_panel =self))
 
-        
     def onBoxavgX(self,event):
         """
-            Perform 2D data averaging on Qx
-            Create a new slicer .
-            @param event: wx.menu event
+        Perform 2D data averaging on Qx
+        Create a new slicer .
+        
+        :param event: wx.menu event
         """
         from boxSlicer import BoxInteractorX
         self.onClearSlicer(event)
         wx.PostEvent(self, InternalEvent(slicer= BoxInteractorX))
        
-       
     def onBoxavgY(self,event):
         """
-            Perform 2D data averaging on Qy
-            Create a new slicer .
-            @param event: wx.menu event
+        Perform 2D data averaging on Qy
+        Create a new slicer .
+        
+        :param event: wx.menu event
+        
         """
         from boxSlicer import BoxInteractorY
         self.onClearSlicer(event)
         wx.PostEvent(self, InternalEvent(slicer= BoxInteractorY))
         
-        
     def onClearSlicer(self, event):
         """
-            Clear the slicer on the plot
+        Clear the slicer on the plot
         """
         if not self.slicer==None:
             self.slicer.clear()

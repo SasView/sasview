@@ -1,6 +1,4 @@
-"""
-    Panel class to show the slicer parameters 
-"""
+
 
 import wx
 import wx.lib.newevent
@@ -12,6 +10,9 @@ from sans.guicomm.events  import SlicerParameterEvent,EVT_SLICER_PARS,EVT_SLICER
 
 
 class SlicerPanel(wx.Panel):
+    """
+    Panel class to show the slicer parameters 
+    """
     #TODO: show units
     #TODO: order parameters properly
      ## Internal name for the AUI manager
@@ -45,9 +46,11 @@ class SlicerPanel(wx.Panel):
 
     def onEVT_SLICER(self, event):
         """
-            Process EVT_SLICER events
-            When the slicer changes, update the panel
-            @param event: EVT_SLICER event
+        Process EVT_SLICER events
+        When the slicer changes, update the panel
+        
+        :param event: EVT_SLICER event
+        
         """
         event.Skip()
         if event.obj_class==None:
@@ -55,10 +58,9 @@ class SlicerPanel(wx.Panel):
         else:
             self.set_slicer(event.type, event.params)
         
-        
     def set_slicer(self, type, params):
         """
-            Rebuild the panel
+        Rebuild the panel
         """
         self.bck.Clear(True)  
         self.type = type  
@@ -105,7 +107,7 @@ class SlicerPanel(wx.Panel):
         
     def onSetFocus(self, evt):
         """
-            Hightlight the textcrtl
+        Hightlight the textcrtl
         """
         # Get a handle to the TextCtrl
         widget = evt.GetEventObject()
@@ -116,7 +118,7 @@ class SlicerPanel(wx.Panel):
     
     def onParamChange(self, evt):
         """
-            Receive and event and reset the text field contained in self.parameters
+        Receive and event and reset the text field contained in self.parameters
             
         """
         evt.Skip()
@@ -125,10 +127,9 @@ class SlicerPanel(wx.Panel):
                 item[1].SetValue(format_number(evt.params[item[0]]))
                 item[1].Refresh()
    
-        
     def onTextEnter(self, evt): 
         """
-            Parameters have changed
+        Parameters have changed
         """ 
         params = {}
         has_error = False

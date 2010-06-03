@@ -1,6 +1,4 @@
-"""
-    Panel class to show the slicer parameters 
-"""
+
 
 import wx
 import wx.lib.newevent
@@ -9,18 +7,18 @@ from copy import deepcopy
 from sans.guiframe.utils import format_number
 from sans.guicomm.events import EVT_SLICER,EVT_SLICER_PARS,SlicerParameterEvent
 
-
-
-
 class SlicerParameterPanel(wx.Dialog):
+    """
+    Panel class to show the slicer parameters 
+    """
     #TODO: show units
     #TODO: order parameters properly
     
     def __init__(self, parent, *args, **kwargs):
         wx.Dialog.__init__(self, parent, *args, **kwargs)
         """
-            Dialog window that allow to edit parameters slicer 
-            by entering new values
+        Dialog window that allow to edit parameters slicer 
+        by entering new values
         """
         self.params = {}
         self.parent = parent
@@ -39,10 +37,10 @@ class SlicerParameterPanel(wx.Dialog):
 
     def onEVT_SLICER(self, event):
         """
-            Process EVT_SLICER events
-            When the slicer changes, update the panel
-            
-            @param event: EVT_SLICER event
+        Process EVT_SLICER events
+        When the slicer changes, update the panel
+        
+        :param event: EVT_SLICER event
         """
         event.Skip()
         if event.obj_class==None:
@@ -52,7 +50,7 @@ class SlicerParameterPanel(wx.Dialog):
         
     def set_slicer(self, type, params):
         """
-            Rebuild the panel
+        Rebuild the panel
         """
         self.bck.Clear(True)  
         self.type = type  
@@ -105,8 +103,8 @@ class SlicerParameterPanel(wx.Dialog):
 
     def onParamChange(self, evt):
         """
-            receive an event end reset value text fields
-            inside self.parameters
+        receive an event end reset value text fields
+        inside self.parameters
         """
         evt.Skip()
         if evt.type == "UPDATE":
@@ -117,7 +115,7 @@ class SlicerParameterPanel(wx.Dialog):
         
     def onTextEnter(self, evt): 
         """
-            Parameters have changed
+        Parameters have changed
         """ 
         params = {}
         has_error = False

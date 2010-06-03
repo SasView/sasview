@@ -19,14 +19,16 @@ else:
     FONT_VARIANT = 1
     
 DEFAULT_CMAP= pylab.cm.jet
+
 class DetectorDialog(wx.Dialog):
     """
-        Dialog box to let the user edit detector settings
+    Dialog box to let the user edit detector settings
     """
     
     def __init__(self,parent,id=1,base=None,dpi = None,cmap=DEFAULT_CMAP,
                  reset_zmin_ctl = None,reset_zmax_ctl = None, *args, **kwds):
-
+        """
+        """
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self,parent,id=1, *args, **kwds)
         
@@ -69,6 +71,8 @@ class DetectorDialog(wx.Dialog):
         self.Fit()
         
     class Event:
+        """
+        """
         xnpts = 0
         ynpts = 0
         qpax = 0
@@ -78,11 +82,9 @@ class DetectorDialog(wx.Dialog):
         cmap= None
         sym4 = False
     
-    
-  
     def onSetFocus(self, event):
         """
-            Highlight the txtcrtl
+        Highlight the txtcrtl
         """
         # Get a handle to the TextCtrl
         widget = event.GetEventObject()
@@ -92,7 +94,7 @@ class DetectorDialog(wx.Dialog):
         
     def resetValues(self, event):
         """
-            reset detector info
+        reset detector info
         """
         try:
             zmin= self.reset_zmin_ctl
@@ -113,8 +115,8 @@ class DetectorDialog(wx.Dialog):
         
     def checkValues(self, event):
         """
-            Check the valitidity of zmin and zmax value
-            zmax should be a float and zmin less than zmax
+        Check the valitidity of zmin and zmax value
+        zmax should be a float and zmin less than zmax
         """
         flag = True
         try:
@@ -153,22 +155,22 @@ class DetectorDialog(wx.Dialog):
     
     def setContent(self, xnpts,ynpts, qmax, beam,zmin=None,zmax=None, sym=False):
         """
-            received value and displayed them
-            @param xnpts: the number of point of the x_bins of data
-            @param ynpts: the number of point of the y_bins of data
-            @param qmax: the maxmimum value of data pixel
-            @param beam : the radius of the beam
-            @param zmin:  the value to get the minimum color
-            @param zmax:  the value to get the maximum color
-            @param sym:
+        received value and displayed them
+        
+        :param xnpts: the number of point of the x_bins of data
+        :param ynpts: the number of point of the y_bins of data
+        :param qmax: the maxmimum value of data pixel
+        :param beam: the radius of the beam
+        :param zmin:  the value to get the minimum color
+        :param zmax:  the value to get the maximum color
+        :param sym:
+        
         """
         self.xnpts_ctl.SetLabel(str(format_number(xnpts)))
         self.ynpts_ctl.SetLabel(str(format_number(ynpts)))
         self.qmax_ctl.SetLabel(str(format_number(qmax)))
         self.beam_ctl.SetLabel(str(format_number(beam)))
-        
     
-       
         if zmin !=None:
             self.zmin_ctl.SetValue(str(format_number(zmin)))
         if zmax !=None:
@@ -176,7 +178,7 @@ class DetectorDialog(wx.Dialog):
 
     def getContent(self):
         """
-            @return event containing value to reset the detector of a given data
+        return event containing value to reset the detector of a given data
         """
         event = self.Event()
        
@@ -205,7 +207,7 @@ class DetectorDialog(wx.Dialog):
 
     def __set_properties(self):
         """
-            set proprieties of the dialog window
+        set proprieties of the dialog window
         """
         self.SetTitle("Detector parameters")
         self.SetSize((600, 595))
@@ -213,7 +215,7 @@ class DetectorDialog(wx.Dialog):
 
     def __do_layout(self):
         """
-            fill the dialog window .
+        fill the dialog window .
         """
         sizer_main = wx.BoxSizer(wx.VERTICAL)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
@@ -221,7 +223,6 @@ class DetectorDialog(wx.Dialog):
         sizer_colormap = wx.BoxSizer(wx.VERTICAL)
         sizer_selection= wx.BoxSizer(wx.HORIZONTAL)
        
-
         iy = 0
         sizer_params.Add(self.label_xnpts, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         sizer_params.Add(self.xnpts_ctl,   (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -242,13 +243,10 @@ class DetectorDialog(wx.Dialog):
         sizer_params.Add(self.zmax_ctl,   (iy,1), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         
-        
-       
         self.fig = mpl.figure.Figure(dpi=self.dpi, figsize=(4,1))
        
         self.ax1 = self.fig.add_axes([0.05, 0.65, 0.9, 0.15])
-        
-        
+    
         self.norm = mpl.colors.Normalize(vmin=0, vmax=100)
         self.cb1 = mpl.colorbar.ColorbarBase(self.ax1, cmap=self.cmap,
                                            norm= self.norm,
@@ -275,12 +273,10 @@ class DetectorDialog(wx.Dialog):
         sizer_main.Add(sizer_colormap, 1, wx.EXPAND|wx.ALL, 10)
         sizer_main.Add(self.static_line_3, 0, wx.EXPAND, 0)
         
-        
         sizer_button.Add(self.button_reset,0, wx.LEFT|wx.ADJUST_MINSIZE, 100)
         sizer_button.Add(self.button_OK, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
         sizer_button.Add(self.button_Cancel, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        
-        
+    
         sizer_main.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
         self.SetAutoLayout(True)
         self.SetSizer(sizer_main)
@@ -290,7 +286,7 @@ class DetectorDialog(wx.Dialog):
         
     def _on_select_cmap(self, event):
         """
-             display a new cmap 
+        display a new cmap 
         """
         cmap_name= self.cmap_selector.GetCurrentSelection()
         current_cmap= self.cmap_selector.GetClientData( cmap_name )

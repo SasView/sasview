@@ -12,7 +12,7 @@ from sans.guicomm.events import NewPlotEvent, StatusEvent
 
 def enable_add_data(existing_panel, new_plot):
     """
-        Enable append data on a plot panel
+    Enable append data on a plot panel
     """
     is_theory = len(existing_panel.plots)<= 1 and \
         existing_panel.plots.values()[0].__class__.__name__=="Theory1D"
@@ -25,7 +25,7 @@ def enable_add_data(existing_panel, new_plot):
 
 def parse_name(name, expression):
     """
-        remove "_" in front of a name
+    remove "_" in front of a name
     """
     if re.match(expression, name) is not None:
         word = re.split(expression, name, 1)
@@ -36,6 +36,8 @@ def parse_name(name, expression):
         return name
     
 def choose_data_file(parent, location=None):
+    """
+    """
     path = None
     if location == None:
         location = os.getcwd()
@@ -54,10 +56,11 @@ def choose_data_file(parent, location=None):
 
 def open_dialog_append_data(panel_name, data_name):
     """
-        Pop up an error message.
-        
-        @param panel_name: the name of the current panel
-        @param data_name: the name of the current data
+    Pop up an error message.
+    
+    :param panel_name: the name of the current panel
+    :param data_name: the name of the current data
+    
     """
     message = " Do you want to append %s data\n in "%(str(data_name))
     message += " %s panel?\n\n"%(str(panel_name))
@@ -71,7 +74,7 @@ def open_dialog_append_data(panel_name, data_name):
 
 def load_ascii_1D(path):
     """
-        Load a 1D ascii file, with errors
+    Load a 1D ascii file, with errors
     """
     if path and os.path.isfile(path):
     
@@ -119,9 +122,9 @@ def load_ascii_1D(path):
 
 def load_error(error=None):
     """
-        Pop up an error message.
-        
-        @param error: details error message to be displayed
+    Pop up an error message.
+    
+    :param error: details error message to be displayed
     """
     message = "You had to try this, didn't you?\n\n"
     message += "The data file you selected could not be loaded.\n"
@@ -141,8 +144,10 @@ def on_load_error(parent):
     
 def plot_data(parent, path):
     """
-        Use the DataLoader loader to created data to plot.
-        @param path: the path of the data to load
+    Use the DataLoader loader to created data to plot.
+    
+    :param path: the path of the data to load
+    
     """
     from sans.guicomm.events import NewPlotEvent, StatusEvent
     from DataLoader.loader import  Loader

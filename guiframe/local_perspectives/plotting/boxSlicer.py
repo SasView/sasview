@@ -268,8 +268,8 @@ class BoxInteractor(_BaseInteractor):
 
 class HorizontalLines(_BaseInteractor):
     """
-     Draw 2 Horizontal lines centered on (0,0) that can move 
-     on the x- direction and in opposite direction
+    Draw 2 Horizontal lines centered on (0,0) that can move 
+    on the x- direction and in opposite direction
     """
     def __init__(self,base,axes,color='black', zorder=5,x=0.5, y=0.5):
         
@@ -331,7 +331,6 @@ class HorizontalLines(_BaseInteractor):
         self.layernum = n
         self.update()
         
-        
     def clear(self):
         """
         Clear this slicer  and its markers
@@ -345,7 +344,6 @@ class HorizontalLines(_BaseInteractor):
             # Old version of matplotlib
             for item in range(len(self.axes.lines)):
                 del self.axes.lines[0]
-   
    
     def update(self,x=None,y=None):
         """

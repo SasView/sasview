@@ -1,0 +1,554 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>SectorSlicer &mdash; guiframe v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="guiframe v0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Local Perspective: Plotting" href="index.html" />
+    <link rel="next" title="slicerpanel" href="slicerpanel.html" />
+    <link rel="prev" title="sectorMask" href="sectorMask.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="slicerpanel.html" title="slicerpanel"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sectorMask.html" title="sectorMask"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Local Perspective: Plotting</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="sectorslicer">
+<h1>SectorSlicer<a class="headerlink" href="#sectorslicer" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.guiframe.local_perspectives.plotting.SectorSlicer">
+<span id="sans-guiframe-local-perspectives-plotting-sectorslicer"></span><h2><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.SectorSlicer"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.SectorSlicer</span></tt></a><a class="headerlink" href="#module-sans.guiframe.local_perspectives.plotting.SectorSlicer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor">
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.SectorSlicer.</tt><tt class="descname">LineInteractor</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='black'</em>, <em>zorder=5</em>, <em>r=1.0</em>, <em>theta=0.78539816339744828</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></p>
+<p>Select an annulus through a 2D plot</p>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.clear_markers">
+<tt class="descname">clear_markers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.clear_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Clear old markers and interfaces.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.connect_markers">
+<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.connect_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Connect markers to callbacks</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.dpixel">
+<tt class="descname">dpixel</tt><big>(</big><em>x</em>, <em>y</em>, <em>nudge=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.dpixel" title="Permalink to this definition">¶</a></dt>
+<dd>Return the step size in data coordinates for a small
+step in screen coordinates.  If nudge is False (default)
+the step size is one pixel.  If nudge is True, the step
+size is 0.2 pixels.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.get_params">
+<tt class="descname">get_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.get_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.move">
+<tt class="descname">move</tt><big>(</big><em>x</em>, <em>y</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.move" title="Permalink to this definition">¶</a></dt>
+<dd>Process move to a new position, making sure that the move is allowed.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.moveend">
+<tt class="descname">moveend</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.moveend" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.onClick">
+<tt class="descname">onClick</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.onClick" title="Permalink to this definition">¶</a></dt>
+<dd>Prepare to move the artist.  Calls save() to preserve the state for
+later restore().</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.onDrag">
+<tt class="descname">onDrag</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.onDrag" title="Permalink to this definition">¶</a></dt>
+<dd>Move the artist.  Calls move() to update the state, or restore() if
+the mouse leaves the window.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.onHilite">
+<tt class="descname">onHilite</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.onHilite" title="Permalink to this definition">¶</a></dt>
+<dd>Hilite the artist reporting the event, indicating that it is
+ready to receive a click.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.onKey">
+<tt class="descname">onKey</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.onKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Respond to keyboard events.  Arrow keys move the widget.  Escape
+restores it to the position before the last click.</p>
+<p>Calls move() to update the state.  Calls restore() on escape.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.onLeave">
+<tt class="descname">onLeave</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.onLeave" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the artist to the original colour when the cursor leaves.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.onRelease">
+<tt class="descname">onRelease</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.onRelease" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.restore">
+<tt class="descname">restore</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.restore" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the roughness for this layer.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.save">
+<tt class="descname">save</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.save" title="Permalink to this definition">¶</a></dt>
+<dd>Remember the roughness for this layer and the next so that we
+can restore on Esc.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.set_cursor">
+<tt class="descname">set_cursor</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.set_cursor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.set_layer">
+<tt class="descname">set_layer</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.set_layer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.set_params">
+<tt class="descname">set_params</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.set_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.update">
+<tt class="descname">update</tt><big>(</big><em>theta=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.LineInteractor.update" title="Permalink to this definition">¶</a></dt>
+<dd>Draw the new roughness on the graph.</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor">
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.SectorSlicer.</tt><tt class="descname">SectorInteractor</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='black'</em>, <em>zorder=3</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></p>
+<p>Draw a sector slicer.Allow to performQ averaging on data 2D</p>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.clear" title="Permalink to this definition">¶</a></dt>
+<dd>Clear the slicer and all connected events related to this slicer</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.clear_markers">
+<tt class="descname">clear_markers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.clear_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Clear old markers and interfaces.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.connect_markers">
+<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.connect_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Connect markers to callbacks</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.dpixel">
+<tt class="descname">dpixel</tt><big>(</big><em>x</em>, <em>y</em>, <em>nudge=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.dpixel" title="Permalink to this definition">¶</a></dt>
+<dd>Return the step size in data coordinates for a small
+step in screen coordinates.  If nudge is False (default)
+the step size is one pixel.  If nudge is True, the step
+size is 0.2 pixels.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.draw">
+<tt class="descname">draw</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.draw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.freeze_axes">
+<tt class="descname">freeze_axes</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.freeze_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.get_params">
+<tt class="descname">get_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.get_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store a copy of values of parameters of the slicer into a dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return params:</th><td class="field-body">the dictionary created</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.move">
+<tt class="descname">move</tt><big>(</big><em>x</em>, <em>y</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.move" title="Permalink to this definition">¶</a></dt>
+<dd>Process move to a new position, making sure that the move is allowed.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.moveend">
+<tt class="descname">moveend</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.moveend" title="Permalink to this definition">¶</a></dt>
+<dd>Called a dragging motion ends.Get slicer event</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.onClick">
+<tt class="descname">onClick</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.onClick" title="Permalink to this definition">¶</a></dt>
+<dd>Prepare to move the artist.  Calls save() to preserve the state for
+later restore().</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.onDrag">
+<tt class="descname">onDrag</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.onDrag" title="Permalink to this definition">¶</a></dt>
+<dd>Move the artist.  Calls move() to update the state, or restore() if
+the mouse leaves the window.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.onHilite">
+<tt class="descname">onHilite</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.onHilite" title="Permalink to this definition">¶</a></dt>
+<dd>Hilite the artist reporting the event, indicating that it is
+ready to receive a click.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.onKey">
+<tt class="descname">onKey</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.onKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Respond to keyboard events.  Arrow keys move the widget.  Escape
+restores it to the position before the last click.</p>
+<p>Calls move() to update the state.  Calls restore() on escape.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.onLeave">
+<tt class="descname">onLeave</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.onLeave" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the artist to the original colour when the cursor leaves.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.onRelease">
+<tt class="descname">onRelease</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.onRelease" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.restore">
+<tt class="descname">restore</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.restore" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the roughness for this layer.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.save">
+<tt class="descname">save</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.save" title="Permalink to this definition">¶</a></dt>
+<dd>Remember the roughness for this layer and the next so that we
+can restore on Esc.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.set_cursor">
+<tt class="descname">set_cursor</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.set_cursor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.set_layer">
+<tt class="descname">set_layer</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.set_layer" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+Allow adding plot to the same panel</blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n</strong> &#8211; the number of layer</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.set_params">
+<tt class="descname">set_params</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.set_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive a dictionary and reset the slicer with values contained 
+in the values of the dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>params</strong> &#8211; a dictionary containing name of slicer parameters and 
+values the user assigned to the slicer.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.thaw_axes">
+<tt class="descname">thaw_axes</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.thaw_axes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.update">
+<tt class="descname">update</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SectorInteractor.update" title="Permalink to this definition">¶</a></dt>
+<dd>Respond to changes in the model by recalculating the profiles and
+resetting the widgets.</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor">
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.SectorSlicer.</tt><tt class="descname">SideInteractor</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='black'</em>, <em>zorder=5</em>, <em>r=1.0</em>, <em>phi=0.78539816339744828</em>, <em>theta2=1.0471975511965976</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></p>
+<p>Draw an oblique line</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>phi</strong> &#8211; the phase between the middle line and one side line</li>
+<li><strong>theta2</strong> &#8211; the angle between the middle line and x- axis</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.clear" title="Permalink to this definition">¶</a></dt>
+<dd>Clear the slicer and all connected events related to this slicer</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.clear_markers">
+<tt class="descname">clear_markers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.clear_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Clear old markers and interfaces.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.connect_markers">
+<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.connect_markers" title="Permalink to this definition">¶</a></dt>
+<dd>Connect markers to callbacks</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.dpixel">
+<tt class="descname">dpixel</tt><big>(</big><em>x</em>, <em>y</em>, <em>nudge=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.dpixel" title="Permalink to this definition">¶</a></dt>
+<dd>Return the step size in data coordinates for a small
+step in screen coordinates.  If nudge is False (default)
+the step size is one pixel.  If nudge is True, the step
+size is 0.2 pixels.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.get_params">
+<tt class="descname">get_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.get_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.move">
+<tt class="descname">move</tt><big>(</big><em>x</em>, <em>y</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.move" title="Permalink to this definition">¶</a></dt>
+<dd>Process move to a new position, making sure that the move is allowed.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.moveend">
+<tt class="descname">moveend</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.moveend" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.onClick">
+<tt class="descname">onClick</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.onClick" title="Permalink to this definition">¶</a></dt>
+<dd>Prepare to move the artist.  Calls save() to preserve the state for
+later restore().</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.onDrag">
+<tt class="descname">onDrag</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.onDrag" title="Permalink to this definition">¶</a></dt>
+<dd>Move the artist.  Calls move() to update the state, or restore() if
+the mouse leaves the window.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.onHilite">
+<tt class="descname">onHilite</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.onHilite" title="Permalink to this definition">¶</a></dt>
+<dd>Hilite the artist reporting the event, indicating that it is
+ready to receive a click.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.onKey">
+<tt class="descname">onKey</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.onKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Respond to keyboard events.  Arrow keys move the widget.  Escape
+restores it to the position before the last click.</p>
+<p>Calls move() to update the state.  Calls restore() on escape.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.onLeave">
+<tt class="descname">onLeave</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.onLeave" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the artist to the original colour when the cursor leaves.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.onRelease">
+<tt class="descname">onRelease</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.onRelease" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.restore">
+<tt class="descname">restore</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.restore" title="Permalink to this definition">¶</a></dt>
+<dd>Restore the roughness for this layer.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.save">
+<tt class="descname">save</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.save" title="Permalink to this definition">¶</a></dt>
+<dd>Remember the roughness for this layer and the next so that we
+can restore on Esc.</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.set_cursor">
+<tt class="descname">set_cursor</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.set_cursor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.set_layer">
+<tt class="descname">set_layer</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.set_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allow adding plot to the same panel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n</strong> &#8211; the number of layer</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.set_params">
+<tt class="descname">set_params</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.set_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.update">
+<tt class="descname">update</tt><big>(</big><em>phi=None</em>, <em>delta=None</em>, <em>mline=None</em>, <em>side=False</em>, <em>left=False</em>, <em>right=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.SectorSlicer.SideInteractor.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw oblique line</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>phi</strong> &#8211; the phase between the middle line and the current line</li>
+<li><strong>delta</strong> &#8211; phi/2 applied only when the mline was moved</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">SectorSlicer</a><ul>
+<li><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.SectorSlicer"><tt class="docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.SectorSlicer</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sectorMask.html"
+                        title="previous chapter">sectorMask</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="slicerpanel.html"
+                        title="next chapter">slicerpanel</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/local_perspectives/plotting/SectorSlicer.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="slicerpanel.html" title="slicerpanel"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sectorMask.html" title="sectorMask"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Local Perspective: Plotting</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b1.
+    </div>
+  </body>
+</html>

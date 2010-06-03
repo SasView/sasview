@@ -1,12 +1,13 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
-
-copyright 2008, University of Tennessee
-"""
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2008, University of Tennessee
+################################################################################
 
 
 import wx
@@ -38,7 +39,7 @@ BIN_WIDTH =1
 
 class ModelPanel1D(PlotPanel):
     """
-        Plot panel for use with the GUI manager
+    Plot panel for use with the GUI manager
     """
     
     ## Internal name for the AUI manager
@@ -54,7 +55,7 @@ class ModelPanel1D(PlotPanel):
     def __init__(self, parent, id = -1, color = None,\
         dpi = None, style = wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
         """
-            Initialize the panel
+        Initialize the panel
         """
         PlotPanel.__init__(self, parent, id = id, style = style, **kwargs)
         
@@ -81,7 +82,7 @@ class ModelPanel1D(PlotPanel):
    
     def _reset(self):
         """
-            Resets internal data and graph
+        Resets internal data and graph
         """    
         self.graph.reset()
         self.plots      = {}
@@ -89,10 +90,11 @@ class ModelPanel1D(PlotPanel):
     
     def _onEVT_1DREPLOT(self, event):
         """
-            Data is ready to be displayed
-            @param event: data event
+        Data is ready to be displayed
+        
+        :param event: data event
+        
         """
-       
         #TODO: Check for existence of plot attribute
         # Check whether this is a replot. If we ask for a replot
         # and the plottable no longer exists, ignore the event.
@@ -158,8 +160,8 @@ class ModelPanel1D(PlotPanel):
     
     def onLeftDown(self,event): 
         """ 
-            left button down and ready to drag
-            Display the position of the mouse on the statusbar
+        left button down and ready to drag
+        Display the position of the mouse on the statusbar
         """
         PlotPanel.onLeftDown(self, event)
         ax = event.inaxes
@@ -172,8 +174,10 @@ class ModelPanel1D(PlotPanel):
         
     def _onRemove(self, event):
         """
-            Remove a plottable from the graph and render the graph 
-            @param event: Menu event
+        Remove a plottable from the graph and render the graph 
+        
+        :param event: Menu event
+        
         """
         ## Check if there is a selected graph to remove
         if not self.graph.selected_plottable == None and\
@@ -189,12 +193,12 @@ class ModelPanel1D(PlotPanel):
             self.graph.render(self)
             self.subplot.figure.canvas.draw_idle()    
            
-            
-
     def onContextMenu(self, event):
         """
-            1D plot context menu
-            @param event: wx context event
+        1D plot context menu
+        
+        :param event: wx context event
+        
         """
         slicerpop = PanelMenu()
         slicerpop.set_plots(self.plots)
@@ -247,19 +251,7 @@ class ModelPanel1D(PlotPanel):
        
         if self.graph.selected_plottable in self.plots:
             selected_plot= self.plots[self.graph.selected_plottable]
-            #if self.plots[self.graph.selected_plottable].name in self.err_dy.iterkeys()\
-            #    and self.errors_hide:
-            """
-            if selected_plot.__class__.__name__=="Data1D":
-                if numpy.all(selected_plot.dy==0):
-                    id = wx.NewId()
-                    slicerpop.Append(id, '&Show errors')
-                    wx.EVT_MENU(self, id, self._on_add_errors)
-                elif selected_plot.dy !=None and selected_plot.dy != []:
-                    id = wx.NewId()
-                    slicerpop.Append(id, '&Hide Error bars')
-                    wx.EVT_MENU(self, id, self._on_remove_errors)
-            """
+           
             id = wx.NewId()
             slicerpop.Append(id, '&Linear fit')
             wx.EVT_MENU(self, id, self.onFitting)
@@ -281,12 +273,14 @@ class ModelPanel1D(PlotPanel):
         
     def _on_remove_errors(self, evt):
         """
-            Save name and dy of data in dictionary self.err_dy
-            Create a new data1D with the same x, y
-            vector and dy with zeros.
-            post self.err_dy as event (ErrorDataEvent) for any object
-            which wants to reconstruct the initial data.
-            @param evt: Menu event
+        Save name and dy of data in dictionary self.err_dy
+        Create a new data1D with the same x, y
+        vector and dy with zeros.
+        post self.err_dy as event (ErrorDataEvent) for any object
+        which wants to reconstruct the initial data.
+        
+        :param evt: Menu event
+        
         """
         if not self.graph.selected_plottable == None:
             ## store existing dy
@@ -295,8 +289,8 @@ class ModelPanel1D(PlotPanel):
             self.err_dy[name]= dy
             ## Create a new dy for a new plottable
             import numpy
-            dy= numpy.zeros(len(self.plots[self.graph.selected_plottable].y))
-            selected_plot= self.plots[self.graph.selected_plottable]
+            dy = numpy.zeros(len(self.plots[self.graph.selected_plottable].y))
+            selected_plot = self.plots[self.graph.selected_plottable]
             
             if selected_plot.__class__.__name__=="Data1D":
                 # Make sure that we can pass a basic Data1D
@@ -347,18 +341,17 @@ class ModelPanel1D(PlotPanel):
             
             event = ErrorDataEvent(err_dy=self.err_dy)
             wx.PostEvent(self.parent, event)
-    
-    
+
     def _on_add_errors(self, evt):
         """
-            create a new data1D witht the errors saved in self.err_dy
-            to show errors of the plot.
-            Compute reasonable errors for a data set without 
-            errors and transorm the plottable to a Data1D
-            @param evt: Menu event
-        """
-       
+        create a new data1D witht the errors saved in self.err_dy
+        to show errors of the plot.
+        Compute reasonable errors for a data set without 
+        errors and transorm the plottable to a Data1D
         
+        :param evt: Menu event
+        
+        """
         if not self.graph.selected_plottable == None \
             and self.graph.selected_plottable in self.plots.keys():
             ##Reset the flag to display the hide option on the context menu
@@ -433,9 +426,10 @@ class ModelPanel1D(PlotPanel):
                
     def _onsaveTXT(self, path):
         """
-            Save file as txt
+        Save file as txt
             
-            TODO: Refactor and remove this method. See TODO in _onSave.
+        :TODO: Refactor and remove this method. See TODO in _onSave.
+        
         """
         data = self.plots[self.graph.selected_plottable]
        
@@ -476,10 +470,11 @@ class ModelPanel1D(PlotPanel):
                 
     def _onSave(self, evt):
         """
-            Save a data set to a text file
-            @param evt: Menu event
+        Save a data set to a text file
+        
+        :param evt: Menu event
+        
         """
-       
         id = str(evt.GetId())
         if id in self.action_ids:         
             
@@ -512,12 +507,3 @@ class ModelPanel1D(PlotPanel):
                 except:
                     pass    
             dlg.Destroy()
-            
-            
-    
-            
-           
-    
-    
-    
-       

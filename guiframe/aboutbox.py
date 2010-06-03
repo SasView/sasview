@@ -39,22 +39,26 @@ except:
     import config
 
 def launchBrowser(url):
-    '''Launches browser and opens specified url
+    """
+    Launches browser and opens specified url
     
     In some cases may require BROWSER environment variable to be set up.
     
-    @param url: URL to open
-    '''
+    :param url: URL to open
+    
+    """
     import webbrowser
     webbrowser.open(url)
 
 
 class DialogAbout(wx.Dialog):
-    '''"About" Dialog
+    """
+    "About" Dialog
     
     Shows product name, current version, authors, and link to the product page.
     Current version is taken from version.py
-    '''
+    
+    """
     
     def __init__(self, *args, **kwds):
 
@@ -146,8 +150,9 @@ class DialogAbout(wx.Dialog):
 
         self.Fit()
         
-
     def __set_properties(self):
+        """
+        """
         # begin wxGlade: DialogAbout.__set_properties
         self.SetTitle("About")
         self.SetSize((600, 595))
@@ -162,6 +167,8 @@ class DialogAbout(wx.Dialog):
         # end wxGlade
 
     def __do_layout(self):
+        """
+        """
         # begin wxGlade: DialogAbout.__do_layout
         sizer_main = wx.BoxSizer(wx.VERTICAL)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
@@ -206,15 +213,24 @@ class DialogAbout(wx.Dialog):
         self.Centre()
         # end wxGlade
 
-    def onNsfLogo(self, event): # wxGlade: DialogAbout.<event_handler>
+    def onNsfLogo(self, event): 
+        """
+        """
+        # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._nsf_url)
         event.Skip()
 
-    def onDanseLogo(self, event): # wxGlade: DialogAbout.<event_handler>
+    def onDanseLogo(self, event):
+        """
+        """
+        # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._danse_url)
         event.Skip()
 
-    def onUTLogo(self, event): # wxGlade: DialogAbout.<event_handler>
+    def onUTLogo(self, event):
+        """
+        """ 
+        # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._inst_url)
         event.Skip()
 

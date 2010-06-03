@@ -1,16 +1,19 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-If you use DANSE applications to do scientific research that leads to 
-publication, we ask that you acknowledge the use of the software with the 
-following sentence:
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#If you use DANSE applications to do scientific research that leads to 
+#publication, we ask that you acknowledge the use of the software with the 
+#following sentence:
+#
+#"This work benefited from DANSE software developed under NSF award DMR-0520547." 
+#
+#copyright 2008, University of Tennessee
+################################################################################
 
-"This work benefited from DANSE software developed under NSF award DMR-0520547." 
 
-copyright 2008, University of Tennessee
-"""
 ##Todo: cleaning up, improving the maskplotpanel initialization, and testing.
 import wx
 import sys
@@ -46,7 +49,7 @@ else:
             
 class MaskPanel(wx.Dialog):
     """
-        Provides the Mask Editor GUI.
+    Provides the Mask Editor GUI.
     """
     ## Internal nickname for the window, used by the AUI manager
     window_name = "Mask Editor"
@@ -56,7 +59,8 @@ class MaskPanel(wx.Dialog):
     CENTER_PANE = True
     def __init__(self, parent=None,base=None,data =None, id = -1, *args, **kwds):
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
-        wx.Dialog.__init__(self, parent, id = id,  size=wx.Size(_STATICBOX_WIDTH*2,PANEL_SIZE), *args, **kwds)
+        kwds["size"] = wx.Size(_STATICBOX_WIDTH*2,PANEL_SIZE) 
+        wx.Dialog.__init__(self, parent, id = id,  *args, **kwds)
         if data != None:
             
             #Font size 
@@ -98,7 +102,7 @@ class MaskPanel(wx.Dialog):
             
     def ShowMessage(self, msg=''):
         """
-            Show error message when mask covers whole data area
+        Show error message when mask covers whole data area
         """
         mssg = 'Erase, redraw or clear the mask. \n\r'
         mssg += 'The data range can not be completely masked... \n\r'
@@ -108,7 +112,7 @@ class MaskPanel(wx.Dialog):
     
     def _setup_layout(self):
         """
-            Set up the layout
+        Set up the layout
         """
         shape = "Select a Shape for Masking:"
         
@@ -194,7 +198,7 @@ class MaskPanel(wx.Dialog):
 
     def onInnerBoxMask(self,event=None):
         """
-            Call Draw Box Slicer and get mask inside of the box
+        Call Draw Box Slicer and get mask inside of the box
         """
         #get ready for next evt
         event.Skip()        
@@ -213,7 +217,7 @@ class MaskPanel(wx.Dialog):
     
     def onOuterBoxMask(self,event=None):
         """
-            Call Draw Box Slicer and get mask outside of the box
+        Call Draw Box Slicer and get mask outside of the box
         """
         event.Skip()        
         from boxMask import BoxMask
@@ -231,7 +235,7 @@ class MaskPanel(wx.Dialog):
         
     def onInnerSectorMask(self,event=None):
         """
-            Call Draw Sector Slicer and get mask inside of the sector
+        Call Draw Sector Slicer and get mask inside of the sector
         """
         event.Skip()
         from sectorMask import SectorMask
@@ -249,7 +253,7 @@ class MaskPanel(wx.Dialog):
         
     def onOuterSectorMask(self,event=None):
         """
-            Call Draw Sector Slicer and get mask outside of the sector
+        Call Draw Sector Slicer and get mask outside of the sector
         """
         event.Skip()
         from sectorMask import SectorMask
@@ -267,7 +271,7 @@ class MaskPanel(wx.Dialog):
         
     def onInnerRingMask(self, event=None):
         """
-            Perform inner circular cut on Phi and draw circular slicer
+        Perform inner circular cut on Phi and draw circular slicer
         """
         event.Skip()
         from AnnulusSlicer import CircularMask
@@ -285,7 +289,7 @@ class MaskPanel(wx.Dialog):
         
     def onOuterRingMask(self, event=None):
         """
-            Perform outer circular cut on Phi and draw circular slicer
+        Perform outer circular cut on Phi and draw circular slicer
         """
         event.Skip()
         from AnnulusSlicer import CircularMask
@@ -301,7 +305,7 @@ class MaskPanel(wx.Dialog):
         
     def onAddMask(self, event):
         """
-            Add new mask to old mask 
+        Add new mask to old mask 
         """
         if not self.slicer==None:
             data = Data2D()
@@ -313,15 +317,17 @@ class MaskPanel(wx.Dialog):
             
     def _check_display_mask(self, mask, event):
         """
-            check if the mask valid and update the plot
-            @param mask: mask data
+        check if the mask valid and update the plot
+        
+        :param mask: mask data
+        
         """
         ## Redraw the current image
         self._update_mask(mask)
 
     def onEraseMask(self, event):
         """
-            Erase new mask from old mask
+        Erase new mask from old mask
         """
         if not self.slicer==None:
             self.slicer_mask = self.slicer.update()
@@ -332,9 +338,8 @@ class MaskPanel(wx.Dialog):
             
     def onResetMask(self, event):
         """
-            Reset mask to the original mask 
-        """
-                    
+        Reset mask to the original mask 
+        """        
         self.slicer_z += 1
         self.slicer =  BoxMask(self, self.subplot, zorder=self.slicer_z, side=True)
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
@@ -348,7 +353,7 @@ class MaskPanel(wx.Dialog):
         
     def onClearMask(self, event):
         """
-            Clear mask
+        Clear mask
         """            
         self.slicer_z += 1
         self.slicer =  BoxMask(self, self.subplot, zorder=self.slicer_z, side=True)
@@ -364,21 +369,21 @@ class MaskPanel(wx.Dialog):
         
     def onClearSlicer(self, event):
         """
-            Clear the slicer on the plot
+        Clear the slicer on the plot
         """
         if not self.slicer==None:
             self.slicer.clear()
             self.subplot.figure.canvas.draw()
             self.slicer = None
 
-            
     def _setSlicer(self):
         """
-            Clear the previous slicer and create a new one.Post an internal
-            event.
-            @param slicer: slicer class to create
-        """
+        Clear the previous slicer and create a new one.Post an internal
+        event.
         
+        :param slicer: slicer class to create
+        
+        """
         ## Clear current slicer
         if not self.slicer == None:  
             self.slicer.clear()            
@@ -402,20 +407,20 @@ class MaskPanel(wx.Dialog):
    
     def update(self, draw=True):
         """
-            Respond to changes in the model by recalculating the 
-            profiles and resetting the widgets.
+        Respond to changes in the model by recalculating the 
+        profiles and resetting the widgets.
         """
         self.plotpanel.draw()
         
     def _set_mask(self, mask):
         """
-            Set mask"
+        Set mask
         """
         self.data.mask = mask
         
     def _update_mask(self,mask):
         """
-            Respond to changes in masking
+        Respond to changes in masking
         """ 
         # the case of liitle numbers of True points
         if (len(mask[mask])<10 and self.data !=None):
@@ -481,7 +486,7 @@ class MaskPanel(wx.Dialog):
         
     def _getEmptySlicerEvent(self):
         """
-            create an empty slicervent 
+        create an empty slicervent 
         """
         self.innerbox_rb.SetValue(False)
         self.outerbox_rb.SetValue(False)
@@ -496,23 +501,36 @@ class MaskPanel(wx.Dialog):
              
     def _draw_model(self,event):
         """
-            on_close, update the model2d plot
+         on_close, update the model2d plot
         """
         pass
         
     def freeze_axes(self):
+        """
+        """
         self.plotpanel.axes_frozen = True
+        
     def thaw_axes(self):
-        self.plotpanel.axes_frozen = False        
+        """
+        """
+        self.plotpanel.axes_frozen = False       
+         
     def onMouseMotion(self,event):
+        """
+        """
         pass
+    
     def onWheel(self, event):
+        """
+        """
         pass  
            
 class Maskplotpanel(PlotPanel):
-    
-    def __init__(self, parent, id = -1, color = None,\
-        dpi = None, **kwargs):
+    """
+    """
+    def __init__(self, parent, id = -1, color = None, dpi = None, **kwargs):
+        """
+        """
         PlotPanel.__init__(self, parent, id=id, color=color, dpi=dpi, **kwargs)
         
         # Keep track of the parent Frame
@@ -524,19 +542,21 @@ class Maskplotpanel(PlotPanel):
         
     def add_toolbar(self):
         """ 
-            Add toolbar
+        Add toolbar
         """
         # Not implemented
         pass
     def on_set_focus(self, event):
         """
-            send to the parenet the current panel on focus
+        send to the parenet the current panel on focus
         """
         #change the panel background
         #self.SetColor((170, 202, 255))
         self.draw()   
          
     def add_image(self, plot):
+        """
+        """
         self.plots[plot.name] = plot
         #init graph
         self.gaph = Graph()
@@ -551,13 +571,13 @@ class Maskplotpanel(PlotPanel):
         
     def onMouseMotion(self, event):
         """
-            Disable dragging 2D image
+        Disable dragging 2D image
         """
         pass
    
     def onContextMenu(self, event):
         """
-            Default context menu for a plot panel
+        Default context menu for a plot panel
         """
         # Slicer plot popup menu
         slicerpop = wx.Menu()
@@ -575,12 +595,12 @@ class Maskplotpanel(PlotPanel):
 
 class ViewerFrame(wx.Frame):
     """
-        Add comment
+    Add comment
     """
     def __init__(self, parent, id, title):
         """
-            comment
-            @param parent: parent panel/container
+        comment
+        :param parent: parent panel/container
         """
         # Initialize the Frame object
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, wx.Size(950,850))

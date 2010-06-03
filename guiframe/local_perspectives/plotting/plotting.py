@@ -1,13 +1,15 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
 
-copyright 2008, University of Tennessee
-"""
 
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2008, University of Tennessee
+################################################################################
 
 import wx
 import sys
@@ -17,12 +19,12 @@ from sans.guicomm.events import StatusEvent
 
 class Plugin:
     """
-        Plug-in class to be instantiated by the GUI manager
+    Plug-in class to be instantiated by the GUI manager
     """
     
     def __init__(self):
         """
-            Initialize the plug-in
+        Initialize the plug-in
         """
         ## Plug-in name
         self.sub_menu = "Plotting"
@@ -38,10 +40,12 @@ class Plugin:
        
     def populate_menu(self, id, parent):
         """
-            Create a 'Plot' menu to list the panels
-            available for displaying
-            @param id: next available unique ID for wx events
-            @param parent: parent window
+        Create a 'Plot' menu to list the panels
+        available for displaying
+        
+        :param id: next available unique ID for wx events
+        :param parent: parent window
+        
         """
         self.menu = wx.Menu()
         
@@ -50,23 +54,20 @@ class Plugin:
         self.menu.FindItemByPosition(0).Enable(False)
         return [(id, self.menu, "Plot")]
     
-        
     def get_panels(self, parent):
         """
-            Create and return a list of panel objects
+        Create and return a list of panel objects
         """
         ## Save a reference to the parent
         self.parent = parent
         # Connect to plotting events
         self.parent.Bind(EVT_NEW_PLOT, self._on_plot_event)
         # We have no initial panels for this plug-in
-        
         return []
    
-    
     def get_perspective(self):
         """
-            Get the list of panel names for this perspective
+        Get the list of panel names for this perspective
         """
         return self.perspective
     
@@ -81,11 +82,10 @@ class Plugin:
     
     def post_init(self):
         """
-            Post initialization call back to close the loose ends
-            [Somehow openGL needs this call]
+        Post initialization call back to close the loose ends
+        [Somehow openGL needs this call]
         """
         pass
-    
     
     def _on_show_panel(self, event):
         """show plug-in panel"""
@@ -94,10 +94,12 @@ class Plugin:
     
     def _on_plot_event(self, event):
         """
-            A new plottable is being shipped to the plotting plug-in.
-            Check whether we have a panel to put in on, or create
-            a new one
-            @param event: EVT_NEW_PLOT event
+        A new plottable is being shipped to the plotting plug-in.
+        Check whether we have a panel to put in on, or create
+        a new one
+        
+        :param event: EVT_NEW_PLOT event
+        
         """
         # Check whether we already have a graph with the same units
         # as the plottable we just received. 

@@ -9,7 +9,7 @@ from sans.guicomm.events import SlicerParameterEvent
 
 class SectorMask(_BaseInteractor):
     """
-         Draw a sector slicer.Allow to find the data 2D inside of the sector lines
+    Draw a sector slicer.Allow to find the data 2D inside of the sector lines
     """
     def __init__(self,base,axes,color='gray', zorder=3, side = False):
         
@@ -55,7 +55,7 @@ class SectorMask(_BaseInteractor):
         
     def clear(self):
         """
-            Clear the slicer and all connected events related to this slicer
+        Clear the slicer and all connected events related to this slicer
         """
         self.clear_markers()
         self.main_line.clear()
@@ -67,8 +67,8 @@ class SectorMask(_BaseInteractor):
         
     def update(self):
         """
-            Respond to changes in the model by recalculating the profiles and
-            resetting the widgets.
+        Respond to changes in the model by recalculating the profiles and
+        resetting the widgets.
         """
         # Update locations  
         ## Check if the middle line was dragged and update the picture accordingly     
@@ -109,7 +109,7 @@ class SectorMask(_BaseInteractor):
 
     def _post_data(self):
         """
-            compute sector averaging of data into data1D
+        compute sector averaging of data into data1D
         """
         ## get the data to average
         data = self.base.data
@@ -135,7 +135,7 @@ class SectorMask(_BaseInteractor):
 
     def moveend(self, ev):
         """
-            Called a dragging motion ends.Get slicer event 
+        Called a dragging motion ends.Get slicer event 
         """
         self.base.thaw_axes()
         ## Post parameters
@@ -168,8 +168,10 @@ class SectorMask(_BaseInteractor):
         
     def get_params(self):
         """
-            Store a copy of values of parameters of the slicer into a dictionary.
-            @return params: the dictionary created
+        Store a copy of values of parameters of the slicer into a dictionary.
+        
+        :return params: the dictionary created
+        
         """
         params = {}
         ## Always make sure that the left and the right line are at phi 
@@ -181,12 +183,12 @@ class SectorMask(_BaseInteractor):
         params["Delta_Phi"] = math.fabs(self.left_line.phi)
         return params
     
-    
     def set_params(self, params):
         """
-            Receive a dictionary and reset the slicer with values contained 
-            in the values of the dictionary.
-            @param params: a dictionary containing name of slicer parameters and 
+        Receive a dictionary and reset the slicer with values contained 
+        in the values of the dictionary.
+        
+        :param params: a dictionary containing name of slicer parameters and 
             values the user assigned to the slicer.
         """
         main = params["Phi"] 
@@ -201,15 +203,18 @@ class SectorMask(_BaseInteractor):
         ## post the new corresponding data
         self._post_data()
         
-        
     def freeze_axes(self):
+        """
+        """
         self.base.freeze_axes()
         
-        
     def thaw_axes(self):
+        """
+        """
         self.base.thaw_axes()
 
-
     def draw(self):
+        """
+        """
         self.base.update()
         

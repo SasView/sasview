@@ -1,19 +1,22 @@
+
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2008, University of Tennessee
+################################################################################
+
 """
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
-
-See the license text in license.txt
-
-copyright 2008, University of Tennessee
-
 How-to build an application using guiframe:
 
- 1- Write a main application script along the lines of dummyapp.py
- 2- Write a config script along the lines of config.py, and name it local_config.py
- 3- Write your plug-ins and place them in a directory called "perspectives".
-     - Look at local_perspectives/plotting for an example of a plug-in.
-     - A plug-in should define a class called Plugin. See abstract class below.
+1- Write a main application script along the lines of dummyapp.py
+2- Write a config script along the lines of config.py, and name it local_config.py
+3- Write your plug-ins and place them in a directory called "perspectives".
+    - Look at local_perspectives/plotting for an example of a plug-in.
+    - A plug-in should define a class called Plugin. See abstract class below.
 
 """
 #TODO: rewrite the status bar monstrosity
@@ -48,7 +51,7 @@ import logging
 
 def quit_guiframe(parent=None):
     """
-        Pop up message to make sure the user wants to quit the application
+    Pop up message to make sure the user wants to quit the application
     """
     message = "Do you really want to quit \n"
     message += "this application?"
@@ -61,22 +64,22 @@ def quit_guiframe(parent=None):
     
 class Plugin:
     """
-        This class defines the interface for a Plugin class
-        that can be used by the gui_manager.
+    This class defines the interface for a Plugin class
+    that can be used by the gui_manager.
+    
+    Plug-ins should be placed in a sub-directory called "perspectives".
+    For example, a plug-in called Foo should be place in "perspectives/Foo".
+    That directory contains at least two files:
+        perspectives/Foo/__init.py contains two lines:
         
-        Plug-ins should be placed in a sub-directory called "perspectives".
-        For example, a plug-in called Foo should be place in "perspectives/Foo".
-        That directory contains at least two files:
-            perspectives/Foo/__init.py contains two lines:
+            PLUGIN_ID = "Foo plug-in 1.0"
+            from Foo import *
             
-                PLUGIN_ID = "Foo plug-in 1.0"
-                from Foo import *
-                
-            perspectives/Foo/Foo.py contains the definition of the Plugin
-            class for the Foo plug-in. The interface of that Plugin class
-            should follow the interface of the class you are looking at.
-            
-        See dummyapp.py for a plugin example.
+        perspectives/Foo/Foo.py contains the definition of the Plugin
+        class for the Foo plug-in. The interface of that Plugin class
+        should follow the interface of the class you are looking at.
+        
+    See dummyapp.py for a plugin example.
     """
     
     def __init__(self, name="Test_plugin"):
@@ -96,26 +99,30 @@ class Plugin:
         
     def populate_menu(self, id, parent):
         """
-            Create and return the list of application menu
-            items for the plug-in. 
-            
-            @param id: deprecated. Un-used.
-            @param parent: parent window
-            @return: plug-in menu
+        Create and return the list of application menu
+        items for the plug-in. 
+        
+        :param id: deprecated. Un-used.
+        :param parent: parent window
+        
+        :return: plug-in menu
+        
         """
         return []
     
     def get_panels(self, parent):
         """
-            Create and return the list of wx.Panels for your plug-in.
-            Define the plug-in perspective.
-            
-            Panels should inherit from DefaultPanel defined below,
-            or should present the same interface. They must define
-            "window_caption" and "window_name".
-            
-            @param parent: parent window
-            @return: list of panels
+        Create and return the list of wx.Panels for your plug-in.
+        Define the plug-in perspective.
+        
+        Panels should inherit from DefaultPanel defined below,
+        or should present the same interface. They must define
+        "window_caption" and "window_name".
+        
+        :param parent: parent window
+        
+        :return: list of panels
+        
         """
         ## Save a reference to the parent
         self.parent = parent
@@ -125,70 +132,74 @@ class Plugin:
     
     def get_tools(self):
         """
-            Returns a set of menu entries for tools
+        Returns a set of menu entries for tools
         """
         return []
         
     
     def get_context_menu(self, graph=None):
         """
-            This method is optional.
+        This method is optional.
+    
+        When the context menu of a plot is rendered, the 
+        get_context_menu method will be called to give you a 
+        chance to add a menu item to the context menu.
         
-            When the context menu of a plot is rendered, the 
-            get_context_menu method will be called to give you a 
-            chance to add a menu item to the context menu.
-            
-            A ref to a Graph object is passed so that you can
-            investigate the plot content and decide whether you
-            need to add items to the context menu.  
-            
-            This method returns a list of menu items.
-            Each item is itself a list defining the text to 
-            appear in the menu, a tool-tip help text, and a
-            call-back method.
-            
-            @param graph: the Graph object to which we attach the context menu
-            @return: a list of menu items with call-back function
+        A ref to a Graph object is passed so that you can
+        investigate the plot content and decide whether you
+        need to add items to the context menu.  
+        
+        This method returns a list of menu items.
+        Each item is itself a list defining the text to 
+        appear in the menu, a tool-tip help text, and a
+        call-back method.
+        
+        :param graph: the Graph object to which we attach the context menu
+        
+        :return: a list of menu items with call-back function
+        
         """
         return []
     
     def get_perspective(self):
         """
-            Get the list of panel names for this perspective
+        Get the list of panel names for this perspective
         """
         return self.perspective
     
     def on_perspective(self, event):
         """
-            Call back function for the perspective menu item.
-            We notify the parent window that the perspective
-            has changed.
-            @param event: menu event
+        Call back function for the perspective menu item.
+        We notify the parent window that the perspective
+        has changed.
+        
+        :param event: menu event
+        
         """
         self.parent.set_perspective(self.perspective)
     
     def post_init(self):
         """
-            Post initialization call back to close the loose ends
+        Post initialization call back to close the loose ends
         """
         pass
     
     def set_default_perspective(self):
         """
-           Call back method that True to notify the parent that the current plug-in
-           can be set as default  perspective.
-           when returning False, the plug-in is not candidate for an automatic 
-           default perspective setting
+       Call back method that True to notify the parent that the current plug-in
+       can be set as default  perspective.
+       when returning False, the plug-in is not candidate for an automatic 
+       default perspective setting
         """
         return False
 
 class ViewerFrame(wx.Frame):
     """
-        Main application frame
+    Main application frame
     """
     def __init__(self, parent, id, title, window_height=300, window_width=300):
         """
-            Initialize the Frame object
+        Initialize the Frame object
         """
         from local_perspectives.plotting import plotting
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(window_width, window_height))
@@ -257,30 +268,29 @@ class ViewerFrame(wx.Frame):
         
     def set_panel_on_focus(self, event):
         """
-            Store reference to the last panel on focus
+        Store reference to the last panel on focus
         """
         self.panel_on_focus = event.panel
         
     def build_gui(self):
+        """
+        """
         # Set up the layout
         self._setup_layout()
         
         # Set up the menu
         self._setup_menus()
-        
         #self.Fit()
-        
         #self._check_update(None)
              
     def _setup_layout(self):
         """
-            Set up the layout
+        Set up the layout
         """
         # Status bar
         from statusbar import StatusBar
         self.sb = StatusBar(self, wx.ID_ANY)
         self.SetStatusBar(self.sb)
-
         # Add panel
         self._mgr = wx.aui.AuiManager(self)
         self._mgr.SetDockSizeConstraint(0.5, 0.5) 
@@ -291,21 +301,27 @@ class ViewerFrame(wx.Frame):
         self._mgr.Update()
         
     def SetStatusText(self, *args, **kwds):
+        """
+        """
         number = self.sb.get_msg_position()
         wx.Frame.SetStatusText(number=number, *args, **kwds)
         
     def PopStatusText(self, *args, **kwds):
+        """
+        """
         field = self.sb.get_msg_position()
         wx.Frame.PopStatusText(field=field)
         
     def PushStatusText(self, *args, **kwds):
+        """
+        """
         field = self.sb.get_msg_position()
         wx.Frame.PushStatusText(self, field=field,string=string)
 
     def add_perspective(self, plugin):
         """
-            Add a perspective if it doesn't already
-            exist.
+        Add a perspective if it doesn't already
+        exist.
         """
         is_loaded = False
         for item in self.plugins:
@@ -318,9 +334,12 @@ class ViewerFrame(wx.Frame):
       
     def _find_plugins(self, dir="perspectives"):
         """
-            Find available perspective plug-ins
-            @param dir: directory in which to look for plug-ins
-            @return: list of plug-ins
+        Find available perspective plug-ins
+        
+        :param dir: directory in which to look for plug-ins
+        
+        :return: list of plug-ins
+        
         """
         import imp
         
@@ -366,14 +385,16 @@ class ViewerFrame(wx.Frame):
     
     def set_welcome_panel(self, panel_class):
         """
-           Sets the default panel as the given welcome panel 
-           @param panel_class: class of the welcome panel to be instantiated
+        Sets the default panel as the given welcome panel 
+        
+        :param panel_class: class of the welcome panel to be instantiated
+        
         """
-        self.defaultPanel    = panel_class(self, -1, style=wx.RAISED_BORDER)
+        self.defaultPanel = panel_class(self, -1, style=wx.RAISED_BORDER)
         
     def _load_panels(self):
         """
-            Load all panels in the panels directory
+        Load all panels in the panels directory
         """
         
         # Look for plug-in panels
@@ -433,9 +454,9 @@ class ViewerFrame(wx.Frame):
       
     def get_context_menu(self, graph=None):
         """
-            Get the context menu items made available 
-            by the different plug-ins. 
-            This function is used by the plotting module
+        Get the context menu items made available 
+        by the different plug-ins. 
+        This function is used by the plotting module
         """
         menu_list = []
         for item in self.plugins:
@@ -446,11 +467,13 @@ class ViewerFrame(wx.Frame):
         
     def popup_panel(self, p):
         """
-            Add a panel object to the AUI manager
-            @param p: panel object to add to the AUI manager
-            @return: ID of the event associated with the new panel [int]
-        """
+        Add a panel object to the AUI manager
         
+        :param p: panel object to add to the AUI manager
+        
+        :return: ID of the event associated with the new panel [int]
+        
+        """
         ID = wx.NewId()
         self.panels[str(ID)] = p
         
@@ -500,7 +523,7 @@ class ViewerFrame(wx.Frame):
         
     def _setup_menus(self):
         """
-            Set up the application menus
+        Set up the application menus
         """
         # Menu
         menubar = wx.MenuBar()
@@ -612,30 +635,28 @@ class ViewerFrame(wx.Frame):
                 for (self.next_id, menu, name) in item.populate_menu(self.next_id, self):
                     menubar.Append(menu, name)
                    
-
         menubar.Append(helpmenu, '&Help')
-         
         self.SetMenuBar(menubar)
-        
-        
-        
+    
     def _on_status_event(self, evt):
         """
-            Display status message
+        Display status message
         """
         self.sb.set_status(event=evt)
        
     def _on_view(self, evt):
         """
-            A panel was selected to be shown. If it's not already
-            shown, display it.
-            @param evt: menu event
+        A panel was selected to be shown. If it's not already
+        shown, display it.
+        
+        :param evt: menu event
+        
         """
         self.show_panel(evt.GetId())
         
     def on_close_welcome_panel(self):
         """
-            Close the welcome panel
+        Close the welcome panel
         """
         if self.defaultPanel is None:
             return 
@@ -646,7 +667,7 @@ class ViewerFrame(wx.Frame):
         
     def show_welcome_panel(self, event):
         """    
-            Display the welcome panel
+        Display the welcome panel
         """
         if self.defaultPanel is None:
             return 
@@ -661,8 +682,10 @@ class ViewerFrame(wx.Frame):
         
     def show_panel(self, uid):
         """
-            Shows the panel with the given id
-            @param uid: unique ID number of the panel to show
+        Shows the panel with the given id
+        
+        :param uid: unique ID number of the panel to show
+        
         """
         ID = str(uid)
         config.printEVT("show_panel: %s" % ID)
@@ -671,8 +694,7 @@ class ViewerFrame(wx.Frame):
                 self._mgr.GetPane(self.panels[ID].window_name).Show()
                 # Hide default panel
                 self._mgr.GetPane(self.panels["default"].window_name).Hide()
-            
-                
+        
             self._mgr.Update()
    
     def _on_open(self, event):
@@ -686,11 +708,9 @@ class ViewerFrame(wx.Frame):
         if path and os.path.isfile(path):
             plot_data(self, path)
            
-        
-        
     def _onClose(self, event):
         """
-            Store info to retrieve in xml before closing the application
+        Store info to retrieve in xml before closing the application
         """
         try:
             doc = xml.dom.minidom.Document()
@@ -710,8 +730,7 @@ class ViewerFrame(wx.Frame):
                 pt1.appendChild(pt3)
                 
                 main_node.appendChild(pt1)
-                
-               
+            
             fd = open("fileOpened.xml",'w')
             fd.write(doc.toprettyxml())
             fd.close()
@@ -721,11 +740,10 @@ class ViewerFrame(wx.Frame):
         import sys
         wx.Exit()
         sys.exit()
-                   
-                   
+                     
     def Close(self, event=None):
         """
-            Quit the application
+        Quit the application
         """
         flag = quit_guiframe(parent=self)
         if flag:
@@ -736,10 +754,10 @@ class ViewerFrame(wx.Frame):
 
     def _check_update(self, event=None): 
         """
-            Check with the deployment server whether a new version
-            of the application is available.
-            A thread is started for the connecting with the server. The thread calls
-            a call-back method when the current version number has been obtained.
+        Check with the deployment server whether a new version
+        of the application is available.
+        A thread is started for the connecting with the server. The thread calls
+        a call-back method when the current version number has been obtained.
         """
         if hasattr(config, "__update_URL__"):
             import version
@@ -748,13 +766,15 @@ class ViewerFrame(wx.Frame):
     
     def _process_version(self, version, standalone=True):
         """
-            Call-back method for the process of checking for updates.
-            This methods is called by a VersionThread object once the current
-            version number has been obtained. If the check is being done in the
-            background, the user will not be notified unless there's an update.
-            
-            @param version: version string
-            @param standalone: True of the update is being checked in the background, False otherwise.
+        Call-back method for the process of checking for updates.
+        This methods is called by a VersionThread object once the current
+        version number has been obtained. If the check is being done in the
+        background, the user will not be notified unless there's an update.
+        
+        :param version: version string
+        :param standalone: True of the update is being checked in 
+           the background, False otherwise.
+           
         """
         try:
             if cmp(version, config.__version__)>0:
@@ -773,8 +793,10 @@ class ViewerFrame(wx.Frame):
         
     def _onAbout(self, evt):
         """
-            Pop up the about dialog
-            @param evt: menu event
+        Pop up the about dialog
+        
+        :param evt: menu event
+        
         """
         if config._do_aboutbox:
             import aboutbox 
@@ -783,7 +805,7 @@ class ViewerFrame(wx.Frame):
             
     def _onreloaFile(self, event):  
         """
-            load a data previously opened 
+        load a data previously opened 
         """
         from data_loader import plot_data
         for item in self.filePathList:
@@ -793,20 +815,20 @@ class ViewerFrame(wx.Frame):
                     plot_data(self, path)
                     break
             
-        
     def set_manager(self, manager):
         """
-            Sets the application manager for this frame
-            @param manager: frame manager
+        Sets the application manager for this frame
+        
+        :param manager: frame manager
         """
         self.app_manager = manager
         
     def post_init(self):
         """
-            This initialization method is called after the GUI 
-            has been created and all plug-ins loaded. It calls
-            the post_init() method of each plug-in (if it exists)
-            so that final initialization can be done.
+        This initialization method is called after the GUI 
+        has been created and all plug-ins loaded. It calls
+        the post_init() method of each plug-in (if it exists)
+        so that final initialization can be done.
         """
         for item in self.plugins:
             if hasattr(item, "post_init"):
@@ -814,9 +836,9 @@ class ViewerFrame(wx.Frame):
         
     def set_default_perspective(self):
         """
-            Choose among the plugin the first plug-in that has 
-            "set_default_perspective" method and its return value is True will be
-            as a default perspective when the welcome page is closed
+        Choose among the plugin the first plug-in that has 
+        "set_default_perspective" method and its return value is True will be
+        as a default perspective when the welcome page is closed
         """
         for item in self.plugins:
             if hasattr(item, "set_default_perspective"):
@@ -826,11 +848,11 @@ class ViewerFrame(wx.Frame):
             
     def set_perspective(self, panels):
         """
-            Sets the perspective of the GUI.
-            Opens all the panels in the list, and closes
-            all the others.
-            
-            @param panels: list of panels
+        Sets the perspective of the GUI.
+        Opens all the panels in the list, and closes
+        all the others.
+        
+        :param panels: list of panels
         """
         for item in self.panels:
             # Check whether this is a sticky panel
@@ -849,8 +871,8 @@ class ViewerFrame(wx.Frame):
         
     def choose_file(self, path=None):
         """ 
-            Functionality that belongs elsewhere
-            Should add a hook to specify the preferred file type/extension.
+        Functionality that belongs elsewhere
+        Should add a hook to specify the preferred file type/extension.
         """
         #TODO: clean this up
         from data_loader import choose_data_file
@@ -889,22 +911,22 @@ class ViewerFrame(wx.Frame):
                         id, menuitem_name , path, title = item
                         self.n_fileOpen += 1
                         label = str(self.n_fileOpen)+". "+ title
-                        #self.filemenu.FindItemById(id).SetItemLabel(label)
-                        
-                          
+                        #self.filemenu.FindItemById(id).SetItemLabel(label)   
             except:
                 raise
                 #pass
         return path
     
     def load_ascii_1D(self, path):
+        """
+        """
         from data_loader import load_ascii_1D
         return load_ascii_1D(path)
                   
 class DefaultPanel(wx.Panel):
     """
-        Defines the API for a panels to work with
-        the GUI manager
+    Defines the API for a panels to work with
+    the GUI manager
     """
     ## Internal nickname for the window, used by the AUI manager
     window_name = "default"
@@ -916,8 +938,11 @@ class DefaultPanel(wx.Panel):
   
 # Toy application to test this Frame
 class ViewApp(wx.App):
+    """
+    """
     def OnInit(self):
-        #from gui_manager import ViewerFrame
+        """
+        """
         self.frame = ViewerFrame(None, -1, config.__appname__)    
         self.frame.Show(True)
 
@@ -928,28 +953,30 @@ class ViewApp(wx.App):
     
     def set_manager(self, manager):
         """
-            Sets a reference to the application manager
-            of the GUI manager (Frame) 
+        Sets a reference to the application manager
+        of the GUI manager (Frame) 
         """
         self.frame.set_manager(manager)
         
     def build_gui(self):
         """
-            Build the GUI
+        Build the GUI
         """
         self.frame.build_gui()
         self.frame.post_init()
         
     def set_welcome_panel(self, panel_class):
         """
-            Set the welcome panel
-            @param panel_class: class of the welcome panel to be instantiated
+        Set the welcome panel
+        
+        :param panel_class: class of the welcome panel to be instantiated
+        
         """
         self.frame.set_welcome_panel(panel_class)
         
     def add_perspective(self, perspective):
         """
-            Manually add a perspective to the application GUI
+        Manually add a perspective to the application GUI
         """
         self.frame.add_perspective(perspective)
         
