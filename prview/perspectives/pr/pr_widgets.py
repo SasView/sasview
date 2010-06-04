@@ -1,15 +1,16 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2009, University of Tennessee
+################################################################################
 
-copyright 2009, University of Tennessee
 """
-
-"""
-    Text controls for input/output of the main PrView panel
+Text controls for input/output of the main PrView panel
 """
 
 import wx
@@ -17,8 +18,8 @@ import os
 
 class PrTextCtrl(wx.TextCtrl):
     """
-        Text control for model and fit parameters.
-        Binds the appropriate events for user interactions.
+    Text control for model and fit parameters.
+    Binds the appropriate events for user interactions.
     """
     def __init__(self, *args, **kwds):
         
@@ -34,17 +35,21 @@ class PrTextCtrl(wx.TextCtrl):
 
     def _on_set_focus(self, event):
         """
-            Catch when the text control is set in focus to highlight the whole
-            text if necessary
-            @param event: mouse event
+        Catch when the text control is set in focus to highlight the whole
+        text if necessary
+        
+        :param event: mouse event
+        
         """
         event.Skip()
         self.full_selection = True
         
     def _highlight_text(self, event):
         """
-            Highlight text of a TextCtrl only of no text has be selected
-            @param event: mouse event
+        Highlight text of a TextCtrl only of no text has be selected
+        
+        :param event: mouse event
+        
         """
         # Make sure the mouse event is available to other listeners
         event.Skip()
@@ -61,11 +66,13 @@ class PrTextCtrl(wx.TextCtrl):
 
 class OutputTextCtrl(wx.TextCtrl):
     """
-        Text control used to display outputs.
-        No editing allowed. The background is 
-        grayed out. User can't select text.
+    Text control used to display outputs.
+    No editing allowed. The background is 
+    grayed out. User can't select text.
     """
     def __init__(self, *args, **kwds):
+        """
+        """
         wx.TextCtrl.__init__(self, *args, **kwds)
         self.SetEditable(False)
         self.SetBackgroundColour(self.GetParent().GetBackgroundColour())
@@ -77,28 +84,30 @@ class OutputTextCtrl(wx.TextCtrl):
         
     def _click(self, event):
         """
-            Prevent further handling of the mouse event
-            by not calling Skip().
+        Prevent further handling of the mouse event
+        by not calling Skip().
         """ 
         pass
         
 
 class DataFileTextCtrl(OutputTextCtrl):
     """
-        Text control used to display only the file name
-        given a full path.
-         
-        TODO: now that we no longer choose the data file from the panel,
+    Text control used to display only the file name
+    given a full path.
+     
+    :TODO: now that we no longer choose the data file from the panel,
         it's no longer necessary to pass around the file path. That code
         should be refactored away and simplified. 
     """
     def __init__(self, *args, **kwds):
+        """
+        """
         OutputTextCtrl.__init__(self, *args, **kwds)
         self._complete_path = None
     
     def SetValue(self, value):
         """
-            Sets the file name given a path
+        Sets the file name given a path
         """
         self._complete_path = str(value)
         file = os.path.basename(self._complete_path)
@@ -106,6 +115,6 @@ class DataFileTextCtrl(OutputTextCtrl):
         
     def GetValue(self):
         """
-            Return the full path
+        Return the full path
         """
         return self._complete_path

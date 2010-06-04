@@ -1,12 +1,14 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2009, University of Tennessee
+################################################################################
 
-copyright 2009, University of Tennessee
-"""
 
 # Make sure the option of saving each curve is available 
 # Use the I(q) curve as input and compare the output to P(r)
@@ -38,12 +40,15 @@ import wx.lib
 
 
 class Plugin:
-    
+    """
+    """
     DEFAULT_ALPHA = 0.0001
     DEFAULT_NFUNC = 10
     DEFAULT_DMAX  = 140.0
     
     def __init__(self, standalone=True):
+        """
+        """
         ## Plug-in name
         self.sub_menu = "Pr inversion"
         
@@ -113,11 +118,12 @@ class Plugin:
         
     def set_state(self, state, datainfo=None):
         """
-            Call-back method for the inversion state reader.
-            This method is called when a .prv file is loaded.
-            
-            @param state: InversionState object
-            @param datainfo: Data1D object [optional]
+        Call-back method for the inversion state reader.
+        This method is called when a .prv file is loaded.
+        
+        :param state: InversionState object
+        :param datainfo: Data1D object [optional]
+        
         """
         try:
             if datainfo is None:
@@ -149,14 +155,16 @@ class Plugin:
 
     def populate_menu(self, id, owner):
         """
-            Create a menu for the plug-in
+        Create a menu for the plug-in
         """
         return []
     
     def help(self, evt):
         """
-            Show a general help dialog. 
-            TODO: replace the text with a nice image
+        Show a general help dialog. 
+        
+        :TODO: replace the text with a nice image
+        
         """
         from inversion_panel import HelpDialog
         dialog = HelpDialog(None, -1)
@@ -166,6 +174,8 @@ class Plugin:
             dialog.Destroy()
     
     def _fit_pr(self, evt):
+        """
+        """
         from sans.pr.invertor import Invertor
         import numpy
         import pylab
@@ -176,7 +186,6 @@ class Plugin:
         # Generate P(r) for sphere
         radius = 60.0
         d_max  = 2*radius
-        
         
         r = pylab.arange(0.01, d_max, d_max/51.0)
         M = len(r)
@@ -190,10 +199,7 @@ class Plugin:
             y[j] = value
             pr_err[j] = math.sqrt(y[j])
 
-            
         y = y/sum*d_max/len(r)
-
-
 
         # Perform fit
         pr = Invertor()
@@ -205,7 +211,6 @@ class Plugin:
         out, cov = pr.pr_fit()
         for i in range(len(out)):
             print "%g +- %g" % (out[i], math.sqrt(cov[i][i]))
-
 
         # Show input P(r)
         new_plot = Data1D(pr.x, pr.y, dy=pr.err)
@@ -221,8 +226,9 @@ class Plugin:
         q = pylab.arange(0.001, 0.1, 0.01/51.0)
         self.show_iq(out, pr, q)
         
-        
     def show_shpere(self, x, radius=70.0, x_range=70.0):
+        """
+        """
         import numpy
         import pylab
         import math
@@ -250,7 +256,7 @@ class Plugin:
         
     def get_npts(self):
         """
-            Returns the number of points in the I(q) data
+        Returns the number of points in the I(q) data
         """
         try:
             return len(self.pr.x)
@@ -258,6 +264,8 @@ class Plugin:
             return 0
         
     def show_iq(self, out, pr, q=None):
+        """
+        """
         import numpy
         import pylab
         import math
@@ -333,7 +341,7 @@ class Plugin:
         
     def _on_pr_npts(self, evt):
         """
-            Redisplay P(r) with a different number of points
+        Redisplay P(r) with a different number of points
         """   
         from inversion_panel import PrDistDialog
         dialog = PrDistDialog(None, -1)
@@ -347,6 +355,8 @@ class Plugin:
         
         
     def show_pr(self, out, pr, cov=None):
+        """
+        """
         import numpy
         import pylab
         import math
@@ -401,7 +411,6 @@ class Plugin:
         
     def choose_file(self, path=None):
         """
-        
         """
         #TODO: this should be in a common module
         return self.parent.choose_file(path=path)
@@ -409,8 +418,8 @@ class Plugin:
                 
     def load(self, path):
         """
-            Load data. This will eventually be replaced
-            by our standard DataLoader class.
+        Load data. This will eventually be replaced
+        by our standard DataLoader class.
         """
         class FileData:
             x = None
@@ -457,7 +466,7 @@ class Plugin:
                 
     def load_columns(self, path = "sphere_60_q0_2.txt"):
         """
-            Load 2- or 3- column ascii
+        Load 2- or 3- column ascii
         """
         import numpy, math, sys
         # Read the data from the data file
@@ -501,9 +510,12 @@ class Plugin:
         
     def load_abs(self, path):
         """
-            Load an IGOR .ABS reduced file
-            @param path: file path
-            @return: x, y, err vectors
+        Load an IGOR .ABS reduced file
+        
+        :param path: file path
+        
+        :return: x, y, err vectors
+        
         """
         import numpy, math, sys
         # Read the data from the data file
@@ -550,11 +562,8 @@ class Plugin:
                         
         return data_x, data_y, data_err     
         
-        
-        
     def pr_theory(self, r, R):
-        """
-           
+        """  
         """
         if r<=2*R:
             return 12.0* ((0.5*r/R)**2) * ((1.0-0.5*r/R)**2) * ( 2.0 + 0.5*r/R )
@@ -563,9 +572,12 @@ class Plugin:
 
     def get_context_menu(self, graph=None):
         """
-            Get the context menu items available for P(r)
-            @param graph: the Graph object to which we attach the context menu
-            @return: a list of menu items with call-back function
+        Get the context menu items available for P(r)
+        
+        :param graph: the Graph object to which we attach the context menu
+        
+        :return: a list of menu items with call-back function
+        
         """
         # Look whether this Graph contains P(r) data
         #if graph.selected_plottable==IQ_DATA_LABEL:
@@ -603,8 +615,10 @@ class Plugin:
 
     def _on_disable_scaling(self, evt):
         """
-            Disable P(r) scaling
-            @param evt: Menu event
+        Disable P(r) scaling
+            
+        :param evt: Menu event
+        
         """
         self._normalize_output = False
         self._scale_output_unity = False
@@ -622,10 +636,11 @@ class Plugin:
         
     def _on_normalize(self, evt):
         """
-            Normalize the area under the P(r) curve to 1.
-            This operation is done for all displayed plots.
-            
-            @param evt: Menu event
+        Normalize the area under the P(r) curve to 1.
+        This operation is done for all displayed plots.
+        
+        :param evt: Menu event
+        
         """
         self._normalize_output = True
         self._scale_output_unity = False
@@ -646,14 +661,13 @@ class Plugin:
             
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, update=True,
                                                    title=self._added_plots[plot].name))
-                
-        
         
     def _on_scale_unity(self, evt):
         """
-            Scale the maximum P(r) value on each displayed plot to 1.
-            
-            @param evt: Menu event
+        Scale the maximum P(r) value on each displayed plot to 1.
+        
+        :param evt: Menu event
+        
         """
         self._scale_output_unity = True
         self._normalize_output = False
@@ -679,8 +693,10 @@ class Plugin:
         
     def _on_add_data(self, evt):
         """
-            Add a data curve to the plot
-            WARNING: this will be removed once guiframe.plotting has its full functionality
+        Add a data curve to the plot
+        
+        :WARNING: this will be removed once guiframe.plotting has
+             its full functionality
         """
         path = self.choose_file()
         if path==None:
@@ -730,6 +746,8 @@ class Plugin:
         
 
     def start_thread(self):
+        """
+        """
         from pr_thread import CalcPr
         from copy import deepcopy
         
@@ -743,14 +761,18 @@ class Plugin:
         self.calc_thread.ready(2.5)
     
     def _thread_error(self, error):
+        """
+        """
         wx.PostEvent(self.parent, StatusEvent(status=error))
     
     def _estimate_completed(self, alpha, message, elapsed):
         """
-            Parameter estimation completed, 
-            display the results to the user
-            @param alpha: estimated best alpha
-            @param elapsed: computation time
+        Parameter estimation completed, 
+        display the results to the user
+        
+        :param alpha: estimated best alpha
+        :param elapsed: computation time
+        
         """
         # Save useful info
         self.elapsed = elapsed
@@ -764,11 +786,13 @@ class Plugin:
     
     def _estimateNT_completed(self, nterms, alpha, message, elapsed):
         """
-            Parameter estimation completed, 
-            display the results to the user
-            @param alpha: estimated best alpha
-            @param nterms: estimated number of terms
-            @param elapsed: computation time
+        Parameter estimation completed, 
+        display the results to the user
+        
+        :param alpha: estimated best alpha
+        :param nterms: estimated number of terms
+        :param elapsed: computation time
+        
         """
         # Save useful info
         self.elapsed = elapsed
@@ -779,13 +803,14 @@ class Plugin:
     
     def _completed(self, out, cov, pr, elapsed):
         """
-            Method called with the results when the inversion
-            is done
-            
-            @param out: output coefficient for the base functions
-            @param cov: covariance matrix
-            @param pr: Invertor instance
-            @param elapsed: time spent computing
+        Method called with the results when the inversion
+        is done
+        
+        :param out: output coefficient for the base functions
+        :param cov: covariance matrix
+        :param pr: Invertor instance
+        :param elapsed: time spent computing
+        
         """
         from copy import deepcopy
         # Save useful info
@@ -842,9 +867,11 @@ class Plugin:
         
     def show_data(self, path=None, reset=False):
         """
-            Show data read from a file
-            @param path: file path
-            @param reset: if True all other plottables will be cleared
+        Show data read from a file
+        
+        :param path: file path
+        :param reset: if True all other plottables will be cleared
+        
         """
         if path is not None:
             try:
@@ -882,12 +909,14 @@ class Plugin:
             
     def save_data(self, filepath, prstate=None):
         """
-            Save data in provided state object.
-            TODO: move the state code away from inversion_panel and move it here. 
-                    Then remove the "prstate" input and make this method private.
-                    
-            @param filepath: path of file to write to
-            @param prstate: P(r) inversion state 
+        Save data in provided state object.
+        
+        :TODO: move the state code away from inversion_panel and move it here. 
+                Then remove the "prstate" input and make this method private.
+                
+        :param filepath: path of file to write to
+        :param prstate: P(r) inversion state 
+        
         """
         #TODO: do we need this or can we use DataLoader.loader.save directly?
         
@@ -905,6 +934,8 @@ class Plugin:
         
     def setup_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None, 
                              bck=False, height=0, width=0):
+        """
+        """
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
@@ -924,6 +955,8 @@ class Plugin:
 
     def estimate_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None, 
                                 bck=False, height=0, width=0):
+        """
+        """
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
@@ -943,9 +976,11 @@ class Plugin:
 
     def _create_plot_pr(self, estimate=False):
         """
-            Create and prepare invertor instance from
-            a plottable data set.
-            @param path: path of the file to read in 
+        Create and prepare invertor instance from
+        a plottable data set.
+        
+        :param path: path of the file to read in 
+        
         """
         # Sanity check
         if self.current_plottable is None:
@@ -999,6 +1034,8 @@ class Plugin:
           
     def setup_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None, 
                              bck=False, height=0, width=0):
+        """
+        """
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
@@ -1018,6 +1055,8 @@ class Plugin:
           
     def estimate_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None, 
                                 bck=False, height=0, width=0):
+        """
+        """
         self.alpha = alpha
         self.nfunc = nfunc
         self.max_length = d_max
@@ -1038,9 +1077,11 @@ class Plugin:
           
     def _create_file_pr(self, path):
         """
-            Create and prepare invertor instance from
-            a file data set.
-            @param path: path of the file to read in 
+        Create and prepare invertor instance from
+        a file data set.
+        
+        :param path: path of the file to read in 
+        
         """
         # Load data
         if os.path.isfile(path):
@@ -1106,6 +1147,8 @@ class Plugin:
         return None
         
     def perform_estimate(self):
+        """
+        """
         from pr_thread import EstimatePr
         from copy import deepcopy
         
@@ -1121,6 +1164,8 @@ class Plugin:
         self.estimation_thread.ready(2.5)
     
     def perform_estimateNT(self):
+        """
+        """
         from pr_thread import EstimateNT
         from copy import deepcopy
         
@@ -1140,7 +1185,8 @@ class Plugin:
         self.estimation_thread.ready(2.5)
         
     def perform_inversion(self):
-        
+        """
+        """
         # Time estimate
         #estimated = self.elapsed*self.nfunc**2
         #message = "Computation time may take up to %g seconds" % self.elapsed
@@ -1160,8 +1206,6 @@ class Plugin:
                 print "%d: %g +- %g" % (i, out[i], math.sqrt(math.fabs(cov[i][i])))
             except: 
                 print "%d: %g +- ?" % (i, out[i])        
-        
-        
         
         # Make a plot of I(q) data
         new_plot = Data1D(self.pr.x, self.pr.y, dy=self.pr.err)

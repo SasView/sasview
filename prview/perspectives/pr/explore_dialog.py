@@ -1,17 +1,22 @@
+
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2009, University of Tennessee
+################################################################################
+
 """
-    Dialog panel to explore the P(r) inversion results for a range
-    of D_max value. User picks a number of points and a range of
-    distances, then can toggle between inversion outputs and see
-    their distribution as a function of D_max.
+Dialog panel to explore the P(r) inversion results for a range
+of D_max value. User picks a number of points and a range of
+distances, then can toggle between inversion outputs and see
+their distribution as a function of D_max.
+"""
     
-    This software was developed by the University of Tennessee as part of the
-    Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-    project funded by the US National Science Foundation. 
 
-    See the license text in license.txt
-
-    copyright 2009, University of Tennessee
-"""
 import wx
 import numpy
 import math
@@ -36,16 +41,17 @@ DEFAULT_OUTPUT = 'Chi2/dof'
 
 class OutputPlot(PlotPanel):
     """
-        Plot panel used to show the selected results as a function
-        of D_max
+    Plot panel used to show the selected results as a function
+    of D_max
     """
     def __init__(self, d_min, d_max, parent, id = -1, color = None,\
         dpi = None, style = wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
         """
-            Initialization. The parameters added to PlotPanel are:
-            
-            @param d_min: Minimum value of D_max to explore
-            @param d_max: Maximum value of D_max to explore
+        Initialization. The parameters added to PlotPanel are:
+        
+        :param d_min: Minimum value of D_max to explore
+        :param d_max: Maximum value of D_max to explore
+        
         """
         PlotPanel.__init__(self, parent, id = id, style = style, **kwargs)
 
@@ -73,9 +79,9 @@ class OutputPlot(PlotPanel):
 
     def onContextMenu(self, event):
         """
-            Default context menu for the plot panel
-            
-            #TODO: Would be nice to add printing and log/linear scales.
+        Default context menu for the plot panel
+        
+        :TODO: Would be nice to add printing and log/linear scales.
             The current verison of plottools no longer plays well with 
             plots outside of guiframe. Guiframe team needs to fix this. 
         """
@@ -94,16 +100,15 @@ class OutputPlot(PlotPanel):
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
 
-        
 class Results:
     """
-        Class to hold the inversion output parameters
-        as a function of D_max
+    Class to hold the inversion output parameters
+    as a function of D_max
     """
     def __init__(self):
         """
-            Initialization. Create empty arrays
-            and dictionary of labels.
+        Initialization. Create empty arrays
+        and dictionary of labels.
         """
         # Array of output for each inversion
         self.chi2 = []
@@ -127,16 +132,17 @@ class Results:
         
 class ExploreDialog(wx.Dialog):
     """
-        The explorer dialog box. This dialog is meant to be
-        invoked by the InversionControl class.
+    The explorer dialog box. This dialog is meant to be
+    invoked by the InversionControl class.
     """
     
     def __init__(self, pr_state, nfunc, *args, **kwds):
         """
-            Initialization. The parameters added to Dialog are:
-            
-            @param pr_state: sans.pr.invertor.Invertor object
-            @param nfunc: Number of terms in the expansion
+        Initialization. The parameters added to Dialog are:
+        
+        :param pr_state: sans.pr.invertor.Invertor object
+        :param nfunc: Number of terms in the expansion
+        
         """
         kwds["style"] = wx.RESIZE_BORDER|wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self, *args, **kwds)
@@ -173,7 +179,7 @@ class ExploreDialog(wx.Dialog):
         
     class Event:
         """
-            Class that holds the content of the form
+        Class that holds the content of the form
         """
         ## Number of points to be plotted
         npts   = 0
@@ -184,10 +190,11 @@ class ExploreDialog(wx.Dialog):
                 
     def _get_values(self, event=None):
         """
-            Invoked when the user changes a value of the form.
-            Check that the values are of the right type.
-            
-            @return: ExploreDialog.Event object if the content is good, None otherwise
+        Invoked when the user changes a value of the form.
+        Check that the values are of the right type.
+        
+        :return: ExploreDialog.Event object if the content is good, 
+            None otherwise
         """
         # Flag to make sure that all values are good
         flag = True
@@ -236,8 +243,8 @@ class ExploreDialog(wx.Dialog):
     
     def _plot_output(self, event=None):
         """
-            Invoked when a new output type is selected for plotting, 
-            or when a new computation is finished.
+        Invoked when a new output type is selected for plotting, 
+        or when a new computation is finished.
         """
         # Get the output type selection
         output_type = self.output_box.GetString(self.output_box.GetSelection())
@@ -263,7 +270,7 @@ class ExploreDialog(wx.Dialog):
         
     def __do_layout(self):
         """
-            Do the layout of the dialog
+        Do the layout of the dialog
         """
         # Dialog box properties
         self.SetTitle("D_max Explorer")
@@ -336,8 +343,8 @@ class ExploreDialog(wx.Dialog):
 
     def _recalc(self, event=None):
         """
-            Invoked when the user changed a value on the form.
-            Process the form and compute the output to be plottted.
+        Invoked when the user changed a value on the form.
+        Process the form and compute the output to be plottted.
         """
         # Get the content of the form
         content = self._get_values()
@@ -380,20 +387,23 @@ class ExploreDialog(wx.Dialog):
         self._plot_output()   
             
 ##### testing code ############################################################
+"""
+Example: ::
+
 class MyApp(wx.App):
-    """
-        Test application used to invoke the ExploreDialog for testing
-    """
+    
+    #Test application used to invoke the ExploreDialog for testing
+   
     def OnInit(self):
         from inversion_state import Reader
         from sans.pr.invertor import Invertor
         wx.InitAllImageHandlers()
         
         def call_back(state, datainfo=None):
-            """
-                Dummy call-back method used by the P(r) 
-                file reader.
-            """
+            
+            #Dummy call-back method used by the P(r) 
+            #file reader.
+            
             print state
             
         # Load test data
@@ -428,4 +438,5 @@ class MyApp(wx.App):
 if __name__ == "__main__":
     app = MyApp(0)
     app.MainLoop()
- 
+    
+""" 

@@ -1,5 +1,5 @@
 """
-    Application settings
+Application settings
 """
 import time
 

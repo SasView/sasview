@@ -1,0 +1,342 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pr_thread &mdash; prview v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="prview v0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="pr_widgets" href="pr_widgets.html" />
+    <link rel="prev" title="inversion_state" href="inversion_state.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pr_widgets.html" title="pr_widgets"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="inversion_state.html" title="inversion_state"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">prview v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="pr-thread">
+<h1>pr_thread<a class="headerlink" href="#pr-thread" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.perspectives.pr.pr_thread">
+<span id="sans-perspectives-pr-pr-thread"></span><h2><a class="reference internal" href="#module-sans.perspectives.pr.pr_thread"><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.pr.pr_thread</span></tt></a><a class="headerlink" href="#module-sans.perspectives.pr.pr_thread" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sans.perspectives.pr.pr_thread.CalcPr">
+<em class="property">class </em><tt class="descclassname">sans.perspectives.pr.pr_thread.</tt><tt class="descname">CalcPr</tt><big>(</big><em>pr</em>, <em>nfunc=5</em>, <em>error_func=None</em>, <em>completefn=None</em>, <em>updatefn=None</em>, <em>yieldtime=0.01</em>, <em>worktime=0.01</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.CalcPr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">data_util.calcthread.CalcThread</span></tt></p>
+<p>Compute P(r)</p>
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.CalcPr.complete">
+<tt class="descname">complete</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.CalcPr.complete" title="Permalink to this definition">¶</a></dt>
+<dd>Update the GUI with the completed results from a work unit.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.CalcPr.compute">
+<tt class="descname">compute</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.CalcPr.compute" title="Permalink to this definition">¶</a></dt>
+<dd>Perform P(r) inversion</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.CalcPr.interrupt">
+<tt class="descname">interrupt</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.CalcPr.interrupt" title="Permalink to this definition">¶</a></dt>
+<dd>Stop the current work item.  To clear the work queue as
+well call the stop() method.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.CalcPr.isquit">
+<tt class="descname">isquit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.CalcPr.isquit" title="Permalink to this definition">¶</a></dt>
+<dd>Check for interrupts.  Should be called frequently to
+provide user responsiveness.  Also yields to other running
+threads, which is required for good performance on OS X.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.CalcPr.isrunning">
+<tt class="descname">isrunning</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.CalcPr.isrunning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.CalcPr.queue">
+<tt class="descname">queue</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.CalcPr.queue" title="Permalink to this definition">¶</a></dt>
+<dd>Add a work unit to the end of the queue.  See the compute()
+method for details of the arguments to the work unit.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.CalcPr.ready">
+<tt class="descname">ready</tt><big>(</big><em>delay=0.0</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.CalcPr.ready" title="Permalink to this definition">¶</a></dt>
+<dd>Ready for another update after delay=t seconds.  Call
+this for threads which can show intermediate results from
+long calculations.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.CalcPr.requeue">
+<tt class="descname">requeue</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.CalcPr.requeue" title="Permalink to this definition">¶</a></dt>
+<dd>Replace the work unit on the end of the queue.  See the compute()
+method for details of the arguments to the work unit.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.CalcPr.reset">
+<tt class="descname">reset</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.CalcPr.reset" title="Permalink to this definition">¶</a></dt>
+<dd>Clear the queue and start a new work unit.  See the compute()
+method for details of the arguments to the work unit.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.CalcPr.stop">
+<tt class="descname">stop</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.CalcPr.stop" title="Permalink to this definition">¶</a></dt>
+<dd>Clear the queue and stop the thread.  New items may be
+queued after stop.  To stop just the current work item, and
+continue the rest of the queue call the interrupt method</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.CalcPr.update">
+<tt class="descname">update</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.CalcPr.update" title="Permalink to this definition">¶</a></dt>
+<dd>Update GUI with the lastest results from the current work unit.</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.perspectives.pr.pr_thread.EstimateNT">
+<em class="property">class </em><tt class="descclassname">sans.perspectives.pr.pr_thread.</tt><tt class="descname">EstimateNT</tt><big>(</big><em>pr</em>, <em>nfunc=5</em>, <em>error_func=None</em>, <em>completefn=None</em>, <em>updatefn=None</em>, <em>yieldtime=0.01</em>, <em>worktime=0.01</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimateNT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">data_util.calcthread.CalcThread</span></tt></p>
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimateNT.complete">
+<tt class="descname">complete</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimateNT.complete" title="Permalink to this definition">¶</a></dt>
+<dd>Update the GUI with the completed results from a work unit.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimateNT.compute">
+<tt class="descname">compute</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimateNT.compute" title="Permalink to this definition">¶</a></dt>
+<dd>Calculates the estimate</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimateNT.interrupt">
+<tt class="descname">interrupt</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimateNT.interrupt" title="Permalink to this definition">¶</a></dt>
+<dd>Stop the current work item.  To clear the work queue as
+well call the stop() method.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimateNT.isquit">
+<tt class="descname">isquit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimateNT.isquit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimateNT.isrunning">
+<tt class="descname">isrunning</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimateNT.isrunning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimateNT.queue">
+<tt class="descname">queue</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimateNT.queue" title="Permalink to this definition">¶</a></dt>
+<dd>Add a work unit to the end of the queue.  See the compute()
+method for details of the arguments to the work unit.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimateNT.ready">
+<tt class="descname">ready</tt><big>(</big><em>delay=0.0</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimateNT.ready" title="Permalink to this definition">¶</a></dt>
+<dd>Ready for another update after delay=t seconds.  Call
+this for threads which can show intermediate results from
+long calculations.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimateNT.requeue">
+<tt class="descname">requeue</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimateNT.requeue" title="Permalink to this definition">¶</a></dt>
+<dd>Replace the work unit on the end of the queue.  See the compute()
+method for details of the arguments to the work unit.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimateNT.reset">
+<tt class="descname">reset</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimateNT.reset" title="Permalink to this definition">¶</a></dt>
+<dd>Clear the queue and start a new work unit.  See the compute()
+method for details of the arguments to the work unit.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimateNT.stop">
+<tt class="descname">stop</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimateNT.stop" title="Permalink to this definition">¶</a></dt>
+<dd>Clear the queue and stop the thread.  New items may be
+queued after stop.  To stop just the current work item, and
+continue the rest of the queue call the interrupt method</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimateNT.update">
+<tt class="descname">update</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimateNT.update" title="Permalink to this definition">¶</a></dt>
+<dd>Update GUI with the lastest results from the current work unit.</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.perspectives.pr.pr_thread.EstimatePr">
+<em class="property">class </em><tt class="descclassname">sans.perspectives.pr.pr_thread.</tt><tt class="descname">EstimatePr</tt><big>(</big><em>pr</em>, <em>nfunc=5</em>, <em>error_func=None</em>, <em>completefn=None</em>, <em>updatefn=None</em>, <em>yieldtime=0.01</em>, <em>worktime=0.01</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimatePr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">data_util.calcthread.CalcThread</span></tt></p>
+<p>Estimate P(r)</p>
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimatePr.complete">
+<tt class="descname">complete</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimatePr.complete" title="Permalink to this definition">¶</a></dt>
+<dd>Update the GUI with the completed results from a work unit.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimatePr.compute">
+<tt class="descname">compute</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimatePr.compute" title="Permalink to this definition">¶</a></dt>
+<dd>Calculates the estimate</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimatePr.interrupt">
+<tt class="descname">interrupt</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimatePr.interrupt" title="Permalink to this definition">¶</a></dt>
+<dd>Stop the current work item.  To clear the work queue as
+well call the stop() method.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimatePr.isquit">
+<tt class="descname">isquit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimatePr.isquit" title="Permalink to this definition">¶</a></dt>
+<dd>Check for interrupts.  Should be called frequently to
+provide user responsiveness.  Also yields to other running
+threads, which is required for good performance on OS X.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimatePr.isrunning">
+<tt class="descname">isrunning</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimatePr.isrunning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimatePr.queue">
+<tt class="descname">queue</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimatePr.queue" title="Permalink to this definition">¶</a></dt>
+<dd>Add a work unit to the end of the queue.  See the compute()
+method for details of the arguments to the work unit.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimatePr.ready">
+<tt class="descname">ready</tt><big>(</big><em>delay=0.0</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimatePr.ready" title="Permalink to this definition">¶</a></dt>
+<dd>Ready for another update after delay=t seconds.  Call
+this for threads which can show intermediate results from
+long calculations.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimatePr.requeue">
+<tt class="descname">requeue</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimatePr.requeue" title="Permalink to this definition">¶</a></dt>
+<dd>Replace the work unit on the end of the queue.  See the compute()
+method for details of the arguments to the work unit.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimatePr.reset">
+<tt class="descname">reset</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimatePr.reset" title="Permalink to this definition">¶</a></dt>
+<dd>Clear the queue and start a new work unit.  See the compute()
+method for details of the arguments to the work unit.</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimatePr.stop">
+<tt class="descname">stop</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimatePr.stop" title="Permalink to this definition">¶</a></dt>
+<dd>Clear the queue and stop the thread.  New items may be
+queued after stop.  To stop just the current work item, and
+continue the rest of the queue call the interrupt method</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr_thread.EstimatePr.update">
+<tt class="descname">update</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr_thread.EstimatePr.update" title="Permalink to this definition">¶</a></dt>
+<dd>Update GUI with the lastest results from the current work unit.</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pr_thread</a><ul>
+<li><a class="reference internal" href="#module-sans.perspectives.pr.pr_thread"><tt class="docutils literal"><span class="pre">sans.perspectives.pr.pr_thread</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="inversion_state.html"
+                        title="previous chapter">inversion_state</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pr_widgets.html"
+                        title="next chapter">pr_widgets</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/perspectives/pr/pr_thread.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pr_widgets.html" title="pr_widgets"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="inversion_state.html" title="inversion_state"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">prview v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b1.
+    </div>
+  </body>
+</html>

@@ -16,6 +16,8 @@ from pr_widgets import PrTextCtrl, DataFileTextCtrl, OutputTextCtrl
 
 
 class InversionControl(ScrolledPanel):
+    """
+    """
     window_name = 'pr_control'
     window_caption = "P(r) control panel"
     CENTER_PANE = True
@@ -26,6 +28,8 @@ class InversionControl(ScrolledPanel):
     oscillation_max = 1.5
     
     def __init__(self, parent, id = -1, plots = None, standalone=False, **kwargs):
+        """
+        """
         ScrolledPanel.__init__(self, parent, id = id, **kwargs)
         self.SetupScrolling()
         
@@ -84,7 +88,7 @@ class InversionControl(ScrolledPanel):
         
     def __setattr__(self, name, value):
         """
-            Allow direct hooks to text boxes
+        Allow direct hooks to text boxes
         """
         if name=='nfunc':
             self.nfunc_ctl.SetValue(str(int(value)))
@@ -137,7 +141,7 @@ class InversionControl(ScrolledPanel):
         
     def __getattr__(self, name):
         """
-            Allow direct hooks to text boxes
+        Allow direct hooks to text boxes
         """
         if name=='nfunc':
             try:
@@ -233,9 +237,9 @@ class InversionControl(ScrolledPanel):
         
     def _save_state(self, evt=None):
         """
-            Method used to create a memento of the current state
+        Method used to create a memento of the current state
             
-            @return: state object 
+        :return: state object 
         """
         # Ask the user the location of the file to write to.
         path = None
@@ -289,12 +293,12 @@ class InversionControl(ScrolledPanel):
     
     def set_state(self, state):
         """
-            Set the state of the panel and inversion problem to
-            the state passed as a parameter.
-            Execute the inversion immediately after filling the 
-            controls.
-            
-            @param state: InversionState object
+        Set the state of the panel and inversion problem to
+        the state passed as a parameter.
+        Execute the inversion immediately after filling the 
+        controls.
+        
+        :param state: InversionState object
         """
         if state.nfunc is not None:
             self.nfunc = state.nfunc
@@ -637,8 +641,8 @@ class InversionControl(ScrolledPanel):
         
     def _on_accept_alpha(self, evt):
         """
-            User has accepted the estimated alpha, 
-            set it as part of the input parameters
+        User has accepted the estimated alpha, 
+        set it as part of the input parameters
         """
         try:
             alpha = self.alpha_estimate_ctl.GetLabel()
@@ -652,8 +656,8 @@ class InversionControl(ScrolledPanel):
     
     def _on_accept_nterms(self, evt):
         """
-            User has accepted the estimated number of terms, 
-            set it as part of the input parameters
+        User has accepted the estimated number of terms, 
+        set it as part of the input parameters
         """
         try:
             nterms = self.nterms_estimate_ctl.GetLabel()
@@ -667,7 +671,7 @@ class InversionControl(ScrolledPanel):
         
     def _on_reset(self, evt):
         """
-            Resets inversion parameters
+        Resets inversion parameters
         """
         self.nfunc = self.manager.DEFAULT_NFUNC
         self.d_max = self.manager.DEFAULT_DMAX
@@ -690,9 +694,9 @@ class InversionControl(ScrolledPanel):
         
     def _on_pars_changed(self, evt=None):
         """
-            Called when an input parameter has changed
-            We will estimate the alpha parameter behind the
-            scenes. 
+        Called when an input parameter has changed
+        We will estimate the alpha parameter behind the
+        scenes. 
         """
         flag, alpha, dmax, nfunc, qmin, qmax, height, width = self._read_pars()
         has_bck = self.bck_chk.IsChecked()
@@ -710,7 +714,9 @@ class InversionControl(ScrolledPanel):
                                                  height=height,
                                                  width=width)
         
-    def _read_pars(self, evt=None):    
+    def _read_pars(self, evt=None):
+        """
+        """    
         alpha = 0
         nfunc = 5
         dmax  = 120
@@ -817,7 +823,7 @@ class InversionControl(ScrolledPanel):
     
     def _on_explore(self, evt):
         """
-            Invoke the d_max exploration dialog
+        Invoke the d_max exploration dialog
         """
         from explore_dialog import ExploreDialog
         if self.manager._last_pr is not None:
@@ -830,8 +836,10 @@ class InversionControl(ScrolledPanel):
             
     def _on_invert(self, evt):
         """
-            Perform inversion
-            @param silent: when True, there will be no output for the user 
+        Perform inversion
+        
+        :param silent: when True, there will be no output for the user 
+        
         """
         # Get the data from the form
         # Push it to the manager
@@ -857,7 +865,7 @@ class InversionControl(ScrolledPanel):
         
     def _change_file(self, evt=None, filepath=None):
         """
-            Choose a new input file for I(q)
+        Choose a new input file for I(q)
         """
         import os
         if not self.manager==None:
@@ -877,7 +885,11 @@ class InversionControl(ScrolledPanel):
                     logging.error("InversionControl._change_file: %s" % sys.exc_value)                    
 
 class HelpDialog(wx.Dialog):
+    """
+    """
     def __init__(self, parent, id):
+        """
+        """
         from sans.pr.invertor import help
         wx.Dialog.__init__(self, parent, id, size=(400, 420))
         self.SetTitle("P(r) help") 
@@ -912,8 +924,8 @@ class HelpDialog(wx.Dialog):
 
 class PrDistDialog(wx.Dialog):
     """
-        Property dialog to let the user change the number
-        of points on the P(r) plot.
+    Property dialog to let the user change the number
+    of points on the P(r) plot.
     """
     def __init__(self, parent, id):
         from sans.pr.invertor import help
@@ -955,7 +967,7 @@ class PrDistDialog(wx.Dialog):
 
     def _checkValues(self, event):
         """
-            Check the dialog content.
+        Check the dialog content.
         """
         flag = True
         try:
@@ -971,20 +983,23 @@ class PrDistDialog(wx.Dialog):
 
     def get_content(self):
         """
-            Return the content of the dialog.
-            At this point the values have already been
-            checked.
+        Return the content of the dialog.
+        At this point the values have already been
+        checked.
         """
         value = int(self.npts_ctl.GetValue())
         return value
     
     def set_content(self, npts):
         """
-            Initialize the content of the dialog.
+        Initialize the content of the dialog.
         """
         self.npts_ctl.SetValue("%i" % npts)
 
 ##### testing code ############################################################
+"""
+Example: ::
+
 class TestPlot:
     def __init__(self, text):
         self.name = text
@@ -1005,4 +1020,5 @@ if __name__ == "__main__":
     app = MyApp(0)
     app.MainLoop()
     
+"""
 ##### end of testing code #####################################################    

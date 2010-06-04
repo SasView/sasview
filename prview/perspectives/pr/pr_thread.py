@@ -3,7 +3,7 @@ from data_util.calcthread import CalcThread
 
 class CalcPr(CalcThread):
     """
-        Compute P(r)
+    Compute P(r)
     """
     
     def __init__(self, pr, nfunc=5, error_func=None,
@@ -12,6 +12,8 @@ class CalcPr(CalcThread):
                  yieldtime  = 0.01,
                  worktime   = 0.01
                  ):
+        """
+        """
         CalcThread.__init__(self,completefn,
                  updatefn,
                  yieldtime,
@@ -23,7 +25,7 @@ class CalcPr(CalcThread):
         
     def compute(self):
         """
-            Perform P(r) inversion
+        Perform P(r) inversion
         """
         try:
             self.starttime = time.time()
@@ -41,7 +43,7 @@ class CalcPr(CalcThread):
 
 class EstimatePr(CalcThread):
     """
-        Estimate P(r)
+    Estimate P(r)
     """
     
     def __init__(self, pr, nfunc=5, error_func=None,
@@ -61,7 +63,7 @@ class EstimatePr(CalcThread):
         
     def compute(self):
         """
-            Calculates the estimate
+        Calculates the estimate
         """
         try:            
             alpha, message, elapsed = self.pr.estimate_alpha(self.nfunc)
@@ -75,7 +77,8 @@ class EstimatePr(CalcThread):
                 self.error_func("EstimatePr.compute: %s" % sys.exc_value)
 
 class EstimateNT(CalcThread):
-    
+    """
+    """
     def __init__(self, pr, nfunc=5, error_func=None,
                  completefn = None,
                  updatefn   = None,
@@ -95,6 +98,8 @@ class EstimateNT(CalcThread):
 
 
     def isquit(self):
+        """
+        """
         CalcThread.isquit(self)
         if time.time()>self._time_for_sleep+self._sleep_delay:
             time.sleep(.2)
@@ -102,7 +107,7 @@ class EstimateNT(CalcThread):
 
     def compute(self):
         """
-            Calculates the estimate
+        Calculates the estimate
         """
         try:            
             t_0 = time.time()

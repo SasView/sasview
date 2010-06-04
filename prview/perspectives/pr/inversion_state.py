@@ -1,12 +1,15 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2009, University of Tennessee
+################################################################################
 
-copyright 2009, University of Tennessee
-"""
+
 import time, os, sys
 import logging
 import DataLoader
@@ -21,7 +24,7 @@ CANSAS_NS = "cansas1d/1.0"
 
 # Translation of names between stored and object data
 ## List of P(r) inversion inputs 
-in_list=  [["nterms",       "nfunc"],
+in_list =  [["nterms",       "nfunc"],
            ["d_max",        "d_max"],
            ["alpha",        "alpha"],
            ["slit_width",   "width"],
@@ -30,7 +33,7 @@ in_list=  [["nterms",       "nfunc"],
            ["qmax",         "qmax"]]                      
 
 ## List of P(r) inversion outputs
-out_list= [["elapsed", "elapsed"],
+out_list = [["elapsed", "elapsed"],
            ["rg",      "rg"],
            ["iq0",     "iq0"],
            ["bck",     "bck"],
@@ -43,11 +46,11 @@ out_list= [["elapsed", "elapsed"],
 
 class InversionState(object):
     """
-        Class to hold the state information of the InversionControl panel.
+    Class to hold the state information of the InversionControl panel.
     """
     def __init__(self):
         """
-            Default values
+        Default values
         """
         # Input 
         self.file  = None
@@ -92,9 +95,10 @@ class InversionState(object):
     
     def __str__(self):
         """
-            Pretty print
-            
-            @return: string representing the state
+        Pretty print
+        
+        :return: string representing the state
+        
         """
         state  = "File:         %s\n" % self.file
         state += "Timestamp:    %s\n" % self.timestamp
@@ -127,15 +131,17 @@ class InversionState(object):
         
     def toXML(self, file="pr_state.prv", doc=None, entry_node=None):
         """
-            Writes the state of the InversionControl panel to file, as XML.
-            
-            Compatible with standalone writing, or appending to an
-            already existing XML document. In that case, the XML document
-            is required. An optional entry node in the XML document may also be given.
-            
-            @param file: file to write to
-            @param doc: XML document object [optional]
-            @param entry_node: XML node within the XML document at which we will append the data [optional]
+        Writes the state of the InversionControl panel to file, as XML.
+        
+        Compatible with standalone writing, or appending to an
+        already existing XML document. In that case, the XML document
+        is required. An optional entry node in the XML document may also be given.
+        
+        :param file: file to write to
+        :param doc: XML document object [optional]
+        :param entry_node: XML node within the XML document at which 
+            we will append the data [optional]
+        
         """
         from xml.dom.minidom import getDOMImplementation
 
@@ -212,10 +218,11 @@ class InversionState(object):
 
     def fromXML(self, file=None, node=None):
         """
-            Load a P(r) inversion state from a file
-            
-            @param file: .prv file
-            @param node: node of a XML document to read from
+        Load a P(r) inversion state from a file
+        
+        :param file: .prv file
+        :param node: node of a XML document to read from
+        
         """
         if file is not None:
             raise RuntimeError, "InversionState no longer supports non-CanSAS format for P(r) files"
@@ -327,7 +334,7 @@ class InversionState(object):
     
 class Reader(CansasReader):
     """
-        Class to load a .prv P(r) inversion file
+    Class to load a .prv P(r) inversion file
     """
     ## File type
     type_name = "P(r)"
@@ -339,11 +346,12 @@ class Reader(CansasReader):
     
     def __init__(self, call_back, cansas=True):
         """
-            Initialize the call-back method to be called
-            after we load a file
-            @param call_back: call-back method
-            @param cansas:  True = files will be written/read in CanSAS format
-                            False = write CanSAS format
+        Initialize the call-back method to be called
+        after we load a file
+        
+        :param call_back: call-back method
+        :param cansas:  True = files will be written/read in CanSAS format
+                        False = write CanSAS format
             
         """
         ## Call back method to be executed after a file is read
@@ -353,10 +361,12 @@ class Reader(CansasReader):
         
     def read(self, path):
         """ 
-            Load a new P(r) inversion state from file
-            
-            @param path: file path
-            @return: None
+        Load a new P(r) inversion state from file
+        
+        :param path: file path
+        
+        :return: None
+        
         """
         if self.cansas==True:
             return self._read_cansas(path)
@@ -365,11 +375,13 @@ class Reader(CansasReader):
         
     def _read_standalone(self, path):
         """ 
-            Load a new P(r) inversion state from file.
-            The P(r) node is assumed to be the top element.
-            
-            @param path: file path
-            @return: None
+        Load a new P(r) inversion state from file.
+        The P(r) node is assumed to be the top element.
+        
+        :param path: file path
+        
+        :return: None
+        
         """
         # Read the new state from file
         state = InversionState()
@@ -381,9 +393,12 @@ class Reader(CansasReader):
     
     def _parse_prstate(self, entry):
         """
-            Read a p(r) inversion result from an XML node
-            @param entry: XML node to read from 
-            @return: InversionState object
+        Read a p(r) inversion result from an XML node
+        
+        :param entry: XML node to read from 
+        
+        :return: InversionState object
+        
         """
         # Create an empty state
         state = InversionState()
@@ -399,14 +414,17 @@ class Reader(CansasReader):
     
     def _read_cansas(self, path):
         """ 
-            Load data and P(r) information from a CanSAS XML file.
-            
-            @param path: file path
-            @return: Data1D object if a single SASentry was found, 
-                        or a list of Data1D objects if multiple entries were found,
-                        or None of nothing was found
-            @raise RuntimeError: when the file can't be opened
-            @raise ValueError: when the length of the data vectors are inconsistent
+        Load data and P(r) information from a CanSAS XML file.
+        
+        :param path: file path
+        
+        :return: Data1D object if a single SASentry was found, 
+                    or a list of Data1D objects if multiple entries were found,
+                    or None of nothing was found
+                    
+        :raise RuntimeError: when the file can't be opened
+        :raise ValueError: when the length of the data vectors are inconsistent
+        
         """
         output = []
         
@@ -447,13 +465,13 @@ class Reader(CansasReader):
     
     def write(self, filename, datainfo=None, prstate=None):
         """
-            Write the content of a Data1D as a CanSAS XML file
-            
-            @param filename: name of the file to write
-            @param datainfo: Data1D object
-            @param prstate: InversionState object
+        Write the content of a Data1D as a CanSAS XML file
+        
+        :param filename: name of the file to write
+        :param datainfo: Data1D object
+        :param prstate: InversionState object
+        
         """
-
         # Sanity check
         if self.cansas == True:
             if datainfo is None:

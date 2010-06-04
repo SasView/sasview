@@ -12,12 +12,19 @@ APP_HEIGHT = 780
 APP_WIDTH  = 850
 
 class PrFrame(gui_manager.ViewerFrame):
+    """
+    """
     def _on_open(self, event):
+        """
+        """
         wx.PostEvent(self, NewPrFileEvent())
 
 class PrApp(gui_manager.ViewApp):
+    """
+    """
     def OnInit(self):
-        
+        """
+        """
         # Check the size of the screen
         # Add some padding to make sure to clear any OS tool bar
         screen_size = wx.GetDisplaySize()
@@ -34,10 +41,10 @@ class PrApp(gui_manager.ViewApp):
         return True
     
 class SansView():
-    
+    """
+    """
     def __init__(self):
         """
-        
         """
         #from gui_manager import ViewApp
         #self.gui = gui_manager.ViewApp(0) 
