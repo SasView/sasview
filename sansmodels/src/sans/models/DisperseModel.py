@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 """ 
-	Wrapper for the Disperser class extension
+Wrapper for the Disperser class extension
 
-    @author: Mathieu Doucet / UTK
-    @contact: mathieu.doucet@nist.gov
+:author: Mathieu Doucet / UTK
+
+:contact: mathieu.doucet@nist.gov
+
 """
 
 from sans.models.BaseComponent import BaseComponent
@@ -11,25 +13,31 @@ from sans_extension.c_models import Disperser
     
 class DisperseModel(Disperser, BaseComponent):
     """ 
-		Wrapper class for the Disperser extension
-		Python class that takes a model and averages its output
-		for a distribution of its parameters.
-		  
-		The parameters to be varied are specified at instantiation time.
-		The distributions are Gaussian, with std deviations specified for
-		each parameter at instantiation time.
+	Wrapper class for the Disperser extension
+	Python class that takes a model and averages its output
+	for a distribution of its parameters.
+	  
+	The parameters to be varied are specified at instantiation time.
+	The distributions are Gaussian, with std deviations specified for
+	each parameter at instantiation time.
+	
+	Example: ::
+	
+		cyl = ModelFactory().getModel("CylinderModel")
+		disp = DisperseModel(cyl, ['cyl_phi'], [0.3])
+		disp.run([0.01, 1.57])
 		
-		Example:
-			cyl = ModelFactory().getModel("CylinderModel")
-			disp = DisperseModel(cyl, ['cyl_phi'], [0.3])
-			disp.run([0.01, 1.57])
     """
         
     def __init__(self, model, paramList, sigmaList):
-        """ Initialization 
-        	@param model: Model to disperse [BaseComponent]
-        	@param paramList: list of parameters to disperse [List of strings]
-        	@param sigmaList: list of std deviations for Gaussian dispersion [List of floats]
+        """ 
+        Initialization 
+        
+    	:param model: Model to disperse [BaseComponent]
+    	:param paramList: list of parameters to disperse [List of strings]
+    	:param sigmaList: list of std deviations for Gaussian dispersion
+					[List of floats]
+        
         """
         
         # Initialize BaseComponent first, then sphere
@@ -42,34 +50,47 @@ class DisperseModel(Disperser, BaseComponent):
         self.description=''
         #list of parameter that cannot be fitted
         self.fixed= []
+        
     def clone(self):
         """ Return a identical copy of self """
         obj = DisperseModel(self.model, self.params['paramList'], self.params['sigmaList'])
         return obj   
    
     def setParam(self, name, value):
+    	"""
+    	"""
     	if name.lower() in self.params:
     		BaseComponent.setParam(self, name, value)
     	else:
     		self.model.setParam(name, value)
    
     def getParam(self, name):
+    	"""
+    	"""
     	if name.lower() in self.params:
     		return BaseComponent.getParam(self, name)
     	else:
     		return self.model.getParam(name)
    
     def run(self, x = 0.0):
-        """ Evaluate the model
-            @param x: input q, or [q,phi]
-            @return: scattering function P(q)
+        """ 
+        Evaluate the model
+            
+        :param x: input q, or [q,phi]
+        
+        :return: scattering function P(q)
+        
         """
         return Disperser.run(self, x)
            
     def runXY(self, x = 0.0):
-        """ Evaluate the model
-            @param x: input q, or [q,phi]
-            @return: scattering function P(q)
+        """ 
+        Evaluate the model
+        
+        :param x: input q, or [q,phi]
+        
+      	:return: scattering function P(q)
+      	
         """
         return Disperser.runXY(self, x)
    

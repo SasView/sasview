@@ -1,6 +1,7 @@
 #!/usr/bin/env python
+
 """ 
-    Provide base functionality for all model components
+Provide base functionality for all model components
 """
 
 # imports   
@@ -11,16 +12,16 @@ import numpy
 
 class BaseComponent:
     """ 
-        Basic model component
-        
-        Since version 0.5.0, basic operations are no longer supported.
+    Basic model component
+    
+    Since version 0.5.0, basic operations are no longer supported.
     """
 
     def __init__(self):
         """ Initialization"""
         
         ## Name of the model
-        self.name   = "BaseComponent"
+        self.name = "BaseComponent"
         
         ## Parameters to be accessed by client
         self.params = {}
@@ -40,14 +41,17 @@ class BaseComponent:
            
     def __str__(self):
         """ 
-            @return: string representation
+        :return: string representatio
+
         """
         return self.name
    
     def is_fittable(self, par_name):
         """
-            Check if a given parameter is fittable or not
-            @param par_name: the parameter name to check 
+        Check if a given parameter is fittable or not
+        
+        :param par_name: the parameter name to check 
+        
         """
         return par_name.lower() in self.fixed
         #For the future
@@ -58,36 +62,40 @@ class BaseComponent:
     def calculate_ER(self): return NotImplemented  
     def evalDistribution(self, qdist):
         """
-            Evaluate a distribution of q-values.
-            
-            * For 1D, a numpy array is expected as input:
-            
-                evalDistribution(q)
-                
-            where q is a numpy array.
-            
-            
-            * For 2D, a list of numpy arrays are expected: [qx_prime,qy_prime],
-            where 1D arrays,
-            
-            qx_prime = [ qx[0], qx[1], qx[2], ....]
-            and
-            qy_prime = [ qy[0], qy[1], qy[2], ....] 
-            
-            Then get
-            q = numpy.sqrt(qx_prime^2+qy_prime^2)
-            
-            that is a qr in 1D array;
-            q = [q[0], q[1], q[2], ....] 
-            Note: Due to 2D speed issue, no anisotropic scattering is supported for python models, 
-            thus C-models should have their own evalDistribution methods.
-            
-            The method is then called the following way:
-            
+        Evaluate a distribution of q-values.
+        
+        * For 1D, a numpy array is expected as input:
+        
             evalDistribution(q)
-            where q is a numpy array.
             
-            @param qdist: ndarray of scalar q-values or list [qx,qy] where qx,qy are 1D ndarrays 
+        where q is a numpy array.
+        
+        
+        * For 2D, a list of numpy arrays are expected: [qx_prime,qy_prime],
+          where 1D arrays,
+        
+        qx_prime = [ qx[0], qx[1], qx[2], ....]
+        and
+        qy_prime = [ qy[0], qy[1], qy[2], ....] 
+        
+        Then get
+        q = numpy.sqrt(qx_prime^2+qy_prime^2)
+        
+        that is a qr in 1D array;
+        q = [q[0], q[1], q[2], ....] 
+        
+        :Note: Due to 2D speed issue, no anisotropic scattering 
+            is supported for python models, thus C-models should have
+             their own evalDistribution methods.
+        
+        The method is then called the following way:
+        
+        evalDistribution(q)
+        where q is a numpy array.
+        
+        :param qdist: ndarray of scalar q-values or list [qx,qy] 
+                    where qx,qy are 1D ndarrays 
+        
         """
         if qdist.__class__.__name__ == 'list':
             # Check whether we have a list of ndarrays [qx,qy]
@@ -130,8 +138,8 @@ class BaseComponent:
     
     def _clone(self, obj):
         """
-            Internal utility function to copy the internal
-            data members to a fresh copy.
+        Internal utility function to copy the internal
+        data members to a fresh copy.
         """
         obj.params     = copy.deepcopy(self.params)
         obj.details    = copy.deepcopy(self.details)
@@ -141,10 +149,11 @@ class BaseComponent:
 
     def setParam(self, name, value):
         """ 
-            Set the value of a model parameter
+        Set the value of a model parameter
+    
+        :param name: name of the parameter
+        :param value: value of the parameter
         
-            @param name: name of the parameter
-            @param value: value of the parameter
         """
         # Look for dispersion parameters
         toks = name.split('.')
@@ -166,9 +175,10 @@ class BaseComponent:
         
     def getParam(self, name):
         """ 
-            Set the value of a model parameter
+        Set the value of a model parameter
 
-            @param name: name of the parameter
+        :param name: name of the parameter
+        
         """
         # Look for dispersion parameters
         toks = name.split('.')
@@ -188,7 +198,7 @@ class BaseComponent:
      
     def getParamList(self):
         """ 
-            Return a list of all available parameters for the model
+        Return a list of all available parameters for the model
         """ 
         list = self.params.keys()
         # WARNING: Extending the list with the dispersion parameters
@@ -197,7 +207,7 @@ class BaseComponent:
     
     def getDispParamList(self):
         """ 
-            Return a list of all available parameters for the model
+        Return a list of all available parameters for the model
         """ 
         list = []
         

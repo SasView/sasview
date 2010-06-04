@@ -1,3 +1,4 @@
+
 from sans.models.BaseComponent import BaseComponent
 import math
 
@@ -11,16 +12,21 @@ class Model1DPlugin(BaseComponent):
         self.details = {}
         self.params  = {}
         self.description=''
+        
     def function(self, x):
         """
-            Function to be implemented by the plug-in writer
+        Function to be implemented by the plug-in writer
         """
         return x
         
     def run(self, x = 0.0):
-        """ Evaluate the model
-            @param x: input x, or [x, phi] [radian]
-            @return: function value
+        """ 
+        Evaluate the model
+        
+        :param x: input x, or [x, phi] [radian]
+        
+        :return: function value
+        
         """
         if x.__class__.__name__ == 'list':
             x_val = x[0]*math.cos(x[1])
@@ -33,9 +39,13 @@ class Model1DPlugin(BaseComponent):
         
    
     def runXY(self, x = 0.0):
-        """ Evaluate the model
-            @param x: input x, or [x, y] 
-            @return: function value
+        """ 
+        Evaluate the model
+        
+        :param x: input x, or [x, y] 
+        
+        :return: function value
+        
         """
         if x.__class__.__name__ == 'list':
             return self.function(x[0])*self.function(x[1])

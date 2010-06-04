@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 """ 
-    
-    Provide F(x)= P(|x|)*S(|x|) + bkd
-    Fractal as a BaseComponent model
+Provide F(x)= P(|x|)*S(|x|) + bkd
+Fractal as a BaseComponent model
 """
 
 from sans.models.FractalModel import FractalModel
@@ -10,21 +9,21 @@ import math
 
 class FractalAbsModel(FractalModel):
     """
-        Class that evaluates a Fractal function.
-        
-        F(|x|)= P(|x|)*S(|x|) + bkd
-        The model has Seven parameters: 
-            scale        =  Volume fraction
-            radius       =  Block radius
-            fractal_dim  =  Fractal dimension
-            corr_length  =  correlation Length
-            block_sld    =  SDL block
-            solvent_sld  =  SDL solvent
-            background   =  background
-           
+    Class that evaluates a Fractal function.
+    
+    F(|x|)= P(|x|)*S(|x|) + bkd
+    The model has Seven parameters: 
+        scale        =  Volume fraction
+        radius       =  Block radius
+        fractal_dim  =  Fractal dimension
+        corr_length  =  correlation Length
+        block_sld    =  SDL block
+        solvent_sld  =  SDL solvent
+        background   =  background
+       
     """
     def __init__(self):
-        """ Initialization """
+        """Initialization """
         # Initialize FractalModel 
 
         FractalModel.__init__(self)
@@ -46,4 +45,8 @@ class FractalAbsModel(FractalModel):
         background   =  background
         """
     def _Fractal(self, x):
+        """
+        """
         return FractalModel._Fractal(self, math.fabs(x))
+    
+    

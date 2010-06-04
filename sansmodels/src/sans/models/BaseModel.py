@@ -1,28 +1,30 @@
 #!/usr/bin/env python
-"""
-    This software was developed by the University of Tennessee as part of the
-    Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-    project funded by the US National Science Foundation.
 
-    If you use DANSE applications to do scientific research that leads to
-    publication, we ask that you acknowledge the use of the software with the
-    following sentence:
-
-    "This work benefited from DANSE software developed under NSF award DMR-0520547."
-
-    copyright 2008, University of Tennessee
-"""
+############################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation.
+#
+#If you use DANSE applications to do scientific research that leads to
+#publication, we ask that you acknowledge the use of the software with the
+#following sentence:
+#
+#"This work benefited from DANSE software developed
+# under NSF award DMR-0520547."
+#
+#copyright 2008, University of Tennessee
+#############################################################################
 
 """ 
-    Provide base functionality for all model components
+Provide base functionality for all model components
+
+The following has changed since going from BaseComponent to BaseModel:
+
+    - Arithmetic operation between models is no longer supported.
+      It was found to be of little use and not very flexible.
     
-    The following has changed since going from BaseComponent to BaseModel:
-    
-        - Arithmetic operation between models is no longer supported.
-          It was found to be of little use and not very flexible.
-        
-        - Parameters are now stored as Parameter object to provide 
-          the necessary extra information like limits, units, etc... 
+    - Parameters are now stored as Parameter object to provide 
+      the necessary extra information like limits, units, etc... 
 """
 
 # imports   
@@ -30,7 +32,7 @@ import copy
    
 class Parameter(object):
     """
-        Parameter class
+    Parameter class
     """
     name  = ''
     value = 0.0
@@ -43,8 +45,8 @@ class Parameter(object):
 
 class ParameterProperty(object):
     """
-        Parameter property allow direct access to
-        the parameter values
+    Parameter property allow direct access to
+    the parameter values
     """
     def __init__(self,name,**kw):
         self.name = name
@@ -61,7 +63,7 @@ from ModelAdaptor import ModelAdaptor
 
 class BaseModel(ModelAdaptor):
     """ 
-        Basic model component
+    Basic model component
     """
     ## Name of the model
     name = "BaseModel"
@@ -76,9 +78,12 @@ class BaseModel(ModelAdaptor):
     def calculate_ER(self):  return NotImplemented
     def __call__(self, x=0):
         """     
-            Evaluate the model. Equivalent to runXY(x)
-            @param x: input value
-            @return: value of the model
+        Evaluate the model. Equivalent to runXY(x)
+        
+        :param x: input value
+        
+        :return: value of the model
+        
         """
         return self.runXY(x)
     
@@ -88,15 +93,15 @@ class BaseModel(ModelAdaptor):
         obj = copy.deepcopy(self)
         obj.params = copy.deepcopy(self.params)
         obj.details = copy.deepcopy(self.details)
-    
         return obj
     
     def setParam(self, name, value):
         """ 
-            Set the value of a model parameter
+        Set the value of a model parameter
+    
+        :param name: name of the parameter
+        :param value: value of the parameter
         
-            @param name: name of the parameter
-            @param value: value of the parameter
         """
         # Lowercase for case insensitivity
         name = name.lower()
@@ -107,10 +112,11 @@ class BaseModel(ModelAdaptor):
         
     def getParam(self, name):
         """ 
-            Set the value of a model parameter
+        Set the value of a model parameter
 
-            @param name: name of the parameter
-            @param value: value of the parameter
+        :param name: name of the parameter
+        :param value: value of the parameter
+        
         """
         # Lowercase for case insensitivity
         name = name.lower()
@@ -118,7 +124,7 @@ class BaseModel(ModelAdaptor):
         
     def getParamList(self):
         """ 
-            Return a list of all available parameters for the model 
+        Return a list of all available parameters for the model 
         """
         param_list = self.params.keys()
         return param_list
