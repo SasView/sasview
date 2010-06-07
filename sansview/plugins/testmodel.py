@@ -1,5 +1,5 @@
 """
-    Test plug-in model
+Test plug-in model
 """
 from sans.models.pluginmodel import Model1DPlugin
 
@@ -8,14 +8,17 @@ import math
 
 # Your model HAS to be called Model
 class Model(Model1DPlugin):
-    """ Class that evaluates a cos(x) model. 
+    """
+    Class that evaluates a cos(x) model. 
     """
     
     ## Name of the model
     name = "A+Bcos(2x)+Csin(2x)"
     
     def __init__(self):
-        """ Initialization """
+        """
+        Initialization
+        """
         Model1DPlugin.__init__(self, name= self.name)
         
         ## Parameters definition and defaults
@@ -32,9 +35,13 @@ class Model(Model1DPlugin):
         self.description = "F(x)=A+Bcos(2x)+Csin(2x) "
    
     def function(self, x = 0.0):
-        """ Evaluate the model
-            @param x: input x
-            @return: function value
+        """
+        Evaluate the model
+        
+        :param x: input x
+        
+        :return: function value
+        
         """
         return self.params['A']+self.params['B']*math.cos(2.0*x)+self.params['C']*math.sin(2.0*x)
    

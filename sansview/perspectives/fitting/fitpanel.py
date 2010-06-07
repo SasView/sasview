@@ -11,55 +11,75 @@ _BOX_WIDTH = 80
 
 class StateIterator(object):
     """
-        Contains all saved state of a given page.
-        Provide position of the current state of a page, the first save state
-        and the last state for a given page. 
-        Allow easy undo or redo for a given page  
+    Contains all saved state of a given page.
+    Provide position of the current state of a page, the first save state
+    and the last state for a given page. 
+    Allow easy undo or redo for a given page  
     """
     def __init__(self):
+        """
+        """
         self._current=0
        
-    
     def __iter__(self):
+        """
+        """
         return self
     
-    
     def first(self):
+        """
+        """
         self._current =0
         return self._current
     
     def next(self, max ):
+        """
+        """
         if self._current < max:
             self._current += 1
         return self._current
     
     def previous(self):
+        """
+        """
         if self._current > 0:
             self._current = self._current -1
         return self._current
     
     def currentPosition(self):
+        """
+        """
         return self._current
     
     def setPosition(self, value):
+        """
+        """
         if value >=0:
             self._current = int(value)
         
     
-class ListOfState(list):     
+class ListOfState(list):    
+    """
+    """ 
     def __init__(self, *args, **kw):
         list.__init__(self, *args, **kw)
         self.iterator = StateIterator()
         
     def appendItem(self, x):
+        """
+        """
         self.append(x)
         self.iterator.setPosition(value= len(self)-1)
         
     def removeItem(self, x):
+        """
+        """
         self.iterator.previous()
         self.remove(x)
         
     def getPreviousItem(self):
+        """
+        """
         position = self.iterator.previous()
         
         if position < 0:
@@ -68,6 +88,8 @@ class ListOfState(list):
             return self[position]
         
     def getNextItem(self):
+        """
+        """
         position = self.iterator.next(max= len(self)-1)
         if position >= len(self):
             return None
@@ -75,6 +97,8 @@ class ListOfState(list):
             return self[position]
         
     def getCurrentItem(self):
+        """
+        """
         postion = self.iterator.currentPosition()
         if postion >= 0 and position < len(self):
             return self[postion]
@@ -82,13 +106,15 @@ class ListOfState(list):
             return None
         
     def getCurrentPosition(self):
+        """
+        """
         return self.iterator.currentPosition()
           
 
 class PageInfo(object):
     """
-        this class contains the minimum numbers of data members
-        a fitpage or model page need to be initialized.
+    this class contains the minimum numbers of data members
+    a fitpage or model page need to be initialized.
     """
     data = None
     model =  None
@@ -105,7 +131,7 @@ class PageInfo(object):
     def __init__(self, model=None, data=None, manager=None,
                   event_owner=None, model_list_box=None, name=None):
         """
-            Initialize data members
+        Initialize data members
         """
         self.data = data
         self.model= model
@@ -120,8 +146,9 @@ class PageInfo(object):
 class FitPanel(wx.aui.AuiNotebook):    
 
     """
-        FitPanel class contains fields allowing to fit  models and  data
-        @note: For Fit to be performed the user should check at least one parameter
+    FitPanel class contains fields allowing to fit  models and  data
+    
+    :note: For Fit to be performed the user should check at least one parameter
         on fit Panel window.
        
     """
@@ -132,6 +159,8 @@ class FitPanel(wx.aui.AuiNotebook):
     CENTER_PANE = True
     
     def __init__(self, parent, *args, **kwargs):
+        """
+        """
         wx.aui.AuiNotebook.__init__(self, parent, -1,
                     style= wx.aui.AUI_NB_WINDOWLIST_BUTTON|
                     wx.aui.AUI_NB_DEFAULT_STYLE|
@@ -172,7 +201,7 @@ class FitPanel(wx.aui.AuiNotebook):
         
     def set_state(self, state):
         """
-            Restore state of the panel
+        Restore state of the panel
         """
         page_is_opened = False
         if state is not None:
@@ -192,7 +221,7 @@ class FitPanel(wx.aui.AuiNotebook):
                     
     def on_close_page(self, event):
         """
-             close page and remove all references to the closed page
+        close page and remove all references to the closed page
         """
         nbr_page = self.GetPageCount()
         if nbr_page == 1:
@@ -203,7 +232,7 @@ class FitPanel(wx.aui.AuiNotebook):
         
     def close_page_with_data(self, deleted_data):
         """
-            close a fit page when its data is completely remove from the graph
+        close a fit page when its data is completely remove from the graph
         """
         if deleted_data is None:
             return
@@ -222,37 +251,42 @@ class FitPanel(wx.aui.AuiNotebook):
         
     def set_manager(self, manager):
         """
-             set panel manager
-             @param manager: instance of plugin fitting
+        set panel manager
+        
+        :param manager: instance of plugin fitting
+        
         """
         self.manager = manager
 
         
     def set_owner(self,owner):
         """ 
-            set and owner for fitpanel
-            @param owner: the class responsible of plotting
+        set and owner for fitpanel
+        
+        :param owner: the class responsible of plotting
+        
         """
         self.event_owner = owner
     
     def set_model_list(self, dict):
          """ 
-             copy a dictionary of model into its own dictionary
-             @param dict: dictionnary made of model name as key and model class
+         copy a dictionary of model into its own dictionary
+         
+         :param dict: dictionnary made of model name as key and model class
              as value
          """
          self.model_list_box = dict
         
-  
     def get_current_page(self):
         """
-            @return the current page selected
+        :return: the current page selected
+        
         """
         return self.GetPage(self.GetSelection() )
     
     def add_sim_page(self):
         """
-            Add the simultaneous fit page
+        Add the simultaneous fit page
         """
         from simfitpage import SimultaneousFitPage
         page_finder= self.manager.get_page_finder()
@@ -264,7 +298,7 @@ class FitPanel(wx.aui.AuiNotebook):
         
     def get_page_info(self, data=None):
         """
-            fill information required to add a page in the fit panel
+        fill information required to add a page in the fit panel
         """
         name = "Fit Page"
         type = 'empty'
@@ -289,7 +323,7 @@ class FitPanel(wx.aui.AuiNotebook):
    
     def add_empty_page(self):
         """
-            add an empty page
+        add an empty page
         """
         page_info = self.get_page_info()
         from fitpage import FitPage
@@ -300,7 +334,7 @@ class FitPanel(wx.aui.AuiNotebook):
     
     def add_page(self, page_info):
         """
-            add a new page
+        add a new page
         """
         from fitpage import FitPage
         panel = FitPage(parent=self, page_info=page_info)
@@ -311,7 +345,7 @@ class FitPanel(wx.aui.AuiNotebook):
     
     def change_page_content(self, data, index):
         """
-            replace the contains of an existing page
+        replace the contains of an existing page
         """
         page_info = self.get_page_info(data=data)
         self.SetPageText(index, page_info.window_name)
@@ -327,7 +361,7 @@ class FitPanel(wx.aui.AuiNotebook):
     
     def replace_page(self, index, page_info, type):
         """
-            replace an existing page
+        replace an existing page
         """
         self.DeletePage(index)
         del self.opened_pages[type]
@@ -335,9 +369,12 @@ class FitPanel(wx.aui.AuiNotebook):
         
     def add_fit_page(self, data, reset=False):
         """ 
-            Add a fitting page on the notebook contained by fitpanel
-            @param data: data to fit
-            @return panel : page just added for further used. is used by fitting module
+        Add a fitting page on the notebook contained by fitpanel
+        
+        :param data: data to fit
+        
+        :return panel : page just added for further used. is used by fitting module
+        
         """
         if data is None:
             return None
@@ -380,7 +417,7 @@ class FitPanel(wx.aui.AuiNotebook):
     
     def  _onGetstate(self, event):
         """
-            copy the state of a page
+        copy the state of a page
         """
         page= event.page
         if page.window_name in self.fit_page_name:
@@ -388,7 +425,7 @@ class FitPanel(wx.aui.AuiNotebook):
             
     def _onUndo(self, event ):
         """
-            return the previous state of a given page is available
+        return the previous state of a given page is available
         """
         page = event.page 
         if page.window_name in self.fit_page_name:
@@ -401,7 +438,7 @@ class FitPanel(wx.aui.AuiNotebook):
         
     def _onRedo(self, event): 
         """
-            return the next state available
+        return the next state available
         """       
         page = event.page 
         if page.window_name in self.fit_page_name:
@@ -416,7 +453,7 @@ class FitPanel(wx.aui.AuiNotebook):
                  
     def _close_helper(self, selected_page):
         """
-            Delete the given page from the notebook
+        Delete the given page from the notebook
         """
         #remove hint page
         if selected_page == self.hint_page:

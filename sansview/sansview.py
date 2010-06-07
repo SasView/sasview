@@ -1,12 +1,14 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2009, University of Tennessee
+################################################################################
 
-copyright 2009, University of Tennessee
-"""
 import wx
 from sans.guiframe import gui_manager
 from welcome_panel import WelcomePanel
@@ -19,7 +21,11 @@ APP_HEIGHT = 800
 APP_WIDTH  = 1000
 
 class SansViewApp(gui_manager.ViewApp):
+    """
+    """
     def OnInit(self):
+        """
+        """
         screen_size = wx.GetDisplaySize()
         app_height = APP_HEIGHT if screen_size[1]>APP_HEIGHT else screen_size[1]-50
         app_width  = APP_WIDTH if screen_size[0]>APP_WIDTH else screen_size[0]-50
@@ -34,10 +40,10 @@ class SansViewApp(gui_manager.ViewApp):
         return True
 
 class SansView():
-    
+    """
+    """
     def __init__(self):
         """
-        
         """
         #from gui_manager import ViewApp
         self.gui = SansViewApp(0) 

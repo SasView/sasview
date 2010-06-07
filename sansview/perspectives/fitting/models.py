@@ -1,9 +1,3 @@
-#TODO: add comments to document this module
-#TODO: clean-up the exception handling.
-
-#TODO: clean-up the FractalAbsModel and PowerLawAbsModel menu items. Those
-#      model definitions do not belong here. They belong with the rest of the
-#      models.
 
 import wx
 import wx.lib.newevent
@@ -22,11 +16,15 @@ import time
 from sans.models.pluginmodel import Model1DPlugin
     
 def log(message):
+    """
+    """
     out = open("plugins.log", 'a')
     out.write("%10g:  %s\n" % (time.clock(), message))
     out.close()
 
 def findModels():
+    """
+    """
     log("looking for models in: %s/plugins" % os.getcwd())
     if os.path.isdir('plugins'):
         return _findModels('plugins')
@@ -34,10 +32,13 @@ def findModels():
     
 def _check_plugin(model, name):
     """
-        Do some checking before model adding plugins in the list
-        @param model: class model to add into the plugin list
-        @param name:name of the module plugin
-        @return model: model if valid model or None if not valid
+    Do some checking before model adding plugins in the list
+    
+    :param model: class model to add into the plugin list
+    :param name:name of the module plugin
+    
+    :return model: model if valid model or None if not valid
+    
     """
     #Check is the plugin is of type Model1DPlugin
     if not issubclass(model, Model1DPlugin):
@@ -73,6 +74,8 @@ def _check_plugin(model, name):
   
   
 def _findModels(dir):
+    """
+    """
     # List of plugin objects
     plugins = []
     # Go through files in plug-in directory
@@ -113,15 +116,18 @@ def _findModels(dir):
 
 class ModelList(object):
     """
-        Contains dictionary of model and their type
+    Contains dictionary of model and their type
     """
     def __init__(self):
-        self.mydict={}
+        """
+        """
+        self.mydict = {}
         
     def set_list(self, name, mylist):
         """
-            @param name: the type of the list
-            @param mylist: the list to add
+        :param name: the type of the list
+        :param mylist: the list to add
+        
         """
         if name not in self.mydict.keys():
             self.mydict[name] = mylist
@@ -129,11 +135,13 @@ class ModelList(object):
             
     def get_list(self):
         """
-         return all the list stored in a dictionary object
+        return all the list stored in a dictionary object
         """
         return self.mydict
         
 class ModelManager:
+    """
+    """
     ## external dict for models
     model_combobox = ModelList()
     ## Dictionary of form models
@@ -155,10 +163,11 @@ class ModelManager:
     
     def _getModelList(self):
         """
-            List of models we want to make available by default
-            for this application
+        List of models we want to make available by default
+        for this application
+    
+        :return: the next free event ID following the new menu events
         
-            @return: the next free event ID following the new menu events
         """
         ## form factor
         from sans.models.SphereModel import SphereModel
@@ -254,10 +263,8 @@ class ModelManager:
         
         from sans.models.HayterMSAStructure import HayterMSAStructure
         self.struct_list.append(HayterMSAStructure)
-        
-        
-        ##shape-independent models
-            
+    
+        ##shape-independent models  
         from sans.models.PowerLawAbsModel import PowerLawAbsModel
         self.shape_indep_list.append( PowerLawAbsModel )
         
@@ -292,7 +299,6 @@ class ModelManager:
         from sans.models.PorodModel import PorodModel
         self.shape_indep_list.append(PorodModel )
         
-        
         #FractalModel (a c-model)will be used.
         #from sans.models.FractalAbsModel import FractalAbsModel
         #self.shape_indep_list.append(FractalAbsModel)
@@ -302,22 +308,22 @@ class ModelManager:
         
         from sans.models.LineModel import LineModel
         self.shape_indep_list.append(LineModel)
-
-    
+        
         #Looking for plugins
         self.plugins = findModels()
-       
         return 0
 
     
     def populate_menu(self, modelmenu, event_owner):
         """
-            Populate a menu with our models
-            
-            @param id: first menu event ID to use when binding the menu events
-            @param modelmenu: wx.Menu object to populate
-            @param event_owner: wx object to bind the menu events to
-            @return: the next free event ID following the new menu events
+        Populate a menu with our models
+        
+        :param id: first menu event ID to use when binding the menu events
+        :param modelmenu: wx.Menu object to populate
+        :param event_owner: wx object to bind the menu events to
+        
+        :return: the next free event ID following the new menu events
+        
         """
         ## Fill model lists
         self._getModelList()
@@ -326,39 +332,36 @@ class ModelManager:
         ## guiframe reference
         self.event_owner = event_owner
         
-        
         shape_submenu = wx.Menu()
         shape_indep_submenu = wx.Menu()
         structure_factor = wx.Menu()
         added_models = wx.Menu()
         multip_models = wx.Menu()
         ## create menu with shape
-        self._fill_simple_menu( menuinfo = ["Shapes",shape_submenu," simple shape"],
-                         list1 = self.shape_list )
+        self._fill_simple_menu(menuinfo=["Shapes",shape_submenu," simple shape"],
+                         list1=self.shape_list)
         
-        self._fill_simple_menu( menuinfo = ["Shape-Independent",shape_indep_submenu,
+        self._fill_simple_menu(menuinfo=["Shape-Independent",shape_indep_submenu,
                                     "List of shape-independent models"],
-                         list1 = self.shape_indep_list )
+                         list1=self.shape_indep_list )
         
-        self._fill_simple_menu( menuinfo= ["Structure Factors",structure_factor,
+        self._fill_simple_menu(menuinfo=["Structure Factors",structure_factor,
                                           "List of Structure factors models" ],
-                                list1= self.struct_list )
+                                list1=self.struct_list)
         
-        self._fill_plugin_menu( menuinfo = ["Customized Models", added_models,
+        self._fill_plugin_menu(menuinfo=["Customized Models", added_models,
                                             "List of additional models"],
-                                 list1= self.plugins )
+                                 list1=self.plugins)
         
         self._fill_menu(menuinfo=["P(Q)*S(Q)",multip_models,
                                   "mulplication of 2 models"],
-                                   list1 = self.multiplication_factor ,
-                                   list2 =  self.struct_list)
-        
-        
+                                   list1=self.multiplication_factor ,
+                                   list2= self.struct_list)
         return 0
     
-    def _fill_plugin_menu(self,menuinfo, list1):
+    def _fill_plugin_menu(self, menuinfo, list1):
         """
-            fill the plugin menu with costumized models
+        fill the plugin menu with costumized models
         """
         if len(list1)==0:
             id = wx.NewId() 
@@ -366,15 +369,16 @@ class ModelManager:
             menuinfo[1].Append(int(id),"Empty",msg)
         self._fill_simple_menu( menuinfo,list1)
         
-        
-    def _fill_simple_menu(self,menuinfo, list1):
+    def _fill_simple_menu(self, menuinfo, list1):
         """
-            Fill the menu with list item
-            @param modelmenu: the menu to fill
-            @param menuinfo: submenu item for the first column of this modelmenu
-                             with info.Should be a list :
-                             [name(string) , menu(wx.menu), help(string)]
-            @param list1: contains item (form factor )to fill modelmenu second column
+        Fill the menu with list item
+        
+        :param modelmenu: the menu to fill
+        :param menuinfo: submenu item for the first column of this modelmenu
+                         with info.Should be a list :
+                         [name(string) , menu(wx.menu), help(string)]
+        :param list1: contains item (form factor )to fill modelmenu second column
+        
         """
         if len(list1)>0:
             self.model_combobox.set_list(menuinfo[0],list1)
@@ -398,16 +402,17 @@ class ModelManager:
         id = wx.NewId()         
         self.modelmenu.AppendMenu(id, menuinfo[0],menuinfo[1],menuinfo[2])
         
-        
-        
-    def _fill_menu(self,menuinfo, list1,list2  ):
+    def _fill_menu(self, menuinfo, list1, list2):
         """
-            Fill the menu with list item
-            @param menuinfo: submenu item for the first column of this modelmenu
-                             with info.Should be a list :
-                             [name(string) , menu(wx.menu), help(string)]
-            @param list1: contains item (form factor )to fill modelmenu second column
-            @param list2: contains item (Structure factor )to fill modelmenu third column
+        Fill the menu with list item
+        
+        :param menuinfo: submenu item for the first column of this modelmenu
+                         with info.Should be a list :
+                         [name(string) , menu(wx.menu), help(string)]
+        :param list1: contains item (form factor )to fill modelmenu second column
+        :param list2: contains item (Structure factor )to fill modelmenu 
+                third column
+                
         """
         if len(list1)>0:
             self.model_combobox.set_list(menuinfo[0],list1)
@@ -436,27 +441,27 @@ class ModelManager:
         id=wx.NewId()
         self.modelmenu.AppendMenu(id,menuinfo[0],menuinfo[1], menuinfo[2])
         
-        
-        
-        
     def _on_model(self, evt):
         """
-            React to a model menu event
-            @param event: wx menu event
+        React to a model menu event
+        
+        :param event: wx menu event
+        
         """
         if int(evt.GetId()) in self.form_factor_dict.keys():
             from sans.models.MultiplicationModel import MultiplicationModel
             model1, model2 = self.form_factor_dict[int(evt.GetId())]
-            model = MultiplicationModel(model1, model2)
-               
+            model = MultiplicationModel(model1, model2)    
         else:
             model= self.struct_factor_dict[str(evt.GetId())]()
-            
         evt = ModelEvent( model= model )
         wx.PostEvent(self.event_owner, evt)
         
     def get_model_list(self):    
-        """ @ return dictionary of models for fitpanel use """
+        """
+        return dictionary of models for fitpanel use 
+        
+        """
         self.model_combobox.set_list("multiplication", self.multiplication_factor)
         return self.model_combobox
     

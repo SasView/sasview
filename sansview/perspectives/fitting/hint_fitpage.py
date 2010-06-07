@@ -1,9 +1,10 @@
+
 import wx
 
 
 class HintFitPage(wx.ScrolledWindow):
     """
-        This class provide general structure of  fitpanel page
+    This class provide general structure of  fitpanel page
     """
      ## Internal name for the AUI manager
     window_name = "Hint Page"
@@ -11,6 +12,8 @@ class HintFitPage(wx.ScrolledWindow):
     window_caption = "Hint page "
     
     def __init__(self, parent):
+        """
+        """
         wx.ScrolledWindow.__init__(self, parent,
                  style= wx.FULL_REPAINT_ON_RESIZE )
         
@@ -20,7 +23,7 @@ class HintFitPage(wx.ScrolledWindow):
         
     def do_layout(self):
         """
-            Draw the page 
+        Draw the page 
         """
         name="Hint"
         box_description= wx.StaticBox(self, -1,name)
@@ -40,18 +43,22 @@ class HintFitPage(wx.ScrolledWindow):
         self.Layout()
         
     def createMemento(self):
+        """
+        """
         return 
-        
-class HelpWindow(wx.Frame):
-    def __init__(self, parent, id, title):
-        wx.Frame.__init__(self, parent, id, title, size=(570, 400))
-       
-        self.page = HintFitPage(self) 
-        self.Centre()
-        self.Show(True)
- 
-if __name__=="__main__":
-    app = wx.App()
-    HelpWindow(None, -1, 'HelpWindow')
-    app.MainLoop()
-                
+"""   
+Example: ::
+     
+    class HelpWindow(wx.Frame):
+        def __init__(self, parent, id, title):
+            wx.Frame.__init__(self, parent, id, title, size=(570, 400))
+           
+            self.page = HintFitPage(self) 
+            self.Centre()
+            self.Show(True)
+     
+    if __name__=="__main__":
+        app = wx.App()
+        HelpWindow(None, -1, 'HelpWindow')
+        app.MainLoop()
+"""              

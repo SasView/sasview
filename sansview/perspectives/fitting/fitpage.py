@@ -32,19 +32,18 @@ from DataLoader.qsmearing import smear_selection
 
 class FitPage(BasicPage):
     """
-        FitPanel class contains fields allowing to display results when
-        fitting  a model and one data
-        @note: For Fit to be performed the user should check at least one parameter
+    FitPanel class contains fields allowing to display results when
+    fitting  a model and one data
+    
+    :note: For Fit to be performed the user should check at least one parameter
         on fit Panel window.
-  
     """
     
     def __init__(self,parent, page_info):
-        BasicPage.__init__(self, parent, page_info)
-
         """ 
-            Initialization of the Panel
+        Initialization of the Panel
         """
+        BasicPage.__init__(self, parent, page_info)
         ## total number of point: float
         self.npts=None
         ## thread for compute Chisqr
@@ -97,7 +96,7 @@ class FitPage(BasicPage):
 
     def _on_fit_complete(self, event):
         """
-            When fit is complete ,reset the fit button label.
+        When fit is complete ,reset the fit button label.
         """
         #self.btFit.SetLabel("Fit")
         #self.btFit.Unbind(event=wx.EVT_BUTTON, id=self.btFit.GetId())
@@ -106,8 +105,10 @@ class FitPage(BasicPage):
         
     def _is_2D(self):
         """
-            Check if data_name is Data2D
-            @return: True or False
+        Check if data_name is Data2D
+        
+        :return: True or False
+        
         """
         
         if self.data.__class__.__name__ =="Data2D":
@@ -116,8 +117,10 @@ class FitPage(BasicPage):
             
     def _on_engine_change(self, event):
         """
-            get an event containing the current name of the fit engine type
-            @param event: FitterTypeEvent containing  the name of the current engine
+        get an event containing the current name of the fit engine type
+        
+        :param event: FitterTypeEvent containing  the name of the current engine
+        
         """
         self.engine_type = event.type
         if len(self.parameters)==0:
@@ -185,8 +188,8 @@ class FitPage(BasicPage):
 
     def _fill_range_sizer(self):
         """
-            Fill the sizer containing the plotting range
-            add  access to npts
+        Fill the sizer containing the plotting range
+        add  access to npts
         """
         is_2Ddata = False
         
@@ -230,8 +233,6 @@ class FitPage(BasicPage):
         self.smear_accuracy.SetSelection(0)
         self.smear_accuracy.SetToolTipString("'Higher' uses more Gaussian points for smearing computation.")
                    
-        
-             
         wx.EVT_COMBOBOX(self.smear_accuracy,-1, self._on_select_accuracy)
 
         #Fit button
@@ -389,7 +390,7 @@ class FitPage(BasicPage):
         
     def _fill_datainfo_sizer(self):
         """
-            fill sizer 0 with data info
+        fill sizer 0 with data info
         """
         ## no loaded data , don't fill the sizer
         if self.data is None:
@@ -454,7 +455,7 @@ class FitPage(BasicPage):
        
     def _fill_model_sizer(self, sizer):
         """
-            fill sizer containing model info
+        fill sizer containing model info
         """
         ##Add model function Details button in fitpanel.
         ##The following 3 lines are for Mac. Let JHC know before modifying... 
@@ -469,11 +470,10 @@ class FitPage(BasicPage):
         
         ## class base method  to add view 2d button    
         self._set_model_sizer(sizer=sizer, box_sizer=boxsizer1, title="Model",object=self.model_help )   
-
-    
+        
     def _set_sizer_dispersion(self, dispersity):
         """
-            draw sizer with gaussian dispersity parameters
+        draw sizer with gaussian dispersity parameters
         """
         self.fittable_param=[]
         self.fixed_param=[]
@@ -748,7 +748,6 @@ class FitPage(BasicPage):
                             self.orientation_params_disp.append([None,name3, Tct2
                                                      ,None,None, None, None,None])
        
-
         self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)  
           
         self.state.model = self.model.clone()  
@@ -768,10 +767,9 @@ class FitPage(BasicPage):
         
         self.Layout()
 
-
     def _onFit(self, event):     
         """
-            Allow to fit
+        Allow to fit
         """
         #make sure all parameter values are updated.
         if self.check_invalid_panel():
@@ -795,7 +793,6 @@ class FitPage(BasicPage):
             wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
             return 
       
-
         self.select_param(event =None)
         
         #Clear errors if exist from previous fitting
@@ -819,11 +816,9 @@ class FitPage(BasicPage):
         #    self.btFit.SetLabel("Fit")
         #    self.btFit.Bind(event= wx.EVT_BUTTON, handler=self._onFit, id=self.btFit.GetId())
            
-
-        
     def _StopFit(self, event):
         """
-            Stop fit 
+        Stop fit 
         """
         self.btFit.SetLabel("Fit")
         if self.engine_type=="scipy":
@@ -834,7 +829,7 @@ class FitPage(BasicPage):
             
     def _on_select_model(self, event): 
         """
-             call back for model selection
+        call back for model selection
         """  
         self._on_select_model_helper() 
         self.set_model_param_sizer(self.model)                   
@@ -878,11 +873,10 @@ class FitPage(BasicPage):
             ## post state to fit panel
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
-     
-                
+      
     def _onparamEnter(self,event):
         """ 
-            when enter value on panel redraw model according to changed
+        when enter value on panel redraw model according to changed
         """
         if self.model ==None:
             msg="Please select a Model first..."
@@ -940,7 +934,7 @@ class FitPage(BasicPage):
    
     def _onparamRangeEnter(self, event):
         """
-            Check validity of value enter in the parameters range field
+        Check validity of value enter in the parameters range field
         """
         if self.check_invalid_panel():
             return
@@ -973,7 +967,7 @@ class FitPage(BasicPage):
                     
     def _onQrangeEnter(self, event):
         """
-            Check validity of value enter in the Q range field
+        Check validity of value enter in the Q range field
         """
         if self.check_invalid_panel():
             return
@@ -1039,12 +1033,12 @@ class FitPage(BasicPage):
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
         self.state_change= False
-
         return
+    
     def _clear_Err_on_Fit(self):
         """
-            hide the error text control shown 
-            after fitting
+        hide the error text control shown 
+        after fitting
         """
         
         if hasattr(self,"text2_3"):
@@ -1083,9 +1077,8 @@ class FitPage(BasicPage):
                 
     def _get_defult_custom_smear(self):
         """
-           Get the defult values for custum smearing.
+        Get the defult values for custum smearing.
         """
-
         # get the default values
         if self.dxl == None: self.dxl = 0.0
         if self.dxw == None: self.dxw = ""
@@ -1094,10 +1087,12 @@ class FitPage(BasicPage):
         
     def _get_smear_info(self):
         """
-           Get the smear info from data.
-           @return: self.smear_type, self.dq_l and self.dq_r, 
+        Get the smear info from data.
+       
+        :return: self.smear_type, self.dq_l and self.dq_r, 
             respectively the type of the smear, dq_min and dq_max for pinhole smear data 
             while dxl and dxw for slit smear
+            
         """
 
         # default
@@ -1117,9 +1112,6 @@ class FitPage(BasicPage):
                 return 
             else: 
                 return
-
-       
-
         # check if it is pinhole smear and get min max if it is.
         if data.dx != None and all(data.dx !=0): 
             self.smear_type = "Pinhole" 
@@ -1132,13 +1124,12 @@ class FitPage(BasicPage):
             if data.dxl != None and all(data.dxl !=0):
                 self.dq_l = data.dxl[0]
             if data.dxw != None and all(data.dxw !=0): 
-                self.dq_r = data.dxw[0]
-                
+                self.dq_r = data.dxw[0]    
         #return self.smear_type,self.dq_l,self.dq_r       
     
     def _show_smear_sizer(self):    
         """
-            Show only the sizers depending on smear selection
+        Show only the sizers depending on smear selection
         """
         # smear disabled
         if self.disable_smearer.GetValue():
@@ -1189,7 +1180,7 @@ class FitPage(BasicPage):
 
     def _hide_all_smear_info(self):
         """
-           Hide all smearing messages in the set_smearer sizer
+        Hide all smearing messages in the set_smearer sizer
         """
         self.smear_description_none.Hide()
         self.smear_description_dqdata.Hide()
@@ -1216,7 +1207,7 @@ class FitPage(BasicPage):
     
     def _set_accuracy_list(self):
         """
-            Set the list of an accuracy in 2D custum smear: Xhigh, High, Med, or Low
+        Set the list of an accuracy in 2D custum smear: Xhigh, High, Med, or Low
         """
         # list of accuracy choices
         list = ['Low','Med','High','Xhigh']
@@ -1225,12 +1216,10 @@ class FitPage(BasicPage):
             
     def _on_select_accuracy(self,event):
         """
-            Select an accuracy in 2D custom smear: Xhigh, High, Med, or Low
+        Select an accuracy in 2D custom smear: Xhigh, High, Med, or Low
         """
         #event.Skip()
-        
         # Check if the accuracy is same as before
-        
         #self.smear2d_accuracy = event.GetEventObject().GetValue()
         self.smear2d_accuracy = self.smear_accuracy.GetValue()
         if self.pinhole_smearer.GetValue():
@@ -1238,13 +1227,12 @@ class FitPage(BasicPage):
         else:    
             self.onSmear(event=None)
             if self.current_smearer != None:
-                self.current_smearer.set_accuracy(accuracy = self.smear2d_accuracy)
-               
+                self.current_smearer.set_accuracy(accuracy = self.smear2d_accuracy) 
         event.Skip()
         
     def _onMask(self, event):     
         """
-            Build a panel to allow to edit Mask
+        Build a panel to allow to edit Mask
         """
         
         from sans.guiframe.local_perspectives.plotting.masking import MaskPanel as MaskDialog
@@ -1278,11 +1266,9 @@ class FitPage(BasicPage):
         
     def set_data(self, data):
         """
-            reset the current data 
+        reset the current data 
         """
         self.data = data
-
-        
         if self.data is None:
             data_min = ""
             data_max = ""
@@ -1301,7 +1287,6 @@ class FitPage(BasicPage):
             if self.data.__class__.__name__ =="Data2D":
                 self.slit_smearer.Disable()
                 self.default_mask = copy.deepcopy(self.data.mask)
-                
                 
             self.formfactorbox.Enable()
             self.structurebox.Enable()
@@ -1331,8 +1316,6 @@ class FitPage(BasicPage):
                 self.Npts_fit.SetValue(str(len(self.data.data)))
                 self.btEditMask.Enable()  
                 self.EditMask_title.Enable() 
-
-            
         self.dataSource.SetValue(data_name)
         self.qmin_x = data_min
         self.qmax_x = data_max
@@ -1346,10 +1329,9 @@ class FitPage(BasicPage):
         self.state.qmin = self.qmin_x
         self.state.qmax = self.qmax_x
         
-
     def reset_page(self, state,first=False):
         """
-            reset the state
+        reset the state
         """
         self.reset_page_helper(state)
         import sans.guiframe.gui_manager
@@ -1367,14 +1349,16 @@ class FitPage(BasicPage):
         
     def get_range(self):
         """
-            return the fitting range
+        return the fitting range
         """
         return float(self.qmin_x) , float(self.qmax_x)
     
     def get_npts2fit(self):
         """
-            return numbers of data points within qrange
-            Note: This is for Park where chi2 is not normalized by Npts of fit
+        return numbers of data points within qrange
+        
+        :Note: This is for Park where chi2 is not normalized by Npts of fit
+        
         """
         npts2fit = 0
         qmin,qmax = self.get_range()
@@ -1392,22 +1376,22 @@ class FitPage(BasicPage):
 
     def set_npts2fit(self):
         """
-            setValue Npts for fitting 
+        setValue Npts for fitting 
         """
         self.Npts_fit.SetValue(str(self.get_npts2fit()))
         
-        
     def get_chi2(self):
         """
-            return the current chi2
+        return the current chi2
         """
         return self.tcChi.GetValue()
         
     def get_param_list(self):
         """
-            @return self.param_toFit: list containing  references to TextCtrl
+        :return self.param_toFit: list containing  references to TextCtrl
             checked.Theses TextCtrl will allow reference to parameters to fit.
-            @raise: if return an empty list of parameter fit will nnote work 
+        
+        :raise: if return an empty list of parameter fit will nnote work 
             properly so raise ValueError,"missing parameter to fit"
         """
         if self.param_toFit !=[]:
@@ -1417,12 +1401,13 @@ class FitPage(BasicPage):
       
     def onsetValues(self,chisqr,p_name, out,cov):
         """
-            Build the panel from the fit result
-            @param chisqr:Value of the goodness of fit metric
-            @p_name: the name of parameters
-            @param out:list of parameter with the best value found during fitting
-            @param cov:Covariance matrix
-       
+        Build the panel from the fit result
+        
+        :param chisqr: Value of the goodness of fit metric
+        :param p_name: the name of parameters
+        :param out: list of parameter with the best value found during fitting
+        :param cov: Covariance matrix
+   
         """
         if out == None or not numpy.isfinite(chisqr):
             raise ValueError,"Fit error occured..." 
@@ -1544,9 +1529,12 @@ class FitPage(BasicPage):
 
     def onPinholeSmear(self, event):
         """
-            Create a custom pinhole smear object that will change the way residuals
-            are compute when fitting
-            @ accuracy: given by strings'High','Med', 'Low' FOR 2d,  None for 1D
+        Create a custom pinhole smear object that will change the way residuals
+        are compute when fitting
+        
+        :Note: accuracy is given by strings'High','Med', 'Low' FOR 2d,
+                     None for 1D
+                     
         """
 
         if self.check_invalid_panel():
@@ -1600,8 +1588,10 @@ class FitPage(BasicPage):
         
     def _is_changed_pinhole(self):  
         """
-            check if any of pinhole smear is changed
-            return: True or False
+        check if any of pinhole smear is changed
+        
+        :return: True or False
+        
         """
         # get the values
         pin_min = self.smear_pinhole_min.GetValue()
@@ -1626,8 +1616,10 @@ class FitPage(BasicPage):
     
     def _set_pinhole_smear(self):
         """
-            Set custom pinhole smear
-            return: msg
+        Set custom pinhole smear
+        
+        :return: msg
+        
         """
         # copy data
         data = copy.deepcopy(self.data)
@@ -1694,9 +1686,11 @@ class FitPage(BasicPage):
         
     def update_pinhole_smear(self):
         """
-            called by kill_focus on pinhole TextCntrl
-            to update the changes 
-            return: msg: False when wrong value was entered
+        called by kill_focus on pinhole TextCntrl
+        to update the changes 
+        
+        :return: False when wrong value was entered
+        
         """
         # msg default
         msg = None
@@ -1713,8 +1707,8 @@ class FitPage(BasicPage):
                      
     def onSlitSmear(self, event):
         """
-            Create a custom slit smear object that will change the way residuals
-            are compute when fitting
+        Create a custom slit smear object that will change the way residuals
+        are compute when fitting
         """
  
         if self.check_invalid_panel():
@@ -1769,13 +1763,13 @@ class FitPage(BasicPage):
         if msg != None:
             wx.PostEvent(self.manager.parent, StatusEvent(status = msg))
 
-
     def _is_changed_slit(self):  
         """
-            check if any of slit lengths is changed
-            return: True or False
-        """
+        check if any of slit lengths is changed
         
+        :return: True or False
+        
+        """
         # get the values
         width = self.smear_slit_width.GetValue()
         height = self.smear_slit_height.GetValue()
@@ -1813,8 +1807,10 @@ class FitPage(BasicPage):
     
     def _set_slit_smear(self):
         """
-            Set custom slit smear
-            return: msg
+        Set custom slit smear
+        
+        :return: message to inform the user about the validity
+            of the values entered for slit smear
         """
         temp_smearer = None
         # make sure once more if it is smearer
@@ -1852,15 +1848,15 @@ class FitPage(BasicPage):
         #temp_smearer = self.current_smearer
         ## set smearing value whether or not the data contain the smearing info
         self.manager.set_smearer(smearer=self.current_smearer, qmin= float(self.qmin_x), qmax= float(self.qmax_x)) 
-
         return msg
-    
     
     def update_slit_smear(self):
         """
-            called by kill_focus on pinhole TextCntrl
-            to update the changes 
-            return: msg: False when wrong value was entered
+        called by kill_focus on pinhole TextCntrl
+        to update the changes 
+        
+        :return: False when wrong value was entered
+        
         """             
         # msg default
         msg = None
@@ -1875,11 +1871,10 @@ class FitPage(BasicPage):
         else:
             return True
                             
-    
     def onSmear(self, event):
         """
-            Create a smear object that will change the way residuals
-            are compute when fitting
+        Create a smear object that will change the way residuals
+        are compute when fitting
         """
         if event != None: 
             event.Skip()    
@@ -1949,8 +1944,10 @@ class FitPage(BasicPage):
       
     def on_complete_chisqr(self, event):  
         """
-            print result chisqr 
-            @event: activated by fitting/ complete after draw
+        print result chisqr 
+        
+        :event: activated by fitting/ complete after draw
+        
         """
         try:
             if event ==None:
@@ -1963,12 +1960,11 @@ class FitPage(BasicPage):
         except:
             pass  
             
-    
+
     def select_all_param(self,event): 
         """
-             set to true or false all checkBox given the main checkbox value cb1
+        set to true or false all checkBox given the main checkbox value cb1
         """            
-
         self.param_toFit=[]
         if  self.parameters !=[]:
             if  self.cb1.GetValue():
@@ -2007,12 +2003,10 @@ class FitPage(BasicPage):
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
      
-                
-                
     def select_param(self,event):
         """ 
-            Select TextCtrl  checked for fitting purpose and stores them
-            in  self.param_toFit=[] list
+        Select TextCtrl  checked for fitting purpose and stores them
+        in  self.param_toFit=[] list
         """
         self.param_toFit=[]
         for item in self.parameters:
@@ -2062,13 +2056,13 @@ class FitPage(BasicPage):
             ## post state to fit panel
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
-     
     
-        
     def set_model_param_sizer(self, model):
         """
-            Build the panel from the model content
-            @param model: the model selected in combo box for fitting purpose
+        Build the panel from the model content
+        
+        :param model: the model selected in combo box for fitting purpose
+        
         """
         self.sizer3.Clear(True)
         self.parameters = []
@@ -2086,7 +2080,6 @@ class FitPage(BasicPage):
         if self.engine_type==None and self.manager !=None:
             self.engine_type= self.manager._return_engine_type()
 
-            
         box_description= wx.StaticBox(self, -1,str("Model Parameters"))
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         sizer = wx.GridBagSizer(5,5)
@@ -2325,12 +2318,13 @@ class FitPage(BasicPage):
         self.Layout()
         self.Refresh()
         self.SetScrollbars(20,20,25,65)
+        
 
 class BGTextCtrl(wx.TextCtrl):
     """
-        Text control used to display outputs.
-        No editing allowed. The background is 
-        grayed out. User can't select text.
+    Text control used to display outputs.
+    No editing allowed. The background is 
+    grayed out. User can't select text.
     """
     def __init__(self, *args, **kwds):
         wx.TextCtrl.__init__(self, *args, **kwds)
@@ -2344,58 +2338,62 @@ class BGTextCtrl(wx.TextCtrl):
         
     def _click(self, event):
         """
-            Prevent further handling of the mouse event
-            by not calling Skip().
+        Prevent further handling of the mouse event
+        by not calling Skip().
         """ 
         pass
-        
-class HelpWindow(wx.Frame):
-    def __init__(self, parent, id, title):
-        wx.Frame.__init__(self, parent, id, title, size=(570, 400))
-       
-        from sans.models.CylinderModel import CylinderModel
-        model = CylinderModel()
-       
-        from danse.common.plottools.plottables import Data1D
-        data= Data1D(x=[1,2], y=[3,4], dy=[0.1, 0,1])
-    
-        from fitpanel import PageInfo
-        myinfo = PageInfo(self,  model, data=data )
-        
-        ## add data
-        
-        from models import ModelList
-        mylist= ModelList()
-
-        from sans.models.SphereModel import SphereModel
-        from sans.models.SquareWellStructure import SquareWellStructure
-        from sans.models.DebyeModel import DebyeModel
-        from sans.models.LineModel import LineModel
-        name= "shapes"
-        list1= [SphereModel]
-        mylist.set_list( name, list1)
-        
-        name= "Shape-independent"
-        list1= [DebyeModel]
-        mylist.set_list( name, list1)
-        
-        name= "Structure Factors"
-        list1= [SquareWellStructure]
-        mylist.set_list( name, list1)
-        
-        name= "Added models"
-        list1= [LineModel]
-        mylist.set_list( name, list1)
-        
-        myinfo.model_list_box = mylist.get_list()
-        
-        self.page = FitPage(self, myinfo) 
-        
-        self.Centre()
-        self.Show(True)
  
-if __name__=="__main__":
-    app = wx.App()
-    HelpWindow(None, -1, 'HelpWindow')
-    app.MainLoop()
-                
+"""
+Example: ::   
+    
+    class HelpWindow(wx.Frame):
+        def __init__(self, parent, id, title):
+            wx.Frame.__init__(self, parent, id, title, size=(570, 400))
+           
+            from sans.models.CylinderModel import CylinderModel
+            model = CylinderModel()
+           
+            from danse.common.plottools.plottables import Data1D
+            data= Data1D(x=[1,2], y=[3,4], dy=[0.1, 0,1])
+        
+            from fitpanel import PageInfo
+            myinfo = PageInfo(self,  model, data=data )
+            
+            ## add data
+            
+            from models import ModelList
+            mylist= ModelList()
+    
+            from sans.models.SphereModel import SphereModel
+            from sans.models.SquareWellStructure import SquareWellStructure
+            from sans.models.DebyeModel import DebyeModel
+            from sans.models.LineModel import LineModel
+            name= "shapes"
+            list1= [SphereModel]
+            mylist.set_list( name, list1)
+            
+            name= "Shape-independent"
+            list1= [DebyeModel]
+            mylist.set_list( name, list1)
+            
+            name= "Structure Factors"
+            list1= [SquareWellStructure]
+            mylist.set_list( name, list1)
+            
+            name= "Added models"
+            list1= [LineModel]
+            mylist.set_list( name, list1)
+            
+            myinfo.model_list_box = mylist.get_list()
+            
+            self.page = FitPage(self, myinfo) 
+            
+            self.Centre()
+            self.Show(True)
+     
+    if __name__=="__main__":
+        app = wx.App()
+        HelpWindow(None, -1, 'HelpWindow')
+        app.MainLoop()
+"""
+            

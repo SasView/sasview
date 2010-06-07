@@ -29,7 +29,8 @@ class FitThread(CalcThread):
    
     def isquit(self):
         """
-             @raise KeyboardInterrupt: when the thread is interrupted
+        :raise KeyboardInterrupt: when the thread is interrupted
+        
         """
         try:
             CalcThread.isquit(self)
@@ -38,7 +39,7 @@ class FitThread(CalcThread):
         
     def compute(self):
         """
-            Perform a fit 
+        Perform a fit 
         """
         try: 
             self.handler.starting_fit()
@@ -57,7 +58,3 @@ class FitThread(CalcThread):
             #Stop on exception during fitting. Todo: need to put some mssg and reset progress bar.
             self.handler.error(msg=msg)
         
-            
-         
-            
-    

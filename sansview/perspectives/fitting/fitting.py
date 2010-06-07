@@ -1,12 +1,16 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
 
-copyright 2009, University of Tennessee
-"""
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2009, University of Tennessee
+################################################################################
+
+
 import  re
 import sys
 import wx
@@ -48,9 +52,11 @@ DEFAULT_NPTS = 50
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
 
 from fitpage import Chi2UpdateEvent
+
+
 class PlotInfo:
     """
-        store some plotting field
+    store some plotting field
     """
     _xunit = 'A^{-1}'
     _xaxis= "\\rm{Q}"
@@ -64,9 +70,11 @@ class PlotInfo:
     
 class Plugin:
     """
-        Fitting plugin is used to perform fit 
+    Fitting plugin is used to perform fit 
     """
     def __init__(self):
+        """
+        """
         ## Plug-in name
         self.sub_menu = "Fitting"
         
@@ -113,10 +121,13 @@ class Plugin:
         
     def populate_menu(self, id, owner):
         """
-            Create a menu for the Fitting plug-in
-            @param id: id to create a menu
-            @param owner: owner of menu
-            @ return : list of information to populate the main menu
+        Create a menu for the Fitting plug-in
+        
+        :param id: id to create a menu
+        :param owner: owner of menu
+        
+        :return: list of information to populate the main menu
+        
         """
         #Menu for fitting
         self.menu1 = wx.Menu()
@@ -156,7 +167,7 @@ class Plugin:
                
     def on_add_sim_page(self, event):
         """
-            Create a page to access simultaneous fit option
+        Create a page to access simultaneous fit option
         """
         Plugin.on_perspective(self,event=event)
         if self.sim_page !=None:
@@ -168,24 +179,25 @@ class Plugin:
         
     def help(self, evt):
         """
-            Show a general help dialog. 
-            TODO: replace the text with a nice image
+        Show a general help dialog. 
         """
         
         from help_panel import  HelpWindow
         frame = HelpWindow(None, -1, 'HelpWindow')    
         frame.Show(True)
         
-        
     def get_context_menu(self, graph=None):
         """
-            Get the context menu items available for P(r).them allow fitting option
-            for Data2D and Data1D only.
-            
-            @param graph: the Graph object to which we attach the context menu
-            @return: a list of menu items with call-back function
-            @note: if Data1D was generated from Theory1D  
-                    the fitting option is not allowed
+        Get the context menu items available for P(r).them allow fitting option
+        for Data2D and Data1D only.
+        
+        :param graph: the Graph object to which we attach the context menu
+        
+        :return: a list of menu items with call-back function
+        
+        :note: if Data1D was generated from Theory1D  
+                the fitting option is not allowed
+                
         """
         self.graph = graph
         fit_option = "Select data for fitting"
@@ -220,7 +232,7 @@ class Plugin:
 
     def get_panels(self, parent):
         """
-            Create and return a list of panel objects
+        Create and return a list of panel objects
         """
         self.parent = parent
         # Creation of the fit panel
@@ -251,39 +263,40 @@ class Plugin:
     
     def get_perspective(self):
         """
-            Get the list of panel names for this perspective
+        Get the list of panel names for this perspective
         """
         return self.perspective
     
-    
     def on_perspective(self, event):
         """
-            Call back function for the perspective menu item.
-            We notify the parent window that the perspective
-            has changed.
+        Call back function for the perspective menu item.
+        We notify the parent window that the perspective
+        has changed.
         """
         self.parent.set_perspective(self.perspective)
    
     def set_default_perspective(self):
         """
-           Call back method that True to notify the parent that the current plug-in
-           can be set as default  perspective.
-           when returning False, the plug-in is not candidate for an automatic 
-           default perspective setting
+        Call back method that True to notify the parent that the current plug-in
+        can be set as default  perspective.
+        when returning False, the plug-in is not candidate for an automatic 
+        default perspective setting
         """
         return True
     
     def post_init(self):
         """
-            Post initialization call back to close the loose ends
+        Post initialization call back to close the loose ends
         """
         pass
     
     def set_state(self, state, datainfo=None):
         """
-            Call-back method for the fit page state reader.
-            This method is called when a .fitv file is loaded.
-            @param state: PageState object
+        Call-back method for the fit page state reader.
+        This method is called when a .fitv file is loaded.
+        
+        :param state: PageState object
+        
         """
         #working on reading state
         return 
@@ -298,15 +311,15 @@ class Plugin:
         
     def save_fit_state(self, filepath, fitstate):  
         """
-            save fit page state into file
+        save fit page state into file
         """
         self.state_reader.write(filename=filepath, fitstate=fitstate)
         
     def copy_data(self, item, dy=None):
         """
-            receive a data 1D and the list of errors on dy
-            and create a new data1D data
-            @param return 
+        receive a data 1D and the list of errors on dy
+        and create a new data1D data
+    
         """
         id = None
         if hasattr(item,"id"):
@@ -326,7 +339,7 @@ class Plugin:
     
     def set_fit_range(self, page, qmin, qmax):
         """
-            Set the fitting range of a given page
+        Set the fitting range of a given page
         """
         if page in self.page_finder.iterkeys():
             fitproblem= self.page_finder[page]
@@ -334,11 +347,13 @@ class Plugin:
                     
     def schedule_for_fit(self,value=0,page=None,fitproblem =None):  
         """
-            Set the fit problem field to 0 or 1 to schedule that problem to fit.
-            Schedule the specified fitproblem or get the fit problem related to 
-            the current page and set value.
-            @param value : integer 0 or 1 
-            @param fitproblem: fitproblem to schedule or not to fit
+        Set the fit problem field to 0 or 1 to schedule that problem to fit.
+        Schedule the specified fitproblem or get the fit problem related to 
+        the current page and set value.
+        
+        :param value: integer 0 or 1 
+        :param fitproblem: fitproblem to schedule or not to fit
+        
         """   
         if fitproblem !=None:
             fitproblem.schedule_tofit(value)
@@ -348,17 +363,21 @@ class Plugin:
                 fitproblem.schedule_tofit(value)
           
     def get_page_finder(self):
-        """ @return self.page_finder used also by simfitpage.py"""  
+        """
+        return self.page_finder used also by simfitpage.py
+        """  
         return self.page_finder 
-    
     
     def set_page_finder(self,modelname,names,values):
         """
-             Used by simfitpage.py to reset a parameter given the string constrainst.
-             @param modelname: the name ot the model for with the parameter has to reset
-             @param value: can be a string in this case.
-             @param names: the paramter name
-             @note: expecting park used for fit.
+        Used by simfitpage.py to reset a parameter given the string constrainst.
+         
+        :param modelname: the name ot the model for with the parameter has to reset
+        :param value: can be a string in this case.
+        :param names: the paramter name
+         
+        :note: expecting park used for fit.
+         
         """  
         sim_page= self.sim_page
         for page, value in self.page_finder.iteritems():
@@ -371,10 +390,12 @@ class Plugin:
          
     def split_string(self,item): 
         """
-            receive a word containing dot and split it. used to split parameterset
-            name into model name and parameter name example:
+        receive a word containing dot and split it. used to split parameterset
+        name into model name and parameter name example: ::
+        
             paramaterset (item) = M1.A
-            @return model_name =M1 , parameter name =A
+            Will return model_name = M1 , parameter name = A
+            
         """
         if string.find(item,".")!=-1:
             param_names= re.split("\.",item)
@@ -388,7 +409,7 @@ class Plugin:
         
     def stop_fit(self):
         """
-            Stop the fit engine
+        Stop the fit engine
         """
         if self.calc_fit!= None and self.calc_fit.isrunning():
             self.calc_fit.stop()
@@ -397,8 +418,10 @@ class Plugin:
            
     def set_smearer_nodraw(self,smearer, qmin=None, qmax=None):
         """
-            Get a smear object and store it to a fit problem
-            @param smearer: smear object to allow smearing data
+        Get a smear object and store it to a fit problem
+        
+        :param smearer: smear object to allow smearing data
+        
         """  
         self.current_pg=self.fit_panel.get_current_page()
         self.page_finder[self.current_pg].set_smearer(smearer)
@@ -407,13 +430,14 @@ class Plugin:
         model = self.page_finder[self.current_pg].get_model()
         ## if user has already selected a model to plot
         ## redraw the model with data smeared
-        
         smear =self.page_finder[self.current_pg].get_smearer()   
             
     def set_smearer(self,smearer, qmin=None, qmax=None):
         """
-            Get a smear object and store it to a fit problem
-            @param smearer: smear object to allow smearing data
+        Get a smear object and store it to a fit problem
+        
+        :param smearer: smear object to allow smearing data
+        
         """   
         self.current_pg=self.fit_panel.get_current_page()
         self.page_finder[self.current_pg].set_smearer(smearer)
@@ -432,19 +456,19 @@ class Plugin:
                    enable1D= True, enable2D= False,
                    qmin= DEFAULT_QMIN, qmax= DEFAULT_QMAX, qstep= DEFAULT_NPTS):
         """
-             Draw model.
-             @param model: the model to draw
-             @param name: the name of the model to draw
-             @param data: the data on which the model is based to be drawn
-             @param description: model's description
-             @param enable1D: if true enable drawing model 1D
-             @param enable2D: if true enable drawing model 2D
-             @param qmin:  Range's minimum value to draw model
-             @param qmax:  Range's maximum value to draw model
-             @param qstep: number of step to divide the x and y-axis
+        Draw model.
+        
+        :param model: the model to draw
+        :param name: the name of the model to draw
+        :param data: the data on which the model is based to be drawn
+        :param description: model's description
+        :param enable1D: if true enable drawing model 1D
+        :param enable2D: if true enable drawing model 2D
+        :param qmin:  Range's minimum value to draw model
+        :param qmax:  Range's maximum value to draw model
+        :param qstep: number of step to divide the x and y-axis
              
         """
-
         if data.__class__.__name__ !="Data2D":    
             ## draw model 1D with no loaded data
             self._draw_model1D( model= model, data= data,
@@ -463,7 +487,7 @@ class Plugin:
             
     def onFit(self):
         """
-            perform fit 
+        perform fit 
         """
         ##  count the number of fitproblem schedule to fit 
         fitproblem_count= 0
@@ -544,7 +568,7 @@ class Plugin:
             
     def remove_plot(self, page, theory=False):
         """
-            remove model plot when a fit page is closed
+        remove model plot when a fit page is closed
         """
         fitproblem = self.page_finder[page]
         data = fitproblem.get_fit_data()
@@ -569,8 +593,10 @@ class Plugin:
                                                     title=data.name))
     def create_fittable_data2D(self, data):
         """
-            check if the current data is a data 2d and add dy to that data
-            @return Data2D
+        check if the current data is a data 2d and add dy to that data
+        
+        :return: Data2D
+        
         """
         if data.__class__.__name__ != "Data2D":
             raise ValueError, " create_fittable_data2D expects a Data2D"
@@ -590,8 +616,10 @@ class Plugin:
         
     def create_fittable_data1D(self, data):
         """
-            check if the current data is a theory 1d and add dy to that data
-            @return Data1D
+        check if the current data is a theory 1d and add dy to that data
+        
+        :return: Data1D
+        
         """
         class_name = data.__class__.__name__
         if not class_name in ["Data1D", "Theory1D"]:
@@ -620,8 +648,10 @@ class Plugin:
            
     def store_page(self, page, data):
         """
-            Helper to save page reference into the plug-in
-            @param page: page to store
+        Helper to save page reference into the plug-in
+        
+        :param page: page to store
+        
         """
         page.set_data(data) 
         #create a fitproblem storing all link to data,model,page creation
@@ -631,8 +661,8 @@ class Plugin:
         
     def add_fit_page(self, data):
         """
-            given a data, ask to the fitting panel to create a new fitting page,
-            get this page and store it into the page_finder of this plug-in
+        given a data, ask to the fitting panel to create a new fitting page,
+        get this page and store it into the page_finder of this plug-in
         """
         try:
             page = self.fit_panel.add_fit_page(data)
@@ -650,9 +680,10 @@ class Plugin:
        
     def _onEVT_SLICER_PANEL(self, event):
         """
-            receive and event telling to update a panel with a name starting with 
-            event.panel_name. this method update slicer panel for a given interactor.
-            @param event: contains type of slicer , paramaters for updating the panel
+        receive and event telling to update a panel with a name starting with 
+        event.panel_name. this method update slicer panel for a given interactor.
+        
+        :param event: contains type of slicer , paramaters for updating the panel
             and panel_name to find the slicer 's panel concerned.
         """
         for item in self.parent.panels:
@@ -661,11 +692,10 @@ class Plugin:
                 
         self.parent._mgr.Update()
    
-              
     def _closed_fitpage(self, event):   
         """
-            request fitpanel to close a given page when its unique data is removed 
-            from the plot. close fitpage only when the a loaded data is removed
+        request fitpanel to close a given page when its unique data is removed 
+        from the plot. close fitpage only when the a loaded data is removed
         """    
         if event is None or event.data is None:
             return
@@ -676,7 +706,7 @@ class Plugin:
         
     def _add_page_onmenu(self, name,fitproblem=None):
         """
-            Add name of a closed page of fitpanel in a menu 
+        Add name of a closed page of fitpanel in a menu 
         """
         list = self.menu1.GetMenuItems()
         for item in list:
@@ -690,10 +720,9 @@ class Plugin:
             self.closed_page_dict[name]= [event_id, fitproblem]
             wx.EVT_MENU(self.parent,event_id,  self._open_closed_page)
         
-        
     def _open_closed_page(self, event):    
         """
-            reopen a closed page
+        reopen a closed page
         """
         for name, value in self.closed_page_dict.iteritems():
             if event.GetId() in value:
@@ -711,18 +740,17 @@ class Plugin:
                     self.fit_panel.add_model_page(model=model, topmenu=True,
                                                   reset= True)
                     break
-        
-        
+    
     def _reset_schedule_problem(self, value=0):
         """
-             unschedule or schedule all fitproblem to be fit
+        unschedule or schedule all fitproblem to be fit
         """
         for page, fitproblem in self.page_finder.iteritems():
             fitproblem.schedule_tofit(value)
             
     def _fit_helper(self,pars,value, id, title="Single Fit " ):
         """
-            helper for fitting
+        helper for fitting
         """
         metadata = value.get_fit_data()
         model = value.get_model()
@@ -760,8 +788,8 @@ class Plugin:
        
     def _onSelect(self,event):
         """ 
-            when Select data to fit a new page is created .Its reference is 
-            added to self.page_finder
+        when Select data to fit a new page is created .Its reference is 
+        added to self.page_finder
         """
         self.panel = event.GetEventObject()
         Plugin.on_perspective(self,event=event)
@@ -777,12 +805,13 @@ class Plugin:
             
     def _single_fit_completed(self,result,pars,cpage, elapsed=None):
         """
-            Display fit result on one page of the notebook.
-            @param result: result of fit 
-            @param pars: list of names of parameters fitted
-            @param current_pg: the page where information will be displayed
-            @param qmin: the minimum value of x to replot the model 
-            @param qmax: the maximum value of x to replot model
+        Display fit result on one page of the notebook.
+        
+        :param result: result of fit 
+        :param pars: list of names of parameters fitted
+        :param current_pg: the page where information will be displayed
+        :param qmin: the minimum value of x to replot the model 
+        :param qmax: the maximum value of x to replot model
           
         """     
         try:
@@ -812,13 +841,14 @@ class Plugin:
                                                   type="stop"))
             return
        
-       
     def _simul_fit_completed(self,result,pars=None,cpage=None, elapsed=None):
         """
-            Parameter estimation completed, 
-            display the results to the user
-            @param alpha: estimated best alpha
-            @param elapsed: computation time
+        Parameter estimation completed, 
+        display the results to the user
+        
+        :param alpha: estimated best alpha
+        :param elapsed: computation time
+        
         """
         ## fit more than 1 model at the same time 
         try:
@@ -859,33 +889,33 @@ class Plugin:
              wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
              return 
              
-                           
-        
     def _on_show_panel(self, event):
-        print "_on_show_panel: fitting"
-      
-      
+        """
+        """
+        #print "_on_show_panel: fitting"
+        pass
+        
     def _onset_engine_park(self,event):
         """ 
-            set engine to park
+        set engine to park
         """
         Plugin.on_perspective(self,event=event)
         self._on_change_engine('park')
        
-       
     def _onset_engine_scipy(self,event):
         """ 
-            set engine to scipy
+        set engine to scipy
         """
         self._on_change_engine('scipy')
        
     def _on_slicer_event(self, event):
         """
-            Receive a panel as event and send it to guiframe 
-            @param event: event containing a panel
+        Receive a panel as event and send it to guiframe 
+        
+        :param event: event containing a panel
+        
         """
-       
-        if event.panel!=None:
+        if event.panel is not None:
             new_panel = event.panel
             self.slicer_panels.append(event.panel)
             # Set group ID if available
@@ -896,11 +926,10 @@ class Plugin:
          
             new_panel.uid = event_id
             self.mypanels.append(new_panel) 
-        return  
-    
+       
     def _onclearslicer(self, event):
         """
-            Clear the boxslicer when close the panel associate with this slicer
+        Clear the boxslicer when close the panel associate with this slicer
         """
         name =event.GetPane().caption
     
@@ -914,23 +943,21 @@ class Plugin:
                             self.parent._mgr.Update()
                             break 
                 break
-       
-       
-        
-        
+    
     def _return_engine_type(self):
         """
-            return the current type of engine
+        return the current type of engine
         """
         return self._fit_engine
      
      
     def _on_change_engine(self, engine='park'):
         """
-            Allow to select the type of engine to perform fit 
-            @param engine: the key work of the engine
+        Allow to select the type of engine to perform fit 
+        
+        :param engine: the key work of the engine
+        
         """
-       
         ## saving fit engine name
         self._fit_engine = engine
         ## change menu item state
@@ -951,11 +978,12 @@ class Plugin:
         for key in self.page_finder.keys():
             wx.PostEvent(key, event)
        
-   
     def _on_model_panel(self, evt):
         """
-            react to model selection on any combo box or model menu.plot the model  
-            @param evt: wx.combobox event
+        react to model selection on any combo box or model menu.plot the model  
+        
+        :param evt: wx.combobox event
+        
         """
         model = evt.model
         if model == None:
@@ -996,8 +1024,10 @@ class Plugin:
         
     def _on_model_menu(self, evt):
         """
-            Plot a theory from a model selected from the menu
-            @param evt: wx.menu event
+        Plot a theory from a model selected from the menu
+        
+        :param evt: wx.menu event
+        
         """
         model = evt.model
         Plugin.on_perspective(self,event=evt)
@@ -1005,24 +1035,22 @@ class Plugin:
         # will be plotted automatically. If a page already exists,
         # the content will be updated and the plot refreshed
         self.fit_panel.add_model_page(model,topmenu=True)
-    
-   
-    
-    
+
     def _update1D(self,x, output):
         """
-            Update the output of plotting model 1D
+        Update the output of plotting model 1D
         """
         wx.PostEvent(self.parent, StatusEvent(status="Plot \
         #updating ... ",type="update"))
         self.ready_fit()
         #self.calc_thread.ready(0.01)
     
-    
     def _fill_default_model2D(self, theory, qmax,qstep, qmin=None):
         """
-            fill Data2D with default value 
-            @param theory: Data2D to fill
+        fill Data2D with default value 
+        
+        :param theory: Data2D to fill
+        
         """
         from DataLoader.data_info import Detector, Source
         
@@ -1038,8 +1066,7 @@ class Plugin:
         
         theory.detector[0].beam_center.x= qmax
         theory.detector[0].beam_center.y= qmax
-        
-        
+    
         ## create x_bins and y_bins of the model 2D
         pixel_width_x = theory.detector[0].pixel_size.x
         pixel_width_y = theory.detector[0].pixel_size.y
@@ -1099,14 +1126,12 @@ class Plugin:
         theory.xmax= xmax
         theory.ymin= ymin 
         theory.ymax= ymax 
-        theory.group_id ="Model"
-        theory.id ="Model"
-        
+        theory.group_id = "Model"
+        theory.id = "Model"
         
     def _get_plotting_info(self, data=None):
         """
-            get plotting info from data if data !=None
-            else use some default
+        get plotting info from data if data !=None else use some default
         """
         my_info = PlotInfo()
         if data !=None:
@@ -1124,13 +1149,11 @@ class Plugin:
                 my_info.info= data.info
             if hasattr(data, "group_id"):
                 my_info.group_id= data.group_id
-        
         return my_info
-                
                 
     def _complete1D(self, x,y, elapsed,index,model,data=None):
         """
-            Complete plotting 1D data
+        Complete plotting 1D data
         """ 
         try:
             new_plot = Theory1D(x=x, y=y)
@@ -1168,22 +1191,21 @@ class Plugin:
             msg= " Error occurred when drawing %s Model 1D: "%new_plot.name
             msg+= " %s"%sys.exc_value
             wx.PostEvent( self.parent, StatusEvent(status= msg, type="stop"))
-            return  
-                  
+   
     def _update2D(self, output,time=None):
         """
-            Update the output of plotting model
+        Update the output of plotting model
         """
         wx.PostEvent(self.parent, StatusEvent(status="Plot \
         #updating ... ",type="update"))
         self.ready_fit()
         #self.calc_thread.ready(0.01)
-        
-        
-    def _complete2D(self, image,data, model,  elapsed,index,qmin, qmax,qstep=DEFAULT_NPTS):
+    
+    def _complete2D(self, image, data, model, elapsed, index, qmin,
+                     qmax, qstep=DEFAULT_NPTS):
         """
-            Complete get the result of modelthread and create model 2D
-            that can be plot.
+        Complete get the result of modelthread and create model 2D
+        that can be plot.
         """
         err_image = numpy.zeros(numpy.shape(image))
        
@@ -1191,7 +1213,8 @@ class Plugin:
         theory.name= model.name
         
         if data ==None:
-            self._fill_default_model2D(theory= theory, qmax=qmax,qstep=qstep, qmin= qmin)
+            self._fill_default_model2D(theory=theory, qmax=qmax, qstep=qstep,
+                                        qmin= qmin)
         
         else:
             theory.id= data.id+"Model"
@@ -1217,28 +1240,30 @@ class Plugin:
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
                          title="Analytical model 2D ", reset=True ))
         # Chisqr in fitpage
-        current_pg=self.fit_panel.get_current_page()
-        wx.PostEvent(current_pg,Chi2UpdateEvent(output=self._cal_chisqr(data=data,index=index)))
+        current_pg = self.fit_panel.get_current_page()
+        wx.PostEvent(current_pg,
+            Chi2UpdateEvent(output=self._cal_chisqr(data=data,index=index)))
         msg = "Plot 2D complete !"
-        wx.PostEvent( self.parent, StatusEvent( status= msg , type="stop" ))
+        wx.PostEvent( self.parent, StatusEvent(status=msg, type="stop" ))
      
     def _on_data_error(self, event):
         """
-            receives and event from plotting plu-gins to store the data name and 
-            their errors of y coordinates for 1Data hide and show error
+        receives and event from plotting plu-gins to store the data name and 
+        their errors of y coordinates for 1Data hide and show error
         """
         self.err_dy = event.err_dy
          
     def _draw_model2D(self,model,data=None, smearer= None,description=None, enable2D=False,
                       qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
         """
-            draw model in 2D
-            @param model: instance of the model to draw
-            @param description: the description of the model
-            @param enable2D: when True allows to draw model 2D
-            @param qmin: the minimum value to  draw model 2D
-            @param qmax: the maximum value to draw model 2D
-            @param qstep: the number of division of Qx and Qy of the model to draw
+        draw model in 2D
+        
+        :param model: instance of the model to draw
+        :param description: the description of the model
+        :param enable2D: when True allows to draw model 2D
+        :param qmin: the minimum value to  draw model 2D
+        :param qmax: the maximum value to draw model 2D
+        :param qstep: the number of division of Qx and Qy of the model to draw
             
         """
         x=  numpy.linspace(start= -1*qmax,
@@ -1282,13 +1307,14 @@ class Plugin:
             msg+= " %s"%sys.exc_value
             wx.PostEvent( self.parent, StatusEvent(status= msg ))
 
-   
     def _draw_model1D(self, model, data=None, smearer= None,
                 qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep= DEFAULT_NPTS,enable1D= True):
         """
-            Draw model 1D from loaded data1D
-            @param data: loaded data
-            @param model: the model to plot
+        Draw model 1D from loaded data1D
+        
+        :param data: loaded data
+        :param model: the model to plot
+        
         """
         x=  numpy.linspace(start= qmin,
                            stop= qmax,
@@ -1331,8 +1357,8 @@ class Plugin:
 
     def _cal_chisqr(self, data=None, index=None): 
         """
-            Get handy Chisqr using the output from draw1D and 2D, 
-            instead of calling expansive CalcChisqr in guithread
+        Get handy Chisqr using the output from draw1D and 2D, 
+        instead of calling expansive CalcChisqr in guithread
         """
         # default chisqr
         chisqr = None
@@ -1368,19 +1394,19 @@ class Plugin:
         return chisqr
     
     
-def profile(fn, *args, **kw):
-    import cProfile, pstats, os
-    global call_result
-    def call():
-        global call_result
-        call_result = fn(*args, **kw)
-    cProfile.runctx('call()', dict(call=call), {}, 'profile.out')
-    stats = pstats.Stats('profile.out')
-    #stats.sort_stats('time')
-    stats.sort_stats('calls')
-    stats.print_stats()
-    os.unlink('profile.out')
-    return call_result
+#def profile(fn, *args, **kw):
+#    import cProfile, pstats, os
+#    global call_result
+#    def call():
+#        global call_result
+#        call_result = fn(*args, **kw)
+#    cProfile.runctx('call()', dict(call=call), {}, 'profile.out')
+#    stats = pstats.Stats('profile.out')
+#    #stats.sort_stats('time')
+#    stats.sort_stats('calls')
+#    stats.print_stats()
+#    os.unlink('profile.out')
+#    return call_result
 if __name__ == "__main__":
     i = Plugin()
     

@@ -1,0 +1,323 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fitproblem &mdash; sansview v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="sansview v0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="fitting" href="fitting.html" />
+    <link rel="prev" title="fitpanel" href="fitpanel.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="fitting.html" title="fitting"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="fitpanel.html" title="fitpanel"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">sansview v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="fitproblem">
+<h1>fitproblem<a class="headerlink" href="#fitproblem" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.perspectives.fitting.fitproblem">
+<span id="sans-perspectives-fitting-fitproblem"></span><h2><a class="reference internal" href="#module-sans.perspectives.fitting.fitproblem"><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.fitting.fitproblem</span></tt></a><a class="headerlink" href="#module-sans.perspectives.fitting.fitproblem" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem">
+<em class="property">class </em><tt class="descclassname">sans.perspectives.fitting.fitproblem.</tt><tt class="descname">FitProblem</tt><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem" title="Permalink to this definition">¶</a></dt>
+<dd><p>FitProblem class allows to link a model with the new name created in _on_model,
+a name theory created with that model  and the data fitted with the model.
+FitProblem is mostly used  as value of the dictionary by fitting module.</p>
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.add_fit_data">
+<tt class="descname">add_fit_data</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.add_fit_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>save a copy of the data select to fit</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> &#8211; data selected</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.add_plotted_data">
+<tt class="descname">add_plotted_data</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.add_plotted_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>save a copy of the data select to fit</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> &#8211; data selected</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.clear_model_param">
+<tt class="descname">clear_model_param</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.clear_model_param" title="Permalink to this definition">¶</a></dt>
+<dd>clear constraint info</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.clone">
+<tt class="descname">clone</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.clone" title="Permalink to this definition">¶</a></dt>
+<dd>copy fitproblem</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.get_fit_data">
+<tt class="descname">get_fit_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.get_fit_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.get_index">
+<tt class="descname">get_index</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.get_index" title="Permalink to this definition">¶</a></dt>
+<dd>get index of the model name</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.get_model">
+<tt class="descname">get_model</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">saved model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.get_model_param">
+<tt class="descname">get_model_param</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.get_model_param" title="Permalink to this definition">¶</a></dt>
+<dd>return list of couple of parameter name and value</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.get_name">
+<tt class="descname">get_name</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.get_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.get_plotted_data">
+<tt class="descname">get_plotted_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.get_plotted_data" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">list of data dList</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.get_range">
+<tt class="descname">get_range</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.get_range" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">fitting range</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.get_scheduled">
+<tt class="descname">get_scheduled</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.get_scheduled" title="Permalink to this definition">¶</a></dt>
+<dd>return true or false if a problem as being schedule for fitting</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.get_smearer">
+<tt class="descname">get_smearer</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.get_smearer" title="Permalink to this definition">¶</a></dt>
+<dd>return smear object</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.save_model_name">
+<tt class="descname">save_model_name</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.save_model_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.schedule_tofit">
+<tt class="descname">schedule_tofit</tt><big>(</big><em>schedule=0</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.schedule_tofit" title="Permalink to this definition">¶</a></dt>
+<dd>set schedule to true to decide if this fit  must be performed</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.set_index">
+<tt class="descname">set_index</tt><big>(</big><em>index</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.set_index" title="Permalink to this definition">¶</a></dt>
+<dd>set index of the model name</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.set_model">
+<tt class="descname">set_model</tt><big>(</big><em>model</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.set_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>associates each model with its new created name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; model selected</li>
+<li><strong>name</strong> &#8211; name created for model</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.set_model_param">
+<tt class="descname">set_model_param</tt><big>(</big><em>name</em>, <em>value=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.set_model_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store the name and value of a parameter of this fitproblem&#8217;s model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; name of the given parameter</li>
+<li><strong>value</strong> &#8211; value of that parameter</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.set_range">
+<tt class="descname">set_range</tt><big>(</big><em>qmin=None</em>, <em>qmax=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.set_range" title="Permalink to this definition">¶</a></dt>
+<dd>set fitting range</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitproblem.FitProblem.set_smearer">
+<tt class="descname">set_smearer</tt><big>(</big><em>smearer</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitproblem.FitProblem.set_smearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>save reference of  smear object on fitdata</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>smear</strong> &#8211; smear object from DataLoader</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">fitproblem</a><ul>
+<li><a class="reference internal" href="#module-sans.perspectives.fitting.fitproblem"><tt class="docutils literal"><span class="pre">sans.perspectives.fitting.fitproblem</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="fitpanel.html"
+                        title="previous chapter">fitpanel</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="fitting.html"
+                        title="next chapter">fitting</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/perspectives/fitting/fitproblem.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="fitting.html" title="fitting"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="fitpanel.html" title="fitpanel"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">sansview v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b1.
+    </div>
+  </body>
+</html>

@@ -21,6 +21,9 @@ class ConsoleUpdate(FitHandler):
         """
         If quiet is true, only print out final summary, not progress and
         improvements.
+        
+        :attr parent: the object that handle the messages
+        
         """
         self.parent= parent
         self.progress_time = time.time()
@@ -95,24 +98,34 @@ class ConsoleUpdate(FitHandler):
                                               info="error", type="stop"))
             
     def finalize(self):
+        """
+        """
         if self.isbetter:
             self.result.print_summary()
 
     def abort(self):
+        """
+        """
         if self.isbetter:
             self.result.print_summary()
             
     def update_fit(self, msg=""):
+        """
+        """
         self.elapsed_time = time.time() - self.elapsed_time
         msg = " Updating fit ...\n result:\n %s \n"%self.result.__str__()
         wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                               type="progress"))
         
     def starting_fit(self):
+        """
+        """
         wx.PostEvent(self.parent, StatusEvent(status="Starting the Fit...",
                                         info="info",type="progress"))
         
     def set_result(self, result):
+        """
+        """
         self.result = result
         
     

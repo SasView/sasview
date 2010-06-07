@@ -1,5 +1,5 @@
 """
-    Test plug-in model
+Test plug-in model
 """
 from sans.models.pluginmodel import Model1DPlugin   ##Do not change this line!!!
 import math                                         ##Do not change this line!!!
@@ -7,14 +7,17 @@ import math                                         ##Do not change this line!!!
 # Modify ONLY lines with '## YOU CAN MODIFY THIS LINE'.
 # Your model HAS to be called Model
 class Model(Model1DPlugin):         ##Do not change this line!!!
-    """ Class that evaluates a ploynomial model. 
+    """
+    Class that evaluates a ploynomial model. 
     """
     
     ## Name of your model
     name = "sin(poly)/(poly)"    ## YOU CAN MODIFY THIS LINE.
     
     def __init__(self):      ##Do not change this line!!!
-        """ Initialization """
+        """
+        Initialization
+        """
         Model1DPlugin.__init__(self, name= self.name)  ##Do not change this line!!!
         
         ## Parameters definition and defaults
@@ -40,9 +43,13 @@ class Model(Model1DPlugin):         ##Do not change this line!!!
         self.description = "scale * sin(F(x)/F(x)) \n where F(x)=A+B*x+C*x^2+D*x^3+E*x^4+F*x^5"  ## YOU CAN MODIFY THIS LINE
    
     def function(self, x = 0.0): ##Do not change this line!!!
-        """ Evaluate the model
-            @param x: input x
-            @return: function value
+        """ 
+        Evaluate the model
+        
+        :param x: input x
+        
+        :return: function value
+        
         """
         ##You can modify from HERE to the END of this function!!!
         

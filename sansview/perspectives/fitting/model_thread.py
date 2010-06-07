@@ -1,17 +1,18 @@
+
+
 import time
 from data_util.calcthread import CalcThread
 import sys
 import numpy,math
 from DataLoader.smearing_2d import Smearer2D
-import fitpage
+
 class Calc2D(CalcThread):
     """
-        Compute 2D model
-        This calculation assumes a 2-fold symmetry of the model
-        where points are computed for one half of the detector
-        and I(qx, qy) = I(-qx, -qy) is assumed.
+    Compute 2D model
+    This calculation assumes a 2-fold symmetry of the model
+    where points are computed for one half of the detector
+    and I(qx, qy) = I(-qx, -qy) is assumed.
     """
-    
     def __init__(self, x, y, data,model,smearer,qmin, qmax,qstep,
                  completefn = None,
                  updatefn   = None,
@@ -36,7 +37,7 @@ class Calc2D(CalcThread):
         
     def compute(self):
         """
-            Compute the data given a model function
+        Compute the data given a model function
         """
         self.starttime = time.time()
         # Determine appropriate q range
@@ -124,8 +125,9 @@ class Calc2D(CalcThread):
         
 
 class Calc1D(CalcThread):
-    """Compute 1D data"""
-    
+    """
+    Compute 1D data
+    """
     def __init__(self, x, model,
                  data=None,
                  qmin=None,
@@ -136,6 +138,8 @@ class Calc1D(CalcThread):
                  yieldtime  = 0.01,
                  worktime   = 0.01
                  ):
+        """
+        """
         CalcThread.__init__(self,completefn,
                  updatefn,
                  yieldtime,
@@ -150,9 +154,8 @@ class Calc1D(CalcThread):
         
     def compute(self):
         """
-            Compute model 1d value given qmin , qmax , x value 
+        Compute model 1d value given qmin , qmax , x value 
         """
-        
         self.starttime = time.time()
         output = numpy.zeros((len(self.x)))
         index= (self.qmin <= self.x)& (self.x <= self.qmax)
@@ -165,54 +168,58 @@ class Calc1D(CalcThread):
         else:
             output[index] = self.model.evalDistribution(self.x[index])
          
-        elapsed = time.time()-self.starttime
+        elapsed = time.time() - self.starttime
        
-        self.complete(x= self.x[index], y= output[index], 
-                      elapsed=elapsed,index=index, model= self.model, data=self.data)
-
+        self.complete(x=self.x[index], y=output[index], 
+                      elapsed=elapsed,index=index, model=self.model,
+                                        data=self.data)
         
     def results(self):
         """
-            Send resuts of the computation
+        Send resuts of the computation
         """
         return [self.out, self.index]
-                
-class CalcCommandline:
-    def __init__(self, n=20000):
-        #print thread.get_ident()
-        from sans.models.CylinderModel import CylinderModel
+
+"""
+Example: ::
+                     
+    class CalcCommandline:
+        def __init__(self, n=20000):
+            #print thread.get_ident()
+            from sans.models.CylinderModel import CylinderModel
+            
+            model = CylinderModel()
+            
+             
+            print model.runXY([0.01, 0.02])
+            
+            qmax = 0.01
+            qstep = 0.0001
+            self.done = False
+            
+            x = numpy.arange(-qmax, qmax+qstep*0.01, qstep)
+            y = numpy.arange(-qmax, qmax+qstep*0.01, qstep)
         
-        model = CylinderModel()
         
+            calc_thread_2D = Calc2D(x, y, None, model.clone(),None,
+                                    -qmax, qmax,qstep,
+                                            completefn=self.complete,
+                                            updatefn=self.update ,
+                                            yieldtime=0.0)
          
-        print model.runXY([0.01, 0.02])
-        
-        qmax = 0.01
-        qstep = 0.0001
-        self.done = False
-        
-        x = numpy.arange(-qmax, qmax+qstep*0.01, qstep)
-        y = numpy.arange(-qmax, qmax+qstep*0.01, qstep)
+            calc_thread_2D.queue()
+            calc_thread_2D.ready(2.5)
+            
+            while not self.done:
+                time.sleep(1)
     
+        def update(self,output):
+            print "update"
     
-        calc_thread_2D = Calc2D(x, y, None, model.clone(),-qmax, qmax,qstep,
-                                        completefn=self.complete,
-                                        updatefn=self.update ,
-                                        yieldtime=0.0)
-     
-        calc_thread_2D.queue()
-        calc_thread_2D.ready(2.5)
-        
-        while not self.done:
-            time.sleep(1)
-
-    def update(self,output):
-        print "update"
-
-    def complete(self, image, data, model, elapsed, qmin, qmax, qstep ):
-        print "complete"
-        self.done = True
-
-if __name__ == "__main__":
-    CalcCommandline()
-   
+        def complete(self, image, data, model, elapsed, qmin, qmax,index, qstep ):
+            print "complete"
+            self.done = True
+    
+    if __name__ == "__main__":
+        CalcCommandline()
+"""   

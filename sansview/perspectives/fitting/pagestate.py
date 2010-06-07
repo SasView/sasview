@@ -1,12 +1,15 @@
-"""
-This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
 
-See the license text in license.txt
 
-copyright 2009, University of Tennessee
-"""
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2009, University of Tennessee
+################################################################################
+
 import time
 import os
 import sys
@@ -86,14 +89,16 @@ list_of_data2d_values = [["qx_data","qx_data"],
 
 class PageState(object):
     """
-        Contains information to reconstruct a page of the fitpanel.
+    Contains information to reconstruct a page of the fitpanel.
     """
     def __init__(self, parent=None, model=None, data=None):
         
         """ 
-            Initialize the current state
-            @param model: a selected model within a page
-            @param data: 
+        Initialize the current state
+        
+        :param model: a selected model within a page
+        :param data: 
+        
         """
         self.file = None
         #Time of state creation
@@ -200,7 +205,7 @@ class PageState(object):
     
     def clone(self):
         """
-            Create a new copy of the current object
+        Create a new copy of the current object
         """
         model = None
         if self.model is not None:
@@ -270,7 +275,7 @@ class PageState(object):
     
     def _repr_helper(self, list, rep):
         """
-            Helper method to print a state
+        Helper method to print a state
         """
         for item in list:
             rep += "parameter name: %s \n"%str(item[1])
@@ -287,7 +292,7 @@ class PageState(object):
     
     def __repr__(self):
         """ 
-            output string for printing
+        output string for printing
         """
         rep = "\nState name: %s\n"%self.file
         t = time.localtime(self.timestamp)
@@ -320,7 +325,7 @@ class PageState(object):
    
     def _toXML_helper(self, list, element, newdoc):
         """
-            Helper method to create xml file for saving state
+        Helper method to create xml file for saving state
         """
         for item in list:
             sub_element = newdoc.createElement('parameter')
@@ -338,15 +343,16 @@ class PageState(object):
         
     def toXML(self, file="fitting_state.fitv", doc=None, entry_node=None):
         """
-            Writes the state of the InversionControl panel to file, as XML.
-            
-            Compatible with standalone writing, or appending to an
-            already existing XML document. In that case, the XML document
-            is required. An optional entry node in the XML document may also be given.
-            
-            @param file: file to write to
-            @param doc: XML document object [optional]
-            @param entry_node: XML node within the XML document at which we will append the data [optional]
+        Writes the state of the InversionControl panel to file, as XML.
+        
+        Compatible with standalone writing, or appending to an
+        already existing XML document. In that case, the XML document
+        is required. An optional entry node in the XML document may also be given.
+        
+        :param file: file to write to
+        :param doc: XML document object [optional]
+        :param entry_node: XML node within the XML document at which we will append the data [optional]
+        
         """
         from xml.dom.minidom import getDOMImplementation
 
@@ -429,7 +435,7 @@ class PageState(object):
         
     def _fromXML_helper(self, node, list):
         """
-            Helper function to write state to xml
+        Helper function to write state to xml
         """
         for item in node:
             name = item.get('name')
@@ -447,10 +453,11 @@ class PageState(object):
        
     def fromXML(self, file=None, node=None):
         """
-            Load fitting state from a file
-            
-            @param file: .fitv file
-            @param node: node of a XML document to read from
+        Load fitting state from a file
+        
+        :param file: .fitv file
+        :param node: node of a XML document to read from
+        
         """
       
         if file is not None:
@@ -511,7 +518,7 @@ class PageState(object):
 
 class Reader(CansasReader):
     """
-        Class to load a .fitv fitting file
+    Class to load a .fitv fitting file
     """
     ## File type
     type_name = "Fitting"
@@ -523,11 +530,12 @@ class Reader(CansasReader):
     
     def __init__(self, call_back=None, cansas=True):
         """
-            Initialize the call-back method to be called
-            after we load a file
-            @param call_back: call-back method
-            @param cansas:  True = files will be written/read in CanSAS format
-                            False = write CanSAS format
+        Initialize the call-back method to be called
+        after we load a file
+        
+        :param call_back: call-back method
+        :param cansas:  True = files will be written/read in CanSAS format
+                        False = write CanSAS format
             
         """
         ## Call back method to be executed after a file is read
@@ -537,19 +545,20 @@ class Reader(CansasReader):
         
     def read(self, path):
         """ 
-            Load a new P(r) inversion state from file
-            
-            @param path: file path
-            @return: None
+        Load a new P(r) inversion state from file
+        
+        :param path: file path
+        
         """
         if self.cansas == True:
             return self._read_cansas(path)
      
     def _data2d_to_xml_doc(self, datainfo):
         """
-            Create an XML document to contain the content of a Data2D
-            
-            @param datainfo: Data2D object
+        Create an XML document to contain the content of a Data2D
+        
+        :param datainfo: Data2D object
+        
         """
         if not issubclass(datainfo.__class__, Data2D):
             raise RuntimeError, "The cansas writer expects a Data2D instance"
@@ -721,17 +730,17 @@ class Reader(CansasReader):
                 write_node(doc, node, "term", value, term)
             for note in item.notes:
                 write_node(doc, node, "SASprocessnote", note)
-        
         # Return the document, and the SASentry node associated with
         # the data we just wrote
         return doc, entry_node
    
-    
     def _parse_state(self, entry):
         """
-            Read a fit result from an XML node
-            @param entry: XML node to read from 
-            @return: PageState object
+        Read a fit result from an XML node
+        
+        :param entry: XML node to read from 
+        
+        :return: PageState object
         """
         # Create an empty state
         state = PageState()
@@ -746,12 +755,13 @@ class Reader(CansasReader):
     
     def _parse_entry_2d(self, dom):
         """
-            Parse a SASentry
-            
-            @param node: SASentry node
-            @return: Data2D object
+        Parse a SASentry
+        
+        :param node: SASentry node
+        
+        :return: Data2D object
+        
         """
-      
         data_info = Data2D()
         
         # Look up title      
@@ -1082,14 +1092,17 @@ class Reader(CansasReader):
 
     def _read_cansas(self, path):
         """ 
-            Load data and P(r) information from a CanSAS XML file.
-            
-            @param path: file path
-            @return: Data1D object if a single SASentry was found, 
-                        or a list of Data1D objects if multiple entries were found,
-                        or None of nothing was found
-            @raise RuntimeError: when the file can't be opened
-            @raise ValueError: when the length of the data vectors are inconsistent
+        Load data and P(r) information from a CanSAS XML file.
+        
+        :param path: file path
+        
+        :return: Data1D object if a single SASentry was found, 
+                    or a list of Data1D objects if multiple entries were found,
+                    or None of nothing was found
+                    
+        :raise RuntimeError: when the file can't be opened
+        :raise ValueError: when the length of the data vectors are inconsistent
+        
         """
         output = []
         try:
@@ -1154,11 +1167,12 @@ class Reader(CansasReader):
            
     def write(self, filename, datainfo=None, fitstate=None):
         """
-            Write the content of a Data1D as a CanSAS XML file
-            
-            @param filename: name of the file to write
-            @param datainfo: Data1D object
-            @param fitstate: PageState object
+        Write the content of a Data1D as a CanSAS XML file
+        
+        :param filename: name of the file to write
+        :param datainfo: Data1D object
+        :param fitstate: PageState object
+        
         """
         # Sanity check
         if self.cansas == True:
@@ -1181,8 +1195,12 @@ class Reader(CansasReader):
         else:
             fitstate.toXML(file=filename)
         
-        
-if __name__ == "__main__":
-    state = PageState(parent=None)
-    state.toXML()
-    print "state", state
+"""     
+Example: ::
+  
+    if __name__ == "__main__":
+        state = PageState(parent=None)
+        state.toXML()
+        print "state", state
+    
+"""
