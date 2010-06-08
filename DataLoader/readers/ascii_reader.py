@@ -305,9 +305,9 @@ class Reader:
                 #Data    
                 output.x = x
                 output.y = y
-                output.dy = dy if has_error_dy == True else None
-                output.dx = dx if has_error_dx == True else None
-                
+                output.dy = dy if has_error_dy == True else numpy.zeros(len(y))
+                output.dx = dx if has_error_dx == True else numpy.zeros(len(x))
+                                
                 if data_conv_q is not None:
                     output.xaxis("\\rm{Q}", output.x_unit)
                 else:
