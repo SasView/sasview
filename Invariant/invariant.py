@@ -360,9 +360,14 @@ class InvariantCalculator(object):
         # change them are by instantiating a new object.
         self._background = background
         self._scale = scale
-        
+        # slit height for smeared data
+        self._smeared = None
         # The data should be private
         self._data = self._get_data(data)
+        # get the dxl if the data is smeared: This is done only once on init.
+        if data.dxl != None and data.dxl.all() >0:
+            # assumes constant dxl
+            self._smeared = data.dxl[0]
       
         # Since there are multiple variants of Q*, you should force the
         # user to use the get method and keep Q* a private data member
@@ -406,7 +411,6 @@ class InvariantCalculator(object):
         if new_data.dy is None or len(new_data.x) != len(new_data.dy) or \
             (min(new_data.dy)==0 and max(new_data.dy)==0):
             new_data.dy = numpy.ones(len(new_data.x))  
-        
         return  new_data
      
     def _fit(self, model, qmin=Q_MINIMUM, qmax=Q_MAXIMUM, power=None):
@@ -437,9 +441,13 @@ class InvariantCalculator(object):
         This invariant is given by: ::
     
             q_star = x0**2 *y0 *dx0 +x1**2 *y1 *dx1 
-                        + ..+ xn**2 *yn *dxn 
+                        + ..+ xn**2 *yn *dxn    for non smeared data
+                        
+            q_star = dxl0 *x0 *y0 *dx0 +dxl1 *x1 *y1 *dx1 
+                        + ..+ dlxn *xn *yn *dxn    for smeared data
                         
             where n >= len(data.x)-1
+            dxl = slit height dQl
             dxi = 1/2*(xi+1 - xi) + (xi - xi-1)
             dx0 = (x1 - x0)/2
             dxn = (xn - xn-1)/2
@@ -453,14 +461,21 @@ class InvariantCalculator(object):
             msg += " and greater than 1; got x=%s, y=%s"%(len(data.x), len(data.y))
             raise ValueError, msg
         else:
+            # Take care of smeared data
+            if self._smeared is None:
+                gx = data.x * data.x
+            # assumes that len(x) == len(dxl).
+            else:               
+                gx = data.dxl * data.x 
+                
             n = len(data.x)- 1
             #compute the first delta q
             dx0 = (data.x[1] - data.x[0])/2
             #compute the last delta q
             dxn = (data.x[n] - data.x[n-1])/2
             sum = 0
-            sum += data.x[0] * data.x[0] * data.y[0] * dx0
-            sum += data.x[n] * data.x[n] * data.y[n] * dxn
+            sum += gx[0] * data.y[0] * dx0
+            sum += gx[n] * data.y[n] * dxn
             
             if len(data.x) == 2:
                 return sum
@@ -468,7 +483,7 @@ class InvariantCalculator(object):
                 #iterate between for element different from the first and the last
                 for i in xrange(1, n-1):
                     dxi = (data.x[i+1] - data.x[i-1])/2
-                    sum += data.x[i] * data.x[i] * data.y[i] * dxi
+                    sum += gx[i] * data.y[i] * dxi
                 return sum
             
     def _get_qstar_uncertainty(self, data):
@@ -500,22 +515,28 @@ class InvariantCalculator(object):
                 dy = math.sqrt(y) 
             else:
                 dy = data.dy
-                
+            # Take care of smeared data
+            if self._smeared is None:
+                gx = data.x * data.x
+            # assumes that len(x) == len(dxl).
+            else:
+                gx = data.dxl * data.x
+  
             n = len(data.x) - 1
             #compute the first delta
             dx0 = (data.x[1] - data.x[0])/2
             #compute the last delta
             dxn= (data.x[n] - data.x[n-1])/2
             sum = 0
-            sum += (data.x[0] * data.x[0] * dy[0] * dx0)**2
-            sum += (data.x[n] * data.x[n] * dy[n] * dxn)**2
+            sum += (gx[0] * dy[0] * dx0)**2
+            sum += (gx[n] * dy[n] * dxn)**2
             if len(data.x) == 2:
                 return math.sqrt(sum)
             else:
                 #iterate between for element different from the first and the last
                 for i in xrange(1, n-1):
                     dxi = (data.x[i+1] - data.x[i-1])/2
-                    sum += (data.x[i] * data.x[i] * dy[i] * dxi)**2
+                    sum += (gx[i] * dy[i] * dxi)**2
                 return math.sqrt(sum)
         
     def _get_extrapolated_data(self, model, npts=INTEGRATION_NSTEPS,
@@ -532,6 +553,8 @@ class InvariantCalculator(object):
         diq = model.evaluate_model_errors(q)
          
         result_data = LoaderData1D(x=q, y=iq, dy=diq)
+        if self._smeared != None:
+            result_data.dxl = self._smeared * numpy.ones(len(q))
         return result_data
     
     def get_data(self):
