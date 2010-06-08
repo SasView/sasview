@@ -6,9 +6,10 @@
 Calculator
 ======================================
 Calculator is a package that contains other sub-modules necessary for small computations. These sub-modules
-may be independant of each other, but there are used as tools for sansview application. The calculator package
+may be independant of each other, but there are used as ``tools`` for sansview application. The calculator package
 currently contains the following sub-modules:
 
+* :ref:`sans.invariant.invariant.index`
 
 .. htmlonly::
 
