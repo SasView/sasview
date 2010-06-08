@@ -1,0 +1,226 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>calculator &mdash; calculatorview v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="calculatorview v0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="calculator_widgets" href="calculator_widgets.html" />
+    <link rel="prev" title="aperture_editor" href="aperture_editor.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="calculator_widgets.html" title="calculator_widgets"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="aperture_editor.html" title="aperture_editor"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">calculatorview v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="calculator">
+<h1>calculator<a class="headerlink" href="#calculator" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.perspectives.calculator.calculator">
+<span id="sans-perspectives-calculator-calculator"></span><h2><a class="reference internal" href="#module-sans.perspectives.calculator.calculator"><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.calculator.calculator</span></tt></a><a class="headerlink" href="#module-sans.perspectives.calculator.calculator" title="Permalink to this headline">¶</a></h2>
+<p>This software was developed by the University of Tennessee as part of the
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+project funded by the US National Science Foundation.</p>
+<p>See the license text in license.txt</p>
+<p>copyright 2010, University of Tennessee</p>
+<dl class="class">
+<dt id="sans.perspectives.calculator.calculator.Plugin">
+<em class="property">class </em><tt class="descclassname">sans.perspectives.calculator.calculator.</tt><tt class="descname">Plugin</tt><big>(</big><em>standalone=True</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class defines the interface for a Plugin class
+for calculator perspective</p>
+<dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.get_context_menu">
+<tt class="descname">get_context_menu</tt><big>(</big><em>graph=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.get_context_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is optional.</p>
+<p>When the context menu of a plot is rendered, the 
+get_context_menu method will be called to give you a 
+chance to add a menu item to the context menu.</p>
+<p>A ref to a Graph object is passed so that you can
+investigate the plot content and decide whether you
+need to add items to the context menu.</p>
+<p>This method returns a list of menu items.
+Each item is itself a list defining the text to 
+appear in the menu, a tool-tip help text, and a
+call-back method.</p>
+<p>&#64;param graph: the Graph object to which we attach the context menu
+&#64;return: a list of menu items with call-back function</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.get_panels">
+<tt class="descname">get_panels</tt><big>(</big><em>parent</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.get_panels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and return the list of wx.Panels for your plug-in.
+Define the plug-in perspective.</p>
+<p>Panels should inherit from DefaultPanel defined below,
+or should present the same interface. They must define
+&#8220;window_caption&#8221; and &#8220;window_name&#8221;.</p>
+<p>&#64;param parent: parent window
+&#64;return: list of panels</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.get_perspective">
+<tt class="descname">get_perspective</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.get_perspective" title="Permalink to this definition">¶</a></dt>
+<dd>Get the list of panel names for this perspective</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.get_tools">
+<tt class="descname">get_tools</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.get_tools" title="Permalink to this definition">¶</a></dt>
+<dd>Returns a set of menu entries for tools</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.help">
+<tt class="descname">help</tt><big>(</big><em>evt</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.help" title="Permalink to this definition">¶</a></dt>
+<dd>Show a general help dialog. 
+TODO: replace the text with a nice image
+provide more hint on the SLD calculator</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.on_calculate_sld">
+<tt class="descname">on_calculate_sld</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_calculate_sld" title="Permalink to this definition">¶</a></dt>
+<dd>Compute the scattering length density of molecula</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.on_calculate_slit_size">
+<tt class="descname">on_calculate_slit_size</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_calculate_slit_size" title="Permalink to this definition">¶</a></dt>
+<dd>Compute the slit size a given data</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.on_edit_data">
+<tt class="descname">on_edit_data</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_edit_data" title="Permalink to this definition">¶</a></dt>
+<dd>Edit meta data</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.on_perspective">
+<tt class="descname">on_perspective</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_perspective" title="Permalink to this definition">¶</a></dt>
+<dd>Call back function for the perspective menu item.
+We notify the parent window that the perspective
+has changed.
+&#64;param event: menu event</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.populate_menu">
+<tt class="descname">populate_menu</tt><big>(</big><em>id</em>, <em>owner</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.populate_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and return the list of application menu
+items for the plug-in.</p>
+<p>&#64;param id: deprecated. Un-used.
+&#64;param parent: parent window
+&#64;return: plug-in menu</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.post_init">
+<tt class="descname">post_init</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.post_init" title="Permalink to this definition">¶</a></dt>
+<dd>Post initialization call back to close the loose ends</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">calculator</a><ul>
+<li><a class="reference internal" href="#module-sans.perspectives.calculator.calculator"><tt class="docutils literal"><span class="pre">sans.perspectives.calculator.calculator</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="aperture_editor.html"
+                        title="previous chapter">aperture_editor</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="calculator_widgets.html"
+                        title="next chapter">calculator_widgets</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/perspectives/calculator/calculator.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="calculator_widgets.html" title="calculator_widgets"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="aperture_editor.html" title="aperture_editor"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">calculatorview v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b1.
+    </div>
+  </body>
+</html>
