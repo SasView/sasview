@@ -168,10 +168,10 @@ class FitData1D(Data1D):
         else:
             self.dy= numpy.asarray(dy)
      
-        # For fitting purposes, replace zero errors by 1
+        # For fitting purposes, replace zero errors by 1 if all of them are zero
         #TODO: check validity for the rare case where only
-        # a few points have zero errors 
-        self.dy[self.dy==0]=1
+        # all points have zero errors 
+        if self.dy.all()==0: self.dy = 1
         
         ## Min Q-value
         #Skip the Q=0 point, especially when y(q=0)=None at x[0].
@@ -218,6 +218,7 @@ class FitData1D(Data1D):
             
         # Identify the bin range for the unsmeared and smeared spaces
         self.idx = (self.x>=self.qmin) & (self.x <= self.qmax)
+        self.idx = self.idx & (self.dy!=0)   ## zero error can not participate for fitting
         self.idx_unsmeared = (self.x>=self._qmin_unsmeared) & (self.x <= self._qmax_unsmeared)
   
         
