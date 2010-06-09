@@ -365,9 +365,9 @@ class InvariantCalculator(object):
         # The data should be private
         self._data = self._get_data(data)
         # get the dxl if the data is smeared: This is done only once on init.
-        if data.dxl != None and data.dxl.all() >0:
+        if self._data.dxl != None and self._data.dxl.all() >0:
             # assumes constant dxl
-            self._smeared = data.dxl[0]
+            self._smeared = self._data.dxl[0]
       
         # Since there are multiple variants of Q*, you should force the
         # user to use the get method and keep Q* a private data member
