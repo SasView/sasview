@@ -295,7 +295,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer3.SetMinSize((PANEL_WIDTH,-1))
         self.sizer4.SetMinSize((PANEL_WIDTH,-1))
         self.sizer5.SetMinSize((PANEL_WIDTH,-1))
-        self.sizer6.SetMinSize((PANEL_WIDTH,-1))
+        #self.sizer6.SetMinSize((PANEL_WIDTH,-1))
         
         self.vbox.Add(self.sizer0)
         self.vbox.Add(self.sizer1)
@@ -303,7 +303,7 @@ class BasicPage(wx.ScrolledWindow):
         self.vbox.Add(self.sizer3)
         self.vbox.Add(self.sizer4)
         self.vbox.Add(self.sizer5)
-        self.vbox.Add(self.sizer6)
+        #self.vbox.Add(self.sizer6)
         
     def set_layout(self):
         """
@@ -2123,6 +2123,7 @@ class BasicPage(wx.ScrolledWindow):
         """
         Draw the layout for saving option
         """
+        return
         self.sizer6.Clear(True)
         box_description= wx.StaticBox(self, -1,"Save Model")
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
