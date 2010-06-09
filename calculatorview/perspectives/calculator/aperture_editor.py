@@ -20,7 +20,7 @@ else:
 class ApertureDialog(wx.Dialog):
     def __init__(self, parent=None, manager=None,aperture=None, *args, **kwds):
         """
-            Dialog allows to enter values for aperture
+        Dialog allows to enter values for aperture
         """
         kwds['size'] =(PANEL_WIDTH, PANEL_HEIGHT)
         kwds['title'] = "Aperture Editor"
@@ -36,7 +36,7 @@ class ApertureDialog(wx.Dialog):
       
     def _define_structure(self):
         """
-            define initial sizer 
+        define initial sizer 
         """
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.box_aperture = wx.StaticBox(self, -1,str("Aperture"))
@@ -51,7 +51,7 @@ class ApertureDialog(wx.Dialog):
  
     def _layout_name(self):
         """
-            Do the layout for aperture name related widgets
+        Do the layout for aperture name related widgets
         """
         #Aperture name [string]
         aperture_name_txt = wx.StaticText(self, -1, 'Aperture Name : ')  
@@ -60,7 +60,7 @@ class ApertureDialog(wx.Dialog):
                                        (self.aperture_name_tcl, 0, wx.EXPAND)])
     def _layout_type(self):
         """
-            Do the  layout for aperture type  related widgets
+        Do the  layout for aperture type  related widgets
         """
         #Aperture type [string]
         type_txt = wx.StaticText(self, -1, 'Type: ')  
@@ -70,7 +70,7 @@ class ApertureDialog(wx.Dialog):
         
     def _layout_distance(self):
         """
-            Do the  layout for aperture distance related widgets
+        Do the  layout for aperture distance related widgets
         """
         #Aperture distance [float]
         distance_txt = wx.StaticText(self, -1, 'Distance:') 
@@ -83,7 +83,7 @@ class ApertureDialog(wx.Dialog):
                                      (self.distance_unit_tcl, 0, wx.EXPAND)])  
     def _layout_size_name(self):
         """
-            Do the  layout for size name related widgets
+        Do the  layout for size name related widgets
         """
         # Size name [string]
         size_name_txt = wx.StaticText(self, -1, 'Size Name : ')  
@@ -93,7 +93,7 @@ class ApertureDialog(wx.Dialog):
         
     def _layout_size(self):
         """
-            Do the  layout for aperture size related widgets
+        Do the  layout for aperture size related widgets
         """
         #Aperture size [Vector]
         aperture_size_txt = wx.StaticText(self, -1, 'Size:') 
@@ -117,7 +117,7 @@ class ApertureDialog(wx.Dialog):
         
     def _layout_button(self):  
         """
-            Do the layout for the button widgets
+        Do the layout for the button widgets
         """ 
         self.bt_apply = wx.Button(self, -1,'Apply')
         self.bt_apply.Bind(wx.EVT_BUTTON, self.on_click_apply)
@@ -133,7 +133,7 @@ class ApertureDialog(wx.Dialog):
         
     def _do_layout(self, data=None):
         """
-            Draw the current panel
+        Draw the current panel
         """
         self._define_structure()
         self._layout_name()
@@ -160,13 +160,13 @@ class ApertureDialog(wx.Dialog):
     
     def set_manager(self, manager):
         """    
-            Set manager of this window
+        Set manager of this window
         """
         self.manager = manager
         
     def reset_aperture(self):
         """
-            put the default value of the detector back to the current aperture
+        put the default value of the detector back to the current aperture
         """
         self._aperture.name = self._reset_aperture.name
         self._aperture.type = self._reset_aperture.type
@@ -180,8 +180,8 @@ class ApertureDialog(wx.Dialog):
         
     def set_values(self):
         """
-            take the aperture values of the current data and display them
-            through the panel
+        take the aperture values of the current data and display them
+        through the panel
         """
         aperture = self._aperture
         #Name
@@ -203,19 +203,19 @@ class ApertureDialog(wx.Dialog):
     
     def get_aperture(self):
         """
-            return the current aperture
+        return the current aperture
         """
         return self._aperture
     
     def get_notes(self):
         """
-            return notes
+        return notes
         """
         return self._notes
     
     def on_change_name(self):
         """
-            Change name
+        Change name
         """
         #Change the name of the aperture
         name = self.aperture_name_tcl.GetValue().lstrip().rstrip()
@@ -228,7 +228,7 @@ class ApertureDialog(wx.Dialog):
             
     def on_change_type(self):
         """
-            Change aperture type
+        Change aperture type
         """
         #Change type 
         type = self.type_tcl.GetValue().lstrip().rstrip()
@@ -238,7 +238,7 @@ class ApertureDialog(wx.Dialog):
         
     def on_change_distance(self):
         """
-            Change distance of the aperture
+        Change distance of the aperture
         """
         #Change distance
         distance = self.distance_tcl.GetValue().lstrip().rstrip()
@@ -263,7 +263,7 @@ class ApertureDialog(wx.Dialog):
         
     def on_change_size_name(self):
         """
-            Change the size's name
+        Change the size's name
         """
         #Change size name
         size_name = self.size_name_tcl.GetValue().lstrip().rstrip()
@@ -273,7 +273,7 @@ class ApertureDialog(wx.Dialog):
    
     def on_change_size(self):
         """
-            Change aperture size
+        Change aperture size
         """
         #Change x coordinate
         x_aperture_size = self.x_aperture_size_tcl.GetValue().lstrip().rstrip()
@@ -329,7 +329,7 @@ class ApertureDialog(wx.Dialog):
                  
     def on_click_apply(self, event):
         """
-            Apply user values to the aperture
+        Apply user values to the aperture
         """
         self.on_change_name()
         self.on_change_type()
@@ -342,7 +342,7 @@ class ApertureDialog(wx.Dialog):
         
     def on_click_cancel(self, event):
         """
-            reset the current aperture to its initial values
+        reset the current aperture to its initial values
         """
         self.reset_aperture()
         self.set_values()

@@ -21,6 +21,8 @@ else:
     FONT_VARIANT = 1
     
 class CollimationDialog(wx.Dialog):
+    """
+    """
     def __init__(self, parent=None, manager=None,
                  collimation=[], *args, **kwds):
         """
@@ -39,7 +41,7 @@ class CollimationDialog(wx.Dialog):
  
     def _define_structure(self):
         """
-            define initial sizer 
+        define initial sizer 
         """
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.box_collimation = wx.StaticBox(self, -1,str("Edit Selected Collimation"))
@@ -62,7 +64,7 @@ class CollimationDialog(wx.Dialog):
       
     def _layout_collimation(self):
         """
-            Do the layout for collimation related widgets
+        Do the layout for collimation related widgets
         """
         collimation_name_txt = wx.StaticText(self, -1, "Collimation:") 
         hint_collimation_txt = 'Current available collimation.'
@@ -96,7 +98,7 @@ class CollimationDialog(wx.Dialog):
 
     def _layout_name(self):
         """
-            Do the layout for collimation name related widgets
+        Do the layout for collimation name related widgets
         """
         #Collimation name [string]
         name_txt = wx.StaticText(self, -1, 'Name : ')  
@@ -106,7 +108,7 @@ class CollimationDialog(wx.Dialog):
         
     def _layout_length(self):
         """
-            Do the  layout for length related widgets
+        Do the  layout for length related widgets
         """
         #Collimation length
         length_txt = wx.StaticText(self, -1, 'Length:') 
@@ -120,7 +122,7 @@ class CollimationDialog(wx.Dialog):
    
     def _layout_button(self):  
         """
-            Do the layout for the button widgets
+        Do the layout for the button widgets
         """ 
         self.bt_apply = wx.Button(self, -1,'Apply')
         self.bt_apply.Bind(wx.EVT_BUTTON, self.on_click_apply)
@@ -135,7 +137,7 @@ class CollimationDialog(wx.Dialog):
                                    (self.bt_close, 0, wx.LEFT, 10)])
     def _layout_aperture(self):
         """
-            Do the layout for aperture related widgets
+        Do the layout for aperture related widgets
         """
         aperture_name_txt = wx.StaticText(self, -1, "Aperture:") 
         hint_aperture_txt = 'Current available aperture.'
@@ -169,7 +171,7 @@ class CollimationDialog(wx.Dialog):
     
     def _do_layout(self, data=None):
         """
-            Draw the current panel
+        Draw the current panel
         """
         self._define_structure()
         self._layout_collimation()
@@ -205,7 +207,7 @@ class CollimationDialog(wx.Dialog):
     
     def fill_collimation_combox(self):
         """
-            fill the current combobox with the available collimation
+        fill the current combobox with the available collimation
         """
         if self._collimation is None or self._collimation == []:
             return
@@ -217,7 +219,7 @@ class CollimationDialog(wx.Dialog):
             
     def add_collimation(self, event):
         """
-            Append empty collimation to data's list of collimation
+        Append empty collimation to data's list of collimation
         """
         
         if not self.collimation_cbox.IsEnabled():
@@ -235,7 +237,7 @@ class CollimationDialog(wx.Dialog):
         
     def remove_collimation(self, event):
         """
-            Remove collimation to data's list of collimation
+        Remove collimation to data's list of collimation
         """
         if self.collimation_cbox.IsEnabled():
             if self.collimation_cbox.GetCount() > 0:
@@ -262,7 +264,7 @@ class CollimationDialog(wx.Dialog):
         
     def on_select_collimation(self, event):
         """
-           fill the control on the panel according to the current  selected collimation 
+        fill the control on the panel according to the current  selected collimation 
         """
         self.set_values()
         self.fill_aperture_combox()
@@ -270,7 +272,7 @@ class CollimationDialog(wx.Dialog):
     
     def enable_collimation(self):
         """
-            Enable /disable widgets related to collimation
+        Enable /disable widgets related to collimation
         """
         if self._collimation is not None and self.collimation_cbox.GetCount() > 0:
             self.collimation_cbox.Enable()
@@ -290,7 +292,7 @@ class CollimationDialog(wx.Dialog):
    
     def reset_collimation_combobox(self, edited_collimation):
         """
-            take all edited editor and reset clientdata of collimation combo box
+        take all edited editor and reset clientdata of collimation combo box
         """
         for position in range(self.collimation_cbox.GetCount()):
             collimation = self.collimation_cbox.GetClientData(position)
@@ -302,7 +304,7 @@ class CollimationDialog(wx.Dialog):
          
     def add_aperture(self, event):
         """
-            Append empty aperture to data's list of aperture
+        Append empty aperture to data's list of aperture
         """
         collimation, _, _ = self.get_current_collimation()
         if not self.aperture_cbox.IsEnabled():
@@ -316,7 +318,7 @@ class CollimationDialog(wx.Dialog):
         
     def edit_aperture(self, event):
         """
-            Edit the selected aperture
+        Edit the selected aperture
         """
         if self._collimation is None or not self.aperture_cbox.IsEnabled():
             return 
@@ -330,7 +332,7 @@ class CollimationDialog(wx.Dialog):
             
     def remove_aperture(self, event):
         """
-            Remove aperture to data's list of aperture
+        Remove aperture to data's list of aperture
         """
         if self._collimation is None or not self._collimation:
             return
@@ -353,7 +355,7 @@ class CollimationDialog(wx.Dialog):
         
     def set_aperture(self, aperture):
         """
-            set aperture for data
+        set aperture for data
         """
         if self._collimation is None or not self._collimation:
             return
@@ -367,7 +369,7 @@ class CollimationDialog(wx.Dialog):
                 
     def enable_aperture(self):
         """
-            Enable /disable widgets crelated to aperture
+        Enable /disable widgets crelated to aperture
         """
         collimation, _, _ = self.get_current_collimation()
         if  self.aperture_cbox.GetCount() > 0:
@@ -389,7 +391,7 @@ class CollimationDialog(wx.Dialog):
     
     def reset_aperture_combobox(self, edited_aperture):
         """
-            take all edited editor and reset clientdata of aperture combo box
+        take all edited editor and reset clientdata of aperture combo box
         """
         for position in range(self.aperture_cbox.GetCount()):
             aperture = self.aperture_cbox.GetClientData(position)
@@ -401,7 +403,7 @@ class CollimationDialog(wx.Dialog):
                 
     def fill_aperture_combox(self):
         """
-            fill the current combobox with the available aperture
+        fill the current combobox with the available aperture
         """
         self.aperture_cbox.Clear()
         collimation, _, _ = self.get_current_collimation()
@@ -415,14 +417,14 @@ class CollimationDialog(wx.Dialog):
          
     def set_manager(self, manager):
         """    
-            Set manager of this window
+        Set manager of this window
         """
         self.manager = manager
         
     def set_values(self):
         """
-            take the collimation values of the current data and display them
-            through the panel
+        take the collimation values of the current data and display them
+        through the panel
         """
         collimation, _, _ = self.get_current_collimation()
         if collimation is None:
@@ -440,19 +442,19 @@ class CollimationDialog(wx.Dialog):
         
     def get_collimation(self):
         """
-            return the current collimation
+        return the current collimation
         """
         return self._collimation
     
     def get_notes(self):
         """
-            return notes
+        return notes
         """
         return self._notes
     
     def on_change_name(self):
         """
-            Change name
+        Change name
         """
         collimation, collimation_name, position = self.get_current_collimation()
         if collimation is None: 
@@ -471,7 +473,7 @@ class CollimationDialog(wx.Dialog):
    
     def on_change_length(self):
         """
-            Change the length
+        Change the length
         """
         collimation, collimation_name, position = self.get_current_collimation()
         if collimation is None: 
@@ -500,7 +502,7 @@ class CollimationDialog(wx.Dialog):
     
     def on_click_apply(self, event):
         """
-            Apply user values to the collimation
+        Apply user values to the collimation
         """
         self.on_change_name()
         self.on_change_length()
@@ -510,7 +512,7 @@ class CollimationDialog(wx.Dialog):
        
     def on_click_cancel(self, event):
         """
-            leave the collimation as it is and close
+        leave the collimation as it is and close
         """
         self._collimation = deepcopy(self._reset_collimation)
         self.set_values()
