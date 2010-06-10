@@ -1,13 +1,20 @@
 Release Notes
 =============
 
-SansView 1.3
+SansView 1.3.1
 
 Package name: None
 
-1- Version 1.3
+1- Version 1.3.1
 
-	- Release date: 04/26/2010
+	- Release date: 06/11/2010
+	
+	- Improved the speed of loading 2D data.
+	- Improved the speed of P*S calculations.
+	- Added 2D smearing calculation for dQx and dQy given along the x-y axes.
+	- Fixed minor bugs.
+		
+	-Version 1.3.0
 	
 	- MAC release
   	- Implemented the invariant, volume fraction, and specific surface area computation.
@@ -52,25 +59,25 @@ Package name: None
 		- Python version >= 2.5 and < 3.0 should be running on the system
 
 	2.2- Installing:
-		- Get the code from svn://danse.us/sans/releases/sansview-1.3.0
+		- Get the code from svn://danse.us/sans/releases/sansview-1.3.1
 			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview-1.0' folder)
 		- This application is also dependent on the following DANSE code:
-			svn://danse.us/sans/releases/calculator-0.1.0 (run 'python setup.py install' under the 'calculator-0.1.0' folder)
-			svn://danse.us/sans/releases/calculatorview-0.1.0 (run 'python setup.py install' under the 'calculatorview-0.1.0' folder)
-			svn://danse.us/sans/releases/Invariant-0.1.0 (run 'python setup.py install' under the 'Invariant-0.1.0' folder)
-			svn://danse.us/sans/releases/invariantview-0.1.0 (run 'python setup.py install' under the 'invariantview-0.1.0' folder)
-			svn://danse.us/sans/releases/theoryview-0.1.0 (run 'python setup.py install' under the 'theoryview-0.1.0' folder)
-			svn://danse.us/sans/releases/guiframe-0.1.9 (run 'python setup.py install' under the 'guiframe-0.1.9' folder)
-			svn://danse.us/sans/releases/guicomm-0.1.4 (run 'python setup.py install' under the 'guicomm-0.1.4' folder)
-			svn://danse.us/sans/releases/DataLoader-0.2.6 (run 'python setup.py install' under the 'DataLoader-0.2.6' folder)
-			svn://danse.us/sans/releases/park_integration-0.1.4 (run 'python setup.py install' under the 'park_integration-0.1.4' folder)
-			svn://danse.us/sans/releases/sansmodels-0.4.6 (run 'python setup.py install' under the 'sansmodels-0.4.6\src\' folder)
+			svn://danse.us/sans/releases/calculator-0.1.1 (run 'python setup.py install' under the 'calculator-0.1.1' folder)
+			svn://danse.us/sans/releases/calculatorview-0.1.1 (run 'python setup.py install' under the 'calculatorview-0.1.1' folder)
+			svn://danse.us/sans/releases/Invariant-0.1.1 (run 'python setup.py install' under the 'Invariant-0.1.1' folder)
+			svn://danse.us/sans/releases/invariantview-0.1.1 (run 'python setup.py install' under the 'invariantview-0.1.1' folder)
+			svn://danse.us/sans/releases/theoryview-0.1.1 (run 'python setup.py install' under the 'theoryview-0.1.1' folder)
+			svn://danse.us/sans/releases/guiframe-0.2.0 (run 'python setup.py install' under the 'guiframe-0.2.0' folder)
+			svn://danse.us/sans/releases/guicomm-0.1.5 (run 'python setup.py install' under the 'guicomm-0.1.5' folder)
+			svn://danse.us/sans/releases/DataLoader-0.2.7 (run 'python setup.py install' under the 'DataLoader-0.2.7' folder)
+			svn://danse.us/sans/releases/park_integration-0.1.5 (run 'python setup.py install' under the 'park_integration-0.1.5' folder)
+			svn://danse.us/sans/releases/sansmodels-0.4.7 (run 'python setup.py install' under the 'sansmodels-0.4.7\src\' folder)
 			svn://danse.us/park/releases/park-1.2.1 (run 'python setup.py install' under the 'park-1.2.1' folder)
-	        svn://danse.us/common/releases/plottools-0.1.8 (run 'python setup.py install'under the 'plottools-0.1.8\trunk\' folder)
-	        svn://danse.us/common/releases/util-0.1.4 (run 'python setup.py install'under the 'util-0.1.4' folder)
+	        svn://danse.us/common/releases/plottools-0.1.9 (run 'python setup.py install'under the 'plottools-0.1.9\trunk\' folder)
+	        svn://danse.us/common/releases/util-0.1.5 (run 'python setup.py install'under the 'util-0.1.5' folder)
 	        svn://danse.us/common/elements/releases/elements-1.2 (run 'python setup.py install'under the 'elements-1.2' folder)
-	        svn://danse.us/sans/releases/pr_inversion-0.2.4 (run 'python setup.py install'under the 'pr_inversion-0.2.4' folder)
-	        svn://danse.us/sans/releases/prview-0.3.1 (run 'python setup.py install'under the 'prview-0.3.1' folder)
+	        svn://danse.us/sans/releases/pr_inversion-0.2.5 (run 'python setup.py install'under the 'pr_inversion-0.2.5' folder)
+	        svn://danse.us/sans/releases/prview-0.3.2 (run 'python setup.py install'under the 'prview-0.3.2' folder)
 		- The following modules are required:
 			* matplotlib >= 0.99
 			* numpy
