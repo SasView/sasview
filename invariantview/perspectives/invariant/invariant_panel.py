@@ -17,8 +17,8 @@ from invariant_widgets import OutputTextCtrl, InvTextCtrl
 Q_MINIMUM  = 1e-5
 # The maximum q-value to be used when extrapolating
 Q_MAXIMUM  = 10
-# the maximum value to plot the theory data
-Q_MAXIMUM_PLOT = 2
+# the ratio of maximum q value/(qmax of data) to plot the theory data
+Q_MAXIMUM_PLOT = 3
 # the number of points to consider during fit
 NPTS = 10
 #Default value for background
@@ -69,6 +69,7 @@ class InvariantPanel(ScrolledPanel):
         self._data = data
         self._scale = SCALE 
         self._background = BACKGROUND
+
         #container of invariant value
         self.inv_container = None
         #Draw the panel
@@ -277,12 +278,14 @@ class InvariantPanel(ScrolledPanel):
         """
         if high_q:
             try: 
+                qmax_plot = Q_MAXIMUM_PLOT * max(self._data.x)
+                if qmax_plot > Q_MAXIMUM: qmax_plot = Q_MAXIMUM
                 qstar_high, qstar_high_err = inv.get_qstar_high()
                 self.inv_container.qstar_high = qstar_high
                 self.inv_container.qstar_high_err = qstar_high_err
                 power_high = inv.get_extrapolation_power(range='high') 
                 self.power_high_tcl.SetValue(format_number(power_high))
-                high_out_data = inv.get_extra_data_high(q_end=Q_MAXIMUM_PLOT)
+                high_out_data = inv.get_extra_data_high(q_end=qmax_plot,npts=500)
                 self._manager.plot_theory(data=high_out_data,
                                            name="High-Q extrapolation")
             except:
