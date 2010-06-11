@@ -632,8 +632,6 @@ class Plugin:
                 dy = self.err_dy[data.name]   
         if data.__class__.__name__ == "Theory1D":
             new_data = self.copy_data(data, dy)
-            if new_data.dy is None:
-                new_data.dy = numpy.zeros(len(new_data.y))
             new_data.group_id = str(new_data.group_id)+"data1D"
             new_data.id = str(new_data.id)+"data1D"
             new_data.is_data = False
