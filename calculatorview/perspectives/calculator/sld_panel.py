@@ -145,19 +145,25 @@ class SldPanel(wx.Panel):
         self.neutron_inc_ctl.SetEditable(False)
         self.neutron_inc_ctl.SetToolTipString("Neutron Inc. Xs")
         neutron_inc_units_txt = wx.StaticText(self, -1,  unit_cm1)
-       
+        neutron_inc_txt.Hide()
+        self.neutron_inc_ctl.Hide()
+        neutron_inc_units_txt.Hide()
         neutron_abs_txt = wx.StaticText(self, -1, 'Neutron Abs. Xs')     
         self.neutron_abs_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.neutron_abs_ctl.SetEditable(False)
         self.neutron_abs_ctl.SetToolTipString("Neutron Abs. Xs")
         neutron_abs_units_txt = wx.StaticText(self, -1,  unit_cm1)
-        
+        neutron_abs_txt.Hide()
+        self.neutron_abs_ctl.Hide()
+        neutron_abs_units_txt.Hide()
         neutron_length_txt = wx.StaticText(self, -1, 'Neutron 1/e length')
         self.neutron_length_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.neutron_length_ctl.SetEditable(False)
         self.neutron_length_ctl.SetToolTipString("Neutron 1/e length")
         neutron_length_units_txt = wx.StaticText(self, -1,  unit_cm)
-      
+        neutron_length_txt.Hide()
+        self.neutron_length_ctl.Hide()
+        neutron_length_units_txt.Hide()
         iy = 0
         ix = 0
         sizer_output.Add(neutron_sld_txt,(iy, ix),(1,1),

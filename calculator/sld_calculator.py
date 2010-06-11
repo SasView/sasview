@@ -35,7 +35,7 @@ class SldCalculator(object):
         self._volume = 0.0
         #Inputs
         self.wavelength  = 6.0
-        self.sld_formula = None
+        self.sld_formula = ""
         self.density = None
         #Outputs
         self.sld_real = None
@@ -45,14 +45,14 @@ class SldCalculator(object):
         self.incoherence = 0.0
         self.length = 0.0
         
-    def set_value(self, formula, density, wavelength=6.0):
+    def set_value(self, user_formula, density, wavelength=6.0):
         """
         Store values into the sld calculator and compute the corresponding
         volume.
         """
         self.wavelength = wavelength
         self.density    = float(density)
-        self.sld_formula = formula(str(formula), density=self.density)
+        self.sld_formula = formula(str(user_formula), density=self.density)
        
         if self.density == 0:
             raise ZeroDivisionError("integer division or modulo\
