@@ -161,18 +161,15 @@ class FitData1D(Data1D):
             Setting it back to None will turn smearing off.
             
         """
-        
         self.smearer = smearer
-        if dy ==None or dy==[]:
-            self.dy= numpy.zeros(len(self.y))  
-        else:
-            self.dy= numpy.asarray(dy)
-     
-        # For fitting purposes, replace zero errors by 1 if all of them are zero
-        #TODO: check validity for the rare case where only
-        # all points have zero errors 
-        if self.dy.all()==0: self.dy = 1
         
+        # Check error bar; if no error bar found, set it constant(=1)
+        # TODO: Should provide an option for users to set it like percent, constant, or dy data
+        if dy ==None or dy==[] or dy.all()==0:
+            self.dy= numpy.ones(len(y))  
+        else:
+            self.dy= numpy.asarray(dy).copy()
+
         ## Min Q-value
         #Skip the Q=0 point, especially when y(q=0)=None at x[0].
         if min (self.x) ==0.0 and self.x[0]==0 and not numpy.isfinite(self.y[0]):
@@ -194,7 +191,7 @@ class FitData1D(Data1D):
     def setFitRange(self,qmin=None,qmax=None):
         """ to set the fit range"""
         # Skip Q=0 point, (especially for y(q=0)=None at x[0]).
-        #ToDo: Fix this.
+        # ToDo: Find better way to do it.
         if qmin==0.0 and not numpy.isfinite(self.y[qmin]):
             self.qmin = min(self.x[self.x!=0])
         elif qmin!=None:                       
@@ -247,7 +244,7 @@ class FitData1D(Data1D):
         ## Smear theory data
         if self.smearer is not None:
             fx = self.smearer(fx, self._first_unsmeared_bin, self._last_unsmeared_bin)
-       
+
         ## Sanity check
         if numpy.size(self.dy)!= numpy.size(fx):
             raise RuntimeError, "FitData1D: invalid error array %d <> %d" % (numpy.shape(self.dy),
