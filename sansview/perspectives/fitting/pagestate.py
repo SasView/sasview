@@ -15,6 +15,7 @@ import os
 import sys
 import copy
 import logging
+import numpy
 
 import xml.dom.minidom
 from xml.dom.minidom import parse
@@ -23,7 +24,7 @@ from lxml import etree
 import DataLoader
 from DataLoader.readers.cansas_reader import Reader as CansasReader
 from DataLoader.readers.cansas_reader import get_content, write_node
-from DataLoader.data_info import Data2D
+from DataLoader.data_info import Data2D, Detector
 
 #Information to read/write state as xml
 FITTING_NODE_NAME = 'fitting_plug_in'
@@ -68,24 +69,24 @@ list_of_state_parameters = [["parameters", "parameters"] ,
                             ["dispersity_parameters", "orientation_params_disp"],
                             ["fixed_param", "fixed_param"],                      
                             ["fittable_param","fittable_param"]]
-list_of_data_2d_attr = [["xmin", "xmin"],
-                        ["xmax","xmax"],
-                        ["ymin","ymin"],
-                        ["ymax","ymax"],
-                        ["_xaxis","_xaxis"],
-                        ["_xunit", "_xunit"],
-                        ["_yaxis","_yaxis"],
-                        ["_yunit","_yunit"],
-                        ["_zaxis","_zaxis"],
-                        ["_zunit","_zunit"]]
-list_of_data2d_values = [["qx_data","qx_data"],
-                         ["qy_data","qy_data"],
-                         ["dqx_data","dqx_data"],
-                         ["dqy_data","dqy_data"],
-                         ["data","data"],
-                         ["q_data","q_data"],
-                         ["err_data","err_data"],
-                         ["mask","mask"],]
+list_of_data_2d_attr = [["xmin", "xmin","float"],
+                        ["xmax","xmax","float"],
+                        ["ymin","ymin","float"],
+                        ["ymax","ymax","float"],
+                        ["_xaxis","_xaxis", "string"],
+                        ["_xunit", "_xunit", "string"],
+                        ["_yaxis","_yaxis","string"],
+                        ["_yunit","_yunit","string"],
+                        ["_zaxis","_zaxis","string"],
+                        ["_zunit","_zunit","string"]]
+list_of_data2d_values = [["qx_data","qx_data","float"],
+                         ["qy_data","qy_data","float"],
+                         ["dqx_data","dqx_data","float"],
+                         ["dqy_data","dqy_data","float"],
+                         ["data","data","float"],
+                         ["q_data","q_data","float"],
+                         ["err_data","err_data","float"],
+                         ["mask","mask","bool"]]
 
 class PageState(object):
     """
@@ -492,7 +493,7 @@ class PageState(object):
                             exec "self.%s= str(field.text)"%item[1]
                         elif item[2] == "bool":
                             try:
-                                exec "self.%s= field.get(str(%s))"%(item[1], item[0])
+                                exec "self.%s= field.get(%s)"%(item[1], item[0])
                             except:
                                 exec "self.%s = None"%item[1]
                         else:
@@ -529,6 +530,7 @@ class Reader(CansasReader):
     ext=['.fitv', '.FITV']  
     
     def __init__(self, call_back=None, cansas=True):
+        CansasReader.__init__(self)
         """
         Initialize the call-back method to be called
         after we load a file
@@ -566,36 +568,47 @@ class Reader(CansasReader):
         doc = xml.dom.minidom.Document()
         main_node = doc.createElement("SASroot")
         main_node.setAttribute("version", self.version)
-      
+        main_node.setAttribute("xmlns", "cansas1d/%s" % self.version)
+        main_node.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+        main_node.setAttribute("xsi:schemaLocation", "cansas1d/%s http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd" % self.version)
+        
         doc.appendChild(main_node)
         
         entry_node = doc.createElement("SASentry")
         main_node.appendChild(entry_node)
-        
+       
         write_node(doc, entry_node, "Title", datainfo.title)
-        
+        if datainfo is not None:
+            write_node(doc, entry_node, "data_class", datainfo.__class__.__name__)
         for item in datainfo.run:
             runname = {}
             if datainfo.run_name.has_key(item) and len(str(datainfo.run_name[item]))>1:
                 runname = {'name': datainfo.run_name[item] }
             write_node(doc, entry_node, "Run", item, runname)
         # Data info
-        node = doc.createElement("SASdata")
-        entry_node.appendChild(node)
+        new_node = doc.createElement("SASdata")
+        entry_node.appendChild(new_node)
         for item in list_of_data_2d_attr:
             element = doc.createElement(item[0])
             exec "element.setAttribute(item[0], str(datainfo.%s))"%(item[1])
-            entry_node.appendChild(element)
+            new_node.appendChild(element)
+            
         for item in list_of_data2d_values:
-            element = doc.createElement(item[0])
+            root_node = doc.createElement(item[0])
+            new_node.appendChild(root_node)
+            
             exec "temp_list = datainfo.%s"%item[1]
+
             if temp_list is None or len(temp_list)== 0:
+                element = doc.createElement(item[0])
                 exec "element.appendChild(doc.createTextNode(str(%s)))"%temp_list
+                root_node.appendChild(element)
             else:
                 for value in temp_list:
-                    exec "element.appendChild(doc.createTextNode(str(%s)))"%value
-            entry_node.appendChild(element)
-      
+                    element = doc.createElement(item[0])
+                    exec "element.setAttribute(item[0], str(%s))"%value
+                    root_node.appendChild(element)
+       
         # Sample info
         sample = doc.createElement("SASsample")
         if datainfo.sample.name is not None:
@@ -747,21 +760,53 @@ class Reader(CansasReader):
         # Locate the P(r) node
         try:
             nodes = entry.xpath('ns:%s' % FITTING_NODE_NAME, namespaces={'ns': CANSAS_NS})
+            #if entry is not None:
+            #    self.file = entry.text.strip()
             state.fromXML(node=nodes[0])
         except:
             logging.info("XML document does not contain fitting information.\n %s" % sys.exc_value)
             
         return state
     
-    def _parse_entry_2d(self, dom):
+    def _parse_entry_2d_helper(self, node, item):
+        """
+        Create a numpy list from value extrated from the node
+        
+        :param node: node from each the value is stored
+        :param item: list name of three strings.the two first are name of data
+            attribute and the third one is the type of the value of that 
+            attribute. type can be string, float, bool, etc.
+        
+        : return: numpy array
+        """
+        if node is not None:
+            if item[2] == "string":
+                return node.get(item[0]).strip()
+            elif item[2] == "bool":
+                try:
+                    return node.get(item[0]).strip()
+                except:
+                    return None
+            else:
+                try:
+                    return float(node.get(item[0]))
+                except:
+                    return None
+                    
+    def _parse_entry(self, dom):
         """
         Parse a SASentry
         
         :param node: SASentry node
         
-        :return: Data2D object
+        :return: Data1D/Data2D object
         
         """
+        node = dom.xpath('ns:data_class', namespaces={'ns': CANSAS_NS})
+        if not node or node[0].text.lstrip().rstrip() != "Data2D":
+            return CansasReader._parse_entry(self, dom)
+        
+        #Parse 2D
         data_info = Data2D()
         
         # Look up title      
@@ -963,130 +1008,19 @@ class Reader(CansasReader):
         nodes = dom.xpath('ns:SASdata', namespaces={'ns': CANSAS_NS})
         if len(nodes)>1:
             raise RuntimeError, "CanSAS reader is not compatible with multiple SASdata entries"
-        
-        nodes = dom.xpath('ns:SASdata/ns:Idata', namespaces={'ns': CANSAS_NS})
-
-        for item in nodes:
-            _x, attr = get_float('ns:Q', item)
-            _dx, attr_d = get_float('ns:Qdev', item)
-            _dxl, attr_l = get_float('ns:dQl', item)
-            _dxw, attr_w = get_float('ns:dQw', item)
-            if _dx == None:
-                _dx = 0.0
-            if _dxl == None:
-                _dxl = 0.0
-            if _dxw == None:
-                _dxw = 0.0
-                
-            if attr.has_key('unit') and attr['unit'].lower() != data_info.x_unit.lower():
-                if has_converter==True:
-                    try:
-                        data_conv_q = Converter(attr['unit'])
-                        _x = data_conv_q(_x, units=data_info.x_unit)
-                    except:
-                        raise ValueError, "CanSAS reader: could not convert Q unit [%s]; expecting [%s]\n  %s" \
-                        % (attr['unit'], data_info.x_unit, sys.exc_value)
-                else:
-                    raise ValueError, "CanSAS reader: unrecognized Q unit [%s]; expecting [%s]" \
-                        % (attr['unit'], data_info.x_unit)
-            # Error in Q
-            if attr_d.has_key('unit') and attr_d['unit'].lower() != data_info.x_unit.lower():
-                if has_converter==True:
-                    try:
-                        data_conv_q = Converter(attr_d['unit'])
-                        _dx = data_conv_q(_dx, units=data_info.x_unit)
-                    except:
-                        raise ValueError, "CanSAS reader: could not convert dQ unit [%s]; expecting [%s]\n  %s" \
-                        % (attr['unit'], data_info.x_unit, sys.exc_value)
-                else:
-                    raise ValueError, "CanSAS reader: unrecognized dQ unit [%s]; expecting [%s]" \
-                        % (attr['unit'], data_info.x_unit)
-            # Slit length
-            if attr_l.has_key('unit') and attr_l['unit'].lower() != data_info.x_unit.lower():
-                if has_converter==True:
-                    try:
-                        data_conv_q = Converter(attr_l['unit'])
-                        _dxl = data_conv_q(_dxl, units=data_info.x_unit)
-                    except:
-                        raise ValueError, "CanSAS reader: could not convert dQl unit [%s]; expecting [%s]\n  %s" \
-                        % (attr['unit'], data_info.x_unit, sys.exc_value)
-                else:
-                    raise ValueError, "CanSAS reader: unrecognized dQl unit [%s]; expecting [%s]" \
-                        % (attr['unit'], data_info.x_unit)
-            # Slit width
-            if attr_w.has_key('unit') and attr_w['unit'].lower() != data_info.x_unit.lower():
-                if has_converter==True:
-                    try:
-                        data_conv_q = Converter(attr_w['unit'])
-                        _dxw = data_conv_q(_dxw, units=data_info.x_unit)
-                    except:
-                        raise ValueError, "CanSAS reader: could not convert dQw unit [%s]; expecting [%s]\n  %s" \
-                        % (attr['unit'], data_info.x_unit, sys.exc_value)
-                else:
-                    raise ValueError, "CanSAS reader: unrecognized dQw unit [%s]; expecting [%s]" \
-                        % (attr['unit'], data_info.x_unit)
+       
+        for entry in nodes:
+            for item in list_of_data_2d_attr:
+                #get node
+                node = get_content('ns:%s'%item[0], entry)
+                exec "data_info.%s = self._parse_entry_2d_helper(node, item)"%(item[1])
                     
-            _y, attr = get_float('ns:I', item)
-            _dy, attr_d = get_float('ns:Idev', item)
-            if _dy == None:
-                _dy = 0.0
-            if attr.has_key('unit') and attr['unit'].lower() != data_info.y_unit.lower():
-                if has_converter==True:
-                    try:
-                        data_conv_i = Converter(attr['unit'])
-                        _y = data_conv_i(_y, units=data_info.y_unit)
-                    except:
-                        raise ValueError, "CanSAS reader: could not convert I(q) unit [%s]; expecting [%s]\n  %s" \
-                        % (attr['unit'], data_info.y_unit, sys.exc_value)
-                else:
-                    raise ValueError, "CanSAS reader: unrecognized I(q) unit [%s]; expecting [%s]" \
-                        % (attr['unit'], data_info.y_unit)
-            if attr_d.has_key('unit') and attr_d['unit'].lower() != data_info.y_unit.lower():
-                if has_converter==True:
-                    try:
-                        data_conv_i = Converter(attr_d['unit'])
-                        _dy = data_conv_i(_dy, units=data_info.y_unit)
-                    except:
-                        raise ValueError, "CanSAS reader: could not convert dI(q) unit [%s]; expecting [%s]\n  %s" \
-                        % (attr_d['unit'], data_info.y_unit, sys.exc_value)
-                else:
-                    raise ValueError, "CanSAS reader: unrecognized dI(q) unit [%s]; expecting [%s]" \
-                        % (attr_d['unit'], data_info.y_unit)
-                
-            if _x is not None and _y is not None:
-                exec "item = numpy.append(x, _x)"
-    
-        for item in list_of_model_attributes:
-            node = get_content("ns:%s"%item[0], entry)
-            list = []
-            for value in node:
-                try:
-                    list.append(float(value)) 
-                except:
-                    list.append(None)
-                
-            exec "self.%s = list"%item[1]
-        data_conv_q = None
-        data_conv_i = None
-        
-        if has_converter == True and data_info.x_unit != '1/A':
-            data_conv_q = Converter('1/A')
-            # Test it
-            data_conv_q(1.0, output.Q_unit)
-            
-        if has_converter == True and data_info.y_unit != '1/cm':
-            data_conv_i = Converter('1/cm')
-            # Test it
-            data_conv_i(1.0, output.I_unit)                    
-                
-        if data_conv_q is not None:
-            data_info.xaxis("\\rm{%s}"%str(_xaxis), data_info.x_unit)
-        else:
-            data_info.xaxis("\\rm{%s}"%str(_xaxis), 'A^{-1}')
-        if data_conv_i is not None:
-            data_info.yaxis("\\rm{%s}"%str(_yaxis), data_info.y_unit)
-        else:
-            data_info.yaxis("\\rm{%s}"%str(_yaxis),"cm^{-1}")
+            for item in list_of_data2d_values:
+                field = get_content('ns:%s'%item[0], entry)
+                list = []
+                if field is not None:
+                    list = [self._parse_entry_2d_helper(node, item) for node in field]
+                exec "data_info.%s = numpy.array(list)"%item[0]
         
         return data_info
 
@@ -1118,17 +1052,16 @@ class Reader(CansasReader):
                     # Check the format version number
                     # Specifying the namespace will take care of the file format version 
                     root = tree.getroot()
-                    entry_list = root.xpath('/ns:SASroot/ns:SASentry', namespaces={'ns': CANSAS_NS})
+                    entry_list = root.xpath('ns:SASentry', namespaces={'ns': CANSAS_NS})
                     for entry in entry_list:
                         try:
                             sas_entry = self._parse_entry(entry)
                         except:
-                            sas_entry = self._parse_entry_2d(entry)
+                            raise
                         fitstate = self._parse_state(entry)
                         sas_entry.meta_data['fitstate'] = fitstate
                         sas_entry.filename = fitstate.file
                         output.append(sas_entry)
-                    
             else:
                 raise RuntimeError, "%s is not a file" % path
             
@@ -1155,6 +1088,9 @@ class Reader(CansasReader):
                 state.data = output[0]
                 state.data.name = state.data_name
                 state.data.id = state.data_id
+                state.data.id = state.data_id
+                if state.is_data is not None:
+                    state.data.is_data = state.is_data
                 #state.data.group_id = state.data_group_id
                 state.data.group_id = output[0].filename
               
