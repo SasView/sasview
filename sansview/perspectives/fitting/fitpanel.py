@@ -210,8 +210,19 @@ class FitPanel(wx.aui.AuiNotebook):
                 #Don't return any panel is the exact same page is created
                 if name == page_info.window_name:
                     # the page is still opened
+                    panel.set_manager(self.manager)
+                    panel.set_owner(self.event_owner)
+                    if panel.model_list_box is None or len(panel.model_list_box) == 0: 
+                        page_info.model_list_box = self.model_list_box.get_list()
+                        panel.populate_box(dict=page_info.model_list_box)
+                        panel.initialize_combox()
+                        panel.set_page_info(page_info=page_info)
+                        self.opened_pages[page_info.type] = [page_info.window_name, panel]
+                    if panel is not None:  
+                        self.manager.store_page(page=panel, data=state.data)
                     panel.reset_page(state=state)
                     page_is_opened = True
+                    
             if not page_is_opened:
                 panel = self.add_fit_page(data=state.data)
                 # add data associated to the page created
@@ -302,7 +313,7 @@ class FitPanel(wx.aui.AuiNotebook):
         """
         name = "Fit Page"
         type = 'empty'
-        if data is not None:
+        if data is not None and hasattr(data, "is_data"):
             if data.is_data:
                 name = data.name 
                 type = 'Data'

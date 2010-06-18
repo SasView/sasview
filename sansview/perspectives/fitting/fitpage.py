@@ -11,10 +11,8 @@ from sans.models.dispersion_models import ArrayDispersion, GaussianDispersion
 from DataLoader.data_info import Data1D
 from sans.guicomm.events import StatusEvent   
 from sans.guiframe.utils import format_number,check_float
-#from sans.guiframe.local_perspectives.plotting.Masking import ModelPanel2D as panel2D
 
-## event to post model to fit to fitting plugins
-(ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
+
 
 ## event to know the selected fit engine
 (FitterTypeEvent, EVT_FITTER_TYPE)   = wx.lib.newevent.NewEvent()
@@ -44,51 +42,22 @@ class FitPage(BasicPage):
         Initialization of the Panel
         """
         BasicPage.__init__(self, parent, page_info)
-        ## total number of point: float
-        self.npts=None
-        ## thread for compute Chisqr
-        self.calc_Chisqr=None
-        ## default fitengine type
-        self.engine_type = None
-        ## smear default
-        self.smearer = None
-        self.current_smearer = None
-        ## 2D smear accuracy default
-        self.smear2d_accuracy = 'Low'
-        ## slit smear: 
-        self.dxl = None
-        self.dxw = None
-        ## pinhole smear 
-        self.dx_min = None
-        self.dx_max = None
-        
-        ## model data (theory) calculated on drawing.
-        self.theory_data = None
-      
+ 
         ## draw sizer
         self._fill_datainfo_sizer()
-        
         # get smear info from data
         self._get_smear_info()
-        
         self._fill_model_sizer( self.sizer1)
-        
         self._get_defult_custom_smear()
-        
         self._fill_range_sizer() 
         
         if self.data is None:
             self.formfactorbox.Disable()
             self.structurebox.Disable()
         else:
-            self.smearer = smear_selection( self.data )
+            self.smearer = smear_selection(self.data)
             if self.smearer ==None:
                 self.enable_smearer.Disable()
-            #if self.data.__class__.__name__ =="Data2D":
-                #if self.model != None:
-                    #self.smear_description_2d.Show(True)
-                    
-        self.disp_cb_dict = {}
         ## to update the panel according to the fit engine type selected
         self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
         self.Bind(EVT_FIT_STOP,self._on_fit_complete)
@@ -123,6 +92,7 @@ class FitPage(BasicPage):
         
         """
         self.engine_type = event.type
+        self.state.engine_type = self.engine_type
         if len(self.parameters)==0:
             self.Layout()
             return
@@ -827,7 +797,7 @@ class FitPage(BasicPage):
         self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit,id=self.btFit.GetId())
         
             
-    def _on_select_model(self, event): 
+    def _on_select_model(self, event=None): 
         """
         call back for model selection
         """  
@@ -858,6 +828,8 @@ class FitPage(BasicPage):
             except:
                 ## error occured on chisqr computation
                 pass
+            ## event to post model to fit to fitting plugins
+            (ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
             if self.data is not None and self.data.__class__.__name__ !="Data2D":
                 ## set smearing value whether or not the data contain the smearing info
                 evt = ModelEventbox(model=self.model, 
@@ -866,13 +838,18 @@ class FitPage(BasicPage):
                                      qmax= float(self.qmax_x)) 
             else:   
                  evt = ModelEventbox(model=self.model)
-            wx.PostEvent(self.event_owner, evt)  
-            
+          
+            self.manager._on_model_panel(evt=evt)
+            self.state.model = self.model.clone()
+            self.state.model.name = self.model.name
+            if event is not None:
+                self._draw_model()
         if event !=None:
             #self._undo.Enable(True)
             ## post state to fit panel
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
+      
       
     def _onparamEnter(self,event):
         """ 
@@ -1334,9 +1311,9 @@ class FitPage(BasicPage):
         reset the state
         """
         self.reset_page_helper(state)
-        import sans.guiframe.gui_manager
-        evt = ModelEventbox(model=state.model)
-        wx.PostEvent(self.event_owner, evt)  
+        #import sans.guiframe.gui_manager
+        #evt = ModelEventbox(model=state.model)
+        #wx.PostEvent(self.event_owner, evt)  
    
         if self.engine_type != None:
             self.manager._on_change_engine(engine=self.engine_type)
@@ -1812,6 +1789,8 @@ class FitPage(BasicPage):
         :return: message to inform the user about the validity
             of the values entered for slit smear
         """
+        if self.data.__class__.__name__ == "Data2D":
+            return
         temp_smearer = None
         # make sure once more if it is smearer
         data = copy.deepcopy(self.data)

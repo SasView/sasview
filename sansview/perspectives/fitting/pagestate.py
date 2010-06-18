@@ -43,9 +43,9 @@ list_of_state_attributes = [["qmin", "qmin", "float"],
                       ["shape_indep_rbutton", "shape_indep_rbutton", "bool"],
                       ["plugin_rbutton", "plugin_rbutton","bool"],
                       ["struct_rbutton", "struct_rbutton", "bool"],
-                      ["formfactorcombobox", "formfactorcombobox", "bool"],
-                      ["structurecombobox", "structurecombobox", "bool"],
-                      ["disp_box", "disp_box"],
+                      ["formfactorcombobox", "formfactorcombobox", "float"],
+                      ["structurecombobox", "structurecombobox", "float"],
+                      ["disp_box", "disp_box", "float"],
                       ["enable_smearer","enable_smearer","bool"],
                       ["disable_smearer","disable_smearer","bool"],
                       ["pinhole_smearer","pinhole_smearer","bool"],
@@ -88,6 +88,33 @@ list_of_data2d_values = [["qx_data","qx_data","float"],
                          ["err_data","err_data","float"],
                          ["mask","mask","bool"]]
 
+def parse_entry_helper( node, item):
+    """
+    Create a numpy list from value extrated from the node
+    
+    :param node: node from each the value is stored
+    :param item: list name of three strings.the two first are name of data
+        attribute and the third one is the type of the value of that 
+        attribute. type can be string, float, bool, etc.
+    
+    : return: numpy array
+    """
+    if node is not None:
+        if item[2] == "string":
+            return str(node.get(item[0]).strip())
+        elif item[2] == "bool":
+            try:
+                exec "value = bool(node.get(item[0]).strip())"
+                return value
+            except:
+                return None
+        else:
+            try:
+                return float(node.get(item[0]))
+            except:
+                return None
+            
+            
 class PageState(object):
     """
     Contains information to reconstruct a page of the fitpanel.
@@ -121,7 +148,7 @@ class PageState(object):
         self.data_group_id = None
         if self.data is not None and hasattr(self.data, "group_id"):
             self.data_group_id = self.data.group_id
-        #-------------------------
+        
         ## reset True change the state of exsiting button
         self.reset = False
        
@@ -188,6 +215,10 @@ class PageState(object):
         ## Q range
         self.qmin = 0.001
         self.qmax = 0.1
+        #reset data range
+        self.qmax_x = None
+        self.qmin_x = None
+        
         self.npts = None
         self.name = ""
         ## enable smearering state
@@ -311,7 +342,22 @@ class PageState(object):
         rep += "data : %s\n"% str(self.data)
         rep += "Plotting Range: min: %s, max: %s, steps: %s\n"%(str(self.qmin),
                                                 str(self.qmax),str(self.npts))
-        """
+        rep += "Dispersion selection : %s\n"%str(self.disp_box)
+        rep += "Smearing enable : %s\n"%str(self.enable_smearer)
+        rep += "Smearing disable : %s\n"%str(self.disable_smearer)
+        rep += "Pinhole smearer enable : %s\n"%str(self.pinhole_smearer)
+        rep += "Slit smearer enable : %s\n"%str(self.slit_smearer)
+        rep += "Dispersity enable : %s\n"%str(self.enable_disp)
+        rep += "Dispersity disable : %s\n"%str(self.disable_disp)
+        rep += "Slit smearer enable: %s\n"%str(self.slit_smearer)
+        rep += "2D enable : %s\n"%str(self.enable2D)
+        rep += "All parameters checkbox selected: %s\n"%(self.cb1)
+        rep += "Value of Chisqr : %s\n"%str(self.tcChi)
+        rep += "Smear object : %s\n"%str(self.smearer)
+        rep += "Smear type : %s\n"%(self.smear_type)
+        rep += "dq_l  : %s\n"%self.dq_l
+        rep += "dq_r  : %s\n"%self.dq_r
+        
         rep += "model  : %s\n\n"% str(self.model)
         rep += "number parameters(self.parameters): %s\n"%len(self.parameters)
         rep += self._repr_helper( list=self.parameters, rep=rep)
@@ -321,7 +367,7 @@ class PageState(object):
         rep += "number dispersity parameters"
         rep += "(self.orientation_params_disp): %s\n"%len(self.orientation_params_disp)
         rep += self._repr_helper( list=self.orientation_params_disp, rep=rep)
-        """
+        
         return rep
    
     def _toXML_helper(self, list, element, newdoc):
@@ -394,7 +440,7 @@ class PageState(object):
         inputs = newdoc.createElement("Attributes")
         top_element.appendChild(inputs)
        
-        element = newdoc.createElement('data_attributes')
+
         if self.data is not None and hasattr(self.data, "group_id"):
             self.data_group_id = self.data.group_id
         if self.data is not None and hasattr(self.data, "is_data"):
@@ -405,8 +451,9 @@ class PageState(object):
             self.data_id = self.data.id
        
         for item in list_of_data_attributes:
+            element = newdoc.createElement(item[0])
             exec "element.setAttribute(item[0], str(self.%s))"%(item[1])
-        inputs.appendChild(element)   
+            inputs.appendChild(element)   
         
         for item in list_of_state_attributes:
             element = newdoc.createElement(item[0])
@@ -417,7 +464,7 @@ class PageState(object):
             element = newdoc.createElement(item[0])
             exec "list = self.%s"%item[1]
             for value in list:
-                exec "element.appendChild(newdoc.createTextNode(str(%s)))" % value
+                exec "element.appendChild(newdoc.createTextNode(str(%s)))"%value
             inputs.appendChild(element)
             
         for item in list_of_state_parameters:
@@ -439,16 +486,46 @@ class PageState(object):
         Helper function to write state to xml
         """
         for item in node:
-            name = item.get('name')
-            value = item.get('value')
-            selected_to_fit = item.get('selected_to_fit')
-            error_displayed = item.get('error_displayed')
-            error_value = item.get('error_value')
-            minimum_displayed = item.get('minimum_displayed')
-            minimum_value = item.get('minimum_value')
-            maximum_displayed = item.get('maximum_displayed')
-            maximum_value = item.get('maximum_value')
-            unit = item.get('unit')
+            try:
+                name = item.get('name')
+            except:
+                name = None
+            try:
+                value = item.get('value')
+            except:
+                value = None
+            try:
+                selected_to_fit = bool(item.get('selected_to_fit'))
+            except:
+                selected_to_fit = None
+            try:
+                error_displayed = item.get('error_displayed')
+            except:
+                error_displayed = None
+            try:  
+                error_value = item.get('error_value')
+            except:
+                error_value = None
+            try:
+                minimum_displayed = bool(item.get('minimum_displayed'))
+            except:
+                minimum_displayed = None
+            try:
+                minimum_value = item.get('minimum_value')
+            except:
+                minimum_value = None
+            try:
+                maximum_displayed = bool(item.get('maximum_displayed'))
+            except:
+                maximum_displayed = None
+            try:
+                maximum_value = item.get('maximum_value')
+            except:
+                maximum_value = None
+            try:
+                unit = item.get('unit')
+            except:
+                unit = None
             list.append([selected_to_fit, name, value, "+/-",[error_displayed, error_value],
                          [minimum_displayed,minimum_value],[maximum_displayed,maximum_value], unit])
        
@@ -460,7 +537,6 @@ class PageState(object):
         :param node: node of a XML document to read from
         
         """
-      
         if file is not None:
             msg = "PageState no longer supports non-CanSAS"
             msg += " format for fitting files"
@@ -485,22 +561,23 @@ class PageState(object):
             
             # Parse fitting attributes
             entry = get_content('ns:Attributes', node)
+            for item in list_of_data_attributes:
+                node = get_content('ns:%s'%item[0], entry)
+                try:
+                    exec "self.%s = parse_entry_helper(node, item)"%item[0]
+                    
+                except:
+                    raise
+            
             if entry is not None:
+                
                 for item in list_of_state_attributes:
-                    field = get_content('ns:%s'%item[0], entry)
-                    if field is not None:
-                        if item[2] == "string":
-                            exec "self.%s= str(field.text)"%item[1]
-                        elif item[2] == "bool":
-                            try:
-                                exec "self.%s= field.get(%s)"%(item[1], item[0])
-                            except:
-                                exec "self.%s = None"%item[1]
-                        else:
-                            try:
-                                exec "self.%s = float(field.get(%s))"%(item[1], item[0])
-                            except:
-                                exec "self.%s = None"%item[1]
+                    node = get_content('ns:%s'%item[0], entry)
+                    try:
+                        exec "self.%s = parse_entry_helper(node, item)"%str(item[0])
+                    except:
+                        raise
+                    
                 for item in list_of_model_attributes:
                     node = get_content("ns:%s"%item[0], entry)
                     list = []
@@ -509,13 +586,12 @@ class PageState(object):
                             list.append(float(value)) 
                         except:
                             list.append(None)
-                        
                     exec "self.%s = list"%item[1]
-                    
+                
                 for item in list_of_state_parameters:
                     node = get_content("ns:%s"%item[0], entry)
-                    self._fromXML_helper(node=node, list=self.parameters)
-                
+                    exec "self._fromXML_helper(node=node, list=self.%s)"%item[1]
+                   
 
 class Reader(CansasReader):
     """
@@ -760,38 +836,13 @@ class Reader(CansasReader):
         # Locate the P(r) node
         try:
             nodes = entry.xpath('ns:%s' % FITTING_NODE_NAME, namespaces={'ns': CANSAS_NS})
-            #if entry is not None:
-            #    self.file = entry.text.strip()
             state.fromXML(node=nodes[0])
         except:
             logging.info("XML document does not contain fitting information.\n %s" % sys.exc_value)
             
         return state
     
-    def _parse_entry_2d_helper(self, node, item):
-        """
-        Create a numpy list from value extrated from the node
-        
-        :param node: node from each the value is stored
-        :param item: list name of three strings.the two first are name of data
-            attribute and the third one is the type of the value of that 
-            attribute. type can be string, float, bool, etc.
-        
-        : return: numpy array
-        """
-        if node is not None:
-            if item[2] == "string":
-                return node.get(item[0]).strip()
-            elif item[2] == "bool":
-                try:
-                    return node.get(item[0]).strip()
-                except:
-                    return None
-            else:
-                try:
-                    return float(node.get(item[0]))
-                except:
-                    return None
+   
                     
     def _parse_entry(self, dom):
         """
@@ -1013,13 +1064,13 @@ class Reader(CansasReader):
             for item in list_of_data_2d_attr:
                 #get node
                 node = get_content('ns:%s'%item[0], entry)
-                exec "data_info.%s = self._parse_entry_2d_helper(node, item)"%(item[1])
+                exec "data_info.%s = parse_entry_helper(node, item)"%(item[1])
                     
             for item in list_of_data2d_values:
                 field = get_content('ns:%s'%item[0], entry)
                 list = []
                 if field is not None:
-                    list = [self._parse_entry_2d_helper(node, item) for node in field]
+                    list = [parse_entry_helper(node, item) for node in field]
                 exec "data_info.%s = numpy.array(list)"%item[0]
         
         return data_info
@@ -1084,14 +1135,12 @@ class Reader(CansasReader):
                     exec 'output[0].is_data = state.is_data' 
                  
                 output[0].filename = state.file
-                #output[0].filename = state.data_name
                 state.data = output[0]
                 state.data.name = state.data_name
                 state.data.id = state.data_id
                 state.data.id = state.data_id
                 if state.is_data is not None:
                     state.data.is_data = state.is_data
-                #state.data.group_id = state.data_group_id
                 state.data.group_id = output[0].filename
               
                 self.call_back(state=state, datainfo=output[0])

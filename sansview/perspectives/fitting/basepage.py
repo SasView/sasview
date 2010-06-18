@@ -40,12 +40,9 @@ class BasicPage(wx.ScrolledWindow):
     def __init__(self,parent, page_info):
         """
         """
-        wx.ScrolledWindow.__init__(self, parent,
-                 style= wx.FULL_REPAINT_ON_RESIZE )
+        wx.ScrolledWindow.__init__(self, parent,style=wx.FULL_REPAINT_ON_RESIZE)
         #Set window's font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
-        ##window_name
-       
         ## parent of the page
         self.parent = parent
         ## manager is the fitting plugin
@@ -57,7 +54,28 @@ class BasicPage(wx.ScrolledWindow):
         ## data
         self.data = None
         self.mask = None
-        self.theory = None
+        ## Q range
+        self.qmax_x = None
+        self.qmin_x = None
+        self.num_points= _NPTS_DEFAULT
+        ## total number of point: float
+        self.npts = None
+        ## default fitengine type
+        self.engine_type = None
+        ## smear default
+        self.smearer = None
+        self.current_smearer = None
+        ## 2D smear accuracy default
+        self.smear2d_accuracy = 'Low'
+        ## slit smear: 
+        self.dxl = None
+        self.dxw = None
+        ## pinhole smear 
+        self.dx_min = None
+        self.dx_max = None
+       
+        self.disp_cb_dict = {}
+   
         self.state = PageState(parent=parent)
         ## dictionary containing list of models
         self.model_list_box = None
@@ -95,10 +113,8 @@ class BasicPage(wx.ScrolledWindow):
         ## check that the fit range is correct to plot the model again
         self.fitrange= True
 
-        ## Q range
-        self.qmin_x= _QMIN_DEFAULT
-        self.qmax_x= _QMAX_DEFAULT
-        self.num_points= _NPTS_DEFAULT
+        
+        
         
         ## Create memento to save the current state
         self.state= PageState(parent= self.parent,model=self.model, data=self.data)
@@ -192,7 +208,6 @@ class BasicPage(wx.ScrolledWindow):
             :param event: mouse event
             
             """
-            
             event.Skip()
             self.full_selection = True
             return self._on_set_focus_callback(event)
@@ -295,7 +310,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer3.SetMinSize((PANEL_WIDTH,-1))
         self.sizer4.SetMinSize((PANEL_WIDTH,-1))
         self.sizer5.SetMinSize((PANEL_WIDTH,-1))
-        #self.sizer6.SetMinSize((PANEL_WIDTH,-1))
+        self.sizer6.SetMinSize((PANEL_WIDTH,-1))
         
         self.vbox.Add(self.sizer0)
         self.vbox.Add(self.sizer1)
@@ -303,7 +318,7 @@ class BasicPage(wx.ScrolledWindow):
         self.vbox.Add(self.sizer3)
         self.vbox.Add(self.sizer4)
         self.vbox.Add(self.sizer5)
-        #self.vbox.Add(self.sizer6)
+        self.vbox.Add(self.sizer6)
         
     def set_layout(self):
         """
@@ -577,8 +592,38 @@ class BasicPage(wx.ScrolledWindow):
         #the manager write the state into file
         self.manager.save_fit_state(filepath=path, fitstate=new_state)
         return new_state  
-      
+    
     def on_bookmark(self, event):
+        """
+        save history of the data and model
+        """
+        if self.model==None:
+            msg="Can not bookmark; Please select Data and Model first..."
+            wx.MessageBox(msg, 'Info')
+            return 
+        self.save_current_state()
+        new_state = self.state.clone()
+        ##Add model state on context menu
+        self.number_saved_state += 1
+        #name= self.model.name+"[%g]"%self.number_saved_state 
+        name= self.model.__class__.__name__+"[%g]"%self.number_saved_state 
+        self.saved_states[name]= new_state
+        
+        ## Add item in the context menu
+        
+        year, month, day,hour,minute,second,tda,ty,tm_isdst= time.localtime()
+        my_time= str(hour)+" : "+str(minute)+" : "+str(second)+" "
+        date= str( month)+"|"+str(day)+"|"+str(year)
+        msg=  "Model saved at %s on %s"%(my_time, date)
+         ## post help message for the selected model 
+        msg +=" Saved! right click on this page to retrieve this model"
+        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        
+        id = wx.NewId()
+        self.popUpMenu.Append(id,name,str(msg))
+        wx.EVT_MENU(self, id, self.onResetModel)
+        
+    def old_on_bookmark(self, event):
         """
         save history of the data and model
         """
@@ -675,17 +720,29 @@ class BasicPage(wx.ScrolledWindow):
         """
         Store current state
         """
+        if hasattr(self, "engine_type"):
+            self.state.engine_type = copy.deepcopy(self.engine_type)
         ## save model option
         if self.model!= None:
             self.disp_list= self.model.getDispParamList()
             self.state.disp_list= copy.deepcopy(self.disp_list)
             self.state.model = self.model.clone()
-
+        #save radiobutton state for model selection
+        self.state.shape_rbutton = self.shape_rbutton.GetValue()
+        self.state.shape_indep_rbutton = self.shape_indep_rbutton.GetValue()
+        self.state.struct_rbutton = self.struct_rbutton.GetValue()
+        self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
+        #model combobox
+        self.state.structurebox = self.structurebox.GetSelection()
+        self.state.formfactorbox = self.formfactorbox.GetSelection()
+        
         self.state.enable2D = copy.deepcopy(self.enable2D)
         self.state.values= copy.deepcopy(self.values)
         self.state.weights = copy.deepcopy( self.weights)
         ## save data    
         self.state.data= copy.deepcopy(self.data)
+        self.state.qmax_x = self.qmax_x
+        self.state.qmin_x = self.qmin_x
         try:
             n = self.disp_box.GetCurrentSelection()
             dispersity= self.disp_box.GetClientData(n)
@@ -696,7 +753,7 @@ class BasicPage(wx.ScrolledWindow):
                    self.state.cb1= self.cb1.GetValue()
         except:
             pass
-        
+      
         if hasattr(self,"enable_disp"):
             self.state.enable_disp= self.enable_disp.GetValue()
             self.state.disable_disp = self.disable_disp.GetValue()
@@ -710,7 +767,7 @@ class BasicPage(wx.ScrolledWindow):
         self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())  
                   
         if hasattr(self,"disp_box"):
-            self.state.disp_box = self.disp_box.GetCurrentSelection()
+            self.state.disp_box = self.disp_box.GetSelection()
 
             if len(self.disp_cb_dict)>0:
                 for k , v in self.disp_cb_dict.iteritems():
@@ -841,7 +898,126 @@ class BasicPage(wx.ScrolledWindow):
             wx.MessageBox(msg, 'Info')
             return  True
         
+           
     def reset_page_helper(self, state):
+        """
+        Use page_state and change the state of existing page
+        
+        :precondition: the page is already drawn or created
+        
+        :postcondition: the state of the underlying data change as well as the
+            state of the graphic interface
+        """
+        if state ==None:
+            #self._undo.Enable(False)
+            return 
+    
+        self.set_data(state.data)
+        self.enable2D= state.enable2D
+        self.engine_type = state.engine_type
+
+        self.disp_cb_dict = state.disp_cb_dict
+        self.disp_list = state.disp_list
+
+        ## set the state of the radio box
+        self.shape_rbutton.SetValue(state.shape_rbutton )
+        self.shape_indep_rbutton.SetValue(state.shape_indep_rbutton)
+        self.struct_rbutton.SetValue(state.struct_rbutton )
+        self.plugin_rbutton.SetValue(state.plugin_rbutton)
+        
+        ## fill model combobox
+        self._show_combox_helper()
+        #select the current model
+        self.structurebox.SetSelection(state.structurecombobox )
+        self.formfactorbox.SetSelection(state.formfactorcombobox)
+        #reset the fitting engine type
+        self.engine_type = state.engine_type
+        #draw the pnael according to the new model parameter 
+        self._on_select_model(event=None)
+  
+        if self.manager !=None:
+            self.manager._on_change_engine(engine=self.engine_type)
+        ## set the select all check box to the a given state
+        self.cb1.SetValue(state.cb1)
+     
+        ## reset state of checkbox,textcrtl  and  regular parameters value
+        self._reset_parameters_state(self.orientation_params_disp,
+                                     state.orientation_params_disp)
+        self._reset_parameters_state(self.orientation_params,
+                                     state.orientation_params)
+        self._reset_parameters_state(self.parameters,state.parameters)    
+         ## display dispersion info layer        
+        self.enable_disp.SetValue(state.enable_disp)
+        self.disable_disp.SetValue(state.disable_disp)
+        
+        if hasattr(self, "disp_box"):
+            
+            self.disp_box.SetSelection(state.disp_box) 
+            n= self.disp_box.GetCurrentSelection()
+            dispersity= self.disp_box.GetClientData(n)
+            name= dispersity.__name__     
+
+            self._set_dipers_Param(event=None)
+       
+            if name=="ArrayDispersion":
+                
+                for item in self.disp_cb_dict.keys():
+                    
+                    if hasattr(self.disp_cb_dict[item],"SetValue") :
+                        self.disp_cb_dict[item].SetValue(state.disp_cb_dict[item])
+                        # Create the dispersion objects
+                        from sans.models.dispersion_models import ArrayDispersion
+                        disp_model = ArrayDispersion()
+                        if hasattr(state,"values")and self.disp_cb_dict[item].GetValue()==True:
+                            if len(state.values)>0:
+                                self.values=state.values
+                                self.weights=state.weights
+                                disp_model.set_weights(self.values, state.weights)
+                            else:
+                                self._reset_dispersity()
+                        
+                        self._disp_obj_dict[item] = disp_model
+                        # Set the new model as the dispersion object for the selected parameter
+                        self.model.set_dispersion(item, disp_model)
+                    
+                        self.model._persistency_dict[item] = [state.values, state.weights]
+                    
+            else:
+                keys = self.model.getParamList()
+                for item in keys:
+                    if item in self.disp_list and not self.model.details.has_key(item):
+                        self.model.details[item]=["",None,None]
+                for k,v in self.state.disp_cb_dict.iteritems():
+                    self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
+                    self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
+
+        ##plotting range restore    
+        self._reset_plotting_range(state)
+        ## smearing info  restore
+        if hasattr(self, "enable_smearer"):
+            ## set smearing value whether or not the data contain the smearing info
+            self.enable_smearer.SetValue(state.enable_smearer)
+            self.disable_smearer.SetValue(state.disable_smearer)
+            self.onSmear(event=None)           
+        self.pinhole_smearer.SetValue(state.pinhole_smearer)
+        self.slit_smearer.SetValue(state.slit_smearer)
+        ## we have two more options for smearing
+        if self.pinhole_smearer.GetValue(): self.onPinholeSmear(event=None)
+        elif self.slit_smearer.GetValue(): self.onSlitSmear(event=None)
+       
+        ## reset state of checkbox,textcrtl  and dispersity parameters value
+        self._reset_parameters_state(self.fittable_param,state.fittable_param)
+        self._reset_parameters_state(self.fixed_param,state.fixed_param)
+        
+        ## draw the model with previous parameters value
+        self._onparamEnter_helper()
+        ## reset context menu items
+        self._reset_context_menu()
+        ## set the value of the current state to the state given as parameter
+        self.state = state.clone() 
+    
+        
+    def old_reset_page_helper(self, state):
         """
         Use page_state and change the state of existing page
         
@@ -1002,9 +1178,7 @@ class BasicPage(wx.ScrolledWindow):
             return
         self.qmin.SetValue(str(state.qmin))
         self.qmax.SetValue(str(state.qmax)) 
-        if self.state.npts!=None:
-            self.npts.SetValue(str(state.npts)) 
-            
+
     def _save_typeOfmodel(self):
         """
         save radiobutton containing the type model that can be selected
@@ -1181,12 +1355,10 @@ class BasicPage(wx.ScrolledWindow):
             item_page = listtorestore[j]
             item_page_info = statelist[j]
             ##change the state of the check box for simple parameters
-            if item_page[0]!=None:               
+            if item_page[0]!=None:   
                 item_page[0].SetValue(item_page_info[0])
-                
             if item_page[2]!=None:
                 item_page[2].SetValue(item_page_info[2])
-                
             if item_page[3]!=None:
                 ## show or hide text +/-
                 if item_page_info[2]:
@@ -1476,7 +1648,38 @@ class BasicPage(wx.ScrolledWindow):
         sizer.Layout()
         self.SetScrollbars(20,20,25,65)
         
-    def _show_combox(self, event):
+    def _show_combox_helper(self):
+        """
+        Fill panel's combo box according to the type of model selected
+        """
+        if self.shape_rbutton.GetValue():
+            ##fill the combobox with form factor list
+            self.structurebox.SetSelection(0)
+            self.structurebox.Disable()
+            self.formfactorbox.Clear()
+            self._populate_box( self.formfactorbox,self.model_list_box["Shapes"])
+        if self.shape_indep_rbutton.GetValue():
+            ##fill the combobox with shape independent  factor list
+            self.structurebox.SetSelection(0)
+            self.structurebox.Disable()
+            self.formfactorbox.Clear()
+            self._populate_box( self.formfactorbox,
+                                self.model_list_box["Shape-Independent"])
+        if self.struct_rbutton.GetValue():
+            ##fill the combobox with structure factor list
+            self.structurebox.SetSelection(0)
+            self.structurebox.Disable()
+            self.formfactorbox.Clear()
+            self._populate_box( self.formfactorbox,
+                                self.model_list_box["Structure Factors"])
+        if self.plugin_rbutton.GetValue():
+            ##fill the combobox with form factor list
+            self.structurebox.Disable()
+            self.formfactorbox.Clear()
+            self._populate_box( self.formfactorbox,
+                                self.model_list_box["Customized Models"])
+        
+    def _show_combox(self, event=None):
         """
         Show combox box associate with type of model selected
         """
@@ -1484,42 +1687,7 @@ class BasicPage(wx.ScrolledWindow):
             self.shape_rbutton.SetValue(True)
             return
 
-        ## Don't want to populate combo box again if the event comes from check box
-        if self.shape_rbutton.GetValue()and\
-             event.GetEventObject()==self.shape_rbutton:
-            ##fill the combobox with form factor list
-            self.structurebox.SetSelection(0)
-            self.structurebox.Disable()
-            self.formfactorbox.Clear()
-            self._populate_box( self.formfactorbox,self.model_list_box["Shapes"])
-            
-        if self.shape_indep_rbutton.GetValue()and\
-             event.GetEventObject()==self.shape_indep_rbutton:
-            ##fill the combobox with shape independent  factor list
-            self.structurebox.SetSelection(0)
-            self.structurebox.Disable()
-            self.formfactorbox.Clear()
-            self._populate_box( self.formfactorbox,
-                                self.model_list_box["Shape-Independent"])
-            
-        if self.struct_rbutton.GetValue() and\
-             event.GetEventObject()==self.struct_rbutton:
-            ##fill the combobox with structure factor list
-            self.structurebox.SetSelection(0)
-            self.structurebox.Disable()
-            self.formfactorbox.Clear()
-            self._populate_box( self.formfactorbox,
-                                self.model_list_box["Structure Factors"])
-           
-        if self.plugin_rbutton.GetValue()and\
-             event.GetEventObject()==self.plugin_rbutton:
-           
-            ##fill the combobox with form factor list
-            self.structurebox.Disable()
-            self.formfactorbox.Clear()
-            self._populate_box( self.formfactorbox,
-                                self.model_list_box["Customized Models"])
-        
+        self._show_combox_helper()
         self._on_select_model(event=None)
         self._save_typeOfmodel()
         self.sizer4_4.Layout()
@@ -1573,8 +1741,7 @@ class BasicPage(wx.ScrolledWindow):
                     tcrtl.SetBackgroundColour("pink")
                     msg= "Model Error:wrong value entered : %s"% sys.exc_value
                     wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-                    return 
-                
+                    return  
             except:
                 tcrtl.SetBackgroundColour("pink")
                 msg= "Model Error:wrong value entered : %s"% sys.exc_value
@@ -1590,12 +1757,10 @@ class BasicPage(wx.ScrolledWindow):
                 else:
                     msg= "Cannot Plot :No npts in that Qrange!!!  "
                     wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-           
         else:
            tcrtl.SetBackgroundColour("pink")
            msg= "Model Error:wrong value entered!!!"
-           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-           
+           wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
         #self._undo.Enable(True)
         self.save_current_state()
         event = PageInfoEvent(page = self)
@@ -1616,7 +1781,7 @@ class BasicPage(wx.ScrolledWindow):
         #For MAC
         form_factor = None
         if f_id >= 0:
-            form_factor = self.formfactorbox.GetClientData( f_id )
+            form_factor = self.formfactorbox.GetClientData(f_id)
 
         if not form_factor in  self.model_list_box["multiplication"]:
             self.structurebox.Hide()
@@ -2118,12 +2283,10 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer5.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer5.Layout()
 
-    
     def _fill_save_sizer(self):
         """
         Draw the layout for saving option
         """
-        return
         self.sizer6.Clear(True)
         box_description= wx.StaticBox(self, -1,"Save Model")
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)

@@ -160,8 +160,7 @@ class Plugin:
       
         self.fit_panel.set_owner(owner)
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
-        owner.Bind(fitpage.EVT_MODEL_BOX,self._on_model_panel)
-
+   
         #create  menubar items
         return [(id, self.menu1, "Fitting")]
                
@@ -298,8 +297,9 @@ class Plugin:
         :param state: PageState object
         
         """
+        #print "state", state
+        #return
         #working on reading state
-        return 
         try: 
             # Load fitting state
             page = self.fit_panel.set_state(state)   
@@ -1002,7 +1002,7 @@ class Plugin:
         ## make sure nothing is done on self.sim_page
         ## example trying to call set_panel on self.sim_page
         if self.current_pg != self.sim_page :
-            if self.page_finder[self.current_pg].get_model()== None :
+            if self.page_finder[self.current_pg].get_model()== None:
                 
                 model.name = "M"+str(self.index_model)
                 self.index_model += 1  
@@ -1015,10 +1015,7 @@ class Plugin:
             self.page_finder[self.current_pg].set_model(model)
             qmin, qmax= self.current_pg.get_range()
             self.page_finder[self.current_pg].set_range(qmin=qmin, qmax=qmax)
-            smearer=  self.page_finder[self.current_pg].get_smearer()
-            # save model name
-            self.set_smearer(smearer=smearer, qmin=qmin, qmax=qmax)
-            
+           
             if self.sim_page!=None:
                 self.sim_page.draw_page()
         
