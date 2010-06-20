@@ -18,8 +18,7 @@ import sys
 import wx
 import logging
 import time
-from sans.guiframe.dataFitting import Data1D
-from danse.common.plottools import Theory1D
+from sans.guiframe.dataFitting import Data1D, Theory1D
 from sans.guicomm.events import NewPlotEvent, StatusEvent    
 import math, numpy
 from sans.pr.invertor import Invertor
