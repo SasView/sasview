@@ -97,7 +97,7 @@ dll_excludes = [
 
 target_wx_client = Target(
     description = 'P(r) inversion viewer',
-    script = 'sansview.py',
+    script = 'PrView.py',
     icon_resources = [(1, "images/ball.ico")],
     other_resources = [(24,1,manifest)],
     dest_base = "prView"
