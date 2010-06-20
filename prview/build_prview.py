@@ -5,13 +5,18 @@
 #
 # SVN must be installed:
 # http://subversion.tigris.org/servlets/ProjectDocumentList?folderID=91
-# Make sure svn.exe in on the path. You might need to log out and log back in again after installing SVN.
 #
-# Inno Setup must be installed
 #
-# py2exe must be installed 
+# On Windows:
+#   - Make sure svn.exe in on the path. You might need to log out and log back in again after installing SVN.
+#   - Inno Setup must be installed
+#   - py2exe must be installed 
+#   - mingw must be installed
 #
-# mingw must be installed
+# In Mac:
+#   - py2app must be installed
+#   - macholib must be installed to use py2app
+#   - modulegraph must be installed to use py2app
 #
 # Usage:
 # python build_prview [command]
@@ -22,11 +27,6 @@
 #   -i: Builds an installer from the release version.
 #   -n: Print out the dependencies for the release notes
 
-
-#TODO: touch site danse/__init__.py
-#TODO: touch site danse/common/__init__.py
-
-
 import os
 import sys
 import shutil
@@ -35,35 +35,33 @@ import logging
 # Installation folder
 import time
 timestamp = int(time.time())
+CWD = os.getcwd()
 INSTALL_FOLDER = "install_%s" % str(timestamp)
+
+# On Windows, the python executable is not always on the path.
+# Use its most frequent location as the default.
+if sys.platform == 'win32':
+    PYTHON = "c:\python25\python"
+    LIB_FOLDER = "%s/%s" % (CWD, INSTALL_FOLDER)
+else:
+    PYTHON = 'python'
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     filename='build_%s.log' % str(timestamp),
                     filemode='w')
 
-CWD    = os.getcwd()
-
-# On Windows, the python executable is not always on the path.
-# Use its most frequent location as the default.
-if sys.platform == 'win32':
-    PYTHON = "c:\python25\python"
-    BUILD_OPT = '-cmingw32'
-else:
-    PYTHON = 'python'
-    BUILD_OPT = ''
-
 SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 
-# Release version 0.2.3
-DATALOADER = "0.2.4"
-GUICOMM    = "0.1.3"
-GUIFRAME   = "0.1.7"
-PRVIEW     = "0.3.0"
-PLOTTOOLS  = "0.1.6"
-UTIL       = "0.1.2"
-PR_INV = "0.2.2"
+# Release version 0.3.3
+DATALOADER = "0.2.7"
+GUICOMM    = "0.1.5"
+GUIFRAME   = "0.2.0"
+PRVIEW     = "0.3.3"
+PLOTTOOLS  = "0.1.9"
+UTIL       = "0.1.5"
+PR_INV = "0.2.5"
 
 # URLs for SVN repos
 DATALOADER_URL = "svn://danse.us/sans/releases/DataLoader-%s" % DATALOADER
@@ -110,13 +108,24 @@ def install_pkg(install_dir, setup_dir, url):
         @param setup_dir: relative location of the setup.py script
         @param url: URL of the SVN repo
     """
-    if not os.path.isdir(install_dir):
-        os.mkdir(install_dir)
-    os.chdir(install_dir)   
-    os.system("%s checkout -q %s" % (SVN, url))        
-    os.chdir(setup_dir)
-    os.system("%s setup.py -q build %s" % (PYTHON, BUILD_OPT))
-    os.system("%s setup.py -q install" % PYTHON)
+    logging.info("Installing %s" % url)
+    try:
+        if not os.path.isdir(install_dir):
+            os.mkdir(install_dir)
+        os.chdir(install_dir)   
+        os.system("%s checkout -q %s" % (SVN, url))        
+        os.chdir(setup_dir)
+        if sys.platform == 'win32':
+            os.system("%s setup.py -q build -cmingw32" % PYTHON)
+            os.system("%s setup.py -q install --root \"%s\"" % (PYTHON, LIB_FOLDER))
+        else:
+            os.system("%s setup.py build" % PYTHON)
+            os.system("%s setup.py install --prefix ~/.local" % PYTHON)
+    except:
+        logging.error("Install failed for %s" % url)
+        logging.error(sys.exc_value)
+        raw_input("Press enter to continue\n")
+        sys.exit()
     
 def checkout(release=False):
     """
@@ -166,13 +175,16 @@ def checkout(release=False):
     else:
         os.system("%s checkout -q svn://danse.us/sans/trunk/prview" % SVN)
     
-def prepare(wipeout = False, install_folder=INSTALL_FOLDER):
+def prepare(wipeout = False):
     """
         Prepare the build
+        
+        @param wipeout: If True, the DANSE modules in the standard site-packages will be
+        removed to avoid conflicts.
     """
     # Remove existing libraries
     if wipeout == True:
-        print "Deleting old modules"
+        logging.info("Deleting DANSES modules in site-packages")
         from distutils.sysconfig import get_python_lib
         libdir = get_python_lib()
         old_dirs = [os.path.join(libdir, 'danse'),
@@ -186,16 +198,16 @@ def prepare(wipeout = False, install_folder=INSTALL_FOLDER):
                 shutil.rmtree(d)
         
     # Create a fresh installation folder
-    if os.path.isdir(install_folder):
-        shutil.rmtree(install_folder)
+    if os.path.isdir(INSTALL_FOLDER):
+        shutil.rmtree(INSTALL_FOLDER)
 
-    os.mkdir(install_folder)
+    os.mkdir(INSTALL_FOLDER)
     
     # Check that the dependencies are properly installed
     check_system()    
     
     # Move to the installation folder
-    os.chdir(install_folder)    
+    os.chdir(INSTALL_FOLDER)   
 
 def warning():
     """
@@ -217,26 +229,11 @@ def warning():
 if __name__ == "__main__": 
     print "Build script for PrView %s" % PRVIEW
     
-    #TODO: add --prefix option
-    
     if len(sys.argv)==1:
-        # By default, build release version in site-packages without cleanup
-        logging.info("Building release version")
-        prepare(install_folder="prview")
-        checkout(True)
-        # Create run script
-        f = open("run_prview.py", 'w')
-        buff  = "import os, sys, site\n"
-        buff += "if __name__ == \"__main__\":\n"
-        buff += "    sys.path.append(os.path.join(os.getcwd(),\"prview-%s\"))\n" % PRVIEW
-        buff += "    site.addsitedir(os.path.join(os.getcwd(),\"prview-%s\"))\n" % PRVIEW
-        buff += "    os.chdir(\"prview-%s\")\n" % PRVIEW
-        buff += "    import sansview\n"
-        buff += "    sansview.SansView()\n"
-        f.write(buff)
-        f.close()
-        
-    elif len(sys.argv)>1:
+        # If there is no argument, build the installer
+        sys.argv.append("-i")
+    
+    if len(sys.argv)>1:
         # Help
         if sys.argv[1]=="-h":
             print "Usage:"
@@ -273,11 +270,15 @@ if __name__ == "__main__":
                 logging.info("Building release version")
                 checkout(True)
                 if sys.platform=='win32':
-                    logging.info("Building installer from release version")
+                    logging.info("Building Windows installer from release version")
                     os.chdir("prview-%s" % (PRVIEW))
-                    os.system("%s setup_exe.py -q py2exe" % PYTHON)
+                    os.system("%s setup_exe.py py2exe --extrapath \"%s\python25\lib\site-packages\"" % (PYTHON, LIB_FOLDER))
                     os.system("%s/Q installer.iss" % INNO)
-                    shutil.copy2(os.path.join("Output","setupPrView.exe"), 
-                                 os.path.join(CWD, "setupPrView_%s.exe" % str(timestamp)))
+                    shutil.copy2(os.path.join("Output","setupSansView.exe"), 
+                                 os.path.join(CWD, "setupSansView_%s.exe" % str(timestamp)))
+                elif sys.platform=='darwin':
+                    logging.info("Building Mac application from release version")
+                    os.chdir("prview-%s" % (PRVIEW))
+                    os.system("%s setup_mac.py py2app" % PYTHON)                    
                     
-    
+    raw_input("Press enter to continue\n")
