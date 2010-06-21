@@ -36,7 +36,8 @@ list_of_data_attributes = [["is_data", "is_data", "bool"],
                       ["data_id", "data_id", "string"],
                       ["name", "name", "string"],
                       ["data_name", "data_name", "string"]]
-list_of_state_attributes = [["qmin", "qmin", "float"],
+list_of_state_attributes = [["engine_type", "engine_type", "string"],
+                       ["qmin", "qmin", "float"],
                       ["qmax", "qmax", "float"],
                       ["npts", "npts", "float"],
                       ["shape_rbutton", "shape_rbutton", "bool"],
@@ -104,8 +105,8 @@ def parse_entry_helper( node, item):
             return str(node.get(item[0]).strip())
         elif item[2] == "bool":
             try:
-                exec "value = bool(node.get(item[0]).strip())"
-                return value
+                return node.get(item[0]).strip() == "True"
+                
             except:
                 return None
         else:

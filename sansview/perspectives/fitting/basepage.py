@@ -61,7 +61,7 @@ class BasicPage(wx.ScrolledWindow):
         ## total number of point: float
         self.npts = None
         ## default fitengine type
-        self.engine_type = None
+        self.engine_type = 'scipy'
         ## smear default
         self.smearer = None
         self.current_smearer = None
@@ -112,10 +112,6 @@ class BasicPage(wx.ScrolledWindow):
         self.enable2D= False
         ## check that the fit range is correct to plot the model again
         self.fitrange= True
-
-        
-        
-        
         ## Create memento to save the current state
         self.state= PageState(parent= self.parent,model=self.model, data=self.data)
         ## flag to determine if state has change
@@ -720,8 +716,7 @@ class BasicPage(wx.ScrolledWindow):
         """
         Store current state
         """
-        if hasattr(self, "engine_type"):
-            self.state.engine_type = copy.deepcopy(self.engine_type)
+        self.state.engine_type = copy.deepcopy(self.engine_type)
         ## save model option
         if self.model!= None:
             self.disp_list= self.model.getDispParamList()
@@ -918,23 +913,24 @@ class BasicPage(wx.ScrolledWindow):
 
         self.disp_cb_dict = state.disp_cb_dict
         self.disp_list = state.disp_list
-
+      
         ## set the state of the radio box
         self.shape_rbutton.SetValue(state.shape_rbutton )
         self.shape_indep_rbutton.SetValue(state.shape_indep_rbutton)
-        self.struct_rbutton.SetValue(state.struct_rbutton )
+        self.struct_rbutton.SetValue(state.struct_rbutton)
         self.plugin_rbutton.SetValue(state.plugin_rbutton)
         
         ## fill model combobox
         self._show_combox_helper()
         #select the current model
+        self.formfactorbox.Select(int(state.formfactorcombobox))
         self.structurebox.SetSelection(state.structurecombobox )
-        self.formfactorbox.SetSelection(state.formfactorcombobox)
+       
         #reset the fitting engine type
         self.engine_type = state.engine_type
         #draw the pnael according to the new model parameter 
         self._on_select_model(event=None)
-  
+       
         if self.manager !=None:
             self.manager._on_change_engine(engine=self.engine_type)
         ## set the select all check box to the a given state
@@ -1794,9 +1790,6 @@ class BasicPage(wx.ScrolledWindow):
             self.text2.Show()
             self.structurebox.Enable()
             self.text2.Enable()
-        #if self.data.__class__.__name__ =="Data2D":
-            #self.smear_description_2d.Show(True)
-            
         s_id = self.structurebox.GetCurrentSelection()
         struct_factor = self.structurebox.GetClientData( s_id )
        
@@ -1810,7 +1803,6 @@ class BasicPage(wx.ScrolledWindow):
             else:
                 self.model = None
                 return self.model
-        
         ## post state to fit panel
         self.state.parameters =[]
         self.state.model =self.model
