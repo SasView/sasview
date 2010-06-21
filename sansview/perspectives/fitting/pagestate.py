@@ -496,11 +496,11 @@ class PageState(object):
             except:
                 value = None
             try:
-                selected_to_fit = bool(item.get('selected_to_fit'))
+                selected_to_fit = (item.get('selected_to_fit') == "True")
             except:
                 selected_to_fit = None
             try:
-                error_displayed = item.get('error_displayed')
+                error_displayed = (item.get('error_displayed') == "True")
             except:
                 error_displayed = None
             try:  
@@ -508,7 +508,7 @@ class PageState(object):
             except:
                 error_value = None
             try:
-                minimum_displayed = bool(item.get('minimum_displayed'))
+                minimum_displayed = (item.get('minimum_displayed')== "True")
             except:
                 minimum_displayed = None
             try:
@@ -516,7 +516,7 @@ class PageState(object):
             except:
                 minimum_value = None
             try:
-                maximum_displayed = bool(item.get('maximum_displayed'))
+                maximum_displayed = (item.get('maximum_displayed') == "True")
             except:
                 maximum_displayed = None
             try:
