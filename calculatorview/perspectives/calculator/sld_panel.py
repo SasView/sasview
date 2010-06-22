@@ -8,8 +8,15 @@ import sys
 
 from sans.guiframe.utils import format_number, check_float
 from sans.guicomm.events import StatusEvent  
-from sans.calculator.sld_calculator import SldCalculator
 
+# the calculator default value for wavelength is 6
+import periodictable
+from periodictable import formula
+from periodictable.xsf import xray_energy, xray_sld_from_atoms
+from periodictable.constants import avogadro_number
+from  periodictable.nsf import neutron_scattering
+       
+WAVELENGTH = 6.0
 _BOX_WIDTH = 76
 _STATICBOX_WIDTH = 350
 _SCALE = 1e-6
@@ -34,21 +41,18 @@ class SldPanel(wx.Panel):
     window_caption = "SLD Calculator"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
-    def __init__(self, parent,base=None, id = -1):
+    def __init__(self, parent, base=None, id=-1):
         wx.Panel.__init__(self, parent, id = id)
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
-        
         # Object that receive status event
         self.base = base
-        self.calculator = SldCalculator()
-        self.wavelength = self.calculator.wavelength
-        
+        self.wavelength = WAVELENGTH
+        #Draw the panel
         self._do_layout()
         self.SetAutoLayout(True)
         self.Layout()
        
-
     def _do_layout(self):
         """
             Draw window content
@@ -145,25 +149,19 @@ class SldPanel(wx.Panel):
         self.neutron_inc_ctl.SetEditable(False)
         self.neutron_inc_ctl.SetToolTipString("Neutron Inc. Xs")
         neutron_inc_units_txt = wx.StaticText(self, -1,  unit_cm1)
-        neutron_inc_txt.Hide()
-        self.neutron_inc_ctl.Hide()
-        neutron_inc_units_txt.Hide()
+       
         neutron_abs_txt = wx.StaticText(self, -1, 'Neutron Abs. Xs')     
         self.neutron_abs_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.neutron_abs_ctl.SetEditable(False)
         self.neutron_abs_ctl.SetToolTipString("Neutron Abs. Xs")
         neutron_abs_units_txt = wx.StaticText(self, -1,  unit_cm1)
-        neutron_abs_txt.Hide()
-        self.neutron_abs_ctl.Hide()
-        neutron_abs_units_txt.Hide()
+      
         neutron_length_txt = wx.StaticText(self, -1, 'Neutron 1/e length')
         self.neutron_length_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.neutron_length_ctl.SetEditable(False)
         self.neutron_length_ctl.SetToolTipString("Neutron 1/e length")
         neutron_length_units_txt = wx.StaticText(self, -1,  unit_cm)
-        neutron_length_txt.Hide()
-        self.neutron_length_ctl.Hide()
-        neutron_length_units_txt.Hide()
+      
         iy = 0
         ix = 0
         sizer_output.Add(neutron_sld_txt,(iy, ix),(1,1),
@@ -262,7 +260,21 @@ class SldPanel(wx.Panel):
         vbox.Fit(self) 
         self.SetSizer(vbox)
         
+    def calculate_xray_sld(self, element):
+        """
+        Get an element and compute the corresponding SLD for a given formula
+        :param element:  elements a string of existing atom
+        """
+        myformula = formula(str(element))
+        if len(myformula.atoms) != 1:
+            return 
+        element = myformula.atoms.keys()[0] 
+        energy = xray_energy(element.K_alpha)
         
+        self.sld_formula = formula(str(user_formula), density=self.density)
+        atom = self.sld_formula.atoms
+        return xray_sld_from_atoms(atom, density=self.density, energy= energy)
+    
     def check_inputs(self):
         """Check validity user inputs"""
         flag = True
@@ -275,16 +287,16 @@ class SldPanel(wx.Panel):
     
         self.wavelength = self.wavelength_ctl.GetValue()
         if self.wavelength.lstrip().rstrip() == "":
-            self.wavelength = self.calculator.wavelength
+            self.wavelength = WAVELENGTH
         else:
             if check_float(self.wavelength_ctl):
                 self.wavelength = float(self.wavelength)
             else:
                 flag = False
-                raise ValueError,"Error for wavelenth value :expect float"
+                raise ValueError,"Error for wavelength value :expect float"
                 
-        self.formulata_text = self.compound_ctl.GetValue().lstrip().rstrip()
-        if self.formulata_text != "":
+        self.compound = self.compound_ctl.GetValue().lstrip().rstrip()
+        if self.compound != "":
             self.compound_ctl.SetBackgroundColour(wx.WHITE)
             self.compound_ctl.Refresh()
         else:
@@ -294,6 +306,22 @@ class SldPanel(wx.Panel):
             raise ValueError, "Enter a formula"
         return flag 
         
+    def calculate_sld_helper(self, element, density, molecule_formula):
+        """
+        Get an element and compute the corresponding SLD for a given formula
+        
+        :param element:  elements a string of existing atom
+        
+        """
+        element_formula = formula(str(element))
+        if len(element_formula.atoms) != 1:
+            return 
+        element = element_formula.atoms.keys()[0] 
+        energy = xray_energy(element.K_alpha)
+        atom = molecule_formula.atoms
+        return xray_sld_from_atoms(atom, density=density, energy=energy)
+
+
     def calculateSld(self, event):
         """
             Calculate the neutron scattering density length of a molecule
@@ -303,8 +331,7 @@ class SldPanel(wx.Panel):
             if self.check_inputs():
                 #get ready to compute
                 try:
-                    self.calculator.set_value(self.formulata_text,
-                                              self.density, self.wavelength)
+                    self.sld_formula = formula(self.compound, density=self.density)
                 except:
                     if self.base is not None:
                         msg = "SLD Calculator: %s" %(sys.exc_value)
@@ -313,25 +340,27 @@ class SldPanel(wx.Panel):
                         raise
                     return
                 
-                # Compute the Cu SLD
-                Cu_reel, Cu_im = self.calculator.calculate_xray_sld( "Cu")
-                self.cu_ka_sld_reel_ctl.SetValue(format_number(Cu_reel *_SCALE))
-                self.cu_ka_sld_im_ctl.SetValue(format_number(Cu_im * _SCALE))
                 
-                # Compute the Mo SLD
-                Mo_reel, Mo_im = self.calculator.calculate_xray_sld( "Mo")
-                self.mo_ka_sld_reel_ctl.SetValue(format_number(Mo_reel *_SCALE))
-                self.mo_ka_sld_im_ctl.SetValue(format_number(Mo_im * _SCALE))
-               
-                sld_real, sld_im, inc = self.calculator.calculate_neutron_sld()
-                length = self.calculator.calculate_length()
-                # Neutron SLD
-                #need to be compute by element package
-                absorp = 1.0 
-                length = 1.0
+                (sld_real, sld_im, sld_inc), (coh,absorp,incoh), \
+                            length = neutron_scattering(self.compound,
+                                       self.density, self.wavelength) 
+                Cu_reel, Cu_im = self.calculate_sld_helper(element="Cu",
+                                                     density=self.density,
+                                            molecule_formula=self.sld_formula)
+                Mo_reel, Mo_im = self.calculate_sld_helper(element="Mo", 
+                                                           density=self.density,
+                                         molecule_formula=self.sld_formula)
+                # set neutron sld values
                 self.neutron_sld_reel_ctl.SetValue(format_number(sld_real * _SCALE))
                 self.neutron_sld_im_ctl.SetValue(format_number(sld_im * _SCALE))
-                self.neutron_inc_ctl.SetValue(format_number(inc))
+                # Compute the Cu SLD
+                self.cu_ka_sld_reel_ctl.SetValue(format_number(Cu_reel *_SCALE))
+                self.cu_ka_sld_im_ctl.SetValue(format_number(Cu_im * _SCALE))
+                # Compute the Mo SLD
+                self.mo_ka_sld_reel_ctl.SetValue(format_number(Mo_reel *_SCALE))
+                self.mo_ka_sld_im_ctl.SetValue(format_number(Mo_im * _SCALE))
+                # set incoherence and absorption
+                self.neutron_inc_ctl.SetValue(format_number(incoh))
                 self.neutron_abs_ctl.SetValue(format_number(absorp))
                 # Neutron length
                 self.neutron_length_ctl.SetValue(format_number(length))
@@ -346,13 +375,6 @@ class SldPanel(wx.Panel):
             return   
 
    
-        
-  
-    
-   
- 
-        
-               
 class SldWindow(wx.Frame):
     def __init__(self, parent=None, id=1, title="SLD Calculator",base=None):
         wx.Frame.__init__(self, parent, id, title, size=( PANEL_SIZE,  PANEL_SIZE))
