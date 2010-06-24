@@ -11,13 +11,15 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys, os, glob
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.append(os.path.abspath(os.path.dirname('../../DataLoader')))
-sys.path.append(os.path.abspath(os.path.dirname('../../DataLoader/readers')))
+
+path = glob.glob('../../build/lib.*')[0]
+sys.path.append(path)
+
 sys.path.append(os.path.abspath('_extensions'))
 # -- General configuration -----------------------------------------------------
 

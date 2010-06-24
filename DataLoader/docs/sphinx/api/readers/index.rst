@@ -17,6 +17,7 @@
    ascii_reader.rst
    associations.rst
    cansas_reader.rst
+   danse_reader.rst
    hfir1d_reader.rst
    IgorReader.rst
    red2d_reader.rst

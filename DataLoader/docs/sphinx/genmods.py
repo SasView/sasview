@@ -50,31 +50,30 @@ def genfiles(package, package_name, modules, dir='api'):
     with open(os.path.join(dir,'index.rst'),'w') as f:
         f.write(INDEX_TEMPLATE%locals())
 
+modules = []
+path = os.path.abspath(os.path.dirname('../../'))
 
-modules=[
-    ('data_info', 'data_info'),
-    ('loader', 'loader'),
-    ('manipulations', 'manipulations'),
-    ('qsmearing', 'qsmearing'),
-    ('smearing_2d', 'smearing_2d'),
-]
+
+list = os.listdir(path)
+for item in list:
+    toks = os.path.splitext(os.path.basename(item))
+    if toks[1]=='.py' and toks[0] not in ["__init__", "setup"]:
+        exec "module = ('%s', '%s')"%(toks[0], toks[0])
+        modules.append(module)
+
 package='DataLoader'
 package_name='Reference'
-#genfiles(package, package_name, modules)
 
 if __name__ == "__main__":
     genfiles(package, package_name, modules, dir='api')
-    
-    modules=[
-    ('abs_reader', 'abs_reader'),
-    ('ascii_reader', 'ascii_reader'),
-    ('associations', 'associations'),
-    ('cansas_reader', 'cansas_reader'),
-    ('hfir1d_reader', 'hfir1d_reader'),
-    ('IgorReader', 'IgorReader'),
-    ('red2d_reader', 'red2d_reader'),
-    ('tiff_reader', 'tiff_reader'),
-    ]
+    modules = []
+    path = os.path.abspath(os.path.dirname('../../readers/'))
+    list = os.listdir(path)
+    for item in list:
+        toks = os.path.splitext(os.path.basename(item))
+        if toks[1]=='.py' and toks[0] not in ["__init__", "setup"]:
+         exec "module = ('%s', '%s')"%(toks[0], toks[0])
+         modules.append(module)
     package='DataLoader.readers'
     package_name='Readers'
     genfiles(package, package_name, modules, dir='api/readers')

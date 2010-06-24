@@ -14,6 +14,7 @@
 .. toctree::
 
    data_info.rst
+   loader.rst
    manipulations.rst
    qsmearing.rst
    smearing_2d.rst
