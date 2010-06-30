@@ -13,7 +13,7 @@ RESOURCES_FILES = os.path.join(DataLoader.readers.get_data_path(),'defaults.xml'
 lib_locs = ['/usr/local/lib', '/usr/lib']
 libxml_path = None
 for item in lib_locs:
-    libxml_path_test = '%s/libxml2.dylib' % item
+    libxml_path_test = '%s/libxml2.2.dylib' % item
     if os.path.isfile(libxml_path_test): 
         libxml_path = libxml_path_test
 if libxml_path == None:
