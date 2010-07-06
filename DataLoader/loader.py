@@ -75,10 +75,9 @@ class Registry(ExtensionRegistry):
         try:
             return super(Registry, self).load(path, format=format)
         except:
-            raise
             # No reader was found. Default to the ascii reader.
-            #ascii_loader = ascii_reader.Reader()
-            #return ascii_loader.read(path)
+            ascii_loader = ascii_reader.Reader()
+            return ascii_loader.read(path)
         
     def find_plugins(self, dir):
         """
