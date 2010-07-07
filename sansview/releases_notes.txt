@@ -77,7 +77,7 @@ Package name: None
 	        svn://danse.us/common/releases/util-0.1.5 (run 'python setup.py install'under the 'util-0.1.5' folder)
 	        svn://danse.us/common/elements/releases/elements-1.2 (run 'python setup.py install'under the 'elements-1.2' folder)
 	        svn://danse.us/sans/releases/pr_inversion-0.2.5 (run 'python setup.py install'under the 'pr_inversion-0.2.5' folder)
-	        svn://danse.us/sans/releases/prview-0.3.2 (run 'python setup.py install'under the 'prview-0.3.2' folder)
+	        svn://danse.us/sans/releases/prview-0.3.3 (run 'python setup.py install'under the 'prview-0.3.2' folder)
 		- The following modules are required:
 			* matplotlib >= 0.99
 			* numpy

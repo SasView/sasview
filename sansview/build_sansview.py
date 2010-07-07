@@ -57,8 +57,8 @@ logging.basicConfig(level=logging.INFO,
 SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 
-# Release version 1.3.0
-SANSMODELS = "0.4.7
+# Release version 1.3.1
+SANSMODELS = "0.4.7"
 DATALOADER = "0.2.7"
 GUICOMM    = "0.1.5"
 GUIFRAME   = "0.2.0"
