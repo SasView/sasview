@@ -4,6 +4,7 @@
 """
 
 import wx
+import math
 import sys
 
 from sans.guiframe.utils import format_number, check_float
@@ -116,7 +117,7 @@ class SldPanel(wx.Panel):
         boxsizer2 = wx.StaticBoxSizer(outputbox, wx.VERTICAL)
         boxsizer2.SetMinSize((_STATICBOX_WIDTH,-1))
         
-        i_complex = '+ i'
+        i_complex = '- i'
         neutron_sld_txt = wx.StaticText(self, -1, 'Neutron SLD')
         self.neutron_sld_reel_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         self.neutron_sld_reel_ctl.SetEditable(False)
@@ -263,7 +264,9 @@ class SldPanel(wx.Panel):
     def calculate_xray_sld(self, element):
         """
         Get an element and compute the corresponding SLD for a given formula
+        
         :param element:  elements a string of existing atom
+        
         """
         myformula = formula(str(element))
         if len(myformula.atoms) != 1:
@@ -344,21 +347,21 @@ class SldPanel(wx.Panel):
                 (sld_real, sld_im, sld_inc), (coh,absorp,incoh), \
                             length = neutron_scattering(self.compound,
                                        self.density, self.wavelength) 
-                Cu_reel, Cu_im = self.calculate_sld_helper(element="Cu",
+                cu_real, cu_im = self.calculate_sld_helper(element="Cu",
                                                      density=self.density,
                                             molecule_formula=self.sld_formula)
-                Mo_reel, Mo_im = self.calculate_sld_helper(element="Mo", 
+                mo_real, mo_im = self.calculate_sld_helper(element="Mo", 
                                                            density=self.density,
                                          molecule_formula=self.sld_formula)
                 # set neutron sld values
                 self.neutron_sld_reel_ctl.SetValue(format_number(sld_real * _SCALE))
-                self.neutron_sld_im_ctl.SetValue(format_number(sld_im * _SCALE))
+                self.neutron_sld_im_ctl.SetValue(format_number(math.fabs(sld_im) * _SCALE))
                 # Compute the Cu SLD
-                self.cu_ka_sld_reel_ctl.SetValue(format_number(Cu_reel *_SCALE))
-                self.cu_ka_sld_im_ctl.SetValue(format_number(Cu_im * _SCALE))
+                self.cu_ka_sld_reel_ctl.SetValue(format_number(cu_real *_SCALE))
+                self.cu_ka_sld_im_ctl.SetValue(format_number(math.fabs(cu_im )* _SCALE))
                 # Compute the Mo SLD
-                self.mo_ka_sld_reel_ctl.SetValue(format_number(Mo_reel *_SCALE))
-                self.mo_ka_sld_im_ctl.SetValue(format_number(Mo_im * _SCALE))
+                self.mo_ka_sld_reel_ctl.SetValue(format_number(mo_real *_SCALE))
+                self.mo_ka_sld_im_ctl.SetValue(format_number(math.fabs(mo_im)* _SCALE))
                 # set incoherence and absorption
                 self.neutron_inc_ctl.SetValue(format_number(incoh))
                 self.neutron_abs_ctl.SetValue(format_number(absorp))
