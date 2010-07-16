@@ -14,6 +14,8 @@
 
 import wx
 import os
+from invariant_state import InvariantState as IState
+import copy
 
 class InvTextCtrl(wx.TextCtrl):
     """
@@ -21,24 +23,22 @@ class InvTextCtrl(wx.TextCtrl):
     Binds the appropriate events for user interactions.
     """
     def __init__(self, *args, **kwds):
-        
         wx.TextCtrl.__init__(self, *args, **kwds)
-        
         ## Set to True when the mouse is clicked while the whole string is selected
-        full_selection = False
+        self.full_selection = False
         ## Call back for EVT_SET_FOCUS events
         _on_set_focus_callback = None
+
         # Bind appropriate events
         self.Bind(wx.EVT_LEFT_UP, self._highlight_text)
         self.Bind(wx.EVT_SET_FOCUS, self._on_set_focus)
-
+        
     def _on_set_focus(self, event):
         """
         Catch when the text control is set in focus to highlight the whole
         text if necessary
         
         :param event: mouse event
-        
         """
         event.Skip()
         self.full_selection = True
@@ -48,7 +48,6 @@ class InvTextCtrl(wx.TextCtrl):
         Highlight text of a TextCtrl only of no text has be selected
         
         :param event: mouse event
-        
         """
         # Make sure the mouse event is available to other listeners
         event.Skip()
@@ -62,7 +61,9 @@ class InvTextCtrl(wx.TextCtrl):
                 (start, end) = control.GetSelection()
                 if start==end:
                     control.SetSelection(-1,-1)
+           
 
+    
 class OutputTextCtrl(wx.TextCtrl):
     """
     Text control used to display outputs.
@@ -77,7 +78,9 @@ class OutputTextCtrl(wx.TextCtrl):
         # Bind to mouse event to avoid text highlighting
         # The event will be skipped once the call-back
         # is called.
+        
         self.Bind(wx.EVT_MOUSE_EVENTS, self._click)
+
         
     def _click(self, event):
         """
@@ -85,4 +88,7 @@ class OutputTextCtrl(wx.TextCtrl):
         by not calling Skip().
         """ 
         pass
+    
+    
+
  
