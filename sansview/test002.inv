@@ -1,0 +1,2663 @@
+<?xml version="1.0" ?>
+<SASroot version="1.0" xmlns="cansas1d/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="cansas1d/1.0 http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd">
+	<SASentry>
+		<Title>
+			
+		</Title>
+		<SASdata>
+			<Idata>
+				<Q unit="1/A">
+					3.0525e-005
+				</Q>
+				<I unit="1/cm">
+					165100000.0
+				</I>
+				<Qdev unit="1/A">
+					3.0525e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					1794400.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					3.33e-005
+				</Q>
+				<I unit="1/cm">
+					190450000.0
+				</I>
+				<Qdev unit="1/A">
+					3.33e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					2040000.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					3.885e-005
+				</Q>
+				<I unit="1/cm">
+					179720000.0
+				</I>
+				<Qdev unit="1/A">
+					3.885e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					975310.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					4.44e-005
+				</Q>
+				<I unit="1/cm">
+					164980000.0
+				</I>
+				<Qdev unit="1/A">
+					4.44e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					908780.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					4.995e-005
+				</Q>
+				<I unit="1/cm">
+					163980000.0
+				</I>
+				<Qdev unit="1/A">
+					4.995e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					907320.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					5.55e-005
+				</Q>
+				<I unit="1/cm">
+					156350000.0
+				</I>
+				<Qdev unit="1/A">
+					5.55e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					872480.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					6.105e-005
+				</Q>
+				<I unit="1/cm">
+					172440000.0
+				</I>
+				<Qdev unit="1/A">
+					6.105e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					9556000.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					6.66e-005
+				</Q>
+				<I unit="1/cm">
+					158680000.0
+				</I>
+				<Qdev unit="1/A">
+					6.66e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					894190.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					7.215e-005
+				</Q>
+				<I unit="1/cm">
+					168260000.0
+				</I>
+				<Qdev unit="1/A">
+					7.215e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					948630.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					7.77e-005
+				</Q>
+				<I unit="1/cm">
+					147240000.0
+				</I>
+				<Qdev unit="1/A">
+					7.77e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					850120.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					8.325e-005
+				</Q>
+				<I unit="1/cm">
+					154710000.0
+				</I>
+				<Qdev unit="1/A">
+					8.325e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					892610.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					8.88e-005
+				</Q>
+				<I unit="1/cm">
+					154150000.0
+				</I>
+				<Qdev unit="1/A">
+					8.88e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					897530.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					9.435e-005
+				</Q>
+				<I unit="1/cm">
+					150060000.0
+				</I>
+				<Qdev unit="1/A">
+					9.435e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					885510.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					9.99e-005
+				</Q>
+				<I unit="1/cm">
+					141700000.0
+				</I>
+				<Qdev unit="1/A">
+					9.99e-007
+				</Qdev>
+				<Idev unit="1/cm">
+					8498900.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00010545
+				</Q>
+				<I unit="1/cm">
+					145840000.0
+				</I>
+				<Qdev unit="1/A">
+					1.0545e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					880320.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000111
+				</Q>
+				<I unit="1/cm">
+					137260000.0
+				</I>
+				<Qdev unit="1/A">
+					1.11e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					487940.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001221
+				</Q>
+				<I unit="1/cm">
+					126900000.0
+				</I>
+				<Qdev unit="1/A">
+					1.221e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					465360.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001332
+				</Q>
+				<I unit="1/cm">
+					125450000.0
+				</I>
+				<Qdev unit="1/A">
+					1.332e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					471620.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001443
+				</Q>
+				<I unit="1/cm">
+					112110000.0
+				</I>
+				<Qdev unit="1/A">
+					1.443e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					439800.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001554
+				</Q>
+				<I unit="1/cm">
+					109740000.0
+				</I>
+				<Qdev unit="1/A">
+					1.554e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					444060.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001665
+				</Q>
+				<I unit="1/cm">
+					97546000.0
+				</I>
+				<Qdev unit="1/A">
+					1.665e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					4150700.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001776
+				</Q>
+				<I unit="1/cm">
+					88127000.0
+				</I>
+				<Qdev unit="1/A">
+					1.776e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					392070.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001887
+				</Q>
+				<I unit="1/cm">
+					82576000.0
+				</I>
+				<Qdev unit="1/A">
+					1.887e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					382470.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0001998
+				</Q>
+				<I unit="1/cm">
+					77312000.0
+				</I>
+				<Qdev unit="1/A">
+					1.998e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					375780.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0002109
+				</Q>
+				<I unit="1/cm">
+					66194000.0
+				</I>
+				<Qdev unit="1/A">
+					2.109e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					343090.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000222
+				</Q>
+				<I unit="1/cm">
+					61870000.0
+				</I>
+				<Qdev unit="1/A">
+					2.22e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					337290.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0002331
+				</Q>
+				<I unit="1/cm">
+					54257000.0
+				</I>
+				<Qdev unit="1/A">
+					2.331e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					316830.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0002442
+				</Q>
+				<I unit="1/cm">
+					47924000.0
+				</I>
+				<Qdev unit="1/A">
+					2.442e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					3004000.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0002553
+				</Q>
+				<I unit="1/cm">
+					40953000.0
+				</I>
+				<Qdev unit="1/A">
+					2.553e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					278010.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0002664
+				</Q>
+				<I unit="1/cm">
+					34975000.0
+				</I>
+				<Qdev unit="1/A">
+					2.664e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					257230.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0002775
+				</Q>
+				<I unit="1/cm">
+					29218000.0
+				</I>
+				<Qdev unit="1/A">
+					2.775e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					165020.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00030525
+				</Q>
+				<I unit="1/cm">
+					19276000.0
+				</I>
+				<Qdev unit="1/A">
+					3.0525e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					135210.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000333
+				</Q>
+				<I unit="1/cm">
+					10557000.0
+				</I>
+				<Qdev unit="1/A">
+					3.33e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					98308.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00036075
+				</Q>
+				<I unit="1/cm">
+					5664700.0
+				</I>
+				<Qdev unit="1/A">
+					3.6075e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					69421.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0003885
+				</Q>
+				<I unit="1/cm">
+					1947500.0
+				</I>
+				<Qdev unit="1/A">
+					3.885e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					313730.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00041625
+				</Q>
+				<I unit="1/cm">
+					241770.0
+				</I>
+				<Qdev unit="1/A">
+					4.1625e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					4755.1
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000444
+				</Q>
+				<I unit="1/cm">
+					114540.0
+				</I>
+				<Qdev unit="1/A">
+					4.44e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					2326.3
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00047175
+				</Q>
+				<I unit="1/cm">
+					208800.0
+				</I>
+				<Qdev unit="1/A">
+					4.7175e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					4001.1
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0004995
+				</Q>
+				<I unit="1/cm">
+					670290.0
+				</I>
+				<Qdev unit="1/A">
+					4.995e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					11420.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00052725
+				</Q>
+				<I unit="1/cm">
+					1137400.0
+				</I>
+				<Qdev unit="1/A">
+					5.2725e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					18885.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000555
+				</Q>
+				<I unit="1/cm">
+					1278100.0
+				</I>
+				<Qdev unit="1/A">
+					5.55e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					15763.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0006105
+				</Q>
+				<I unit="1/cm">
+					1225600.0
+				</I>
+				<Qdev unit="1/A">
+					6.105e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					176810.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000666
+				</Q>
+				<I unit="1/cm">
+					583310.0
+				</I>
+				<Qdev unit="1/A">
+					6.66e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					11772.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0007215
+				</Q>
+				<I unit="1/cm">
+					69003.0
+				</I>
+				<Qdev unit="1/A">
+					7.215e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					1907.7
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000777
+				</Q>
+				<I unit="1/cm">
+					23263.0
+				</I>
+				<Qdev unit="1/A">
+					7.77e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					683.84
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0008325
+				</Q>
+				<I unit="1/cm">
+					97644.0
+				</I>
+				<Qdev unit="1/A">
+					8.325e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					2565.3
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000888
+				</Q>
+				<I unit="1/cm">
+					233120.0
+				</I>
+				<Qdev unit="1/A">
+					8.88e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					5864.3
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0009435
+				</Q>
+				<I unit="1/cm">
+					202080.0
+				</I>
+				<Qdev unit="1/A">
+					9.435e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					6035.5
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.000999
+				</Q>
+				<I unit="1/cm">
+					80861.0
+				</I>
+				<Qdev unit="1/A">
+					9.99e-006
+				</Qdev>
+				<Idev unit="1/cm">
+					30528.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0010545
+				</Q>
+				<I unit="1/cm">
+					7683.4
+				</I>
+				<Qdev unit="1/A">
+					1.0545e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					354.56
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00111
+				</Q>
+				<I unit="1/cm">
+					11329.0
+				</I>
+				<Qdev unit="1/A">
+					1.11e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					382.48
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001221
+				</Q>
+				<I unit="1/cm">
+					87375.0
+				</I>
+				<Qdev unit="1/A">
+					1.221e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					2658.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001332
+				</Q>
+				<I unit="1/cm">
+					10915.0
+				</I>
+				<Qdev unit="1/A">
+					1.332e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					517.94
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001443
+				</Q>
+				<I unit="1/cm">
+					7683.6
+				</I>
+				<Qdev unit="1/A">
+					1.443e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					376.72
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001554
+				</Q>
+				<I unit="1/cm">
+					31538.0
+				</I>
+				<Qdev unit="1/A">
+					1.554e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					1461.6
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001665
+				</Q>
+				<I unit="1/cm">
+					2991.0
+				</I>
+				<Qdev unit="1/A">
+					1.665e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					2025.4
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001776
+				</Q>
+				<I unit="1/cm">
+					6126.4
+				</I>
+				<Qdev unit="1/A">
+					1.776e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					413.24
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001887
+				</Q>
+				<I unit="1/cm">
+					9246.2
+				</I>
+				<Qdev unit="1/A">
+					1.887e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					642.09
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001998
+				</Q>
+				<I unit="1/cm">
+					861.73
+				</I>
+				<Qdev unit="1/A">
+					1.998e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					67.504
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002109
+				</Q>
+				<I unit="1/cm">
+					8017.5
+				</I>
+				<Qdev unit="1/A">
+					2.109e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					550.7
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00222
+				</Q>
+				<I unit="1/cm">
+					5502.9
+				</I>
+				<Qdev unit="1/A">
+					2.22e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					494.11
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002331
+				</Q>
+				<I unit="1/cm">
+					741.32
+				</I>
+				<Qdev unit="1/A">
+					2.331e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					83.931
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002442
+				</Q>
+				<I unit="1/cm">
+					2919.8
+				</I>
+				<Qdev unit="1/A">
+					2.442e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					3303.4
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002553
+				</Q>
+				<I unit="1/cm">
+					1667.6
+				</I>
+				<Qdev unit="1/A">
+					2.553e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					206.1
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002664
+				</Q>
+				<I unit="1/cm">
+					584.11
+				</I>
+				<Qdev unit="1/A">
+					2.664e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					74.745
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002775
+				</Q>
+				<I unit="1/cm">
+					1585.4
+				</I>
+				<Qdev unit="1/A">
+					2.775e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					167.96
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0030525
+				</Q>
+				<I unit="1/cm">
+					1422.7
+				</I>
+				<Qdev unit="1/A">
+					3.0525e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					183.59
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00333
+				</Q>
+				<I unit="1/cm">
+					70.932
+				</I>
+				<Qdev unit="1/A">
+					3.33e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					16.5
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0036075
+				</Q>
+				<I unit="1/cm">
+					400.33
+				</I>
+				<Qdev unit="1/A">
+					3.6075e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					63.21
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.003885
+				</Q>
+				<I unit="1/cm">
+					393.52
+				</I>
+				<Qdev unit="1/A">
+					3.885e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					659.6
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0041625
+				</Q>
+				<I unit="1/cm">
+					212.31
+				</I>
+				<Qdev unit="1/A">
+					4.1625e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					47.277
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00444
+				</Q>
+				<I unit="1/cm">
+					39.89
+				</I>
+				<Qdev unit="1/A">
+					4.44e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					11.694
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0047175
+				</Q>
+				<I unit="1/cm">
+					71.693
+				</I>
+				<Qdev unit="1/A">
+					4.7175e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					18.86
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.004995
+				</Q>
+				<I unit="1/cm">
+					2.5476
+				</I>
+				<Qdev unit="1/A">
+					4.995e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					0.77203
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0052725
+				</Q>
+				<I unit="1/cm">
+					157.13
+				</I>
+				<Qdev unit="1/A">
+					5.2725e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					30.429
+				</Idev>
+			</Idata>
+		</SASdata>
+		<SASsample name="">
+			<ID>
+				
+			</ID>
+		</SASsample>
+		<SASinstrument>
+			<name>
+				
+			</name>
+			<SASsource/>
+		</SASinstrument>
+		<invariant version="1.0">
+			<filename>
+				1000A_sphere_dsm.xml
+			</filename>
+			<timestamp epoch="1279140622.15">
+				Wed Jul 14 16:50:22 2010
+			</timestamp>
+			<state>
+				<power_law_low>
+					False
+				</power_law_low>
+				<npts_high_tcl>
+					10
+				</npts_high_tcl>
+				<surface_tcl>
+					
+				</surface_tcl>
+				<enable_high_cbox>
+					True
+				</enable_high_cbox>
+				<porod_constant_tcl>
+					
+				</porod_constant_tcl>
+				<volume_err_tcl>
+					5.57e-018
+				</volume_err_tcl>
+				<compute_num>
+					8
+				</compute_num>
+				<file>
+					1000A_sphere_dsm.xml
+				</file>
+				<enable_low_cbox>
+					True
+				</enable_low_cbox>
+				<is_time_machine>
+					False
+				</is_time_machine>
+				<volume_tcl>
+					4.2e-013
+				</volume_tcl>
+				<state_num>
+					8
+				</state_num>
+				<guinier>
+					True
+				</guinier>
+				<power_high_tcl>
+					4
+				</power_high_tcl>
+				<npts_low_tcl>
+					10
+				</npts_low_tcl>
+				<scale_tcl>
+					1.0
+				</scale_tcl>
+				<fix_enable_low>
+					True
+				</fix_enable_low>
+				<power_law_high>
+					False
+				</power_law_high>
+				<fit_enable_high>
+					False
+				</fit_enable_high>
+				<contrast_tcl>
+					1.0
+				</contrast_tcl>
+				<fix_enable_high>
+					True
+				</fix_enable_high>
+				<surface_err_tcl>
+					
+				</surface_err_tcl>
+				<power_low_tcl>
+					4.0
+				</power_low_tcl>
+				<background_tcl>
+					0.0
+				</background_tcl>
+				<fit_enable_low>
+					False
+				</fit_enable_low>
+			</state>
+			<history>
+				<state_1>
+					<guinier>
+						True
+					</guinier>
+					<npts_high_tcl>
+						10
+					</npts_high_tcl>
+					<surface_tcl>
+						
+					</surface_tcl>
+					<enable_high_cbox>
+						False
+					</enable_high_cbox>
+					<porod_constant_tcl>
+						5
+					</porod_constant_tcl>
+					<volume_err_tcl>
+						2.55e-018
+					</volume_err_tcl>
+					<compute_num>
+						0
+					</compute_num>
+					<file>
+						1000A_sphere_dsm.xml
+					</file>
+					<enable_low_cbox>
+						False
+					</enable_low_cbox>
+					<is_time_machine>
+						False
+					</is_time_machine>
+					<volume_tcl>
+						4.11e-013
+					</volume_tcl>
+					<state_num>
+						1
+					</state_num>
+					<power_law_low>
+						False
+					</power_law_low>
+					<power_high_tcl>
+						4.0
+					</power_high_tcl>
+					<npts_low_tcl>
+						10
+					</npts_low_tcl>
+					<scale_tcl>
+						1.0
+					</scale_tcl>
+					<fix_enable_low>
+						True
+					</fix_enable_low>
+					<power_law_high>
+						False
+					</power_law_high>
+					<fit_enable_high>
+						False
+					</fit_enable_high>
+					<contrast_tcl>
+						1.0
+					</contrast_tcl>
+					<fix_enable_high>
+						True
+					</fix_enable_high>
+					<surface_err_tcl>
+						
+					</surface_err_tcl>
+					<power_low_tcl>
+						4.0
+					</power_low_tcl>
+					<background_tcl>
+						0.0
+					</background_tcl>
+					<fit_enable_low>
+						False
+					</fit_enable_low>
+				</state_1>
+				<state_0>
+					<guinier>
+						True
+					</guinier>
+					<npts_high_tcl>
+						10
+					</npts_high_tcl>
+					<surface_tcl>
+						
+					</surface_tcl>
+					<enable_high_cbox>
+						False
+					</enable_high_cbox>
+					<porod_constant_tcl>
+						
+					</porod_constant_tcl>
+					<volume_err_tcl>
+						2.55e-018
+					</volume_err_tcl>
+					<compute_num>
+						0
+					</compute_num>
+					<file>
+						1000A_sphere_dsm.xml
+					</file>
+					<enable_low_cbox>
+						False
+					</enable_low_cbox>
+					<is_time_machine>
+						False
+					</is_time_machine>
+					<volume_tcl>
+						4.11e-013
+					</volume_tcl>
+					<state_num>
+						0
+					</state_num>
+					<power_law_low>
+						False
+					</power_law_low>
+					<power_high_tcl>
+						4.0
+					</power_high_tcl>
+					<npts_low_tcl>
+						10
+					</npts_low_tcl>
+					<scale_tcl>
+						1.0
+					</scale_tcl>
+					<fix_enable_low>
+						True
+					</fix_enable_low>
+					<power_law_high>
+						False
+					</power_law_high>
+					<fit_enable_high>
+						False
+					</fit_enable_high>
+					<contrast_tcl>
+						1.0
+					</contrast_tcl>
+					<fix_enable_high>
+						True
+					</fix_enable_high>
+					<surface_err_tcl>
+						
+					</surface_err_tcl>
+					<power_low_tcl>
+						4.0
+					</power_low_tcl>
+					<background_tcl>
+						0.0
+					</background_tcl>
+					<fit_enable_low>
+						False
+					</fit_enable_low>
+				</state_0>
+				<state_3>
+					<guinier>
+						True
+					</guinier>
+					<npts_high_tcl>
+						10
+					</npts_high_tcl>
+					<surface_tcl>
+						1.59e-008
+					</surface_tcl>
+					<enable_high_cbox>
+						False
+					</enable_high_cbox>
+					<porod_constant_tcl>
+						
+					</porod_constant_tcl>
+					<volume_err_tcl>
+						2.55e-018
+					</volume_err_tcl>
+					<compute_num>
+						2
+					</compute_num>
+					<file>
+						1000A_sphere_dsm.xml
+					</file>
+					<enable_low_cbox>
+						False
+					</enable_low_cbox>
+					<is_time_machine>
+						False
+					</is_time_machine>
+					<volume_tcl>
+						4.11e-013
+					</volume_tcl>
+					<state_num>
+						3
+					</state_num>
+					<power_law_low>
+						False
+					</power_law_low>
+					<power_high_tcl>
+						4.0
+					</power_high_tcl>
+					<npts_low_tcl>
+						10
+					</npts_low_tcl>
+					<scale_tcl>
+						1.0
+					</scale_tcl>
+					<fix_enable_low>
+						True
+					</fix_enable_low>
+					<power_law_high>
+						False
+					</power_law_high>
+					<fit_enable_high>
+						False
+					</fit_enable_high>
+					<contrast_tcl>
+						1.0
+					</contrast_tcl>
+					<fix_enable_high>
+						True
+					</fix_enable_high>
+					<surface_err_tcl>
+						9.9e-014
+					</surface_err_tcl>
+					<power_low_tcl>
+						4.0
+					</power_low_tcl>
+					<background_tcl>
+						0.0
+					</background_tcl>
+					<fit_enable_low>
+						False
+					</fit_enable_low>
+				</state_3>
+				<state_2>
+					<guinier>
+						True
+					</guinier>
+					<npts_high_tcl>
+						10
+					</npts_high_tcl>
+					<surface_tcl>
+						1.59e-008
+					</surface_tcl>
+					<enable_high_cbox>
+						False
+					</enable_high_cbox>
+					<porod_constant_tcl>
+						5
+					</porod_constant_tcl>
+					<volume_err_tcl>
+						2.55e-018
+					</volume_err_tcl>
+					<compute_num>
+						2
+					</compute_num>
+					<file>
+						1000A_sphere_dsm.xml
+					</file>
+					<enable_low_cbox>
+						False
+					</enable_low_cbox>
+					<is_time_machine>
+						False
+					</is_time_machine>
+					<volume_tcl>
+						4.11e-013
+					</volume_tcl>
+					<state_num>
+						2
+					</state_num>
+					<power_law_low>
+						False
+					</power_law_low>
+					<power_high_tcl>
+						4.0
+					</power_high_tcl>
+					<npts_low_tcl>
+						10
+					</npts_low_tcl>
+					<scale_tcl>
+						1.0
+					</scale_tcl>
+					<fix_enable_low>
+						True
+					</fix_enable_low>
+					<power_law_high>
+						False
+					</power_law_high>
+					<fit_enable_high>
+						False
+					</fit_enable_high>
+					<contrast_tcl>
+						1.0
+					</contrast_tcl>
+					<fix_enable_high>
+						True
+					</fix_enable_high>
+					<surface_err_tcl>
+						9.9e-014
+					</surface_err_tcl>
+					<power_low_tcl>
+						4.0
+					</power_low_tcl>
+					<background_tcl>
+						0.0
+					</background_tcl>
+					<fit_enable_low>
+						False
+					</fit_enable_low>
+				</state_2>
+				<state_5>
+					<guinier>
+						True
+					</guinier>
+					<npts_high_tcl>
+						10
+					</npts_high_tcl>
+					<surface_tcl>
+						
+					</surface_tcl>
+					<enable_high_cbox>
+						False
+					</enable_high_cbox>
+					<porod_constant_tcl>
+						
+					</porod_constant_tcl>
+					<volume_err_tcl>
+						2.55e-018
+					</volume_err_tcl>
+					<compute_num>
+						4
+					</compute_num>
+					<file>
+						1000A_sphere_dsm.xml
+					</file>
+					<enable_low_cbox>
+						True
+					</enable_low_cbox>
+					<is_time_machine>
+						False
+					</is_time_machine>
+					<volume_tcl>
+						4.11e-013
+					</volume_tcl>
+					<state_num>
+						5
+					</state_num>
+					<power_law_low>
+						False
+					</power_law_low>
+					<power_high_tcl>
+						4.0
+					</power_high_tcl>
+					<npts_low_tcl>
+						10
+					</npts_low_tcl>
+					<scale_tcl>
+						1.0
+					</scale_tcl>
+					<fix_enable_low>
+						True
+					</fix_enable_low>
+					<power_law_high>
+						False
+					</power_law_high>
+					<fit_enable_high>
+						False
+					</fit_enable_high>
+					<contrast_tcl>
+						1.0
+					</contrast_tcl>
+					<fix_enable_high>
+						True
+					</fix_enable_high>
+					<surface_err_tcl>
+						
+					</surface_err_tcl>
+					<power_low_tcl>
+						4.0
+					</power_low_tcl>
+					<background_tcl>
+						0.0
+					</background_tcl>
+					<fit_enable_low>
+						False
+					</fit_enable_low>
+				</state_5>
+				<state_4>
+					<guinier>
+						True
+					</guinier>
+					<npts_high_tcl>
+						10
+					</npts_high_tcl>
+					<surface_tcl>
+						
+					</surface_tcl>
+					<enable_high_cbox>
+						False
+					</enable_high_cbox>
+					<porod_constant_tcl>
+						
+					</porod_constant_tcl>
+					<volume_err_tcl>
+						2.55e-018
+					</volume_err_tcl>
+					<compute_num>
+						4
+					</compute_num>
+					<file>
+						1000A_sphere_dsm.xml
+					</file>
+					<enable_low_cbox>
+						False
+					</enable_low_cbox>
+					<is_time_machine>
+						False
+					</is_time_machine>
+					<volume_tcl>
+						4.11e-013
+					</volume_tcl>
+					<state_num>
+						4
+					</state_num>
+					<power_law_low>
+						False
+					</power_law_low>
+					<power_high_tcl>
+						4.0
+					</power_high_tcl>
+					<npts_low_tcl>
+						10
+					</npts_low_tcl>
+					<scale_tcl>
+						1.0
+					</scale_tcl>
+					<fix_enable_low>
+						True
+					</fix_enable_low>
+					<power_law_high>
+						False
+					</power_law_high>
+					<fit_enable_high>
+						False
+					</fit_enable_high>
+					<contrast_tcl>
+						1.0
+					</contrast_tcl>
+					<fix_enable_high>
+						True
+					</fix_enable_high>
+					<surface_err_tcl>
+						
+					</surface_err_tcl>
+					<power_low_tcl>
+						4.0
+					</power_low_tcl>
+					<background_tcl>
+						0.0
+					</background_tcl>
+					<fit_enable_low>
+						False
+					</fit_enable_low>
+				</state_4>
+				<state_7>
+					<guinier>
+						True
+					</guinier>
+					<npts_high_tcl>
+						10
+					</npts_high_tcl>
+					<surface_tcl>
+						
+					</surface_tcl>
+					<enable_high_cbox>
+						True
+					</enable_high_cbox>
+					<porod_constant_tcl>
+						
+					</porod_constant_tcl>
+					<volume_err_tcl>
+						2.56e-018
+					</volume_err_tcl>
+					<compute_num>
+						6
+					</compute_num>
+					<file>
+						1000A_sphere_dsm.xml
+					</file>
+					<enable_low_cbox>
+						True
+					</enable_low_cbox>
+					<is_time_machine>
+						False
+					</is_time_machine>
+					<volume_tcl>
+						4.12e-013
+					</volume_tcl>
+					<state_num>
+						7
+					</state_num>
+					<power_law_low>
+						False
+					</power_law_low>
+					<power_high_tcl>
+						4.0
+					</power_high_tcl>
+					<npts_low_tcl>
+						10
+					</npts_low_tcl>
+					<scale_tcl>
+						1.0
+					</scale_tcl>
+					<fix_enable_low>
+						True
+					</fix_enable_low>
+					<power_law_high>
+						False
+					</power_law_high>
+					<fit_enable_high>
+						False
+					</fit_enable_high>
+					<contrast_tcl>
+						1.0
+					</contrast_tcl>
+					<fix_enable_high>
+						True
+					</fix_enable_high>
+					<surface_err_tcl>
+						
+					</surface_err_tcl>
+					<power_low_tcl>
+						4.0
+					</power_low_tcl>
+					<background_tcl>
+						0.0
+					</background_tcl>
+					<fit_enable_low>
+						False
+					</fit_enable_low>
+				</state_7>
+				<state_6>
+					<guinier>
+						True
+					</guinier>
+					<npts_high_tcl>
+						10
+					</npts_high_tcl>
+					<surface_tcl>
+						
+					</surface_tcl>
+					<enable_high_cbox>
+						False
+					</enable_high_cbox>
+					<porod_constant_tcl>
+						
+					</porod_constant_tcl>
+					<volume_err_tcl>
+						2.56e-018
+					</volume_err_tcl>
+					<compute_num>
+						6
+					</compute_num>
+					<file>
+						1000A_sphere_dsm.xml
+					</file>
+					<enable_low_cbox>
+						True
+					</enable_low_cbox>
+					<is_time_machine>
+						False
+					</is_time_machine>
+					<volume_tcl>
+						4.12e-013
+					</volume_tcl>
+					<state_num>
+						6
+					</state_num>
+					<power_law_low>
+						False
+					</power_law_low>
+					<power_high_tcl>
+						4.0
+					</power_high_tcl>
+					<npts_low_tcl>
+						10
+					</npts_low_tcl>
+					<scale_tcl>
+						1.0
+					</scale_tcl>
+					<fix_enable_low>
+						True
+					</fix_enable_low>
+					<power_law_high>
+						False
+					</power_law_high>
+					<fit_enable_high>
+						False
+					</fit_enable_high>
+					<contrast_tcl>
+						1.0
+					</contrast_tcl>
+					<fix_enable_high>
+						True
+					</fix_enable_high>
+					<surface_err_tcl>
+						
+					</surface_err_tcl>
+					<power_low_tcl>
+						4.0
+					</power_low_tcl>
+					<background_tcl>
+						0.0
+					</background_tcl>
+					<fit_enable_low>
+						False
+					</fit_enable_low>
+				</state_6>
+				<state_8>
+					<guinier>
+						True
+					</guinier>
+					<npts_high_tcl>
+						10
+					</npts_high_tcl>
+					<surface_tcl>
+						
+					</surface_tcl>
+					<enable_high_cbox>
+						True
+					</enable_high_cbox>
+					<porod_constant_tcl>
+						
+					</porod_constant_tcl>
+					<volume_err_tcl>
+						5.57e-018
+					</volume_err_tcl>
+					<compute_num>
+						8
+					</compute_num>
+					<file>
+						1000A_sphere_dsm.xml
+					</file>
+					<enable_low_cbox>
+						True
+					</enable_low_cbox>
+					<is_time_machine>
+						False
+					</is_time_machine>
+					<volume_tcl>
+						4.2e-013
+					</volume_tcl>
+					<state_num>
+						8
+					</state_num>
+					<power_law_low>
+						False
+					</power_law_low>
+					<power_high_tcl>
+						4
+					</power_high_tcl>
+					<npts_low_tcl>
+						10
+					</npts_low_tcl>
+					<scale_tcl>
+						1.0
+					</scale_tcl>
+					<fix_enable_low>
+						True
+					</fix_enable_low>
+					<power_law_high>
+						False
+					</power_law_high>
+					<fit_enable_high>
+						False
+					</fit_enable_high>
+					<contrast_tcl>
+						1.0
+					</contrast_tcl>
+					<fix_enable_high>
+						True
+					</fix_enable_high>
+					<surface_err_tcl>
+						
+					</surface_err_tcl>
+					<power_low_tcl>
+						4.0
+					</power_low_tcl>
+					<background_tcl>
+						0.0
+					</background_tcl>
+					<fit_enable_low>
+						False
+					</fit_enable_low>
+				</state_8>
+			</history>
+			<bookmark>
+				<mark_1>
+					<time>
+						16:50:1
+					</time>
+					<date>
+						7/14/2010
+					</date>
+					<state>
+						<guinier>
+							True
+						</guinier>
+						<npts_high_tcl>
+							10
+						</npts_high_tcl>
+						<surface_tcl>
+							1.59e-008
+						</surface_tcl>
+						<enable_high_cbox>
+							False
+						</enable_high_cbox>
+						<porod_constant_tcl>
+							5
+						</porod_constant_tcl>
+						<volume_err_tcl>
+							2.55e-018
+						</volume_err_tcl>
+						<compute_num>
+							2
+						</compute_num>
+						<file>
+							1000A_sphere_dsm.xml
+						</file>
+						<enable_low_cbox>
+							False
+						</enable_low_cbox>
+						<is_time_machine>
+							False
+						</is_time_machine>
+						<volume_tcl>
+							4.11e-013
+						</volume_tcl>
+						<state_num>
+							2
+						</state_num>
+						<power_law_low>
+							False
+						</power_law_low>
+						<power_high_tcl>
+							4.0
+						</power_high_tcl>
+						<npts_low_tcl>
+							10
+						</npts_low_tcl>
+						<scale_tcl>
+							1.0
+						</scale_tcl>
+						<fix_enable_low>
+							True
+						</fix_enable_low>
+						<power_law_high>
+							False
+						</power_law_high>
+						<fit_enable_high>
+							False
+						</fit_enable_high>
+						<contrast_tcl>
+							1.0
+						</contrast_tcl>
+						<fix_enable_high>
+							True
+						</fix_enable_high>
+						<surface_err_tcl>
+							9.9e-014
+						</surface_err_tcl>
+						<power_low_tcl>
+							4.0
+						</power_low_tcl>
+						<background_tcl>
+							0.0
+						</background_tcl>
+						<fit_enable_low>
+							False
+						</fit_enable_low>
+					</state>
+					<comp_state>
+						<power_law_low>
+							False
+						</power_law_low>
+						<npts_high_tcl>
+							10
+						</npts_high_tcl>
+						<surface_tcl>
+							1.59e-008
+						</surface_tcl>
+						<enable_high_cbox>
+							False
+						</enable_high_cbox>
+						<porod_constant_tcl>
+							5
+						</porod_constant_tcl>
+						<volume_err_tcl>
+							2.55e-018
+						</volume_err_tcl>
+						<compute_num>
+							2
+						</compute_num>
+						<file>
+							1000A_sphere_dsm.xml
+						</file>
+						<enable_low_cbox>
+							False
+						</enable_low_cbox>
+						<is_time_machine>
+							False
+						</is_time_machine>
+						<volume_tcl>
+							4.11e-013
+						</volume_tcl>
+						<state_num>
+							2
+						</state_num>
+						<guinier>
+							True
+						</guinier>
+						<power_high_tcl>
+							4.0
+						</power_high_tcl>
+						<npts_low_tcl>
+							10
+						</npts_low_tcl>
+						<scale_tcl>
+							1.0
+						</scale_tcl>
+						<fix_enable_low>
+							True
+						</fix_enable_low>
+						<power_law_high>
+							False
+						</power_law_high>
+						<fit_enable_high>
+							False
+						</fit_enable_high>
+						<contrast_tcl>
+							1.0
+						</contrast_tcl>
+						<fix_enable_high>
+							True
+						</fix_enable_high>
+						<surface_err_tcl>
+							9.9e-014
+						</surface_err_tcl>
+						<power_low_tcl>
+							4.0
+						</power_low_tcl>
+						<background_tcl>
+							0.0
+						</background_tcl>
+						<fit_enable_low>
+							False
+						</fit_enable_low>
+					</comp_state>
+				</mark_1>
+				<mark_2>
+					<time>
+						16:50:4
+					</time>
+					<date>
+						7/14/2010
+					</date>
+					<state>
+						<guinier>
+							True
+						</guinier>
+						<npts_high_tcl>
+							10
+						</npts_high_tcl>
+						<surface_tcl>
+							1.59e-008
+						</surface_tcl>
+						<enable_high_cbox>
+							False
+						</enable_high_cbox>
+						<porod_constant_tcl>
+							
+						</porod_constant_tcl>
+						<volume_err_tcl>
+							2.55e-018
+						</volume_err_tcl>
+						<compute_num>
+							2
+						</compute_num>
+						<file>
+							1000A_sphere_dsm.xml
+						</file>
+						<enable_low_cbox>
+							False
+						</enable_low_cbox>
+						<is_time_machine>
+							False
+						</is_time_machine>
+						<volume_tcl>
+							4.11e-013
+						</volume_tcl>
+						<state_num>
+							3
+						</state_num>
+						<power_law_low>
+							False
+						</power_law_low>
+						<power_high_tcl>
+							4.0
+						</power_high_tcl>
+						<npts_low_tcl>
+							10
+						</npts_low_tcl>
+						<scale_tcl>
+							1.0
+						</scale_tcl>
+						<fix_enable_low>
+							True
+						</fix_enable_low>
+						<power_law_high>
+							False
+						</power_law_high>
+						<fit_enable_high>
+							False
+						</fit_enable_high>
+						<contrast_tcl>
+							1.0
+						</contrast_tcl>
+						<fix_enable_high>
+							True
+						</fix_enable_high>
+						<surface_err_tcl>
+							9.9e-014
+						</surface_err_tcl>
+						<power_low_tcl>
+							4.0
+						</power_low_tcl>
+						<background_tcl>
+							0.0
+						</background_tcl>
+						<fit_enable_low>
+							False
+						</fit_enable_low>
+					</state>
+					<comp_state>
+						<power_law_low>
+							False
+						</power_law_low>
+						<npts_high_tcl>
+							10
+						</npts_high_tcl>
+						<surface_tcl>
+							1.59e-008
+						</surface_tcl>
+						<enable_high_cbox>
+							False
+						</enable_high_cbox>
+						<porod_constant_tcl>
+							5
+						</porod_constant_tcl>
+						<volume_err_tcl>
+							2.55e-018
+						</volume_err_tcl>
+						<compute_num>
+							2
+						</compute_num>
+						<file>
+							1000A_sphere_dsm.xml
+						</file>
+						<enable_low_cbox>
+							False
+						</enable_low_cbox>
+						<is_time_machine>
+							False
+						</is_time_machine>
+						<volume_tcl>
+							4.11e-013
+						</volume_tcl>
+						<state_num>
+							2
+						</state_num>
+						<guinier>
+							True
+						</guinier>
+						<power_high_tcl>
+							4.0
+						</power_high_tcl>
+						<npts_low_tcl>
+							10
+						</npts_low_tcl>
+						<scale_tcl>
+							1.0
+						</scale_tcl>
+						<fix_enable_low>
+							True
+						</fix_enable_low>
+						<power_law_high>
+							False
+						</power_law_high>
+						<fit_enable_high>
+							False
+						</fit_enable_high>
+						<contrast_tcl>
+							1.0
+						</contrast_tcl>
+						<fix_enable_high>
+							True
+						</fix_enable_high>
+						<surface_err_tcl>
+							9.9e-014
+						</surface_err_tcl>
+						<power_low_tcl>
+							4.0
+						</power_low_tcl>
+						<background_tcl>
+							0.0
+						</background_tcl>
+						<fit_enable_low>
+							False
+						</fit_enable_low>
+					</comp_state>
+				</mark_2>
+				<mark_3>
+					<time>
+						16:50:7
+					</time>
+					<date>
+						7/14/2010
+					</date>
+					<state>
+						<guinier>
+							True
+						</guinier>
+						<npts_high_tcl>
+							10
+						</npts_high_tcl>
+						<surface_tcl>
+							
+						</surface_tcl>
+						<enable_high_cbox>
+							False
+						</enable_high_cbox>
+						<porod_constant_tcl>
+							
+						</porod_constant_tcl>
+						<volume_err_tcl>
+							2.55e-018
+						</volume_err_tcl>
+						<compute_num>
+							4
+						</compute_num>
+						<file>
+							1000A_sphere_dsm.xml
+						</file>
+						<enable_low_cbox>
+							False
+						</enable_low_cbox>
+						<is_time_machine>
+							False
+						</is_time_machine>
+						<volume_tcl>
+							4.11e-013
+						</volume_tcl>
+						<state_num>
+							4
+						</state_num>
+						<power_law_low>
+							False
+						</power_law_low>
+						<power_high_tcl>
+							4.0
+						</power_high_tcl>
+						<npts_low_tcl>
+							10
+						</npts_low_tcl>
+						<scale_tcl>
+							1.0
+						</scale_tcl>
+						<fix_enable_low>
+							True
+						</fix_enable_low>
+						<power_law_high>
+							False
+						</power_law_high>
+						<fit_enable_high>
+							False
+						</fit_enable_high>
+						<contrast_tcl>
+							1.0
+						</contrast_tcl>
+						<fix_enable_high>
+							True
+						</fix_enable_high>
+						<surface_err_tcl>
+							
+						</surface_err_tcl>
+						<power_low_tcl>
+							4.0
+						</power_low_tcl>
+						<background_tcl>
+							0.0
+						</background_tcl>
+						<fit_enable_low>
+							False
+						</fit_enable_low>
+					</state>
+					<comp_state>
+						<power_law_low>
+							False
+						</power_law_low>
+						<npts_high_tcl>
+							10
+						</npts_high_tcl>
+						<surface_tcl>
+							
+						</surface_tcl>
+						<enable_high_cbox>
+							False
+						</enable_high_cbox>
+						<porod_constant_tcl>
+							
+						</porod_constant_tcl>
+						<volume_err_tcl>
+							2.55e-018
+						</volume_err_tcl>
+						<compute_num>
+							4
+						</compute_num>
+						<file>
+							1000A_sphere_dsm.xml
+						</file>
+						<enable_low_cbox>
+							False
+						</enable_low_cbox>
+						<is_time_machine>
+							False
+						</is_time_machine>
+						<volume_tcl>
+							4.11e-013
+						</volume_tcl>
+						<state_num>
+							4
+						</state_num>
+						<guinier>
+							True
+						</guinier>
+						<power_high_tcl>
+							4.0
+						</power_high_tcl>
+						<npts_low_tcl>
+							10
+						</npts_low_tcl>
+						<scale_tcl>
+							1.0
+						</scale_tcl>
+						<fix_enable_low>
+							True
+						</fix_enable_low>
+						<power_law_high>
+							False
+						</power_law_high>
+						<fit_enable_high>
+							False
+						</fit_enable_high>
+						<contrast_tcl>
+							1.0
+						</contrast_tcl>
+						<fix_enable_high>
+							True
+						</fix_enable_high>
+						<surface_err_tcl>
+							
+						</surface_err_tcl>
+						<power_low_tcl>
+							4.0
+						</power_low_tcl>
+						<background_tcl>
+							0.0
+						</background_tcl>
+						<fit_enable_low>
+							False
+						</fit_enable_low>
+					</comp_state>
+				</mark_3>
+				<mark_4>
+					<time>
+						16:50:13
+					</time>
+					<date>
+						7/14/2010
+					</date>
+					<state>
+						<guinier>
+							True
+						</guinier>
+						<npts_high_tcl>
+							10
+						</npts_high_tcl>
+						<surface_tcl>
+							
+						</surface_tcl>
+						<enable_high_cbox>
+							False
+						</enable_high_cbox>
+						<porod_constant_tcl>
+							
+						</porod_constant_tcl>
+						<volume_err_tcl>
+							2.56e-018
+						</volume_err_tcl>
+						<compute_num>
+							6
+						</compute_num>
+						<file>
+							1000A_sphere_dsm.xml
+						</file>
+						<enable_low_cbox>
+							True
+						</enable_low_cbox>
+						<is_time_machine>
+							False
+						</is_time_machine>
+						<volume_tcl>
+							4.12e-013
+						</volume_tcl>
+						<state_num>
+							6
+						</state_num>
+						<power_law_low>
+							False
+						</power_law_low>
+						<power_high_tcl>
+							4.0
+						</power_high_tcl>
+						<npts_low_tcl>
+							10
+						</npts_low_tcl>
+						<scale_tcl>
+							1.0
+						</scale_tcl>
+						<fix_enable_low>
+							True
+						</fix_enable_low>
+						<power_law_high>
+							False
+						</power_law_high>
+						<fit_enable_high>
+							False
+						</fit_enable_high>
+						<contrast_tcl>
+							1.0
+						</contrast_tcl>
+						<fix_enable_high>
+							True
+						</fix_enable_high>
+						<surface_err_tcl>
+							
+						</surface_err_tcl>
+						<power_low_tcl>
+							4.0
+						</power_low_tcl>
+						<background_tcl>
+							0.0
+						</background_tcl>
+						<fit_enable_low>
+							False
+						</fit_enable_low>
+					</state>
+					<comp_state>
+						<power_law_low>
+							False
+						</power_law_low>
+						<npts_high_tcl>
+							10
+						</npts_high_tcl>
+						<surface_tcl>
+							
+						</surface_tcl>
+						<enable_high_cbox>
+							False
+						</enable_high_cbox>
+						<porod_constant_tcl>
+							
+						</porod_constant_tcl>
+						<volume_err_tcl>
+							2.56e-018
+						</volume_err_tcl>
+						<compute_num>
+							6
+						</compute_num>
+						<file>
+							1000A_sphere_dsm.xml
+						</file>
+						<enable_low_cbox>
+							True
+						</enable_low_cbox>
+						<is_time_machine>
+							False
+						</is_time_machine>
+						<volume_tcl>
+							4.12e-013
+						</volume_tcl>
+						<state_num>
+							6
+						</state_num>
+						<guinier>
+							True
+						</guinier>
+						<power_high_tcl>
+							4.0
+						</power_high_tcl>
+						<npts_low_tcl>
+							10
+						</npts_low_tcl>
+						<scale_tcl>
+							1.0
+						</scale_tcl>
+						<fix_enable_low>
+							True
+						</fix_enable_low>
+						<power_law_high>
+							False
+						</power_law_high>
+						<fit_enable_high>
+							False
+						</fit_enable_high>
+						<contrast_tcl>
+							1.0
+						</contrast_tcl>
+						<fix_enable_high>
+							True
+						</fix_enable_high>
+						<surface_err_tcl>
+							
+						</surface_err_tcl>
+						<power_low_tcl>
+							4.0
+						</power_low_tcl>
+						<background_tcl>
+							0.0
+						</background_tcl>
+						<fit_enable_low>
+							False
+						</fit_enable_low>
+					</comp_state>
+				</mark_4>
+				<mark_5>
+					<time>
+						16:50:17
+					</time>
+					<date>
+						7/14/2010
+					</date>
+					<state>
+						<guinier>
+							True
+						</guinier>
+						<npts_high_tcl>
+							10
+						</npts_high_tcl>
+						<surface_tcl>
+							
+						</surface_tcl>
+						<enable_high_cbox>
+							True
+						</enable_high_cbox>
+						<porod_constant_tcl>
+							
+						</porod_constant_tcl>
+						<volume_err_tcl>
+							5.57e-018
+						</volume_err_tcl>
+						<compute_num>
+							8
+						</compute_num>
+						<file>
+							1000A_sphere_dsm.xml
+						</file>
+						<enable_low_cbox>
+							True
+						</enable_low_cbox>
+						<is_time_machine>
+							False
+						</is_time_machine>
+						<volume_tcl>
+							4.2e-013
+						</volume_tcl>
+						<state_num>
+							8
+						</state_num>
+						<power_law_low>
+							False
+						</power_law_low>
+						<power_high_tcl>
+							4
+						</power_high_tcl>
+						<npts_low_tcl>
+							10
+						</npts_low_tcl>
+						<scale_tcl>
+							1.0
+						</scale_tcl>
+						<fix_enable_low>
+							True
+						</fix_enable_low>
+						<power_law_high>
+							False
+						</power_law_high>
+						<fit_enable_high>
+							False
+						</fit_enable_high>
+						<contrast_tcl>
+							1.0
+						</contrast_tcl>
+						<fix_enable_high>
+							True
+						</fix_enable_high>
+						<surface_err_tcl>
+							
+						</surface_err_tcl>
+						<power_low_tcl>
+							4.0
+						</power_low_tcl>
+						<background_tcl>
+							0.0
+						</background_tcl>
+						<fit_enable_low>
+							False
+						</fit_enable_low>
+					</state>
+					<comp_state>
+						<power_law_low>
+							False
+						</power_law_low>
+						<npts_high_tcl>
+							10
+						</npts_high_tcl>
+						<surface_tcl>
+							
+						</surface_tcl>
+						<enable_high_cbox>
+							True
+						</enable_high_cbox>
+						<porod_constant_tcl>
+							
+						</porod_constant_tcl>
+						<volume_err_tcl>
+							5.57e-018
+						</volume_err_tcl>
+						<compute_num>
+							8
+						</compute_num>
+						<file>
+							1000A_sphere_dsm.xml
+						</file>
+						<enable_low_cbox>
+							True
+						</enable_low_cbox>
+						<is_time_machine>
+							False
+						</is_time_machine>
+						<volume_tcl>
+							4.2e-013
+						</volume_tcl>
+						<state_num>
+							8
+						</state_num>
+						<guinier>
+							True
+						</guinier>
+						<power_high_tcl>
+							4
+						</power_high_tcl>
+						<npts_low_tcl>
+							10
+						</npts_low_tcl>
+						<scale_tcl>
+							1.0
+						</scale_tcl>
+						<fix_enable_low>
+							True
+						</fix_enable_low>
+						<power_law_high>
+							False
+						</power_law_high>
+						<fit_enable_high>
+							False
+						</fit_enable_high>
+						<contrast_tcl>
+							1.0
+						</contrast_tcl>
+						<fix_enable_high>
+							True
+						</fix_enable_high>
+						<surface_err_tcl>
+							
+						</surface_err_tcl>
+						<power_low_tcl>
+							4.0
+						</power_low_tcl>
+						<background_tcl>
+							0.0
+						</background_tcl>
+						<fit_enable_low>
+							False
+						</fit_enable_low>
+					</comp_state>
+				</mark_5>
+			</bookmark>
+		</invariant>
+	</SASentry>
+</SASroot>
