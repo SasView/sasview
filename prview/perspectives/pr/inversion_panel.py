@@ -291,6 +291,29 @@ class InversionControl(ScrolledPanel):
         
         return state
     
+    def set_data(self, list=[], state=None):
+        """
+        Receive  a list of data from gui_manager to compute pr
+        """
+        if list==[]:
+            return
+        elif len(list) == 1:
+            data, filepath = list[0]
+            if data.__class__.__name__ == "Data2D":
+                msg = "Pr cannot be computed for Data2D.\n"
+                msg += "Please load another file.\n"
+                dial = wx.MessageDialog(None, msg, 'Error Loading File', 
+                                        wx.OK | wx.ICON_EXCLAMATION)
+                dial.ShowModal() 
+            else:
+                 self._change_file(evt=None, filepath=filepath)
+        else:
+            msg = "Pr cannot be computed for more than one data.\n"
+            msg += "Please load only file.\n"
+            dial = wx.MessageDialog(None, msg, 'Error Loading File', 
+                                    wx.OK | wx.ICON_EXCLAMATION)
+            dial.ShowModal() 
+            
     def set_state(self, state):
         """
         Set the state of the panel and inversion problem to
