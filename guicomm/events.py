@@ -1,4 +1,8 @@
 import wx.lib.newevent
+#send  data to data manager
+(NewStoreDataEvent, EVT_NEW_STORE_DATA) = wx.lib.newevent.NewEvent()
+# send data to other perspectives
+(NewLoadedDataEvent, EVT_NEW_LOADED_DATA) = wx.lib.newevent.NewEvent()
 # plot data
 (NewPlotEvent, EVT_NEW_PLOT) = wx.lib.newevent.NewEvent()
 # print the messages on statusbar

@@ -65,7 +65,13 @@ class WelcomePanel(wx.aui.AuiNotebook):
         if self.parent is not None:
             self.parent.on_close_welcome_panel()
         event.Veto() 
-   
+        
+    def set_data(self, list=[]):
+        """
+        """
+        pass
+    
+    
 class WelcomePage(wx.Panel):
     """
         Panel created like about box  as a welcome page
@@ -126,7 +132,11 @@ class WelcomePage(wx.Panel):
         self.SetAutoLayout(True)
         self.SetSizer(sizer_main)
         self.Fit()
-
+        
+    def set_data(self, list=[]):
+        """
+        """
+        pass
 
 class ViewApp(wx.App):
     def OnInit(self):

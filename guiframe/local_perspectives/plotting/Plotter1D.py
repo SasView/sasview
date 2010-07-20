@@ -80,6 +80,12 @@ class ModelPanel1D(PlotPanel):
         self.graph.yaxis("\\rm{Intensity} ","cm^{-1}")
         self.graph.render(self)
    
+    def set_data(self, list=[]):
+        """
+        """
+        pass
+    
+    
     def _reset(self):
         """
         Resets internal data and graph

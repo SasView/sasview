@@ -112,11 +112,38 @@ class InvariantPanel(ScrolledPanel):
                                                       type="stop")) 
         return flag
     
-    def set_data(self, data):
+    def set_data(self, list=[], state=None):
+        """
+        Receive  a list of data from gui_manager to compute invariant
+        """
+        if list==[]:
+            msg = "Please select data for Invariant perspective.\n"
+            dial = wx.MessageDialog(None, msg, 'Error Loading File', 
+                                    wx.OK | wx.ICON_EXCLAMATION)
+            dial.ShowModal() 
+            return
+        elif len(list) == 1:
+            data, filepath = list[0]
+            if data.__class__.__name__ == "Data2D":
+                msg = "Invariant cannot be computed for Data2D.\n"
+                msg += "Please load another file.\n"
+                dial = wx.MessageDialog(None, msg, 'Error Loading File', 
+                                        wx.OK | wx.ICON_EXCLAMATION)
+                dial.ShowModal() 
+            else:
+                 self.set_current_data(data=data)
+        else:
+            msg = " Invariant cannot be computed for more than one data.\n"
+            msg += "Please load only file.\n"
+            dial = wx.MessageDialog(None, msg, 'Error Loading File', 
+                                    wx.OK | wx.ICON_EXCLAMATION)
+            dial.ShowModal() 
+    
+    def set_current_data(self, data):
         """
         Set the data
         
-        : return: True/False; if False, it will not set_data
+        : return: True/False; if False, it will not set_current_data
         """
         # warn the users
         if self._data != None and data != None:
@@ -177,7 +204,7 @@ class InvariantPanel(ScrolledPanel):
         if state == None or data == None:
             self.state = IState()
         else:
-            if not self.set_data(data):
+            if not self.set_current_data(data):
                 return
             self.new_state = True
             self.state = state   
@@ -825,7 +852,7 @@ class InvariantPanel(ScrolledPanel):
         
     def _reset_state_list(self,data=None):
         """
-        Reset the state_list just before data was loading: Used in 'set_data()'
+        Reset the state_list just before data was loading: Used in 'set_current_data()'
         """
         #if data == None: return
         #temp_state = self.state.clone_state()#copy.deepcopy(self.state.saved_state)
@@ -1702,7 +1729,7 @@ class InvariantWindow(wx.Frame):
         self.panel = InvariantPanel(self)
 
         data.name = data.filename
-        self.panel.set_data(data)
+        self.panel.set_current_data(data)
         self.Centre()
         self.Show(True)
         

@@ -40,14 +40,21 @@ try:
 except:
     # Didn't find local config, load the default 
     import config
-    
+ 
+import warnings
+warnings.simplefilter("ignore")
+import logging  
+ 
+from sans.guicomm.events import NewPlotEvent
+from sans.guicomm.events import NewLoadedDataEvent
 from sans.guicomm.events import EVT_STATUS
 from sans.guicomm.events import EVT_NEW_PLOT,EVT_SLICER_PARS_UPDATE
 from sans.guicomm.events import EVT_ADD_MANY_DATA
-import warnings
-warnings.simplefilter("ignore")
+from sans.guicomm.events import StatusEvent
 
-import logging
+
+from data_manager import DataManager
+from data_panel import DataFrame
 
 def quit_guiframe(parent=None):
     """
@@ -167,7 +174,7 @@ class Plugin:
         """
         return self.perspective
     
-    def on_perspective(self, event):
+    def on_perspective(self, event=None):
         """
         Call back function for the perspective menu item.
         We notify the parent window that the perspective
@@ -225,7 +232,12 @@ class ViewerFrame(wx.Frame):
         
         ## Application manager
         self.app_manager = None
-        
+        ## data manager 
+        self.data_manager = DataManager(parent=self)
+        ## panel to display available data
+        self.data_panel = DataFrame(parent=self, list=[])
+        self.data_panel.set_manager(manager=self.data_manager)
+        self.data_panel.set_owner(owner=self)
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins =[]
@@ -513,9 +525,7 @@ class ViewerFrame(wx.Frame):
         self._mgr.MaximizePane(pane)
         self._mgr.RestoreMaximizedPane()
         
-        
         # Register for showing/hiding the panel
-        
         wx.EVT_MENU(self, ID, self._on_view)
         
         self._mgr.Update()
@@ -532,10 +542,18 @@ class ViewerFrame(wx.Frame):
         self.filemenu = wx.Menu()
         
         id = wx.NewId()
-        self.filemenu.Append(id, '&Load Data', 'Load data file into the application')
-        wx.EVT_MENU(self, id, self._on_open)
-        #self.filemenu.AppendSeparator()
+        self.filemenu.Append(id, '&Load File', 'Load data file(s) into the application')
+        wx.EVT_MENU(self, id, self._on_open_file)
+        id = wx.NewId()
+        self.filemenu.Append(id, '&Load Folder', 'Load data folder into the application')
+        wx.EVT_MENU(self, id, self._on_open_folder)
         
+        self.filemenu.AppendSeparator()
+        id = wx.NewId()
+        self.filemenu.Append(id, '&Available Data', 'Data available in the application')
+        wx.EVT_MENU(self, id, self._on_display_data)
+         
+        self.filemenu.AppendSeparator()
         id = wx.NewId()
         self.filemenu.Append(id,'&Quit', 'Exit') 
         wx.EVT_MENU(self, id, self.Close)
@@ -575,14 +593,16 @@ class ViewerFrame(wx.Frame):
                 n_perspectives += 1
         
         if n_perspectives>1:
+            list=[]
             p_menu = wx.Menu()
             for plug in self.plugins:
                 if len(plug.get_perspective()) > 0:
                     id = wx.NewId()
                     p_menu.Append(id, plug.sub_menu, "Switch to %s perspective" % plug.sub_menu)
                     wx.EVT_MENU(self, id, plug.on_perspective)
+                    list.append(plug)
             menubar.Append(p_menu,   '&Perspective')
- 
+        self.data_panel.layout_perspective(list_of_perspective=list)
         # Tools menu
         # Go through plug-ins and find tools to populate the tools menu
         toolsmenu = None
@@ -696,18 +716,68 @@ class ViewerFrame(wx.Frame):
                 self._mgr.GetPane(self.panels["default"].window_name).Hide()
         
             self._mgr.Update()
-   
-    def _on_open(self, event):
+       
+    def _on_display_data(self, event):
+        """
+        """
+        self.data_panel.Show(True)
+        
+    def _on_open_file(self, event):
         """
         """
         path = self.choose_file()
-        if path is None:
+        if path is None or path[0] is None:
             return
         
-        from data_loader import plot_data
-        if path and os.path.isfile(path):
-            plot_data(self, path)
-           
+        from data_loader import read_data
+        if os.path.isfile(path[0]):
+            data = read_data(self, path)
+            data = self.data_manager.on_get_data(data_list=data)
+            self.data_panel.load_list(list=data)
+            self.data_panel.Show(True)
+            
+    def _on_open_folder(self, event):
+        """
+        """
+        path = self.choose_file(folder=True)
+        msg = "Loading .... "
+        event = StatusEvent(status=msg, info="info", type="progress")
+        self._on_status_event( evt=event)
+        if path is None or path[0] is None:
+            msg = "Loading stopped.... "
+            event = StatusEvent(status=msg, info="info", type="stop")
+            self._on_status_event( evt=event)
+            return
+        from data_loader import read_data
+        if os.path.isdir(path[0]):
+            data = read_data(self, path)
+            data = self.data_manager.on_get_data(data_list=data)
+            self.data_panel.load_list(list=data)
+            self.data_panel.Show(True)
+            
+    def post_data(self, list_of_data, perspective=None,plot=False):
+        """
+        Receive a list of data from data_manager to send to a current 
+        active perspective. if plot is True sends the list of data to plotting
+        perspective
+        """
+        if perspective is not None:
+             for plug in self.plugins:
+                if len(plug.get_perspective()) > 0:
+                    id = wx.NewId()
+                    if plug.sub_menu == perspective:
+                        plug.on_perspective(event=None)
+        if plot:
+             wx.PostEvent(self, NewLoadedDataEvent(plots=list_of_data))
+             return 
+        if self.defaultPanel is not None and \
+            self._mgr.GetPane(self.panels["default"].window_name).IsShown():
+            self.on_close_welcome_panel()
+            
+        for item in self.panels:
+            if self._mgr.GetPane(self.panels[item].window_name).IsShown():
+                self.panels[item].set_data(list=list_of_data)
+    
     def _onClose(self, event):
         """
         Store info to retrieve in xml before closing the application
@@ -736,7 +806,8 @@ class ViewerFrame(wx.Frame):
             fd.close()
         except:
             pass
-        
+        if self.data_panel is not None or not self.data_panel.IsBeingDeleted():
+            self.data_panel.Destroy()
         import sys
         wx.Exit()
         sys.exit()
@@ -747,6 +818,8 @@ class ViewerFrame(wx.Frame):
         """
         flag = quit_guiframe(parent=self)
         if flag:
+            if self.data_panel is not None or not self.data_panel.IsBeingDeleted():
+                self.data_panel.Destroy()
             import sys
             wx.Frame.Close(self)
             wx.Exit()
@@ -802,19 +875,7 @@ class ViewerFrame(wx.Frame):
             import aboutbox 
             dialog = aboutbox.DialogAbout(None, -1, "")
             dialog.ShowModal()            
-            
-    def _onreloaFile(self, event):  
-        """
-        load a data previously opened 
-        """
-        from data_loader import plot_data
-        for item in self.filePathList:
-            id, menuitem_name , path, title = item
-            if id == event.GetId():
-                if path and os.path.isfile(path):
-                    plot_data(self, path)
-                    break
-            
+        
     def set_manager(self, manager):
         """
         Sets the application manager for this frame
@@ -863,66 +924,43 @@ class ViewerFrame(wx.Frame):
             if self.panels[item].window_name in panels:
                 if not self._mgr.GetPane(self.panels[item].window_name).IsShown():
                     self._mgr.GetPane(self.panels[item].window_name).Show()
+                    list_of_data = self.data_manager.get_selected_data()
+                    self.panels[item].set_data(list=list_of_data)
             else:
                 if self._mgr.GetPane(self.panels[item].window_name).IsShown():
                     self._mgr.GetPane(self.panels[item].window_name).Hide()
     
         self._mgr.Update()
-        
-    def choose_file(self, path=None):
+    
+        if self.data_panel is not None:
+            for plug in self.plugins:
+                if len(plug.get_perspective()) > 0:
+                    for panel in plug.get_perspective():
+                        if panel in panels:
+                            self.data_panel.set_perspective(plug.sub_menu)
+                            break 
+            
+    def choose_file(self, path=None, folder=False):
         """ 
         Functionality that belongs elsewhere
         Should add a hook to specify the preferred file type/extension.
         """
-        #TODO: clean this up
-        from data_loader import choose_data_file
-        
         # Choose a file path
-        if path==None:
-            path = choose_data_file(self, self._default_save_location)
+        if path is None:
+            if folder:
+                from data_loader import choose_data_folder
+                path = choose_data_folder(self, self._default_save_location)
+            else:
+                from data_loader import choose_data_file
+                path = choose_data_file(self, self._default_save_location)
             
-        if not path==None:
+        if path is not None:
             try:
-                self._default_save_location = os.path.dirname(path)
-               
-                #self.n_fileOpen += 1
-                if self.n_fileOpen==1:
-                    pos= self.filemenu.GetMenuItemCount()-1
-                    #self.filemenu.InsertSeparator(pos )
-               
-                id = wx.NewId()
-                filename= os.path.basename(path)
-                dir= os.path.split(self._default_save_location)[1]
-                title= str(os.path.join(dir,filename )) 
-                menuitem_name = str(self.n_fileOpen)+". "+ title
-                position= self.filemenu.GetMenuItemCount()-2
-                #self.filemenu.Insert(id=id, pos= position,text=menuitem_name,help=str(path) ) 
-                #self.filePathList.append(( id, menuitem_name, path, title))
-                #wx.EVT_MENU(self, id, self._onreloaFile)
-                
-                ## construct menu item for open file
-                if self.n_fileOpen == self.n_maxfileopen +1:
-                    ## reach the maximun number of path to store
-                    self.n_fileOpen = 0
-                    id, menuitem_name , path, title = self.filePathList[0]
-                    self.filemenu.Delete(id)
-                    self.filePathList.pop(0)
-                    for item in self.filePathList:
-                        id, menuitem_name , path, title = item
-                        self.n_fileOpen += 1
-                        label = str(self.n_fileOpen)+". "+ title
-                        #self.filemenu.FindItemById(id).SetItemLabel(label)   
+                self._default_save_location = os.path.dirname(path[0])
             except:
-                raise
-                #pass
+                pass
         return path
-    
-    def load_ascii_1D(self, path):
-        """
-        """
-        from data_loader import load_ascii_1D
-        return load_ascii_1D(path)
-                  
+ 
 class DefaultPanel(wx.Panel):
     """
     Defines the API for a panels to work with

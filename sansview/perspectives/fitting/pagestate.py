@@ -361,13 +361,13 @@ class PageState(object):
         
         rep += "model  : %s\n\n"% str(self.model)
         rep += "number parameters(self.parameters): %s\n"%len(self.parameters)
-        rep += self._repr_helper( list=self.parameters, rep=rep)
+        rep = self._repr_helper( list=self.parameters, rep=rep)
         rep += "number orientation parameters"
         rep += "(self.orientation_params): %s\n"%len(self.orientation_params)
-        rep += self._repr_helper( list=self.orientation_params, rep=rep)
+        rep = self._repr_helper( list=self.orientation_params, rep=rep)
         rep += "number dispersity parameters"
         rep += "(self.orientation_params_disp): %s\n"%len(self.orientation_params_disp)
-        rep += self._repr_helper( list=self.orientation_params_disp, rep=rep)
+        rep = self._repr_helper( list=self.orientation_params_disp, rep=rep)
         
         return rep
    
@@ -1137,7 +1137,7 @@ class Reader(CansasReader):
                  
                 output[0].filename = state.file
                 state.data = output[0]
-                state.data.name = state.data_name
+                state.data.name = output[0].filename #state.data_name
                 state.data.id = state.data_id
                 state.data.id = state.data_id
                 if state.is_data is not None:
@@ -1181,12 +1181,44 @@ class Reader(CansasReader):
         else:
             fitstate.toXML(file=filename)
         
-"""     
-Example: ::
+
   
-    if __name__ == "__main__":
-        state = PageState(parent=None)
-        state.toXML()
-        print "state", state
+if __name__ == "__main__":
+    state = PageState(parent=None)
+    #state.toXML()
+    """
     
-"""
+    file = open("test_state", "w")
+    pickle.dump(state, file)
+    print pickle.dumps(state)
+    state.data_name = "hello---->"
+    pickle.dump(state, file)
+    file = open("test_state", "r")
+    new_state= pickle.load(file)
+    print "new state", new_state
+    new_state= pickle.load(file)
+    print "new state", new_state
+    #print "state", state
+    """
+    import bsddb
+    import pickle
+    db= bsddb.btopen('file_state.db', 'c')
+    val = (pickle.dumps(state), "hello", "hi")
+    db['state1']= pickle.dumps(val)
+    print pickle.loads(db['state1'])
+    state.data_name = "hello---->22"
+    db['state2']= pickle.dumps(state)
+    state.data_name = "hello---->2"
+    db['state3']= pickle.dumps(state)
+    del db['state3']
+    state.data_name = "hello---->3"
+    db['state4']= pickle.dumps(state)
+    new_state = pickle.loads(db['state1'])
+    #print db.last()
+    db.set_location('state2')
+    state.data_name = "hello---->5"
+    db['aastate5']= pickle.dumps(state)
+    db.keys().sort()
+    print pickle.loads(db['state2'])
+  
+    db.close()

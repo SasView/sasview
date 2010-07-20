@@ -296,6 +296,10 @@ class InversionControl(ScrolledPanel):
         Receive  a list of data from gui_manager to compute pr
         """
         if list==[]:
+            msg = "Please select data for Pr perspective.\n"
+            dial = wx.MessageDialog(None, msg, 'Error Loading File', 
+                                    wx.OK | wx.ICON_EXCLAMATION)
+            dial.ShowModal() 
             return
         elif len(list) == 1:
             data, filepath = list[0]

@@ -1935,7 +1935,7 @@ class FitPage(BasicPage):
                 output = event.output
             self.tcChi.SetValue(str(format_number(output)))
 
-            self.state.tcChi =self.tcChi
+            self.state.tcChi = self.tcChi.GetValue()
         except:
             pass  
             

@@ -43,6 +43,7 @@ class BasicPage(wx.ScrolledWindow):
         wx.ScrolledWindow.__init__(self, parent,style=wx.FULL_REPAINT_ON_RESIZE)
         #Set window's font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
+       
         ## parent of the page
         self.parent = parent
         ## manager is the fitting plugin
@@ -159,7 +160,7 @@ class BasicPage(wx.ScrolledWindow):
         self._fill_save_sizer()
         ## layout
         self.set_layout()
-       
+        
     class ModelTextCtrl(wx.TextCtrl):
         """
         Text control for model and fit parameters.
@@ -232,8 +233,9 @@ class BasicPage(wx.ScrolledWindow):
                         
         def _silent_kill_focus(self,event):
             """
-            do nothing to kill focus
+            Save the state of the page
             """
+            
             event.Skip()
             pass
     
@@ -802,8 +804,9 @@ class BasicPage(wx.ScrolledWindow):
         self._copy_parameters_state(self.parameters, self.state.parameters)
         self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
-    
-
+        #save chisqr
+        self.state.tcChi = self.tcChi.GetValue()
+        
     def save_current_state_fit(self):
         """
         Store current state for fit_page
@@ -1007,8 +1010,11 @@ class BasicPage(wx.ScrolledWindow):
         
         ## draw the model with previous parameters value
         self._onparamEnter_helper()
+        #reset the value of chisqr when not consistent with the value computed
+        self.tcChi.SetValue(str(self.state.tcChi))
         ## reset context menu items
         self._reset_context_menu()
+        
         ## set the value of the current state to the state given as parameter
         self.state = state.clone() 
     

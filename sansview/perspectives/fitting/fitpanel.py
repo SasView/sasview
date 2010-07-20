@@ -199,6 +199,19 @@ class FitPanel(wx.aui.AuiNotebook):
         self.Update()
         self.Center()
         
+    def set_data(self, list=[]):
+        """
+        Receive a list of data and create new 
+        """
+        if list==[]:
+            msg = "Please select data for Fitting perspective.\n"
+            dial = wx.MessageDialog(None, msg, 'Error Loading File', 
+                                    wx.OK | wx.ICON_EXCLAMATION)
+            dial.ShowModal() 
+            return 
+        for data, path in list:
+            self.manager.add_fit_page(data=data)
+            
     def set_state(self, state):
         """
         Restore state of the panel
@@ -414,13 +427,12 @@ class FitPanel(wx.aui.AuiNotebook):
                 panel = self.replace_page(index=index, page_info=page_info, type=type)
                 return panel 
             else:
-                for name, panel in self.opened_pages.values():
-                    #Don't return any panel is the exact same page is created
-                    if name == page_info.window_name:
+                for value in self.opened_pages.values():
+                    if page_info.window_name == str(value[0]):
+                        #Don't return any panel is the exact same page is created
                         return None
-                    else:
-                        panel = self.add_page(page_info=page_info)
-                        return panel        
+                panel = self.add_page(page_info=page_info)
+                return panel        
         else:
             #a new type of page is created
             panel = self.add_page(page_info=page_info)
