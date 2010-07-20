@@ -240,6 +240,8 @@ class Plugin:
                                  NewPlotEvent(plot=plot, title=plot.name))
                 else:
                     list_of_data1d.append((plot, path))
+                    wx.PostEvent(self.parent, 
+                                 NewPlotEvent(plot=plot, title=plot.name))
   
     def _on_plot_event(self, event):
         """
