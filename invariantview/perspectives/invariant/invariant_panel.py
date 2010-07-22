@@ -228,7 +228,8 @@ class InvariantPanel(ScrolledPanel):
                 # append it to menu
                 id = wx.NewId()
                 self.popUpMenu.Append(id,name,str(''))
-                wx.EVT_MENU(self, id, self._back_to_bookmark)   
+                wx.EVT_MENU(self, id, self._back_to_bookmark)  
+            self._get_input_list() 
             self.new_state = False 
 
 
@@ -804,7 +805,6 @@ class InvariantPanel(ScrolledPanel):
             self.state.saved_state['state_num'] +=1
             self.state.state_num = self.state.saved_state['state_num']
             self.state.state_list[str(self.state.state_num)] = self.state.clone_state()#copy.deepcopy(self.state.saved_state)
-
         except:           
             pass
 
@@ -940,6 +940,19 @@ class InvariantPanel(ScrolledPanel):
         except:
             pass
         if event != None: event.Skip()\
+
+    def _get_input_list(self):     
+        """
+        get input_list; called by set_state
+        """    
+        # get state num of the last compute state
+        compute_num = self.state.saved_state['compute_num']
+        # find values and put into the input list
+        for key1,value1 in self.state.state_list[str(compute_num)].iteritems(): 
+            for key,value in self.state.input_list.iteritems(): 
+                if key == key1:
+                    self.state.input_list[key]=value1
+                    break
         
     def _set_bookmark_menu(self):
         """
