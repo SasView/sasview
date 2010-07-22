@@ -8,10 +8,7 @@ from dataFitting import Data2D
 from DataLoader.loader import Loader
 from load_thread import DataReader
 
-from sans.guicomm.events import StatusEvent
-from sans.guicomm.events import  NewStoreDataEvent
-from sans.guicomm.events import NewPlotEvent
-
+from sans.guicomm.events import NewPlotEvent, StatusEvent
 
 def enable_add_data(existing_panel, new_plot):
     """
@@ -40,7 +37,6 @@ def parse_name(name, expression):
     
 def choose_data_file(parent, location=None):
     """
-    return a list of file path to read
     """
     path = None
     if location == None:
@@ -50,36 +46,13 @@ def choose_data_file(parent, location=None):
     cards = l.get_wildcards()
     wlist = '|'.join(cards)
     
-    dlg = wx.FileDialog(parent, "Choose a file", location, "", wlist,
-                        style=wx.OPEN|wx.MULTIPLE|wx.CHANGE_DIR)
-    if dlg.ShowModal() == wx.ID_OK:
-        path = dlg.GetPaths()
-        if path:
-            mypath = os.path.basename(path[0])
-    dlg.Destroy()
-   
-    return path
-
-def choose_data_folder(parent, location=None):
-    """
-    return a list of folder to read
-    """
-    path = None
-    if location == None:
-        location = os.getcwd()
-    
-    l = Loader()
-    cards = l.get_wildcards()
-    wlist = '|'.join(cards)
-    
-    dlg = wx.DirDialog(parent, "Choose a directory", location,
-                        style=wx.DD_DEFAULT_STYLE)
+    dlg = wx.FileDialog(parent, "Choose a file", location, "", wlist, wx.OPEN)
     if dlg.ShowModal() == wx.ID_OK:
         path = dlg.GetPath()
         mypath = os.path.basename(path)
     dlg.Destroy()
     
-    return [path]
+    return path
 
 def open_dialog_append_data(panel_name, data_name):
     """
@@ -97,7 +70,55 @@ def open_dialog_append_data(panel_name, data_name):
         return True
     else:
         return False
+   
 
+def load_ascii_1D(path):
+    """
+    Load a 1D ascii file, with errors
+    """
+    if path and os.path.isfile(path):
+    
+        file_x = numpy.zeros(0)
+        file_y = numpy.zeros(0)
+        file_dy = numpy.zeros(0)
+        file_dx = numpy.zeros(0)
+        
+        input_f = open(path,'r')
+        buff = input_f.read()
+        lines = buff.split('\n')
+        
+        has_dy = False
+        has_dx = False
+        
+        for line in lines:
+            try:
+                toks = line.split()
+                x = float(toks[0])
+                y = float(toks[1])
+                if len(toks)==3:
+                    has_dy = True
+                    errdy = float(toks[2])
+                else:
+                    errdy = 0.0
+                if len(toks) == 4:
+                    has_dx = True
+                    errdx = float(toks[3])
+                else:
+                    errdx = 0.0
+                file_x  = numpy.append(file_x, x)
+                file_y  = numpy.append(file_y, y)
+                file_dy = numpy.append(file_dy, dyerr)
+                file_dx = numpy.append(file_dx, dxerr)
+            except:
+                print "READ ERROR", line
+    
+        if has_dy == False:
+            file_dy = None
+        if has_dx == False:
+            file_dx = None
+            
+        return file_x, file_y, file_dy, file_dx
+    return None, None, None, None
 
 def load_error(error=None):
     """
@@ -121,187 +142,7 @@ def on_load_error(parent):
     wx.PostEvent(parent, StatusEvent(status="Load cancel..", info="warning",
                                                 type="stop"))
     
-
-
-def read_data(parent, path):
-    """
-    Create a list of data to read
-    """
-    list = []
-    if path is not None and len(path) > 0:
-        for p in path:
-            if os.path.isdir(p):
-               list = [os.path.join(os.path.abspath(p), file) for file in os.listdir(p) ]
-              
-            if os.path.isfile(p):
-               list.append(p)
-               
-    return plot_data(parent, numpy.array(list))
-    
-def load_helper(parent , output, path):
-    """
-    """
-    filename = os.path.basename(path)
-    #print output.process
-    if not  output.__class__.__name__ == "list":
-        ## Creating a Data2D with output
-        if hasattr(output,'data'):
-            msg = "Loading 2D data: %s "%output.filename
-            wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
-            new_plot = Data2D(image=None, err_image=None)
-      
-        else:
-            msg = "Loading 1D data: %s "%output.filename
-            wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
-            new_plot = Data1D(x=[], y=[], dx=None, dy=None)
-            
-        new_plot.copy_from_datainfo(output) 
-        output.clone_without_data(clone=new_plot)      
-      
-        ## data 's name
-        if output.filename is None or output.filename == "":
-            output.filename = str(filename)
-        ## name of the data allow to differentiate data when plotted
-        name = parse_name(name=output.filename, expression="_")
-        if not name in parent.indice_load_data.keys():
-            parent.indice_load_data[name] = 0
-        else:
-            ## create a copy of the loaded data
-            parent.indice_load_data[name] += 1
-            name = name +"[%i]"%parent.indice_load_data[name]
-       
-        new_plot.name = name
-        ## allow to highlight data when plotted
-        new_plot.interactive = True
-        ## when 2 data have the same id override the 1 st plotted
-        new_plot.id = name
-        ##group_id specify on which panel to plot this data
-        new_plot.group_id = name
-        new_plot.is_data = True
-        ##post data to plot
-        title = output.filename
-        if hasattr(new_plot,"title"):
-            title = str(new_plot.title.lstrip().rstrip())
-            if title == "":
-                title = str(name)
-        else:
-            title = str(name)
-        if hasattr(parent, "panel_on_focus") and not(parent.panel_on_focus is None):
-                existing_panel  = parent.panel_on_focus
-                panel_name = existing_panel.window_caption
-                data_name = new_plot.name
-                if enable_add_data(existing_panel, new_plot):
-                    if open_dialog_append_data(panel_name, data_name):
-                        #add this plot the an existing panel
-                        new_plot.group_id = existing_panel.group_id
-        return [(new_plot, path)]
-        #wx.PostEvent(parent, NewStoreDataEvent(data=new_plot))
-        
-    ## the output of the loader is a list , some xml files contain more than one data
-    else:
-        i=1
-        temp=[]
-        for item in output:
-            msg = "Loading 1D data: %s "%str(item.run[0])
-            wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
-            try:
-                dx = item.dx
-                dxl = item.dxl
-                dxw = item.dxw
-            except:
-                dx = None
-                dxl = None
-                dxw = None
-
-            new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy)
-            new_plot.copy_from_datainfo(item)
-            item.clone_without_data(clone=new_plot)
-            new_plot.dxl = dxl
-            new_plot.dxw = dxw
-           
-            name = parse_name(name=str(item.run[0]), expression="_")
-            if not name in parent.indice_load_data.keys():
-                parent.indice_load_data[name] = 0
-            else:
-                ## create a copy of the loaded data
-                
-                #TODO: this is a very annoying feature. We should make this
-                # an option. Excel doesn't do this. Why should we?
-                # What is the requirement for this feature, and are the
-                # counter arguments stronger? Is this feature developed
-                # to please at least 80% of the users or a special few?
-                parent.indice_load_data[name] += 1
-                name = name + "(copy %i)"%parent.indice_load_data[name]
-                
-            new_plot.name = name
-            new_plot.interactive = True
-            new_plot.group_id = name
-            new_plot.id = name
-            new_plot.is_data = True
-        
-            if hasattr(item,"title"):
-                title = item.title.lstrip().rstrip()
-                if title == "":
-                    title = str(name)
-            else:
-                title = name
-            if hasattr(parent, "panel_on_focus") and not(parent.panel_on_focus is None):
-                existing_panel  = parent.panel_on_focus
-                panel_name = existing_panel.window_caption
-                data_name = new_plot.name
-                if enable_add_data(existing_panel, new_plot):
-                    if open_dialog_append_data(panel_name, data_name):
-                        #add this plot the an existing panel
-                        new_plot.group_id = existing_panel.group_id
-            temp.append((new_plot, path))
-            #wx.PostEvent(parent, NewStoreDataEvent(data=new_plot))
-            i+=1
-        return temp
-    
-    
 def plot_data(parent, path):
-    """
-    Use the DataLoader loader to created data to plot.
-    
-    :param path: the path of the data to load
-    
-    """
-    from sans.guicomm.events import NewPlotEvent, StatusEvent
-    from DataLoader.loader import  Loader
-   
-    # Instantiate a loader 
-    L = Loader()
-    
-    # Load data 
-    msg = ""
-    list_of_data = []
-    for p in path:
-        try:
-            list_of_data.append((L.load(p), p))
-        except:
-            p_msg = "Loading... " + str(sys.exc_value)
-            wx.PostEvent(parent, StatusEvent(status=p_msg, info="warning"))
-            msg += (str(sys.exc_value)+"\n")
-    if msg.lstrip().rstrip() != "":
-        load_error(msg)
-        
-    #output = map(L.load, path)
-   
-    # Notify user if the loader completed the load but no data came out
-    if len(list_of_data) == 0 or numpy.array(list_of_data).all() is None:
-        load_error("The data file appears to be empty.")
-        msg = "Loading complete: %s"%output.filename
-        wx.PostEvent(parent, StatusEvent(status=msg, info="warning", type="stop"))
-        return
-    result =[]
-    for output , path in list_of_data:
-        result += load_helper(parent=parent, output=output, path=path)
-    msg = "Loading complete: %s"%output.filename
-    wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
-    return result
-    
-    
-def old_plot_data(parent, path):
     """
     Use the DataLoader loader to created data to plot.
     
@@ -318,8 +159,7 @@ def old_plot_data(parent, path):
     try:
         output = L.load(path)
     except:
-        raise
-        #load_error(sys.exc_value)
+        load_error(sys.exc_value)
         return
     
     # Notify user if the loader completed the load but no data came out
@@ -440,4 +280,4 @@ def old_plot_data(parent, path):
                         new_plot.group_id = existing_panel.group_id
             wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
             i+=1
-  
+         

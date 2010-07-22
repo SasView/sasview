@@ -14,143 +14,9 @@
 import wx
 import sys
 from sans.guicomm.events import EVT_NEW_PLOT
-from sans.guicomm.events import NewPlotEvent
-from sans.guicomm.events import EVT_NEW_LOADED_DATA
 from sans.guicomm.events import StatusEvent 
 
 
-class PlottingDialog(wx.Dialog):
-    """
-    Dialog to display plotting option
-    """
-    def __init__(self, parent=None, panel_on_focus=None, list_of_data=[]):
-        """
-        """
-        wx.Dialog.__init__(self, parent=parent,title="Plotting", size=(300, 280))
-        self.parent = parent
-        self.panel_on_focus = panel_on_focus
-        self.list_of_data = list_of_data
-        self.define_structure()
-        self.layout_plot_on_panel(list_of_data=self.list_of_data)
-        self.layout_data_name(list_of_data=self.list_of_data)
-        self.layout_button()
-        
-    def define_structure(self):
-        """
-        """
-        #Dialog interface
-        vbox  = wx.BoxSizer(wx.VERTICAL)
-        self.sizer_data = wx.BoxSizer(wx.HORIZONTAL)
-        
-        self.sizer_selection = wx.BoxSizer(wx.VERTICAL)
-        self.sizer_button = wx.BoxSizer(wx.HORIZONTAL)
-        vbox.Add(self.sizer_data)
-        vbox.Add(self.sizer_selection)
-        vbox.Add(self.sizer_button)
-        self.SetSizer(vbox)
-        self.Centre()
-        
-    def layout_button(self):
-        """
-        """
-        self.bt_ok = wx.Button(self, wx.NewId(), "Ok", (30, 10))
-        self.bt_ok.SetToolTipString("plot data")
-        wx.EVT_BUTTON(self, self.bt_ok.GetId(), self.on_ok)
-        
-        self.sizer_button.AddMany([((40,40), 0,
-                                     wx.LEFT|wx.ADJUST_MINSIZE, 100 ),
-                                     (self.bt_ok, 0, wx.ALL,10)])
-        
-    def layout_data_name(self, list_of_data=[]):
-        """
-        """
-        self.data_tcl = wx.TextCtrl(self, -1,size=(260,80), style=wx.TE_MULTILINE)
-        hint_data = "Data to plot."
-        self.data_tcl.SetToolTipString(hint_data)
-        self.data_tcl.SetEditable(False)
-        for item in list_of_data:
-            self.data_tcl.AppendText(item.name+"\n")
-            
-        self.sizer_data.AddMany([(self.data_tcl, 1, wx.ALL, 10)])
-        
-    def layout_plot_on_panel(self, list_of_data=[]):
-        """
-        """
-        if len(list_of_data) == 0:
-            return
-        elif len(list_of_data) ==1:
-            self.layout_single_data(list_of_data=list_of_data)
-        else:
-            self.layout_multiple(list_of_data=list_of_data)
-            
-    def layout_single_data(self, list_of_data=[]):
-        """
-        """
-        self.sizer_selection.Clear(True)
-        if self.panel_on_focus is None and list_of_data < 1:
-            return 
-        else:
-            name = "Plot data on new panel"
-            self.rb_single_data_panel = wx.RadioButton(self, -1,name, 
-                                                    style=wx.RB_GROUP)   
-            msg = "Each data will be plotted separately on a new panel"
-            self.rb_single_data_panel.SetToolTipString(msg)
-            self.rb_single_data_panel.SetValue(True)
-            self.Bind(wx.EVT_RADIOBUTTON, self.on_choose_panel, 
-                                id=self.rb_single_data_panel.GetId())
-            self.rb_panel_on_focus = wx.RadioButton(self, -1,"No Panel on Focus")
-            msg = "All Data will be appended to panel on focus"
-            self.rb_panel_on_focus.SetToolTipString(msg)
-            self.rb_panel_on_focus.Disable()
-            self.Bind(wx.EVT_RADIOBUTTON, self.on_choose_panel, 
-                                id=self.rb_panel_on_focus.GetId())
-            if self.panel_on_focus is not  None:
-                self.rb_panel_on_focus.Enable()
-                self.rb_panel_on_focus.SetLabel(str(panel.window_name))
-            self.sizer_selection.AddMany([(self.rb_single_data_panel,
-                                            1, wx.ALL, 10),
-                     (self.rb_panel_on_focus,1, wx.ALL, 10)])
-            
-    def layout_multiple(self, list_of_data=[]):
-        """
-        """
-        self.sizer_selection.Clear(True)
-        if self.panel_on_focus is None and list_of_data <= 1:
-            return 
-        name = "Plot each data separately"
-        self.rb_single_data_panel = wx.RadioButton(self, -1,name, 
-                                                    style=wx.RB_GROUP)
-        msg = "Each data will be plotted separately on a new panel"
-        self.rb_single_data_panel.SetToolTipString(msg)
-        self.rb_single_data_panel.SetValue(True)
-        self.Bind(wx.EVT_RADIOBUTTON, self.on_choose_panel, 
-                            id=self.rb_single_data_panel.GetId())
-        name = "Append all to new panel"
-        self.rb_new_panel = wx.RadioButton(self, -1,name)
-        msg = "All Data will be appended to a new panel"
-        self.rb_new_panel.SetToolTipString(msg)
-        self.Bind(wx.EVT_RADIOBUTTON, self.on_choose_panel, 
-                            id=self.rb_new_panel.GetId())
-        self.rb_panel_on_focus = wx.RadioButton(self, -1,"No Panel on Focus")
-        msg = "All Data will be appended to panel on focus"
-        self.rb_panel_on_focus.SetToolTipString(msg)
-        self.rb_panel_on_focus.Disable()
-        self.Bind(wx.EVT_RADIOBUTTON, self.on_choose_panel, 
-                            id=self.rb_panel_on_focus.GetId())
-        if self.panel_on_focus is not  None:
-            self.rb_panel_on_focus.Enable()
-            self.rb_panel_on_focus.SetLabel(str(panel.window_name))
-       
-        self.sizer_selection.AddMany([(self.rb_single_data_panel,
-                                            1, wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
-                (self.rb_new_panel, 1, wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
-                (self.rb_panel_on_focus, 1, wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),])
-    def on_ok(self, event):
-        """
-        """
-    def on_choose_panel(self, event):
-        """
-        """
 class Plugin:
     """
     Plug-in class to be instantiated by the GUI manager
@@ -195,7 +61,6 @@ class Plugin:
         ## Save a reference to the parent
         self.parent = parent
         # Connect to plotting events
-        self.parent.Bind(EVT_NEW_LOADED_DATA, self._on_plot)
         self.parent.Bind(EVT_NEW_PLOT, self._on_plot_event)
         # We have no initial panels for this plug-in
         return []
@@ -226,23 +91,7 @@ class Plugin:
         """show plug-in panel"""
         pass
     
-    def _on_plot(self, event):
-        """
-        check the contains of event.
-        if it is a list of data to plot plot each one at the time
-        """
-        list_of_data1d = []
-        if hasattr(event, "plots"):
-            for plot, path in event.plots:
-                print "plotting _on_plot"
-                if plot.__class__.__name__ == "Data2D":
-                    wx.PostEvent(self.parent, 
-                                 NewPlotEvent(plot=plot, title=plot.name))
-                else:
-                    list_of_data1d.append((plot, path))
-                    wx.PostEvent(self.parent, 
-                                 NewPlotEvent(plot=plot, title=plot.name))
-  
+    
     def _on_plot_event(self, event):
         """
         A new plottable is being shipped to the plotting plug-in.
@@ -328,23 +177,3 @@ class Plugin:
             
         return
         
-class Data(object): 
-    def __init__(self, name):
-        self.name = str(name)
-class MyApp(wx.App):
-    def OnInit(self):
-        wx.InitAllImageHandlers()
-        list =[Data(name="Data1D")]#,
-                                   # Data(name="Data2D"),Data(name="Data3D")]
-        dialog = PlottingDialog(list_of_data=list)
-        if dialog.ShowModal() == wx.ID_OK:
-            pass
-        dialog.Destroy()
-        
-        return 1
-  
-# end of class MyApp
-
-if __name__ == "__main__":
-    app = MyApp(0)
-    app.MainLoop()      

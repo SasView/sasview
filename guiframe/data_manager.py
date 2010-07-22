@@ -41,6 +41,17 @@ class DataManager(object):
         #gui manager 
         self.parent = parent
      
+    def get_data(self, data_list={}):
+        """
+        return 
+        """
+        if not data_list:
+            return self.available_data.values()
+        for data, path in data_list:
+            if data.name not in self.available_data.keys():
+                self.available_data[data.name] = (data, path)
+        return self.available_data.values()
+    
     def on_get_data(self, data_list, plot=False):
         """
         This method is a handler to an event sent by data_loader or theory
@@ -52,9 +63,9 @@ class DataManager(object):
         """
         for data, path in data_list:
             if data.name not in self.available_data.keys():
-                self.available_data[data.name] = data, path
+                self.available_data[data.name] = (data, path)
                 if plot:
-                    self.data_to_plot[data.name] = data, path
+                    self.data_to_plot[data.name] = (data, path)
           
         return self.get_sorted_list()
     
