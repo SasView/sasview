@@ -257,11 +257,10 @@ class Plugin:
         
         :param state: State object
         """
-        
         try:
             if datainfo is None:
                 raise RuntimeError, "invariant.set_state: datainfo parameter cannot be None in standalone mode"
-            datainfo.meta_data['invstate'].file = datainfo.meta_data['invstate'].file+"_copy"
+            datainfo.meta_data['invstate'].file = datainfo.meta_data['invstate'].file
             datainfo.name = datainfo.meta_data['invstate'].file
             datainfo.filename = datainfo.meta_data['invstate'].file
             self.__data = datainfo
@@ -273,9 +272,8 @@ class Plugin:
             # Load the invariant states
             # Make sure the user sees the invariant panel after loading
             self.parent.set_perspective(self.perspective)
-
             # set state
-            self.invariant_panel.set_state(state=temp_state,data=self.__data)                
+            self.invariant_panel.set_state(state=temp_state,data=self.__data)              
 
         except:
             logging.error("invariant.set_state: %s" % sys.exc_value)

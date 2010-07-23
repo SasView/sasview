@@ -41,7 +41,14 @@ list = {'file': 'None',
 state_list = {}
 bookmark_list = {}
 # list of input parameters (will be filled up on panel init) used by __str__ 
-input_list = {}   
+input_list = {'background_tcl':0,
+        'scale_tcl':0,
+        'contrast_tcl':0,
+        'porod_constant_tcl':'',
+        'npts_low_tcl':0,
+        'npts_high_tcl':0,
+        'power_high_tcl':0,
+        'power_low_tcl': 0}  
 # list of output parameters (order sensitive) used by __str__    
 output_list = [["qstar_low",                  "Q* from low Q extrapolation [1/(cm*A)]"],
                ["qstar_low_err",             "dQ* from low Q extrapolation"],
@@ -83,9 +90,18 @@ class InvariantState(object):
         
         self.compute_num = 0
         self.state_num = 0
-        self.timestamp = None
+        self.timestamp = "('00:00:00', '00/00/0000')"
         self.container = None
+        # report_html strings
+        import sans.perspectives.invariant as invariant
+        path = invariant.get_data_path(media='media')
+        path_report_html= os.path.join(path,"report_template.html")
+        html_template=open(path_report_html,"r")
+        self.template_str = html_template.read()
+        self.report_str = self.template_str
+        html_template.close()
         
+
         
     def __str__(self):
         """
@@ -198,7 +214,7 @@ class InvariantState(object):
                 state += "\n%s:   %s "%(item[1],format_number(value,high=True))
         # Include warning msg
         state += "\n\nNote:\n" + self.container.warning_msg
-
+        
         return state
 
     
@@ -368,7 +384,6 @@ class InvariantState(object):
                                 exec "temp_state['%s'] = %s"% (item,val)      
                             except:
                                 exec "temp_state['%s'] = '%s'"% (item,val)
-
                             
                     comp_entry = get_content('ns:comp_state', entry )
                     
@@ -415,8 +430,64 @@ class InvariantState(object):
                     if input_field is not None:
                         self.set_saved_state(name=item, value=val)
 
+    def set_report_string(self):
+        """
+        Get the values (strings) from __str__ for report 
+        """
+        strings = self.__str__()
+    
+        # default string values
+        for num in range (1,19):
+            exec "s_%s = 'NA'"% str(num)
+        lines = strings.split('\n')
+        # get all string values from __str__()
+        for line in range(0,len(lines)):
+            if line == 1:
+                s_1 = lines[1]
+            elif line == 2:
+                s_2 = lines[2]
+            else:
+                item = lines[line].split(':')
+                item[0] = item[0].strip()
+                if item[0]== "scale":
+                    s_3 = item[1]
+                elif item[0] == "porod constant":
+                    s_4 = item[1]
+                elif item[0] == "background":
+                    s_5 = item[1]
+                elif item[0] == "contrast":
+                    s_6 = item[1]
+                elif item[0] == "Extrapolation":
+                    extra = item[1].split(";")
+                    bool_0 = extra[0].split("=")
+                    bool_1 = extra[1].split("=")
+                    s_7 = " "+bool_0[0]+" = "+bool_0[1]
+                    s_8 = " "+bool_1[0]+" = "+bool_1[1]
+                elif item[0]=="npts low":
+                    s_9 = item[1]
+                elif item[0]=="npts high":
+                    s_10 = item[1]
+                elif item[0] == "volume fraction":
+                    s_17 = item[1]
+                elif item[0] == "specific surface":
+                    s_18 = item[1]
+                elif item[0].split("(")[0].strip()=="power high":
+                    s_11 = item[0]+" ="+item[1]
+                elif item[0].split("(")[0].strip()=="power low":
+                    s_12 = item[0]+" ="+item[1]
+                elif item[0].split("[")[0].strip()=="Q* from low Q extrapolation":
+                    s_13 = item[1]
+                elif item[0].split("[")[0].strip()=="Q* from data":
+                    s_14 = item[1]
+                elif item[0].split("[")[0].strip()=="Q* from high Q extrapolation":
+                    s_15 = item[1]
+                elif item[0].split("[")[0].strip()=="total Q*":
+                    s_16 = item[1]
+                else:
+                    continue
 
-            
+        self.report_str = str(self.template_str)% (s_1,s_2,s_3,s_4,s_5,s_6,s_7,s_8,s_9,s_10,s_11,s_12,s_13,s_14,s_15,s_16,s_17,s_18)
+
     def set_saved_state(self, name, value):
         """
         Set the state list 
