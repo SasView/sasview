@@ -92,6 +92,8 @@ class InvariantState(object):
         self.state_num = 0
         self.timestamp = "('00:00:00', '00/00/0000')"
         self.container = None
+        #plot image
+        self.wximbmp = None
         # report_html strings
         import sans.perspectives.invariant as invariant
         path = invariant.get_data_path(media='media')
@@ -486,8 +488,13 @@ class InvariantState(object):
                 else:
                     continue
 
-        self.report_str = str(self.template_str)% (s_1,s_2,s_3,s_4,s_5,s_6,s_7,s_8,s_9,s_10,s_11,s_12,s_13,s_14,s_15,s_16,s_17,s_18)
-
+        # make plot image
+        self.set_plot_state(extra_high=bool_0[1],extra_low=bool_1[1])
+        
+        # get ready for report with setting all the html strings
+        self.report_str = str(self.template_str)% (s_1,s_2,s_3,s_4,s_5,s_6,s_7,s_8,s_9,s_10,s_11,s_12,s_13,s_14,s_15,s_16,s_17,s_18,self.file,self.wximbmp)
+    
+    
     def set_saved_state(self, name, value):
         """
         Set the state list 
@@ -519,7 +526,57 @@ class InvariantState(object):
         except:           
             pass
 
+    def set_plot_state(self,extra_high=False,extra_low=False):
+        """
+        Build image state that wx.html understand
+        by plotting, putting it into wx.FileSystem image object
+        
+        : extrap_high,extra_low: low/high extrapolations are possible extra-plots
+        """
+        # some imports
+        import cStringIO
+        import matplotlib,wx
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        import Image
+        
+        #we use simple plot, not plotpanel
+        #make matlab figure
+        fig = plt.figure()
+        graph = fig.add_subplot(111)
+        
+        #data plot
+        graph.errorbar(self.data.x, self.data.y, yerr=self.data.dy, fmt='o')
+        #low Q extrapolation fit plot
+        if not extra_low == 'False':
+            graph.plot(self.theory_lowQ.x,self.theory_lowQ.y)
+        #high Q extrapolation fit plot
+        if not extra_high == 'False':
+            graph.plot(self.theory_highQ.x,self.theory_highQ.y)
+        graph.set_xscale("log", nonposx='clip')
+        graph.set_yscale("log", nonposy='clip')
+        plt.xlabel('$\\rm{Q}(\\AA^{-1})$', fontsize = 12)
+        plt.ylabel('$\\rm{Intensity}(cm^{-1})$', fontsize = 12)
 
+        #make python.Image object
+        imagedata = cStringIO.StringIO()
+        fig.savefig(imagedata,format='png')
+        imagedata.seek(0)
+        img = Image.open(imagedata) 
+        #convert to wx.Image
+        wxim = wx.EmptyImage(img.size[0],img.size[1])
+        wxim.SetData(img.convert("RGB").tostring())  
+        #get the dynamic image for the htmlwindow
+        wximbmp = wx.BitmapFromImage(wxim)
+        #store the image in wx.FileSystem Object 
+        wx.FileSystem.AddHandler(wx.MemoryFSHandler())
+        # use wx.MemoryFSHandler
+        self.imgRAM = wx.MemoryFSHandler()
+        #AddFile, image can be retrieved with 'memory:filename'
+        self.imgRAM.AddFile('img_inv.png',wximbmp, wx.BITMAP_TYPE_PNG)
+        
+        self.wximbmp = 'memory:img_inv.png'
+            
 
 class Reader(CansasReader):
     """

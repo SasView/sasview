@@ -17,7 +17,7 @@ Dialog report panel to show and summarize the results of the invariant calculati
 import wx
 import sys,os
 import wx.html as html
-
+import Image
 if sys.platform.count("win32")>0:
     _STATICBOX_WIDTH = 450
     PANEL_WIDTH = 500 
@@ -44,6 +44,7 @@ class ReportDialog(wx.Dialog):
         """
         kwds["style"] = wx.RESIZE_BORDER|wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self, *args, **kwds)
+        kwds["image"] = 'Dynamic Image'
         # title
         self.SetTitle("Report: Invariant computaion")
         # size
@@ -54,7 +55,7 @@ class ReportDialog(wx.Dialog):
         self.report_string =string
         # layout
         self._setup_layout()
-
+        
     def _setup_layout(self):
         """
         Set up layout
@@ -74,7 +75,7 @@ class ReportDialog(wx.Dialog):
         button_preview = wx.Button(self, id, "Preview")
         button_preview.SetToolTipString("Print preview this report.")
         button_preview.Bind(wx.EVT_BUTTON, self.onPreview, id = button_preview.GetId()) 
-        #hbox.Add(button_preview)
+        hbox.Add(button_preview)
 
         id = wx.NewId()
         button_print = wx.Button(self, id, "Print")
@@ -99,21 +100,47 @@ class ReportDialog(wx.Dialog):
         self.Centre()
         self.Show(True)
 
-    def onSave(self,event):
+    def onSave(self,event=None):
         """
+        Save
         """
-        pass
+        #todo: complete saving fig file and as a txt file
+        dlg = wx.FileDialog(self, "Choose a file",\
+                            wildcard ='HTML files (*.html)|*.html|'+
+                            'Text files (*.txt)|*.txt',
+                            style = wx.SAVE|wx.OVERWRITE_PROMPT|wx.CHANGE_DIR)
+        dlg.SetFilterIndex(0) #Set .html files to be default
+
+        if dlg.ShowModal() != wx.ID_OK:
+          dlg.Destroy()
+          return
+        fName = dlg.GetPath()
+        fName = os.path.splitext(fName)[0] + '.html'
+        dlg.Destroy()
     
-    def onPreview(self,event):
-        """
-        """
-        pass
+        html = self.report_string
+        f = open(fName, 'w')
+        f.write(html)
+        f.close()
+
     
-    def onPrint(self,event):
+    def onPreview(self,event=None):
         """
-        """
-        gg=html.HtmlEasyPrinting(name="Printing", parentWindow=self)
+        Preview
         
-        gg.PreviewText(self.report_string)
+        : event: Preview button event
+        """
+        previewh=html.HtmlEasyPrinting(name="Printing", parentWindow=self)
+        previewh.PreviewText(self.report_string)
+    
+    def onPrint(self,event=None):
+        """
+        Print
+        
+        : event: Print button event
+        """
+        printh=html.HtmlEasyPrinting(name="Printing", parentWindow=self)
+        printh.PrintText(self.report_string)
+
         
         

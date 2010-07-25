@@ -6,6 +6,7 @@ This module provide GUI for the neutron scattering length density calculator
 import wx
 
 import sys,os
+
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.invariant import invariant
 from sans.guiframe.utils import format_number, check_float
@@ -80,7 +81,7 @@ class InvariantPanel(ScrolledPanel):
         # default flags for state
         self.new_state = False
         self.is_power_out = False
-        
+
         #container of invariant value
         self.inv_container = None
         #Draw the panel
@@ -94,7 +95,7 @@ class InvariantPanel(ScrolledPanel):
             
         ## Default file location for save
         self._default_save_location = os.getcwd()
- 
+        
     def err_check_on_data(self):
         """
         Check if data is valid for further computation
@@ -647,7 +648,8 @@ class InvariantPanel(ScrolledPanel):
         """
         from report_dialog import ReportDialog
 
-        report_string = self.state.report_str
+        self.state.set_report_string()
+        report_string = self.state.report_str 
         dialog = ReportDialog(report_string, None, -1, "")
         dialog.ShowModal()
         
@@ -1137,6 +1139,7 @@ class InvariantPanel(ScrolledPanel):
             return True
         else:
             return False
+
         
     def _reset_output(self):
         """
@@ -1700,6 +1703,8 @@ class InvariantPanel(ScrolledPanel):
         Do the layout for the save button widgets
         """ 
         import sans.perspectives.invariant as invariant
+        #from wx.lib.buttons import GenBitmapTextButton
+
         path = invariant.get_data_path(media='media')
         self.undo_png = os.path.join(path,"undo.png")
         self.redo_png = os.path.join(path,"redo.png")
@@ -1710,6 +1715,8 @@ class InvariantPanel(ScrolledPanel):
         id = wx.NewId()
         self.button_undo = wx.BitmapButton(self, id,wx.Bitmap(self.undo_png))#wx.Button(self, id, "Undo",size=(50,20))
         self.button_undo.SetToolTipString("Undo")
+        #self.button_undo.SetBackgroundColour('#c2e6f8')
+
         self.Bind(wx.EVT_BUTTON, self.undo, id=id)
         self.button_undo.Disable()
         #redo button
@@ -1723,7 +1730,6 @@ class InvariantPanel(ScrolledPanel):
         self.button_bookmark = wx.BitmapButton(self, id,wx.Bitmap(self.bookmark_png))#wx.Button(self, id, "Undo",size=(50,20))
         self.button_bookmark.SetToolTipString("Bookmark: right-click on the panel to retrieve")
         self.Bind(wx.EVT_BUTTON, self._on_bookmark, id=id)
-        #self.button_bookmark.Disable()
         #report button
         id = wx.NewId()
         self.button_report = wx.BitmapButton(self, id,wx.Bitmap(self.report_png))#wx.Button(self, id, "Redo",size=(50,20))
