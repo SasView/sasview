@@ -190,12 +190,12 @@ def plot_data(parent, path):
             output.filename = str(filename)
         ## name of the data allow to differentiate data when plotted
         name = parse_name(name=output.filename, expression="_")
-        if not name in parent.indice_load_data.keys():
-            parent.indice_load_data[name] = 0
-        else:
+        #if not name in parent.indice_load_data.keys():
+        #    parent.indice_load_data[name] = 0
+        #else:
             ## create a copy of the loaded data
-            parent.indice_load_data[name] += 1
-            name = name +"[%i]"%parent.indice_load_data[name]
+        #    parent.indice_load_data[name] += 1
+        #    name = name +"[%i]"%parent.indice_load_data[name]
        
         new_plot.name = name
         ## allow to highlight data when plotted
@@ -221,8 +221,7 @@ def plot_data(parent, path):
                     if open_dialog_append_data(panel_name, data_name):
                         #add this plot the an existing panel
                         new_plot.group_id = existing_panel.group_id
-        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=title))
-        
+        parent.set_loaded_data(data_list=[(new_plot, path)])
     ## the output of the loader is a list , some xml files contain more than one data
     else:
         i=1
@@ -278,6 +277,6 @@ def plot_data(parent, path):
                     if open_dialog_append_data(panel_name, data_name):
                         #add this plot the an existing panel
                         new_plot.group_id = existing_panel.group_id
-            wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
+            parent.set_loaded_data(data_list=[(new_plot, path)])
             i+=1
          

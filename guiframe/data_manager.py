@@ -22,104 +22,47 @@ class DataManager(object):
     """
     def __init__(self, parent):
         """
-        Initialize the class. This class is binded with event sent by 
-        sans.guiframe.data_loader, sans.perspective.theoryview.theory 
-        to collected data created and loaded data.
-        
-         
-        attribute::  available_data  is dictionary of data
-        attribute::  data_to_plot  dictionary  of data to plot automatically
-        attribute:: sorted_data is a list of tuples containing  data's name,
-                data's type(Data1D, Data2, Theory1D, Theory2D), data of
-                 modification etc. 
-        :param parent: is the class that instantiates this object.
-         for sansview :parent is gui_manager
+        Store opened path and data object created at the loading time
         """
-        self.available_data = {}
-        self.sorted_data = {}
-        self.selected_data_list = []
-        #gui manager 
-        self.parent = parent
-     
-    def get_data(self, data_list={}):
+        self.loaded_data_list = []
+        self.created_data_list = []
+        self.list_of_data = []
+        self.message = ""
+        
+    def get_message(self):
+        """
+        return message
+        """
+        return self.message
+    
+    def set_loaded_data(self, data_list=[]):
+        """
+        save data and path
+        """
+        if not data_list:
+            return
+        else:
+            for data, path in data_list:
+                if data.name not in self.list_of_data:
+                    self.loaded_data_list.append((data, path))
+                    self.list_of_data.append(data.name)
+                else:
+                    self.message += " %s already loaded"%str(data.name)
+        
+    def set_created_data(self, data_list=[]):
         """
         return 
         """
-        if not data_list:
-            return self.available_data.values()
         for data, path in data_list:
-            if data.name not in self.available_data.keys():
-                self.available_data[data.name] = (data, path)
-        return self.available_data.values()
+            for created_data, created_path in self.created_data_list:
+                if data.name == created_data.name:
+                    self.message += " %s already created"%str(data.name)
+                else:
+                    self.created_data_list.append((data, path))
     
-    def on_get_data(self, data_list, plot=False):
+    def get_data(self):
         """
-        This method is a handler to an event sent by data_loader or theory
-        perspective. It gets a list of data object through that event
-        and stores that list into available_data dictionary. Only new data are 
-        stored.
-        
-        param event: contains a list of data. The size of the list is >= 1
+        Send list of available data
         """
-        for data, path in data_list:
-            if data.name not in self.available_data.keys():
-                self.available_data[data.name] = (data, path)
-                if plot:
-                    self.data_to_plot[data.name] = (data, path)
-          
-        return self.get_sorted_list()
-    
-    def sort_data(self):
-        """
-        Get the dictionary of data and created a list of turple of data's name,
-                data's type(Data1D, Data2, Theory1D, Theory2D), data of
-                 modification etc. 
-        In other words extra data from available_data dictionary and create 
-        sorted_data_list.
-        """
-        self.sorted_data = {}
-        index = 1
-        for data, path in self.available_data.values():
-            self.sorted_data[index]= (data.name, data.__class__.__name__,
-                                      "created on...", path)
-            index += 1
-        return self.sorted_data.values()  
-    
-    def get_sorted_list(self):
-        """
-        Return a list of turple of data sorted
-        return: sorted_data_list .
-        """
-        return self.sort_data()
-        
-    def remove_data(self, data_name_list):
-        """
-        Remove data which names are in data_name_list from available_data and
-        sorted_data_list. Post an event to all perspectives(including plotting
-         perspective) to remove all reference of these data from themselves .
-        
-        param data_name_list: a list containing names of data to remove from 
-        the whole application.
-        """
-        for data_name in data_name_list:
-            del self.available_data[data_name]
-            del self.data_to_plot[data_name]
-        return self.get_sorted_list()
-        
-    def post_data(self, data_name_list, perspective=None,plot=False):
-        """
-        Set data from available_data for with the name is in data_name_list
-        and post these data to the current active perspective
-        """
-        self.selected_data_list = []
-        for data_name in data_name_list:
-            self.selected_data_list.append(self.available_data[data_name])
-        self.parent.post_data(list_of_data=self.selected_data_list, 
-                              perspective=perspective,plot=plot)
-        
-    def get_selected_data(self):
-        """
-        """
-        return self.selected_data_list
-        
+        return   self.loaded_data_list + self.created_data_list
         
