@@ -194,7 +194,7 @@ class InvariantPanel(ScrolledPanel):
                 self.hint_msg_txt.SetForegroundColour("black")
                 wx.PostEvent(self.parent,StatusEvent(status=msg,info="info"))
             self.hint_msg_txt.SetLabel(msg)
-        self.data_name_boxsizer.Layout()
+            
        
     def set_manager(self, manager):
         """
@@ -237,7 +237,8 @@ class InvariantPanel(ScrolledPanel):
             self.get_state_by_num(state_num=str(num))
             
             self._get_input_list() 
-            
+            #make sure that the data is reset (especially when loaded from a inv file)
+            self.state.data = self._data
             self.new_state = False 
             
 
@@ -594,7 +595,7 @@ class InvariantPanel(ScrolledPanel):
 
         #enable the button_ok for more details
         self.button_details.Enable()
-        self.button_details.SetFocus()
+
         if event != None: 
             self.button_report.Enable(True)
             wx.PostEvent(self.parent, StatusEvent(status = '\nFinished invariant computation...'))
@@ -613,9 +614,9 @@ class InvariantPanel(ScrolledPanel):
         self.get_state_by_num(state_num=str(pre_state_num))
         
         if float(pre_state_num) <=0:
-            self.button_undo.Disable()
-        elif not self.button_undo.Enabled:
-            self.button_undo.Enable(True)
+            self._undo_disable()
+        else:
+            self._undo_enable()
 
         self._redo_enable()
         self.is_power_out = False  
@@ -630,14 +631,15 @@ class InvariantPanel(ScrolledPanel):
         """
         if event != None: event.Skip()
         self.is_power_out = True
+        # get the next state_num
         next_state_num = int(self.state.saved_state['state_num']) + 1
 
         self.get_state_by_num(state_num=str(next_state_num))
         
         if float(next_state_num)+2 > len(self.state.state_list):
-            self.button_redo.Disable()
+            self._redo_disable()
         elif not self.button_redo.Enabled:
-            self.button_redo.Enable(True)
+            self._redo_enable()
         
         self._undo_enable()
         self.is_power_out = False
@@ -652,8 +654,11 @@ class InvariantPanel(ScrolledPanel):
         from report_dialog import ReportDialog
 
         self.state.set_report_string()
-        report_string = self.state.report_str 
-        dialog = ReportDialog(report_string, None, -1, "")
+        report_html_str = self.state.report_str
+        report_text_str = self.state.__str__()
+        report_img = self.state.image
+        report_list = [report_html_str,report_text_str,report_img]
+        dialog = ReportDialog(report_list, None, -1, "")
         dialog.ShowModal()
         
     def get_state_by_num(self,state_num=None):
@@ -661,9 +666,7 @@ class InvariantPanel(ScrolledPanel):
         Get the state given by number
         
         : param state_num: the given state number
-        
-        """
-       
+        """     
         if state_num == None:
             return
 
@@ -693,13 +696,8 @@ class InvariantPanel(ScrolledPanel):
         self.compute_invariant(event=None)
         # set the input params at the state at pre_state_num
         for key in current_state:
-            # Do not reset set some outputs
-            #key_split = key.split('_') 
-            #if key_split[0] == 'surface' or key_split[0] == 'volume':
-            #    continue
             # set the inputs and boxes
             value = current_state[key]
-
             try:
                 exec 'self.%s.SetValue(str(%s))' % (key, value)
             except TypeError:
@@ -707,14 +705,12 @@ class InvariantPanel(ScrolledPanel):
             except:
                 pass
 
-        
         self._enable_high_q_section(event=None)
         self._enable_low_q_section(event=None)
         self.state.state_list = backup_state_list
         self.state.saved_state = current_state
         self.state.state_num = state_num
-        
-        
+           
         
     def get_bookmark_by_num(self, num=None):
         """
@@ -797,7 +793,6 @@ class InvariantPanel(ScrolledPanel):
         Set the state list
         
         :param event: rb/cb event
-        
         """
         if event == None:
             return
@@ -1015,7 +1010,7 @@ class InvariantPanel(ScrolledPanel):
         # name and message of the bookmark list
         msg=  "State saved at %s on %s"%(my_time, date)
          ## post help message for the selected model 
-        msg +=" Saved! right click on this page to retrieve this model"
+        msg +=" Right click on the panel to retrieve this state"
         #wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         name = "%d] bookmarked at %s on %s"%(self.bookmark_num,my_time, date)
         
@@ -1027,6 +1022,8 @@ class InvariantPanel(ScrolledPanel):
         comp_state = copy.deepcopy(self.state.state_list[str(compute_num)])
         self.state.bookmark_list[self.bookmark_num] = [my_time,date,state,comp_state]
         self.state.toXML(self, doc=None, entry_node=None)
+        
+        wx.PostEvent(self.parent,StatusEvent(status=msg,info="info"))
 
     def _back_to_bookmark(self,event):
         """
@@ -1718,10 +1715,9 @@ class InvariantPanel(ScrolledPanel):
         """
         Do the layout for the save button widgets
         """ 
-        import sans.perspectives.invariant as invariant
-        #from wx.lib.buttons import GenBitmapTextButton
+        import sans.perspectives.invariant as inv
 
-        path = invariant.get_data_path(media='media')
+        path = inv.get_data_path(media='media')
         self.undo_png = os.path.join(path,"undo.png")
         self.redo_png = os.path.join(path,"redo.png")
         self.bookmark_png = os.path.join(path,"bookmark.png")
@@ -1732,19 +1728,18 @@ class InvariantPanel(ScrolledPanel):
         self.button_undo = wx.BitmapButton(self, id,wx.Bitmap(self.undo_png))#wx.Button(self, id, "Undo",size=(50,20))
         self.button_undo.SetToolTipString("Undo")
         #self.button_undo.SetBackgroundColour('#c2e6f8')
-
         self.Bind(wx.EVT_BUTTON, self.undo, id=id)
-        self.button_undo.Disable()
+        self._undo_disable()
         #redo button
         id = wx.NewId()
         self.button_redo = wx.BitmapButton(self, id,wx.Bitmap(self.redo_png))#wx.Button(self, id, "Redo",size=(50,20))
         self.button_redo.SetToolTipString("Redo")
         self.Bind(wx.EVT_BUTTON, self.redo, id=id)
-        self.button_redo.Disable()   
+        self._redo_disable()   
         #bookmark button
         id = wx.NewId()
         self.button_bookmark = wx.BitmapButton(self, id,wx.Bitmap(self.bookmark_png))#wx.Button(self, id, "Undo",size=(50,20))
-        self.button_bookmark.SetToolTipString("Bookmark: right-click on the panel to retrieve")
+        self.button_bookmark.SetToolTipString("Bookmark: right-click on the panel to retrieve it")
         self.Bind(wx.EVT_BUTTON, self._on_bookmark, id=id)
         #report button
         id = wx.NewId()
