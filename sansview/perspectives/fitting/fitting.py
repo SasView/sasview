@@ -669,14 +669,22 @@ class Plugin:
             # add data associated to the page created
             if page != None:  
                 self.store_page(page=page, data=data)
+                if hasattr(data,"title"):
+                    title = str(data.title.lstrip().rstrip())
+                    if title == "":
+                        title = str(data.name)
+                else:
+                    title = str(data.name)
+                wx.PostEvent(self.parent, NewPlotEvent(plot=data, title=title))
                 wx.PostEvent(self.parent, StatusEvent(status="Page Created",
                                                info="info"))
             else:
                 msg = "Page was already Created"
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="warning"))
         except:
-            msg = "Creating Fit page: %s"%sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
+            raise
+            #msg = "Creating Fit page: %s"%sys.exc_value
+            #wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
        
     def _onEVT_SLICER_PANEL(self, event):
         """
