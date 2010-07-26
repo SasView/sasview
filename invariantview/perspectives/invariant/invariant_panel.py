@@ -81,7 +81,7 @@ class InvariantPanel(ScrolledPanel):
         # default flags for state
         self.new_state = False
         self.is_power_out = False
-        
+
         #container of invariant value
         self.inv_container = None
         #Draw the panel
@@ -95,7 +95,7 @@ class InvariantPanel(ScrolledPanel):
             
         ## Default file location for save
         self._default_save_location = os.getcwd()
- 
+        
     def err_check_on_data(self):
         """
         Check if data is valid for further computation
@@ -215,16 +215,15 @@ class InvariantPanel(ScrolledPanel):
             self.state = state   
 
             num = self.state.saved_state['state_num']
-            self.get_state_by_num(state_num=num)
             
             if num > 0 :
                 self._undo_enable()
             if num < len(state.state_list)-1:
                 self._redo_enable()
                 
-            
             # get bookmarks
             self.bookmark_num = len(self.state.bookmark_list)
+
             total_bookmark_num = self.bookmark_num+1
             for ind in range(1,total_bookmark_num):
                 #bookmark_num = ind
@@ -233,12 +232,11 @@ class InvariantPanel(ScrolledPanel):
                 # append it to menu
                 id = wx.NewId()
                 self.popUpMenu.Append(id,name,str(''))
-                 wx.EVT_MENU(self, id, self._back_to_bookmark) 
+                wx.EVT_MENU(self, id, self._back_to_bookmark) 
 
             self.get_state_by_num(state_num=str(num))
             
             self._get_input_list() 
-          
             
             self.new_state = False 
             
@@ -506,6 +504,7 @@ class InvariantPanel(ScrolledPanel):
             self.button_bookmark.Enable(True)
             msg= "\n\nStarting a new invariant computation..."            
             wx.PostEvent(self.parent, StatusEvent(status=msg))
+            
 
         if self._data is None or self.err_check_on_data():
             return
@@ -592,14 +591,14 @@ class InvariantPanel(ScrolledPanel):
             self.state.set_report_string()
             self.is_power_out = False
             wx.PostEvent(self.parent, StatusEvent(status = msg ))
-        
+
         #enable the button_ok for more details
         self.button_details.Enable()
         self.button_details.SetFocus()
         if event != None: 
             self.button_report.Enable(True)
             wx.PostEvent(self.parent, StatusEvent(status = '\nFinished invariant computation...'))
-    
+        
     def undo(self,event=None):
         """
         Go back to the previous state
@@ -669,7 +668,7 @@ class InvariantPanel(ScrolledPanel):
             return
 
         backup_state_list = copy.deepcopy(self.state.state_list)
-
+        
         # get the previous state
         try:
             current_state = copy.deepcopy(self.state.state_list[str(state_num)])
@@ -677,7 +676,7 @@ class InvariantPanel(ScrolledPanel):
             current_compute_num = str(current_state['compute_num'])
         except :
             raise ValueError,  "No such state exists in history"
-
+        
         # get the state at pre_compute_num
         comp_state = copy.deepcopy(self.state.state_list[current_compute_num])
 
@@ -690,7 +689,7 @@ class InvariantPanel(ScrolledPanel):
                 exec "self.%s.SetValue(%s)" % (key, value)
             except:
                 pass
-            
+          
         self.compute_invariant(event=None)
         # set the input params at the state at pre_state_num
         for key in current_state:
@@ -714,7 +713,8 @@ class InvariantPanel(ScrolledPanel):
         self.state.state_list = backup_state_list
         self.state.saved_state = current_state
         self.state.state_num = state_num
-
+        
+        
         
     def get_bookmark_by_num(self, num=None):
         """
@@ -754,7 +754,7 @@ class InvariantPanel(ScrolledPanel):
             except:
                 pass
         self.state.saved_state = copy.deepcopy(current_state)
-
+       
         self._enable_high_q_section(event=None)
         self._enable_low_q_section(event=None)
         self.state.state_list = backup_state_list
@@ -873,6 +873,7 @@ class InvariantPanel(ScrolledPanel):
         # Enable the undo button if it was not
         self._undo_enable()
         self._redo_disable()
+        
         
     def _reset_state_list(self,data=None):
         """
@@ -1141,6 +1142,7 @@ class InvariantPanel(ScrolledPanel):
             return True
         else:
             return False
+
         
     def _reset_output(self):
         """
@@ -1234,8 +1236,7 @@ class InvariantPanel(ScrolledPanel):
         #Data name [string]
         data_name_txt = wx.StaticText(self, -1, 'Data : ')  
        
-        self.data_name_tcl = OutputTextCtrl(self, -1,size=(260,20), style=0, 
-                                            name='data_name_tcl') 
+        self.data_name_tcl = OutputTextCtrl(self, -1,size=(260,20), style=0, name='data_name_tcl') 
         self.data_name_tcl.SetToolTipString("Data's name.")
         self.loaded_data_name_sizer.AddMany([(self.data_txt, 0,
                                                wx.LEFT|wx.RIGHT, 10),
@@ -1251,7 +1252,6 @@ class InvariantPanel(ScrolledPanel):
         data_max_txt = wx.StaticText(self, -1, 'Max : ') 
         self.data_max_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0, name='data_max_tcl') 
         self.data_max_tcl.SetToolTipString("The maximum value of q range.")
-       
         self.data_range_sizer.AddMany([(data_range_txt, 0, wx.RIGHT, 10),
                                        (data_min_txt, 0, wx.RIGHT, 10),
                                        (self.data_min_tcl, 0, wx.RIGHT, 10),
