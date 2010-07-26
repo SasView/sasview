@@ -81,7 +81,7 @@ class InvariantPanel(ScrolledPanel):
         # default flags for state
         self.new_state = False
         self.is_power_out = False
-
+        
         #container of invariant value
         self.inv_container = None
         #Draw the panel
@@ -95,7 +95,7 @@ class InvariantPanel(ScrolledPanel):
             
         ## Default file location for save
         self._default_save_location = os.getcwd()
-        
+ 
     def err_check_on_data(self):
         """
         Check if data is valid for further computation
@@ -113,33 +113,37 @@ class InvariantPanel(ScrolledPanel):
                                                       type="stop")) 
         return flag
     
+    def on_select_data(self, event=None):
+        """
+        """
+        n = self.data_cbbox.GetCurrentSelection()
+        data, path = self.data_cbbox.GetClientData(n)
+        self._manager.compute_helper(data=data)
+        title = os.path.basename(path)
+        if hasattr(data,"title"):
+            title = str(data.title.lstrip().rstrip())
+            if title == "":
+                title = str(data.name)
+        else:
+            title = str(data.name)
+        wx.PostEvent(self.parent, NewPlotEvent(plot=data, title=title))
+    
     def set_data(self, list=[], state=None):
         """
         Receive  a list of data from gui_manager to compute invariant
         """
-        if list==[]:
-            msg = "Please select data for Invariant perspective.\n"
-            dial = wx.MessageDialog(None, msg, 'Error Loading File', 
-                                    wx.OK | wx.ICON_EXCLAMATION)
-            dial.ShowModal() 
-            return
-        elif len(list) == 1:
-            data, filepath = list[0]
-            if data.__class__.__name__ == "Data2D":
-                msg = "Invariant cannot be computed for Data2D.\n"
-                msg += "Please load another file.\n"
-                dial = wx.MessageDialog(None, msg, 'Error Loading File', 
-                                        wx.OK | wx.ICON_EXCLAMATION)
-                dial.ShowModal() 
-            else:
-                 self.set_current_data(data=data)
-        else:
-            msg = " Invariant cannot be computed for more than one data.\n"
-            msg += "Please load only file.\n"
-            dial = wx.MessageDialog(None, msg, 'Error Loading File', 
-                                    wx.OK | wx.ICON_EXCLAMATION)
-            dial.ShowModal() 
-    
+        if not list:
+            return 
+        for data, path in list:
+            if data.__class__.__name__ != "Data2D" and \
+                data.name not in self.data_cbbox.GetItems():
+                self.data_cbbox.Insert(item=data.name, pos=0,
+                                    clientData=(data, path))
+        if self.data_cbbox.GetCount() >0:
+            self.data_cbbox.SetSelection(0)
+            self.data_cbbox.Enable()
+            self.on_select_data(event=None)
+            
     def set_current_data(self, data):
         """
         Set the data
@@ -205,22 +209,22 @@ class InvariantPanel(ScrolledPanel):
         if state == None or data == None:
             self.state = IState()
         else:
-            
             if not self.set_current_data(data):
                 return
             self.new_state = True
             self.state = state   
 
             num = self.state.saved_state['state_num']
+            self.get_state_by_num(state_num=num)
             
             if num > 0 :
                 self._undo_enable()
             if num < len(state.state_list)-1:
                 self._redo_enable()
                 
+            
             # get bookmarks
             self.bookmark_num = len(self.state.bookmark_list)
-
             total_bookmark_num = self.bookmark_num+1
             for ind in range(1,total_bookmark_num):
                 #bookmark_num = ind
@@ -229,11 +233,12 @@ class InvariantPanel(ScrolledPanel):
                 # append it to menu
                 id = wx.NewId()
                 self.popUpMenu.Append(id,name,str(''))
-                wx.EVT_MENU(self, id, self._back_to_bookmark) 
+                 wx.EVT_MENU(self, id, self._back_to_bookmark) 
 
             self.get_state_by_num(state_num=str(num))
             
             self._get_input_list() 
+          
             
             self.new_state = False 
             
@@ -501,7 +506,6 @@ class InvariantPanel(ScrolledPanel):
             self.button_bookmark.Enable(True)
             msg= "\n\nStarting a new invariant computation..."            
             wx.PostEvent(self.parent, StatusEvent(status=msg))
-            
 
         if self._data is None or self.err_check_on_data():
             return
@@ -588,14 +592,14 @@ class InvariantPanel(ScrolledPanel):
             self.state.set_report_string()
             self.is_power_out = False
             wx.PostEvent(self.parent, StatusEvent(status = msg ))
-
+        
         #enable the button_ok for more details
         self.button_details.Enable()
         self.button_details.SetFocus()
         if event != None: 
             self.button_report.Enable(True)
             wx.PostEvent(self.parent, StatusEvent(status = '\nFinished invariant computation...'))
-        
+    
     def undo(self,event=None):
         """
         Go back to the previous state
@@ -665,7 +669,7 @@ class InvariantPanel(ScrolledPanel):
             return
 
         backup_state_list = copy.deepcopy(self.state.state_list)
-        
+
         # get the previous state
         try:
             current_state = copy.deepcopy(self.state.state_list[str(state_num)])
@@ -673,7 +677,7 @@ class InvariantPanel(ScrolledPanel):
             current_compute_num = str(current_state['compute_num'])
         except :
             raise ValueError,  "No such state exists in history"
-        
+
         # get the state at pre_compute_num
         comp_state = copy.deepcopy(self.state.state_list[current_compute_num])
 
@@ -686,7 +690,7 @@ class InvariantPanel(ScrolledPanel):
                 exec "self.%s.SetValue(%s)" % (key, value)
             except:
                 pass
-          
+            
         self.compute_invariant(event=None)
         # set the input params at the state at pre_state_num
         for key in current_state:
@@ -710,8 +714,7 @@ class InvariantPanel(ScrolledPanel):
         self.state.state_list = backup_state_list
         self.state.saved_state = current_state
         self.state.state_num = state_num
-        
-        
+
         
     def get_bookmark_by_num(self, num=None):
         """
@@ -751,7 +754,7 @@ class InvariantPanel(ScrolledPanel):
             except:
                 pass
         self.state.saved_state = copy.deepcopy(current_state)
-       
+
         self._enable_high_q_section(event=None)
         self._enable_low_q_section(event=None)
         self.state.state_list = backup_state_list
@@ -870,7 +873,6 @@ class InvariantPanel(ScrolledPanel):
         # Enable the undo button if it was not
         self._undo_enable()
         self._redo_disable()
-        
         
     def _reset_state_list(self,data=None):
         """
@@ -1139,7 +1141,6 @@ class InvariantPanel(ScrolledPanel):
             return True
         else:
             return False
-
         
     def _reset_output(self):
         """
@@ -1177,6 +1178,7 @@ class InvariantPanel(ScrolledPanel):
         self.data_name_boxsizer = wx.StaticBoxSizer(data_name_box, wx.VERTICAL)
         self.data_name_boxsizer.SetMinSize((PANEL_WIDTH,-1))
         self.hint_msg_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.loaded_data_name_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.data_name_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.data_range_sizer = wx.BoxSizer(wx.HORIZONTAL)
         #Sizer related to background and scale
@@ -1222,13 +1224,25 @@ class InvariantPanel(ScrolledPanel):
         msg = "Highlight = mouse the mouse's cursor on the data until the plot's color changes to yellow"
         self.hint_msg_txt.SetToolTipString(msg)
         self.hint_msg_sizer.Add(self.hint_msg_txt)
+        
+        self.data_txt = wx.StaticText(self, -1,"Loaded Data: ")
+        self.data_cbbox = wx.ComboBox(self, -1, size=(260,20))
+        self.data_cbbox.Disable()
+        wx.EVT_COMBOBOX(self.data_cbbox ,-1, self.on_select_data) 
+        
+
         #Data name [string]
         data_name_txt = wx.StaticText(self, -1, 'Data : ')  
        
-        self.data_name_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH*5, 20), style=0, name='data_name_tcl') 
+        self.data_name_tcl = OutputTextCtrl(self, -1,size=(260,20), style=0, 
+                                            name='data_name_tcl') 
         self.data_name_tcl.SetToolTipString("Data's name.")
+        self.loaded_data_name_sizer.AddMany([(self.data_txt, 0,
+                                               wx.LEFT|wx.RIGHT, 10),
+                                      (self.data_cbbox, 0, wx.EXPAND)])
         self.data_name_sizer.AddMany([(data_name_txt, 0, wx.LEFT|wx.RIGHT, 10),
-                                       (self.data_name_tcl, 0, wx.EXPAND)])
+                                       (self.data_name_tcl, 0, wx.EXPAND|wx.LEFT,35)])
+    
         #Data range [string]
         data_range_txt = wx.StaticText(self, -1, 'Total Q Range (1/A): ') 
         data_min_txt = wx.StaticText(self, -1, 'Min : ')  
@@ -1237,14 +1251,16 @@ class InvariantPanel(ScrolledPanel):
         data_max_txt = wx.StaticText(self, -1, 'Max : ') 
         self.data_max_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0, name='data_max_tcl') 
         self.data_max_tcl.SetToolTipString("The maximum value of q range.")
+       
         self.data_range_sizer.AddMany([(data_range_txt, 0, wx.RIGHT, 10),
                                        (data_min_txt, 0, wx.RIGHT, 10),
                                        (self.data_min_tcl, 0, wx.RIGHT, 10),
                                        (data_max_txt, 0, wx.RIGHT, 10),
                                        (self.data_max_tcl, 0, wx.RIGHT, 10)])
         self.data_name_boxsizer.AddMany([(self.hint_msg_sizer, 0 , wx.ALL, 5),
-                                         (self.data_name_sizer, 0 , wx.RIGHT, 10),
-                                         (self.data_range_sizer, 0 , wx.ALL, 10)])
+                            (self.loaded_data_name_sizer, 0 , wx.ALL, 10),
+                                    (self.data_name_sizer, 0 , wx.LEFT|wx.RIGHT, 10),
+                                     (self.data_range_sizer, 0 , wx.ALL, 10)])
     
     def _layout_bkg_scale(self):
         """
