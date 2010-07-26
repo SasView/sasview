@@ -101,6 +101,7 @@ class InvariantState(object):
         html_template=open(path_report_html,"r")
         self.template_str = html_template.read()
         self.report_str = self.template_str
+        #self.report_str_save = None
         html_template.close()
         
 
@@ -210,7 +211,7 @@ class InvariantState(object):
                     value = float(value)*100
                 except:
                     pass
-                state += "(%s %s)"%(format_number(value),'%')
+                state += "(%s %s)"%(format_number(value),'o/o')
             # Outputs
             else:
                 state += "\n%s:   %s "%(item[1],format_number(value,high=True))
@@ -463,8 +464,8 @@ class InvariantState(object):
                     extra = item[1].split(";")
                     bool_0 = extra[0].split("=")
                     bool_1 = extra[1].split("=")
-                    s_7 = " "+bool_0[0]+" = "+bool_0[1]
-                    s_8 = " "+bool_1[0]+" = "+bool_1[1]
+                    s_7 = " "+bool_0[0]+"Q region = "+bool_0[1]
+                    s_8 = " "+bool_1[0]+"Q region = "+bool_1[1]
                 elif item[0]=="npts low":
                     s_9 = item[1]
                 elif item[0]=="npts high":
@@ -490,11 +491,10 @@ class InvariantState(object):
 
         # make plot image
         self.set_plot_state(extra_high=bool_0[1],extra_low=bool_1[1])
-        
         # get ready for report with setting all the html strings
-        self.report_str = str(self.template_str)% (s_1,s_2,s_3,s_4,s_5,s_6,s_7,s_8,s_9,s_10,s_11,s_12,s_13,s_14,s_15,s_16,s_17,s_18,self.file,self.wximbmp)
-    
-    
+        self.report_str =  str(self.template_str)% (s_1,s_2,s_3,s_4,s_5,s_6,s_7,s_8,s_9,s_10,s_11,s_12,s_13,s_14,s_15,s_16,s_17,s_18,self.file,"%s")
+
+
     def set_saved_state(self, name, value):
         """
         Set the state list 
@@ -576,7 +576,7 @@ class InvariantState(object):
         self.imgRAM.AddFile('img_inv.png',wximbmp, wx.BITMAP_TYPE_PNG)
         
         self.wximbmp = 'memory:img_inv.png'
-            
+        self.image = img
 
 class Reader(CansasReader):
     """

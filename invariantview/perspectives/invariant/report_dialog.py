@@ -18,6 +18,7 @@ import wx
 import sys,os
 import wx.html as html
 import Image
+
 if sys.platform.count("win32")>0:
     _STATICBOX_WIDTH = 450
     PANEL_WIDTH = 500 
@@ -36,11 +37,11 @@ class ReportDialog(wx.Dialog):
     The report dialog box. 
     """
     
-    def __init__(self,  string, *args, **kwds):
+    def __init__(self,  list, *args, **kwds):
         """
         Initialization. The parameters added to Dialog are:
         
-        :param string: report_string  from invariant_state
+        :param list: report_list (list of html_str, text_str, image) from invariant_state
         """
         kwds["style"] = wx.RESIZE_BORDER|wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self, *args, **kwds)
@@ -52,7 +53,9 @@ class ReportDialog(wx.Dialog):
         # font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         # report string
-        self.report_string =string
+        self.report_list =list
+        # put image path in the report string
+        self.report_html = self.report_list[0]% "memory:img_inv.png"
         # layout
         self._setup_layout()
         
@@ -60,13 +63,11 @@ class ReportDialog(wx.Dialog):
         """
         Set up layout
         """
-        # panel for buttons
-        bpanel = wx.Panel(self, -1)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         
         # buttons
         id = wx.NewId()
-        button_save = wx.Button(self, id, "Save")
+        button_save = wx.Button(self, id, "Save" )
         button_save.SetToolTipString("Save this report.")
         button_save.Bind(wx.EVT_BUTTON, self.onSave, id = button_save.GetId()) 
         hbox.Add(button_save)
@@ -83,6 +84,13 @@ class ReportDialog(wx.Dialog):
         button_print.Bind(wx.EVT_BUTTON, self.onPrint, id = button_print.GetId()) 
         hbox.Add(button_print)
         
+        id = wx.ID_OK
+        button_close = wx.Button(self, id, "Close")
+        button_close.SetToolTipString("Close this report window.") 
+        hbox.Add((5,10), 1 , wx.EXPAND|wx.ADJUST_MINSIZE,0)
+        hbox.Add(button_close)
+        button_close.SetFocus()
+        
         
         # panel for report page
         panel = wx.Panel(self, -1)
@@ -90,10 +98,10 @@ class ReportDialog(wx.Dialog):
         # html window
         self.hwindow = html.HtmlWindow(panel, -1,style=wx.BORDER,size=(700,500))
         # set the html page with the report string
-        self.hwindow.SetPage(self.report_string)
+        self.hwindow.SetPage(self.report_html)
         # add panels to boxsizers
-        hbox.Add(bpanel)
-        vbox.Add(hbox,40, wx.EXPAND)
+        #hbox.Add(bpanel)
+        vbox.Add(hbox,30, wx.EXPAND)
         vbox.Add(panel,500, wx.EXPAND)
 
         self.SetSizerAndFit(vbox)
@@ -108,22 +116,41 @@ class ReportDialog(wx.Dialog):
         dlg = wx.FileDialog(self, "Choose a file",\
                             wildcard ='HTML files (*.html)|*.html|'+
                             'Text files (*.txt)|*.txt',
+                            #'PDF files (*.pdf)|*.pdf',
                             style = wx.SAVE|wx.OVERWRITE_PROMPT|wx.CHANGE_DIR)
         dlg.SetFilterIndex(0) #Set .html files to be default
 
         if dlg.ShowModal() != wx.ID_OK:
           dlg.Destroy()
           return
+        
         fName = dlg.GetPath()
-        fName = os.path.splitext(fName)[0] + '.html'
-        dlg.Destroy()
-    
-        html = self.report_string
-        f = open(fName, 'w')
-        f.write(html)
-        f.close()
-
-    
+        
+        if dlg.GetFilterIndex()== 0:
+            fName = os.path.splitext(fName)[0] + '.html'
+            dlg.Destroy()
+            
+            #pic (png) file path/name
+            pic_fname = os.path.splitext(fName)[0] + '_img.png'
+            #put the path in html string
+            html = self.report_list[0] % pic_fname
+            f = open(fName, 'w')
+            f.write(html)
+            f.close()
+            #save png file using pic_fname
+            self.report_list[2].save(pic_fname)
+        elif dlg.GetFilterIndex()== 1:
+            fName = os.path.splitext(fName)[0] + '.txt'
+            dlg.Destroy()
+            
+            text = self.report_list[1]
+            f = open(fName, 'w')
+            f.write(text)
+            f.close()
+            
+        else:
+            dlg.Destroy()
+            
     def onPreview(self,event=None):
         """
         Preview
@@ -131,7 +158,7 @@ class ReportDialog(wx.Dialog):
         : event: Preview button event
         """
         previewh=html.HtmlEasyPrinting(name="Printing", parentWindow=self)
-        previewh.PreviewText(self.report_string)
+        previewh.PreviewText(self.report_html)
     
     def onPrint(self,event=None):
         """
@@ -140,7 +167,16 @@ class ReportDialog(wx.Dialog):
         : event: Print button event
         """
         printh=html.HtmlEasyPrinting(name="Printing", parentWindow=self)
-        printh.PrintText(self.report_string)
+        printh.PrintText(self.report_html)
 
+
+    def OnClose(self,event=None):
+        """
+        Close the Dialog
         
+        : event: Close button event
+        """
+        
+        self.Close()
+          
         
