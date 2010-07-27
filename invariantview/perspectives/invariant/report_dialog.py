@@ -12,12 +12,9 @@
 """
 Dialog report panel to show and summarize the results of the invariant calculation.
 """
-    
-
 import wx
 import sys,os
 import wx.html as html
-import Image
 
 if sys.platform.count("win32")>0:
     _STATICBOX_WIDTH = 450
@@ -115,8 +112,8 @@ class ReportDialog(wx.Dialog):
         #todo: complete saving fig file and as a txt file
         dlg = wx.FileDialog(self, "Choose a file",\
                             wildcard ='HTML files (*.html)|*.html|'+
-                            'Text files (*.txt)|*.txt',
-                            #'PDF files (*.pdf)|*.pdf',
+                            'Text files (*.txt)|*.txt|'+
+                            'PDF files (*.pdf)|*.pdf',
                             style = wx.SAVE|wx.OVERWRITE_PROMPT|wx.CHANGE_DIR)
         dlg.SetFilterIndex(0) #Set .html files to be default
 
@@ -139,6 +136,7 @@ class ReportDialog(wx.Dialog):
             f.close()
             #save png file using pic_fname
             self.report_list[2].save(pic_fname)
+            
         elif dlg.GetFilterIndex()== 1:
             fName = os.path.splitext(fName)[0] + '.txt'
             dlg.Destroy()
@@ -148,8 +146,31 @@ class ReportDialog(wx.Dialog):
             f.write(text)
             f.close()
             
-        else:
+        elif dlg.GetFilterIndex()== 2:
+            fName = os.path.splitext(fName)[0] + '.pdf'
             dlg.Destroy()
+
+            #pic (png) file path/name
+            pic_fname = os.path.splitext(fName)[0] + '_img.png'
+            # save the image for use with pdf writer
+            self.report_list[2].save(pic_fname)
+            
+            # put the image file path in the html data
+            html = self.report_list[0] % str(pic_fname)
+            
+            open_pdf = True
+            # make/open file in case of absence
+            f = open(fName, 'w')
+            f.close()
+            # write pdf as a pdf file
+            pdf = self.HTML2PDF(data=html, filename=fName)
+            
+            #open pdf
+            if open_pdf and pdf:
+                os.startfile(str(fName))
+
+            #delete image file
+            os.remove(pic_fname)
             
     def onPreview(self,event=None):
         """
@@ -178,5 +199,22 @@ class ReportDialog(wx.Dialog):
         """
         
         self.Close()
-          
+    
+    def HTML2PDF(self, data, filename):
+        """
+        Create a PDF file from html source string. 
+        
+        : data: html string
+        : filename: name of file to be saved
+        """
+        import ho.pisa as pisa
+        f = file(filename, "wb")
+        # pisa requires some extra packages, see their web-site
+        pdf = pisa.CreatePDF(data,f)
+        # close the file here otherwise it will be open until quitting the application.
+        f.close()
+
+        return not pdf.err
+
+        
         
