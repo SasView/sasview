@@ -166,7 +166,13 @@ class InvariantPanel(ScrolledPanel):
             data_name = self._data.name
             data_qmin = min (self._data.x)
             data_qmax = max (self._data.x)
-            self.data_name_tcl.SetValue(str(data_name))      
+            if data.name not in self.data_cbbox.GetItems():
+                self.data_cbbox.Insert(pos=0, clientData=(data, None), 
+                                       item=data.name)
+            else:
+                pos = self.data_cbbox.FindString(data.name)
+                print "pos", pos
+                self.data_cbbox.SetSelection(pos)
             self.data_min_tcl.SetLabel(str(data_qmin))
             self.data_max_tcl.SetLabel(str(data_qmax))
             self.button_save.Enable(True)  
@@ -678,7 +684,8 @@ class InvariantPanel(ScrolledPanel):
             # get the previously computed state number (computation before the state changes happened)
             current_compute_num = str(current_state['compute_num'])
         except :
-            raise ValueError,  "No such state exists in history"
+            raise
+            #raise ValueError,  "No such state exists in history"
         
         # get the state at pre_compute_num
         comp_state = copy.deepcopy(self.state.state_list[current_compute_num])
@@ -1178,7 +1185,7 @@ class InvariantPanel(ScrolledPanel):
         self.data_name_boxsizer.SetMinSize((PANEL_WIDTH,-1))
         self.hint_msg_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.loaded_data_name_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.data_name_sizer = wx.BoxSizer(wx.HORIZONTAL)
+       
         self.data_range_sizer = wx.BoxSizer(wx.HORIZONTAL)
         #Sizer related to background and scale
         self.bkg_scale_sizer = wx.BoxSizer(wx.HORIZONTAL) 
@@ -1224,23 +1231,15 @@ class InvariantPanel(ScrolledPanel):
         self.hint_msg_txt.SetToolTipString(msg)
         self.hint_msg_sizer.Add(self.hint_msg_txt)
         
-        self.data_txt = wx.StaticText(self, -1,"Loaded Data: ")
-        self.data_cbbox = wx.ComboBox(self, -1, size=(260,20))
+        self.data_txt = wx.StaticText(self, -1,"Data: ")
+        self.data_cbbox = wx.ComboBox(self, -1, size=(260,20),
+                                      style=wx.CB_READONLY)
         self.data_cbbox.Disable()
         wx.EVT_COMBOBOX(self.data_cbbox ,-1, self.on_select_data) 
-        
-
-        #Data name [string]
-        data_name_txt = wx.StaticText(self, -1, 'Data : ')  
-       
-        self.data_name_tcl = OutputTextCtrl(self, -1,size=(260,20), style=0, name='data_name_tcl') 
-        self.data_name_tcl.SetToolTipString("Data's name.")
+    
         self.loaded_data_name_sizer.AddMany([(self.data_txt, 0,
                                                wx.LEFT|wx.RIGHT, 10),
                                       (self.data_cbbox, 0, wx.EXPAND)])
-        self.data_name_sizer.AddMany([(data_name_txt, 0, wx.LEFT|wx.RIGHT, 10),
-                                       (self.data_name_tcl, 0, wx.EXPAND|wx.LEFT,35)])
-    
         #Data range [string]
         data_range_txt = wx.StaticText(self, -1, 'Total Q Range (1/A): ') 
         data_min_txt = wx.StaticText(self, -1, 'Min : ')  
@@ -1256,7 +1255,6 @@ class InvariantPanel(ScrolledPanel):
                                        (self.data_max_tcl, 0, wx.RIGHT, 10)])
         self.data_name_boxsizer.AddMany([(self.hint_msg_sizer, 0 , wx.ALL, 5),
                             (self.loaded_data_name_sizer, 0 , wx.ALL, 10),
-                                    (self.data_name_sizer, 0 , wx.LEFT|wx.RIGHT, 10),
                                      (self.data_range_sizer, 0 , wx.ALL, 10)])
     
     def _layout_bkg_scale(self):
