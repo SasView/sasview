@@ -80,7 +80,15 @@ class HintFitPage(ScrolledPanel):
         n = self.data_cbbox.GetCurrentSelection()
         data, path = self.data_cbbox.GetClientData(n)
         self.parent.manager.add_fit_page(data=data)
-      
+        if data !=None:
+            if hasattr(data,"title"):
+                title = str(data.title.lstrip().rstrip())
+                if title == "":
+                    title = str(data.name)
+            else:
+                title = str(data.name)
+            wx.PostEvent(self.parent.parent, NewPlotEvent(plot=data, title=title))
+        
     def createMemento(self):
         """
         """

@@ -241,7 +241,7 @@ class FitPanel(wx.aui.AuiNotebook):
                 if panel is not None:  
                     self.manager.store_page(page=panel, data=state.data)
                     panel.reset_page(state=state)
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=state.data, title=title))
+                
                     
     def on_close_page(self, event):
         """

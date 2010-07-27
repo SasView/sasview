@@ -666,14 +666,7 @@ class Plugin:
         """
         try:
             page = self.fit_panel.add_fit_page(data)
-            if data !=None:
-                if hasattr(data,"title"):
-                    title = str(data.title.lstrip().rstrip())
-                    if title == "":
-                        title = str(data.name)
-                else:
-                    title = str(data.name)
-                wx.PostEvent(self.parent, NewPlotEvent(plot=data, title=title))
+            
             # add data associated to the page created
             if page != None:  
                 self.store_page(page=page, data=data)
