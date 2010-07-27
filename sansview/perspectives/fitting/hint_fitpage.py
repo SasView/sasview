@@ -80,9 +80,7 @@ class HintFitPage(ScrolledPanel):
         n = self.data_cbbox.GetCurrentSelection()
         data, path = self.data_cbbox.GetClientData(n)
         self.parent.manager.add_fit_page(data=data)
-        title = os.path.basename(path)
-       
-        
+      
     def createMemento(self):
         """
         """

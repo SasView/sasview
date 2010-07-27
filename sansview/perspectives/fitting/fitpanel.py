@@ -3,7 +3,7 @@ import numpy
 import string 
 import wx
 import wx.aui
-
+from sans.guicomm.events import NewPlotEvent, StatusEvent  
 import basepage
 
 _BOX_WIDTH = 80
@@ -211,6 +211,12 @@ class FitPanel(wx.aui.AuiNotebook):
         page_is_opened = False
         if state is not None:
             page_info = self.get_page_info(data=state.data)
+            if hasattr(state.data,"title"):
+                title = str(state.data.title.lstrip().rstrip())
+                if title == "":
+                    title = str(state.data.name)
+            else:
+                title = str(state.data.name)
             for name, panel, type in self.opened_pages.values():
                 #Don't return any panel is the exact same page is created
                 if name == page_info.window_name:
@@ -226,6 +232,7 @@ class FitPanel(wx.aui.AuiNotebook):
                     if panel is not None:  
                         self.manager.store_page(page=panel, data=state.data)
                     panel.reset_page(state=state)
+                    wx.PostEvent(self.parent, NewPlotEvent(plot=state.data, title=title))
                     page_is_opened = True
                     
             if not page_is_opened:
@@ -234,6 +241,7 @@ class FitPanel(wx.aui.AuiNotebook):
                 if panel is not None:  
                     self.manager.store_page(page=panel, data=state.data)
                     panel.reset_page(state=state)
+                    wx.PostEvent(self.parent, NewPlotEvent(plot=state.data, title=title))
                     
     def on_close_page(self, event):
         """

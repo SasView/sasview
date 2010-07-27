@@ -666,9 +666,7 @@ class Plugin:
         """
         try:
             page = self.fit_panel.add_fit_page(data)
-            # add data associated to the page created
-            if page != None:  
-                self.store_page(page=page, data=data)
+            if data !=None:
                 if hasattr(data,"title"):
                     title = str(data.title.lstrip().rstrip())
                     if title == "":
@@ -676,15 +674,18 @@ class Plugin:
                 else:
                     title = str(data.name)
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data, title=title))
+            # add data associated to the page created
+            if page != None:  
+                self.store_page(page=page, data=data)
                 wx.PostEvent(self.parent, StatusEvent(status="Page Created",
                                                info="info"))
             else:
                 msg = "Page was already Created"
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="warning"))
         except:
-            raise
-            #msg = "Creating Fit page: %s"%sys.exc_value
-            #wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
+            
+            msg = "Creating Fit page: %s"%sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
        
     def _onEVT_SLICER_PANEL(self, event):
         """
