@@ -119,7 +119,7 @@ class InvariantPanel(ScrolledPanel):
         n = self.data_cbbox.GetCurrentSelection()
         data, path = self.data_cbbox.GetClientData(n)
         self._manager.compute_helper(data=data)
-        title = os.path.basename(path)
+        title = "Untitled"
         if hasattr(data,"title"):
             title = str(data.title.lstrip().rstrip())
             if title == "":
@@ -166,6 +166,7 @@ class InvariantPanel(ScrolledPanel):
             data_name = self._data.name
             data_qmin = min (self._data.x)
             data_qmax = max (self._data.x)
+            print "set_current_data",self.data_cbbox.GetCount()
             if data.name not in self.data_cbbox.GetItems():
                 self.data_cbbox.Insert(pos=0, clientData=(data, None), 
                                        item=data.name)
@@ -214,7 +215,7 @@ class InvariantPanel(ScrolledPanel):
         if state == None or data == None:
             self.state = IState()
         else:
-            if not self.set_current_data(data):
+            if not self.set_current_data(data, path=None):
                 return
             self.new_state = True
             self.state = state   
