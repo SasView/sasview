@@ -279,7 +279,7 @@ class Plugin:
             self.__data = datainfo
             self.__data.group_id = datainfo.filename
             self.__data.id = datainfo.filename
-
+            
             temp_state = copy.deepcopy(state)
             
             # Load the invariant states

@@ -90,7 +90,7 @@ class InvariantState(object):
         
         self.compute_num = 0
         self.state_num = 0
-        self.timestamp = "('00:00:00', '00/00/0000')"
+        self.timestamp = ('00:00:00', '00/00/0000')
         self.container = None
         #plot image
         self.wximbmp = None

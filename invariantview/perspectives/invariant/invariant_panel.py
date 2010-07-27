@@ -119,14 +119,7 @@ class InvariantPanel(ScrolledPanel):
         n = self.data_cbbox.GetCurrentSelection()
         data, path = self.data_cbbox.GetClientData(n)
         self._manager.compute_helper(data=data)
-        title = "Untitled"
-        if hasattr(data,"title"):
-            title = str(data.title.lstrip().rstrip())
-            if title == "":
-                title = str(data.name)
-        else:
-            title = str(data.name)
-        wx.PostEvent(self.parent, NewPlotEvent(plot=data, title=title))
+       
     
     def set_data(self, list=[], state=None):
         """
@@ -143,8 +136,17 @@ class InvariantPanel(ScrolledPanel):
             self.data_cbbox.SetSelection(0)
             self.data_cbbox.Enable()
             self.on_select_data(event=None)
+            title = "Untitled"
+            if hasattr(data,"title"):
+                title = str(data.title.lstrip().rstrip())
+                if title == "":
+                    title = str(data.name)
+            else:
+                title = str(data.name)
+
+            wx.PostEvent(self.parent, NewPlotEvent(plot=data, title=title))
             
-    def set_current_data(self, data):
+    def set_current_data(self, data, path=None):
         """
         Set the data
         
@@ -166,7 +168,7 @@ class InvariantPanel(ScrolledPanel):
             data_name = self._data.name
             data_qmin = min (self._data.x)
             data_qmax = max (self._data.x)
-            print "set_current_data",self.data_cbbox.GetCount()
+
             if data.name not in self.data_cbbox.GetItems():
                 self.data_cbbox.Insert(pos=0, clientData=(data, None), 
                                        item=data.name)
@@ -219,7 +221,7 @@ class InvariantPanel(ScrolledPanel):
                 return
             self.new_state = True
             self.state = state   
-
+            
             num = self.state.saved_state['state_num']
             
             if num > 0 :
