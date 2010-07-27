@@ -171,7 +171,6 @@ class InvariantPanel(ScrolledPanel):
                                        item=data.name)
             else:
                 pos = self.data_cbbox.FindString(data.name)
-                print "pos", pos
                 self.data_cbbox.SetSelection(pos)
             self.data_min_tcl.SetLabel(str(data_qmin))
             self.data_max_tcl.SetLabel(str(data_qmax))
