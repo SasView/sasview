@@ -244,9 +244,9 @@ def plot_data(parent, path):
             new_plot.dxw = dxw
            
             name = parse_name(name=str(item.run[0]), expression="_")
-            if not name in parent.indice_load_data.keys():
-                parent.indice_load_data[name] = 0
-            else:
+            #if not name in parent.indice_load_data.keys():
+            #    parent.indice_load_data[name] = 0
+            #else:
                 ## create a copy of the loaded data
                 
                 #TODO: this is a very annoying feature. We should make this
@@ -254,8 +254,8 @@ def plot_data(parent, path):
                 # What is the requirement for this feature, and are the
                 # counter arguments stronger? Is this feature developed
                 # to please at least 80% of the users or a special few?
-                parent.indice_load_data[name] += 1
-                name = name + "(copy %i)"%parent.indice_load_data[name]
+                #parent.indice_load_data[name] += 1
+                #name = name + "(copy %i)"%parent.indice_load_data[name]
                 
             new_plot.name = name
             new_plot.interactive = True

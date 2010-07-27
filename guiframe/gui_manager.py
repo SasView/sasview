@@ -918,37 +918,8 @@ class ViewerFrame(wx.Frame):
         if not path==None:
             try:
                 self._default_save_location = os.path.dirname(path)
-               
-                #self.n_fileOpen += 1
-                if self.n_fileOpen==1:
-                    pos= self.filemenu.GetMenuItemCount()-1
-                    #self.filemenu.InsertSeparator(pos )
-               
-                id = wx.NewId()
-                filename= os.path.basename(path)
-                dir= os.path.split(self._default_save_location)[1]
-                title= str(os.path.join(dir,filename )) 
-                menuitem_name = str(self.n_fileOpen)+". "+ title
-                position= self.filemenu.GetMenuItemCount()-2
-                #self.filemenu.Insert(id=id, pos= position,text=menuitem_name,help=str(path) ) 
-                #self.filePathList.append(( id, menuitem_name, path, title))
-                #wx.EVT_MENU(self, id, self._onreloaFile)
-                
-                ## construct menu item for open file
-                if self.n_fileOpen == self.n_maxfileopen +1:
-                    ## reach the maximun number of path to store
-                    self.n_fileOpen = 0
-                    id, menuitem_name , path, title = self.filePathList[0]
-                    self.filemenu.Delete(id)
-                    self.filePathList.pop(0)
-                    for item in self.filePathList:
-                        id, menuitem_name , path, title = item
-                        self.n_fileOpen += 1
-                        label = str(self.n_fileOpen)+". "+ title
-                        #self.filemenu.FindItemById(id).SetItemLabel(label)   
             except:
-                raise
-                #pass
+                pass
         return path
     
     def load_ascii_1D(self, path):
