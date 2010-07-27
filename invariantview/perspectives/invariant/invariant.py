@@ -47,6 +47,9 @@ class Plugin:
         #  for your plug-in. This defines your plug-in "perspective"
         self.perspective = []
         
+        # is this data from *.inv file?
+        self.is_state_data = False
+        
         self.state_reader = None   
         """
         # Create a CanSAS/Pr reader
@@ -234,10 +237,13 @@ class Plugin:
         """
         if data is None:
             return 
-        # Store reference to data
-        self.__data = data
-        # Set the data set to be user for invariant calculation
-        self.invariant_panel.set_current_data(data=data)
+        if self.is_state_data:
+            self.is_state_data = False
+        else:
+            # Store reference to data
+            self.__data = data
+            # Set the data set to be user for invariant calculation
+            self.invariant_panel.set_current_data(data=data)
         
     def save_file(self, filepath, state=None):
         """
@@ -280,7 +286,8 @@ class Plugin:
             # Make sure the user sees the invariant panel after loading
             self.parent.set_perspective(self.perspective)
             # set state
-            self.invariant_panel.set_state(state=temp_state,data=self.__data)              
+            self.invariant_panel.set_state(state=temp_state,data=self.__data)
+            self.is_state_data = True            
 
         except:
             logging.error("invariant.set_state: %s" % sys.exc_value)
