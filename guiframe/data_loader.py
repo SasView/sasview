@@ -126,8 +126,7 @@ def load_error(error=None):
     
     :param error: details error message to be displayed
     """
-    message = "You had to try this, didn't you?\n\n"
-    message += "The data file you selected could not be loaded.\n"
+    message = "The data file you selected could not be loaded.\n"
     message += "Make sure the content of your file is properly formatted.\n\n"
     
     if error is not None:
