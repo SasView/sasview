@@ -81,6 +81,7 @@ class InvariantPanel(ScrolledPanel):
         # default flags for state
         self.new_state = False
         self.is_power_out = False
+        self.is_state_data = False
 
         #container of invariant value
         self.inv_container = None
@@ -116,10 +117,18 @@ class InvariantPanel(ScrolledPanel):
     def on_select_data(self, event=None):
         """
         """
+        
         n = self.data_cbbox.GetCurrentSelection()
-        data, path = self.data_cbbox.GetClientData(n)
-        self._manager.compute_helper(data=data)
-       
+        try:
+            data, path = self.data_cbbox.GetClientData(n)
+        
+            if not self._data == data:
+                self._manager.compute_helper(data=data)
+            else:
+                msg = "The data named %s is already loaded..."% data.name
+                wx.PostEvent(self.parent, StatusEvent(status=msg))
+        except:
+           self.data_cbbox.SetSelection(0)
     
     def set_data(self, list=[], state=None):
         """
@@ -127,15 +136,25 @@ class InvariantPanel(ScrolledPanel):
         """
         if not list:
             return 
+        count_bf = self.data_cbbox.GetCount()
         for data, path in list:
             if data.__class__.__name__ != "Data2D" and \
                 data.name not in self.data_cbbox.GetItems():
-                self.data_cbbox.Insert(item=data.name, pos=0,
+                position = self.data_cbbox.GetCount()
+                self.data_cbbox.Insert(item=data.name, pos=position,
                                     clientData=(data, path))
-        if self.data_cbbox.GetCount() >0:
-            self.data_cbbox.SetSelection(0)
-            self.data_cbbox.Enable()
-            self.on_select_data(event=None)
+        count = self.data_cbbox.GetCount()
+        if count >0:
+            # set data only on the first or state data 
+            if count ==1 or self.is_state_data:
+                # when count increased especially if self.is_state_data.
+                if count > count_bf:
+                    self.data_cbbox.SetSelection(count-1)
+
+                self.data_cbbox.Enable()
+                self.on_select_data(event=None)
+                self.is_state_data = False
+            
             title = "Untitled"
             if hasattr(data,"title"):
                 title = str(data.title.lstrip().rstrip())
@@ -143,7 +162,7 @@ class InvariantPanel(ScrolledPanel):
                     title = str(data.name)
             else:
                 title = str(data.name)
-
+    
             wx.PostEvent(self.parent, NewPlotEvent(plot=data, title=title))
             
     def set_current_data(self, data, path=None):

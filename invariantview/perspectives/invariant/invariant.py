@@ -286,8 +286,10 @@ class Plugin:
             # Make sure the user sees the invariant panel after loading
             self.parent.set_perspective(self.perspective)
             # set state
+            self.is_state_data = True 
+            self.invariant_panel.is_state_data = True
             self.invariant_panel.set_state(state=temp_state,data=self.__data)
-            self.is_state_data = True            
+                       
 
         except:
             logging.error("invariant.set_state: %s" % sys.exc_value)
