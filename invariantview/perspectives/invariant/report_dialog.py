@@ -112,8 +112,7 @@ class ReportDialog(wx.Dialog):
         #todo: complete saving fig file and as a txt file
         dlg = wx.FileDialog(self, "Choose a file",\
                             wildcard ='HTML files (*.html)|*.html|'+
-                            'Text files (*.txt)|*.txt|'+
-                            'PDF files (*.pdf)|*.pdf',
+                            'Text files (*.txt)|*.txt',
                             style = wx.SAVE|wx.OVERWRITE_PROMPT|wx.CHANGE_DIR)
         dlg.SetFilterIndex(0) #Set .html files to be default
 
@@ -135,7 +134,7 @@ class ReportDialog(wx.Dialog):
             f.write(html)
             f.close()
             #save png file using pic_fname
-            self.report_list[2].save(pic_fname)
+            self.report_list[2].savefig(pic_fname)
             
         elif dlg.GetFilterIndex()== 1:
             fName = os.path.splitext(fName)[0] + '.txt'
@@ -145,33 +144,7 @@ class ReportDialog(wx.Dialog):
             f = open(fName, 'w')
             f.write(text)
             f.close()
-            
-        elif dlg.GetFilterIndex()== 2:
-            fName = os.path.splitext(fName)[0] + '.pdf'
-            dlg.Destroy()
-
-            #pic (png) file path/name
-            pic_fname = os.path.splitext(fName)[0] + '_img.png'
-            # save the image for use with pdf writer
-            self.report_list[2].save(pic_fname)
-            
-            # put the image file path in the html data
-            html = self.report_list[0] % str(pic_fname)
-            
-            open_pdf = True
-            # make/open file in case of absence
-            f = open(fName, 'w')
-            f.close()
-            # write pdf as a pdf file
-            pdf = self.HTML2PDF(data=html, filename=fName)
-            
-            #open pdf
-            if open_pdf and pdf:
-                os.startfile(str(fName))
-
-            #delete image file
-            os.remove(pic_fname)
-            
+ 
     def onPreview(self,event=None):
         """
         Preview

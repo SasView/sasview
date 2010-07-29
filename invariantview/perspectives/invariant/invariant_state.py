@@ -4,6 +4,20 @@ import copy
 import DataLoader
 from xml.dom.minidom import parse
 from lxml import etree
+"""
+try:
+    import PIL.Image as Image
+    import PIL.PngImagePlugin as PngImagePlugin
+    Image._initialized = 2
+except:
+    try:
+        import Image 
+        import PngImagePlugin
+        Image._initialized = 2
+    except:
+        Image = None    
+"""
+
 
 from DataLoader.readers.cansas_reader import Reader as CansasReader
 from DataLoader.readers.cansas_reader import get_content
@@ -536,15 +550,15 @@ class InvariantState(object):
         # some imports
         import cStringIO
         import matplotlib,wx
-        matplotlib.use('Agg')
         import matplotlib.pyplot as plt
-        import Image
-        
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+
         #we use simple plot, not plotpanel
         #make matlab figure
         fig = plt.figure()
+        fig.set_facecolor('w')
         graph = fig.add_subplot(111)
-        
+
         #data plot
         graph.errorbar(self.data.x, self.data.y, yerr=self.data.dy, fmt='o')
         #low Q extrapolation fit plot
@@ -555,28 +569,30 @@ class InvariantState(object):
             graph.plot(self.theory_highQ.x,self.theory_highQ.y)
         graph.set_xscale("log", nonposx='clip')
         graph.set_yscale("log", nonposy='clip')
-        plt.xlabel('$\\rm{Q}(\\AA^{-1})$', fontsize = 12)
-        plt.ylabel('$\\rm{Intensity}(cm^{-1})$', fontsize = 12)
-
-        #make python.Image object
-        imagedata = cStringIO.StringIO()
-        fig.savefig(imagedata,format='png')
-        imagedata.seek(0)
-        img = Image.open(imagedata) 
+        graph.set_xlabel('$\\rm{Q}(\\AA^{-1})$', fontsize = 12)
+        graph.set_ylabel('$\\rm{Intensity}(cm^{-1})$', fontsize = 12)
+        canvas = FigureCanvasAgg(fig)
+        #actually make image
+        canvas.draw()
+        
+        #make python.Image object 
+        #size
+        w,h =canvas.get_width_height()
         #convert to wx.Image
-        wxim = wx.EmptyImage(img.size[0],img.size[1])
-        wxim.SetData(img.convert("RGB").tostring())  
+        wximg = wx.EmptyImage(w,h)
+        #wxim.SetData(img.convert('RGB').tostring() ) 
+        wximg.SetData(canvas.tostring_rgb()) 
         #get the dynamic image for the htmlwindow
-        wximbmp = wx.BitmapFromImage(wxim)
+        wximgbmp = wx.BitmapFromImage(wximg)
         #store the image in wx.FileSystem Object 
         wx.FileSystem.AddHandler(wx.MemoryFSHandler())
         # use wx.MemoryFSHandler
         self.imgRAM = wx.MemoryFSHandler()
         #AddFile, image can be retrieved with 'memory:filename'
-        self.imgRAM.AddFile('img_inv.png',wximbmp, wx.BITMAP_TYPE_PNG)
+        self.imgRAM.AddFile('img_inv.png',wximgbmp, wx.BITMAP_TYPE_PNG)
         
-        self.wximbmp = 'memory:img_inv.png'
-        self.image = img
+        self.wximgbmp = 'memory:img_inv.png'
+        self.image = fig
 
 class Reader(CansasReader):
     """
