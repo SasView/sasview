@@ -116,19 +116,30 @@ class InvariantPanel(ScrolledPanel):
     
     def on_select_data(self, event=None):
         """
+        On select data by combobox or contextmenu or by set_data
         """
-        
-        n = self.data_cbbox.GetCurrentSelection()
-        try:
+        if event !=None:
+            n = self.data_cbbox.GetCurrentSelection()
             data, path = self.data_cbbox.GetClientData(n)
+            #warning message for losing all the calculation and states
+            if self._data !=None:
+                if self._data.name != data.name:
+                    if self._show_message():
+                        self._manager.compute_helper(data=data)
+                        data = self._data
+            return
         
-            if not self._data == data:
-                self._manager.compute_helper(data=data)
-            else:
-                msg = "The data named %s is already loaded..."% data.name
-                wx.PostEvent(self.parent, StatusEvent(status=msg))
+        #update the computation
+        data = self._data
+        if data == None: return
+        n = data.name
+        try:
+            pos = self.data_cbbox.FindString(data.name)
+            self.data_cbbox.SetSelection(pos)
+            self._manager.compute_helper(data=data)
         except:
-           self.data_cbbox.SetSelection(0)
+            n = self.data_cbbox.GetCount()
+            self.data_cbbox.SetSelection(n)
     
     def set_data(self, list=[], state=None):
         """
@@ -136,6 +147,7 @@ class InvariantPanel(ScrolledPanel):
         """
         if not list:
             return 
+
         count_bf = self.data_cbbox.GetCount()
         for data, path in list:
             if data.__class__.__name__ != "Data2D" and \
@@ -143,57 +155,59 @@ class InvariantPanel(ScrolledPanel):
                 position = self.data_cbbox.GetCount()
                 self.data_cbbox.Insert(item=data.name, pos=position,
                                     clientData=(data, path))
+                
         count = self.data_cbbox.GetCount()
         if count >0:
-            # set data only on the first or state data 
+            # set data only on the first or state data            
             if count ==1 or self.is_state_data:
-                # when count increased especially if self.is_state_data.
-                if count > count_bf:
-                    self.data_cbbox.SetSelection(count-1)
-
                 self.data_cbbox.Enable()
+                self._data = data
                 self.on_select_data(event=None)
                 self.is_state_data = False
-            
-            title = "Untitled"
-            if hasattr(data,"title"):
-                title = str(data.title.lstrip().rstrip())
-                if title == "":
-                    title = str(data.name)
-            else:
+                
+        title = "Untitled"
+        if hasattr(data,"title"):
+            title = str(data.title.lstrip().rstrip())
+            if title == "":
                 title = str(data.name)
-    
-            wx.PostEvent(self.parent, NewPlotEvent(plot=data, title=title))
+        else:
+            title = str(data.name)
+
+        wx.PostEvent(self.parent, NewPlotEvent(plot=data, title=title))
+            
             
     def set_current_data(self, data, path=None):
         """
-        Set the data
+        Set the data, mainly used by the inv state file
         
         : return: True/False; if False, it will not set_current_data
         """
         # warn the users
         if self._data != None and data != None:
-            if not self._show_message():
-                return False
+            if self._data.name != data.name:
+                if not self._show_message():
+                    return False
             
         self._data = data
         # reset popUpMenu
         self._set_bookmark_menu()
         #edit the panel
-        if self._data is not None:
+        if data is not None:
             
             self.err_check_on_data()
             self.get_state_by_num(0)
             data_name = self._data.name
-            data_qmin = min (self._data.x)
-            data_qmax = max (self._data.x)
+            data_qmin = min (data.x)
+            data_qmax = max (data.x)
 
             if data.name not in self.data_cbbox.GetItems():
-                self.data_cbbox.Insert(pos=0, clientData=(data, None), 
+                position = self.data_cbbox.GetCount()
+                self.data_cbbox.Insert(pos=position, clientData=(data, None), 
                                        item=data.name)
             else:
                 pos = self.data_cbbox.FindString(data.name)
                 self.data_cbbox.SetSelection(pos)
+
             self.data_min_tcl.SetLabel(str(data_qmin))
             self.data_max_tcl.SetLabel(str(data_qmax))
             self.button_save.Enable(True)  
@@ -267,6 +281,7 @@ class InvariantPanel(ScrolledPanel):
             #make sure that the data is reset (especially when loaded from a inv file)
             self.state.data = self._data
             self.new_state = False 
+
             
 
     def get_background(self):
@@ -1158,16 +1173,17 @@ class InvariantPanel(ScrolledPanel):
         """
         Show warning message when resetting data
         """
-        
-        mssg += 'Loading a new data set will reset all the work done in this panel. \n\r'
-        mssg += 'Please make sure to save it first... \n\r'
-        answer = wx.MessageBox(mssg, msg, wx.CANCEL|wx.OK|wx.ICON_EXCLAMATION)
-
-        if answer == wx.OK:
-            return True
-        else:
-            return False
-
+        count_bf = self.data_cbbox.GetCount()
+        if count_bf > 1:
+            mssg += 'Loading a new data set will reset all the work done in this panel. \n\r'
+            mssg += 'Please make sure to save it first... \n\r'
+            answer = wx.MessageBox(mssg, msg, wx.CANCEL|wx.OK|wx.ICON_EXCLAMATION)
+    
+            if answer == wx.OK:
+                return True
+            else:
+                return False
+        else: True
         
     def _reset_output(self):
         """
@@ -1802,7 +1818,8 @@ class InvariantPanel(ScrolledPanel):
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)])
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
-    
+        
+        
 class InvariantDialog(wx.Dialog):
     """
     """
