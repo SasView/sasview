@@ -548,7 +548,7 @@ class InvariantState(object):
         : extrap_high,extra_low: low/high extrapolations are possible extra-plots
         """
         # some imports
-        import cStringIO
+        #import cStringIO
         import matplotlib,wx
         import matplotlib.pyplot as plt
         from matplotlib.backends.backend_agg import FigureCanvasAgg

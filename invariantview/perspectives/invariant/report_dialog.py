@@ -121,30 +121,35 @@ class ReportDialog(wx.Dialog):
           return
         
         fName = dlg.GetPath()
+        ext_num = dlg.GetFilterIndex()     
+
+        #set file extensions  
+        if ext_num == 0:
+            ext = '.html'
+            img_ext= '_img4html.png'
+            report_frame = self.report_list[0]
+        elif ext_num == 1:
+            ext = '.txt'   
+            # changing the image extension actually changes the image format on saving
+            img_ext= '_img4txt.pdf'
+            report = self.report_list[1]
+        else:
+            return
         
-        if dlg.GetFilterIndex()== 0:
-            fName = os.path.splitext(fName)[0] + '.html'
-            dlg.Destroy()
+        #file name     
+        fName = os.path.splitext(fName)[0] + ext
+        dlg.Destroy()
+        #pic (png) file path/name
+        pic_fname = os.path.splitext(fName)[0] + img_ext
+        #put the image path in html string
+        if ext_num == 0: report = report_frame % pic_fname
+        f = open(fName, 'w')
+        f.write(report)
+        f.close()
+        #save png file using pic_fname
+        self.report_list[2].savefig(pic_fname)
+        
             
-            #pic (png) file path/name
-            pic_fname = os.path.splitext(fName)[0] + '_img.png'
-            #put the path in html string
-            html = self.report_list[0] % pic_fname
-            f = open(fName, 'w')
-            f.write(html)
-            f.close()
-            #save png file using pic_fname
-            self.report_list[2].savefig(pic_fname)
-            
-        elif dlg.GetFilterIndex()== 1:
-            fName = os.path.splitext(fName)[0] + '.txt'
-            dlg.Destroy()
-            
-            text = self.report_list[1]
-            f = open(fName, 'w')
-            f.write(text)
-            f.close()
- 
     def onPreview(self,event=None):
         """
         Preview

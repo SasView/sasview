@@ -665,7 +665,7 @@ class InvariantPanel(ScrolledPanel):
         
         if float(next_state_num)+2 > len(self.state.state_list):
             self._redo_disable()
-        elif not self.button_redo.Enabled:
+        else:
             self._redo_enable()
         
         self._undo_enable()
