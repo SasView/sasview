@@ -80,8 +80,8 @@ class InvariantPanel(ScrolledPanel):
         self.set_state()
         # default flags for state
         self.new_state = False
-        self.is_power_out = False
         self.is_state_data = False
+        self.is_power_out = False
 
         #container of invariant value
         self.inv_container = None
@@ -116,17 +116,16 @@ class InvariantPanel(ScrolledPanel):
     
     def on_select_data(self, event=None):
         """
-        On select data by combobox or contextmenu or by set_data
+        On select data by combobox or by set_data
         """
         if event !=None:
+            self.state
             n = self.data_cbbox.GetCurrentSelection()
+            self.data_cbbox.SetSelection(n)
             data, path = self.data_cbbox.GetClientData(n)
-            #warning message for losing all the calculation and states
             if self._data !=None:
-                if self._data.name != data.name:
-                    if self._show_message():
-                        self._manager.compute_helper(data=data)
-                        data = self._data
+                self._manager.compute_helper(data=data)
+                data = self._data
             return
         
         #update the computation
@@ -148,7 +147,7 @@ class InvariantPanel(ScrolledPanel):
         if not list:
             return 
 
-        count_bf = self.data_cbbox.GetCount()
+        #count_bf = self.data_cbbox.GetCount()
         for data, path in list:
             if data.__class__.__name__ != "Data2D" and \
                 data.name not in self.data_cbbox.GetItems():
@@ -157,14 +156,18 @@ class InvariantPanel(ScrolledPanel):
                                     clientData=(data, path))
                 
         count = self.data_cbbox.GetCount()
-        if count >0:
-            # set data only on the first or state data            
-            if count ==1 or self.is_state_data:
-                self.data_cbbox.Enable()
-                self._data = data
-                self.on_select_data(event=None)
-                self.is_state_data = False
-                
+        if count > 0:
+            self.data_cbbox.Enable()
+            # reset data (cb) only on the first data            
+            if count ==1:
+                try:
+                    #check if the data is from inv file
+                    self._data.meta_data['invstate'].file
+                except:
+                    self._data = data
+                    self.on_select_data(event=None)
+            
+    #data = self._data    
         title = "Untitled"
         if hasattr(data,"title"):
             title = str(data.title.lstrip().rstrip())
@@ -173,6 +176,11 @@ class InvariantPanel(ScrolledPanel):
         else:
             title = str(data.name)
 
+        if self.is_state_data:
+            self.data_cbbox.SetValue(title)
+        self.data_cbbox.Enable(True)
+        self.is_state_data = False
+             
         wx.PostEvent(self.parent, NewPlotEvent(plot=data, title=title))
             
             
@@ -205,8 +213,8 @@ class InvariantPanel(ScrolledPanel):
                 self.data_cbbox.Insert(pos=position, clientData=(data, None), 
                                        item=data.name)
             else:
-                pos = self.data_cbbox.FindString(data.name)
-                self.data_cbbox.SetSelection(pos)
+                position = self.data_cbbox.FindString(data.name)
+            self.data_cbbox.SetSelection(position)
 
             self.data_min_tcl.SetLabel(str(data_qmin))
             self.data_max_tcl.SetLabel(str(data_qmax))
@@ -250,9 +258,9 @@ class InvariantPanel(ScrolledPanel):
         if state == None or data == None:
             self.state = IState()
         else:
+            self.new_state = True
             if not self.set_current_data(data, path=None):
                 return
-            self.new_state = True
             self.state = state   
             
             num = self.state.saved_state['state_num']
@@ -281,6 +289,7 @@ class InvariantPanel(ScrolledPanel):
             #make sure that the data is reset (especially when loaded from a inv file)
             self.state.data = self._data
             self.new_state = False 
+            self.is_state_data = False
 
             
 
@@ -1173,6 +1182,8 @@ class InvariantPanel(ScrolledPanel):
         """
         Show warning message when resetting data
         """
+        # no message for now
+        return True
         count_bf = self.data_cbbox.GetCount()
         if count_bf > 1:
             mssg += 'Loading a new data set will reset all the work done in this panel. \n\r'

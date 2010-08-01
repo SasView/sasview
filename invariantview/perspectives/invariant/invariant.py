@@ -47,9 +47,6 @@ class Plugin:
         #  for your plug-in. This defines your plug-in "perspective"
         self.perspective = []
         
-        # is this data from *.inv file?
-        self.is_state_data = False
-        
         self.state_reader = None   
         """
         # Create a CanSAS/Pr reader
@@ -237,9 +234,8 @@ class Plugin:
         """
         if data is None:
             return 
-        if self.is_state_data:
-            self.is_state_data = False
-        else:
+        # set current data if not it's a state data
+        if not self.invariant_panel.is_state_data:
             # Store reference to data
             self.__data = data
             # Set the data set to be user for invariant calculation
@@ -252,10 +248,8 @@ class Plugin:
         :param filepath: path of file to write to
         :param state: invariant state 
         """     
-        
         # Write the state to file
         # First, check that the data is of the right type
-
         current_plottable = self.__data
 
         if issubclass(current_plottable.__class__, LoaderData1D):
@@ -279,22 +273,18 @@ class Plugin:
             self.__data = datainfo
             self.__data.group_id = datainfo.filename
             self.__data.id = datainfo.filename
-            
+
             temp_state = copy.deepcopy(state)
-            
+            # set state
+            self.invariant_panel.is_state_data = True
             # Load the invariant states
             # Make sure the user sees the invariant panel after loading
             self.parent.set_perspective(self.perspective)
-            # set state
-            self.is_state_data = True 
-            self.invariant_panel.is_state_data = True
-            self.invariant_panel.set_state(state=temp_state,data=self.__data)
-                       
+            self.invariant_panel.set_state(state=temp_state,data=self.__data)         
 
         except:
             logging.error("invariant.set_state: %s" % sys.exc_value)
-        
-    
+
         
     def plot_theory(self, data=None, name=None):
         """
