@@ -366,19 +366,8 @@ class ModelPanel(BasicPage):
         """
         Receive  a list of data from gui_manager to plot theory
         """
-        if list==[]:
-            msg = "Please select data for Theory perspective.\n"
-            dial = wx.MessageDialog(None, msg, 'Error Loading File', 
-                                    wx.OK | wx.ICON_EXCLAMATION)
-            dial.ShowModal() 
-            return
-        else :
-            msg = "Theory perspective does not allow Data.\n"
-            msg += "Please import theory or go the theory perspective.\n"
-            dial = wx.MessageDialog(None, msg, 'Error Loading File', 
-                                    wx.OK | wx.ICON_EXCLAMATION)
-            dial.ShowModal() 
-     
+        pass
+      
     def reset_page(self, state):
         """
         reset the state
