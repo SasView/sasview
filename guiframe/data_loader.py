@@ -20,8 +20,16 @@ def enable_add_data(existing_panel, new_plot):
     is_data2d = hasattr(new_plot, 'data')
     is_data1d = existing_panel.__class__.__name__ == "ModelPanel1D"\
         and existing_panel.group_id is not None
-   
-    return is_data1d and not is_data2d and not is_theory
+    has_meta_data = hasattr(new_plot, 'meta_data')
+    
+    #disable_add_data if the data is being recovered from  a saved state file.
+    is_state_data = False
+    if has_meta_data:
+        if 'invstate' in new_plot.meta_data: is_state_data = True
+        if  'prstate' in new_plot.meta_data: is_state_data = True
+        if  'fitstate' in new_plot.meta_data: is_state_data = True
+
+    return is_data1d and not is_data2d and not is_theory and not is_state_data
 
 def parse_name(name, expression):
     """
