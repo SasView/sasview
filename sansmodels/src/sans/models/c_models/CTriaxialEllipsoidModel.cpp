@@ -103,6 +103,15 @@ CTriaxialEllipsoidModel_init(CTriaxialEllipsoidModel *self, PyObject *args, PyOb
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
         disp_dict = PyDict_New();
+        self->model->semi_axisA.dispersion->accept_as_source(visitor, self->model->semi_axisA.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "semi_axisA", disp_dict);
+        disp_dict = PyDict_New();
+        self->model->semi_axisB.dispersion->accept_as_source(visitor, self->model->semi_axisB.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "semi_axisB", disp_dict);
+        disp_dict = PyDict_New();
+        self->model->semi_axisC.dispersion->accept_as_source(visitor, self->model->semi_axisC.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "semi_axisC", disp_dict);
+        disp_dict = PyDict_New();
         self->model->axis_theta.dispersion->accept_as_source(visitor, self->model->axis_theta.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "axis_theta", disp_dict);
         disp_dict = PyDict_New();
@@ -253,6 +262,12 @@ static PyObject * evalDistribution(CTriaxialEllipsoidModel *self, PyObject *args
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "semi_axisA");
+    self->model->semi_axisA.dispersion->accept_as_destination(visitor, self->model->semi_axisA.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "semi_axisB");
+    self->model->semi_axisB.dispersion->accept_as_destination(visitor, self->model->semi_axisB.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "semi_axisC");
+    self->model->semi_axisC.dispersion->accept_as_destination(visitor, self->model->semi_axisC.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
     self->model->axis_theta.dispersion->accept_as_destination(visitor, self->model->axis_theta.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_phi");
@@ -334,6 +349,12 @@ static PyObject * run(CTriaxialEllipsoidModel *self, PyObject *args) {
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "semi_axisA");
+    self->model->semi_axisA.dispersion->accept_as_destination(visitor, self->model->semi_axisA.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "semi_axisB");
+    self->model->semi_axisB.dispersion->accept_as_destination(visitor, self->model->semi_axisB.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "semi_axisC");
+    self->model->semi_axisC.dispersion->accept_as_destination(visitor, self->model->semi_axisC.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
     self->model->axis_theta.dispersion->accept_as_destination(visitor, self->model->axis_theta.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_phi");
@@ -402,6 +423,12 @@ static PyObject * calculate_ER(CTriaxialEllipsoidModel *self) {
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "semi_axisA");
+    self->model->semi_axisA.dispersion->accept_as_destination(visitor, self->model->semi_axisA.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "semi_axisB");
+    self->model->semi_axisB.dispersion->accept_as_destination(visitor, self->model->semi_axisB.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "semi_axisC");
+    self->model->semi_axisC.dispersion->accept_as_destination(visitor, self->model->semi_axisC.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
     self->model->axis_theta.dispersion->accept_as_destination(visitor, self->model->axis_theta.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_phi");
@@ -439,6 +466,12 @@ static PyObject * runXY(CTriaxialEllipsoidModel *self, PyObject *args) {
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "semi_axisA");
+    self->model->semi_axisA.dispersion->accept_as_destination(visitor, self->model->semi_axisA.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "semi_axisB");
+    self->model->semi_axisB.dispersion->accept_as_destination(visitor, self->model->semi_axisB.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "semi_axisC");
+    self->model->semi_axisC.dispersion->accept_as_destination(visitor, self->model->semi_axisC.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_theta");
     self->model->axis_theta.dispersion->accept_as_destination(visitor, self->model->axis_theta.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "axis_phi");
@@ -500,7 +533,13 @@ static PyObject * set_dispersion(CTriaxialEllipsoidModel *self, PyObject *args) 
 
 	// Ugliness necessary to go from python to C
 	    // TODO: refactor this
-    if (!strcmp(par_name, "axis_theta")) {
+    if (!strcmp(par_name, "semi_axisA")) {
+        self->model->semi_axisA.dispersion = dispersion;
+    } else    if (!strcmp(par_name, "semi_axisB")) {
+        self->model->semi_axisB.dispersion = dispersion;
+    } else    if (!strcmp(par_name, "semi_axisC")) {
+        self->model->semi_axisC.dispersion = dispersion;
+    } else    if (!strcmp(par_name, "axis_theta")) {
         self->model->axis_theta.dispersion = dispersion;
     } else    if (!strcmp(par_name, "axis_phi")) {
         self->model->axis_phi.dispersion = dispersion;

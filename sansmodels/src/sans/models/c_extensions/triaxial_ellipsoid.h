@@ -2,7 +2,7 @@
 #define triaxial_ellipsoid_h
 /** Structure definition for cylinder parameters
  * [PYTHONCLASS] = TriaxialEllipsoidModel
- * [DISP_PARAMS] = axis_theta, axis_phi, axis_psi
+ * [DISP_PARAMS] = semi_axisA, semi_axisB, semi_axisC,axis_theta, axis_phi, axis_psi
 	[DESCRIPTION] = <text>Note: During fitting ensure that the inequality A<B<C is not
 	violated. Otherwise the calculation will
 	not be correct.
