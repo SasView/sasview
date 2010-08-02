@@ -32,7 +32,7 @@ def smear_selection(data1D):
     """
     # Sanity check. If we are not dealing with a SANS Data1D
     # object, just return None
-    if  data1D.__class__.__name__ != 'Data1D':
+    if  data1D.__class__.__name__ not in ['Data1D', 'Theory1D']:
         if data1D == None:
             return None
         elif data1D.dqx_data == None or data1D.dqy_data == None:
