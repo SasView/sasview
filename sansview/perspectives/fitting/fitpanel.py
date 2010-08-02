@@ -203,7 +203,7 @@ class FitPanel(wx.aui.AuiNotebook):
         if len(list) ==0:
             return 
         #pos = self.GetPageIndex(self.hint_page)
-        self.SetSelection(pos)
+        #self.SetSelection(pos)
         self.hint_page.set_data(list=list)
       
     def set_state(self, state):
