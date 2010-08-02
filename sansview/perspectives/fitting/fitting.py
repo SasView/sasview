@@ -676,7 +676,6 @@ class Plugin:
                 msg = "Page was already Created"
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="warning"))
         except:
-            
             msg = "Creating Fit page: %s"%sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
        

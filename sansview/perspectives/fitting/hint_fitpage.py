@@ -9,9 +9,9 @@ class HintFitPage(ScrolledPanel):
     This class provide general structure of  fitpanel page
     """
      ## Internal name for the AUI manager
-    window_name = "Hint Page"
+    window_name = "Loaded Data"
     ## Title to appear on top of the window
-    window_caption = "Hint page "
+    window_caption = "Loaded Data"
     
     def __init__(self, parent):
         """
@@ -20,10 +20,15 @@ class HintFitPage(ScrolledPanel):
                  style=wx.FULL_REPAINT_ON_RESIZE)
         self.SetupScrolling()
         self.parent = parent
+        self.manager = None
         msg = "right click on the data when it is highlighted "
         msg += "the select option to fit for futher options"
         self.do_layout()
-       
+        
+    def set_manager(self, manager):
+        """
+        """
+        self.manager = manager
         
     def set_data(self, list=[], state=None):
         """
@@ -34,7 +39,8 @@ class HintFitPage(ScrolledPanel):
             if data.name not in self.data_cbbox.GetItems():
                 self.data_cbbox.Insert(item=data.name, pos=0,
                                     clientData=(data, path))
-        if self.data_cbbox.GetCount() >0:
+     
+        if self.data_cbbox.GetCount() ==1:
             self.data_cbbox.SetSelection(0)
             self.data_cbbox.Enable()
             self.on_select_data(event=None)
@@ -79,6 +85,10 @@ class HintFitPage(ScrolledPanel):
         """
         n = self.data_cbbox.GetCurrentSelection()
         data, path = self.data_cbbox.GetClientData(n)
+        if data.__class__.__name__ in ["Data1D", "Theory1D"]:
+            data = self.manager.create_fittable_data1D(data=data)
+        else:
+            data = self.manager.create_fittable_data2D(data=data)
         self.parent.manager.add_fit_page(data=data)
         if data !=None:
             if hasattr(data,"title"):

@@ -189,7 +189,7 @@ class FitPanel(wx.aui.AuiNotebook):
         #add default page
         from hint_fitpage import HintFitPage
         self.hint_page = HintFitPage(self) 
-        self.AddPage(page=self.hint_page, caption="Loaded Data")
+        self.AddPage(page=self.hint_page, caption=self.hint_page.window_caption)
         # increment number for model name
         self.count = 0
         #updating the panel
@@ -282,7 +282,7 @@ class FitPanel(wx.aui.AuiNotebook):
         
         """
         self.manager = manager
-
+        self.hint_page.set_manager(self.manager)
         
     def set_owner(self,owner):
         """ 
@@ -327,6 +327,7 @@ class FitPanel(wx.aui.AuiNotebook):
         """
         name = "Fit Page"
         type = 'empty'
+        print "get_page_info",data.is_data
         if data is not None and hasattr(data, "is_data"):
             if data.is_data:
                 name = data.name 
@@ -405,6 +406,7 @@ class FitPanel(wx.aui.AuiNotebook):
             return None
         page_info = self.get_page_info(data=data)
         type = page_info.type
+        print "add_fit_page",page_info.type
         npages = len(self.opened_pages.keys())
         if npages == 0:
             # create new type of page
