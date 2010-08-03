@@ -225,7 +225,7 @@ class InvariantState(object):
                     value = float(value)*100
                 except:
                     pass
-                state += "(%s %s)"%(format_number(value),'o/o')
+                state += "(%s %s)"%(format_number(value),'%')
             # Outputs
             else:
                 state += "\n%s:   %s "%(item[1],format_number(value,high=True))
@@ -485,21 +485,40 @@ class InvariantState(object):
                 elif item[0]=="npts high":
                     s_10 = item[1]
                 elif item[0] == "volume fraction":
-                    s_17 = item[1]
+                    val=item[1].split("+-")[0].strip()
+                    error = item[1].split("+-")[1].strip()
+                    s_17 = val+" &plusmn; "+error
                 elif item[0] == "specific surface":
-                    s_18 = item[1]
+                    val=item[1].split("+-")[0].strip()
+                    error = item[1].split("+-")[1].strip()
+                    s_18 = val+" &plusmn; "+error
                 elif item[0].split("(")[0].strip()=="power high":
                     s_11 = item[0]+" ="+item[1]
                 elif item[0].split("(")[0].strip()=="power low":
                     s_12 = item[0]+" ="+item[1]
                 elif item[0].split("[")[0].strip()=="Q* from low Q extrapolation":
-                    s_13 = item[1]
+                    #looks messy but this way the symbols +_ and % work on html
+                    val=item[1].split("+-")[0].strip()
+                    error = item[1].split("+-")[1].strip()
+                    err = error.split("%")[0].strip()
+                    percent = error.split("%")[1].strip()
+                    s_13 = val+" &plusmn; "+err+"&#37"+percent
                 elif item[0].split("[")[0].strip()=="Q* from data":
-                    s_14 = item[1]
+                    val=item[1].split("+-")[0].strip()
+                    error = item[1].split("+-")[1].strip()
+                    err = error.split("%")[0].strip()
+                    percent = error.split("%")[1].strip()
+                    s_14 = val+" &plusmn; "+err+"&#37"+percent
                 elif item[0].split("[")[0].strip()=="Q* from high Q extrapolation":
-                    s_15 = item[1]
+                    val=item[1].split("+-")[0].strip()
+                    error = item[1].split("+-")[1].strip()
+                    err = error.split("%")[0].strip()
+                    percent = error.split("%")[1].strip()
+                    s_15 = val+" &plusmn; "+err+"&#37"+percent
                 elif item[0].split("[")[0].strip()=="total Q*":
-                    s_16 = item[1]
+                    val=item[1].split("+-")[0].strip()
+                    error = item[1].split("+-")[1].strip()
+                    s_16 = val+" &plusmn; "+error
                 else:
                     continue
 
