@@ -63,11 +63,12 @@ class ReportDialog(wx.Dialog):
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         
         # buttons
-        id = wx.NewId()
-        button_save = wx.Button(self, id, "Save" )
-        button_save.SetToolTipString("Save this report.")
-        button_save.Bind(wx.EVT_BUTTON, self.onSave, id = button_save.GetId()) 
-        hbox.Add(button_save)
+        id = wx.ID_OK
+        button_close = wx.Button(self, id, "Close")
+        button_close.SetToolTipString("Close this report window.") 
+        #hbox.Add((5,10), 1 , wx.EXPAND|wx.ADJUST_MINSIZE,0)
+        hbox.Add(button_close)
+        button_close.SetFocus()
 
         id = wx.NewId()
         button_preview = wx.Button(self, id, "Preview")
@@ -81,25 +82,23 @@ class ReportDialog(wx.Dialog):
         button_print.Bind(wx.EVT_BUTTON, self.onPrint, id = button_print.GetId()) 
         hbox.Add(button_print)
         
-        id = wx.ID_OK
-        button_close = wx.Button(self, id, "Close")
-        button_close.SetToolTipString("Close this report window.") 
-        hbox.Add((5,10), 1 , wx.EXPAND|wx.ADJUST_MINSIZE,0)
-        hbox.Add(button_close)
-        button_close.SetFocus()
-        
+        id = wx.NewId()
+        button_save = wx.Button(self, id, "Save" )
+        button_save.SetToolTipString("Save this report.")
+        button_save.Bind(wx.EVT_BUTTON, self.onSave, id = button_save.GetId()) 
+        hbox.Add(button_save)     
         
         # panel for report page
         panel = wx.Panel(self, -1)
         vbox= wx.BoxSizer(wx.VERTICAL)
         # html window
-        self.hwindow = html.HtmlWindow(panel, -1,style=wx.BORDER,size=(700,500))
+        self.hwindow = html.HtmlWindow(panel,style=wx.BORDER,size=(700,500))
         # set the html page with the report string
         self.hwindow.SetPage(self.report_html)
+        
         # add panels to boxsizers
-        #hbox.Add(bpanel)
-        vbox.Add(hbox,30, wx.EXPAND)
-        vbox.Add(panel,500, wx.EXPAND)
+        vbox.Add(hbox,30)
+        vbox.Add(panel,500, wx.EXPAND|wx.ALL)
 
         self.SetSizerAndFit(vbox)
         self.Centre()

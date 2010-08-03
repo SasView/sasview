@@ -4,21 +4,6 @@ import copy
 import DataLoader
 from xml.dom.minidom import parse
 from lxml import etree
-"""
-try:
-    import PIL.Image as Image
-    import PIL.PngImagePlugin as PngImagePlugin
-    Image._initialized = 2
-except:
-    try:
-        import Image 
-        import PngImagePlugin
-        Image._initialized = 2
-    except:
-        Image = None    
-"""
-
-
 from DataLoader.readers.cansas_reader import Reader as CansasReader
 from DataLoader.readers.cansas_reader import get_content
 from sans.guiframe.utils import format_number
@@ -567,8 +552,7 @@ class InvariantState(object):
         : extrap_high,extra_low: low/high extrapolations are possible extra-plots
         """
         # some imports
-        #import cStringIO
-        import matplotlib,wx
+        import wx
         import matplotlib.pyplot as plt
         from matplotlib.backends.backend_agg import FigureCanvasAgg
 
