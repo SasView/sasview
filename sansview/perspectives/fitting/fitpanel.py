@@ -186,26 +186,19 @@ class FitPanel(wx.aui.AuiNotebook):
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
         self.Bind(basepage.EVT_NEXT_STATE, self._onRedo)
         
-        #add default page
+       #add default page
         from hint_fitpage import HintFitPage
         self.hint_page = HintFitPage(self) 
-        self.AddPage(page=self.hint_page, caption=self.hint_page.window_caption)
+        self.AddPage(page=self.hint_page, caption="Hint")
+        #Add the first fit page
+        self.add_empty_page()
+        
         # increment number for model name
         self.count = 0
         #updating the panel
         self.Update()
         self.Center()
         
-    def set_data(self, list=[], state=None):
-        """
-        Receive a list of data from data manager
-        """
-        if len(list) ==0:
-            return 
-        #pos = self.GetPageIndex(self.hint_page)
-        #self.SetSelection(pos)
-        self.hint_page.set_data(list=list)
-      
     def set_state(self, state):
         """
         Restore state of the panel
@@ -284,7 +277,7 @@ class FitPanel(wx.aui.AuiNotebook):
         
         """
         self.manager = manager
-        self.hint_page.set_manager(self.manager)
+    
         
     def set_owner(self,owner):
         """ 
@@ -329,7 +322,6 @@ class FitPanel(wx.aui.AuiNotebook):
         """
         name = "Fit Page"
         type = 'empty'
-        print "get_page_info",data.is_data
         if data is not None and hasattr(data, "is_data"):
             if data.is_data:
                 name = data.name 
@@ -408,7 +400,6 @@ class FitPanel(wx.aui.AuiNotebook):
             return None
         page_info = self.get_page_info(data=data)
         type = page_info.type
-        print "add_fit_page",page_info.type
         npages = len(self.opened_pages.keys())
         if npages == 0:
             # create new type of page
