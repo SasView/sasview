@@ -230,9 +230,6 @@ class ViewerFrame(wx.Frame):
         ## Application manager
         self.app_manager = None
         
-        ## Data Manager
-        self.data_manager = DataManager(parent=self)
-        
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins =[]
@@ -704,18 +701,6 @@ class ViewerFrame(wx.Frame):
         
             self._mgr.Update()
    
-    def set_loaded_data(self, data_list=[]):
-        """
-        Save data and path in to data manager
-        """
-        self.data_manager.set_loaded_data(data_list=data_list)
-       
-    def get_data_manager(self):
-        """
-        return data manager instance
-        """
-        return self.data_manager
-    
     def _on_open(self, event):
         """
         """
@@ -726,20 +711,10 @@ class ViewerFrame(wx.Frame):
         from data_loader import plot_data
         if path and os.path.isfile(path):
             plot_data(self, path)
-        data_list = self.data_manager.get_data()
-        
         if self.defaultPanel is not None and \
             self._mgr.GetPane(self.panels["default"].window_name).IsShown():
             self.on_close_welcome_panel()
-        else:
-            for item in self.panels.keys():
-                # Check whether this is a sticky panel
-                if hasattr(self.panels[item], "ALWAYS_ON"):
-                    if self.panels[item].ALWAYS_ON:
-                        continue 
-                if self._mgr.GetPane(self.panels[item].window_name).IsShown():
-                    self.panels[item].set_data(list=data_list)
-            
+       
     def _onClose(self, event):
         """
         Store info to retrieve in xml before closing the application
@@ -895,12 +870,10 @@ class ViewerFrame(wx.Frame):
             if self.panels[item].window_name in panels:
                 if not self._mgr.GetPane(self.panels[item].window_name).IsShown():
                     self._mgr.GetPane(self.panels[item].window_name).Show()
-                    list_of_data = self.data_manager.get_data()
-                    self.panels[item].set_data(list=list_of_data)
             else:
                 if self._mgr.GetPane(self.panels[item].window_name).IsShown():
                     self._mgr.GetPane(self.panels[item].window_name).Hide()
-                    
+    
         self._mgr.Update()
         
     def choose_file(self, path=None):

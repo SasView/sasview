@@ -228,7 +228,8 @@ def plot_data(parent, path):
                     if open_dialog_append_data(panel_name, data_name):
                         #add this plot the an existing panel
                         new_plot.group_id = existing_panel.group_id
-        parent.set_loaded_data(data_list=[(new_plot, path)])
+        wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=title))
+        
     ## the output of the loader is a list , some xml files contain more than one data
     else:
         i=1
@@ -284,6 +285,6 @@ def plot_data(parent, path):
                     if open_dialog_append_data(panel_name, data_name):
                         #add this plot the an existing panel
                         new_plot.group_id = existing_panel.group_id
-            parent.set_loaded_data(data_list=[(new_plot, path)])
+            wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
             i+=1
          
