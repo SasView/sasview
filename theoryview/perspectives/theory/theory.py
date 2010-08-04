@@ -444,8 +444,6 @@ class Plugin:
             else:
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                              title= str(title)))
-            self.parent.set_created_data(data_list=[(new_plot, None)])
-         
             msg = "Plot 1D  complete !"
             wx.PostEvent( self.parent, StatusEvent( status= msg , type="stop" ))
         except:
@@ -496,9 +494,7 @@ class Plugin:
             theory.ymax= data.ymax
             theory.xmin= data.xmin
             theory.xmax= data.xmax
-            
-        self.parent.set_created_data(data_list=[(theory, None)])
-     
+       
         ## plot
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
                          title="Analytical model 2D ", reset=True ))
