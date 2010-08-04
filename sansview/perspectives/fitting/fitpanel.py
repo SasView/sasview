@@ -3,7 +3,7 @@ import numpy
 import string 
 import wx
 import wx.aui
-from sans.guicomm.events import NewPlotEvent, StatusEvent  
+
 import basepage
 
 _BOX_WIDTH = 80
@@ -186,7 +186,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
         self.Bind(basepage.EVT_NEXT_STATE, self._onRedo)
         
-       #add default page
+        #add default page
         from hint_fitpage import HintFitPage
         self.hint_page = HintFitPage(self) 
         self.AddPage(page=self.hint_page, caption="Hint")
@@ -194,7 +194,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.add_empty_page()
         
         # increment number for model name
-        self.count = 0
+        self.count=0
         #updating the panel
         self.Update()
         self.Center()
@@ -206,45 +206,25 @@ class FitPanel(wx.aui.AuiNotebook):
         page_is_opened = False
         if state is not None:
             page_info = self.get_page_info(data=state.data)
-            if hasattr(state.data,"title"):
-                title = str(state.data.title.lstrip().rstrip())
-                if title == "":
-                    title = str(state.data.name)
-            else:
-                title = str(state.data.name)
-            for name, panel, type in self.opened_pages.values():
+            for name, panel in self.opened_pages.values():
                 #Don't return any panel is the exact same page is created
                 if name == page_info.window_name:
                     # the page is still opened
-                    panel.set_manager(self.manager)
-                    panel.set_owner(self.event_owner)
-                    if panel.model_list_box is None or len(panel.model_list_box) == 0: 
-                        page_info.model_list_box = self.model_list_box.get_list()
-                        panel.populate_box(dict=page_info.model_list_box)
-                        panel.initialize_combox()
-                        panel.set_page_info(page_info=page_info)
-                        self.opened_pages[page_info.window_name] = [page_info.window_name, panel, page_info.type]
-                    if panel is not None:  
-                        self.manager.store_page(page=panel, data=state.data)
                     panel.reset_page(state=state)
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=state.data, title=title))
                     page_is_opened = True
-                    
             if not page_is_opened:
                 panel = self.add_fit_page(data=state.data)
                 # add data associated to the page created
                 if panel is not None:  
                     self.manager.store_page(page=panel, data=state.data)
                     panel.reset_page(state=state)
-                
                     
     def on_close_page(self, event):
         """
         close page and remove all references to the closed page
         """
         nbr_page = self.GetPageCount()
-        pos = self.GetSelection()
-        if nbr_page == 1 or self.GetPage(pos)== self.hint_page:
+        if nbr_page == 1:
             event.Veto()
             return 
         selected_page = self.GetPage(self.GetSelection())
@@ -277,7 +257,7 @@ class FitPanel(wx.aui.AuiNotebook):
         
         """
         self.manager = manager
-    
+
         
     def set_owner(self,owner):
         """ 
@@ -322,7 +302,7 @@ class FitPanel(wx.aui.AuiNotebook):
         """
         name = "Fit Page"
         type = 'empty'
-        if data is not None and hasattr(data, "is_data"):
+        if data is not None:
             if data.is_data:
                 name = data.name 
                 type = 'Data'
@@ -349,7 +329,7 @@ class FitPanel(wx.aui.AuiNotebook):
         from fitpage import FitPage
         panel = FitPage(parent=self, page_info=page_info)
         self.AddPage(page=panel, caption=page_info.window_name, select=True)
-        self.opened_pages[page_info.window_name] = [page_info.window_name, panel, page_info.type]
+        self.opened_pages[page_info.type] = [page_info.window_name, panel]
         return panel 
     
     def add_page(self, page_info):
@@ -376,7 +356,7 @@ class FitPanel(wx.aui.AuiNotebook):
             panel.populate_box(dict=page_info.model_list_box)
             panel.initialize_combox()
         panel.set_page_info(page_info=page_info)
-        self.opened_pages[page_info.window_name] = [page_info.window_name, panel, page_info.type]
+        self.opened_pages[page_info.type] = [page_info.window_name, panel]
         return panel
     
     def replace_page(self, index, page_info, type):
@@ -384,7 +364,7 @@ class FitPanel(wx.aui.AuiNotebook):
         replace an existing page
         """
         self.DeletePage(index)
-        del self.opened_pages[page_info.window_name]
+        del self.opened_pages[type]
         return self.add_page(page_info=page_info)
         
     def add_fit_page(self, data, reset=False):
@@ -401,39 +381,40 @@ class FitPanel(wx.aui.AuiNotebook):
         page_info = self.get_page_info(data=data)
         type = page_info.type
         npages = len(self.opened_pages.keys())
-        if npages == 0:
-            # create new type of page
-            panel = self.add_page(page_info=page_info)
-            return panel
-        else:
-            if page_info.window_name not in self.opened_pages.keys() and \
-                page_info.type.lower() in ['data']:
-                #create new data type page
-                panel = self.add_page(page_info=page_info)
-                return panel 
-            elif page_info.type.lower() not in ['data']:
-                #create new theory page
-                for open_tab_caption, value in self.opened_pages.iteritems():
-                    open_tab = value[1]
-                    open_type = value[2]
-                    if page_info.type == open_type:
-                        #replace theory fit tab
-                        existing_value = self.opened_pages[open_tab_caption]
-                        panel = existing_value[1]
-                        #delete the existing page and replace it
-                        index = self.GetPageIndex(panel)
-                        panel = self.replace_page(index=index, page_info=page_info,
-                                                   type=type)
-                        return panel 
-                panel = self.add_page(page_info=page_info)
+        #check if only and empty page is opened
+        if len(self.opened_pages.keys()) > 0:
+            first_page_type = self.opened_pages.keys()[0]
+            if npages == 1 and first_page_type in ['empty']:
+                #replace the first empty page
+                name, panel = self.opened_pages[first_page_type]
+                index = self.GetPageIndex(panel)
+                panel = self.change_page_content(data=data, index=index)
+                del self.opened_pages[first_page_type]
+                return panel
+        if type in self.opened_pages.keys():
+            #this type of page is already created but it is a theory
+            # meaning the same page is just to fit different data
+            if not type.lower() in ['data']:
+                #delete the previous theory page and add a new one
+                name, panel = self.opened_pages[type]
+                #self.manager.reset_plot_panel(panel.get_data())
+                #delete the existing page and replace it
+                index = self.GetPageIndex(panel)
+                panel = self.replace_page(index=index, page_info=page_info, type=type)
                 return panel 
             else:
-                _, panel, _ = self.opened_pages[page_info.window_name]
-                index = self.GetPageIndex(panel)
-                self.SetSelection(index)
-                #page already existing
-                return None
-             
+                for name, panel in self.opened_pages.values():
+                    #Don't return any panel is the exact same page is created
+                    if name == page_info.window_name:
+                        return None
+                    else:
+                        panel = self.add_page(page_info=page_info)
+                        return panel        
+        else:
+            #a new type of page is created
+            panel = self.add_page(page_info=page_info)
+            return panel
+    
     def  _onGetstate(self, event):
         """
         copy the state of a page
