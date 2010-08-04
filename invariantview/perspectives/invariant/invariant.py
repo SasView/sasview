@@ -239,7 +239,7 @@ class Plugin:
             # Store reference to data
             self.__data = data
             # Set the data set to be user for invariant calculation
-            self.invariant_panel.set_current_data(data=data)
+            self.invariant_panel.set_data(data=data)
         
     def save_file(self, filepath, state=None):
         """

@@ -114,119 +114,23 @@ class InvariantPanel(ScrolledPanel):
                                                       type="stop")) 
         return flag
     
-    def on_select_data(self, event=None):
+    def set_data(self, data):
         """
-        On select data by combobox or by set_data
+        Set the data
         """
-        if event !=None:
-            self.state
-            n = self.data_cbbox.GetCurrentSelection()
-            self.data_cbbox.SetSelection(n)
-            data, path = self.data_cbbox.GetClientData(n)
-            if self._data !=None:
-                self._manager.compute_helper(data=data)
-                data = self._data
-            return
-        
-        #update the computation
-        data = self._data
-        if data == None: return
-        n = data.name
-        try:
-            pos = self.data_cbbox.FindString(data.name)
-            self.data_cbbox.SetSelection(pos)
-            self._manager.compute_helper(data=data)
-        except:
-            n = self.data_cbbox.GetCount()
-            self.data_cbbox.SetSelection(n)
-    
-    def set_data(self, list=[], state=None):
-        """
-        Receive  a list of data from gui_manager to compute invariant
-        """
-        if not list:
-            return 
-
-        #count_bf = self.data_cbbox.GetCount()
-        for data, path in list:
-            if data.__class__.__name__ != "Data2D" and \
-                data.name not in self.data_cbbox.GetItems():
-                position = self.data_cbbox.GetCount()
-                self.data_cbbox.Insert(item=data.name, pos=position,
-                                    clientData=(data, path))
-                
-        count = self.data_cbbox.GetCount()
-        if count > 0:
-            self.data_cbbox.Enable()
-            # reset data (cb) only on the first data            
-            if count ==1:
-                try:
-                    #check if the data is from inv file
-                    self._data.meta_data['invstate'].file
-                except:
-                    self._data = data
-                    self.on_select_data(event=None)
-            
-    #data = self._data    
-        title = "Untitled"
-        if hasattr(data,"title"):
-            title = str(data.title.lstrip().rstrip())
-            if title == "":
-                title = str(data.name)
-        else:
-            title = str(data.name)
-
-        if self.is_state_data:
-            self.data_cbbox.SetValue(title)
-        self.data_cbbox.Enable(True)
-        self.is_state_data = False
-             
-        wx.PostEvent(self.parent, NewPlotEvent(plot=data, title=title))
-            
-            
-    def set_current_data(self, data, path=None):
-        """
-        Set the data, mainly used by the inv state file
-        
-        : return: True/False; if False, it will not set_current_data
-        """
-        # warn the users
-        if self._data != None and data != None:
-            if self._data.name != data.name:
-                if not self._show_message():
-                    return False
-            
         self._data = data
-        # reset popUpMenu
-        self._set_bookmark_menu()
         #edit the panel
-        if data is not None:
-            
+        if self._data is not None:
             self.err_check_on_data()
-            self.get_state_by_num(0)
             data_name = self._data.name
-            data_qmin = min (data.x)
-            data_qmax = max (data.x)
-
-            if data.name not in self.data_cbbox.GetItems():
-                position = self.data_cbbox.GetCount()
-                self.data_cbbox.Insert(pos=position, clientData=(data, None), 
-                                       item=data.name)
-            else:
-                position = self.data_cbbox.FindString(data.name)
-            self.data_cbbox.SetSelection(position)
-
+            data_qmin = min (self._data.x)
+            data_qmax = max (self._data.x)
+            self.data_name_tcl.SetValue(str(data_name))
             self.data_min_tcl.SetLabel(str(data_qmin))
             self.data_max_tcl.SetLabel(str(data_qmax))
-            self.button_save.Enable(True)  
             self.reset_panel()
             self.compute_invariant(event=None)
-            #Reset the list of states
-            self.state.data = copy.deepcopy(data)
-            self._reset_state_list()
-            
-        return True     
-
+        return True  
     def set_message(self):
         """
         Display warning message if available
@@ -259,7 +163,7 @@ class InvariantPanel(ScrolledPanel):
             self.state = IState()
         else:
             self.new_state = True
-            if not self.set_current_data(data, path=None):
+            if not self.set_data(data):
                 return
             self.state = state   
             
@@ -1232,7 +1136,7 @@ class InvariantPanel(ScrolledPanel):
         self.data_name_boxsizer = wx.StaticBoxSizer(data_name_box, wx.VERTICAL)
         self.data_name_boxsizer.SetMinSize((PANEL_WIDTH,-1))
         self.hint_msg_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.loaded_data_name_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.data_name_sizer = wx.BoxSizer(wx.HORIZONTAL)
        
         self.data_range_sizer = wx.BoxSizer(wx.HORIZONTAL)
         #Sizer related to background and scale
@@ -1278,16 +1182,13 @@ class InvariantPanel(ScrolledPanel):
         msg = "Highlight = mouse the mouse's cursor on the data until the plot's color changes to yellow"
         self.hint_msg_txt.SetToolTipString(msg)
         self.hint_msg_sizer.Add(self.hint_msg_txt)
-        
-        self.data_txt = wx.StaticText(self, -1,"Data: ")
-        self.data_cbbox = wx.ComboBox(self, -1, size=(260,20),
-                                      style=wx.CB_READONLY)
-        self.data_cbbox.Disable()
-        wx.EVT_COMBOBOX(self.data_cbbox ,-1, self.on_select_data) 
-    
-        self.loaded_data_name_sizer.AddMany([(self.data_txt, 0,
-                                               wx.LEFT|wx.RIGHT, 10),
-                                      (self.data_cbbox, 0, wx.EXPAND)])
+        #Data name [string]
+        data_name_txt = wx.StaticText(self, -1, 'Data : ')  
+       
+        self.data_name_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH*5, 20), style=0) 
+        self.data_name_tcl.SetToolTipString("Data's name.")
+        self.data_name_sizer.AddMany([(data_name_txt, 0, wx.LEFT|wx.RIGHT, 10),
+                                       (self.data_name_tcl, 0, wx.EXPAND)])
         #Data range [string]
         data_range_txt = wx.StaticText(self, -1, 'Total Q Range (1/A): ') 
         data_min_txt = wx.StaticText(self, -1, 'Min : ')  
@@ -1302,7 +1203,7 @@ class InvariantPanel(ScrolledPanel):
                                        (data_max_txt, 0, wx.RIGHT, 10),
                                        (self.data_max_tcl, 0, wx.RIGHT, 10)])
         self.data_name_boxsizer.AddMany([(self.hint_msg_sizer, 0 , wx.ALL, 5),
-                            (self.loaded_data_name_sizer, 0 , wx.ALL, 10),
+                            (self.data_name_sizer, 0 , wx.ALL, 10),
                                      (self.data_range_sizer, 0 , wx.ALL, 10)])
     
     def _layout_bkg_scale(self):
@@ -1858,7 +1759,7 @@ class InvariantWindow(wx.Frame):
         self.panel = InvariantPanel(self)
 
         data.name = data.filename
-        self.panel.set_current_data(data)
+        self.panel.set_data(data)
         self.Centre()
         self.Show(True)
         
