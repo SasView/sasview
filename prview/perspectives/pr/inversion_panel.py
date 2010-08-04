@@ -291,36 +291,6 @@ class InversionControl(ScrolledPanel):
         
         return state
     
-    def set_data(self, list=[], state=None):
-        """
-        Receive  a list of data from gui_manager to compute pr
-        """
-        msg = "Could not load: \n"
-        for data, path in list:
-            if data.__class__.__name__ != "Data2D":
-                name = os.path.basename(path)
-                if name not in self.data_cbbox.GetItems():
-                    self.data_cbbox.Insert(item=name,pos=0,clientData=(data, path))
-            else:
-                message = "Prview cannot load Data2D"
-                wx.PostEvent(self.manager.parent, StatusEvent(status=message, 
-                                                              type="error"))
-        if list:
-            self.data_cbbox.Enable()
-            self.data_cbbox.SetSelection(0)
-            self.on_select_data(event=None)
-                
-    def on_select_data(self, event=None):
-        """
-        Select data from combobox
-        """
-        position = self.data_cbbox.GetCurrentSelection()
-        #For MAC
-        data, path = None, None
-        if position >= 0:
-            data, path = self.data_cbbox.GetClientData(position)
-            self._change_file(evt=None, filepath=path)
-    
     def set_state(self, state):
         """
         Set the state of the panel and inversion problem to
@@ -393,19 +363,8 @@ class InversionControl(ScrolledPanel):
         boxsizer1 = wx.StaticBoxSizer(databox, wx.VERTICAL)
         boxsizer1.SetMinSize((self._default_width,50))
         pars_sizer = wx.GridBagSizer(5,5)
-        
-        self.data_txt = wx.StaticText(self, -1,"Loaded Data: ")
-        self.data_cbbox = wx.ComboBox(self, -1, size=(260,20))
-        self.data_cbbox.Disable()
-        wx.EVT_COMBOBOX(self.data_cbbox ,-1, self.on_select_data) 
-        
+
         iy = 0
-        pars_sizer.Add(self.data_txt, (iy,0), (1,1), 
-                       wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        pars_sizer.Add(self.data_cbbox , (iy,1), (1,1),
-                        wx.EXPAND|wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 15)
-        
-        iy = 1
         self.file_radio = wx.StaticText(self, -1, "Data:")
         pars_sizer.Add(self.file_radio, (iy,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
@@ -823,8 +782,7 @@ class InversionControl(ScrolledPanel):
             npts = self.manager.get_npts()
             if npts>0 and nfunc>npts:
                 message = "Number of function terms should be smaller than the number of points"
-                wx.PostEvent(self.manager.parent, StatusEvent(status=message, 
-                                                              type="warning"))
+                wx.PostEvent(self.manager.parent, StatusEvent(status=message))
                 raise ValueError, message
             self.nfunc_ctl.SetBackgroundColour(wx.WHITE)
             self.nfunc_ctl.Refresh()
