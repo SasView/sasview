@@ -251,7 +251,19 @@ class InversionControl(ScrolledPanel):
             return None
         
         dlg.Destroy()
-                
+        
+        state = self.get_state()
+            
+        self.manager.save_data(filepath=path, prstate=state)
+        
+        return state
+    
+    def get_state(self):
+        """
+        Get the current state
+        
+        : return: state object
+        """
         # Construct the state object    
         state = InversionState()
         
@@ -286,8 +298,6 @@ class InversionControl(ScrolledPanel):
         state.rg      = self.rg
         state.iq0     = self.iq0
         state.bck     = self.bck
-            
-        self.manager.save_data(filepath=path, prstate=state)
         
         return state
     

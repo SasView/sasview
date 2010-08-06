@@ -130,6 +130,7 @@ class InvariantPanel(ScrolledPanel):
             self.data_max_tcl.SetLabel(str(data_qmax))
             self.reset_panel()
             self.compute_invariant(event=None)
+            self.state.file = self._data.name
         return True  
     def set_message(self):
         """
@@ -165,8 +166,8 @@ class InvariantPanel(ScrolledPanel):
             self.new_state = True
             if not self.set_data(data):
                 return
-            self.state = state   
-            
+            self.state = state 
+            self.state.file = data.name   
             num = self.state.saved_state['state_num']
             
             if num > 0 :

@@ -340,9 +340,10 @@ class Reader(CansasReader):
     type_name = "P(r)"
     
     ## Wildcards
-    type = ["P(r) files (*.prv)|*.prv"]
+    type = ["P(r) files (*.prv)|*.prv",
+            "SANSView files (*.svs)|*.svs"]
     ## List of allowed extensions
-    ext=['.prv', '.PRV']  
+    ext=['.prv', '.PRV', '.svs', '.SVS']  
     
     def __init__(self, call_back, cansas=True):
         """
@@ -400,13 +401,15 @@ class Reader(CansasReader):
         :return: InversionState object
         
         """
-        # Create an empty state
-        state = InversionState()
+        state = None
         
         # Locate the P(r) node
         try:
             nodes = entry.xpath('ns:%s' % PRNODE_NAME, namespaces={'ns': CANSAS_NS})
-            state.fromXML(node=nodes[0])
+            if nodes !=[]:
+                # Create an empty state
+                state =  InversionState()
+                state.fromXML(node=nodes[0])
         except:
             logging.info("XML document does not contain P(r) information.\n %s" % sys.exc_value)
             
@@ -446,9 +449,12 @@ class Reader(CansasReader):
                 for entry in entry_list:
                     sas_entry = self._parse_entry(entry)
                     prstate = self._parse_prstate(entry)
-                    sas_entry.meta_data['prstate'] = prstate
-                    sas_entry.filename = prstate.file
-                    output.append(sas_entry)
+                    #prstate could be None when .svs file is loaded
+                    #in this case, skip appending to output
+                    if prstate != None:
+                        sas_entry.meta_data['prstate'] = prstate
+                        sas_entry.filename = prstate.file
+                        output.append(sas_entry)
         else:
             raise RuntimeError, "%s is not a file" % path
         
@@ -474,18 +480,7 @@ class Reader(CansasReader):
         """
         # Sanity check
         if self.cansas == True:
-            if datainfo is None:
-                datainfo = DataLoader.data_info.Data1D(x=[], y=[])    
-            elif not issubclass(datainfo.__class__, DataLoader.data_info.Data1D):
-                raise RuntimeError, "The cansas writer expects a Data1D instance: %s" % str(datainfo.__class__.__name__)
-        
-            # Create basic XML document
-            doc, sasentry = self._to_xml_doc(datainfo)
-        
-            # Add the P(r) information to the XML document
-            if prstate is not None:
-                prstate.toXML(doc=doc, entry_node=sasentry)
-        
+            doc =self.write_toXML(datainfo, prstate)        
             # Write the XML document
             fd = open(filename, 'w')
             fd.write(doc.toprettyxml())
@@ -493,5 +488,23 @@ class Reader(CansasReader):
         else:
             prstate.toXML(file=filename)
         
+    def write_toXML(self, datainfo=None, state=None):
+        """
+        Write toXML, a helper for write()
+        
+        : return: xml doc
+        """
+        if datainfo is None:
+            datainfo = DataLoader.data_info.Data1D(x=[], y=[])    
+        elif not issubclass(datainfo.__class__, DataLoader.data_info.Data1D):
+            raise RuntimeError, "The cansas writer expects a Data1D instance: %s" % str(datainfo.__class__.__name__)
     
+        # Create basic XML document
+        doc, sasentry = self._to_xml_doc(datainfo)
+    
+        # Add the invariant information to the XML document
+        if state is not None:
+            state.toXML(doc=doc, entry_node=sasentry)
+            
+        return doc 
     

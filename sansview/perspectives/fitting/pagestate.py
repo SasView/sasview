@@ -602,9 +602,10 @@ class Reader(CansasReader):
     type_name = "Fitting"
     
     ## Wildcards
-    type = ["Fitting files (*.fitv)|*.fitv"]
+    type = ["Fitting files (*.fitv)|*.fitv"
+            "SANSView file (*.svs)|*.svs"]
     ## List of allowed extensions
-    ext=['.fitv', '.FITV']  
+    ext=['.fitv', '.FITV', '.svs', 'SVS']   
     
     def __init__(self, call_back=None, cansas=True):
         CansasReader.__init__(self)
@@ -833,11 +834,14 @@ class Reader(CansasReader):
         :return: PageState object
         """
         # Create an empty state
-        state = PageState()
+        state = None   
         # Locate the P(r) node
         try:
             nodes = entry.xpath('ns:%s' % FITTING_NODE_NAME, namespaces={'ns': CANSAS_NS})
-            state.fromXML(node=nodes[0])
+            if nodes !=[]:
+                # Create an empty state
+                state =  PageState()
+                state.fromXML(node=nodes[0])
         except:
             logging.info("XML document does not contain fitting information.\n %s" % sys.exc_value)
             
@@ -1105,55 +1109,62 @@ class Reader(CansasReader):
                     # Specifying the namespace will take care of the file format version 
                     root = tree.getroot()
                     entry_list = root.xpath('ns:SASentry', namespaces={'ns': CANSAS_NS})
-                    for entry in entry_list:
+                    for entry in entry_list:   
                         try:
                             sas_entry = self._parse_entry(entry)
                         except:
                             raise
                         fitstate = self._parse_state(entry)
-                        sas_entry.meta_data['fitstate'] = fitstate
-                        sas_entry.filename = fitstate.file
-                        output.append(sas_entry)
+                        
+                        #state could be None when .svs file is loaded
+                        #in this case, skip appending to output
+                        if fitstate != None:
+                            sas_entry.meta_data['fitstate'] = fitstate
+                            sas_entry.filename = fitstate.file
+                            output.append(sas_entry)
             else:
                 raise RuntimeError, "%s is not a file" % path
-            
+
             # Return output consistent with the loader's api
             if len(output)==0:
                 return None
-            elif len(output)==1:
-                # Call back to post the new state
-                state = output[0].meta_data['fitstate']
-                t = time.localtime(state.timestamp)
-                time_str = time.strftime("%b %d %H:%M", t)
-                # Check that no time stamp is already appended
-                max_char = state.file.find("[")
-                if max_char < 0:
-                    max_char = len(state.file)
-                state.file = state.file[0:max_char] +' [' + time_str + ']'
-               
-                    
-                if state is not None and state.is_data is not None:
-                    exec 'output[0].is_data = state.is_data' 
-                 
-                output[0].filename = state.file
-                state.data = output[0]
-                state.data.name = output[0].filename #state.data_name
-                state.data.id = state.data_id
-                state.data.id = state.data_id
-                if state.is_data is not None:
-                    state.data.is_data = state.is_data
-                state.data.group_id = output[0].filename
-              
-                self.call_back(state=state, datainfo=output[0])
-                return output[0]
             else:
-                return output                
+                for ind in range(len(output)):
+                    # Call back to post the new state
+                    state = output[ind].meta_data['fitstate']
+                    t = time.localtime(state.timestamp)
+                    time_str = time.strftime("%b %d %H:%M", t)
+                    # Check that no time stamp is already appended
+                    max_char = state.file.find("[")
+                    if max_char < 0:
+                        max_char = len(state.file)
+                    state.file = state.file[0:max_char] +' [' + time_str + ']'
+                   
+                        
+                    if state is not None and state.is_data is not None:
+                        exec 'output[%d].is_data = state.is_data'% ind 
+                     
+                    output[ind].filename = state.file
+                    state.data = output[ind]
+                    state.data.name = output[ind].filename #state.data_name
+                    state.data.id = state.data_id
+                    state.data.id = state.data_id
+                    if state.is_data is not None:
+                        state.data.is_data = state.is_data
+                    state.data.group_id = output[ind].filename
+                  
+                    # make sure to put run name if none
+                    #if output[ind].run == None or output[ind].run ==[]:
+                    #    exec 'output[%d].run = [output[%d].filename]'% (ind,ind)
+                    self.call_back(state=state, datainfo=output[ind])
+                    return output[ind]
+              
         except:
             raise
            
     def write(self, filename, datainfo=None, fitstate=None):
         """
-        Write the content of a Data1D as a CanSAS XML file
+        Write the content of a Data1D as a CanSAS XML file only for standalone
         
         :param filename: name of the file to write
         :param datainfo: Data1D object
@@ -1164,16 +1175,7 @@ class Reader(CansasReader):
         if self.cansas == True:
             
             # Add fitting information to the XML document
-            if fitstate is not None:
-                if fitstate.data is None:
-                    data = DataLoader.data_info.Data1D(x=[], y=[])   
-                elif issubclass(fitstate.data.__class__, DataLoader.data_info.Data1D):
-                    data = fitstate.data
-                    doc, sasentry = self._to_xml_doc(data)
-                else:
-                    data = fitstate.data
-                    doc, sasentry = self._data2d_to_xml_doc(data)
-                fitstate.toXML(doc=doc, file=data.name, entry_node=sasentry)
+            self.write_toXML(datainfo, fitstate)
             # Write the XML document
             fd = open(filename, 'w')
             fd.write(doc.toprettyxml())
@@ -1181,7 +1183,34 @@ class Reader(CansasReader):
         else:
             fitstate.toXML(file=filename)
         
+    def write_toXML(self, datainfo=None, state=None):
+        """
+        Write toXML, a helper for write() , could be used by guimanager._on_save()
+        
+        : return: xml doc
+        """
 
+        if state.data is None:
+            data = DataLoader.data_info.Data1D(x=[], y=[])  
+        else:  
+            #make sure title and data run is filled up.
+            #if state.data.title == None or state.data.title=='': state.data.title = state.data.name
+            #if state.data.run_name == None or state.data.run_name=={}: 
+            #    state.data.run = [str(state.data.name)]
+            #    state.data.run_name[0] = state.data.name
+   
+            if issubclass(state.data.__class__, DataLoader.data_info.Data1D):
+                data = state.data
+                doc, sasentry = self._to_xml_doc(data)
+            else:
+                data = state.data
+                doc, sasentry = self._data2d_to_xml_doc(data)
+            
+
+        if state is not None:
+            state.toXML(doc=doc, file=data.name, entry_node=sasentry)
+            
+        return doc 
   
 if __name__ == "__main__":
     state = PageState(parent=None)

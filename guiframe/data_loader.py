@@ -149,12 +149,12 @@ def on_load_error(parent):
     wx.PostEvent(parent, StatusEvent(status="Load cancel..", info="warning",
                                                 type="stop"))
     
-def plot_data(parent, path):
+def plot_data(parent, path, format=None):
     """
     Use the DataLoader loader to created data to plot.
     
     :param path: the path of the data to load
-    
+    : param format: file format (as file extension)
     """
     from sans.guicomm.events import NewPlotEvent, StatusEvent
     from DataLoader.loader import  Loader
@@ -164,7 +164,7 @@ def plot_data(parent, path):
     
     # Load data 
     try:
-        output = L.load(path)
+        output = L.load(path, format)
     except:
         load_error(sys.exc_value)
         return
@@ -234,57 +234,59 @@ def plot_data(parent, path):
     else:
         i=1
         for item in output:
-            msg = "Loading 1D data: %s"%str(item.run[0])
-            wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
             try:
-                dx = item.dx
-                dxl = item.dxl
-                dxw = item.dxw
+                msg = "Loading 1D data: %s"%str(item.run[0])
+                wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
+                try:
+                    dx = item.dx
+                    dxl = item.dxl
+                    dxw = item.dxw
+                except:
+                    dx = None
+                    dxl = None
+                    dxw = None
+    
+                new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy)
+                new_plot.copy_from_datainfo(item)
+                item.clone_without_data(clone=new_plot)
+                new_plot.dxl = dxl
+                new_plot.dxw = dxw
+                
+                name = parse_name(name=str(item.run[0]), expression="_")
+                #if not name in parent.indice_load_data.keys():
+                #    parent.indice_load_data[name] = 0
+                #else:
+                    ## create a copy of the loaded data
+                    
+                    #TODO: this is a very annoying feature. We should make this
+                    # an option. Excel doesn't do this. Why should we?
+                    # What is the requirement for this feature, and are the
+                    # counter arguments stronger? Is this feature developed
+                    # to please at least 80% of the users or a special few?
+                    #parent.indice_load_data[name] += 1
+                    #name = name + "(copy %i)"%parent.indice_load_data[name]
+                    
+                new_plot.name = name
+                new_plot.interactive = True
+                new_plot.group_id = name
+                new_plot.id = name
+                new_plot.is_data = True
+            
+                if hasattr(item,"title"):
+                    title = item.title.lstrip().rstrip()
+                    if title == "":
+                        title = str(name)
+                else:
+                    title = name
+                if hasattr(parent, "panel_on_focus") and not(parent.panel_on_focus is None):
+                    existing_panel  = parent.panel_on_focus
+                    panel_name = existing_panel.window_caption
+                    data_name = new_plot.name
+                    if enable_add_data(existing_panel, new_plot):
+                        if open_dialog_append_data(panel_name, data_name):
+                            #add this plot the an existing panel
+                            new_plot.group_id = existing_panel.group_id
+                wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
+                i+=1
             except:
-                dx = None
-                dxl = None
-                dxw = None
-
-            new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy)
-            new_plot.copy_from_datainfo(item)
-            item.clone_without_data(clone=new_plot)
-            new_plot.dxl = dxl
-            new_plot.dxw = dxw
-           
-            name = parse_name(name=str(item.run[0]), expression="_")
-            #if not name in parent.indice_load_data.keys():
-            #    parent.indice_load_data[name] = 0
-            #else:
-                ## create a copy of the loaded data
-                
-                #TODO: this is a very annoying feature. We should make this
-                # an option. Excel doesn't do this. Why should we?
-                # What is the requirement for this feature, and are the
-                # counter arguments stronger? Is this feature developed
-                # to please at least 80% of the users or a special few?
-                #parent.indice_load_data[name] += 1
-                #name = name + "(copy %i)"%parent.indice_load_data[name]
-                
-            new_plot.name = name
-            new_plot.interactive = True
-            new_plot.group_id = name
-            new_plot.id = name
-            new_plot.is_data = True
-        
-            if hasattr(item,"title"):
-                title = item.title.lstrip().rstrip()
-                if title == "":
-                    title = str(name)
-            else:
-                title = name
-            if hasattr(parent, "panel_on_focus") and not(parent.panel_on_focus is None):
-                existing_panel  = parent.panel_on_focus
-                panel_name = existing_panel.window_caption
-                data_name = new_plot.name
-                if enable_add_data(existing_panel, new_plot):
-                    if open_dialog_append_data(panel_name, data_name):
-                        #add this plot the an existing panel
-                        new_plot.group_id = existing_panel.group_id
-            wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
-            i+=1
-         
+                raise

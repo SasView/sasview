@@ -536,8 +536,13 @@ class ViewerFrame(wx.Frame):
         self.filemenu = wx.Menu()
         
         id = wx.NewId()
-        self.filemenu.Append(id, '&Load Data', 'Load data file into the application')
+        self.filemenu.Append(id, '&Open', 'Load data file into the application')
         wx.EVT_MENU(self, id, self._on_open)
+        #self.filemenu.AppendSeparator()
+        
+        id = wx.NewId()
+        self.filemenu.Append(id, '&Save', 'Save project as a SanaView (svs) file')
+        wx.EVT_MENU(self, id, self._on_save)
         #self.filemenu.AppendSeparator()
         
         id = wx.NewId()
@@ -710,10 +715,79 @@ class ViewerFrame(wx.Frame):
         
         from data_loader import plot_data
         if path and os.path.isfile(path):
-            plot_data(self, path)
+             basename  = os.path.basename(path)
+             if  basename.endswith('.svs'):
+                 plot_data(self, path,'.inv')
+                 plot_data(self, path,'.prv')
+                 plot_data(self, path,'.fitv')
+             else: plot_data(self,path)
         if self.defaultPanel is not None and \
             self._mgr.GetPane(self.panels["default"].window_name).IsShown():
             self.on_close_welcome_panel()
+            
+    def _on_save(self, event):
+        """
+        Save state into a file
+        """
+        # Ask the user the location of the file to write to.
+        
+        ## Default file location for save
+        self._default_save_location = os.getcwd()
+        path = None
+        dlg = wx.FileDialog(self, "Choose a file", self._default_save_location, "", "*.svs", wx.SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            self._default_save_location = os.path.dirname(path)
+        else:
+            return None
+        
+        dlg.Destroy()
+        if path is None:
+            return
+        # default cansas xml doc
+        doc = None
+        for item in self.panels:
+            try:
+                if self.panels[item].window_name == 'Invariant' or self.panels[item].window_name == 'pr_control' or self.panels[item].window_name == 'Fit panel':
+                    if self.panels[item].window_name == 'Invariant':
+                        data = self.panels[item]._data
+                        state = self.panels[item].state
+                        new_doc =self.panels[item]._manager.state_reader.write_toXML(data,state)
+                        if hasattr(doc, "firstChild"):
+                            doc.firstChild.appendChild (new_doc.firstChild.firstChild)  
+                        else:
+                            doc = new_doc 
+                    elif self.panels[item].window_name == 'pr_control':
+                        data = self.panels[item].manager.current_plottable
+                        state = self.panels[item].get_state()
+                        new_doc =self.panels[item].manager.state_reader.write_toXML(data,state)
+                        if hasattr(doc, "firstChild"):
+                            doc.firstChild.appendChild (new_doc.firstChild.firstChild)  
+                        else:
+                            doc = new_doc 
+                    elif self.panels[item].window_name == 'Fit panel':
+                        for index in range(self.panels[item].GetPageCount()):
+                            selected_page = self.panels[item].GetPage(index) 
+                            if hasattr(selected_page,"get_data"):
+                                data = selected_page.get_data()
+                                state = selected_page.state
+                                new_doc =selected_page.manager.state_reader.write_toXML(data,state)
+                                if doc != None and hasattr(doc, "firstChild"):
+                                    doc.firstChild.appendChild (new_doc.firstChild.firstChild)
+                                else:
+                                    doc = new_doc
+
+            except: 
+                pass
+
+        # Write the XML document
+        if doc != None:
+            fd = open(path, 'w')
+            fd.write(doc.toprettyxml())
+            fd.close()
+        else:
+            raise RuntimeError, "%s is not a SansView (.svs) file..." % path
+
        
     def _onClose(self, event):
         """

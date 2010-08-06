@@ -265,7 +265,7 @@ class InvariantState(object):
         
         # File name
         element = newdoc.createElement("filename")
-        if self.file is not None:
+        if self.file != None and self.file !='':
             element.appendChild(newdoc.createTextNode(str(self.file)))
         else:
             element.appendChild(newdoc.createTextNode(str(file)))
@@ -352,8 +352,8 @@ class InvariantState(object):
             # Get file name
             entry = get_content('ns:filename', node)
             if entry is not None:
-                self.file = entry.text.strip()
-            
+                file_name = entry.text.strip()
+
             # Get time stamp
             entry = get_content('ns:timestamp', node)
             if entry is not None and entry.get('epoch'):
@@ -431,7 +431,9 @@ class InvariantState(object):
                     val = str(input_field.text.strip())
                     if input_field is not None:
                         self.set_saved_state(name=item, value=val)
-
+                        
+            self.file = file_name
+            
     def set_report_string(self):
         """
         Get the values (strings) from __str__ for report 
@@ -605,9 +607,10 @@ class Reader(CansasReader):
     type_name = "Invariant"
     
     ## Wildcards
-    type = ["Invariant file (*.inv)|*.inv"]
+    type = ["Invariant file (*.inv)|*.inv",
+            "SANSView file (*.svs)|*.svs"]
     ## List of allowed extensions
-    ext=['.inv', '.INV']  
+    ext=['.inv', '.INV', '.svs', 'SVS']  
     
     def __init__(self, call_back, cansas=True):
         """
@@ -659,13 +662,14 @@ class Reader(CansasReader):
         : param entry: XML node to read from 
         : return: InvariantState object
         """
-        # Create an empty state
-        state = InvariantState()
-
+        state = None
         # Locate the invariant node
         try:
             nodes = entry.xpath('ns:%s' % INVNODE_NAME, namespaces={'ns': CANSAS_NS})
-            state.fromXML(node=nodes[0])
+            # Create an empty state
+            if nodes !=[]:
+                state = InvariantState()
+                state.fromXML(node=nodes[0])
         except:
             logging.info("XML document does not contain invariant information.\n %s" % sys.exc_value)  
         return state
@@ -682,7 +686,6 @@ class Reader(CansasReader):
         : raise ValueError: when the length of the data vectors are inconsistent
         """
         output = []
-        
         if os.path.isfile(path):
             basename  = os.path.basename(path)
             root, extension = os.path.splitext(basename)
@@ -701,11 +704,13 @@ class Reader(CansasReader):
                     
                     sas_entry = self._parse_entry(entry)
                     invstate = self._parse_state(entry)
-                    sas_entry.meta_data['invstate'] = invstate
-
-                    sas_entry.filename = invstate.file
-                    output.append(sas_entry)
-                
+                    
+                    #invstate could be None when .svs file is loaded
+                    #in this case, skip appending to output
+                    if invstate != None:
+                        sas_entry.meta_data['invstate'] = invstate
+                        sas_entry.filename = invstate.file
+                        output.append(sas_entry)
         else:
             raise RuntimeError, "%s is not a file" % path
 
@@ -729,21 +734,9 @@ class Reader(CansasReader):
         : param datainfo: Data1D object
         : param invstate: InvariantState object
         """
-
         # Sanity check
         if self.cansas == True:
-            if datainfo is None:
-                datainfo = DataLoader.data_info.Data1D(x=[], y=[])    
-            elif not issubclass(datainfo.__class__, DataLoader.data_info.Data1D):
-                raise RuntimeError, "The cansas writer expects a Data1D instance: %s" % str(datainfo.__class__.__name__)
-        
-            # Create basic XML document
-            doc, sasentry = self._to_xml_doc(datainfo)
-        
-            # Add the invariant information to the XML document
-            if invstate is not None:
-                invstate.toXML(doc=doc, entry_node=sasentry)
-        
+            doc = self.write_toXML(datainfo,invstate)
             # Write the XML document
             fd = open(filename, 'w')
             fd.write(doc.toprettyxml())
@@ -751,5 +744,27 @@ class Reader(CansasReader):
         else:
             invstate.toXML(file=filename)
         
+    def write_toXML(self, datainfo=None, state=None):
+        """
+        Write toXML, a helper for write()
+        
+        : return: xml doc
+        """
+        if datainfo is None:
+            datainfo = DataLoader.data_info.Data1D(x=[], y=[])    
+        elif not issubclass(datainfo.__class__, DataLoader.data_info.Data1D):
+            raise RuntimeError, "The cansas writer expects a Data1D instance: %s" % str(datainfo.__class__.__name__)
+        #make sure title and data run is filled up.
+        if datainfo.title == None or datainfo.title=='': datainfo.title = datainfo.name
+        if datainfo.run_name == None or datainfo.run_name=={}: 
+            datainfo.run = [str(datainfo.name)]
+            datainfo.run_name[0] = datainfo.name
+
+        # Create basic XML document
+        doc, sasentry = self._to_xml_doc(datainfo)
     
-    
+        # Add the invariant information to the XML document
+        if state is not None:
+            state.toXML(doc=doc, entry_node=sasentry)
+            
+        return doc

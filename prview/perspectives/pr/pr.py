@@ -111,6 +111,7 @@ class Plugin:
         self.state_reader = Reader(self.set_state)
         l = Loader()
         l.associate_file_reader('.prv', self.state_reader)
+        l.associate_file_reader(".sav", self.state_reader)
                 
         # Log startup
         logging.info("Pr(r) plug-in started")
