@@ -751,20 +751,22 @@ class ViewerFrame(wx.Frame):
                 if self.panels[item].window_name == 'Invariant' or self.panels[item].window_name == 'pr_control' or self.panels[item].window_name == 'Fit panel':
                     if self.panels[item].window_name == 'Invariant':
                         data = self.panels[item]._data
-                        state = self.panels[item].state
-                        new_doc =self.panels[item]._manager.state_reader.write_toXML(data,state)
-                        if hasattr(doc, "firstChild"):
-                            doc.firstChild.appendChild (new_doc.firstChild.firstChild)  
-                        else:
-                            doc = new_doc 
+                        if data != None:
+                            state = self.panels[item].state
+                            new_doc =self.panels[item]._manager.state_reader.write_toXML(data,state)
+                            if hasattr(doc, "firstChild"):
+                                doc.firstChild.appendChild (new_doc.firstChild.firstChild)  
+                            else:
+                                doc = new_doc 
                     elif self.panels[item].window_name == 'pr_control':
                         data = self.panels[item].manager.current_plottable
-                        state = self.panels[item].get_state()
-                        new_doc =self.panels[item].manager.state_reader.write_toXML(data,state)
-                        if hasattr(doc, "firstChild"):
-                            doc.firstChild.appendChild (new_doc.firstChild.firstChild)  
-                        else:
-                            doc = new_doc 
+                        if data != None:
+                            state = self.panels[item].get_state()
+                            new_doc =self.panels[item].manager.state_reader.write_toXML(data,state)
+                            if hasattr(doc, "firstChild"):
+                                doc.firstChild.appendChild (new_doc.firstChild.firstChild)  
+                            else:
+                                doc = new_doc 
                     elif self.panels[item].window_name == 'Fit panel':
                         for index in range(self.panels[item].GetPageCount()):
                             selected_page = self.panels[item].GetPage(index) 

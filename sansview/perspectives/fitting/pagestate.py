@@ -1194,12 +1194,13 @@ class Reader(CansasReader):
             data = DataLoader.data_info.Data1D(x=[], y=[])  
         else:  
             #make sure title and data run is filled up.
-            #if state.data.title == None or state.data.title=='': state.data.title = state.data.name
-            #if state.data.run_name == None or state.data.run_name=={}: 
-            #    state.data.run = [str(state.data.name)]
-            #    state.data.run_name[0] = state.data.name
+            if state.data.title == None or state.data.title=='': state.data.title = state.data.name
+            if state.data.run_name == None or state.data.run_name=={}: 
+                state.data.run = [str(state.data.name)]
+                state.data.run_name[0] = state.data.name
    
             if issubclass(state.data.__class__, DataLoader.data_info.Data1D):
+
                 data = state.data
                 doc, sasentry = self._to_xml_doc(data)
             else:

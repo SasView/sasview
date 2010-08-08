@@ -171,7 +171,9 @@ def plot_data(parent, path, format=None):
     
     # Notify user if the loader completed the load but no data came out
     if output == None:
-        load_error("The data file appears to be empty.")
+        basename  = os.path.basename(path)
+        if  not basename.endswith('.svs'):
+            load_error("The data file appears to be empty.")
         return
   
      
