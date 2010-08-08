@@ -1157,7 +1157,7 @@ class Reader(CansasReader):
                     #if output[ind].run == None or output[ind].run ==[]:
                     #    exec 'output[%d].run = [output[%d].filename]'% (ind,ind)
                     self.call_back(state=state, datainfo=output[ind])
-                    return output[ind]
+                return output[ind]
               
         except:
             raise

@@ -50,7 +50,7 @@ DEFAULT_QMAX = 0.13
 DEFAULT_NPTS = 50
 
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
-
+(FitStateUpdateEvent, EVT_STATE_UPDATE)   = wx.lib.newevent.NewEvent()
 from fitpage import Chi2UpdateEvent
 
 
@@ -116,6 +116,7 @@ class Plugin:
         self.theory_data = None  
         #Create a reader for fit page's state
         self.state_reader = None 
+        self.temp_state = []
         # Log startup
         logging.info("Fitting plug-in started") 
         
@@ -234,6 +235,7 @@ class Plugin:
         Create and return a list of panel objects
         """
         self.parent = parent
+        self.parent.Bind(EVT_STATE_UPDATE, self.on_set_state_helper)
         # Creation of the fit panel
         self.fit_panel = FitPanel(self.parent, -1)
         #Set the manager for the main panel
@@ -301,15 +303,30 @@ class Plugin:
         #print "state", state
         #return
         #working on reading state
+        self.temp_state = []
         try: 
+            # state
             # Load fitting state
-            page = self.fit_panel.set_state(state)   
+            self.temp_state.append(state) 
             # Make sure the user sees the fitting panel after loading
-            self.parent.set_perspective(self.perspective)   
+            #self.parent.set_perspective(self.perspective)   
                    
         except:
             raise
         
+    def  on_set_state_helper(self,event=None):
+        """
+        """
+        if self.temp_state == None:
+            return
+        # Load fitting state
+        for index in range(len(self.temp_state)):
+            page = self.fit_panel.set_state(self.temp_state[index]) 
+            # Make sure the user sees the fitting panel after loading
+            self.parent.set_perspective(self.perspective)  
+             
+        self.temp_state = []   
+                 
     def save_fit_state(self, filepath, fitstate):  
         """
         save fit page state into file

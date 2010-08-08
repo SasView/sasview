@@ -7,6 +7,8 @@ from dataFitting import Data1D
 from dataFitting import Data2D
 from DataLoader.loader import Loader
 from load_thread import DataReader
+from sans.perspectives.invariant import InvStateUpdateEvent
+from perspectives.fitting import FitStateUpdateEvent
 
 from sans.guicomm.events import NewPlotEvent, StatusEvent
 
@@ -231,29 +233,39 @@ def plot_data(parent, path, format=None):
                         #add this plot the an existing panel
                         new_plot.group_id = existing_panel.group_id
         wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=title))
-        
+        wx.PostEvent(parent,InvStateUpdateEvent())
+        wx.PostEvent(parent,FitStateUpdateEvent())
     ## the output of the loader is a list , some xml files contain more than one data
     else:
+        
         i=1
         for item in output:
             try:
-                msg = "Loading 1D data: %s"%str(item.run[0])
-                wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
-                try:
-                    dx = item.dx
-                    dxl = item.dxl
-                    dxw = item.dxw
-                except:
-                    dx = None
-                    dxl = None
-                    dxw = None
-    
-                new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy)
+                ## Creating a Data2D with output
+                if hasattr(item,'data'):
+                    msg = "Loading 2D data: %s"%item.filename
+                    wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
+                    new_plot = Data2D(image=None, err_image=None)
+              
+                else:
+                    msg = "Loading 1D data: %s"%str(item.run[0])
+                    wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
+                    try:
+                        dx = item.dx
+                        dxl = item.dxl
+                        dxw = item.dxw
+                    except:
+                        dx = None
+                        dxl = None
+                        dxw = None
+        
+                    new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy)
+                    
+                    new_plot.dxl = dxl
+                    new_plot.dxw = dxw
+                    
+                item.clone_without_data(clone=new_plot)    
                 new_plot.copy_from_datainfo(item)
-                item.clone_without_data(clone=new_plot)
-                new_plot.dxl = dxl
-                new_plot.dxw = dxw
-                
                 name = parse_name(name=str(item.run[0]), expression="_")
                 #if not name in parent.indice_load_data.keys():
                 #    parent.indice_load_data[name] = 0
@@ -289,6 +301,8 @@ def plot_data(parent, path, format=None):
                             #add this plot the an existing panel
                             new_plot.group_id = existing_panel.group_id
                 wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
+                wx.PostEvent(parent,InvStateUpdateEvent())
+                wx.PostEvent(parent,FitStateUpdateEvent())
                 i+=1
             except:
-                raise
+                pass

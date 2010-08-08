@@ -25,6 +25,7 @@ from sans.guicomm.events import ERR_DATA
 from invariant_state import Reader as reader
 from DataLoader.loader import Loader
 from invariant_panel import InvariantPanel
+(InvStateUpdateEvent, EVT_STATE_UPDATE)   = wx.lib.newevent.NewEvent()
 
 class Plugin:
     """
@@ -46,8 +47,10 @@ class Plugin:
         ## List of panels that you would like to open in AUI windows
         #  for your plug-in. This defines your plug-in "perspective"
         self.perspective = []
-        
-        self.state_reader = None   
+        #default state objects
+        self.state_reader = None 
+        self.temp_state = None 
+        self.__data = None 
         """
         # Create a CanSAS/Pr reader
         self.state_reader = Reader(self.set_state)
@@ -94,7 +97,7 @@ class Plugin:
         self.parent = parent
         #add error back to the data
         self.parent.Bind(ERR_DATA, self._on_data_error)
-        
+        self.parent.Bind(EVT_STATE_UPDATE, self.on_set_state_helper)
         
         self.invariant_panel = InvariantPanel(parent=self.parent)
         self.invariant_panel.set_manager(manager=self)
@@ -265,6 +268,7 @@ class Plugin:
         
         :param state: State object
         """
+        self.temp_state = None
         try:
             if datainfo is None:
                 raise RuntimeError, "invariant.set_state: datainfo parameter cannot be None in standalone mode"
@@ -281,11 +285,17 @@ class Plugin:
             # Load the invariant states
             # Make sure the user sees the invariant panel after loading
             self.parent.set_perspective(self.perspective)
-            self.invariant_panel.set_state(state=temp_state,data=self.__data)         
+            self.temp_state = temp_state
+            #self.invariant_panel.set_state(state=temp_state,data=self.__data)         
 
         except:
             logging.error("invariant.set_state: %s" % sys.exc_value)
-
+            
+    def on_set_state_helper(self,event=None):
+        """
+        """
+        self.invariant_panel.set_state(state=self.temp_state,data=self.__data)
+        self.temp_state = None
         
     def plot_theory(self, data=None, name=None):
         """
