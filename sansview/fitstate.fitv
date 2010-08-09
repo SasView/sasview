@@ -2,561 +2,1064 @@
 <SASroot version="1.0" xmlns="cansas1d/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="cansas1d/1.0 http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd">
 	<SASentry>
 		<Title>
-			
+			1000A Sphere Desmeared Simulated USANS Data
 		</Title>
+		<Run>
+			1000A_sphere_dsm.xml
+		</Run>
 		<SASdata>
 			<Idata>
 				<Q unit="1/A">
-					0.0
+					3.0525e-005
 				</Q>
 				<I unit="1/cm">
-					2.83954
+					165100000.0
 				</I>
+				<Qdev unit="1/A">
+					3.0525e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					0.6
+					1794400.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					0.204082
+					3.33e-005
 				</Q>
 				<I unit="1/cm">
-					3.44938
+					190450000.0
 				</I>
+				<Qdev unit="1/A">
+					3.33e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					0.676531
+					2040000.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					0.408163
+					3.885e-005
 				</Q>
 				<I unit="1/cm">
-					5.82026
+					179720000.0
 				</I>
+				<Qdev unit="1/A">
+					3.885e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					0.753061
+					975310.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					0.612245
+					4.44e-005
 				</Q>
 				<I unit="1/cm">
-					5.27591
+					164980000.0
 				</I>
+				<Qdev unit="1/A">
+					4.44e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					0.829592
+					908780.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					0.816327
+					4.995e-005
 				</Q>
 				<I unit="1/cm">
-					5.2781
+					163980000.0
 				</I>
+				<Qdev unit="1/A">
+					4.995e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					0.906122
+					907320.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					1.02041
+					5.55e-005
 				</Q>
 				<I unit="1/cm">
-					5.22531
+					156350000.0
 				</I>
+				<Qdev unit="1/A">
+					5.55e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					0.982653
+					872480.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					1.22449
+					6.105e-005
 				</Q>
 				<I unit="1/cm">
-					7.47487
+					172440000.0
 				</I>
+				<Qdev unit="1/A">
+					6.105e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					1.05918
+					9556000.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					1.42857
+					6.66e-005
 				</Q>
 				<I unit="1/cm">
-					7.85852
+					158680000.0
 				</I>
+				<Qdev unit="1/A">
+					6.66e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					1.13571
+					894190.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					1.63265
+					7.215e-005
 				</Q>
 				<I unit="1/cm">
-					10.2278
+					168260000.0
 				</I>
+				<Qdev unit="1/A">
+					7.215e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					1.21224
+					948630.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					1.83673
+					7.77e-005
 				</Q>
 				<I unit="1/cm">
-					8.33195
+					147240000.0
 				</I>
+				<Qdev unit="1/A">
+					7.77e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					1.28878
+					850120.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					2.04082
+					8.325e-005
 				</Q>
 				<I unit="1/cm">
-					9.22407
+					154710000.0
 				</I>
+				<Qdev unit="1/A">
+					8.325e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					1.36531
+					892610.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					2.2449
+					8.88e-005
 				</Q>
 				<I unit="1/cm">
-					7.95013
+					154150000.0
 				</I>
+				<Qdev unit="1/A">
+					8.88e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					1.44184
+					897530.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					2.44898
+					9.435e-005
 				</Q>
 				<I unit="1/cm">
-					10.0289
+					150060000.0
 				</I>
+				<Qdev unit="1/A">
+					9.435e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					1.51837
+					885510.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					2.65306
+					9.99e-005
 				</Q>
 				<I unit="1/cm">
-					11.0736
+					141700000.0
 				</I>
+				<Qdev unit="1/A">
+					9.99e-007
+				</Qdev>
 				<Idev unit="1/cm">
-					1.5949
+					8498900.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					2.85714
+					0.00010545
 				</Q>
 				<I unit="1/cm">
-					12.2957
+					145840000.0
 				</I>
+				<Qdev unit="1/A">
+					1.0545e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					1.67143
+					880320.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					3.06122
+					0.000111
 				</Q>
 				<I unit="1/cm">
-					12.3108
+					137260000.0
 				</I>
+				<Qdev unit="1/A">
+					1.11e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					1.74796
+					487940.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					3.26531
+					0.0001221
 				</Q>
 				<I unit="1/cm">
-					12.6916
+					126900000.0
 				</I>
+				<Qdev unit="1/A">
+					1.221e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					1.82449
+					465360.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					3.46939
+					0.0001332
 				</Q>
 				<I unit="1/cm">
-					12.5859
+					125450000.0
 				</I>
+				<Qdev unit="1/A">
+					1.332e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					1.90102
+					471620.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					3.67347
+					0.0001443
 				</Q>
 				<I unit="1/cm">
-					14.5972
+					112110000.0
 				</I>
+				<Qdev unit="1/A">
+					1.443e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					1.97755
+					439800.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					3.87755
+					0.0001554
 				</Q>
 				<I unit="1/cm">
-					10.9443
+					109740000.0
 				</I>
+				<Qdev unit="1/A">
+					1.554e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					2.05408
+					444060.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					4.08163
+					0.0001665
 				</Q>
 				<I unit="1/cm">
-					11.4356
+					97546000.0
 				</I>
+				<Qdev unit="1/A">
+					1.665e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					2.13061
+					4150700.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					4.28571
+					0.0001776
 				</Q>
 				<I unit="1/cm">
-					19.3213
+					88127000.0
 				</I>
+				<Qdev unit="1/A">
+					1.776e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					2.20714
+					392070.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					4.4898
+					0.0001887
 				</Q>
 				<I unit="1/cm">
-					14.3191
+					82576000.0
 				</I>
+				<Qdev unit="1/A">
+					1.887e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					2.28367
+					382470.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					4.69388
+					0.0001998
 				</Q>
 				<I unit="1/cm">
-					14.6961
+					77312000.0
 				</I>
+				<Qdev unit="1/A">
+					1.998e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					2.3602
+					375780.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					4.89796
+					0.0002109
 				</Q>
 				<I unit="1/cm">
-					19.27
+					66194000.0
 				</I>
+				<Qdev unit="1/A">
+					2.109e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					2.43673
+					343090.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					5.10204
+					0.000222
 				</Q>
 				<I unit="1/cm">
-					12.1831
+					61870000.0
 				</I>
+				<Qdev unit="1/A">
+					2.22e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					2.51327
+					337290.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					5.30612
+					0.0002331
 				</Q>
 				<I unit="1/cm">
-					21.4745
+					54257000.0
 				</I>
+				<Qdev unit="1/A">
+					2.331e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					2.5898
+					316830.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					5.5102
+					0.0002442
 				</Q>
 				<I unit="1/cm">
-					20.0393
+					47924000.0
 				</I>
+				<Qdev unit="1/A">
+					2.442e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					2.66633
+					3004000.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					5.71429
+					0.0002553
 				</Q>
 				<I unit="1/cm">
-					13.2472
+					40953000.0
 				</I>
+				<Qdev unit="1/A">
+					2.553e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					2.74286
+					278010.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					5.91837
+					0.0002664
 				</Q>
 				<I unit="1/cm">
-					14.9428
+					34975000.0
 				</I>
+				<Qdev unit="1/A">
+					2.664e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					2.81939
+					257230.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					6.12245
+					0.0002775
 				</Q>
 				<I unit="1/cm">
-					22.1974
+					29218000.0
 				</I>
+				<Qdev unit="1/A">
+					2.775e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					2.89592
+					165020.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					6.32653
+					0.00030525
 				</Q>
 				<I unit="1/cm">
-					17.3418
+					19276000.0
 				</I>
+				<Qdev unit="1/A">
+					3.0525e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					2.97245
+					135210.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					6.53061
+					0.000333
 				</Q>
 				<I unit="1/cm">
-					19.8174
+					10557000.0
 				</I>
+				<Qdev unit="1/A">
+					3.33e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					3.04898
+					98308.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					6.73469
+					0.00036075
 				</Q>
 				<I unit="1/cm">
-					17.6186
+					5664700.0
 				</I>
+				<Qdev unit="1/A">
+					3.6075e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					3.12551
+					69421.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					6.93878
+					0.0003885
 				</Q>
 				<I unit="1/cm">
-					21.329
+					1947500.0
 				</I>
+				<Qdev unit="1/A">
+					3.885e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					3.20204
+					313730.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					7.14286
+					0.00041625
 				</Q>
 				<I unit="1/cm">
-					20.2873
+					241770.0
 				</I>
+				<Qdev unit="1/A">
+					4.1625e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					3.27857
+					4755.1
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					7.34694
+					0.000444
 				</Q>
 				<I unit="1/cm">
-					23.4112
+					114540.0
 				</I>
+				<Qdev unit="1/A">
+					4.44e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					3.3551
+					2326.3
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					7.55102
+					0.00047175
 				</Q>
 				<I unit="1/cm">
-					26.063
+					208800.0
 				</I>
+				<Qdev unit="1/A">
+					4.7175e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					3.43163
+					4001.1
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					7.7551
+					0.0004995
 				</Q>
 				<I unit="1/cm">
-					29.8775
+					670290.0
 				</I>
+				<Qdev unit="1/A">
+					4.995e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					3.50816
+					11420.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					7.95918
+					0.00052725
 				</Q>
 				<I unit="1/cm">
-					19.0027
+					1137400.0
 				</I>
+				<Qdev unit="1/A">
+					5.2725e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					3.58469
+					18885.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					8.16327
+					0.000555
 				</Q>
 				<I unit="1/cm">
-					19.4248
+					1278100.0
 				</I>
+				<Qdev unit="1/A">
+					5.55e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					3.66122
+					15763.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					8.36735
+					0.0006105
 				</Q>
 				<I unit="1/cm">
-					27.4876
+					1225600.0
 				</I>
+				<Qdev unit="1/A">
+					6.105e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					3.73776
+					176810.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					8.57143
+					0.000666
 				</Q>
 				<I unit="1/cm">
-					33.8399
+					583310.0
 				</I>
+				<Qdev unit="1/A">
+					6.66e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					3.81429
+					11772.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					8.77551
+					0.0007215
 				</Q>
 				<I unit="1/cm">
-					24.2611
+					69003.0
 				</I>
+				<Qdev unit="1/A">
+					7.215e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					3.89082
+					1907.7
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					8.97959
+					0.000777
 				</Q>
 				<I unit="1/cm">
-					29.8796
+					23263.0
 				</I>
+				<Qdev unit="1/A">
+					7.77e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					3.96735
+					683.84
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					9.18367
+					0.0008325
 				</Q>
 				<I unit="1/cm">
-					24.6149
+					97644.0
 				</I>
+				<Qdev unit="1/A">
+					8.325e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					4.04388
+					2565.3
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					9.38776
+					0.000888
 				</Q>
 				<I unit="1/cm">
-					35.7664
+					233120.0
 				</I>
+				<Qdev unit="1/A">
+					8.88e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					4.12041
+					5864.3
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					9.59184
+					0.0009435
 				</Q>
 				<I unit="1/cm">
-					32.145
+					202080.0
 				</I>
+				<Qdev unit="1/A">
+					9.435e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					4.19694
+					6035.5
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					9.79592
+					0.000999
 				</Q>
 				<I unit="1/cm">
-					24.8085
+					80861.0
 				</I>
+				<Qdev unit="1/A">
+					9.99e-006
+				</Qdev>
 				<Idev unit="1/cm">
-					4.27347
+					30528.0
 				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
-					10.0
+					0.0010545
 				</Q>
 				<I unit="1/cm">
-					31.3767
+					7683.4
 				</I>
+				<Qdev unit="1/A">
+					1.0545e-005
+				</Qdev>
 				<Idev unit="1/cm">
-					4.35
+					354.56
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00111
+				</Q>
+				<I unit="1/cm">
+					11329.0
+				</I>
+				<Qdev unit="1/A">
+					1.11e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					382.48
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001221
+				</Q>
+				<I unit="1/cm">
+					87375.0
+				</I>
+				<Qdev unit="1/A">
+					1.221e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					2658.0
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001332
+				</Q>
+				<I unit="1/cm">
+					10915.0
+				</I>
+				<Qdev unit="1/A">
+					1.332e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					517.94
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001443
+				</Q>
+				<I unit="1/cm">
+					7683.6
+				</I>
+				<Qdev unit="1/A">
+					1.443e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					376.72
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001554
+				</Q>
+				<I unit="1/cm">
+					31538.0
+				</I>
+				<Qdev unit="1/A">
+					1.554e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					1461.6
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001665
+				</Q>
+				<I unit="1/cm">
+					2991.0
+				</I>
+				<Qdev unit="1/A">
+					1.665e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					2025.4
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001776
+				</Q>
+				<I unit="1/cm">
+					6126.4
+				</I>
+				<Qdev unit="1/A">
+					1.776e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					413.24
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001887
+				</Q>
+				<I unit="1/cm">
+					9246.2
+				</I>
+				<Qdev unit="1/A">
+					1.887e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					642.09
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.001998
+				</Q>
+				<I unit="1/cm">
+					861.73
+				</I>
+				<Qdev unit="1/A">
+					1.998e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					67.504
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002109
+				</Q>
+				<I unit="1/cm">
+					8017.5
+				</I>
+				<Qdev unit="1/A">
+					2.109e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					550.7
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00222
+				</Q>
+				<I unit="1/cm">
+					5502.9
+				</I>
+				<Qdev unit="1/A">
+					2.22e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					494.11
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002331
+				</Q>
+				<I unit="1/cm">
+					741.32
+				</I>
+				<Qdev unit="1/A">
+					2.331e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					83.931
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002442
+				</Q>
+				<I unit="1/cm">
+					2919.8
+				</I>
+				<Qdev unit="1/A">
+					2.442e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					3303.4
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002553
+				</Q>
+				<I unit="1/cm">
+					1667.6
+				</I>
+				<Qdev unit="1/A">
+					2.553e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					206.1
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002664
+				</Q>
+				<I unit="1/cm">
+					584.11
+				</I>
+				<Qdev unit="1/A">
+					2.664e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					74.745
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.002775
+				</Q>
+				<I unit="1/cm">
+					1585.4
+				</I>
+				<Qdev unit="1/A">
+					2.775e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					167.96
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0030525
+				</Q>
+				<I unit="1/cm">
+					1422.7
+				</I>
+				<Qdev unit="1/A">
+					3.0525e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					183.59
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00333
+				</Q>
+				<I unit="1/cm">
+					70.932
+				</I>
+				<Qdev unit="1/A">
+					3.33e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					16.5
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0036075
+				</Q>
+				<I unit="1/cm">
+					400.33
+				</I>
+				<Qdev unit="1/A">
+					3.6075e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					63.21
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.003885
+				</Q>
+				<I unit="1/cm">
+					393.52
+				</I>
+				<Qdev unit="1/A">
+					3.885e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					659.6
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0041625
+				</Q>
+				<I unit="1/cm">
+					212.31
+				</I>
+				<Qdev unit="1/A">
+					4.1625e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					47.277
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.00444
+				</Q>
+				<I unit="1/cm">
+					39.89
+				</I>
+				<Qdev unit="1/A">
+					4.44e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					11.694
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0047175
+				</Q>
+				<I unit="1/cm">
+					71.693
+				</I>
+				<Qdev unit="1/A">
+					4.7175e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					18.86
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.004995
+				</Q>
+				<I unit="1/cm">
+					2.5476
+				</I>
+				<Qdev unit="1/A">
+					4.995e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					0.77203
+				</Idev>
+			</Idata>
+			<Idata>
+				<Q unit="1/A">
+					0.0052725
+				</Q>
+				<I unit="1/cm">
+					157.13
+				</I>
+				<Qdev unit="1/A">
+					5.2725e-005
+				</Qdev>
+				<Idev unit="1/cm">
+					30.429
 				</Idev>
 			</Idata>
 		</SASdata>
-		<SASsample name="">
+		<SASsample>
 			<ID>
 				
 			</ID>
@@ -565,21 +1068,54 @@
 			<name>
 				
 			</name>
-			<SASsource/>
+			<SASsource>
+				<radiation>
+					neutron
+				</radiation>
+			</SASsource>
+			<SAScollimation/>
+			<SASdetector>
+				<name>
+					BT5 DETECTOR ARRAY
+				</name>
+			</SASdetector>
 		</SASinstrument>
+		<SASprocess>
+			<name>
+				
+			</name>
+			<date>
+				
+			</date>
+			<description>
+				
+			</description>
+			<SASprocessnote>
+				Macintosh HD:Users:ajj:Documents:Work:Devel:DANSE:test data:simulated:SIMUL_1000A_sphere_dsm.txt
+Chi^2 = 0.998099   PowerLaw m = -4.09   Iterations = 17
+0 box smooth passes and 0 smoothing spline passes
+CREATED: Wed, May 26, 2010 at  2:43:15 PM
+			</SASprocessnote>
+		</SASprocess>
 		<fitting_plug_in version="1.0">
 			<filename>
-				testdata_line.txt
+				1000A_sphere_dsm.xml
 			</filename>
-			<timestamp epoch="1274799621.7">
-				Tue May 25 11:00:21 2010
+			<timestamp epoch="1281367930.14">
+				Mon Aug 09 11:32:10 2010
 			</timestamp>
 			<Attributes>
-				<data_attributes data_id="testdata_line.txt" data_name="testdata_line.txt" group_id="testdata_line.txt" is_data="True" name=""/>
-				<qmin qmin="0.0"/>
-				<qmax qmax="10.0"/>
+				<is_data is_data="True"/>
+				<group_id group_id="1000A_sphere_dsm.xml"/>
+				<data_name data_name="1000A_sphere_dsm.xml"/>
+				<data_id data_id="1000A_sphere_dsm.xml"/>
+				<name name=""/>
+				<data_name data_name="1000A_sphere_dsm.xml"/>
+				<engine_type engine_type="scipy"/>
+				<qmin qmin="3.0525e-005"/>
+				<qmax qmax="0.0052725"/>
 				<npts npts="None"/>
-				<shape_rbutton shape_rbutton="False"/>
+				<shape_rbutton shape_rbutton="True"/>
 				<shape_indep_rbutton shape_indep_rbutton="False"/>
 				<plugin_rbutton plugin_rbutton="False"/>
 				<struct_rbutton struct_rbutton="False"/>
@@ -594,20 +1130,20 @@
 				<disable_disp disable_disp="True"/>
 				<slit_smearer slit_smearer="False"/>
 				<enable2D enable2D="False"/>
-				<cb1 cb1="False"/>
-				<tcChi tcChi="&lt;perspectives.fitting.fitpage.BGTextCtrl; proxy of &lt;Swig Object of type 'wxTextCtrl *' at 0x2fd1d18&gt; &gt;"/>
-				<smearer smearer="None"/>
+				<cb1 cb1="True"/>
+				<tcChi tcChi="86.3"/>
+				<smearer smearer="&lt;DataLoader.qsmearing._BaseSmearer object at 0x03665F30&gt;"/>
 				<smear_type smear_type="None"/>
 				<dq_l dq_l="None"/>
 				<dq_r dq_r="None"/>
 				<values/>
 				<weights/>
 				<parameters>
-					<parameter error_displayed="False" error_value="" maximum_displayed="False" maximum_value="" minimum_displayed="False" minimum_value="" name="background" selected_to_fit="False" unit="[1/cm]" value="0"/>
-					<parameter error_displayed="False" error_value="" maximum_displayed="False" maximum_value="" minimum_displayed="False" minimum_value="" name="radius" selected_to_fit="False" unit="[A]" value="60"/>
-					<parameter error_displayed="False" error_value="" maximum_displayed="False" maximum_value="" minimum_displayed="False" minimum_value="" name="scale" selected_to_fit="False" unit="" value="1"/>
-					<parameter error_displayed="False" error_value="" maximum_displayed="False" maximum_value="" minimum_displayed="False" minimum_value="" name="sldSolv" selected_to_fit="False" unit="[1/A^(2)]" value="1e-006"/>
-					<parameter error_displayed="False" error_value="" maximum_displayed="False" maximum_value="" minimum_displayed="False" minimum_value="" name="sldSph" selected_to_fit="False" unit="[1/A^(2)]" value="2e-006"/>
+					<parameter error_displayed="True" error_value="1.57" maximum_displayed="False" maximum_value="" minimum_displayed="False" minimum_value="" name="background" selected_to_fit="True" unit="[1/cm]" value="-214"/>
+					<parameter error_displayed="True" error_value="1.64" maximum_displayed="False" maximum_value="" minimum_displayed="False" minimum_value="" name="radius" selected_to_fit="True" unit="[A]" value="1.01e+004"/>
+					<parameter error_displayed="False" error_value="" maximum_displayed="False" maximum_value="" minimum_displayed="False" minimum_value="" name="scale" selected_to_fit="True" unit="" value="0.198"/>
+					<parameter error_displayed="True" error_value="0.0537" maximum_displayed="False" maximum_value="" minimum_displayed="False" minimum_value="" name="sldSolv" selected_to_fit="True" unit="[1/A^(2)]" value="8.19e-007"/>
+					<parameter error_displayed="False" error_value="" maximum_displayed="False" maximum_value="" minimum_displayed="False" minimum_value="" name="sldSph" selected_to_fit="True" unit="[1/A^(2)]" value="2.26e-006"/>
 				</parameters>
 				<orientation_parameters/>
 				<dispersity_parameters/>
