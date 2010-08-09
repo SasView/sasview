@@ -117,6 +117,7 @@ class Plugin:
         #Create a reader for fit page's state
         self.state_reader = None 
         self.temp_state = []
+        self.state_index = 0
         # Log startup
         logging.info("Fitting plug-in started") 
         
@@ -300,32 +301,35 @@ class Plugin:
         :param state: PageState object
         
         """
-        #print "state", state
-        #return
-        #working on reading state
-        self.temp_state = []
-        try: 
-            # state
-            # Load fitting state
-            self.temp_state.append(state) 
-            # Make sure the user sees the fitting panel after loading
-            #self.parent.set_perspective(self.perspective)   
-                   
-        except:
-            raise
-        
+        # store fitting state in temp_state
+        self.temp_state.append(state) 
+        # index to start with for a new set_state
+        self.state_index = 0
+
     def  on_set_state_helper(self,event=None):
         """
+        Set_state_helper. This acutally sets state after plotting data from state file.
+        
+        : event: FitStateUpdateEvent called by plot_data from guiframe, data_loader
         """
-        if self.temp_state == None:
+        if self.temp_state == None or len(self.temp_state) == 0:
             return
-        # Load fitting state
-        for index in range(len(self.temp_state)):
-            page = self.fit_panel.set_state(self.temp_state[index]) 
-            # Make sure the user sees the fitting panel after loading
-            self.parent.set_perspective(self.perspective)  
-             
-        self.temp_state = []   
+        try:
+            # Load fitting state
+            state = self.temp_state[self.state_index]
+            #set state
+            page = self.fit_panel.set_state(state) 
+            # get ready for the next set state
+            self.state_index += 1
+            
+            #reset state variables to default when all set_state is finished. 
+            if len(self.temp_state) == self.state_index:
+                self.temp_state = []
+                # Make sure the user sees the fitting panel after loading
+                self.parent.set_perspective(self.perspective) 
+        except:
+            self.temp_state = [] 
+            raise
                  
     def save_fit_state(self, filepath, fitstate):  
         """

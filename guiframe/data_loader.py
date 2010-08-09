@@ -180,7 +180,6 @@ def plot_data(parent, path, format=None):
   
      
     filename = os.path.basename(path)
-    
     if not  output.__class__.__name__ == "list":
         ## Creating a Data2D with output
         if hasattr(output,'data'):
@@ -201,12 +200,6 @@ def plot_data(parent, path, format=None):
             output.filename = str(filename)
         ## name of the data allow to differentiate data when plotted
         name = parse_name(name=output.filename, expression="_")
-        #if not name in parent.indice_load_data.keys():
-        #    parent.indice_load_data[name] = 0
-        #else:
-            ## create a copy of the loaded data
-        #    parent.indice_load_data[name] += 1
-        #    name = name +"[%i]"%parent.indice_load_data[name]
        
         new_plot.name = name
         ## allow to highlight data when plotted
@@ -232,14 +225,15 @@ def plot_data(parent, path, format=None):
                     if open_dialog_append_data(panel_name, data_name):
                         #add this plot the an existing panel
                         new_plot.group_id = existing_panel.group_id
+        # plot data
         wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=title))
+        # set state and plot computation if exists
         wx.PostEvent(parent,InvStateUpdateEvent())
         wx.PostEvent(parent,FitStateUpdateEvent())
     ## the output of the loader is a list , some xml files contain more than one data
     else:
-        
-        i=1
-        for item in output:
+        i=0
+        for item in output: 
             try:
                 ## Creating a Data2D with output
                 if hasattr(item,'data'):
@@ -260,32 +254,28 @@ def plot_data(parent, path, format=None):
                         dxw = None
         
                     new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy)
-                    
-                    new_plot.dxl = dxl
-                    new_plot.dxw = dxw
-                    
+                    if dxl != None:
+                        new_plot.dxl = dxl
+                    if dxl != None:
+                        new_plot.dxw = dxw
+                
+                new_plot.copy_from_datainfo(item)    
                 item.clone_without_data(clone=new_plot)    
-                new_plot.copy_from_datainfo(item)
+                
                 name = parse_name(name=str(item.run[0]), expression="_")
-                #if not name in parent.indice_load_data.keys():
-                #    parent.indice_load_data[name] = 0
-                #else:
-                    ## create a copy of the loaded data
                     
-                    #TODO: this is a very annoying feature. We should make this
-                    # an option. Excel doesn't do this. Why should we?
-                    # What is the requirement for this feature, and are the
-                    # counter arguments stronger? Is this feature developed
-                    # to please at least 80% of the users or a special few?
-                    #parent.indice_load_data[name] += 1
-                    #name = name + "(copy %i)"%parent.indice_load_data[name]
-                    
+                #TODO: this is a very annoying feature. We should make this
+                # an option. Excel doesn't do this. Why should we?
+                # What is the requirement for this feature, and are the
+                # counter arguments stronger? Is this feature developed
+                # to please at least 80% of the users or a special few?                    
                 new_plot.name = name
                 new_plot.interactive = True
                 new_plot.group_id = name
                 new_plot.id = name
                 new_plot.is_data = True
-            
+                title = item.filename
+                
                 if hasattr(item,"title"):
                     title = item.title.lstrip().rstrip()
                     if title == "":
@@ -300,9 +290,11 @@ def plot_data(parent, path, format=None):
                         if open_dialog_append_data(panel_name, data_name):
                             #add this plot the an existing panel
                             new_plot.group_id = existing_panel.group_id
+                # plot data
                 wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
+
+                # set state and plot computation if exists
                 wx.PostEvent(parent,InvStateUpdateEvent())
                 wx.PostEvent(parent,FitStateUpdateEvent())
-                i+=1
             except:
-                pass
+                raise

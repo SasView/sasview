@@ -1138,7 +1138,8 @@ class Reader(CansasReader):
                     max_char = state.file.find("[")
                     if max_char < 0:
                         max_char = len(state.file)
-                    state.file = state.file[0:max_char] +' [' + time_str + ']'
+                    original_fname = state.file[0:max_char]
+                    state.file = original_fname +' [' + time_str + ']'
                    
                         
                     if state is not None and state.is_data is not None:
@@ -1148,16 +1149,17 @@ class Reader(CansasReader):
                     state.data = output[ind]
                     state.data.name = output[ind].filename #state.data_name
                     state.data.id = state.data_id
-                    state.data.id = state.data_id
                     if state.is_data is not None:
                         state.data.is_data = state.is_data
-                    state.data.group_id = output[ind].filename
-                  
-                    # make sure to put run name if none
-                    #if output[ind].run == None or output[ind].run ==[]:
-                    #    exec 'output[%d].run = [output[%d].filename]'% (ind,ind)
+                    if output[ind].run_name is not None and len(output[ind].run_name) != 0 :
+                        name = output[ind].run_name
+                    else: 
+                        name=original_fname
+                    state.data.group_id = name
+                    #store state in fitting
                     self.call_back(state=state, datainfo=output[ind])
-                return output[ind]
+                    
+                return output
               
         except:
             raise
@@ -1175,7 +1177,7 @@ class Reader(CansasReader):
         if self.cansas == True:
             
             # Add fitting information to the XML document
-            self.write_toXML(datainfo, fitstate)
+            doc = self.write_toXML(datainfo, fitstate)
             # Write the XML document
             fd = open(filename, 'w')
             fd.write(doc.toprettyxml())
