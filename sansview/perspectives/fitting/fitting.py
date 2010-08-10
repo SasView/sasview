@@ -318,14 +318,22 @@ class Plugin:
         """
         if self.temp_state == None or len(self.temp_state) == 0:
             return
+        
         try:
             #close all panels only when svs file opened
             if self.format == '.svs':
                 self.fit_panel.close_all()
             # Load fitting state
             state = self.temp_state[self.state_index]
-            #set state
-            page = self.fit_panel.set_state(state) 
+            #panel state should have model selection to set_state
+            if state.formfactorcombobox != None:
+                #set state
+                page = self.fit_panel.set_state(state)   
+            else:
+                #just set data because set_state won't work
+                page_info = self.fit_panel.get_page_info(data=state.data)
+                self.fit_panel.add_page(page_info)
+                
             # get ready for the next set state
             self.state_index += 1
             
