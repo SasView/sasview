@@ -1676,7 +1676,7 @@ class InvariantPanel(ScrolledPanel):
         id = wx.NewId()
         self.button_undo = wx.BitmapButton(self, id,wx.Bitmap(self.undo_png))#wx.Button(self, id, "Undo",size=(50,20))
         self.button_undo.SetToolTipString("Undo")
-        self.button_undo.SetBitmapLabel('bitmap')
+        
         #self.button_undo.SetBackgroundColour('#c2e6f8')
         self.Bind(wx.EVT_BUTTON, self.undo, id=id)
         self._undo_disable()
