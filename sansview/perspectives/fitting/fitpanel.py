@@ -204,11 +204,17 @@ class FitPanel(wx.aui.AuiNotebook):
         
     def close_all(self):
         """
-        remove all pages
+        remove all pages, used when a svs file is opened
         """
-        for index in range(self.GetPageCount()):
-            self.DeletePage(index)
-        self.model_list_box = {}
+        #get number of pages
+        nop = self.GetPageCount()
+        #use while-loop, for-loop will not do the job well.
+        while (nop>0):
+            #delete the first page until no page exists
+            page = self.GetPage(0)
+            self._close_helper(selected_page=page)
+            self.DeletePage(0)
+            nop = nop - 1
         ## save the title of the last page tab added
         self.fit_page_name = {}
         ## list of existing fit page
