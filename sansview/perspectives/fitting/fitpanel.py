@@ -190,6 +190,9 @@ class FitPanel(wx.aui.AuiNotebook):
         from hint_fitpage import HintFitPage
         self.hint_page = HintFitPage(self) 
         self.AddPage(page=self.hint_page, caption="Hint")
+        
+        
+            
         #Add the first fit page
         self.add_empty_page()
         
@@ -199,6 +202,18 @@ class FitPanel(wx.aui.AuiNotebook):
         self.Update()
         self.Center()
         
+    def close_all(self):
+        """
+        remove all pages
+        """
+        for index in range(self.GetPageCount()):
+            self.DeletePage(index)
+        self.model_list_box = {}
+        ## save the title of the last page tab added
+        self.fit_page_name = {}
+        ## list of existing fit page
+        self.opened_pages = {}  
+         
     def set_state(self, state):
         """
         Restore state of the panel
@@ -219,12 +234,13 @@ class FitPanel(wx.aui.AuiNotebook):
                     self.manager.store_page(page=panel, data=state.data)
                     panel.reset_page(state=state)
                     
-    def on_close_page(self, event):
+    def on_close_page(self, event=None):
         """
         close page and remove all references to the closed page
         """
         nbr_page = self.GetPageCount()
         if nbr_page == 1:
+           
             event.Veto()
             return 
         selected_page = self.GetPage(self.GetSelection())
@@ -240,6 +256,7 @@ class FitPanel(wx.aui.AuiNotebook):
             selected_page = self.GetPage(index) 
             if hasattr(selected_page,"get_data"):
                 data = selected_page.get_data()
+                
                 if data is None:
                     #the fitpanel exists and only the initial fit page is open 
                     #with no selected data
