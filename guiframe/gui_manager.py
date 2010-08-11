@@ -714,9 +714,15 @@ class ViewerFrame(wx.Frame):
             return
         
         from data_loader import plot_data
+        from sans.perspectives import invariant
         if path and os.path.isfile(path):
              basename  = os.path.basename(path)
              if  basename.endswith('.svs'):
+             	#remove panels for new states
+                 for item in self.panels:
+                     try:
+                         self.panels[item].clear_panel()
+                     except: pass
                  plot_data(self, path,'.inv')
                  plot_data(self, path,'.prv')
                  plot_data(self, path,'.fitv')

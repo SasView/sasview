@@ -11,6 +11,7 @@ from sans.perspectives.invariant import InvStateUpdateEvent
 from perspectives.fitting import FitStateUpdateEvent
 
 from sans.guicomm.events import NewPlotEvent, StatusEvent
+SVS_FILE_EXT = ['.svs','.inv','.prv','.fitv']
 
 def enable_add_data(existing_panel, new_plot):
     """
@@ -227,9 +228,10 @@ def plot_data(parent, path, format=None):
                         new_plot.group_id = existing_panel.group_id
         # plot data
         wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=title))
-        # set state and plot computation if exists
-        wx.PostEvent(parent,InvStateUpdateEvent())
-        wx.PostEvent(parent,FitStateUpdateEvent())
+        if format in SVS_FILE_EXT:
+            # set state and plot computation if exists
+            wx.PostEvent(parent,InvStateUpdateEvent())
+            wx.PostEvent(parent,FitStateUpdateEvent())
     ## the output of the loader is a list , some xml files contain more than one data
     else:
         i=0
@@ -261,9 +263,12 @@ def plot_data(parent, path, format=None):
                 
                 new_plot.copy_from_datainfo(item)    
                 item.clone_without_data(clone=new_plot)    
-                
+                # find original data file name without timestemp
                 name = parse_name(name=str(item.run[0]), expression="_")
-                    
+                max_char = name.find("[")
+                if max_char < 0:
+                    max_char = len(name)
+                original_name =name[0:max_char]
                 #TODO: this is a very annoying feature. We should make this
                 # an option. Excel doesn't do this. Why should we?
                 # What is the requirement for this feature, and are the
@@ -271,7 +276,7 @@ def plot_data(parent, path, format=None):
                 # to please at least 80% of the users or a special few?                    
                 new_plot.name = name
                 new_plot.interactive = True
-                new_plot.group_id = name
+                new_plot.group_id = original_name
                 new_plot.id = name
                 new_plot.is_data = True
                 title = item.filename
@@ -292,9 +297,10 @@ def plot_data(parent, path, format=None):
                             new_plot.group_id = existing_panel.group_id
                 # plot data
                 wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
-
-                # set state and plot computation if exists
-                wx.PostEvent(parent,InvStateUpdateEvent())
-                wx.PostEvent(parent,FitStateUpdateEvent())
+                
+                if format in SVS_FILE_EXT:
+                    # set state and plot computation if exists
+                    wx.PostEvent(parent,InvStateUpdateEvent())
+                    wx.PostEvent(parent,FitStateUpdateEvent())
             except:
                 raise

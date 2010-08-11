@@ -260,7 +260,7 @@ class Plugin:
         loader = Loader()
         loader.associate_file_reader(".fitv", self.state_reader)
         loader.associate_file_reader(".svs", self.state_reader)
-        self.format = None
+
         #Send the fitting panel to guiframe
         self.mypanels.append(self.fit_panel)
         return self.mypanels
@@ -294,35 +294,31 @@ class Plugin:
         """
         pass
     
-    def set_state(self, state, datainfo=None, format=None):
+    def set_state(self, state, datainfo=None):
         """
         Call-back method for the fit page state reader.
         This method is called when a .fitv/.svs file is loaded.
         
         : param state: PageState object
         : param datainfo: data
-        : param format: file extension in lower case with dot in front
         """
         # store fitting state in temp_state
         self.temp_state.append(state) 
         # index to start with for a new set_state
         self.state_index = 0
-        #file format (extension of the file) opened
-        self.format = format
 
     def  on_set_state_helper(self,event=None):
         """
         Set_state_helper. This actually sets state after plotting data from state file.
         
-        : event: FitStateUpdateEvent called by plot_data from guiframe, data_loader
+        : event: FitStateUpdateEvent called by dataloader.plot_data from guiframe
         """
         if self.temp_state == None or len(self.temp_state) == 0:
+            if self.state_index==0 and len(self.mypanels) <= 0:
+                self.fit_panel.add_default_pages()
             return
         
         try:
-            #close all panels only when svs file opened
-            if self.format == '.svs':
-                self.fit_panel.close_all()
             # Load fitting state
             state = self.temp_state[self.state_index]
             #panel state should have model selection to set_state
@@ -332,19 +328,20 @@ class Plugin:
             else:
                 #just set data because set_state won't work
                 page_info = self.fit_panel.get_page_info(data=state.data)
-                self.fit_panel.add_page(page_info)
+                panel = self.fit_panel.add_page(page_info)
+                self.store_page(page=panel, data=state.data)
                 
-            # get ready for the next set state
+            # get ready for the next set_state
             self.state_index += 1
-            
+
             #reset state variables to default when all set_state is finished. 
             if len(self.temp_state) == self.state_index:
+                
                 self.temp_state = []
                 # Make sure the user sees the fitting panel after loading
                 self.parent.set_perspective(self.perspective) 
         except:
             self.temp_state = []
-            self.format = None 
             raise
                  
     def save_fit_state(self, filepath, fitstate):  

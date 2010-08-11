@@ -122,6 +122,7 @@ class InvariantPanel(ScrolledPanel):
         #edit the panel
         if self._data is not None:
             self.err_check_on_data()
+            self.get_state_by_num(0)
             data_name = self._data.name
             data_qmin = min (self._data.x)
             data_qmax = max (self._data.x)
@@ -131,6 +132,9 @@ class InvariantPanel(ScrolledPanel):
             self.reset_panel()
             self.compute_invariant(event=None)
             self.state.file = self._data.name
+            #Reset the list of states
+            self.state.data = copy.deepcopy(data)
+            self._reset_state_list()
         return True  
     def set_message(self):
         """
@@ -158,7 +162,7 @@ class InvariantPanel(ScrolledPanel):
         
     def set_state(self,state=None,data=None):
         """
-        set state when loading it from a .inv file
+        set state when loading it from a .inv/.svs file
         """
         if state == None or data == None:
             self.state = IState()
@@ -196,7 +200,30 @@ class InvariantPanel(ScrolledPanel):
             self.new_state = False 
             self.is_state_data = False
 
-            
+    def clear_panel(self, format='.svs'):
+        """
+        Clear panel to defaults, used by set_state of manager
+        """
+        if format == '.svs':
+            self._data = None
+            # default data testctrl
+            self.hint_msg_txt.SetLabel('')
+            data_name = ''
+            data_qmin = ''
+            data_qmax = ''
+            self.data_name_tcl.SetValue(str(data_name))
+            self.data_min_tcl.SetLabel(str(data_qmin))
+            self.data_max_tcl.SetLabel(str(data_qmax))
+            #reset output textctrl
+            self._reset_output()
+            #reset panel
+            self.reset_panel()
+            #reset state w/o data
+            self.set_state()
+            # default flags for state
+            self.new_state = False
+            self.is_state_data = False
+            self.is_power_out = False
 
     def get_background(self):
         """
@@ -743,6 +770,7 @@ class InvariantPanel(ScrolledPanel):
         self.button_redo.Disable()
         self.button_bookmark.Disable()
         self.button_report.Disable()
+        self.button_save.Disable() 
         self.button_calculate.SetFocus()
         #self.SetupScrolling()
         

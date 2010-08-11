@@ -264,14 +264,16 @@ class Plugin:
     def set_state(self, state, datainfo=None):    
         """
         Call-back method for the state reader.
-        This method is called when a .inv file is loaded.
+        This method is called when a .inv/.svs file is loaded.
         
         :param state: State object
         """
         self.temp_state = None
         try:
+            
             if datainfo is None:
                 raise RuntimeError, "invariant.set_state: datainfo parameter cannot be None in standalone mode"
+            
             datainfo.meta_data['invstate'].file = datainfo.meta_data['invstate'].file
             datainfo.name = datainfo.meta_data['invstate'].file
             datainfo.filename = datainfo.meta_data['invstate'].file
@@ -282,20 +284,25 @@ class Plugin:
             temp_state = copy.deepcopy(state)
             # set state
             self.invariant_panel.is_state_data = True
-            # Load the invariant states
+            
             # Make sure the user sees the invariant panel after loading
             self.parent.set_perspective(self.perspective)
+            # Load the invariant states
             self.temp_state = temp_state
             #self.invariant_panel.set_state(state=temp_state,data=self.__data)         
-
+            
         except:
             logging.error("invariant.set_state: %s" % sys.exc_value)
             
-    def on_set_state_helper(self,event=None):
+    def on_set_state_helper(self, event=None):
         """
+        Set the state when called by EVT_STATE_UPDATE event from guiframe
+        after a .inv/.svs file is loaded 
         """
         self.invariant_panel.set_state(state=self.temp_state,data=self.__data)
         self.temp_state = None
+        
+        
         
     def plot_theory(self, data=None, name=None):
         """

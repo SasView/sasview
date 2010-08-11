@@ -186,15 +186,8 @@ class FitPanel(wx.aui.AuiNotebook):
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
         self.Bind(basepage.EVT_NEXT_STATE, self._onRedo)
         
-        #add default page
-        from hint_fitpage import HintFitPage
-        self.hint_page = HintFitPage(self) 
-        self.AddPage(page=self.hint_page, caption="Hint")
-        
-        
-            
-        #Add the first fit page
-        self.add_empty_page()
+        #add default pages
+        self.add_default_pages()
         
         # increment number for model name
         self.count=0
@@ -202,6 +195,19 @@ class FitPanel(wx.aui.AuiNotebook):
         self.Update()
         self.Center()
         
+    def add_default_pages(self):
+        """
+        Add default pages such as a hint page and an empty fit page
+        """
+        #add default page
+        from hint_fitpage import HintFitPage
+        self.hint_page = HintFitPage(self) 
+        self.AddPage(page=self.hint_page, caption="Hint")
+         
+        #Add the first fit page
+        self.add_empty_page()
+
+    
     def close_all(self):
         """
         remove all pages, used when a svs file is opened
@@ -240,6 +246,15 @@ class FitPanel(wx.aui.AuiNotebook):
                     self.manager.store_page(page=panel, data=state.data)
                     panel.reset_page(state=state)
                     
+    def clear_panel(self, format='.svs'):
+        """
+        Clear and close all panels, used by guimanager
+        """
+        if format == '.svs':
+            #close all panels only when svs file opened
+            self.close_all()
+            self.manager.mypanels = []
+                       
     def on_close_page(self, event=None):
         """
         close page and remove all references to the closed page
@@ -437,7 +452,7 @@ class FitPanel(wx.aui.AuiNotebook):
             #a new type of page is created
             panel = self.add_page(page_info=page_info)
             return panel
-    
+        
     def  _onGetstate(self, event):
         """
         copy the state of a page
