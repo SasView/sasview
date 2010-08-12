@@ -171,15 +171,15 @@ def plot_data(parent, path, format=None):
     except:
         load_error(sys.exc_value)
         return
-    
+    basename  = os.path.basename(path)
     # Notify user if the loader completed the load but no data came out
     if output == None:
-        basename  = os.path.basename(path)
         if  not basename.endswith('.svs'):
             load_error("The data file appears to be empty.")
         return
   
-     
+    root, extension = os.path.splitext(basename)
+    ext =  extension.lower()
     filename = os.path.basename(path)
     if not  output.__class__.__name__ == "list":
         ## Creating a Data2D with output
@@ -228,7 +228,7 @@ def plot_data(parent, path, format=None):
                         new_plot.group_id = existing_panel.group_id
         # plot data
         wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=title))
-        if format in SVS_FILE_EXT:
+        if ext in SVS_FILE_EXT:
             # set state and plot computation if exists
             wx.PostEvent(parent,InvStateUpdateEvent())
             wx.PostEvent(parent,FitStateUpdateEvent())
@@ -298,7 +298,7 @@ def plot_data(parent, path, format=None):
                 # plot data
                 wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
                 
-                if format in SVS_FILE_EXT:
+                if ext in SVS_FILE_EXT:
                     # set state and plot computation if exists
                     wx.PostEvent(parent,InvStateUpdateEvent())
                     wx.PostEvent(parent,FitStateUpdateEvent())

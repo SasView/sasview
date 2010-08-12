@@ -794,6 +794,7 @@ class ViewerFrame(wx.Frame):
             fd.write(doc.toprettyxml())
             fd.close()
         else:
+            print "Nothing to save..."
             raise RuntimeError, "%s is not a SansView (.svs) file..." % path
 
        

@@ -118,6 +118,7 @@ class Plugin:
         self.state_reader = None 
         self.temp_state = []
         self.state_index = 0
+        self.sfile_ext = None
         # Log startup
         logging.info("Fitting plug-in started") 
         
@@ -294,7 +295,7 @@ class Plugin:
         """
         pass
     
-    def set_state(self, state, datainfo=None):
+    def set_state(self, state=None, datainfo=None, format=None):
         """
         Call-back method for the fit page state reader.
         This method is called when a .fitv/.svs file is loaded.
@@ -302,10 +303,15 @@ class Plugin:
         : param state: PageState object
         : param datainfo: data
         """
-        # store fitting state in temp_state
-        self.temp_state.append(state) 
+        if state != None:
+            # store fitting state in temp_state
+            self.temp_state.append(state) 
+        else:
+            self.temp_state = []
         # index to start with for a new set_state
         self.state_index = 0
+        # state file format
+        self.sfile_ext = format
 
     def  on_set_state_helper(self,event=None):
         """
@@ -313,9 +319,11 @@ class Plugin:
         
         : event: FitStateUpdateEvent called by dataloader.plot_data from guiframe
         """
-        if self.temp_state == None or len(self.temp_state) == 0:
+        if len(self.temp_state) == 0 and self.sfile_ext =='.svs':
             if self.state_index==0 and len(self.mypanels) <= 0:
                 self.fit_panel.add_default_pages()
+                self.temp_state = []
+                self.state_index = 0
             return
         
         try:
@@ -330,6 +338,7 @@ class Plugin:
                 page_info = self.fit_panel.get_page_info(data=state.data)
                 panel = self.fit_panel.add_page(page_info)
                 self.store_page(page=panel, data=state.data)
+                self.mypanels.append(panel) 
                 
             # get ready for the next set_state
             self.state_index += 1
@@ -338,9 +347,11 @@ class Plugin:
             if len(self.temp_state) == self.state_index:
                 
                 self.temp_state = []
+                #self.state_index = 0
                 # Make sure the user sees the fitting panel after loading
                 self.parent.set_perspective(self.perspective) 
         except:
+            self.state_index==0
             self.temp_state = []
             raise
                  

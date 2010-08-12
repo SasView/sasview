@@ -1095,14 +1095,16 @@ class Reader(CansasReader):
         
         """
         output = []
+        basename  = os.path.basename(path)
+        root, extension = os.path.splitext(basename)
+        ext = extension.lower()
         try:
             if os.path.isfile(path):
-                basename  = os.path.basename(path)
-                root, extension = os.path.splitext(basename)
+                
                 #TODO: eventually remove the check for .xml once
                 # the P(r) writer/reader is truly complete.
-                if  extension.lower() in self.ext or \
-                    extension.lower() == '.xml':
+                if  ext in self.ext or \
+                    ext == '.xml':
                     
                     tree = etree.parse(path, parser=etree.ETCompatXMLParser())
                     # Check the format version number
@@ -1123,10 +1125,12 @@ class Reader(CansasReader):
                             sas_entry.filename = fitstate.file
                             output.append(sas_entry)
             else:
+                self.call_back(format=ext)
                 raise RuntimeError, "%s is not a file" % path
 
             # Return output consistent with the loader's api
             if len(output)==0:
+                self.call_back(state=None, datainfo=None,format=ext)
                 return None
             else:
                 for ind in range(len(output)):
@@ -1157,11 +1161,11 @@ class Reader(CansasReader):
                         name=original_fname
                     state.data.group_id = name
                     #store state in fitting
-                    self.call_back(state=state, datainfo=output[ind])
-                    
+                    self.call_back(state=state, datainfo=output[ind],format=ext)
                 return output
               
         except:
+            self.call_back(format=ext)
             raise
            
     def write(self, filename, datainfo=None, fitstate=None):
