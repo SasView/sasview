@@ -21,3 +21,6 @@ import wx.lib.newevent
 (RemoveDataEvent, EVT_REMOVE_DATA)   = wx.lib.newevent.NewEvent()
 ##event that allow to add more that to the same plot
 (AddManyDataEvent, EVT_ADD_MANY_DATA)   = wx.lib.newevent.NewEvent()
+# event to update state of each perspectives after state file is loaded
+(InvStateUpdateEvent, EVT_INVSTATE_UPDATE)   = wx.lib.newevent.NewEvent()
+(FitStateUpdateEvent, EVT_FITSTATE_UPDATE)   = wx.lib.newevent.NewEvent()
