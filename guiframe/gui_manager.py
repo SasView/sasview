@@ -49,9 +49,8 @@ from sans.guicomm.events import NewLoadedDataEvent
 from sans.guicomm.events import EVT_STATUS
 from sans.guicomm.events import EVT_NEW_PLOT,EVT_SLICER_PARS_UPDATE
 from sans.guicomm.events import EVT_ADD_MANY_DATA
-
-
 from data_manager import DataManager
+STATE_FILE_EXT = ['.inv','.fitv','.prv']
 
 def quit_guiframe(parent=None):
     """
@@ -719,14 +718,15 @@ class ViewerFrame(wx.Frame):
              basename  = os.path.basename(path)
              if  basename.endswith('.svs'):
              	#remove panels for new states
-                 for item in self.panels:
-                     try:
-                         self.panels[item].clear_panel()
-                     except: pass
-                 plot_data(self, path,'.inv')
-                 plot_data(self, path,'.prv')
-                 plot_data(self, path,'.fitv')
+                for item in self.panels:
+                    try:
+                        self.panels[item].clear_panel()
+                    except: pass
+                #reset states and plot data 
+                for item in STATE_FILE_EXT:
+                    exec "plot_data(self, path,'%s')"% str(item)
              else: plot_data(self,path)
+             
         if self.defaultPanel is not None and \
             self._mgr.GetPane(self.panels["default"].window_name).IsShown():
             self.on_close_welcome_panel()
@@ -754,36 +754,35 @@ class ViewerFrame(wx.Frame):
         doc = None
         for item in self.panels:
             try:
-                if self.panels[item].window_name == 'Invariant' or self.panels[item].window_name == 'pr_control' or self.panels[item].window_name == 'Fit panel':
-                    if self.panels[item].window_name == 'Invariant':
-                        data = self.panels[item]._data
-                        if data != None:
-                            state = self.panels[item].state
-                            new_doc =self.panels[item]._manager.state_reader.write_toXML(data,state)
-                            if hasattr(doc, "firstChild"):
-                                doc.firstChild.appendChild (new_doc.firstChild.firstChild)  
+                if self.panels[item].window_name == 'Invariant':
+                    data = self.panels[item]._data
+                    if data != None:
+                        state = self.panels[item].state
+                        new_doc =self.panels[item]._manager.state_reader.write_toXML(data,state)
+                        if hasattr(doc, "firstChild"):
+                            doc.firstChild.appendChild (new_doc.firstChild.firstChild)  
+                        else:
+                            doc = new_doc 
+                elif self.panels[item].window_name == 'pr_control':
+                    data = self.panels[item].manager.current_plottable
+                    if data != None:
+                        state = self.panels[item].get_state()
+                        new_doc =self.panels[item].manager.state_reader.write_toXML(data,state)
+                        if hasattr(doc, "firstChild"):
+                            doc.firstChild.appendChild (new_doc.firstChild.firstChild)  
+                        else:
+                            doc = new_doc 
+                elif self.panels[item].window_name == 'Fit panel':
+                    for index in range(self.panels[item].GetPageCount()):
+                        selected_page = self.panels[item].GetPage(index) 
+                        if hasattr(selected_page,"get_data"):
+                            data = selected_page.get_data()
+                            state = selected_page.state
+                            new_doc =selected_page.manager.state_reader.write_toXML(data,state)
+                            if doc != None and hasattr(doc, "firstChild"):
+                                doc.firstChild.appendChild (new_doc.firstChild.firstChild)
                             else:
-                                doc = new_doc 
-                    elif self.panels[item].window_name == 'pr_control':
-                        data = self.panels[item].manager.current_plottable
-                        if data != None:
-                            state = self.panels[item].get_state()
-                            new_doc =self.panels[item].manager.state_reader.write_toXML(data,state)
-                            if hasattr(doc, "firstChild"):
-                                doc.firstChild.appendChild (new_doc.firstChild.firstChild)  
-                            else:
-                                doc = new_doc 
-                    elif self.panels[item].window_name == 'Fit panel':
-                        for index in range(self.panels[item].GetPageCount()):
-                            selected_page = self.panels[item].GetPage(index) 
-                            if hasattr(selected_page,"get_data"):
-                                data = selected_page.get_data()
-                                state = selected_page.state
-                                new_doc =selected_page.manager.state_reader.write_toXML(data,state)
-                                if doc != None and hasattr(doc, "firstChild"):
-                                    doc.firstChild.appendChild (new_doc.firstChild.firstChild)
-                                else:
-                                    doc = new_doc
+                                doc = new_doc
 
             except: 
                 pass

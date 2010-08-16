@@ -7,8 +7,8 @@ from dataFitting import Data1D
 from dataFitting import Data2D
 from DataLoader.loader import Loader
 from load_thread import DataReader
-from sans.perspectives.invariant import InvStateUpdateEvent
-from perspectives.fitting import FitStateUpdateEvent
+from sans.guicomm.events import FitStateUpdateEvent
+from sans.guicomm.events import InvStateUpdateEvent
 
 from sans.guicomm.events import NewPlotEvent, StatusEvent
 SVS_FILE_EXT = ['.svs','.inv','.prv','.fitv']

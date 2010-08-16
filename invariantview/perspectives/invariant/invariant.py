@@ -25,7 +25,7 @@ from sans.guicomm.events import ERR_DATA
 from invariant_state import Reader as reader
 from DataLoader.loader import Loader
 from invariant_panel import InvariantPanel
-(InvStateUpdateEvent, EVT_STATE_UPDATE)   = wx.lib.newevent.NewEvent()
+from sans.guicomm.events import EVT_INVSTATE_UPDATE
 
 class Plugin:
     """
@@ -97,7 +97,7 @@ class Plugin:
         self.parent = parent
         #add error back to the data
         self.parent.Bind(ERR_DATA, self._on_data_error)
-        self.parent.Bind(EVT_STATE_UPDATE, self.on_set_state_helper)
+        self.parent.Bind(EVT_INVSTATE_UPDATE, self.on_set_state_helper)
         
         self.invariant_panel = InvariantPanel(parent=self.parent)
         self.invariant_panel.set_manager(manager=self)

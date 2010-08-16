@@ -34,6 +34,7 @@ from sans.guiframe.dataFitting import Theory1D
 from sans.guicomm.events import NewPlotEvent, StatusEvent  
 from sans.guicomm.events import EVT_SLICER_PANEL,ERR_DATA,EVT_REMOVE_DATA
 from sans.guicomm.events import EVT_SLICER_PARS_UPDATE
+from sans.guicomm.events import EVT_FITSTATE_UPDATE
 
 from sans.fit.AbstractFitEngine import Model
 from sans.fit.AbstractFitEngine import FitAbort
@@ -50,7 +51,7 @@ DEFAULT_QMAX = 0.13
 DEFAULT_NPTS = 50
 
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
-(FitStateUpdateEvent, EVT_STATE_UPDATE)   = wx.lib.newevent.NewEvent()
+#(FitStateUpdateEvent, EVT_STATE_UPDATE)   = wx.lib.newevent.NewEvent()
 from fitpage import Chi2UpdateEvent
 
 
@@ -237,7 +238,7 @@ class Plugin:
         Create and return a list of panel objects
         """
         self.parent = parent
-        self.parent.Bind(EVT_STATE_UPDATE, self.on_set_state_helper)
+        self.parent.Bind(EVT_FITSTATE_UPDATE, self.on_set_state_helper)
         # Creation of the fit panel
         self.fit_panel = FitPanel(self.parent, -1)
         #Set the manager for the main panel
@@ -319,8 +320,8 @@ class Plugin:
         
         : event: FitStateUpdateEvent called by dataloader.plot_data from guiframe
         """
-        if len(self.temp_state) == 0 and self.sfile_ext =='.svs':
-            if self.state_index==0 and len(self.mypanels) <= 0:
+        if len(self.temp_state) == 0:
+            if self.state_index==0 and len(self.mypanels) <= 0 and self.sfile_ext =='.svs':
                 self.fit_panel.add_default_pages()
                 self.temp_state = []
                 self.state_index = 0
