@@ -765,6 +765,6 @@ class Reader(CansasReader):
     
         # Add the invariant information to the XML document
         if state is not None:
-            state.toXML(doc=doc, entry_node=sasentry)
+            state.toXML(datainfo.name,doc=doc, entry_node=sasentry)
             
         return doc
