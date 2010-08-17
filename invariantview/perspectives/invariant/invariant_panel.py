@@ -164,16 +164,17 @@ class InvariantPanel(ScrolledPanel):
         """
         set state when loading it from a .inv/.svs file
         """
-        if state == None or data == None:
+        if state == None and data == None:
             self.state = IState()
+        elif state == None or data == None: return
         else:
             self.new_state = True
             if not self.set_data(data):
                 return
             self.state = state 
             self.state.file = data.name   
+
             num = self.state.saved_state['state_num']
-            
             if num > 0 :
                 self._undo_enable()
             if num < len(state.state_list)-1:
@@ -197,6 +198,7 @@ class InvariantPanel(ScrolledPanel):
             self._get_input_list() 
             #make sure that the data is reset (especially when loaded from a inv file)
             self.state.data = self._data
+
             self.new_state = False 
             self.is_state_data = False
 
@@ -566,7 +568,7 @@ class InvariantPanel(ScrolledPanel):
         
         #display a message
         self.set_message()
-        
+
         # reset power_out to default to get ready for another '_on_text'
         if self.is_power_out == True:
             self.state.container = copy.deepcopy(self.inv_container)
@@ -578,12 +580,13 @@ class InvariantPanel(ScrolledPanel):
 
         #enable the button_ok for more details
         self.button_details.Enable()
-
+        
         if event != None: 
             if not self.button_report.IsEnabled(): self.button_report.Enable(True)
             if not self.button_save.IsEnabled(): self.button_save.Enable(True)
             wx.PostEvent(self.parent, StatusEvent(status = '\nFinished invariant computation...'))
-        
+            
+
     def undo(self,event=None):
         """
         Go back to the previous state

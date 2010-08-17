@@ -238,6 +238,7 @@ class FitPanel(wx.aui.AuiNotebook):
                 if name == page_info.window_name:
                     # the page is still opened
                     panel.reset_page(state=state)
+                    panel.save_current_state() 
                     page_is_opened = True
             if not page_is_opened:
                 panel = self.add_fit_page(data=state.data)
@@ -245,6 +246,7 @@ class FitPanel(wx.aui.AuiNotebook):
                 if panel is not None:  
                     self.manager.store_page(page=panel, data=state.data)
                     panel.reset_page(state=state)
+                    panel.save_current_state()
                     
     def clear_panel(self, format='.svs'):
         """
