@@ -83,6 +83,7 @@ class PageState(object):
         self.qmax= 0.1
         self.npts = None
         self.name=""
+        self.multi_factor = None
         ## enable smearering state
         self.enable_smearer = False
         self.disable_smearer = True
@@ -145,6 +146,7 @@ class PageState(object):
         obj.disp_box = copy.deepcopy(self.disp_box)
         obj.qmin = copy.deepcopy(self.qmin)
         obj.qmax = copy.deepcopy(self.qmax)
+        obj.multi_factor = copy.deepcopy(self.multi_factor)
         obj.npts = copy.deepcopy(self.npts )
         obj.cb1 = copy.deepcopy(self.cb1)
         obj.smearer = copy.deepcopy(self.smearer)

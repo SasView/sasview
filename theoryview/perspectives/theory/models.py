@@ -189,11 +189,11 @@ class ModelManager:
         from sans.models.CoreShellModel import CoreShellModel
         self.shape_list.append(CoreShellModel)
         self.multiplication_factor.append(CoreShellModel)
-
-        from sans.models.CoreFourShellModel import CoreFourShellModel
-        self.shape_list.append(CoreFourShellModel)
-        self.multiplication_factor.append(CoreFourShellModel)
         
+        from sans.models.CoreMultiShellModel import CoreMultiShellModel
+        self.shape_list.append(CoreMultiShellModel)
+        self.multiplication_factor.append(CoreMultiShellModel)
+
         from sans.models.VesicleModel import VesicleModel
         self.shape_list.append(VesicleModel)
         self.multiplication_factor.append(VesicleModel)

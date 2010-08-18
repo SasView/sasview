@@ -928,7 +928,9 @@ class BasicPage(wx.ScrolledWindow):
         #select the current model
         self.formfactorbox.Select(int(state.formfactorcombobox))
         self.structurebox.SetSelection(state.structurecombobox )
-       
+        if state.multi_factor != None:
+            self.multifactorbox.SetSelection(state.multi_factor-1)
+
         #reset the fitting engine type
         self.engine_type = state.engine_type
         #draw the pnael according to the new model parameter 
@@ -1583,7 +1585,7 @@ class BasicPage(wx.ScrolledWindow):
             boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         else:
             boxsizer1 = box_sizer
-            
+        sizer_buttons = wx.BoxSizer(wx.HORIZONTAL)    
         #--------------------------------------------------------
         self.shape_rbutton = wx.RadioButton(self, -1, 'Shapes', style=wx.RB_GROUP)
         self.shape_indep_rbutton = wx.RadioButton(self, -1, "Shape-Independent")
@@ -1604,27 +1606,34 @@ class BasicPage(wx.ScrolledWindow):
         sizer_radiobutton = wx.GridSizer(2, 2,5, 5)
         sizer_radiobutton.Add(self.shape_rbutton)
         sizer_radiobutton.Add(self.shape_indep_rbutton)
+
         sizer_radiobutton.Add(self.plugin_rbutton)
         sizer_radiobutton.Add(self.struct_rbutton)
+        sizer_buttons.Add(sizer_radiobutton)
+        # detail button
+        if object !=None:
+            sizer_buttons.Add((50,0))
+            sizer_buttons.Add(object)
         
         sizer_selection = wx.BoxSizer(wx.HORIZONTAL)
+        mutifactor_selection = wx.BoxSizer(wx.HORIZONTAL)
         
         self.text1 = wx.StaticText( self,-1,"" )
         self.text2 = wx.StaticText( self,-1,"P(Q)*S(Q)" )
-        
+        self.mutifactor_text = wx.StaticText( self,-1,"No. of Shells: " )
         
         self.formfactorbox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
         if self.model!= None:
             self.formfactorbox.SetValue(self.model.name)
            
         self.structurebox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
-        
+        self.multifactorbox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
         self.initialize_combox()
              
         wx.EVT_COMBOBOX(self.formfactorbox,-1, self._on_select_model)
         wx.EVT_COMBOBOX(self.structurebox,-1, self._on_select_model)
+        wx.EVT_COMBOBOX(self.multifactorbox,-1, self._on_select_model)
         
-       
         ## check model type to show sizer
         if self.model !=None:
             self._set_model_sizer_selection( self.model )
@@ -1636,19 +1645,51 @@ class BasicPage(wx.ScrolledWindow):
         sizer_selection.Add(self.text2)
         sizer_selection.Add((5,5))
         sizer_selection.Add(self.structurebox)
-        sizer_selection.Add((5,5))
+        #sizer_selection.Add((5,5))
+        mutifactor_selection.Add((10,5))
+        mutifactor_selection.Add(self.mutifactor_text)
+        mutifactor_selection.Add(self.multifactorbox)
         
-        boxsizer1.Add( sizer_radiobutton )
-        boxsizer1.Add( (20,20))
+        boxsizer1.Add( sizer_buttons )
+        boxsizer1.Add( (15,15))
         boxsizer1.Add( sizer_selection )
-        if object !=None:
-            boxsizer1.Add( (-72,-72))
-            boxsizer1.Add( object,  0, wx.ALIGN_RIGHT| wx.RIGHT, 35)
-            boxsizer1.Add( (60,60))
+        boxsizer1.Add( (10,10))
+        boxsizer1.Add(mutifactor_selection)
+        
+        self._set_multfactor_combobox()
+
         #--------------------------------------------------------
         sizer.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         sizer.Layout()
         self.SetScrollbars(20,20,25,65)
+        
+    def _set_multfactor_combobox(self):   
+        """
+        Set comboBox for muitfactor of CoreMultiShellModel
+        """
+        for idx in range(1,5):
+            self.multifactorbox.Append(str(idx),int(idx))
+            self.multifactorbox.SetSelection(0) 
+        self._hide_multfactor_combobox()
+        
+    def _show_multfactor_combobox(self):   
+        """
+        Show the comboBox of muitfactor of CoreMultiShellModel
+        """ 
+        if not self.mutifactor_text.IsShown():
+            self.mutifactor_text.Show(True)
+        if not self.multifactorbox.IsShown():
+            self.multifactorbox.Show(True)  
+             
+    def _hide_multfactor_combobox(self):   
+        """
+        Hide the comboBox of muitfactor of CoreMultiShellModel
+        """ 
+        if self.mutifactor_text.IsShown():
+            self.mutifactor_text.Hide()
+        if self.multifactorbox.IsShown():
+            self.multifactorbox.Hide()   
+
         
     def _show_combox_helper(self):
         """
@@ -1796,22 +1837,43 @@ class BasicPage(wx.ScrolledWindow):
             self.text2.Show()
             self.structurebox.Enable()
             self.text2.Enable()
+            
+        if form_factor != None:    
+            # set multifactor for Mutifunctional models    
+            if form_factor().name == 'CoreMultiShellModel':
+                self._show_multfactor_combobox()
+                m_id = self.multifactorbox.GetCurrentSelection()
+                self.multi_factor = self.multifactorbox.GetClientData(m_id)
+                if self.multi_factor == None: self.multi_factor =0
+                form_factor = form_factor(int(self.multi_factor))
+            else:
+                self._hide_multfactor_combobox()
+                form_factor = form_factor()
+                self.multi_factor = None
+        else:
+            self._hide_multfactor_combobox()
+            self.multi_factor = None  
+              
         s_id = self.structurebox.GetCurrentSelection()
         struct_factor = self.structurebox.GetClientData( s_id )
-       
+        
         if  struct_factor !=None:
             from sans.models.MultiplicationModel import MultiplicationModel
-            self.model= MultiplicationModel(form_factor(),struct_factor())
+            self.model= MultiplicationModel(form_factor,struct_factor())
             
         else:
             if form_factor != None:
-                self.model= form_factor()
+                self.model= form_factor
             else:
                 self.model = None
                 return self.model
+            
+
         ## post state to fit panel
         self.state.parameters =[]
         self.state.model =self.model
+        self.state.qmin = self.qmin_x
+        self.state.multi_factor = self.multi_factor
         self.disp_list =self.model.getDispParamList()
         self.state.disp_list = self.disp_list
         self.Layout()     
