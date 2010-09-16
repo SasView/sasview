@@ -929,7 +929,7 @@ class BasicPage(wx.ScrolledWindow):
         self.formfactorbox.Select(int(state.formfactorcombobox))
         self.structurebox.SetSelection(state.structurecombobox )
         if state.multi_factor != None:
-            self.multifactorbox.SetSelection(state.multi_factor-1)
+            self.multifactorbox.SetSelection(state.multi_factor)
 
         #reset the fitting engine type
         self.engine_type = state.engine_type
@@ -1667,9 +1667,9 @@ class BasicPage(wx.ScrolledWindow):
         """
         Set comboBox for muitfactor of CoreMultiShellModel
         """
-        for idx in range(1,5):
+        for idx in range(0,5):
             self.multifactorbox.Append(str(idx),int(idx))
-            self.multifactorbox.SetSelection(0) 
+            self.multifactorbox.SetSelection(1) 
         self._hide_multfactor_combobox()
         
     def _show_multfactor_combobox(self):   
