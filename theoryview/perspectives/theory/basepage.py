@@ -700,7 +700,7 @@ class BasicPage(wx.ScrolledWindow):
         self.structurebox.SetSelection(state.structurecombobox )
         self.formfactorbox.SetSelection(state.formfactorcombobox)
         if state.multi_factor != None:
-            self.multifactorbox.SetSelection(state.multi_factor-1)
+            self.multifactorbox.SetSelection(state.multi_factor)
         #draw the pnael according to the new model parameter 
         self._on_select_model(event=None)
        
@@ -1259,9 +1259,9 @@ class BasicPage(wx.ScrolledWindow):
         """
         Set comboBox for muitfactor of CoreMultiShellModel
         """
-        for idx in range(1,5):
+        for idx in range(0,5):
             self.multifactorbox.Append(str(idx),int(idx))
-            self.multifactorbox.SetSelection(0) 
+            self.multifactorbox.SetSelection(1) 
         self._hide_multfactor_combobox()
         
     def _show_multfactor_combobox(self):   
@@ -1470,7 +1470,7 @@ class BasicPage(wx.ScrolledWindow):
                 self._show_multfactor_combobox()
                 m_id = self.multifactorbox.GetCurrentSelection()
                 self.multi_factor = self.multifactorbox.GetClientData(m_id)
-                if self.multi_factor == None: self.multi_factor =0
+                if self.multi_factor == None: self.multi_factor =1
                 form_factor = form_factor(int(self.multi_factor))
             else:
                 self._hide_multfactor_combobox()
