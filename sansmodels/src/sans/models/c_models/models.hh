@@ -74,6 +74,81 @@ public:
 };
 
 
+class OnionModel{
+public:
+	// Model parameters
+	Parameter n_shells;
+	Parameter scale;
+	Parameter rad_core;
+	Parameter sld_core;
+	Parameter sld_solv;
+	Parameter background;
+
+	Parameter sld_out_shell1;
+	Parameter sld_out_shell2;
+	Parameter sld_out_shell3;
+	Parameter sld_out_shell4;
+	Parameter sld_out_shell5;
+	Parameter sld_out_shell6;
+	Parameter sld_out_shell7;
+	Parameter sld_out_shell8;
+	Parameter sld_out_shell9;
+	Parameter sld_out_shell10;
+
+	Parameter sld_in_shell1;
+	Parameter sld_in_shell2;
+	Parameter sld_in_shell3;
+	Parameter sld_in_shell4;
+	Parameter sld_in_shell5;
+	Parameter sld_in_shell6;
+	Parameter sld_in_shell7;
+	Parameter sld_in_shell8;
+	Parameter sld_in_shell9;
+	Parameter sld_in_shell10;
+
+	Parameter A_shell1;
+	Parameter A_shell2;
+	Parameter A_shell3;
+	Parameter A_shell4;
+	Parameter A_shell5;
+	Parameter A_shell6;
+	Parameter A_shell7;
+	Parameter A_shell8;
+	Parameter A_shell9;
+	Parameter A_shell10;
+
+	Parameter thick_shell1;
+	Parameter thick_shell2;
+	Parameter thick_shell3;
+	Parameter thick_shell4;
+	Parameter thick_shell5;
+	Parameter thick_shell6;
+	Parameter thick_shell7;
+	Parameter thick_shell8;
+	Parameter thick_shell9;
+	Parameter thick_shell10;
+
+	Parameter func_shell1;
+	Parameter func_shell2;
+	Parameter func_shell3;
+	Parameter func_shell4;
+	Parameter func_shell5;
+	Parameter func_shell6;
+	Parameter func_shell7;
+	Parameter func_shell8;
+	Parameter func_shell9;
+	Parameter func_shell10;
+
+	// Constructor
+	OnionModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
 class SphereModel{
 public:
 	// Model parameters
@@ -92,6 +167,7 @@ public:
 	double calculate_ER();
 	double evaluate_rphi(double q, double phi);
 };
+
 
 class FuzzySphereModel{
 public:

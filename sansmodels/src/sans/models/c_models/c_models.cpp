@@ -14,6 +14,7 @@ void addCCylinderModel(PyObject *module);
 void addCTriaxialEllipsoidModel(PyObject *module);
 void addCParallelepipedModel(PyObject *module);
 void addCSphereModel(PyObject *module);
+void addCOnionModel(PyObject *module);
 void addCFuzzySphereModel(PyObject *module);
 void addCHardsphereStructure(PyObject *module);
 void addCStickyHSStructure(PyObject *module);
@@ -221,6 +222,7 @@ initc_models(void)
 	addCCoreFourShellModel(m);
 	addCEllipsoidModel(m);
 	addCSphereModel(m);
+	addCOnionModel(m);
 	addCFuzzySphereModel(m);
 	addCHardsphereStructure(m);
 	addCStickyHSStructure(m);
