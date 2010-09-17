@@ -1840,7 +1840,7 @@ class BasicPage(wx.ScrolledWindow):
             
         if form_factor != None:    
             # set multifactor for Mutifunctional models    
-            if form_factor().name == 'CoreMultiShellModel':
+            if form_factor().__class__ in self.model_list_box["Multi-Functions"]:
                 self._show_multfactor_combobox()
                 m_id = self.multifactorbox.GetCurrentSelection()
                 self.multi_factor = self.multifactorbox.GetClientData(m_id)

@@ -156,6 +156,8 @@ class ModelManager:
     struct_list= []
     ##list of model allowing multiplication
     multiplication_factor=[]
+    ##list of multifunctional shapes
+    multi_func_list =[]
     ## list of added models
     plugins=[]
     ## Event owner (guiframe)
@@ -173,6 +175,11 @@ class ModelManager:
         from sans.models.SphereModel import SphereModel
         self.shape_list.append(SphereModel)
         self.multiplication_factor.append(SphereModel)
+        
+        from sans.models.SphereExpShellModel import SphereExpShellModel
+        self.shape_list.append(SphereExpShellModel)
+        self.multiplication_factor.append(SphereExpShellModel)
+        self.multi_func_list.append(SphereExpShellModel)
         
         from sans.models.FuzzySphereModel import FuzzySphereModel
         self.shape_list.append(FuzzySphereModel)
@@ -463,6 +470,7 @@ class ModelManager:
         
         """
         self.model_combobox.set_list("multiplication", self.multiplication_factor)
+        self.model_combobox.set_list("Multi-Functions", self.multi_func_list)
         return self.model_combobox
     
   
