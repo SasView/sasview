@@ -41,7 +41,7 @@ class SphereExpShellModel(BaseComponent):
         ## parameters with orientation: can be removed since there is no orientational params
         for item in self.model.orientation_params:
             self.orientation_params.append(item)
-                
+        self.getProfile()        
     def _clone(self, obj):
         """
         Internal utility function to copy the internal
@@ -132,8 +132,63 @@ class SphereExpShellModel(BaseComponent):
                             value = self.model.params['sld_solv']
                             self.model.setParam(key, value)
                         except: pass
-
-   
+    def getProfile(self):
+        """
+        Get SLD profile 
+        
+        : return: (r, beta) where r is a list of radius of the transition points
+                beta is a list of the corresponding SLD values 
+        : Note: This works only for func_shell# = 2.
+        """
+        # max_pts for each shells
+        max_pts = 10
+        r = []
+        beta = []
+        # for core at r=0
+        r.append(0)
+        beta.append(self.params['sld_core'])
+        # for core at r=rad_core
+        r.append(self.params['rad_core'])
+        beta.append(self.params['sld_core'])
+        
+        # for shells
+        for n in range(1,self.n_shells+1):
+            # Left side of each shells
+            r0 = r[len(r)-1]            
+            r.append(r0)
+            exec "beta.append(self.params['sld_in_shell%s'% str(n)])"
+            
+            exec "A = self.params['A_shell%s'% str(n)]"
+            if A ==0:
+                # Right side of each shells
+                exec "r0 += self.params['thick_shell%s'% str(n)]"
+                r.append(r0)
+                exec "beta.append(self.params['sld_in_shell%s'% str(n)])"
+            else:
+                from math import exp
+                rn = r0
+                for n_sub in range(0,max_pts):
+                    # Right side of each sub_shells
+                    exec "rn += self.params['thick_shell%s'% str(n)]/10.0"
+                    r.append(rn)
+                    exec "slope = (self.params['sld_out_shell%s'% str(n)] \
+                                        -self.params['sld_in_shell%s'% str(n)]) \
+                                        /(exp(self.params['A_shell%s'% str(n)])-1)"
+                    exec "const = (self.params['sld_in_shell%s'% str(n)]-slope)"
+                    exec "beta_n = slope*exp((self.params['A_shell%s'% str(n)]*(rn-r0) \
+                                        /self.params['thick_shell%s'% str(n)])) + const"
+                    beta.append(beta_n)
+            
+        # for solvent
+        r0 = r[len(r)-1]            
+        r.append(r0)
+        beta.append(self.params['sld_solv'])
+        r_solv = 5*r0/4
+        r.append(r_solv)
+        beta.append(self.params['sld_solv'])
+        
+        return r, beta
+    
     def setParam(self, name, value):
         """ 
         Set the value of a model parameter

@@ -128,7 +128,45 @@ class CoreMultiShellModel(BaseComponent):
                             self.model.setParam(key, value)
                         except: pass
 
-   
+    def getProfile(self):
+        """
+        Get SLD profile 
+        
+        : return: (r, beta) where r is a list of radius of the transition points
+                beta is a list of the corresponding SLD values 
+        : Note: This works only for func_shell# = 2.
+        """
+        r = []
+        beta = []
+        # for core at r=0
+        r.append(0)
+        beta.append(self.params['sld_core'])
+        # for core at r=rad_core
+        r.append(self.params['rad_core'])
+        beta.append(self.params['sld_core'])
+        
+        # for shells
+        for n in range(1,self.n_shells+1):
+            # Left side of each shells
+            r0 = r[len(r)-1]            
+            r.append(r0)
+            exec "beta.append(self.params['sld_shell%s'% str(n)])"
+
+            # Right side of each shells
+            exec "r0 += self.params['thick_shell%s'% str(n)]"
+            r.append(r0)
+            exec "beta.append(self.params['sld_shell%s'% str(n)])"
+            
+        # for solvent
+        r0 = r[len(r)-1]            
+        r.append(r0)
+        beta.append(self.params['sld_solv'])
+        r_solv = 5*r0/4
+        r.append(r_solv)
+        beta.append(self.params['sld_solv'])
+        
+        return r, beta
+
     def setParam(self, name, value):
         """ 
         Set the value of a model parameter

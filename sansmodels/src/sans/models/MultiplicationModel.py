@@ -81,8 +81,24 @@ class MultiplicationModel(BaseComponent):
         """
         ##set dispersion only from p_model 
         for name , value in self.p_model.dispersion.iteritems():
-            self.dispersion[name]= value                           
-
+            self.dispersion[name]= value 
+                                      
+    def getProfile(self):
+        """
+        Get SLD profile of p_model if exists
+        
+        : return: (r, beta) where r is a list of radius of the transition points
+                beta is a list of the corresponding SLD values 
+        : Note: This works only for func_shell# = 2 (exp function).
+        """
+        try:
+            x,y = self.p_model.getProfile()
+        except:
+            x = None
+            y = None
+            
+        return x, y
+    
     def _set_params(self):
         """
             Concatenate the parameters of the two models to create

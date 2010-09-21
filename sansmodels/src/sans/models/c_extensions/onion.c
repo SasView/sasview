@@ -40,13 +40,16 @@ double so_kernel(double dp[], double q) {
 	fun_type[0] = 0;
 	fun_type[n+1] = 0;
 
-    double bes,fun,alpha,f,vol,qr,r,contr,f2;
+    double bes,fun,alpha,f,vol,vol_pre,vol_sub,qr,r,contr,f2;
     double sign;
     double pi;
 
     pi = 4.0*atan(1.0);
     f = 0.0;
     r = 0.0;
+    vol = 0.0;
+    vol_pre = 0.0;
+    vol_sub = 0.0;
     double r0 = 0.0;
 
     for (i =0; i<= n+1; i++){
@@ -57,6 +60,7 @@ double so_kernel(double dp[], double q) {
     		slope[i] = 0.0;
     		A[i] = 0.0;
     	}
+    	vol_pre = vol;
         switch(fun_type[i]){
             case 2 :
 					r0 = r;
@@ -102,6 +106,9 @@ double so_kernel(double dp[], double q) {
                         contr = slope[i]*exp(A[i]*(r-r0)/thick[i]);
 
                         vol = 4.0 * pi / 3.0 * r * r * r;
+                        if (j == 1 && fabs(sld_in[i]-sld_solv) < 1e-04*fabs(sld_solv) && A[i]==0.0){
+                        	vol_sub += (vol_pre - vol);
+                        }
                         f += vol * (contr * (fun) + (sld_in[i]-slope[i]) * bes);
                         }
                         break;
@@ -140,13 +147,16 @@ double so_kernel(double dp[], double q) {
                                     }
                                 }
                             vol = 4.0 * pi / 3.0 * r * r * r;
+                            if (j == 1 && fabs(sld_in[i]-sld_solv) < 1e-04*fabs(sld_solv) && fun_type[i]==0){
+                            	vol_sub += (vol_pre - vol);
+                            }
                             f += vol * (bes * contr + fun * slope[i]);
                             }
                             break;
 				}
 
         }
-
+    vol += vol_sub;
     f2 = f * f / vol * 1.0e8;
 	f2 *= scale;
 	f2 += background;

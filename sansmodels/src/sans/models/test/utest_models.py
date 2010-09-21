@@ -12,7 +12,17 @@ import unittest, time, math
 # Disable "could be a function" complaint 
 # pylint: disable-msg=R0201
 
-
+class TestSpherew(unittest.TestCase):
+    """ Unit tests for sphere model """
+    
+    def setUp(self):
+        from sans.models.CoreFourShellModel import CoreFourShellModel
+        from sans.models.CoreMultiShellModel import CoreMultiShellModel
+        self.comp = CoreMultiShellModel(4)
+        
+    def test1D(self):
+        """ Test 1D model for a sphere """
+        self.comp._set_dispersion()
         
 class TestSphere(unittest.TestCase):
     """ Unit tests for sphere model """

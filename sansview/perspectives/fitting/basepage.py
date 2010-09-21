@@ -1621,7 +1621,9 @@ class BasicPage(wx.ScrolledWindow):
         self.text1 = wx.StaticText( self,-1,"" )
         self.text2 = wx.StaticText( self,-1,"P(Q)*S(Q)" )
         self.mutifactor_text = wx.StaticText( self,-1,"No. of Shells: " )
-        
+        self.show_sld_button = wx.Button( self,-1,"Show SLD Profile" )
+        self.show_sld_button.Bind(wx.EVT_BUTTON,self._on_show_sld)
+
         self.formfactorbox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
         if self.model!= None:
             self.formfactorbox.SetValue(self.model.name)
@@ -1649,7 +1651,9 @@ class BasicPage(wx.ScrolledWindow):
         mutifactor_selection.Add((10,5))
         mutifactor_selection.Add(self.mutifactor_text)
         mutifactor_selection.Add(self.multifactorbox)
-        
+        mutifactor_selection.Add((10,5))
+        mutifactor_selection.Add(self.show_sld_button)
+
         boxsizer1.Add( sizer_buttons )
         boxsizer1.Add( (15,15))
         boxsizer1.Add( sizer_selection )
@@ -1657,11 +1661,27 @@ class BasicPage(wx.ScrolledWindow):
         boxsizer1.Add(mutifactor_selection)
         
         self._set_multfactor_combobox()
-
+        self.show_sld_button.Hide()
         #--------------------------------------------------------
         sizer.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         sizer.Layout()
         self.SetScrollbars(20,20,25,65)
+        
+        
+    def _on_show_sld(self, event=None):
+        """
+        Plot SLD profile
+        """
+        # get profile data
+        x,y=self.model.getProfile()
+
+        from danse.common.plottools import Data1D
+        from sans.perspectives.theory.profile_dialog import SLDPanel
+        sld_data = Data1D(x,y)
+        sld_data.name = 'SLD'
+   
+        self.panel = SLDPanel(self, data=sld_data,id =-1 )
+        self.panel.ShowModal()    
         
     def _set_multfactor_combobox(self):   
         """
@@ -1842,16 +1862,19 @@ class BasicPage(wx.ScrolledWindow):
             # set multifactor for Mutifunctional models    
             if form_factor().__class__ in self.model_list_box["Multi-Functions"]:
                 self._show_multfactor_combobox()
+                self.show_sld_button.Show(True)
                 m_id = self.multifactorbox.GetCurrentSelection()
                 self.multi_factor = self.multifactorbox.GetClientData(m_id)
                 if self.multi_factor == None: self.multi_factor =0
                 form_factor = form_factor(int(self.multi_factor))
             else:
                 self._hide_multfactor_combobox()
+                self.show_sld_button.Hide()
                 form_factor = form_factor()
                 self.multi_factor = None
         else:
             self._hide_multfactor_combobox()
+            self.show_sld_button.Hide()
             self.multi_factor = None  
               
         s_id = self.structurebox.GetCurrentSelection()

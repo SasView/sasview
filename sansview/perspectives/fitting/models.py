@@ -192,6 +192,7 @@ class ModelManager:
         from sans.models.CoreMultiShellModel import CoreMultiShellModel
         self.shape_list.append(CoreMultiShellModel)
         self.multiplication_factor.append(CoreMultiShellModel)
+        self.multi_func_list.append(CoreMultiShellModel)
         
         from sans.models.VesicleModel import VesicleModel
         self.shape_list.append(VesicleModel)
