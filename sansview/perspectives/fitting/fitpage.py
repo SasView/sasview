@@ -2069,7 +2069,36 @@ class FitPage(BasicPage):
         #list of dispersion paramaters
         self.disp_list=self.model.getDispParamList()
 
-        keys.sort()
+        def custom_compare(a,b):
+            """
+            Custom compare to order, first by alphabets then second by number.
+            """ 
+            a_last = a[len(a)-1]
+            b_last = b[len(b)-1]
+            
+            num_a = None
+            num_b = None
+            # check if it contains a int number(<10)
+            try: 
+                num_a = int(a_last)
+            except: pass
+            try:
+                num_b = int(b_last)
+            except: pass
+            # both have a number    
+            if num_a != None and num_b != None:
+                if num_a > num_b: return 1
+                elif num_a == num_b: 
+                    return cmp(a.lower(), b.lower())
+                else: return -1
+            # one of them has a number
+            elif num_a == None: return -1
+            elif num_b == None: return 1
+            # no nuumbers
+            else:
+                return cmp(a.lower(), b.lower())
+            
+        keys.sort(custom_compare)
     
         iy = 0
         ix = 0
