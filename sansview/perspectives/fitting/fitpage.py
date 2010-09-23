@@ -2092,12 +2092,11 @@ class FitPage(BasicPage):
                     return cmp(a.lower(), b.lower())
                 else: return -1
             # one of them has a number
-            elif num_a == None: return -1
-            elif num_b == None: return 1
+            elif num_a != None: return 1
+            elif num_b != None: return -1
             # no nuumbers
-            else:
-                return cmp(a.lower(), b.lower())
-            
+            else: return cmp(a.lower(), b.lower())
+                        
         keys.sort(custom_compare)
     
         iy = 0
