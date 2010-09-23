@@ -53,46 +53,46 @@ typedef struct {
 	//  [DEFAULT]=background=0 [1/cm]
 	double background;
 
-    //  [DEFAULT]=sld_out_shell1=2.0e-06
+    //  [DEFAULT]=sld_out_shell1=2.0e-06 [1/A^(2)]
     double sld_out_shell1;
-    //  [DEFAULT]=sld_out_shell2=2.5e-06
+    //  [DEFAULT]=sld_out_shell2=2.5e-06 [1/A^(2)]
     double sld_out_shell2;
-    //  [DEFAULT]=sld_out_shell3=3.0e-06
+    //  [DEFAULT]=sld_out_shell3=3.0e-06 [1/A^(2)]
     double sld_out_shell3;
-    //  [DEFAULT]=sld_out_shell4=3.5e-06
+    //  [DEFAULT]=sld_out_shell4=3.5e-06 [1/A^(2)]
     double sld_out_shell4;
-    //  [DEFAULT]=sld_out_shell5=4.0e-06
+    //  [DEFAULT]=sld_out_shell5=4.0e-06 [1/A^(2)]
     double sld_out_shell5;
-    //  [DEFAULT]=sld_out_shell6=4.5e-06
+    //  [DEFAULT]=sld_out_shell6=4.5e-06 [1/A^(2)]
     double sld_out_shell6;
-    //  [DEFAULT]=sld_out_shell7=5.0e-06
+    //  [DEFAULT]=sld_out_shell7=5.0e-06 [1/A^(2)]
     double sld_out_shell7;
-    //  [DEFAULT]=sld_out_shell8=5.5e-06
+    //  [DEFAULT]=sld_out_shell8=5.5e-06 [1/A^(2)]
     double sld_out_shell8;
-    //  [DEFAULT]=sld_out_shell9=6.0e-06
+    //  [DEFAULT]=sld_out_shell9=6.0e-06 [1/A^(2)]
     double sld_out_shell9;
-    //  [DEFAULT]=sld_out_shell10=6.2e-06
+    //  [DEFAULT]=sld_out_shell10=6.2e-06 [1/A^(2)]
     double sld_out_shell10;
 
-    //  [DEFAULT]=sld_in_shell1=1.7e-06
+    //  [DEFAULT]=sld_in_shell1=1.7e-06 [1/A^(2)]
     double sld_in_shell1;
-    //  [DEFAULT]=sld_in_shell2=2.2e-06
+    //  [DEFAULT]=sld_in_shell2=2.2e-06 [1/A^(2)]
     double sld_in_shell2;
-    //  [DEFAULT]=sld_in_shell3=2.7e-06
+    //  [DEFAULT]=sld_in_shell3=2.7e-06 [1/A^(2)]
     double sld_in_shell3;
-    //  [DEFAULT]=sld_in_shell4=3.2e-06
+    //  [DEFAULT]=sld_in_shell4=3.2e-06 [1/A^(2)]
     double sld_in_shell4;
-    //  [DEFAULT]=sld_in_shell5=3.7e-06
+    //  [DEFAULT]=sld_in_shell5=3.7e-06 [1/A^(2)]
     double sld_in_shell5;
-    //  [DEFAULT]=sld_in_shell6=4.2e-06
+    //  [DEFAULT]=sld_in_shell6=4.2e-06 [1/A^(2)]
     double sld_in_shell6;
-    //  [DEFAULT]=sld_in_shell7=4.7e-06
+    //  [DEFAULT]=sld_in_shell7=4.7e-06 [1/A^(2)]
     double sld_in_shell7;
-    //  [DEFAULT]=sld_in_shell8=5.2e-06
+    //  [DEFAULT]=sld_in_shell8=5.2e-06 [1/A^(2)]
     double sld_in_shell8;
-    //  [DEFAULT]=sld_in_shell9=5.7e-06
+    //  [DEFAULT]=sld_in_shell9=5.7e-06 [1/A^(2)]
     double sld_in_shell9;
-    //  [DEFAULT]=sld_in_shell10=6.0e-06
+    //  [DEFAULT]=sld_in_shell10=6.0e-06 [1/A^(2)]
     double sld_in_shell10;
 
     //  [DEFAULT]=A_shell1=1.0
@@ -116,25 +116,25 @@ typedef struct {
     //  [DEFAULT]=A_shell10=1.0
     double A_shell10;
 
-    //  [DEFAULT]=thick_shell1=50.0
+    //  [DEFAULT]=thick_shell1=50.0 [A]
     double thick_shell1;
-    //  [DEFAULT]=thick_shell2=50.0
+    //  [DEFAULT]=thick_shell2=50.0 [A]
     double thick_shell2;
-    //  [DEFAULT]=thick_shell3=50.0
+    //  [DEFAULT]=thick_shell3=50.0 [A]
     double thick_shell3;
-    //  [DEFAULT]=thick_shell4=50.0
+    //  [DEFAULT]=thick_shell4=50.0 [A]
     double thick_shell4;
-    //  [DEFAULT]=thick_shell5=50.0
+    //  [DEFAULT]=thick_shell5=50.0 [A]
     double thick_shell5;
-    //  [DEFAULT]=thick_shell6=50.0
+    //  [DEFAULT]=thick_shell6=50.0 [A]
     double thick_shell6;
-    //  [DEFAULT]=thick_shell7=50.0
+    //  [DEFAULT]=thick_shell7=50.0 [A]
     double thick_shell7;
-    //  [DEFAULT]=thick_shell8=50.0
+    //  [DEFAULT]=thick_shell8=50.0 [A]
     double thick_shell8;
-    //  [DEFAULT]=thick_shell9=50.0
+    //  [DEFAULT]=thick_shell9=50.0 [A]
     double thick_shell9;
-    //  [DEFAULT]=thick_shell10=50.0
+    //  [DEFAULT]=thick_shell10=50.0 [A]
     double thick_shell10;
 
     //  [DEFAULT]=func_shell1=2
