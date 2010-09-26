@@ -138,7 +138,6 @@ class SphereExpShellModel(BaseComponent):
         
         : return: (r, beta) where r is a list of radius of the transition points
                 beta is a list of the corresponding SLD values 
-        : Note: This works only for func_shell# = 2.
         """
         # max_pts for each shells
         max_pts = 10
@@ -156,27 +155,27 @@ class SphereExpShellModel(BaseComponent):
             # Left side of each shells
             r0 = r[len(r)-1]            
             r.append(r0)
-            exec "beta.append(self.params['sld_in_shell%s'% str(n)])"
+            beta.append(self.params['sld_in_shell%s'% str(n)])
             
-            exec "A = self.params['A_shell%s'% str(n)]"
+            A = self.params['A_shell%s'% str(n)]
             if A ==0:
                 # Right side of each shells
-                exec "r0 += self.params['thick_shell%s'% str(n)]"
+                r0 += self.params['thick_shell%s'% str(n)]
                 r.append(r0)
-                exec "beta.append(self.params['sld_in_shell%s'% str(n)])"
+                beta.append(self.params['sld_in_shell%s'% str(n)])
             else:
                 from math import exp
                 rn = r0
                 for n_sub in range(0,max_pts):
                     # Right side of each sub_shells
-                    exec "rn += self.params['thick_shell%s'% str(n)]/10.0"
+                    rn += self.params['thick_shell%s'% str(n)]/10.0
                     r.append(rn)
-                    exec "slope = (self.params['sld_out_shell%s'% str(n)] \
+                    slope = (self.params['sld_out_shell%s'% str(n)] \
                                         -self.params['sld_in_shell%s'% str(n)]) \
-                                        /(exp(self.params['A_shell%s'% str(n)])-1)"
-                    exec "const = (self.params['sld_in_shell%s'% str(n)]-slope)"
-                    exec "beta_n = slope*exp((self.params['A_shell%s'% str(n)]*(rn-r0) \
-                                        /self.params['thick_shell%s'% str(n)])) + const"
+                                        /(exp(self.params['A_shell%s'% str(n)])-1)
+                    const = (self.params['sld_in_shell%s'% str(n)]-slope)
+                    beta_n = slope*exp((self.params['A_shell%s'% str(n)]*(rn-r0) \
+                                        /self.params['thick_shell%s'% str(n)])) + const
                     beta.append(beta_n)
             
         # for solvent
@@ -245,7 +244,7 @@ class SphereExpShellModel(BaseComponent):
         Evaluate the model
         
         : param x: input q-value (float or [float, float] as [r, theta])
-        : return: (DAB value)
+        : return: (I value)
         """
 
         return self.model.run(x)
@@ -255,7 +254,7 @@ class SphereExpShellModel(BaseComponent):
         Evaluate the model
         
         : param x: input q-value (float or [float, float] as [qx, qy])
-        : return: DAB value
+        : return: I value
         """  
 
         return self.model.runXY(x)
