@@ -2,7 +2,6 @@
 This module is a small tool to allow user to quickly
 determine the slit length value of data.
 """
-from numpy import *
 
 class SlitlengthCalculator(object):
     """
