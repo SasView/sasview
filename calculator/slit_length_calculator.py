@@ -70,11 +70,15 @@ class SlitlengthCalculator(object):
         ind = 0.0
         # find indices where it crosses y = y_half.
         while (True):
-            ind += 1                # no need to check when ind == 0
-            y_half_d = y[ind]       # y value and ind just after passed the spot of the half height 
-            if y[ind] < y_half: break
-   
-        y_half_u = y[ind-1]         # y value and ind just before passed the spot of the half height
+            # no need to check when ind == 0
+            ind += 1     
+            # y value and ind just after passed the spot of the half height            
+            y_half_d = y[ind]       
+            if y[ind] < y_half: 
+                break
+        
+        # y value and ind just before passed the spot of the half height
+        y_half_u = y[ind-1]        
         
         # get corresponding x values
         x_half_d = x[ind]
@@ -84,7 +88,8 @@ class SlitlengthCalculator(object):
         if y_half_u == y_half_d:
             x_half = (x_half_d + x_half_u)/2.0
         else:
-            x_half = (x_half_u * (y_half - y_half_d) + x_half_d*(y_half_u-y_half))/(y_half_u - y_half_d)
+            x_half = (x_half_u * (y_half - y_half_d) + x_half_d*(y_half_u-y_half))\
+                        /(y_half_u - y_half_d)
         
         # multiply by 2 due to the beam profile is for half beam
         slit_length = 2.0 * x_half
