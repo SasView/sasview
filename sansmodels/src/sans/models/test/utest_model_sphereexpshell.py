@@ -14,11 +14,13 @@ class TestSphereExpShell1(unittest.TestCase):
         from sans.models.SphereExpShellModel import SphereExpShellModel
         from sans.models.CoreMultiShellModel import CoreMultiShellModel
         from sans.models.VesicleModel import VesicleModel 
-
-        self.model = SphereExpShellModel(n_shells=1)
-        self.model2 = SphereExpShellModel(n_shells=1).model
-        self.model3 = CoreMultiShellModel(n_shells=1)
+        
+        # intit models and the multifactor
+        self.model = SphereExpShellModel(1)
+        self.model2 = SphereExpShellModel(1).model
+        self.model3 = CoreMultiShellModel(1)
         self.model4 = VesicleModel()
+        self.model5 = SphereExpShellModel(9)
         
     def test_compare_Exp0_flat(self):
         """
@@ -52,9 +54,11 @@ class TestSphereExpShell1(unittest.TestCase):
 
     def test_compare_Exp0_flat_vesicle(self):
         """
-        Check if Exp function with A_shell=0 gives the same value as Flat function of vesicle model when sld_solv=sld_core
+        Check if Exp function with A_shell=0 gives the same value as Flat 
+        function of vesicle model when sld_solv=sld_core
         """
-        print "\n*****Note: All tests (test_compare_Exp0_flat and test_compare_Expsmall_line) were passes since Sept. 18, 2010..."
+        print "\n*****Note: All tests (test_compare_Exp0_flat and \
+            test_compare_Expsmall_line) were passes since Sept. 18, 2010..."
         # Exp: func_shell = 2, Line: func_shell =1 , Flat: func_shell = 0.
         # A_shell = The coefficient of the exponential function: exp(A_shell*(r-ro)/thick_shell)
         # exp function by default
@@ -89,7 +93,8 @@ class TestSphereExpShell1(unittest.TestCase):
   
     def test_compare_Expsmall_line(self):
         """
-        Check if Exp function with A_shell-->0 gives the same value as linear function
+        Check if Exp function with A_shell-->0 gives the same value 
+        as a linear function
         """
         # exp function crosses over to line func as A_shell-->0
         self.model.setParam("A_shell1", 0.000001)
@@ -100,6 +105,32 @@ class TestSphereExpShell1(unittest.TestCase):
         #Compare exp(A=0.000001) to linear (where A_shell is null) function   
         self.assertAlmostEqual(self.model.run(0.1),self.model2.run(0.1),4)
         
+    def test_compare_time_linear_flat_functions(self):
+        """
+        Compare the calculation time between func=1(linear) , and 2 (step).
+        """
+        from time import time
+        # using linear func
+        self.model5.model.setParam("func_shell1", 1)
+        #input
+        input = [0.01,0.01]
+        st = time()
+        for iter in range(0,100000):
+            self.model5.model.run(0.01)
+        time_linear = time()-st
+        
+        # using flat function
+        self.model5.model.setParam("func_shell1", 0)
+        st = time()
+        for iter in range(0,100000):
+            self.model5.model.run(0.01)
+        time_flat = time()-st
+        
+        print "time (linear) = %s, \n time (flat) = %s"% (time_linear,time_flat)
+        
+        #Compare time of the calculation: time_linear takes a bit longer
+        # but they are not much different  
+        self.assertAlmostEqual(time_linear,time_flat,0)
   
                 
 if __name__ == '__main__':
