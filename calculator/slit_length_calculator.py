@@ -59,7 +59,8 @@ class SlitlengthCalculator(object):
             if ind >= 10 and y_max == max_y:
                 break
             y_sum = y_sum + y[ind]
-            if y[ind] > y_max: y_max = y[ind]
+            if y[ind] > y_max: 
+                y_max = y[ind]
             ind += 1
      
         # find the average value/2 of the top values  
@@ -88,7 +89,8 @@ class SlitlengthCalculator(object):
         if y_half_u == y_half_d:
             x_half = (x_half_d + x_half_u)/2.0
         else:
-            x_half = (x_half_u * (y_half - y_half_d) + x_half_d*(y_half_u-y_half))\
+            x_half = (x_half_u * (y_half - y_half_d)  \
+                       + x_half_d*(y_half_u-y_half)) \
                         /(y_half_u - y_half_d)
         
         # multiply by 2 due to the beam profile is for half beam
