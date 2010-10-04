@@ -21,7 +21,7 @@ class slit_calculator(unittest.TestCase):
         f = self.reader.read("beam profile.DAT")
         cal = calculator()
         cal.set_data(f.x,f.y)
-        slitlength = cal.get_slit_length()
+        slitlength = cal.calculate_slit_length()
         
         # The value "5.5858" was obtained by manual calculation.
         self.assertAlmostEqual(slitlength,5.5858, 3)
