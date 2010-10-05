@@ -4,6 +4,7 @@ from calculator import *
 import os
 from distutils.filelist import findall
 
+N_DIR = 12
 def get_data_path(media):
     """
     """
@@ -18,8 +19,10 @@ def get_data_path(media):
     # directory.
     path = os.path.dirname(__file__)
     #Look for maximum n_dir up of the current dir to find media
-    n_dir = 12
-    for i in range(n_dir):
+   
+    #for i in range(n_dir):
+    i = 0
+    while(i < N_DIR):
         path, _ = os.path.split(path)
         media_path = os.path.join(path, media)
         if os.path.isdir(media_path):
@@ -27,6 +30,7 @@ def get_data_path(media):
              if os.path.isdir(module_media_path):
                  return module_media_path
              return media_path
+        i += 1
    
     raise RuntimeError('Could not find calculator media files')
 
@@ -38,7 +42,7 @@ def data_files():
     used directly in setup(...,data_files=...) for setup.py.
 
     """
-    data_files =[]
+    data_files = []
     path = get_data_path(media="media")
     for f in findall(path):
         data_files.append(('media/calculator_media', [f]))
