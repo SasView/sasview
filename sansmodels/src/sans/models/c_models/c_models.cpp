@@ -15,6 +15,7 @@ void addCTriaxialEllipsoidModel(PyObject *module);
 void addCParallelepipedModel(PyObject *module);
 void addCSphereModel(PyObject *module);
 void addCOnionModel(PyObject *module);
+void addCReflModel(PyObject *module);
 void addCFuzzySphereModel(PyObject *module);
 void addCHardsphereStructure(PyObject *module);
 void addCStickyHSStructure(PyObject *module);
@@ -43,7 +44,7 @@ void addCHollowCylinderModel(PyObject *module);
 void addCMultiShellModel(PyObject *module);
 void addCVesicleModel(PyObject *module);
 void addCBinaryHSModel(PyObject *module);
-//void addCPolymerExclVolModel(PyObject *module);
+void addCRPAModel(PyObject *module);
 void addCFractalModel(PyObject *module);
 void addCPoly_GaussCoil(PyObject *module);
 
@@ -223,6 +224,7 @@ initc_models(void)
 	addCEllipsoidModel(m);
 	addCSphereModel(m);
 	addCOnionModel(m);
+	addCReflModel(m);
 	addCFuzzySphereModel(m);
 	addCHardsphereStructure(m);
 	addCStickyHSStructure(m);
@@ -253,6 +255,6 @@ initc_models(void)
 	addCLorentzian(m);
 	addCVesicleModel(m);
 	addCPoly_GaussCoil(m);
+	addCRPAModel(m);
 	addCFractalModel(m);
-//	addCPolymerExclVolModel(m);
 }

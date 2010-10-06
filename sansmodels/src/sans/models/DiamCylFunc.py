@@ -63,6 +63,9 @@ class DiamCylFunc(CDiamCylFunc, BaseComponent):
         ## fittable parameters
         self.fixed=['radius.width', 'length.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

@@ -89,16 +89,16 @@ CTriaxialEllipsoidModel_init(CTriaxialEllipsoidModel *self, PyObject *args, PyOb
         self->model = new TriaxialEllipsoidModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"axis_psi",Py_BuildValue("d",0.00000000));
-        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"semi_axisA",Py_BuildValue("d",35.00000000));
-        PyDict_SetItemString(self->params,"semi_axisB",Py_BuildValue("d",100.00000000));
-        PyDict_SetItemString(self->params,"semi_axisC",Py_BuildValue("d",400.00000000));
-        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.00000630));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00000000));
-        PyDict_SetItemString(self->params,"sldEll",Py_BuildValue("d",0.00000100));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"axis_psi",Py_BuildValue("d",0.000000000000));
+        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"semi_axisA",Py_BuildValue("d",35.000000000000));
+        PyDict_SetItemString(self->params,"semi_axisB",Py_BuildValue("d",100.000000000000));
+        PyDict_SetItemString(self->params,"semi_axisC",Py_BuildValue("d",400.000000000000));
+        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.000006300000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000000000));
+        PyDict_SetItemString(self->params,"sldEll",Py_BuildValue("d",0.000001000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

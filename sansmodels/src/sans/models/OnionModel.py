@@ -190,6 +190,9 @@ class OnionModel(COnionModel, BaseComponent):
         ## fittable parameters
         self.fixed=['rad_core.width', 'thick_shell1.width', 'thick_shell2.width', 'thick_shell3.width', 'thick_shell4.width', 'thick_shell5.width', 'thick_shell6.width', 'thick_shell7.width', 'thick_shell8.width', 'thick_shell9.width', 'thick_shell10.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

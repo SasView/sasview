@@ -89,14 +89,14 @@ CFlexCylEllipXModel_init(CFlexCylEllipXModel *self, PyObject *args, PyObject *kw
         self->model = new FlexCylEllipXModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"sldCyl",Py_BuildValue("d",0.00000100));
-        PyDict_SetItemString(self->params,"axis_ratio",Py_BuildValue("d",1.50000000));
-        PyDict_SetItemString(self->params,"length",Py_BuildValue("d",1000.00000000));
-        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",20.00000000));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00010000));
-        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.00000630));
-        PyDict_SetItemString(self->params,"kuhn_length",Py_BuildValue("d",100.00000000));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"sldCyl",Py_BuildValue("d",0.000001000000));
+        PyDict_SetItemString(self->params,"axis_ratio",Py_BuildValue("d",1.500000000000));
+        PyDict_SetItemString(self->params,"length",Py_BuildValue("d",1000.000000000000));
+        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",20.000000000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000100000000));
+        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.000006300000));
+        PyDict_SetItemString(self->params,"kuhn_length",Py_BuildValue("d",100.000000000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

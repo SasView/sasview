@@ -67,6 +67,9 @@ class DiamEllipFunc(CDiamEllipFunc, BaseComponent):
         ## fittable parameters
         self.fixed=['radius_a.width', 'radius_b.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

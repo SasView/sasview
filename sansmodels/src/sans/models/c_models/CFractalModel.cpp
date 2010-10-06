@@ -89,13 +89,13 @@ CFractalModel_init(CFractalModel *self, PyObject *args, PyObject *kwds)
         self->model = new FractalModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",0.05000000));
-        PyDict_SetItemString(self->params,"fractal_dim",Py_BuildValue("d",2.00000000));
-        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.00000635));
-        PyDict_SetItemString(self->params,"cor_length",Py_BuildValue("d",100.00000000));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00000000));
-        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",5.00000000));
-        PyDict_SetItemString(self->params,"sldBlock",Py_BuildValue("d",0.00000200));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",0.050000000000));
+        PyDict_SetItemString(self->params,"fractal_dim",Py_BuildValue("d",2.000000000000));
+        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.000006350000));
+        PyDict_SetItemString(self->params,"cor_length",Py_BuildValue("d",100.000000000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000000000));
+        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",5.000000000000));
+        PyDict_SetItemString(self->params,"sldBlock",Py_BuildValue("d",0.000002000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

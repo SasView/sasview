@@ -89,13 +89,13 @@ CLamellarFFHGModel_init(CLamellarFFHGModel *self, PyObject *args, PyObject *kwds
         self->model = new LamellarFFHGModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"h_thickness",Py_BuildValue("d",10.00000000));
-        PyDict_SetItemString(self->params,"sld_tail",Py_BuildValue("d",0.00000040));
-        PyDict_SetItemString(self->params,"sld_solvent",Py_BuildValue("d",0.00000600));
-        PyDict_SetItemString(self->params,"t_length",Py_BuildValue("d",15.00000000));
-        PyDict_SetItemString(self->params,"sld_head",Py_BuildValue("d",0.00000300));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00000000));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"h_thickness",Py_BuildValue("d",10.000000000000));
+        PyDict_SetItemString(self->params,"sld_tail",Py_BuildValue("d",0.000000400000));
+        PyDict_SetItemString(self->params,"sld_solvent",Py_BuildValue("d",0.000006000000));
+        PyDict_SetItemString(self->params,"t_length",Py_BuildValue("d",15.000000000000));
+        PyDict_SetItemString(self->params,"sld_head",Py_BuildValue("d",0.000003000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

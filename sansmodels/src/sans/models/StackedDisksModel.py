@@ -88,6 +88,9 @@ class StackedDisksModel(CStackedDisksModel, BaseComponent):
         ## fittable parameters
         self.fixed=['core_thick.width', 'layer_thick.width', 'radius.width', 'axis_theta.width', 'axis_phi.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
    

@@ -99,6 +99,9 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
         ## fittable parameters
         self.fixed=['axis_phi.width', 'axis_theta.width', 'length.width', 'radius.width', 'thickness.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
    

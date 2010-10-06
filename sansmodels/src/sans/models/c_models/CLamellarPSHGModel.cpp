@@ -89,16 +89,16 @@ CLamellarPSHGModel_init(CLamellarPSHGModel *self, PyObject *args, PyObject *kwds
         self->model = new LamellarPSHGModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"n_plates",Py_BuildValue("d",30.00000000));
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"deltaT",Py_BuildValue("d",10.00000000));
-        PyDict_SetItemString(self->params,"spacing",Py_BuildValue("d",40.00000000));
-        PyDict_SetItemString(self->params,"sld_tail",Py_BuildValue("d",0.00000040));
-        PyDict_SetItemString(self->params,"sld_solvent",Py_BuildValue("d",0.00000600));
-        PyDict_SetItemString(self->params,"caille",Py_BuildValue("d",0.00100000));
-        PyDict_SetItemString(self->params,"sld_head",Py_BuildValue("d",0.00000200));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00100000));
-        PyDict_SetItemString(self->params,"deltaH",Py_BuildValue("d",2.00000000));
+        PyDict_SetItemString(self->params,"n_plates",Py_BuildValue("d",30.000000000000));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"deltaT",Py_BuildValue("d",10.000000000000));
+        PyDict_SetItemString(self->params,"spacing",Py_BuildValue("d",40.000000000000));
+        PyDict_SetItemString(self->params,"sld_tail",Py_BuildValue("d",0.000000400000));
+        PyDict_SetItemString(self->params,"sld_solvent",Py_BuildValue("d",0.000006000000));
+        PyDict_SetItemString(self->params,"caille",Py_BuildValue("d",0.001000000000));
+        PyDict_SetItemString(self->params,"sld_head",Py_BuildValue("d",0.000002000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000000000));
+        PyDict_SetItemString(self->params,"deltaH",Py_BuildValue("d",2.000000000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

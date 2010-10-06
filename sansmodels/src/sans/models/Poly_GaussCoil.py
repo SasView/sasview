@@ -71,6 +71,9 @@ class Poly_GaussCoil(CPoly_GaussCoil, BaseComponent):
         ## fittable parameters
         self.fixed=[]
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

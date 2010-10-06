@@ -89,8 +89,8 @@ CHardsphereStructure_init(CHardsphereStructure *self, PyObject *args, PyObject *
         self->model = new HardsphereStructure();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"effect_radius",Py_BuildValue("d",50.00000000));
-        PyDict_SetItemString(self->params,"volfraction",Py_BuildValue("d",0.20000000));
+        PyDict_SetItemString(self->params,"effect_radius",Py_BuildValue("d",50.000000000000));
+        PyDict_SetItemString(self->params,"volfraction",Py_BuildValue("d",0.200000000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

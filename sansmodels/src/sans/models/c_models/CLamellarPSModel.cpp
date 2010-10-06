@@ -89,14 +89,14 @@ CLamellarPSModel_init(CLamellarPSModel *self, PyObject *args, PyObject *kwds)
         self->model = new LamellarPSModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"n_plates",Py_BuildValue("d",20.00000000));
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"sld_sol",Py_BuildValue("d",0.00000100));
-        PyDict_SetItemString(self->params,"delta",Py_BuildValue("d",30.00000000));
-        PyDict_SetItemString(self->params,"spacing",Py_BuildValue("d",400.00000000));
-        PyDict_SetItemString(self->params,"caille",Py_BuildValue("d",0.10000000));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00000000));
-        PyDict_SetItemString(self->params,"sld_bi",Py_BuildValue("d",0.00000630));
+        PyDict_SetItemString(self->params,"n_plates",Py_BuildValue("d",20.000000000000));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"sld_sol",Py_BuildValue("d",0.000001000000));
+        PyDict_SetItemString(self->params,"delta",Py_BuildValue("d",30.000000000000));
+        PyDict_SetItemString(self->params,"spacing",Py_BuildValue("d",400.000000000000));
+        PyDict_SetItemString(self->params,"caille",Py_BuildValue("d",0.100000000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000000000));
+        PyDict_SetItemString(self->params,"sld_bi",Py_BuildValue("d",0.000006300000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

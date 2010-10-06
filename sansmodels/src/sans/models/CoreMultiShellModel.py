@@ -8,7 +8,7 @@ class CoreMultiShellModel(BaseComponent):
     This multi-model is based on CoreFourShellModel and provides the capability
     of changing the number of shells between 1 and 4.
     """
-    def __init__(self, n_shells=4):
+    def __init__(self, multfactor=1):
         BaseComponent.__init__(self)
         """
         :param n_shells: number of shells in the model, assumes 1<= n_shells <=4.
@@ -20,12 +20,15 @@ class CoreMultiShellModel(BaseComponent):
         self.model = model
         self.name = "CoreMultiShellModel"
         self.description=""
-        self.n_shells = n_shells
+        self.n_shells = multfactor
         ## Define parameters
         self.params = {}
 
         ## Parameter details [units, min, max]
         self.details = {}
+        
+        # non-fittable parameters
+        self.non_fittable = model.non_fittable
         
         ## dispersion
         self._set_dispersion()
@@ -38,6 +41,8 @@ class CoreMultiShellModel(BaseComponent):
         #list of parameter that can be fitted
         self._set_fixed_params()  
         
+        ## functional multiplicity of the model
+        self.multiplicity = 5
         ## parameters with orientation: can be removed since there is no orientational params
         for item in self.model.orientation_params:
             self.orientation_params.append(item)

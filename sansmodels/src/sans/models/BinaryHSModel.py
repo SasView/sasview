@@ -79,6 +79,9 @@ class BinaryHSModel(CBinaryHSModel, BaseComponent):
         ## fittable parameters
         self.fixed=['l_radius.width', 's_radius.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

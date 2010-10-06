@@ -149,6 +149,123 @@ public:
 	double evaluate_rphi(double q, double phi);
 };
 
+
+class RPAModel{
+public:
+	// Model parameters
+	Parameter lcase_n;
+	Parameter ba;
+	Parameter bb;
+	Parameter bc;
+	Parameter bd;
+
+	Parameter Kab;
+	Parameter Kac;
+	Parameter Kad;
+	Parameter Kbc;
+	Parameter Kbd;
+	Parameter Kcd;
+
+	Parameter scale;
+	Parameter background;
+
+	Parameter Na;
+	Parameter Phia;
+	Parameter va;
+	Parameter La;
+
+	Parameter Nb;
+	Parameter Phib;
+	Parameter vb;
+	Parameter Lb;
+
+	Parameter Nc;
+	Parameter Phic;
+	Parameter vc;
+	Parameter Lc;
+
+	Parameter Nd;
+	Parameter Phid;
+	Parameter vd;
+	Parameter Ld;
+
+	// Constructor
+	RPAModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
+
+class ReflModel{
+public:
+	// Model parameters
+	Parameter n_layers;
+	Parameter scale;
+	Parameter thick_inter0;
+	Parameter func_inter0;
+	Parameter sld_sub0;
+	Parameter sld_medium;
+	Parameter background;
+
+	Parameter sld_flat1;
+	Parameter sld_flat2;
+	Parameter sld_flat3;
+	Parameter sld_flat4;
+	Parameter sld_flat5;
+	Parameter sld_flat6;
+	Parameter sld_flat7;
+	Parameter sld_flat8;
+	Parameter sld_flat9;
+	Parameter sld_flat10;
+
+	Parameter thick_inter1;
+	Parameter thick_inter2;
+	Parameter thick_inter3;
+	Parameter thick_inter4;
+	Parameter thick_inter5;
+	Parameter thick_inter6;
+	Parameter thick_inter7;
+	Parameter thick_inter8;
+	Parameter thick_inter9;
+	Parameter thick_inter10;
+
+	Parameter thick_flat1;
+	Parameter thick_flat2;
+	Parameter thick_flat3;
+	Parameter thick_flat4;
+	Parameter thick_flat5;
+	Parameter thick_flat6;
+	Parameter thick_flat7;
+	Parameter thick_flat8;
+	Parameter thick_flat9;
+	Parameter thick_flat10;
+
+	Parameter func_inter1;
+	Parameter func_inter2;
+	Parameter func_inter3;
+	Parameter func_inter4;
+	Parameter func_inter5;
+	Parameter func_inter6;
+	Parameter func_inter7;
+	Parameter func_inter8;
+	Parameter func_inter9;
+	Parameter func_inter10;
+
+	// Constructor
+	ReflModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
+
 class SphereModel{
 public:
 	// Model parameters
@@ -766,23 +883,4 @@ public:
 	double evaluate_rphi(double q, double phi);
 };
 
-/***
-class PolymerExclVolModel{
-public:
-	// Model parameters
-	Parameter rg;
-	Parameter scale;
-	Parameter m;
-	Parameter background;
-
-	// Constructor
-	PolymerExclVolModel();
-
-	// Operators to get I(Q)
-	double operator()(double q);
-	double operator()(double qx, double qy);
-	double calculate_ER();
-	double evaluate_rphi(double q, double phi);
-};
-***/
 #endif

@@ -83,6 +83,8 @@ class WrapperGenerator:
         self.description=''
         # paramaters for fittable
         self.fixed= []
+        # paramaters for non-fittable
+        self.non_fittable= []
         ## parameters with orientation
         self.orientation_params =[]
         
@@ -95,6 +97,7 @@ class WrapperGenerator:
         rep += "  params:     %s\n\n" % self.params
         rep += "  description:    %s\n\n" % self.description
         rep += "  Fittable parameters:     %s\n\n"% self.fixed
+        rep += "  Non-Fittable parameters:     %s\n\n"% self.non_fittable
         rep += "  Orientation parameters:  %s\n\n"% self.orientation_params
         return rep
         
@@ -128,6 +131,13 @@ class WrapperGenerator:
             self.fixed= lineparser.readhelper(lines,key, key2,key3, file= self.file)
         except:
            raise   
+        ## Catch non-fittable parameters parameters
+        key = "[NON_FITTABLE_PARAMS]"
+        try:
+            self.non_fittable= lineparser.readhelper(lines,key, key2,key3, file= self.file)
+        except:
+           raise   
+
         ## Catch parameters with orientation
         key = "[ORIENTATION_PARAMS]"    
         try:
@@ -297,7 +307,7 @@ class WrapperGenerator:
             # Dictionary initialization
             param_str = "// Initialize parameter dictionary\n"            
             for par in self.params:
-                param_str += "        PyDict_SetItemString(self->params,\"%s\",Py_BuildValue(\"d\",%10.8f));\n" % \
+                param_str += "        PyDict_SetItemString(self->params,\"%s\",Py_BuildValue(\"d\",%10.12f));\n" % \
                     (par, self.params[par])
 
             param_str += "        // Initialize dispersion / averaging parameter dict\n"
@@ -419,6 +429,9 @@ class WrapperGenerator:
             # fixed list  details
             newline = self.replaceToken(newline, 
                                         "[FIXED]",str(self.fixed))
+            # non-fittable list  details
+            newline = self.replaceToken(newline, 
+                                        "[NON_FITTABLE_PARAMS]",str(self.non_fittable))
             ## parameters with orientation
        
             newline = self.replaceToken(newline, 

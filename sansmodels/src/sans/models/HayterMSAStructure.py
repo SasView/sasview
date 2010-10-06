@@ -81,6 +81,9 @@ class HayterMSAStructure(CHayterMSAStructure, BaseComponent):
         ## fittable parameters
         self.fixed=['effect_radius.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

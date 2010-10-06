@@ -97,6 +97,9 @@ class CoreShellEllipsoidModel(CCoreShellEllipsoidModel, BaseComponent):
         ## fittable parameters
         self.fixed=['equat_core.width', 'polar_core.width', 'equat_shell.width', 'polar_shell.width', 'axis_phi.width', 'axis_theta.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
    

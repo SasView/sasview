@@ -89,9 +89,9 @@ CSchulz_init(CSchulz *self, PyObject *args, PyObject *kwds)
         self->model = new Schulz();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"sigma",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"center",Py_BuildValue("d",0.00000000));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"sigma",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"center",Py_BuildValue("d",0.000000000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

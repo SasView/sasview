@@ -88,6 +88,9 @@ class ProlateModel(CProlateModel, BaseComponent):
         ## fittable parameters
         self.fixed=['major_core.width', 'minor_core.width', 'major_shell.width', 'minor_shell.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

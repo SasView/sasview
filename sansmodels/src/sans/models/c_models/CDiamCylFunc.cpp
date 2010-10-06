@@ -89,8 +89,8 @@ CDiamCylFunc_init(CDiamCylFunc *self, PyObject *args, PyObject *kwds)
         self->model = new DiamCylFunc();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"length",Py_BuildValue("d",400.00000000));
-        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",20.00000000));
+        PyDict_SetItemString(self->params,"length",Py_BuildValue("d",400.000000000000));
+        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",20.000000000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

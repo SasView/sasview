@@ -89,10 +89,10 @@ CPoly_GaussCoil_init(CPoly_GaussCoil *self, PyObject *args, PyObject *kwds)
         self->model = new Poly_GaussCoil();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"poly_m",Py_BuildValue("d",2.00000000));
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"rg",Py_BuildValue("d",60.00000000));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00100000));
+        PyDict_SetItemString(self->params,"poly_m",Py_BuildValue("d",2.000000000000));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"rg",Py_BuildValue("d",60.000000000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

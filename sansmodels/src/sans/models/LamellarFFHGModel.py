@@ -77,6 +77,9 @@ class LamellarFFHGModel(CLamellarFFHGModel, BaseComponent):
         ## fittable parameters
         self.fixed=['t_length.width', 'h_thickness.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

@@ -75,6 +75,9 @@ class FlexCylEllipXModel(CFlexCylEllipXModel, BaseComponent):
         ## fittable parameters
         self.fixed=['length.width', 'kuhn_length.width', 'radius.width', 'axis_ratio.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

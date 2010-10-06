@@ -73,6 +73,9 @@ class FlexibleCylinderModel(CFlexibleCylinderModel, BaseComponent):
         ## fittable parameters
         self.fixed=['length.width', 'kuhn_length.width', 'radius.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

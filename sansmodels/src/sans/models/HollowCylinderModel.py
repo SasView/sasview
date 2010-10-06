@@ -80,6 +80,9 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
         ## fittable parameters
         self.fixed=['axis_phi.width', 'axis_theta.width', 'length.width', 'core_radius.width', 'radius']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
    

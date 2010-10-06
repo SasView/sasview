@@ -84,6 +84,9 @@ class CylinderModel(CCylinderModel, BaseComponent):
         ## fittable parameters
         self.fixed=['cyl_phi.width', 'cyl_theta.width', 'length.width', 'radius.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =['cyl_phi', 'cyl_theta', 'cyl_phi.width', 'cyl_theta.width']
    

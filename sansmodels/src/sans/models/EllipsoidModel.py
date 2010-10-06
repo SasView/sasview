@@ -88,6 +88,9 @@ class EllipsoidModel(CEllipsoidModel, BaseComponent):
         ## fittable parameters
         self.fixed=['axis_phi.width', 'axis_theta.width', 'radius_a.width', 'radius_b.width', 'length.width', 'r_minor.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =['axis_phi.width', 'axis_theta.width', 'axis_phi', 'axis_theta']
    

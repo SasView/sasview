@@ -80,6 +80,9 @@ class MultiShellModel(CMultiShellModel, BaseComponent):
         ## fittable parameters
         self.fixed=['core_radius.width', 's_thickness.width', 'w_thickness.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

@@ -89,12 +89,12 @@ CFuzzySphereModel_init(CFuzzySphereModel *self, PyObject *args, PyObject *kwds)
         self->model = new FuzzySphereModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",0.01000000));
-        PyDict_SetItemString(self->params,"sldSph",Py_BuildValue("d",0.00000100));
-        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",60.00000000));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00100000));
-        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.00000300));
-        PyDict_SetItemString(self->params,"fuzziness",Py_BuildValue("d",10.00000000));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",0.010000000000));
+        PyDict_SetItemString(self->params,"sldSph",Py_BuildValue("d",0.000001000000));
+        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",60.000000000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000000000));
+        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.000003000000));
+        PyDict_SetItemString(self->params,"fuzziness",Py_BuildValue("d",10.000000000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

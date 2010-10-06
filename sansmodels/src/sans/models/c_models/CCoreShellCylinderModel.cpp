@@ -89,16 +89,16 @@ CCoreShellCylinderModel_init(CCoreShellCylinderModel *self, PyObject *args, PyOb
         self->model = new CoreShellCylinderModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.57000000));
-        PyDict_SetItemString(self->params,"solvent_sld",Py_BuildValue("d",0.00000100));
-        PyDict_SetItemString(self->params,"thickness",Py_BuildValue("d",10.00000000));
-        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",0.00000000));
-        PyDict_SetItemString(self->params,"length",Py_BuildValue("d",400.00000000));
-        PyDict_SetItemString(self->params,"core_sld",Py_BuildValue("d",0.00000100));
-        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",20.00000000));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00000000));
-        PyDict_SetItemString(self->params,"shell_sld",Py_BuildValue("d",0.00000400));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.570000000000));
+        PyDict_SetItemString(self->params,"solvent_sld",Py_BuildValue("d",0.000001000000));
+        PyDict_SetItemString(self->params,"thickness",Py_BuildValue("d",10.000000000000));
+        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",0.000000000000));
+        PyDict_SetItemString(self->params,"length",Py_BuildValue("d",400.000000000000));
+        PyDict_SetItemString(self->params,"core_sld",Py_BuildValue("d",0.000001000000));
+        PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",20.000000000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000000000));
+        PyDict_SetItemString(self->params,"shell_sld",Py_BuildValue("d",0.000004000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

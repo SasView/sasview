@@ -74,6 +74,9 @@ class LamellarModel(CLamellarModel, BaseComponent):
         ## fittable parameters
         self.fixed=[]
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

@@ -94,6 +94,9 @@ class LamellarPSHGModel(CLamellarPSHGModel, BaseComponent):
         ## fittable parameters
         self.fixed=['deltaT.width', 'deltaH.width', 'spacing.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

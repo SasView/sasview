@@ -89,11 +89,11 @@ CLamellarModel_init(CLamellarModel *self, PyObject *args, PyObject *kwds)
         self->model = new LamellarModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"sld_sol",Py_BuildValue("d",0.00000630));
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"bi_thick",Py_BuildValue("d",50.00000000));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00000000));
-        PyDict_SetItemString(self->params,"sld_bi",Py_BuildValue("d",0.00000100));
+        PyDict_SetItemString(self->params,"sld_sol",Py_BuildValue("d",0.000006300000));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"bi_thick",Py_BuildValue("d",50.000000000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000000000));
+        PyDict_SetItemString(self->params,"sld_bi",Py_BuildValue("d",0.000001000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

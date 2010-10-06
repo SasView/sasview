@@ -73,6 +73,9 @@ class SphereModel(CSphereModel, BaseComponent):
         ## fittable parameters
         self.fixed=['radius.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

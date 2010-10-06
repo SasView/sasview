@@ -89,14 +89,14 @@ CEllipsoidModel_init(CEllipsoidModel *self, PyObject *args, PyObject *kwds)
         self->model = new EllipsoidModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.57000000));
-        PyDict_SetItemString(self->params,"radius_b",Py_BuildValue("d",400.00000000));
-        PyDict_SetItemString(self->params,"radius_a",Py_BuildValue("d",20.00000000));
-        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",0.00000000));
-        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.00000100));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00000000));
-        PyDict_SetItemString(self->params,"sldEll",Py_BuildValue("d",0.00000400));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.570000000000));
+        PyDict_SetItemString(self->params,"radius_b",Py_BuildValue("d",400.000000000000));
+        PyDict_SetItemString(self->params,"radius_a",Py_BuildValue("d",20.000000000000));
+        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",0.000000000000));
+        PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.000001000000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000000000));
+        PyDict_SetItemString(self->params,"sldEll",Py_BuildValue("d",0.000004000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

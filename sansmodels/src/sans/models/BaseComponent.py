@@ -33,9 +33,11 @@ class BaseComponent:
         #of the given model, exception or possible use
         self.description=''
         #list of parameter that can be fitted
-        self.fixed= []
+        self.fixed = []
+        #list of non-fittable parameter
+        self.non_fittable = []
         ## parameters with orientation
-        self.orientation_params =[]
+        self.orientation_params = []
         ## store dispersity reference
         self._persistency_dict = {}
            

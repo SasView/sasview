@@ -84,6 +84,9 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
         ## fittable parameters
         self.fixed=['short_a.width', 'short_b.width', 'long_c.width', 'parallel_phi.width', 'parallel_psi.width', 'parallel_theta.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =['parallel_phi', 'parallel_psi', 'parallel_theta', 'parallel_phi.width', 'parallel_psi.width', 'parallel_theta.width']
    

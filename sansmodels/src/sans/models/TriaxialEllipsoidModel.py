@@ -78,6 +78,9 @@ class TriaxialEllipsoidModel(CTriaxialEllipsoidModel, BaseComponent):
         ## fittable parameters
         self.fixed=['axis_psi.width', 'axis_phi.width', 'axis_theta.width', 'semi_axisA.width', 'semi_axisB.width', 'semi_axisC.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =['axis_psi', 'axis_phi', 'axis_theta', 'axis_psi.width', 'axis_phi.width', 'axis_theta.width']
    

@@ -53,6 +53,9 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         ## fittable parameters
         self.fixed=[FIXED]
         
+        ## non-fittable parameters
+        self.non_fittable=[NON_FITTABLE_PARAMS]
+        
         ## parameters with orientation
         self.orientation_params =[ORIENTATION_PARAMS]
    

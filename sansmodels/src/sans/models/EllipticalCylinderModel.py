@@ -81,6 +81,9 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
         ## fittable parameters
         self.fixed=['cyl_phi.width', 'cyl_theta.width', 'cyl_psi.width', 'length.width', 'r_minor.width', 'r_ratio.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =['cyl_phi', 'cyl_theta', 'cyl_psi', 'cyl_phi.width', 'cyl_theta.width', 'cyl_psi.width']
    

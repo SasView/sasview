@@ -89,19 +89,19 @@ CCoreFourShellModel_init(CCoreFourShellModel *self, PyObject *args, PyObject *kw
         self->model = new CoreFourShellModel();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"thick_shell4",Py_BuildValue("d",10.00000000));
-        PyDict_SetItemString(self->params,"sld_shell4",Py_BuildValue("d",0.00000400));
-        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.00000000));
-        PyDict_SetItemString(self->params,"sld_shell2",Py_BuildValue("d",0.00000200));
-        PyDict_SetItemString(self->params,"thick_shell1",Py_BuildValue("d",10.00000000));
-        PyDict_SetItemString(self->params,"thick_shell2",Py_BuildValue("d",10.00000000));
-        PyDict_SetItemString(self->params,"sld_shell1",Py_BuildValue("d",0.00000100));
-        PyDict_SetItemString(self->params,"rad_core",Py_BuildValue("d",60.00000000));
-        PyDict_SetItemString(self->params,"sld_core",Py_BuildValue("d",0.00000640));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.00100000));
-        PyDict_SetItemString(self->params,"thick_shell3",Py_BuildValue("d",10.00000000));
-        PyDict_SetItemString(self->params,"sld_solv",Py_BuildValue("d",0.00000640));
-        PyDict_SetItemString(self->params,"sld_shell3",Py_BuildValue("d",0.00000300));
+        PyDict_SetItemString(self->params,"thick_shell4",Py_BuildValue("d",10.000000000000));
+        PyDict_SetItemString(self->params,"sld_shell4",Py_BuildValue("d",0.000004000000));
+        PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"sld_shell2",Py_BuildValue("d",0.000002000000));
+        PyDict_SetItemString(self->params,"thick_shell1",Py_BuildValue("d",10.000000000000));
+        PyDict_SetItemString(self->params,"thick_shell2",Py_BuildValue("d",10.000000000000));
+        PyDict_SetItemString(self->params,"sld_shell1",Py_BuildValue("d",0.000001000000));
+        PyDict_SetItemString(self->params,"rad_core",Py_BuildValue("d",60.000000000000));
+        PyDict_SetItemString(self->params,"sld_core",Py_BuildValue("d",0.000006400000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000000000));
+        PyDict_SetItemString(self->params,"thick_shell3",Py_BuildValue("d",10.000000000000));
+        PyDict_SetItemString(self->params,"sld_solv",Py_BuildValue("d",0.000006400000));
+        PyDict_SetItemString(self->params,"sld_shell3",Py_BuildValue("d",0.000003000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

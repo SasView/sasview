@@ -89,6 +89,9 @@ class CoreFourShellModel(CCoreFourShellModel, BaseComponent):
         ## fittable parameters
         self.fixed=['thick_shell4.width', 'thick_shell1.width', 'thick_shell2.width', 'thick_shell3.width', 'rad_core.width']
         
+        ## non-fittable parameters
+        self.non_fittable=[]
+        
         ## parameters with orientation
         self.orientation_params =[]
    

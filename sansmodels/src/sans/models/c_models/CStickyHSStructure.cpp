@@ -89,10 +89,10 @@ CStickyHSStructure_init(CStickyHSStructure *self, PyObject *args, PyObject *kwds
         self->model = new StickyHSStructure();
         
         // Initialize parameter dictionary
-        PyDict_SetItemString(self->params,"stickiness",Py_BuildValue("d",0.20000000));
-        PyDict_SetItemString(self->params,"effect_radius",Py_BuildValue("d",50.00000000));
-        PyDict_SetItemString(self->params,"volfraction",Py_BuildValue("d",0.10000000));
-        PyDict_SetItemString(self->params,"perturb",Py_BuildValue("d",0.05000000));
+        PyDict_SetItemString(self->params,"stickiness",Py_BuildValue("d",0.200000000000));
+        PyDict_SetItemString(self->params,"effect_radius",Py_BuildValue("d",50.000000000000));
+        PyDict_SetItemString(self->params,"volfraction",Py_BuildValue("d",0.100000000000));
+        PyDict_SetItemString(self->params,"perturb",Py_BuildValue("d",0.050000000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

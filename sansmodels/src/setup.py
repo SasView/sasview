@@ -11,7 +11,8 @@
 """
 import sys
 import os
-
+if len(sys.argv) == 1:
+    sys.argv.append('install')
 from numpy.distutils.misc_util import get_numpy_include_dirs
 numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
 
@@ -102,6 +103,9 @@ setup(
         "sans/models/c_models/COnionModel.cpp",
         "sans/models/c_models/onion.cpp",
         srcdir+"/onion.c",
+        "sans/models/c_models/CReflModel.cpp",
+        "sans/models/c_models/refl.cpp",
+        srcdir+"/refl.c",
         srcdir+"/SquareWell.c",
         "sans/models/c_models/CSquareWellStructure.cpp",  
         "sans/models/c_models/SquareWell.cpp", 
@@ -213,6 +217,9 @@ setup(
         "sans/models/c_models/binaryHS.cpp",                
         "sans/models/c_models/CPoly_GaussCoil.cpp",
         "sans/models/c_models/polygausscoil.cpp",   
+        srcdir+"/rpa.c",             
+        "sans/models/c_models/CRPAModel.cpp",
+        "sans/models/c_models/rpa.cpp", 
         srcdir+"/fractal.c",             
         "sans/models/c_models/CFractalModel.cpp",
         "sans/models/c_models/fractal.cpp", 

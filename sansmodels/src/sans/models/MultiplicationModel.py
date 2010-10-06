@@ -31,7 +31,10 @@ class MultiplicationModel(BaseComponent):
 
         ## Parameter details [units, min, max]
         self.details = {}
-                     
+        
+        # non-fittable parameters
+        self.non_fittable = p_model.non_fittable   
+            
         ##models 
         self.p_model= p_model
         self.s_model= s_model
@@ -57,7 +60,13 @@ class MultiplicationModel(BaseComponent):
         for item in self.s_model.orientation_params:
             if not item in self.orientation_params:
                 self.orientation_params.append(item)
-                
+        # get multiplicity if model provide it, else 1.
+        try:
+            multiplicity = p_model.multiplicity
+        except:
+            multiplicity = 1
+        ## functional multiplicity of the model
+        self.multiplicity = multiplicity      
         
     def _clone(self, obj):
         """
@@ -212,7 +221,7 @@ class MultiplicationModel(BaseComponent):
     def run(self, x = 0.0):
         """ Evaluate the model
             @param x: input q-value (float or [float, float] as [r, theta])
-            @return: (DAB value)
+            @return: (scattering function value)
         """
         # set effective radius and scaling factor before run
         self._set_effect_radius()
@@ -222,7 +231,7 @@ class MultiplicationModel(BaseComponent):
     def runXY(self, x = 0.0):
         """ Evaluate the model
             @param x: input q-value (float or [float, float] as [qx, qy])
-            @return: DAB value
+            @return: scattering function value
         """  
         # set effective radius and scaling factor before run
         self._set_effect_radius()
