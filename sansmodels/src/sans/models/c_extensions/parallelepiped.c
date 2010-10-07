@@ -38,9 +38,9 @@ double pkernel(double a, double b,double c, double ala, double alb, double alc){
     double argA,argB,argC,tmp1,tmp2,tmp3;			//local variables
 
     //handle arg=0 separately, as sin(t)/t -> 1 as t->0
-    argA = a*ala/2;
-    argB = b*alb/2;
-    argC = c*alc/2;
+    argA = a*ala/2.0;
+    argB = b*alb/2.0;
+    argC = c*alc/2.0;
     if(argA==0.0) {
 		tmp1 = 1.0;
 	} else {
@@ -116,7 +116,7 @@ double parallelepiped_analytical_2D_scaled(ParallelepipedParameters *pars, doubl
     cparallel_z = cos(pars->parallel_theta);
 
     // q vector
-    q_z = 0;
+    q_z = 0.0;
 
     // Compute the angle btw vector q and the
     // axis of the parallelepiped
@@ -132,8 +132,8 @@ double parallelepiped_analytical_2D_scaled(ParallelepipedParameters *pars, doubl
 
 
     // parallelepiped b axis orientation
-    bparallel_x = sqrt(1-sin(pars->parallel_theta)*cos(pars->parallel_phi))*cos(pars->parallel_psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)* cos(pars->parallel_psi);
-    bparallel_y = sqrt(1-sin(pars->parallel_theta)*cos(pars->parallel_phi))*sin(pars->parallel_psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)* sin(pars->parallel_psi);
+    bparallel_x = sqrt(1.0-sin(pars->parallel_theta)*cos(pars->parallel_phi))*cos(pars->parallel_psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)* cos(pars->parallel_psi);
+    bparallel_y = sqrt(1.0-sin(pars->parallel_theta)*cos(pars->parallel_phi))*sin(pars->parallel_psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)* sin(pars->parallel_psi);
     // axis of the parallelepiped
     cos_val_b = sin(acos(cos_val_a)) ;
 
