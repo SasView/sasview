@@ -19,6 +19,7 @@ void addCReflModel(PyObject *module);
 void addCFuzzySphereModel(PyObject *module);
 void addCHardsphereStructure(PyObject *module);
 void addCStickyHSStructure(PyObject *module);
+void addCSCCrystalModel(PyObject *module);
 void addCSquareWellStructure(PyObject *module);
 void addCHayterMSAStructure(PyObject *module);
 void addCCoreShellModel(PyObject *module);
@@ -228,6 +229,7 @@ initc_models(void)
 	addCFuzzySphereModel(m);
 	addCHardsphereStructure(m);
 	addCStickyHSStructure(m);
+	addCSCCrystalModel(m);
 	addCSquareWellStructure(m);
 	addCHayterMSAStructure(m);
 	addCEllipticalCylinderModel(m);

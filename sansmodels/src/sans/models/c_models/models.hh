@@ -286,6 +286,31 @@ public:
 };
 
 
+class SCCrystalModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter dnn;
+	Parameter d_factor;
+	Parameter radius;
+	Parameter sldSph;
+	Parameter sldSolv;
+	Parameter background;
+	Parameter theta;
+	Parameter phi;
+	Parameter psi;
+
+	// Constructor
+	SCCrystalModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
+
 class FuzzySphereModel{
 public:
 	// Model parameters
