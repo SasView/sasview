@@ -35,7 +35,7 @@ void addCFlexCylEllipXModel(PyObject *module);
 void addCStackedDisksModel(PyObject *module);
 void addCLamellarPSModel(PyObject *module);
 void addCLamellarPSHGModel(PyObject *module);
-void addCLamellarPCrystalModel(PyObject *module);
+//void addCLamellarPCrystalModel(PyObject *module);
 void addCCoreShellEllipsoidModel(PyObject *module);
 void addCDiamEllipFunc(PyObject *module);
 void addCDiamCylFunc(PyObject *module);
@@ -244,7 +244,7 @@ initc_models(void)
 	addCStackedDisksModel(m);
 	addCLamellarPSModel(m);
 	addCLamellarPSHGModel(m);
-	addCLamellarPCrystalModel(m);
+	//addCLamellarPCrystalModel(m);
 	addCCoreShellEllipsoidModel(m);
 	addCDiamEllipFunc(m);
 	addCDiamCylFunc(m);
