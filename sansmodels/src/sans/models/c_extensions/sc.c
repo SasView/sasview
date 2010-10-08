@@ -59,7 +59,7 @@ double sc_analytical_2D(SCParameters *pars, double q, double phi) {
 double sc_analytical_2D_scaled(SCParameters *pars, double q, double q_x, double q_y) {
 	double a3_x, a3_y, a3_z, a2_x, a2_y, a1_x, a1_y, a1_z;
 	double q_z;
-	double alpha, vol, cos_val_a3, cos_val_a2, cos_val_a1, edgeA, edgeB, edgeC;
+	double alpha, vol, cos_val_a3, cos_val_a2, cos_val_a1;
 	double a1_dot_q, a2_dot_q,a3_dot_q;
 	double answer;
 	double Pi = 4.0*atan(1.0);

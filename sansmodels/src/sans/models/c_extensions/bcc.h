@@ -1,10 +1,10 @@
-#if !defined(sc_h)
-#define sc_h
+#if !defined(bcc_h)
+#define bcc_h
 
 /**
- * Structure definition for SC_ParaCrystal parameters
+ * Structure definition for BCC_ParaCrystal parameters
  */
- //[PYTHONCLASS] = SCCrystalModel
+ //[PYTHONCLASS] = BCCrystalModel
  //[DISP_PARAMS] = radius,phi, psi, theta
  //[DESCRIPTION] =<text>P(q)=(scale/Vp)*V_lattice*P(q)*Z(q)+bkg where scale is the volume
  //					 fraction of sphere,
@@ -13,8 +13,8 @@
  //					for the crystal structure,
  //				P(q)= form factor of the sphere (normalized),
  //				Z(q)= paracrystalline structure factor
- //					for a simple cubic structure.
- //				[Simple Cubic ParaCrystal Model]
+ //					for a face centered cubic structure.
+ //				[Body Centered Cubic ParaCrystal Model]
  //				Parameters;
  //				scale: volume fraction of spheres
  //				bkg:background, R: radius of sphere
@@ -66,16 +66,16 @@ typedef struct {
     //  [DEFAULT]=psi=0.0 [rad]
     double psi;
 
-} SCParameters;
+} BCParameters;
 
 
 
 /// 1D scattering function
-double sc_analytical_1D(SCParameters *pars, double q);
+double bc_analytical_1D(BCParameters *pars, double q);
 
 /// 2D scattering function
-double sc_analytical_2D(SCParameters *pars, double q, double phi);
-double sc_analytical_2DXY(SCParameters *pars, double qx, double qy);
-double sc_analytical_2D_scaled(SCParameters *pars, double q, double q_x, double q_y);
+double bc_analytical_2D(BCParameters *pars, double q, double phi);
+double bc_analytical_2DXY(BCParameters *pars, double qx, double qy);
+double bc_analytical_2D_scaled(BCParameters *pars, double q, double q_x, double q_y);
 
 #endif

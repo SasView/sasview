@@ -311,6 +311,56 @@ public:
 };
 
 
+class FCCrystalModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter dnn;
+	Parameter d_factor;
+	Parameter radius;
+	Parameter sldSph;
+	Parameter sldSolv;
+	Parameter background;
+	Parameter theta;
+	Parameter phi;
+	Parameter psi;
+
+	// Constructor
+	FCCrystalModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
+
+class BCCrystalModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter dnn;
+	Parameter d_factor;
+	Parameter radius;
+	Parameter sldSph;
+	Parameter sldSolv;
+	Parameter background;
+	Parameter theta;
+	Parameter phi;
+	Parameter psi;
+
+	// Constructor
+	BCCrystalModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
+
 class FuzzySphereModel{
 public:
 	// Model parameters
@@ -727,6 +777,29 @@ public:
 
 	// Constructor
 	LamellarPSHGModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
+
+class LamellarPCrystalModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter thickness;
+	Parameter Nlayers;
+	Parameter spacing;
+	Parameter pd_spacing;
+	Parameter sld_layer;
+	Parameter sld_solvent;
+	Parameter background;
+
+	// Constructor
+	LamellarPCrystalModel();
 
 	// Operators to get I(Q)
 	double operator()(double q);
