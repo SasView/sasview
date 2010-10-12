@@ -11,6 +11,8 @@
 
 
 void addCCylinderModel(PyObject *module);
+void addCBarBellModel(PyObject *module);
+void addCCappedCylinderModel(PyObject *module);
 void addCTriaxialEllipsoidModel(PyObject *module);
 void addCParallelepipedModel(PyObject *module);
 void addCSphereModel(PyObject *module);
@@ -35,7 +37,7 @@ void addCFlexCylEllipXModel(PyObject *module);
 void addCStackedDisksModel(PyObject *module);
 void addCLamellarPSModel(PyObject *module);
 void addCLamellarPSHGModel(PyObject *module);
-//void addCLamellarPCrystalModel(PyObject *module);
+void addCLamellarPCrystalModel(PyObject *module);
 void addCCoreShellEllipsoidModel(PyObject *module);
 void addCDiamEllipFunc(PyObject *module);
 void addCDiamCylFunc(PyObject *module);
@@ -221,6 +223,8 @@ initc_models(void)
 	import_array();
 
 	addCCylinderModel(m);
+	addCBarBellModel(m);
+	addCCappedCylinderModel(m);
 	addCParallelepipedModel(m);
 	addCCoreShellCylinderModel(m);
 	addCCoreShellModel(m);
@@ -244,7 +248,7 @@ initc_models(void)
 	addCStackedDisksModel(m);
 	addCLamellarPSModel(m);
 	addCLamellarPSHGModel(m);
-	//addCLamellarPCrystalModel(m);
+	addCLamellarPCrystalModel(m);
 	addCCoreShellEllipsoidModel(m);
 	addCDiamEllipFunc(m);
 	addCDiamCylFunc(m);

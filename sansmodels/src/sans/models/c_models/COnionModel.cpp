@@ -93,6 +93,8 @@ COnionModel_init(COnionModel *self, PyObject *args, PyObject *kwds)
         PyDict_SetItemString(self->params,"thick_shell5",Py_BuildValue("d",50.000000000000));
         PyDict_SetItemString(self->params,"thick_shell9",Py_BuildValue("d",50.000000000000));
         PyDict_SetItemString(self->params,"thick_shell7",Py_BuildValue("d",50.000000000000));
+        PyDict_SetItemString(self->params,"sld_core0",Py_BuildValue("d",0.000001000000));
+        PyDict_SetItemString(self->params,"rad_core0",Py_BuildValue("d",200.000000000000));
         PyDict_SetItemString(self->params,"A_shell10",Py_BuildValue("d",1.000000000000));
         PyDict_SetItemString(self->params,"thick_shell1",Py_BuildValue("d",50.000000000000));
         PyDict_SetItemString(self->params,"func_shell4",Py_BuildValue("d",2.000000000000));
@@ -102,8 +104,6 @@ COnionModel_init(COnionModel *self, PyObject *args, PyObject *kwds)
         PyDict_SetItemString(self->params,"func_shell1",Py_BuildValue("d",2.000000000000));
         PyDict_SetItemString(self->params,"thick_shell10",Py_BuildValue("d",50.000000000000));
         PyDict_SetItemString(self->params,"func_shell3",Py_BuildValue("d",2.000000000000));
-        PyDict_SetItemString(self->params,"rad_core",Py_BuildValue("d",200.000000000000));
-        PyDict_SetItemString(self->params,"thick_shell3",Py_BuildValue("d",50.000000000000));
         PyDict_SetItemString(self->params,"func_shell8",Py_BuildValue("d",2.000000000000));
         PyDict_SetItemString(self->params,"func_shell9",Py_BuildValue("d",2.000000000000));
         PyDict_SetItemString(self->params,"sld_in_shell5",Py_BuildValue("d",0.000003700000));
@@ -117,12 +117,12 @@ COnionModel_init(COnionModel *self, PyObject *args, PyObject *kwds)
         PyDict_SetItemString(self->params,"sld_in_shell9",Py_BuildValue("d",0.000005700000));
         PyDict_SetItemString(self->params,"sld_in_shell8",Py_BuildValue("d",0.000005200000));
         PyDict_SetItemString(self->params,"thick_shell2",Py_BuildValue("d",50.000000000000));
-        PyDict_SetItemString(self->params,"sld_core",Py_BuildValue("d",0.000001000000));
+        PyDict_SetItemString(self->params,"thick_shell3",Py_BuildValue("d",50.000000000000));
         PyDict_SetItemString(self->params,"sld_out_shell1",Py_BuildValue("d",0.000002000000));
-        PyDict_SetItemString(self->params,"sld_in_shell1",Py_BuildValue("d",0.000001700000));
+        PyDict_SetItemString(self->params,"sld_out_shell5",Py_BuildValue("d",0.000004000000));
         PyDict_SetItemString(self->params,"sld_out_shell3",Py_BuildValue("d",0.000003000000));
         PyDict_SetItemString(self->params,"sld_in_shell6",Py_BuildValue("d",0.000004200000));
-        PyDict_SetItemString(self->params,"sld_out_shell5",Py_BuildValue("d",0.000004000000));
+        PyDict_SetItemString(self->params,"sld_in_shell1",Py_BuildValue("d",0.000001700000));
         PyDict_SetItemString(self->params,"sld_out_shell4",Py_BuildValue("d",0.000003500000));
         PyDict_SetItemString(self->params,"sld_in_shell3",Py_BuildValue("d",0.000002700000));
         PyDict_SetItemString(self->params,"sld_out_shell6",Py_BuildValue("d",0.000004500000));
@@ -149,8 +149,8 @@ COnionModel_init(COnionModel *self, PyObject *args, PyObject *kwds)
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
         disp_dict = PyDict_New();
-        self->model->rad_core.dispersion->accept_as_source(visitor, self->model->rad_core.dispersion, disp_dict);
-        PyDict_SetItemString(self->dispersion, "rad_core", disp_dict);
+        self->model->rad_core0.dispersion->accept_as_source(visitor, self->model->rad_core0.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "rad_core0", disp_dict);
         disp_dict = PyDict_New();
         self->model->thick_shell1.dispersion->accept_as_source(visitor, self->model->thick_shell1.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "thick_shell1", disp_dict);
@@ -314,6 +314,8 @@ static PyObject * evalDistribution(COnionModel *self, PyObject *args){
     self->model->thick_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell5") );
     self->model->thick_shell9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell9") );
     self->model->thick_shell7 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell7") );
+    self->model->sld_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core0") );
+    self->model->rad_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core0") );
     self->model->A_shell10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "A_shell10") );
     self->model->thick_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell1") );
     self->model->func_shell4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell4") );
@@ -323,8 +325,6 @@ static PyObject * evalDistribution(COnionModel *self, PyObject *args){
     self->model->func_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell1") );
     self->model->thick_shell10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell10") );
     self->model->func_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell3") );
-    self->model->rad_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core") );
-    self->model->thick_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell3") );
     self->model->func_shell8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell8") );
     self->model->func_shell9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell9") );
     self->model->sld_in_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell5") );
@@ -338,12 +338,12 @@ static PyObject * evalDistribution(COnionModel *self, PyObject *args){
     self->model->sld_in_shell9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell9") );
     self->model->sld_in_shell8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell8") );
     self->model->thick_shell2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell2") );
-    self->model->sld_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core") );
+    self->model->thick_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell3") );
     self->model->sld_out_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell1") );
-    self->model->sld_in_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell1") );
+    self->model->sld_out_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell5") );
     self->model->sld_out_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell3") );
     self->model->sld_in_shell6 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell6") );
-    self->model->sld_out_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell5") );
+    self->model->sld_in_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell1") );
     self->model->sld_out_shell4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell4") );
     self->model->sld_in_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell3") );
     self->model->sld_out_shell6 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell6") );
@@ -369,8 +369,8 @@ static PyObject * evalDistribution(COnionModel *self, PyObject *args){
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core");
-    self->model->rad_core.dispersion->accept_as_destination(visitor, self->model->rad_core.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core0");
+    self->model->rad_core0.dispersion->accept_as_destination(visitor, self->model->rad_core0.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell1");
     self->model->thick_shell1.dispersion->accept_as_destination(visitor, self->model->thick_shell1.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell2");
@@ -457,6 +457,8 @@ static PyObject * run(COnionModel *self, PyObject *args) {
     self->model->thick_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell5") );
     self->model->thick_shell9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell9") );
     self->model->thick_shell7 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell7") );
+    self->model->sld_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core0") );
+    self->model->rad_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core0") );
     self->model->A_shell10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "A_shell10") );
     self->model->thick_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell1") );
     self->model->func_shell4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell4") );
@@ -466,8 +468,6 @@ static PyObject * run(COnionModel *self, PyObject *args) {
     self->model->func_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell1") );
     self->model->thick_shell10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell10") );
     self->model->func_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell3") );
-    self->model->rad_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core") );
-    self->model->thick_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell3") );
     self->model->func_shell8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell8") );
     self->model->func_shell9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell9") );
     self->model->sld_in_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell5") );
@@ -481,12 +481,12 @@ static PyObject * run(COnionModel *self, PyObject *args) {
     self->model->sld_in_shell9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell9") );
     self->model->sld_in_shell8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell8") );
     self->model->thick_shell2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell2") );
-    self->model->sld_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core") );
+    self->model->thick_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell3") );
     self->model->sld_out_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell1") );
-    self->model->sld_in_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell1") );
+    self->model->sld_out_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell5") );
     self->model->sld_out_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell3") );
     self->model->sld_in_shell6 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell6") );
-    self->model->sld_out_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell5") );
+    self->model->sld_in_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell1") );
     self->model->sld_out_shell4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell4") );
     self->model->sld_in_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell3") );
     self->model->sld_out_shell6 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell6") );
@@ -512,8 +512,8 @@ static PyObject * run(COnionModel *self, PyObject *args) {
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core");
-    self->model->rad_core.dispersion->accept_as_destination(visitor, self->model->rad_core.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core0");
+    self->model->rad_core0.dispersion->accept_as_destination(visitor, self->model->rad_core0.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell1");
     self->model->thick_shell1.dispersion->accept_as_destination(visitor, self->model->thick_shell1.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell2");
@@ -587,6 +587,8 @@ static PyObject * calculate_ER(COnionModel *self) {
     self->model->thick_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell5") );
     self->model->thick_shell9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell9") );
     self->model->thick_shell7 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell7") );
+    self->model->sld_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core0") );
+    self->model->rad_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core0") );
     self->model->A_shell10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "A_shell10") );
     self->model->thick_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell1") );
     self->model->func_shell4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell4") );
@@ -596,8 +598,6 @@ static PyObject * calculate_ER(COnionModel *self) {
     self->model->func_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell1") );
     self->model->thick_shell10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell10") );
     self->model->func_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell3") );
-    self->model->rad_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core") );
-    self->model->thick_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell3") );
     self->model->func_shell8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell8") );
     self->model->func_shell9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell9") );
     self->model->sld_in_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell5") );
@@ -611,12 +611,12 @@ static PyObject * calculate_ER(COnionModel *self) {
     self->model->sld_in_shell9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell9") );
     self->model->sld_in_shell8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell8") );
     self->model->thick_shell2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell2") );
-    self->model->sld_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core") );
+    self->model->thick_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell3") );
     self->model->sld_out_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell1") );
-    self->model->sld_in_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell1") );
+    self->model->sld_out_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell5") );
     self->model->sld_out_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell3") );
     self->model->sld_in_shell6 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell6") );
-    self->model->sld_out_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell5") );
+    self->model->sld_in_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell1") );
     self->model->sld_out_shell4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell4") );
     self->model->sld_in_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell3") );
     self->model->sld_out_shell6 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell6") );
@@ -642,8 +642,8 @@ static PyObject * calculate_ER(COnionModel *self) {
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core");
-    self->model->rad_core.dispersion->accept_as_destination(visitor, self->model->rad_core.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core0");
+    self->model->rad_core0.dispersion->accept_as_destination(visitor, self->model->rad_core0.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell1");
     self->model->thick_shell1.dispersion->accept_as_destination(visitor, self->model->thick_shell1.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell2");
@@ -686,6 +686,8 @@ static PyObject * runXY(COnionModel *self, PyObject *args) {
     self->model->thick_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell5") );
     self->model->thick_shell9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell9") );
     self->model->thick_shell7 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell7") );
+    self->model->sld_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core0") );
+    self->model->rad_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core0") );
     self->model->A_shell10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "A_shell10") );
     self->model->thick_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell1") );
     self->model->func_shell4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell4") );
@@ -695,8 +697,6 @@ static PyObject * runXY(COnionModel *self, PyObject *args) {
     self->model->func_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell1") );
     self->model->thick_shell10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell10") );
     self->model->func_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell3") );
-    self->model->rad_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core") );
-    self->model->thick_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell3") );
     self->model->func_shell8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell8") );
     self->model->func_shell9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_shell9") );
     self->model->sld_in_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell5") );
@@ -710,12 +710,12 @@ static PyObject * runXY(COnionModel *self, PyObject *args) {
     self->model->sld_in_shell9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell9") );
     self->model->sld_in_shell8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell8") );
     self->model->thick_shell2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell2") );
-    self->model->sld_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core") );
+    self->model->thick_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell3") );
     self->model->sld_out_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell1") );
-    self->model->sld_in_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell1") );
+    self->model->sld_out_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell5") );
     self->model->sld_out_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell3") );
     self->model->sld_in_shell6 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell6") );
-    self->model->sld_out_shell5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell5") );
+    self->model->sld_in_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell1") );
     self->model->sld_out_shell4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell4") );
     self->model->sld_in_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_in_shell3") );
     self->model->sld_out_shell6 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_out_shell6") );
@@ -741,8 +741,8 @@ static PyObject * runXY(COnionModel *self, PyObject *args) {
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core");
-    self->model->rad_core.dispersion->accept_as_destination(visitor, self->model->rad_core.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core0");
+    self->model->rad_core0.dispersion->accept_as_destination(visitor, self->model->rad_core0.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell1");
     self->model->thick_shell1.dispersion->accept_as_destination(visitor, self->model->thick_shell1.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell2");
@@ -818,8 +818,8 @@ static PyObject * set_dispersion(COnionModel *self, PyObject *args) {
 
 	// Ugliness necessary to go from python to C
 	    // TODO: refactor this
-    if (!strcmp(par_name, "rad_core")) {
-        self->model->rad_core.dispersion = dispersion;
+    if (!strcmp(par_name, "rad_core0")) {
+        self->model->rad_core0.dispersion = dispersion;
     } else    if (!strcmp(par_name, "thick_shell1")) {
         self->model->thick_shell1.dispersion = dispersion;
     } else    if (!strcmp(par_name, "thick_shell2")) {
