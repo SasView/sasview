@@ -89,8 +89,12 @@ CReflModel_init(CReflModel *self, PyObject *args, PyObject *kwds)
         self->model = new ReflModel();
         
         // Initialize parameter dictionary
+        PyDict_SetItemString(self->params,"sldIM_flat4",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"thick_flat8",Py_BuildValue("d",100.000000000000));
         PyDict_SetItemString(self->params,"thick_flat9",Py_BuildValue("d",100.000000000000));
+        PyDict_SetItemString(self->params,"sldIM_flat7",Py_BuildValue("d",0.000000000000));
+        PyDict_SetItemString(self->params,"sldIM_flat10",Py_BuildValue("d",0.000000000000));
+        PyDict_SetItemString(self->params,"sldIM_flat5",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"thick_flat1",Py_BuildValue("d",10.000000000000));
         PyDict_SetItemString(self->params,"thick_flat3",Py_BuildValue("d",100.000000000000));
         PyDict_SetItemString(self->params,"n_layers",Py_BuildValue("d",1.000000000000));
@@ -108,9 +112,12 @@ CReflModel_init(CReflModel *self, PyObject *args, PyObject *kwds)
         PyDict_SetItemString(self->params,"thick_inter7",Py_BuildValue("d",1.000000000000));
         PyDict_SetItemString(self->params,"thick_inter8",Py_BuildValue("d",1.000000000000));
         PyDict_SetItemString(self->params,"thick_inter9",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"sldIM_flat1",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"sldIM_flat2",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"func_inter9",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"thick_inter10",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"sldIM_flat3",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"func_inter8",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"thick_flat2",Py_BuildValue("d",100.000000000000));
         PyDict_SetItemString(self->params,"func_inter0",Py_BuildValue("d",0.000000000000));
@@ -128,12 +135,17 @@ CReflModel_init(CReflModel *self, PyObject *args, PyObject *kwds)
         PyDict_SetItemString(self->params,"sld_flat1",Py_BuildValue("d",0.000004000000));
         PyDict_SetItemString(self->params,"sld_flat2",Py_BuildValue("d",0.000003500000));
         PyDict_SetItemString(self->params,"sld_flat3",Py_BuildValue("d",0.000004000000));
+        PyDict_SetItemString(self->params,"sldIM_flat8",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"sld_flat8",Py_BuildValue("d",0.000003500000));
         PyDict_SetItemString(self->params,"sld_flat9",Py_BuildValue("d",0.000004000000));
+        PyDict_SetItemString(self->params,"sldIM_flat9",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"func_inter1",Py_BuildValue("d",0.000000000000));
+        PyDict_SetItemString(self->params,"sldIM_sub0",Py_BuildValue("d",0.000000000000));
+        PyDict_SetItemString(self->params,"sldIM_medium",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"sld_flat10",Py_BuildValue("d",0.000003500000));
         PyDict_SetItemString(self->params,"thick_inter0",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"sldIM_flat6",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"func_inter4",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"func_inter10",Py_BuildValue("d",0.000000000000));
         // Initialize dispersion / averaging parameter dict
@@ -271,8 +283,12 @@ static PyObject * evalDistribution(CReflModel *self, PyObject *args){
 	// Get parameters
 	
 	    // Reader parameter dictionary
+    self->model->sldIM_flat4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat4") );
     self->model->thick_flat8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat8") );
     self->model->thick_flat9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat9") );
+    self->model->sldIM_flat7 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat7") );
+    self->model->sldIM_flat10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat10") );
+    self->model->sldIM_flat5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat5") );
     self->model->thick_flat1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat1") );
     self->model->thick_flat3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat3") );
     self->model->n_layers = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_layers") );
@@ -290,9 +306,12 @@ static PyObject * evalDistribution(CReflModel *self, PyObject *args){
     self->model->thick_inter7 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter7") );
     self->model->thick_inter8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter8") );
     self->model->thick_inter9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter9") );
+    self->model->sldIM_flat1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat1") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sldIM_flat2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat2") );
     self->model->func_inter9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter9") );
     self->model->thick_inter10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter10") );
+    self->model->sldIM_flat3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat3") );
     self->model->func_inter8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter8") );
     self->model->thick_flat2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat2") );
     self->model->func_inter0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter0") );
@@ -310,12 +329,17 @@ static PyObject * evalDistribution(CReflModel *self, PyObject *args){
     self->model->sld_flat1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat1") );
     self->model->sld_flat2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat2") );
     self->model->sld_flat3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat3") );
+    self->model->sldIM_flat8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat8") );
     self->model->sld_flat8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat8") );
     self->model->sld_flat9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat9") );
+    self->model->sldIM_flat9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat9") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->func_inter1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter1") );
+    self->model->sldIM_sub0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_sub0") );
+    self->model->sldIM_medium = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_medium") );
     self->model->sld_flat10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat10") );
     self->model->thick_inter0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter0") );
+    self->model->sldIM_flat6 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat6") );
     self->model->func_inter4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter4") );
     self->model->func_inter10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter10") );
     // Read in dispersion parameters
@@ -385,8 +409,12 @@ static PyObject * run(CReflModel *self, PyObject *args) {
 	// Get parameters
 	
 	    // Reader parameter dictionary
+    self->model->sldIM_flat4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat4") );
     self->model->thick_flat8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat8") );
     self->model->thick_flat9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat9") );
+    self->model->sldIM_flat7 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat7") );
+    self->model->sldIM_flat10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat10") );
+    self->model->sldIM_flat5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat5") );
     self->model->thick_flat1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat1") );
     self->model->thick_flat3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat3") );
     self->model->n_layers = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_layers") );
@@ -404,9 +432,12 @@ static PyObject * run(CReflModel *self, PyObject *args) {
     self->model->thick_inter7 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter7") );
     self->model->thick_inter8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter8") );
     self->model->thick_inter9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter9") );
+    self->model->sldIM_flat1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat1") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sldIM_flat2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat2") );
     self->model->func_inter9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter9") );
     self->model->thick_inter10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter10") );
+    self->model->sldIM_flat3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat3") );
     self->model->func_inter8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter8") );
     self->model->thick_flat2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat2") );
     self->model->func_inter0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter0") );
@@ -424,12 +455,17 @@ static PyObject * run(CReflModel *self, PyObject *args) {
     self->model->sld_flat1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat1") );
     self->model->sld_flat2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat2") );
     self->model->sld_flat3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat3") );
+    self->model->sldIM_flat8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat8") );
     self->model->sld_flat8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat8") );
     self->model->sld_flat9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat9") );
+    self->model->sldIM_flat9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat9") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->func_inter1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter1") );
+    self->model->sldIM_sub0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_sub0") );
+    self->model->sldIM_medium = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_medium") );
     self->model->sld_flat10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat10") );
     self->model->thick_inter0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter0") );
+    self->model->sldIM_flat6 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat6") );
     self->model->func_inter4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter4") );
     self->model->func_inter10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter10") );
     // Read in dispersion parameters
@@ -486,8 +522,12 @@ static PyObject * calculate_ER(CReflModel *self) {
 	// Get parameters
 	
 	    // Reader parameter dictionary
+    self->model->sldIM_flat4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat4") );
     self->model->thick_flat8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat8") );
     self->model->thick_flat9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat9") );
+    self->model->sldIM_flat7 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat7") );
+    self->model->sldIM_flat10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat10") );
+    self->model->sldIM_flat5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat5") );
     self->model->thick_flat1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat1") );
     self->model->thick_flat3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat3") );
     self->model->n_layers = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_layers") );
@@ -505,9 +545,12 @@ static PyObject * calculate_ER(CReflModel *self) {
     self->model->thick_inter7 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter7") );
     self->model->thick_inter8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter8") );
     self->model->thick_inter9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter9") );
+    self->model->sldIM_flat1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat1") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sldIM_flat2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat2") );
     self->model->func_inter9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter9") );
     self->model->thick_inter10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter10") );
+    self->model->sldIM_flat3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat3") );
     self->model->func_inter8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter8") );
     self->model->thick_flat2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat2") );
     self->model->func_inter0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter0") );
@@ -525,12 +568,17 @@ static PyObject * calculate_ER(CReflModel *self) {
     self->model->sld_flat1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat1") );
     self->model->sld_flat2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat2") );
     self->model->sld_flat3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat3") );
+    self->model->sldIM_flat8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat8") );
     self->model->sld_flat8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat8") );
     self->model->sld_flat9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat9") );
+    self->model->sldIM_flat9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat9") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->func_inter1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter1") );
+    self->model->sldIM_sub0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_sub0") );
+    self->model->sldIM_medium = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_medium") );
     self->model->sld_flat10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat10") );
     self->model->thick_inter0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter0") );
+    self->model->sldIM_flat6 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat6") );
     self->model->func_inter4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter4") );
     self->model->func_inter10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter10") );
     // Read in dispersion parameters
@@ -556,8 +604,12 @@ static PyObject * runXY(CReflModel *self, PyObject *args) {
 	// Get parameters
 	
 	    // Reader parameter dictionary
+    self->model->sldIM_flat4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat4") );
     self->model->thick_flat8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat8") );
     self->model->thick_flat9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat9") );
+    self->model->sldIM_flat7 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat7") );
+    self->model->sldIM_flat10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat10") );
+    self->model->sldIM_flat5 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat5") );
     self->model->thick_flat1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat1") );
     self->model->thick_flat3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat3") );
     self->model->n_layers = PyFloat_AsDouble( PyDict_GetItemString(self->params, "n_layers") );
@@ -575,9 +627,12 @@ static PyObject * runXY(CReflModel *self, PyObject *args) {
     self->model->thick_inter7 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter7") );
     self->model->thick_inter8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter8") );
     self->model->thick_inter9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter9") );
+    self->model->sldIM_flat1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat1") );
     self->model->scale = PyFloat_AsDouble( PyDict_GetItemString(self->params, "scale") );
+    self->model->sldIM_flat2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat2") );
     self->model->func_inter9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter9") );
     self->model->thick_inter10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter10") );
+    self->model->sldIM_flat3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat3") );
     self->model->func_inter8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter8") );
     self->model->thick_flat2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_flat2") );
     self->model->func_inter0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter0") );
@@ -595,12 +650,17 @@ static PyObject * runXY(CReflModel *self, PyObject *args) {
     self->model->sld_flat1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat1") );
     self->model->sld_flat2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat2") );
     self->model->sld_flat3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat3") );
+    self->model->sldIM_flat8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat8") );
     self->model->sld_flat8 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat8") );
     self->model->sld_flat9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat9") );
+    self->model->sldIM_flat9 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat9") );
     self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->func_inter1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter1") );
+    self->model->sldIM_sub0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_sub0") );
+    self->model->sldIM_medium = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_medium") );
     self->model->sld_flat10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_flat10") );
     self->model->thick_inter0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_inter0") );
+    self->model->sldIM_flat6 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sldIM_flat6") );
     self->model->func_inter4 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter4") );
     self->model->func_inter10 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "func_inter10") );
     // Read in dispersion parameters

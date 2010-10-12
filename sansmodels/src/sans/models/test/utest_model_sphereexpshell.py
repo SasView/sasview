@@ -41,9 +41,9 @@ class TestSphereExpShell1(unittest.TestCase):
         
         # model3: set param values as same as the model2
         self.model3.setParam("background", 0.0)
-        self.model3.setParam("rad_core", 200.0)
+        self.model3.setParam("rad_core0", 200.0)
         self.model3.setParam("scale", 1.0)
-        self.model3.setParam("sld_core", 1.0e-006)
+        self.model3.setParam("sld_core0", 1.0e-006)
         self.model3.setParam("sld_shell1", 1.7e-006)
         self.model3.setParam("sld_solv", 6.4e-006)
         self.model3.setParam("thick_shell1", 50.0)
@@ -71,17 +71,17 @@ class TestSphereExpShell1(unittest.TestCase):
         
         # model: set param values as same as the model2
         self.model.setParam("background", 0.0)
-        self.model.setParam("rad_core", 100.0)
+        self.model.setParam("rad_core0", 100.0)
         self.model.setParam("scale", 1.0)
-        self.model.setParam("sld_core", 6.36e-006)
+        self.model.setParam("sld_core0", 6.36e-006)
         self.model.setParam("sld_in_shell1", 5e-007)
         self.model.setParam("sld_solv", 6.36e-006)
         self.model.setParam("thick_shell1", 30.0)
         # model2: set param values as same as the model2
         self.model2.setParam("background", 0.0)
-        self.model2.setParam("rad_core", 100.0)
+        self.model2.setParam("rad_core0", 100.0)
         self.model2.setParam("scale", 1.0)
-        self.model2.setParam("sld_core", 6.36e-006)
+        self.model2.setParam("sld_core0", 6.36e-006)
         self.model2.setParam("sld_in_shell1", 5e-007)
         self.model2.setParam("sld_solv", 6.36e-006)
         self.model2.setParam("thick_shell1", 30.0)

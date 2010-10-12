@@ -64,7 +64,7 @@ double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, double 
 	double a1_dot_q, a2_dot_q,a3_dot_q;
 	double answer;
 	double Pi = 4.0*atan(1.0);
-	double aa, Da, qDa_2, latticeScale, Zq, Fkq, Fkq_2;
+	double aa, Da, qDa_2, latticeScale, Zq, Fkq, Fkq_2,contrast;
 
 	double dp[5];
 	dp[0] = 1.0;
@@ -76,6 +76,7 @@ double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, double 
 	aa = pars->dnn;
 	Da = pars->d_factor*aa;
 	qDa_2 = pow(q*Da,2.0);
+	contrast = pars->sldSph - pars->sldSolv;
 
 	latticeScale = 4.0*(4.0/3.0)*Pi*(dp[1]*dp[1]*dp[1])/pow(aa*sqrt(2.0),3.0);
 
@@ -132,7 +133,7 @@ double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, double 
     Zq = Zq * (1.0-Fkq_2)/(1.0-2.0*Fkq*cos(a3_dot_q)+Fkq_2);
 
 	// Use SphereForm directly from libigor
-	answer = SphereForm(dp,q)*Zq;
+	answer = SphereForm_Paracrystal(pars->radius,contrast,q)*Zq;
 
 	//consider scales
 	answer *= latticeScale * pars->scale;

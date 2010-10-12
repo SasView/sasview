@@ -48,6 +48,53 @@ public:
 	double evaluate_rphi(double q, double phi);
 };
 
+class BarBellModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter rad_bar;
+	Parameter len_bar;
+	Parameter rad_bell;
+	Parameter sld_barbell;
+	Parameter sld_solv;
+	Parameter background;
+	Parameter theta;
+	Parameter phi;
+
+	// Constructor
+	BarBellModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
+class CappedCylinderModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter rad_cyl;
+	Parameter len_cyl;
+	Parameter rad_cap;
+	Parameter sld_capcyl;
+	Parameter sld_solv;
+	Parameter background;
+	Parameter theta;
+	Parameter phi;
+
+	// Constructor
+	CappedCylinderModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
+
 class ParallelepipedModel{
 public:
 	// TODO: add 2D
@@ -79,8 +126,8 @@ public:
 	// Model parameters
 	Parameter n_shells;
 	Parameter scale;
-	Parameter rad_core;
-	Parameter sld_core;
+	Parameter rad_core0;
+	Parameter sld_core0;
 	Parameter sld_solv;
 	Parameter background;
 
@@ -254,6 +301,20 @@ public:
 	Parameter func_inter8;
 	Parameter func_inter9;
 	Parameter func_inter10;
+
+	Parameter sldIM_flat1;
+	Parameter sldIM_flat2;
+	Parameter sldIM_flat3;
+	Parameter sldIM_flat4;
+	Parameter sldIM_flat5;
+	Parameter sldIM_flat6;
+	Parameter sldIM_flat7;
+	Parameter sldIM_flat8;
+	Parameter sldIM_flat9;
+	Parameter sldIM_flat10;
+
+	Parameter sldIM_sub0;
+	Parameter sldIM_medium;
 
 	// Constructor
 	ReflModel();
@@ -510,8 +571,8 @@ class CoreFourShellModel{
 public:
 	// Model parameters
 	Parameter scale;
-	Parameter rad_core;
-	Parameter sld_core;
+	Parameter rad_core0;
+	Parameter sld_core0;
 	Parameter thick_shell1;
 	Parameter sld_shell1;
 	Parameter thick_shell2;

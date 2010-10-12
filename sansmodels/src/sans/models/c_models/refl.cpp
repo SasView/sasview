@@ -66,6 +66,19 @@ ReflModel :: ReflModel() {
     func_inter9 = Parameter(0);
     func_inter10 = Parameter(0);
 
+    sldIM_flat1 = Parameter(0);
+    sldIM_flat2 = Parameter(0);
+    sldIM_flat3 = Parameter(0);
+    sldIM_flat4 = Parameter(0);
+    sldIM_flat5 = Parameter(0);
+    sldIM_flat6 = Parameter(0);
+    sldIM_flat7 = Parameter(0);
+    sldIM_flat8 = Parameter(0);
+    sldIM_flat9 = Parameter(0);
+    sldIM_flat10 = Parameter(0);
+
+    sldIM_sub0 = Parameter(0);
+    sldIM_medium = Parameter(0);
 }
 
 /**
@@ -74,7 +87,7 @@ ReflModel :: ReflModel() {
  * @return: function value
  */
 double ReflModel :: operator()(double q) {
-	double dp[47];
+	double dp[59];
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
 	dp[0] = n_layers();
@@ -128,6 +141,20 @@ double ReflModel :: operator()(double q) {
 	dp[44] = func_inter8();
 	dp[45] = func_inter9();
 	dp[46] = func_inter10();
+
+	dp[47] = sldIM_flat1();
+	dp[48] = sldIM_flat2();
+	dp[49] = sldIM_flat3();
+	dp[50] = sldIM_flat4();
+	dp[51] = sldIM_flat5();
+	dp[52] = sldIM_flat6();
+	dp[53] = sldIM_flat7();
+	dp[54] = sldIM_flat8();
+	dp[55] = sldIM_flat9();
+	dp[56] = sldIM_flat10();
+
+	dp[57] = sldIM_sub0();
+	dp[58] = sldIM_medium();
 
 	// Get the dispersion points for the radius
 	//vector<WeightPoint> weights_thick;

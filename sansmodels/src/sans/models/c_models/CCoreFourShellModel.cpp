@@ -96,18 +96,18 @@ CCoreFourShellModel_init(CCoreFourShellModel *self, PyObject *args, PyObject *kw
         PyDict_SetItemString(self->params,"thick_shell1",Py_BuildValue("d",10.000000000000));
         PyDict_SetItemString(self->params,"thick_shell2",Py_BuildValue("d",10.000000000000));
         PyDict_SetItemString(self->params,"sld_shell1",Py_BuildValue("d",0.000001000000));
-        PyDict_SetItemString(self->params,"rad_core",Py_BuildValue("d",60.000000000000));
-        PyDict_SetItemString(self->params,"sld_core",Py_BuildValue("d",0.000006400000));
-        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000000000));
         PyDict_SetItemString(self->params,"thick_shell3",Py_BuildValue("d",10.000000000000));
+        PyDict_SetItemString(self->params,"sld_core0",Py_BuildValue("d",0.000006400000));
+        PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000000000));
+        PyDict_SetItemString(self->params,"rad_core0",Py_BuildValue("d",60.000000000000));
         PyDict_SetItemString(self->params,"sld_solv",Py_BuildValue("d",0.000006400000));
         PyDict_SetItemString(self->params,"sld_shell3",Py_BuildValue("d",0.000003000000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
         disp_dict = PyDict_New();
-        self->model->rad_core.dispersion->accept_as_source(visitor, self->model->rad_core.dispersion, disp_dict);
-        PyDict_SetItemString(self->dispersion, "rad_core", disp_dict);
+        self->model->rad_core0.dispersion->accept_as_source(visitor, self->model->rad_core0.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "rad_core0", disp_dict);
         disp_dict = PyDict_New();
         self->model->thick_shell1.dispersion->accept_as_source(visitor, self->model->thick_shell1.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "thick_shell1", disp_dict);
@@ -256,17 +256,17 @@ static PyObject * evalDistribution(CCoreFourShellModel *self, PyObject *args){
     self->model->thick_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell1") );
     self->model->thick_shell2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell2") );
     self->model->sld_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_shell1") );
-    self->model->rad_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core") );
-    self->model->sld_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core") );
-    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->thick_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell3") );
+    self->model->sld_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core0") );
+    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->rad_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core0") );
     self->model->sld_solv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_solv") );
     self->model->sld_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_shell3") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core");
-    self->model->rad_core.dispersion->accept_as_destination(visitor, self->model->rad_core.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core0");
+    self->model->rad_core0.dispersion->accept_as_destination(visitor, self->model->rad_core0.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell1");
     self->model->thick_shell1.dispersion->accept_as_destination(visitor, self->model->thick_shell1.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell2");
@@ -344,17 +344,17 @@ static PyObject * run(CCoreFourShellModel *self, PyObject *args) {
     self->model->thick_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell1") );
     self->model->thick_shell2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell2") );
     self->model->sld_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_shell1") );
-    self->model->rad_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core") );
-    self->model->sld_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core") );
-    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->thick_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell3") );
+    self->model->sld_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core0") );
+    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->rad_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core0") );
     self->model->sld_solv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_solv") );
     self->model->sld_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_shell3") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core");
-    self->model->rad_core.dispersion->accept_as_destination(visitor, self->model->rad_core.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core0");
+    self->model->rad_core0.dispersion->accept_as_destination(visitor, self->model->rad_core0.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell1");
     self->model->thick_shell1.dispersion->accept_as_destination(visitor, self->model->thick_shell1.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell2");
@@ -419,17 +419,17 @@ static PyObject * calculate_ER(CCoreFourShellModel *self) {
     self->model->thick_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell1") );
     self->model->thick_shell2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell2") );
     self->model->sld_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_shell1") );
-    self->model->rad_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core") );
-    self->model->sld_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core") );
-    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->thick_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell3") );
+    self->model->sld_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core0") );
+    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->rad_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core0") );
     self->model->sld_solv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_solv") );
     self->model->sld_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_shell3") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core");
-    self->model->rad_core.dispersion->accept_as_destination(visitor, self->model->rad_core.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core0");
+    self->model->rad_core0.dispersion->accept_as_destination(visitor, self->model->rad_core0.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell1");
     self->model->thick_shell1.dispersion->accept_as_destination(visitor, self->model->thick_shell1.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell2");
@@ -463,17 +463,17 @@ static PyObject * runXY(CCoreFourShellModel *self, PyObject *args) {
     self->model->thick_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell1") );
     self->model->thick_shell2 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell2") );
     self->model->sld_shell1 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_shell1") );
-    self->model->rad_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core") );
-    self->model->sld_core = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core") );
-    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
     self->model->thick_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "thick_shell3") );
+    self->model->sld_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_core0") );
+    self->model->background = PyFloat_AsDouble( PyDict_GetItemString(self->params, "background") );
+    self->model->rad_core0 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "rad_core0") );
     self->model->sld_solv = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_solv") );
     self->model->sld_shell3 = PyFloat_AsDouble( PyDict_GetItemString(self->params, "sld_shell3") );
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
-    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core");
-    self->model->rad_core.dispersion->accept_as_destination(visitor, self->model->rad_core.dispersion, disp_dict);
+    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core0");
+    self->model->rad_core0.dispersion->accept_as_destination(visitor, self->model->rad_core0.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell1");
     self->model->thick_shell1.dispersion->accept_as_destination(visitor, self->model->thick_shell1.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_shell2");
@@ -537,8 +537,8 @@ static PyObject * set_dispersion(CCoreFourShellModel *self, PyObject *args) {
 
 	// Ugliness necessary to go from python to C
 	    // TODO: refactor this
-    if (!strcmp(par_name, "rad_core")) {
-        self->model->rad_core.dispersion = dispersion;
+    if (!strcmp(par_name, "rad_core0")) {
+        self->model->rad_core0.dispersion = dispersion;
     } else    if (!strcmp(par_name, "thick_shell1")) {
         self->model->thick_shell1.dispersion = dispersion;
     } else    if (!strcmp(par_name, "thick_shell2")) {

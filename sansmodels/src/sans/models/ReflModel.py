@@ -82,6 +82,18 @@ class ReflModel(CReflModel, BaseComponent):
          func_inter8     = 0.0 
          func_inter9     = 0.0 
          func_inter10    = 0.0 
+         sldIM_flat1     = 0.0 
+         sldIM_flat2     = 0.0 
+         sldIM_flat3     = 0.0 
+         sldIM_flat4     = 0.0 
+         sldIM_flat5     = 0.0 
+         sldIM_flat6     = 0.0 
+         sldIM_flat7     = 0.0 
+         sldIM_flat8     = 0.0 
+         sldIM_flat9     = 0.0 
+         sldIM_flat10    = 0.0 
+         sldIM_sub0      = 0.0 
+         sldIM_medium    = 0.0 
 
     """
         
@@ -168,6 +180,18 @@ class ReflModel(CReflModel, BaseComponent):
         self.details['func_inter8'] = ['', None, None]
         self.details['func_inter9'] = ['', None, None]
         self.details['func_inter10'] = ['', None, None]
+        self.details['sldIM_flat1'] = ['', None, None]
+        self.details['sldIM_flat2'] = ['', None, None]
+        self.details['sldIM_flat3'] = ['', None, None]
+        self.details['sldIM_flat4'] = ['', None, None]
+        self.details['sldIM_flat5'] = ['', None, None]
+        self.details['sldIM_flat6'] = ['', None, None]
+        self.details['sldIM_flat7'] = ['', None, None]
+        self.details['sldIM_flat8'] = ['', None, None]
+        self.details['sldIM_flat9'] = ['', None, None]
+        self.details['sldIM_flat10'] = ['', None, None]
+        self.details['sldIM_sub0'] = ['', None, None]
+        self.details['sldIM_medium'] = ['', None, None]
 
         ## fittable parameters
         self.fixed=[]

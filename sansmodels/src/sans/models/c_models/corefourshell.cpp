@@ -32,9 +32,9 @@ extern "C" {
 
 CoreFourShellModel :: CoreFourShellModel() {
 	scale      = Parameter(1.0);
-	rad_core     = Parameter(60.0, true);
-	rad_core.set_min(0.0);
-	sld_core   = Parameter(6.4e-6);
+	rad_core0     = Parameter(60.0, true);
+	rad_core0.set_min(0.0);
+	sld_core0   = Parameter(6.4e-6);
 	thick_shell1     = Parameter(10.0, true);
 	thick_shell1.set_min(0.0);
 	sld_shell1   = Parameter(1.0e-6);
@@ -63,8 +63,8 @@ double CoreFourShellModel :: operator()(double q) {
 	// Fill parameter array for IGOR library
 	// Add the background after averaging
 	dp[0] = scale();
-	dp[1] = rad_core();
-	dp[2] = sld_core();
+	dp[1] = rad_core0();
+	dp[2] = sld_core0();
 	dp[3] = thick_shell1();
 	dp[4] = sld_shell1();
 	dp[5] = thick_shell2();
@@ -78,7 +78,7 @@ double CoreFourShellModel :: operator()(double q) {
 
 	// Get the dispersion points for the radius
 	vector<WeightPoint> weights_rad;
-	rad_core.get_weights(weights_rad);
+	rad_core0.get_weights(weights_rad);
 
 	// Get the dispersion points for the thick 1
 	vector<WeightPoint> weights_s1;
@@ -166,8 +166,8 @@ double CoreFourShellModel :: calculate_ER() {
 	CoreFourShellParameters dp;
 
 	dp.scale = scale();
-	dp.rad_core = rad_core();
-	dp.sld_core = sld_core();
+	dp.rad_core0 = rad_core0();
+	dp.sld_core0 = sld_core0();
 	dp.thick_shell1 = thick_shell1();
 	dp.sld_shell1 = sld_shell1();
 	dp.thick_shell2 = thick_shell2();
@@ -181,7 +181,7 @@ double CoreFourShellModel :: calculate_ER() {
 
 	// Get the dispersion points for the radius
 	vector<WeightPoint> weights_rad;
-	rad_core.get_weights(weights_rad);
+	rad_core0.get_weights(weights_rad);
 
 	// Get the dispersion points for the thick 1
 	vector<WeightPoint> weights_s1;
@@ -206,7 +206,7 @@ double CoreFourShellModel :: calculate_ER() {
 
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
-		dp.rad_core = weights_rad[i].value;
+		dp.rad_core0 = weights_rad[i].value;
 		// Loop over radius weight points
 		for(int j=0; j<weights_s1.size(); j++) {
 			dp.thick_shell1 = weights_s1[j].value;
@@ -221,7 +221,7 @@ double CoreFourShellModel :: calculate_ER() {
 						dp.thick_shell4 = weights_s4[m].value;
 						//Un-normalize FourShell by volume
 						sum += weights_rad[i].weight*weights_s1[j].weight*weights_s2[k].weight*weights_s3[l].weight*weights_s4[m].weight
-							* (dp.rad_core+dp.thick_shell1+dp.thick_shell2+dp.thick_shell3+dp.thick_shell4);
+							* (dp.rad_core0+dp.thick_shell1+dp.thick_shell2+dp.thick_shell3+dp.thick_shell4);
 						norm += weights_rad[i].weight*weights_s1[j].weight*weights_s2[k].weight*weights_s3[l].weight*weights_s4[m].weight;
 					}
 				}
@@ -233,7 +233,7 @@ double CoreFourShellModel :: calculate_ER() {
 		rad_out =  sum/norm;}
 	else{
 		//return normal value
-		rad_out = dp.rad_core+dp.thick_shell1+dp.thick_shell2+dp.thick_shell3+dp.thick_shell4;}
+		rad_out = dp.rad_core0+dp.thick_shell1+dp.thick_shell2+dp.thick_shell3+dp.thick_shell4;}
 
 	return rad_out;
 }

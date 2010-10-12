@@ -45,7 +45,17 @@ class RPA10Model(BaseComponent):
         self.model.params['lcase_n'] = self.case_num
         
         ## functional multiplicity of the model
-        self.multiplicity = max_case_n
+        self.multiplicity_info = [max_case_n,"Case No.:",["C/D Binary Mixture of Homopolymers",
+                                                         "C-D Diblock Copolymer",
+                                                         "B/C/D Ternary Mixture of Homopolymers",
+                                                         "B/C-D Mixture of Homopolymer B and Diblock Copolymer C-D",
+                                                         "B-C-D Triblock Copolymer",
+                                                         "A/B/C/D Quaternary Mixture of Homopolymers",
+                                                         "A/B/C-D Mixture of Homopolymer A/B and Diblock C-D",
+                                                         "A/B-C-D Mixture of Homopolymer A and triblock B-C-D",
+                                                         "A-B/C-D Mixture of Diblock Copolymer A-B and Diblock C-D",
+                                                         "A-B-C-D Four-block Copolymer"],
+                                                         []]
     
     def _clone(self, obj):
         """

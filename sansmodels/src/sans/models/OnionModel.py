@@ -37,8 +37,8 @@ class OnionModel(COnionModel, BaseComponent):
     List of default parameters:
          n_shells        = 1.0 
          scale           = 1.0 
-         rad_core        = 200.0 [A]
-         sld_core        = 1e-006 [1/A^(2)]
+         rad_core0       = 200.0 [A]
+         sld_core0       = 1e-006 [1/A^(2)]
          sld_solv        = 6.4e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
          sld_out_shell1  = 2e-006 [1/A^(2)]
@@ -121,9 +121,9 @@ class OnionModel(COnionModel, BaseComponent):
 		Note that the 'sld_out' becaomes NULL in this case.
 		
 		background:background,
-		rad_core: radius of sphere(core)
+		rad_core0: radius of sphere(core)
 		thick_shell#:the thickness of the shell#
-		sld_core: the SLD of the sphere
+		sld_core0: the SLD of the sphere
 		sld_solv: the SLD of the solvent
 		sld_shell: the SLD of the shell#
 		A_shell#: the coefficient in the exponential function"""
@@ -132,8 +132,8 @@ class OnionModel(COnionModel, BaseComponent):
         self.details = {}
         self.details['n_shells'] = ['', None, None]
         self.details['scale'] = ['', None, None]
-        self.details['rad_core'] = ['[A]', None, None]
-        self.details['sld_core'] = ['[1/A^(2)]', None, None]
+        self.details['rad_core0'] = ['[A]', None, None]
+        self.details['sld_core0'] = ['[1/A^(2)]', None, None]
         self.details['sld_solv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['sld_out_shell1'] = ['[1/A^(2)]', None, None]
@@ -188,7 +188,7 @@ class OnionModel(COnionModel, BaseComponent):
         self.details['func_shell10'] = ['', None, None]
 
         ## fittable parameters
-        self.fixed=['rad_core.width', 'thick_shell1.width', 'thick_shell2.width', 'thick_shell3.width', 'thick_shell4.width', 'thick_shell5.width', 'thick_shell6.width', 'thick_shell7.width', 'thick_shell8.width', 'thick_shell9.width', 'thick_shell10.width']
+        self.fixed=['rad_core0.width', 'thick_shell1.width', 'thick_shell2.width', 'thick_shell3.width', 'thick_shell4.width', 'thick_shell5.width', 'thick_shell6.width', 'thick_shell7.width', 'thick_shell8.width', 'thick_shell9.width', 'thick_shell10.width']
         
         ## non-fittable parameters
         self.non_fittable=[]

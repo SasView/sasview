@@ -10,8 +10,8 @@
 double so_kernel(double dp[], double q) {
 	int n = dp[0];
 	double scale = dp[1];
-	double rad_core = dp[2];
-	double sld_core = dp[3];
+	double rad_core0 = dp[2];
+	double sld_core0 = dp[3];
 	double sld_solv = dp[4];
 	double background = dp[5];
 	double sld_out[n+2];
@@ -29,11 +29,11 @@ double so_kernel(double dp[], double q) {
 		thick[i] = dp[i+35];
 		fun_type[i] = dp[i+45];
 	}
-	sld_out[0] = sld_core;
+	sld_out[0] = sld_core0;
 	sld_out[n+1] = sld_solv;
-	sld_in[0] = sld_core;
+	sld_in[0] = sld_core0;
 	sld_in[n+1] = sld_solv;
-	thick[0] = rad_core;
+	thick[0] = rad_core0;
 	thick[n+1] = 1e+10;
 	A[0] = 0.0;
 	A[n+1] = 0.0;
@@ -68,7 +68,7 @@ double so_kernel(double dp[], double q) {
 						slope[i] = 0.0;
 					}
 					else{
-						slope[i] = (sld_out[i]-sld_in[i])/(exp(A[i])-1);
+						slope[i] = (sld_out[i]-sld_in[i])/(exp(A[i])-1.0);
 					}
                     for (j=0; j<2; j++){
                         if ( i == 0 && j == 0){
@@ -173,8 +173,8 @@ double onion_analytical_1D(OnionParameters *pars, double q) {
 
 	dp[0] = pars->n_shells;
 	dp[1] = pars->scale;
-	dp[2] = pars->rad_core;
-	dp[3] = pars->sld_core;
+	dp[2] = pars->rad_core0;
+	dp[3] = pars->sld_core0;
 	dp[4] = pars->sld_solv;
 	dp[5] = pars->background;
 

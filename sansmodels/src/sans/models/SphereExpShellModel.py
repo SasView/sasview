@@ -38,6 +38,11 @@ class SphereExpShellModel(BaseComponent):
         #list of parameter that can be fitted
         self._set_fixed_params()  
         self.model.params['n_shells'] = self.n_shells
+        ## functional multiplicity info of the model
+        # [int(maximum no. of functionality),"str(Titl),
+        # [str(name of function0),...], [str(x-asix name of sld),...]]
+        self.multiplicity_info = [max_nshells,"No. of Shells:",[],['Radius']]
+
         ## parameters with orientation: can be removed since there is no orientational params
         for item in self.model.orientation_params:
             self.orientation_params.append(item)
@@ -145,10 +150,10 @@ class SphereExpShellModel(BaseComponent):
         beta = []
         # for core at r=0
         r.append(0)
-        beta.append(self.params['sld_core'])
+        beta.append(self.params['sld_core0'])
         # for core at r=rad_core
-        r.append(self.params['rad_core'])
-        beta.append(self.params['sld_core'])
+        r.append(self.params['rad_core0'])
+        beta.append(self.params['sld_core0'])
         
         # for shells
         for n in range(1,self.n_shells+1):

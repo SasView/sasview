@@ -32,8 +32,8 @@ extern "C" {
 OnionModel :: OnionModel() {
 	n_shells = Parameter(1.0);
 	scale = Parameter(1.0);
-	rad_core = Parameter(200.0);
-	sld_core = Parameter(1e-06);
+	rad_core0 = Parameter(200.0);
+	sld_core0 = Parameter(1e-06);
 	sld_solv = Parameter(6.4e-06);
     background = Parameter(0.0);
 
@@ -111,8 +111,8 @@ double OnionModel :: operator()(double q) {
 	// Add the background after averaging
 	dp[0] = n_shells();
 	dp[1] = scale();
-	dp[2] = rad_core();
-	dp[3] = sld_core();
+	dp[2] = rad_core0();
+	dp[3] = sld_core0();
 	dp[4] = sld_solv();
 	dp[5] = 0.0;
 
@@ -174,7 +174,7 @@ double OnionModel :: operator()(double q) {
 
 	// Get the dispersion points for the radius
 	vector<WeightPoint> weights_rad;
-	rad_core.get_weights(weights_rad);
+	rad_core0.get_weights(weights_rad);
 
 	// Get the dispersion points for the thick 1
 	vector<WeightPoint> weights_s1;
@@ -312,7 +312,7 @@ double OnionModel :: evaluate_rphi(double q, double phi) {
  */
 double OnionModel :: calculate_ER() {
 	OnionParameters dp;
-	dp.rad_core = rad_core();
+	dp.rad_core0 = rad_core0();
 	dp.thick_shell1 = thick_shell1();
 	dp.thick_shell2 = thick_shell2();
 	dp.thick_shell3 = thick_shell3();
@@ -332,7 +332,7 @@ double OnionModel :: calculate_ER() {
 
 	// Get the dispersion points for the radius
 	vector<WeightPoint> weights_rad;
-	rad_core.get_weights(weights_rad);
+	rad_core0.get_weights(weights_rad);
 
 	// Get the dispersion points for the thick 1
 	vector<WeightPoint> weights_s1;
@@ -375,7 +375,7 @@ double OnionModel :: calculate_ER() {
 
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
-		dp.rad_core = weights_rad[i].value;
+		dp.rad_core0 = weights_rad[i].value;
 		// Loop over radius weight points
 		for(int j=0; j<weights_s1.size(); j++) {
 			dp.thick_shell1 = weights_s1[j].value;
@@ -410,7 +410,7 @@ double OnionModel :: calculate_ER() {
 												sum += weights_rad[i].weight*weights_s1[j].weight*weights_s2[k].weight*weights_s3[l].weight*weights_s4[m].weight
 													*weights_s5[n].weight*weights_s6[o].weight*weights_s7[p].weight*weights_s8[t].weight
 													*weights_s9[r].weight*weights_s10[s].weight
-													* (dp.rad_core+dp.thick_shell1+dp.thick_shell2+dp.thick_shell3+dp.thick_shell4+dp.thick_shell5
+													* (dp.rad_core0+dp.thick_shell1+dp.thick_shell2+dp.thick_shell3+dp.thick_shell4+dp.thick_shell5
 															+dp.thick_shell6+dp.thick_shell7+dp.thick_shell8+dp.thick_shell9+dp.thick_shell10);
 												norm += weights_rad[i].weight*weights_s1[j].weight*weights_s2[k].weight*weights_s3[l].weight
 													*weights_s4[m].weight*weights_s5[n].weight*weights_s6[o].weight*weights_s7[p].weight
@@ -432,7 +432,7 @@ double OnionModel :: calculate_ER() {
 		rad_out =  sum/norm;}
 	else{
 		//return normal value
-		rad_out = dp.rad_core+dp.thick_shell1+dp.thick_shell2+dp.thick_shell3+dp.thick_shell4
+		rad_out = dp.rad_core0+dp.thick_shell1+dp.thick_shell2+dp.thick_shell3+dp.thick_shell4
 					+dp.thick_shell5+dp.thick_shell6+dp.thick_shell7+dp.thick_shell8+dp.thick_shell9+dp.thick_shell10;}
 	return rad_out;
 }

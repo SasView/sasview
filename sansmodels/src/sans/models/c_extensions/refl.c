@@ -267,18 +267,21 @@ double re_kernel(double dp[], double q) {
 	double sld_super = dp[5];
 	double background = dp[6];
 
-	double sld[n+2],sld_nul[n+2],thick_inter[n+2],thick[n+2],total_thick;
+	double sld[n+2],sld_im[n+2],thick_inter[n+2],thick[n+2],total_thick;
 	fun_type[0] = dp[3];
 	for (i =1; i<=n; i++){
 		sld[i] = dp[i+6];
 		thick_inter[i]= dp[i+16];
 		thick[i] = dp[i+26];
 		fun_type[i] = dp[i+36];
+		sld_im[i] = dp[i+46];
 
 		total_thick += thick[i] + thick_inter[i];
 	}
 	sld[0] = sld_sub;
 	sld[n+1] = sld_super;
+	sld_im[0] = fabs(dp[0+56]);
+	sld_im[n+1] = fabs(dp[1+56]);
 	thick[0] = total_thick/5.0;
 	thick[n+1] = total_thick/5.0;
 	thick_inter[0] = thick_inter_sub;
@@ -286,7 +289,7 @@ double re_kernel(double dp[], double q) {
 
 	double nsl=21.0; //nsl = Num_sub_layer:  MUST ODD number in double //no other number works now
 	int n_s, floor_nsl;
-    double sld_i,dz,phi,R,ko2;
+    double sld_i,sldim_i,dz,phi,R,ko2;
     double sign,erfunc;
     double pi;
 	complex  inv_n,phi1,alpha,alpha2,kn,fnm,fnp,rn,Xn,nn,nn2,an,nnp1,one,zero,two,n_sub,n_sup,knp1,Xnp1;
@@ -299,8 +302,8 @@ double re_kernel(double dp[], double q) {
 
 	//Checking if floor is available.
 	//no imaginary sld inputs in this function yet
-    n_sub=cassign(1.0-sld_sub*pow(lamda,2.0)/(2.0*pi),0.0);
-    n_sup=cassign(1.0-sld_super*pow(lamda,2.0)/(2.0*pi),0.0);
+    n_sub=cassign(1.0-sld_sub*pow(lamda,2.0)/(2.0*pi),pow(lamda,2.0)/(2.0*pi)*sld_im[0]);
+    n_sup=cassign(1.0-sld_super*pow(lamda,2.0)/(2.0*pi),pow(lamda,2.0)/(2.0*pi)*sld_im[n+1]);
     ko2 = pow(2.0*pi/lamda,2.0);
 
     phi = asin(lamda*q/(4.0*pi));
@@ -322,12 +325,24 @@ double re_kernel(double dp[], double q) {
 						break;
 					dz = thick[i];
 					sld_i = sld[i];
+					sldim_i = sld_im[i];
 				}
 				else{
 					dz = thick_inter[i-1]/nsl;
-					sld_i = interfunc(fun_type[i-1],nsl, n_s, sld[i-1], sld[i]);
+					if (sld[i-1] == sld[i]){
+						sld_i = sld[i];
+					}
+					else{
+						sld_i = interfunc(fun_type[i-1],nsl, n_s, sld[i-1], sld[i]);
+					}
+					if (sld_im[i-1] == sld_im[i]){
+						sldim_i = sld_im[i];
+					}
+					else{
+						sldim_i = interfunc(fun_type[i-1],nsl, n_s, sld_im[i-1], sld_im[i]);
+					}
 				}
-				nn = cassign(1.0-sld_i*pow(lamda,2.0)/(2.0*pi),0.0);
+				nn = cassign(1.0-sld_i*pow(lamda,2.0)/(2.0*pi),pow(lamda,2.0)/(2.0*pi)*sldim_i);
 				nn2=cmult(nn,nn);
 
 				kn=csqrt(rcmult(ko2,csub(nn2,alpha2)));        //nn*ko*sin(phin)
@@ -365,7 +380,7 @@ double re_kernel(double dp[], double q) {
  * @return: function value
  */
 double refl_analytical_1D(ReflParameters *pars, double q) {
-	double dp[47];
+	double dp[59];
 
 	dp[0] = pars->n_layers;
 	dp[1] = pars->scale;
@@ -418,6 +433,20 @@ double refl_analytical_1D(ReflParameters *pars, double q) {
 	dp[44] = pars->func_inter8;
 	dp[45] = pars->func_inter9;
 	dp[46] = pars->func_inter10;
+
+	dp[47] = pars->sldIM_flat1;
+	dp[48] = pars->sldIM_flat2;
+	dp[49] = pars->sldIM_flat3;
+	dp[50] = pars->sldIM_flat4;
+	dp[51] = pars->sldIM_flat5;
+	dp[52] = pars->sldIM_flat6;
+	dp[53] = pars->sldIM_flat7;
+	dp[54] = pars->sldIM_flat8;
+	dp[55] = pars->sldIM_flat9;
+	dp[56] = pars->sldIM_flat10;
+
+	dp[57] = pars->sldIM_sub0;
+	dp[58] = pars->sldIM_medium;
 
 	return re_kernel(dp, q);
 }

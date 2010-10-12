@@ -1,10 +1,12 @@
 """
-    Unit tests for extra models,PolymerexclVolume, RPA10Model
+Unit tests for extra models,PolymerexclVolume, RPA10Model
+The reference values are calculated on IGOR/NIST package(Oct.,2010)
+@author: JHJ Cho / UTK
 """
 import unittest
 class TestPolymerExclVolume(unittest.TestCase):
     """
-        Unit tests for PolymerexclVolume (non-shape) function
+    Unit tests for PolymerexclVolume (non-shape) function
     """
     def setUp(self):
         from sans.models.PolymerExclVolume import PolymerExclVolume
@@ -16,9 +18,9 @@ class TestPolymerExclVolume(unittest.TestCase):
         self.assertAlmostEqual(self.model.run(0.21571), 0.00192041, 6)
         self.assertAlmostEqual(self.model.runXY(0.41959), 0.000261302, 6)
         
-class TestPolymerExclVolume(unittest.TestCase):
+class TestRPA10Case(unittest.TestCase):
     """
-        Unit tests for RPA10Model (non-shape) function
+    Unit tests for RPA10Model (non-shape) function
     """
     def setUp(self):
         from sans.models.RPA10Model import RPA10Model
@@ -82,7 +84,99 @@ class TestPolymerExclVolume(unittest.TestCase):
         self.assertAlmostEqual(self.model8.runXY(0.414955), 0.00305743, 6)
         # case 9
         self.assertAlmostEqual(self.model9.run(0.001), 0.00839376, 6)
-        self.assertAlmostEqual(self.model9.runXY(0.414955), 0.00305777, 6)        
+        self.assertAlmostEqual(self.model9.runXY(0.414955), 0.00305777, 6)  
+              
+class TestBarBell(unittest.TestCase):
+    """
+    Unit tests for BarBell function
+    """
+    def setUp(self):
+        from sans.models.BarBellModel import BarBellModel
+        self.model= BarBellModel()
         
+    def test1D(self):          
+        # the values are from Igor pro calculation    
+        self.assertAlmostEqual(self.model.run(0.001), 2864.7, 1)
+        self.assertAlmostEqual(self.model.run(0.215268), 0.526351, 4)
+        self.assertAlmostEqual(self.model.runXY(0.414467), 0.0685892, 6)
+
+class TestCappedCylinder(unittest.TestCase):
+    """
+    Unit tests for CappedCylinder function
+    """
+    def setUp(self):
+        from sans.models.CappedCylinderModel import CappedCylinderModel
+        self.model= CappedCylinderModel()
+        
+    def test1D(self):          
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model.run(0.001), 1424.72, 2)
+        self.assertAlmostEqual(self.model.run(0.215268), 0.360736, 4)
+        self.assertAlmostEqual(self.model.runXY(0.414467), 0.110283, 5)
+
+class TestLamellarParaCrystal(unittest.TestCase):
+    """
+    Unit tests for LamellarParaCystal function
+    """
+    def setUp(self):
+        from sans.models.LamellarPCrystalModel import LamellarPCrystalModel
+        self.model= LamellarPCrystalModel()
+        
+    def test1D(self):    
+        self.model.setParam("pd_spacing", 0.2)      
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model.run(0.001), 21829.3, 1)
+        self.assertAlmostEqual(self.model.run(0.215268), 0.00487686, 6)
+        self.assertAlmostEqual(self.model.runXY(0.414467), 0.00062029, 6)
+
+
+class TestSCParaCrystal(unittest.TestCase):
+    """
+    Unit tests for Simple Cubic ParaCrystal Model function
+    """
+    def setUp(self):
+        from sans.models.SCCrystalModel import SCCrystalModel
+        self.model= SCCrystalModel()
+        
+    def test1D(self):        
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model.run(0.001), 10.3038, 4)
+        self.assertAlmostEqual(self.model.run(0.215268), 0.00714905, 6)
+        self.assertAlmostEqual(self.model.runXY(0.414467), 0.000313289, 6)
+
+class TestFCParaCrystal(unittest.TestCase):
+    """
+    Unit tests for Face Centered Cubic ParaCrystal Model function
+    """
+    def setUp(self):
+        from sans.models.FCCrystalModel import FCCrystalModel
+        self.model= FCCrystalModel()
+        
+    def test1D(self):       
+        self.model.setParam("d_factor", 0.05)  
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model.run(0.001), 0.121017, 6)
+        self.assertAlmostEqual(self.model.run(0.215268), 0.0107218, 6)
+        self.assertAlmostEqual(self.model.runXY(0.414467), 0.000443282, 6)
+
+class TestBCParaCrystal(unittest.TestCase):
+    """
+    Unit tests for Body Centered Cubic ParaCrystal Model function
+    """
+    def setUp(self):
+        from sans.models.BCCrystalModel import BCCrystalModel
+        self.model= BCCrystalModel()
+        
+    def test1D(self):        
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model.run(0.001), 1.77267, 4)
+        self.assertAlmostEqual(self.model.run(0.215268), 0.00927739, 6)
+        self.assertAlmostEqual(self.model.runXY(0.414467), 0.000406973, 6)
+                                                        
 if __name__ == '__main__':
     unittest.main()

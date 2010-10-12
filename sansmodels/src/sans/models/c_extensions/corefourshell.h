@@ -5,17 +5,17 @@
  * Structure definition for sphere parameters
  */
  //[PYTHONCLASS] = CoreFourShellModel
- //[DISP_PARAMS] = rad_core, thick_shell1,thick_shell2,thick_shell3,thick_shell4
+ //[DISP_PARAMS] = rad_core0, thick_shell1,thick_shell2,thick_shell3,thick_shell4
  //[DESCRIPTION] =<text> Calculates the scattering intensity from a core-4 shell structure.
  // 			scale = scale factor * volume fraction
- //				rad_core: the radius of the core
- //				sld_core: the SLD of the core
+ //				rad_core0: the radius of the core
+ //				sld_core0: the SLD of the core
  //				thick_shelli: the thickness of the i'th shell from the core
  //				sld_shelli: the SLD of the i'th shell from the core
  //				sld_solv: the SLD of the solvent
  //				background: incoherent background
  //		</text>
- //[FIXED]=<text>  thick_shell4.width; thick_shell1.width;thick_shell2.width;thick_shell3.width;rad_core.width </text>
+ //[FIXED]=<text>  thick_shell4.width; thick_shell1.width;thick_shell2.width;thick_shell3.width;rad_core0.width </text>
  //[ORIENTATION_PARAMS]= <text> </text>
 
 typedef struct {
@@ -23,13 +23,13 @@ typedef struct {
     //  [DEFAULT]=scale= 1.0
     double scale;
 
-    ///	Radius of the core [A]
-    //  [DEFAULT]=rad_core=60. [A]
-    double rad_core;
+    ///	Radius of the core0 [A]
+    //  [DEFAULT]=rad_core0=60. [A]
+    double rad_core0;
 
-    ///	sld of core [1/A^(2)]
-    //  [DEFAULT]=sld_core= 6.4e-6 [1/A^(2)]
-    double sld_core;
+    ///	sld of core0 [1/A^(2)]
+    //  [DEFAULT]=sld_core0= 6.4e-6 [1/A^(2)]
+    double sld_core0;
 
     ///	thickness of the shell1 [A]
      //  [DEFAULT]=thick_shell1=10.0 [A]

@@ -48,8 +48,11 @@ class ReflectivityModel(BaseComponent):
         self._set_fixed_params()  
         self.model.params['n_layers'] = self.n_layers
         
-        ## functional multiplicity of the model
-        self.multiplicity = max_nshells
+        ## functional multiplicity info of the model
+        # [int(maximum no. of functionality),"str(Titl),
+        # [str(name of function0),...], [str(x-asix name of sld),...]]
+        self.multiplicity_info = [max_nshells,"No. of Layers:",[],['Depth']]
+
     
     def _clone(self, obj):
         """
@@ -83,7 +86,9 @@ class ReflectivityModel(BaseComponent):
         for name , value in self.model.params.iteritems():
             n = 0
             pos = len(name.split('_'))-1
-            if name.split('_')[0] == 'func':
+            if name.split('_')[0] == 'sldIM':
+                continue
+            elif name.split('_')[0] == 'func':
                 n= -1
                 while n<self.n_layers:
                     n += 1
@@ -140,7 +145,10 @@ class ReflectivityModel(BaseComponent):
                 for nshell in range(self.n_layers,max_nshells):
                     if key.split('_')[1] == 'flat%s' % str(nshell+1):
                         try:
-                            value = self.model.params['sld_medium']
+                            if key.split('_')[0] == 'sld':
+                                value = self.model.params['sld_medium']
+                            elif key.split('_')[0] == 'sldIM':
+                                value = self.model.params['sldIM_medium']
                             self.model.setParam(key, value)
                         except: pass
     

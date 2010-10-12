@@ -17,8 +17,8 @@ double corefourshell_analytical_1D(CoreFourShellParameters *pars, double q) {
 	double dp[13];
 
 	dp[0] = pars->scale;
-	dp[1] = pars->rad_core;
-	dp[2] = pars->sld_core;
+	dp[1] = pars->rad_core0;
+	dp[2] = pars->sld_core0;
 	dp[3] = pars->thick_shell1;
 	dp[4] = pars->sld_shell1;
 	dp[5] = pars->thick_shell2;

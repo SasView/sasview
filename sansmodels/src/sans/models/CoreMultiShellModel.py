@@ -2,7 +2,7 @@
 from sans.models.BaseComponent import BaseComponent
 from sans.models.CoreFourShellModel import CoreFourShellModel
 import copy
-max_nshells = 4
+max_nshells = 5
 class CoreMultiShellModel(BaseComponent):
     """
     This multi-model is based on CoreFourShellModel and provides the capability
@@ -41,8 +41,11 @@ class CoreMultiShellModel(BaseComponent):
         #list of parameter that can be fitted
         self._set_fixed_params()  
         
-        ## functional multiplicity of the model
-        self.multiplicity = 5
+        ## functional multiplicity info of the model
+        # [int(maximum no. of functionality),"str(Titl),
+        # [str(name of function0),...], [str(x-asix name of sld),...]]
+        self.multiplicity_info = [max_nshells,"No. of Shells:",[],['Radius']]
+
         ## parameters with orientation: can be removed since there is no orientational params
         for item in self.model.orientation_params:
             self.orientation_params.append(item)
@@ -90,7 +93,7 @@ class CoreMultiShellModel(BaseComponent):
         for name , value in self.model.params.iteritems():
             nshell = 0
             if name.split('_')[0] == 'thick' or name.split('_')[0] == 'sld':
-                if name.split('_')[1] == 'solv' or name.split('_')[1] == 'core':
+                if name.split('_')[1] == 'solv' or name.split('_')[1] == 'core0':
                     self.params[name]= value
                     continue
                 while nshell<self.n_shells:
@@ -145,10 +148,10 @@ class CoreMultiShellModel(BaseComponent):
         beta = []
         # for core at r=0
         r.append(0)
-        beta.append(self.params['sld_core'])
+        beta.append(self.params['sld_core0'])
         # for core at r=rad_core
-        r.append(self.params['rad_core'])
-        beta.append(self.params['sld_core'])
+        r.append(self.params['rad_core0'])
+        beta.append(self.params['sld_core0'])
         
         # for shells
         for n in range(1,self.n_shells+1):

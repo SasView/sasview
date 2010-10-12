@@ -141,6 +141,30 @@ typedef struct {
     //  [DEFAULT]=func_inter10=0
     double func_inter10;
 
+    //  [DEFAULT]=sldIM_flat1=0
+    double sldIM_flat1;
+    //  [DEFAULT]=sldIM_flat2=0
+    double sldIM_flat2;
+    //  [DEFAULT]=sldIM_flat3=0
+    double sldIM_flat3;
+    //  [DEFAULT]=sldIM_flat4=0
+    double sldIM_flat4;
+    //  [DEFAULT]=sldIM_flat5=0
+    double sldIM_flat5;
+    //  [DEFAULT]=sldIM_flat6=0
+    double sldIM_flat6;
+    //  [DEFAULT]=sldIM_flat7=0
+    double sldIM_flat7;
+    //  [DEFAULT]=sldIM_flat8=0
+    double sldIM_flat8;
+    //  [DEFAULT]=sldIM_flat9=0
+    double sldIM_flat9;
+    //  [DEFAULT]=sldIM_flat10=0
+    double sldIM_flat10;
+    //  [DEFAULT]=sldIM_sub0=0
+    double sldIM_sub0;
+    //  [DEFAULT]=sldIM_medium=0
+    double sldIM_medium;
 
 } ReflParameters;
 
