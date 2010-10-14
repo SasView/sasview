@@ -177,6 +177,116 @@ class TestBCParaCrystal(unittest.TestCase):
         self.assertAlmostEqual(self.model.run(0.001), 1.77267, 4)
         self.assertAlmostEqual(self.model.run(0.215268), 0.00927739, 6)
         self.assertAlmostEqual(self.model.runXY(0.414467), 0.000406973, 6)
-                                                        
+                               
+
+class TestGuinierPorod(unittest.TestCase):
+    """
+    Unit tests for GuinierPorod Model function
+    """
+    def setUp(self):
+        from sans.models.GuinierPorodModel import GuinierPorodModel 
+        self.model= GuinierPorodModel()
+        
+    def test1D(self):        
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model.run(0.001), 995.112, 3)
+        self.assertAlmostEqual(self.model.run(0.105363), 0.162904, 5)
+        self.assertAlmostEqual(self.model.runXY(0.441623), 0.100854, 6)
+
+class TestGaussLorentzGel(unittest.TestCase):
+    """
+    Unit tests for GuinierPorod Model function
+    """
+    def setUp(self):
+        from sans.models.GaussLorentzGelModel import GaussLorentzGelModel
+        self.model= GaussLorentzGelModel()
+        
+    def test1D(self):        
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model.run(0.001), 149.481, 3)
+        self.assertAlmostEqual(self.model.run(0.105363), 9.1903, 4)
+        self.assertAlmostEqual(self.model.runXY(0.441623), 0.632811, 5)
+                                
+
+class TestTwoPowerLaw(unittest.TestCase):
+    """
+    Unit tests for TwoPowerLaw Model function
+    """
+    def setUp(self):
+        from sans.models.TwoPowerLawModel import TwoPowerLawModel
+        self.model= TwoPowerLawModel()
+        
+    def test1D(self):        
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertEqual(self.model.run(0.001), 1000)
+        self.assertAlmostEqual(self.model.run(0.150141), 0.125945, 5)
+        self.assertAlmostEqual(self.model.runXY(0.442528), 0.00166884, 7)
+                                
+class TestTwoLorentzian(unittest.TestCase):
+    """
+    Unit tests for TwoLorentzian Model function
+    """
+    def setUp(self):
+        from sans.models.TwoLorentzianModel import TwoLorentzianModel
+        self.model= TwoLorentzianModel()
+        
+    def test1D(self):        
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model.run(0.001), 11.0899, 3)
+        self.assertAlmostEqual(self.model.run(0.150141), 0.410245, 5)
+        self.assertAlmostEqual(self.model.runXY(0.442528), 0.148699, 6)
+                                
+
+class TestCorrLengthLaw(unittest.TestCase):
+    """
+    Unit tests for CorrLength Model function
+    """
+    def setUp(self):
+        from sans.models.CorrLengthModel import CorrLengthModel
+        self.model= CorrLengthModel()
+        
+    def test1D(self):        
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model.run(0.001), 1010.08, 1)
+        self.assertAlmostEqual(self.model.run(0.150141), 0.274645, 5)
+        self.assertAlmostEqual(self.model.runXY(0.442528), 0.120396, 6)
+                                
+
+class TestBroadPeak(unittest.TestCase):
+    """
+    Unit tests for BroadPeak Model function
+    """
+    def setUp(self):
+        from sans.models.BroadPeakModel import BroadPeakModel
+        self.model= BroadPeakModel()
+        
+    def test1D(self):        
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model.run(0.001), 10000.5, 1)
+        self.assertAlmostEqual(self.model.run(0.1501412), 1.47557, 5)
+        self.assertAlmostEqual(self.model.runXY(0.4425284), 0.134093, 6)
+        
+class TestFractalCoreShell(unittest.TestCase):
+    """
+    Unit tests for FractalCoreShell Model function
+    """
+    def setUp(self):
+        from sans.models.FractalCoreShellModel import FractalCoreShellModel
+        self.model= FractalCoreShellModel()
+        
+    def test1D(self):        
+        #self.model.setParam('radius.width', 2.0)
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model.run(0.001), 273.742, 3)
+        self.assertAlmostEqual(self.model.run(0.1501412), 0.040079, 6)
+        self.assertAlmostEqual(self.model.runXY(0.4425284), 0.00141167, 6)                             
+                                                                                                               
 if __name__ == '__main__':
     unittest.main()

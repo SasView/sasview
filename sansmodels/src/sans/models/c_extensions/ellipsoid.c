@@ -31,7 +31,7 @@ double kernel(double q, double r_small, double r_long, double angle) {
 			r_long*r_long/(r_small*r_small)*cos_alpha*cos_alpha);
 
 	// Spherical scattering ampliture, with modified length for ellipsoid
-	sph_func = 3*( sin(q*length) - q*length*cos(q*length) ) / (q*q*q*length*length*length);
+	sph_func = 3.0*( sin(q*length) - q*length*cos(q*length) ) / (q*q*q*length*length*length);
 
 	return sph_func*sph_func;
 }
@@ -98,7 +98,7 @@ double ellipsoid_analytical_2D_scaled(EllipsoidParameters *pars, double q, doubl
     cyl_z = cos(pars->axis_theta);
 
     // q vector
-    q_z = 0;
+    q_z = 0.0;
 
     // Compute the angle btw vector q and the
     // axis of the cylinder

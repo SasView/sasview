@@ -90,8 +90,8 @@ double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, double 
     b1_x = sin(pars->psi);
     b1_y = cos(pars->psi);
     // b2 axis orientation
-    b2_x = sqrt(1-sin(pars->theta)*cos(pars->phi))*cos(pars->psi);
-    b2_y = sqrt(1-sin(pars->theta)*cos(pars->phi))*sin(pars->psi);
+    b2_x = sqrt(1.0-sin(pars->theta)*cos(pars->phi))*cos(pars->psi);
+    b2_y = sqrt(1.0-sin(pars->theta)*cos(pars->phi))*sin(pars->psi);
 
     // a3 axis orientation
     a3_x = 0.5*(b2_x + b1_x);
@@ -108,7 +108,7 @@ double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, double 
     q_z = 0.0; // for SANS; assuming qz is negligible
 
     // Compute the angle btw vector q and the a3 axis
-    cos_val_a3 = a3_x*q_x + a3_y*q_y + a3_z*q_z;
+    cos_val_a3 = a3_x*q_x + a3_y*q_y;// + a3_z*q_z;
     a3_dot_q = aa*q*cos_val_a3;
 
     // a1 axis

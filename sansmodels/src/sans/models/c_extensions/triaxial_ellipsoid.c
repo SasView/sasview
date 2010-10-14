@@ -96,7 +96,7 @@ double triaxial_ellipsoid_analytical_2D_scaled(TriaxialEllipsoidParameters *pars
     cyl_z = cos(pars->axis_theta);
 
     // q vector
-    q_z = 0;
+    q_z = 0.0;
 
 	//dx = 1.0;
 	//dy = 1.0;

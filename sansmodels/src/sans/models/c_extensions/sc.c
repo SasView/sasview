@@ -98,10 +98,10 @@ double sc_analytical_2D_scaled(SCParameters *pars, double q, double q_x, double 
     a1_dot_q = aa*q*cos_val_a1;
 
     // a2 axis orientation
-    a2_x = sqrt(1-sin(pars->theta)*cos(pars->phi))*cos(pars->psi);
-    a2_y = sqrt(1-sin(pars->theta)*cos(pars->phi))*sin(pars->psi);
+    a2_x = sqrt(1.0-sin(pars->theta)*cos(pars->phi))*cos(pars->psi);
+    a2_y = sqrt(1.0-sin(pars->theta)*cos(pars->phi))*sin(pars->psi);
     // a2 axis
-    cos_val_a2 = sin(acos(cos_val_a1)) ;
+    cos_val_a2 =  a2_x*q_x + a2_y*q_y;//sin(acos(cos_val_a1)) ;
     a2_dot_q = aa*q*cos_val_a2;
 
     // The following test should always pass
