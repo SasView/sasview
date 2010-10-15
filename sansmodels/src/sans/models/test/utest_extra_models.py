@@ -286,7 +286,49 @@ class TestFractalCoreShell(unittest.TestCase):
         # the different digits are due to precision of q values  
         self.assertAlmostEqual(self.model.run(0.001), 273.742, 3)
         self.assertAlmostEqual(self.model.run(0.1501412), 0.040079, 6)
-        self.assertAlmostEqual(self.model.runXY(0.4425284), 0.00141167, 6)                             
-                                                                                                               
+        self.assertAlmostEqual(self.model.runXY(0.4425284), 0.00141167, 8)                             
+
+class TestUnifiedPowerRg(unittest.TestCase):
+    """
+    Unit tests for FractalCoreShell Model function
+    """
+    def setUp(self):
+        from sans.models.UnifiedPowerRgModel import UnifiedPowerRgModel
+        self.model1= UnifiedPowerRgModel(1)
+        self.model4= UnifiedPowerRgModel(4)
+        
+    def test1DLabel1(self):        
+        # Label #1
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model1.run(0.001), 2.99956, 5)
+        self.assertAlmostEqual(self.model1.run(0.1501412), 0.126506, 6)
+        self.assertAlmostEqual(self.model1.runXY(0.4425284), 0.00306386, 8)                             
+ 
+    def test1DLabel4(self):        
+        # Label #4
+        # Set params consistent w/NIST
+        # No. 4 already same
+        # No. 3
+        self.model4.setParam('Rg3', 200)
+        self.model4.setParam('B3', 5e-06)
+        self.model4.setParam('G3', 400)
+        # No. 2
+        self.model4.setParam('Rg2', 600)
+        self.model4.setParam('B2', 2e-07)
+        self.model4.setParam('G2', 4000)
+        # No. 1
+        self.model4.setParam('Rg1', 2000)
+        self.model4.setParam('B1', 1e-08)
+        self.model4.setParam('G1', 40000)
+        
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model4.run(0.001), 14778.4, 1)
+        self.assertAlmostEqual(self.model4.run(0.0301614), 7.88115, 4)
+        self.assertAlmostEqual(self.model4.run(0.1501412), 0.126864, 6)
+        self.assertAlmostEqual(self.model4.runXY(0.4425284), 0.00306386, 8)  
+                                                                                  
+                                                                                                                                                                                 
 if __name__ == '__main__':
     unittest.main()
