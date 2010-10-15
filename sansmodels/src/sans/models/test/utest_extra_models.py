@@ -345,6 +345,21 @@ class TestUnifiedPowerRg(unittest.TestCase):
         self.assertAlmostEqual(self.model4.run(0.1501412), 0.126864, 6)
         self.assertAlmostEqual(self.model4.runXY(0.4425284), 0.00306386, 8)  
                                                                               
-                                                                                                                                                                                 
+
+class TestCSPP(unittest.TestCase):
+    """
+    Unit tests for CSParallelepiped Model function
+    """
+    def setUp(self):
+        from sans.models.CSParallelepipedModel import CSParallelepipedModel
+        self.model= CSParallelepipedModel()
+        
+    def test1D(self):        
+        # the values are from Igor pro calculation  
+        # the different digits are due to precision of q values  
+        self.assertAlmostEqual(self.model.run(0.001), 1383.96, 2)
+        self.assertAlmostEqual(self.model.run(0.1501412), 2.51932, 4)
+        self.assertAlmostEqual(self.model.runXY(0.4425284), 0.0736735, 6)
+                                                                                                                                                          
 if __name__ == '__main__':
     unittest.main()

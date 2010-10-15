@@ -97,7 +97,6 @@ public:
 
 class ParallelepipedModel{
 public:
-	// TODO: add 2D
 	// Model parameters
 	Parameter scale;
 	Parameter short_a;
@@ -120,6 +119,36 @@ public:
 	double evaluate_rphi(double q, double phi);
 };
 
+
+class CSParallelepipedModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter shortA;
+	Parameter midB;
+	Parameter longC;
+	Parameter rimA;
+	Parameter rimB;
+	Parameter rimC;
+	Parameter sld_rimA;
+	Parameter sld_rimB;
+	Parameter sld_rimC;
+	Parameter sld_pcore;
+	Parameter sld_solv;
+	Parameter background;
+	Parameter parallel_theta;
+	Parameter parallel_phi;
+	Parameter parallel_psi;
+
+	// Constructor
+	CSParallelepipedModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
 
 class OnionModel{
 public:

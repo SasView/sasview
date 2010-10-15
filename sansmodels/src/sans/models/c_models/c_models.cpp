@@ -15,6 +15,7 @@ void addCBarBellModel(PyObject *module);
 void addCCappedCylinderModel(PyObject *module);
 void addCTriaxialEllipsoidModel(PyObject *module);
 void addCParallelepipedModel(PyObject *module);
+void addCCSParallelepipedModel(PyObject *module);
 void addCSphereModel(PyObject *module);
 void addCOnionModel(PyObject *module);
 void addCReflModel(PyObject *module);
@@ -226,6 +227,7 @@ initc_models(void)
 	addCBarBellModel(m);
 	addCCappedCylinderModel(m);
 	addCParallelepipedModel(m);
+	addCCSParallelepipedModel(m);
 	addCCoreShellCylinderModel(m);
 	addCCoreShellModel(m);
 	addCCoreFourShellModel(m);

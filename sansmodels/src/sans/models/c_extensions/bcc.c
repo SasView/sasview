@@ -109,16 +109,16 @@ double bc_analytical_2D_scaled(BCParameters *pars, double q, double q_x, double 
 
     // Compute the angle btw vector q and the a3 axis
     cos_val_a3 = a3_x*q_x + a3_y*q_y + a3_z*q_z;
-    //alpha = acos(cos_val_a3);
+    alpha = acos(cos_val_a3);
     a3_dot_q = aa*q*cos_val_a3;
 
     // a1 axis
     cos_val_a1 = a1_x*q_x + a1_y*q_y;
-    a1_dot_q = aa*q*cos_val_a1;
+    a1_dot_q = aa*q*cos_val_a1*sin(alpha);
 
     // a2 axis
-    cos_val_a2 = a2_x*q_x + a2_y*q_y; //sin(acos(cos_val_a1)) ;
-    a2_dot_q = aa*q*cos_val_a2;
+    cos_val_a2 = sin(acos(cos_val_a1));//a2_x*q_x + a2_y*q_y;
+    a2_dot_q = aa*q*cos_val_a2*sin(alpha); //aa*q*cos_val_a2
 
     // The following test should always pass
     if (fabs(cos_val_a3)>1.0) {

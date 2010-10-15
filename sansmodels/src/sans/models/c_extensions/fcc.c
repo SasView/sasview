@@ -76,7 +76,7 @@ double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, double 
 	aa = pars->dnn;
 	Da = pars->d_factor*aa;
 	qDa_2 = pow(q*Da,2.0);
-	contrast = pars->sldSph - pars->sldSolv;
+	//contrast = pars->sldSph - pars->sldSolv;
 
 	latticeScale = 4.0*(4.0/3.0)*Pi*(dp[1]*dp[1]*dp[1])/pow(aa*sqrt(2.0),3.0);
 
@@ -108,16 +108,17 @@ double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, double 
     q_z = 0.0; // for SANS; assuming qz is negligible
 
     // Compute the angle btw vector q and the a3 axis
-    cos_val_a3 = a3_x*q_x + a3_y*q_y;// + a3_z*q_z;
+    cos_val_a3 = a3_x*q_x + a3_y*q_y + a3_z*q_z;
+    alpha = acos(cos_val_a3);
     a3_dot_q = aa*q*cos_val_a3;
 
     // a1 axis
     cos_val_a1 = a1_x*q_x + a1_y*q_y;
-    a1_dot_q = aa*q*cos_val_a1;
+    a1_dot_q = aa*q*cos_val_a1*sin(alpha);
 
     // a2 axis
-    cos_val_a2 = a2_x*q_x + a2_y*q_y; //sin(acos(cos_val_a1)) ;
-    a2_dot_q = aa*q*cos_val_a2;
+    cos_val_a2 = sin(acos(cos_val_a1));//a2_x*q_x + a2_y*q_y;
+    a2_dot_q = aa*q*cos_val_a2*sin(alpha);
 
     // The following test should always pass
     if (fabs(cos_val_a3)>1.0) {
@@ -133,7 +134,7 @@ double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, double 
     Zq = Zq * (1.0-Fkq_2)/(1.0-2.0*Fkq*cos(a3_dot_q)+Fkq_2);
 
 	// Use SphereForm directly from libigor
-	answer = SphereForm_Paracrystal(pars->radius,contrast,q)*Zq;
+	answer = SphereForm(dp,q)*Zq;
 
 	//consider scales
 	answer *= latticeScale * pars->scale;

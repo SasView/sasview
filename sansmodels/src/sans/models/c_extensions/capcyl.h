@@ -6,8 +6,8 @@
  */
  //[PYTHONCLASS] = CappedCylinderModel
  //[DISP_PARAMS] = rad_cyl,len_cyl,rad_cap,phi,  theta
- //[DESCRIPTION] =<text>Calculates the scattering from a cylinder with spherical
- //				section end-caps. That is, a sphereocylinder
+ //[DESCRIPTION] =<text>Calculates the scattering from a cylinder with spherical section end-caps.
+ //				That is, a sphereocylinder
  //				with end caps that have a radius larger than
  //				that of the cylinder and the center of the
  //				end cap radius lies within the cylinder.
