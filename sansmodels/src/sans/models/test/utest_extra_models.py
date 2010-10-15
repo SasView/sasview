@@ -286,7 +286,23 @@ class TestFractalCoreShell(unittest.TestCase):
         # the different digits are due to precision of q values  
         self.assertAlmostEqual(self.model.run(0.001), 273.742, 3)
         self.assertAlmostEqual(self.model.run(0.1501412), 0.040079, 6)
-        self.assertAlmostEqual(self.model.runXY(0.4425284), 0.00141167, 8)                             
+        self.assertAlmostEqual(self.model.runXY(0.4425284), 0.00141167, 8)  
+         
+    def test1DSchulzDispersion(self):      
+        # Same test w/ test1D up there but w/ Schulzdispersion
+        from sans.models.dispersion_models import SchulzDispersion
+        disp = SchulzDispersion()
+        self.model.set_dispersion('radius', disp)
+        self.model.dispersion['radius']['width'] = 2.0
+        self.model.dispersion['radius']['npts'] = 100
+        self.model.dispersion['radius']['nsigmas'] = 3.0
+        # the values are from Igor pro calculation
+        # the run does not neccessary to be exactly same with NIST 
+        # 'cause we used different method.
+        self.assertAlmostEqual(self.model.run(0.001), 287.851, -1)
+        self.assertAlmostEqual(self.model.run(0.1501412), 0.0500775, 3)
+        self.assertAlmostEqual(self.model.runXY(0.4425284), 0.00390948, 3)         
+       
 
 class TestUnifiedPowerRg(unittest.TestCase):
     """
@@ -328,7 +344,7 @@ class TestUnifiedPowerRg(unittest.TestCase):
         self.assertAlmostEqual(self.model4.run(0.0301614), 7.88115, 4)
         self.assertAlmostEqual(self.model4.run(0.1501412), 0.126864, 6)
         self.assertAlmostEqual(self.model4.runXY(0.4425284), 0.00306386, 8)  
-                                                                                  
+                                                                              
                                                                                                                                                                                  
 if __name__ == '__main__':
     unittest.main()
