@@ -111,12 +111,17 @@ class Plugin:
         """
         Returns a set of menu entries for tools
         """
+        kiessig_help = "This tool is to approximatly compute the "
+        kiessig_help += "thickness of a shell or the size of "
+        kiessig_help += "particles \n from the width of a Kiessig fringe."
         sld_help = "Provides computation related to Scattering Length Density"
         slit_length_help = "Provides computation related to Slit Length Density"
         data_editor_help = "Meta Data Editor"
         return [("SLD Calculator", sld_help, self.on_calculate_sld),
                 ("Slit Size Calculator", slit_length_help,
-                                self.on_calculate_slit_size)]#,
+                        self.on_calculate_slit_size),
+                ("Kiessig Thickness Calculator", 
+                        kiessig_help, self.on_calculate_kiessig),]#,
                 #("Data Editor", data_editor_help, self.on_edit_data)]
               
     def on_edit_data(self, event):
@@ -126,7 +131,16 @@ class Plugin:
         from data_editor import DataEditorWindow
         frame = DataEditorWindow(parent=self.parent, data=[], title="Data Editor")
         frame.Show(True)
-        
+
+    def on_calculate_kiessig(self, event):
+        """
+        Compute the Kiessig thickness
+        """
+        from kiessig_calculator_panel import KiessigWindow
+        frame = KiessigWindow()
+        frame.Show(True) 
+    
+       
     def on_calculate_sld(self, event):
         """
         Compute the scattering length density of molecula

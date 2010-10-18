@@ -24,7 +24,8 @@ class slit_calculator(unittest.TestCase):
         slitlength = cal.calculate_slit_length()
         
         # The value "5.5858" was obtained by manual calculation.
-        self.assertAlmostEqual(slitlength,5.5858, 3)
+        # It turns out our slit length is FWHM/2
+        self.assertAlmostEqual(slitlength,5.5858/2, 3)
         
         
 if __name__ == '__main__':

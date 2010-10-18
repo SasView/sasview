@@ -93,8 +93,8 @@ class SlitlengthCalculator(object):
                        + x_half_d*(y_half_u-y_half)) \
                         /(y_half_u - y_half_d)
         
-        # multiply by 2 due to the beam profile is for half beam
-        slit_length = 2.0 * x_half
+        # Our slit length is half width, so just give half beam value
+        slit_length = x_half
         
         # set slit_length
         self.slit_length = slit_length

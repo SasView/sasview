@@ -85,7 +85,7 @@ class SlitLengthCalculatorPanel(wx.Panel):
         """
             Fill the sizer containing slit size information
         """
-        slit_size_txt = wx.StaticText(self, -1, 'Slit Size (FWHM): ')
+        slit_size_txt = wx.StaticText(self, -1, 'Slit Size (FWHM/2): ')
         self.slit_size_tcl = InterActiveOutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
         slit_size_hint = " Estimated full slit size"
         self.slit_size_tcl.SetToolTipString(slit_size_hint)
