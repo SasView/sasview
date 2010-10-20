@@ -4,7 +4,7 @@ allows to create instance of type ScipyFit or ParkFit to perform either
 a park fit or a scipy fit.
 """
 
-from scipy import optimize
+#from scipy import optimize
 from ScipyFitting import ScipyFit
 from ParkFitting import ParkFit
 
@@ -32,7 +32,7 @@ class Fit:
         self._engine = None
         self.set_engine(engine)
           
-    def set_engine(self,word):
+    def set_engine(self, word):
         """
         Select the type of Fit 
         
@@ -42,9 +42,9 @@ class Fit:
              a valueError is raised 
              
         """
-        if word=="scipy":
-            self._engine=ScipyFit()
-        elif word=="park":
+        if word == "scipy":
+            self._engine = ScipyFit()
+        elif word == "park":
             self._engine=ParkFit()
         else:
             raise ValueError, "enter the keyword scipy or park"
@@ -52,18 +52,17 @@ class Fit:
     def fit(self, q=None, handler=None, curr_thread=None):
         """Perform the fit """
         try:
-            return self._engine.fit(q,handler, curr_thread= curr_thread)
+            return self._engine.fit(q,handler, curr_thread=curr_thread)
         except:
             raise
     
-    def set_model(self,model,Uid,pars=[],constraints=[]):
+    def set_model(self, model, Uid, pars=[], constraints=[]):
         """
         store a model model to fit at the position Uid of the fit engine
         """
-        self._engine.set_model(model,Uid,pars,constraints)
+        self._engine.set_model(model, Uid, pars, constraints)
    
-   
-    def set_data(self,data,Uid,smearer=None,qmin=None, qmax=None):
+    def set_data(self, data, Uid, smearer=None, qmin=None, qmax=None):
         """
         Store data to fit at the psotion Uid of the fit engine
         
@@ -73,20 +72,18 @@ class Fit:
         :param qmax: the minimum q range to fit
         
         """
-        self._engine.set_data(data,Uid,smearer,qmin, qmax)
+        self._engine.set_data(data, Uid, smearer, qmin, qmax)
         
-        
-    def get_model(self,Uid):
+    def get_model(self, Uid):
         """ return list of data"""
         self._engine.get_model(Uid)
 
 
-    def remove_Fit_Problem(self,Uid):
+    def remove_Fit_Problem(self, Uid):
         """remove fitarrange in Uid"""
         self._engine.remove_Fit_Problem(Uid)
         
-        
-    def select_problem_for_fit(self,Uid,value):
+    def select_problem_for_fit(self, Uid, value):
         """
         select a couple of model and data at the Uid position in dictionary
         and set in self.selected value to value
@@ -94,10 +91,9 @@ class Fit:
         :param value: the value to allow fitting.
              can only have the value one or zero
         """
-        self._engine.select_problem_for_fit(Uid,value)
+        self._engine.select_problem_for_fit(Uid, value)
         
-        
-    def get_problem_to_fit(self,Uid):
+    def get_problem_to_fit(self, Uid):
         """
         return the self.selected value of the fit problem of Uid
            

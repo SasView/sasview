@@ -7,7 +7,7 @@ This file should be removed after its content has been used by the team.
 
 # This code belongs in AbstractFitEngine
 class FitData1D:
-    def setFitRange(self,qmin=None,qmax=None):
+    def setFitRange(self, qmin=None, qmax=None):
         """ 
         Change the fit range.
         Take into account the fact that if smearing is applied, 
@@ -17,12 +17,12 @@ class FitData1D:
         
         # Skip Q=0 point, (especially for y(q=0)=None at x[0]).
         #ToDo: Fix this.
-        if qmin==0.0 and not numpy.isfinite(self.data.y[qmin]):
+        if qmin == 0.0 and not numpy.isfinite(self.data.y[qmin]):
             self.qmin = min(self.data.x[self.data.x!=0])
-        elif qmin!=None:                       
+        elif qmin != None:                       
             self.qmin = qmin            
 
-        if qmax !=None:
+        if qmax != None:
             self.qmax = qmax
             
         # Range used for input to smearing
@@ -39,7 +39,7 @@ class FitData1D:
         elif self.smearer.__class__.__name__ == 'QSmearer':
             # Take 3 sigmas as the offset between smeared and unsmeared space.
             try:
-                offset = 3.0*max(self.smearer.width)
+                offset = 3.0 * max(self.smearer.width)
                 self._qmin_unsmeared = max([min(self.data.x), self.qmin-offset])
                 self._qmax_unsmeared = min([max(self.data.x), self.qmax+offset])
             except:
@@ -63,30 +63,29 @@ class FitData1D:
         :return: residuals
         
         """
-        x,y = [numpy.asarray(v) for v in (self.x,self.y)]
-        if self.dy ==None or self.dy==[]:
-            dy= numpy.zeros(len(y))  
+        x, y = [numpy.asarray(v) for v in (self.x, self.y)]
+        if self.dy == None or self.dy == []:
+            dy = numpy.zeros(len(y))  
         else:
-            dy= numpy.asarray(dy)
-     
-        dy[dy==0]=1
-        idx_unsmeared = (x>=self._qmin_unsmeared) & (x <= self._qmax_unsmeared)
-  
+            dy = numpy.asarray(dy)
+        dy[dy == 0] = 1
+        idx_unsmeared = (x >= self._qmin_unsmeared) \
+                        & (x <= self._qmax_unsmeared)
         # Compute theory data f(x)
-        idx=[]
-        tempy=[]
-        tempfx=[]
-        tempdy=[]
-    
+        idx = []
+        tempy = []
+        tempfx = []
+        tempdy = []
         _first_bin = None
         for i_x in range(len(x)):
             try:
-                if idx_unsmeared[i_x]==True:
+                if idx_unsmeared[i_x] == True:
                     if _first_bin is None:
                         _first_bin = i_x
                     
-                    value= fn(x[i_x])
-                    idx.append(x[i_x]>=self.qmin and x[i_x]<=self.qmax)
+                    value = fn(x[i_x])
+                    idx.append(x[i_x] >= self.qmin and \
+                                x[i_x] <= self.qmax)
                     tempfx.append( value)
                     tempy.append(y[i_x])
                     tempdy.append(dy[i_x])
@@ -100,15 +99,15 @@ class FitData1D:
             tempfx = self.smearer(tempfx, _first_bin)
        
         newy = numpy.asarray(tempy)
-        newfx= numpy.asarray(tempfx)
-        newdy= numpy.asarray(tempdy)
+        newfx = numpy.asarray(tempfx)
+        newdy = numpy.asarray(tempdy)
        
         ## Sanity check
-        if numpy.size(newdy)!= numpy.size(newfx):
-            raise RuntimeError, "FitData1D: invalid error array %d <> %d" % (numpy.size(newdy), numpy.size(newfx))
-
-        return (newy[idx]-newfx[idx])/newdy[idx]
-     
+        if numpy.size(newdy) != numpy.size(newfx):
+            msg = "FitData1D: invalid error "
+            msg += "array %d <> %d" % (numpy.size(newdy), numpy.size(newfx))
+            raise RuntimeError, msg
+        return (newy[idx] - newfx[idx]) / newdy[idx]
      
     def residuals_alt(self, fn):
         """ 
@@ -136,48 +135,45 @@ class FitData1D:
         """
         # Make sure the arrays are numpy arrays, which are
         # expected by the fitter.
-        x,y = [numpy.asarray(v) for v in (self.x,self.y)]
-        if self.dy ==None or self.dy==[]:
-            dy= numpy.zeros(len(y))  
+        x, y = [numpy.asarray(v) for v in (self.x, self.y)]
+        if self.dy == None or self.dy == []:
+            dy = numpy.zeros(len(y))  
         else:
-            dy= numpy.asarray(dy)
-     
-        dy[dy==0]=1
-        idx = (x>=self.qmin) & (x <= self.qmax)
-        idx_unsmeared = (x>=self._qmin_unsmeared) & (x <= self._qmax_unsmeared)
-  
+            dy = numpy.asarray(dy)
+        dy[dy ==0 ] = 1
+        idx = (x >= self.qmin) & (x <= self.qmax)
+        idx_unsmeared = (x >= self._qmin_unsmeared) \
+                            & (x <= self._qmax_unsmeared)
         # Compute theory data f(x)
-        fx= numpy.zeros(len(x))
-    
+        fx = numpy.zeros(len(x))
         # First and last bins of the array, corresponding to
         # the Q range to be smeared
         _first_bin = None
         _last_bin  = None
         for i_x in range(len(x)):
             try:
-                if idx_unsmeared[i_x]==True:
+                if idx_unsmeared[i_x] == True:
                     if _first_bin is None:
                         _first_bin = i_x
                     else:
                         _last_bin  = i_x
-                    
                     value = fn(x[i_x])
                     fx[i_x] = value
             except:
                 ## skip error for model.run(x)
                 ## Should properly log the error
                 pass
-                 
         # Smear theory data
         if self.smearer is not None:
             fx = self.smearer(fx, _first_bin, _last_bin)
-       
         # Sanity check
-        if numpy.size(dy)!= numpy.size(fx):
-            raise RuntimeError, "FitData1D: invalid error array %d <> %d" % (numpy.size(dy), numpy.size(fx))
+        if numpy.size(dy) != numpy.size(fx):
+            msg = "FitData1D: invalid error array"
+            msg += " %d <> %d" % (numpy.size(dy), numpy.size(fx))
 
+            raise RuntimeError, msg
         # Return the residuals for the smeared (observed) Q range
-        return (y[idx]-fx[idx])/dy[idx]
+        return (y[idx] - fx[idx]) / dy[idx]
      
 # The following code belongs in DataLoader.qsmearing
 class _BaseSmearer(object):
@@ -201,28 +197,32 @@ class _BaseSmearer(object):
         
         """
         # Sanity check
-        if len(iq)+first_bin > self.nbins:
-            raise RuntimeError, "Invalid I(q) vector: inconsistent array length %s > %s" % (str(len(iq)+first_bin), str(self.nbins))
+        if len(iq) + first_bin > self.nbins:
+            msg = "Invalid I(q) vector: inconsistent array length "
+            msg += " %s > %s" % (str(len(iq) + first_bin), str(self.nbins))
+            raise RuntimeError, msg
         
         if self._weights == None:
             self._compute_matrix()
             
         iq_smeared = numpy.zeros(len(iq))
         # Loop over q-values
-        idwb=[]
+        idwb = []
         
         for q_i in range(len(iq)):
             sum = 0.0
             counts = 0.0  
             for i in range(len(iq)):
-                if iq[i]==0 or self._weights[q_i+first_bin][i+first_bin]==0:
+                if iq[i] == 0 or \
+                    self._weights[q_i+first_bin][i+first_bin] == 0:
                     continue
                 else:
                     sum += iq[i] * self._weights[q_i+first_bin][i+first_bin] 
                     counts += self._weights[q_i+first_bin][i+first_bin]
-            
             if counts == 0:
                 iq_smeared[q_i] = 0
             else:
                 iq_smeared[q_i] = sum/counts 
-        return iq_smeared              
+        return iq_smeared   
+    
+           

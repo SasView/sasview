@@ -6,10 +6,10 @@ ParkFitting module contains SansParameter,Model,Data
 FitArrange, ParkFit,Parameter classes.All listed classes work together to perform a 
 simple fit with park optimizer.
 """
-import time
-import numpy
+#import time
+#import numpy
 import park
-from park import fit,fitresult
+from park import fit, fitresult
 from park import assembly
 from park.fitmc import FitSimplex, FitMC
 
@@ -51,8 +51,8 @@ class ParkFit(FitEngine):
         Creates a dictionary (self.fitArrangeList={})of FitArrange elements
         with Uid as keys
         """
-        self.fitArrangeDict={}
-        self.paramList=[]
+        self.fitArrangeDict = {}
+        self.paramList = []
         
     def createAssembly(self):
         """
@@ -60,39 +60,35 @@ class ParkFit(FitEngine):
         Create parkmodel and park data ,form a list couple of parkmodel and parkdata
         create an assembly self.problem=  park.Assembly([(parkmodel,parkdata)])
         """
-        mylist=[]
-        listmodel=[]
-        i=0
-        fitproblems=[]
-        for id ,fproblem in self.fitArrangeDict.iteritems():
-            if fproblem.get_to_fit()==1:
+        mylist = []
+        listmodel = []
+        i = 0
+        fitproblems = []
+        for id,fproblem in self.fitArrangeDict.iteritems():
+            if fproblem.get_to_fit() == 1:
                 fitproblems.append(fproblem)
-                
-        if len(fitproblems)==0 : 
+        if len(fitproblems) == 0: 
             raise RuntimeError, "No Assembly scheduled for Park fitting."
             return
         for item in fitproblems:
             parkmodel = item.get_model()
             for p in parkmodel.parameterset:
                 ## does not allow status change for constraint parameters
-                if p.status!= 'computed':
+                if p.status != 'computed':
                     if p._getname()in item.pars:
                         ## make parameters selected for fit will be between boundaries
-                        p.set( p.range )
-                                
+                        p.set(p.range)         
                     else:
-                        p.status= 'fixed'
-             
-            i+=1
-            Ldata=item.get_data()
+                        p.status = 'fixed'
+            i += 1
+            Ldata = item.get_data()
             #parkdata=self._concatenateData(Ldata)
-            parkdata=Ldata
-            fitness=(parkmodel,parkdata)
+            parkdata = Ldata
+            fitness = (parkmodel, parkdata)
             mylist.append(fitness)
+        self.problem = park.Assembly(mylist)
         
-        self.problem =  park.Assembly(mylist)
-        
-    def fit(self,q=None,handler=None, curr_thread= None):
+    def fit(self, q=None, handler=None, curr_thread=None):
         """
         Performs fit with park.fit module.It can  perform fit with one model
         and a set of data, more than two fit of  one model and sets of data or 
@@ -111,22 +107,19 @@ class ParkFit(FitEngine):
         
         """
         self.createAssembly()
-    
         localfit = FitSimplex()
         localfit.ftol = 1e-8
         
         # See `park.fitresult.FitHandler` for details.
         fitter = FitMC(localfit=localfit, start_points=1)
         if handler == None:
-            handler= fitresult.ConsoleUpdate(improvement_delta=0.1)
-      
-            
+            handler = fitresult.ConsoleUpdate(improvement_delta=0.1)
         result = fit.fit(self.problem,
                          fitter=fitter,
-                         handler= handler)
+                         handler=handler)
         self.problem.all_results(result)
-        if result !=None:
-            if q !=None:
+        if result != None:
+            if q != None:
                 q.put(result)
                 return q
             return result

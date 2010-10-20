@@ -9,22 +9,22 @@ simple fit with scipy optimizer.
 import numpy 
 from scipy import optimize
 
-from AbstractFitEngine import FitEngine, SansAssembly,FitAbort
+from AbstractFitEngine import FitEngine, SansAssembly, FitAbort
 
 class fitresult(object):
     """
     Storing fit result
     """
     def __init__(self, model=None, paramList=None):
-        self.calls     = None
-        self.fitness   = None
-        self.chisqr    = None
-        self.pvec      = None
-        self.cov       = None
-        self.info      = None
-        self.mesg      = None
-        self.success   = None
-        self.stderr    = None
+        self.calls = None
+        self.fitness = None
+        self.chisqr = None
+        self.pvec = None
+        self.cov = None
+        self.info = None
+        self.mesg = None
+        self.success = None
+        self.stderr = None
         self.parameters = None
         self.model = model
         self.paramList = paramList
@@ -47,8 +47,9 @@ class fitresult(object):
         n = len(self.model.parameterset)
 
         result_param = zip(xrange(n), self.model.parameterset)
-        L = ["P%-3d  %s......|.....%s"%(p[0], p[1], p[1].value) for p in result_param if p[1].name in self.paramList ]
-        L.append("=== goodness of fit: %s"%(str(self.fitness)))
+        L = ["P%-3d  %s......|.....%s"%(p[0], p[1], p[1].value)\
+              for p in result_param if p[1].name in self.paramList]
+        L.append("=== goodness of fit: %s" % (str(self.fitness)))
         return "\n".join(L)
     
     def print_summary(self):
@@ -88,38 +89,38 @@ class ScipyFit(FitEngine):
         Creates a dictionary (self.fitArrangeDict={})of FitArrange elements
         with Uid as keys
         """
-        self.fitArrangeDict={}
-        self.paramList=[]
+        self.fitArrangeDict = {}
+        self.paramList = []
     #def fit(self, *args, **kw):
     #    return profile(self._fit, *args, **kw)
 
     def fit(self, q=None, handler=None, curr_thread=None):
         """
         """
-        fitproblem=[]
-        for id ,fproblem in self.fitArrangeDict.iteritems():
-            if fproblem.get_to_fit()==1:
+        fitproblem = []
+        for id, fproblem in self.fitArrangeDict.iteritems():
+            if fproblem.get_to_fit() == 1:
                 fitproblem.append(fproblem)
-        if len(fitproblem)>1 : 
+        if len(fitproblem) > 1 : 
             msg = "Scipy can't fit more than a single fit problem at a time."
             raise RuntimeError, msg
             return
-        elif len(fitproblem)==0 : 
+        elif len(fitproblem) == 0 : 
             raise RuntimeError, "No Assembly scheduled for Scipy fitting."
             return
     
-        listdata=[]
+        listdata = []
         model = fitproblem[0].get_model()
         listdata = fitproblem[0].get_data()
         # Concatenate dList set (contains one or more data)before fitting
         data = listdata
-        self.curr_thread= curr_thread
+        self.curr_thread = curr_thread
         result = fitresult(model=model, paramList=self.paramList)
         if handler is not None:
             handler.set_result(result=result)
         #try:
         functor = SansAssembly(self.paramList, model, data, handler=handler,
-                                fitresult=result,curr_thread= self.curr_thread)
+                         fitresult=result, curr_thread= self.curr_thread)
        
        
         out, cov_x, info, mesg, success = optimize.leastsq(functor,
@@ -145,7 +146,7 @@ class ScipyFit(FitEngine):
                     return q
                 return result
         else:  
-            raise ValueError, "SVD did not converge"+str(success)
+            raise ValueError, "SVD did not converge" + str(success)
     
 
 

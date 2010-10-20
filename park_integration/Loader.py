@@ -1,12 +1,13 @@
 # class Loader  to load any king of file
-import wx
-import string,numpy
+#import wx
+#import string
+import numpy
 class Load:
     """
     This class is loading values from given file or value giving by the user
     """
     
-    def _init_(self,x=None,y=None,dx=None,dy=None):
+    def _init_(self, x=None, y=None, dx=None, dy=None):
         # variable to store loaded values
         self.x = x
         self.y = y
@@ -14,7 +15,7 @@ class Load:
         self.dy = dy
         self.filename = None
         
-    def set_filename(self,path=None):
+    def set_filename(self, path=None):
         """
         Store path into a variable.If the user doesn't give a path as a parameter a pop-up
         window appears to select the file.
@@ -24,7 +25,6 @@ class Load:
         """
         self.filename = path
        
-
     def get_filename(self):
         """ return the file's path"""
         return self.filename
@@ -32,13 +32,13 @@ class Load:
     def set_values(self):
         """ Store the values loaded from file in local variables"""
         if not self.filename == None:
-            input_f =  open(self.filename,'r')
+            input_f =  open(self.filename, 'r')
             buff = input_f.read()
             lines = buff.split('\n')
-            self.x=[]
-            self.y=[]
+            self.x = []
+            self.y = []
             self.dx = [] 
-            self.dy=[]
+            self.dy = []
             for line in lines:
                 try:
                     toks = line.split()
@@ -63,21 +63,21 @@ class Load:
             
     def get_values(self):
         """ Return x, y, dx, dy"""
-        return self.x,self.y,self.dx,self.dy
+        return self.x, self.y, self.dx, self.dy
     
-    def load_data(self,data):
+    def load_data(self, data):
         """ Return plottable"""
         #load data
         data.x = self.x
         data.y = self.y
         data.dx = self.dx
-        data.dy =self.dy
+        data.dy = self.dy
         #Load its View class
         #plottable.reset_view()
        
     
 if __name__ == "__main__": 
-    load= Load()
+    load = Load()
     load.set_filename("testdata_line.txt")
     print load.get_filename() 
     load.set_values()

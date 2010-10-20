@@ -1,7 +1,10 @@
 
-
-import logging, sys
-import park,numpy,math, copy
+import  copy
+import logging
+import sys
+import numpy
+import math
+import park
 from DataLoader.data_info import Data1D
 from DataLoader.data_info import Data2D
 
@@ -17,7 +20,7 @@ class SansParameter(park.Parameter):
         :param model: the sans model to wrap as a park model
         
         """
-        self._model, self._name = model,name
+        self._model, self._name = model, name
         #set the value for the parameter of the given name
         self.set(model.getParam(name))
          
@@ -30,7 +33,7 @@ class SansParameter(park.Parameter):
         """
         return self._model.getParam(self.name)
     
-    def _setvalue(self,value):
+    def _setvalue(self, value):
         """
         override the _setvalue pf park parameter
         
@@ -47,7 +50,7 @@ class SansParameter(park.Parameter):
         return the range of parameter
         """
         #if not  self.name in self._model.getDispParamList():
-        lo,hi = self._model.details[self.name][1:3]
+        lo, hi = self._model.details[self.name][1:3]
         if lo is None: lo = -numpy.inf
         if hi is None: hi = numpy.inf
         #else:
@@ -57,9 +60,9 @@ class SansParameter(park.Parameter):
         if lo >= hi:
             raise ValueError,"wrong fit range for parameters"
         
-        return lo,hi
+        return lo, hi
     
-    def _setrange(self,r):
+    def _setrange(self, r):
         """
         override _setrange of park parameter
         
@@ -67,7 +70,7 @@ class SansParameter(park.Parameter):
         
         """
         self._model.details[self.name][1:3] = r
-    range = property(_getrange,_setrange)
+    range = property(_getrange, _setrange)
     
 class Model(park.Model):
     """
@@ -86,26 +89,26 @@ class Model(park.Model):
         #list of park parameter
         self.parkp = [SansParameter(p,sans_model) for p in self.sansp]
         #list of parameterset 
-        self.parameterset = park.ParameterSet(sans_model.name,pars=self.parkp)
-        self.pars=[]
+        self.parameterset = park.ParameterSet(sans_model.name, pars=self.parkp)
+        self.pars = []
   
-    def getParams(self,fitparams):
+    def getParams(self, fitparams):
         """
         return a list of value of paramter to fit
         
         :param fitparams: list of paramaters name to fit
         
         """
-        list=[]
-        self.pars=[]
-        self.pars=fitparams
+        list = []
+        self.pars = []
+        self.pars = fitparams
         for item in fitparams:
             for element in self.parkp:
-                 if element.name ==str(item):
+                 if element.name == str(item):
                      list.append(element.value)
         return list
     
-    def setParams(self,paramlist, params):
+    def setParams(self, paramlist, params):
         """
         Set value for parameters to fit
         
@@ -115,13 +118,13 @@ class Model(park.Model):
         try:
             for i in range(len(self.parkp)):
                 for j in range(len(paramlist)):
-                    if self.parkp[i].name==paramlist[j]:
+                    if self.parkp[i].name == paramlist[j]:
                         self.parkp[i].value = params[j]
-                        self.model.setParam(self.parkp[i].name,params[j])
+                        self.model.setParam(self.parkp[i].name, params[j])
         except:
             raise
   
-    def eval(self,x):
+    def eval(self, x):
         """
         override eval method of park model. 
         
@@ -140,8 +143,7 @@ class FitData1D(Data1D):
     FitData1D inherits from DataLoader.data_info.Data1D. Implements 
     a way to get residuals from data.
     """
-    def __init__(self,x, y,dx= None, dy=None, smearer=None):
-        Data1D.__init__(self, x=numpy.array(x), y=numpy.array(y), dx=dx, dy=dy)
+    def __init__(self, x, y, dx=None, dy=None, smearer=None):
         """
         :param smearer: is an object of class QSmearer or SlitSmearer
            that will smear the theory data (slit smearing or resolution 
@@ -161,64 +163,66 @@ class FitData1D(Data1D):
             Setting it back to None will turn smearing off.
             
         """
+        Data1D.__init__(self, x=x, y=y, dx=dx, dy=dy)
+        
         self.smearer = smearer
         
         # Check error bar; if no error bar found, set it constant(=1)
         # TODO: Should provide an option for users to set it like percent, constant, or dy data
-        if dy ==None or dy==[] or dy.all()==0:
-            self.dy= numpy.ones(len(y))  
+        if dy == None or dy == [] or dy.all() == 0:
+            self.dy = numpy.ones(len(y))  
         else:
-            self.dy= numpy.asarray(dy).copy()
+            self.dy = numpy.asarray(dy).copy()
 
         ## Min Q-value
         #Skip the Q=0 point, especially when y(q=0)=None at x[0].
-        if min (self.x) ==0.0 and self.x[0]==0 and not numpy.isfinite(self.y[0]):
+        if min (self.x) == 0.0 and self.x[0] == 0 and\
+                     not numpy.isfinite(self.y[0]):
             self.qmin = min(self.x[self.x!=0])
         else:                              
-            self.qmin= min (self.x)
+            self.qmin = min(self.x)
         ## Max Q-value
-        self.qmax = max (self.x)
+        self.qmax = max(self.x)
         
         # Range used for input to smearing
         self._qmin_unsmeared = self.qmin
         self._qmax_unsmeared = self.qmax
         # Identify the bin range for the unsmeared and smeared spaces
-        self.idx = (self.x>=self.qmin) & (self.x <= self.qmax)
-        self.idx_unsmeared = (self.x>=self._qmin_unsmeared) & (self.x <= self._qmax_unsmeared)
+        self.idx = (self.x >= self.qmin) & (self.x <= self.qmax)
+        self.idx_unsmeared = (self.x >= self._qmin_unsmeared) \
+                            & (self.x <= self._qmax_unsmeared)
   
-       
-       
-    def setFitRange(self,qmin=None,qmax=None):
+    def setFitRange(self, qmin=None, qmax=None):
         """ to set the fit range"""
         # Skip Q=0 point, (especially for y(q=0)=None at x[0]).
         # ToDo: Find better way to do it.
-        if qmin==0.0 and not numpy.isfinite(self.y[qmin]):
-            self.qmin = min(self.x[self.x!=0])
-        elif qmin!=None:                       
+        if qmin == 0.0 and not numpy.isfinite(self.y[qmin]):
+            self.qmin = min(self.x[self.x != 0])
+        elif qmin != None:                       
             self.qmin = qmin            
-
-        if qmax !=None:
+        if qmax != None:
             self.qmax = qmax
-            
         # Determine the range needed in unsmeared-Q to cover
         # the smeared Q range
         self._qmin_unsmeared = self.qmin
         self._qmax_unsmeared = self.qmax    
         
         self._first_unsmeared_bin = 0
-        self._last_unsmeared_bin  = len(self.x)-1
+        self._last_unsmeared_bin  = len(self.x) - 1
         
         if self.smearer!=None:
-            self._first_unsmeared_bin, self._last_unsmeared_bin = self.smearer.get_bin_range(self.qmin, self.qmax)
+            self._first_unsmeared_bin, self._last_unsmeared_bin = \
+                    self.smearer.get_bin_range(self.qmin, self.qmax)
             self._qmin_unsmeared = self.x[self._first_unsmeared_bin]
             self._qmax_unsmeared = self.x[self._last_unsmeared_bin]
             
         # Identify the bin range for the unsmeared and smeared spaces
-        self.idx = (self.x>=self.qmin) & (self.x <= self.qmax)
-        self.idx = self.idx & (self.dy!=0)   ## zero error can not participate for fitting
-        self.idx_unsmeared = (self.x>=self._qmin_unsmeared) & (self.x <= self._qmax_unsmeared)
+        self.idx = (self.x >= self.qmin) & (self.x <= self.qmax)
+        ## zero error can not participate for fitting
+        self.idx = self.idx & (self.dy != 0)  
+        self.idx_unsmeared = (self.x >= self._qmin_unsmeared) \
+                            & (self.x <= self._qmax_unsmeared)
   
-        
     def getFitRange(self):
         """
         return the range of data.x to fit
@@ -238,19 +242,19 @@ class FitData1D(Data1D):
         
         """
         # Compute theory data f(x)
-        fx= numpy.zeros(len(self.x))
+        fx = numpy.zeros(len(self.x))
         fx[self.idx_unsmeared] = fn(self.x[self.idx_unsmeared])
        
         ## Smear theory data
         if self.smearer is not None:
-            fx = self.smearer(fx, self._first_unsmeared_bin, self._last_unsmeared_bin)
-
+            fx = self.smearer(fx, self._first_unsmeared_bin, 
+                              self._last_unsmeared_bin)
         ## Sanity check
-        if numpy.size(self.dy)!= numpy.size(fx):
-            raise RuntimeError, "FitData1D: invalid error array %d <> %d" % (numpy.shape(self.dy),
-                                                                              numpy.size(fx))
-                                                                              
-        return (self.y[self.idx]-fx[self.idx])/self.dy[self.idx]
+        if numpy.size(self.dy) != numpy.size(fx):
+            msg = "FitData1D: invalid error array "
+            msg += "%d <> %d" % (numpy.shape(self.dy), numpy.size(fx))                                                      
+            raise RuntimeError, msg  
+        return (self.y[self.idx] - fx[self.idx]) / self.dy[self.idx]
      
     def residuals_deriv(self, model, pars=[]):
         """ 
@@ -261,32 +265,31 @@ class FitData1D(Data1D):
         """
         return []
     
-    
 class FitData2D(Data2D):
     """ Wrapper class  for SANS data """
-    def __init__(self,sans_data2d ,data=None, err_data=None):
-        Data2D.__init__(self, data= data, err_data= err_data)
+    def __init__(self, sans_data2d, data=None, err_data=None):
+        Data2D.__init__(self, data=data, err_data= err_data)
         """
         Data can be initital with a data (sans plottable)
         or with vectors.
         """
-        self.res_err_image=[]
-        self.index_model=[]
-        self.qmin= None
-        self.qmax= None
+        self.res_err_image = []
+        self.index_model = []
+        self.qmin = None
+        self.qmax = None
         self.smearer = None
-        self.set_data(sans_data2d )
+        self.set_data(sans_data2d)
 
         
-    def set_data(self, sans_data2d, qmin=None, qmax=None ):
+    def set_data(self, sans_data2d, qmin=None, qmax=None):
         """
         Determine the correct qx_data and qy_data within range to fit
         """
-        self.data     = sans_data2d.data
+        self.data = sans_data2d.data
         self.err_data = sans_data2d.err_data
         self.qx_data = sans_data2d.qx_data
         self.qy_data = sans_data2d.qy_data
-        self.mask       = sans_data2d.mask
+        self.mask = sans_data2d.mask
 
         x_max = max(math.fabs(sans_data2d.xmin), math.fabs(sans_data2d.xmax))
         y_max = max(math.fabs(sans_data2d.ymin), math.fabs(sans_data2d.ymax))
@@ -295,18 +298,19 @@ class FitData2D(Data2D):
         if qmin == None:
             self.qmin = 1e-16
         if qmax == None:
-            self.qmax = math.sqrt(x_max*x_max +y_max*y_max)
+            self.qmax = math.sqrt(x_max * x_max + y_max * y_max)
         ## new error image for fitting purpose
-        if self.err_data== None or self.err_data ==[]:
-            self.res_err_data= numpy.ones(len(self.data))
+        if self.err_data == None or self.err_data == []:
+            self.res_err_data = numpy.ones(len(self.data))
         else:
             self.res_err_data = copy.deepcopy(self.err_data)
         #self.res_err_data[self.res_err_data==0]=1
         
-        self.radius= numpy.sqrt(self.qx_data**2 + self.qy_data**2)
+        self.radius = numpy.sqrt(self.qx_data**2 + self.qy_data**2)
         
         # Note: mask = True: for MASK while mask = False for NOT to mask
-        self.index_model = ((self.qmin <= self.radius)&(self.radius<= self.qmax))
+        self.index_model = ((self.qmin <= self.radius)&\
+                            (self.radius <= self.qmax))
         self.index_model = (self.index_model) & (self.mask)
         self.index_model = (self.index_model) & (numpy.isfinite(self.data))
         
@@ -320,16 +324,17 @@ class FitData2D(Data2D):
         self.smearer.set_index(self.index_model)
         self.smearer.get_data()
 
-    def setFitRange(self,qmin=None,qmax=None):
+    def setFitRange(self, qmin=None, qmax=None):
         """ to set the fit range"""
-        if qmin==0.0:
+        if qmin == 0.0:
             self.qmin = 1e-16
-        elif qmin!=None:                       
+        elif qmin != None:                       
             self.qmin = qmin            
-        if qmax!=None:
-            self.qmax= qmax        
-        self.radius= numpy.sqrt(self.qx_data**2 + self.qy_data**2)
-        self.index_model = ((self.qmin <= self.radius)&(self.radius<= self.qmax))
+        if qmax != None:
+            self.qmax = qmax        
+        self.radius = numpy.sqrt(self.qx_data**2 + self.qy_data**2)
+        self.index_model = ((self.qmin <= self.radius)&\
+                            (self.radius <= self.qmax))
         self.index_model = (self.index_model) &(self.mask)
         self.index_model = (self.index_model) & (numpy.isfinite(self.data))
         self.index_model = (self.index_model) & (self.res_err_data!=0)
@@ -351,9 +356,11 @@ class FitData2D(Data2D):
 
             gn = fn.get_value()  
         else:
-            gn = fn([self.qx_data[self.index_model],self.qy_data[self.index_model]])
+            gn = fn([self.qx_data[self.index_model],
+                     self.qy_data[self.index_model]])
         # use only the data point within ROI range
-        res=(self.data[self.index_model] - gn)/self.res_err_data[self.index_model]
+        res = (self.data[self.index_model] - gn)/\
+                    self.res_err_data[self.index_model]
         return res
         
     def residuals_deriv(self, model, pars=[]):
@@ -417,7 +424,7 @@ class SansAssembly:
         """
         #import thread
         self.model.setParams(self.paramlist,params)
-        self.res= self.data.residuals(self.model.eval)
+        self.res = self.data.residuals(self.model.eval)
         if self.fitresult is not None and  self.handler is not None:
             self.fitresult.set_model(model=self.model)
             fitness = self.chisq(params=params)
@@ -449,12 +456,12 @@ class FitEngine:
         
         :param listdata: list of data 
         
-        :return Data: Data is wrapper class for sans plottable. it is created with all parameters
-            of data concatenanted
+        :return Data: Data is wrapper class for sans plottable.
+         it is created with all parameters of data concatenanted
             
         :raise: if listdata is empty  will return None
-        :raise: if data in listdata don't contain dy field ,will create an error
-            during fitting
+        :raise: if data in listdata don't contain dy field ,
+        will create an error during fitting
             
         """
         #TODO: we have to refactor the way we handle data.
@@ -466,36 +473,35 @@ class FitEngine:
         #    raise RuntimeError, "FitEngine._concatenateData: Multiple data files is not currently supported"
         #return listdata[0]
         
-        if listdata==[]:
+        if listdata == []:
             raise ValueError, " data list missing"
         else:
-            xtemp=[]
-            ytemp=[]
-            dytemp=[]
-            self.mini=None
-            self.maxi=None
+            xtemp = []
+            ytemp = []
+            dytemp = []
+            self.mini = None
+            self.maxi = None
                
             for item in listdata:
-                data=item.data
-                mini,maxi=data.getFitRange()
-                if self.mini==None and self.maxi==None:
-                    self.mini=mini
-                    self.maxi=maxi
+                data = item.data
+                mini, maxi = data.getFitRange()
+                if self.mini == None and self.maxi == None:
+                    self.mini = mini
+                    self.maxi = maxi
                 else:
                     if mini < self.mini:
-                        self.mini=mini
+                        self.mini = mini
                     if self.maxi < maxi:
-                        self.maxi=maxi
-                        
-                    
+                        self.maxi = maxi
                 for i in range(len(data.x)):
                     xtemp.append(data.x[i])
                     ytemp.append(data.y[i])
-                    if data.dy is not None and len(data.dy)==len(data.y):   
+                    if data.dy is not None and len(data.dy) == len(data.y):   
                         dytemp.append(data.dy[i])
                     else:
-                        raise RuntimeError, "Fit._concatenateData: y-errors missing"
-            data= Data(x=xtemp,y=ytemp,dy=dytemp)
+                        msg = "Fit._concatenateData: y-errors missing"
+                        raise RuntimeError, msg
+            data = Data(x=xtemp, y=ytemp, dy=dytemp)
             data.setFitRange(self.mini, self.maxi)
             return data
         
@@ -524,48 +530,49 @@ class FitEngine:
         if model == None:
             raise ValueError, "AbstractFitEngine: Need to set model to fit"
         
-        new_model= model
+        new_model = model
         if not issubclass(model.__class__, Model):
-            new_model= Model(model)
+            new_model = Model(model)
         
-        if len(constraints)>0:
+        if len(constraints) > 0:
             for constraint in constraints:
                 name, value = constraint
                 try:
-                    new_model.parameterset[ str(name)].set( str(value) )
+                    new_model.parameterset[str(name)].set(str(value))
                 except:
-                    msg= "Fit Engine: Error occurs when setting the constraint"
+                    msg = "Fit Engine: Error occurs when setting the constraint"
                     msg += " %s for parameter %s "%(value, name)
                     raise ValueError, msg
                 
-        if len(pars) >0:
-            temp=[]
+        if len(pars) > 0:
+            temp = []
             for item in pars:
                 if item in new_model.model.getParamList():
                     temp.append(item)
                     self.paramList.append(item)
                 else:
                     
-                    msg = "wrong parameter %s used"%str(item)
-                    msg += "to set model %s. Choose"%str(new_model.model.name)
-                    msg += "parameter name within %s"%str(new_model.model.getParamList())
-                    raise ValueError,msg
+                    msg = "wrong parameter %s used" % str(item)
+                    msg += "to set model %s. Choose" % str(new_model.model.name)
+                    msg += "parameter name within %s" % \
+                                str(new_model.model.getParamList())
+                    raise ValueError, msg
               
             #A fitArrange is already created but contains dList only at Uid
             if self.fitArrangeDict.has_key(Uid):
                 self.fitArrangeDict[Uid].set_model(new_model)
-                self.fitArrangeDict[Uid].pars= pars
+                self.fitArrangeDict[Uid].pars = pars
             else:
             #no fitArrange object has been create with this Uid
                 fitproblem = FitArrange()
                 fitproblem.set_model(new_model)
-                fitproblem.pars= pars
+                fitproblem.pars = pars
                 self.fitArrangeDict[Uid] = fitproblem
                 
         else:
             raise ValueError, "park_integration:missing parameters"
     
-    def set_data(self,data,Uid,smearer=None,qmin=None,qmax=None):
+    def set_data(self, data, Uid, smearer=None, qmin=None, qmax=None):
         """ 
         Receives plottable, creates a list of data to fit,set data
         in a FitArrange object and adds that object in a dictionary 
@@ -575,22 +582,24 @@ class FitEngine:
         :param Uid: unique key corresponding to a fitArrange object with data
         
         """
-        if data.__class__.__name__=='Data2D':
-            fitdata=FitData2D(sans_data2d=data, data=data.data, err_data= data.err_data)
+        if data.__class__.__name__ == 'Data2D':
+            fitdata = FitData2D(sans_data2d=data, data=data.data,
+                                 err_data=data.err_data)
         else:
-            fitdata=FitData1D(x=data.x, y=data.y , dx= data.dx,dy=data.dy,smearer=smearer)
+            fitdata = FitData1D(x=data.x, y=data.y ,
+                                 dx=data.dx, dy=data.dy, smearer=smearer)
        
-        fitdata.setFitRange(qmin=qmin,qmax=qmax)
+        fitdata.setFitRange(qmin=qmin, qmax=qmax)
         #A fitArrange is already created but contains model only at Uid
         if self.fitArrangeDict.has_key(Uid):
             self.fitArrangeDict[Uid].add_data(fitdata)
         else:
         #no fitArrange object has been create with this Uid
-            fitproblem= FitArrange()
+            fitproblem = FitArrange()
             fitproblem.add_data(fitdata)
-            self.fitArrangeDict[Uid]=fitproblem    
+            self.fitArrangeDict[Uid] = fitproblem    
    
-    def get_model(self,Uid):
+    def get_model(self, Uid):
         """ 
         
         :param Uid: Uid is key in the dictionary containing the model to return
@@ -604,12 +613,12 @@ class FitEngine:
         else:
             return None
     
-    def remove_Fit_Problem(self,Uid):
+    def remove_Fit_Problem(self, Uid):
         """remove   fitarrange in Uid"""
         if self.fitArrangeDict.has_key(Uid):
             del self.fitArrangeDict[Uid]
             
-    def select_problem_for_fit(self,Uid,value):
+    def select_problem_for_fit(self, Uid, value):
         """
         select a couple of model and data at the Uid position in dictionary
         and set in self.selected value to value
@@ -619,9 +628,9 @@ class FitEngine:
                 
         """
         if self.fitArrangeDict.has_key(Uid):
-             self.fitArrangeDict[Uid].set_to_fit( value)
+             self.fitArrangeDict[Uid].set_to_fit(value)
              
-    def get_problem_to_fit(self,Uid):
+    def get_problem_to_fit(self, Uid):
         """
         return the self.selected value of the fit problem of Uid
         
@@ -643,13 +652,13 @@ class FitArrange:
             
         """
         self.model = None
-        self.dList =[]
-        self.pars=[]
+        self.dList = []
+        self.pars = []
         #self.selected  is zero when this fit problem is not schedule to fit 
         #self.selected is 1 when schedule to fit 
         self.selected = 0
         
-    def set_model(self,model):
+    def set_model(self, model):
         """ 
         set_model save a copy of the model
         
@@ -658,7 +667,7 @@ class FitArrange:
         """
         self.model = model
         
-    def add_data(self,data):
+    def add_data(self, data):
         """ 
         add_data fill a self.dList with data to fit
         
@@ -685,7 +694,7 @@ class FitArrange:
         #return self.dList 
         return self.dList[0] 
       
-    def remove_data(self,data):
+    def remove_data(self, data):
         """
         Remove one element from the list
         
@@ -702,7 +711,7 @@ class FitArrange:
         :param value: integer between 0 or 1
         
         """
-        self.selected= value
+        self.selected = value
         
     def get_to_fit(self):
         """
