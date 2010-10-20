@@ -198,7 +198,7 @@ double TriaxialEllipsoidModel :: operator()(double qx, double qy) {
 								* triaxial_ellipsoid_analytical_2DXY(&dp, qx, qy)
 								* weights_semi_axisA[i].value*weights_semi_axisB[j].value*weights_semi_axisC[k].value;
 							if (weights_theta.size()>1) {
-								_ptvalue *= sin(weights_theta[k].value);
+								_ptvalue *= fabs(sin(weights_theta[k].value));
 							}
 							sum += _ptvalue;
 							//Find average volume

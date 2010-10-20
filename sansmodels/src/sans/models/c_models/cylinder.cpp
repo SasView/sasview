@@ -166,7 +166,7 @@ double CylinderModel :: operator()(double qx, double qy) {
 						* cylinder_analytical_2DXY(&dp, qx, qy)
 						*pow(weights_rad[i].value,2)*weights_len[j].value;
 					if (weights_theta.size()>1) {
-						_ptvalue *= sin(weights_theta[k].value);
+						_ptvalue *= fabs(sin(weights_theta[k].value));
 					}
 					sum += _ptvalue;
 					//Find average volume

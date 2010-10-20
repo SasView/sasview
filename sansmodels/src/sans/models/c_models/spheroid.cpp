@@ -240,7 +240,7 @@ double CoreShellEllipsoidModel :: operator()(double qx, double qy) {
 								* spheroid_analytical_2DXY(&dp, qx, qy)
 								* pow(weights_equat_shell[k].value,2)*weights_polar_shell[l].value;
 							if (weights_theta.size()>1) {
-								_ptvalue *= sin(weights_theta[m].value);
+								_ptvalue *= fabs(sin(weights_theta[m].value));
 							}
 							sum += _ptvalue;
 							//Find average volume

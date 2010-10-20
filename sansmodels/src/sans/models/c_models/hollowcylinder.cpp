@@ -194,7 +194,7 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 						* (pow(weights_radius[m].value,2)-pow(weights_core_radius[i].value,2))
 						* weights_length[j].value;
 					if (weights_theta.size()>1) {
-						_ptvalue *= sin(weights_theta[k].value);
+						_ptvalue *= fabs(sin(weights_theta[k].value));
 					}
 					sum += _ptvalue;
 					//Find average volume

@@ -207,7 +207,7 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 								* weights_long_c[k].value;
 
 							if (weights_parallel_theta.size()>1) {
-								_ptvalue *= sin(weights_parallel_theta[l].value);
+								_ptvalue *= fabs(sin(weights_parallel_theta[l].value));
 							}
 							sum += _ptvalue;
 							//Find average volume

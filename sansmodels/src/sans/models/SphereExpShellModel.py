@@ -163,7 +163,8 @@ class SphereExpShellModel(BaseComponent):
             beta.append(self.params['sld_in_shell%s'% str(n)])
             
             A = self.params['A_shell%s'% str(n)]
-            if A <1.0e-16:
+            from math import fabs
+            if fabs(A) <1.0e-16:
                 # Right side of each shells
                 r0 += self.params['thick_shell%s'% str(n)]
                 r.append(r0)

@@ -169,7 +169,7 @@ double EllipsoidModel :: operator()(double qx, double qy) {
 						* ellipsoid_analytical_2DXY(&dp, qx, qy)
 						* pow(weights_rad_b[j].value,2) * weights_rad_a[i].value;
 					if (weights_theta.size()>1) {
-						_ptvalue *= sin(weights_theta[k].value);
+						_ptvalue *= fabs(sin(weights_theta[k].value));
 					}
 					sum += _ptvalue;
 					//Find average volume

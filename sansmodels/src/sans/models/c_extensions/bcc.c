@@ -60,7 +60,7 @@ double bc_analytical_2D_scaled(BCParameters *pars, double q, double q_x, double 
 	double a3_x, a3_y, a3_z, a2_x, a2_y, a1_x, a1_y;
 	double b3_x, b3_y, b3_z, b2_x, b2_y, b1_x, b1_y;
 	double q_z;
-	double alpha, vol, cos_val_a3, cos_val_a2, cos_val_a1;
+	double alpha, vol, cos_val_b3, cos_val_b2, cos_val_b1;
 	double a1_dot_q, a2_dot_q,a3_dot_q;
 	double answer;
 	double Pi = 4.0*atan(1.0);
@@ -79,50 +79,39 @@ double bc_analytical_2D_scaled(BCParameters *pars, double q, double q_x, double 
 
 	//the occupied volume of the lattice
 	latticeScale = 2.0*(4.0/3.0)*Pi*(dp[1]*dp[1]*dp[1])/pow(aa/sqrt(3.0/4.0),3.0);
-
+	// q vector
+	q_z = 0.0; // for SANS; assuming qz is negligible
 	/// Angles here are respect to detector coordinate
 	///  instead of against q coordinate(PRB 36(46), 3(6), 1754(3854))
     // b3 axis orientation
     b3_x = sin(pars->theta) * cos(pars->phi);//negative sign here???
     b3_y = sin(pars->theta) * sin(pars->phi);
     b3_z = cos(pars->theta);
+    cos_val_b3 =  b3_x*q_x + b3_y*q_y + b3_z*q_z;
+
+    alpha = acos(cos_val_b3);
     // b1 axis orientation
     b1_x = sin(pars->psi);
     b1_y = cos(pars->psi);
+	cos_val_b1 = (b1_x*q_x + b1_y*q_y);
     // b2 axis orientation
-    b2_x = sqrt(1.0-sin(pars->theta)*cos(pars->phi))*cos(pars->psi);
-    b2_y = sqrt(1.0-sin(pars->theta)*cos(pars->phi))*sin(pars->psi);
-
-    // a3 axis orientation
-    a3_x = 0.5*(b2_x + b1_x - b3_x);
-    a3_y = 0.5*(b2_y + b1_y - b3_y);
-    a3_z = 0.0;
-    // a1 axis orientation
-    a1_x = 0.5*(b3_x + b2_x - b1_x);
-    a1_y = 0.5*(b3_y + b2_y - b1_y);
-    // a2 axis orientation
-    a2_x = 0.5*(b3_x + b1_x - b2_x);
-    a2_y = 0.5*(b3_y + b1_y - b2_y);
-
-    // q vector
-    q_z = 0.0; // for SANS; assuming qz is negligible
+	cos_val_b2 = sin(acos(cos_val_b1));
+	// alpha corrections
+	cos_val_b2 *= sin(alpha);
+	cos_val_b1 *= sin(alpha);
 
     // Compute the angle btw vector q and the a3 axis
-    cos_val_a3 = a3_x*q_x + a3_y*q_y + a3_z*q_z;
-    alpha = acos(cos_val_a3);
-    a3_dot_q = aa*q*cos_val_a3;
+    a3_dot_q = 0.5*aa*q*(cos_val_b2+cos_val_b1-cos_val_b3);
 
     // a1 axis
-    cos_val_a1 = a1_x*q_x + a1_y*q_y;
-    a1_dot_q = aa*q*cos_val_a1*sin(alpha);
+    a1_dot_q = 0.5*aa*q*(cos_val_b3+cos_val_b2-cos_val_b1);
 
     // a2 axis
-    cos_val_a2 = sin(acos(cos_val_a1));//a2_x*q_x + a2_y*q_y;
-    a2_dot_q = aa*q*cos_val_a2*sin(alpha); //aa*q*cos_val_a2
+    a2_dot_q = 0.5*aa*q*(cos_val_b3+cos_val_b1-cos_val_b2);
 
     // The following test should always pass
-    if (fabs(cos_val_a3)>1.0) {
-    	printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+    if (fabs(cos_val_b3)>1.0) {
+    	printf("bcc_ana_2D: Unexpected error: cos(alpha)>1\n");
      	return 0;
     }
     // Get Fkq and Fkq_2
@@ -130,8 +119,8 @@ double bc_analytical_2D_scaled(BCParameters *pars, double q, double q_x, double 
     Fkq_2 = Fkq*Fkq;
     // Call Zq=Z1*Z2*Z3
     Zq = (1.0-Fkq_2)/(1.0-2.0*Fkq*cos(a1_dot_q)+Fkq_2);
-    Zq = Zq * (1.0-Fkq_2)/(1.0-2.0*Fkq*cos(a2_dot_q)+Fkq_2);
-    Zq = Zq * (1.0-Fkq_2)/(1.0-2.0*Fkq*cos(a3_dot_q)+Fkq_2);
+    Zq *= (1.0-Fkq_2)/(1.0-2.0*Fkq*cos(a2_dot_q)+Fkq_2);
+    Zq *= (1.0-Fkq_2)/(1.0-2.0*Fkq*cos(a3_dot_q)+Fkq_2);
 
 	// Use SphereForm directly from libigor
 	answer = SphereForm(dp,q)*Zq;

@@ -206,7 +206,7 @@ double EllipticalCylinderModel :: operator()(double qx, double qy) {
 						* weights_len[j].value
 						* weights_rat[m].value;
 					if (weights_theta.size()>1) {
-						_ptvalue *= sin(weights_theta[k].value);
+						_ptvalue *= fabs(sin(weights_theta[k].value));
 					}
 					sum += _ptvalue;
 					//Find average volume
