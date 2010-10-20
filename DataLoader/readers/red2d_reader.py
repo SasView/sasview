@@ -23,7 +23,17 @@ try:
     from data_util.nxsunit import Converter
 except:
     has_converter = False
-
+    
+def check_point(x_point):
+    """
+    check point validity
+    """
+    # set zero for non_floats
+    try:
+        return float(x_point)
+    except:
+        return 0
+        
 class Reader:
     """ Simple data reader for Igor data files """
     ## File type
@@ -184,12 +194,13 @@ class Reader:
         if len(data_list) != (len(data_lines)) * col_num:
             data_list = "\t".join(data_lines.tolist())
             data_list = data_list.split()
-            
-        # Change it(string) into float
-        data_list = map(float,data_list)
-        # numpy array form
-        data_array = numpy.array(data_list)
 
+        # Change it(string) into float
+        #data_list = map(float,data_list)
+        data_list1 = map(check_point,data_list)
+      
+        # numpy array form
+        data_array = numpy.array(data_list1)
         # Redimesion based on the row_num and col_num, otherwise raise an error.
         try:
             data_point = data_array.reshape(row_num,col_num).transpose()
@@ -215,7 +226,7 @@ class Reader:
         # Extra protection(it is needed for some data files): 
         # If all mask elements are False, put all True
         if not mask.any(): mask[mask==False] = True   
-  
+            
         # Store limits of the image in q space
         xmin    = numpy.min(qx_data)
         xmax    = numpy.max(qx_data)
