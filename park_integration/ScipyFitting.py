@@ -9,7 +9,9 @@ simple fit with scipy optimizer.
 import numpy 
 from scipy import optimize
 
-from AbstractFitEngine import FitEngine, SansAssembly, FitAbort
+from sans.fit.AbstractFitEngine import FitEngine
+from sans.fit.AbstractFitEngine import SansAssembly
+from sans.fit.AbstractFitEngine import FitAbort
 
 class fitresult(object):
     """
@@ -27,7 +29,7 @@ class fitresult(object):
         self.stderr = None
         self.parameters = None
         self.model = model
-        self.paramList = paramList
+        self.param_list = paramList
      
     def set_model(self, model):
         """
@@ -42,13 +44,13 @@ class fitresult(object):
     def __str__(self):
         """
         """
-        if self.pvec == None and self.model is None and self.paramList is None:
+        if self.pvec == None and self.model is None and self.param_list is None:
             return "No results"
         n = len(self.model.parameterset)
 
         result_param = zip(xrange(n), self.model.parameterset)
         L = ["P%-3d  %s......|.....%s"%(p[0], p[1], p[1].value)\
-              for p in result_param if p[1].name in self.paramList]
+              for p in result_param if p[1].name in self.param_list]
         L.append("=== goodness of fit: %s" % (str(self.fitness)))
         return "\n".join(L)
     
@@ -86,11 +88,12 @@ class ScipyFit(FitEngine):
     """
     def __init__(self):
         """
-        Creates a dictionary (self.fitArrangeDict={})of FitArrange elements
+        Creates a dictionary (self.fit_arrange_dict={})of FitArrange elements
         with Uid as keys
         """
-        self.fitArrangeDict = {}
-        self.paramList = []
+        FitEngine.__init__(self)
+        self.fit_arrange_dict = {}
+        self.param_list = []
     #def fit(self, *args, **kw):
     #    return profile(self._fit, *args, **kw)
 
@@ -98,7 +101,7 @@ class ScipyFit(FitEngine):
         """
         """
         fitproblem = []
-        for id, fproblem in self.fitArrangeDict.iteritems():
+        for id, fproblem in self.fit_arrange_dict.iteritems():
             if fproblem.get_to_fit() == 1:
                 fitproblem.append(fproblem)
         if len(fitproblem) > 1 : 
@@ -115,16 +118,16 @@ class ScipyFit(FitEngine):
         # Concatenate dList set (contains one or more data)before fitting
         data = listdata
         self.curr_thread = curr_thread
-        result = fitresult(model=model, paramList=self.paramList)
+        result = fitresult(model=model, paramList=self.param_list)
         if handler is not None:
             handler.set_result(result=result)
         #try:
-        functor = SansAssembly(self.paramList, model, data, handler=handler,
+        functor = SansAssembly(self.param_list, model, data, handler=handler,
                          fitresult=result, curr_thread= self.curr_thread)
        
        
         out, cov_x, info, mesg, success = optimize.leastsq(functor,
-                                                model.getParams(self.paramList),
+                                                model.getParams(self.param_list),
                                                     full_output=1, warning=True)
         
         chisqr = functor.chisq(out)

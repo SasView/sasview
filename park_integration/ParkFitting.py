@@ -3,18 +3,20 @@
 
 """
 ParkFitting module contains SansParameter,Model,Data
-FitArrange, ParkFit,Parameter classes.All listed classes work together to perform a 
-simple fit with park optimizer.
+FitArrange, ParkFit,Parameter classes.All listed classes work together
+to perform a simple fit with park optimizer.
 """
 #import time
 #import numpy
-import park
-from park import fit, fitresult
-from park import assembly
-from park.fitmc import FitSimplex, FitMC
+#import park
+from park import fit
+from park import fitresult
+from park.assembly import Assembly
+from park.fitmc import FitSimplex 
+from park.fitmc import FitMC
 
 #from Loader import Load
-from AbstractFitEngine import FitEngine
+from sans.fit.AbstractFitEngine import FitEngine
 
 
 class ParkFit(FitEngine):
@@ -35,7 +37,8 @@ class ParkFit(FitEngine):
          for the fit to be performed.
     engine.set_param( model,"M1", {'A':2,'B':4})
     
-    Add model with a dictionnary of FitArrangeList{} where Uid is a key and model
+    Add model with a dictionnary of FitArrangeList{} where Uid is a key
+    and model
     is save in FitArrange object.
     engine.set_model(model,Uid)
     
@@ -51,20 +54,23 @@ class ParkFit(FitEngine):
         Creates a dictionary (self.fitArrangeList={})of FitArrange elements
         with Uid as keys
         """
-        self.fitArrangeDict = {}
-        self.paramList = []
+        FitEngine.__init__(self)
+        self.fit_arrange_dict = {}
+        self.param_list = []
         
-    def createAssembly(self):
+    def create_assembly(self):
         """
-        Extract sansmodel and sansdata from self.FitArrangelist ={Uid:FitArrange}
-        Create parkmodel and park data ,form a list couple of parkmodel and parkdata
+        Extract sansmodel and sansdata from 
+        self.FitArrangelist ={Uid:FitArrange}
+        Create parkmodel and park data ,form a list couple of parkmodel 
+        and parkdata
         create an assembly self.problem=  park.Assembly([(parkmodel,parkdata)])
         """
         mylist = []
-        listmodel = []
-        i = 0
+        #listmodel = []
+        #i = 0
         fitproblems = []
-        for id,fproblem in self.fitArrangeDict.iteritems():
+        for fproblem in self.fit_arrange_dict.itervalues():
             if fproblem.get_to_fit() == 1:
                 fitproblems.append(fproblem)
         if len(fitproblems) == 0: 
@@ -75,38 +81,42 @@ class ParkFit(FitEngine):
             for p in parkmodel.parameterset:
                 ## does not allow status change for constraint parameters
                 if p.status != 'computed':
-                    if p._getname()in item.pars:
-                        ## make parameters selected for fit will be between boundaries
+                    if p.get_name()in item.pars:
+                        ## make parameters selected for 
+                        #fit will be between boundaries
                         p.set(p.range)         
                     else:
                         p.status = 'fixed'
-            i += 1
-            Ldata = item.get_data()
+            #i += 1
+            data_list = item.get_data()
             #parkdata=self._concatenateData(Ldata)
-            parkdata = Ldata
+            parkdata = data_list
             fitness = (parkmodel, parkdata)
             mylist.append(fitness)
-        self.problem = park.Assembly(mylist)
+        self.problem = Assembly(mylist)
         
     def fit(self, q=None, handler=None, curr_thread=None):
         """
         Performs fit with park.fit module.It can  perform fit with one model
         and a set of data, more than two fit of  one model and sets of data or 
-        fit with more than two model associated with their set of data and constraints
+        fit with more than two model associated with their set of data and 
+        constraints
         
-        :param pars: Dictionary of parameter names for the model and their values.
+        :param pars: Dictionary of parameter names for the model and their 
+            values.
         :param qmin: The minimum value of data's range to be fit
         :param qmax: The maximum value of data's range to be fit
         
-        :note: all parameter are ignored most of the time.Are just there to keep ScipyFit
-            and ParkFit interface the same.
+        :note: all parameter are ignored most of the time.Are just there 
+            to keep ScipyFit and ParkFit interface the same.
             
         :return: result.fitness Value of the goodness of fit metric
-        :return: result.pvec list of parameter with the best value found during fitting
+        :return: result.pvec list of parameter with the best value 
+            found during fitting
         :return: result.cov Covariance matrix
         
         """
-        self.createAssembly()
+        self.create_assembly()
         localfit = FitSimplex()
         localfit.ftol = 1e-8
         

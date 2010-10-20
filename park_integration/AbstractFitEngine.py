@@ -8,6 +8,8 @@ import park
 from DataLoader.data_info import Data1D
 from DataLoader.data_info import Data2D
 
+    
+    
 class SansParameter(park.Parameter):
     """
     SANS model parameters for use in the PARK fitting service.
@@ -61,6 +63,11 @@ class SansParameter(park.Parameter):
             raise ValueError,"wrong fit range for parameters"
         
         return lo, hi
+    
+    def get_name(self):
+        """
+        """
+        return self._getname()
     
     def _setrange(self, r):
         """
@@ -445,9 +452,9 @@ class FitEngine:
         Base class for scipy and park fit engine
         """
         #List of parameter names to fit
-        self.paramList=[]
+        self.param_list = []
         #Dictionnary of fitArrange element (fit problems)
-        self.fitArrangeDict={}
+        self.fit_arrange_dict = {}
         
     def _concatenateData(self, listdata=[]):
         """  
@@ -549,7 +556,7 @@ class FitEngine:
             for item in pars:
                 if item in new_model.model.getParamList():
                     temp.append(item)
-                    self.paramList.append(item)
+                    self.param_list.append(item)
                 else:
                     
                     msg = "wrong parameter %s used" % str(item)
@@ -559,15 +566,15 @@ class FitEngine:
                     raise ValueError, msg
               
             #A fitArrange is already created but contains dList only at Uid
-            if self.fitArrangeDict.has_key(Uid):
-                self.fitArrangeDict[Uid].set_model(new_model)
-                self.fitArrangeDict[Uid].pars = pars
+            if self.fit_arrange_dict.has_key(Uid):
+                self.fit_arrange_dict[Uid].set_model(new_model)
+                self.fit_arrange_dict[Uid].pars = pars
             else:
             #no fitArrange object has been create with this Uid
                 fitproblem = FitArrange()
                 fitproblem.set_model(new_model)
                 fitproblem.pars = pars
-                self.fitArrangeDict[Uid] = fitproblem
+                self.fit_arrange_dict[Uid] = fitproblem
                 
         else:
             raise ValueError, "park_integration:missing parameters"
@@ -591,13 +598,13 @@ class FitEngine:
        
         fitdata.setFitRange(qmin=qmin, qmax=qmax)
         #A fitArrange is already created but contains model only at Uid
-        if self.fitArrangeDict.has_key(Uid):
-            self.fitArrangeDict[Uid].add_data(fitdata)
+        if self.fit_arrange_dict.has_key(Uid):
+            self.fit_arrange_dict[Uid].add_data(fitdata)
         else:
         #no fitArrange object has been create with this Uid
             fitproblem = FitArrange()
             fitproblem.add_data(fitdata)
-            self.fitArrangeDict[Uid] = fitproblem    
+            self.fit_arrange_dict[Uid] = fitproblem    
    
     def get_model(self, Uid):
         """ 
@@ -608,15 +615,15 @@ class FitEngine:
             with this Uid
             
         """
-        if self.fitArrangeDict.has_key(Uid):
-            return self.fitArrangeDict[Uid].get_model()
+        if self.fit_arrange_dict.has_key(Uid):
+            return self.fit_arrange_dict[Uid].get_model()
         else:
             return None
     
     def remove_Fit_Problem(self, Uid):
         """remove   fitarrange in Uid"""
-        if self.fitArrangeDict.has_key(Uid):
-            del self.fitArrangeDict[Uid]
+        if self.fit_arrange_dict.has_key(Uid):
+            del self.fit_arrange_dict[Uid]
             
     def select_problem_for_fit(self, Uid, value):
         """
@@ -627,8 +634,8 @@ class FitEngine:
                 can only have the value one or zero
                 
         """
-        if self.fitArrangeDict.has_key(Uid):
-             self.fitArrangeDict[Uid].set_to_fit(value)
+        if self.fit_arrange_dict.has_key(Uid):
+             self.fit_arrange_dict[Uid].set_to_fit(value)
              
     def get_problem_to_fit(self, Uid):
         """
@@ -637,8 +644,8 @@ class FitEngine:
         :param Uid: the Uid of the problem
         
         """
-        if self.fitArrangeDict.has_key(Uid):
-             self.fitArrangeDict[Uid].get_to_fit()
+        if self.fit_arrange_dict.has_key(Uid):
+             self.fit_arrange_dict[Uid].get_to_fit()
     
 class FitArrange:
     def __init__(self):
