@@ -93,6 +93,8 @@ class BasicPage(wx.ScrolledWindow):
         ## each item related to a given parameters
         ##[cb state, name, value, "+/-", error of fit, min, max , units]
         self.parameters=[]
+        # non-fittable parameter whose value is astring
+        self.str_parameters = []
         ## list of parameters to fit , must be like self.parameters
         self.param_toFit=[]
         ## list of looking like parameters but with non fittable parameters info
@@ -946,6 +948,8 @@ class BasicPage(wx.ScrolledWindow):
                                      state.orientation_params_disp)
         self._reset_parameters_state(self.orientation_params,
                                      state.orientation_params)
+        self._reset_parameters_state(self.str_parameters,
+                                     state.str_parameters)
         self._reset_parameters_state(self.parameters,state.parameters)    
          ## display dispersion info layer        
         self.enable_disp.SetValue(state.enable_disp)
@@ -1485,6 +1489,8 @@ class BasicPage(wx.ScrolledWindow):
                     self.shape_indep_rbutton.SetValue(True)
                 elif k == "Structure Factors":
                      self.struct_rbutton.SetValue(True)
+                elif  k == "Multi-Functions":
+                    continue
                 else:
                     self.plugin_rbutton.SetValue(True)
                
@@ -1535,6 +1541,8 @@ class BasicPage(wx.ScrolledWindow):
                     self.shape_indep_rbutton.SetValue(True)
                 elif k == "Structure Factors":
                     self.struct_rbutton.SetValue(True)
+                elif  k == "Multi-Functions":
+                    continue
                 else:
                     self.plugin_rbutton.SetValue(True)
                 if class_name in list:
@@ -1621,6 +1629,7 @@ class BasicPage(wx.ScrolledWindow):
         self.text1 = wx.StaticText( self,-1,"" )
         self.text2 = wx.StaticText( self,-1,"P(Q)*S(Q)" )
         self.mutifactor_text = wx.StaticText( self,-1,"No. of Shells: " )
+        self.mutifactor_text1 = wx.StaticText( self,-1,"" )
         self.show_sld_button = wx.Button( self,-1,"Show SLD Profile" )
         self.show_sld_button.Bind(wx.EVT_BUTTON,self._on_show_sld)
 
@@ -1651,6 +1660,8 @@ class BasicPage(wx.ScrolledWindow):
         mutifactor_selection.Add((10,5))
         mutifactor_selection.Add(self.mutifactor_text)
         mutifactor_selection.Add(self.multifactorbox)
+        mutifactor_selection.Add((5,5))
+        mutifactor_selection.Add(self.mutifactor_text1)
         mutifactor_selection.Add((10,5))
         mutifactor_selection.Add(self.show_sld_button)
 
@@ -1661,6 +1672,7 @@ class BasicPage(wx.ScrolledWindow):
         boxsizer1.Add(mutifactor_selection)
         
         self._set_multfactor_combobox()
+        self.multifactorbox.SetSelection(1)
         self.show_sld_button.Hide()
         #--------------------------------------------------------
         sizer.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
@@ -1679,17 +1691,19 @@ class BasicPage(wx.ScrolledWindow):
         from sans.perspectives.theory.profile_dialog import SLDPanel
         sld_data = Data1D(x,y)
         sld_data.name = 'SLD'
-   
-        self.panel = SLDPanel(self, data=sld_data,id =-1 )
+        sld_data.axes = self.sld_axes
+        self.panel = SLDPanel(self, data=sld_data,axes =self.sld_axes,id =-1 )
         self.panel.ShowModal()    
         
-    def _set_multfactor_combobox(self):   
+    def _set_multfactor_combobox(self, multiplicity=10):   
         """
         Set comboBox for muitfactor of CoreMultiShellModel
+        :param multiplicit: no. of multi-functionality
         """
-        for idx in range(0,5):
+        # build content of the combobox
+        for idx in range(0,multiplicity):
             self.multifactorbox.Append(str(idx),int(idx))
-            self.multifactorbox.SetSelection(1) 
+            #self.multifactorbox.SetSelection(1) 
         self._hide_multfactor_combobox()
         
     def _show_multfactor_combobox(self):   
@@ -1698,6 +1712,7 @@ class BasicPage(wx.ScrolledWindow):
         """ 
         if not self.mutifactor_text.IsShown():
             self.mutifactor_text.Show(True)
+            self.mutifactor_text1.Show(True)
         if not self.multifactorbox.IsShown():
             self.multifactorbox.Show(True)  
              
@@ -1707,6 +1722,7 @@ class BasicPage(wx.ScrolledWindow):
         """ 
         if self.mutifactor_text.IsShown():
             self.mutifactor_text.Hide()
+            self.mutifactor_text1.Hide()
         if self.multifactorbox.IsShown():
             self.multifactorbox.Hide()   
 
@@ -1861,12 +1877,37 @@ class BasicPage(wx.ScrolledWindow):
         if form_factor != None:    
             # set multifactor for Mutifunctional models    
             if form_factor().__class__ in self.model_list_box["Multi-Functions"]:
-                self._show_multfactor_combobox()
-                self.show_sld_button.Show(True)
                 m_id = self.multifactorbox.GetCurrentSelection()
+                multiplicity = form_factor().multiplicity_info[0]
+                self.multifactorbox.Clear()
+                #self.mutifactor_text.SetLabel(form_factor().details[])
+                self._set_multfactor_combobox(multiplicity)
+                self._show_multfactor_combobox()
+                #ToDo:  this info should be called directly from the model 
+                text = form_factor().multiplicity_info[1]#'No. of Shells: '
+
+                #self.mutifactor_text.Clear()
+                self.mutifactor_text.SetLabel(text)
+                if m_id > multiplicity -1:
+                    # default value
+                    m_id = 1
+                    
                 self.multi_factor = self.multifactorbox.GetClientData(m_id)
                 if self.multi_factor == None: self.multi_factor =0
                 form_factor = form_factor(int(self.multi_factor))
+                self.multifactorbox.SetSelection(m_id)
+                # Check len of the text1 and max_multiplicity
+                text = ''
+                if form_factor.multiplicity_info[0] == len(form_factor.multiplicity_info[2]):
+                    text = form_factor.multiplicity_info[2][self.multi_factor]
+                self.mutifactor_text1.SetLabel(text)
+                # Check if model has  get sld profile.
+                if len(form_factor.multiplicity_info[3]) > 0:
+                    self.sld_axes = form_factor.multiplicity_info[3]
+                    self.show_sld_button.Show(True)
+                else:
+                    self.sld_axes = ""
+
             else:
                 self._hide_multfactor_combobox()
                 self.show_sld_button.Hide()

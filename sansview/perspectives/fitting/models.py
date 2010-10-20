@@ -171,7 +171,6 @@ class ModelManager:
         :return: the next free event ID following the new menu events
         
         """
-        ## form factor
         from sans.models.SphereModel import SphereModel
         self.shape_list.append(SphereModel)
         self.multiplication_factor.append(SphereModel)
@@ -184,7 +183,7 @@ class ModelManager:
         from sans.models.FuzzySphereModel import FuzzySphereModel
         self.shape_list.append(FuzzySphereModel)
         self.multiplication_factor.append(FuzzySphereModel)
-        
+           
         from sans.models.CoreShellModel import CoreShellModel
         self.shape_list.append(CoreShellModel)
         self.multiplication_factor.append(CoreShellModel)
@@ -193,7 +192,7 @@ class ModelManager:
         self.shape_list.append(CoreMultiShellModel)
         self.multiplication_factor.append(CoreMultiShellModel)
         self.multi_func_list.append(CoreMultiShellModel)
-        
+
         from sans.models.VesicleModel import VesicleModel
         self.shape_list.append(VesicleModel)
         self.multiplication_factor.append(VesicleModel)
@@ -231,10 +230,24 @@ class ModelManager:
         self.shape_list.append(ParallelepipedModel)
         self.multiplication_factor.append(ParallelepipedModel)
         
+        from sans.models.CSParallelepipedModel import CSParallelepipedModel
+        self.shape_list.append(CSParallelepipedModel)
+        self.multiplication_factor.append(CSParallelepipedModel)
+        
         from sans.models.EllipticalCylinderModel import EllipticalCylinderModel
         self.shape_list.append(EllipticalCylinderModel)
         self.multiplication_factor.append(EllipticalCylinderModel)
-                
+        
+        from sans.models.BarBellModel import BarBellModel
+        self.shape_list.append(BarBellModel)
+        # not implemeted yet!
+        #self.multiplication_factor.append(BarBellModel)
+        
+        from sans.models.CappedCylinderModel import CappedCylinderModel
+        self.shape_list.append(CappedCylinderModel)
+        # not implemeted yet!
+        #self.multiplication_factor.append(CappedCylinderModel)
+        
         from sans.models.EllipsoidModel import EllipsoidModel
         self.shape_list.append(EllipsoidModel)
         self.multiplication_factor.append(EllipsoidModel)
@@ -258,6 +271,18 @@ class ModelManager:
      
         from sans.models.LamellarPSHGModel import LamellarPSHGModel
         self.shape_list.append(LamellarPSHGModel)
+        
+        from sans.models.LamellarPCrystalModel import LamellarPCrystalModel
+        self.shape_list.append(LamellarPCrystalModel)
+        
+        from sans.models.SCCrystalModel import SCCrystalModel
+        self.shape_list.append(SCCrystalModel)
+        
+        from sans.models.FCCrystalModel import FCCrystalModel
+        self.shape_list.append(FCCrystalModel)
+        
+        from sans.models.BCCrystalModel import BCCrystalModel
+        self.shape_list.append(BCCrystalModel)
       
         ## Structure factor 
         from sans.models.SquareWellStructure import SquareWellStructure
@@ -271,27 +296,43 @@ class ModelManager:
         
         from sans.models.HayterMSAStructure import HayterMSAStructure
         self.struct_list.append(HayterMSAStructure)
-    
-        ##shape-independent models  
+        
+        ##shape-independent models
         from sans.models.PowerLawAbsModel import PowerLawAbsModel
         self.shape_indep_list.append( PowerLawAbsModel )
         
         from sans.models.BEPolyelectrolyte import BEPolyelectrolyte
         self.shape_indep_list.append(BEPolyelectrolyte )
         self.form_factor_dict[str(wx.NewId())] =  [SphereModel]
-
+        
+        from sans.models.BroadPeakModel import BroadPeakModel
+        self.shape_indep_list.append(BroadPeakModel)
+        
+        from sans.models.CorrLengthModel import CorrLengthModel
+        self.shape_indep_list.append(CorrLengthModel)
+        
         from sans.models.DABModel import DABModel
         self.shape_indep_list.append(DABModel )
         
         from sans.models.DebyeModel import DebyeModel
         self.shape_indep_list.append(DebyeModel )
         
-        from sans.models.GuinierModel import GuinierModel
-        self.shape_indep_list.append(GuinierModel )
-        
+        #FractalModel (a c-model)is now being used instead of FractalAbsModel.
         from sans.models.FractalModel import FractalModel
         self.shape_indep_list.append(FractalModel )
         
+        from sans.models.FractalCoreShellModel import FractalCoreShellModel
+        self.shape_indep_list.append(FractalCoreShellModel )
+        
+        from sans.models.GaussLorentzGelModel import GaussLorentzGelModel
+        self.shape_indep_list.append(GaussLorentzGelModel) 
+                
+        from sans.models.GuinierModel import GuinierModel
+        self.shape_indep_list.append(GuinierModel )
+        
+        from sans.models.GuinierPorodModel import GuinierPorodModel
+        self.shape_indep_list.append(GuinierPorodModel )
+
         from sans.models.LorentzModel import LorentzModel
         self.shape_indep_list.append( LorentzModel) 
         
@@ -303,22 +344,40 @@ class ModelManager:
         
         from sans.models.Poly_GaussCoil import Poly_GaussCoil
         self.shape_indep_list.append(Poly_GaussCoil)
-                 
-        from sans.models.PorodModel import PorodModel
-        self.shape_indep_list.append(PorodModel )
         
-        #FractalModel (a c-model)will be used.
-        #from sans.models.FractalAbsModel import FractalAbsModel
-        #self.shape_indep_list.append(FractalAbsModel)
+        from sans.models.PolymerExclVolume import PolymerExclVolume
+        self.shape_indep_list.append(PolymerExclVolume)
+        
+        from sans.models.PorodModel import PorodModel
+        self.shape_indep_list.append(PorodModel )      
+        
+        from sans.models.RPA10Model import RPA10Model
+        self.shape_indep_list.append(RPA10Model)
+        self.multi_func_list.append(RPA10Model)
         
         from sans.models.TeubnerStreyModel import TeubnerStreyModel
         self.shape_indep_list.append(TeubnerStreyModel )
         
+        from sans.models.TwoLorentzianModel import TwoLorentzianModel
+        self.shape_indep_list.append(TwoLorentzianModel )
+        
+        from sans.models.TwoPowerLawModel import TwoPowerLawModel
+        self.shape_indep_list.append(TwoPowerLawModel )
+        
+        from sans.models.UnifiedPowerRgModel import UnifiedPowerRgModel
+        self.shape_indep_list.append(UnifiedPowerRgModel )
+        self.multi_func_list.append(UnifiedPowerRgModel)
+        
         from sans.models.LineModel import LineModel
         self.shape_indep_list.append(LineModel)
         
+        from sans.models.ReflectivityModel import ReflectivityModel
+        self.multi_func_list.append(ReflectivityModel)
+    
         #Looking for plugins
         self.plugins = findModels()
+        self._get_multifunc_models()
+        self.plugins.append(ReflectivityModel)
         return 0
 
     
@@ -465,6 +524,19 @@ class ModelManager:
         evt = ModelEvent( model= model )
         wx.PostEvent(self.event_owner, evt)
         
+    def _get_multifunc_models(self):
+        """
+        Get the multifunctional models
+        """
+        for item in self.plugins:
+            try:
+                # check the multiplicity if any
+                if item.multiplicity_info[0] > 1:
+                    self.multi_func_list.append(item)
+            except:
+                # pass to other items
+                pass
+                    
     def get_model_list(self):    
         """
         return dictionary of models for fitpanel use 

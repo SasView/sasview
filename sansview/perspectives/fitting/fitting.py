@@ -822,7 +822,7 @@ class Plugin:
             #Do the single fit
             self.fitter.set_model(model, self.fit_id,
                                    pars,constraints = listOfConstraint)
-            
+            print "listOfConstraint",listOfConstraint
             self.fitter.set_data(data=metadata,Uid=self.fit_id,
                                  smearer=smearer,qmin= qmin,qmax=qmax )
            

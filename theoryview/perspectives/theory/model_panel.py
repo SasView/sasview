@@ -361,6 +361,53 @@ class ModelPanel(BasicPage):
         #self._undo.Enable(True)
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
+        
+    def _set_fun_box_list(self,fun_box):
+        """
+        Set the list of func for multifunctional models
+        
+        :param fun_box: function combo box
+        """
+        # Check if it is multi_functional model
+        if self.model.__class__ not in self.model_list_box["Multi-Functions"]:
+            return None
+        # Get the func name list
+        list = self.model.fun_list
+       
+        if len(list) == 0:
+            return None
+
+        # build function (combo)box
+        ind = 0
+        while(ind < len(list)):
+            for key, val in list.iteritems():
+                if (val == ind):
+                    fun_box.Append(key,val)
+                    break
+            ind += 1
+            
+    def _on_fun_box(self,event):
+        """
+        Select an func: Erf,Rparabola,LParabola...
+        """
+        fun_val = None
+        fun_box = event.GetEventObject()
+        name = fun_box.Name
+        value = fun_box.GetValue()
+        if self.model.fun_list.has_key(value):
+            fun_val = self.model.fun_list[value]
+        
+        self.model.setParam(name,fun_val)
+        # save state
+        self._copy_parameters_state(self.str_parameters, self.state.str_parameters)
+        # update params
+        #self._update_paramv_on_fit() 
+
+        # draw
+        self._draw_model()
+        self.Refresh()
+        # get ready for new event
+        event.Skip()
               
     def set_data(self, list=[], state=None):
         """
@@ -506,6 +553,7 @@ class ModelPanel(BasicPage):
         """
         self.sizer3.Clear(True)
         self.parameters = []
+        self.str_parameters = []
         self.param_toFit=[]
         self.fixed_param=[]
         self.orientation_params=[]
@@ -531,11 +579,18 @@ class ModelPanel(BasicPage):
             """
             Custom compare to order, first by alphabets then second by number.
             """ 
+            # number at the last digit
             a_last = a[len(a)-1]
             b_last = b[len(b)-1]
-            
+            # default
             num_a = None
             num_b = None
+            # split the names
+            a2 = a.lower().split('_')
+            b2 = b.lower().split('_')
+            # check length of a2, b2
+            len_a2 = len(a2)
+            len_b2 = len(b2)
             # check if it contains a int number(<10)
             try: 
                 num_a = int(a_last)
@@ -543,18 +598,27 @@ class ModelPanel(BasicPage):
             try:
                 num_b = int(b_last)
             except: pass
+            # Put 'scale' near the top; happens 
+            # when numbered param name exists
+            if a == 'scale':
+                return -1
             # both have a number    
             if num_a != None and num_b != None:
-                if num_a > num_b: return 1
+                if num_a > num_b: return -1
+                # same number
                 elif num_a == num_b: 
-                    return cmp(a.lower(), b.lower())
-                else: return -1
+                    # different last names
+                    if a2[len_a2-1] != b2[len_b2-1] and num_a != 0:
+                        return -cmp(a2[len_a2-1], b2[len_b2-1])
+                    else: 
+                        return cmp(a, b) 
+                else: return 1
             # one of them has a number
             elif num_a != None: return 1
             elif num_b != None: return -1
-            # no nuumbers
+            # no numbers
             else: return cmp(a.lower(), b.lower())
-            
+
         keys.sort(custom_compare)
 
     
@@ -577,28 +641,53 @@ class ModelPanel(BasicPage):
             if not item in self.disp_list and not item in self.model.orientation_params:
                 iy += 1
                 ix = 0
-                name = wx.StaticText(self, -1,item)
-                sizer.Add( name,( iy, ix),(1,1),
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-
-                ix += 1
-                value= self.model.getParam(item)
-                ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
-                    style=wx.TE_PROCESS_ENTER)
-                
-                ctl1.SetValue(str (format_number(value)))
-                
-                sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
-                ix +=1
-                # Units
-                if self.model.details.has_key(item):
-                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
+                if self.model.__class__ in self.model_list_box["Multi-Functions"]\
+                            and item in self.model.non_fittable:
+                    non_fittable_name = wx.StaticText(self, -1, item )
+                    sizer.Add(non_fittable_name,(iy, ix),(1,1),\
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                    ## add parameter value
+                    ix += 1
+                    value= self.model.getParam(item)
+                    if len(self.model.fun_list) > 0:
+                        num = item.split('_')[1][5:7]
+                        fun_box = wx.ComboBox(self, -1,size=(100,-1),style=wx.CB_READONLY, name = '%s'% item)
+                        self._set_fun_box_list(fun_box)
+                        fun_box.SetSelection(0)
+                        #self.fun_box.SetToolTipString("A function describing the interface")
+                        wx.EVT_COMBOBOX(fun_box,-1, self._on_fun_box)
+                    else:
+                        fun_box = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                                        style=wx.TE_PROCESS_ENTER, name ='%s'% item)
+                        fun_box.SetToolTipString("Hit 'Enter' after typing.")
+                        fun_box.SetValue(format_number(value))
+                    sizer.Add(fun_box, (iy,ix),(1,1), wx.EXPAND)
+                    ##[cb state, name, value, "+/-", error of fit, min, max , units]
+                    self.str_parameters.append([None,item, fun_box, \
+                                                None,None,None,None,None])
                 else:
-                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
-                sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                ##[cb state, name, value, "+/-", error of fit, min, max , units]
-                self.parameters.append([None,item, ctl1,
-                                        None,None, None, None,None])
+                    name = wx.StaticText(self, -1,item)
+                    sizer.Add( name,( iy, ix),(1,1),
+                                 wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+    
+                    ix += 1
+                    value= self.model.getParam(item)
+                    ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                        style=wx.TE_PROCESS_ENTER)
+                    
+                    ctl1.SetValue(str (format_number(value)))
+                    
+                    sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
+                    ix +=1
+                    # Units
+                    if self.model.details.has_key(item):
+                        units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
+                    else:
+                        units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
+                    sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    ##[cb state, name, value, "+/-", error of fit, min, max , units]
+                    self.parameters.append([None,item, ctl1,
+                                            None,None, None, None,None])
         iy+=1
         sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         iy += 1

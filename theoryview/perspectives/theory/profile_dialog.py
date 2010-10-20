@@ -1,7 +1,7 @@
 import wx
 import sys
 
-import copy,numpy
+from copy import deepcopy
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph
 from sans.guiframe.dataFitting import Theory1D
@@ -16,11 +16,11 @@ _SCALE = 1e-6
 #SLD panel size 
 if sys.platform.count("win32")>0:
     _STATICBOX_WIDTH = 380
-    PANEL_SIZE = 420
+    PANEL_SIZE = 475
     FONT_VARIANT = 0
 else:
     _STATICBOX_WIDTH = 410
-    PANEL_SIZE = 450
+    PANEL_SIZE = 505
     FONT_VARIANT = 1
     
 
@@ -35,9 +35,9 @@ class SLDPanel(wx.Dialog):
     window_caption = "SLD Profile"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
-    def __init__(self, parent=None,base=None,data =None, id = -1, *args, **kwds):
+    def __init__(self, parent=None,base=None,data =None,axes =['Radius'], id = -1, *args, **kwds):
         kwds["style"] =  wx.DEFAULT_DIALOG_STYLE
-        kwds["size"] = wx.Size(_STATICBOX_WIDTH*2,PANEL_SIZE) 
+        kwds["size"] = wx.Size(_STATICBOX_WIDTH*1.5,PANEL_SIZE) 
         wx.Dialog.__init__(self, parent, id = id,  *args, **kwds)
         if data != None:
             
@@ -53,14 +53,15 @@ class SLDPanel(wx.Dialog):
             ## when 2 data have the same id override the 1 st plotted
             self.name = self.data.name
             
-            # Panel for 2D plot
-            self.plotpanel    = SLDplotpanel(self, -1, style=wx.TRANSPARENT_WINDOW)
+            # Panel for plot
+            self.plotpanel    = SLDplotpanel(self, axes, -1, style=wx.TRANSPARENT_WINDOW)
             self.cmap = DEFAULT_CMAP
             ## Create Artist and bind it
             self.subplot = self.plotpanel.subplot
 
             self._setup_layout()
-            self.newplot=Theory1D(self.data.x,self.data.y)
+            data_plot = deepcopy(self.data)
+            self.newplot=Theory1D(data_plot.x,data_plot.y)
             self.newplot.name = 'SLD'
             self.plotpanel.add_image(self.newplot) 
 
@@ -75,7 +76,7 @@ class SLDPanel(wx.Dialog):
         #  panel
         sizer = wx.GridBagSizer(14,14)
         
-        sizer.Add(self.plotpanel,(0, 0), (13, 13), wx.EXPAND | wx.LEFT| wx.RIGHT, 15)
+        sizer.Add(self.plotpanel,(0, 0), (13, 13), wx.EXPAND | wx.LEFT| wx.RIGHT, 1)
 
         #-----Button------------1
         id = wx.NewId()
@@ -109,7 +110,7 @@ class SLDplotpanel(PlotPanel):
     """
     Panel
     """
-    def __init__(self, parent, id = -1, color = None, dpi = None, **kwargs):
+    def __init__(self, parent,axes=[], id = -1, color = None, dpi = None, **kwargs):
         """
         """
         PlotPanel.__init__(self, parent, id=id, color=color, dpi=dpi, **kwargs)
@@ -119,8 +120,9 @@ class SLDplotpanel(PlotPanel):
         # doesn't have a dictionary of handles for the plottables)
         self.plots = {}
         self.graph = Graph()
-
-
+        self.axes_label = []
+        for idx in range(0,len(axes)):
+            self.axes_label.append(axes[idx])
          
     def add_image(self, plot):
         """
@@ -132,7 +134,8 @@ class SLDplotpanel(PlotPanel):
         #add plot
         self.graph.add(plot)
         #add axes
-        self.graph.xaxis('\\rm{Radius} ', '\\AA')
+        x1_label = self.axes_label[0]
+        self.graph.xaxis('\\rm{%s} '% x1_label, '\\AA')
         self.graph.yaxis('\\rm{SLD} ', '\\AA^{-2}')
 
 

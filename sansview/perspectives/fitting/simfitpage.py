@@ -22,7 +22,8 @@ def get_fittableParam( model):
     
     for item in model.getParamList():
         if not item  in model.getDispParamList():
-            fittable_param.append(item)
+            if not item in model.non_fittable:
+                fittable_param.append(item)
             
     for item in model.fixed:
         fittable_param.append(item)

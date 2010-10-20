@@ -1191,6 +1191,26 @@ class FitPage(BasicPage):
         for idx in range(len(list)):
             self.smear_accuracy.Append(list[idx],idx)
             
+    def _set_fun_box_list(self,fun_box):
+        """
+        Set the list of func for multifunctional models
+        """
+        # Check if it is multi_functional model
+        if self.model.__class__ not in self.model_list_box["Multi-Functions"]:
+            return None
+        # Get the func name list
+        list = self.model.fun_list
+        if len(list) == 0:
+            return None
+        # build function (combo)box
+        ind = 0
+        while(ind < len(list)):
+            for key, val in list.iteritems():
+                if (val == ind):
+                    fun_box.Append(key,val)
+                    break
+            ind += 1
+        
     def _on_select_accuracy(self,event):
         """
         Select an accuracy in 2D custom smear: Xhigh, High, Med, or Low
@@ -1205,6 +1225,28 @@ class FitPage(BasicPage):
             self.onSmear(event=None)
             if self.current_smearer != None:
                 self.current_smearer.set_accuracy(accuracy = self.smear2d_accuracy) 
+        event.Skip()
+
+    def _on_fun_box(self,event):
+        """
+        Select an func: Erf,Rparabola,LParabola
+        """
+        fun_val = None
+        fun_box = event.GetEventObject()
+        name = fun_box.Name
+        value = fun_box.GetValue()
+        if self.model.fun_list.has_key(value):
+            fun_val = self.model.fun_list[value]
+
+        self.model.setParam(name,fun_val)
+        # save state
+        self._copy_parameters_state(self.str_parameters, self.state.str_parameters)
+        # update params
+        self._update_paramv_on_fit() 
+        # draw
+        self._draw_model()
+        self.Refresh()
+        # get ready for new event
         event.Skip()
         
     def _onMask(self, event):     
@@ -2045,6 +2087,7 @@ class FitPage(BasicPage):
         """
         self.sizer3.Clear(True)
         self.parameters = []
+        self.str_parameters = []
         self.param_toFit=[]
         self.fittable_param=[]
         self.fixed_param=[]
@@ -2073,11 +2116,18 @@ class FitPage(BasicPage):
             """
             Custom compare to order, first by alphabets then second by number.
             """ 
+            # number at the last digit
             a_last = a[len(a)-1]
             b_last = b[len(b)-1]
-            
+            # default
             num_a = None
             num_b = None
+            # split the names
+            a2 = a.lower().split('_')
+            b2 = b.lower().split('_')
+            # check length of a2, b2
+            len_a2 = len(a2)
+            len_b2 = len(b2)
             # check if it contains a int number(<10)
             try: 
                 num_a = int(a_last)
@@ -2085,17 +2135,27 @@ class FitPage(BasicPage):
             try:
                 num_b = int(b_last)
             except: pass
+            # Put 'scale' near the top; happens 
+            # when numbered param name exists
+            if a == 'scale':
+                return -1
             # both have a number    
             if num_a != None and num_b != None:
-                if num_a > num_b: return 1
+                if num_a > num_b: return -1
+                # same number
                 elif num_a == num_b: 
-                    return cmp(a.lower(), b.lower())
-                else: return -1
+                    # different last names
+                    if a2[len_a2-1] != b2[len_b2-1] and num_a != 0:
+                        return -cmp(a2[len_a2-1], b2[len_b2-1])
+                    else: 
+                        return cmp(a, b) 
+                else: return 1
             # one of them has a number
             elif num_a != None: return 1
             elif num_b != None: return -1
-            # no nuumbers
+            # no numbers
             else: return cmp(a.lower(), b.lower())
+
                         
         keys.sort(custom_compare)
     
@@ -2146,63 +2206,88 @@ class FitPage(BasicPage):
          
                 iy += 1
                 ix = 0
-                ## add parameters name with checkbox for selecting to fit
-                cb = wx.CheckBox(self, -1, item )              
-                cb.SetToolTipString(" Check for fitting.")
-                #cb.SetValue(True)
-                wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
-                
-                sizer.Add( cb,( iy, ix),(1,1),
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
-                
-                ## add parameter value
-                ix += 1
-                value= self.model.getParam(item)
-                ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
-                                    style=wx.TE_PROCESS_ENTER)
-                ctl1.SetToolTipString("Hit 'Enter' after typing.")
-                ctl1.SetValue(format_number(value))
-                sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
-                ## text to show error sign
-                ix += 1
-                text2=wx.StaticText(self, -1, '+/-')
-                sizer.Add(text2,(iy, ix),(1,1),\
-                                wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-                text2.Hide() 
-                ix += 1
-                ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0)
-                sizer.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                ctl2.Hide()
-                
-                ix += 1
-                ctl3 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
-                                               text_enter_callback = self._onparamRangeEnter)
-     
-                sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                ctl3.Hide()
-        
-                ix += 1
-                ctl4 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
-                                               text_enter_callback = self._onparamRangeEnter)
-                sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-      
-                ctl4.Hide()
+                if self.model.__class__ in self.model_list_box["Multi-Functions"] \
+                    and item in self.model.non_fittable:
+                    non_fittable_name = wx.StaticText(self, -1, item )
+                    sizer.Add(non_fittable_name,(iy, ix),(1,1),\
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 21)
+                    ## add parameter value
+                    ix += 1
+                    value= self.model.getParam(item)
+                    if len(self.model.fun_list) > 0:
+                        num = item.split('_')[1][5:7]
+                        fun_box = wx.ComboBox(self, -1,size=(100,-1),style=wx.CB_READONLY, name = '%s'% item)
+                        self._set_fun_box_list(fun_box)
+                        fun_box.SetSelection(0)
+                        #self.fun_box.SetToolTipString("A function describing the interface")
+                        wx.EVT_COMBOBOX(fun_box,-1, self._on_fun_box)
+                    else:
+                        fun_box = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                                        style=wx.TE_PROCESS_ENTER, name ='%s'% item)
+                        fun_box.SetToolTipString("Hit 'Enter' after typing.")
+                        fun_box.SetValue(format_number(value))
+                    sizer.Add(fun_box, (iy,ix),(1,1), wx.EXPAND)
+                    self.str_parameters.append([None,item, fun_box,None,None,None,None,None])
 
-                if self.engine_type=="park":
-                    ctl3.Show(True)
-                    ctl4.Show(True)
-                ix +=1
-                # Units
-                if self.model.details.has_key(item):
-                    units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
-                else:
-                    units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
-                sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                     
-                ##[cb state, name, value, "+/-", error of fit, min, max , units]
-                self.parameters.append([cb,item, ctl1,
-                                        text2,ctl2, ctl3, ctl4,units])
-              
+                else:
+                    ## add parameters name with checkbox for selecting to fit
+                    cb = wx.CheckBox(self, -1, item )              
+                    cb.SetToolTipString(" Check for fitting.")
+                    #cb.SetValue(True)
+                    wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
+                    
+                    sizer.Add( cb,( iy, ix),(1,1),
+                                 wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
+
+                    ## add parameter value
+                    ix += 1
+                    value= self.model.getParam(item)
+                    ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                                        style=wx.TE_PROCESS_ENTER)
+                    ctl1.SetToolTipString("Hit 'Enter' after typing.")
+                    ctl1.SetValue(format_number(value))
+                    sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
+                    ## text to show error sign
+                    ix += 1
+                    text2=wx.StaticText(self, -1, '+/-')
+                    sizer.Add(text2,(iy, ix),(1,1),\
+                                    wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+                    text2.Hide() 
+                    ix += 1
+                    ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0)
+                    sizer.Add(ctl2, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    ctl2.Hide()
+                    
+                    ix += 1
+                    ctl3 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
+                                                   text_enter_callback = self._onparamRangeEnter)
+         
+                    sizer.Add(ctl3, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    ctl3.Hide()
+            
+                    ix += 1
+                    ctl4 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
+                                                   text_enter_callback = self._onparamRangeEnter)
+                    sizer.Add(ctl4, (iy,ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+          
+                    ctl4.Hide()
+    
+                    if self.engine_type=="park":
+                        ctl3.Show(True)
+                        ctl4.Show(True)
+                    ix +=1
+                    # Units
+                    if self.model.details.has_key(item):
+                        units = wx.StaticText(self, -1, self.model.details[item][0], style=wx.ALIGN_LEFT)
+                    else:
+                        units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
+                    sizer.Add(units, (iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                        
+                    ##[cb state, name, value, "+/-", error of fit, min, max , units]
+                    self.parameters.append([cb,item, ctl1,
+                                            text2,ctl2, ctl3, ctl4,units])
+                                  
         iy+=1
         sizer.Add((10,10),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         

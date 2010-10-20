@@ -65,7 +65,8 @@ list_of_state_attributes = [["engine_type", "engine_type", "string"],
 list_of_model_attributes = [["values", "values"],
                             ["weights", "weights"]]
 
-list_of_state_parameters = [["parameters", "parameters"] ,                     
+list_of_state_parameters = [["parameters", "parameters"] , 
+                            ["str_parameters", "str_parameters"] ,                     
                             ["orientation_parameters", "orientation_params"],
                             ["dispersity_parameters", "orientation_params_disp"],
                             ["fixed_param", "fixed_param"],                      
@@ -171,6 +172,8 @@ class PageState(object):
         self.page_name = ""
         # Contains link between  model ,all its parameters, and panel organization
         self.parameters = []
+        # String parameter list that can not be fitted
+        self.str_parameters = []
         # Contains list of parameters that cannot be fitted and reference to 
         #panel objects 
         self.fixed_param = []
@@ -269,6 +272,7 @@ class PageState(object):
         
         obj.enable2D = copy.deepcopy(self.enable2D)
         obj.parameters = copy.deepcopy(self.parameters)
+        obj.str_parameters = copy.deepcopy(self.str_parameters)
         obj.fixed_param = copy.deepcopy(self.fixed_param)
         obj.fittable_param = copy.deepcopy(self.fittable_param)
         obj.orientation_params =  copy.deepcopy(self.orientation_params)
@@ -364,6 +368,8 @@ class PageState(object):
         rep += "model  : %s\n\n"% str(self.model)
         rep += "number parameters(self.parameters): %s\n"%len(self.parameters)
         rep = self._repr_helper( list=self.parameters, rep=rep)
+        rep += "number str_parameters(self.str_parameters): %s\n"%len(self.str_parameters)
+        rep = self._repr_helper( list=self.str_parameters, rep=rep)
         rep += "number orientation parameters"
         rep += "(self.orientation_params): %s\n"%len(self.orientation_params)
         rep = self._repr_helper( list=self.orientation_params, rep=rep)

@@ -40,6 +40,8 @@ class PageState(object):
         self.page_name = ""
         # Contains link between  model ,all its parameters, and panel organization
         self.parameters =[]
+        # String parameter list that can not be fitted
+        self.str_parameters = []
         # Contains list of parameters that cannot be fitted and reference to 
         #panel objects 
         self.fixed_param =[]
@@ -123,6 +125,7 @@ class PageState(object):
         
         obj.enable2D = copy.deepcopy(self.enable2D)
         obj.parameters = copy.deepcopy(self.parameters)
+        obj.str_parameters = copy.deepcopy(self.str_parameters)
         obj.fixed_param = copy.deepcopy(self.fixed_param)
         obj.fittable_param = copy.deepcopy(self.fittable_param)
         obj.orientation_params =  copy.deepcopy(self.orientation_params)
@@ -180,6 +183,7 @@ class PageState(object):
             rep += "maximum displayed : %s \n"%str(item[6][0])
             rep += "maximum value : %s \n"%str(item[6][1])
             rep += "parameter unit: %s\n\n"%str(item[7])
+        rep += "number str_parameters(self.str_parameters): %s\n"%len(self.str_parameters)
         rep +="number orientation parameters"
         rep +="(self.orientation_params): %s\n"%len(self.orientation_params)
         for item in self.orientation_params:
