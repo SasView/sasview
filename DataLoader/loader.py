@@ -31,7 +31,7 @@ from zipfile import ZipFile
 
 # Default readers are defined in the readers sub-module
 import readers
-from readers import ascii_reader
+from readers import ascii_reader,cansas_reader
 
 class Registry(ExtensionRegistry):
     """
@@ -75,10 +75,13 @@ class Registry(ExtensionRegistry):
         try:
             return super(Registry, self).load(path, format=format)
         except:
-            # No reader was found. Default to the ascii reader.
-            ascii_loader = ascii_reader.Reader()
-            return ascii_loader.read(path)
-        
+            try:
+                # No reader was found. Default to the ascii reader.
+                ascii_loader = ascii_reader.Reader()
+                return ascii_loader.read(path)
+            except:
+                cansas_loader = cansas_reader.Reader()
+                return cansas_loader.read(path)
     def find_plugins(self, dir):
         """
         Find readers in a given directory. This method
