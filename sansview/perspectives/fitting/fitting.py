@@ -494,14 +494,14 @@ class Plugin:
         ## if user has already selected a model to plot
         ## redraw the model with data smeared
 
-        smear =self.page_finder[self.current_pg].get_smearer()
-        if model!= None:
-            self.draw_model( model=model, data= data, smearer= smear,
-                qmin= qmin, qmax= qmax)
+        smear = self.page_finder[self.current_pg].get_smearer()
+        if model != None:
+            self.draw_model(model=model, data=data, smearer=smear,
+                qmin=qmin, qmax=qmax)
 
-    def draw_model(self, model, data= None,smearer= None,
-                   enable1D= True, enable2D= False,
-                   qmin= DEFAULT_QMIN, qmax= DEFAULT_QMAX, qstep= DEFAULT_NPTS):
+    def draw_model(self, model, data=None, smearer=None,
+                   enable1D=True, enable2D=False,
+                   qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
         """
         Draw model.
         
@@ -516,51 +516,54 @@ class Plugin:
         :param qstep: number of step to divide the x and y-axis
              
         """
-        if data.__class__.__name__ !="Data2D":    
+        if data.__class__.__name__ != "Data2D":    
             ## draw model 1D with no loaded data
-            self._draw_model1D( model= model, data= data,
-                                                    enable1D=enable1D, 
-                                                    smearer= smearer,
-                                                    qmin= qmin, qmax= qmax, qstep= qstep )
+            self._draw_model1D(model=model, 
+                               data=data,
+                               enable1D=enable1D, 
+                               smearer=smearer,
+                               qmin=qmin,
+                               qmax=qmax, 
+                               qstep=qstep)
         else:     
             ## draw model 2D with no initial data
              self._draw_model2D(model=model,
-                                      data = data,
-                                      enable2D= enable2D,
-                                      smearer= smearer,
-                                      qmin=qmin,
-                                      qmax=qmax,
-                                      qstep=qstep)
+                                data=data,
+                                enable2D=enable2D,
+                                smearer=smearer,
+                                qmin=qmin,
+                                qmax=qmax,
+                                qstep=qstep)
             
     def onFit(self):
         """
         perform fit 
         """
         ##  count the number of fitproblem schedule to fit 
-        fitproblem_count= 0
+        fitproblem_count = 0
         for value in self.page_finder.itervalues():
-            if value.get_scheduled()==1:
+            if value.get_scheduled() == 1:
                 fitproblem_count += 1
                 
         ## if simultaneous fit change automatically the engine to park
-        if fitproblem_count >1:
+        if fitproblem_count > 1:
             self._on_change_engine(engine='park')
             
         self.fitproblem_count = fitproblem_count  
           
         from sans.fit.Fitting import Fit
-        self.fitter= Fit(self._fit_engine)
+        self.fitter = Fit(self._fit_engine)
         
-        if self._fit_engine=="park":
-            engineType="Simultaneous Fit"
+        if self._fit_engine == "park":
+            engineType = "Simultaneous Fit"
         else:
-            engineType="Single Fit"
+            engineType = "Single Fit"
             
         fproblemId = 0
-        self.current_pg=None
+        self.current_pg = None
         for page, value in self.page_finder.iteritems():
             try:
-                if value.get_scheduled()==1:
+                if value.get_scheduled() == 1:
                     #Get list of parameters name to fit
                     pars = []
                     templist = []
@@ -569,12 +572,12 @@ class Plugin:
                         name = str(element[1])
                         pars.append(name)
                     #Set Engine  (model , data) related to the page on 
-                    self._fit_helper( value=value,pars=pars,
-                                      id=fproblemId, title= engineType ) 
+                    self._fit_helper(value=value, pars=pars,
+                                      id=fproblemId, title=engineType) 
                     fproblemId += 1 
-                    self.current_pg= page
+                    self.current_pg = page
             except:
-                msg= "%s error: %s" % (engineType,sys.exc_value)
+                msg= "%s error: %s" % (engineType, sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                       type="stop"))
                 return 
@@ -585,16 +588,16 @@ class Plugin:
         handler = ConsoleUpdate(parent=self.parent,improvement_delta=0.1)
         ## perform single fit
         if fitproblem_count == 1:
-            calc_fit=FitThread(parent =self.parent,
+            calc_fit = FitThread(parent=self.parent,
                                     handler = handler,
-                                    fn= self.fitter,
+                                    fn=self.fitter,
                                    cpage=self.current_pg,
-                                   pars= pars,
+                                   pars=pars,
                                    updatefn=handler.update_fit,
-                                   completefn= self._single_fit_completed)
+                                   completefn=self._single_fit_completed)
         else:
             ## Perform more than 1 fit at the time
-            calc_fit=FitThread(parent=self.parent,
+            calc_fit = FitThread(parent=self.parent,
                                 handler=handler,
                                     fn= self.fitter,
                                    completefn= self._simul_fit_completed,
@@ -796,51 +799,50 @@ class Plugin:
         for page, fitproblem in self.page_finder.iteritems():
             fitproblem.schedule_tofit(value)
             
-    def _fit_helper(self,pars,value, id, title="Single Fit " ):
+    def _fit_helper(self, pars, value, id, title="Single Fit " ):
         """
         helper for fitting
         """
         metadata = value.get_fit_data()
         model = value.get_model()
         smearer = value.get_smearer()
-        qmin , qmax = value.get_range()
-        self.fit_id =id
+        qmin, qmax = value.get_range()
+        self.fit_id = id
         #Create list of parameters for fitting used
-        templist=[]
+        templist = []
        
         try:
             #Extra list of parameters and their constraints
-            listOfConstraint= []
+            listOfConstraint = []
             
             param = value.get_model_param()
-            if len(param)>0:
+            if len(param) > 0:
                 for item in param:
                     ## check if constraint
-                    if item[0] !=None and item[1] != None:
+                    if item[0] != None and item[1] != None:
                         listOfConstraint.append((item[0],item[1]))
                    
             #Do the single fit
             self.fitter.set_model(model, self.fit_id,
-                                   pars,constraints = listOfConstraint)
-            print "listOfConstraint",listOfConstraint
-            self.fitter.set_data(data=metadata,Uid=self.fit_id,
-                                 smearer=smearer,qmin= qmin,qmax=qmax )
+                                   pars, constraints=listOfConstraint)
+            
+            self.fitter.set_data(data=metadata, id=self.fit_id,
+                                 smearer=smearer, qmin=qmin, qmax=qmax)
            
-            self.fitter.select_problem_for_fit(Uid= self.fit_id,
-                                               value= value.get_scheduled())
+            self.fitter.select_problem_for_fit(id=self.fit_id,
+                                               value=value.get_scheduled())
             value.clear_model_param()
         except:
-            msg= title +" error: %s" % sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status= msg, type="stop"))
-            return
-       
+            msg = title + " error: %s" % sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
+          
     def _onSelect(self,event):
         """ 
         when Select data to fit a new page is created .Its reference is 
         added to self.page_finder
         """
         self.panel = event.GetEventObject()
-        Plugin.on_perspective(self,event=event)
+        Plugin.on_perspective(self, event=event)
         for plottable in self.panel.graph.plottables:
             if plottable.__class__.__name__ in ["Data1D", "Theory1D"]:
                 if plottable.name == self.panel.graph.selected_plottable:
@@ -868,28 +870,33 @@ class Plugin:
                 wx.PostEvent(self.parent, StatusEvent(status=msg,info="warning",
                                                       type="stop"))
                 return
-            if not numpy.isfinite(result.fitness) or numpy.any(result.pvec ==None )or not numpy.all(numpy.isfinite(result.pvec) ):
-                msg= "Single Fitting did not converge!!!"
-                wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+            if not numpy.isfinite(result.fitness) or \
+                    numpy.any(result.pvec == None) or \
+                    not numpy.all(numpy.isfinite(result.pvec)):
+                msg = "Single Fitting did not converge!!!"
+                wx.PostEvent(self.parent, 
+                             StatusEvent(status=msg, type="stop"))
                 return
             for page, value in self.page_finder.iteritems():
-                if page==cpage :
-                    model= value.get_model()
+                if page == cpage :
+                    model = value.get_model()
                     break
             param_name = []
             i = 0
             for name in pars:
                 param_name.append(name)
 
-            cpage.onsetValues(result.fitness,param_name, result.pvec,result.stderr)
+            cpage.onsetValues(result.fitness, 
+                              param_name, result.pvec,result.stderr)
            
         except:
-            msg= "Single Fit completed but Following error occurred:%s"% sys.exc_value
+            msg = "Single Fit completed but Following"
+            msg += " error occurred:%s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                   type="stop"))
             return
        
-    def _simul_fit_completed(self,result,pars=None,cpage=None, elapsed=None):
+    def _simul_fit_completed(self, result, pars=None, cpage=None, elapsed=None):
         """
         Parameter estimation completed, 
         display the results to the user
@@ -970,7 +977,7 @@ class Plugin:
             event_id = self.parent.popup_panel(new_panel)
             #self.menu3.Append(event_id, new_panel.window_caption, 
             #                 "Show %s plot panel" % new_panel.window_caption)
-            # Set UID to allow us to reference the panel later
+            # Set id to allow us to reference the panel later
          
             new_panel.uid = event_id
             self.mypanels.append(new_panel) 
@@ -1268,7 +1275,7 @@ class Plugin:
             theory.y_bins= data.y_bins
             theory.detector= data.detector
             theory.source= data.source
-            theory.is_data =False 
+            theory.is_data = False 
             theory.qx_data = data.qx_data
             theory.qy_data = data.qy_data
             theory.q_data = data.q_data
@@ -1348,12 +1355,13 @@ class Plugin:
             self.calc_2D.queue()
 
         except:
-            msg= " Error occurred when drawing %s Model 2D: "%model.name
-            msg+= " %s"%sys.exc_value
-            wx.PostEvent( self.parent, StatusEvent(status= msg ))
+            msg= " Error occurred when drawing %s Model 2D: " % model.name
+            msg+= " %s" % sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg))
 
-    def _draw_model1D(self, model, data=None, smearer= None,
-                qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep= DEFAULT_NPTS,enable1D= True):
+    def _draw_model1D(self, model, data=None, smearer=None,
+                qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, 
+                qstep=DEFAULT_NPTS, enable1D=True):
         """
         Draw model 1D from loaded data1D
         
