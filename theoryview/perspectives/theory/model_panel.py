@@ -167,22 +167,31 @@ class ModelPanel(BasicPage):
         self.sizer4_4.Add(disp,( iy, ix),(1,1), 
                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1 
-        values = wx.StaticText(self, -1, 'Sigma (STD)')
-        values.SetToolTipString("Polydispersity multiplied by the value of the original parameter.")
-        self.sizer4_4.Add(values,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        values = wx.StaticText(self, -1, 'Sigma [A]')
+        values.SetToolTipString(\
+        "Sigma(STD) in the A unit; the standard deviation from the mean value.")
+
+        self.sizer4_4.Add(values,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 
+                          0)
        
         ix += 1 
         npts = wx.StaticText(self, -1, 'Npts')
-        npts.SetToolTipString("Number of points for weighting.")
+        npts.SetToolTipString("Number of sampling points for the numerical\n\
+        integration over the distribution function.")
         self.sizer4_4.Add(npts,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 1 
         nsigmas = wx.StaticText(self, -1, 'Nsigmas')
-        nsigmas.SetToolTipString("Number of sigmas between which the range of the distribution function will be used for weighting. The value '3' covers 99.5% for Gaussian distribution function.")
-        self.sizer4_4.Add(nsigmas,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        
+        nsigmas.SetToolTipString("   Number of sigmas between which the range\n\
+         of the distribution function will be used for weighting. \n\
+        The value '3' covers 99.5% for Gaussian distribution \n\
+        function.")
+        self.sizer4_4.Add(nsigmas,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE,
+                           0)
+         
         for item in self.model.dispersion.keys():
             if not item in self.model.orientation_params:
                 self.disp_cb_dict[item]= None
+                name0="Distribution of " + item
                 name1=item+".width"
                 name2=item+".npts"
                 name3=item+".nsigmas"
@@ -190,14 +199,16 @@ class ModelPanel(BasicPage):
                 for p in self.model.dispersion[item].keys():
                     if p=="width":
                         ix = 0
-                        name = wx.StaticText(self, -1,  name1)
+                        name = wx.StaticText(self, -1,  name0)
                         self.sizer4_4.Add( name,( iy, ix),(1,1),  
                                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                         ix = 1
                         value= self.model.getParam(name1)
                         ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
-                        ctl1.SetToolTipString("Polydispersity multiplied by the value of the '%s'."%item)
+                        ctl1.SetToolTipString("Absolute Sigma: \n\
+                        1) It is the STD (ratio*mean) of '%s' distribution.\n \
+                        2) It should not exceed Mean/(2*Nsigmas)." %item)
                         ctl1.SetValue(str (format_number(value)))
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                         self.fittable_param.append([None,name1,ctl1,None,
@@ -227,9 +238,11 @@ class ModelPanel(BasicPage):
                                                wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                             self.fixed_param.append([None,name3, Tctl2,
                                                      None,None, None, None,None])
+        first_orient  = True
         for item in self.model.dispersion.keys():
             if item in self.model.orientation_params:
                 self.disp_cb_dict[item]= None
+                name0="Distribution of " + item
                 name1=item+".width"
                 name2=item+".npts"
                 name3=item+".nsigmas"
@@ -237,7 +250,7 @@ class ModelPanel(BasicPage):
                 for p in self.model.dispersion[item].keys():
                     if p=="width":
                         ix = 0
-                        name = wx.StaticText(self, -1,  name1)
+                        name = wx.StaticText(self, -1,  name0)
                         self.sizer4_4.Add( name,( iy, ix),(1,1),  
                                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                         if not self.enable2D:
@@ -248,12 +261,21 @@ class ModelPanel(BasicPage):
                         value= self.model.getParam(name1)
                         ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                             style=wx.TE_PROCESS_ENTER)
-                        ctl1.SetToolTipString("Polydispersity multiplied by the value of '%s'."%item)
+                        ctl1.SetToolTipString("Absolute Sigma: \n\
+                        1) It is the STD (ratio*mean) of '%s' distribution."% \
+                        item)
                         ctl1.SetValue(str (format_number(value)))
                         if not self.enable2D:
                             ctl1.Hide()
                             ctl1.Disable()
                         else:
+                            # in the case of 2D and angle parameter
+                            if first_orient:
+                                values.SetLabel('Sigma [A (or deg)]')
+                                values.SetToolTipString(\
+                                "Sigma(STD) in the A or deg(for angles) unit;\n\
+                                the standard deviation from the mean value.")
+                                first_orient = False 
                             ctl1.Show(True)
                             ctl1.Enable()
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
@@ -302,7 +324,7 @@ class ModelPanel(BasicPage):
                                                      None,None, None, None,None])
                             self.orientation_params_disp.append([None,name3, Tctl2,
                                                      None,None, None, None,None])
-            
+          
         msg = " Selected Distribution: Gaussian"        
         wx.PostEvent(self.parent, StatusEvent( status= msg )) 
         self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)   
