@@ -197,7 +197,7 @@ double BarBellModel :: operator()(double qx, double qy) {
 							_ptvalue = 0.0;
 						}
 						if (weights_theta.size()>1) {
-							_ptvalue *= fabs(sin(weights_theta[l].value));
+							_ptvalue *= fabs(sin(weights_theta[l].value*pi/180.0));
 						}
 						sum += _ptvalue;
 						// This model dose not need the volume of spheres correction!!!

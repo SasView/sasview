@@ -47,7 +47,7 @@ double cspkernel(double dp[],double q, double ala, double alb, double alc){
 	double Vin,Vot,V1,V2,V3;
 	double rhoA,rhoB,rhoC, rhoP, rhosolv;
 	double dr0, drA,drB, drC;
-	double Pi,retVal;
+	double retVal;
 
 	aa = dp[1];
 	bb = dp[2];
@@ -180,17 +180,21 @@ double csparallelepiped_analytical_2D_scaled(CSParallelepipedParameters *pars, d
 	double alpha, vol, cos_val_c, cos_val_b, cos_val_a, edgeA, edgeB, edgeC;
 
 	double answer;
-	double pi = 4.0*atan(1.0);
 
 	edgeA = pars->shortA;
 	edgeB = pars->midB;
 	edgeC = pars->longC;
 
+	//convert angle degree to radian
+	double pi = 4.0*atan(1.0);
+	double theta = pars->parallel_theta * pi/180.0;
+	double phi = pars->parallel_phi * pi/180.0;
+	double psi = pars->parallel_psi* pi/180.0;
 
     // parallelepiped c axis orientation
-    cparallel_x = sin(pars->parallel_theta) * cos(pars->parallel_phi);
-    cparallel_y = sin(pars->parallel_theta) * sin(pars->parallel_phi);
-    cparallel_z = cos(pars->parallel_theta);
+    cparallel_x = sin(theta) * cos(phi);
+    cparallel_y = sin(theta) * sin(phi);
+    cparallel_z = cos(theta);
 
     // q vector
     q_z = 0.0;
@@ -201,16 +205,16 @@ double csparallelepiped_analytical_2D_scaled(CSParallelepipedParameters *pars, d
     alpha = acos(cos_val_c);
 
     // parallelepiped a axis orientation
-    parallel_x = sin(pars->parallel_psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)*sin(pars->parallel_psi);
-    parallel_y = cos(pars->parallel_psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)*cos(pars->parallel_psi);
+    parallel_x = sin(psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)*sin(pars->parallel_psi);
+    parallel_y = cos(psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)*cos(pars->parallel_psi);
 
     cos_val_a = parallel_x*q_x + parallel_y*q_y;
 
 
 
     // parallelepiped b axis orientation
-    bparallel_x = sqrt(1.0-sin(pars->parallel_theta)*cos(pars->parallel_phi))*cos(pars->parallel_psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)* cos(pars->parallel_psi);
-    bparallel_y = sqrt(1.0-sin(pars->parallel_theta)*cos(pars->parallel_phi))*sin(pars->parallel_psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)* sin(pars->parallel_psi);
+    bparallel_x = sqrt(1.0-sin(theta)*cos(phi))*cos(psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)* cos(pars->parallel_psi);
+    bparallel_y = sqrt(1.0-sin(theta)*cos(phi))*sin(psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)* sin(pars->parallel_psi);
     // axis of the parallelepiped
     cos_val_b = sin(acos(cos_val_a)) ;
 

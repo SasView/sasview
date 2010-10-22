@@ -139,7 +139,7 @@ double FCCrystalModel :: operator()(double qx, double qy) {
 	double norm = 0.0;
 	double norm_vol = 0.0;
 	double vol = 0.0;
-
+	double pi = 4.0*atan(1.0);
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
 		dp.radius = weights_rad[i].value;
@@ -164,7 +164,7 @@ double FCCrystalModel :: operator()(double qx, double qy) {
 						_ptvalue = 0.0;
 					}
 					if (weights_theta.size()>1) {
-						_ptvalue *= fabs(sin(weights_theta[j].value));
+						_ptvalue *= fabs(sin(weights_theta[j].value*pi/180.0));
 					}
 					sum += _ptvalue;
 					// This model dose not need the volume of spheres correction!!!

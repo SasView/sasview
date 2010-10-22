@@ -171,7 +171,7 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 	double norm = 0.0;
 	double norm_vol = 0.0;
 	double vol = 0.0;
-
+	double pi = 4.0*atan(1.0);
 	// Loop over radius weight points
 	for(int i=0; i< (int)weights_short_a.size(); i++) {
 		dp.short_a = weights_short_a[i].value;
@@ -207,7 +207,7 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 								* weights_long_c[k].value;
 
 							if (weights_parallel_theta.size()>1) {
-								_ptvalue *= fabs(sin(weights_parallel_theta[l].value));
+								_ptvalue *= fabs(sin(weights_parallel_theta[l].value*pi/180.0));
 							}
 							sum += _ptvalue;
 							//Find average volume

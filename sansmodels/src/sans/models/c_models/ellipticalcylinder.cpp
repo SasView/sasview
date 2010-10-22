@@ -43,7 +43,7 @@ EllipticalCylinderModel :: EllipticalCylinderModel() {
 	sldCyl   = Parameter(4.e-6);
 	sldSolv   = Parameter(1.e-6);
 	background = Parameter(0.0);
-	cyl_theta  = Parameter(1.57, true);
+	cyl_theta  = Parameter(57.325, true);
 	cyl_phi    = Parameter(0.0, true);
 	cyl_psi    = Parameter(0.0, true);
 }
@@ -169,7 +169,7 @@ double EllipticalCylinderModel :: operator()(double qx, double qy) {
 	double norm = 0.0;
 	double norm_vol = 0.0;
 	double vol = 0.0;
-
+	double pi = 4.0*atan(1.0);
 	// Loop over minor radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
 		dp.r_minor = weights_rad[i].value;
@@ -206,7 +206,7 @@ double EllipticalCylinderModel :: operator()(double qx, double qy) {
 						* weights_len[j].value
 						* weights_rat[m].value;
 					if (weights_theta.size()>1) {
-						_ptvalue *= fabs(sin(weights_theta[k].value));
+						_ptvalue *= fabs(sin(weights_theta[k].value*pi/180.0));
 					}
 					sum += _ptvalue;
 					//Find average volume

@@ -92,9 +92,9 @@ COblateModel_init(COblateModel *self, PyObject *args, PyObject *kwds)
         PyDict_SetItemString(self->params,"major_core",Py_BuildValue("d",200.000000000000));
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
         PyDict_SetItemString(self->params,"minor_core",Py_BuildValue("d",20.000000000000));
-        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",57.325000000000));
         PyDict_SetItemString(self->params,"sld_solvent",Py_BuildValue("d",0.000006300000));
-        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",1.000000000000));
+        PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",57.325000000000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.001000000000));
         PyDict_SetItemString(self->params,"major_shell",Py_BuildValue("d",250.000000000000));
         PyDict_SetItemString(self->params,"contrast",Py_BuildValue("d",0.000001000000));

@@ -163,7 +163,7 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 	double norm = 0.0;
 	double norm_vol = 0.0;
 	double vol = 0.0;
-
+	double pi = 4.0*atan(1.0);
 	// Loop over core radius weight points
 	for(int i=0; i<(int)weights_core_radius.size(); i++) {
 		dp.core_radius = weights_core_radius[i].value;
@@ -191,16 +191,16 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 						* weights_theta[k].weight
 						* weights_phi[l].weight
 						* hollow_cylinder_analytical_2DXY(&dp, qx, qy)
-						* (pow(weights_radius[m].value,2)-pow(weights_core_radius[i].value,2))
-						* weights_length[j].value;
+						/ ((pow(weights_radius[m].value,2)-pow(weights_core_radius[i].value,2))
+						* weights_length[j].value);
 					if (weights_theta.size()>1) {
-						_ptvalue *= fabs(sin(weights_theta[k].value));
+						_ptvalue *= fabs(sin(weights_theta[k].value * pi/180.0));
 					}
 					sum += _ptvalue;
 					//Find average volume
 					vol += weights_core_radius[i].weight
 						* weights_length[j].weight
-						* weights_radius[k].weight
+						* weights_radius[m].weight
 						* (pow(weights_radius[m].value,2)-pow(weights_core_radius[i].value,2))
 						* weights_length[j].value;
 					//Find norm for volume
@@ -222,10 +222,10 @@ double HollowCylinderModel :: operator()(double qx, double qy) {
 	// Averaging in theta needs an extra normalization
 	// factor to account for the sin(theta) term in the
 	// integration (see documentation).
-	if (weights_theta.size()>1) norm = norm / asin(1.0);
-	if (vol != 0.0 && norm_vol != 0.0) {
+	if (weights_theta.size()>1) norm = norm/asin(1.0);
+	if (vol != 0.0 || norm_vol != 0.0) {
 		//Re-normalize by avg volume
-		sum = sum/(vol/norm_vol);}
+		sum = sum*(vol/norm_vol);}
 	return sum/norm + background();
 }
 

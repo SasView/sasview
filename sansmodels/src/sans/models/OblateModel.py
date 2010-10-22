@@ -43,8 +43,8 @@ class OblateModel(COblateModel, BaseComponent):
          contrast        = 1e-006 [1/A^(2)]
          sld_solvent     = 6.3e-006 [1/A^(2)]
          background      = 0.001 [1/cm]
-         axis_theta      = 1.0 [rad]
-         axis_phi        = 1.0 [rad]
+         axis_theta      = 57.325 [deg]
+         axis_phi        = 57.325 [deg]
 
     """
         
@@ -86,8 +86,8 @@ class OblateModel(COblateModel, BaseComponent):
         self.details['contrast'] = ['[1/A^(2)]', None, None]
         self.details['sld_solvent'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
-        self.details['axis_theta'] = ['[rad]', None, None]
-        self.details['axis_phi'] = ['[rad]', None, None]
+        self.details['axis_theta'] = ['[deg]', None, None]
+        self.details['axis_phi'] = ['[deg]', None, None]
 
         ## fittable parameters
         self.fixed=['major_core.width', 'minor_core.width', 'major_shell.width', 'minor_shell.width']

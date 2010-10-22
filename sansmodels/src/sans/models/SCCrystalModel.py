@@ -42,9 +42,9 @@ class SCCrystalModel(CSCCrystalModel, BaseComponent):
          sldSph          = 3e-006 [1/A^(2)]
          sldSolv         = 6.3e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
-         theta           = 0.0 [rad]
-         phi             = 0.0 [rad]
-         psi             = 0.0 [rad]
+         theta           = 0.0 [deg]
+         phi             = 0.0 [deg]
+         psi             = 0.0 [deg]
 
     """
         
@@ -86,9 +86,9 @@ class SCCrystalModel(CSCCrystalModel, BaseComponent):
         self.details['sldSph'] = ['[1/A^(2)]', None, None]
         self.details['sldSolv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
-        self.details['theta'] = ['[rad]', None, None]
-        self.details['phi'] = ['[rad]', None, None]
-        self.details['psi'] = ['[rad]', None, None]
+        self.details['theta'] = ['[deg]', None, None]
+        self.details['phi'] = ['[deg]', None, None]
+        self.details['psi'] = ['[deg]', None, None]
 
         ## fittable parameters
         self.fixed=['radius.width', 'phi.width', 'psi.width', 'theta.width']

@@ -42,9 +42,9 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
          sldCyl          = 4e-006 [1/A^(2)]
          sldSolv         = 1e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
-         cyl_theta       = 1.57 [rad]
-         cyl_phi         = 0.0 [rad]
-         cyl_psi         = 0.0 [rad]
+         cyl_theta       = 90.0 [deg]
+         cyl_phi         = 0.0 [deg]
+         cyl_psi         = 0.0 [deg]
 
     """
         
@@ -74,9 +74,9 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
         self.details['sldCyl'] = ['[1/A^(2)]', None, None]
         self.details['sldSolv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
-        self.details['cyl_theta'] = ['[rad]', None, None]
-        self.details['cyl_phi'] = ['[rad]', None, None]
-        self.details['cyl_psi'] = ['[rad]', None, None]
+        self.details['cyl_theta'] = ['[deg]', None, None]
+        self.details['cyl_phi'] = ['[deg]', None, None]
+        self.details['cyl_psi'] = ['[deg]', None, None]
 
         ## fittable parameters
         self.fixed=['cyl_phi.width', 'cyl_theta.width', 'cyl_psi.width', 'length.width', 'r_minor.width', 'r_ratio.width']

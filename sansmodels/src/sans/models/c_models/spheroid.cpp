@@ -208,7 +208,7 @@ double CoreShellEllipsoidModel :: operator()(double qx, double qy) {
 	double norm = 0.0;
 	double norm_vol = 0.0;
 	double vol = 0.0;
-
+	double pi = 4.0*atan(1.0);
 	// Loop over major core weight points
 	for(int i=0; i< (int)weights_equat_core.size(); i++) {
 		dp.equat_core = weights_equat_core[i].value;
@@ -240,7 +240,7 @@ double CoreShellEllipsoidModel :: operator()(double qx, double qy) {
 								* spheroid_analytical_2DXY(&dp, qx, qy)
 								* pow(weights_equat_shell[k].value,2)*weights_polar_shell[l].value;
 							if (weights_theta.size()>1) {
-								_ptvalue *= fabs(sin(weights_theta[m].value));
+								_ptvalue *= fabs(sin(weights_theta[m].value*pi/180.0));
 							}
 							sum += _ptvalue;
 							//Find average volume

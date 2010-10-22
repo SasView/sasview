@@ -43,8 +43,8 @@ TriaxialEllipsoidModel :: TriaxialEllipsoidModel() {
 	sldEll   = Parameter(1.0e-6);
 	sldSolv   = Parameter(6.3e-6);
 	background = Parameter(0.0);
-	axis_theta  = Parameter(1.0, true);
-	axis_phi    = Parameter(1.0, true);
+	axis_theta  = Parameter(57.325, true);
+	axis_phi    = Parameter(57.325, true);
 	axis_psi    = Parameter(0.0, true);
 }
 
@@ -165,7 +165,7 @@ double TriaxialEllipsoidModel :: operator()(double qx, double qy) {
 	double norm = 0.0;
 	double norm_vol = 0.0;
 	double vol = 0.0;
-
+	double pi = 4.0*atan(1.0);
 	// Loop over semi axis A weight points
 	for(int i=0; i< (int)weights_semi_axisA.size(); i++) {
 		dp.semi_axisA = weights_semi_axisA[i].value;
@@ -198,7 +198,7 @@ double TriaxialEllipsoidModel :: operator()(double qx, double qy) {
 								* triaxial_ellipsoid_analytical_2DXY(&dp, qx, qy)
 								* weights_semi_axisA[i].value*weights_semi_axisB[j].value*weights_semi_axisC[k].value;
 							if (weights_theta.size()>1) {
-								_ptvalue *= fabs(sin(weights_theta[k].value));
+								_ptvalue *= fabs(sin(weights_theta[k].value*pi/180.0));
 							}
 							sum += _ptvalue;
 							//Find average volume

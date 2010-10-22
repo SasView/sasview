@@ -90,7 +90,7 @@ CCoreShellCylinderModel_init(CCoreShellCylinderModel *self, PyObject *args, PyOb
         
         // Initialize parameter dictionary
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
-        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.570000000000));
+        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",90.000000000000));
         PyDict_SetItemString(self->params,"solvent_sld",Py_BuildValue("d",0.000001000000));
         PyDict_SetItemString(self->params,"thickness",Py_BuildValue("d",10.000000000000));
         PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",0.000000000000));

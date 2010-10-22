@@ -42,8 +42,8 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
          sldCyl          = 6.3e-006 [1/A^(2)]
          sldSolv         = 1e-006 [1/A^(2)]
          background      = 0.01 [1/cm]
-         axis_theta      = 1.57 [rad]
-         axis_phi        = 0.0 [rad]
+         axis_theta      = 90.0 [deg]
+         axis_phi        = 0.0 [deg]
 
     """
         
@@ -74,8 +74,8 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
         self.details['sldCyl'] = ['[1/A^(2)]', None, None]
         self.details['sldSolv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
-        self.details['axis_theta'] = ['[rad]', None, None]
-        self.details['axis_phi'] = ['[rad]', None, None]
+        self.details['axis_theta'] = ['[deg]', None, None]
+        self.details['axis_phi'] = ['[deg]', None, None]
 
         ## fittable parameters
         self.fixed=['axis_phi.width', 'axis_theta.width', 'length.width', 'core_radius.width', 'radius']

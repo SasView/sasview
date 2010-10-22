@@ -92,7 +92,7 @@ CHollowCylinderModel_init(CHollowCylinderModel *self, PyObject *args, PyObject *
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
         PyDict_SetItemString(self->params,"sldCyl",Py_BuildValue("d",0.000006300000));
         PyDict_SetItemString(self->params,"core_radius",Py_BuildValue("d",20.000000000000));
-        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.570000000000));
+        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",90.000000000000));
         PyDict_SetItemString(self->params,"length",Py_BuildValue("d",400.000000000000));
         PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",0.000000000000));
         PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.000001000000));

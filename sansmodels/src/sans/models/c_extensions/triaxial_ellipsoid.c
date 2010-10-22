@@ -89,11 +89,17 @@ double triaxial_ellipsoid_analytical_2D_scaled(TriaxialEllipsoidParameters *pars
 	double cos_nu,nu;
 	double alpha, vol, cos_val;
 	double answer;
-    double pi = acos(-1.0);
+    double pi = 4.0*atan(1.0);
+
+	//convert angle degree to radian
+	double theta = pars->axis_theta * pi/180.0;
+	double phi = pars->axis_phi * pi/180.0;
+	double psi = pars->axis_psi * pi/180.0;
+
     // Cylinder orientation
-    cyl_x = sin(pars->axis_theta) * cos(pars->axis_phi);
-    cyl_y = sin(pars->axis_theta) * sin(pars->axis_phi);
-    cyl_z = cos(pars->axis_theta);
+    cyl_x = sin(theta) * cos(phi);
+    cyl_y = sin(theta) * sin(phi);
+    cyl_z = cos(theta);
 
     // q vector
     q_z = 0.0;
@@ -122,8 +128,8 @@ double triaxial_ellipsoid_analytical_2D_scaled(TriaxialEllipsoidParameters *pars
 	// the wave vector q.
 
 	//x- y- component on the detector plane.
-    ell_x =  cos(pars->axis_psi);
-    ell_y =  sin(pars->axis_psi);
+    ell_x =  cos(psi);
+    ell_y =  sin(psi);
 
     // calculate the axis of the ellipse wrt q-coord.
     cos_nu = ell_x*q_x + ell_y*q_y;

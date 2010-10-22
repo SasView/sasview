@@ -67,14 +67,14 @@ typedef struct {
 	/// Incoherent Background [1/cm]
 	//  [DEFAULT]=background=0.06 [1/cm]
 	double background;
-    /// Orientation of the parallelepiped axis w/respect incoming beam [rad]
-    //  [DEFAULT]=parallel_theta=0.0 [rad]
+    /// Orientation of the parallelepiped axis w/respect incoming beam [deg]
+    //  [DEFAULT]=parallel_theta=0.0 [deg]
     double parallel_theta;
-    /// Orientation of the longitudinal axis of the parallelepiped in the plane of the detector [rad]
-    //  [DEFAULT]=parallel_phi=0.0 [rad]
+    /// Orientation of the longitudinal axis of the parallelepiped in the plane of the detector [deg]
+    //  [DEFAULT]=parallel_phi=0.0 [deg]
     double parallel_phi;
-    /// Orientation of the cross-sectional minor axis of the parallelepiped in the plane of the detector [rad]
-    //  [DEFAULT]=parallel_psi=0.0 [rad]
+    /// Orientation of the cross-sectional minor axis of the parallelepiped in the plane of the detector [deg]
+    //  [DEFAULT]=parallel_psi=0.0 [deg]
     double parallel_psi;
 
 

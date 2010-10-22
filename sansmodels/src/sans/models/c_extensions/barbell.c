@@ -141,12 +141,16 @@ double barbell_analytical_2D_scaled(BarBellParameters *pars, double q, double q_
 	dp[5] = pars->sld_solv;
 	dp[6] = pars->background;
 
+	//convert angle degree to radian
+	double pi = 4.0*atan(1.0);
+	double theta = pars->theta * pi/180.0;
+	double phi = pars->phi * pi/180.0;
 
 	//double Pi = 4.0*atan(1.0);
     // Cylinder orientation
-    cyl_x = sin(pars->theta) * cos(pars->phi);
-    cyl_y = sin(pars->theta) * sin(pars->phi);
-    cyl_z = cos(pars->theta);
+    cyl_x = sin(theta) * cos(phi);
+    cyl_y = sin(theta) * sin(phi);
+    cyl_z = cos(theta);
 
     // q vector
     q_z = 0;

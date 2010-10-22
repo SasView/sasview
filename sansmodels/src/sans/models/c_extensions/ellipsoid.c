@@ -89,13 +89,17 @@ double ellipsoid_analytical_2D(EllipsoidParameters *pars, double q, double phi) 
 double ellipsoid_analytical_2D_scaled(EllipsoidParameters *pars, double q, double q_x, double q_y) {
 	double cyl_x, cyl_y, cyl_z;
 	double q_z, lenq;
-	double theta, alpha, f, vol, sin_val, cos_val;
+	double alpha, f, vol, sin_val, cos_val;
 	double answer;
+	//convert angle degree to radian
+	double pi = 4.0*atan(1.0);
+	double theta = pars->axis_theta * pi/180.0;
+	double phi = pars->axis_phi * pi/180.0;
 
     // Ellipsoid orientation
-    cyl_x = sin(pars->axis_theta) * cos(pars->axis_phi);
-    cyl_y = sin(pars->axis_theta) * sin(pars->axis_phi);
-    cyl_z = cos(pars->axis_theta);
+    cyl_x = sin(theta) * cos(phi);
+    cyl_y = sin(theta) * sin(phi);
+    cyl_z = cos(theta);
 
     // q vector
     q_z = 0.0;

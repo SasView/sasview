@@ -57,11 +57,11 @@ typedef struct {
 	//  [DEFAULT]=background=0.0 [1/cm]
 	double background;
 
-    /// Angle of the main axis against z-axis in detector plane [rad]
-    //  [DEFAULT]=theta=0.0 [rad]
+    /// Angle of the main axis against z-axis in detector plane [deg]
+    //  [DEFAULT]=theta=0.0 [deg]
     double theta;
-    /// Azimuthal angle around z-axis in detector plane [rad]
-    //  [DEFAULT]=phi=0.0 [rad]
+    /// Azimuthal angle around z-axis in detector plane [deg]
+    //  [DEFAULT]=phi=0.0 [deg]
     double phi;
 
 } BarBellParameters;

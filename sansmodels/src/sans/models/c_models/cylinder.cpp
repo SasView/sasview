@@ -141,7 +141,7 @@ double CylinderModel :: operator()(double qx, double qy) {
 	double norm = 0.0;
 	double norm_vol = 0.0;
 	double vol = 0.0;
-
+	double pi = 4.0*atan(1.0);
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad.size(); i++) {
 		dp.radius = weights_rad[i].value;
@@ -166,7 +166,7 @@ double CylinderModel :: operator()(double qx, double qy) {
 						* cylinder_analytical_2DXY(&dp, qx, qy)
 						*pow(weights_rad[i].value,2)*weights_len[j].value;
 					if (weights_theta.size()>1) {
-						_ptvalue *= fabs(sin(weights_theta[k].value));
+						_ptvalue *= fabs(sin(weights_theta[k].value*pi/180.0));
 					}
 					sum += _ptvalue;
 					//Find average volume

@@ -72,6 +72,11 @@ double sc_analytical_2D_scaled(SCParameters *pars, double q, double q_x, double 
 	dp[3] = pars->sldSolv;
 	dp[4] = 0.0;
 
+	//convert angle degree to radian
+	double theta = pars->theta * Pi/180.0;
+	double phi = pars->phi * Pi/180.0;
+	double psi = pars->psi * Pi/180.0;
+
 	aa = pars->dnn;
 	Da = pars->d_factor*aa;
 	qDa_2 = pow(q*Da,2.0);
@@ -79,9 +84,9 @@ double sc_analytical_2D_scaled(SCParameters *pars, double q, double q_x, double 
 	latticeScale = (4.0/3.0)*Pi*(dp[1]*dp[1]*dp[1])/pow(aa,3.0);
 	/// Angles here are respect to detector coordinate instead of against q coordinate(PRB 36, 3, 1754)
     // a3 axis orientation
-    a3_x = sin(pars->theta) * cos(pars->phi);//negative sign here???
-    a3_y = sin(pars->theta) * sin(pars->phi);
-    a3_z = cos(pars->theta);
+    a3_x = sin(theta) * cos(phi);//negative sign here???
+    a3_y = sin(theta) * sin(phi);
+    a3_z = cos(theta);
 
     // q vector
     q_z = 0.0;
@@ -92,15 +97,15 @@ double sc_analytical_2D_scaled(SCParameters *pars, double q, double q_x, double 
     //alpha = acos(cos_val_a3);
     a3_dot_q = aa*q*cos_val_a3;
     // a1 axis orientation
-    a1_x = sin(pars->psi);
-    a1_y = cos(pars->psi);
+    a1_x = sin(psi);
+    a1_y = cos(psi);
 
     cos_val_a1 = a1_x*q_x + a1_y*q_y;
     a1_dot_q = aa*q*cos_val_a1*sin(alpha);
 
     // a2 axis orientation
-    a2_x = sqrt(1.0-sin(pars->theta)*cos(pars->phi))*cos(pars->psi);
-    a2_y = sqrt(1.0-sin(pars->theta)*cos(pars->phi))*sin(pars->psi);
+    a2_x = sqrt(1.0-sin(theta)*cos(phi))*cos(psi);
+    a2_y = sqrt(1.0-sin(theta)*cos(phi))*sin(psi);
     // a2 axis
     cos_val_a2 =  sin(acos(cos_val_a1));//a2_x*q_x + a2_y*q_y;
     a2_dot_q = aa*q*cos_val_a2*sin(alpha);

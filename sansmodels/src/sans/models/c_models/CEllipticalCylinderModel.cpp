@@ -96,7 +96,7 @@ CEllipticalCylinderModel_init(CEllipticalCylinderModel *self, PyObject *args, Py
         PyDict_SetItemString(self->params,"r_minor",Py_BuildValue("d",20.000000000000));
         PyDict_SetItemString(self->params,"sldSolv",Py_BuildValue("d",0.000001000000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000000000));
-        PyDict_SetItemString(self->params,"cyl_theta",Py_BuildValue("d",1.570000000000));
+        PyDict_SetItemString(self->params,"cyl_theta",Py_BuildValue("d",90.000000000000));
         PyDict_SetItemString(self->params,"r_ratio",Py_BuildValue("d",1.500000000000));
         PyDict_SetItemString(self->params,"cyl_phi",Py_BuildValue("d",0.000000000000));
         // Initialize dispersion / averaging parameter dict

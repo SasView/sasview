@@ -42,9 +42,9 @@ class TriaxialEllipsoidModel(CTriaxialEllipsoidModel, BaseComponent):
          sldEll          = 1e-006 [1/A^(2)]
          sldSolv         = 6.3e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
-         axis_theta      = 1.0 [rad]
-         axis_phi        = 1.0 [rad]
-         axis_psi        = 0.0 [rad]
+         axis_theta      = 57.325 [deg]
+         axis_phi        = 57.325 [deg]
+         axis_psi        = 0.0 [deg]
 
     """
         
@@ -71,9 +71,9 @@ class TriaxialEllipsoidModel(CTriaxialEllipsoidModel, BaseComponent):
         self.details['sldEll'] = ['[1/A^(2)]', None, None]
         self.details['sldSolv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
-        self.details['axis_theta'] = ['[rad]', None, None]
-        self.details['axis_phi'] = ['[rad]', None, None]
-        self.details['axis_psi'] = ['[rad]', None, None]
+        self.details['axis_theta'] = ['[deg]', None, None]
+        self.details['axis_phi'] = ['[deg]', None, None]
+        self.details['axis_psi'] = ['[deg]', None, None]
 
         ## fittable parameters
         self.fixed=['axis_psi.width', 'axis_phi.width', 'axis_theta.width', 'semi_axisA.width', 'semi_axisB.width', 'semi_axisC.width']

@@ -68,11 +68,15 @@ double cylinder_analytical_2D_scaled(CylinderParameters *pars, double q, double 
 	double q_z;
 	double alpha, vol, cos_val;
 	double answer;
+	//convert angle degree to radian
+	double pi = 4.0*atan(1.0);
+	double theta = pars->cyl_theta * pi/180.0;
+	double phi = pars->cyl_phi * pi/180.0;
 
     // Cylinder orientation
-    cyl_x = sin(pars->cyl_theta) * cos(pars->cyl_phi);
-    cyl_y = sin(pars->cyl_theta) * sin(pars->cyl_phi);
-    cyl_z = cos(pars->cyl_theta);
+    cyl_x = sin(theta) * cos(phi);
+    cyl_y = sin(theta) * sin(phi);
+    cyl_z = cos(theta);
 
     // q vector
     q_z = 0;

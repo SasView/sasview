@@ -98,11 +98,16 @@ double elliptical_cylinder_analytical_2D_scaled(EllipticalCylinderParameters *pa
 	double alpha, vol, cos_val;
 	double nu, cos_nu;
 	double answer;
+	//convert angle degree to radian
+	double pi = 4.0*atan(1.0);
+	double theta = pars->cyl_theta * pi/180.0;
+	double phi = pars->cyl_phi * pi/180.0;
+	double psi = pars->cyl_psi * pi/180.0;
 
     //Cylinder orientation
-    cyl_x = sin(pars->cyl_theta) * cos(pars->cyl_phi);
-    cyl_y = sin(pars->cyl_theta) * sin(pars->cyl_phi);
-    cyl_z = cos(pars->cyl_theta);
+    cyl_x = sin(theta) * cos(phi);
+    cyl_y = sin(theta) * sin(phi);
+    cyl_z = cos(theta);
 
     // q vector
     q_z = 0;
@@ -129,8 +134,8 @@ double elliptical_cylinder_analytical_2D_scaled(EllipticalCylinderParameters *pa
 	// the wave vector q.
 
 	//x- y- component on the detector plane.
-    ell_x =  cos(pars->cyl_psi);
-    ell_y =  sin(pars->cyl_psi);
+    ell_x =  cos(psi);
+    ell_y =  sin(psi);
 
     // calculate the axis of the ellipse wrt q-coord.
     cos_nu = ell_x*q_x + ell_y*q_y;

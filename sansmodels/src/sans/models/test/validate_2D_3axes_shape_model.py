@@ -90,20 +90,20 @@ class Validate2D:
             sum = 0.0
             weight = 0.0
             for i_theta in range(npts):
-                theta = math.pi/npts*(i_theta+1)
+                theta = 180.0/npts*(i_theta+1)
                 
                 model.setParam(theta_label, theta)
                 
                 for j in range(npts_alpha):
-                    model.setParam(phi_label, math.pi * 2.0 / npts_alpha * j)
+                    model.setParam(phi_label, 180.0 * 2.0 / npts_alpha * j)
                     for k in range(npts):
-                        model.setParam(psi_label, math.pi * 2.0 / npts * k)
+                        model.setParam(psi_label, 180.0 * 2.0 / npts * k)
                         if str(model.run([q, 0])).count("INF")>0:                        
-                            print "ERROR", q, theta, math.pi * 2.0 / npts * k
+                            print "ERROR", q, theta, 180.0 * 2.0 / npts * k
                             
                         # sin() is due to having not uniform bin number density wrt the q plane.
-                        sum += model.run([q, 0])*math.sin(theta)
-                        weight += math.sin(theta) 
+                        sum += model.run([q, 0])*math.sin(theta*math.pi/180.0)
+                        weight += math.sin(theta*math.pi/180.0) 
 
             value = sum/weight #*math.pi/2.0
             ana = model.run(q)

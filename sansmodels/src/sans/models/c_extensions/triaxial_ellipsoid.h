@@ -32,14 +32,14 @@ typedef struct {
 	/// Incoherent Background [1/cm] 0.00
 	//  [DEFAULT]=background=0.0 [1/cm]
 	double background;
-    /// Orientation of the triaxial_ellipsoid axis w/respect incoming beam [rad]
-    //  [DEFAULT]=axis_theta=1.0 [rad]
+    /// Orientation of the triaxial_ellipsoid axis w/respect incoming beam [deg]
+    //  [DEFAULT]=axis_theta=57.325 [deg]
     double axis_theta;
-    /// Orientation of the triaxial_ellipsoid in the plane of the detector [rad]
-    //  [DEFAULT]=axis_phi=1.0 [rad]
+    /// Orientation of the triaxial_ellipsoid in the plane of the detector [deg]
+    //  [DEFAULT]=axis_phi=57.325 [deg]
     double axis_phi;
-    /// Orientation of the cross section of the triaxial_ellipsoid in the plane of the detector [rad]
-    //  [DEFAULT]=axis_psi=0.0 [rad]
+    /// Orientation of the cross section of the triaxial_ellipsoid in the plane of the detector [deg]
+    //  [DEFAULT]=axis_psi=0.0 [deg]
     double axis_psi;
 
 } TriaxialEllipsoidParameters;

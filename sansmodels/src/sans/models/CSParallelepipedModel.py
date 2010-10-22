@@ -48,9 +48,9 @@ class CSParallelepipedModel(CCSParallelepipedModel, BaseComponent):
          sld_pcore       = 1e-006 [1/A^(2)]
          sld_solv        = 6e-006 [1/A^(2)]
          background      = 0.06 [1/cm]
-         parallel_theta  = 0.0 [rad]
-         parallel_phi    = 0.0 [rad]
-         parallel_psi    = 0.0 [rad]
+         parallel_theta  = 0.0 [deg]
+         parallel_phi    = 0.0 [deg]
+         parallel_psi    = 0.0 [deg]
 
     """
         
@@ -94,9 +94,9 @@ class CSParallelepipedModel(CCSParallelepipedModel, BaseComponent):
         self.details['sld_pcore'] = ['[1/A^(2)]', None, None]
         self.details['sld_solv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
-        self.details['parallel_theta'] = ['[rad]', None, None]
-        self.details['parallel_phi'] = ['[rad]', None, None]
-        self.details['parallel_psi'] = ['[rad]', None, None]
+        self.details['parallel_theta'] = ['[deg]', None, None]
+        self.details['parallel_phi'] = ['[deg]', None, None]
+        self.details['parallel_psi'] = ['[deg]', None, None]
 
         ## fittable parameters
         self.fixed=['shortA.width', 'midB.width', 'longC.width', 'parallel_phi.width', 'parallel_psi.width', 'parallel_theta.width']

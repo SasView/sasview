@@ -47,12 +47,12 @@ typedef struct {
 	//  [DEFAULT]=background=0.01 [1/cm]
 	double background;
 
-    /// Orientation of the long axis of the hollow cylinder w/respect incoming beam [rad]
-    //  [DEFAULT]=axis_theta=1.57 [rad]
+    /// Orientation of the long axis of the hollow cylinder w/respect incoming beam [deg]
+    //  [DEFAULT]=axis_theta=90.0 [deg]
     double axis_theta;
 
-    /// Orientation of the long axis of the hollow cylinder in the plane of the detector [rad]
-    //  [DEFAULT]=axis_phi=0.0 [rad]
+    /// Orientation of the long axis of the hollow cylinder in the plane of the detector [deg]
+    //  [DEFAULT]=axis_phi=0.0 [deg]
     double axis_phi;
 
 } HollowCylinderParameters;

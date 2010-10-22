@@ -90,7 +90,7 @@ CEllipsoidModel_init(CEllipsoidModel *self, PyObject *args, PyObject *kwds)
         
         // Initialize parameter dictionary
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
-        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",1.570000000000));
+        PyDict_SetItemString(self->params,"axis_theta",Py_BuildValue("d",90.000000000000));
         PyDict_SetItemString(self->params,"radius_b",Py_BuildValue("d",400.000000000000));
         PyDict_SetItemString(self->params,"radius_a",Py_BuildValue("d",20.000000000000));
         PyDict_SetItemString(self->params,"axis_phi",Py_BuildValue("d",0.000000000000));

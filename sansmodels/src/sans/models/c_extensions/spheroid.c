@@ -74,10 +74,15 @@ double spheroid_analytical_2D_scaled(SpheroidParameters *pars, double q, double 
 	double Pi = 4.0*atan(1.0);
 	double sldcs,sldss;
 
+	//convert angle degree to radian
+	double theta = pars->axis_theta * Pi/180.0;
+	double phi = pars->axis_phi * Pi/180.0;
+
+
     // ellipsoid orientation, the axis of the rotation is consistent with the ploar axis.
-    cyl_x = sin(pars->axis_theta) * cos(pars->axis_phi);
-    cyl_y = sin(pars->axis_theta) * sin(pars->axis_phi);
-    cyl_z = cos(pars->axis_theta);
+    cyl_x = sin(theta) * cos(phi);
+    cyl_y = sin(theta) * sin(phi);
+    cyl_z = cos(theta);
     //del sld
     sldcs = pars->sld_core - pars->sld_shell;
     sldss = pars->sld_shell- pars->sld_solvent;

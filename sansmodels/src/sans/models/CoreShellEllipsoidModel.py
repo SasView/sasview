@@ -44,8 +44,8 @@ class CoreShellEllipsoidModel(CCoreShellEllipsoidModel, BaseComponent):
          sld_shell       = 1e-006 [1/A^(2)]
          sld_solvent     = 6.3e-006 [1/A^(2)]
          background      = 0.001 [1/cm]
-         axis_theta      = 0.0 [rad]
-         axis_phi        = 0.0 [rad]
+         axis_theta      = 0.0 [deg]
+         axis_phi        = 0.0 [deg]
 
     """
         
@@ -91,8 +91,8 @@ class CoreShellEllipsoidModel(CCoreShellEllipsoidModel, BaseComponent):
         self.details['sld_shell'] = ['[1/A^(2)]', None, None]
         self.details['sld_solvent'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
-        self.details['axis_theta'] = ['[rad]', None, None]
-        self.details['axis_phi'] = ['[rad]', None, None]
+        self.details['axis_theta'] = ['[deg]', None, None]
+        self.details['axis_phi'] = ['[deg]', None, None]
 
         ## fittable parameters
         self.fixed=['equat_core.width', 'polar_core.width', 'equat_shell.width', 'polar_shell.width', 'axis_phi.width', 'axis_theta.width']

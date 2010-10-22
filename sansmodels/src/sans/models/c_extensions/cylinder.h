@@ -41,11 +41,11 @@ typedef struct {
 	/// Incoherent Background [1/cm] 0.00
 	//  [DEFAULT]=background=0.0 [1/cm]
 	double background;
-    /// Orientation of the cylinder axis w/respect incoming beam [rad]
-    //  [DEFAULT]=cyl_theta=1.0 [rad]
+    /// Orientation of the cylinder axis w/respect incoming beam [deg]
+    //  [DEFAULT]=cyl_theta=60.0 [deg]
     double cyl_theta;
-    /// Orientation of the cylinder in the plane of the detector [rad]
-    //  [DEFAULT]=cyl_phi=1.0 [rad]
+    /// Orientation of the cylinder in the plane of the detector [deg]
+    //  [DEFAULT]=cyl_phi=60.0 [deg]
     double cyl_phi;
 
 } CylinderParameters;

@@ -135,7 +135,6 @@ double CappedCylinderModel :: operator()(double qx, double qy) {
 	dp.theta  = theta();
 	dp.phi    = phi();
 
-
 	// Get the dispersion points for the rad_bar
 	vector<WeightPoint> weights_rad_cyl;
 	rad_cyl.get_weights(weights_rad_cyl);
@@ -197,7 +196,7 @@ double CappedCylinderModel :: operator()(double qx, double qy) {
 							_ptvalue = 0.0;
 						}
 						if (weights_theta.size()>1) {
-							_ptvalue *= fabs(sin(weights_theta[l].value));
+							_ptvalue *= fabs(sin(weights_theta[l].value*pi/180.0));
 						}
 						sum += _ptvalue;
 						// This model dose not need the volume of spheres correction!!!

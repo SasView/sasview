@@ -41,8 +41,8 @@ class CylinderModel(CCylinderModel, BaseComponent):
          sldCyl          = 4e-006 [1/A^(2)]
          sldSolv         = 1e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
-         cyl_theta       = 1.0 [rad]
-         cyl_phi         = 1.0 [rad]
+         cyl_theta       = 60.0 [deg]
+         cyl_phi         = 60.0 [deg]
 
     """
         
@@ -78,8 +78,8 @@ class CylinderModel(CCylinderModel, BaseComponent):
         self.details['sldCyl'] = ['[1/A^(2)]', None, None]
         self.details['sldSolv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
-        self.details['cyl_theta'] = ['[rad]', None, None]
-        self.details['cyl_phi'] = ['[rad]', None, None]
+        self.details['cyl_theta'] = ['[deg]', None, None]
+        self.details['cyl_phi'] = ['[deg]', None, None]
 
         ## fittable parameters
         self.fixed=['cyl_phi.width', 'cyl_theta.width', 'length.width', 'radius.width']

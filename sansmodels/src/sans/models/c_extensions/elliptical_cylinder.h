@@ -40,14 +40,14 @@ typedef struct {
 	/// Incoherent Background [1/cm] 0.000
 	//  [DEFAULT]=background=0 [1/cm]
 	double background;
-    /// Orientation of the cylinder axis w/respect incoming beam [rad]
-    //  [DEFAULT]=cyl_theta=1.57 [rad]
+    /// Orientation of the cylinder axis w/respect incoming beam [deg]
+    //  [DEFAULT]=cyl_theta=90.0 [deg]
     double cyl_theta;
-    /// Orientation of the cylinder in the plane of the detector [rad]
-    //  [DEFAULT]=cyl_phi=0.0 [rad]
+    /// Orientation of the cylinder in the plane of the detector [deg]
+    //  [DEFAULT]=cyl_phi=0.0 [deg]
     double cyl_phi;
-    /// Orientation of major radius of the cross-section w/respect vector q [rad]
-    //  [DEFAULT]=cyl_psi=0.0 [rad]
+    /// Orientation of major radius of the cross-section w/respect vector q [deg]
+    //  [DEFAULT]=cyl_psi=0.0 [deg]
     double cyl_psi;
 } EllipticalCylinderParameters;
 

@@ -65,11 +65,15 @@ double hollow_cylinder_analytical_2D_scaled(HollowCylinderParameters *pars, doub
 	double q_z;
 	double  alpha,vol, cos_val;
 	double answer;
+	//convert angle degree to radian
+	double pi = 4.0*atan(1.0);
+	double theta = pars->axis_theta * pi/180.0;
+	double phi = pars->axis_phi * pi/180.0;
 
     // Cylinder orientation
-    cyl_x = sin(pars->axis_theta) * cos(pars->axis_phi);
-    cyl_y = sin(pars->axis_theta) * sin(pars->axis_phi);
-    cyl_z = cos(pars->axis_theta);
+    cyl_x = sin(theta) * cos(phi);
+    cyl_y = sin(theta) * sin(phi);
+    cyl_z = cos(theta);
 
     // q vector
     q_z = 0;
@@ -93,9 +97,9 @@ double hollow_cylinder_analytical_2D_scaled(HollowCylinderParameters *pars, doub
 	answer *= (pars->sldCyl - pars->sldSolv)*(pars->sldCyl - pars->sldSolv);
 
 	//normalize by cylinder volume
-	vol=acos(-1.0)*((pars->radius*pars->radius)-(pars->core_radius *pars->core_radius))
+	vol=pi*((pars->radius*pars->radius)-(pars->core_radius *pars->core_radius))
 			*(pars->length);
-	answer /= vol;
+	answer *= vol;
 
 	//convert to [cm-1]
 	answer *= 1.0e8;

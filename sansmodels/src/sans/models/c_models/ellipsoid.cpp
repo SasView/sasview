@@ -41,7 +41,7 @@ EllipsoidModel :: EllipsoidModel() {
 	sldEll   = Parameter(4.e-6);
 	sldSolv   = Parameter(1.e-6);
 	background = Parameter(0.0);
-	axis_theta  = Parameter(1.57, true);
+	axis_theta  = Parameter(57.325, true);
 	axis_phi    = Parameter(0.0, true);
 }
 
@@ -144,7 +144,7 @@ double EllipsoidModel :: operator()(double qx, double qy) {
 	double norm = 0.0;
 	double norm_vol = 0.0;
 	double vol = 0.0;
-
+	double pi = 4.0*atan(1.0);
 	// Loop over radius weight points
 	for(int i=0; i<weights_rad_a.size(); i++) {
 		dp.radius_a = weights_rad_a[i].value;
@@ -169,7 +169,7 @@ double EllipsoidModel :: operator()(double qx, double qy) {
 						* ellipsoid_analytical_2DXY(&dp, qx, qy)
 						* pow(weights_rad_b[j].value,2) * weights_rad_a[i].value;
 					if (weights_theta.size()>1) {
-						_ptvalue *= fabs(sin(weights_theta[k].value));
+						_ptvalue *= fabs(sin(weights_theta[k].value*pi/180.0));
 					}
 					sum += _ptvalue;
 					//Find average volume

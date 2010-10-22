@@ -42,8 +42,8 @@ class BarBellModel(CBarBellModel, BaseComponent):
          sld_barbell     = 1e-006 [1/A^(2)]
          sld_solv        = 6.3e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
-         theta           = 0.0 [rad]
-         phi             = 0.0 [rad]
+         theta           = 0.0 [deg]
+         phi             = 0.0 [deg]
 
     """
         
@@ -85,8 +85,8 @@ class BarBellModel(CBarBellModel, BaseComponent):
         self.details['sld_barbell'] = ['[1/A^(2)]', None, None]
         self.details['sld_solv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
-        self.details['theta'] = ['[rad]', None, None]
-        self.details['phi'] = ['[rad]', None, None]
+        self.details['theta'] = ['[deg]', None, None]
+        self.details['phi'] = ['[deg]', None, None]
 
         ## fittable parameters
         self.fixed=['rad_bar.width', 'len_bar', 'rad_bell', 'phi.width', 'theta.width']

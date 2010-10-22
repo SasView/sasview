@@ -72,6 +72,10 @@ double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, double 
 	dp[2] = pars->sldSph;
 	dp[3] = pars->sldSolv;
 	dp[4] = 0.0;
+	//convert angle degree to radian
+	double theta = pars->theta * Pi/180.0;
+	double phi = pars->phi * Pi/180.0;
+	double psi = pars->psi * Pi/180.0;
 
 	aa = pars->dnn;
 	Da = pars->d_factor*aa;
@@ -84,14 +88,14 @@ double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, double 
 	/// Angles here are respect to detector coordinate
 	///  instead of against q coordinate in PRB 36(46), 3(6), 1754(3854)
     // b3 axis orientation
-    b3_x = sin(pars->theta) * cos(pars->phi);//negative sign here???
-    b3_y = sin(pars->theta) * sin(pars->phi);
-    b3_z = cos(pars->theta);
+    b3_x = sin(theta) * cos(phi);//negative sign here???
+    b3_y = sin(theta) * sin(phi);
+    b3_z = cos(theta);
     cos_val_b3 =  b3_x*q_x + b3_y*q_y + b3_z*q_z;
     alpha = acos(cos_val_b3);
     // b1 axis orientation
-    b1_x = sin(pars->psi);
-    b1_y = cos(pars->psi);
+    b1_x = sin(psi);
+    b1_y = cos(psi);
 	cos_val_b1 = (b1_x*q_x + b1_y*q_y);
     // b2 axis orientation
 	cos_val_b2 = sin(acos(cos_val_b1));

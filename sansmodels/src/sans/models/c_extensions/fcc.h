@@ -56,14 +56,14 @@ typedef struct {
 	/// Incoherent Background [1/cm]
 	//  [DEFAULT]=background=0 [1/cm]
 	double background;
-    /// Orientation of the a1 axis w/respect incoming beam [rad]
-    //  [DEFAULT]=theta=0.0 [rad]
+    /// Orientation of the a1 axis w/respect incoming beam [deg]
+    //  [DEFAULT]=theta=0.0 [deg]
     double theta;
-    /// Orientation of the a2 in the plane of the detector [rad]
-    //  [DEFAULT]=phi=0.0 [rad]
+    /// Orientation of the a2 in the plane of the detector [deg]
+    //  [DEFAULT]=phi=0.0 [deg]
     double phi;
-    /// Orientation of the a3 in the plane of the detector [rad]
-    //  [DEFAULT]=psi=0.0 [rad]
+    /// Orientation of the a3 in the plane of the detector [deg]
+    //  [DEFAULT]=psi=0.0 [deg]
     double psi;
 
 } FCParameters;

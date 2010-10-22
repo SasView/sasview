@@ -42,9 +42,9 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
          sldPipe         = 6.3e-006 [1/A^(2)]
          sldSolv         = 1e-006 [1/A^(2)]
          background      = 0.0 [1/cm]
-         parallel_theta  = 0.0 [rad]
-         parallel_phi    = 0.0 [rad]
-         parallel_psi    = 0.0 [rad]
+         parallel_theta  = 0.0 [deg]
+         parallel_phi    = 0.0 [deg]
+         parallel_psi    = 0.0 [deg]
 
     """
         
@@ -77,9 +77,9 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
         self.details['sldPipe'] = ['[1/A^(2)]', None, None]
         self.details['sldSolv'] = ['[1/A^(2)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
-        self.details['parallel_theta'] = ['[rad]', None, None]
-        self.details['parallel_phi'] = ['[rad]', None, None]
-        self.details['parallel_psi'] = ['[rad]', None, None]
+        self.details['parallel_theta'] = ['[deg]', None, None]
+        self.details['parallel_phi'] = ['[deg]', None, None]
+        self.details['parallel_psi'] = ['[deg]', None, None]
 
         ## fittable parameters
         self.fixed=['short_a.width', 'short_b.width', 'long_c.width', 'parallel_phi.width', 'parallel_psi.width', 'parallel_theta.width']

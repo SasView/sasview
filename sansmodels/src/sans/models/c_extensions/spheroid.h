@@ -58,11 +58,11 @@ typedef struct {
 	//  [DEFAULT]=background=0.001 [1/cm]
 	double background;
 	//Disable for now
-    /// Orientation of the oblate axis w/respect incoming beam [rad]
-    //  [DEFAULT]=axis_theta=0.0 [rad]
+    /// Orientation of the oblate axis w/respect incoming beam [deg]
+    //  [DEFAULT]=axis_theta=0.0 [deg]
     double axis_theta;
-    /// Orientation of the oblate in the plane of the detector [rad]
-    //  [DEFAULT]=axis_phi=0.0 [rad]
+    /// Orientation of the oblate in the plane of the detector [deg]
+    //  [DEFAULT]=axis_phi=0.0 [deg]
     double axis_phi;
 
 } SpheroidParameters;
