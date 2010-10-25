@@ -111,9 +111,12 @@ class Reader:
     ## File type
     type_name = "CanSAS 1D"
     ## Wildcards
-    type = ["CanSAS 1D files (*.xml)|*.xml"]
+    type = ["CanSAS 1D files (*.xml)|*.xml",
+                        "CanSAS 1D AVE files (*.AVEx)|*.AVEx",
+                         "CanSAS 1D AVE files (*.ABSx)|*.ABSx"]
+
     ## List of allowed extensions
-    ext=['.xml', '.XML']  
+    ext=['.xml', '.XML','.avex', '.AVEx', '.absx', 'ABSx']  
     
     def __init__(self):
         ## List of errors
@@ -133,7 +136,6 @@ class Reader:
         :raise ValueError: when the length of the data vectors are inconsistent
         """
         output = []
-        
         if os.path.isfile(path):
             basename  = os.path.basename(path)
             root, extension = os.path.splitext(basename)
@@ -158,7 +160,6 @@ class Reader:
                 
         else:
             raise RuntimeError, "%s is not a file" % path
-        
         # Return output consistent with the loader's api
         if len(output)==0:
             return None
@@ -539,7 +540,6 @@ class Reader:
         main_node.appendChild(entry_node)
         
         write_node(doc, entry_node, "Title", datainfo.title)
-        
         for item in datainfo.run:
             runname = {}
             if datainfo.run_name.has_key(item) and len(str(datainfo.run_name[item]))>1:
