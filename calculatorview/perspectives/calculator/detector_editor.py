@@ -4,9 +4,9 @@ import sys
 from copy import deepcopy
 from DataLoader.data_info import Detector
 from sans.guiframe.utils import check_float
-_BOX_WIDTH = 60
 
-if sys.platform.count("win32")>0:
+_BOX_WIDTH = 60
+if sys.platform.count("win32") > 0:
     _STATICBOX_WIDTH = 465
     PANEL_WIDTH = 500
     PANEL_HEIGHT = 450
@@ -18,8 +18,9 @@ else:
     FONT_VARIANT = 1
     
 class DetectorDialog(wx.Dialog):
-    def __init__(self, parent=None, id=-1, manager=None, detector=None,
-                        title="Detector Editor",size=(PANEL_WIDTH, PANEL_HEIGHT)):
+    def __init__(self, parent=None, manager=None, detector=None,
+                        title="Detector Editor",
+                        size=(PANEL_WIDTH, PANEL_HEIGHT)):
         wx.Dialog.__init__(self, parent=parent, id=id, title=title, size=size)
         try:
             self.parent = parent
@@ -85,7 +86,8 @@ class DetectorDialog(wx.Dialog):
         detector_hint_txt = 'No detector is available for this data.'
         self.detector_txt = wx.StaticText(self, -1, detector_hint_txt) 
         self.detector_hint_sizer.Add(self.detector_txt, 0, wx.LEFT, 10)
-        self.detector_sizer.AddMany([(self.detector_button_sizer, 0, wx.ALL, 10),
+        self.detector_sizer.AddMany([(self.detector_button_sizer, 0,
+                                       wx.ALL, 10),
                                      (self.detector_hint_sizer, 0, wx.ALL, 10)])
      
         self.fill_detector_combox()
@@ -97,17 +99,21 @@ class DetectorDialog(wx.Dialog):
         """
         #Instrument
         instrument_name_txt = wx.StaticText(self, -1, 'Instrument Name : ')  
-        self.instrument_name_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH*5, 20), style=0) 
-        self.instrument_sizer.AddMany([(instrument_name_txt, 0, wx.LEFT|wx.RIGHT, 10),
-                                       (self.instrument_name_tcl, 0, wx.EXPAND)])
+        self.instrument_name_tcl = wx.TextCtrl(self, -1,
+                                             size=(_BOX_WIDTH*5, 20), style=0) 
+        self.instrument_sizer.AddMany([(instrument_name_txt, 0, 
+                                        wx.LEFT|wx.RIGHT, 10),
+                                    (self.instrument_name_tcl, 0, wx.EXPAND)])
     def _layout_distance(self):
         """
             Do the  layout for distance related widgets
         """
         distance_txt = wx.StaticText(self, -1, 'Sample to Detector Distance : ')  
-        self.distance_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
+        self.distance_tcl = wx.TextCtrl(self, -1,
+                                         size=(_BOX_WIDTH, 20), style=0)
         distance_unit_txt = wx.StaticText(self, -1, 'Unit: ')  
-        self.distance_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)  
+        self.distance_unit_tcl = wx.TextCtrl(self, -1,
+                                              size=(_BOX_WIDTH, 20), style=0)  
         self.distance_sizer.AddMany([(distance_txt, 0, wx.LEFT|wx.RIGHT, 10),
                                      (self.distance_tcl, 0, wx.RIGHT, 10),
                                      (distance_unit_txt, 0, wx.EXPAND),
@@ -120,13 +126,17 @@ class DetectorDialog(wx.Dialog):
         #Offset
         offset_txt = wx.StaticText(self, -1, 'Offset:') 
         x_offset_txt = wx.StaticText(self, -1, 'x = ')  
-        self.x_offset_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0) 
+        self.x_offset_tcl = wx.TextCtrl(self, -1, 
+                                        size=(_BOX_WIDTH, 20), style=0) 
         y_offset_txt = wx.StaticText(self, -1, 'y = ')  
-        self.y_offset_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0) 
+        self.y_offset_tcl = wx.TextCtrl(self, -1,
+                                         size=(_BOX_WIDTH, 20), style=0) 
         z_offset_txt = wx.StaticText(self, -1, 'z = ')  
-        self.z_offset_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)  
+        self.z_offset_tcl = wx.TextCtrl(self, -1,
+                                         size=(_BOX_WIDTH, 20), style=0)  
         offset_unit_txt = wx.StaticText(self, -1, 'Unit: ') 
-        self.offset_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
+        self.offset_unit_tcl = wx.TextCtrl(self, -1, 
+                                           size=(_BOX_WIDTH, 20), style=0)
         self.offset_sizer.AddMany([(offset_txt, 0, wx.LEFT|wx.RIGHT, 10),
                                      (x_offset_txt, 0, wx.LEFT, 30),
                                      (self.x_offset_tcl, 0, wx.RIGHT, 10),
@@ -144,14 +154,19 @@ class DetectorDialog(wx.Dialog):
         #Orientation
         orientation_txt = wx.StaticText(self, -1, 'Orientation:') 
         x_orientation_txt = wx.StaticText(self, -1, 'x = ')  
-        self.x_orientation_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0) 
+        self.x_orientation_tcl = wx.TextCtrl(self, -1,
+                                              size=(_BOX_WIDTH, 20), style=0) 
         y_orientation_txt = wx.StaticText(self, -1, 'y = ')  
-        self.y_orientation_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0) 
+        self.y_orientation_tcl = wx.TextCtrl(self, -1, 
+                                             size=(_BOX_WIDTH, 20), style=0) 
         z_orientation_txt = wx.StaticText(self, -1, 'z = ')  
-        self.z_orientation_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)  
+        self.z_orientation_tcl = wx.TextCtrl(self, -1,
+                                              size=(_BOX_WIDTH, 20), style=0)  
         orientation_unit_txt = wx.StaticText(self, -1, 'Unit: ') 
-        self.orientation_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20),style=0)  
-        self.orientation_sizer.AddMany([(orientation_txt, 0, wx.LEFT|wx.RIGHT, 10),
+        self.orientation_unit_tcl = wx.TextCtrl(self, -1,
+                                             size=(_BOX_WIDTH, 20), style=0)  
+        self.orientation_sizer.AddMany([(orientation_txt, 0,
+                                          wx.LEFT|wx.RIGHT, 10),
                                      (x_orientation_txt, 0, wx.LEFT, 7),
                                      (self.x_orientation_tcl, 0, wx.RIGHT, 10),
                                      (y_orientation_txt, 0, wx.EXPAND),
@@ -159,7 +174,7 @@ class DetectorDialog(wx.Dialog):
                                      (z_orientation_txt, 0, wx.EXPAND),
                                      (self.z_orientation_tcl, 0, wx.RIGHT, 10),
                                      (orientation_unit_txt, 0, wx.EXPAND),
-                                     (self.orientation_unit_tcl, 0, wx.RIGHT, 10)]) 
+                            (self.orientation_unit_tcl, 0, wx.RIGHT, 10)]) 
         
     def _layout_beam_center(self):
         """
@@ -168,13 +183,17 @@ class DetectorDialog(wx.Dialog):
         #Beam center
         beam_center_txt = wx.StaticText(self, -1, 'Beam Center:') 
         x_beam_center_txt = wx.StaticText(self, -1, 'x = ')  
-        self.x_beam_center_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0) 
+        self.x_beam_center_tcl = wx.TextCtrl(self, -1,
+                                              size=(_BOX_WIDTH, 20), style=0) 
         y_beam_center_txt = wx.StaticText(self, -1, 'y = ')  
-        self.y_beam_center_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0) 
+        self.y_beam_center_tcl = wx.TextCtrl(self, -1,
+                                              size=(_BOX_WIDTH, 20), style=0) 
         z_beam_center_txt = wx.StaticText(self, -1, 'z = ')  
-        self.z_beam_center_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)  
+        self.z_beam_center_tcl = wx.TextCtrl(self, -1,
+                                              size=(_BOX_WIDTH, 20), style=0)  
         beam_center_unit_txt = wx.StaticText(self, -1, 'Unit: ') 
-        self.beam_center_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
+        self.beam_center_unit_tcl = wx.TextCtrl(self, -1,
+                                                 size=(_BOX_WIDTH, 20), style=0)
         self.beam_sizer.AddMany([(beam_center_txt, 0, wx.LEFT|wx.RIGHT, 10),
                                      (x_beam_center_txt, 0, wx.EXPAND),
                                      (self.x_beam_center_tcl, 0, wx.RIGHT, 10),
@@ -183,7 +202,7 @@ class DetectorDialog(wx.Dialog):
                                      (z_beam_center_txt, 0, wx.EXPAND),
                                      (self.z_beam_center_tcl, 0, wx.RIGHT, 10),
                                      (beam_center_unit_txt, 0, wx.EXPAND),
-                                     (self.beam_center_unit_tcl, 0,wx.RIGHT, 10)])   
+                                (self.beam_center_unit_tcl, 0,wx.RIGHT, 10)])   
     
     def _layout_pixel_size(self):
         """
@@ -192,13 +211,17 @@ class DetectorDialog(wx.Dialog):
         #Pixel Size
         pixel_size_txt = wx.StaticText(self, -1, 'Pixel Size:') 
         x_pixel_size_txt = wx.StaticText(self, -1, 'x = ')  
-        self.x_pixel_size_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0) 
+        self.x_pixel_size_tcl = wx.TextCtrl(self, -1,
+                                             size=(_BOX_WIDTH,20), style=0) 
         y_pixel_size_txt = wx.StaticText(self, -1, 'y = ')  
-        self.y_pixel_size_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0) 
+        self.y_pixel_size_tcl = wx.TextCtrl(self, -1, 
+                                            size=(_BOX_WIDTH,20), style=0) 
         z_pixel_size_txt = wx.StaticText(self, -1, 'z = ')  
-        self.z_pixel_size_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0)  
+        self.z_pixel_size_tcl = wx.TextCtrl(self, -1,
+                                             size=(_BOX_WIDTH,20), style=0)  
         pixel_size_unit_txt = wx.StaticText(self, -1, 'Unit: ') 
-        self.pixel_size_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0)  
+        self.pixel_size_unit_tcl = wx.TextCtrl(self, -1,
+                                             size=(_BOX_WIDTH,20), style=0)  
         self.pixel_sizer.AddMany([(pixel_size_txt, 0, wx.LEFT|wx.RIGHT, 10),
                                      (x_pixel_size_txt, 0, wx.LEFT, 17),
                                      (self.x_pixel_size_tcl, 0, wx.RIGHT, 10),
@@ -207,7 +230,7 @@ class DetectorDialog(wx.Dialog):
                                      (z_pixel_size_txt, 0, wx.EXPAND),
                                      (self.z_pixel_size_tcl, 0, wx.RIGHT, 10),
                                      (pixel_size_unit_txt, 0, wx.EXPAND),
-                                     (self.pixel_size_unit_tcl, 0, wx.RIGHT, 10)])
+                                (self.pixel_size_unit_tcl, 0, wx.RIGHT, 10)])
     
     def _layout_slit_length(self):
         """
@@ -215,13 +238,15 @@ class DetectorDialog(wx.Dialog):
         """
         #slit length
         slit_length_txt = wx.StaticText(self, -1, 'Slit Length: ')  
-        self.slit_length_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0)
+        self.slit_length_tcl = wx.TextCtrl(self, -1,
+                                            size=(_BOX_WIDTH,20), style=0)
         slit_length_unit_txt = wx.StaticText(self, -1, 'Unit: ')  
-        self.slit_length_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0)   
+        self.slit_length_unit_tcl = wx.TextCtrl(self, -1,
+                                                 size=(_BOX_WIDTH,20), style=0)   
         self.slit_sizer.AddMany([(slit_length_txt, 0, wx.LEFT, 10),
                                      (self.slit_length_tcl, 0, wx.RIGHT, 10),
                                      (slit_length_unit_txt, 0, wx.EXPAND),
-                                     (self.slit_length_unit_tcl, 0,wx.RIGHT, 10)])
+                            (self.slit_length_unit_tcl, 0,wx.RIGHT, 10)])
         
     def _layout_button(self):  
         """
@@ -412,19 +437,22 @@ class DetectorDialog(wx.Dialog):
         self.z_offset_tcl.SetValue(str(z))  
         self.offset_unit_tcl.SetValue(str(detector.offset_unit))
         #Orientation
-        x, y, z = detector.orientation.x, detector.orientation.y, detector.orientation.z
+        x, y = detector.orientation.x, detector.orientation.y
+        z = detector.orientation.z
         self.x_orientation_tcl.SetValue(str(x))  
         self.y_orientation_tcl.SetValue(str(y)) 
         self.z_orientation_tcl.SetValue(str(z))  
         self.orientation_unit_tcl.SetValue(str(detector.orientation_unit))
         #Beam center
-        x, y, z = detector.beam_center.x, detector.beam_center.y, detector.beam_center.z
+        x, y = detector.beam_center.x, detector.beam_center.y
+        z  =   detector.beam_center.z
         self.x_beam_center_tcl.SetValue(str(x))  
         self.y_beam_center_tcl.SetValue(str(y)) 
         self.z_beam_center_tcl.SetValue(str(z))  
         self.beam_center_unit_tcl.SetValue(str(detector.beam_center_unit))
         #Pixel size 
-        x, y, z = detector.pixel_size.x, detector.pixel_size.y, detector.pixel_size.z
+        x, y = detector.pixel_size.x, detector.pixel_size.y
+        z = detector.pixel_size.z
         self.x_pixel_size_tcl.SetValue(str(x))  
         self.y_pixel_size_tcl.SetValue(str(y)) 
         self.z_pixel_size_tcl.SetValue(str(z))  
@@ -484,7 +512,8 @@ class DetectorDialog(wx.Dialog):
                     self._notes += " %s to %s \n"%(detector.distance, distance)
                     detector.distance = float(distance)
             else:
-                self._notes += "Error: Expected a float for the distance won't changes "
+                self._notes += "Error: Expected a float for "
+                self._notes += " the distance won't changes "
                 self._notes += "%s to %s"%(detector.distance, distance)
         #change the distance unit
         unit = self.distance_unit_tcl.GetValue().lstrip().rstrip()
@@ -512,12 +541,13 @@ class DetectorDialog(wx.Dialog):
             if check_float(self.x_offset_tcl):
                 if detector.offset.x != float(x_offset):
                     self._notes += "Change x of offset from"
-                    self._notes += " %s to %s \n"%(detector.offset.x, x_offset)
+                    self._notes += " %s to %s \n" % (detector.offset.x,
+                                                      x_offset)
                     detector.offset.x = float(x_offset)
             else:
                 self._notes += "Error: Expected a float for the offset 's x "
                 self._notes += "won't changes x offset"
-                self._notes += " from %s to %s"%(detector.offset.x, x_offset)
+                self._notes += " from %s to %s" % (detector.offset.x, x_offset)
         #Change y coordinate
         y_offset = self.y_offset_tcl.GetValue().lstrip().rstrip()
         if y_offset == "" or y_offset == str(None):
@@ -532,8 +562,8 @@ class DetectorDialog(wx.Dialog):
             else:
                 self._notes += "Error: Expected a float for the offset 's y "
                 self._notes += "won't changes y "
-                self._notes += "offset from %s to %s"%(detector.offset.y\
-                                                         ,y_offset)
+                self._notes += "offset from %s to %s"%(detector.offset.y,
+                                                         y_offset)
         #Change z coordinate
         z_offset = self.z_offset_tcl.GetValue().lstrip().rstrip()
         if z_offset == "" or z_offset == str(None):
@@ -542,19 +572,20 @@ class DetectorDialog(wx.Dialog):
         else:
             if check_float(self.z_offset_tcl):
                 if detector.offset.z != float(z_offset):
-                    self._notes += "Change z of"
-                    self._notes += "offset from %s to %s \n"%(detector.offset.z,\
+                    self._notes += "Change z of offset from"
+                    self._notes += " %s to %s \n" % (detector.offset.z,
                                                               z_offset)
                     detector.offset.z  = float(z_offset)
             else:
                 self._notes += "Error: Expected a float for the offset 's x "
                 self._notes += "won't changes z"
-                self._notes += "offset from %s to %s"%(detector.offset.z, z_offset)
+                self._notes += "offset from %s to %s" % (detector.offset.z, 
+                                                       z_offset)
         #change the offset unit
         unit = self.offset_unit_tcl.GetValue().lstrip().rstrip()
         if detector.offset_unit != unit:
             self._notes += " Change Offset's"
-            self._notes += "unit from %s to %s"%(detector.offset_unit, unit)
+            self._notes += "unit from %s to %s" % (detector.offset_unit, unit)
             
         self.detector_cbox.SetString(position, str(detector.name)) 
         self.detector_cbox.SetClientData(position, detector)
@@ -576,12 +607,14 @@ class DetectorDialog(wx.Dialog):
             if check_float(self.x_orientation_tcl):
                 if detector.orientation.x != float(x_orientation):
                     self._notes += "Change x of orientation from "
-                    self._notes += "%s to %s \n"%(detector.orientation.x, x_orientation)
+                    self._notes += "%s to %s \n" % (detector.orientation.x,
+                                                   x_orientation)
                     detector.orientation.x  = float(x_orientation)
             else:
-                self._notes += "Error: Expected a float for the orientation 's x "
-                self._notes += "won't changes x orientation from "
-                self._notes += "%s to %s"%(detector.orientation.x, x_orientation)
+                self._notes += "Error: Expected a float for the orientation "
+                self._notes += "'s x  won't changes x orientation from "
+                self._notes += "%s to %s" % (detector.orientation.x,
+                                              x_orientation)
         #Change y coordinate
         y_orientation = self.y_orientation_tcl.GetValue().lstrip().rstrip()
         if y_orientation == "" or y_orientation == str(None):
@@ -591,12 +624,14 @@ class DetectorDialog(wx.Dialog):
             if check_float(self.y_orientation_tcl):
                 if detector.orientation.y != float(y_orientation):
                     self._notes += "Change y of orientation from "
-                    self._notes += "%s to %s \n"%(detector.orientation.y, y_orientation)
+                    self._notes += "%s to %s \n" % (detector.orientation.y,
+                                                     y_orientation)
                     detector.orientation.y  = float(y_orientation)
             else:
-                self._notes += "Error: Expected a float for the orientation's y "
-                self._notes += "won't changes y orientation from "
-                self._notes += "%s to %s"%(detector.orientation.y, y_orientation)
+                self._notes += "Error: Expected a float for the orientation's "
+                self._notes += " y won't changes y orientation from "
+                self._notes += "%s to %s" % (detector.orientation.y,
+                                            y_orientation)
         #Change z coordinate
         z_orientation = self.z_orientation_tcl.GetValue().lstrip().rstrip()
         if z_orientation == "" or z_orientation  == str(None):
@@ -606,12 +641,14 @@ class DetectorDialog(wx.Dialog):
             if check_float(self.z_orientation_tcl):
                 if detector.orientation.z != float(z_orientation):
                     self._notes += "Change z of offset from "
-                    self._notes += "%s to %s \n"%(detector.orientation.z, z_orientation)
+                    self._notes += "%s to %s \n"%(detector.orientation.z,
+                                                   z_orientation)
                     detector.orientation.z  = float(z_orientation)
             else:
-                self._notes += "Error: Expected a float for the orientation 's x "
-                self._notes += "won't changes z orientation from "
-                self._notes += "%s to %s"%(detector.orientation.z, z_orientation)
+                self._notes += "Error: Expected a float for the orientation 's"
+                self._notes += " x won't changes z orientation from "
+                self._notes += "%s to %s" % (detector.orientation.z,
+                                              z_orientation)
         #change the orientation unit
         unit = self.orientation_unit_tcl.GetValue().lstrip().rstrip()
         if detector.orientation_unit != unit:
@@ -639,12 +676,14 @@ class DetectorDialog(wx.Dialog):
             if check_float(self.x_beam_center_tcl):
                 if detector.beam_center.x != float(x_beam_center):
                     self._notes += "Change x of offset from "
-                    self._notes += "%s to %s \n"%(detector.beam_center.x, x_beam_center)
+                    self._notes += "%s to %s \n" % (detector.beam_center.x,
+                                                     x_beam_center)
                     detector.beam_center.x  = float(x_beam_center)
             else:
-                self._notes += "Error: Expected a float for the beam center 's x "
-                self._notes += "won't changes x beam center from "
-                self._notes += "%s to %s"%(detector.beam_center.x, x_beam_center)
+                self._notes += "Error: Expected a float for the beam "
+                self._notes += "center 's x won't changes x beam center from "
+                self._notes += "%s to %s" % (detector.beam_center.x,
+                                            x_beam_center)
         #Change y coordinate
         y_beam_center = self.y_beam_center_tcl.GetValue().lstrip().rstrip()
         if y_beam_center == "" or y_beam_center == str(None):
@@ -654,12 +693,14 @@ class DetectorDialog(wx.Dialog):
             if check_float(self.y_beam_center_tcl):
                 if detector.beam_center.y != float(y_beam_center):
                     self._notes += "Change y of beam center from "
-                    self._notes += "%s to %s \n"%(detector.beam_center.y, y_beam_center)
+                    self._notes += "%s to %s \n" % (detector.beam_center.y,
+                                                     y_beam_center)
                     detector.beam_center.y  = float(y_beam_center)
             else:
-                self._notes += "Error: Expected a float for the beam center 's y "
-                self._notes += "won't changes y beam center from "
-                self._notes += "%s to %s"%(detector.beam_center.y, y_beam_center)
+                self._notes += "Error: Expected a float for the beam "
+                self._notes += "center 's y won't changes y beam center from "
+                self._notes += "%s to %s" % (detector.beam_center.y,
+                                              y_beam_center)
         #Change z coordinate
         z_beam_center = self.z_beam_center_tcl.GetValue().lstrip().rstrip()
         if z_beam_center == "" or z_beam_center == str(None):
@@ -669,12 +710,14 @@ class DetectorDialog(wx.Dialog):
             if check_float(self.z_beam_center_tcl):
                 if detector.beam_center.z != float(z_beam_center):
                     self._notes += "Change z of beam center from "
-                    self._notes += "%s to %s \n"%(detector.beam_center.z, z_beam_center)
+                    self._notes += "%s to %s \n" % (detector.beam_center.z,
+                                                     z_beam_center)
                     detector.beam_center.z  = float(z_beam_center)
             else:
                 self._notes += "Error: Expected a float for the offset 's x "
                 self._notes += "won't changes z beam center from "
-                self._notes += "%s to %s"%(detector.beam_center.z, z_beam_center)
+                self._notes += "%s to %s"%(detector.beam_center.z,
+                                            z_beam_center)
         #change the beam center unit
         unit = self.beam_center_unit_tcl.GetValue().lstrip().rstrip()
         if detector.beam_center_unit != unit:
@@ -700,12 +743,14 @@ class DetectorDialog(wx.Dialog):
             if check_float(self.x_pixel_size_tcl):
                 if detector.pixel_size.x != float(x_pixel_size) :
                     self._notes += "Change x of pixel size from "
-                    self._notes += "%s to %s \n"%(detector.pixel_size.x, x_pixel_size)
+                    self._notes += "%s to %s \n"%(detector.pixel_size.x,
+                                                   x_pixel_size)
                     detector.pixel_size.x  = float(x_pixel_size)
             else:
-                self._notes += "Error: Expected a float for the pixel size 's x "
-                self._notes += "won't changes x pixel size from "
-                self._notes += "%s to %s"%(detector.pixel_size.x, x_pixel_size)
+                self._notes += "Error: Expected a float for the pixel"
+                self._notes += " size 's x  won't changes x pixel size from "
+                self._notes += "%s to %s" % (detector.pixel_size.x, 
+                                             x_pixel_size)
         #Change y coordinate
         y_pixel_size = self.y_pixel_size_tcl.GetValue().lstrip().rstrip()
         if y_pixel_size == "" or y_pixel_size == str(None):
@@ -715,12 +760,14 @@ class DetectorDialog(wx.Dialog):
             if check_float(self.y_pixel_size_tcl):
                 if detector.pixel_size.y != float(y_pixel_size):
                     self._notes += "Change y of pixel size from "
-                    self._notes += "%s to %s \n"%(detector.pixel_size.y, y_pixel_size)
+                    self._notes += "%s to %s \n"%(detector.pixel_size.y,
+                                                   y_pixel_size)
                     detector.pixel_size.y  = float(y_pixel_size)
             else:
-                self._notes += "Error: Expected a float for the pixel size's y "
-                self._notes += "won't changes y pixel size from "
-                self._notes += "%s to %s"%(detector.pixel_size.y, y_pixel_size)
+                self._notes += "Error: Expected a float for the pixel "
+                self._notes += "size's y  won't changes y pixel size from "
+                self._notes += "%s to %s" % (detector.pixel_size.y,
+                                              y_pixel_size)
         #Change z coordinate
         z_pixel_size = self.z_pixel_size_tcl.GetValue().lstrip().rstrip()
         if z_pixel_size == "" or z_pixel_size == str(None):
@@ -730,7 +777,8 @@ class DetectorDialog(wx.Dialog):
             if check_float(self.z_pixel_size_tcl):
                 if detector.pixel_size.z != float(z_pixel_size):
                     self._notes += "Change z of pixel size from "
-                    self._notes += "%s to %s \n"%(detector.pixel_size.z, z_pixel_size)
+                    self._notes += "%s to %s \n"%(detector.pixel_size.z,
+                                                   z_pixel_size)
                     detector.pixel_size.z  = float(z_pixel_size)
             else:
                 self._notes += "Error: Expected a float for the offset 's x "
@@ -762,11 +810,13 @@ class DetectorDialog(wx.Dialog):
             if check_float(self.slit_length_tcl):
                 if detector.slit_length != float(slit_length):
                     self._notes += " Change slit length from"
-                    self._notes += " %s to %s \n"%(detector.slit_length, slit_length)
+                    self._notes += " %s to %s \n"%(detector.slit_length,
+                                                    slit_length)
                     detector.slit_length = float(slit_length)
             else:
-                self._notes += "Error: Expected a float for the slit length won't changes "
-                self._notes += "%s to %s"%(detector.slit_length, slit_length)
+                self._notes += "Error: Expected a float"
+                self._notes += " for the slit length won't changes "
+                self._notes += "%s to %s" % (detector.slit_length, slit_length)
         #change the distance unit
         unit = self.slit_length_unit_tcl.GetValue().lstrip().rstrip()
         if detector.slit_length_unit != unit:
@@ -803,8 +853,8 @@ class DetectorDialog(wx.Dialog):
             
 if __name__ == "__main__":
     app = wx.App()
-    detector = Detector()
-    dlg = DetectorDialog(detector=[detector])
+    test_detector = Detector()
+    dlg = DetectorDialog(detector=[test_detector])
     dlg.ShowModal()
     app.MainLoop()
  

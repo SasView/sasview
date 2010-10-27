@@ -8,7 +8,7 @@ See the license text in license.txt
 copyright 2009, University of Tennessee
 """
 import wx
-import os
+#import os
 
 class InputTextCtrl(wx.TextCtrl):
     """
@@ -19,8 +19,9 @@ class InputTextCtrl(wx.TextCtrl):
         
         wx.TextCtrl.__init__(self, *args, **kwds)
         
-        ## Set to True when the mouse is clicked while the whole string is selected
-        full_selection = False
+        ## Set to True when the mouse is clicked while the whole 
+        #string is selected
+        self.full_selection = False
         ## Call back for EVT_SET_FOCUS events
         _on_set_focus_callback = None
         # Bind appropriate events
@@ -51,8 +52,8 @@ class InputTextCtrl(wx.TextCtrl):
                 # Check whether text has been selected, 
                 # if not, select the whole string
                 (start, end) = control.GetSelection()
-                if start==end:
-                    control.SetSelection(-1,-1)
+                if start == end:
+                    control.SetSelection(-1, -1)
 
     
 class InterActiveOutputTextCtrl(wx.TextCtrl):

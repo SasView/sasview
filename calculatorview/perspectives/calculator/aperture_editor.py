@@ -30,7 +30,33 @@ class ApertureDialog(wx.Dialog):
         self._aperture = aperture
         self._reset_aperture = deepcopy(aperture)
         self._notes = ""
-        self_description = "Edit aperture"
+        #self_description = "Edit aperture"
+        
+        #Attributes for panel
+        self.aperture_name_tcl = None
+        self.main_sizer = None
+        self.box_aperture = None
+        self.boxsizer_aperture = None
+        self.name_sizer = None
+        self.name_sizer = None
+        self.size_name_tcl  = None
+        self.type_sizer = None
+        self.distance_sizer = None
+        self.size_name_sizer = None
+        self.aperture_size_unit_tcl = None
+        self.aperture_size_sizer = None
+        self.button_sizer = None
+        self.aperture_name_tcl = None
+        self.type_tcl = None
+        self.distance_tcl = None
+        self.distance_unit_tcl = None
+        self.x_aperture_size_tcl = None
+        self.y_aperture_size_tcl = None
+        self.z_aperture_size_tcl = None
+        self.bt_apply = None
+        self.bt_cancel = None
+        self.bt_close = None
+        
         self._do_layout()
         self.set_values()
       

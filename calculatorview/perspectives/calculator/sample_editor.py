@@ -5,7 +5,7 @@ from copy import deepcopy
 from sans.guiframe.utils import check_float
 
 _BOX_WIDTH = 60
-if sys.platform.count("win32")>0:
+if sys.platform.count("win32") > 0:
     _STATICBOX_WIDTH = 450
     PANEL_WIDTH = 500
     PANEL_HEIGHT = 430
@@ -54,7 +54,8 @@ class SampleDialog(wx.Dialog):
         """
         ## Short name for sample [string]
         sample_name_txt = wx.StaticText(self, -1, 'Sample Name : ')  
-        self.sample_name_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH*5, 20), style=0) 
+        self.sample_name_tcl = wx.TextCtrl(self, -1,
+                                            size=(_BOX_WIDTH*5, 20), style=0) 
         self.name_sizer.AddMany([(sample_name_txt, 0, wx.LEFT|wx.RIGHT, 10),
                                        (self.sample_name_tcl, 0, wx.EXPAND)])
     def _layout_id(self):
@@ -73,13 +74,14 @@ class SampleDialog(wx.Dialog):
         """
         ## Thickness [float] [mm]
         thickness_txt = wx.StaticText(self, -1, 'Thickness:') 
-        self.thickness_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20),style=0)  
+        self.thickness_tcl = wx.TextCtrl(self, -1,
+                                          size=(_BOX_WIDTH, 20),style=0)  
         thickness_unit_txt = wx.StaticText(self, -1, 'Unit: ') 
         self.thickness_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                               style=0)  
         self.thickness_sizer.AddMany([(thickness_txt, 0, wx.LEFT|wx.RIGHT, 10),
                                      (self.thickness_tcl, 0, wx.LEFT, 25),
-                                     (thickness_unit_txt, 0, wx.LEFT|wx.RIGHT, 10),
+                            (thickness_unit_txt, 0, wx.LEFT|wx.RIGHT, 10),
                                      (self.thickness_unit_tcl, 0, wx.EXPAND)]) 
     def _layout_transmission(self):
         """
@@ -88,8 +90,10 @@ class SampleDialog(wx.Dialog):
         ## Transmission [float] [fraction]
         transmission = None
         transmission_txt = wx.StaticText(self, -1, 'Transmission:') 
-        self.transmission_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20),style=0)   
-        self.transmission_sizer.AddMany([(transmission_txt, 0, wx.LEFT|wx.RIGHT, 10),
+        self.transmission_tcl = wx.TextCtrl(self, -1,
+                                             size=(_BOX_WIDTH, 20),style=0)   
+        self.transmission_sizer.AddMany([(transmission_txt,
+                                         0, wx.LEFT|wx.RIGHT, 10),
                                      (self.transmission_tcl, 0, wx.LEFT, 12)]) 
         
     def _layout_temperature(self):
@@ -98,13 +102,15 @@ class SampleDialog(wx.Dialog):
         """
         ## Temperature [float] [C]
         temperature_txt = wx.StaticText(self, -1, 'Temperature:') 
-        self.temperature_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)   
+        self.temperature_tcl = wx.TextCtrl(self, -1, 
+                                           size=(_BOX_WIDTH, 20), style=0)   
         temperature_unit_txt = wx.StaticText(self, -1, 'Unit: ') 
         self.temperature_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                                             style=0)  
-        self.temperature_sizer.AddMany([(temperature_txt, 0, wx.LEFT|wx.RIGHT, 10),
+        self.temperature_sizer.AddMany([(temperature_txt, 0,
+                                          wx.LEFT|wx.RIGHT, 10),
                                      (self.temperature_tcl, 0, wx.LEFT, 10),
-                                     (temperature_unit_txt, 0, wx.LEFT|wx.RIGHT, 10),
+                                (temperature_unit_txt, 0, wx.LEFT|wx.RIGHT, 10),
                                      (self.temperature_unit_tcl, 0, wx.EXPAND)])  
     
     def _layout_position(self):
@@ -114,13 +120,17 @@ class SampleDialog(wx.Dialog):
         ## Position [Vector] [mm]
         position_txt = wx.StaticText(self, -1, 'Position:') 
         x_position_txt = wx.StaticText(self, -1, 'x = ')  
-        self.x_position_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0) 
+        self.x_position_tcl = wx.TextCtrl(self, -1,
+                                           size=(_BOX_WIDTH,20), style=0) 
         y_position_txt = wx.StaticText(self, -1, 'y = ')  
-        self.y_position_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0) 
+        self.y_position_tcl = wx.TextCtrl(self, -1,
+                                           size=(_BOX_WIDTH,20), style=0) 
         z_position_txt = wx.StaticText(self, -1, 'z = ')  
-        self.z_position_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0)  
+        self.z_position_tcl = wx.TextCtrl(self, -1,
+                                           size=(_BOX_WIDTH,20), style=0)  
         position_unit_txt = wx.StaticText(self, -1, 'Unit: ') 
-        self.position_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0)  
+        self.position_unit_tcl = wx.TextCtrl(self, -1, 
+                                             size=(_BOX_WIDTH,20), style=0)  
         self.position_sizer.AddMany([(position_txt, 0, wx.LEFT|wx.RIGHT, 10),
                                      (x_position_txt, 0, wx.LEFT, 14),
                                      (self.x_position_tcl, 0, wx.RIGHT, 10),
@@ -137,14 +147,19 @@ class SampleDialog(wx.Dialog):
         ## Orientation [Vector] [degrees]
         orientation_txt = wx.StaticText(self, -1, 'Orientation:') 
         x_orientation_txt = wx.StaticText(self, -1, 'x = ')  
-        self.x_orientation_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0) 
+        self.x_orientation_tcl = wx.TextCtrl(self, -1,
+                                              size=(_BOX_WIDTH,20), style=0) 
         y_orientation_txt = wx.StaticText(self, -1, 'y = ')  
-        self.y_orientation_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0) 
+        self.y_orientation_tcl = wx.TextCtrl(self, -1,
+                                              size=(_BOX_WIDTH,20), style=0) 
         z_orientation_txt = wx.StaticText(self, -1, 'z = ')  
-        self.z_orientation_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0)  
+        self.z_orientation_tcl = wx.TextCtrl(self, -1,
+                                              size=(_BOX_WIDTH,20), style=0)  
         orientation_unit_txt = wx.StaticText(self, -1, 'Unit: ') 
-        self.orientation_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH,20), style=0)  
-        self.orientation_sizer.AddMany([(orientation_txt, 0, wx.LEFT|wx.RIGHT, 10),
+        self.orientation_unit_tcl = wx.TextCtrl(self, -1,
+                                                 size=(_BOX_WIDTH,20), style=0)  
+        self.orientation_sizer.AddMany([(orientation_txt, 0,
+                                          wx.LEFT|wx.RIGHT, 10),
                                      (x_orientation_txt, 0, wx.LEFT, 0),
                                      (self.x_orientation_tcl, 0, wx.RIGHT, 10),
                                      (y_orientation_txt, 0, wx.EXPAND),
@@ -152,7 +167,7 @@ class SampleDialog(wx.Dialog):
                                      (z_orientation_txt, 0, wx.EXPAND),
                                      (self.z_orientation_tcl, 0, wx.RIGHT, 10),
                                      (orientation_unit_txt, 0, wx.EXPAND),
-                                     (self.orientation_unit_tcl, 0, wx.RIGHT, 10)])
+                            (self.orientation_unit_tcl, 0, wx.RIGHT, 10)])
         
     def _layout_details(self):
         """
@@ -274,7 +289,8 @@ class SampleDialog(wx.Dialog):
         self.z_position_tcl.SetValue(str(z))  
         self.position_unit_tcl.SetValue(str(sample.position_unit))
         #orientation
-        x, y, z = sample.orientation.x, sample.orientation.y , sample.orientation.z
+        x, y = sample.orientation.x, sample.orientation.y 
+        z = sample.orientation.z
         self.x_orientation_tcl.SetValue(str(x))  
         self.y_orientation_tcl.SetValue(str(y)) 
         self.z_orientation_tcl.SetValue(str(z))  
@@ -346,7 +362,8 @@ class SampleDialog(wx.Dialog):
         transmission = self.transmission_tcl.GetValue().lstrip().rstrip()
         if self._sample.transmission != transmission:
             self._notes += " Change transmission from"
-            self._notes += " %s to %s \n"%(self._sample.transmission, transmission)
+            self._notes += " %s to %s \n" % (self._sample.transmission,
+                                              transmission)
             self._sample.transmission = transmission
             
     def on_change_temperature(self):
@@ -377,7 +394,8 @@ class SampleDialog(wx.Dialog):
             if check_float(self.x_position_tcl):
                 if self._sample.position.x != float(x_position) :
                     self._notes += "Change x of position from "
-                    self._notes += "%s to %s \n"%(self._sample.position.x, x_position)
+                    self._notes += "%s to %s \n" % (self._sample.position.x,
+                                                     x_position)
                     self._sample.position.x  = float(x_position)
             else:
                 self._notes += "Error: Expected a float for the position 's x "
@@ -392,7 +410,8 @@ class SampleDialog(wx.Dialog):
             if check_float(self.y_position_tcl):
                 if self._sample.position.y != float(y_position):
                     self._notes += "Change y of position from "
-                    self._notes += "%s to %s \n"%(self._sample.position.y, y_position)
+                    self._notes += "%s to %s \n" % (self._sample.position.y, 
+                                                    y_position)
                     self._sample.position.y  = float(y_position)
             else:
                 self._notes += "Error: Expected a float for the beam size's y "
@@ -407,7 +426,8 @@ class SampleDialog(wx.Dialog):
             if check_float(self.z_position_tcl):
                 if self._sample.position.z != float(z_position):
                     self._notes += "Change z of position from "
-                    self._notes += "%s to %s \n"%(self._sample.position.z, z_position)
+                    self._notes += "%s to %s \n" % (self._sample.position.z,
+                                                    z_position)
                     self._sample.position.z  = float(z_position)
             else:
                 self._notes += "Error: Expected a float for position's x "
@@ -437,7 +457,8 @@ class SampleDialog(wx.Dialog):
             else:
                 self._notes += "Error: Expected a float for orientation 's x "
                 self._notes += "won't changes x orientation from "
-                self._notes += "%s to %s"%(self._sample.orientation.x, x_orientation)
+                self._notes += "%s to %s" % (self._sample.orientation.x,
+                                              x_orientation)
         #Change y coordinate
         y_orientation = self.y_orientation_tcl.GetValue().lstrip().rstrip()
         if y_orientation == "" or y_orientation == str(None):
@@ -447,12 +468,14 @@ class SampleDialog(wx.Dialog):
             if check_float(self.y_orientation_tcl):
                 if self._sample.orientation.y != float(y_orientation):
                     self._notes += "Change y of orientation from "
-                    self._notes += "%s to %s \n"%(self._sample.orientation.y, y_orientation)
+                    self._notes += "%s to %s \n" % (self._sample.orientation.y,
+                                                     y_orientation)
                     self._sample.orientation.y  = float(y_orientation)
             else:
                 self._notes += "Error: Expected a float for orientation's y "
                 self._notes += "won't changes y orientation from "
-                self._notes += "%s to %s"%(self._sample.orientation.y, y_orientation)
+                self._notes += "%s to %s" % (self._sample.orientation.y,
+                                            y_orientation)
         #Change z coordinate
         z_orientation = self.z_orientation_tcl.GetValue().lstrip().rstrip()
         if z_orientation == "" or z_orientation == str(None):
@@ -462,12 +485,14 @@ class SampleDialog(wx.Dialog):
             if check_float(self.z_orientation_tcl):
                 if self._sample.orientation.z != float(z_orientation):
                     self._notes += "Change z of orientation from "
-                    self._notes += "%s to %s \n"%(self._sample.orientation.z, z_orientation)
-                    self._sample.orientation.z  = float(z_orientation)
+                    self._notes += "%s to %s \n" % (self._sample.orientation.z,
+                                                     z_orientation)
+                    self._sample.orientation.z = float(z_orientation)
             else:
                 self._notes += "Error: Expected a float for orientation 's x "
                 self._notes += "won't changes z orientation from "
-                self._notes += "%s to %s"%(self._sample.orientation.z, z_orientation)
+                self._notes += "%s to %s" % (self._sample.orientation.z,
+                                              z_orientation)
         #change the beam center unit
         unit = self.orientation_unit_tcl.GetValue().lstrip().rstrip()
         if self._sample.orientation_unit != unit:
@@ -504,7 +529,9 @@ class SampleDialog(wx.Dialog):
         self.set_details(self._sample)
         if self.manager is not None:
             self.manager.set_sample(self._sample)
-       
+        if event is not None:
+            event.Skip()
+            
     def on_click_cancel(self, event):
         """
             leave the sample as it is and close
@@ -513,10 +540,11 @@ class SampleDialog(wx.Dialog):
         self.set_values()
         if self.manager is not None:
              self.manager.set_sample(self._sample, self._notes)
+        if event is not None:
+            event.Skip()
 
-if __name__ =="__main__":
-    
-    app  = wx.App()
+if __name__ == "__main__":
+    app = wx.App()
     from DataLoader.data_info import Sample
     sample = Sample()
     dlg = SampleDialog(sample=sample)

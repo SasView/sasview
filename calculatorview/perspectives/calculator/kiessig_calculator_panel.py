@@ -10,11 +10,12 @@ copyright 2008, 2009, University of Tennessee
 
 import wx
 import sys
-import os
+#import os
 
-from sans.guicomm.events import StatusEvent  
+#from sans.guicomm.events import StatusEvent  
 from sans.calculator.kiessig_calculator import KiessigThicknessCalculator 
-from calculator_widgets import OutputTextCtrl, InputTextCtrl
+from calculator_widgets import OutputTextCtrl
+from calculator_widgets import InputTextCtrl
 
 _BOX_WIDTH = 77
 #Slit length panel size 
@@ -38,13 +39,15 @@ class KiessigThicknessCalculatorPanel(wx.Panel):
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
     
-    def __init__(self, parent, id=-1, *args, **kwds):
-        wx.Panel.__init__(self, parent, id=id, *args, **kwds)
+    def __init__(self, parent, *args, **kwds):
+        wx.Panel.__init__(self, parent, *args, **kwds)
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)  
         # Object that receive status event
         self.parent = parent
         self.kiessig = KiessigThicknessCalculator()
+        #layout attribute
+        self.hint_sizer = None
         self._do_layout()
        
     def _define_structure(self):
@@ -90,7 +93,8 @@ class KiessigThicknessCalculatorPanel(wx.Panel):
         Fill the sizer containing thickness information
         """
         thick_unit = '['+self.kiessig.get_thickness_unit() +']'
-        thickness_size_txt = wx.StaticText(self, -1, 'Thickness (or Diameter): ')
+        thickness_size_txt = wx.StaticText(self, -1, 
+                                           'Thickness (or Diameter): ')
         self.thickness_size_tcl = OutputTextCtrl(self, -1, 
                                                  size=(_BOX_WIDTH,-1))
         thickness_size_hint = " Estimated Size in Real Space"
@@ -105,7 +109,8 @@ class KiessigThicknessCalculatorPanel(wx.Panel):
         """
         Fill the sizer containing hint 
         """
-        hint_msg = "This tool is to approximately estimate the thickness of a layer"
+        hint_msg = "This tool is to approximately estimate "
+        hint_msg += "the thickness of a layer"
         hint_msg += " or the diameter of particles\n "
         hint_msg += "from the Kiessig fringe width in SANS/NR data."
         hint_msg += ""
@@ -147,6 +152,8 @@ class KiessigThicknessCalculatorPanel(wx.Panel):
         close the window containing this panel
         """
         self.parent.Close()
+        if event is not None:
+            event.Skip()
         
     def on_compute(self, event):
         """
@@ -163,7 +170,7 @@ class KiessigThicknessCalculatorPanel(wx.Panel):
         # set tcl
         self.thickness_size_tcl.SetValue(str(thickness))
         
-    def format_number(self,value=None):
+    def format_number(self, value=None):
         """
         Return a float in a standardized, human-readable formatted string 
         """
@@ -173,12 +180,13 @@ class KiessigThicknessCalculatorPanel(wx.Panel):
             output = None
             return output
 
-        output= "%-7.4g" % value
+        output = "%-7.4g" % value
         return output.lstrip().rstrip()   
      
 class KiessigWindow(wx.Frame):
-    def __init__(self, parent=None, id=1, title="Kiessig Thickness Calculator"):
-        wx.Frame.__init__(self, parent, id, title, size=(PANEL_WIDTH,PANEL_HEIGHT))
+    def __init__(self, parent=None, title="Kiessig Thickness Calculator"):
+        wx.Frame.__init__(self, parent, title,
+                           size=(PANEL_WIDTH,PANEL_HEIGHT))
         self.parent = parent
         self.panel = KiessigThicknessCalculatorPanel(parent=self)
         self.Centre()

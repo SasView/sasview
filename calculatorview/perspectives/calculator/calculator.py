@@ -1,4 +1,6 @@
-
+"""
+Calculator Module
+"""
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
@@ -9,7 +11,7 @@
 #copyright 2010, University of Tennessee
 ################################################################################
 
-import wx
+#import wx
 import logging
 
 class Plugin:
@@ -17,14 +19,14 @@ class Plugin:
     This class defines the interface for a Plugin class
     for calculator perspective
     """
-    
     def __init__(self, standalone=True):
         """
         Abstract class for gui_manager Plugins.
         """
         ## Plug-in name. It will appear on the application menu.
         self.sub_menu = "Calculator"        
-        
+        #standalone flag
+        self.standalone = standalone
         ## Reference to the parent window. Filled by get_panels() below.
         self.parent = None
         
@@ -77,7 +79,8 @@ class Plugin:
         from help_panel import  HelpWindow
         frame = HelpWindow(None, -1)    
         frame.Show(True)
-      
+        evt.Skip()
+        
     def get_context_menu(self, graph=None):
         """
         This method is optional.
@@ -116,7 +119,7 @@ class Plugin:
         kiessig_help += "particles \n from the width of a Kiessig fringe."
         sld_help = "Provides computation related to Scattering Length Density"
         slit_length_help = "Provides computation related to Slit Length Density"
-        data_editor_help = "Meta Data Editor"
+        #data_editor_help = "Meta Data Editor"
         return [("SLD Calculator", sld_help, self.on_calculate_sld),
                 ("Slit Size Calculator", slit_length_help,
                         self.on_calculate_slit_size),
@@ -129,8 +132,10 @@ class Plugin:
         Edit meta data 
         """
         from data_editor import DataEditorWindow
-        frame = DataEditorWindow(parent=self.parent, data=[], title="Data Editor")
+        frame = DataEditorWindow(parent=self.parent, data=[],
+                                  title="Data Editor")
         frame.Show(True)
+        event.Skip()
 
     def on_calculate_kiessig(self, event):
         """
@@ -139,7 +144,7 @@ class Plugin:
         from kiessig_calculator_panel import KiessigWindow
         frame = KiessigWindow()
         frame.Show(True) 
-    
+        event.Skip()
        
     def on_calculate_sld(self, event):
         """
@@ -148,7 +153,8 @@ class Plugin:
         from sld_panel import SldWindow
         frame = SldWindow(base=self.parent)
         frame.Show(True) 
-    
+        event.Skip()
+        
     def on_calculate_slit_size(self, event):
         """
         Compute the slit size a given data
@@ -156,6 +162,7 @@ class Plugin:
         from slit_length_calculator_panel import SlitLengthCalculatorWindow
         frame = SlitLengthCalculatorWindow(parent=self.parent)    
         frame.Show(True)
+        event.Skip()
         
     def on_perspective(self, event):
         """
@@ -167,8 +174,8 @@ class Plugin:
         
         """
         self.parent.set_perspective(self.perspective)
-       
-    
+        event.Skip()
+        
     def post_init(self):
         """
         Post initialization call back to close the loose ends

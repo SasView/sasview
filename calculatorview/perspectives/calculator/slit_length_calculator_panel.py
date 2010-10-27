@@ -12,10 +12,11 @@ import wx
 import sys
 import os
 
-from DataLoader.readers.ascii_reader import Reader
+#from DataLoader.readers.ascii_reader import Reader
 from sans.guicomm.events import StatusEvent  
 from sans.calculator.slit_length_calculator import SlitlengthCalculator  
-from calculator_widgets import OutputTextCtrl, InterActiveOutputTextCtrl
+from calculator_widgets import OutputTextCtrl
+from calculator_widgets import InterActiveOutputTextCtrl
 
 _BOX_WIDTH = 76
 #Slit length panel size 
@@ -39,8 +40,8 @@ class SlitLengthCalculatorPanel(wx.Panel):
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
     
-    def __init__(self, parent, id=-1, *args, **kwds):
-        wx.Panel.__init__(self, parent, id=id, *args, **kwds)
+    def __init__(self, parent, *args, **kwds):
+        wx.Panel.__init__(self, parent, *args, **kwds)
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         #thread to read data 
@@ -69,7 +70,8 @@ class SlitLengthCalculatorPanel(wx.Panel):
             Fill the sizer containing data's name
         """
         data_name_txt = wx.StaticText(self, -1, 'Data: ')
-        self.data_name_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH*4,-1))
+        self.data_name_tcl = OutputTextCtrl(self, -1, 
+                                            size=(_BOX_WIDTH*4, -1))
         data_hint = "Loaded data"
         self.data_name_tcl.SetToolTipString(data_hint)
         #control that triggers importing data
@@ -86,17 +88,19 @@ class SlitLengthCalculatorPanel(wx.Panel):
             Fill the sizer containing slit size information
         """
         slit_size_txt = wx.StaticText(self, -1, 'Slit Size (FWHM/2): ')
-        self.slit_size_tcl = InterActiveOutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
+        self.slit_size_tcl = InterActiveOutputTextCtrl(self, -1,
+                                                       size=(_BOX_WIDTH, -1))
         slit_size_hint = " Estimated full slit size"
         self.slit_size_tcl.SetToolTipString(slit_size_hint)
         slit_size_unit_txt = wx.StaticText(self, -1, 'Unit: ')
-        self.slit_size_unit_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1)) 
+        self.slit_size_unit_tcl = OutputTextCtrl(self, -1, 
+                                                 size=(_BOX_WIDTH, -1)) 
         slit_size_unit_hint = "Full slit size's unit"
         self.slit_size_unit_tcl.SetToolTipString(slit_size_unit_hint)
         self.slit_size_sizer.AddMany([(slit_size_txt, 0, wx.LEFT, 15),
                                       (self.slit_size_tcl, 0, wx.LEFT, 10),
                                       (slit_size_unit_txt, 0, wx.LEFT, 10),
-                                      (self.slit_size_unit_tcl, 0, wx.LEFT, 10)])
+                                    (self.slit_size_unit_tcl, 0, wx.LEFT, 10)])
     
     def _layout_hint(self):
         """
@@ -144,7 +148,8 @@ class SlitLengthCalculatorPanel(wx.Panel):
         
         wildcard = "SAXSess Data 1D (*.DAT, *.dat)|*.DAT" 
         
-        dlg = wx.FileDialog(self, "Choose a file", location,"", wildcard, wx.OPEN)
+        dlg = wx.FileDialog(self, "Choose a file", location,
+                            "", wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             filename = os.path.basename(path)
@@ -176,7 +181,8 @@ class SlitLengthCalculatorPanel(wx.Panel):
             if self.reader is not None and self.reader.isrunning():
                 self.reader.stop()
             if self.parent.parent is not None:
-                wx.PostEvent(self.parent.parent, StatusEvent(status="Loading...",
+                wx.PostEvent(self.parent.parent, 
+                                StatusEvent(status="Loading...",
                                 type="progress"))
             self.reader = DataReader(path=path,
                                     completefn=self.complete_loading,
@@ -185,8 +191,9 @@ class SlitLengthCalculatorPanel(wx.Panel):
         except:
             if self.parent.parent is None:
                 return 
-            msg = "Slit Length Calculator: %s"%(sys.exc_value)
-            wx.PostEvent(self.parent.parent, StatusEvent(status=msg, type='stop'))
+            msg = "Slit Length Calculator: %s" % (sys.exc_value)
+            wx.PostEvent(self.parent.parent,
+                          StatusEvent(status=msg, type='stop'))
             return 
             
     def complete_loading(self, data=None, filename=''):
@@ -197,7 +204,8 @@ class SlitLengthCalculatorPanel(wx.Panel):
             if self.parent.parent is None:
                 return 
             msg = "Slit Length cannot be computed for 2D Data"
-            wx.PostEvent(self.parent.parent, StatusEvent(status=msg, type='stop'))
+            wx.PostEvent(self.parent.parent, 
+                         StatusEvent(status=msg, type='stop'))
             return 
         self.data_name_tcl.SetValue(str(data.filename))
         #compute the slit size
@@ -205,16 +213,17 @@ class SlitLengthCalculatorPanel(wx.Panel):
             x = data.x
             y = data.y
             if x == [] or  x is None or y == [] or y is None:
-                 msg = "The current data is empty please check x and y"
-                 raise ValueError, msg
+                msg = "The current data is empty please check x and y"
+                raise ValueError, msg
             slit_length_calculator = SlitlengthCalculator()
             slit_length_calculator.set_data(x=x, y=y)
             slit_length = slit_length_calculator.calculate_slit_length()
         except:
             if self.parent.parent is None:
                 return 
-            msg = "Slit Size Calculator: %s"%(sys.exc_value)
-            wx.PostEvent(self.parent.parent, StatusEvent(status=msg, type='stop'))
+            msg = "Slit Size Calculator: %s" % (sys.exc_value)
+            wx.PostEvent(self.parent.parent,
+                          StatusEvent(status=msg, type='stop'))
             return 
         self.slit_size_tcl.SetValue(str(slit_length))
         #Display unit
@@ -224,9 +233,15 @@ class SlitLengthCalculatorPanel(wx.Panel):
         msg = "Load Complete"
         wx.PostEvent(self.parent.parent, StatusEvent(status=msg, type='stop'))
     
+    
 class SlitLengthCalculatorWindow(wx.Frame):
-    def __init__(self, parent=None, id=1, title="Slit Size Calculator"):
-        wx.Frame.__init__(self, parent, id, title, size=(PANEL_WIDTH,PANEL_HEIGHT))
+    """
+    """
+    def __init__(self, parent=None, title="Slit Size Calculator"):
+        """
+        """
+        wx.Frame.__init__(self, parent, title,
+                           size=(PANEL_WIDTH,PANEL_HEIGHT))
         self.parent = parent
         self.panel = SlitLengthCalculatorPanel(parent=self)
         self.Centre()

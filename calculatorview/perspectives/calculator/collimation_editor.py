@@ -1,4 +1,5 @@
-
+"""
+"""
 import wx
 import sys
 from copy import deepcopy
@@ -27,7 +28,7 @@ class CollimationDialog(wx.Dialog):
                  collimation=[], *args, **kwds):
         """
         """
-        kwds['size'] =(PANEL_WIDTH, PANEL_HEIGHT)
+        kwds['size'] = (PANEL_WIDTH, PANEL_HEIGHT)
         kwds['title'] = "Collimation Editor"
         wx.Dialog.__init__(self, parent=parent, *args, **kwds)
         self.parent = parent
@@ -36,6 +37,12 @@ class CollimationDialog(wx.Dialog):
         self._reset_collimation = deepcopy(collimation)
         self._notes = ""
         self._description = "Edit collimation"
+        #layout attributes
+        self.main_sizer = None
+        self.box_collimation = None
+        self.boxsizer_collimation = None
+        
+        
         self._do_layout()
         self.set_values()
  
@@ -44,8 +51,10 @@ class CollimationDialog(wx.Dialog):
         define initial sizer 
         """
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.box_collimation = wx.StaticBox(self, -1,str("Edit Selected Collimation"))
-        self.boxsizer_collimation = wx.StaticBoxSizer(self.box_collimation, wx.VERTICAL)
+        self.box_collimation = wx.StaticBox(self, -1,
+                                            str("Edit Selected Collimation"))
+        self.boxsizer_collimation = wx.StaticBoxSizer(self.box_collimation,
+                                                       wx.VERTICAL)
         
         collimation_box = wx.StaticBox(self, -1, "Edit Number of Collimations")
         self.collimation_sizer = wx.StaticBoxSizer(collimation_box, wx.VERTICAL)
@@ -79,18 +88,23 @@ class CollimationDialog(wx.Dialog):
         self.bt_add_collimation.Bind(wx.EVT_BUTTON, self.add_collimation)
         
         self.bt_remove_collimation = wx.Button(self, -1, "Remove")
-        self.bt_remove_collimation.SetToolTipString("Remove data's collimation.")
+        hint = "Remove data's collimation."
+        self.bt_remove_collimation.SetToolTipString(hint)
         self.bt_remove_collimation.Bind(wx.EVT_BUTTON, self.remove_collimation)
       
-        self.collimation_button_sizer.AddMany([(collimation_name_txt, 0, wx.LEFT, 15),
+        self.collimation_button_sizer.AddMany([(collimation_name_txt, 0,
+                                                 wx.LEFT, 15),
                                      (self.collimation_cbox, 0, wx.LEFT, 5),
                                      (self.bt_add_collimation, 0, wx.LEFT, 10),
-                                     (self.bt_remove_collimation, 0, wx.LEFT, 5)])
+                                     (self.bt_remove_collimation,
+                                       0, wx.LEFT, 5)])
         collimation_hint_txt = 'No collimation is available for this data.'
         self.collimation_txt = wx.StaticText(self, -1, collimation_hint_txt) 
         self.collimation_hint_sizer.Add(self.collimation_txt, 0, wx.LEFT, 10)
-        self.collimation_sizer.AddMany([(self.collimation_button_sizer, 0, wx.ALL, 10),
-                                     (self.collimation_hint_sizer, 0, wx.ALL, 10)])
+        self.collimation_sizer.AddMany([(self.collimation_button_sizer,
+                                          0, wx.ALL, 10),
+                                     (self.collimation_hint_sizer,
+                                       0, wx.ALL, 10)])
      
         self.fill_collimation_combox()
         self.enable_collimation()
@@ -114,7 +128,8 @@ class CollimationDialog(wx.Dialog):
         length_txt = wx.StaticText(self, -1, 'Length:') 
         self.length_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)   
         length_unit_txt = wx.StaticText(self, -1, 'Unit: ') 
-        self.length_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20),style=0)  
+        self.length_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20),
+                                           style=0)  
         self.length_sizer.AddMany([(length_txt, 0, wx.LEFT|wx.RIGHT, 10),
                                      (self.length_tcl, 0, wx.LEFT, 12),
                                      (length_unit_txt, 0, wx.LEFT|wx.RIGHT, 10),
@@ -164,12 +179,13 @@ class CollimationDialog(wx.Dialog):
         aperture_hint_txt = 'No aperture is available for this data.'
         self.aperture_txt = wx.StaticText(self, -1, aperture_hint_txt) 
         self.aperture_hint_sizer.Add(self.aperture_txt, 0, wx.LEFT, 10)
-        self.aperture_sizer.AddMany([(self.aperture_button_sizer, 0, wx.ALL, 10),
+        self.aperture_sizer.AddMany([(self.aperture_button_sizer,
+                                       0, wx.ALL, 10),
                                      (self.aperture_hint_sizer, 0, wx.ALL, 10)])
         self.fill_aperture_combox()
         self.enable_aperture()
     
-    def _do_layout(self, data=None):
+    def _do_layout(self):
         """
         Draw the current panel
         """
@@ -264,7 +280,8 @@ class CollimationDialog(wx.Dialog):
         
     def on_select_collimation(self, event):
         """
-        fill the control on the panel according to the current  selected collimation 
+        fill the control on the panel according to 
+        the current  selected collimation 
         """
         self.set_values()
         self.fill_aperture_combox()
@@ -274,11 +291,13 @@ class CollimationDialog(wx.Dialog):
         """
         Enable /disable widgets related to collimation
         """
-        if self._collimation is not None and self.collimation_cbox.GetCount() > 0:
+        if self._collimation is not None and \
+            self.collimation_cbox.GetCount() > 0:
             self.collimation_cbox.Enable()
             self.bt_remove_collimation.Enable()
             n_collimation = self.collimation_cbox.GetCount()
-            collimation_hint_txt = 'collimations available: %s '%str(n_collimation)
+            collimation_hint_txt = "collimations"
+            collimation_hint_txt += " available: %s "% str(n_collimation)
             if len(self._collimation) > 0:
                 self.bt_remove_collimation.Enable()
             else:
@@ -490,8 +509,8 @@ class CollimationDialog(wx.Dialog):
                     self._notes += "%s to %s \n"%(collimation.length, length)
                     collimation.length  = float(length)
             else:
-                self._notes += "Error: Expected a float for collimation length "
-                self._notes += "won't changes length from "
+                self._notes += "Error: Expected a float for collimation length"
+                self._notes += " won't changes length from "
                 self._notes += "%s to %s"%(collimation.length, length)
         #change length  unit
         unit = self.length_unit_tcl.GetValue().lstrip().rstrip()
@@ -517,10 +536,10 @@ class CollimationDialog(wx.Dialog):
         self._collimation = deepcopy(self._reset_collimation)
         self.set_values()
         if self.manager is not None:
-             self.manager.set_collimation(self._collimation)
+            self.manager.set_collimation(self._collimation)
        
  
-if __name__ =="__main__":
+if __name__ == "__main__":
 
     app  = wx.App()
     dlg = CollimationDialog(collimation=[Collimation()])
