@@ -11,13 +11,13 @@ from scipy import optimize
 
 from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import SansAssembly
-from sans.fit.AbstractFitEngine import FitAbort
+#from sans.fit.AbstractFitEngine import FitAbort
 
 class fitresult(object):
     """
     Storing fit result
     """
-    def __init__(self, model=None, paramList=None):
+    def __init__(self, model=None, param_list=None):
         self.calls = None
         self.fitness = None
         self.chisqr = None
@@ -29,7 +29,7 @@ class fitresult(object):
         self.stderr = None
         self.parameters = None
         self.model = model
-        self.param_list = paramList
+        self.param_list = param_list
      
     def set_model(self, model):
         """
@@ -49,10 +49,10 @@ class fitresult(object):
         n = len(self.model.parameterset)
 
         result_param = zip(xrange(n), self.model.parameterset)
-        L = ["P%-3d  %s......|.....%s"%(p[0], p[1], p[1].value)\
+        msg = ["P%-3d  %s......|.....%s" % (p[0], p[1], p[1].value)\
               for p in result_param if p[1].name in self.param_list]
-        L.append("=== goodness of fit: %s" % (str(self.fitness)))
-        return "\n".join(L)
+        msg.append("=== goodness of fit: %s" % (str(self.fitness)))
+        return "\n".join(msg)
     
     def print_summary(self):
         """
@@ -94,6 +94,7 @@ class ScipyFit(FitEngine):
         FitEngine.__init__(self)
         self.fit_arrange_dict = {}
         self.param_list = []
+        self.curr_thread = None
     #def fit(self, *args, **kw):
     #    return profile(self._fit, *args, **kw)
 
@@ -101,7 +102,7 @@ class ScipyFit(FitEngine):
         """
         """
         fitproblem = []
-        for id, fproblem in self.fit_arrange_dict.iteritems():
+        for fproblem in self.fit_arrange_dict.itervalues():
             if fproblem.get_to_fit() == 1:
                 fitproblem.append(fproblem)
         if len(fitproblem) > 1 : 
@@ -118,53 +119,52 @@ class ScipyFit(FitEngine):
         # Concatenate dList set (contains one or more data)before fitting
         data = listdata
         self.curr_thread = curr_thread
-        result = fitresult(model=model, paramList=self.param_list)
+        result = fitresult(model=model, param_list=self.param_list)
         if handler is not None:
             handler.set_result(result=result)
         #try:
         functor = SansAssembly(self.param_list, model, data, handler=handler,
                          fitresult=result, curr_thread= self.curr_thread)
-       
-       
-        out, cov_x, info, mesg, success = optimize.leastsq(functor,
-                                                model.getParams(self.param_list),
-                                                    full_output=1, warning=True)
+        out, cov_x, _, _, success = optimize.leastsq(functor,
+                                            model.get_params(self.param_list),
+                                                    full_output=1,
+                                                    warning=True)
         
-        chisqr = functor.chisq(out)
-        
+        #chisqr = functor.chisq(out)
+        chisqr = functor.chisq()
         if cov_x is not None and numpy.isfinite(cov_x).all():
             stderr = numpy.sqrt(numpy.diag(cov_x))
         else:
             stderr = None
-        if not (numpy.isnan(out).any()) or ( cov_x !=None) :
-                result.fitness = chisqr
-                result.stderr  = stderr
-                result.pvec = out
-                result.success = success
-                #print result
-                if q is not  None:
-                    #print "went here"
-                    q.put(result)
-                    #print "get q scipy fit enfine",q.get()
-                    return q
-                return result
+        if not (numpy.isnan(out).any()) or (cov_x != None):
+            result.fitness = chisqr
+            result.stderr  = stderr
+            result.pvec = out
+            result.success = success
+            #print result
+            if q is not None:
+                #print "went here"
+                q.put(result)
+                #print "get q scipy fit enfine",q.get()
+                return q
+            return result
         else:  
             raise ValueError, "SVD did not converge" + str(success)
     
 
 
-def profile(fn, *args, **kw):
-    import cProfile, pstats, os
-    global call_result
-    def call():
-        global call_result
-        call_result = fn(*args, **kw)
-    cProfile.runctx('call()', dict(call=call), {}, 'profile.out')
-    stats = pstats.Stats('profile.out')
-    #stats.sort_stats('time')
-    stats.sort_stats('calls')
-    stats.print_stats()
-    os.unlink('profile.out')
-    return call_result
+#def profile(fn, *args, **kw):
+#    import cProfile, pstats, os
+#    global call_result
+#   def call():
+#        global call_result
+#        call_result = fn(*args, **kw)
+#    cProfile.runctx('call()', dict(call=call), {}, 'profile.out')
+#    stats = pstats.Stats('profile.out')
+#    stats.sort_stats('time')
+#    stats.sort_stats('calls')
+#    stats.print_stats()
+#    os.unlink('profile.out')
+#    return call_result
 
       

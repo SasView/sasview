@@ -2,12 +2,13 @@
 #import wx
 #import string
 import numpy
+
 class Load:
     """
     This class is loading values from given file or value giving by the user
     """
     
-    def _init_(self, x=None, y=None, dx=None, dy=None):
+    def __init__(self, x=None, y=None, dx=None, dy=None):
         # variable to store loaded values
         self.x = x
         self.y = y
@@ -17,7 +18,8 @@ class Load:
         
     def set_filename(self, path=None):
         """
-        Store path into a variable.If the user doesn't give a path as a parameter a pop-up
+        Store path into a variable.If the user doesn't give 
+        a path as a parameter a pop-up
         window appears to select the file.
         
         :param path: the path given by the user
@@ -52,8 +54,6 @@ class Load:
                     self.dx = numpy.zeros(len(self.x))
                 except:
                     print "READ ERROR", line
-            
-            
             # Sanity check
             if not len(self.x) == len(self.dx):
                 raise ValueError, "x and dx have different length"
