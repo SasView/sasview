@@ -1,19 +1,17 @@
-// The original code, of which work was not DANSE funded,
-// was provided by J. Cho.
 #if !defined(o_h)
-#define refl_h
+#define sphere_sld_h
 
 /**
  * Structure definition for sphere parameters
  */
- //[PYTHONCLASS] = ReflModel
+ //[PYTHONCLASS] = SphereSLDModel
  //[DISP_PARAMS] = thick_inter0
  //[DESCRIPTION] =<text>Calculate neutron reflectivity using the Parratt iterative formula
  //				Parameters:
  //				background:background
  //				scale: scale factor
- //				sld_bottom0: the SLD of the substrate
- //				sld_medium: the SLD of the incident medium
+ //				sld_core0: the SLD of the substrate
+ //				sld_solv: the SLD of the incident medium
  //					or superstrate
  //				sld_flatN: the SLD of the flat region of
  //					the N'th layer
@@ -21,34 +19,35 @@
  //					region of the N'th layer
  //				func_interN: the function used to describe
  //					the interface of the N'th layer
+ //				nu_interN: the coefficient for the func_interN
  //				thick_interN: the thickness of the interface
  //					of the N'th layer
  //				Note: the layer number starts to increase
  //					from the bottom (substrate) to the top.
  //		</text>
  //[FIXED]=  <text></text>
- //[NON_FITTABLE_PARAMS]= <text>n_layers;func_inter0;func_inter1;func_inter2;func_inter3;func_inter4;func_inter5;func_inter5;func_inter7;func_inter8;func_inter9;func_inter10 </text>
+ //[NON_FITTABLE_PARAMS]= <text>n_shells;func_inter0;func_inter1;func_inter2;func_inter3;func_inter4;func_inter5;func_inter5;func_inter7;func_inter8;func_inter9;func_inter10 </text>
  //[ORIENTATION_PARAMS]= <text> </text>
 
 typedef struct {
-	/// number of layers
-	//  [DEFAULT]=n_layers=1
-	int n_layers;
+	/// number of shells
+	//  [DEFAULT]=n_shells=1
+	int n_shells;
     /// Scale factor
     //  [DEFAULT]=scale= 1.0
 	double scale;
     ///	thick_inter0 [A]
-    //  [DEFAULT]=thick_inter0=1.0 [A]
+    //  [DEFAULT]=thick_inter0=50.0 [A]
 	double thick_inter0;
 	///	func_inter0
 	//  [DEFAULT]=func_inter0= 0
 	double func_inter0;
-	///	sld_bottom0 [1/A^(2)]
-	//  [DEFAULT]=sld_bottom0= 2.07e-6 [1/A^(2)]
-	double sld_bottom0;
-	///	sld_medium [1/A^(2)]
-	//  [DEFAULT]=sld_medium= 1.0e-6 [1/A^(2)]
-	double sld_medium;
+	///	sld_core0 [1/A^(2)]
+	//  [DEFAULT]=sld_core0= 2.07e-6 [1/A^(2)]
+	double sld_core0;
+	///	sld_solv [1/A^(2)]
+	//  [DEFAULT]=sld_solv= 1.0e-6 [1/A^(2)]
+	double sld_solv;
 	/// Background
 	//  [DEFAULT]=background=0
 	double background;
@@ -74,28 +73,28 @@ typedef struct {
     //  [DEFAULT]=sld_flat10=3.5e-06 [1/A^(2)]
     double sld_flat10;
 
-    //  [DEFAULT]=thick_inter1=1 [A]
+    //  [DEFAULT]=thick_inter1=50.0 [A]
     double thick_inter1;
-    //  [DEFAULT]=thick_inter2=1 [A]
+    //  [DEFAULT]=thick_inter2=50.0 [A]
     double thick_inter2;
-    //  [DEFAULT]=thick_inter3=1 [A]
+    //  [DEFAULT]=thick_inter3=50.0 [A]
     double thick_inter3;
-    //  [DEFAULT]=thick_inter4=1 [A]
+    //  [DEFAULT]=thick_inter4=50.0 [A]
     double thick_inter4;
-    //  [DEFAULT]=thick_inter5=1 [A]
+    //  [DEFAULT]=thick_inter5=50.0 [A]
     double thick_inter5;
-    //  [DEFAULT]=thick_inter6=1 [A]
+    //  [DEFAULT]=thick_inter6=50.0 [A]
     double thick_inter6;
-    //  [DEFAULT]=thick_inter7=1 [A]
+    //  [DEFAULT]=thick_inter7=50.0 [A]
     double thick_inter7;
-    //  [DEFAULT]=thick_inter8=1 [A]
+    //  [DEFAULT]=thick_inter8=50.0 [A]
     double thick_inter8;
-    //  [DEFAULT]=thick_inter9=1 [A]
+    //  [DEFAULT]=thick_inter9=50.0 [A]
     double thick_inter9;
-    //  [DEFAULT]=thick_inter10=1 [A]
+    //  [DEFAULT]=thick_inter10=50.0 [A]
     double thick_inter10;
 
-    //  [DEFAULT]=thick_flat1=10 [A]
+    //  [DEFAULT]=thick_flat1=100 [A]
     double thick_flat1;
     //  [DEFAULT]=thick_flat2=100 [A]
     double thick_flat2;
@@ -137,16 +136,42 @@ typedef struct {
     //  [DEFAULT]=func_inter10=0
     double func_inter10;
 
+    //  [DEFAULT]=nu_inter1=2.5
+    double nu_inter1;
+    //  [DEFAULT]=nu_inter2=2.5
+    double nu_inter2;
+    //  [DEFAULT]=nu_inter3=2.5
+    double nu_inter3;
+    //  [DEFAULT]=nu_inter4=2.5
+    double nu_inter4;
+    //  [DEFAULT]=nu_inter5=2.5
+    double nu_inter5;
+    //  [DEFAULT]=nu_inter6=2.5
+    double nu_inter6;
+    //  [DEFAULT]=nu_inter7=2.5
+    double nu_inter7;
+    //  [DEFAULT]=nu_inter8=2.5
+    double nu_inter8;
+    //  [DEFAULT]=nu_inter9=2.5
+    double nu_inter9;
+    //  [DEFAULT]=nu_inter10=2.5
+    double nu_inter10;
 
-} ReflParameters;
+    //  [DEFAULT]=npts_inter=35.0
+    double npts_inter;
+    //  [DEFAULT]=nu_inter0=2.5
+    double nu_inter0;
+    //  [DEFAULT]=rad_core0=50.0 [A]
+    double rad_core0;
+} SphereSLDParameters;
 
-double re_kernel(double dq[], double q);
+double sphere_sld_kernel(double dq[], double q);
 
 /// 1D scattering function
-double refl_analytical_1D(ReflParameters *pars, double q);
+double sphere_sld_analytical_1D(SphereSLDParameters *pars, double q);
 
 /// 2D scattering function
-double refl_analytical_2D(ReflParameters *pars, double q, double phi);
-double refl_analytical_2DXY(ReflParameters *pars, double qx, double qy);
+double sphere_sld_analytical_2D(SphereSLDParameters *pars, double q, double phi);
+double sphere_sld_analytical_2DXY(SphereSLDParameters *pars, double qx, double qy);
 
 #endif

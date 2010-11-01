@@ -1,12 +1,12 @@
 /**
- * Scattering model for a sphere
+ * Scattering model for a onion
  */
 
 #include <math.h>
 #include "onion.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+// some details can be found in sld_cal.c
 double so_kernel(double dp[], double q) {
 	int n = dp[0];
 	double scale = dp[1];
@@ -106,9 +106,9 @@ double so_kernel(double dp[], double q) {
                         contr = slope[i]*exp(A[i]*(r-r0)/thick[i]);
 
                         vol = 4.0 * pi / 3.0 * r * r * r;
-                        if (j == 1 && fabs(sld_in[i]-sld_solv) < 1e-04*fabs(sld_solv) && A[i]==0.0){
-                        	vol_sub += (vol_pre - vol);
-                        }
+                        //if (j == 1 && fabs(sld_in[i]-sld_solv) < 1e-04*fabs(sld_solv) && A[i]==0.0){
+                        //	vol_sub += (vol_pre - vol);
+                        //}
                         f += vol * (contr * (fun) + (sld_in[i]-slope[i]) * bes);
                         }
                         break;
@@ -147,16 +147,16 @@ double so_kernel(double dp[], double q) {
                                     }
                                 }
                             vol = 4.0 * pi / 3.0 * r * r * r;
-                            if (j == 1 && fabs(sld_in[i]-sld_solv) < 1e-04*fabs(sld_solv) && fun_type[i]==0){
-                            	vol_sub += (vol_pre - vol);
-                            }
+                            //if (j == 1 && fabs(sld_in[i]-sld_solv) < 1e-04*fabs(sld_solv) && fun_type[i]==0){
+                            //	vol_sub += (vol_pre - vol);
+                            //}
                             f += vol * (bes * contr + fun * slope[i]);
                             }
                             break;
 				}
 
         }
-    vol += vol_sub;
+    //vol += vol_sub;
     f2 = f * f / vol * 1.0e8;
 	f2 *= scale;
 	f2 += background;
