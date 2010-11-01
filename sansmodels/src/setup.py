@@ -228,6 +228,9 @@ setup(
         "sans/models/c_models/CMultiShellModel.cpp",
         "sans/models/c_models/multishell.cpp",                
         srcdir+"/multishell.c",
+        "sans/models/c_models/CSphereSLDModel.cpp",
+        "sans/models/c_models/spheresld.cpp",                
+        srcdir+"/spheresld.c",
         #srcdir+"/CVesicleModel.c",
         "sans/models/c_models/CVesicleModel.cpp",
         "sans/models/c_models/vesicle.cpp",                
@@ -243,12 +246,14 @@ setup(
         srcdir+"/fractal.c",             
         "sans/models/c_models/CFractalModel.cpp",
         "sans/models/c_models/fractal.cpp", 
-        
+        srcdir+"/sld_cal.c",         
+        "sans/models/c_models/CSLDCalFunc.cpp", 
+        "sans/models/c_models/sld_cal.cpp",  
         #gammainc function need to imported from somewhere  
         #srcdir+"/polyexclvol.c",             
         #"sans/models/c_models/CPolymerExclVolModel.cpp",
         #"sans/models/c_models/polyexclvol.cpp",  
-         
+        srcdir+"/libmultifunc/librefl.c",
         srcdir+"/polygausscoil.c",             
         srcdir+"/binaryHS.c",
         srcdir+"/disperser.c",

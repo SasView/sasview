@@ -17,6 +17,7 @@ void addCTriaxialEllipsoidModel(PyObject *module);
 void addCParallelepipedModel(PyObject *module);
 void addCCSParallelepipedModel(PyObject *module);
 void addCSphereModel(PyObject *module);
+void addCSphereSLDModel(PyObject *module);
 void addCOnionModel(PyObject *module);
 void addCReflModel(PyObject *module);
 void addCFuzzySphereModel(PyObject *module);
@@ -42,6 +43,7 @@ void addCLamellarPCrystalModel(PyObject *module);
 void addCCoreShellEllipsoidModel(PyObject *module);
 void addCDiamEllipFunc(PyObject *module);
 void addCDiamCylFunc(PyObject *module);
+void addCSLDCalFunc(PyObject *module);
 
 //void addCOblateModel(PyObject *module);
 //void addCProlateModel(PyObject *module);
@@ -233,6 +235,7 @@ initc_models(void)
 	addCCoreFourShellModel(m);
 	addCEllipsoidModel(m);
 	addCSphereModel(m);
+	addCSphereSLDModel(m);
 	addCOnionModel(m);
 	addCReflModel(m);
 	addCFuzzySphereModel(m);
@@ -254,6 +257,7 @@ initc_models(void)
 	addCCoreShellEllipsoidModel(m);
 	addCDiamEllipFunc(m);
 	addCDiamCylFunc(m);
+	addCSLDCalFunc(m);
 
 //	addCOblateModel(m);
 //	addCProlateModel(m);
