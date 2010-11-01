@@ -175,11 +175,9 @@ class ModelManager:
         self.shape_list.append(SphereModel)
         self.multiplication_factor.append(SphereModel)
         
-        from sans.models.SphereExpShellModel import SphereExpShellModel
-        self.shape_list.append(SphereExpShellModel)
-        self.multiplication_factor.append(SphereExpShellModel)
-        self.multi_func_list.append(SphereExpShellModel)
-        
+        from sans.models.BinaryHSModel import BinaryHSModel
+        self.shape_list.append(BinaryHSModel)
+                        
         from sans.models.FuzzySphereModel import FuzzySphereModel
         self.shape_list.append(FuzzySphereModel)
         self.multiplication_factor.append(FuzzySphereModel)
@@ -201,8 +199,15 @@ class ModelManager:
         self.shape_list.append(MultiShellModel)
         self.multiplication_factor.append(MultiShellModel)
         
-        from sans.models.BinaryHSModel import BinaryHSModel
-        self.shape_list.append(BinaryHSModel)
+        from sans.models.OnionExpShellModel import OnionExpShellModel
+        self.shape_list.append(OnionExpShellModel)
+        self.multiplication_factor.append(OnionExpShellModel)
+        self.multi_func_list.append(OnionExpShellModel)
+                        
+        from sans.models.SphericalSLDModel import SphericalSLDModel
+        self.shape_list.append(SphericalSLDModel)
+        self.multiplication_factor.append(SphericalSLDModel)
+        self.multi_func_list.append(SphericalSLDModel)
         
         from sans.models.CylinderModel import CylinderModel
         self.shape_list.append(CylinderModel)
