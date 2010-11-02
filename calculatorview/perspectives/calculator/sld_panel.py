@@ -45,10 +45,10 @@ class SldPanel(wx.Panel):
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
     
-    def __init__(self, parent, base=None):
+    def __init__(self, parent, base=None, *args, **kwds):
         """
         """
-        wx.Panel.__init__(self, parent)
+        wx.Panel.__init__(self, parent, *args, **kwds)
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         # Object that receive status event
@@ -414,11 +414,13 @@ class SldPanel(wx.Panel):
 class SldWindow(wx.Frame):
     """
     """
-    def __init__(self, parent=None, title="SLD Calculator", base=None):
+    def __init__(self, parent=None, title="SLD Calculator",
+                  base=None, size=(PANEL_SIZE, PANEL_SIZE), *args, **kwds):
         """
         """
-        wx.Frame.__init__(self, parent, title,
-                           size=(PANEL_SIZE, PANEL_SIZE))
+        kwds['title'] = title
+        kwds['size'] = size
+        wx.Frame.__init__(self, parent, *args, **kwds)
         """
         """
         self.panel = SldPanel(self, base=base)
@@ -431,7 +433,7 @@ class ViewApp(wx.App):
     def OnInit(self):
         """
         """
-        frame = SldWindow(None, -1, 'SLD Calculator')    
+        frame = SldWindow(None, title='SLD Calculator')    
         frame.Show(True)
         self.SetTopWindow(frame)
         return True

@@ -237,11 +237,13 @@ class SlitLengthCalculatorPanel(wx.Panel):
 class SlitLengthCalculatorWindow(wx.Frame):
     """
     """
-    def __init__(self, parent=None, title="Slit Size Calculator"):
+    def __init__(self, parent=None, title="Slit Size Calculator",
+                size=(PANEL_WIDTH,PANEL_HEIGHT), *args, **kwds):
         """
         """
-        wx.Frame.__init__(self, parent, title,
-                           size=(PANEL_WIDTH,PANEL_HEIGHT))
+        kwds['size']= size
+        kwds['title']= title
+        wx.Frame.__init__(self, parent, *args, **kwds)
         self.parent = parent
         self.panel = SlitLengthCalculatorPanel(parent=self)
         self.Centre()

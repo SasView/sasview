@@ -144,8 +144,7 @@ class Plugin:
         from kiessig_calculator_panel import KiessigWindow
         frame = KiessigWindow()
         frame.Show(True) 
-        event.Skip()
-       
+    
     def on_calculate_sld(self, event):
         """
         Compute the scattering length density of molecula
@@ -153,8 +152,7 @@ class Plugin:
         from sld_panel import SldWindow
         frame = SldWindow(base=self.parent)
         frame.Show(True) 
-        event.Skip()
-        
+       
     def on_calculate_slit_size(self, event):
         """
         Compute the slit size a given data
@@ -162,8 +160,7 @@ class Plugin:
         from slit_length_calculator_panel import SlitLengthCalculatorWindow
         frame = SlitLengthCalculatorWindow(parent=self.parent)    
         frame.Show(True)
-        event.Skip()
-        
+   
     def on_perspective(self, event):
         """
         Call back function for the perspective menu item.

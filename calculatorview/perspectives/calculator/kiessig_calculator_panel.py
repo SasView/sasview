@@ -184,9 +184,11 @@ class KiessigThicknessCalculatorPanel(wx.Panel):
         return output.lstrip().rstrip()   
      
 class KiessigWindow(wx.Frame):
-    def __init__(self, parent=None, title="Kiessig Thickness Calculator"):
-        wx.Frame.__init__(self, parent, title,
-                           size=(PANEL_WIDTH,PANEL_HEIGHT))
+    def __init__(self, parent=None, title="Kiessig Thickness Calculator",
+                  size=(PANEL_WIDTH,PANEL_HEIGHT), *args, **kwds):
+        kwds['title'] = title
+        kwds['size'] = size
+        wx.Frame.__init__(self, parent, *args, **kwds)
         self.parent = parent
         self.panel = KiessigThicknessCalculatorPanel(parent=self)
         self.Centre()
