@@ -18,7 +18,8 @@ The module reads an xml file to get the readers for each file extension.
 The readers are tried in order they appear when reading a file.
 """
 
-import os, sys
+import os
+import sys
 import logging
 from lxml import etree 
 # Py2exe compatibility: import _elementpath to ensure that py2exe finds it
@@ -51,7 +52,8 @@ def read_associations(loader, settings='defaults.xml'):
         root = tree.getroot()
         
         # Read in the file extension associations
-        entry_list = root.xpath('/ns:SansLoader/ns:FileType', namespaces={'ns': VERSION})
+        entry_list = root.xpath('/ns:SansLoader/ns:FileType',
+                                 namespaces={'ns': VERSION})
 
         # For each FileType entry, get the associated reader and extension
         for entry in entry_list:
@@ -60,14 +62,18 @@ def read_associations(loader, settings='defaults.xml'):
             
             if reader is not None and ext is not None:
                 # Associate the extension with a particular reader
-                # TODO: Modify the Register code to be case-insensitive and remove the
-                #       extra line below.
+                # TODO: Modify the Register code to be case-insensitive 
+                # and remove the extra line below.
                 try:
                     exec "import %s" % reader
-                    exec "loader.associate_file_type('%s', %s)" % (ext.lower(), reader)
-                    exec "loader.associate_file_type('%s', %s)" % (ext.upper(), reader)
+                    exec "loader.associate_file_type('%s', %s)" % (ext.lower(),
+                                                                    reader)
+                    exec "loader.associate_file_type('%s', %s)" % (ext.upper(),
+                                                                    reader)
                 except:
-                    logging.error("read_associations: skipping association for %s\n  %s" % (attr['extension'], sys.exc_value))
+                    msg = "read_associations: skipping association"
+                    msg += " for %s\n  %s" % (attr['extension'], sys.exc_value)
+                    logging.error(msg)
          
          
 def register_readers(registry_function):

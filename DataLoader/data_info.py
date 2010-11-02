@@ -32,7 +32,8 @@ class plottable_1D:
     """
     Data1D is a place holder for 1D plottables.
     """
-    # The presence of these should be mutually exclusive with the presence of Qdev (dx)
+    # The presence of these should be mutually
+    # exclusive with the presence of Qdev (dx)
     x = None
     y = None
     dx = None
@@ -48,19 +49,29 @@ class plottable_1D:
     _yaxis = ''
     _yunit = ''
     
-    def __init__(self,x,y,dx=None,dy=None,dxl=None,dxw=None):
+    def __init__(self, x, y, dx=None, dy=None, dxl=None, dxw=None):
         self.x = numpy.asarray(x)
         self.y = numpy.asarray(y)
-        if dx is not None: self.dx = numpy.asarray(dx)
-        if dy is not None: self.dy = numpy.asarray(dy)
-        if dxl is not None: self.dxl = numpy.asarray(dxl)
-        if dxw is not None: self.dxw = numpy.asarray(dxw)
+        if dx is not None:
+             self.dx = numpy.asarray(dx)
+        if dy is not None: 
+            self.dy = numpy.asarray(dy)
+        if dxl is not None: 
+            self.dxl = numpy.asarray(dxl)
+        if dxw is not None: 
+            self.dxw = numpy.asarray(dxw)
 
     def xaxis(self, label, unit):
+        """
+        set the x axis label and unit
+        """
         self._xaxis = label
         self._xunit = unit
         
     def yaxis(self, label, unit):
+        """
+        set the y axis label and unit
+        """
         self._yaxis = label
         self._yunit = unit
 
@@ -89,7 +100,9 @@ class plottable_2D:
     _zaxis = ''
     _zunit = ''
     
-    def __init__(self, data=None, err_data=None, qx_data=None, qy_data=None, q_data=None,mask=None, dqx_data=None, dqy_data=None):
+    def __init__(self, data=None, err_data=None, qx_data=None,
+                  qy_data=None, q_data=None, mask=None,
+                   dqx_data=None, dqy_data=None):
         self.data = numpy.asarray(data)
         self.qx_data = numpy.asarray(qx_data)
         self.qy_data = numpy.asarray(qy_data)
@@ -100,14 +113,23 @@ class plottable_2D:
         if dqy_data is not None: self.dqy_data = numpy.asarray(dqy_data) 
                
     def xaxis(self, label, unit):
+        """
+        set the x axis label and unit
+        """
         self._xaxis = label
         self._xunit = unit
         
     def yaxis(self, label, unit):
+        """
+        set the y axis label and unit
+        """
         self._yaxis = label
         self._yunit = unit
             
     def zaxis(self, label, unit):
+        """
+        set the z axis label and unit
+        """
         self._zaxis = label
         self._zunit = unit
 
@@ -138,7 +160,8 @@ class Vector:
         self.z = z
         
     def __str__(self):
-        return "x = %s\ty = %s\tz = %s" % (str(self.x), str(self.y), str(self.z))
+        msg = "x = %s\ty = %s\tz = %s" % (str(self.x), str(self.y), str(self.z))
+        return msg
         
 
 class Detector:
@@ -150,13 +173,16 @@ class Detector:
     ## Sample to detector distance [float] [mm]
     distance = None
     distance_unit = 'mm'
-    ## Offset of this detector position in X, Y, (and Z if necessary) [Vector] [mm] 
+    ## Offset of this detector position in X, Y, 
+    #(and Z if necessary) [Vector] [mm] 
     offset = None
     offset_unit = 'm'
-    ## Orientation (rotation) of this detector in roll, pitch, and yaw [Vector] [degrees]
+    ## Orientation (rotation) of this detector in roll,
+    # pitch, and yaw [Vector] [degrees]
     orientation = None
     orientation_unit = 'degree'
-    ## Center of the beam on the detector in X and Y (and Z if necessary) [Vector] [mm]
+    ## Center of the beam on the detector in X and Y 
+    #(and Z if necessary) [Vector] [mm]
     beam_center = None
     beam_center_unit = 'mm'
     ## Pixel size in X, Y, (and Z if necessary) [Vector] [mm]
@@ -351,7 +377,7 @@ class Process:
     """
     name = ''
     date = ''
-    description= ''
+    description = ''
     term = None
     notes = None
     
@@ -459,7 +485,13 @@ class DataInfo:
     # Private method to perform operation. Not implemented for DataInfo,
     # but should be implemented for each data class inherited from DataInfo
     # that holds actual data (ex.: Data1D)
-    def _perform_operation(self, other, operation): return NotImplemented
+    def _perform_operation(self, other, operation): 
+        """
+        Private method to perform operation. Not implemented for DataInfo,
+        but should be implemented for each data class inherited from DataInfo
+        that holds actual data (ex.: Data1D)
+        """
+        return NotImplemented
 
     def __add__(self, other):
         """
@@ -469,7 +501,8 @@ class DataInfo:
         :return: new data set
         :raise ValueError: raised when two data sets are incompatible
         """
-        def operation(a, b): return a+b
+        def operation(a, b):
+            return a + b
         return self._perform_operation(other, operation)
         
     def __radd__(self, other):
@@ -483,7 +516,8 @@ class DataInfo:
         :raise ValueError: raised when two data sets are incompatible
         
         """
-        def operation(a, b): return b+a
+        def operation(a, b):
+            return b + a
         return self._perform_operation(other, operation)
         
     def __sub__(self, other):
@@ -497,7 +531,8 @@ class DataInfo:
         :raise ValueError: raised when two data sets are incompatible
         
         """
-        def operation(a, b): return a-b
+        def operation(a, b):
+            return a - b
         return self._perform_operation(other, operation)
         
     def __rsub__(self, other):
@@ -511,7 +546,8 @@ class DataInfo:
         :raise ValueError: raised when two data sets are incompatible
         
         """
-        def operation(a, b): return b-a
+        def operation(a, b):
+            return b - a
         return self._perform_operation(other, operation)
         
     def __mul__(self, other):
@@ -525,7 +561,8 @@ class DataInfo:
         :raise ValueError: raised when two data sets are incompatible
         
         """
-        def operation(a, b): return a*b
+        def operation(a, b):
+            return a * b
         return self._perform_operation(other, operation)
         
     def __rmul__(self, other):
@@ -538,7 +575,8 @@ class DataInfo:
         
         :raise ValueError: raised when two data sets are incompatible
         """
-        def operation(a, b): return b*a
+        def operation(a, b):
+            return b * a
         return self._perform_operation(other, operation)
         
     def __div__(self, other):
@@ -552,7 +590,8 @@ class DataInfo:
         :raise ValueError: raised when two data sets are incompatible
         
         """
-        def operation(a, b): return a/b
+        def operation(a, b):
+            return a/b
         return self._perform_operation(other, operation)
         
     def __rdiv__(self, other):
@@ -566,7 +605,8 @@ class DataInfo:
         :raise ValueError: raised when two data sets are incompatible
         
         """
-        def operation(a, b): return b/a
+        def operation(a, b):
+            return b/a
         return self._perform_operation(other, operation)            
             
 class Data1D(plottable_1D, DataInfo):
@@ -603,8 +643,8 @@ class Data1D(plottable_1D, DataInfo):
         
         """
         def _check(v):            
-            if (v.__class__==list or v.__class__==numpy.ndarray) \
-                and len(v)>0 and min(v)>0:
+            if (v.__class__ == list or v.__class__ == numpy.ndarray) \
+                and len(v) > 0 and min(v) > 0:
                 return True
             
             return False
@@ -663,22 +703,24 @@ class Data1D(plottable_1D, DataInfo):
             # Check that data lengths are the same
             if len(self.x) != len(other.x) or \
                 len(self.y) != len(other.y):
-                raise ValueError, "Unable to perform operation: data length are not equal"
+                msg =  "Unable to perform operation: data length are not equal"
+                raise ValueError, msg
             
             # Here we could also extrapolate between data points
             for i in range(len(self.x)):
                 if self.x[i] != other.x[i]:
-                    raise ValueError, "Incompatible data sets: x-values do not match"
+                    msg = "Incompatible data sets: x-values do not match"
+                    raise ValueError, msg
             
             # Check that the other data set has errors, otherwise
             # create zero vector
             dy_other = other.dy
-            if other.dy==None or (len(other.dy) != len(other.y)):
+            if other.dy == None or (len(other.dy) != len(other.y)):
                 dy_other = numpy.zeros(len(other.y))
             
         # Check that we have errors, otherwise create zero vector
         dy = self.dy
-        if self.dy==None or (len(self.dy) != len(self.y)):
+        if self.dy == None or (len(self.dy) != len(self.y)):
             dy = numpy.zeros(len(self.y))            
             
         return dy, dy_other
@@ -692,7 +734,7 @@ class Data1D(plottable_1D, DataInfo):
         
         for i in range(len(self.x)):
             result.x[i] = self.x[i]
-            if self.dx is not None and len(self.x)==len(self.dx):
+            if self.dx is not None and len(self.x) == len(self.dx):
                 result.dx[i] = self.dx[i]
             
             a = Uncertainty(self.y[i], dy[i]**2)
@@ -723,12 +765,15 @@ class Data2D(plottable_2D, DataInfo):
     y_bins = None
     
     
-    def __init__(self, data=None, err_data=None, qx_data=None, qy_data=None, q_data=None, mask=None, dqx_data=None, dqy_data=None):
+    def __init__(self, data=None, err_data=None, qx_data=None,
+                  qy_data=None, q_data=None, mask=None, 
+                  dqx_data=None, dqy_data=None):
         self.y_bins = []
         self.x_bins = []
         DataInfo.__init__(self)
-        plottable_2D.__init__(self, data, err_data, qx_data, qy_data, q_data,mask, dqx_data, dqy_data)
-        if len(self.detector)>0:
+        plottable_2D.__init__(self, data, err_data, qx_data,
+                              qy_data, q_data,mask, dqx_data, dqy_data)
+        if len(self.detector) > 0:
             raise RuntimeError, "Data2D: Detector bank already filled at init"
 
     def __str__(self):
@@ -738,9 +783,9 @@ class Data2D(plottable_2D, DataInfo):
         _str += "   Type:         %s\n" % self.__class__.__name__
         _str += "   X- & Y-axis:  %s\t[%s]\n" % (self._yaxis, self._yunit)
         _str += "   Z-axis:       %s\t[%s]\n" % (self._zaxis, self._zunit)
-        leny = 0
-        if len(self.data)>0:
-            leny = len(self.data)
+        #leny = 0
+        #if len(self.data) > 0:
+        #    leny = len(self.data)
         _str += "   Length:       %g \n" % (len(self.data))
         
         return _str
@@ -765,7 +810,8 @@ class Data2D(plottable_2D, DataInfo):
             mask = numpy.zeros(length)
             dqx_data = None
             dqy_data = None
-            clone = Data2D(data, err_data, qx_data, qy_data, q_data,mask, dqx_data=dqx_data, dqy_data=dqy_data)
+            clone = Data2D(data, err_data, qx_data, qy_data,
+                            q_data,mask, dqx_data=dqx_data, dqy_data=dqy_data)
 
         clone.title       = self.title
         clone.run         = self.run
@@ -801,7 +847,8 @@ class Data2D(plottable_2D, DataInfo):
         if isinstance(other, Data2D):
             # Check that data lengths are the same
             if numpy.size(self.data) != numpy.size(other.data):
-                raise ValueError, "Unable to perform operation: data length are not equal"
+                msg = "Unable to perform operation: data length are not equal"
+                raise ValueError, msg
                
             # Check that the scales match
             #TODO: matching scales?     
@@ -810,13 +857,17 @@ class Data2D(plottable_2D, DataInfo):
             # create zero vector
             #TODO: test this
             err_other = other.err_data
-            if other.err_data==None or (numpy.size(other.err_data) != numpy.size(other.data)):
-                err_other = numpy.zeros([numpy.size(other.data,0), numpy.size(other.data,1)])
+            if other.err_data == None or \
+                (numpy.size(other.err_data) != numpy.size(other.data)):
+                err_other = numpy.zeros([numpy.size(other.data, 0),
+                                          numpy.size(other.data, 1)])
             
         # Check that we have errors, otherwise create zero vector
         err = self.err_data
-        if self.err_data==None or (numpy.size(self.err_data) != numpy.size(self.data)):
-            err = numpy.zeros([numpy.size(self.data,0), numpy.size(self.data,1)])
+        if self.err_data == None or \
+            (numpy.size(self.err_data) != numpy.size(self.data)):
+            err = numpy.zeros([numpy.size(self.data, 0),
+                                numpy.size(self.data, 1)])
             
         return err, err_other
   
@@ -832,12 +883,14 @@ class Data2D(plottable_2D, DataInfo):
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
     
-        result = self.clone_without_data([numpy.size(self.data,0), numpy.size(self.data,1)])
+        result = self.clone_without_data([numpy.size(self.data, 0), 
+                                          numpy.size(self.data, 1)])
         
-        for i in range(numpy.size(self.data,0)):
-            for j in range(numpy.size(self.data,1)):
+        for i in range(numpy.size(self.data, 0)):
+            for j in range(numpy.size(self.data, 1)):
                 result.data[i][j] = self.data[i][j]
-                if self.err_data is not None and numpy.size(self.data)==numpy.size(self.err_data):
+                if self.err_data is not None and \
+                    numpy.size(self.data) == numpy.size(self.err_data):
                     result.err_data[i][j] = self.err_data[i][j]
                 
                 a = Uncertainty(self.data[i][j], dy[i][j]**2)

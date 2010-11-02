@@ -27,7 +27,7 @@ class Reader(object):
     ## Wildcards
     type = ["HFIR 1D files (*.d1d)|*.d1d"]
     ## List of allowed extensions
-    ext=['.d1d']  
+    ext = ['.d1d']  
     
     def read(self, path):
         """ 
@@ -86,7 +86,6 @@ class Reader(object):
                             _y = data_conv_i(_y, units=output.y_unit)                        
                             _dy = data_conv_i(_dy, units=output.y_unit)                        
                                                     
-
                         x   = numpy.append(x, _x) 
                         y   = numpy.append(y, _y)
                         dx  = numpy.append(dx, _dx)
@@ -98,13 +97,15 @@ class Reader(object):
                      
                 # Sanity check
                 if not len(y) == len(dy):
-                    raise RuntimeError, "hfir1d_reader: y and dy have different length"
+                    msg = "hfir1d_reader: y and dy have different length"
+                    raise RuntimeError, msg
                 if not len(x) == len(dx):
-                    raise RuntimeError, "hfir1d_reader: x and dx have different length"
+                    msg = "hfir1d_reader: x and dx have different length"
+                    raise RuntimeError, msg
 
                 # If the data length is zero, consider this as
                 # though we were not able to read the file.
-                if len(x)==0:
+                if len(x) == 0:
                     raise RuntimeError, "hfir1d_reader: could not load file"
                
                 output.x = x

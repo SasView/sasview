@@ -22,16 +22,16 @@
     look for new readers/writers.
 """
 
-from data_util.registry import ExtensionRegistry
 import os 
 import sys
 import logging
 import time
 from zipfile import ZipFile
-
+from data_util.registry import ExtensionRegistry
 # Default readers are defined in the readers sub-module
 import readers
-from readers import ascii_reader,cansas_reader
+from readers import ascii_reader
+from readers import cansas_reader
 
 class Registry(ExtensionRegistry):
     """
@@ -54,7 +54,8 @@ class Registry(ExtensionRegistry):
         # Register default readers
         readers.read_associations(self)
         
-        #TODO: remove the following line when ready to switch to the new default readers
+        #TODO: remove the following line when ready to switch to 
+        #the new default readers
         #readers.register_readers(self._identify_plugin)
         
         # Look for plug-in readers
@@ -66,7 +67,8 @@ class Registry(ExtensionRegistry):
         Call the loader for the file type of path.
 
         :param path: file path
-        :param format: explicit extension, to force the use of a particular reader
+        :param format: explicit extension, to force the use 
+            of a particular reader
 
         Defaults to the ascii (multi-column) reader
         if no reader was registered for the file's
@@ -82,6 +84,7 @@ class Registry(ExtensionRegistry):
             except:
                 cansas_loader = cansas_reader.Reader()
                 return cansas_loader.read(path)
+            
     def find_plugins(self, dir):
         """
         Find readers in a given directory. This method
@@ -111,8 +114,10 @@ class Registry(ExtensionRegistry):
                         module = __import__(toks[0], globals(), locals())
                         if self._identify_plugin(module):
                             readers_found += 1
-                    except :
-                        logging.error("Loader: Error importing %s\n  %s" % (item, sys.exc_value))
+                    except:
+                        msg = "Loader: Error importing "
+                        msg += "%s\n  %s" % (item, sys.exc_value)
+                        logging.error(msg)
                             
                 # Process zip files
                 elif item.endswith('.zip'):
@@ -127,14 +132,19 @@ class Registry(ExtensionRegistry):
                                 # Change OS path to python path
                                 fullname = mfile.replace('/', '.')
                                 fullname = os.path.splitext(fullname)[0]
-                                module = __import__(fullname, globals(), locals(), [""])
+                                module = __import__(fullname, globals(),
+                                                     locals(), [""])
                                 if self._identify_plugin(module):
                                     readers_found += 1
                             except:
-                                logging.error("Loader: Error importing %s\n  %s" % (mfile, sys.exc_value))
+                                msg = "Loader: Error importing"
+                                msg += " %s\n  %s" % (mfile, sys.exc_value)
+                                logging.error(msg)
                             
                     except:
-                        logging.error("Loader: Error importing %s\n  %s" % (item, sys.exc_value))
+                        msg = "Loader: Error importing "
+                        msg += " %s\n  %s" % (item, sys.exc_value)
+                        logging.error(msg)
                      
         return readers_found 
     
@@ -165,7 +175,8 @@ class Registry(ExtensionRegistry):
                 if hasattr(loader, 'type_name'):
                     type_name = loader.type_name
                     
-                wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(), ext.lower())
+                wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(),
+                                                 ext.lower())
                 if wcard not in self.wildcards:
                     self.wildcards.append(wcard)
                             
@@ -177,7 +188,9 @@ class Registry(ExtensionRegistry):
                     self.writers[ext].append(loader.write)
                         
             except:
-                logging.error("Loader: Error accessing Reader in %s\n  %s" % (module.__name__, sys.exc_value))
+                msg = "Loader: Error accessing"
+                msg += " Reader in %s\n  %s" % (module.__name__, sys.exc_value)
+                logging.error(msg)
         return reader_found
 
     def associate_file_reader(self, ext, loader):
@@ -202,12 +215,15 @@ class Registry(ExtensionRegistry):
             if hasattr(loader, 'type_name'):
                 type_name = loader.type_name
                 
-                wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(), ext.lower())
+                wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(), 
+                                                ext.lower())
                 if wcard not in self.wildcards:
                     self.wildcards.append(wcard)
                  
         except:
-            logging.error("Loader: Error accessing Reader in %s\n  %s" % (module.__name__, sys.exc_value))
+            msg = "Loader: Error accessing Reader "
+            msg += "in %s\n  %s" % (module.__name__, sys.exc_value)
+            logging.error(msg)
         return reader_found
 
     
@@ -228,9 +244,9 @@ class Registry(ExtensionRegistry):
                 for ext in loader.ext:
                     if ext not in self.loaders:
                         self.loaders[ext] = []
-                    # When finding a reader at run time, treat this reader as the new 
-                    # default
-                    self.loaders[ext].insert(0,loader.read)
+                    # When finding a reader at run time,
+                    # treat this reader as the new default
+                    self.loaders[ext].insert(0, loader.read)
 
                     reader_found = True
                     
@@ -238,7 +254,8 @@ class Registry(ExtensionRegistry):
                     type_name = module.__name__
                     if hasattr(loader, 'type_name'):
                         type_name = loader.type_name
-                    wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(), ext.lower())
+                    wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(),
+                                                     ext.lower())
                     if wcard not in self.wildcards:
                     	self.wildcards.append(wcard)
                             
@@ -250,7 +267,9 @@ class Registry(ExtensionRegistry):
                         self.writers[ext].insert(0,loader.write)
                         
             except:
-                logging.error("Loader: Error accessing Reader in %s\n  %s" % (module.__name__, sys.exc_value))
+                msg = "Loader: Error accessing Reader"
+                msg += " in %s\n  %s" % (module.__name__, sys.exc_value)
+                logging.error(msg)
         return reader_found
 
     def lookup_writers(self, path):
@@ -262,7 +281,7 @@ class Registry(ExtensionRegistry):
         # Find matching extensions
         extlist = [ext for ext in self.extensions() if path.endswith(ext)]
         # Sort matching extensions by decreasing order of length
-        extlist.sort(lambda a,b: len(a)<len(b))
+        extlist.sort(lambda a, b: len(a) < len(b))
         # Combine loaders for matching extensions into one big list
         writers = []
         for L in [self.writers[ext] for ext in extlist]:
@@ -275,7 +294,7 @@ class Registry(ExtensionRegistry):
             writers = L
         # Raise an error if there are no matching extensions
         if len(writers) == 0:
-            raise ValueError, "Unknown file type for "+path
+            raise ValueError, "Unknown file type for " + path
         # All done
         return writers
 
@@ -371,8 +390,8 @@ if __name__ == "__main__":
                         filename='loader.log',
                         filemode='w')
     l = Loader()
-    data = l.load('test/cansas1d.xml')
-    l.save('test_file.xml', data, '.xml')
+    test_data = l.load('test/cansas1d.xml')
+    l.save('test_file.xml', test_data, '.xml')
     
     print l.get_wildcards()
         

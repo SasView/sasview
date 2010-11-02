@@ -40,7 +40,8 @@ class Reader:
         try:
             import Image
         except:
-            raise RuntimeError, "tiff_reader: could not load file. Missing Image module."
+            msg = "tiff_reader: could not load file. Missing Image module."
+            raise RuntimeError, msg
         
         # Instantiate data object
         output = Data2D()

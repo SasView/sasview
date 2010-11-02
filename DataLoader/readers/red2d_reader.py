@@ -12,9 +12,11 @@
 """
 
 
-import os, sys
+import os
+#import sys
 import numpy
-import math, logging
+import math
+#import logging
 from DataLoader.data_info import Data2D, Detector
 
 # Look for unit converter
@@ -120,9 +122,11 @@ class Reader:
                 try:
                     wavelength = float(line_toks[1])
                     # Units
-                    if has_converter==True and output.source.wavelength_unit != 'A':
+                    if has_converter == True and \
+                    output.source.wavelength_unit != 'A':
                         conv = Converter('A')
-                        wavelength = conv(wavelength, units=output.source.wavelength_unit)
+                        wavelength = conv(wavelength,
+                                          units=output.source.wavelength_unit)
                 except:
                     #Not required
                     pass
@@ -130,7 +134,7 @@ class Reader:
                 try:
                     distance = float(line_toks[3])
                     # Units
-                    if has_converter==True and detector.distance_unit != 'm':
+                    if has_converter == True and detector.distance_unit != 'm':
                         conv = Converter('m')
                         distance = conv(distance, units=detector.distance_unit)
                 except:
@@ -144,7 +148,7 @@ class Reader:
                     #Not required
                     pass
                                             
-            if line.count("LAMBDA")>0:
+            if line.count("LAMBDA") > 0:
                 isInfo = True
                 
             # Find center info line
@@ -155,11 +159,11 @@ class Reader:
                 center_x = float(line_toks[0])
                 center_y = float(line_toks[1])
 
-            if line.count("BCENT")>0:
+            if line.count("BCENT") > 0:
                 isCenter = True
                        
             # Find data start
-            if line.count("Data columns") or line.count("ASCII data")>0:
+            if line.count("Data columns") or line.count("ASCII data") > 0:
                 dataStarted = True
                 continue
 
@@ -172,8 +176,6 @@ class Reader:
                 # the number of columns must be stayed same 
                 col_num = len(line_toks)
                 break
-
-        
         # Make numpy array to remove header lines using index
         lines_array = numpy.array(lines)
 
@@ -181,7 +183,7 @@ class Reader:
         lines_index = numpy.arange(len(lines))
         
         # get the data lines
-        data_lines = lines_array[lines_index>=(line_num-1)]
+        data_lines = lines_array[lines_index >= (line_num - 1)]
         # Now we get the total number of rows (i.e., # of data points)
         row_num = len(data_lines)
         # make it as list again to control the separators
@@ -189,8 +191,10 @@ class Reader:
         # split all data to one big list w/" "separator
         data_list = data_list.split()
  
-        # Check if the size is consistent with data, otherwise try the tab(\t) separator
-        # (this may be removed once get the confidence the former working all cases).
+        # Check if the size is consistent with data, otherwise 
+        #try the tab(\t) separator
+        # (this may be removed once get the confidence 
+        #the former working all cases).
         if len(data_list) != (len(data_lines)) * col_num:
             data_list = "\t".join(data_lines.tolist())
             data_list = data_list.split()
@@ -201,11 +205,13 @@ class Reader:
       
         # numpy array form
         data_array = numpy.array(data_list1)
-        # Redimesion based on the row_num and col_num, otherwise raise an error.
+        # Redimesion based on the row_num and col_num, 
+        #otherwise raise an error.
         try:
-            data_point = data_array.reshape(row_num,col_num).transpose()
+            data_point = data_array.reshape(row_num, col_num).transpose()
         except:
-            raise ValueError, "red2d_reader: Can't read this file: Not a proper file format"
+            msg = "red2d_reader: Can't read this file: Not a proper file format"
+            raise ValueError, msg
         
         ## Get the all data: Let's HARDcoding; Todo find better way
         # Defaults
@@ -217,10 +223,10 @@ class Reader:
         qx_data = data_point[0]
         qy_data = data_point[1]
         data = data_point[2]
-        if col_num >3: qz_data = data_point[3]
-        if col_num >4: dqx_data = data_point[4]
-        if col_num >5: dqy_data = data_point[5]
-        if col_num >6: mask[data_point[6]<1] = False
+        if col_num > 3: qz_data = data_point[3]
+        if col_num > 4: dqx_data = data_point[4]
+        if col_num > 5: dqy_data = data_point[5]
+        if col_num > 6: mask[data_point[6] < 1] = False
         q_data = numpy.sqrt(qx_data*qx_data+qy_data*qy_data+qz_data*qz_data)
            
         # Extra protection(it is needed for some data files): 
@@ -290,7 +296,8 @@ class Reader:
         
         # optional data: if all of dq data == 0, do not pass to output
         if len(dqx_data) == len(qx_data) and dqx_data.any()!=0: 
-            # if no dqx_data, do not pass dqy_data.(1 axis dq is not supported yet).
+            # if no dqx_data, do not pass dqy_data.
+            #(1 axis dq is not supported yet).
             if len(dqy_data) == len(qy_data) and dqy_data.any()!=0:
                 output.dqx_data = dqx_data
                 output.dqy_data = dqy_data

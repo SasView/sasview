@@ -6,11 +6,11 @@
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
-
-import DataLoader.extensions.smearer as smearer
 import numpy
-import math
-import logging, sys
+#import math
+import logging
+import sys
+import DataLoader.extensions.smearer as smearer
 from DataLoader.smearing_2d import Smearer2D
 
 def smear_selection(data1D):
@@ -39,15 +39,16 @@ def smear_selection(data1D):
             return None
         return Smearer2D(data1D)
     
-    if  not hasattr(data1D, "dx") and not hasattr(data1D, "dxl") and not hasattr(data1D, "dxw"):
+    if  not hasattr(data1D, "dx") and not hasattr(data1D, "dxl")\
+         and not hasattr(data1D, "dxw"):
         return None
     
     # Look for resolution smearing data
     _found_resolution = False
-    if data1D.dx is not None and len(data1D.dx)==len(data1D.x):
+    if data1D.dx is not None and len(data1D.dx) == len(data1D.x):
         
         # Check that we have non-zero data
-        if data1D.dx[0]>0.0:
+        if data1D.dx[0] > 0.0:
             _found_resolution = True
             #print "_found_resolution",_found_resolution
             #print "data1D.dx[0]",data1D.dx[0],data1D.dxl[0]
@@ -57,11 +58,11 @@ def smear_selection(data1D):
 
     # Look for slit smearing data
     _found_slit = False
-    if data1D.dxl is not None and len(data1D.dxl)==len(data1D.x) \
-        and data1D.dxw is not None and len(data1D.dxw)==len(data1D.x):
+    if data1D.dxl is not None and len(data1D.dxl) == len(data1D.x) \
+        and data1D.dxw is not None and len(data1D.dxw) == len(data1D.x):
         
         # Check that we have non-zero data
-        if data1D.dxl[0]>0.0 or data1D.dxw[0]>0.0:
+        if data1D.dxl[0] > 0.0 or data1D.dxw[0] > 0.0:
             _found_slit = True
         
         # Sanity check: all data should be the same as a function of Q
@@ -77,7 +78,6 @@ def smear_selection(data1D):
     # If we found slit smearing data, return a slit smearer
     if _found_slit == True:
         return SlitSmearer(data1D)
-    
     return None
             
 
@@ -100,8 +100,10 @@ class _BaseSmearer(object):
         result.nbins = self.nbins
         return result
 
-        
-    def _compute_matrix(self): return NotImplemented
+    def _compute_matrix(self):
+        """
+        """
+        return NotImplemented
 
     def get_bin_range(self, q_min=None, q_max=None):
         """
@@ -114,19 +116,16 @@ class _BaseSmearer(object):
         # initialize the C++ smearer object first
         if not self._init_complete:
             self._initialize_smearer()
-            
         if q_min == None:
             q_min = self.min
-        
         if q_max == None:
             q_max = self.max
-        
-        _qmin_unsmeared, _qmax_unsmeared = self.get_unsmeared_range(q_min, q_max)
-        
+        _qmin_unsmeared, _qmax_unsmeared = self.get_unsmeared_range(q_min,
+                                                                     q_max)
         _first_bin = None
         _last_bin  = None
 
-        step = (self.max-self.min)/(self.nbins-1.0)
+        step = (self.max - self.min) / (self.nbins - 1.0)
         try:
             for i in range(self.nbins):
                 q_i = smearer.get_q(self._smearer, i)
@@ -137,7 +136,9 @@ class _BaseSmearer(object):
                     else:
                         _last_bin  = i
         except:
-            raise RuntimeError, "_BaseSmearer.get_bin_range: error getting range\n  %s" % sys.exc_value
+            msg = "_BaseSmearer.get_bin_range: "
+            msg += " error getting range\n  %s" % sys.exc_value
+            raise RuntimeError, msg
                
         return _first_bin, _last_bin
 
@@ -151,22 +152,31 @@ class _BaseSmearer(object):
             self._initialize_smearer()
              
         # Get the max value for the last bin
-        if last_bin is None or last_bin>=len(iq_in):
-            last_bin = len(iq_in)-1
+        if last_bin is None or last_bin >= len(iq_in):
+            last_bin = len(iq_in) - 1
         # Check that the first bin is positive
-        if first_bin<0:
+        if first_bin < 0:
             first_bin = 0
             
         # Sanity check
         if len(iq_in) != self.nbins:
-            raise RuntimeError, "Invalid I(q) vector: inconsistent array length %d != %s" % (len(iq_in), str(self.nbins))
+            msg = "Invalid I(q) vector: inconsistent array "
+            msg += " length %d != %s" % (len(iq_in), str(self.nbins))
+            raise RuntimeError, msg
              
         # Storage for smeared I(q)   
         iq_out = numpy.zeros(self.nbins)
-        smear_output = smearer.smear(self._smearer, iq_in, iq_out, first_bin, last_bin)
+        smear_output = smearer.smear(self._smearer, iq_in, iq_out,
+                                      first_bin, last_bin)
         if smear_output < 0:
-            raise RuntimeError, "_BaseSmearer: could not smear, code = %g" % smear_output
+            msg = "_BaseSmearer: could not smear, code = %g" % smear_output
+            raise RuntimeError, msg
         return iq_out
+    
+    def _initialize_smearer(self):
+        """
+        """
+        return NotImplemented
     
 class _SlitSmearer(_BaseSmearer):
     """
@@ -206,8 +216,10 @@ class _SlitSmearer(_BaseSmearer):
         Initialize the C++ smearer object.
         This method HAS to be called before smearing
         """
-        #self._smearer = smearer.new_slit_smearer(self.width, self.height, self.min, self.max, self.nbins)
-        self._smearer = smearer.new_slit_smearer_with_q(self.width, self.height, self.qvalues)
+        #self._smearer = smearer.new_slit_smearer(self.width,
+        # self.height, self.min, self.max, self.nbins)
+        self._smearer = smearer.new_slit_smearer_with_q(self.width, 
+                                                    self.height, self.qvalues)
         self._init_complete = True
 
     def get_unsmeared_range(self, q_min, q_max):
@@ -240,21 +252,24 @@ class SlitSmearer(_SlitSmearer):
         
         ## Slit width
         self.width = 0
-        if data1D.dxw is not None and len(data1D.dxw)==len(data1D.x):
+        if data1D.dxw is not None and len(data1D.dxw) == len(data1D.x):
             self.width = data1D.dxw[0]
             # Sanity check
             for value in data1D.dxw:
                 if value != self.width:
-                    raise RuntimeError, "Slit smearing parameters must be the same for all data"
-                
+                    msg = "Slit smearing parameters must "
+                    msg += " be the same for all data"
+                    raise RuntimeError, msg
         ## Slit height
         self.height = 0
-        if data1D.dxl is not None and len(data1D.dxl)==len(data1D.x):
+        if data1D.dxl is not None and len(data1D.dxl) == len(data1D.x):
             self.height = data1D.dxl[0]
             # Sanity check
             for value in data1D.dxl:
                 if value != self.height:
-                    raise RuntimeError, "Slit smearing parameters must be the same for all data"
+                    msg = "Slit smearing parameters must be"
+                    msg += " the same for all data"
+                    raise RuntimeError, msg
         
         ## Number of Q bins
         self.nbins = len(data1D.x)
@@ -282,13 +297,13 @@ class _QSmearer(_BaseSmearer):
         """
         _BaseSmearer.__init__(self)
         ## Standard deviation in Q [A-1]
-        self.width  = width
+        self.width = width
         ## Q_min (Min Q-value for I(q))
-        self.min    = min
+        self.min = min
         ## Q_max (Max Q_value for I(q))
-        self.max    = max
+        self.max = max
         ## Number of Q bins 
-        self.nbins  = nbins
+        self.nbins = nbins
         ## Smearing matrix
         self._weights = None
         self.qvalues  = None
@@ -298,8 +313,10 @@ class _QSmearer(_BaseSmearer):
         Initialize the C++ smearer object.
         This method HAS to be called before smearing
         """
-        #self._smearer = smearer.new_q_smearer(numpy.asarray(self.width), self.min, self.max, self.nbins)
-        self._smearer = smearer.new_q_smearer_with_q(numpy.asarray(self.width), self.qvalues)
+        #self._smearer = smearer.new_q_smearer(numpy.asarray(self.width),
+        # self.min, self.max, self.nbins)
+        self._smearer = smearer.new_q_smearer_with_q(numpy.asarray(self.width),
+                                                      self.qvalues)
         self._init_complete = True
         
     def get_unsmeared_range(self, q_min, q_max):
@@ -312,9 +329,9 @@ class _QSmearer(_BaseSmearer):
         _qmin_unsmeared = q_min
         _qmax_unsmeared = q_max 
         try:
-            offset = 3.0*max(self.width)
-            _qmin_unsmeared = max([self.min, q_min-offset])
-            _qmax_unsmeared = min([self.max, q_max+offset])
+            offset = 3.0 * max(self.width)
+            _qmin_unsmeared = max([self.min, q_min - offset])
+            _qmax_unsmeared = min([self.max, q_max + offset])
         except:
             logging.error("_QSmearer.get_bin_range: %s" % sys.exc_value)
         return _qmin_unsmeared, _qmax_unsmeared
@@ -335,7 +352,7 @@ class QSmearer(_QSmearer):
         
         ## Resolution
         self.width = numpy.zeros(len(data1D.x))
-        if data1D.dx is not None and len(data1D.dx)==len(data1D.x):
+        if data1D.dx is not None and len(data1D.dx) == len(data1D.x):
             self.width = data1D.dx
         
         ## Number of Q bins
@@ -349,13 +366,11 @@ class QSmearer(_QSmearer):
 
 
 if __name__ == '__main__':
-    x = 0.001*numpy.arange(1,11)
-    y = 12.0-numpy.arange(1,11)
+    x = 0.001 * numpy.arange(1, 11)
+    y = 12.0 - numpy.arange(1, 11)
     print x
     #for i in range(10): print i, 0.001 + i*0.008/9.0 
     #for i in range(100): print i, int(math.floor( (i/ (100/9.0)) )) 
-
-    
     s = _SlitSmearer(nbins=10, width=0.0, height=0.005, min=0.001, max=0.010)
     #s = _QSmearer(nbins=10, width=0.001, min=0.001, max=0.010)
     s._compute_matrix()
@@ -365,7 +380,7 @@ if __name__ == '__main__':
     
     if True:
         for i in range(10):
-            print x[i],y[i], sy[i]
+            print x[i], y[i], sy[i]
             #print q, ' : ', s.weight(q), s._compute_iq(q) 
             #print q, ' : ', s(q), s._compute_iq(q) 
             #s._compute_iq(q) 

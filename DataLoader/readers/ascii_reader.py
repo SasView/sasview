@@ -35,7 +35,7 @@ class Reader:
             "ASCII files (*.dat)|*.dat",
             "ASCII files (*.abs)|*.abs"]
     ## List of allowed extensions
-    ext=['.txt', '.TXT', '.dat', '.DAT', '.abs', '.ABS']  
+    ext = ['.txt', '.TXT', '.dat', '.DAT', '.abs', '.ABS']  
     
     ## Flag to bypass extension check
     allow_all = True
@@ -53,7 +53,7 @@ class Reader:
         """
         if os.path.isfile(path):
             basename  = os.path.basename(path)
-            root, extension = os.path.splitext(basename)
+            _, extension = os.path.splitext(basename)
             if self.allow_all or extension.lower() in self.ext:
                 try:
                     input_f =  open(path,'r')
@@ -62,8 +62,10 @@ class Reader:
                 buff = input_f.read()
                 lines = buff.split('\n')
                 
-                #Jae could not find python universal line spliter: keep the below for now
-                # some ascii data has \r line separator, try it when the data is on only one long line
+                #Jae could not find python universal line spliter: 
+                #keep the below for now
+                # some ascii data has \r line separator,
+                # try it when the data is on only one long line
                 if len(lines) < 2 : 
                     lines = buff.split('\r')
                  
@@ -102,17 +104,21 @@ class Reader:
                 
                 #Initialize counters for data lines and header lines.
                 is_data = False #Has more than 5 lines
-                mum_data_lines = 5 # More than "5" lines of data is considered as actual data unless that is the only data
-
-                i=-1            # To count # of current data candidate lines
-                i1=-1           # To count total # of previous data candidate lines
-                j=-1            # To count # of header lines
-                j1=-1           # Helps to count # of header lines
-                lentoks = 2     # minimum required number of columns of data; ( <= 4).
-                
+                # More than "5" lines of data is considered as actual
+                # data unless that is the only data
+                mum_data_lines = 5 
+                # To count # of current data candidate lines
+                i = -1  
+                # To count total # of previous data candidate lines          
+                i1 = -1 
+                # To count # of header lines          
+                j = -1
+                # Helps to count # of header lines            
+                j1 = -1
+                #minimum required number of columns of data; ( <= 4).           
+                lentoks = 2     
                 for line in lines:
                     toks = line.split()
-                    
                     try:
                         #Make sure that all columns are numbers.
                         for colnum in range(len(toks)):
@@ -139,7 +145,7 @@ class Reader:
                         # whether it can be interpreted as a
                         # third column.
                         _dy = None
-                        if len(toks)>2:
+                        if len(toks) > 2:
                             try:
                                 _dy = float(toks[2])
                                 
@@ -157,7 +163,7 @@ class Reader:
                             
                         #Check for dx
                         _dx = None
-                        if len(toks)>3:
+                        if len(toks) > 3:
                             try:
                                 _dx = float(toks[3])
                                 
@@ -173,12 +179,15 @@ class Reader:
                         if has_error_dx == None:
                             has_error_dx = False if _dx == None else True
                         
-                        #After talked with PB, we decided to take care of only 4 columns of data for now.
+                        #After talked with PB, we decided to take care of only 
+                        # 4 columns of data for now.
                         #number of columns in the current line
-                        #To remember the # of columns in the current line of data
+                        #To remember the # of columns in the current 
+                        #line of data
                         new_lentoks = len(toks)
                         
-                        #If the previous columns not equal to the current, mark the previous as non-data and reset the dependents.  
+                        #If the previous columns not equal to the current, 
+                        #mark the previous as non-data and reset the dependents.  
                         if lentoks != new_lentoks :
                             if is_data == True:
                                 break
@@ -189,12 +198,13 @@ class Reader:
                                 j1 = -1
                             
                             
-                        #Delete the previously stored lines of data candidates if is not data.
-                        if i < 0 and -1< i1 < mum_data_lines and is_data == False:
+                        #Delete the previously stored lines of data candidates
+                        # if is not data.
+                        if i < 0 and -1 < i1 < mum_data_lines and \
+                            is_data == False:
                             try:
-                                x= numpy.zeros(0)
-                                y= numpy.zeros(0)
-                                
+                                x = numpy.zeros(0)
+                                y = numpy.zeros(0)
                             except:
                                 pass
                             
@@ -202,8 +212,10 @@ class Reader:
                         y  = numpy.append(y,   _y)
                         
                         if has_error_dy == True:
-                            #Delete the previously stored lines of data candidates if is not data.
-                            if i < 0 and -1< i1 < mum_data_lines and is_data== False:
+                            #Delete the previously stored lines of
+                            # data candidates if is not data.
+                            if i < 0 and -1 < i1 < mum_data_lines and \
+                                is_data == False:
                                 try:
                                     dy = numpy.zeros(0)  
                                 except:
@@ -211,8 +223,10 @@ class Reader:
                             dy = numpy.append(dy, _dy)
                             
                         if has_error_dx == True:
-                            #Delete the previously stored lines of data candidates if is not data.
-                            if i < 0 and -1< i1 < mum_data_lines and is_data== False:
+                            #Delete the previously stored lines of
+                            # data candidates if is not data.
+                            if i < 0 and -1 < i1 < mum_data_lines and \
+                                is_data == False:
                                 try:
                                     dx = numpy.zeros(0)                            
                                 except:
@@ -220,46 +234,53 @@ class Reader:
                             dx = numpy.append(dx, _dx)
                             
                         #Same for temp.
-                        #Delete the previously stored lines of data candidates if is not data.
-                        if i < 0 and -1< i1 < mum_data_lines and is_data== False:
+                        #Delete the previously stored lines of data candidates
+                        # if is not data.
+                        if i < 0 and -1 < i1 < mum_data_lines and\
+                            is_data == False:
                             try:
                                 tx = numpy.zeros(0)
                                 ty = numpy.zeros(0)
                             except:
-                                pass                                                               
+                                pass                                                           
 
                         tx  = numpy.append(tx,   _x) 
                         ty  = numpy.append(ty,   _y)
                         
                         if has_error_dy == True:
-                            #Delete the previously stored lines of data candidates if is not data.
-                            if i < 0 and -1<i1 < mum_data_lines and is_data== False:
+                            #Delete the previously stored lines of
+                            # data candidates if is not data.
+                            if i < 0 and -1 < i1 < mum_data_lines and \
+                                is_data == False:
                                 try:
                                     tdy = numpy.zeros(0)
                                 except:
                                     pass                                                                                                                
                             tdy = numpy.append(tdy, _dy)
                         if has_error_dx == True:
-                            #Delete the previously stored lines of data candidates if is not data.
-                            if i < 0 and -1< i1 < mum_data_lines and is_data== False:
+                            #Delete the previously stored lines of
+                            # data candidates if is not data.
+                            if i < 0 and -1 < i1 < mum_data_lines and \
+                                is_data == False:
                                 try:
                                     tdx = numpy.zeros(0)
                                 except:
-                                    pass                                                                                                             
+                                    pass                                                                                                          
                             tdx = numpy.append(tdx, _dx)
 
                         #reset i1 and flag lentoks for the next
-                        if lentoks < new_lentoks :
+                        if lentoks < new_lentoks:
                             if is_data == False:
                                 i1 = -1                            
-                        #To remember the # of columns on the current line for the next line of data
+                        #To remember the # of columns on the current line
+                        # for the next line of data
                         lentoks = len(toks)
                         
-                        #Reset # of header lines and counts # of data candidate lines    
-                        if j == 0 and j1 ==0:
+                        #Reset # of header lines and counts # 
+                        # of data candidate lines    
+                        if j == 0 and j1 == 0:
                             i1 = i + 1                            
-                        i+=1
-                        
+                        i += 1
                     except:
 
                         # It is data and meet non - number, then stop reading
@@ -267,8 +288,8 @@ class Reader:
                             break    
                         lentoks = 2
                         #Counting # of header lines                    
-                        j+=1
-                        if j == j1+1:
+                        j += 1
+                        if j == j1 + 1:
                             j1 = j                            
                         else:                            
                             j = -1
@@ -278,21 +299,22 @@ class Reader:
                         # Couldn't parse this line, skip it 
                         pass
                     
-    
                 input_f.close()     
                 # Sanity check
                 if has_error_dy == True and not len(y) == len(dy):
-                    raise RuntimeError, "ascii_reader: y and dy have different length"
+                    msg = "ascii_reader: y and dy have different length"
+                    raise RuntimeError, msg
                 if has_error_dx == True and not len(x) == len(dx):
-                    raise RuntimeError, "ascii_reader: y and dy have different length"
-
+                    msg = "ascii_reader: y and dy have different length"
+                    raise RuntimeError, msg
                 # If the data length is zero, consider this as
                 # though we were not able to read the file.
-                if len(x)==0:
+                if len(x) == 0:
                     raise RuntimeError, "ascii_reader: could not load file"
                 
-                #Let's re-order the data to make cal. curve look better some cases
-                ind = numpy.lexsort((ty,tx))
+                #Let's re-order the data to make cal.
+                # curve look better some cases
+                ind = numpy.lexsort((ty, tx))
                 for i in ind:
                     x[i] = tx[ind[i]]
                     y[i] = ty[ind[i]]
@@ -300,8 +322,6 @@ class Reader:
                         dy[i] = tdy[ind[i]]
                     if has_error_dx == True:
                         dx[i] = tdx[ind[i]]
-                
-                
                 #Data    
                 output.x = x
                 output.y = y

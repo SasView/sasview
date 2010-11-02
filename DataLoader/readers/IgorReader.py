@@ -14,10 +14,13 @@
     IGOR 2D reduced file reader
 """
 
-import os, sys
+import os
+#import sys
 import numpy
-import math, logging
-from DataLoader.data_info import Data2D, Detector
+import math
+#import logging
+from DataLoader.data_info import Data2D
+from DataLoader.data_info import Detector
 from DataLoader.manipulations import reader2D_converter
 
 # Look for unit converter
@@ -99,7 +102,8 @@ class Reader:
                 try:
                     wavelength = float(line_toks[1])
                 except:
-                    raise ValueError,"IgorReader: can't read this file, missing wavelength"
+                    msg = "IgorReader: can't read this file, missing wavelength"
+                    raise ValueError, msg
                 
             #Find # of bins in a row assuming the detector is square.
             if dataStarted == True:
@@ -129,18 +133,22 @@ class Reader:
                 try:
                     wavelength = float(line_toks[1])
                 except:
-                    raise ValueError,"IgorReader: can't read this file, missing wavelength"
+                    msg = "IgorReader: can't read this file, missing wavelength"
+                    raise ValueError, msg
                 # Distance in meters
                 try:
                     distance = float(line_toks[3])
                 except:
-                    raise ValueError,"IgorReader: can't read this file, missing distance"
+                    msg = "IgorReader: can't read this file, missing distance"
+                    raise ValueError, msg
                 
                 # Distance in meters
                 try:
                     transmission = float(line_toks[4])
                 except:
-                    raise ValueError,"IgorReader: can't read this file, missing transmission"
+                    msg = "IgorReader: can't read this file, "
+                    msg += "missing transmission"
+                    raise ValueError, msg
                                             
             if line.count("LAMBDA")>0:
                 isInfo = True
@@ -150,7 +158,8 @@ class Reader:
                 isCenter = False                
                 line_toks = line.split()
                 
-                # Center in bin number: Must substrate 1 because the index starts from 1
+                # Center in bin number: Must substrate 1 because 
+                #the index starts from 1
                 center_x = float(line_toks[0])-1
                 center_y = float(line_toks[1])-1
 
@@ -167,7 +176,8 @@ class Reader:
                     or distance == None \
                     or center_x == None \
                     or center_y == None:
-                    raise ValueError, "IgorReader:Missing information in data file"
+                    msg = "IgorReader:Missing information in data file"
+                    raise ValueError, msg
                 
             if dataStarted == True:
                 try:
@@ -189,9 +199,12 @@ class Reader:
                 # Det 640 x 640 mm
                 # Q = 4pi/lambda sin(theta/2)
                 # Bin size is 0.5 cm 
-                #REmoved +1 from theta = (i_x-center_x+1)*0.5 / distance / 100.0 and 
-                #REmoved +1 from theta = (i_y-center_y+1)*0.5 / distance / 100.0
-                #ToDo: Need  complete check if the following covert process is consistent with fitting.py.
+                #REmoved +1 from theta = (i_x-center_x+1)*0.5 / distance 
+                # / 100.0 and 
+                #REmoved +1 from theta = (i_y-center_y+1)*0.5 /
+                # distance / 100.0
+                #ToDo: Need  complete check if the following
+                # covert process is consistent with fitting.py.
                 theta = (i_x-center_x)*0.5 / distance / 100.0
                 qx = 4.0*math.pi/wavelength * math.sin(theta/2.0)
 
