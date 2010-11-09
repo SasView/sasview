@@ -477,8 +477,8 @@ class MaskPanel(wx.Dialog):
                        cmap= self.cmap,
                        color=0,symbol=0,label=self.data.name)
         # axis labels
-        self.plotpanel.axes[0].set_xlabel('$\\rm{Q}_{x}(\\AA^{-1})$')
-        self.plotpanel.axes[0].set_ylabel('$\\rm{Q}_{y}(\\AA^{-1})$')
+        self.plotpanel.axes[0].set_xlabel('$\\rm{Q}_{x}(A^{-1})$')
+        self.plotpanel.axes[0].set_ylabel('$\\rm{Q}_{y}(A^{-1})$')
         
         self.plotpanel.render()
         self.plotpanel.subplot.figure.canvas.draw_idle()
