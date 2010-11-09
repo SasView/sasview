@@ -1688,7 +1688,9 @@ class BasicPage(wx.ScrolledWindow):
         x,y=self.model.getProfile()
 
         from danse.common.plottools import Data1D
-        from sans.perspectives.theory.profile_dialog import SLDPanel
+        #from sans.perspectives.theory.profile_dialog import SLDPanel
+        from sans.guiframe.local_perspectives.plotting.profile_dialog \
+        import SLDPanel
         sld_data = Data1D(x,y)
         sld_data.name = 'SLD'
         sld_data.axes = self.sld_axes
