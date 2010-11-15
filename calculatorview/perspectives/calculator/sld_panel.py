@@ -373,8 +373,9 @@ class SldPanel(wx.Panel):
                 
                 
                 (sld_real, sld_im, _), (_, absorp, incoh), \
-                            length = neutron_scattering(self.compound,
-                                       self.density, self.wavelength) 
+                            length = neutron_scattering(compound=self.compound,
+                                       density=self.density, 
+                                       wavelength=self.wavelength) 
                 cu_real, cu_im = self.calculate_sld_helper(element="Cu",
                                                      density=self.density,
                                             molecule_formula=self.sld_formula)
@@ -402,12 +403,15 @@ class SldPanel(wx.Panel):
                 # display wavelength
                 self.wavelength_ctl.SetValue(str(self.wavelength))
         except:
+            raise
+            """
             if self.base is not None:
                 msg = "SLD Calculator: %s"%(sys.exc_value)
                 wx.PostEvent(self.base, StatusEvent(status=msg))
             else:
                 raise
             return   
+            """
         if event is not None:
             event.Skip()
    
