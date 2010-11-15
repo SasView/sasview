@@ -55,8 +55,8 @@ class DistExplorer(object):
         
         """
         self.pr_state  = pr_state
-        self._default_min = 0.8*self.pr_state.d_max
-        self._default_max = 1.2*self.pr_state.d_max
+        self._default_min = 0.8 * self.pr_state.d_max
+        self._default_max = 1.2 * self.pr_state.d_max
 
         
     def __call__(self, dmin=None, dmax=None, npts=10):
@@ -102,7 +102,9 @@ class DistExplorer(object):
                 results.osc.append(osc)           
             except:
                 # This inversion failed, skip this D_max value
-                results.errors.append("ExploreDialog: inversion failed for D_max=%s\n %s" % (str(d), sys.exc_value))
+                msg = "ExploreDialog: inversion failed for "
+                msg += "D_max=%s\n %s" % (str(d), sys.exc_value)
+                results.errors.append(msg)
             
         return results
         

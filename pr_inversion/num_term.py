@@ -1,4 +1,10 @@
-import unittest, math, numpy, sys, string
+
+#import unittest
+import math
+import numpy
+#import sys
+#import string
+import copy
 from sans.pr.invertor import Invertor
 
 class Num_terms():    
@@ -10,8 +16,8 @@ class Num_terms():
         self.invertor = invertor
         self.nterm_min = 10
         self.nterm_max = len(self.invertor.x)
-        if self.nterm_max>50:
-            self.nterm_max=50
+        if self.nterm_max > 50:
+            self.nterm_max = 50
         self.isquit_func = None
          
         self.osc_list = []
@@ -24,12 +30,12 @@ class Num_terms():
     def is_odd(self, n):
         """
         """
-        return bool(n%2)
+        return bool(n % 2)
 
     def sort_osc(self):
         """
         """
-        import copy
+        #import copy
         osc = copy.deepcopy(self.dataset)
         lis = []
         for i in range(len(osc)):
@@ -68,7 +74,7 @@ class Num_terms():
             inver.out, inver.cov = inver.lstsq(k)
             osc = inver.oscillations(inver.out)
             err = inver.get_pos_err(inver.out, inver.cov)
-            if osc>10.0:
+            if osc > 10.0:
                 break
             self.osc_list.append(osc)
             self.err_list.append(err)
@@ -78,27 +84,27 @@ class Num_terms():
         #print "osc", self.osc_list
         #print "err", self.err_list
         #print "alpha", self.alpha_list
-        new_ls = []
+        #new_ls = []
         new_osc1 = []
-        new_osc2= []
+        new_osc2 = []
         new_osc3 = []
-        flag9=False
-        flag8=False
-        flag7=False
+        flag9 = False
+        flag8 = False
+        flag7 = False
         for i in range(len(self.err_list)):
-            if self.err_list[i] <= 1.0 and self.err_list[i] >=0.9:
+            if self.err_list[i] <= 1.0 and self.err_list[i] >= 0.9:
                 new_osc1.append(self.osc_list[i])
-                flag9=True
-            if self.err_list[i] < 0.9 and self.err_list[i] >=0.8:
+                flag9 = True
+            if self.err_list[i] < 0.9 and self.err_list[i] >= 0.8:
                 new_osc2.append(self.osc_list[i])
-                flag8=True
-            if self.err_list[i] <0.8 and self.err_list[i] >= 0.7:
+                flag8 = True
+            if self.err_list[i] < 0.8 and self.err_list[i] >= 0.7:
                 new_osc3.append(self.osc_list[i])
-                falg7=True
+                falg7 = True
                  
-        if flag9==True:
+        if flag9 == True:
             self.dataset = new_osc1
-        elif flag8==True:
+        elif flag8 == True:
             self.dataset = new_osc2
         else:
             self.dataset = new_osc3
@@ -158,7 +164,7 @@ class Num_terms():
 
 #For testing
 def load(path):
-    import numpy, math, sys
+    #import numpy, math, sys
     # Read the data from the data file
     data_x   = numpy.zeros(0)
     data_y   = numpy.zeros(0)
@@ -172,20 +178,20 @@ def load(path):
         for line in lines:
             try:
                 toks = line.split()
-                x = float(toks[0])
-                y = float(toks[1])
-                if len(toks)>2:
+                test_x = float(toks[0])
+                test_y = float(toks[1])
+                if len(toks) > 2:
                     err = float(toks[2])
                 else:
-                    if scale==None:
-                        scale = 0.05*math.sqrt(y)
+                    if scale == None:
+                        scale = 0.05 * math.sqrt(test_y)
                         #scale = 0.05/math.sqrt(y)
                         min_err = 0.01*y
-                    err = scale*math.sqrt(y)+min_err
+                    err = scale * math.sqrt(test_y) + min_err
                     #err = 0
                     
-                data_x = numpy.append(data_x, x)
-                data_y = numpy.append(data_y, y)
+                data_x = numpy.append(data_x, test_x)
+                data_y = numpy.append(data_y, test_y)
                 data_err = numpy.append(data_err, err)
             except:
                 pass
