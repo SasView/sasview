@@ -24,8 +24,8 @@ if sys.platform.count("win32") > 0:
     PANEL_HEIGHT = 210
     FONT_VARIANT = 0
 else:
-    PANEL_WIDTH = 530
-    PANEL_HEIGHT = 250
+    PANEL_WIDTH = 560
+    PANEL_HEIGHT = 230
     FONT_VARIANT = 1
  
 class KiessigThicknessCalculatorPanel(wx.Panel):

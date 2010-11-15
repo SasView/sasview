@@ -14,11 +14,11 @@ _SCALE = 1e-6
 
 #SLD panel size 
 if sys.platform.count("win32")>0:
-    _STATICBOX_WIDTH = 380
+    _STATICBOX_WIDTH = 570
     PANEL_SIZE = 475
     FONT_VARIANT = 0
 else:
-    _STATICBOX_WIDTH = 410
+    _STATICBOX_WIDTH = 810
     PANEL_SIZE = 505
     FONT_VARIANT = 1
     
@@ -37,7 +37,7 @@ class SLDPanel(wx.Dialog):
     def __init__(self, parent=None,base=None,data =None,axes =['Radius'], 
                  id = -1, *args, **kwds):
         kwds["style"] =  wx.DEFAULT_DIALOG_STYLE
-        kwds["size"] = wx.Size(_STATICBOX_WIDTH*1.5,PANEL_SIZE) 
+        kwds["size"] = wx.Size(_STATICBOX_WIDTH,PANEL_SIZE) 
         wx.Dialog.__init__(self, parent, id = id,  *args, **kwds)
         if data != None:
             

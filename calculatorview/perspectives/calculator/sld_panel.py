@@ -31,7 +31,7 @@ if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
 else:
     _STATICBOX_WIDTH = 380
-    PANEL_SIZE = 430
+    PANEL_SIZE = 410
     FONT_VARIANT = 1
     
 class SldPanel(wx.Panel):

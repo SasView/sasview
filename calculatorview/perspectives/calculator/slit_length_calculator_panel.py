@@ -26,7 +26,7 @@ if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
 else:
     PANEL_WIDTH = 530
-    PANEL_HEIGHT = 230
+    PANEL_HEIGHT = 210
     FONT_VARIANT = 1
  
 class SlitLengthCalculatorPanel(wx.Panel):
