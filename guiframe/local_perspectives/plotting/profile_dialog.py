@@ -13,13 +13,13 @@ _STATICBOX_WIDTH = 400
 _SCALE = 1e-6
 
 #SLD panel size 
-if sys.platform.count("win32")>0:
+if sys.platform.count("win32") > 0:
     _STATICBOX_WIDTH = 570
     PANEL_SIZE = 475
     FONT_VARIANT = 0
 else:
-    _STATICBOX_WIDTH = 810
-    PANEL_SIZE = 505
+    _STATICBOX_WIDTH = 610
+    PANEL_SIZE = 500
     FONT_VARIANT = 1
     
 
@@ -39,6 +39,7 @@ class SLDPanel(wx.Dialog):
         kwds["style"] =  wx.DEFAULT_DIALOG_STYLE
         kwds["size"] = wx.Size(_STATICBOX_WIDTH,PANEL_SIZE) 
         wx.Dialog.__init__(self, parent, id = id,  *args, **kwds)
+
         if data != None:
             
             #Font size 
@@ -55,7 +56,7 @@ class SLDPanel(wx.Dialog):
             
             # Panel for plot
             self.plotpanel    = SLDplotpanel(self, axes, -1, 
-                                             style=wx.TRANSPARENT_WINDOW)
+                                             style = wx.TRANSPARENT_WINDOW)
             self.cmap = DEFAULT_CMAP
             ## Create Artist and bind it
             self.subplot = self.plotpanel.subplot
@@ -70,6 +71,7 @@ class SLDPanel(wx.Dialog):
 
             self.Centre()
             self.Layout()
+
             
     def _set_dy_data(self): 
         """
@@ -85,27 +87,25 @@ class SLDPanel(wx.Dialog):
         """
         Set up the layout
         """
-        #  panel
-        sizer = wx.GridBagSizer(14,14)
-        
-        sizer.Add(self.plotpanel,(0, 0), (13, 13), 
-                  wx.EXPAND | wx.LEFT| wx.RIGHT, 1)
-
+        # panel sizer
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self.plotpanel,-1, wx.LEFT|wx.RIGHT,  5)
+        sizer.Add((0,10))
         #-----Button------------1
         id = wx.NewId()
         button_reset = wx.Button(self, id, "Close")
         button_reset.SetToolTipString("Close...")
         button_reset.Bind(wx.EVT_BUTTON, self._close, 
                           id = button_reset.GetId()) 
-        sizer.Add(button_reset, (13, 12), flag=wx.RIGHT | wx.BOTTOM, border=15)
-
-        sizer.AddGrowableCol(2)
-        sizer.AddGrowableRow(3)
+        sizer.Add(button_reset, 0, wx.LEFT, _STATICBOX_WIDTH - 80) 
+        sizer.Add((0,10))
+        
         self.SetSizerAndFit(sizer)
-        button_reset.SetFocus()
+        
         self.Centre()
         self.Show(True)
-
+        button_reset.SetFocus()
+        
     def _close(self, event):
         """
         Close the dialog
@@ -135,12 +135,14 @@ class SLDplotpanel(PlotPanel):
     """
     Panel
     """
-    def __init__(self, parent,axes=[], id = -1, color = None, dpi = None,
+    def __init__(self, parent,axes = [], id = -1, color = None, dpi = None,
                   **kwargs):
         """
         """
-        PlotPanel.__init__(self, parent, id=id, xtransform='x', ytransform='y', 
-                           color=color, dpi=dpi, **kwargs)
+        PlotPanel.__init__(self, parent, id=id, xtransform = 'x', ytransform = 'y', 
+                           color = color, dpi = dpi, 
+                           size = (_STATICBOX_WIDTH, PANEL_SIZE-100), **kwargs)
+
         # Keep track of the parent Frame
         self.parent = parent
         # Internal list of plottable names (because graph 
@@ -148,7 +150,7 @@ class SLDplotpanel(PlotPanel):
         self.plots = {}
         self.graph = Graph()
         self.axes_label = []
-        for idx in range(0,len(axes)):
+        for idx in range(0, len(axes)):
             self.axes_label.append(axes[idx])
         
     def add_image(self, plot):
@@ -198,10 +200,10 @@ class ViewerFrame(wx.Frame):
         """
         # Initialize the Frame object
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, 
-                          wx.Size(950,850))
+                          wx.Size(_STATICBOX_WIDTH,PANEL_SIZE))
         
         # Panel for 1D plot
-        self.plotpanel    = SLDplotpanel(self, -1, style=wx.RAISED_BORDER)
+        self.plotpanel    = SLDplotpanel(self, -1, style = wx.RAISED_BORDER)
 
 class ViewApp(wx.App):
     def OnInit(self):
