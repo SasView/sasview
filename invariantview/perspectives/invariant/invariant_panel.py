@@ -127,8 +127,8 @@ class InvariantPanel(ScrolledPanel):
             data_qmin = min (self._data.x)
             data_qmax = max (self._data.x)
             self.data_name_tcl.SetValue(str(data_name))
-            self.data_min_tcl.SetLabel(str(data_qmin))
-            self.data_max_tcl.SetLabel(str(data_qmax))
+            self.data_min_tcl.SetValue(str(data_qmin))
+            self.data_max_tcl.SetValue(str(data_qmax))
             self.reset_panel()
             self.compute_invariant(event=None)
             self.state.file = self._data.name
@@ -214,8 +214,8 @@ class InvariantPanel(ScrolledPanel):
             data_qmin = ''
             data_qmax = ''
             self.data_name_tcl.SetValue(str(data_name))
-            self.data_min_tcl.SetLabel(str(data_qmin))
-            self.data_max_tcl.SetLabel(str(data_qmax))
+            self.data_min_tcl.SetValue(str(data_qmin))
+            self.data_max_tcl.SetValue(str(data_qmax))
             #reset output textctrl
             self._reset_output()
             #reset panel
