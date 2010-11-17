@@ -55,7 +55,8 @@ class Transform(object):
 
         output_points = [(self.linearize_q_value(p[0]),
                           math.log(p[1]),
-                          p[2]/p[1]) for p in data_points if p[0]>0 and p[1]>0 and p[2]>0]
+                          p[2]/p[1]) for p in data_points if p[0]>0 and \
+                          p[1]>0 and p[2]>0]
         
         x_out, y_out, dy_out = zip(*output_points)
        
@@ -74,7 +75,8 @@ class Transform(object):
         
         :param data: Data1D object
         """
-        return [p[0]>0 and p[1]>0 and p[2]>0 for p in zip(data.x, data.y, data.dy)]
+        return [p[0]>0 and p[1]>0 and p[2]>0 for p in zip(data.x, data.y,
+                                                           data.dy)]
         
     def linearize_q_value(self, value):
         """
@@ -149,8 +151,10 @@ class Guinier(Transform):
         
         :param x: array of q-values
         """
-        p1 = numpy.array([self.dscale * math.exp(-((self.radius * q)**2/3)) for q in x])
-        p2 = numpy.array([self.scale * math.exp(-((self.radius * q)**2/3)) * (-(q**2/3)) * 2 * self.radius * self.dradius for q in x])
+        p1 = numpy.array([self.dscale * math.exp(-((self.radius * q)**2/3)) \
+                          for q in x])
+        p2 = numpy.array([self.scale * math.exp(-((self.radius * q)**2/3))\
+                     * (-(q**2/3)) * 2 * self.radius * self.dradius for q in x])
         diq2 = p1*p1 + p2*p2        
         return numpy.array( [math.sqrt(err) for err in diq2] )
              
@@ -169,7 +173,8 @@ class Guinier(Transform):
         # transform the radius of coming from the inverse guinier function to a 
         # a radius of a guinier function
         if self.radius <= 0:
-            raise ValueError("Rg expected positive value, but got %s"%self.radius)  
+            msg = "Rg expected positive value, but got %s"%self.radius
+            raise ValueError(msg)  
         value = numpy.array([math.exp(-((self.radius * i)**2/3)) for i in x ]) 
         return self.scale * value
 
@@ -219,7 +224,8 @@ class PowerLaw(Transform):
         :param x: array of q-values
         """
         p1 = numpy.array([self.dscale * math.pow(q, -self.power) for q in x])
-        p2 = numpy.array([self.scale * self.power * math.pow(q, -self.power-1) * self.dpower for q in x])
+        p2 = numpy.array([self.scale * self.power * math.pow(q, -self.power-1)\
+                           * self.dpower for q in x])
         diq2 = p1*p1 + p2*p2        
         return numpy.array( [math.sqrt(err) for err in diq2] )
        
@@ -237,9 +243,12 @@ class PowerLaw(Transform):
         :return: F(x)
         """
         if self.power <= 0:
-            raise ValueError("Power_law function expected positive power, but got %s"%self.power)
+            msg = "Power_law function expected positive power,"
+            msg += " but got %s"%self.power
+            raise ValueError(msg)
         if self.scale <= 0:
-            raise ValueError("scale expected positive value, but got %s"%self.scale) 
+            msg = "scale expected positive value, but got %s"%self.scale
+            raise ValueError(msg) 
        
         value = numpy.array([ math.pow(i, -self.power) for i in x ])  
         return self.scale * value
@@ -253,7 +262,8 @@ class Extrapolator:
         Determine a and b given a linear equation y = ax + b
         
         If a model is given, it will be used to linearize the data before 
-        the extrapolation is performed. If None, a simple linear fit will be done.
+        the extrapolation is performed. If None,
+        a simple linear fit will be done.
         
         :param data: data containing x and y  such as  y = ax + b 
         :param model: optional Transform object 
@@ -288,7 +298,8 @@ class Extrapolator:
         fx = numpy.zeros(len(self.data.x))
 
         # Uncertainty
-        if type(self.data.dy)==numpy.ndarray and len(self.data.dy)==len(self.data.x):
+        if type(self.data.dy)==numpy.ndarray and \
+            len(self.data.dy)==len(self.data.x):
             sigma = self.data.dy
         else:
             sigma = numpy.ones(len(self.data.x))
@@ -298,9 +309,10 @@ class Extrapolator:
         
         # Linearize the data
         if self.model is not None:
-            linearized_data = self.model.linearize_data(LoaderData1D(self.data.x[idx],
+            linearized_data = self.model.linearize_data(\
+                                            LoaderData1D(self.data.x[idx],
                                                                 fx[idx],
-                                                                dy = sigma[idx]))
+                                                            dy = sigma[idx]))
         else:
             linearized_data = LoaderData1D(self.data.x[idx],
                                            fx[idx],
@@ -314,7 +326,8 @@ class Extrapolator:
                  - a*numpy.sum(linearized_data.x/sigma2))/numpy.sum(1.0/sigma2)
             
             
-            deltas = linearized_data.x*a+numpy.ones(len(linearized_data.x))*b-linearized_data.y
+            deltas = linearized_data.x*a + \
+                    numpy.ones(len(linearized_data.x))*b-linearized_data.y
             residuals = numpy.sum(deltas*deltas/sigma2)
             
             err = math.fabs(residuals) / numpy.sum(1.0/sigma2)
@@ -322,7 +335,8 @@ class Extrapolator:
         else:
             A = numpy.vstack([ linearized_data.x/linearized_data.dy,
                                1.0/linearized_data.dy]).T        
-            (p, residuals, rank, s) = numpy.linalg.lstsq(A, linearized_data.y/linearized_data.dy)
+            (p, residuals, rank, s) = numpy.linalg.lstsq(A,
+                                        linearized_data.y/linearized_data.dy)
             
             # Get the covariance matrix, defined as inv_cov = a_transposed * a
             err = numpy.zeros(2)
@@ -353,8 +367,10 @@ class InvariantCalculator(object):
         Initialize variables.
         
         :param data: data must be of type DataLoader.Data1D
-        :param background: Background value. The data will be corrected before processing
-        :param scale: Scaling factor for I(q). The data will be corrected before processing
+        :param background: Background value. The data will be corrected 
+            before processing
+        :param scale: Scaling factor for I(q). The data will be corrected
+            before processing
         """
         # Background and scale should be private data member if the only way to
         # change them are by instantiating a new object.
@@ -433,7 +449,8 @@ class InvariantCalculator(object):
         extrapolator = Extrapolator(data=self._data, model=model)
         p, dp = extrapolator.fit(power=power, qmin=qmin, qmax=qmax) 
         
-        return model.extract_model_parameters(constant=p[1], slope=p[0], dconstant=dp[1], dslope=dp[0])
+        return model.extract_model_parameters(constant=p[1], slope=p[0],
+                                              dconstant=dp[1], dslope=dp[0])
     
     def _get_qstar(self, data):
         """
@@ -458,7 +475,8 @@ class InvariantCalculator(object):
         """
         if len(data.x) <= 1 or len(data.y) <= 1 or len(data.x)!= len(data.y):
             msg =  "Length x and y must be equal"
-            msg += " and greater than 1; got x=%s, y=%s"%(len(data.x), len(data.y))
+            msg += " and greater than 1; got x=%s, y=%s"%(len(data.x),
+                                                          len(data.y))
             raise ValueError, msg
         else:
             # Take care of smeared data
@@ -480,7 +498,8 @@ class InvariantCalculator(object):
             if len(data.x) == 2:
                 return sum
             else:
-                #iterate between for element different from the first and the last
+                #iterate between for element different
+                #from the first and the last
                 for i in xrange(1, n-1):
                     dxi = (data.x[i+1] - data.x[i-1])/2
                     sum += gx[i] * data.y[i] * dxi
@@ -533,7 +552,8 @@ class InvariantCalculator(object):
             if len(data.x) == 2:
                 return math.sqrt(sum)
             else:
-                #iterate between for element different from the first and the last
+                #iterate between for element different
+                #from the first and the last
                 for i in xrange(1, n-1):
                     dxi = (data.x[i+1] - data.x[i-1])/2
                     sum += (gx[i] * dy[i] * dxi)**2
@@ -565,7 +585,8 @@ class InvariantCalculator(object):
     
     def get_extrapolation_power(self, range='high'):
         """
-        :return: the fitted power for power law function for a given extrapolation range
+        :return: the fitted power for power law function for a given
+            extrapolation range
         """
         if range == 'low':
             return self._low_extrapolation_power_fitted
@@ -597,15 +618,17 @@ class InvariantCalculator(object):
         if Q_MINIMUM >= qmin:
             self._low_q_limit = qmin/10
         
-        data = self._get_extrapolated_data(model=self._low_extrapolation_function,
-                                               npts=INTEGRATION_NSTEPS,
-                                               q_start=self._low_q_limit, q_end=qmin)
+        data = self._get_extrapolated_data(\
+                                    model=self._low_extrapolation_function,
+                                            npts=INTEGRATION_NSTEPS,
+                                        q_start=self._low_q_limit, q_end=qmin)
         
         # Systematic error
         # If we have smearing, the shape of the I(q) distribution at low Q will
         # may not be a Guinier or simple power law. The following is a conservative
         # estimation for the systematic error.
-        err = qmin*qmin*math.fabs((qmin-self._low_q_limit)*(data.y[0] - data.y[INTEGRATION_NSTEPS-1]))
+        err = qmin*qmin*math.fabs((qmin-self._low_q_limit)*\
+                                  (data.y[0] - data.y[INTEGRATION_NSTEPS-1]))
         return self._get_qstar(data), self._get_qstar_uncertainty(data)+err
         
     def get_qstar_high(self):
@@ -631,7 +654,8 @@ class InvariantCalculator(object):
         self._high_extrapolation_power_fitted = p[0]
         
         #create new Data1D to compute the invariant
-        data = self._get_extrapolated_data(model=self._high_extrapolation_function,
+        data = self._get_extrapolated_data(\
+                                    model=self._high_extrapolation_function,
                                            npts=INTEGRATION_NSTEPS,
                                            q_start=qmax, q_end=Q_MAXIMUM)        
         
@@ -646,7 +670,8 @@ class InvariantCalculator(object):
         the minimum q-value used when extrapolating for the purpose of the 
         invariant calculation. 
         
-        :param npts_in: number of data points for which the extrapolated data overlap
+        :param npts_in: number of data points for which
+            the extrapolated data overlap
         :param q_start: is the minimum value to uses for extrapolated data
         :param npts: the number of points in the extrapolated distribution
            
@@ -662,7 +687,8 @@ class InvariantCalculator(object):
         if q_start >= q_end:
             return numpy.zeros(0), numpy.zeros(0)
 
-        return self._get_extrapolated_data(model=self._low_extrapolation_function,
+        return self._get_extrapolated_data(\
+                                    model=self._low_extrapolation_function,
                                            npts=npts,
                                            q_start=q_start, q_end=q_end)
           
@@ -675,7 +701,8 @@ class InvariantCalculator(object):
         the maximum q-value used when extrapolating for the purpose of the 
         invariant calculation. 
         
-        :param npts_in: number of data points for which the extrapolated data overlap
+        :param npts_in: number of data points for which the
+            extrapolated data overlap
         :param q_end: is the maximum value to uses for extrapolated data
         :param npts: the number of points in the extrapolated distribution
         """
@@ -688,7 +715,8 @@ class InvariantCalculator(object):
         if q_start >= q_end:
             return numpy.zeros(0), numpy.zeros(0)
         
-        return self._get_extrapolated_data(model=self._high_extrapolation_function,
+        return self._get_extrapolated_data(\
+                                model=self._high_extrapolation_function,
                                            npts=npts,
                                            q_start=q_start, q_end=q_end)
      
@@ -698,8 +726,10 @@ class InvariantCalculator(object):
         Note that this does not turn extrapolation on or off.
         
         :param range: a keyword set the type of extrapolation . type string
-        :param npts: the numbers of q points of data to consider for extrapolation
-        :param function: a keyword to select the function to use for extrapolation.
+        :param npts: the numbers of q points of data to consider
+            for extrapolation
+        :param function: a keyword to select the function to use
+            for extrapolation.
             of type string.
         :param power: an power to apply power_low function
                 
@@ -709,11 +739,13 @@ class InvariantCalculator(object):
             raise ValueError, "Extrapolation range should be 'high' or 'low'"
         function = function.lower()
         if function not in ['power_law', 'guinier']:
-            raise ValueError, "Extrapolation function should be 'guinier' or 'power_law'"
+            msg = "Extrapolation function should be 'guinier' or 'power_law'"
+            raise ValueError, msg
         
         if range == 'high':
             if function != 'power_law':
-                raise ValueError, "Extrapolation only allows a power law at high Q"
+                msg = "Extrapolation only allows a power law at high Q"
+                raise ValueError, msg
             self._high_extrapolation_npts  = npts
             self._high_extrapolation_power = power
             self._high_extrapolation_power_fitted = power
@@ -734,8 +766,10 @@ class InvariantCalculator(object):
            
         :return q_star: invariant of the data within data's q range
         
-        :warning: When using setting data to Data1D , the user is responsible of
-            checking that the scale and the background are properly apply to the data
+        :warning: When using setting data to Data1D ,
+            the user is responsible of
+            checking that the scale and the background are
+            properly apply to the data
         
         """
         self._qstar = self._get_qstar(self._data)
@@ -783,7 +817,8 @@ class InvariantCalculator(object):
         """
         # Compute the volume
         volume = self.get_volume_fraction(contrast, extrapolation)
-        return 2 * math.pi * volume *(1 - volume) * float(porod_const)/self._qstar
+        return 2 * math.pi * volume *(1 - volume) * \
+            float(porod_const)/self._qstar
         
     def get_volume_fraction(self, contrast, extrapolation=None):
         """
@@ -817,7 +852,8 @@ class InvariantCalculator(object):
         self.get_qstar(extrapolation)
         
         if self._qstar <= 0:
-            raise RuntimeError, "Invalid invariant: Invariant Q* must be greater than zero"
+            msg = "Invalid invariant: Invariant Q* must be greater than zero"
+            raise RuntimeError, msg
         
         # Compute intermediate constant
         k =  1.e-8 * self._qstar/(2 * (math.pi * math.fabs(float(contrast)))**2)
@@ -826,7 +862,8 @@ class InvariantCalculator(object):
         
         # Compute volume fraction
         if discrim < 0:
-            raise RuntimeError, "Could not compute the volume fraction: negative discriminant"
+            msg = "Could not compute the volume fraction: negative discriminant"
+            raise RuntimeError, msg
         elif discrim == 0:
             return 1/2
         else:
@@ -837,7 +874,8 @@ class InvariantCalculator(object):
                 return volume1
             elif 0 <= volume2 and volume2 <= 1: 
                 return volume2 
-            raise RuntimeError, "Could not compute the volume fraction: inconsistent results"
+            msg = "Could not compute the volume fraction: inconsistent results"
+            raise RuntimeError, msg
     
     def get_qstar_with_error(self, extrapolation=None):
         """
@@ -881,7 +919,8 @@ class InvariantCalculator(object):
         if (value) <= 0:
             uncertainty = -1
         # Compute uncertainty
-        uncertainty = math.fabs((0.5 * 4 * k * self._qstar_err)/(2 * math.sqrt(1 - k * self._qstar)))
+        uncertainty = math.fabs((0.5 * 4 * k * \
+                        self._qstar_err)/(2 * math.sqrt(1 - k * self._qstar)))
         
         return volume, uncertainty
     
