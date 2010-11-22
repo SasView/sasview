@@ -1,9 +1,9 @@
 
 import wx
 import sys
-
 import numpy
-from sans.guiframe.utils import format_number, check_float
+from sans.guiframe.utils import format_number
+from sans.guiframe.utils import check_float
 from invariant_widgets import OutputTextCtrl
 # Dimensions related to chart
 RECTANGLE_WIDTH  = 400.0  
@@ -15,7 +15,7 @@ _BOX_WIDTH = 76
 RECTANGLE_SCALE  = 0.0001
 DEFAULT_QSTAR = 1.0  
   
-if sys.platform.count("win32")>0:
+if sys.platform.count("win32") > 0:
     _STATICBOX_WIDTH = 450
     PANEL_WIDTH = 500
     PANEL_HEIGHT = 430
@@ -27,7 +27,6 @@ else:
     FONT_VARIANT = 1
     
   
-    
 class InvariantContainer(wx.Object):
     """
     This class stores some values resulting resulting from invariant
@@ -83,7 +82,8 @@ class InvariantContainer(wx.Object):
             self.qstar_low_percent = None
         else:
             try:
-                self.qstar_low_percent = float(self.qstar_low)/float(self.qstar_total)
+                self.qstar_low_percent = float(self.qstar_low)\
+                                            /float(self.qstar_total)
             except:
                 self.qstar_low_percent = 'error'
         #compute high q invariant percentage
@@ -91,7 +91,8 @@ class InvariantContainer(wx.Object):
             self.qstar_high_percent = None
         else:
             try:
-                self.qstar_high_percent = float(self.qstar_high)/float(self.qstar_total)
+                self.qstar_high_percent = float(self.qstar_high)\
+                                                /float(self.qstar_total)
             except:
                 self.qstar_high_percent = 'error'
         self.check_values()
@@ -104,10 +105,11 @@ class InvariantContainer(wx.Object):
             self.warning_msg = "Invariant not calculated.\n"
             return 
         if self.qstar_total == 0:
-             self.existing_warning = True
-             self.warning_msg = "Invariant is zero. \n"
-             self.warning_msg += "The calculations are likely to be unreliable!\n"
-             return 
+            self.existing_warning = True
+            self.warning_msg = "Invariant is zero. \n"
+            self.warning_msg += "The calculations are likely "
+            self.warning_msg += "to be unreliable!\n"
+            return 
         #warning to the user when the extrapolated invariant is greater than %5
         msg = ''
         if self.qstar_percent == 'error':
@@ -116,15 +118,19 @@ class InvariantContainer(wx.Object):
       
         if self.qstar_low_percent == 'error':
             self.existing_warning = True
-            msg = 'Error occurred when computing extrapolated invariant at low-Q region.\n'
-        elif self.qstar_low_percent is not None and self.qstar_low_percent >= 0.05:
+            msg = "Error occurred when computing extrapolated invariant"
+            msg += " at low-Q region.\n"
+        elif self.qstar_low_percent is not None and \
+             self.qstar_low_percent >= 0.05:
             self.existing_warning = True
             msg += "Extrapolated contribution at Low Q is higher "
             msg += "than 5% of the invariant.\n"
         if self.qstar_high_percent == 'error':
             self.existing_warning = True
-            msg += 'Error occurred when computing extrapolated invariant at high-Q region.\n'
-        elif self.qstar_high_percent is not None and self.qstar_high_percent >= 0.05:
+            msg += 'Error occurred when computing extrapolated'
+            msg += ' invariant at high-Q region.\n'
+        elif self.qstar_high_percent is not None and \
+            self.qstar_high_percent >= 0.05:
             self.existing_warning = True
             msg += "Extrapolated contribution at High Q is higher "
             msg += "than 5% of the invariant.\n"
@@ -138,7 +144,8 @@ class InvariantContainer(wx.Object):
         if self.existing_warning:
             self.warning_msg = ''
             self.warning_msg += msg 
-            self.warning_msg += "The calculations are likely to be unreliable!\n"
+            self.warning_msg += "The calculations are likely to be"
+            self.warning_msg += " unreliable!\n"
         else:
             self.warning_msg = "No Details on calculations available...\n"
             
@@ -149,7 +156,7 @@ class InvariantDetailsPanel(wx.Dialog):
     def __init__(self, parent=None, id=-1, qstar_container=None, 
                                     title="Invariant Details",
                                     size=(PANEL_WIDTH, PANEL_HEIGHT)):
-        wx.Dialog.__init__(self, parent=parent, id=id,title=title,size=size)
+        wx.Dialog.__init__(self, parent=parent, id=id, title=title, size=size)
         
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
@@ -183,23 +190,24 @@ class InvariantDetailsPanel(wx.Dialog):
         """
         Define main sizers needed for this panel
         """
-        #Box sizers must be defined first before defining buttons/textctrls (MAC).
+        #Box sizers must be defined first before defining buttons/textctrls
+        # (MAC).
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         #Sizer related to chart
         chart_box = wx.StaticBox(self, -1, "Invariant Chart")
         self.chart_sizer = wx.StaticBoxSizer(chart_box, wx.VERTICAL)
-        self.chart_sizer.SetMinSize((PANEL_WIDTH - 50,110))
+        self.chart_sizer.SetMinSize((PANEL_WIDTH - 50, 110))
         #Sizer related to invariant values
         self.invariant_sizer =  wx.GridBagSizer(4, 4)
         invariant_box = wx.StaticBox(self, -1, "Numerical Values")
         self.invariant_box_sizer = wx.StaticBoxSizer(invariant_box,
                                                       wx.HORIZONTAL)
 
-        self.invariant_box_sizer.SetMinSize((PANEL_WIDTH - 50,-1))
+        self.invariant_box_sizer.SetMinSize((PANEL_WIDTH - 50, -1))
         #Sizer related to warning message
         warning_box = wx.StaticBox(self, -1, "Warning")
         self.warning_sizer = wx.StaticBoxSizer(warning_box, wx.VERTICAL)
-        self.warning_sizer.SetMinSize((PANEL_WIDTH-50,-1))
+        self.warning_sizer.SetMinSize((PANEL_WIDTH-50, -1))
         #Sizer related to button
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
       
@@ -220,83 +228,98 @@ class InvariantDetailsPanel(wx.Dialog):
      
         invariant_txt = wx.StaticText(self, -1, 'Q* from Data ')
         invariant_txt.SetToolTipString("Invariant in the data set's Q range.")
-        self.invariant_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_tcl.SetToolTipString("Invariant in the data set's Q range.")
-        self.invariant_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_err_tcl.SetToolTipString("Uncertainty on the invariant from data's range.")
+        self.invariant_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH, -1))
+        hint_msg = "Invariant in the data set's Q range."
+        self.invariant_tcl.SetToolTipString(hint_msg)
+        self.invariant_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH, -1))
+        hint_msg = "Uncertainty on the invariant from data's range."
+        self.invariant_err_tcl.SetToolTipString(hint_msg)
         invariant_units_txt = wx.StaticText(self, -1, unit_invariant)
-        invariant_units_txt.SetToolTipString("Unit of the invariant from data's Q range")
+        hint_msg = "Unit of the invariant from data's Q range"
+        invariant_units_txt.SetToolTipString(hint_msg)
        
         invariant_low_txt = wx.StaticText(self, -1, 'Q* from Low-Q')
-        invariant_low_txt.SetToolTipString("Extrapolated invariant from low-Q range.")
-        self.invariant_low_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_low_tcl.SetToolTipString("Extrapolated invariant from low-Q range.")
-        self.invariant_low_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_low_err_tcl.SetToolTipString("Uncertainty on the invariant from low-Q range.")
-        invariant_low_units_txt = wx.StaticText(self, -1,  unit_invariant)
-        invariant_low_units_txt.SetToolTipString("Unit of the extrapolated invariant from  low-Q range")
+        hint_msg = "Extrapolated invariant from low-Q range."
+        invariant_low_txt.SetToolTipString(hint_msg)
+        self.invariant_low_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH, -1))
+        hint_msg = "Extrapolated invariant from low-Q range."
+        self.invariant_low_tcl.SetToolTipString(hint_msg)
+        self.invariant_low_err_tcl = OutputTextCtrl(self, -1,
+                                                    size=(_BOX_WIDTH, -1))
+        hint_msg = "Uncertainty on the invariant from low-Q range."
+        self.invariant_low_err_tcl.SetToolTipString(hint_msg)
+        invariant_low_units_txt = wx.StaticText(self, -1, unit_invariant)
+        hint_msg = "Unit of the extrapolated invariant from  low-Q range"
+        invariant_low_units_txt.SetToolTipString(hint_msg)
         
         invariant_high_txt = wx.StaticText(self, -1, 'Q* from High-Q')
-        invariant_high_txt.SetToolTipString("Extrapolated invariant from  high-Q range")
-        self.invariant_high_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_high_tcl.SetToolTipString("Extrapolated invariant from  high-Q range")
-        self.invariant_high_err_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH,-1))
-        self.invariant_high_err_tcl.SetToolTipString("Uncertainty on the invariant from high-Q range.")
-        invariant_high_units_txt = wx.StaticText(self, -1,  unit_invariant)
-        invariant_high_units_txt.SetToolTipString("Unit of the extrapolated invariant from  high-Q range")
+        hint_msg = "Extrapolated invariant from  high-Q range"
+        invariant_high_txt.SetToolTipString(hint_msg)
+        self.invariant_high_tcl = OutputTextCtrl(self, -1,
+                                                 size=(_BOX_WIDTH, -1))
+        hint_msg = "Extrapolated invariant from  high-Q range"
+        self.invariant_high_tcl.SetToolTipString(hint_msg)
+        self.invariant_high_err_tcl = OutputTextCtrl(self, -1,
+                                                     size=(_BOX_WIDTH, -1))
+        hint_msg = "Uncertainty on the invariant from high-Q range."
+        self.invariant_high_err_tcl.SetToolTipString()
+        invariant_high_units_txt = wx.StaticText(self, -1, unit_invariant)
+        hint_msg = "Unit of the extrapolated invariant from  high-Q range"
+        invariant_high_units_txt.SetToolTipString(hint_msg)
    
         #Invariant low
         iy = 0
         ix = 0 
-        self.invariant_sizer.Add(invariant_low_txt, (iy, ix), (1,1),
+        self.invariant_sizer.Add(invariant_low_txt, (iy, ix), (1, 1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.invariant_sizer.Add(self.invariant_low_tcl, (iy, ix), (1,1),
+        self.invariant_sizer.Add(self.invariant_low_tcl, (iy, ix), (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix += 1
         self.invariant_sizer.Add( wx.StaticText(self, -1, uncertainty),
-                         (iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+                         (iy, ix), (1, 1),wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix += 1
-        self.invariant_sizer.Add(self.invariant_low_err_tcl, (iy, ix), (1,1),
+        self.invariant_sizer.Add(self.invariant_low_err_tcl, (iy, ix), (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 1
         self.invariant_sizer.Add(invariant_low_units_txt
-                         ,(iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
+                         ,(iy, ix), (1, 1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
         #Invariant 
         iy += 1
         ix = 0 
-        self.invariant_sizer.Add(invariant_txt, (iy, ix), (1,1),
+        self.invariant_sizer.Add(invariant_txt, (iy, ix), (1, 1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.invariant_sizer.Add(self.invariant_tcl, (iy, ix), (1,1),
+        self.invariant_sizer.Add(self.invariant_tcl, (iy, ix), (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix += 1
         self.invariant_sizer.Add(wx.StaticText(self, -1, uncertainty),
-                         (iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+                         (iy, ix), (1, 1),wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix += 1
-        self.invariant_sizer.Add(self.invariant_err_tcl, (iy, ix), (1,1),
+        self.invariant_sizer.Add(self.invariant_err_tcl, (iy, ix), (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix +=1
         self.invariant_sizer.Add(invariant_units_txt
-                         ,(iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
+                         ,(iy, ix), (1, 1),wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
         #Invariant high
         iy += 1
         ix = 0 
-        self.invariant_sizer.Add(invariant_high_txt, (iy, ix), (1,1),
+        self.invariant_sizer.Add(invariant_high_txt, (iy, ix), (1, 1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.invariant_sizer.Add(self.invariant_high_tcl, (iy, ix), (1,1),
+        self.invariant_sizer.Add(self.invariant_high_tcl, (iy, ix), (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix += 1
         self.invariant_sizer.Add(wx.StaticText(self, -1, uncertainty),
-                         (iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+                         (iy, ix), (1, 1),wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix += 1
-        self.invariant_sizer.Add(self.invariant_high_err_tcl, (iy, ix), (1,1),
+        self.invariant_sizer.Add(self.invariant_high_err_tcl, (iy, ix), (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix += 1
         self.invariant_sizer.Add(invariant_high_units_txt
-                         ,(iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        self.invariant_box_sizer.Add(self.invariant_sizer, 0, wx.TOP|wx.BOTTOM, 10)  
+                         ,(iy, ix), (1, 1),wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        self.invariant_box_sizer.Add(self.invariant_sizer, 0,
+                                     wx.TOP|wx.BOTTOM, 10)  
        
     def _layout_warning(self):
         """
@@ -318,7 +341,7 @@ class InvariantDetailsPanel(wx.Dialog):
         button_ok = wx.Button(self, id, "Ok")
         button_ok.SetToolTipString("Give Details on Computation")
         self.Bind(wx.EVT_BUTTON, self.on_close, id=id)
-        self.button_sizer.AddMany([((20,20), 0 , wx.LEFT, 350),
+        self.button_sizer.AddMany([((20, 20), 0 , wx.LEFT, 350),
                                    (button_ok, 0 , wx.RIGHT, 10)])
     def _do_layout(self):
         """
@@ -340,12 +363,18 @@ class InvariantDetailsPanel(wx.Dialog):
         """
         Set value of txtcrtl
         """
-        self.invariant_tcl.SetValue(format_number(self.qstar_container.qstar))
-        self.invariant_err_tcl.SetValue(format_number(self.qstar_container.qstar_err)) 
-        self.invariant_low_tcl.SetValue(format_number(self.qstar_container.qstar_low))
-        self.invariant_low_err_tcl.SetValue(format_number(self.qstar_container.qstar_low_err)) 
-        self.invariant_high_tcl.SetValue(format_number(self.qstar_container.qstar_high))
-        self.invariant_high_err_tcl.SetValue(format_number(self.qstar_container.qstar_high_err)) 
+        value = format_number(self.qstar_container.qstar)
+        self.invariant_tcl.SetValue(value)
+        value = format_number(self.qstar_container.qstar_err)
+        self.invariant_err_tcl.SetValue(value) 
+        value = format_number(self.qstar_container.qstar_low)
+        self.invariant_low_tcl.SetValue(value)
+        value = format_number(self.qstar_container.qstar_low_err)
+        self.invariant_low_err_tcl.SetValue(value) 
+        value = format_number(self.qstar_container.qstar_high)
+        self.invariant_high_tcl.SetValue(value)
+        value = format_number(self.qstar_container.qstar_high_err)
+        self.invariant_high_err_tcl.SetValue(value) 
 
     def get_scale(self, percentage, scale_name='scale'):
         """
@@ -360,7 +389,8 @@ class InvariantDetailsPanel(wx.Dialog):
         except:
             scale = RECTANGLE_SCALE
             self.warning_msg += "Receive an invalid scale for %s\n"
-            self.warning_msg += "check this value : %s\n"%(str(scale_name),str(percentage))
+            self.warning_msg += "check this value : %s\n"%(str(scale_name),
+                                                           str(percentage))
         return  scale
     
     def set_color_bar(self):
@@ -387,8 +417,9 @@ class InvariantDetailsPanel(wx.Dialog):
         try:
             gc = wx.GraphicsContext.Create(dc)
         except NotImplementedError:
-            dc.DrawText("This build of wxPython does not support the wx.GraphicsContext "
-                        "family of classes.", 25, 25)
+            msg = "This build of wxPython does not support "
+            msg += "the wx.GraphicsContext family of classes."
+            dc.DrawText(msg, 25, 25)
             return
         #Start the drawing
         font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)

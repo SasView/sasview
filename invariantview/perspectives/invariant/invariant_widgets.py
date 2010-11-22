@@ -13,9 +13,9 @@
 
 
 import wx
-import os
-from invariant_state import InvariantState as IState
-import copy
+#import os
+#from invariant_state import InvariantState as IState
+#import copy
 
 class InvTextCtrl(wx.TextCtrl):
     """
@@ -24,7 +24,8 @@ class InvTextCtrl(wx.TextCtrl):
     """
     def __init__(self, *args, **kwds):
         wx.TextCtrl.__init__(self, *args, **kwds)
-        ## Set to True when the mouse is clicked while the whole string is selected
+        ## Set to True when the mouse is clicked while 
+        #the whole string is selected
         self.full_selection = False
         ## Call back for EVT_SET_FOCUS events
         _on_set_focus_callback = None
@@ -59,11 +60,10 @@ class InvTextCtrl(wx.TextCtrl):
                 # Check whether text has been selected, 
                 # if not, select the whole string
                 (start, end) = control.GetSelection()
-                if start==end:
-                    control.SetSelection(-1,-1)
+                if start == end:
+                    control.SetSelection(-1, -1)
            
 
-    
 class OutputTextCtrl(wx.TextCtrl):
     """
     Text control used to display outputs.

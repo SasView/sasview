@@ -23,10 +23,10 @@ def get_data_path(media):
         path, _ = os.path.split(path)
         media_path = os.path.join(path, media)
         if os.path.isdir(media_path):
-             module_media_path = os.path.join(media_path,'invariant_media')
-             if os.path.isdir(module_media_path):
-                 return module_media_path
-             return media_path
+            module_media_path = os.path.join(media_path, 'invariant_media')
+            if os.path.isdir(module_media_path):
+                return module_media_path
+            return media_path
    
     raise RuntimeError('Could not find invariant media files')
 
@@ -38,7 +38,7 @@ def data_files():
     used directly in setup(...,data_files=...) for setup.py.
 
     """
-    data_files =[]
+    data_files = []
     path = get_data_path(media="media")
     for f in findall(path):
         data_files.append(('media/invariant_media', [f]))

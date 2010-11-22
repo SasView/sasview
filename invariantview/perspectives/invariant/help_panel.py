@@ -18,7 +18,7 @@ class HelpDialog(wx.Dialog):
 
         explanation = help()
            
-        label_explain = wx.StaticText(self, -1, explanation, size=(350,320))
+        label_explain = wx.StaticText(self, -1, explanation, size=(350, 320))
             
         vbox.Add(label_explain, 0, wx.ALL|wx.EXPAND, 15)
 
@@ -50,7 +50,7 @@ class HelpWindow(wx.Frame):
       
         splitter = MultiSplitterWindow(self, style=wx.SP_LIVE_UPDATE)
         rpanel = wx.Panel(splitter, -1)
-        lpanel = wx.Panel(splitter, -1,style=wx.BORDER_SUNKEN)
+        lpanel = wx.Panel(splitter, -1, style=wx.BORDER_SUNKEN)
         
         vbox = wx.BoxSizer(wx.VERTICAL)
         header = wx.Panel(rpanel, -1)
@@ -65,7 +65,7 @@ class HelpWindow(wx.Frame):
         header.SetSizer(hbox)
         vbox.Add(header, 0, wx.EXPAND)
        
-        vboxl= wx.BoxSizer(wx.VERTICAL)
+        vboxl = wx.BoxSizer(wx.VERTICAL)
         headerl = wx.Panel(lpanel, -1, size=(-1, 20))
        
         headerl.SetBackgroundColour('#6666FF')
@@ -80,31 +80,31 @@ class HelpWindow(wx.Frame):
         vboxl.Add(headerl, 0, wx.EXPAND)
         self.lhelp = html.HtmlWindow(lpanel, -1, style=wx.NO_BORDER)
         self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER, 
-                                     size=(500,-1))
+                                     size=(500, -1))
         import sans.perspectives.invariant as invariant
         path = invariant.get_data_path(media='media')
-        self.path= os.path.join(path,"invariant_help.html")
+        self.path = os.path.join(path,"invariant_help.html")
      
         self.rhelp.LoadPage(self.path)
-        page="""<html>
+        page = """<html>
             <body>
             <ul>
             <li><a href =%s target ="showframe">Invariant</a><br></li>
             </ul>
             </body>
-            </html>"""%self.path
+            </html>""" % self.path
         
         self.lhelp.SetPage(page)
-        self.lhelp.Bind(wx.html.EVT_HTML_LINK_CLICKED,self.OnLinkClicked )
+        self.lhelp.Bind(wx.html.EVT_HTML_LINK_CLICKED, self.OnLinkClicked)
         
-        vbox.Add(self.rhelp,1, wx.EXPAND)
+        vbox.Add(self.rhelp, 1, wx.EXPAND)
         vboxl.Add(self.lhelp, 1, wx.EXPAND)
         rpanel.SetSizer(vbox)
         lpanel.SetSizer(vboxl)
         lpanel.SetFocus()
         
         vbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        vbox1.Add(splitter,1,wx.EXPAND)
+        vbox1.Add(splitter, 1, wx.EXPAND)
         splitter.AppendWindow(lpanel, 200)
         splitter.AppendWindow(rpanel)
         self.SetSizer(vbox1)
@@ -120,7 +120,11 @@ class HelpWindow(wx.Frame):
         self.rhelp.LoadPage(self.path)
 
 class ViewApp(wx.App):
+    """
+    """
     def OnInit(self):
+        """
+        """
         frame = HelpWindow(None, -1, 'HelpWindow')    
         frame.Show(True)
         self.SetTopWindow(frame)

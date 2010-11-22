@@ -10,13 +10,15 @@
 ################################################################################
 
 """
-Dialog report panel to show and summarize the results of the invariant calculation.
+Dialog report panel to show and summarize the results of 
+the invariant calculation.
 """
 import wx
-import sys,os
+import sys
+import os
 import wx.html as html
 
-if sys.platform.count("win32")>0:
+if sys.platform.count("win32") > 0:
     _STATICBOX_WIDTH = 450
     PANEL_WIDTH = 500 
     PANEL_HEIGHT = 700
@@ -38,7 +40,8 @@ class ReportDialog(wx.Dialog):
         """
         Initialization. The parameters added to Dialog are:
         
-        :param list: report_list (list of html_str, text_str, image) from invariant_state
+        :param list: report_list (list of html_str, text_str, image)
+        from invariant_state
         """
         kwds["style"] = wx.RESIZE_BORDER|wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self, *args, **kwds)
@@ -50,9 +53,9 @@ class ReportDialog(wx.Dialog):
         # font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         # report string
-        self.report_list =list
+        self.report_list = list
         # put image path in the report string
-        self.report_html = self.report_list[0]% "memory:img_inv.png"
+        self.report_html = self.report_list[0] % "memory:img_inv.png"
         # layout
         self._setup_layout()
         
@@ -73,13 +76,15 @@ class ReportDialog(wx.Dialog):
         id = wx.NewId()
         button_preview = wx.Button(self, id, "Preview")
         button_preview.SetToolTipString("Print preview this report.")
-        button_preview.Bind(wx.EVT_BUTTON, self.onPreview, id = button_preview.GetId()) 
+        button_preview.Bind(wx.EVT_BUTTON, self.onPreview,
+                            id=button_preview.GetId()) 
         hbox.Add(button_preview)
 
         id = wx.NewId()
         button_print = wx.Button(self, id, "Print")
         button_print.SetToolTipString("Print this report.")
-        button_print.Bind(wx.EVT_BUTTON, self.onPrint, id = button_print.GetId()) 
+        button_print.Bind(wx.EVT_BUTTON, self.onPrint,
+                          id=button_print.GetId()) 
         hbox.Add(button_print)
         
         id = wx.NewId()
@@ -90,34 +95,34 @@ class ReportDialog(wx.Dialog):
         
         # panel for report page
         panel = wx.Panel(self, -1)
-        vbox= wx.BoxSizer(wx.VERTICAL)
+        vbox = wx.BoxSizer(wx.VERTICAL)
         # html window
         self.hwindow = html.HtmlWindow(panel,style=wx.BORDER,size=(700,500))
         # set the html page with the report string
         self.hwindow.SetPage(self.report_html)
         
         # add panels to boxsizers
-        vbox.Add(hbox,30)
-        vbox.Add(panel,500, wx.EXPAND|wx.ALL)
+        vbox.Add(hbox, 30)
+        vbox.Add(panel, 500, wx.EXPAND|wx.ALL)
 
         self.SetSizerAndFit(vbox)
         self.Centre()
         self.Show(True)
 
-    def onSave(self,event=None):
+    def onSave(self, event=None):
         """
         Save
         """
         #todo: complete saving fig file and as a txt file
-        dlg = wx.FileDialog(self, "Choose a file",\
-                            wildcard ='HTML files (*.html)|*.html|'+
+        dlg = wx.FileDialog(self, "Choose a file",
+                            wildcard='HTML files (*.html)|*.html|'+
                             'Text files (*.txt)|*.txt',
-                            style = wx.SAVE|wx.OVERWRITE_PROMPT|wx.CHANGE_DIR)
+                            style=wx.SAVE|wx.OVERWRITE_PROMPT|wx.CHANGE_DIR)
         dlg.SetFilterIndex(0) #Set .html files to be default
 
         if dlg.ShowModal() != wx.ID_OK:
-          dlg.Destroy()
-          return
+            dlg.Destroy()
+            return
         
         fName = dlg.GetPath()
         ext_num = dlg.GetFilterIndex()     
@@ -125,12 +130,13 @@ class ReportDialog(wx.Dialog):
         #set file extensions  
         if ext_num == 0:
             ext = '.html'
-            img_ext= '_img4html.png'
+            img_ext = '_img4html.png'
             report_frame = self.report_list[0]
         elif ext_num == 1:
             ext = '.txt'   
-            # changing the image extension actually changes the image format on saving
-            img_ext= '_img4txt.pdf'
+            # changing the image extension actually changes the image
+            # format on saving
+            img_ext = '_img4txt.pdf'
             report = self.report_list[1]
         else:
             return
@@ -141,7 +147,8 @@ class ReportDialog(wx.Dialog):
         #pic (png) file path/name
         pic_fname = os.path.splitext(fName)[0] + img_ext
         #put the image path in html string
-        if ext_num == 0: report = report_frame % pic_fname
+        if ext_num == 0:
+            report = report_frame % pic_fname
         f = open(fName, 'w')
         f.write(report)
         f.close()
@@ -149,24 +156,27 @@ class ReportDialog(wx.Dialog):
         self.report_list[2].savefig(pic_fname)
         
             
-    def onPreview(self,event=None):
+    def onPreview(self, event=None):
         """
         Preview
         
         : event: Preview button event
         """
-        previewh=html.HtmlEasyPrinting(name="Printing", parentWindow=self)
+        previewh = html.HtmlEasyPrinting(name="Printing", parentWindow=self)
         previewh.PreviewText(self.report_html)
+        if event is not None:
+            event.Skip()
     
-    def onPrint(self,event=None):
+    def onPrint(self, event=None):
         """
         Print
         
         : event: Print button event
         """
-        printh=html.HtmlEasyPrinting(name="Printing", parentWindow=self)
+        printh = html.HtmlEasyPrinting(name="Printing", parentWindow=self)
         printh.PrintText(self.report_html)
-
+        if event is not None:
+            event.Skip()
 
     def OnClose(self,event=None):
         """
@@ -174,7 +184,6 @@ class ReportDialog(wx.Dialog):
         
         : event: Close button event
         """
-        
         self.Close()
     
     def HTML2PDF(self, data, filename):
@@ -187,8 +196,9 @@ class ReportDialog(wx.Dialog):
         import ho.pisa as pisa
         f = file(filename, "wb")
         # pisa requires some extra packages, see their web-site
-        pdf = pisa.CreatePDF(data,f)
-        # close the file here otherwise it will be open until quitting the application.
+        pdf = pisa.CreatePDF(data, f)
+        # close the file here otherwise it will be open until quitting
+        #the application.
         f.close()
 
         return not pdf.err

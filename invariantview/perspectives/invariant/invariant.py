@@ -10,17 +10,19 @@
 #
 #copyright 2009, University of Tennessee
 ################################################################################
-import os
+#import os
 import sys
 import wx
 import copy
-import logging, time
-from sans.invariant import invariant
+import logging
+#import time
+#from sans.invariant import invariant
 
 from DataLoader.data_info import Data1D as LoaderData1D
-from sans.guiframe.dataFitting import Theory1D, Data1D
+from sans.guiframe.dataFitting import Theory1D
+from sans.guiframe.dataFitting import Data1D
 
-from sans.guicomm.events import NewPlotEvent, StatusEvent
+from sans.guicomm.events import NewPlotEvent
 from sans.guicomm.events import ERR_DATA
 from invariant_state import Reader as reader
 from DataLoader.loader import Loader
@@ -141,16 +143,19 @@ class Plugin:
         """
         self.graph = graph
         invariant_option = "Compute invariant"
-        invariant_hint = "Will displays the invariant panel for futher computation"
+        invariant_hint = "Will displays the invariant panel for"
+        invairant_hint += " futher computation"
        
         for item in self.graph.plottables:
             if item.name == graph.selected_plottable :
                 if issubclass(item.__class__,LoaderData1D):
            
-                    if item.name !="$I_{obs}(q)$" and item.name !="$P_{fit}(r)$":
+                    if item.name != "$I_{obs}(q)$" and \
+                        item.name != " $P_{fit}(r)$":
                         if hasattr(item, "group_id"):
                             return [[invariant_option, 
-                                        invariant_hint, self._compute_invariant]]
+                                        invariant_hint, 
+                                        self._compute_invariant]]
         return []   
 
     
@@ -219,12 +224,12 @@ class Plugin:
         Open the invariant panel to invariant computation
         """
         self.panel = event.GetEventObject()
-        Plugin.on_perspective(self,event=event)
+        Plugin.on_perspective(self, event=event)
         for plottable in self.panel.graph.plottables:
             if plottable.name == self.panel.graph.selected_plottable:
-                ## put the errors values back to the model if the errors were hiden
-                ## before sending them to the fit engine
-                if len(self.err_dy)>0:
+                ## put the errors values back to the model if the errors 
+                ## were hiden before sending them to the fit engine
+                if len(self.err_dy) > 0:
                     dy = plottable.dy
                     if plottable.name in  self.err_dy.iterkeys():
                         dy = self.err_dy[plottable.name]
@@ -259,7 +264,9 @@ class Plugin:
         if issubclass(current_plottable.__class__, LoaderData1D):
             self.state_reader.write(filepath, current_plottable, state)
         else:
-            raise RuntimeError, "invariant.save_file: the data being saved is not a DataLoader.data_info.Data1D object" 
+            msg = "invariant.save_file: the data being saved is"
+            msg += " not a DataLoader.data_info.Data1D object" 
+            raise RuntimeError, msg
 
     def set_state(self, state, datainfo=None):    
         """
@@ -272,11 +279,14 @@ class Plugin:
         try:
             
             if datainfo is None:
-                raise RuntimeError, "invariant.set_state: datainfo parameter cannot be None in standalone mode"
+                msg = "invariant.set_state: datainfo parameter cannot"
+                msg += " be None in standalone mode"
+                raise RuntimeError, msg
             
-            datainfo.meta_data['invstate'].file = datainfo.meta_data['invstate'].file
-            datainfo.name = datainfo.meta_data['invstate'].file
-            datainfo.filename = datainfo.meta_data['invstate'].file
+            name = datainfo.meta_data['invstate'].file
+            datainfo.meta_data['invstate'].file = name
+            datainfo.name = name
+            datainfo.filename = name
             self.__data = datainfo
             self.__data.group_id = datainfo.filename
             self.__data.id = datainfo.filename
@@ -299,7 +309,8 @@ class Plugin:
         Set the state when called by EVT_STATE_UPDATE event from guiframe
         after a .inv/.svs file is loaded 
         """
-        self.invariant_panel.set_state(state=self.temp_state,data=self.__data)
+        self.invariant_panel.set_state(state=self.temp_state,
+                                       data=self.__data)
         self.temp_state = None
         
         
@@ -311,11 +322,11 @@ class Plugin:
         :param data: extrapolated data to be plotted
         :param name: Data's name to use for the legend
         """
-        import copy
+        #import copy
         if data is None:
             new_plot = Theory1D(x=[], y=[], dy=None)
         else:
-            scale =self.invariant_panel.get_scale()
+            scale = self.invariant_panel.get_scale()
             background = self.invariant_panel.get_background()
             
             if scale != 0:
@@ -334,12 +345,13 @@ class Plugin:
         # Save theory_data in a state
         if data != None:
             name_head = name.split('-')
-            if name_head[0]=='Low':
+            if name_head[0] == 'Low':
                 self.invariant_panel.state.theory_lowQ = copy.deepcopy(new_plot)
-            elif name_head[0]=='High':
+            elif name_head[0] == 'High':
                 self.invariant_panel.state.theory_highQ = copy.deepcopy(new_plot)
 
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=self.__data.name))
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
+                                               title=self.__data.name))
         
     def plot_data(self, scale, background):
         """
@@ -353,5 +365,6 @@ class Plugin:
         # Save data in a state: but seems to never happen 
         if new_plot != None:
             self.invariant_panel.state.data = copy.deepcopy(new_plot)
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=new_plot.name))
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
+                                               title=new_plot.name))
         
