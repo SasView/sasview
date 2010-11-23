@@ -37,19 +37,20 @@ class BasicPage(wx.ScrolledWindow):
     ## Title to appear on top of the window
     window_caption = "Basic page "
     
-    def __init__(self,parent, page_info):
+    def __init__(self, parent, page_info):
         """
         """
-        wx.ScrolledWindow.__init__(self, parent,style=wx.FULL_REPAINT_ON_RESIZE)
+        wx.ScrolledWindow.__init__(self, parent, 
+                                   style=wx.FULL_REPAINT_ON_RESIZE)
         #Set window's font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
        
         ## parent of the page
         self.parent = parent
         ## manager is the fitting plugin
-        self.manager= None
+        self.manager = None
         ## owner of the page (fitting plugin)
-        self.event_owner= None
+        self.event_owner = None
          ## current model
         self.model = None
         ## data
@@ -92,58 +93,61 @@ class BasicPage(wx.ScrolledWindow):
         ##list of model parameters. each item must have same length
         ## each item related to a given parameters
         ##[cb state, name, value, "+/-", error of fit, min, max , units]
-        self.parameters=[]
+        self.parameters = []
         # non-fittable parameter whose value is astring
         self.str_parameters = []
         ## list of parameters to fit , must be like self.parameters
-        self.param_toFit=[]
+        self.param_toFit = []
         ## list of looking like parameters but with non fittable parameters info
-        self.fixed_param=[]
+        self.fixed_param = []
         ## list of looking like parameters but with  fittable parameters info
-        self.fittable_param=[]
+        self.fittable_param = []
         ##list of dispersion parameters
-        self.disp_list=[]
-        self.disp_name=""
+        self.disp_list = []
+        self.disp_name = ""
         
         ## list of orientation parameters
-        self.orientation_params=[]
-        self.orientation_params_disp=[]
-        if self.model !=None:
-            self.disp_list= self.model.getDispParamList()
+        self.orientation_params = []
+        self.orientation_params_disp = []
+        if self.model != None:
+            self.disp_list = self.model.getDispParamList()
         
         ##enable model 2D draw
-        self.enable2D= False
+        self.enable2D = False
         ## check that the fit range is correct to plot the model again
-        self.fitrange= True
+        self.fitrange = True
         ## Create memento to save the current state
-        self.state= PageState(parent= self.parent,model=self.model, data=self.data)
+        self.state = PageState(parent=self.parent,
+                               model=self.model, data=self.data)
         ## flag to determine if state has change
-        self.state_change= False
+        self.state_change = False
         ## save customized array
-        self.values=[]
-        self.weights=[]
+        self.values = []
+        self.weights = []
         ## retrieve saved state
-        self.number_saved_state= 0
+        self.number_saved_state = 0
         ## dictionary of saved state
-        self.saved_states={} 
-        
+        self.saved_states = {} 
         ## Create context menu for page
         self.popUpMenu = wx.Menu()
         #id = wx.NewId()
-        #self._undo = wx.MenuItem(self.popUpMenu,id, "Undo","cancel the previous action")
+        #self._undo = wx.MenuItem(self.popUpMenu,id, "Undo",
+        #"cancel the previous action")
         #self.popUpMenu.AppendItem(self._undo)
         #self._undo.Enable(False)
         #wx.EVT_MENU(self, id, self.onUndo)
         
         #id = wx.NewId()
-        #self._redo = wx.MenuItem(self.popUpMenu,id,"Redo"," Restore the previous action")
+        #self._redo = wx.MenuItem(self.popUpMenu,id,"Redo",
+        #" Restore the previous action")
         #self.popUpMenu.AppendItem(self._redo)
         #self._redo.Enable(False)
         #wx.EVT_MENU(self, id, self.onRedo)       
         #self.popUpMenu.AppendSeparator()
         #if sys.platform.count("win32")>0:        
         id = wx.NewId()
-        self._keep = wx.MenuItem(self.popUpMenu,id,"BookMark"," Keep the panel status to recall it later")
+        self._keep = wx.MenuItem(self.popUpMenu,id,"BookMark",
+                                 " Keep the panel status to recall it later")
         self.popUpMenu.AppendItem(self._keep)
         self._keep.Enable(True)
         wx.EVT_MENU(self, id, self.on_bookmark)
@@ -180,12 +184,20 @@ class BasicPage(wx.ScrolledWindow):
         ## Call back for EVT_SET_FOCUS events
         _on_set_focus_callback = None
         
-        def __init__(self, parent, id=-1, value=wx.EmptyString, pos=wx.DefaultPosition, 
-                     size=wx.DefaultSize, style=0, validator=wx.DefaultValidator, name=wx.TextCtrlNameStr,
-                     kill_focus_callback = None, set_focus_callback  = None,
-                     mouse_up_callback   = None, text_enter_callback = None):
+        def __init__(self, parent, id=-1, 
+                     value=wx.EmptyString, 
+                     pos=wx.DefaultPosition, 
+                     size=wx.DefaultSize,
+                     style=0, 
+                     validator=wx.DefaultValidator,
+                     name=wx.TextCtrlNameStr,
+                     kill_focus_callback=None,
+                     set_focus_callback=None,
+                     mouse_up_callback=None,
+                     text_enter_callback = None):
              
-            wx.TextCtrl.__init__(self, parent, id, value, pos, size, style, validator, name)
+            wx.TextCtrl.__init__(self, parent, id, value, pos,
+                                  size, style, validator, name)
             
             # Bind appropriate events
             self._on_set_focus_callback = parent.onSetFocus \
@@ -381,13 +393,14 @@ class BasicPage(wx.ScrolledWindow):
         ## fill combox box
         if self.model_list_box is None:
             return
-        if len(self.model_list_box)>0:
-            self._populate_box( self.formfactorbox,self.model_list_box["Shapes"])
+        if len(self.model_list_box) > 0:
+            self._populate_box(self.formfactorbox,
+                               self.model_list_box["Shapes"])
        
-        if len(self.model_list_box)>0:
-            self._populate_box( self.structurebox,
+        if len(self.model_list_box) > 0:
+            self._populate_box(self.structurebox,
                                 self.model_list_box["Structure Factors"])
-            self.structurebox.Insert("None", 0,None)
+            self.structurebox.Insert("None", 0, None)
             self.structurebox.SetSelection(0)
             self.structurebox.Hide()
             self.text2.Hide()
@@ -409,12 +422,15 @@ class BasicPage(wx.ScrolledWindow):
         box_description= wx.StaticBox(self, -1,name)
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #----------------------------------------------------
-        self.disable_disp = wx.RadioButton(self, -1, 'Off', (10, 10), style=wx.RB_GROUP)
+        self.disable_disp = wx.RadioButton(self, -1, 'Off', (10, 10),
+                                            style=wx.RB_GROUP)
         self.enable_disp = wx.RadioButton(self, -1, 'On', (10, 30))
        
         
-        self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param, id=self.disable_disp.GetId())
-        self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param, id=self.enable_disp.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param,
+                     id=self.disable_disp.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param,
+                   id=self.enable_disp.GetId())
         #MAC needs SetValue
         self.disable_disp.SetValue(True)
         sizer_dispersion = wx.BoxSizer(wx.HORIZONTAL)
@@ -480,15 +496,18 @@ class BasicPage(wx.ScrolledWindow):
                 self._reset_dispersity()
                 ## Redraw the model ???
                 self._draw_model()
-        # Go through the list of dispersion check boxes to identify which one has changed 
+        # Go through the list of dispersion check boxes to identify
+        # which one has changed 
         for p in self.disp_cb_dict:
             self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
             # Catch which one of the box was just checked or unchecked.
             if event.GetEventObject() == self.disp_cb_dict[p]:              
                 if self.disp_cb_dict[p].GetValue() == True:
                     
-                    ##Temp. FIX for V1.0 regarding changing checkbox to radiobutton.
-                    ##This (self._reset_dispersity) should be removed when the array dispersion is fixed.                
+                    ##Temp. FIX for V1.0 regarding changing checkbox 
+                    #to radiobutton.
+                    ##This (self._reset_dispersity) should be removed 
+                    #when the array dispersion is fixed.                
                     self._reset_dispersity()
 
                     # The user wants this parameter to be averaged. 
@@ -508,44 +527,52 @@ class BasicPage(wx.ScrolledWindow):
                         self.values,self.weights = self.read_file(path)
                     except:
                         msg="Could not read input file"
-                        wx.PostEvent(self.parent.parent, StatusEvent(status= msg))
+                        wx.PostEvent(self.parent.parent, 
+                                     StatusEvent(status=msg))
                         return
                     
                     # If any of the two arrays is empty, notify the user that we won't
                     # proceed 
                     if self.values is None or self.weights is None or \
                          self.values ==[] or self.weights ==[]:
-                        wx.PostEvent(self.parent.parent, StatusEvent(status=\
-                            "The loaded %s distrubtion is corrupted or empty" % p))
+                        msg = "The loaded %s distrubtion is"
+                        msg + " corrupted or empty" % p
+                        wx.PostEvent(self.parent.parent, 
+                                     StatusEvent(status=msg))
                         return
                         
                     # Tell the user that we are about to apply the distribution
-                    wx.PostEvent(self.parent.parent, StatusEvent(status=\
-                            "Applying loaded %s distribution: %s" % (p, path)))  
+                    msg = "Applying loaded %s distribution: %s" % (p, path)
+                    wx.PostEvent(self.parent.parent, StatusEvent(status=msg))  
                     
                     # Create the dispersion objects
                     from sans.models.dispersion_models import ArrayDispersion
                     disp_model = ArrayDispersion()
                     disp_model.set_weights(self.values, self.weights)
                    
-                    # Store the object to make it persist outside the scope of this method
+                    # Store the object to make it persist outside the
+                    # scope of this method
                     #TODO: refactor model to clean this up?
                     self._disp_obj_dict[p] = disp_model
                     self.state._disp_obj_dict [p]= disp_model
-                    self.state.values=[]
-                    self.state.weights=[]
+                    self.state.values = []
+                    self.state.weights = []
                     self.state.values = copy.deepcopy(self.values)
                     self.state.weights = copy.deepcopy(self.weights)
-                    # Set the new model as the dispersion object for the selected parameter
+                    # Set the new model as the dispersion object for the 
+                    #selected parameter
                     self.model.set_dispersion(p, disp_model)
-                    # Store a reference to the weights in the model object so that
+                    # Store a reference to the weights in the model object 
+                    #so that
                     # it's not lost when we use the model within another thread.
                     #TODO: total hack - fix this
                     self.state.model= self.model.clone()
 
                     self.model._persistency_dict = {}
-                    self.model._persistency_dict[p] = [self.values, self.weights]
-                    self.state.model._persistency_dict[p] = [self.values, self.weights]
+                    self.model._persistency_dict[p] = \
+                                                    [self.values, self.weights]
+                    self.state.model._persistency_dict[p] = \
+                                                    [self.values,self.weights]
                 else:
                     self._reset_dispersity()
               
@@ -759,10 +786,13 @@ class BasicPage(wx.ScrolledWindow):
             
         self.state.smearer = copy.deepcopy(self.smearer)
         if hasattr(self,"enable_smearer"):
-            self.state.enable_smearer = copy.deepcopy(self.enable_smearer.GetValue())
-            self.state.disable_smearer = copy.deepcopy(self.disable_smearer.GetValue())
+            self.state.enable_smearer = \
+                                copy.deepcopy(self.enable_smearer.GetValue())
+            self.state.disable_smearer = \
+                                copy.deepcopy(self.disable_smearer.GetValue())
 
-        self.state.pinhole_smearer = copy.deepcopy(self.pinhole_smearer.GetValue())
+        self.state.pinhole_smearer = \
+                                copy.deepcopy(self.pinhole_smearer.GetValue())
         self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())  
                   
         if hasattr(self,"disp_box"):
@@ -804,7 +834,8 @@ class BasicPage(wx.ScrolledWindow):
                                      self.state.orientation_params_disp)
         
         self._copy_parameters_state(self.parameters, self.state.parameters)
-        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        self._copy_parameters_state(self.fittable_param,
+                                     self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
         #save chisqr
         self.state.tcChi = self.tcChi.GetValue()
@@ -844,30 +875,33 @@ class BasicPage(wx.ScrolledWindow):
             
         self.state.smearer = copy.deepcopy(self.smearer)
         if hasattr(self,"enable_smearer"):
-            self.state.enable_smearer = copy.deepcopy(self.enable_smearer.GetValue())
-            self.state.disable_smearer = copy.deepcopy(self.disable_smearer.GetValue())
+            self.state.enable_smearer = \
+                                copy.deepcopy(self.enable_smearer.GetValue())
+            self.state.disable_smearer = \
+                                copy.deepcopy(self.disable_smearer.GetValue())
             
-        self.state.pinhole_smearer = copy.deepcopy(self.pinhole_smearer.GetValue())
+        self.state.pinhole_smearer = \
+                                copy.deepcopy(self.pinhole_smearer.GetValue())
         self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())  
             
         if hasattr(self,"disp_box"):
             self.state.disp_box = self.disp_box.GetCurrentSelection()
 
-            if len(self.disp_cb_dict)>0:
-                for k , v in self.disp_cb_dict.iteritems():
+            if len(self.disp_cb_dict) > 0:
+                for k, v in self.disp_cb_dict.iteritems():
          
-                    if v ==None :
-                        self.state.disp_cb_dict[k]= v
+                    if v == None :
+                        self.state.disp_cb_dict[k] = v
                     else:
                         try:
-                            self.state.disp_cb_dict[k]=v.GetValue()
+                            self.state.disp_cb_dict[k] = v.GetValue()
                         except:
-                            self.state.disp_cb_dict[k]= None
+                            self.state.disp_cb_dict[k] = None
            
-            if len(self._disp_obj_dict)>0:
+            if len(self._disp_obj_dict) > 0:
                 for k , v in self._disp_obj_dict.iteritems():
       
-                    self.state._disp_obj_dict[k]= v
+                    self.state._disp_obj_dict[k] = v
                         
             
             self.state.values = copy.deepcopy(self.values)
@@ -882,7 +916,8 @@ class BasicPage(wx.ScrolledWindow):
         self._copy_parameters_state(self.orientation_params_disp,
                                      self.state.orientation_params_disp)
         self._copy_parameters_state(self.parameters, self.state.parameters)
-        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
+        self._copy_parameters_state(self.fittable_param,
+                                             self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
     
           
@@ -908,7 +943,7 @@ class BasicPage(wx.ScrolledWindow):
         :postcondition: the state of the underlying data change as well as the
             state of the graphic interface
         """
-        if state ==None:
+        if state == None:
             #self._undo.Enable(False)
             return 
     
@@ -960,38 +995,44 @@ class BasicPage(wx.ScrolledWindow):
             self.disp_box.SetSelection(state.disp_box) 
             n= self.disp_box.GetCurrentSelection()
             dispersity= self.disp_box.GetClientData(n)
-            name= dispersity.__name__     
+            name = dispersity.__name__     
 
             self._set_dipers_Param(event=None)
        
-            if name=="ArrayDispersion":
+            if name == "ArrayDispersion":
                 
                 for item in self.disp_cb_dict.keys():
                     
-                    if hasattr(self.disp_cb_dict[item],"SetValue") :
-                        self.disp_cb_dict[item].SetValue(state.disp_cb_dict[item])
+                    if hasattr(self.disp_cb_dict[item], "SetValue") :
+                        self.disp_cb_dict[item].SetValue(\
+                                                    state.disp_cb_dict[item])
                         # Create the dispersion objects
                         from sans.models.dispersion_models import ArrayDispersion
                         disp_model = ArrayDispersion()
-                        if hasattr(state,"values")and self.disp_cb_dict[item].GetValue()==True:
+                        if hasattr(state,"values")and\
+                                 self.disp_cb_dict[item].GetValue() == True:
                             if len(state.values)>0:
                                 self.values=state.values
                                 self.weights=state.weights
-                                disp_model.set_weights(self.values, state.weights)
+                                disp_model.set_weights(self.values,
+                                                        state.weights)
                             else:
                                 self._reset_dispersity()
                         
                         self._disp_obj_dict[item] = disp_model
-                        # Set the new model as the dispersion object for the selected parameter
+                        # Set the new model as the dispersion object 
+                        #for the selected parameter
                         self.model.set_dispersion(item, disp_model)
                     
-                        self.model._persistency_dict[item] = [state.values, state.weights]
+                        self.model._persistency_dict[item] = \
+                                                [state.values, state.weights]
                     
             else:
                 keys = self.model.getParamList()
                 for item in keys:
-                    if item in self.disp_list and not self.model.details.has_key(item):
-                        self.model.details[item]=["",None,None]
+                    if item in self.disp_list and \
+                        not self.model.details.has_key(item):
+                        self.model.details[item] = ["", None, None]
                 for k,v in self.state.disp_cb_dict.iteritems():
                     self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
                     self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
@@ -1000,7 +1041,8 @@ class BasicPage(wx.ScrolledWindow):
         self._reset_plotting_range(state)
         ## smearing info  restore
         if hasattr(self, "enable_smearer"):
-            ## set smearing value whether or not the data contain the smearing info
+            ## set smearing value whether or not the data 
+            #contain the smearing info
             self.enable_smearer.SetValue(state.enable_smearer)
             self.disable_smearer.SetValue(state.disable_smearer)
             self.onSmear(event=None)           
@@ -1102,24 +1144,29 @@ class BasicPage(wx.ScrolledWindow):
                         # Create the dispersion objects
                         from sans.models.dispersion_models import ArrayDispersion
                         disp_model = ArrayDispersion()
-                        if hasattr(state,"values")and self.disp_cb_dict[item].GetValue()==True:
-                            if len(state.values)>0:
-                                self.values=state.values
-                                self.weights=state.weights
-                                disp_model.set_weights(self.values, state.weights)
+                        if hasattr(state,"values") and\
+                             self.disp_cb_dict[item].GetValue()==True:
+                            if len(state.values) > 0:
+                                self.values = state.values
+                                self.weights = state.weights
+                                disp_model.set_weights(self.values,
+                                                        state.weights)
                             else:
                                 self._reset_dispersity()
                         
                         self._disp_obj_dict[item] = disp_model
-                        # Set the new model as the dispersion object for the selected parameter
+                        # Set the new model as the dispersion
+                        #object for the selected parameter
                         self.model.set_dispersion(item, disp_model)
                     
-                        self.model._persistency_dict[item] = [state.values, state.weights]
+                        self.model._persistency_dict[item] = [state.values,
+                                                               state.weights]
                     
             else:
                 keys = self.model.getParamList()
                 for item in keys:
-                    if item in self.disp_list and not self.model.details.has_key(item):
+                    if item in self.disp_list and \
+                            not self.model.details.has_key(item):
                         self.model.details[item]=["",None,None]
                 for k,v in self.state.disp_cb_dict.iteritems():
                     self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
@@ -1130,7 +1177,8 @@ class BasicPage(wx.ScrolledWindow):
 
         ## smearing info  restore
         if hasattr(self,"enable_smearer"):
-            ## set smearing value whether or not the data contain the smearing info
+            ## set smearing value whether or not the data 
+            #contain the smearing info
             self.enable_smearer.SetValue(state.enable_smearer)
             self.disable_smearer.SetValue(state.disable_smearer)
             self.onSmear(event=None)           
@@ -1160,7 +1208,8 @@ class BasicPage(wx.ScrolledWindow):
         """
         import os
         dlg = wx.FileDialog(self, "Choose a weight file",
-                                self._default_save_location , "", "*.*", wx.OPEN)
+                                self._default_save_location , "", 
+                                "*.*", wx.OPEN)
         path = None
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
@@ -1175,7 +1224,8 @@ class BasicPage(wx.ScrolledWindow):
             self.number_saved_state += 1
             ## Add item in the context menu
             id = wx.NewId()
-            self.popUpMenu.Append(id,name, 'Save model and state %g'%self.number_saved_state)
+            msg = 'Save model and state %g' % self.number_saved_state
+            self.popUpMenu.Append(id, name, msg)
             wx.EVT_MENU(self, id, self.onResetModel)
     
     def _reset_plotting_range(self, state):
@@ -1209,9 +1259,8 @@ class BasicPage(wx.ScrolledWindow):
         """
         self.state.qmin = self.qmin_x
         self.state.qmax = self.qmax_x 
-        if self.npts!=None:
-            self.state.npts= self.num_points
-            
+        if self.npts != None:
+            self.state.npts = self.num_points
             
     def _onparamEnter_helper(self):
         """
@@ -1220,17 +1269,20 @@ class BasicPage(wx.ScrolledWindow):
         """
         # Flag to register when a parameter has changed.   
         is_modified = False
-        self.fitrange =True
+        self.fitrange = True
         is_2Ddata = False
         #self._undo.Enable(True)
         # check if 2d data
-        if self.data.__class__.__name__ =="Data2D":
+        if self.data.__class__.__name__ == "Data2D":
             is_2Ddata = True
         if self.model !=None:
             try:
-                is_modified =self._check_value_enter( self.fittable_param ,is_modified)
-                is_modified =self._check_value_enter( self.fixed_param ,is_modified)
-                is_modified =self._check_value_enter( self.parameters ,is_modified) 
+                is_modified = self._check_value_enter(self.fittable_param,
+                                                     is_modified)
+                is_modified = self._check_value_enter(self.fixed_param,
+                                                      is_modified)
+                is_modified = self._check_value_enter(self.parameters,
+                                                      is_modified) 
             except:
                 pass
             #if is_modified:
@@ -1311,13 +1363,17 @@ class BasicPage(wx.ScrolledWindow):
                     elif self.pinhole_smearer.GetValue():
                         flag = self.update_pinhole_smear()
                     else:
-                        self.manager.set_smearer_nodraw(smearer=temp_smearer, qmin= float(self.qmin_x),
-                                                 qmax= float(self.qmax_x))
+                        self.manager.set_smearer_nodraw(smearer=temp_smearer,
+                                                     qmin=float(self.qmin_x),
+                                                      qmax=float(self.qmax_x))
                 elif not self._is_2D():
-                    self.manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
+                    self.manager.set_smearer(smearer=temp_smearer,
+                                              qmin=float(self.qmin_x),
                                                  qmax= float(self.qmax_x))
-                    index_data = ((self.qmin_x <= self.data.x)&(self.data.x <= self.qmax_x))
-                    self.Npts_fit.SetValue(str(len(self.data.x[index_data==True])))
+                    index_data = ((self.qmin_x <= self.data.x)&\
+                                  (self.data.x <= self.qmax_x))
+                    val = str(len(self.data.x[index_data==True]))
+                    self.Npts_fit.SetValue(val)
                     flag = True
                 if self._is_2D():
                     # only 2D case set mask   
@@ -1337,8 +1393,9 @@ class BasicPage(wx.ScrolledWindow):
             if self._is_2D():self.btEditMask.Enable(True)
 
         if not flag:
-            msg= "Cannot Plot or Fit :Must select a model or Fitting range is not valid!!!  "
-            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+            msg = "Cannot Plot or Fit :Must select a "
+            msg += " model or Fitting range is not valid!!!  "
+            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
         
         self.save_current_state()
    
@@ -1350,13 +1407,13 @@ class BasicPage(wx.ScrolledWindow):
         """
         return is_modified
                        
-    def _reset_parameters_state(self, listtorestore,statelist):
+    def _reset_parameters_state(self, listtorestore, statelist):
         """
         Reset the parameters at the given state
         """
-        if len(statelist)==0 or  len(listtorestore)==0 :
+        if len(statelist) == 0 or len(listtorestore) == 0:
             return
-        if len(statelist)!=  len(listtorestore) :
+        if len(statelist) !=  len(listtorestore):
             return
 
         for j in range(len(listtorestore)):
@@ -1441,8 +1498,9 @@ class BasicPage(wx.ScrolledWindow):
                 unit = item[7].GetLabel()
                
             statelist.append([checkbox_state, parameter_name, parameter_value,
-                              static_text ,[error_state,error_value],
-                                [min_state,min_value],[max_state , max_value],unit])
+                              static_text ,[error_state, error_value],
+                                [min_state, min_value],
+                                [max_state, max_value], unit])
            
     def _set_model_sizer_selection(self, model):
         """
@@ -1452,17 +1510,18 @@ class BasicPage(wx.ScrolledWindow):
             return
         if hasattr(model ,"s_model"):
             
-            class_name= model.s_model.__class__
-            name= model.s_model.name
-            flag= name != "NoStructure"
-            if flag and (class_name in self.model_list_box["Structure Factors"]):
+            class_name = model.s_model.__class__
+            name = model.s_model.name
+            flag = (name != "NoStructure")
+            if flag and \
+                (class_name in self.model_list_box["Structure Factors"]):
                 self.structurebox.Show()
                 self.text2.Show()                
                 self.structurebox.Enable()
                 self.text2.Enable()
                 items = self.structurebox.GetItems()
                 self.sizer1.Layout()
-                self.SetScrollbars(20,20,25,65)
+                self.SetScrollbars(20, 20, 25 ,65)
                 for i in range(len(items)):
                     if items[i]== str(name):
                         self.structurebox.SetSelection(i)
