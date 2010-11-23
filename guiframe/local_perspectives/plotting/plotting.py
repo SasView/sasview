@@ -91,7 +91,6 @@ class Plugin:
         """show plug-in panel"""
         pass
     
-    
     def _on_plot_event(self, event):
         """
         A new plottable is being shipped to the plotting plug-in.
@@ -110,63 +109,56 @@ class Plugin:
             and event.plot._yunit == panel.graph.prop["yunit_base"]:
                 if hasattr(event.plot, "group_id"):
                     ## if same group_id used the same panel to plot
-                    if not event.plot.group_id==None \
-                        and event.plot.group_id==panel.group_id:
+                    if not event.plot.group_id == None \
+                        and event.plot.group_id == panel.group_id:
                         is_available = True
-                        
                         panel._onEVT_1DREPLOT(event)
                         self.parent.show_panel(panel.uid)   
                 else:
                     # Check that the plot panel has no group ID
                     ## Use a panel with group_id ==None to plot
-                    
-                    if panel.group_id==None:
+                    if panel.group_id == None:
                         is_available = True
                         panel._onEVT_1DREPLOT(event)
                         self.parent.show_panel(panel.uid)
-        
         # Create a new plot panel if none was available        
         if not is_available:
             #print"event.plot",hasattr(event.plot,'data')
-            if not hasattr(event.plot,'data'):
+            if not hasattr(event.plot, 'data'):
                 from Plotter1D import ModelPanel1D
                 ## get the data representation label of the data to plot
                 ## when even the user select "change scale"
-                if hasattr(event.plot,"xtransform"):
+                if hasattr(event.plot, "xtransform"):
                     xtransform = event.plot.xtransform
                 else:
-                    xtransform =None
+                    xtransform = None
                     
-                if hasattr(event.plot,"ytransform"):
-                    ytransform=  event.plot.ytransform
+                if hasattr(event.plot, "ytransform"):
+                    ytransform = event.plot.ytransform
                 else:
-                    ytransform=None
+                    ytransform = None
                 ## create a plotpanel for 1D Data
-                new_panel = ModelPanel1D(self.parent, -1,xtransform=xtransform,
-                                         ytransform=ytransform, style=wx.RAISED_BORDER)
-
+                new_panel = ModelPanel1D(self.parent, -1, xtransform=xtransform,
+                         ytransform=ytransform, style=wx.RAISED_BORDER)
             else:
                 ##Create a new plotpanel for 2D data
                 from Plotter2D import ModelPanel2D
-                new_panel = ModelPanel2D(self.parent, id = -1, data2d=event.plot,style=wx.RAISED_BORDER)
-            
+                new_panel = ModelPanel2D(self.parent, id = -1,
+                                    data2d=event.plot, style=wx.RAISED_BORDER)
             ## Set group ID if available
             ## Assign data properties to the new create panel
             group_id_str = ''
             if hasattr(event.plot, "group_id"):
-                if not event.plot.group_id==None:
+                if not event.plot.group_id == None:
                     new_panel.group_id = event.plot.group_id
                     group_id_str = ' [%s]' % event.plot.group_id
-            
             if hasattr(event, "title"):
                 new_panel.window_caption = event.title
                 new_panel.window_name = event.title
-               
             event_id = self.parent.popup_panel(new_panel)
             #remove the default item in the menu
             if len(self.plot_panels) == 0:
                 self.menu.RemoveItem(self.menu.FindItemByPosition(0))
-                
             self.menu.Append(event_id, new_panel.window_caption, 
                              "Show %s plot panel" % new_panel.window_caption)
             # Set UID to allow us to reference the panel later

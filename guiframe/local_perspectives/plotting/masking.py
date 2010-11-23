@@ -17,26 +17,30 @@
 ##Todo: cleaning up, improving the maskplotpanel initialization, and testing.
 import wx
 import sys
-
-import copy,numpy
+import pylab
+from pylab import gca
+from pylab import gcf
+import math
+import re
+import copy
+import numpy
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph
 from binder import BindArtist
 from sans.guiframe.dataFitting import Data2D
 from boxMask import BoxMask
 from sectorMask import SectorMask
-from sans.guicomm.events import SlicerEvent, StatusEvent
-(InternalEvent, EVT_INTERNAL)   = wx.lib.newevent.NewEvent()
-from pylab import  gca, gcf
-import math,pylab,re
-DEFAULT_CMAP= pylab.cm.jet
+from sans.guicomm.events import SlicerEvent
+from sans.guicomm.events import StatusEvent
+(InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()
 
+DEFAULT_CMAP = pylab.cm.jet
 _BOX_WIDTH = 76
 _STATICBOX_WIDTH = 400
 _SCALE = 1e-6
 
 #SLD panel size 
-if sys.platform.count("win32")>0:
+if sys.platform.count("win32") > 0:
     _STATICBOX_WIDTH = 380
     PANEL_SIZE = 420
     FONT_VARIANT = 0
@@ -46,7 +50,6 @@ else:
     FONT_VARIANT = 1
     
 
-            
 class MaskPanel(wx.Dialog):
     """
     Provides the Mask Editor GUI.
@@ -57,17 +60,17 @@ class MaskPanel(wx.Dialog):
     window_caption = "Mask Editor"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
-    def __init__(self, parent=None,base=None,data =None, id = -1, *args, **kwds):
+    def __init__(self, parent=None, base=None, 
+                 data=None, id=-1, *args, **kwds):
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
-        kwds["size"] = wx.Size(_STATICBOX_WIDTH*2,PANEL_SIZE) 
-        wx.Dialog.__init__(self, parent, id = id,  *args, **kwds)
+        kwds["size"] = wx.Size(_STATICBOX_WIDTH * 2, PANEL_SIZE) 
+        wx.Dialog.__init__(self, parent, id=id,  *args, **kwds)
+        
         if data != None:
-            
             #Font size 
-            kwds =[]
+            kwds = []
             self.SetWindowVariant(variant=FONT_VARIANT)
-
-            self.SetTitle("Mask Editor for "+ data.name)
+            self.SetTitle("Mask Editor for " + data.name)
             self.parent = base
             self.data = data
             self.str = self.data.__str__()
@@ -78,20 +81,18 @@ class MaskPanel(wx.Dialog):
             self.slicer_mask = None
             self.slicer = None
             self.slicer_z = 5
-
             self.data.interactive = True
             ## when 2 data have the same id override the 1 st plotted
             self.name = self.data.name
-
             # Panel for 2D plot
-            self.plotpanel    = Maskplotpanel(self, -1, style=wx.TRANSPARENT_WINDOW)
+            self.plotpanel = Maskplotpanel(self, -1,
+                                           style=wx.TRANSPARENT_WINDOW)
             self.cmap = DEFAULT_CMAP
             ## Create Artist and bind it
             self.subplot = self.plotpanel.subplot
             self.connect = BindArtist(self.subplot.figure)
-
             self._setup_layout()
-            self.newplot=Data2D(image=self.data.data)
+            self.newplot = Data2D(image=self.data.data)
             self.newplot.setValues(self.data)
             self.plotpanel.add_image(self.newplot) 
             self._update_mask(self.mask)
@@ -107,197 +108,185 @@ class MaskPanel(wx.Dialog):
         mssg = 'Erase, redraw or clear the mask. \n\r'
         mssg += 'The data range can not be completely masked... \n\r'
         mssg += msg
-        wx.MessageBox(mssg, 'Error', wx.OK | 
-            wx.ICON_ERROR)
+        wx.MessageBox(mssg, 'Error', wx.OK | wx.ICON_ERROR)
     
     def _setup_layout(self):
         """
         Set up the layout
         """
         shape = "Select a Shape for Masking:"
-        
         #  panel
-        sizer = wx.GridBagSizer(10,10)
-
+        sizer = wx.GridBagSizer(10, 10)
         #---------inputs----------------
         #inputbox = wx.StaticBox(self, -1, "Draw Mask")
         shape_txt = wx.StaticText(self, -1, shape)  
-        sizer.Add(shape_txt, (1, 1), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
-                
+        sizer.Add(shape_txt, (1, 1), flag=wx.TOP|wx.LEFT|wx.BOTTOM, border=5)
         #innersector_x_txt = wx.StaticText(self, -1, 'Inner Sector')
-        self.innersector_rb = wx.RadioButton(self, -1,"Double Wings")
-        self.Bind(wx.EVT_RADIOBUTTON,self.onInnerSectorMask , id=self.innersector_rb.GetId())
-        sizer.Add(self.innersector_rb, (2, 1),flag=wx.RIGHT | wx.BOTTOM, border=5)
-        
+        self.innersector_rb = wx.RadioButton(self, -1, "Double Wings")
+        self.Bind(wx.EVT_RADIOBUTTON, self.onInnerSectorMask,
+                  id=self.innersector_rb.GetId())
+        sizer.Add(self.innersector_rb, (2, 1), 
+                  flag=wx.RIGHT|wx.BOTTOM, border=5)
         #innersector_x_txt = wx.StaticText(self, -1, 'Inner Sector')
-        self.innercircle_rb = wx.RadioButton(self, -1,"Circular Disk")
-        self.Bind(wx.EVT_RADIOBUTTON,self.onInnerRingMask , id=self.innercircle_rb.GetId())
-        sizer.Add(self.innercircle_rb, (3, 1),flag=wx.RIGHT | wx.BOTTOM, border=5)
+        self.innercircle_rb = wx.RadioButton(self, -1, "Circular Disk")
+        self.Bind(wx.EVT_RADIOBUTTON, self.onInnerRingMask,
+                  id=self.innercircle_rb.GetId())
+        sizer.Add(self.innercircle_rb, (3, 1),
+                   flag=wx.RIGHT|wx.BOTTOM, border=5)
         
-        self.innerbox_rb = wx.RadioButton(self, -1,"Rectangular Disk")
-        self.Bind(wx.EVT_RADIOBUTTON,self.onInnerBoxMask , id=self.innerbox_rb.GetId())
-        sizer.Add(self.innerbox_rb, (4, 1),flag=wx.RIGHT | wx.BOTTOM, border=5)
-
+        self.innerbox_rb = wx.RadioButton(self, -1, "Rectangular Disk")
+        self.Bind(wx.EVT_RADIOBUTTON, self.onInnerBoxMask,
+                  id=self.innerbox_rb.GetId())
+        sizer.Add(self.innerbox_rb, (4, 1), flag=wx.RIGHT|wx.BOTTOM, border=5)
         #outersector_y_txt = wx.StaticText(self, -1, 'Outer Sector')
-        self.outersector_rb = wx.RadioButton(self, -1,"Double Wing Window")
-        self.Bind(wx.EVT_RADIOBUTTON,self.onOuterSectorMask , id=self.outersector_rb.GetId())
-        sizer.Add(self.outersector_rb, (5, 1),flag=wx.RIGHT | wx.BOTTOM, border=5)
+        self.outersector_rb = wx.RadioButton(self, -1, "Double Wing Window")
+        self.Bind(wx.EVT_RADIOBUTTON, self.onOuterSectorMask, 
+                  id=self.outersector_rb.GetId())
+        sizer.Add(self.outersector_rb, (5, 1),
+                  flag=wx.RIGHT|wx.BOTTOM, border=5)
         
         #outersector_y_txt = wx.StaticText(self, -1, 'Outer Sector')
-        self.outercircle_rb = wx.RadioButton(self, -1,"Circular Window")
-        self.Bind(wx.EVT_RADIOBUTTON,self.onOuterRingMask , id=self.outercircle_rb.GetId())
-        sizer.Add(self.outercircle_rb, (6, 1),flag=wx.RIGHT | wx.BOTTOM, border=5)
-        
+        self.outercircle_rb = wx.RadioButton(self, -1, "Circular Window")
+        self.Bind(wx.EVT_RADIOBUTTON, self.onOuterRingMask,
+                  id=self.outercircle_rb.GetId())
+        sizer.Add(self.outercircle_rb, (6, 1), 
+                  flag=wx.RIGHT|wx.BOTTOM, border=5)
         #outerbox_txt = wx.StaticText(self, -1, 'Outer Box')
-        self.outerbox_rb = wx.RadioButton(self, -1,"Rectangular Window")
-        self.Bind(wx.EVT_RADIOBUTTON,self.onOuterBoxMask , id=self.outerbox_rb.GetId())
-        sizer.Add(self.outerbox_rb, (7, 1),flag=wx.RIGHT | wx.BOTTOM, border=5)
-        
+        self.outerbox_rb = wx.RadioButton(self, -1, "Rectangular Window")
+        self.Bind(wx.EVT_RADIOBUTTON, self.onOuterBoxMask, 
+                  id=self.outerbox_rb.GetId())
+        sizer.Add(self.outerbox_rb, (7, 1), flag=wx.RIGHT|wx.BOTTOM, border=5)
         self.innercircle_rb.SetValue(False)
         self.outercircle_rb.SetValue(False)        
         self.innerbox_rb.SetValue(False)
         self.outerbox_rb.SetValue(False)
         self.innersector_rb.SetValue(False)
         self.outersector_rb.SetValue(False)
-        
-        sizer.Add(self.plotpanel,(0, 2), (13, 13), wx.EXPAND | wx.LEFT| wx.RIGHT, 15)
+        sizer.Add(self.plotpanel, (0, 2), (13, 13), 
+                  wx.EXPAND|wx.LEFT|wx.RIGHT, 15)
 
         #-----Buttons------------1
         id = wx.NewId()
-        
         button_add = wx.Button(self, id, "Add")
         button_add.SetToolTipString("Add the mask drawn.")
-        button_add.Bind(wx.EVT_BUTTON, self.onAddMask, id = button_add.GetId()) 
+        button_add.Bind(wx.EVT_BUTTON, self.onAddMask, id=button_add.GetId()) 
         sizer.Add(button_add, (13, 7))
-        
         id = wx.NewId()
         button_erase = wx.Button(self, id, "Erase")
         button_erase.SetToolTipString("Erase the mask drawn.")
-        button_erase.Bind(wx.EVT_BUTTON, self.onEraseMask, id = button_erase.GetId()) 
+        button_erase.Bind(wx.EVT_BUTTON, self.onEraseMask,
+                          id=button_erase.GetId()) 
         sizer.Add(button_erase, (13, 8))
-        
         id = wx.NewId()
         button_reset = wx.Button(self, id, "Reset")
         button_reset.SetToolTipString("Reset the mask.")
-        button_reset.Bind(wx.EVT_BUTTON, self.onResetMask, id = button_reset.GetId()) 
-        sizer.Add(button_reset, (13, 9), flag=wx.RIGHT | wx.BOTTOM, border=15)
-        
+        button_reset.Bind(wx.EVT_BUTTON, self.onResetMask,
+                          id=button_reset.GetId()) 
+        sizer.Add(button_reset, (13, 9), flag=wx.RIGHT|wx.BOTTOM, border=15)
         id = wx.NewId()
         button_reset = wx.Button(self, id, "Clear")
         button_reset.SetToolTipString("Clear all mask.")
-        button_reset.Bind(wx.EVT_BUTTON, self.onClearMask, id = button_reset.GetId()) 
-        sizer.Add(button_reset, (13, 10), flag=wx.RIGHT | wx.BOTTOM, border=15)
-
+        button_reset.Bind(wx.EVT_BUTTON, self.onClearMask,
+                          id=button_reset.GetId()) 
+        sizer.Add(button_reset, (13, 10), flag=wx.RIGHT|wx.BOTTOM, border=15)
         sizer.AddGrowableCol(3)
         sizer.AddGrowableRow(2)
         self.SetSizerAndFit(sizer)
-
         self.Centre()
         self.Show(True)
 
-
-    def onInnerBoxMask(self,event=None):
+    def onInnerBoxMask(self, event=None):
         """
         Call Draw Box Slicer and get mask inside of the box
         """
         #get ready for next evt
         event.Skip()        
-        from boxMask import BoxMask
-        if event !=None:
-            self.onClearSlicer(event)
-                    
+        #from boxMask import BoxMask
+        if event != None:
+            self.onClearSlicer(event)         
         self.slicer_z += 1
-        self.slicer =  BoxMask(self, self.subplot, zorder=self.slicer_z, side=True)
-
+        self.slicer =  BoxMask(self, self.subplot,
+                               zorder=self.slicer_z, side=True)
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)
         self.update()
         self.slicer_mask = self.slicer.update()
         
-    
-    def onOuterBoxMask(self,event=None):
+    def onOuterBoxMask(self, event=None):
         """
         Call Draw Box Slicer and get mask outside of the box
         """
         event.Skip()        
-        from boxMask import BoxMask
-        if event !=None:
-            self.onClearSlicer(event)
-                    
+        #from boxMask import BoxMask
+        if event != None:
+            self.onClearSlicer(event)      
         self.slicer_z += 1
-        self.slicer =  BoxMask(self, self.subplot, zorder=self.slicer_z, side=False)
-
+        self.slicer =  BoxMask(self, self.subplot,
+                               zorder=self.slicer_z, side=False)
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)
         self.update()
         self.slicer_mask = self.slicer.update()
 
-        
-    def onInnerSectorMask(self,event=None):
+    def onInnerSectorMask(self, event=None):
         """
         Call Draw Sector Slicer and get mask inside of the sector
         """
         event.Skip()
         from sectorMask import SectorMask
-        if event !=None:
+        if event != None:
             self.onClearSlicer(event)
-
         self.slicer_z += 1
-        self.slicer =  SectorMask(self, self.subplot, zorder=self.slicer_z, side=True)
+        self.slicer =  SectorMask(self, self.subplot,
+                                  zorder=self.slicer_z, side=True)
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)   
-
         self.update()
         self.slicer_mask = self.slicer.update() 
 
-        
     def onOuterSectorMask(self,event=None):
         """
         Call Draw Sector Slicer and get mask outside of the sector
         """
         event.Skip()
         from sectorMask import SectorMask
-        if event !=None:
+        if event != None:
             self.onClearSlicer(event)
-
         self.slicer_z += 1
-        self.slicer =  SectorMask(self, self.subplot, zorder=self.slicer_z, side=False)
+        self.slicer =  SectorMask(self, self.subplot,
+                                  zorder=self.slicer_z, side=False)
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)    
-
         self.update()     
         self.slicer_mask = self.slicer.update()   
 
-        
     def onInnerRingMask(self, event=None):
         """
         Perform inner circular cut on Phi and draw circular slicer
         """
         event.Skip()
         from AnnulusSlicer import CircularMask
-        if event !=None:
+        if event != None:
             self.onClearSlicer(event)
-        
         self.slicer_z += 1
-        self.slicer = CircularMask(self,self.subplot, zorder=self.slicer_z, side=True)
+        self.slicer = CircularMask(self,self.subplot,
+                                   zorder=self.slicer_z, side=True)
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)   
-
         self.update()
         self.slicer_mask = self.slicer.update() 
 
-        
     def onOuterRingMask(self, event=None):
         """
         Perform outer circular cut on Phi and draw circular slicer
         """
         event.Skip()
         from AnnulusSlicer import CircularMask
-        if event !=None:
+        if event != None:
             self.onClearSlicer(event)
-        
         self.slicer_z += 1
-        self.slicer = CircularMask(self,self.subplot, zorder=self.slicer_z, side=False)   
+        self.slicer = CircularMask(self,self.subplot,
+                                   zorder=self.slicer_z, side=False)   
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)
         self.update()
@@ -307,12 +296,11 @@ class MaskPanel(wx.Dialog):
         """
         Add new mask to old mask 
         """
-        if not self.slicer==None:
+        if not self.slicer == None:
             data = Data2D()
             data = self.data
             self.slicer_mask = self.slicer.update()
             data.mask = self.data.mask & self.slicer_mask
-
             self._check_display_mask(data.mask, event)
             
     def _check_display_mask(self, mask, event):
@@ -333,7 +321,6 @@ class MaskPanel(wx.Dialog):
             self.slicer_mask = self.slicer.update()
             mask = self.data.mask
             mask[self.slicer_mask==False] = True
-
             self._check_display_mask(mask, event)
             
     def onResetMask(self, event):
@@ -341,13 +328,12 @@ class MaskPanel(wx.Dialog):
         Reset mask to the original mask 
         """        
         self.slicer_z += 1
-        self.slicer =  BoxMask(self, self.subplot, zorder=self.slicer_z, side=True)
+        self.slicer =  BoxMask(self, self.subplot, 
+                               zorder=self.slicer_z, side=True)
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)   
-
         mask = copy.deepcopy(self.default_mask)
         self.data.mask = mask
-
         # update mask plot
         self._check_display_mask(mask, event)
         
@@ -356,14 +342,13 @@ class MaskPanel(wx.Dialog):
         Clear mask
         """            
         self.slicer_z += 1
-        self.slicer =  BoxMask(self, self.subplot, zorder=self.slicer_z, side=True)
+        self.slicer =  BoxMask(self, self.subplot,
+                               zorder=self.slicer_z, side=True)
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)   
-
         #mask = copy.deepcopy(self.default_mask)
         mask = numpy.ones(len(self.data.mask), dtype=bool)
         self.data.mask = mask
-
         # update mask plot
         self._check_display_mask(mask, event)
         
@@ -371,7 +356,7 @@ class MaskPanel(wx.Dialog):
         """
         Clear the slicer on the plot
         """
-        if not self.slicer==None:
+        if not self.slicer == None:
             self.slicer.clear()
             self.subplot.figure.canvas.draw()
             self.slicer = None
@@ -395,12 +380,11 @@ class MaskPanel(wx.Dialog):
         ## Draw slicer
         self.update()
         self.slicer.update()
-        wx.PostEvent(self.parent, StatusEvent(status=\
-                        "Plotter2D._setSlicer  %s"%self.slicer.__class__.__name__))
+        msg = "Plotter2D._setSlicer  %s"%self.slicer.__class__.__name__
+        wx.PostEvent(self.parent, StatusEvent(status=msg))
         # Post slicer event
         event = self._getEmptySlicerEvent()
         event.type = self.slicer.__class__.__name__
-        
         event.obj_class = self.slicer.__class__
         event.params = self.slicer.get_params()
         wx.PostEvent(self, event)
@@ -423,13 +407,12 @@ class MaskPanel(wx.Dialog):
         Respond to changes in masking
         """ 
         # the case of liitle numbers of True points
-        if (len(mask[mask])<10 and self.data !=None):
+        if (len(mask[mask]) < 10 and self.data != None):
             self.ShowMessage()
             mask = copy.deepcopy(self.mask)
             self.data.mask = mask
         else:
             self.mask = mask
-
         # make temperary data to plot
         temp_mask = numpy.zeros(len(mask))
         temp_data = copy.deepcopy(self.data)
@@ -444,17 +427,9 @@ class MaskPanel(wx.Dialog):
         if self.slicer != None:
             self.slicer.clear()
             self.slicer = None
-        
         # Post slicer None event
         event = self._getEmptySlicerEvent()
         wx.PostEvent(self, event)
-        
-        #replot
-        ##This method not alway updating the plot(?): use manual plot 
-        #self.newplot=Data2D(image=temp_data.data)
-        #self.newplot.setValues(temp_data)
-        #self.plotpanel.add_image(self.newplot)
-        
        
         ##use this method
         #set zmax and zmin to plot: Fix it w/ data.
@@ -465,24 +440,22 @@ class MaskPanel(wx.Dialog):
             zmax = max(self.data.data[self.data.data>0])
             zmin = min(self.data.data[self.data.data>0])
         #plot    
-        plot = self.plotpanel.image(data= temp_mask,
+        plot = self.plotpanel.image(data=temp_mask,
                        qx_data=self.data.qx_data,
                        qy_data=self.data.qy_data,
-                       xmin= self.data.xmin,
-                       xmax= self.data.xmax,
-                       ymin= self.data.ymin,
-                       ymax= self.data.ymax,
-                       zmin= zmin,
-                       zmax= zmax,
-                       cmap= self.cmap,
-                       color=0,symbol=0,label=self.data.name)
+                       xmin=self.data.xmin,
+                       xmax=self.data.xmax,
+                       ymin=self.data.ymin,
+                       ymax=self.data.ymax,
+                       zmin=zmin,
+                       zmax=zmax,
+                       cmap=self.cmap,
+                       color=0, symbol=0, label=self.data.name)
         # axis labels
         self.plotpanel.axes[0].set_xlabel('$\\rm{Q}_{x}(A^{-1})$')
         self.plotpanel.axes[0].set_ylabel('$\\rm{Q}_{y}(A^{-1})$')
-        
         self.plotpanel.render()
         self.plotpanel.subplot.figure.canvas.draw_idle()
-        
         
     def _getEmptySlicerEvent(self):
         """
@@ -494,12 +467,11 @@ class MaskPanel(wx.Dialog):
         self.outersector_rb.SetValue(False)
         self.innercircle_rb.SetValue(False)
         self.outercircle_rb.SetValue(False)
-
         return SlicerEvent(type=None,
                            params=None,
                            obj_class=None) 
              
-    def _draw_model(self,event):
+    def _draw_model(self, event):
         """
          on_close, update the model2d plot
         """
@@ -515,7 +487,7 @@ class MaskPanel(wx.Dialog):
         """
         self.plotpanel.axes_frozen = False       
          
-    def onMouseMotion(self,event):
+    def onMouseMotion(self, event):
         """
         """
         pass
@@ -528,7 +500,7 @@ class MaskPanel(wx.Dialog):
 class Maskplotpanel(PlotPanel):
     """
     """
-    def __init__(self, parent, id = -1, color = None, dpi = None, **kwargs):
+    def __init__(self, parent, id=-1, color=None, dpi=None, **kwargs):
         """
         """
         PlotPanel.__init__(self, parent, id=id, color=color, dpi=dpi, **kwargs)
@@ -603,10 +575,10 @@ class ViewerFrame(wx.Frame):
         :param parent: parent panel/container
         """
         # Initialize the Frame object
-        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, wx.Size(950,850))
-        
+        wx.Frame.__init__(self, parent, id, title,
+                          wx.DefaultPosition, wx.Size(950, 850))
         # Panel for 1D plot
-        self.plotpanel    = Maskplotpanel(self, -1, style=wx.RAISED_BORDER)
+        self.plotpanel = Maskplotpanel(self, -1, style=wx.RAISED_BORDER)
 
 class ViewApp(wx.App):
     def OnInit(self):

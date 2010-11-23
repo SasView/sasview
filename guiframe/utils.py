@@ -1,7 +1,8 @@
 """
 Contains common classes and functions
 """
-import wx,re
+import wx
+import re
 
 def format_number(value, high=False):
     """
@@ -10,21 +11,19 @@ def format_number(value, high=False):
     try: 
         value = float(value)
     except:
-        output="NaN"
+        output = "NaN"
         return output.lstrip().rstrip()
-    
     if high:
-        output= "%-6.4g" % value
-        
+        output = "%-6.4g" % value
     else:
-        output= "%-5.3g" % value
+        output = "%-5.3g" % value
     return output.lstrip().rstrip()
 
 def check_float(item):
     """
     :param item: txtcrtl containing a value
     """
-    flag= True
+    flag = True
     try:
         mini = float(item.GetValue())
         item.SetBackgroundColour(wx.WHITE)
@@ -60,15 +59,15 @@ def split_list(separator, mylist, n=0):
     :param separator: the string to remove
     
     """
-    list=[]
+    list = []
     for item in mylist:
-        if re.search( separator,item)!=None:
-            if n >0:
-                word =re.split(separator,item,int(n))
+        if re.search(separator,item)!= None:
+            if n > 0:
+                word = re.split(separator, item, int(n))
             else:
-                word =re.split( separator,item)
+                word = re.split(separator, item)
             for new_item in word: 
-                if new_item.lstrip().rstrip() !='':
+                if new_item.lstrip().rstrip() != '':
                     list.append(new_item.lstrip().rstrip())
     return list
 
@@ -79,14 +78,14 @@ def split_text(separator, string1, n=0):
     :param separator: the string to remove
     
     """
-    list=[]
-    if re.search( separator,string1)!=None:
-        if n >0:
-            word =re.split(separator,string1,int(n))
+    list = []
+    if re.search(separator, string1) is not None:
+        if n > 0:
+            word = re.split(separator,string1,int(n))
         else:
-            word =re.split(separator,string1)
+            word = re.split(separator,string1)
         for item in word: 
-            if item.lstrip().rstrip() !='':
+            if item.lstrip().rstrip() != '':
                 list.append(item.lstrip().rstrip())
     return list
 
@@ -103,11 +102,12 @@ def look_for_tag(string1, begin, end=None):
      end_flag==if end was found else return false, false
      
     """
-    begin_flag= False
-    end_flag= False
-    if  re.search( begin,string1)!=None:
-        begin_flag= True
-    if end !=None:
-        if  re.search(end,string1)!=None:
-            end_flag= True
+    begin_flag = False
+    end_flag = False
+    if  re.search(begin,string1) is not None:
+        begin_flag = True
+    if end  is not None:
+        if  re.search(end,string1) is not None:
+            end_flag = True
     return begin_flag, end_flag
+

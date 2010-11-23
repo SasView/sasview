@@ -1,7 +1,7 @@
 import wx
 from wx import StatusBar as wxStatusB
 import wx.lib
-from wx.lib import newevent
+#from wx.lib import newevent
 (MessageEvent, EVT_MESSAGE) = wx.lib.newevent.NewEvent()
 #numner of fields of the status bar 
 NB_FIELDS = 4
@@ -19,7 +19,9 @@ class ConsolePanel(wx.Panel):
     """
     """
     def __init__(self, parent, *args, **kwargs):
-        wx.Panel.__init__(self, parent=parent,*args, **kwargs)
+        """
+        """
+        wx.Panel.__init__(self, parent=parent, *args, **kwargs)
         self.parent = parent
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.msg_txt = wx.TextCtrl(self, size=(CONSOLE_WIDTH-40,
@@ -30,8 +32,10 @@ class ConsolePanel(wx.Panel):
         self.sizer.Add(self.msg_txt, 1, wx.EXPAND|wx.ALL, 10)
         self.SetSizer(self.sizer)
         
-    def set_message(self, status=""):  
-        msg = status+ "\n"  
+    def set_message(self, status=""):
+        """
+        """
+        msg = status + "\n"  
         self.msg_txt.AppendText(str(msg))
         
 class Console(wx.Frame):
@@ -62,71 +66,70 @@ class StatusBar(wxStatusB):
     """
     """
     def __init__(self, parent, *args, **kargs):
-         wxStatusB.__init__(self, parent, *args, **kargs)
-         """
+        wxStatusB.__init__(self, parent, *args, **kargs)
+        """
         Implement statusbar functionalities 
-         """
-         self.parent= parent
-         self.parent.SetStatusBarPane(MSG_POSITION)
-       
-         #Layout of status bar
-         self.SetFieldsCount(NB_FIELDS) 
-         self.SetStatusWidths([BUTTON_SIZE, -2, -1,BUTTON_SIZE])
-        
-         #display default message
-         self.msg_position = MSG_POSITION 
-       
-         #save the position of the gauge
-         width, height = self.GetSize()
-         self.gauge = wx.Gauge(self, size=(width/10,height-3),
-                               style= wx.GA_HORIZONTAL)
-         
-         self.gauge.Hide()
-         
-         #status bar icon
-         self.bitmap_bt_warning = wx.BitmapButton(self, -1, size=(BUTTON_SIZE,-1),
+        """
+        self.parent = parent
+        self.parent.SetStatusBarPane(MSG_POSITION)
+        #Layout of status bar
+        self.SetFieldsCount(NB_FIELDS) 
+        self.SetStatusWidths([BUTTON_SIZE, -2, -1, BUTTON_SIZE])
+        #display default message
+        self.msg_position = MSG_POSITION 
+        #save the position of the gauge
+        width, height = self.GetSize()
+        self.gauge = wx.Gauge(self, size=(width/10, height-3),
+                               style=wx.GA_HORIZONTAL)
+        self.gauge.Hide()
+        #status bar icon
+        self.bitmap_bt_warning = wx.BitmapButton(self, -1,
+                                                 size=(BUTTON_SIZE,-1),
                                                   style=wx.NO_BORDER)
-         console_bmp =  wx.ArtProvider.GetBitmap(wx.ART_TIP, wx.ART_TOOLBAR)
-         self.bitmap_bt_console = wx.BitmapButton(self, -1, 
+        console_bmp = wx.ArtProvider.GetBitmap(wx.ART_TIP, wx.ART_TOOLBAR)
+        self.bitmap_bt_console = wx.BitmapButton(self, -1, 
                                  size=(BUTTON_SIZE-5, height-4))
-         self.bitmap_bt_console.SetBitmapLabel(console_bmp)
-         console_hint = "History of status bar messages"
-         self.bitmap_bt_console.SetToolTipString(console_hint)
-         self.bitmap_bt_console.Bind(wx.EVT_BUTTON, self._onMonitor,
+        self.bitmap_bt_console.SetBitmapLabel(console_bmp)
+        console_hint = "History of status bar messages"
+        self.bitmap_bt_console.SetToolTipString(console_hint)
+        self.bitmap_bt_console.Bind(wx.EVT_BUTTON, self._onMonitor,
                                             id=self.bitmap_bt_console.GetId())
-         self.reposition()
-         ## Current progress value of the bar 
-         self.nb_start = 0
-         self.nb_progress = 0
-         self.nb_stop = 0
-         
-         self.frame = None
-         self.list_msg = []
-         self.progress = 0      
-         self.timer = wx.Timer(self, -1) 
-         self.timer_stop = wx.Timer(self, -1) 
-         self.thread = None
-         self.Bind(wx.EVT_TIMER,self.OnTimer, self.timer) 
-         self.Bind(wx.EVT_TIMER,self.OnTimer_stop, self.timer_stop) 
-         self.Bind(wx.EVT_SIZE, self.OnSize)
-         self.Bind(wx.EVT_IDLE, self.OnIdle)
+        self.reposition()
+        ## Current progress value of the bar 
+        self.nb_start = 0
+        self.nb_progress = 0
+        self.nb_stop = 0
+        self.frame = None
+        self.list_msg = []
+        self.progress = 0      
+        self.timer = wx.Timer(self, -1) 
+        self.timer_stop = wx.Timer(self, -1) 
+        self.thread = None
+        self.Bind(wx.EVT_TIMER, self._on_time, self.timer) 
+        self.Bind(wx.EVT_TIMER, self._on_time_stop, self.timer_stop) 
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_IDLE, self.OnIdle)
         
     def reposition(self):
         """
         """
         rect = self.GetFieldRect(GAUGE_POSITION)
-        self.gauge.SetPosition((rect.x+5, rect.y-2))
+        self.gauge.SetPosition((rect.x + 5, rect.y - 2))
         rect = self.GetFieldRect(ICON_POSITION)
-        self.bitmap_bt_warning.SetPosition((rect.x+5, rect.y-2))
+        self.bitmap_bt_warning.SetPosition((rect.x + 5, rect.y - 2))
         rect = self.GetFieldRect(CONSOLE_POSITION)
-        self.bitmap_bt_console.SetPosition((rect.x-5, rect.y-2))
+        self.bitmap_bt_console.SetPosition((rect.x - 5, rect.y - 2))
         self.sizeChanged = False
         
     def OnIdle(self, event):
+        """
+        """
         if self.sizeChanged:
             self.reposition()
             
     def OnSize(self, evt):
+        """
+        """
         self.reposition() 
         self.sizeChanged = True
         
@@ -138,9 +141,9 @@ class StatusBar(wxStatusB):
     def SetStatusText(self, text="", number=MSG_POSITION):
         """
         """
-        wxStatusB.SetStatusText(self, text, MSG_POSITION)
+        wxStatusB.SetStatusText(self, text, number)
         self.list_msg.append(text)
-        icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR)
+        icon_bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR)
         self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
         try:
             if self.frame is not None and self.frame.IsShown():
@@ -152,23 +155,26 @@ class StatusBar(wxStatusB):
             
     def PopStatusText(self, *args, **kwds):
         """
+        Override status bar 
         """
         wxStatusB.PopStatusText(self, field=MSG_POSITION)
       
     def PushStatusText(self, *args, **kwds):
         """
         """
-        wxStatusB.PushStatusText(self, field=MSG_POSITION,string=string)
+        wxStatusB.PushStatusText(self, field=MSG_POSITION, string=string)
         
     def enable_clear_gauge(self):
         """
+        clear the progress bar
         """
         flag = False
-        if (self.nb_start <= self.nb_stop) or (self.nb_progress <= self.nb_stop):
+        if (self.nb_start <= self.nb_stop) or \
+            (self.nb_progress <= self.nb_stop):
             flag = True
         return flag
     
-    def OnTimer_stop(self, evt): 
+    def _on_time_stop(self, evt): 
         """
         Clear the progress bar
         
@@ -184,7 +190,7 @@ class StatusBar(wxStatusB):
         self.nb_start = 0 
         self.nb_stop = 0
        
-    def OnTimer(self, evt): 
+    def _on_time(self, evt): 
         """
         Update the progress bar while the timer is running 
         
@@ -218,7 +224,8 @@ class StatusBar(wxStatusB):
             icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_ERROR, wx.ART_TOOLBAR)
             self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
         if msg == "info":
-            icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR)
+            icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION,
+                                                 wx.ART_TOOLBAR)
             self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
     
     def set_message(self, event):
@@ -236,23 +243,23 @@ class StatusBar(wxStatusB):
             return
         type = event.type
         self.gauge.Show(True)
-        if type.lower()=="start":
+        if type.lower() == "start":
             self.nb_start += 1
             self.timer.Stop()
             self.progress += 10
             self.gauge.SetValue(int(self.progress)) 
             self.progress += 10
-            if self.progress < self.gauge.GetRange()-20:
+            if self.progress < self.gauge.GetRange() - 20:
                 self.gauge.SetValue(int(self.progress)) 
-        if type.lower()=="progress":
+        if type.lower() == "progress":
             self.nb_progress += 1
             self.timer.Start(100)
             self.gauge.Pulse()
-        if type.lower()=="update":
+        if type.lower() == "update":
             self.progress += 10
-            if self.progress < self.gauge.GetRange()-20:
+            if self.progress < self.gauge.GetRange()- 20:
                 self.gauge.SetValue(int(self.progress))   
-        if type.lower()=="stop":
+        if type.lower() == "stop":
             self.nb_stop += 1
             self.gauge.Show(True)
             if self.enable_clear_gauge():
@@ -277,24 +284,23 @@ class StatusBar(wxStatusB):
     
     def _onMonitor(self, event):
         """
+        Pop up a frame with messages sent to the status bar
         """
         self.frame = Console(parent=self)
-        
         self.frame.set_multiple_messages(self.list_msg)
         self.frame.Show(True)
         
         
 if __name__ == "__main__":
-     app = wx.PySimpleApp()
-     frame= wx.Frame(None,wx.ID_ANY,'test frame')
-     statusBar = StatusBar(frame, wx.ID_ANY)
-     frame.SetStatusBar(statusBar)
-     frame.Show(True)
-     
-     event = MessageEvent()
-     event.type = "progress"
-     event.status  = "statusbar...."
-     event.info = "error"
-     statusBar.set_status(event=event)
-     app.MainLoop()
+    app = wx.PySimpleApp()
+    frame = wx.Frame(None, wx.ID_ANY, 'test frame')
+    statusBar = StatusBar(frame, wx.ID_ANY)
+    frame.SetStatusBar(statusBar)
+    frame.Show(True)
+    event = MessageEvent()
+    event.type = "progress"
+    event.status  = "statusbar...."
+    event.info = "error"
+    statusBar.set_status(event=event)
+    app.MainLoop()
 

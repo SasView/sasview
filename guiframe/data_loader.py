@@ -1,5 +1,7 @@
 
-import os, sys,numpy
+import os
+import sys
+import numpy
 import wx
 import re
 
@@ -9,16 +11,17 @@ from DataLoader.loader import Loader
 from load_thread import DataReader
 from sans.guicomm.events import FitStateUpdateEvent
 from sans.guicomm.events import InvStateUpdateEvent
+from sans.guicomm.events import StatusEvent
+from sans.guicomm.events import NewPlotEvent
 
-from sans.guicomm.events import NewPlotEvent, StatusEvent
-SVS_FILE_EXT = ['.svs','.inv','.prv','.fitv']
+SVS_FILE_EXT = ['.svs', '.inv', '.prv', '.fitv']
 
 def enable_add_data(existing_panel, new_plot):
     """
     Enable append data on a plot panel
     """
-    is_theory = len(existing_panel.plots)<= 1 and \
-        existing_panel.plots.values()[0].__class__.__name__=="Theory1D"
+    is_theory = len(existing_panel.plots) <= 1 and \
+        existing_panel.plots.values()[0].__class__.__name__ == "Theory1D"
         
     is_data2d = hasattr(new_plot, 'data')
     is_data1d = existing_panel.__class__.__name__ == "ModelPanel1D"\
@@ -73,8 +76,8 @@ def open_dialog_append_data(panel_name, data_name):
     :param data_name: the name of the current data
     
     """
-    message = " Do you want to append %s data\n in "%(str(data_name))
-    message += " %s panel?\n\n"%(str(panel_name))
+    message = " Do you want to append %s data\n in " % (str(data_name))
+    message += " %s panel?\n\n" % (str(panel_name))
     dial = wx.MessageDialog(None, message, 'Question',
                        wx.YES_NO|wx.NO_DEFAULT|wx.ICON_QUESTION)
     if dial.ShowModal() == wx.ID_YES:
@@ -82,7 +85,7 @@ def open_dialog_append_data(panel_name, data_name):
     else:
         return False
    
-
+# where is this method used?
 def load_ascii_1D(path):
     """
     Load a 1D ascii file, with errors
@@ -106,7 +109,7 @@ def load_ascii_1D(path):
                 toks = line.split()
                 x = float(toks[0])
                 y = float(toks[1])
-                if len(toks)==3:
+                if len(toks) == 3:
                     has_dy = True
                     errdy = float(toks[2])
                 else:
@@ -141,9 +144,11 @@ def load_error(error=None):
     message += "Make sure the content of your file is properly formatted.\n\n"
     
     if error is not None:
-        message += "When contacting the DANSE team, mention the following:\n%s" % str(error)
+        message += "When contacting the DANSE team, mention the"
+        message += " following:\n%s" % str(error)
     
-    dial = wx.MessageDialog(None, message, 'Error Loading File', wx.OK | wx.ICON_EXCLAMATION)
+    dial = wx.MessageDialog(None, message, 'Error Loading File',
+                            wx.OK | wx.ICON_EXCLAMATION)
     dial.ShowModal()    
 
 def on_load_error(parent):
@@ -159,9 +164,8 @@ def plot_data(parent, path, format=None):
     :param path: the path of the data to load
     : param format: file format (as file extension)
     """
-    from sans.guicomm.events import NewPlotEvent, StatusEvent
-    from DataLoader.loader import  Loader
-   
+    #from sans.guicomm.events import NewPlotEvent, StatusEvent
+    #from DataLoader.loader import  Loader
     # Instantiate a loader 
     L = Loader()
     
@@ -184,13 +188,15 @@ def plot_data(parent, path, format=None):
     if not  output.__class__.__name__ == "list":
         ## Creating a Data2D with output
         if hasattr(output,'data'):
-            msg = "Loading 2D data: %s"%output.filename
-            wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
+            msg = "Loading 2D data: %s" % output.filename
+            wx.PostEvent(parent, StatusEvent(status=msg, info="info",
+                                             type="stop"))
             new_plot = Data2D(image=None, err_image=None)
       
         else:
-            msg = "Loading 1D data: %s"%output.filename
-            wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
+            msg = "Loading 1D data: %s" % output.filename
+            wx.PostEvent(parent, StatusEvent(status=msg, info="info",
+                                             type="stop"))
             new_plot = Data1D(x=[], y=[], dx=None, dy=None)
             
         new_plot.copy_from_datainfo(output) 
@@ -218,34 +224,38 @@ def plot_data(parent, path, format=None):
                 title = str(name)
         else:
             title = str(name)
-        if hasattr(parent, "panel_on_focus") and not(parent.panel_on_focus is None):
-                existing_panel  = parent.panel_on_focus
-                panel_name = existing_panel.window_caption
-                data_name = new_plot.name
-                if enable_add_data(existing_panel, new_plot):
-                    if open_dialog_append_data(panel_name, data_name):
-                        #add this plot the an existing panel
-                        new_plot.group_id = existing_panel.group_id
+        if hasattr(parent, "panel_on_focus") and \
+            not(parent.panel_on_focus is None):
+            existing_panel  = parent.panel_on_focus
+            panel_name = existing_panel.window_caption
+            data_name = new_plot.name
+            if enable_add_data(existing_panel, new_plot):
+                if open_dialog_append_data(panel_name, data_name):
+                    #add this plot the an existing panel
+                    new_plot.group_id = existing_panel.group_id
         # plot data
         wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=title))
         if ext in SVS_FILE_EXT:
             # set state and plot computation if exists
-            wx.PostEvent(parent,InvStateUpdateEvent())
-            wx.PostEvent(parent,FitStateUpdateEvent())
-    ## the output of the loader is a list , some xml files contain more than one data
+            wx.PostEvent(parent, InvStateUpdateEvent())
+            wx.PostEvent(parent, FitStateUpdateEvent())
+    ## the output of the loader is a list , some xml files contain 
+    #more than one data
     else:
-        i=0
+        i = 0
         for item in output: 
             try:
                 ## Creating a Data2D with output
-                if hasattr(item,'data'):
-                    msg = "Loading 2D data: %s"%item.filename
-                    wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
+                if hasattr(item, 'data'):
+                    msg = "Loading 2D data: %s" % item.filename
+                    wx.PostEvent(parent, StatusEvent(status=msg, info="info",
+                                                     type="stop"))
                     new_plot = Data2D(image=None, err_image=None)
               
                 else:
-                    msg = "Loading 1D data: %s"%str(item.run[0])
-                    wx.PostEvent(parent, StatusEvent(status=msg, info="info", type="stop"))
+                    msg = "Loading 1D data: %s" % str(item.run[0])
+                    wx.PostEvent(parent, StatusEvent(status=msg, info="info",
+                                                     type="stop"))
                     try:
                         dx = item.dx
                         dxl = item.dxl
@@ -255,7 +265,7 @@ def plot_data(parent, path, format=None):
                         dxl = None
                         dxw = None
         
-                    new_plot = Data1D(x=item.x,y=item.y,dx=dx,dy=item.dy)
+                    new_plot = Data1D(x=item.x, y=item.y, dx=dx, dy=item.dy)
                     if dxl != None:
                         new_plot.dxl = dxl
                     if dxl != None:
@@ -268,7 +278,7 @@ def plot_data(parent, path, format=None):
                 max_char = name.find("[")
                 if max_char < 0:
                     max_char = len(name)
-                original_name =name[0:max_char]
+                original_name = name[0:max_char]
                 #TODO: this is a very annoying feature. We should make this
                 # an option. Excel doesn't do this. Why should we?
                 # What is the requirement for this feature, and are the
@@ -281,13 +291,14 @@ def plot_data(parent, path, format=None):
                 new_plot.is_data = True
                 title = item.filename
                 
-                if hasattr(item,"title"):
+                if hasattr(item, "title"):
                     title = item.title.lstrip().rstrip()
                     if title == "":
                         title = str(name)
                 else:
                     title = name
-                if hasattr(parent, "panel_on_focus") and not(parent.panel_on_focus is None):
+                if hasattr(parent, "panel_on_focus") and \
+                    not(parent.panel_on_focus is None):
                     existing_panel  = parent.panel_on_focus
                     panel_name = existing_panel.window_caption
                     data_name = new_plot.name
@@ -296,11 +307,11 @@ def plot_data(parent, path, format=None):
                             #add this plot the an existing panel
                             new_plot.group_id = existing_panel.group_id
                 # plot data
-                wx.PostEvent(parent, NewPlotEvent(plot=new_plot, title=str(title)))
-                
+                wx.PostEvent(parent, NewPlotEvent(plot=new_plot,
+                                                  title=str(title)))
                 if ext in SVS_FILE_EXT:
                     # set state and plot computation if exists
-                    wx.PostEvent(parent,InvStateUpdateEvent())
-                    wx.PostEvent(parent,FitStateUpdateEvent())
+                    wx.PostEvent(parent, InvStateUpdateEvent())
+                    wx.PostEvent(parent, FitStateUpdateEvent())
             except:
                 raise

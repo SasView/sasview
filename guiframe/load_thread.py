@@ -1,6 +1,6 @@
 
 import time
-import sys
+#import sys
 
 from data_util.calcthread import CalcThread
 from DataLoader.loader import Loader
@@ -45,7 +45,7 @@ class DataReader(CalcThread):
         self.starttime = time.time()
         try:
             output =  self.loader.load(self.path)
-            elapsed = time.time() - self.starttime
+            #elapsed = time.time() - self.starttime
             self.complete(output=output, parent=self.parent, path=self.path)
         except RuntimeError:
             self.err_fct()

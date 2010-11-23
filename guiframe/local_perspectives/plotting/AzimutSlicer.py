@@ -10,17 +10,18 @@
 import math
 import wx
 from copy import deepcopy
-
 from BaseInteractor import _BaseInteractor
-from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,EVT_SLICER_PARS
-
+from sans.guicomm.events import NewPlotEvent
+from sans.guicomm.events import StatusEvent
+from sans.guicomm.events import SlicerParameterEvent
+from sans.guicomm.events import EVT_SLICER_PARS
 
 
 class SectorInteractor(_BaseInteractor):
     """
     Select an annulus through a 2D plot
     """
-    def __init__(self,base,axes,color='black', zorder=3):
+    def __init__(self, base, axes, color='black', zorder=3):
         """
         """
         _BaseInteractor.__init__(self, base, axes, color=color)
@@ -31,28 +32,36 @@ class SectorInteractor(_BaseInteractor):
         
         ## Number of points on the plot
         self.nbins = 20
-        theta1=math.pi/8
-        theta2=math.pi/2
-        theta1=2*math.pi/3
-        theta2=-2*math.pi/3
-        r1=self.qmax/2.0
-        r2=self.qmax/1.8
+        theta1 = math.pi/8
+        theta2 = math.pi/2
+        theta1 = 2 * math.pi/3
+        theta2 = -2 * math.pi/3
+        r1 = self.qmax/2.0
+        r2 = self.qmax/1.8
        
         # Inner circle
         from Arc import ArcInteractor
-        self.inner_circle = ArcInteractor(self, self.base.subplot, zorder=zorder, r=self.qmax/2.0,theta1= theta1,
+        self.inner_circle = ArcInteractor(self, self.base.subplot,
+                                           zorder=zorder,
+                                           r=self.qmax/2.0,
+                                           theta1=theta1,
                                            theta2=theta2)
         self.inner_circle.qmax = self.qmax
-        self.outer_circle = ArcInteractor(self, self.base.subplot, zorder=zorder+1, r=self.qmax/1.8,theta1= theta1,
+        self.outer_circle = ArcInteractor(self, self.base.subplot,
+                                          zorder=zorder+1,
+                                          r=self.qmax/1.8,
+                                          theta1=theta1,
                                            theta2=theta2)
-        self.outer_circle.qmax = self.qmax*1.2
+        self.outer_circle.qmax = self.qmax * 1.2
         #self.outer_circle.set_cursor(self.base.qmax/1.8, 0)
         from Edge import RadiusInteractor
-        self.right_edge= RadiusInteractor(self, self.base.subplot, zorder=zorder+1,
+        self.right_edge= RadiusInteractor(self, self.base.subplot,
+                                          zorder=zorder+1,
                                              arc1=self.inner_circle,
                                              arc2=self.outer_circle,
                                             theta=theta1)
-        self.left_edge= RadiusInteractor(self, self.base.subplot, zorder=zorder+1,
+        self.left_edge= RadiusInteractor(self, self.base.subplot,
+                                         zorder=zorder+1,
                                              arc1=self.inner_circle,
                                              arc2=self.outer_circle,
                                             theta=theta2)
@@ -74,7 +83,6 @@ class SectorInteractor(_BaseInteractor):
         """
         """
         output = open(path, 'w')
-        
         data_x, data_y = self.get_data(image, x, y)
         
         output.write("<phi>  <average>\n")
@@ -108,29 +116,32 @@ class SectorInteractor(_BaseInteractor):
         if self.inner_circle.has_move:    
             #print "inner circle has moved" 
             self.inner_circle.update()
-            r1=self.inner_circle.get_radius()
-            r2=self.outer_circle.get_radius()
-            self.right_edge.update(r1,r2)
-            self.left_edge.update(r1,r2)
+            r1 = self.inner_circle.get_radius()
+            r2 = self.outer_circle.get_radius()
+            self.right_edge.update(r1, r2)
+            self.left_edge.update(r1, r2)
         if self.outer_circle.has_move:    
             #print "outer circle has moved" 
             self.outer_circle.update()
-            r1=self.inner_circle.get_radius()
-            r2=self.outer_circle.get_radius()
-            self.left_edge.update(r1,r2)
-            self.right_edge.update(r1,r2)
+            r1 = self.inner_circle.get_radius()
+            r2 = self.outer_circle.get_radius()
+            self.left_edge.update(r1, r2)
+            self.right_edge.update(r1, r2)
         if self.right_edge.has_move:
             #print "right edge has moved"
             self.right_edge.update()
-            self.inner_circle.update(theta1=self.right_edge.get_angle(), theta2=None)
-            self.outer_circle.update(theta1=self.right_edge.get_angle(), theta2=None)
+            self.inner_circle.update(theta1=self.right_edge.get_angle(),
+                                     theta2=None)
+            self.outer_circle.update(theta1=self.right_edge.get_angle(),
+                                     theta2=None)
         if  self.left_edge.has_move:
             #print "left Edge has moved"
             self.left_edge.update()
-            self.inner_circle.update(theta1=None, theta2=self.left_edge.get_angle())
-            self.outer_circle.update(theta1=None, theta2=self.left_edge.get_angle())
+            self.inner_circle.update(theta1=None,
+                                     theta2=self.left_edge.get_angle())
+            self.outer_circle.update(theta1=None,
+                                     theta2=self.left_edge.get_angle())
              
-        
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
@@ -148,55 +159,53 @@ class SectorInteractor(_BaseInteractor):
     def post_data(self,new_sector ):
         """ post data averaging in Q"""
         if self.inner_circle.get_radius() < self.outer_circle.get_radius():
-            rmin=self.inner_circle.get_radius()
-            rmax=self.outer_circle.get_radius()
+            rmin = self.inner_circle.get_radius()
+            rmax = self.outer_circle.get_radius()
         else:
-            rmin=self.outer_circle.get_radius()
-            rmax=self.inner_circle.get_radius()
+            rmin = self.outer_circle.get_radius()
+            rmax = self.inner_circle.get_radius()
         if self.right_edge.get_angle() < self.left_edge.get_angle():
-            phimin=self.right_edge.get_angle()
-            phimax=self.left_edge.get_angle()
+            phimin = self.right_edge.get_angle()
+            phimax = self.left_edge.get_angle()
         else:
-            phimin=self.left_edge.get_angle()
-            phimax=self.right_edge.get_angle()
-            
-        #print "phimin, phimax, rmin ,rmax",math.degrees(phimin), math.degrees(phimax), rmin ,rmax
+            phimin = self.left_edge.get_angle()
+            phimax = self.right_edge.get_angle()   
+        #print "phimin, phimax, rmin ,rmax",math.degrees(phimin),
+        # math.degrees(phimax), rmin ,rmax
         #from DataLoader.manipulations import SectorQ
         
-        sect = new_sector(r_min=rmin, r_max=rmax, phi_min=phimin, phi_max=phimax)
+        sect = new_sector(r_min=rmin, r_max=rmax,
+                          phi_min=phimin, phi_max=phimax)
         sector = sect(self.base.data2D)
         
         from sans.guiframe.dataFitting import Data1D
-        if hasattr(sector,"dxl"):
-            dxl= sector.dxl
+        if hasattr(sector, "dxl"):
+            dxl = sector.dxl
         else:
-            dxl= None
-        if hasattr(sector,"dxw"):
-            dxw= sector.dxw
+            dxl = None
+        if hasattr(sector, "dxw"):
+            dxw = sector.dxw
         else:
-            dxw= None
-       
-        new_plot = Data1D(x=sector.x,y=sector.y,dy=sector.dy,dxl=dxl,dxw=dxw)
-        new_plot.name = str(new_sector.__name__) +"("+ self.base.data2D.name+")"
-        
-       
-
-        new_plot.source=self.base.data2D.source
+            dxw = None
+        new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy,
+                          dxl=dxl, dxw=dxw)
+        new_plot.name = str(new_sector.__name__) + \
+                        "("+ self.base.data2D.name+")"
+        new_plot.source = self.base.data2D.source
         new_plot.interactive = True
         #print "loader output.detector",output.source
-        new_plot.detector =self.base.data2D.detector
+        new_plot.detector = self.base.data2D.detector
         # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}", 'rad')
-        new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-        new_plot.group_id = str(new_sector.__name__)+self.base.data2D.name
-        wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
-                                                 title=str(new_sector.__name__) ))
-        
+        new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+        new_plot.group_id = str(new_sector.__name__) + self.base.data2D.name
+        wx.PostEvent(self.base.parent,
+                    NewPlotEvent(plot=new_plot, title=str(new_sector.__name__)))
         
     def moveend(self, ev):
         #self.base.thaw_axes()
         
-         # Post paramters
+        # Post paramters
         #event = SlicerParameterEvent()
         #event.type = self.__class__.__name__
         #event.params = self.get_params()
@@ -270,7 +279,7 @@ class SectorInteractor(_BaseInteractor):
 class SectorInteractorQ(SectorInteractor):
     """
     """
-    def __init__(self,base,axes,color='black', zorder=3):
+    def __init__(self, base, axes, color='black', zorder=3):
         """
         """
         SectorInteractor.__init__(self, base, axes, color=color)
@@ -281,13 +290,13 @@ class SectorInteractorQ(SectorInteractor):
         """
         """
         from DataLoader.manipulations import SectorQ
-        self.post_data(SectorQ )   
+        self.post_data(SectorQ)   
         
 
 class SectorInteractorPhi(SectorInteractor):
     """
     """
-    def __init__(self,base,axes,color='black', zorder=3):
+    def __init__(self, base, axes, color='black', zorder=3):
         """
         """
         SectorInteractor.__init__(self, base, axes, color=color)

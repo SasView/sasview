@@ -10,8 +10,10 @@
 ################################################################################
 
 
-import sys, time
-import subprocess, os
+import sys
+import time
+import subprocess
+import os
 import getopt
 from threading import Thread
 
@@ -40,7 +42,8 @@ class VersionChecker(object):
         """
         Start the sub-process used to read the version URL
         """
-        self._process = subprocess.Popen([sys.executable, __file__, '-g', '-u%s' % version_url])
+        self._process = subprocess.Popen([sys.executable, __file__,
+                                          '-g', '-u%s' % version_url])
         self._t_0 = time.time()
         
     def is_complete(self):
@@ -50,7 +53,7 @@ class VersionChecker(object):
         This method should always be called before get_version() to ensure
         accuracy of the version number that is returned.
         """
-        if(time.time()-self._t_0<MAX_WAIT_TIME):
+        if(time.time() - self._t_0 < MAX_WAIT_TIME):
             if self._process.poll() is not None:
                 return True
             return False
@@ -109,12 +112,13 @@ def _get_version_from_server(url):
     :param url: URL to read the version number from
     
     """
-    import urllib, re
+    import urllib
+    import re
     try: 
         h = urllib.urlopen(url)
         for line in h.readlines():
             version = line.strip()
-            if len(re.findall('\d+\.\d+\.\d+$', version))>0:
+            if len(re.findall('\d+\.\d+\.\d+$', version)) > 0:
                 write_version(version)
                 return       
         write_version('0.0.0')

@@ -13,7 +13,8 @@
 How-to build an application using guiframe:
 
 1- Write a main application script along the lines of dummyapp.py
-2- Write a config script along the lines of config.py, and name it local_config.py
+2- Write a config script along the lines of config.py, and 
+    name it local_config.py
 3- Write your plug-ins and place them in a directory called "perspectives".
     - Look at local_perspectives/plotting for an example of a plug-in.
     - A plug-in should define a class called Plugin. See abstract class below.
@@ -23,7 +24,8 @@ How-to build an application using guiframe:
 
 import wx
 import wx.aui
-import os, sys
+import os
+import sys
 import xml
 
 try:
@@ -31,9 +33,9 @@ try:
     import imp
     path = os.getcwd()
     if(os.path.isfile("%s/%s.py" % (path, 'local_config'))) or \
-      (os.path.isfile("%s/%s.pyc" % (path, 'local_config'))):
-            fObj, path, descr = imp.find_module('local_config', [path])
-            config = imp.load_module('local_config', fObj, path, descr)  
+        (os.path.isfile("%s/%s.pyc" % (path, 'local_config'))):
+        fObj, path, descr = imp.find_module('local_config', [path])
+        config = imp.load_module('local_config', fObj, path, descr)  
     else:
         # Try simply importing local_config
         import local_config as config
@@ -45,12 +47,14 @@ import warnings
 warnings.simplefilter("ignore")
 
 import logging
-from sans.guicomm.events import NewLoadedDataEvent
+#from sans.guicomm.events import NewLoadedDataEvent
 from sans.guicomm.events import EVT_STATUS
-from sans.guicomm.events import EVT_NEW_PLOT,EVT_SLICER_PARS_UPDATE
+#from sans.guicomm.events import EVT_NEW_PLOT
+#from sans.guicomm.events import EVT_SLICER_PARS_UPDATE
 from sans.guicomm.events import EVT_ADD_MANY_DATA
-from data_manager import DataManager
-STATE_FILE_EXT = ['.inv','.fitv','.prv']
+#from data_manager import DataManager
+
+STATE_FILE_EXT = ['.inv', '.fitv', '.prv']
 
 def quit_guiframe(parent=None):
     """
@@ -205,7 +209,8 @@ class ViewerFrame(wx.Frame):
         Initialize the Frame object
         """
         from local_perspectives.plotting import plotting
-        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size=(window_width, window_height))
+        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition,
+                          size=(window_width, window_height))
         # Preferred window size
         self._window_height = window_height
         self._window_width  = window_width
@@ -216,22 +221,24 @@ class ViewerFrame(wx.Frame):
                     filename='sans_app.log',
                     filemode='w')        
         path = os.path.dirname(__file__)
-        temp_path= os.path.join(path,'images')
+        temp_path = os.path.join(path,'images')
         ico_file = os.path.join(temp_path,'ball.ico')
         if os.path.isfile(ico_file):
             self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         else:
-            temp_path= os.path.join(os.getcwd(),'images')
+            temp_path = os.path.join(os.getcwd(),'images')
             ico_file = os.path.join(temp_path,'ball.ico')
             if os.path.isfile(ico_file):
                 self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         
         ## Application manager
         self.app_manager = None
+        self._mgr = None
+        self.file_menu = None
         
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
-        self.plugins =[]
+        self.plugins = []
         self.plugins.append(plotting.Plugin())
         self.plugins += self._find_plugins()
       
@@ -254,14 +261,15 @@ class ViewerFrame(wx.Frame):
         ## maximum number of opened files' paths to store
         self.n_maxfileopen =  2
         ## number of file open
-        self.n_fileOpen=0
+        self.n_fileOpen = 0
         ## list of path of open files 
-        self.filePathList=[]
+        self.filePathList = []
         ## list of open file with name form menu
         #self._saveOpenData()
-        ## Dictionary of open file where keys are filename  and values are number of copy of data plotted
+        ## Dictionary of open file where keys are filename  and
+        # values are number of copy of data plotted
         ## using the same loaded file 
-        self.indice_load_data={}
+        self.indice_load_data = {}
         # Register the close event so it calls our own method
         wx.EVT_CLOSE(self, self._onClose)
         # Register to status events
@@ -297,10 +305,8 @@ class ViewerFrame(wx.Frame):
         # Add panel
         self._mgr = wx.aui.AuiManager(self)
         self._mgr.SetDockSizeConstraint(0.5, 0.5) 
-        
         # Load panels
         self._load_panels()
-        
         self._mgr.Update()
         
     def SetStatusText(self, *args, **kwds):
@@ -319,7 +325,7 @@ class ViewerFrame(wx.Frame):
         """
         """
         field = self.sb.get_msg_position()
-        wx.Frame.PushStatusText(self, field=field,string=string)
+        wx.Frame.PushStatusText(self, field=field, string=string)
 
     def add_perspective(self, plugin):
         """
@@ -328,10 +334,9 @@ class ViewerFrame(wx.Frame):
         """
         is_loaded = False
         for item in self.plugins:
-             if plugin.__class__==item.__class__:
-                 print "Plugin %s already loaded" % plugin.__class__.__name__
-                 is_loaded = True
-                 
+            if plugin.__class__ == item.__class__:
+                #print "Plugin %s already loaded" % plugin.__class__.__name__
+                is_loaded = True    
         if not is_loaded:
             self.plugins.append(plugin)
       
@@ -345,7 +350,6 @@ class ViewerFrame(wx.Frame):
         
         """
         import imp
-        
         plugins = []
         # Go through files in panels directory
         try:
@@ -356,33 +360,38 @@ class ViewerFrame(wx.Frame):
                 name = None
                 if not toks[0] == '__init__':
                     
-                    if toks[1]=='.py' or toks[1]=='':
+                    if toks[1] == '.py' or toks[1] == '':
                         name = toks[0]
                 
                     path = [os.path.abspath(dir)]
                     file = None
                     try:
-                        if toks[1]=='':
+                        if toks[1] == '':
                             mod_path = '.'.join([dir, name])
-                            module = __import__(mod_path, globals(), locals(), [name])
+                            module = __import__(mod_path, globals(),
+                                                locals(), [name])
                         else:
                             (file, path, info) = imp.find_module(name, path)
-                            module = imp.load_module( name, file, item, info )
+                            module = imp.load_module( name, file, item, info)
                         if hasattr(module, "PLUGIN_ID"):
                             try:
                                 plugins.append(module.Plugin())
-                                logging.info("Found plug-in: %s" % module.PLUGIN_ID)
+                                msg = "Found plug-in: %s" % module.PLUGIN_ID
+                                logging.info(msg)
                             except:
-                                config.printEVT("Error accessing PluginPanel in %s\n  %s" % (name, sys.exc_value))
-                        
+                                msg = "Error accessing PluginPanel"
+                                msg += " in %s\n  %s" % (name, sys.exc_value)
+                                config.printEVT(msg)
                     except:
-                        print sys.exc_value
-                        logging.error("ViewerFrame._find_plugins: %s" % sys.exc_value)
+                        #print sys.exc_value
+                        msg = "ViewerFrame._find_plugins: %s" % sys.exc_value
+                        logging.error(msg)
                     finally:
-                        if not file==None:
+                        if not file == None:
                             file.close()
         except:
-            # Should raise and catch at a higher level and display error on status bar
+            # Should raise and catch at a higher level and 
+            # display error on status bar
             pass   
         return plugins
     
@@ -411,19 +420,21 @@ class ViewerFrame(wx.Frame):
         # It also sets the size of the application windows
         #TODO: Use this for slpash screen
         if self.defaultPanel is None:
-            self.defaultPanel    = DefaultPanel(self, -1, style=wx.RAISED_BORDER)
+            self.defaultPanel = DefaultPanel(self, -1, style=wx.RAISED_BORDER)
             
         self.panels["default"] = self.defaultPanel
         
         self._mgr.AddPane(self.defaultPanel, wx.aui.AuiPaneInfo().
                               Name("default").
                               CenterPane().
-                              # This is where we set the size of the application window
-                              BestSize(wx.Size(self._window_width, self._window_height)).
-                              #MinSize(wx.Size(self._window_width, self._window_height)).
+                              # This is where we set the size of
+                              # the application window
+                              BestSize(wx.Size(self._window_width, 
+                                               self._window_height)).
+                              #MinSize(wx.Size(self._window_width, 
+                              #self._window_height)).
                               Show())
      
-
         # Add the panels to the AUI manager
         for panel_class in panels:
             p = panel_class
@@ -465,7 +476,6 @@ class ViewerFrame(wx.Frame):
         for item in self.plugins:
             if hasattr(item, "get_context_menu"):
                 menu_list.extend(item.get_context_menu(graph))
-            
         return menu_list
         
     def popup_panel(self, p):
@@ -484,14 +494,11 @@ class ViewerFrame(wx.Frame):
         for item in self.panels:
             if self.panels[item].window_name.startswith(p.window_name): 
                 count += 1
-        
         windowname = p.window_name
         caption = p.window_caption
-        
-        if count>0:
+        if count > 0:
             windowname += str(count+1)
             caption += (' '+str(count))
-          
         p.window_name = windowname
         p.window_caption = caption
             
@@ -515,10 +522,7 @@ class ViewerFrame(wx.Frame):
         pane = self._mgr.GetPane(windowname)
         self._mgr.MaximizePane(pane)
         self._mgr.RestoreMaximizedPane()
-        
-        
         # Register for showing/hiding the panel
-        
         wx.EVT_MENU(self, ID, self._on_view)
         
         self._mgr.Update()
@@ -530,7 +534,6 @@ class ViewerFrame(wx.Frame):
         """
         # Menu
         menubar = wx.MenuBar()
-        
         # File menu
         self.filemenu = wx.Menu()
         
@@ -540,16 +543,17 @@ class ViewerFrame(wx.Frame):
         #self.filemenu.AppendSeparator()
         
         id = wx.NewId()
-        self.filemenu.Append(id, '&Save', 'Save project as a SanaView (svs) file')
+        self.filemenu.Append(id, '&Save',
+                             'Save project as a SanaView (svs) file')
         wx.EVT_MENU(self, id, self._on_save)
         #self.filemenu.AppendSeparator()
         
         id = wx.NewId()
-        self.filemenu.Append(id,'&Quit', 'Exit') 
+        self.filemenu.Append(id, '&Quit', 'Exit') 
         wx.EVT_MENU(self, id, self.Close)
         
         # Add sub menus
-        menubar.Append(self.filemenu,  '&File')
+        menubar.Append(self.filemenu, '&File')
         
         # Window menu
         # Attach a menu item for each panel in our
@@ -557,20 +561,22 @@ class ViewerFrame(wx.Frame):
         
         # Only add the panel menu if there is only one perspective and
         # it has more than two panels.
-        # Note: the first plug-in is always the plotting plug-in. The first application
+        # Note: the first plug-in is always the plotting plug-in. 
+        #The first application
         # plug-in is always the second one in the list.
-        if len(self.plugins)==2:
+        if len(self.plugins) == 2:
             plug = self.plugins[1]
             pers = plug.get_perspective()
        
-            if len(pers)>1:
+            if len(pers) > 1:
                 viewmenu = wx.Menu()
                 for item in self.panels:
                     if item == 'default':
                         continue
                     panel = self.panels[item]
                     if panel.window_name in pers:
-                        viewmenu.Append(int(item), panel.window_caption, "Show %s window" % panel.window_caption)
+                        viewmenu.Append(int(item), panel.window_caption,
+                                        "Show %s window" % panel.window_caption)
                         wx.EVT_MENU(self, int(item), self._on_view)
                 menubar.Append(viewmenu, '&Window')
 
@@ -582,14 +588,15 @@ class ViewerFrame(wx.Frame):
             if len(plug.get_perspective()) > 0:
                 n_perspectives += 1
         
-        if n_perspectives>1:
+        if n_perspectives > 1:
             p_menu = wx.Menu()
             for plug in self.plugins:
                 if len(plug.get_perspective()) > 0:
                     id = wx.NewId()
-                    p_menu.Append(id, plug.sub_menu, "Switch to %s perspective" % plug.sub_menu)
+                    p_menu.Append(id, plug.sub_menu,
+                                  "Switch to %s perspective" % plug.sub_menu)
                     wx.EVT_MENU(self, id, plug.on_perspective)
-            menubar.Append(p_menu,   '&Perspective')
+            menubar.Append(p_menu, '&Perspective')
  
         # Tools menu
         # Go through plug-ins and find tools to populate the tools menu
@@ -601,7 +608,6 @@ class ViewerFrame(wx.Frame):
                     if toolsmenu is None:
                         toolsmenu = wx.Menu()
                     id = wx.NewId()
-                    
                     toolsmenu.Append(id, tool[0], tool[1])
                     wx.EVT_MENU(self, id, tool[2])
         if toolsmenu is not None:
@@ -612,17 +618,15 @@ class ViewerFrame(wx.Frame):
         # add the welcome panel menu item
         if self.defaultPanel is not None:
             id = wx.NewId()
-            helpmenu.Append(id,'&Welcome', '')
+            helpmenu.Append(id, '&Welcome', '')
             helpmenu.AppendSeparator()
             wx.EVT_MENU(self, id, self.show_welcome_panel)
-        
         # Look for help item in plug-ins 
         for item in self.plugins:
             if hasattr(item, "help"):
                 id = wx.NewId()
                 helpmenu.Append(id,'&%s help' % item.sub_menu, '')
                 wx.EVT_MENU(self, id, item.help)
-        
         if config._do_aboutbox:
             id = wx.NewId()
             helpmenu.Append(id,'&About', 'Software information')
@@ -633,14 +637,16 @@ class ViewerFrame(wx.Frame):
         # is not up. We also need to make sure there's a proper executable to
         # run if we spawn a new background process.
         #id = wx.NewId()
-        #helpmenu.Append(id,'&Check for update', 'Check for the latest version of %s' % config.__appname__)
+        #helpmenu.Append(id,'&Check for update', 
+        #'Check for the latest version of %s' % config.__appname__)
         #wx.EVT_MENU(self, id, self._check_update)
         
         # Look for plug-in menus
         # Add available plug-in sub-menus. 
         for item in self.plugins:
             if hasattr(item, "populate_menu"):
-                for (self.next_id, menu, name) in item.populate_menu(self.next_id, self):
+                for (self.next_id, menu, name) in \
+                    item.populate_menu(self.next_id, self):
                     menubar.Append(menu, name)
                    
         menubar.Append(helpmenu, '&Help')
@@ -702,7 +708,6 @@ class ViewerFrame(wx.Frame):
                 self._mgr.GetPane(self.panels[ID].window_name).Show()
                 # Hide default panel
                 self._mgr.GetPane(self.panels["default"].window_name).Hide()
-        
             self._mgr.Update()
    
     def _on_open(self, event):
@@ -715,18 +720,19 @@ class ViewerFrame(wx.Frame):
         from data_loader import plot_data
         from sans.perspectives import invariant
         if path and os.path.isfile(path):
-             basename  = os.path.basename(path)
-             if  basename.endswith('.svs'):
-             	#remove panels for new states
+            basename  = os.path.basename(path)
+            if  basename.endswith('.svs'):
+                #remove panels for new states
                 for item in self.panels:
                     try:
                         self.panels[item].clear_panel()
-                    except: pass
+                    except:
+                        pass
                 #reset states and plot data 
                 for item in STATE_FILE_EXT:
-                    exec "plot_data(self, path,'%s')"% str(item)
-             else: plot_data(self,path)
-             
+                    exec "plot_data(self, path,'%s')" % str(item)
+            else:
+                plot_data(self, path)
         if self.defaultPanel is not None and \
             self._mgr.GetPane(self.panels["default"].window_name).IsShown():
             self.on_close_welcome_panel()
@@ -740,13 +746,13 @@ class ViewerFrame(wx.Frame):
         ## Default file location for save
         self._default_save_location = os.getcwd()
         path = None
-        dlg = wx.FileDialog(self, "Choose a file", self._default_save_location, "", "*.svs", wx.SAVE)
+        dlg = wx.FileDialog(self, "Choose a file",
+                            self._default_save_location, "", "*.svs", wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
         else:
             return None
-        
         dlg.Destroy()
         if path is None:
             return
@@ -758,18 +764,22 @@ class ViewerFrame(wx.Frame):
                     data = self.panels[item]._data
                     if data != None:
                         state = self.panels[item].state
-                        new_doc =self.panels[item]._manager.state_reader.write_toXML(data,state)
+                        manager = self.panels[item]._manager
+                        new_doc = manager.state_reader.write_toXML(data, state)
                         if hasattr(doc, "firstChild"):
-                            doc.firstChild.appendChild (new_doc.firstChild.firstChild)  
+                            child = new_doc.firstChild.firstChild
+                            doc.firstChild.appendChild(child)  
                         else:
                             doc = new_doc 
                 elif self.panels[item].window_name == 'pr_control':
                     data = self.panels[item].manager.current_plottable
                     if data != None:
                         state = self.panels[item].get_state()
-                        new_doc =self.panels[item].manager.state_reader.write_toXML(data,state)
+                        manager = self.panels[item].manager
+                        new_doc = manager.state_reader.write_toXML(data, state)
                         if hasattr(doc, "firstChild"):
-                            doc.firstChild.appendChild (new_doc.firstChild.firstChild)  
+                            child = new_doc.firstChild.firstChild
+                            doc.firstChild.appendChild(child)  
                         else:
                             doc = new_doc 
                 elif self.panels[item].window_name == 'Fit panel':
@@ -778,25 +788,24 @@ class ViewerFrame(wx.Frame):
                         if hasattr(selected_page,"get_data"):
                             data = selected_page.get_data()
                             state = selected_page.state
-                            new_doc =selected_page.manager.state_reader.write_toXML(data,state)
+                            reader = selected_page.manager.state_reader
+                            new_doc = reader.write_toXML(data, state)
                             if doc != None and hasattr(doc, "firstChild"):
-                                doc.firstChild.appendChild (new_doc.firstChild.firstChild)
+                                child = new_doc.firstChild.firstChild
+                                doc.firstChild.appendChild(child)
                             else:
                                 doc = new_doc
-
             except: 
                 pass
-
         # Write the XML document
         if doc != None:
             fd = open(path, 'w')
             fd.write(doc.toprettyxml())
             fd.close()
         else:
-            print "Nothing to save..."
+            #print "Nothing to save..."
             raise RuntimeError, "%s is not a SansView (.svs) file..." % path
 
-       
     def _onClose(self, event):
         """
         Store info to retrieve in xml before closing the application
@@ -804,11 +813,10 @@ class ViewerFrame(wx.Frame):
         try:
             doc = xml.dom.minidom.Document()
             main_node = doc.createElement("file Path")
-            
             doc.appendChild(main_node)
         
             for item in self.filePathList:
-                id, menuitem_name , path, title = item
+                id, menuitem_name, path, title = item
                 pt1 = doc.createElement("File")
                 pt1.setAttribute("name", menuitem_name)
                 pt2 = doc.createElement("path")
@@ -817,7 +825,6 @@ class ViewerFrame(wx.Frame):
                 pt3 = doc.createElement("title")
                 pt3.appendChild(doc.createTextNode(str(title)))
                 pt1.appendChild(pt3)
-                
                 main_node.appendChild(pt1)
             
             fd = open("fileOpened.xml",'w')
@@ -825,8 +832,7 @@ class ViewerFrame(wx.Frame):
             fd.close()
         except:
             pass
-        
-        import sys
+        #import sys
         wx.Exit()
         sys.exit()
                      
@@ -836,7 +842,7 @@ class ViewerFrame(wx.Frame):
         """
         flag = quit_guiframe(parent=self)
         if flag:
-            import sys
+            #import sys
             wx.Frame.Close(self)
             wx.Exit()
             sys.exit()
@@ -850,7 +856,9 @@ class ViewerFrame(wx.Frame):
         """
         if hasattr(config, "__update_URL__"):
             import version
-            checker = version.VersionThread(config.__update_URL__, self._process_version, baggage=event==None)
+            checker = version.VersionThread(config.__update_URL__,
+                                            self._process_version,
+                                            baggage=event==None)
             checker.start()  
     
     def _process_version(self, version, standalone=True):
@@ -866,20 +874,27 @@ class ViewerFrame(wx.Frame):
            
         """
         try:
-            if cmp(version, config.__version__)>0:
-                self.SetStatusText("Version %s is available! See the Help menu to download it." % version)
+            if cmp(version, config.__version__) > 0:
+                msg = "Version %s is available! See the Help "
+                msg += "menu to download it." % version
+                self.SetStatusText(msg)
                 if not standalone:
                     import webbrowser
                     webbrowser.open(config.__download_page__)
             else:
                 if not standalone:
-                    self.SetStatusText("You have the latest version of %s" % config.__appname__)
+                    msg = "You have the latest version"
+                    msg += " of %s" % config.__appname__
+                    self.SetStatusText(msg)
         except:
-            logging.error("guiframe: could not get latest application version number\n  %s" % sys.exc_value)
+            msg = "guiframe: could not get latest application"
+            msg += " version number\n  %s" % sys.exc_value
+            logging.error(msg)
             if not standalone:
-                self.SetStatusText("Could not connect to the application server. Please try again later.")
+                msg = "Could not connect to the application server."
+                msg += " Please try again later."
+                self.SetStatusText(msg)
                     
-        
     def _onAbout(self, evt):
         """
         Pop up the about dialog
@@ -896,9 +911,9 @@ class ViewerFrame(wx.Frame):
         """
         load a data previously opened 
         """
-        from data_loader import plot_data
+        from .data_loader import plot_data
         for item in self.filePathList:
-            id, menuitem_name , path, title = item
+            id, _, path, _ = item
             if id == event.GetId():
                 if path and os.path.isfile(path):
                     plot_data(self, path)
@@ -948,14 +963,12 @@ class ViewerFrame(wx.Frame):
             if hasattr(self.panels[item], "ALWAYS_ON"):
                 if self.panels[item].ALWAYS_ON:
                     continue 
-            
             if self.panels[item].window_name in panels:
                 if not self._mgr.GetPane(self.panels[item].window_name).IsShown():
                     self._mgr.GetPane(self.panels[item].window_name).Show()
             else:
                 if self._mgr.GetPane(self.panels[item].window_name).IsShown():
                     self._mgr.GetPane(self.panels[item].window_name).Hide()
-    
         self._mgr.Update()
         
     def choose_file(self, path=None):
@@ -964,13 +977,11 @@ class ViewerFrame(wx.Frame):
         Should add a hook to specify the preferred file type/extension.
         """
         #TODO: clean this up
-        from data_loader import choose_data_file
-        
+        from .data_loader import choose_data_file
         # Choose a file path
-        if path==None:
+        if path == None:
             path = choose_data_file(self, self._default_save_location)
-            
-        if not path==None:
+        if not path == None:
             try:
                 self._default_save_location = os.path.dirname(path)
             except:
@@ -980,7 +991,7 @@ class ViewerFrame(wx.Frame):
     def load_ascii_1D(self, path):
         """
         """
-        from data_loader import load_ascii_1D
+        from .data_loader import load_ascii_1D
         return load_ascii_1D(path)
                   
 class DefaultPanel(wx.Panel):
@@ -1043,4 +1054,6 @@ class ViewApp(wx.App):
 
 if __name__ == "__main__": 
     app = ViewApp(0)
-    app.MainLoop()              
+    app.MainLoop()
+
+             

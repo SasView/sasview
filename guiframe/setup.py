@@ -1,7 +1,9 @@
 """
     Installs the guiframe package
 """
-
+import sys
+if len(sys.argv) == 1:
+    sys.argv.append('install')
 from distutils.core import setup, Extension
 
 from distutils.sysconfig import get_python_lib

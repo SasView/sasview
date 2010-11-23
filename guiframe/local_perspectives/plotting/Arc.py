@@ -4,15 +4,18 @@ import wx
 from copy import deepcopy
 
 from BaseInteractor import _BaseInteractor
-from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,EVT_SLICER_PARS
+from sans.guicomm.events import NewPlotEvent
+from sans.guicomm.events import StatusEvent
+from sans.guicomm.events import SlicerParameterEvent
+from sans.guicomm.events import EVT_SLICER_PARS
   
  
 class ArcInteractor(_BaseInteractor):
     """
     Select an annulus through a 2D plot
     """
-    def __init__(self,base,axes,color='black', zorder=5, r=1.0,theta1=math.pi/8,
-                 theta2=math.pi/4):
+    def __init__(self, base, axes, color='black', zorder=5, r=1.0, 
+                 theta1=math.pi/8, theta2=math.pi/4):
         
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
@@ -25,14 +28,14 @@ class ArcInteractor(_BaseInteractor):
         
         self.scale = 10.0
         
-        self.theta1=theta1
-        self.theta2=theta2
-        self.radius= r
-        [self.arc] = self.axes.plot([],[],
+        self.theta1 = theta1
+        self.theta2 = theta2
+        self.radius = r
+        [self.arc] = self.axes.plot([], [],
                                       linestyle='-', marker='',
                                       color=self.color)
         self.npts = 20
-        self.has_move= False    
+        self.has_move = False    
         self.connect_markers([self.arc])
         self.update()
 
@@ -57,45 +60,43 @@ class ArcInteractor(_BaseInteractor):
     def get_radius(self):
         """
         """
-        radius =math.sqrt(math.pow(self._mouse_x, 2)+math.pow(self._mouse_y, 2))
+        radius = math.sqrt(math.pow(self._mouse_x, 2) + \
+                           math.pow(self._mouse_y, 2))
         return radius
         
-    def update(self,theta1=None,theta2=None, nbins=None, r=None):
+    def update(self, theta1=None, theta2=None, nbins=None, r=None):
         """
         """
         # Plot inner circle
         x = []
         y = []
-        if theta1 !=None:
-            self.theta1= theta1
-        if theta2 !=None:
-            self.theta2= theta2
-        
-        print "ring update theta1 theta2", math.degrees(self.theta1), math.degrees(self.theta2)
-        while self.theta2 < self.theta1: self.theta2 += 2*math.pi
-        while self.theta2 >= self.theta1+2*math.pi: self.theta2 -= 2*math.pi
-
+        if theta1 != None:
+            self.theta1 = theta1
+        if theta2 != None:
+            self.theta2 = theta2
+        #print "ring update theta1 theta2", math.degrees(self.theta1), 
+        #math.degrees(self.theta2)
+        while self.theta2 < self.theta1:
+            self.theta2 += (2 * math.pi)
+        while self.theta2 >= (self.theta1 + 2 * math.pi):
+            self.theta2 -= (2 * math.pi)
         npts = int((self.theta2 - self.theta1)/(math.pi/120))  
              
-        if r ==None:
-            self.radius=  math.sqrt(math.pow(self._mouse_x, 2)+math.pow(self._mouse_y, 2))
+        if r == None:
+            self.radius =  math.sqrt(math.pow(self._mouse_x, 2) + \
+                                     math.pow(self._mouse_y, 2))
         else:
-            self.radius= r
-            
+            self.radius = r
         for i in range(self.npts):
-            
-            phi =(self.theta2-self.theta1)/(self.npts-1)*i +self.theta1
-            
-            xval = 1.0*self.radius*math.cos(phi) 
-            yval = 1.0*self.radius*math.sin(phi) 
+            phi = (self.theta2 - self.theta1)/(self.npts - 1) * i + self.theta1
+            xval = 1.0 * self.radius * math.cos(phi) 
+            yval = 1.0 * self.radius * math.sin(phi) 
             
             x.append(xval)
             y.append(yval)
-        
         #self.marker.set(xdata=[self._mouse_x],ydata=[0])
         self.arc.set_data(x, y) 
         
-      
     def save(self, ev):
         """
         Remember the roughness for this layer and the next so that we
@@ -105,20 +106,18 @@ class ArcInteractor(_BaseInteractor):
         self._save_y = self._mouse_y
         #self._save_x = ev.xdata
         #self._save_y = ev.ydata
-        
         self.base.freeze_axes()
 
     def moveend(self, ev):
         """
         """
-        self.has_move= False
+        self.has_move = False
         
         event = SlicerParameterEvent()
         event.type = self.__class__.__name__
         event.params = self.get_params()
-        print "in arc moveend params",self.get_params()
+        #print "in arc moveend params",self.get_params()
         #wx.PostEvent(self.base.base.parent, event)
-        
         self.base.moveend(ev)
             
     def restore(self):
@@ -135,17 +134,16 @@ class ArcInteractor(_BaseInteractor):
         #print "ring move x, y", x,y
         self._mouse_x = x
         self._mouse_y = y
-        self.has_move= True
+        self.has_move = True
         self.base.base.update()
         
-    def set_cursor(self,radius, phi_min, phi_max,nbins):
+    def set_cursor(self, radius, phi_min, phi_max, nbins):
         """
         """
-        self.theta1= phi_min
-        self.theta2= phi_max
+        self.theta1 = phi_min
+        self.theta2 = phi_max
         self.update(nbins=nbins, r=radius)
-        
-        
+
     def get_params(self):
         """
         """

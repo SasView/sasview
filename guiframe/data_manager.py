@@ -28,6 +28,7 @@ class DataManager(object):
         self.created_data_list = []
         self.list_of_data = []
         self.message = ""
+        self.parent = parent
         
     def get_message(self):
         """
@@ -35,28 +36,29 @@ class DataManager(object):
         """
         return self.message
     
-    def set_loaded_data(self, data_list=[]):
+    def set_loaded_data(self, data_list=None):
         """
         save data and path
         """
-        if not data_list:
+        if data_list is None:
             return
-        else:
-            for data, path in data_list:
-                if data.name not in self.list_of_data:
-                    self.loaded_data_list.append((data, path))
-                    self.list_of_data.append(data.name)
-                else:
-                    self.message += " %s already loaded"%str(data.name)
+        for data, path in data_list:
+            if data.name not in self.list_of_data:
+                self.loaded_data_list.append((data, path))
+                self.list_of_data.append(data.name)
+            else:
+                self.message += " %s already loaded" % str(data.name)
         
-    def set_created_data(self, data_list=[]):
+    def set_created_data(self, data_list=None):
         """
         return 
         """
+        if data_list is None:
+            return
         for data, path in data_list:
-            for created_data, created_path in self.created_data_list:
+            for created_data, _ in self.created_data_list:
                 if data.name == created_data.name:
-                    self.message += " %s already created"%str(data.name)
+                    self.message += " %s already created" % str(data.name)
                 else:
                     self.created_data_list.append((data, path))
     
@@ -64,5 +66,5 @@ class DataManager(object):
         """
         Send list of available data
         """
-        return   self.loaded_data_list + self.created_data_list
+        return self.loaded_data_list + self.created_data_list
         

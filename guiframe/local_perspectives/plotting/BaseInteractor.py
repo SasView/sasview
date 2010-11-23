@@ -39,19 +39,23 @@ class _BaseInteractor:
         markers - list of handles for the interactor
         
     """
-    def __init__(self,base,axes,color='black'):
+    def __init__(self, base, axes, color='black'):
         """
         """
         self.base = base
         self.axes = axes
         self.color = color
+        self.clickx = None
+        self.clicky = None
+        self.markers = []
         
     def clear_markers(self):
         """
         Clear old markers and interfaces.
         """
         for h in self.markers: h.remove()
-        if self.markers: self.base.connect.clear(*self.markers)
+        if self.markers:
+            self.base.connect.clear(*self.markers)
         self.markers = []
 
     def save(self, ev):
@@ -74,7 +78,7 @@ class _BaseInteractor:
         """
         pass
 
-    def connect_markers(self,markers):
+    def connect_markers(self, markers):
         """
         Connect markers to callbacks
         """
@@ -110,7 +114,7 @@ class _BaseInteractor:
         Prepare to move the artist.  Calls save() to preserve the state for
         later restore().
         """
-        self.clickx,self.clicky = ev.xdata,ev.ydata
+        self.clickx, self.clicky = ev.xdata, ev.ydata
         self.save(ev)
         return True
 
@@ -125,10 +129,10 @@ class _BaseInteractor:
         Move the artist.  Calls move() to update the state, or restore() if
         the mouse leaves the window.
         """
-        inside,prop = self.axes.contains(ev)
+        inside, _ = self.axes.contains(ev)
         if inside:
-            self.clickx,self.clicky = ev.xdata,ev.ydata
-            self.move(ev.xdata,ev.ydata,ev)
+            self.clickx, self.clicky = ev.xdata, ev.ydata
+            self.move(ev.xdata, ev.ydata, ev)
         else:
             self.restore()
         self.base.update()
@@ -144,18 +148,21 @@ class _BaseInteractor:
         if ev.key == 'escape':
             self.restore()
         elif ev.key in ['up', 'down', 'right', 'left']:
-            dx,dy = self.dpixel(self.clickx,self.clicky,nudge=ev.control)
-            if ev.key == 'up': self.clicky += dy
-            elif ev.key == 'down': self.clicky -= dy
-            elif ev.key == 'right': self.clickx += dx
+            dx, dy = self.dpixel(self.clickx, self.clicky, nudge=ev.control)
+            if ev.key == 'up':
+                self.clicky += dy
+            elif ev.key == 'down':
+                self.clicky -= dy
+            elif ev.key == 'right':
+                self.clickx += dx
             else: self.clickx -= dx
-            self.move(self.clickx,self.clicky,ev)
+            self.move(self.clickx, self.clicky, ev)
         else:
             return False
         self.base.update()
         return True
 
-    def dpixel(self,x,y,nudge=False):
+    def dpixel(self, x, y, nudge=False):
         """
         Return the step size in data coordinates for a small
         step in screen coordinates.  If nudge is False (default)
@@ -163,11 +170,11 @@ class _BaseInteractor:
         size is 0.2 pixels.
         """
         ax = self.axes
-        px,py = ax.transData.inverse_xy_tup((x,y))
+        px, py = ax.transData.inverse_xy_tup((x, y))
         if nudge:
-            nx,ny = ax.transData.xy_tup((px+0.2,py+0.2))
+            nx, ny = ax.transData.xy_tup((px+0.2, py+0.2))
         else:
-            nx,ny = ax.transData.xy_tup((px+1.,py+1.))
-        dx,dy = nx-x,ny-y
-        return dx,dy
+            nx, ny = ax.transData.xy_tup((px+1.0, py+1.0))
+        dx, dy = nx-x, ny-y
+        return dx, dy
 

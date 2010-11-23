@@ -15,9 +15,13 @@ from DataLoader.data_info import Data2D as LoadData2D
 class Data1D(PlotData1D, LoadData1D):
     """
     """
-    def __init__(self, x=[], y=[], dx=None, dy=None):
+    def __init__(self, x=None, y=None, dx=None, dy=None):
         """
         """
+        if x is None:
+            x = []
+        if y is None:
+            y = []
         PlotData1D.__init__(self, x, y, dx, dy)
         LoadData1D.__init__(self, x, y, dx, dy)
         self.id = None
@@ -75,12 +79,16 @@ class Data1D(PlotData1D, LoadData1D):
             result.dy[i] = math.sqrt(math.fabs(output.variance))
         return result
     
-class Theory1D(PlotTheory1D,LoadData1D):
+class Theory1D(PlotTheory1D, LoadData1D):
     """
     """
-    def __init__(self, x=[], y=[], dy=None):
+    def __init__(self, x=None, y=None, dy=None):
         """
         """
+        if x is None:
+            x = []
+        if y is None:
+            y = []
         PlotTheory1D.__init__(self, x, y, dy)
         LoadData1D.__init__(self, x, y, dy)
         self.id = None
@@ -127,15 +135,15 @@ class Theory1D(PlotTheory1D,LoadData1D):
                 b = Uncertainty(other.y[i], dy_other[i]**2)
             else:
                 b = other
-            
             output = operation(a, b)
             result.y[i] = output.x
-            if result.dy is None: result.dy = numpy.zeros(len(self.x))
+            if result.dy is None:
+                result.dy = numpy.zeros(len(self.x))
             result.dy[i] = math.sqrt(math.fabs(output.variance))
         return result
     
       
-class Data2D(PlotData2D,LoadData2D):
+class Data2D(PlotData2D, LoadData2D):
     """
     """
     def __init__(self, image=None, err_image=None,
@@ -158,25 +166,26 @@ class Data2D(PlotData2D,LoadData2D):
         """
         copy value of Data2D of type DataLoader.data_info
         """
-        self.data     =  copy.deepcopy(data2d.data)
-        self.qx_data  =  copy.deepcopy(data2d.qx_data)
-        self.qy_data  =  copy.deepcopy(data2d.qy_data)
-        self.q_data    =  copy.deepcopy(data2d.q_data)
-        self.mask     =  copy.deepcopy(data2d.mask)
-        self.err_data =  copy.deepcopy(data2d.err_data)
-        self.x_bins     = copy.deepcopy(data2d.x_bins)
-        self.y_bins     = copy.deepcopy(data2d.y_bins)
-        if data2d.dqx_data is not None: self.dqx_data = copy.deepcopy(data2d.dqx_data)
-        if data2d.dqy_data is not None: self.dqy_data = copy.deepcopy(data2d.dqy_data)
-        self.xmin       = data2d.xmin
-        self.xmax       = data2d.xmax
-        self.ymin       = data2d.ymin
-        self.ymax       = data2d.ymax
+        self.data = copy.deepcopy(data2d.data)
+        self.qx_data = copy.deepcopy(data2d.qx_data)
+        self.qy_data = copy.deepcopy(data2d.qy_data)
+        self.q_data = copy.deepcopy(data2d.q_data)
+        self.mask = copy.deepcopy(data2d.mask)
+        self.err_data = copy.deepcopy(data2d.err_data)
+        self.x_bins = copy.deepcopy(data2d.x_bins)
+        self.y_bins = copy.deepcopy(data2d.y_bins)
+        if data2d.dqx_data is not None:
+            self.dqx_data = copy.deepcopy(data2d.dqx_data)
+        if data2d.dqy_data is not None:
+            self.dqy_data = copy.deepcopy(data2d.dqy_data)
+        self.xmin = data2d.xmin
+        self.xmax = data2d.xmax
+        self.ymin = data2d.ymin
+        self.ymax = data2d.ymax
         if hasattr(data2d, "zmin"):
-            self.zmin       = data2d.zmin
+            self.zmin = data2d.zmin
         if hasattr(data2d, "zmax"):
-            self.zmax      = data2d.zmax
-        
+            self.zmax = data2d.zmax
         self.xaxis(data2d._xaxis, data2d._xunit)
         self.yaxis(data2d._yaxis, data2d._yunit)
         
@@ -185,7 +194,6 @@ class Data2D(PlotData2D,LoadData2D):
         print data
         """
         _str = "%s\n" % LoadData2D.__str__(self)
-      
         return _str 
     
     def _perform_operation(self, other, operation):
@@ -206,11 +214,11 @@ class Data2D(PlotData2D,LoadData2D):
         result.clone_without_data(clone=self)
         result.copy_from_datainfo(data2d=self)
         
-        for i in range(numpy.size(self.data,0)):
-            for j in range(numpy.size(self.data,1)):
+        for i in range(numpy.size(self.data, 0)):
+            for j in range(numpy.size(self.data, 1)):
                 result.data[i][j] = self.data[i][j]
                 if self.err_data is not None and \
-                        numpy.size(self.data)==numpy.size(self.err_data):
+                        numpy.size(self.data) == numpy.size(self.err_data):
                     result.err_data[i][j] = self.err_data[i][j]
                 
                 a = Uncertainty(self.data[i][j], dy[i][j]**2)
@@ -218,7 +226,6 @@ class Data2D(PlotData2D,LoadData2D):
                     b = Uncertainty(other.data[i][j], dy_other[i][j]**2)
                 else:
                     b = other
-                
                 output = operation(a, b)
                 result.data[i][j] = output.x
                 result.err_data[i][j] = math.sqrt(math.fabs(output.variance))

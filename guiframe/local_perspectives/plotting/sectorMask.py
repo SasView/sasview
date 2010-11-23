@@ -1,18 +1,19 @@
 
 import math
 import wx
-from copy import deepcopy
-
+#from copy import deepcopy
 from BaseInteractor import _BaseInteractor
-from SectorSlicer import SideInteractor, LineInteractor
+from SectorSlicer import SideInteractor
+from SectorSlicer import LineInteractor
 from sans.guicomm.events import SlicerParameterEvent
 
 class SectorMask(_BaseInteractor):
     """
     Draw a sector slicer.Allow to find the data 2D inside of the sector lines
     """
-    def __init__(self,base,axes,color='gray', zorder=3, side = False):
-        
+    def __init__(self, base, axes, color='gray', zorder=3, side=False):
+        """
+        """
         _BaseInteractor.__init__(self, base, axes, color=color)
         ## Class initialization
         self.markers = []
@@ -22,36 +23,35 @@ class SectorMask(_BaseInteractor):
         self.connect = self.base.connect
         
         ## compute qmax limit to reset the graph     
-        x = math.pow(max(self.base.data.xmax,math.fabs(self.base.data.xmin)),2)
-        y = math.pow(max(self.base.data.ymax,math.fabs(self.base.data.ymin)),2)
-        self.qmax= math.sqrt(x + y)
+        x = math.pow(max(self.base.data.xmax, 
+                         math.fabs(self.base.data.xmin)), 2)
+        y = math.pow(max(self.base.data.ymax, 
+                         math.fabs(self.base.data.ymin)), 2)
+        self.qmax = math.sqrt(x + y)
         ## Number of points on the plot
         self.nbins = 20
         ## Angle of the middle line
-        self.theta2= math.pi/3
+        self.theta2 = math.pi/3
         ## Absolute value of the Angle between the middle line and any side line
-        self.phi=math.pi/12
+        self.phi = math.pi/12
         
         ## Middle line
-        self.main_line = LineInteractor(self, self.base.subplot,color='blue', zorder=zorder, r=self.qmax,
-                                           theta= self.theta2)
+        self.main_line = LineInteractor(self, self.base.subplot, color='blue',
+                                zorder=zorder, r=self.qmax, theta=self.theta2)
         self.main_line.qmax = self.qmax
         ## Right Side line
-        self.right_line= SideInteractor(self, self.base.subplot,color='gray', zorder=zorder,
-                                     r=self.qmax,
-                                           phi= -1*self.phi,
-                                           theta2=self.theta2)
+        self.right_line = SideInteractor(self, self.base.subplot, color='gray',
+                            zorder=zorder, r=self.qmax, phi= -1*self.phi,
+                                                            theta2=self.theta2)
         self.right_line.qmax = self.qmax
         ## Left Side line 
-        self.left_line= SideInteractor(self, self.base.subplot,color='gray', zorder=zorder,
-                                     r=self.qmax,
-                                           phi= self.phi,
-                                           theta2=self.theta2)
+        self.left_line = SideInteractor(self, self.base.subplot, color='gray', 
+                                    zorder=zorder, r=self.qmax, phi= self.phi,
+                                                        theta2=self.theta2)
         self.left_line.qmax = self.qmax
         ## draw the sector               
         self.update()
         self._post_data()
-
         
     def clear(self):
         """
@@ -64,35 +64,36 @@ class SectorMask(_BaseInteractor):
         self.base.connect.clearall()
         #self.base.Unbind(EVT_SLICER_PARS)
         
-        
     def update(self):
         """
         Respond to changes in the model by recalculating the profiles and
         resetting the widgets.
         """
         # Update locations  
-        ## Check if the middle line was dragged and update the picture accordingly     
+        ## Check if the middle line was dragged and 
+        #update the picture accordingly     
         if self.main_line.has_move:
             self.main_line.update()
-            self.right_line.update( delta= -self.left_line.phi/2,
-                                    mline= self.main_line.theta )
-            self.left_line.update( delta = self.left_line.phi/2,
-                                   mline= self.main_line.theta )
+            self.right_line.update(delta=-self.left_line.phi/2,
+                                    mline=self.main_line.theta)
+            self.left_line.update(delta=self.left_line.phi/2,
+                                   mline=self.main_line.theta)
         ## Check if the left side has moved and update the slicer accordingly  
         if self.left_line.has_move:
             self.main_line.update()
-            self.left_line.update( phi=None, delta=None, mline=self.main_line ,
+            self.left_line.update(phi=None, delta=None, mline=self.main_line ,
                                   side=True, left=True )
-            self.right_line.update( phi= self.left_line.phi, delta= None,
-                                     mline= self.main_line, side= True,
-                                     left=False, right= True )
-        ## Check if the right side line has moved and update the slicer accordingly
+            self.right_line.update(phi=self.left_line.phi, delta=None,
+                                     mline=self.main_line, side=True,
+                                     left=False, right=True)
+        ## Check if the right side line has moved and 
+        #update the slicer accordingly
         if self.right_line.has_move:
             self.main_line.update()
-            self.right_line.update( phi=None, delta=None, mline=self.main_line,
-                                   side=True, left=False, right=True )
-            self.left_line.update( phi=self.right_line.phi, delta=None,
-                                    mline=self.main_line, side=True, left=False )
+            self.right_line.update(phi=None, delta=None, mline=self.main_line,
+                                   side=True, left=False, right=True)
+            self.left_line.update(phi=self.right_line.phi, delta=None,
+                                    mline=self.main_line, side=True, left=False)
         #if self.is_inside != None:
         out = self._post_data()
         return out
@@ -124,10 +125,9 @@ class SectorMask(_BaseInteractor):
         phimin =  -self.left_line.phi + self.main_line.theta
         phimax = self.left_line.phi + self.main_line.theta
          
-        mask = Sectorcut(phi_min= phimin, phi_max= phimax)
-        
+        mask = Sectorcut(phi_min=phimin, phi_max=phimax)
         if self.is_inside:
-            out = (mask(data)==False)
+            out = (mask(data) == False)
         else:
             out = (mask(data))
         #self.base.data.mask=out
@@ -146,7 +146,6 @@ class SectorMask(_BaseInteractor):
         wx.PostEvent(self.base, event)
         self._post_data()
             
-            
     def restore(self):
         """
         Restore the roughness for this layer.
@@ -161,10 +160,8 @@ class SectorMask(_BaseInteractor):
         """
         pass
         
-        
     def set_cursor(self, x, y):
         pass
-        
         
     def get_params(self):
         """
@@ -177,8 +174,10 @@ class SectorMask(_BaseInteractor):
         ## Always make sure that the left and the right line are at phi 
         ## angle of the middle line
         if math.fabs(self.left_line.phi) != math.fabs(self.right_line.phi):
-            raise ValueError,"Phi left and phi right are different %f, %f"%(self.left_line.phi, self.right_line.phi)
-        
+            msg = "Phi left and phi right are "
+            msg += "different %f, %f" % (self.left_line.phi, 
+                                         self.right_line.phi)
+            raise ValueError, msg
         params["Phi"] = self.main_line.theta
         params["Delta_Phi"] = math.fabs(self.left_line.phi)
         return params
@@ -192,14 +191,15 @@ class SectorMask(_BaseInteractor):
             values the user assigned to the slicer.
         """
         main = params["Phi"] 
-        phi = math.fabs(params["Delta_Phi"] )
+        phi = math.fabs(params["Delta_Phi"])
         
-        self.main_line.theta= main
+        self.main_line.theta = main
         ## Reset the slicer parameters
         self.main_line.update()
-        self.right_line.update( phi=phi,delta=None, mline=self.main_line,
-                               side=True, right=True )
-        self.left_line.update( phi=phi, delta=None, mline=self.main_line, side=True )
+        self.right_line.update(phi=phi, delta=None, mline=self.main_line,
+                               side=True, right=True)
+        self.left_line.update(phi=phi, delta=None,
+                              mline=self.main_line, side=True)
         ## post the new corresponding data
         self._post_data()
         

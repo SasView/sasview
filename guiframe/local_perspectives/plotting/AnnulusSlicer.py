@@ -7,9 +7,12 @@
 
 import math
 import wx
-from copy import deepcopy 
+#from copy import deepcopy 
 # Debug printout
-from sans.guicomm.events import NewPlotEvent, StatusEvent,SlicerParameterEvent,EVT_SLICER_PARS
+from sans.guicomm.events import NewPlotEvent
+from sans.guicomm.events import StatusEvent
+from sans.guicomm.events import SlicerParameterEvent
+from sans.guicomm.events import EVT_SLICER_PARS
 from BaseInteractor import _BaseInteractor
 from sans.guiframe.dataFitting import Data1D
 
@@ -20,33 +23,35 @@ class AnnulusInteractor(_BaseInteractor):
     defined by 2 radius.
     this class is defined by 2 Ringinterators.
     """
-    def __init__(self,base,axes,color='black', zorder=3):
+    def __init__(self, base, axes, color='black', zorder=3):
         
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.base= base
-        self.qmax = min(math.fabs(self.base.data2D.xmax),math.fabs(self.base.data2D.xmin))  #must be positive
+        self.base = base
+        self.qmax = min(math.fabs(self.base.data2D.xmax),
+                        math.fabs(self.base.data2D.xmin))  #must be positive
         self.connect = self.base.connect
     
         ## Number of points on the plot
         self.nbins = 20
-        
         #Cursor position of Rings (Left(-1) or Right(1))
-        self.xmaxd=self.base.data2D.xmax
-        self.xmind=self.base.data2D.xmin
+        self.xmaxd = self.base.data2D.xmax
+        self.xmind = self.base.data2D.xmin
 
-        if (self.xmaxd+self.xmind)>0:
-            self.sign=1
+        if (self.xmaxd + self.xmind) > 0:
+            self.sign = 1
         else:
-            self.sign=-1
-                 
+            self.sign = -1
         # Inner circle
-        self.inner_circle = RingInteractor(self, self.base.subplot, zorder=zorder, r=self.qmax/2.0,sign=self.sign)
+        self.inner_circle = RingInteractor(self, self.base.subplot,
+                                            zorder=zorder,
+                                            r=self.qmax/2.0, sign=self.sign)
         self.inner_circle.qmax = self.qmax
-        self.outer_circle = RingInteractor(self, self.base.subplot, zorder=zorder+1, r=self.qmax/1.8,sign=self.sign)
-        self.outer_circle.qmax = self.qmax*1.2
-       
+        self.outer_circle = RingInteractor(self, self.base.subplot,
+                                           zorder=zorder+1, r=self.qmax/1.8,
+                                           sign=self.sign)
+        self.outer_circle.qmax = self.qmax * 1.2
         self.update()
         self._post_data()
         
@@ -61,7 +66,8 @@ class AnnulusInteractor(_BaseInteractor):
             attribute
             
         """
-        wx.PostEvent(self.base, StatusEvent(status="AnnulusSlicer._onEVT_SLICER_PARS"))
+        wx.PostEvent(self.base,
+                     StatusEvent(status="AnnulusSlicer._onEVT_SLICER_PARS"))
         event.Skip()
         if event.type == self.__class__.__name__:
             self.set_params(event.params)
@@ -105,7 +111,7 @@ class AnnulusInteractor(_BaseInteractor):
         self.inner_circle.save(ev)
         self.outer_circle.save(ev)
 
-    def _post_data(self,nbins=None):
+    def _post_data(self, nbins=None):
         """
         Uses annulus parameters to plot averaged data into 1D data.
         
@@ -119,52 +125,48 @@ class AnnulusInteractor(_BaseInteractor):
             return
         
         from DataLoader.manipulations import Ring
-    
-        rmin= min(math.fabs(self.inner_circle.get_radius()),
+        rmin = min(math.fabs(self.inner_circle.get_radius()),
                   math.fabs(self.outer_circle.get_radius()))
         rmax = max(math.fabs(self.inner_circle.get_radius()),
                    math.fabs(self.outer_circle.get_radius()))
         #if the user does not specify the numbers of points to plot 
         # the default number will be nbins= 20
-        if nbins==None:
-            self.nbins= 20
+        if nbins == None:
+            self.nbins = 20
         else:
             self.nbins = nbins
         ## create the data1D Q average of data2D    
-        sect = Ring(r_min=rmin , r_max= rmax, nbins=self.nbins)
+        sect = Ring(r_min=rmin, r_max=rmax, nbins=self.nbins)
         sector = sect(self.base.data2D)
-        
-        
-        if hasattr(sector,"dxl"):
-            dxl= sector.dxl
+    
+        if hasattr(sector, "dxl"):
+            dxl = sector.dxl
         else:
-            dxl= None
-        if hasattr(sector,"dxw"):
-            dxw= sector.dxw
+            dxl = None
+        if hasattr(sector, "dxw"):
+            dxw = sector.dxw
         else:
-            dxw= None
-       
-        new_plot = Data1D(x=(sector.x-math.pi)*180/math.pi,y=sector.y,dy=sector.dy)
+            dxw = None
+        new_plot = Data1D(x=(sector.x - math.pi) * 180/math.pi,
+                          y=sector.y, dy=sector.dy)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
         new_plot.name = "AnnulusPhi" +"("+ self.base.data2D.name+")"
         
-        new_plot.source=self.base.data2D.source
+        new_plot.source = self.base.data2D.source
         #new_plot.info=self.base.data2D.info
-        
         new_plot.interactive = True
-        new_plot.detector =self.base.data2D.detector
+        new_plot.detector = self.base.data2D.detector
         # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{\phi}", 'degrees')
-        new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-        new_plot.group_id = "AnnulusPhi"+self.base.data2D.name
-        new_plot.id= "AnnulusPhi"+self.base.data2D.name
+        new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+        new_plot.group_id = "AnnulusPhi" + self.base.data2D.name
+        new_plot.id = "AnnulusPhi" + self.base.data2D.name
         #new_plot.is_data= True
-        
-        new_plot.xtransform="x"
-        new_plot.ytransform="y"
+        new_plot.xtransform = "x"
+        new_plot.ytransform = "y"
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
-                                                 title="AnnulusPhi" ))
+                                                 title="AnnulusPhi"))
         
     def moveend(self, ev):
         """
@@ -220,8 +222,8 @@ class AnnulusInteractor(_BaseInteractor):
             values the user assigned to the slicer.
             
         """
-        inner = math.fabs(params["inner_radius"] )
-        outer = math.fabs(params["outer_radius"] )
+        inner = math.fabs(params["inner_radius"])
+        outer = math.fabs(params["outer_radius"])
         self.nbins = int(params["nbins"])
         ## Update the picture
         self.inner_circle.set_cursor(inner, self.inner_circle._inner_mouse_y)
@@ -249,7 +251,7 @@ class RingInteractor(_BaseInteractor):
     """
      Draw a ring Given a radius 
     """
-    def __init__(self,base,axes,color='black', zorder=5, r=1.0,sign=1):
+    def __init__(self, base, axes, color='black', zorder=5, r=1.0, sign=1):
         """
         :param: the color of the line that defined the ring
         :param r: the radius of the ring
@@ -268,32 +270,41 @@ class RingInteractor(_BaseInteractor):
         #Save value of the center of the ring
         self._inner_save_y  = 0
         #Class instantiating RingIterator class
-        self.base= base
+        self.base = base
         #the direction of the motion of the marker
-        self.sign=sign
+        self.sign = sign
         ## Create a marker 
         try:
             # Inner circle marker
-            self.inner_marker = self.axes.plot([self.sign*math.fabs(self._inner_mouse_x)],[0], linestyle='',
+            x_value = [self.sign * math.fabs(self._inner_mouse_x)]
+            self.inner_marker = self.axes.plot(x_value,
+                                               [0],
+                                                linestyle='',
                                           marker='s', markersize=10,
                                           color=self.color, alpha=0.6,
                                           pickradius=5, label="pick", 
-                                          zorder=zorder, # Prefer this to other lines
+                                          zorder=zorder,
                                           visible=True)[0]
         except:
-            self.inner_marker = self.axes.plot([self.sign*math.fabs(self._inner_mouse_x)],[0], linestyle='',
+            x_value = [self.sign * math.fabs(self._inner_mouse_x)]
+            self.inner_marker = self.axes.plot(x_value,
+                                               [0], 
+                                               linestyle='',
                                           marker='s', markersize=10,
                                           color=self.color, alpha=0.6,
                                           label="pick", 
                                           visible=True)[0]
-            message  = "\nTHIS PROTOTYPE NEEDS THE LATEST VERSION OF MATPLOTLIB\n"
-            message += "Get the SVN version that is at least as recent as June 1, 2007"
+            message  = "\nTHIS PROTOTYPE NEEDS THE LATEST"
+            message += " VERSION OF MATPLOTLIB\n"
+            message += "Get the SVN version that is at "
+            message += " least as recent as June 1, 2007"
             
-            owner=self.base.base.parent
-            wx.PostEvent(owner, StatusEvent(status="AnnulusSlicer: %s"%message))
+            owner = self.base.base.parent
+            wx.PostEvent(owner, 
+                         StatusEvent(status="AnnulusSlicer: %s" % message))
             
         # Draw a circle 
-        [self.inner_circle] = self.axes.plot([],[],
+        [self.inner_circle] = self.axes.plot([], [],
                                       linestyle='-', marker='',
                                       color=self.color)
         # the number of points that make the ring line
@@ -339,15 +350,16 @@ class RingInteractor(_BaseInteractor):
         x = []
         y = []
         for i in range(self.npts):
-            phi = 2.0*math.pi/(self.npts-1)*i
+            phi = 2.0 * math.pi / (self.npts - 1) * i
             
-            xval = 1.0*self._inner_mouse_x*math.cos(phi) 
-            yval = 1.0*self._inner_mouse_x*math.sin(phi) 
+            xval = 1.0 * self._inner_mouse_x * math.cos(phi) 
+            yval = 1.0 * self._inner_mouse_x * math.sin(phi) 
             
             x.append(xval)
             y.append(yval)
             
-        self.inner_marker.set(xdata=[self.sign*math.fabs(self._inner_mouse_x)],ydata=[0])
+        self.inner_marker.set(xdata=[self.sign*math.fabs(self._inner_mouse_x)],
+                              ydata=[0])
         self.inner_circle.set_data(x, y)        
 
     def save(self, ev):
@@ -415,7 +427,7 @@ class CircularMask(_BaseInteractor):
     """
      Draw a ring Given a radius 
     """
-    def __init__(self,base,axes,color='grey', zorder=3, side=None):
+    def __init__(self, base, axes, color='grey', zorder=3, side=None):
         """
         
         :param: the color of the line that defined the ring
@@ -426,24 +438,25 @@ class CircularMask(_BaseInteractor):
         _BaseInteractor.__init__(self, base, axes, color=color)
         self.markers = []
         self.axes = axes
-        self.base= base
+        self.base = base
         self.is_inside = side
-        self.qmax = min(math.fabs(self.base.data.xmax),math.fabs(self.base.data.xmin))  #must be positive
+        self.qmax = min(math.fabs(self.base.data.xmax),
+                        math.fabs(self.base.data.xmin))  #must be positive
         self.connect = self.base.connect
         
         #Cursor position of Rings (Left(-1) or Right(1))
-        self.xmaxd=self.base.data.xmax
-        self.xmind=self.base.data.xmin
+        self.xmaxd = self.base.data.xmax
+        self.xmind = self.base.data.xmin
 
-        if (self.xmaxd+self.xmind)>0:
-            self.sign=1
+        if (self.xmaxd + self.xmind) > 0:
+            self.sign = 1
         else:
-            self.sign=-1
-                 
+            self.sign = -1
         # Inner circle
-        self.outer_circle = RingInteractor(self, self.base.subplot, 'blue', zorder=zorder+1, r=self.qmax/1.8,sign=self.sign)
-        self.outer_circle.qmax = self.qmax*1.2
-       
+        self.outer_circle = RingInteractor(self, self.base.subplot, 'blue',
+                                            zorder=zorder+1, r=self.qmax/1.8,
+                                            sign=self.sign)
+        self.outer_circle.qmax = self.qmax * 1.2
         self.update()
         self._post_data()
         
@@ -457,7 +470,8 @@ class CircularMask(_BaseInteractor):
         :param event: event of type SlicerParameterEvent with params as 
             attribute
         """
-        wx.PostEvent(self.base, StatusEvent(status="AnnulusSlicer._onEVT_SLICER_PARS"))
+        wx.PostEvent(self.base,
+                     StatusEvent(status="AnnulusSlicer._onEVT_SLICER_PARS"))
         event.Skip()
         if event.type == self.__class__.__name__:
             self.set_params(event.params)
@@ -517,14 +531,14 @@ class CircularMask(_BaseInteractor):
         mask = data.mask  
         from DataLoader.manipulations import Ringcut
     
-        rmin= 0
+        rmin = 0
         rmax = math.fabs(self.outer_circle.get_radius())
 
         ## create the data1D Q average of data2D    
-        mask = Ringcut(r_min=rmin , r_max= rmax)
+        mask = Ringcut(r_min=rmin, r_max= rmax)
 
         if self.is_inside:
-            out = (mask(data)==False)
+            out = (mask(data) == False)
         else:
             out = (mask(data))
         #self.base.data.mask=out
