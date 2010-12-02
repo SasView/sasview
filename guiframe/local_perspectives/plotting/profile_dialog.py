@@ -161,6 +161,10 @@ class SLDplotpanel(PlotPanel):
         #draw
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
+                
+        # For latter scale changes 
+        self.plots[plot.name].xaxis('\\rm{%s} '% x1_label, 'A')
+        self.plots[plot.name].yaxis('\\rm{SLD} ', 'A^{-2}')
 
     def on_set_focus(self, event):
         """
