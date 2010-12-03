@@ -79,7 +79,7 @@ class Plugin:
         from help_panel import  HelpWindow
         frame = HelpWindow(None, -1)    
         frame.Show(True)
-        evt.Skip()
+        #evt.Skip()
         
     def get_context_menu(self, graph=None):
         """
