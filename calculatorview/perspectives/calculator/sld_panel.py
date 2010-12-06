@@ -67,6 +67,7 @@ class SldPanel(wx.Panel):
         self.neutron_abs_ctl = None
         self.neutron_inc_ctl = None
         self.neutron_length_ctl = None
+        self.button_calculate = None
         #Draw the panel
         self._do_layout()
         self.SetAutoLayout(True)
@@ -273,12 +274,12 @@ class SldPanel(wx.Panel):
         #-----Button  sizer------------
     
         id = wx.NewId()
-        button_calculate = wx.Button(self, id, "Calculate")
-        button_calculate.SetToolTipString("Calculate SLD.")
+        self.button_calculate = wx.Button(self, id, "Calculate")
+        self.button_calculate.SetToolTipString("Calculate SLD.")
         self.Bind(wx.EVT_BUTTON, self.calculateSld, id=id)   
         
         sizer_button.Add((250, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        sizer_button.Add(button_calculate, 0, wx.RIGHT|wx.ADJUST_MINSIZE, 20)
+        sizer_button.Add(self.button_calculate, 0, wx.RIGHT|wx.ADJUST_MINSIZE, 20)
         sizer3.Add(sizer_button)
         #---------layout----------------
         vbox  = wx.BoxSizer(wx.VERTICAL)
@@ -308,33 +309,44 @@ class SldPanel(wx.Panel):
     def check_inputs(self):
         """Check validity user inputs"""
         flag = True
-       
+        msg = ""
         if check_float(self.density_ctl):
             self.density = float(self.density_ctl.GetValue())
         else:
             flag = False
-            raise ValueError,"Error for Density value :expect float"
+            msg += "Error for Density value :expect float"
     
         self.wavelength = self.wavelength_ctl.GetValue()
         if self.wavelength.lstrip().rstrip() == "":
             self.wavelength = WAVELENGTH
+            self.wavelength_ctl.SetValue(str(WAVELENGTH))
+            self.wavelength_ctl.SetBackgroundColour(wx.WHITE)
+            self.wavelength_ctl.Refresh()
+            msg += "Default value for wavelength is 6.0"
         else:
             if check_float(self.wavelength_ctl):
                 self.wavelength = float(self.wavelength)
             else:
                 flag = False
-                raise ValueError, "Error for wavelength value :expect float"
+                msg += "Error for wavelength value :expect float"
                 
         self.compound = self.compound_ctl.GetValue().lstrip().rstrip()
         if self.compound != "":
-            self.compound_ctl.SetBackgroundColour(wx.WHITE)
-            self.compound_ctl.Refresh()
+            try :
+                formula(self.compound)
+                self.compound_ctl.SetBackgroundColour(wx.WHITE)
+                self.compound_ctl.Refresh()
+            except:
+                self.compound_ctl.SetBackgroundColour("pink")
+                self.compound_ctl.Refresh()
+                flag = False
+                msg += "Enter correct formula"
         else:
             self.compound_ctl.SetBackgroundColour("pink")
             self.compound_ctl.Refresh()
             flag = False
-            raise ValueError, "Enter a formula"
-        return flag 
+            msg += "Enter a formula"
+        return flag, msg
         
     def calculate_sld_helper(self, element, density, molecule_formula):
         """
@@ -356,65 +368,70 @@ class SldPanel(wx.Panel):
         """
             Calculate the neutron scattering density length of a molecule
         """
+        self.clear_outputs()
         try:
             #Check validity user inputs
-            if self.check_inputs():
-                #get ready to compute
-                try:
-                    self.sld_formula = formula(self.compound,
-                                                density=self.density)
-                except:
-                    if self.base is not None:
-                        msg = "SLD Calculator: %s"  % (sys.exc_value)
-                        wx.PostEvent(self.base, StatusEvent(status=msg))
-                    else:
-                        raise
-                    return
-                
-                
-                (sld_real, sld_im, _), (_, absorp, incoh), \
-                            length = neutron_scattering(compound=self.compound,
-                                       density=self.density, 
-                                       wavelength=self.wavelength) 
-                cu_real, cu_im = self.calculate_sld_helper(element="Cu",
-                                                     density=self.density,
-                                            molecule_formula=self.sld_formula)
-                mo_real, mo_im = self.calculate_sld_helper(element="Mo", 
-                                                           density=self.density,
-                                         molecule_formula=self.sld_formula)
-                # set neutron sld values
-                val = format_number(sld_real * _SCALE)
-                self.neutron_sld_reel_ctl.SetValue(val)
-                val = format_number(math.fabs(sld_im) * _SCALE)
-                self.neutron_sld_im_ctl.SetValue(val)
-                # Compute the Cu SLD
-                self.cu_ka_sld_reel_ctl.SetValue(format_number(cu_real *_SCALE))
-                val = format_number(math.fabs(cu_im )* _SCALE)
-                self.cu_ka_sld_im_ctl.SetValue(val)
-                # Compute the Mo SLD
-                self.mo_ka_sld_reel_ctl.SetValue(format_number(mo_real *_SCALE))
-                val = format_number(math.fabs(mo_im)* _SCALE)
-                self.mo_ka_sld_im_ctl.SetValue(val)
-                # set incoherence and absorption
-                self.neutron_inc_ctl.SetValue(format_number(incoh))
-                self.neutron_abs_ctl.SetValue(format_number(absorp))
-                # Neutron length
-                self.neutron_length_ctl.SetValue(format_number(length))
-                # display wavelength
-                self.wavelength_ctl.SetValue(str(self.wavelength))
+            flag, msg = self.check_inputs()
+            if self.base is not None and msg.lstrip().rstrip() != "":
+                msg = "SLD Calculator: %s" % str(msg)
+                wx.PostEvent(self.base, StatusEvent(status=msg))
+            if not flag:
+               return 
+            #get ready to compute
+            self.sld_formula = formula(self.compound,
+                                            density=self.density)
+            (sld_real, sld_im, _), (_, absorp, incoh), \
+                        length = neutron_scattering(compound=self.compound,
+                                   density=self.density, 
+                                   wavelength=self.wavelength) 
+            cu_real, cu_im = self.calculate_sld_helper(element="Cu",
+                                                 density=self.density,
+                                        molecule_formula=self.sld_formula)
+            mo_real, mo_im = self.calculate_sld_helper(element="Mo", 
+                                                       density=self.density,
+                                     molecule_formula=self.sld_formula)
+            # set neutron sld values
+            val = format_number(sld_real * _SCALE)
+            self.neutron_sld_reel_ctl.SetValue(val)
+            val = format_number(math.fabs(sld_im) * _SCALE)
+            self.neutron_sld_im_ctl.SetValue(val)
+            # Compute the Cu SLD
+            self.cu_ka_sld_reel_ctl.SetValue(format_number(cu_real *_SCALE))
+            val = format_number(math.fabs(cu_im )* _SCALE)
+            self.cu_ka_sld_im_ctl.SetValue(val)
+            # Compute the Mo SLD
+            self.mo_ka_sld_reel_ctl.SetValue(format_number(mo_real *_SCALE))
+            val = format_number(math.fabs(mo_im)* _SCALE)
+            self.mo_ka_sld_im_ctl.SetValue(val)
+            # set incoherence and absorption
+            self.neutron_inc_ctl.SetValue(format_number(incoh))
+            self.neutron_abs_ctl.SetValue(format_number(absorp))
+            # Neutron length
+            self.neutron_length_ctl.SetValue(format_number(length))
+            # display wavelength
+            self.wavelength_ctl.SetValue(str(self.wavelength))
         except:
-            raise
-            """
             if self.base is not None:
                 msg = "SLD Calculator: %s"%(sys.exc_value)
                 wx.PostEvent(self.base, StatusEvent(status=msg))
-            else:
-                raise
-            return   
-            """
         if event is not None:
             event.Skip()
-   
+            
+    def clear_outputs(self):
+        """
+        Clear the outputs textctrl
+        """
+        self.neutron_sld_reel_ctl.SetValue("")
+        self.neutron_sld_im_ctl.SetValue("")
+        self.mo_ka_sld_reel_ctl.SetValue("")
+        self.mo_ka_sld_im_ctl.SetValue("")
+        self.cu_ka_sld_reel_ctl.SetValue("")
+        self.cu_ka_sld_im_ctl.SetValue("")
+        self.neutron_abs_ctl.SetValue("")
+        self.neutron_inc_ctl.SetValue("")
+        self.neutron_length_ctl.SetValue("")
+        
+        
 class SldWindow(wx.Frame):
     """
     """

@@ -44,7 +44,7 @@ class TestH2O(unittest.TestCase):
         """
         #Compute incoherence , absorption, and incoherence
         (sld_real,sld_im,sld_inc), (coh,abs,incoh), length = neutron_scattering(self.compound,
-                                       self.density, self.wavelength) 
+                                       density=self.density, wavelength=self.wavelength) 
         cu_reel, cu_im = calculate_xray_sld(element="Cu", density=self.density,
                                   molecule_formula=self.sld_formula)
         mo_reel, mo_im = calculate_xray_sld(element="Mo", density=self.density,
@@ -84,7 +84,7 @@ class TestD2O(unittest.TestCase):
         """
         #Compute incoherence , absorption, and incoherence
         (sld_real,sld_im,sld_inc), (coh,abs,incoh), length = neutron_scattering(self.compound,
-                                       self.density, self.wavelength) 
+                                       density=self.density, wavelength=self.wavelength) 
         cu_reel, cu_im = calculate_xray_sld(element="Cu", density=self.density,
                                   molecule_formula=self.sld_formula)
         mo_reel, mo_im = calculate_xray_sld(element="Mo", density=self.density,
@@ -124,7 +124,7 @@ class TestCd(unittest.TestCase):
         """
         #Compute incoherence , absorption, and incoherence
         (sld_real,sld_im,sld_inc), (coh,abs,incoh), length = neutron_scattering(self.compound,
-                                       self.density, self.wavelength) 
+                                density=self.density, wavelength=self.wavelength) 
         cu_reel, cu_im = calculate_xray_sld(element="Cu", density=self.density,
                                   molecule_formula=self.sld_formula)
         mo_reel, mo_im = calculate_xray_sld(element="Mo", density=self.density,
