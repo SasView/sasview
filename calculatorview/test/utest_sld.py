@@ -45,9 +45,9 @@ class TestH2O(unittest.TestCase):
         #Compute incoherence , absorption, and incoherence
         (sld_real,sld_im,sld_inc), (coh,abs,incoh), length = neutron_scattering(self.compound,
                                        density=self.density, wavelength=self.wavelength) 
-        cu_reel, cu_im = calculate_xray_sld(element="Cu", density=self.density,
+        cu_real, cu_im = calculate_xray_sld(element="Cu", density=self.density,
                                   molecule_formula=self.sld_formula)
-        mo_reel, mo_im = calculate_xray_sld(element="Mo", density=self.density,
+        mo_real, mo_im = calculate_xray_sld(element="Mo", density=self.density,
                                   molecule_formula=self.sld_formula)
         #test sld 
         self.assertAlmostEquals(sld_real * _SCALE, -5.6e-7, 1)
@@ -58,10 +58,10 @@ class TestH2O(unittest.TestCase):
         #Test length
         self.assertAlmostEquals(length, 0.1755, 3)
         #test Cu sld
-        self.assertAlmostEquals(cu_reel * _SCALE, 9.46e-6, 1)
+        self.assertAlmostEquals(cu_real * _SCALE, 9.46e-6, 1)
         self.assertAlmostEquals(cu_im * _SCALE, 3.01e-8)
         # test Mo sld
-        self.assertAlmostEquals(mo_reel * _SCALE, 9.43e-6)
+        self.assertAlmostEquals(mo_real * _SCALE, 9.43e-6)
         self.assertAlmostEquals(mo_im * _SCALE, 5.65e-7,1)
     
     
@@ -85,9 +85,9 @@ class TestD2O(unittest.TestCase):
         #Compute incoherence , absorption, and incoherence
         (sld_real,sld_im,sld_inc), (coh,abs,incoh), length = neutron_scattering(self.compound,
                                        density=self.density, wavelength=self.wavelength) 
-        cu_reel, cu_im = calculate_xray_sld(element="Cu", density=self.density,
+        cu_real, cu_im = calculate_xray_sld(element="Cu", density=self.density,
                                   molecule_formula=self.sld_formula)
-        mo_reel, mo_im = calculate_xray_sld(element="Mo", density=self.density,
+        mo_real, mo_im = calculate_xray_sld(element="Mo", density=self.density,
                                   molecule_formula=self.sld_formula)
         #test sld 
         self.assertAlmostEquals(sld_real * _SCALE, 6.33e-6, 1)
@@ -98,10 +98,10 @@ class TestD2O(unittest.TestCase):
         #Test length
         self.assertAlmostEquals(length, 1.549, 3)
         #test Cu sld
-        self.assertAlmostEquals(cu_reel * _SCALE, 9.36e-6, 1)
+        self.assertAlmostEquals(cu_real * _SCALE, 9.36e-6, 1)
         self.assertAlmostEquals(cu_im * _SCALE, 2.98e-8)
         # test Mo sld
-        self.assertAlmostEquals(mo_reel * _SCALE, 9.33e-6)
+        self.assertAlmostEquals(mo_real * _SCALE, 9.33e-6)
         self.assertAlmostEquals(mo_im * _SCALE, 5.59e-9,1)
     
         
@@ -125,9 +125,9 @@ class TestCd(unittest.TestCase):
         #Compute incoherence , absorption, and incoherence
         (sld_real,sld_im,sld_inc), (coh,abs,incoh), length = neutron_scattering(self.compound,
                                 density=self.density, wavelength=self.wavelength) 
-        cu_reel, cu_im = calculate_xray_sld(element="Cu", density=self.density,
+        cu_real, cu_im = calculate_xray_sld(element="Cu", density=self.density,
                                   molecule_formula=self.sld_formula)
-        mo_reel, mo_im = calculate_xray_sld(element="Mo", density=self.density,
+        mo_real, mo_im = calculate_xray_sld(element="Mo", density=self.density,
                                   molecule_formula=self.sld_formula)
         #test sld 
         self.assertAlmostEquals(sld_real * _SCALE, 1.04e-6, 1)
@@ -138,10 +138,10 @@ class TestCd(unittest.TestCase):
         #Test length
         self.assertAlmostEquals(length, 0.005551, 4)
         #test Cu sld
-        self.assertAlmostEquals(cu_reel * _SCALE, 2.89e-5, 1)
+        self.assertAlmostEquals(cu_real * _SCALE, 2.89e-5, 1)
         self.assertAlmostEquals(cu_im * _SCALE, 2.81e-6)
         # test Mo sld
-        self.assertAlmostEquals(mo_reel * _SCALE, 2.84e-5, 1)
+        self.assertAlmostEquals(mo_real * _SCALE, 2.84e-5, 1)
         self.assertAlmostEquals(mo_im * _SCALE, 7.26e-7,1)
   
 if __name__ == '__main__':

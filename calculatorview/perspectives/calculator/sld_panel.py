@@ -58,11 +58,11 @@ class SldPanel(wx.Panel):
         self.compound_ctl = None
         self.density_ctl = None
         self.wavelength_ctl = None
-        self.neutron_sld_reel_ctl = None
+        self.neutron_sld_real_ctl = None
         self.neutron_sld_im_ctl = None
-        self.mo_ka_sld_reel_ctl = None
+        self.mo_ka_sld_real_ctl = None
         self.mo_ka_sld_im_ctl = None
-        self.cu_ka_sld_reel_ctl = None
+        self.cu_ka_sld_real_ctl = None
         self.cu_ka_sld_im_ctl = None
         self.neutron_abs_ctl = None
         self.neutron_inc_ctl = None
@@ -138,10 +138,10 @@ class SldPanel(wx.Panel):
         
         i_complex = '- i'
         neutron_sld_txt = wx.StaticText(self, -1, 'Neutron SLD')
-        self.neutron_sld_reel_ctl = wx.TextCtrl(self, -1,
+        self.neutron_sld_real_ctl = wx.TextCtrl(self, -1,
                                                  size=(_BOX_WIDTH, -1))
-        self.neutron_sld_reel_ctl.SetEditable(False)
-        self.neutron_sld_reel_ctl.SetToolTipString("Neutron SLD real.")
+        self.neutron_sld_real_ctl.SetEditable(False)
+        self.neutron_sld_real_ctl.SetToolTipString("Neutron SLD real.")
         self.neutron_sld_im_ctl = wx.TextCtrl(self, -1, 
                                               size=(_BOX_WIDTH, -1))
         self.neutron_sld_im_ctl.SetEditable(False)
@@ -149,10 +149,10 @@ class SldPanel(wx.Panel):
         neutron_sld_units_txt = wx.StaticText(self, -1, unit_sld)
         
         cu_ka_sld_txt = wx.StaticText(self, -1, 'Cu Ka SLD')
-        self.cu_ka_sld_reel_ctl = wx.TextCtrl(self, -1,
+        self.cu_ka_sld_real_ctl = wx.TextCtrl(self, -1,
                                                size=(_BOX_WIDTH, -1))
-        self.cu_ka_sld_reel_ctl.SetEditable(False)
-        self.cu_ka_sld_reel_ctl.SetToolTipString("Cu Ka SLD real.")
+        self.cu_ka_sld_real_ctl.SetEditable(False)
+        self.cu_ka_sld_real_ctl.SetToolTipString("Cu Ka SLD real.")
         self.cu_ka_sld_im_ctl = wx.TextCtrl(self, -1, 
                                             size=(_BOX_WIDTH, -1))
         self.cu_ka_sld_im_ctl.SetEditable(False)
@@ -160,10 +160,10 @@ class SldPanel(wx.Panel):
         cu_ka_sld_units_txt = wx.StaticText(self, -1, unit_sld)
         
         mo_ka_sld_txt = wx.StaticText(self, -1, 'Mo Ka SLD')
-        self.mo_ka_sld_reel_ctl = wx.TextCtrl(self, -1,
+        self.mo_ka_sld_real_ctl = wx.TextCtrl(self, -1,
                                                size=(_BOX_WIDTH, -1))
-        self.mo_ka_sld_reel_ctl.SetEditable(False)
-        self.mo_ka_sld_reel_ctl.SetToolTipString("Mo Ka SLD real.")
+        self.mo_ka_sld_real_ctl.SetEditable(False)
+        self.mo_ka_sld_real_ctl.SetToolTipString("Mo Ka SLD real.")
         self.mo_ka_sld_im_ctl = wx.TextCtrl(self, -1,
                                              size=(_BOX_WIDTH, -1))
         self.mo_ka_sld_im_ctl.SetEditable(False)
@@ -196,7 +196,7 @@ class SldPanel(wx.Panel):
         sizer_output.Add(neutron_sld_txt, (iy, ix), (1, 1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer_output.Add(self.neutron_sld_reel_ctl, (iy, ix), (1, 1),
+        sizer_output.Add(self.neutron_sld_real_ctl, (iy, ix), (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix += 1
         sizer_output.Add(wx.StaticText(self, -1, i_complex),
@@ -212,7 +212,7 @@ class SldPanel(wx.Panel):
         sizer_output.Add(cu_ka_sld_txt, (iy, ix), (1, 1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer_output.Add(self.cu_ka_sld_reel_ctl, (iy, ix), (1, 1),
+        sizer_output.Add(self.cu_ka_sld_real_ctl, (iy, ix), (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix += 1
         sizer_output.Add(wx.StaticText(self, -1, i_complex),
@@ -228,7 +228,7 @@ class SldPanel(wx.Panel):
         sizer_output.Add(mo_ka_sld_txt,(iy, ix), (1, 1),
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer_output.Add(self.mo_ka_sld_reel_ctl,(iy, ix), (1, 1),
+        sizer_output.Add(self.mo_ka_sld_real_ctl,(iy, ix), (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix += 1
         sizer_output.Add(wx.StaticText(self, -1, i_complex),
@@ -392,15 +392,15 @@ class SldPanel(wx.Panel):
                                      molecule_formula=self.sld_formula)
             # set neutron sld values
             val = format_number(sld_real * _SCALE)
-            self.neutron_sld_reel_ctl.SetValue(val)
+            self.neutron_sld_real_ctl.SetValue(val)
             val = format_number(math.fabs(sld_im) * _SCALE)
             self.neutron_sld_im_ctl.SetValue(val)
             # Compute the Cu SLD
-            self.cu_ka_sld_reel_ctl.SetValue(format_number(cu_real *_SCALE))
+            self.cu_ka_sld_real_ctl.SetValue(format_number(cu_real *_SCALE))
             val = format_number(math.fabs(cu_im )* _SCALE)
             self.cu_ka_sld_im_ctl.SetValue(val)
             # Compute the Mo SLD
-            self.mo_ka_sld_reel_ctl.SetValue(format_number(mo_real *_SCALE))
+            self.mo_ka_sld_real_ctl.SetValue(format_number(mo_real *_SCALE))
             val = format_number(math.fabs(mo_im)* _SCALE)
             self.mo_ka_sld_im_ctl.SetValue(val)
             # set incoherence and absorption
@@ -421,11 +421,11 @@ class SldPanel(wx.Panel):
         """
         Clear the outputs textctrl
         """
-        self.neutron_sld_reel_ctl.SetValue("")
+        self.neutron_sld_real_ctl.SetValue("")
         self.neutron_sld_im_ctl.SetValue("")
-        self.mo_ka_sld_reel_ctl.SetValue("")
+        self.mo_ka_sld_real_ctl.SetValue("")
         self.mo_ka_sld_im_ctl.SetValue("")
-        self.cu_ka_sld_reel_ctl.SetValue("")
+        self.cu_ka_sld_real_ctl.SetValue("")
         self.cu_ka_sld_im_ctl.SetValue("")
         self.neutron_abs_ctl.SetValue("")
         self.neutron_inc_ctl.SetValue("")
