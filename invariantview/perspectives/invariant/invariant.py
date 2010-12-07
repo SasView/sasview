@@ -144,11 +144,11 @@ class Plugin:
         self.graph = graph
         invariant_option = "Compute invariant"
         invariant_hint = "Will displays the invariant panel for"
-        invairant_hint += " futher computation"
+        invariant_hint += " futher computation"
        
         for item in self.graph.plottables:
             if item.name == graph.selected_plottable :
-                if issubclass(item.__class__,LoaderData1D):
+                if issubclass(item.__class__, LoaderData1D):
            
                     if item.name != "$I_{obs}(q)$" and \
                         item.name != " $P_{fit}(r)$":
