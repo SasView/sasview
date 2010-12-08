@@ -79,9 +79,9 @@ Package name: None
 	        svn://danse.us/sans/releases/pr_inversion-0.2.5 (run 'python setup.py install'under the 'pr_inversion-0.2.5' folder)
 	        svn://danse.us/sans/releases/prview-0.3.3 (run 'python setup.py install'under the 'prview-0.3.2' folder)
 		- The following modules are required:
-			* matplotlib >= 0.99
-			* numpy
-			* scipy
+			* matplotlib = 0.99.0
+			* numpy = 1.2.1
+			* scipy >= 0.7.0
 			* wxpython 2.8 unicode
 			* lxml
 			* PIL (Python Image Library)
