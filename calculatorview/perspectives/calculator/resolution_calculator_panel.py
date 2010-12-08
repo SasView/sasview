@@ -1,0 +1,996 @@
+"""
+   This software was developed by the University of Tennessee as part of the
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+project funded by the US National Science Foundation. 
+
+See the license text in license.txt
+
+copyright 2008, 2009, 2010 University of Tennessee
+"""
+import wx
+import sys
+import matplotlib
+#Use the WxAgg back end. The Wx one takes too long to render
+matplotlib.use('WXAgg')
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+from matplotlib.backends.backend_wxagg import NavigationToolbar2Wx as Toolbar
+from matplotlib.backend_bases import FigureManagerBase
+# Wx-Pylab magic for displaying plots within an application's window.
+from matplotlib import _pylab_helpers
+# The Figure object is used to create backend-independent plot representations.
+from matplotlib.figure import Figure
+
+#from sans.guicomm.events import StatusEvent  
+from sans.calculator.resolution_calculator import ResolutionCalculator 
+from sans.guicomm.events import StatusEvent  
+from calculator_widgets import OutputTextCtrl
+from calculator_widgets import InputTextCtrl
+from wx.lib.scrolledpanel import ScrolledPanel
+from math import fabs
+_BOX_WIDTH = 100
+_Q_DEFAULT = 0.0
+#Slit length panel size 
+if sys.platform.count("win32") > 0:
+    PANEL_WIDTH = 535
+    PANEL_HEIGHT = 653
+    FONT_VARIANT = 0
+else:
+    PANEL_WIDTH = 620
+    PANEL_HEIGHT = 815
+    FONT_VARIANT = 1
+ 
+class ResolutionCalculatorPanel(ScrolledPanel):
+    """
+    Provides the Resolution calculator GUI.
+    """
+    ## Internal nickname for the window, used by the AUI manager
+    window_name = "SANS Resolution Estimator"
+    ## Name to appear on the window title bar
+    window_caption = ""
+    ## Flag to tell the AUI manager to put this panel in the center pane
+    CENTER_PANE = True
+    
+    def __init__(self, parent,  *args, **kwds):
+        kwds["size"]= (PANEL_WIDTH * 2, PANEL_HEIGHT)
+        kwds["style"]= wx.FULL_REPAINT_ON_RESIZE
+        ScrolledPanel.__init__(self, parent, *args, **kwds)
+        self.SetupScrolling()
+        self.parent = parent
+        
+        # input defaults
+        self.qx = []
+        self.qy = []
+        # dQ defaults
+        self.sigma_r = None
+        self.sigma_phi = None
+        self.sigma_1d = None
+        # dQ 2d image
+        self.image = None
+        #Font size 
+        self.SetWindowVariant(variant=FONT_VARIANT)
+        # Object that receive status event
+        self.resolution = ResolutionCalculator()
+     
+        #layout attribute
+        self.hint_sizer = None
+        # detector coordinate of estimation of sigmas
+        self.det_coordinate = 'polar'
+
+        self._do_layout()
+
+    def _define_structure(self):
+        """
+        Define the main sizers building to build this application.
+        """
+        self.main_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.vertical_l_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.vertical_r_spacer = wx.BoxSizer(wx.VERTICAL)
+        self.vertical_r_frame = wx.StaticBox(self, -1, '')
+        self.vertical_r_sizer = wx.StaticBoxSizer(self.vertical_r_frame,
+                                                  wx.VERTICAL)
+        self.box_source = wx.StaticBox(self, -1,
+                                str(self.window_caption))
+        self.boxsizer_source = wx.StaticBoxSizer(self.box_source,
+                                                    wx.VERTICAL)
+        self.mass_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.intensity_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.wavelength_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.wavelength_spread_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.source_aperture_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.sample_aperture_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.source2sample_distance_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.sample2sample_distance_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.sample2detector_distance_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.detector_size_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.detector_pix_size_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        #self.detector_offset_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.input_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.output_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.hint_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        
+    def _layout_mass(self):
+        """
+        Fill the sizer containing mass
+        """
+        # get the mass
+        mass_value = str(self.resolution.mass)
+        mass_unit_txt = wx.StaticText(self, -1, '[g]')
+        mass_txt = wx.StaticText(self, -1, 
+                                'Mass: ')
+        self.mass_tcl = InputTextCtrl(self, -1, 
+                                         size=(_BOX_WIDTH,-1))
+        mass_hint = "Mass of Neutrons"
+        self.mass_tcl.SetValue(mass_value)
+        self.mass_tcl.SetToolTipString(mass_hint)
+        self.mass_sizer.AddMany([(mass_txt, 0, wx.LEFT, 15),
+                                    (self.mass_tcl, 0, wx.LEFT, 15),
+                                    (mass_unit_txt,0, wx.LEFT, 10)])   
+        
+    def _layout_intensity(self):
+        """
+        Fill the sizer containing intensity
+        """
+        # get the intensity
+        intensity_value = str(self.resolution.intensity)
+        intensity_unit_txt = wx.StaticText(self, -1, '[counts/s]')
+        intensity_txt = wx.StaticText(self, -1, 
+                                'Intensity: ')
+        self.intensity_tcl = InputTextCtrl(self, -1, 
+                                        size=(_BOX_WIDTH,-1))
+        intensity_hint = "Intensity of Neutrons"
+        self.intensity_tcl.SetValue(intensity_value)
+        self.intensity_tcl.SetToolTipString(intensity_hint)
+        self.intensity_sizer.AddMany([(intensity_txt, 0, wx.LEFT, 15),
+                                    (self.intensity_tcl, 0, wx.LEFT, 15),
+                                    (intensity_unit_txt,0, wx.LEFT, 10)])   
+
+        
+    def _layout_wavelength(self):
+        """
+        Fill the sizer containing wavelength
+        """
+        # get the wavelength
+        wavelength_value = str(self.resolution.wavelength)
+        wavelength_unit_txt = wx.StaticText(self, -1, '[A]')
+        wavelength_txt = wx.StaticText(self, -1, 
+                                'Wavelength: ')
+        self.wavelength_tcl = InputTextCtrl(self, -1, 
+                                         size=(_BOX_WIDTH,-1))
+        wavelength_hint = "Wavelength of Neutrons"
+        self.wavelength_tcl.SetValue(wavelength_value)
+        self.wavelength_tcl.SetToolTipString(wavelength_hint)
+        self.wavelength_sizer.AddMany([(wavelength_txt, 0, wx.LEFT, 15),
+                                    (self.wavelength_tcl, 0, wx.LEFT, 15),
+                                    (wavelength_unit_txt,0, wx.LEFT, 10)])   
+         
+        
+    def _layout_wavelength_spread(self):
+        """
+        Fill the sizer containing wavelength
+        """
+        # get the wavelength
+        wavelength_spread_value = str(self.resolution.wavelength_spread)
+        wavelength_spread_unit_txt = wx.StaticText(self, -1, '')
+        wavelength_spread_txt = wx.StaticText(self, -1, 
+                                'Wavelength Spread: ')
+        self.wavelength_spread_tcl = InputTextCtrl(self, -1, 
+                                         size=(_BOX_WIDTH,-1))
+        wavelength_spread_hint = "Wavelength  Spread of Neutrons"
+        self.wavelength_spread_tcl.SetValue(wavelength_spread_value)
+        self.wavelength_spread_tcl.SetToolTipString(wavelength_spread_hint)
+        self.wavelength_spread_sizer.AddMany([(wavelength_spread_txt, 0, 
+                                               wx.LEFT, 15),
+                                (self.wavelength_spread_tcl, 0, wx.LEFT, 15),
+                                (wavelength_spread_unit_txt,0, wx.LEFT, 10)])      
+         
+        
+    def _layout_source_aperture(self):
+        """
+        Fill the sizer containing source aperture size
+        """
+        # get the wavelength
+        source_aperture_value = str(self.resolution.source_aperture_size[0])
+        if len(self.resolution.source_aperture_size)>1:
+            source_aperture_value += ", "
+            source_aperture_value += str(\
+                                    self.resolution.source_aperture_size[1])
+        source_aperture_unit_txt = wx.StaticText(self, -1, '[cm]')
+        source_aperture_txt = wx.StaticText(self, -1, 
+                                'Source Aperture Size: ')
+        self.source_aperture_tcl = InputTextCtrl(self, -1, 
+                                         size=(_BOX_WIDTH,-1))
+        source_aperture_hint = "Source Aperture Size"
+        self.source_aperture_tcl.SetValue(source_aperture_value)
+        self.source_aperture_tcl.SetToolTipString(source_aperture_hint)
+        self.source_aperture_sizer.AddMany([(source_aperture_txt, 0, 
+                                               wx.LEFT, 15),
+                                (self.source_aperture_tcl, 0, wx.LEFT, 15),
+                                    (source_aperture_unit_txt,0, wx.LEFT, 10)])  
+
+        
+    def _layout_sample_aperture(self):
+        """
+        Fill the sizer containing sample aperture size
+        """
+        # get the wavelength
+        sample_aperture_value = str(self.resolution.sample_aperture_size[0])
+        if len(self.resolution.sample_aperture_size)>1:
+            sample_aperture_value += ", "
+            sample_aperture_value += str(\
+                                    self.resolution.sample_aperture_size[1])
+        sample_aperture_unit_txt = wx.StaticText(self, -1, '[cm]')
+        sample_aperture_txt = wx.StaticText(self, -1, 
+                                'Sample Aperture Size: ')
+        self.sample_aperture_tcl = InputTextCtrl(self, -1, 
+                                         size=(_BOX_WIDTH,-1))
+        sample_aperture_hint = "Sample Aperture Size"
+        self.sample_aperture_tcl.SetValue(sample_aperture_value)
+        self.sample_aperture_tcl.SetToolTipString(sample_aperture_hint)
+        self.sample_aperture_sizer.AddMany([(sample_aperture_txt, 0, 
+                                               wx.LEFT, 15),
+                                (self.sample_aperture_tcl, 0, wx.LEFT, 15),
+                                    (sample_aperture_unit_txt,0, wx.LEFT, 10)])  
+
+
+    def _layout_source2sample_distance(self):
+        """
+        Fill the sizer containing souce2sample_distance
+        """
+        # get the wavelength
+        source2sample_distance_value = str(\
+                                    self.resolution.source2sample_distance[0])
+
+        source2sample_distance_unit_txt = wx.StaticText(self, -1, '[cm]')
+        source2sample_distance_txt = wx.StaticText(self, -1, 
+                                'Source to Sample Aperture Distance: ')
+        self.source2sample_distance_tcl = InputTextCtrl(self, -1, 
+                                         size=(_BOX_WIDTH,-1))
+        source2sample_distance_hint = "Source to Sample Aperture Distance"
+        self.source2sample_distance_tcl.SetValue(source2sample_distance_value)
+        self.source2sample_distance_tcl.SetToolTipString(\
+                                                source2sample_distance_hint)
+        self.source2sample_distance_sizer.AddMany([(source2sample_distance_txt, 
+                                               0, wx.LEFT, 15),
+                            (self.source2sample_distance_tcl, 0, wx.LEFT, 15),
+                            (source2sample_distance_unit_txt,0, wx.LEFT, 10)])  
+
+    def _layout_sample2sample_distance(self):
+        """
+        Fill the sizer containing sampleslit2sample_distance
+        """
+        # get the distance
+        sample2sample_distance_value = str(\
+                                    self.resolution.sample2sample_distance[0])
+
+        sample2sample_distance_unit_txt = wx.StaticText(self, -1, '[cm]')
+        sample2sample_distance_txt = wx.StaticText(self, -1, 
+                                'Sample Offset: ')
+        self.sample2sample_distance_tcl = InputTextCtrl(self, -1, 
+                                         size=(_BOX_WIDTH,-1))
+        sample2sample_distance_hint = "Sample Aperture to Sample Distance"
+        self.sample2sample_distance_tcl.SetValue(sample2sample_distance_value)
+        self.sample2sample_distance_tcl.SetToolTipString(\
+                                                sample2sample_distance_hint)
+        self.sample2sample_distance_sizer.AddMany([(sample2sample_distance_txt, 
+                                               0, wx.LEFT, 15),
+                            (self.sample2sample_distance_tcl, 0, wx.LEFT, 15),
+                            (sample2sample_distance_unit_txt,0, wx.LEFT, 10)])  
+
+
+
+    def _layout_sample2detector_distance(self):
+        """
+        Fill the sizer containing sample2detector_distance
+        """
+        # get the wavelength
+        sample2detector_distance_value = str(\
+                                    self.resolution.sample2detector_distance[0])
+
+        sample2detector_distance_unit_txt = wx.StaticText(self, -1, '[cm]')
+        sample2detector_distance_txt = wx.StaticText(self, -1, 
+                                'Sample Aperture to Detector Distance: ')
+        self.sample2detector_distance_tcl = InputTextCtrl(self, -1, 
+                                         size=(_BOX_WIDTH,-1))
+        sample2detector_distance_hint = \
+                                "Sample Aperture to Detector Distance"
+        self.sample2detector_distance_tcl.SetValue(\
+                                                sample2detector_distance_value)
+        self.sample2detector_distance_tcl.SetToolTipString(\
+                                                sample2detector_distance_hint)
+        self.sample2detector_distance_sizer.AddMany([\
+                            (sample2detector_distance_txt, 0, wx.LEFT, 15),        
+                            (self.sample2detector_distance_tcl, 0, wx.LEFT, 15),
+                            (sample2detector_distance_unit_txt,0, wx.LEFT, 10)])  
+        
+    def _layout_detector_size(self):
+        """
+        Fill the sizer containing detector size
+        """
+        # get the wavelength
+        detector_size_value = str(self.resolution.detector_size[0])
+        if len(self.resolution.detector_size)>1:
+            detector_size_value += ", "
+            detector_size_value += str(self.resolution.detector_size[1])
+        detector_size_unit_txt = wx.StaticText(self, -1, '')
+        detector_size_txt = wx.StaticText(self, -1, 
+                                'Number of Pixels on Detector: ')
+        self.detector_size_tcl = InputTextCtrl(self, -1, 
+                                         size=(_BOX_WIDTH,-1))
+        detector_size_hint = "Number of Pixels on Detector"
+        self.detector_size_tcl.SetValue(detector_size_value)
+        self.detector_size_tcl.SetToolTipString(detector_size_hint)
+        self.detector_size_sizer.AddMany([(detector_size_txt, 0, 
+                                               wx.LEFT, 15),
+                                (self.detector_size_tcl, 0, wx.LEFT, 15),
+                                    (detector_size_unit_txt,0, wx.LEFT, 10)])  
+
+        
+    def _layout_detector_pix_size(self):
+        """
+        Fill the sizer containing detector pixel size
+        """
+        # get the detector_pix_size
+        detector_pix_size_value = str(self.resolution.detector_pix_size[0])
+        if len(self.resolution.detector_pix_size)>1:
+            detector_pix_size_value += ", "
+            detector_pix_size_value += str(self.resolution.detector_pix_size[1])
+        detector_pix_size_unit_txt = wx.StaticText(self, -1, '[cm]')
+        detector_pix_size_txt = wx.StaticText(self, -1, 
+                                'Detector Pixel Size: ')
+        self.detector_pix_size_tcl = InputTextCtrl(self, -1, 
+                                         size=(_BOX_WIDTH,-1))
+        detector_pix_size_hint = "Detector Pixel Size"
+        self.detector_pix_size_tcl.SetValue(detector_pix_size_value)
+        self.detector_pix_size_tcl.SetToolTipString(detector_pix_size_hint)
+        self.detector_pix_size_sizer.AddMany([(detector_pix_size_txt, 0, 
+                                               wx.LEFT, 15),
+                                (self.detector_pix_size_tcl, 0, wx.LEFT, 15),
+                                (detector_pix_size_unit_txt,0, wx.LEFT, 10)])
+        
+    def _layout_input(self):
+        """
+        Fill the sizer containing inputs; qx, qy
+        """
+        
+        q_title = wx.StaticText(self, -1, 
+                            "[Q Location of the Estimation]:")
+        # sizers for inputs
+        inputQx_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        inputQy_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        # get the default dq
+        qx_value = str(_Q_DEFAULT)
+        qy_value = str(_Q_DEFAULT)
+        qx_unit_txt = wx.StaticText(self, -1, '[1/A]  ')
+        qy_unit_txt = wx.StaticText(self, -1, '[1/A]  ')
+        qx_name_txt = wx.StaticText(self, -1, 
+                                'Qx: ')
+        qy_name_txt = wx.StaticText(self, -1, 
+                                'Qy: ')
+        self.qx_tcl = InputTextCtrl(self, -1, 
+                                         size=(_BOX_WIDTH*3,-1))
+        self.qy_tcl = InputTextCtrl(self, -1, 
+                                         size=(_BOX_WIDTH*3,-1))
+        qx_hint = "Type the Qx value."
+        qy_hint = "Type the Qy value."
+        self.qx_tcl.SetValue(qx_value)
+        self.qy_tcl.SetValue(qy_value)
+        self.qx_tcl.SetToolTipString(qx_hint)
+        self.qy_tcl.SetToolTipString(qy_hint)
+        inputQx_sizer.AddMany([(qx_name_txt, 0, wx.LEFT, 15),
+                                    (self.qx_tcl, 0, wx.LEFT, 15),
+                                    (qx_unit_txt, 0, wx.LEFT, 15)])
+        inputQy_sizer.AddMany([(qy_name_txt, 0, wx.LEFT, 15),
+                                    (self.qy_tcl, 0, wx.LEFT, 15),
+                                    (qy_unit_txt, 0, wx.LEFT, 15)])
+        self.input_sizer.AddMany([(q_title, 0, wx.LEFT, 15), 
+                                    (inputQx_sizer, 0,
+                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                    (inputQy_sizer, 0, 
+                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
+                                #(self.compute_button, 0, wx.LEFT, 30)])
+        
+    def _layout_output(self):
+        """
+        Fill the sizer containing dQ|| and dQ+
+        """
+        sigma_title = wx.StaticText(self, -1, 
+                        "[Standard Deviation of the Resolution Distribution]:")
+         # sizers for inputs
+        outputQxy_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        outputQ_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sigma_unit = '['+'1/A' +']'
+        self.sigma_r_txt = wx.StaticText(self, -1, 
+                                           'Sigma_r:   ')
+        self.sigma_r_tcl = OutputTextCtrl(self, -1, 
+                                                 size=(_BOX_WIDTH,-1))
+        self.sigma_phi_txt = wx.StaticText(self, -1, 
+                                           'Sigma_phi:')
+        self.sigma_phi_tcl = OutputTextCtrl(self, -1, 
+                                                 size=(_BOX_WIDTH,-1))
+        sigma_1d_txt = wx.StaticText(self, -1, '( 1D:   Sigma:')
+        self.sigma_1d_tcl = OutputTextCtrl(self, -1, 
+                                                 size=(_BOX_WIDTH,-1))
+        sigma_hint = " dQ_r or dQ_x, and dQ_phi or dQ_y"
+        sigma_hint_1d = " dQ for 1-dimension"
+        self.sigma_r_tcl.SetToolTipString(sigma_hint)
+        self.sigma_phi_tcl.SetToolTipString(sigma_hint)
+        self.sigma_1d_tcl.SetToolTipString(sigma_hint_1d)
+        sigma_r_unit_txt = wx.StaticText(self, -1, sigma_unit)
+        sigma_phi_unit_txt = wx.StaticText(self, -1, sigma_unit)
+        sigma_1d_unit_txt = wx.StaticText(self, -1, sigma_unit+' )')
+        outputQxy_sizer.AddMany([(self.sigma_r_txt, 0, wx.LEFT, 15),
+                                    (self.sigma_r_tcl, 0, wx.LEFT, 15),
+                                    (sigma_r_unit_txt, 0, wx.LEFT, 15),
+                                    (self.sigma_phi_txt, 0, wx.LEFT, 15),
+                                    (self.sigma_phi_tcl, 0, wx.LEFT, 15),
+                                    (sigma_phi_unit_txt, 0, wx.LEFT, 15)])
+        outputQ_sizer.AddMany([(sigma_1d_txt, 0, wx.LEFT, 15),
+                                    (self.sigma_1d_tcl, 0, wx.LEFT, 15),
+                                    (sigma_1d_unit_txt, 0, wx.LEFT, 15)])
+        self.output_sizer.AddMany([(sigma_title, 0, wx.LEFT, 15), 
+                                    (outputQxy_sizer, 0,
+                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                    (outputQ_sizer, 0, 
+                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
+        
+    
+    def _layout_hint(self):
+        """
+        Fill the sizer containing hint 
+        """
+        hint_msg = ""
+        #hint_msg += "This tool is to approximately compute "
+        #hint_msg += "the resolution (dQ)."
+
+        self.hint_txt = wx.StaticText(self, -1, hint_msg)
+        self.hint_sizer.AddMany([(self.hint_txt, 0, wx.LEFT, 15)])
+    
+    def _layout_button(self):  
+        """
+        Do the layout for the button widgets
+        """ 
+        #outerbox_txt = wx.StaticText(self, -1, 'Outer Box')
+        self.x_y_rb = wx.RadioButton(self, -1,"Cartesian")
+        self.Bind(wx.EVT_RADIOBUTTON,
+                  self._on_xy_coordinate, id=self.x_y_rb.GetId())
+        self.r_phi_rb = wx.RadioButton(self, -1,"Polar")
+        self.Bind(wx.EVT_RADIOBUTTON,
+                  self._on_rp_coordinate, id=self.r_phi_rb.GetId())
+        self.r_phi_rb.SetValue(True)
+        #reset button
+        id = wx.NewId()
+        self.reset_button = wx.Button(self, id, "Reset")
+        hint_on_reset = "..."
+        self.reset_button.SetToolTipString(hint_on_reset)
+        self.Bind(wx.EVT_BUTTON, self.on_reset, id=id)
+        #compute button
+        id = wx.NewId()
+        self.compute_button = wx.Button(self, id, "Compute")
+        hint_on_compute = "..."
+        self.compute_button.SetToolTipString(hint_on_compute)
+        self.Bind(wx.EVT_BUTTON, self.on_compute, id=id)
+        # close button
+        self.bt_close = wx.Button(self, wx.ID_CANCEL,'Close')
+        self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
+        self.bt_close.SetToolTipString("Close this window.")
+        self.button_sizer.AddMany([(self.r_phi_rb,  0, wx.LEFT, 15),
+                                   (self.x_y_rb,  0, wx.LEFT, 15),
+                                   (self.reset_button, 0, wx.LEFT, 50),
+                                   (self.compute_button, 0, wx.LEFT, 15),
+                                   (self.bt_close, 0, wx.LEFT, 15)])#370)])
+        self.compute_button.SetFocus()
+        
+    def _layout_image(self):
+        """
+        Layout for image plot
+        """
+        color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)
+
+        # Contribution by James C.
+        # Instantiate a figure object that will contain our plots.
+        # Make the fig a little smaller than the default
+        self.figure = Figure(figsize=(6.5, 6), facecolor = 'white')
+        
+        # Initialize the figure canvas, mapping the figure object to the plot
+        # engine backend.
+        self.canvas = FigureCanvas(self, wx.ID_ANY, self.figure)
+
+        # Wx-Pylab magic ...
+        # Make our canvas the active figure manager for pylab so that when
+        # pylab plotting statements are executed they will operate on our
+        # canvas and not create a new frame and canvas for display purposes.
+        # This technique allows this application to execute code that uses
+        # pylab stataments to generate plots and embed these plots in our
+        # application window(s).
+        self.fm = FigureManagerBase(self.canvas, 1)
+        _pylab_helpers.Gcf.set_active(self.fm)
+        
+        # Instantiate the matplotlib navigation toolbar and explicitly show it.
+        mpl_toolbar = Toolbar(self.canvas)
+        # Diable pan
+        mpl_toolbar.DeleteToolByPos(3)
+
+        # Add a toolbar into the frame
+        mpl_toolbar.Realize()
+
+        # Compute before adding the canvas to the sizer
+        self.on_compute()
+
+        # Fill up the sizer
+        self.vertical_r_sizer.Add(self.canvas, -1) 
+        self.vertical_r_spacer.Add((0, 24)) 
+        self.vertical_r_spacer.Add(self.vertical_r_sizer, 0, 
+                                       wx.ALL|wx.EXPAND, 2)
+        self.vertical_r_spacer.Add((0, 30)) 
+        self.vertical_r_spacer.Add(wx.StaticLine(self), 0, 
+                                       wx.ALL|wx.EXPAND, 2)
+        self.vertical_r_spacer.Add(mpl_toolbar, 0,  wx.ALL|wx.EXPAND, 2)
+
+        
+    def _do_layout(self):
+        """
+            Draw window layout
+        """
+        #  Title of parameters
+        instrument_txt = wx.StaticText(self, -1, 
+                                '[Instrumental Parameters]:')
+        # Build individual layouts
+        self._define_structure()
+        self._layout_mass()
+        #self._layout_intensity()
+        self._layout_wavelength()
+        self._layout_wavelength_spread()
+        self._layout_source_aperture()
+        self._layout_sample_aperture()
+        self._layout_source2sample_distance()
+        self._layout_sample2detector_distance()
+        self._layout_sample2sample_distance()
+        self._layout_detector_size()
+        self._layout_detector_pix_size()
+        self._layout_input()
+        self._layout_output()
+        self._layout_hint()
+        self._layout_button()
+        # Fill the sizers
+        self.boxsizer_source.AddMany([(instrument_txt, 0,
+                                       wx.EXPAND|wx.LEFT, 15),
+                                      (self.mass_sizer, 0,
+                                      wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      #(self.intensity_sizer, 0,
+                                      #wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      (self.wavelength_sizer, 0,
+                                      wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      (self.wavelength_spread_sizer, 0,
+                                      wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      (self.source_aperture_sizer, 0,
+                                      wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      (self.sample_aperture_sizer, 0,
+                                      wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      (self.source2sample_distance_sizer, 0,
+                                      wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      (self.sample2detector_distance_sizer, 0,
+                                      wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      (self.sample2sample_distance_sizer, 0,
+                                      wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      (self.detector_size_sizer, 0,
+                                      wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      (self.detector_pix_size_sizer, 0,
+                                      wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      (wx.StaticLine(self), 0, 
+                                       wx.ALL|wx.EXPAND, 5),
+                                      (self.input_sizer, 0,
+                                      wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      (wx.StaticLine(self), 0, 
+                                       wx.ALL|wx.EXPAND, 5),
+                                      (self.output_sizer, 0,
+                                      wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
+        self.vertical_l_sizer.AddMany([(self.boxsizer_source, 0, wx.ALL, 10),
+                                       (wx.StaticLine(self), 0, 
+                                       wx.ALL|wx.EXPAND, 5),
+                                  (self.button_sizer, 0,
+                                    wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
+        self.main_sizer.Add(self.vertical_l_sizer, 0, wx.ALL, 10)
+        # Build image plot layout                     
+        self._layout_image()
+        # Add a vertical static line
+        self.main_sizer.Add( wx.StaticLine(self, -1, (2,2), 
+                            (2,PANEL_HEIGHT * 0.94), style = wx.LI_VERTICAL))
+        # Add the plot to main sizer
+        self.main_sizer.Add(self.vertical_r_spacer, 0, wx.ALL, 10)
+        self.SetSizer(self.main_sizer)
+        self.SetAutoLayout(True)
+
+    def on_close(self, event):
+        """
+        close the window containing this panel
+        """
+        # get ready for other events
+        if event is not None:
+            event.Skip()
+        # Clear the plot
+        if self.image != None:
+            self.image.clf()
+            #self.image.draw()
+        # Close panel
+        self.parent.Close()
+        # reset image
+        self.image =None
+       
+    def on_compute(self, event = None):
+        """
+        Execute the computation of resolution
+        """
+        # Skip event for next event
+        if event != None:
+            event.Skip()
+            msg = "Please Check your input values "
+            msg += "before starting the computation..."
+
+        # message
+        status_type = 'progress' 
+        msg = 'Calculating...'
+        self._status_info(msg, status_type)
+
+        status_type = 'stop'           
+        # Q min max list default
+        qx_min = []   
+        qx_max = [] 
+        qy_min = [] 
+        qy_max = [] 
+        # Get all the values at set to compute
+        #intensity = self.intensity_tcl.GetValue()
+        #self.resolution.set_intensity(float(intensity))
+        wavelength = self.wavelength_tcl.GetValue()
+        self.resolution.set_wavelength(float(wavelength))
+        mass = self.mass_tcl.GetValue()
+        self.resolution.set_neutron_mass(float(mass))
+        wavelength_spread = self.wavelength_spread_tcl.GetValue()
+        self.resolution.set_wavelength_spread(float(wavelength_spread))
+        source_aperture_size = self.source_aperture_tcl.GetValue()
+        source_aperture_size = self._string2list(source_aperture_size)
+        self.resolution.set_source_aperture_size(source_aperture_size)
+        sample_aperture_size = self.sample_aperture_tcl.GetValue()
+        sample_aperture_size = self._string2list(sample_aperture_size)
+        self.resolution.set_sample_aperture_size(sample_aperture_size)
+        source2sample_distance = self.source2sample_distance_tcl.GetValue()
+        source2sample_distance = self._string2list(source2sample_distance)
+        self.resolution.set_source2sample_distance(source2sample_distance)
+        sample2sample_distance = self.sample2sample_distance_tcl.GetValue()
+        sample2sample_distance = self._string2list(sample2sample_distance)
+        self.resolution.set_sample2sample_distance(sample2sample_distance)
+        sample2detector_distance = self.sample2detector_distance_tcl.GetValue()
+        sample2detector_distance = self._string2list(sample2detector_distance)
+        self.resolution.set_sample2detector_distance(sample2detector_distance)
+        detector_size = self.detector_size_tcl.GetValue()
+        detector_size = self._string2list(detector_size)
+        self.resolution.set_detector_size(detector_size)
+        detector_pix_size = self.detector_pix_size_tcl.GetValue()
+        detector_pix_size = self._string2list(detector_pix_size)
+        self.resolution.set_detector_pix_size(detector_pix_size)
+        self.qx = self._string2inputlist(self.qx_tcl.GetValue())
+        self.qy = self._string2inputlist(self.qy_tcl.GetValue())
+        
+        # Find min max of qs
+        xmin = min(self.qx)
+        xmax = max(self.qx)
+        ymin = min(self.qy)
+        ymax = max(self.qy)
+
+        # Validate the q inputs
+        self._validate_q_input(self.qx, self.qy)
+        
+        # Make list of q min max for mapping
+        for length in range(len(self.qx)):
+            qx_min.append(xmin)
+            qx_max.append(xmax)
+        for length in range(len(self.qy)):
+            qy_min.append(ymin)
+            qy_max.append(ymax)
+        
+        # Compute the resolution
+        if self.image != None:
+            #_pylab_helpers.Gcf.set_active(self.fm)
+            # Clear the image before redraw
+            self.image.clf()
+            #self.image.draw()
+            # reset the image
+            self.resolution.reset_image()
+
+        # Compute and get the image plot
+        try:
+            self.image = map(self._map_func, self.qx, self.qy, 
+                             qx_min, qx_max, qy_min, qy_max)[0]
+            msg = "Finished the resolution computation..."
+            self._status_info(msg, status_type)
+        except:
+            msg = "An error occured during the resolution computation."
+            msg += "Please check your inputs..."
+            self._status_info(msg, status_type)
+            raise ValueError, "Invalid Q Input: Out of detector range..."
+        
+        # Draw lines in image before drawing
+        self._draw_lines(self.image)
+        # Draw image
+        self.image.draw()
+        #self.vertical_r_sizer.Layout()
+        
+        # Get and format the sigmas 
+        sigma_r = self.format_number(self.resolution.sigma_1)
+        sigma_phi = self.format_number(self.resolution.sigma_2)
+        sigma_1d =  self.format_number(self.resolution.sigma_1d)
+
+        # Set output values 
+        self.sigma_r_tcl.SetValue(str(sigma_r))
+        self.sigma_phi_tcl.SetValue(str(sigma_phi))
+        self.sigma_1d_tcl.SetValue(str(sigma_1d))
+        
+    def _draw_lines(self, image = None):
+        """
+        Draw lines in image if applicable
+        : Param image: pylab object
+        """
+        if image == None:
+            return
+        
+        # Get the params from resolution
+        # ploting range
+        qx_min = self.resolution.qx_min
+        qx_max = self.resolution.qx_max
+        qy_min = self.resolution.qy_min
+        qy_max = self.resolution.qy_max
+        
+        # detector range
+        detector_qx_min = self.resolution.detector_qx_min
+        detector_qx_max = self.resolution.detector_qx_max
+        detector_qy_min = self.resolution.detector_qy_min
+        detector_qy_max = self.resolution.detector_qy_max
+        
+        # Draw zero axis lines
+        if qy_min < 0 and qy_max >= 0:
+            image.axhline(linewidth = 1)
+        if qx_min < 0 and qx_max >= 0:
+            image.axvline(linewidth = 1)
+            
+        # Find x and y ratio values to draw the detector outline
+        x_min = fabs(detector_qx_min - qx_min) / (qx_max - qx_min)
+        x_max = fabs(detector_qx_max - qx_min) / (qx_max - qx_min)
+        y_min = fabs(detector_qy_min - qy_min) / (qy_max - qy_min)
+        y_max = fabs(detector_qy_max - qy_min) / (qy_max - qy_min)
+        
+        # Draw Detector outline
+        if detector_qy_min >= qy_min:
+            image.axhline(y = detector_qy_min + 0.0002,
+                               xmin = x_min,
+                               xmax = x_max, 
+                               linewidth = 2, color='r')
+        if detector_qy_max <= qy_max:
+            image.axhline(y = detector_qy_max - 0.0002, 
+                               xmin = x_min, 
+                               xmax = x_max, 
+                               linewidth = 2, color='r')
+        if detector_qx_min >= qx_min:
+            image.axvline(x = detector_qx_min + 0.0002, 
+                               ymin = y_min, 
+                               ymax = y_max, 
+                               linewidth = 2, color='r')
+        if detector_qx_max <= qx_max:
+            image.axvline(x = detector_qx_max - 0.0002, 
+                               ymin = y_min, 
+                               ymax = y_max, 
+                               linewidth = 2, color='r')
+
+    def _map_func(self, qx, qy, qx_min, qx_max, qy_min, qy_max):    
+        """
+        Prepare the Mapping for the computation
+        : params qx, qy, qx_min, qx_max, qy_min, qy_max:
+        
+        : return: image (pylab)
+        """
+        # calculate 2D resolution distribution image
+        image = self.resolution.compute_and_plot(float(qx), float(qy), 
+                                 qx_min, qx_max, qy_min, qy_max, 
+                                 self.det_coordinate)
+        return image
+    
+    def _validate_q_input(self, qx, qy):    
+        """
+        Check if q inputs are valid
+        : params qx:  qx as a list
+        : params qy:  qy as a list
+        
+        : return: True/False
+        """
+        # check qualifications
+        if qx.__class__.__name__ != 'list':
+            return False
+        if qy.__class__.__name__ != 'list' :
+            return False
+        if len(qx) < 1:
+            return False
+        if len(qy) < 1:
+            return False
+        # allow one input
+        if len(qx) == 1 and len(qy) > 1:
+            qx = [qx[0] for ind in range(len(qy))]
+            self.qx = qx
+        if len(qy) == 1 and len(qx) > 1:
+            qy = [qy[0] for ind in range(len(qx))]
+            self.qy = qy
+        # check length
+        if len(qx) != len(qy):
+            return False
+
+        return True  
+     
+    def on_reset(self, event):
+        """
+        Execute the reset
+        """
+        # skip for another event
+        if event != None:
+            event.Skip()  
+        # init resolution_calculator
+        self.resolution = ResolutionCalculator()
+        self.resolution.get_all_instrument_params()
+        # reset all param values
+        self.mass_tcl.SetValue(str(self.resolution.mass))
+        #self.intensity_tcl.SetValue(str(self.resolution.intensity))
+        self.wavelength_tcl.SetValue(str(self.resolution.wavelength))
+        self.wavelength_spread_tcl.SetValue(\
+                                        str(self.resolution.wavelength_spread))
+        source_aperture_value = str(self.resolution.source_aperture_size[0])
+        if len(self.resolution.source_aperture_size)>1:
+            source_aperture_value += ", "
+            source_aperture_value += \
+                str(self.resolution.source_aperture_size[1])
+        self.source_aperture_tcl.SetValue(str(source_aperture_value))
+        sample_aperture_value = str(self.resolution.sample_aperture_size[0])
+        if len(self.resolution.sample_aperture_size)>1:
+            sample_aperture_value += ", "
+            sample_aperture_value += \
+                str(self.resolution.sample_aperture_size[1])
+        self.sample_aperture_tcl.SetValue(sample_aperture_value)
+        source2sample_distance_value = \
+            str(self.resolution.source2sample_distance[0])
+        self.source2sample_distance_tcl.SetValue(source2sample_distance_value)
+        sample2sample_distance_value = \
+            str(self.resolution.sample2sample_distance[0])
+        self.sample2sample_distance_tcl.SetValue(sample2sample_distance_value)
+        sample2detector_distance_value = \
+            str(self.resolution.sample2detector_distance[0])
+        self.sample2detector_distance_tcl.SetValue(\
+                                            sample2detector_distance_value)
+        detector_size_value = str(self.resolution.detector_size[0])
+        if len(self.resolution.detector_size)>1:
+            detector_size_value += ", "
+            detector_size_value += str(self.resolution.detector_size[1])
+        self.detector_size_tcl.SetValue(detector_size_value)
+        detector_pix_size_value = str(self.resolution.detector_pix_size[0])
+        if len(self.resolution.detector_pix_size)>1:
+            detector_pix_size_value += ", "
+            detector_pix_size_value += str(self.resolution.detector_pix_size[1])
+        self.detector_pix_size_tcl.SetValue(detector_pix_size_value)
+        #layout attribute
+        self.hint_sizer = None
+        # reset q inputs
+        self.qx_tcl.SetValue(str(_Q_DEFAULT))
+        self.qy_tcl.SetValue(str(_Q_DEFAULT))
+        # reset sigma outputs
+        self.sigma_r_tcl.SetValue('')
+        self.sigma_phi_tcl.SetValue('')
+        self.sigma_1d_tcl.SetValue('')
+        # reset radio button
+        self.det_coordinate = 'polar'
+        self.r_phi_rb.SetValue(True)
+        # Finally re-compute
+        self.on_compute()
+        # msg on info
+        msg = " Finished the resetting..."
+        self._status_info(msg, 'stop')
+        
+    def format_number(self, value=None):
+        """
+        Return a float in a standardized, human-readable formatted string 
+        """
+        try: 
+            value = float(value)
+        except:
+            output = None
+            return output
+
+        output = "%-7.4g" % value
+        return output.lstrip().rstrip()  
+     
+    def _string2list(self, string):
+        """
+        Change NNN, NNN to list,ie. [NNN, NNN] where NNN is a number
+        """
+        new_string = []
+        # check the number of floats 
+        try:
+            strg = float(string)
+            new_string.append(strg)
+            #new_string.append(0)
+        except:
+            string_split = string.split(',')
+            if len(string_split) == 2:
+                str_1 = string_split[0]
+                str_2 = string_split[1]
+                new_string.append(float(str_1))
+                new_string.append(float(str_2))
+            elif len(string_split) == 1:
+                str_1 = string_split[0]
+                new_string.append(float(str_1))
+            else:
+                msg = "The numbers must be one or two (separated by ',')..."
+                self._status_info(msg, 'stop')
+                raise RuntimeError, msg
+
+        return new_string
+    
+    def _string2inputlist(self, string):
+        """
+        Change NNN, NNN,... to list,ie. [NNN, NNN,...] where NNN is a number
+        
+        : return new_string: string like list
+        """
+        new_string = []
+        string_split = string.split(',')
+        length = len(string_split)
+        for ind in range(length):
+            try:
+                value = float(string_split[ind])
+                new_string.append(value)
+            except:
+                pass
+        
+        return new_string
+
+    def _on_xy_coordinate(self,event=None):
+        """
+        Set the detector coordinate for sigmas to x-y coordinate
+        """
+        if event != None:
+            event.Skip()        
+        # Set the coordinate in Cartesian       
+        self.det_coordinate = 'cartesian'
+        self.sigma_r_txt.SetLabel('Sigma_x:')
+        self.sigma_phi_txt.SetLabel('Sigma_y:')
+        
+    def _on_rp_coordinate(self,event=None):
+        """
+        Set the detector coordinate for sigmas to polar coordinate
+        """
+        if event != None:
+            event.Skip()        
+        # Set the coordinate in polar            
+        self.det_coordinate = 'polar'
+        self.sigma_r_txt.SetLabel('Sigma_r:   ')
+        self.sigma_phi_txt.SetLabel('Sigma_phi:')
+        
+    def _status_info(self, msg = '', type = "update"):
+        """
+        Status msg
+        """
+        if self.parent.parent != None:
+                wx.PostEvent(self.parent.parent, 
+                             StatusEvent(status = msg, type = type ))
+
+                  
+class ResolutionWindow(wx.Frame):
+    def __init__(self, parent = None, title = "SANS Resolution Estimator",
+                  size=(PANEL_WIDTH * 2, PANEL_HEIGHT), *args, **kwds):
+        kwds['title'] = title
+        kwds['size'] = size
+        wx.Frame.__init__(self, parent=None, *args, **kwds)
+        self.parent = parent
+        self.panel = ResolutionCalculatorPanel(parent=self)
+        self.Centre()
+        self.Show(True)
+        
+if __name__ == "__main__": 
+    app = wx.PySimpleApp()
+    frame = ResolutionWindow()    
+    frame.Show(True)
+    app.MainLoop()     

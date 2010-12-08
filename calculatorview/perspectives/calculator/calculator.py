@@ -124,7 +124,9 @@ class Plugin:
                 ("Slit Size Calculator", slit_length_help,
                         self.on_calculate_slit_size),
                 ("Kiessig Thickness Calculator", 
-                        kiessig_help, self.on_calculate_kiessig),]#,
+                        kiessig_help, self.on_calculate_kiessig),
+                          ("SANS Resolution Estimator", 
+                        kiessig_help, self.on_calculate_resoltuion)]#,
                 #("Data Editor", data_editor_help, self.on_edit_data)]
               
     def on_edit_data(self, event):
@@ -160,7 +162,15 @@ class Plugin:
         from slit_length_calculator_panel import SlitLengthCalculatorWindow
         frame = SlitLengthCalculatorWindow(parent=self.parent)    
         frame.Show(True)
-   
+        
+    def on_calculate_resoltuion(self, event):
+        """
+        Estimate the instrumental resolution
+        """
+        from resolution_calculator_panel import ResolutionWindow
+        frame = ResolutionWindow(parent=self.parent)
+        frame.Show(True) 
+  
     def on_perspective(self, event):
         """
         Call back function for the perspective menu item.
