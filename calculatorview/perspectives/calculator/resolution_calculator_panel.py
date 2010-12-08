@@ -35,8 +35,8 @@ if sys.platform.count("win32") > 0:
     PANEL_HEIGHT = 653
     FONT_VARIANT = 0
 else:
-    PANEL_WIDTH = 620
-    PANEL_HEIGHT = 815
+    PANEL_WIDTH = 560
+    PANEL_HEIGHT = 692
     FONT_VARIANT = 1
  
 class ResolutionCalculatorPanel(ScrolledPanel):
