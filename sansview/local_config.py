@@ -5,7 +5,7 @@ import time
 
 # Version of the application
 __appname__ = "SansView"
-__version__ = '1.3.1'
+__version__ = 'Dev12132010'
 __download_page__ = 'http://danse.chem.utk.edu'
 __update_URL__ = 'http://danse.chem.utk.edu/sansview_version.php'
 
