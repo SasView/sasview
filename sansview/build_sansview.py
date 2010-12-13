@@ -26,7 +26,7 @@
 # [command] can be any of the following:
 #   -h: lists the command line options
 #   -r: Builds a SansView using the released modules.
-#   -t: Builds SansView from the trunk.
+#   -t: Builds SansView from the trubuild_sank.
 #   -i: Builds a Windows installer from the release version.
 #   -n: Print out the dependencies for the release notes
 
