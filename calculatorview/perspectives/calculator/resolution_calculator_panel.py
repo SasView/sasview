@@ -615,7 +615,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         # Close panel
         self.parent.Close()
         # reset image
-        self.image =None
+        self.image = None
        
     def on_compute(self, event = None):
         """

@@ -114,11 +114,14 @@ class Plugin:
         """
         Returns a set of menu entries for tools
         """
-        kiessig_help = "This tool is to approximatly compute the "
+        kiessig_help = "Approximately computes the "
         kiessig_help += "thickness of a shell or the size of "
         kiessig_help += "particles \n from the width of a Kiessig fringe."
-        sld_help = "Provides computation related to Scattering Length Density"
-        slit_length_help = "Provides computation related to Slit Length Density"
+        sld_help = "Computes the Scattering Length Density."
+        slit_length_help = "Computes the slit length from the beam profile."
+        resolution_help = "Approximately estimates the "
+        resolution_help += "resolution of Q in 2D based on the SANS "
+        resolution_help += "instrumental parameter values."
         #data_editor_help = "Meta Data Editor"
         return [("SLD Calculator", sld_help, self.on_calculate_sld),
                 ("Slit Size Calculator", slit_length_help,
@@ -126,7 +129,7 @@ class Plugin:
                 ("Kiessig Thickness Calculator", 
                         kiessig_help, self.on_calculate_kiessig),
                           ("SANS Resolution Estimator", 
-                        kiessig_help, self.on_calculate_resoltuion)]#,
+                        resolution_help, self.on_calculate_resoltuion)]#,
                 #("Data Editor", data_editor_help, self.on_edit_data)]
               
     def on_edit_data(self, event):
