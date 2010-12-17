@@ -1084,7 +1084,7 @@ class BasicPage(wx.ScrolledWindow):
         self.data = state.data
         if self.data !=None:
             from DataLoader.qsmearing import smear_selection
-            self.smearer= smear_selection(self.data)
+            self.smearer= smear_selection(self.data, self.model)
         self.enable2D= state.enable2D
         self.engine_type = state.engine_type
 

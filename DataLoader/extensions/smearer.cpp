@@ -210,9 +210,9 @@ void QSmearer :: compute_matrix(){
 			get_bin_range(j, &q_j, &q_jmin, &q_jmax);
 
 			// Compute the fraction of the Gaussian contributing
-			// to the q bin between q_min and q_max
-			double value =  erf( (q_max-q_j)/(sqrt(2.0)*width[j]) );
-        	value -= erf( (q_min-q_j)/(sqrt(2.0)*width[j]) );
+			// to the q_j bin between q_jmin and q_jmax
+			double value =  erf( (q_jmax-q)/(sqrt(2.0)*width[i]) );
+        	value -= erf( (q_jmin-q)/(sqrt(2.0)*width[i]) );
         	(*weights)[i*nbins+j] += value;
 		}
 	}
@@ -272,11 +272,18 @@ void BaseSmearer :: smear(double *iq_in, double *iq_out, int first_bin, int last
 		double counts = 0.0;
 
 		for(int i=first_bin; i<=last_bin; i++){
+			// Skip if weight is less than 1e-04(this value is much smaller than
+			// the weight at the 3*sigma distance
+			// Will speed up a little bit...
+			if ((*weights)[q_i*nbins+i] < 1.0e-004){
+				continue;
+			}
 			sum += iq_in[i] * (*weights)[q_i*nbins+i];
 			counts += (*weights)[q_i*nbins+i];
 		}
 
 		// Normalize counts
 		iq_out[q_i] = (counts>0.0) ? sum/counts : 0;
+		//printf("\n iii=%g,%g ",iq_out[q_i], q_i);
 	}
 }

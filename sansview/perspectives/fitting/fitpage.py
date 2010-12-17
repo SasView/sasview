@@ -55,7 +55,7 @@ class FitPage(BasicPage):
             self.formfactorbox.Disable()
             self.structurebox.Disable()
         else:
-            self.smearer = smear_selection(self.data)
+            self.smearer = smear_selection(self.data, self.model)
             if self.smearer ==None:
                 self.enable_smearer.Disable()
         ## to update the panel according to the fit engine type selected
@@ -339,7 +339,7 @@ class FitPage(BasicPage):
         self._hide_all_smear_info()
         
         # get smear_selection
-        self.current_smearer= smear_selection( self.data )
+        self.current_smearer= smear_selection( self.data, self.model )
 
         # Show only the relevant smear messages, etc
         if self.current_smearer == None:
@@ -873,8 +873,11 @@ class FitPage(BasicPage):
         self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
       
         if self.model != None:
+            temp_smear= None
+            self.onSmear(None)
+            self.smearer.set_model(self.model)
             try:
-                temp_smear= None
+                
                 if self.enable_smearer.GetValue():
                     temp_smear= self.smearer
                 #self.compute_chisqr(temp_smear)
@@ -1362,7 +1365,7 @@ class FitPage(BasicPage):
             self.formfactorbox.Disable()
             self.structurebox.Disable()
         else:
-            self.smearer = smear_selection( self.data )
+            self.smearer = smear_selection(self.data, self.model)
             self.disable_smearer.SetValue(True)
             if self.smearer == None:
                 self.enable_smearer.Disable()
@@ -1760,7 +1763,7 @@ class FitPage(BasicPage):
             elif self.dx_max != None:
                 if self._is_2D(): data.dqy_data[data.dqy_data==0] = self.dx_max
                 else: data.dx[data.dx==0] = self.dx_max          
-            self.current_smearer = smear_selection(data)
+            self.current_smearer = smear_selection(data, self.model)
             # 2D need to set accuracy
             if self._is_2D(): 
                 self.current_smearer.set_accuracy(accuracy = \
@@ -1939,7 +1942,7 @@ class FitPage(BasicPage):
             else:
                 self.smear_slit_width.SetBackgroundColour(wx.WHITE)
               
-        self.current_smearer = smear_selection(data)
+        self.current_smearer = smear_selection(data, self.model)
         #temp_smearer = self.current_smearer
         ## set smearing value whether or not the data contain the smearing info
         self.manager.set_smearer(smearer=self.current_smearer, qmin= \
@@ -2000,7 +2003,7 @@ class FitPage(BasicPage):
         
         data = copy.deepcopy(self.data)
         # make sure once more if it is smearer
-        self.current_smearer = smear_selection(data)
+        self.current_smearer = smear_selection(data, self.model)
         
         if self.enable_smearer.GetValue():
             if hasattr(self.data,"dxl"):

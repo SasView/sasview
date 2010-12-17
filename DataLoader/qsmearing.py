@@ -7,13 +7,13 @@
 #copyright 2008, University of Tennessee
 ######################################################################
 import numpy
-#import math
+import math
 import logging
 import sys
 import DataLoader.extensions.smearer as smearer
 from DataLoader.smearing_2d import Smearer2D
 
-def smear_selection(data1D):
+def smear_selection(data1D, model = None):
     """
     Creates the right type of smearer according 
     to the data.
@@ -29,6 +29,7 @@ def smear_selection(data1D):
     resolution smearing data. 
     
     :param data1D: Data1D object
+    :param model: sans.model instance
     """
     # Sanity check. If we are not dealing with a SANS Data1D
     # object, just return None
@@ -54,7 +55,7 @@ def smear_selection(data1D):
             #print "data1D.dx[0]",data1D.dx[0],data1D.dxl[0]
     # If we found resolution smearing data, return a QSmearer
     if _found_resolution == True:
-        return QSmearer(data1D)
+        return QSmearer(data1D, model)
 
     # Look for slit smearing data
     _found_slit = False
@@ -85,10 +86,13 @@ class _BaseSmearer(object):
     
     def __init__(self):
         self.nbins = 0
+        self.nbins_low = 0
+        self.nbins_high = 0
         self._weights = None
         ## Internal flag to keep track of C++ smearer initialization
         self._init_complete = False
         self._smearer = None
+        self.model = None
         
     def __deepcopy__(self, memo={}):
         """
@@ -120,12 +124,14 @@ class _BaseSmearer(object):
             q_min = self.min
         if q_max == None:
             q_max = self.max
+
         _qmin_unsmeared, _qmax_unsmeared = self.get_unsmeared_range(q_min,
                                                                      q_max)
         _first_bin = None
         _last_bin  = None
 
-        step = (self.max - self.min) / (self.nbins - 1.0)
+        #step = (self.max - self.min) / (self.nbins - 1.0)
+        # Find the first and last bin number in all extrapolated and real data
         try:
             for i in range(self.nbins):
                 q_i = smearer.get_q(self._smearer, i)
@@ -139,10 +145,14 @@ class _BaseSmearer(object):
             msg = "_BaseSmearer.get_bin_range: "
             msg += " error getting range\n  %s" % sys.exc_value
             raise RuntimeError, msg
-               
+   
+        #  Find the first and last bin number only in the real data
+        _first_bin, _last_bin = self._get_unextrapolated_bin( \
+                                        _first_bin, _last_bin)
+
         return _first_bin, _last_bin
 
-    def __call__(self, iq_in, first_bin=0, last_bin=None):
+    def __call__(self, iq_in, first_bin = 0, last_bin = None):
         """
         Perform smearing
         """
@@ -150,34 +160,117 @@ class _BaseSmearer(object):
         # initialize the C++ smearer object first
         if not self._init_complete:
             self._initialize_smearer()
-             
-        # Get the max value for the last bin
+
         if last_bin is None or last_bin >= len(iq_in):
             last_bin = len(iq_in) - 1
         # Check that the first bin is positive
         if first_bin < 0:
             first_bin = 0
             
+        # With a model given, compute I for the extrapolated points and append
+        # to the iq_in
+        #iq_in_temp = iq_in
+        if self.model != None:
+            temp_first, temp_last = self._get_extrapolated_bin( \
+                                                        first_bin, last_bin)
+            iq_in_low = self.model.evalDistribution( \
+                                            self.qvalues[0:self.nbins_low])
+            iq_in_high = self.model.evalDistribution( \
+                                            self.qvalues[(len(self.qvalues) - \
+                                            self.nbins_high - 1): -1])
+            if self.nbins_low > 0:                             
+                iq_in_temp = numpy.append(iq_in_low, iq_in)
+            if self.nbins_high > 0:
+                iq_in_temp = numpy.append(iq_in_temp, iq_in_high)
+        else:
+            temp_first = first_bin
+            temp_last = last_bin
+            iq_in_temp = iq_in
         # Sanity check
-        if len(iq_in) != self.nbins:
+        if len(iq_in_temp) != self.nbins:
             msg = "Invalid I(q) vector: inconsistent array "
-            msg += " length %d != %s" % (len(iq_in), str(self.nbins))
+            msg += " length %d != %s" % (len(iq_in_temp), str(self.nbins))
             raise RuntimeError, msg
-             
+
         # Storage for smeared I(q)   
         iq_out = numpy.zeros(self.nbins)
-        smear_output = smearer.smear(self._smearer, iq_in, iq_out,
-                                      first_bin, last_bin)
+
+        smear_output = smearer.smear(self._smearer, iq_in_temp, iq_out,
+                                      #0, self.nbins - 1)
+                                      temp_first, temp_last)
+                                      #first_bin, last_bin)
         if smear_output < 0:
             msg = "_BaseSmearer: could not smear, code = %g" % smear_output
             raise RuntimeError, msg
-        return iq_out
+        
+        
+        temp_first += self.nbins_low
+        temp_last = self.nbins - (self.nbins_high + 1)
+
+        return iq_out[temp_first: (temp_last + 1)]
     
     def _initialize_smearer(self):
         """
         """
         return NotImplemented
     
+    def set_model(self, model):
+        """
+        Set model
+        """
+        if model != None:
+            self.model = model
+            
+    
+    def _get_unextrapolated_bin(self, first_bin = 0, last_bin = 0):
+        """
+        Get unextrapolated first bin and the last bin
+        
+        : param first_bin: extrapolated first_bin
+        : param last_bin: extrapolated last_bin
+        
+        : return fist_bin, last_bin: unextrapolated first and last bin
+        """
+        #  For first bin
+        if first_bin <= self.nbins_low:
+            first_bin = 0
+        else:
+            first_bin = first_bin - self.nbins_low
+        # For last bin
+        if last_bin >= (self.nbins - self.nbins_high):
+            last_bin  = self.nbins - (self.nbins_high + self.nbins_low + 1)
+        elif last_bin >= self.nbins_low:
+            last_bin = last_bin - self.nbins_low
+        else:
+            last_bin = 0
+        return first_bin, last_bin
+    
+    def _get_extrapolated_bin(self, first_bin = 0, last_bin = 0):
+        """
+        Get extrapolated first bin and the last bin
+        
+        : param first_bin: unextrapolated first_bin
+        : param last_bin: unextrapolated last_bin
+        
+        : return first_bin, last_bin: extrapolated first and last bin
+        """
+        #  For the first bin
+        if first_bin > 0:
+            # In the case that doesn't need lower q extrapolation data 
+            first_bin +=  self.nbins_low
+        else:
+            # In the case that needs low extrapolation data
+            first_bin = 0
+        # For last bin
+        if last_bin >= self.nbins - (self.nbins_high + self.nbins_low + 1):
+            # In the case that needs higher q extrapolation data 
+            last_bin = self.nbins - 1
+        else:
+            # In the case that doesn't need higher q extrapolation data 
+             last_bin += self.nbins_low
+
+        return first_bin, last_bin
+        
 class _SlitSmearer(_BaseSmearer):
     """
     Slit smearing for I(q) array
@@ -252,6 +345,8 @@ class SlitSmearer(_SlitSmearer):
         
         ## Slit width
         self.width = 0
+        self.nbins_low = 0
+        self.nbins_high = 0
         if data1D.dxw is not None and len(data1D.dxw) == len(data1D.x):
             self.width = data1D.dxw[0]
             # Sanity check
@@ -341,7 +436,7 @@ class QSmearer(_QSmearer):
     """
     Adaptor for Gaussian Q smearing class and SANS data
     """
-    def __init__(self, data1D):
+    def __init__(self, data1D, model = None):
         """
         Assumption: equally spaced bins of increasing q-values.
         
@@ -349,22 +444,92 @@ class QSmearer(_QSmearer):
         """
         # Initialization from parent class
         super(QSmearer, self).__init__()
-        
+        data1d_x = []
+        self.nbins_low = 0
+        self.nbins_high = 0
+        self.model = model
         ## Resolution
-        self.width = numpy.zeros(len(data1D.x))
+        #self.width = numpy.zeros(len(data1D.x))
         if data1D.dx is not None and len(data1D.dx) == len(data1D.x):
             self.width = data1D.dx
         
+        if self.model == None:
+            data1d_x = data1D.x
+        else:
+            self.nbins_low, self.nbins_high, self.width, data1d_x = \
+                                get_qextrapolate(self.width, data1D.x)
+
         ## Number of Q bins
-        self.nbins = len(data1D.x)
+        self.nbins = len(data1d_x)
         ## Minimum Q 
-        self.min = min(data1D.x)
+        self.min = min(data1d_x)
         ## Maximum
-        self.max = max(data1D.x)
+        self.max = max(data1d_x)
         ## Q-values
-        self.qvalues = data1D.x
+        self.qvalues = data1d_x
 
+        
+def get_qextrapolate(width, data_x):
+    """
+    Make fake data_x points extrapolated outside of the data_x points
+    
+    : param width: array of std of q resolution
+    : param Data1D.x: Data1D.x array
+    
+    : return new_width, data_x_ext: extrapolated width array and x array
+    
+    : assumption1: data_x is ordered from lower q to higher q
+    : assumption2: len(data) = len(width)
+    : assumption3: the distance between the data points is more compact 
+            than the size of width 
+    : Todo1: Make sure that the assumptions are correct for Data1D
+    : Todo2: This fixes the edge problem in Qsmearer but still needs to make 
+            smearer interface 
+    """
+    # Length of the width
+    length = len(width)
+    max_width = max(width)
+    # Find bin sizes
+    bin_size_low = math.fabs(data_x[1] - data_x[0])
+    bin_size_high = math.fabs(data_x[length -1] - data_x[length -2])
+    # Number of q points required below the 1st data point in order to extend
+    # them 3 times of the width (std)
+    nbins_low = math.ceil(3 * max_width / bin_size_low)
+    # Number of q points required above the last data point
+    nbins_high = math.ceil(3 * max_width / (bin_size_high))
+    # Make null q points        
+    extra_low = numpy.zeros(nbins_low)
+    extra_high = numpy.zeros(nbins_high)
+    # Give extrapolated values
+    ind = 0
+    qvalue = data_x[0] - bin_size_low
+    while(ind < nbins_low):
+        extra_low[nbins_low - (ind + 1)] = qvalue
+        qvalue -= bin_size_low
+        ind += 1
+    # Remove the points <= 0
+    extra_low = extra_low[extra_low > 0]
+    nbins_low = len(extra_low)
+    # Reset ind for another extrapolation
+    ind = 0
+    qvalue = data_x[length -1] + bin_size_high
+    while(ind < nbins_high):
+        extra_high[ind] = qvalue
+        qvalue += bin_size_high
+        ind += 1
+    # Make a new qx array
+    data_x_ext = numpy.append(extra_low, data_x)
+    data_x_ext = numpy.append(data_x_ext, extra_high)
+    # Redefine extra_low and high based on corrected nbins  
+    # And note that it is not necessary for extra_width to be a non-zero      
+    extra_low = numpy.zeros(nbins_low)
+    extra_high = numpy.zeros(nbins_high) 
+    # Make new width array
+    new_width = numpy.append(extra_low, width)
+    new_width = numpy.append(new_width, extra_high)
 
+    return  nbins_low, nbins_high, new_width, data_x_ext
+    
 if __name__ == '__main__':
     x = 0.001 * numpy.arange(1, 11)
     y = 12.0 - numpy.arange(1, 11)

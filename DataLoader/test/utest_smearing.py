@@ -88,7 +88,7 @@ class smear_tests(unittest.TestCase):
                   7.99906585,   6.99998311,   6.00001689,
                   5.00093415,   4.01898292,   3.15008701,   2.55214921]
         for i in range(len(input)):
-            self.assertAlmostEqual(answer[i], output[i], 5)
+            self.assertAlmostEqual(answer[i], output[i], 4)
       
 
 if __name__ == '__main__':
