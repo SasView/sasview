@@ -873,11 +873,10 @@ class FitPage(BasicPage):
         self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
       
         if self.model != None:
-            temp_smear= None
-            self.onSmear(None)
-            self.smearer.set_model(self.model)
             try:
-                
+                temp_smear= None
+                self.onSmear(None)
+                self.smearer.set_model(self.model)
                 if self.enable_smearer.GetValue():
                     temp_smear= self.smearer
                 #self.compute_chisqr(temp_smear)
