@@ -166,7 +166,7 @@ class _BaseSmearer(object):
         # Check that the first bin is positive
         if first_bin < 0:
             first_bin = 0
-            
+        
         # With a model given, compute I for the extrapolated points and append
         # to the iq_in
         #iq_in_temp = iq_in
@@ -174,18 +174,23 @@ class _BaseSmearer(object):
             temp_first, temp_last = self._get_extrapolated_bin( \
                                                         first_bin, last_bin)
             iq_in_low = self.model.evalDistribution( \
-                                            self.qvalues[0:self.nbins_low])
+                                    numpy.fabs(self.qvalues[0:self.nbins_low]))
             iq_in_high = self.model.evalDistribution( \
                                             self.qvalues[(len(self.qvalues) - \
-                                            self.nbins_high - 1): -1])
+                                            self.nbins_high - 1):])
+            # Todo: find out who is sending iq[last_poin] = 0.
+            if iq_in[len(iq_in) - 1] == 0:
+                iq_in[len(iq_in) - 1] = iq_in_high[0]
+            # Append the extrapolated points to the data points
             if self.nbins_low > 0:                             
                 iq_in_temp = numpy.append(iq_in_low, iq_in)
             if self.nbins_high > 0:
-                iq_in_temp = numpy.append(iq_in_temp, iq_in_high)
+                iq_in_temp = numpy.append(iq_in_temp, iq_in_high[1:])
         else:
             temp_first = first_bin
             temp_last = last_bin
             iq_in_temp = iq_in
+        
         # Sanity check
         if len(iq_in_temp) != self.nbins:
             msg = "Invalid I(q) vector: inconsistent array "
@@ -202,12 +207,11 @@ class _BaseSmearer(object):
         if smear_output < 0:
             msg = "_BaseSmearer: could not smear, code = %g" % smear_output
             raise RuntimeError, msg
-        
-        
-        temp_first += self.nbins_low
-        temp_last = self.nbins - (self.nbins_high + 1)
 
-        return iq_out[temp_first: (temp_last + 1)]
+        temp_first += self.nbins_low
+        temp_last = self.nbins - self.nbins_high
+        
+        return iq_out[temp_first: temp_last]
     
     def _initialize_smearer(self):
         """
@@ -255,12 +259,8 @@ class _BaseSmearer(object):
         : return first_bin, last_bin: extrapolated first and last bin
         """
         #  For the first bin
-        if first_bin > 0:
-            # In the case that doesn't need lower q extrapolation data 
-            first_bin +=  self.nbins_low
-        else:
-            # In the case that needs low extrapolation data
-            first_bin = 0
+        # In the case that needs low extrapolation data
+        first_bin = 0
         # For last bin
         if last_bin >= self.nbins - (self.nbins_high + self.nbins_low + 1):
             # In the case that needs higher q extrapolation data 
@@ -488,15 +488,24 @@ def get_qextrapolate(width, data_x):
     """
     # Length of the width
     length = len(width)
-    max_width = max(width)
+    width_low = math.fabs(width[0])
+    width_high = math.fabs(width[length -1])
     # Find bin sizes
     bin_size_low = math.fabs(data_x[1] - data_x[0])
-    bin_size_high = math.fabs(data_x[length -1] - data_x[length -2])
+    bin_size_high = math.fabs(data_x[length - 1] - data_x[length - 2])
+    # Compare width(dQ) to the data bin size and take smaller one as the bin 
+    # size of the extrapolation; this will correct some weird behavior 
+    # at the edge
+    if width_low < (bin_size_low):
+        bin_size_low = width_low / 2.0
+    if width_high < (bin_size_high):
+        bin_size_high = width_high / 2.0
+        
     # Number of q points required below the 1st data point in order to extend
     # them 3 times of the width (std)
-    nbins_low = math.ceil(3 * max_width / bin_size_low)
+    nbins_low = math.ceil(3 * width_low / bin_size_low)
     # Number of q points required above the last data point
-    nbins_high = math.ceil(3 * max_width / (bin_size_high))
+    nbins_high = math.ceil(3 * width_high / (bin_size_high))
     # Make null q points        
     extra_low = numpy.zeros(nbins_low)
     extra_high = numpy.zeros(nbins_high)
@@ -508,8 +517,8 @@ def get_qextrapolate(width, data_x):
         qvalue -= bin_size_low
         ind += 1
     # Remove the points <= 0
-    extra_low = extra_low[extra_low > 0]
-    nbins_low = len(extra_low)
+    #extra_low = extra_low[extra_low > 0]
+    #nbins_low = len(extra_low)
     # Reset ind for another extrapolation
     ind = 0
     qvalue = data_x[length -1] + bin_size_high
@@ -520,6 +529,7 @@ def get_qextrapolate(width, data_x):
     # Make a new qx array
     data_x_ext = numpy.append(extra_low, data_x)
     data_x_ext = numpy.append(data_x_ext, extra_high)
+    
     # Redefine extra_low and high based on corrected nbins  
     # And note that it is not necessary for extra_width to be a non-zero      
     extra_low = numpy.zeros(nbins_low)

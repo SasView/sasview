@@ -284,6 +284,5 @@ void BaseSmearer :: smear(double *iq_in, double *iq_out, int first_bin, int last
 
 		// Normalize counts
 		iq_out[q_i] = (counts>0.0) ? sum/counts : 0;
-		//printf("\n iii=%g,%g ",iq_out[q_i], q_i);
 	}
 }
