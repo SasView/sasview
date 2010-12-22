@@ -262,7 +262,7 @@ class InvariantDetailsPanel(wx.Dialog):
         self.invariant_high_err_tcl = OutputTextCtrl(self, -1,
                                                      size=(_BOX_WIDTH, -1))
         hint_msg = "Uncertainty on the invariant from high-Q range."
-        self.invariant_high_err_tcl.SetToolTipString()
+        self.invariant_high_err_tcl.SetToolTipString(hint_msg)
         invariant_high_units_txt = wx.StaticText(self, -1, unit_invariant)
         hint_msg = "Unit of the extrapolated invariant from  high-Q range"
         invariant_high_units_txt.SetToolTipString(hint_msg)
