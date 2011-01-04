@@ -873,11 +873,14 @@ class FitPage(BasicPage):
         self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
       
         if self.model != None:
+            # Reset smearer, model and data
+            self.set_data(self.data)
+            # update smearer sizer
+            self.onSmear(None)
             try:
-                temp_smear= None
-                self.onSmear(None)
-                self.smearer.set_model(self.model)
+                temp_smear = None
                 if self.enable_smearer.GetValue():
+                    # Set the smearer environments
                     temp_smear= self.smearer
                 #self.compute_chisqr(temp_smear)
             except:
@@ -889,14 +892,14 @@ class FitPage(BasicPage):
                     self.data.__class__.__name__ !="Data2D":
                 ## set smearing value whether or not 
                 #    the data contain the smearing info
-                evt = ModelEventbox(model=self.model, 
-                                        smearer=temp_smear, 
-                                        qmin= float(self.qmin_x),
-                                     qmax= float(self.qmax_x)) 
+                evt = ModelEventbox(model = self.model, 
+                                        smearer = temp_smear, 
+                                        qmin = float(self.qmin_x),
+                                     qmax = float(self.qmax_x)) 
             else:   
-                 evt = ModelEventbox(model=self.model)
+                 evt = ModelEventbox(model = self.model)
           
-            self.manager._on_model_panel(evt=evt)
+            self.manager._on_model_panel(evt = evt)
             self.state.model = self.model.clone()
             self.state.model.name = self.model.name
             if event is not None:
@@ -1978,7 +1981,7 @@ class FitPage(BasicPage):
             event.Skip()    
         if self.check_invalid_panel():
             return
-        if self.model ==None:
+        if self.model == None:
             self.disable_smearer.SetValue(True)
             msg="Please select a Model first..."
             wx.MessageBox(msg, 'Info')
