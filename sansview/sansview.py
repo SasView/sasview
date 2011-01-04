@@ -10,6 +10,16 @@
 ################################################################################
 
 import wx
+import os
+import sys
+# The below will make sure that sansview application uses the matplotlib font 
+# bundled with sansview. 
+if hasattr(sys, 'frozen'):
+    mplconfigdir = os.path.join(sys.prefix, '.matplotlib')
+    if not os.path.exists(mplconfigdir):
+        os.mkdir(mplconfigdir)
+    os.environ['MPLCONFIGDIR'] = mplconfigdir
+
 from sans.guiframe import gui_manager
 from welcome_panel import WelcomePanel
 # For py2exe, import config here
