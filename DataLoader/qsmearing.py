@@ -78,7 +78,7 @@ def smear_selection(data1D, model = None):
                 break
     # If we found slit smearing data, return a slit smearer
     if _found_slit == True:
-        return SlitSmearer(data1D)
+        return SlitSmearer(data1D, model)
     return None
             
 
@@ -166,14 +166,15 @@ class _BaseSmearer(object):
         # Check that the first bin is positive
         if first_bin < 0:
             first_bin = 0
-        
+
         # With a model given, compute I for the extrapolated points and append
         # to the iq_in
-        #iq_in_temp = iq_in
+        iq_in_temp = iq_in
         if self.model != None:
             temp_first, temp_last = self._get_extrapolated_bin( \
                                                         first_bin, last_bin)
-            iq_in_low = self.model.evalDistribution( \
+            if self.nbins_low > 1:
+                iq_in_low = self.model.evalDistribution( \
                                     numpy.fabs(self.qvalues[0:self.nbins_low]))
             iq_in_high = self.model.evalDistribution( \
                                             self.qvalues[(len(self.qvalues) - \
@@ -189,7 +190,7 @@ class _BaseSmearer(object):
         else:
             temp_first = first_bin
             temp_last = last_bin
-            iq_in_temp = iq_in
+            #iq_in_temp = iq_in
         
         # Sanity check
         if len(iq_in_temp) != self.nbins:
@@ -210,20 +211,14 @@ class _BaseSmearer(object):
 
         temp_first += self.nbins_low
         temp_last = self.nbins - self.nbins_high
-        
-        return iq_out[temp_first: temp_last]
+        out = iq_out[temp_first: temp_last]
+
+        return out
     
     def _initialize_smearer(self):
         """
         """
         return NotImplemented
-    
-    def set_model(self, model):
-        """
-        Set model
-        """
-        if model != None:
-            self.model = model
             
     
     def _get_unextrapolated_bin(self, first_bin = 0, last_bin = 0):
@@ -299,7 +294,7 @@ class _SlitSmearer(_BaseSmearer):
         ## Number of Q bins 
         self.nbins  = nbins
         ## Number of points used in the smearing computation
-        self.npts   = 1000
+        self.npts   = 2000
         ## Smearing matrix
         self._weights = None
         self.qvalues  = None
@@ -334,7 +329,7 @@ class SlitSmearer(_SlitSmearer):
     """
     Adaptor for slit smearing class and SANS data
     """
-    def __init__(self, data1D):
+    def __init__(self, data1D, model = None):
         """
         Assumption: equally spaced bins of increasing q-values.
         
@@ -347,6 +342,7 @@ class SlitSmearer(_SlitSmearer):
         self.width = 0
         self.nbins_low = 0
         self.nbins_high = 0
+        self.model = model
         if data1D.dxw is not None and len(data1D.dxw) == len(data1D.x):
             self.width = data1D.dxw[0]
             # Sanity check
@@ -365,15 +361,30 @@ class SlitSmearer(_SlitSmearer):
                     msg = "Slit smearing parameters must be"
                     msg += " the same for all data"
                     raise RuntimeError, msg
-        
+        # If a model is given, get the q extrapolation
+        if self.model == None:
+            data1d_x = data1D.x
+        else:
+            # Take larger sigma
+            if self.height > self.width:
+                # The denominator (2.0) covers all the possible w^2 + h^2 range
+                sigma_in = data1D.dxl / 2.0
+            elif self.width > 0:
+                sigma_in = data1D.dxw / 2.0
+            else:
+                sigma_in = []
+
+            self.nbins_low, self.nbins_high, _, data1d_x = \
+                                get_qextrapolate(sigma_in, data1D.x)
+
         ## Number of Q bins
-        self.nbins = len(data1D.x)
+        self.nbins = len(data1d_x)
         ## Minimum Q 
-        self.min = min(data1D.x)
+        self.min = min(data1d_x)
         ## Maximum
-        self.max = max(data1D.x)
+        self.max = max(data1d_x)
         ## Q-values
-        self.qvalues = data1D.x
+        self.qvalues = data1d_x
         
 
 class _QSmearer(_BaseSmearer):
@@ -490,35 +501,44 @@ def get_qextrapolate(width, data_x):
     length = len(width)
     width_low = math.fabs(width[0])
     width_high = math.fabs(width[length -1])
-    # Find bin sizes
-    bin_size_low = math.fabs(data_x[1] - data_x[0])
-    bin_size_high = math.fabs(data_x[length - 1] - data_x[length - 2])
+    
     # Compare width(dQ) to the data bin size and take smaller one as the bin 
     # size of the extrapolation; this will correct some weird behavior 
-    # at the edge
-    if width_low < (bin_size_low):
-        bin_size_low = width_low / 2.0
-    if width_high < (bin_size_high):
-        bin_size_high = width_high / 2.0
+    # at the edge: This method was out (commented) 
+    # because it becomes very expansive when
+    # bin size is very small comparing to the width.
+    # Now on, we will just give the bin size of the extrapolated points 
+    # based on the width.
+    # Find bin sizes
+    #bin_size_low = math.fabs(data_x[1] - data_x[0])
+    #bin_size_high = math.fabs(data_x[length - 1] - data_x[length - 2])
+    # Let's set the bin size 1/3 of the width(sigma), it is good as long as
+    # the scattering is monotonous.
+    #if width_low < (bin_size_low):
+    bin_size_low = width_low / 10.0
+    #if width_high < (bin_size_high):
+    bin_size_high = width_high / 10.0
         
     # Number of q points required below the 1st data point in order to extend
     # them 3 times of the width (std)
-    nbins_low = math.ceil(3 * width_low / bin_size_low)
+    nbins_low = math.ceil(3.0 * width_low / bin_size_low)
     # Number of q points required above the last data point
-    nbins_high = math.ceil(3 * width_high / (bin_size_high))
+    nbins_high = math.ceil(3.0 * width_high / (bin_size_high))
     # Make null q points        
     extra_low = numpy.zeros(nbins_low)
     extra_high = numpy.zeros(nbins_high)
     # Give extrapolated values
     ind = 0
     qvalue = data_x[0] - bin_size_low
+    #if qvalue > 0:
     while(ind < nbins_low):
         extra_low[nbins_low - (ind + 1)] = qvalue
         qvalue -= bin_size_low
         ind += 1
-    # Remove the points <= 0
-    #extra_low = extra_low[extra_low > 0]
-    #nbins_low = len(extra_low)
+        #if qvalue <= 0:
+        #    break
+    # Redefine nbins_low
+    nbins_low = ind
     # Reset ind for another extrapolation
     ind = 0
     qvalue = data_x[length -1] + bin_size_high
@@ -527,18 +547,25 @@ def get_qextrapolate(width, data_x):
         qvalue += bin_size_high
         ind += 1
     # Make a new qx array
-    data_x_ext = numpy.append(extra_low, data_x)
+    if nbins_low > 0:  
+    	data_x_ext = numpy.append(extra_low, data_x)
+    else:
+    	data_x_ext = data_x
     data_x_ext = numpy.append(data_x_ext, extra_high)
     
     # Redefine extra_low and high based on corrected nbins  
-    # And note that it is not necessary for extra_width to be a non-zero      
-    extra_low = numpy.zeros(nbins_low)
+    # And note that it is not necessary for extra_width to be a non-zero 
+    if nbins_low > 0:     
+        extra_low = numpy.zeros(nbins_low)
     extra_high = numpy.zeros(nbins_high) 
     # Make new width array
     new_width = numpy.append(extra_low, width)
     new_width = numpy.append(new_width, extra_high)
-
-    return  nbins_low, nbins_high, new_width, data_x_ext
+    
+    # nbins corrections due to the negative q value
+    nbins_low = nbins_low - len(data_x_ext[data_x_ext<0])
+    return  nbins_low, nbins_high, \
+             new_width[data_x_ext>0], data_x_ext[data_x_ext>0]
     
 if __name__ == '__main__':
     x = 0.001 * numpy.arange(1, 11)
