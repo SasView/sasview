@@ -3,6 +3,7 @@ from sans.models.BaseComponent import BaseComponent
 from sans.models.ReflAdvModel import ReflAdvModel
 from copy import deepcopy
 from math import floor
+from math import fabs
 from scipy.special import erf
 func_list = {'Erf(|nu|*z)':0, 'RPower(z^|nu|)':1, 'LPower(z^|nu|)':2, \
                      'RExp(-|nu|*z)':3, 'LExp(-|nu|*z)':4}
@@ -204,7 +205,7 @@ class ReflectivityIIModel(BaseComponent):
                         z0 += dz
                     else:
                         dz = self.params['thick_inter%s'% str(i-1)]/n_sub
-                        nu = self.params['nu_inter%s'% str(i-1)]
+                        nu = fabs(self.params['nu_inter%s'% str(i-1)])
                         if n_s == 0:
                             # shift half sub thickness for the point
                             z0 += dz/2.0
