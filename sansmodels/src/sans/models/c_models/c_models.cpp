@@ -20,6 +20,7 @@ void addCSphereModel(PyObject *module);
 void addCSphereSLDModel(PyObject *module);
 void addCOnionModel(PyObject *module);
 void addCReflModel(PyObject *module);
+void addCReflAdvModel(PyObject *module);
 void addCFuzzySphereModel(PyObject *module);
 void addCHardsphereStructure(PyObject *module);
 void addCStickyHSStructure(PyObject *module);
@@ -238,6 +239,7 @@ initc_models(void)
 	addCSphereSLDModel(m);
 	addCOnionModel(m);
 	addCReflModel(m);
+	addCReflAdvModel(m);
 	addCFuzzySphereModel(m);
 	addCHardsphereStructure(m);
 	addCStickyHSStructure(m);

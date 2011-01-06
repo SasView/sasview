@@ -27,7 +27,12 @@ Provide functionality for a C extension model
 from sans.models.BaseComponent import BaseComponent
 from sans_extension.c_models import COblateModel
 import copy    
-    
+
+def create_OblateModel():
+    obj = OblateModel()
+    #COblateModel.__init__(obj) is called by OblateModel constructor
+    return obj
+
 class OblateModel(COblateModel, BaseComponent):
     """ 
     Class that evaluates a OblateModel model. 
@@ -53,6 +58,7 @@ class OblateModel(COblateModel, BaseComponent):
         
         # Initialize BaseComponent first, then sphere
         BaseComponent.__init__(self)
+        #apply(COblateModel.__init__, (self,)) 
         COblateModel.__init__(self)
         
         ## Name of the model
@@ -93,35 +99,21 @@ class OblateModel(COblateModel, BaseComponent):
         self.fixed=['major_core.width', 'minor_core.width', 'major_shell.width', 'minor_shell.width']
         
         ## non-fittable parameters
-        self.non_fittable=[]
+        self.non_fittable = []
         
         ## parameters with orientation
-        self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
+        self.orientation_params = ['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
    
+    def __reduce_ex__(self, proto):
+        """
+        Overwrite the __reduce_ex__ of PyTypeObject *type call in the init of 
+        c model.
+        """
+        return (create_OblateModel,tuple())
+        
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(OblateModel())   
-        
-    def __getstate__(self):
-        """
-        return object state for pickling and copying
-        """
-        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
-        
-        return self.__dict__, model_state
-        
-    def __setstate__(self, state):
-        """
-        create object from pickled state
-        
-        :param state: the state of the current model
-        
-        """
-        
-        self.__dict__, model_state = state
-        self.params = model_state['params']
-        self.dispersion = model_state['dispersion']
-        self.log = model_state['log']
        	
    
     def run(self, x=0.0):

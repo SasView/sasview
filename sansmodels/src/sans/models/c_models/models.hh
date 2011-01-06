@@ -342,6 +342,98 @@ public:
 };
 
 
+class ReflAdvModel{
+public:
+	// Model parameters
+	Parameter n_layers;
+	Parameter scale;
+	Parameter thick_inter0;
+	Parameter func_inter0;
+	Parameter sld_bottom0;
+	Parameter sld_medium;
+	Parameter background;
+
+	Parameter sld_flat1;
+	Parameter sld_flat2;
+	Parameter sld_flat3;
+	Parameter sld_flat4;
+	Parameter sld_flat5;
+	Parameter sld_flat6;
+	Parameter sld_flat7;
+	Parameter sld_flat8;
+	Parameter sld_flat9;
+	Parameter sld_flat10;
+
+	Parameter thick_inter1;
+	Parameter thick_inter2;
+	Parameter thick_inter3;
+	Parameter thick_inter4;
+	Parameter thick_inter5;
+	Parameter thick_inter6;
+	Parameter thick_inter7;
+	Parameter thick_inter8;
+	Parameter thick_inter9;
+	Parameter thick_inter10;
+
+	Parameter thick_flat1;
+	Parameter thick_flat2;
+	Parameter thick_flat3;
+	Parameter thick_flat4;
+	Parameter thick_flat5;
+	Parameter thick_flat6;
+	Parameter thick_flat7;
+	Parameter thick_flat8;
+	Parameter thick_flat9;
+	Parameter thick_flat10;
+
+	Parameter func_inter1;
+	Parameter func_inter2;
+	Parameter func_inter3;
+	Parameter func_inter4;
+	Parameter func_inter5;
+	Parameter func_inter6;
+	Parameter func_inter7;
+	Parameter func_inter8;
+	Parameter func_inter9;
+	Parameter func_inter10;
+
+	Parameter sldIM_flat1;
+	Parameter sldIM_flat2;
+	Parameter sldIM_flat3;
+	Parameter sldIM_flat4;
+	Parameter sldIM_flat5;
+	Parameter sldIM_flat6;
+	Parameter sldIM_flat7;
+	Parameter sldIM_flat8;
+	Parameter sldIM_flat9;
+	Parameter sldIM_flat10;
+
+	Parameter nu_inter1;
+	Parameter nu_inter2;
+	Parameter nu_inter3;
+	Parameter nu_inter4;
+	Parameter nu_inter5;
+	Parameter nu_inter6;
+	Parameter nu_inter7;
+	Parameter nu_inter8;
+	Parameter nu_inter9;
+	Parameter nu_inter10;
+
+	Parameter sldIM_sub0;
+	Parameter sldIM_medium;
+	Parameter npts_inter;
+	Parameter nu_inter0;
+
+	// Constructor
+	ReflAdvModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
 
 class SphereModel{
 public:

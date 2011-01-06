@@ -27,7 +27,12 @@ Provide functionality for a C extension model
 from sans.models.BaseComponent import BaseComponent
 from sans_extension.c_models import CHollowCylinderModel
 import copy    
-    
+
+def create_HollowCylinderModel():
+    obj = HollowCylinderModel()
+    #CHollowCylinderModel.__init__(obj) is called by HollowCylinderModel constructor
+    return obj
+
 class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
     """ 
     Class that evaluates a HollowCylinderModel model. 
@@ -52,6 +57,7 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
         
         # Initialize BaseComponent first, then sphere
         BaseComponent.__init__(self)
+        #apply(CHollowCylinderModel.__init__, (self,)) 
         CHollowCylinderModel.__init__(self)
         
         ## Name of the model
@@ -81,35 +87,21 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
         self.fixed=['axis_phi.width', 'axis_theta.width', 'length.width', 'core_radius.width', 'radius']
         
         ## non-fittable parameters
-        self.non_fittable=[]
+        self.non_fittable = []
         
         ## parameters with orientation
-        self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
+        self.orientation_params = ['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
    
+    def __reduce_ex__(self, proto):
+        """
+        Overwrite the __reduce_ex__ of PyTypeObject *type call in the init of 
+        c model.
+        """
+        return (create_HollowCylinderModel,tuple())
+        
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(HollowCylinderModel())   
-        
-    def __getstate__(self):
-        """
-        return object state for pickling and copying
-        """
-        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
-        
-        return self.__dict__, model_state
-        
-    def __setstate__(self, state):
-        """
-        create object from pickled state
-        
-        :param state: the state of the current model
-        
-        """
-        
-        self.__dict__, model_state = state
-        self.params = model_state['params']
-        self.dispersion = model_state['dispersion']
-        self.log = model_state['log']
        	
    
     def run(self, x=0.0):

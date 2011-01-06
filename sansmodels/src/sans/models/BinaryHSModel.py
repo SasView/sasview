@@ -27,7 +27,12 @@ Provide functionality for a C extension model
 from sans.models.BaseComponent import BaseComponent
 from sans_extension.c_models import CBinaryHSModel
 import copy    
-    
+
+def create_BinaryHSModel():
+    obj = BinaryHSModel()
+    #CBinaryHSModel.__init__(obj) is called by BinaryHSModel constructor
+    return obj
+
 class BinaryHSModel(CBinaryHSModel, BaseComponent):
     """ 
     Class that evaluates a BinaryHSModel model. 
@@ -51,6 +56,7 @@ class BinaryHSModel(CBinaryHSModel, BaseComponent):
         
         # Initialize BaseComponent first, then sphere
         BaseComponent.__init__(self)
+        #apply(CBinaryHSModel.__init__, (self,)) 
         CBinaryHSModel.__init__(self)
         
         ## Name of the model
@@ -80,35 +86,21 @@ class BinaryHSModel(CBinaryHSModel, BaseComponent):
         self.fixed=['l_radius.width', 's_radius.width']
         
         ## non-fittable parameters
-        self.non_fittable=[]
+        self.non_fittable = []
         
         ## parameters with orientation
-        self.orientation_params =[]
+        self.orientation_params = []
    
+    def __reduce_ex__(self, proto):
+        """
+        Overwrite the __reduce_ex__ of PyTypeObject *type call in the init of 
+        c model.
+        """
+        return (create_BinaryHSModel,tuple())
+        
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(BinaryHSModel())   
-        
-    def __getstate__(self):
-        """
-        return object state for pickling and copying
-        """
-        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
-        
-        return self.__dict__, model_state
-        
-    def __setstate__(self, state):
-        """
-        create object from pickled state
-        
-        :param state: the state of the current model
-        
-        """
-        
-        self.__dict__, model_state = state
-        self.params = model_state['params']
-        self.dispersion = model_state['dispersion']
-        self.log = model_state['log']
        	
    
     def run(self, x=0.0):

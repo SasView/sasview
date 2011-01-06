@@ -79,18 +79,18 @@ class Validate2D:
             q = 0.025*i_q
             sum = 0.0
             for i_theta in range(npts):
-                theta = math.pi/npts*i_theta
+                theta = 180.0/npts*i_theta
                 
                 model.setParam(theta_label, theta)
                 
                 for j in range(npts):
-                    model.setParam(phi_label, math.pi * 2.0 / npts * j)
+                    model.setParam(phi_label, 180.0 * 2.0 / npts * j)
                     if str(model.run([q, 0])).count("INF")>0:                        
-                        print "ERROR", q, theta, math.pi * 2.0 / npts * j
-                    sum += math.sin(theta)*model.run([q, 0])
+                        print "ERROR", q, theta, 180.0 * 2.0 / npts * j
+                    sum += math.sin(theta*math.pi/180.0)*model.run([q, 0])
                     #sum += model.run([q, 0])
             
-            value = sum/npts/npts*math.pi/2.0
+            value = sum/npts/npts*180.0/2.0
             ana = model.run(q)
             if q<0.3 and (value-ana)/ana>0.05:
                 passed = False
@@ -127,15 +127,15 @@ class Validate2D:
         for i_q in range(1, 30):
             q = 0.025*i_q
             sum = 0.0
-            theta = 1.57
+            theta = 90.0
             
             model.setParam(theta_label, theta)
             
             for j in range(npts):
-                model.setParam(phi_label, math.pi / 2.0 / npts * j)
+                model.setParam(phi_label, 180.0 / 2.0 / npts * j)
                 if str(model.run([q, 0])).count("INF")>0:                        
-                    print "ERROR", q, theta, math.pi * 2.0 / npts * j
-                #sum += math.sin(theta)*model.run([q, 0])
+                    print "ERROR", q, theta, 180.0 * 2.0 / npts * j
+                #sum += math.sin(theta*math.pi/180.0)*model.run([q, 0])
                 sum += math.sin(math.pi / 2.0 / npts * j)*model.run([q, 0])
                 #sum += model.run([q, 0])
             
@@ -169,14 +169,14 @@ class Validate2D:
             q = 0.025*i_q
             sum = 0.0
             for i_theta in range(npts):
-                theta = math.pi/npts*i_theta
+                theta = 180.0/npts*i_theta
                 
                 for j in range(npts):
                     if str(model.run([q, 0])).count("INF")>0:                        
-                        print "ERROR", q, theta, math.pi * 2.0 / npts * j
-                    sum += math.sin(theta)*model.run([q, 0])
+                        print "ERROR", q, theta, 180.0 * 2.0 / npts * j
+                    sum += math.sin(theta*math.pi/180.0)*model.run([q, 0])
             
-            value = sum/npts/npts*math.pi/2.0
+            value = sum/npts/npts*180.0/2.0
             ana = model.run(q)
             if q<0.3 and (value-ana)/ana>0.05:
                 passed = False

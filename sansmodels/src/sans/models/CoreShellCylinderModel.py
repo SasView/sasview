@@ -27,7 +27,12 @@ Provide functionality for a C extension model
 from sans.models.BaseComponent import BaseComponent
 from sans_extension.c_models import CCoreShellCylinderModel
 import copy    
-    
+
+def create_CoreShellCylinderModel():
+    obj = CoreShellCylinderModel()
+    #CCoreShellCylinderModel.__init__(obj) is called by CoreShellCylinderModel constructor
+    return obj
+
 class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
     """ 
     Class that evaluates a CoreShellCylinderModel model. 
@@ -53,6 +58,7 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
         
         # Initialize BaseComponent first, then sphere
         BaseComponent.__init__(self)
+        #apply(CCoreShellCylinderModel.__init__, (self,)) 
         CCoreShellCylinderModel.__init__(self)
         
         ## Name of the model
@@ -100,35 +106,21 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
         self.fixed=['axis_phi.width', 'axis_theta.width', 'length.width', 'radius.width', 'thickness.width']
         
         ## non-fittable parameters
-        self.non_fittable=[]
+        self.non_fittable = []
         
         ## parameters with orientation
-        self.orientation_params =['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
+        self.orientation_params = ['axis_phi', 'axis_theta', 'axis_phi.width', 'axis_theta.width']
    
+    def __reduce_ex__(self, proto):
+        """
+        Overwrite the __reduce_ex__ of PyTypeObject *type call in the init of 
+        c model.
+        """
+        return (create_CoreShellCylinderModel,tuple())
+        
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(CoreShellCylinderModel())   
-        
-    def __getstate__(self):
-        """
-        return object state for pickling and copying
-        """
-        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
-        
-        return self.__dict__, model_state
-        
-    def __setstate__(self, state):
-        """
-        create object from pickled state
-        
-        :param state: the state of the current model
-        
-        """
-        
-        self.__dict__, model_state = state
-        self.params = model_state['params']
-        self.dispersion = model_state['dispersion']
-        self.log = model_state['log']
        	
    
     def run(self, x=0.0):

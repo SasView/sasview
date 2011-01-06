@@ -27,7 +27,12 @@ Provide functionality for a C extension model
 from sans.models.BaseComponent import BaseComponent
 from sans_extension.c_models import CLamellarPSModel
 import copy    
-    
+
+def create_LamellarPSModel():
+    obj = LamellarPSModel()
+    #CLamellarPSModel.__init__(obj) is called by LamellarPSModel constructor
+    return obj
+
 class LamellarPSModel(CLamellarPSModel, BaseComponent):
     """ 
     Class that evaluates a LamellarPSModel model. 
@@ -51,6 +56,7 @@ class LamellarPSModel(CLamellarPSModel, BaseComponent):
         
         # Initialize BaseComponent first, then sphere
         BaseComponent.__init__(self)
+        #apply(CLamellarPSModel.__init__, (self,)) 
         CLamellarPSModel.__init__(self)
         
         ## Name of the model
@@ -91,35 +97,21 @@ class LamellarPSModel(CLamellarPSModel, BaseComponent):
         self.fixed=['delta.width', 'spacing.width']
         
         ## non-fittable parameters
-        self.non_fittable=[]
+        self.non_fittable = []
         
         ## parameters with orientation
-        self.orientation_params =[]
+        self.orientation_params = []
    
+    def __reduce_ex__(self, proto):
+        """
+        Overwrite the __reduce_ex__ of PyTypeObject *type call in the init of 
+        c model.
+        """
+        return (create_LamellarPSModel,tuple())
+        
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(LamellarPSModel())   
-        
-    def __getstate__(self):
-        """
-        return object state for pickling and copying
-        """
-        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
-        
-        return self.__dict__, model_state
-        
-    def __setstate__(self, state):
-        """
-        create object from pickled state
-        
-        :param state: the state of the current model
-        
-        """
-        
-        self.__dict__, model_state = state
-        self.params = model_state['params']
-        self.dispersion = model_state['dispersion']
-        self.log = model_state['log']
        	
    
     def run(self, x=0.0):

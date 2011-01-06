@@ -27,7 +27,12 @@ Provide functionality for a C extension model
 from sans.models.BaseComponent import BaseComponent
 from sans_extension.c_models import CEllipticalCylinderModel
 import copy    
-    
+
+def create_EllipticalCylinderModel():
+    obj = EllipticalCylinderModel()
+    #CEllipticalCylinderModel.__init__(obj) is called by EllipticalCylinderModel constructor
+    return obj
+
 class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
     """ 
     Class that evaluates a EllipticalCylinderModel model. 
@@ -53,6 +58,7 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
         
         # Initialize BaseComponent first, then sphere
         BaseComponent.__init__(self)
+        #apply(CEllipticalCylinderModel.__init__, (self,)) 
         CEllipticalCylinderModel.__init__(self)
         
         ## Name of the model
@@ -82,35 +88,21 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
         self.fixed=['cyl_phi.width', 'cyl_theta.width', 'cyl_psi.width', 'length.width', 'r_minor.width', 'r_ratio.width']
         
         ## non-fittable parameters
-        self.non_fittable=[]
+        self.non_fittable = []
         
         ## parameters with orientation
-        self.orientation_params =['cyl_phi', 'cyl_theta', 'cyl_psi', 'cyl_phi.width', 'cyl_theta.width', 'cyl_psi.width']
+        self.orientation_params = ['cyl_phi', 'cyl_theta', 'cyl_psi', 'cyl_phi.width', 'cyl_theta.width', 'cyl_psi.width']
    
+    def __reduce_ex__(self, proto):
+        """
+        Overwrite the __reduce_ex__ of PyTypeObject *type call in the init of 
+        c model.
+        """
+        return (create_EllipticalCylinderModel,tuple())
+        
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(EllipticalCylinderModel())   
-        
-    def __getstate__(self):
-        """
-        return object state for pickling and copying
-        """
-        model_state = {'params': self.params, 'dispersion': self.dispersion, 'log': self.log}
-        
-        return self.__dict__, model_state
-        
-    def __setstate__(self, state):
-        """
-        create object from pickled state
-        
-        :param state: the state of the current model
-        
-        """
-        
-        self.__dict__, model_state = state
-        self.params = model_state['params']
-        self.dispersion = model_state['dispersion']
-        self.log = model_state['log']
        	
    
     def run(self, x=0.0):
