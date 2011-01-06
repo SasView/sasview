@@ -378,11 +378,15 @@ class ModelManager:
         
         from sans.models.ReflectivityModel import ReflectivityModel
         self.multi_func_list.append(ReflectivityModel)
+        
+        from sans.models.ReflectivityIIModel import ReflectivityIIModel
+        self.multi_func_list.append(ReflectivityIIModel)
     
         #Looking for plugins
         self.plugins = findModels()
         self._get_multifunc_models()
         self.plugins.append(ReflectivityModel)
+        self.plugins.append(ReflectivityIIModel)
         return 0
 
     
