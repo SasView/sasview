@@ -147,9 +147,13 @@ void SlitSmearer :: compute_matrix(){
 		// modify the number of points in each direction so
 		// that the total number of points is still what
 		// the user would expect (downgrade resolution)
+		// Never down-grade npts_h. That will give incorrect slit smearing...
 		if(npts_h>1 && npts_w>1){
-			npts_h = (int)ceil(sqrt((double)npts));
-			npts_w = npts_h;
+			npts_h = npts;//(int)ceil(sqrt((double)npts));
+			// In general width is much smaller than height, so smaller npt_w
+			// should work fine.
+			// Todo: It is still very expansive in time. Think about better way.
+			npts_w = (int)ceil(npts_h / 100);
 		}
 
 		double shift_h, shift_w;
