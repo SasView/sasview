@@ -39,7 +39,7 @@ class BoxSum(_BaseInteractor):
         self.xmin = -1 * 0.5 * min(math.fabs(self.base.data2D.xmax),
                                   math.fabs(self.base.data2D.xmin))
         self.ymin = -1 * 0.5 * min(math.fabs(self.base.data2D.xmax),
-                                  math.fabs( elf.base.data2D.xmin))
+                                  math.fabs(self.base.data2D.xmin))
         self.xmax = 0.5 * min(math.fabs(self.base.data2D.xmax),
                               math.fabs(self.base.data2D.xmin))
         self.ymax = 0.5 * min(math.fabs(self.base.data2D.xmax),
