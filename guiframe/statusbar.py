@@ -245,7 +245,7 @@ class StatusBar(wxStatusB):
         self.gauge.Show(True)
         if type.lower() == "start":
             self.nb_start += 1
-            self.timer.Stop()
+            #self.timer.Stop()
             self.progress += 10
             self.gauge.SetValue(int(self.progress)) 
             self.progress += 10
@@ -253,7 +253,7 @@ class StatusBar(wxStatusB):
                 self.gauge.SetValue(int(self.progress)) 
         if type.lower() == "progress":
             self.nb_progress += 1
-            self.timer.Start(100)
+            self.timer.Start(0)
             self.gauge.Pulse()
         if type.lower() == "update":
             self.progress += 10

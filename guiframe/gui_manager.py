@@ -9,18 +9,6 @@
 #copyright 2008, University of Tennessee
 ################################################################################
 
-"""
-How-to build an application using guiframe:
-
-1- Write a main application script along the lines of dummyapp.py
-2- Write a config script along the lines of config.py, and 
-    name it local_config.py
-3- Write your plug-ins and place them in a directory called "perspectives".
-    - Look at local_perspectives/plotting for an example of a plug-in.
-    - A plug-in should define a class called Plugin. See abstract class below.
-
-"""
-#TODO: rewrite the status bar monstrosity
 
 import wx
 import wx.aui
@@ -56,149 +44,7 @@ from sans.guicomm.events import EVT_ADD_MANY_DATA
 
 STATE_FILE_EXT = ['.inv', '.fitv', '.prv']
 
-def quit_guiframe(parent=None):
-    """
-    Pop up message to make sure the user wants to quit the application
-    """
-    message = "Do you really want to quit \n"
-    message += "this application?"
-    dial = wx.MessageDialog(parent, message, 'Question',
-                       wx.YES_NO|wx.NO_DEFAULT|wx.ICON_QUESTION)
-    if dial.ShowModal() == wx.ID_YES:
-        return True
-    else:
-        return False
-    
-class Plugin:
-    """
-    This class defines the interface for a Plugin class
-    that can be used by the gui_manager.
-    
-    Plug-ins should be placed in a sub-directory called "perspectives".
-    For example, a plug-in called Foo should be place in "perspectives/Foo".
-    That directory contains at least two files:
-        perspectives/Foo/__init.py contains two lines:
-        
-            PLUGIN_ID = "Foo plug-in 1.0"
-            from Foo import *
-            
-        perspectives/Foo/Foo.py contains the definition of the Plugin
-        class for the Foo plug-in. The interface of that Plugin class
-        should follow the interface of the class you are looking at.
-        
-    See dummyapp.py for a plugin example.
-    """
-    
-    def __init__(self, name="Test_plugin"):
-        """
-            Abstract class for gui_manager Plugins.
-        """
-        ## Plug-in name. It will appear on the application menu.
-        self.sub_menu = name     
-        
-        ## Reference to the parent window. Filled by get_panels() below.
-        self.parent = None
-        
-        ## List of panels that you would like to open in AUI windows
-        #  for your plug-in. This defines your plug-in "perspective"
-        self.perspective = []
-        
-        
-    def populate_menu(self, id, parent):
-        """
-        Create and return the list of application menu
-        items for the plug-in. 
-        
-        :param id: deprecated. Un-used.
-        :param parent: parent window
-        
-        :return: plug-in menu
-        
-        """
-        return []
-    
-    def get_panels(self, parent):
-        """
-        Create and return the list of wx.Panels for your plug-in.
-        Define the plug-in perspective.
-        
-        Panels should inherit from DefaultPanel defined below,
-        or should present the same interface. They must define
-        "window_caption" and "window_name".
-        
-        :param parent: parent window
-        
-        :return: list of panels
-        
-        """
-        ## Save a reference to the parent
-        self.parent = parent
-        
-        # Return the list of panels
-        return []
-    
-    def get_tools(self):
-        """
-        Returns a set of menu entries for tools
-        """
-        return []
-        
-    
-    def get_context_menu(self, graph=None):
-        """
-        This method is optional.
-    
-        When the context menu of a plot is rendered, the 
-        get_context_menu method will be called to give you a 
-        chance to add a menu item to the context menu.
-        
-        A ref to a Graph object is passed so that you can
-        investigate the plot content and decide whether you
-        need to add items to the context menu.  
-        
-        This method returns a list of menu items.
-        Each item is itself a list defining the text to 
-        appear in the menu, a tool-tip help text, and a
-        call-back method.
-        
-        :param graph: the Graph object to which we attach the context menu
-        
-        :return: a list of menu items with call-back function
-        
-        """
-        return []
-    
-    def get_perspective(self):
-        """
-        Get the list of panel names for this perspective
-        """
-        return self.perspective
-    
-    def on_perspective(self, event):
-        """
-        Call back function for the perspective menu item.
-        We notify the parent window that the perspective
-        has changed.
-        
-        :param event: menu event
-        
-        """
-        self.parent.set_perspective(self.perspective)
-    
-    def post_init(self):
-        """
-        Post initialization call back to close the loose ends
-        """
-        pass
-    
-    def set_default_perspective(self):
-        """
-       Call back method that True to notify the parent that the current plug-in
-       can be set as default  perspective.
-       when returning False, the plug-in is not candidate for an automatic 
-       default perspective setting
-        """
-        return False
+
 
 class ViewerFrame(wx.Frame):
     """
@@ -835,12 +681,25 @@ class ViewerFrame(wx.Frame):
         #import sys
         wx.Exit()
         sys.exit()
-                     
+                 
+    def quit_guiframe(self):
+        """
+        Pop up message to make sure the user wants to quit the application
+        """
+        message = "Do you really want to quit \n"
+        message += "this application?"
+        dial = wx.MessageDialog(self, message, 'Question',
+                           wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
+        if dial.ShowModal() == wx.ID_YES:
+            return True
+        else:
+            return False    
+        
     def Close(self, event=None):
         """
         Quit the application
         """
-        flag = quit_guiframe(parent=self)
+        flag = self.quit_guiframe()
         if flag:
             #import sys
             wx.Frame.Close(self)
