@@ -4,6 +4,7 @@ import string
 import wx
 import wx.aui
 
+from sans.guiframe.panel_base import PanelBase
 import basepage
 
 _BOX_WIDTH = 80
@@ -143,7 +144,7 @@ class PageInfo(object):
         self.window_caption = "Page"
         self.type = "Data"
         
-class FitPanel(wx.aui.AuiNotebook):    
+class FitPanel(wx.aui.AuiNotebook, PanelBase):    
 
     """
     FitPanel class contains fields allowing to fit  models and  data
@@ -165,10 +166,11 @@ class FitPanel(wx.aui.AuiNotebook):
                     style= wx.aui.AUI_NB_WINDOWLIST_BUTTON|
                     wx.aui.AUI_NB_DEFAULT_STYLE|
                     wx.CLIP_CHILDREN)
+        PanelBase.__init__(self)
     
-        self.manager=None
-        self.parent=parent
-        self.event_owner=None
+        self.manager = None
+        self.parent = parent
+        self.event_owner = None
         
         pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_page)
@@ -190,7 +192,7 @@ class FitPanel(wx.aui.AuiNotebook):
         self.add_default_pages()
         
         # increment number for model name
-        self.count=0
+        self.count = 0
         #updating the panel
         self.Update()
         self.Center()
