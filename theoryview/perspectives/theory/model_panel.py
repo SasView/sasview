@@ -4,18 +4,20 @@ import wx.lib.newevent
 import numpy
 import copy
 import math
-from sans.models.dispersion_models import ArrayDispersion, GaussianDispersion
-
+from sans.guiframe.panel_base import PanelBase
+from sans.models.dispersion_models import ArrayDispersion
+from sans.models.dispersion_models import GaussianDispersion
 from sans.guicomm.events import StatusEvent   
 from sans.guiframe.utils import format_number
-(ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
-_BOX_WIDTH = 76
-
 import basepage
 from basepage import BasicPage
 from basepage import PageInfoEvent
+(ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
 
-class ModelPanel(BasicPage):
+_BOX_WIDTH = 76
+
+
+class ModelPanel(BasicPage, PanelBase):
     """
     FitPanel class contains fields allowing to display results when
     fitting  a model and one data
@@ -29,22 +31,21 @@ class ModelPanel(BasicPage):
     window_name = "Theory model"
     ## Title to appear on top of the window
     window_caption = "Theory Model"
-    def __init__(self,parent, page_info, model_list_box):
-        BasicPage.__init__(self, parent, page_info , model_list_box)
+    
+    def __init__(self, parent, page_info, model_list_box):
+        BasicPage.__init__(self, parent, page_info, model_list_box)
+        PanelBase.__init__(self)
         """ 
         Initialization of the Panel
         """
         self._fill_model_sizer( self.sizer1)  
         self._fill_range_sizer()
         self.engine_type = None 
-         
-        description=""
-        if self.model!=None:
-            
+        description = ""
+        if self.model != None:
             description = self.model.description
-            
             self.select_model(self.model)
-            self.set_model_description(description,self.sizer2)
+            self.set_model_description(description, self.sizer2)
             
     def _on_display_description(self, event):
         """
@@ -54,8 +55,7 @@ class ModelPanel(BasicPage):
         
         """
         self._on_display_description_helper()
-        
-        self.SetScrollbars(20,20,25,65)
+        self.SetScrollbars(20, 20, 25, 65)
         self.Refresh()
 
     def _on_display_description_helper(self):
@@ -68,18 +68,16 @@ class ModelPanel(BasicPage):
         ## Show description
         if self.description_hide.GetValue():
             self.sizer_description.Clear(True)
-            
         else:
             description="Model contains no description"
-            if self.model!=None:
+            if self.model != None:
                 description = self.model.description
-            if description.lstrip().rstrip() =="": 
+            if description.lstrip().rstrip() == "": 
                 description="Model contains no description"
-            self.description = wx.StaticText( self,-1,str(description) )
-            self.sizer_description.Add( self.description, 1, wx.EXPAND | wx.ALL, 10 )
-           
+            self.description = wx.StaticText(self, -1, str(description))
+            self.sizer_description.Add(self.description, 1, 
+                                       wx.EXPAND|wx.ALL, 10)
         self.Layout()
-    
     
     def _fill_range_sizer(self):
         """
@@ -89,20 +87,20 @@ class ModelPanel(BasicPage):
         """
         ##The following 3 lines are for Mac. Let JHC know before modifying..
         title = "Plotted Q Range"
-        box_description= wx.StaticBox(self, -1,str(title))
+        box_description = wx.StaticBox(self, -1, str(title))
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
 
-        sizer_npts= wx.GridSizer(1, 1,5, 5)    
-        self.npts    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20), style=wx.TE_PROCESS_ENTER)
+        sizer_npts= wx.GridSizer(1, 1, 5, 5)    
+        self.npts    = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20), 
+                                          style=wx.TE_PROCESS_ENTER)
         self.npts.SetValue(format_number(self.num_points))
         self.npts.SetToolTipString("Number of point to plot.")
-        
-        sizer_npts.Add(wx.StaticText(self, -1, 'Npts'),1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 13)        
-
-        sizer_npts.Add(self.npts,1,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10) 
-        self._set_range_sizer( title=title, box_sizer=boxsizer1, object= sizer_npts)
-       
-       
+        sizer_npts.Add(wx.StaticText(self, -1, 'Npts'), 1, 
+                       wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 13)        
+        sizer_npts.Add(self.npts, 1, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10) 
+        self._set_range_sizer(title=title, box_sizer=boxsizer1, 
+                              object=sizer_npts)
+    
     def _on_select_model(self, event): 
         """
         call back for model selection
@@ -113,7 +111,6 @@ class ModelPanel(BasicPage):
         self._reset_dispersity()
         self.select_model(self.model)
         
-       
     def _fill_model_sizer(self, sizer):
         """
         fill sizer containing model info
@@ -121,31 +118,28 @@ class ModelPanel(BasicPage):
         """
         ##The following 3 lines are for Mac. Let JHC know before modifying..
         title = "Model"
-        box_description= wx.StaticBox(self, -1,str(title))
+        box_description = wx.StaticBox(self, -1, str(title))
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-        
         id = wx.NewId()
-        self.model_view =wx.Button(self,id,'View 2D', size=(80,23))
-        self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D,id=id)
+        self.model_view = wx.Button(self, id,'View 2D', size=(80, 23))
+        self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=id)
         self.model_view.SetToolTipString("View model in 2D")
-        
         ## class base method  to add view 2d button   
-        self._set_model_sizer(sizer=sizer,box_sizer=boxsizer1, title=title,object= self.model_view )    
+        self._set_model_sizer(sizer=sizer, box_sizer=boxsizer1, 
+                              title=title, object=self.model_view)    
     
-  
     #def _set_sizer_gaussian(self):
     def _set_sizer_dispersion(self, dispersity):
         """
         draw sizer with gaussian, log or schulz dispersity parameters
         
         """
-        self.fittable_param=[]
-        self.fixed_param=[]
-        self.orientation_params_disp=[]
+        self.fittable_param = []
+        self.fixed_param = []
+        self.orientation_params_disp = []
         #self.temp=[]
-       
         self.sizer4_4.Clear(True)
-        if self.model==None:
+        if self.model == None:
             ##no model is selected
             return
         if not self.enable_disp.GetValue():
@@ -158,46 +152,45 @@ class ModelPanel(BasicPage):
             disp_model = dispersity()
             self._disp_obj_dict[item] = disp_model
             self.model.set_dispersion(item, disp_model)
-            self.state._disp_obj_dict[item]= disp_model
-            
-            
-        ix=0
-        iy=1
+            self.state._disp_obj_dict[item] = disp_model
+        ix = 0
+        iy = 1
         disp = wx.StaticText(self, -1, ' ')
-        self.sizer4_4.Add(disp,( iy, ix),(1,1), 
+        self.sizer4_4.Add(disp,(iy, ix), (1, 1), 
                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1 
         values = wx.StaticText(self, -1, 'Sigma [A]')
-        values.SetToolTipString(\
-        "Sigma(STD) in the A unit; the standard deviation from the mean value.")
-
-        self.sizer4_4.Add(values,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 
-                          0)
-       
+        hint_msg = "Sigma(STD) in the A unit; the standard "
+        hint_msg += "deviation from the mean value."
+        values.SetToolTipString(hint_msg)
+        self.sizer4_4.Add(values, (iy, ix), (1, 1), 
+                          wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 1 
         npts = wx.StaticText(self, -1, 'Npts')
-        npts.SetToolTipString("Number of sampling points for the numerical\n\
-        integration over the distribution function.")
-        self.sizer4_4.Add(npts,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        hint_msg = "Number of sampling points for the numerical\n"
+        hint_msg += "integration over the distribution function."
+        npts.SetToolTipString(hint_msg)
+        self.sizer4_4.Add(npts, (iy, ix), (1, 1),
+                          wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 1 
         nsigmas = wx.StaticText(self, -1, 'Nsigmas')
-        nsigmas.SetToolTipString("   Number of sigmas between which the range\n\
-         of the distribution function will be used for weighting. \n\
-        The value '3' covers 99.5% for Gaussian distribution \n\
-        function.")
-        self.sizer4_4.Add(nsigmas,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE,
-                           0)
-         
+        hint_msg = "Number of sigmas between which the range\n"
+        hint_msg += "of the distribution function will be used for "
+        hint_msg += "weighting.\n The value '3' covers 99.5% for Gaussian "
+        hint_msg += "  distribution \n function."
+        nsigmas.SetToolTipString(hint_msg)
+        self.sizer4_4.Add(nsigmas, (iy, ix), 
+                          (1, 1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         for item in self.model.dispersion.keys():
             if not item in self.model.orientation_params:
-                self.disp_cb_dict[item]= None
-                name0="Distribution of " + item
-                name1=item+".width"
+                self.disp_cb_dict[item] = None
+                name0 = "Distribution of " + item
+                name1 = item + ".width"
                 name2=item+".npts"
                 name3=item+".nsigmas"
                 iy += 1
                 for p in self.model.dispersion[item].keys():
-                    if p=="width":
+                    if p == "width":
                         ix = 0
                         name = wx.StaticText(self, -1,  name0)
                         self.sizer4_4.Add( name,( iy, ix),(1,1),  
@@ -488,13 +481,14 @@ class ModelPanel(BasicPage):
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
 
         sizer_selection=wx.BoxSizer(wx.HORIZONTAL)
-        self.description_hide = wx.RadioButton(self, -1, 'Hide', style=wx.RB_GROUP)
+        self.description_hide = wx.RadioButton(self, -1, 'Hide', 
+                                               style=wx.RB_GROUP)
         self.description_show = wx.RadioButton(self, -1, 'Show')
        
         
-        if description=="":
+        if description == "":
             self.description_hide.SetValue(True)
-            description=" Description unavailable. Click for details"
+            description = " Description unavailable. Click for details"
             
         self.description = wx.StaticText( self,-1,str(description) )
         

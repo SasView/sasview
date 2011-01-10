@@ -6,7 +6,7 @@ import os
 
 
 class HelpWindow(wx.Frame):
-    def __init__(self, parent, id, title= 'HelpWindow', pageToOpen=None):
+    def __init__(self, parent, id, title='HelpWindow', pageToOpen=None):
         wx.Frame.__init__(self, parent, id, title, size=(850, 500))
         """
         Windows containing html documentation for theory application
@@ -15,7 +15,7 @@ class HelpWindow(wx.Frame):
       
         splitter = MultiSplitterWindow(self, style=wx.SP_LIVE_UPDATE)
         rpanel = wx.Panel(splitter, -1)
-        lpanel = wx.Panel(splitter, -1,style=wx.BORDER_SUNKEN)
+        lpanel = wx.Panel(splitter, -1, style=wx.BORDER_SUNKEN)
         
         vbox = wx.BoxSizer(wx.VERTICAL)
         header = wx.Panel(rpanel, -1)
@@ -26,7 +26,7 @@ class HelpWindow(wx.Frame):
         font = st.GetFont()
         font.SetPointSize(10)
         st.SetFont(font)
-        hbox.Add(st, 1, wx.TOP | wx.BOTTOM | wx.LEFT, 5)
+        hbox.Add(st, 1, wx.TOP|wx.BOTTOM|wx.LEFT, 5)
         header.SetSizer(hbox)
         vbox.Add(header, 0, wx.EXPAND)
        
@@ -40,17 +40,18 @@ class HelpWindow(wx.Frame):
         fontl = lst.GetFont()
         fontl.SetPointSize(10)
         lst.SetFont(fontl)
-        hboxl.Add(lst, 1, wx.TOP | wx.BOTTOM | wx.LEFT, 5)
+        hboxl.Add(lst, 1, wx.TOP|wx.BOTTOM|wx.LEFT, 5)
         headerl.SetSizer(hboxl)
         vboxl.Add(headerl, 0, wx.EXPAND)
         self.lhelp = html.HtmlWindow(lpanel, -1, style=wx.NO_BORDER)
-        self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER, size=(500,-1))
-        page1="""<html>
+        self.rhelp = html.HtmlWindow(rpanel, -1, 
+                                     style=wx.NO_BORDER, size=(500, -1))
+        page1 = """<html>
             <body>
              <p>Select topic on Menu</p>
             </body>
             </html>"""
-        page="""<html>
+        page = """<html>
             <body>
             <ul>
             <li><a href ="media/model_functions.html" target ="showframe">Model Functions</a><br></li>
@@ -59,24 +60,20 @@ class HelpWindow(wx.Frame):
             </html>"""
         self.rhelp.SetPage(page1)
         self.lhelp.SetPage(page)
-        self.lhelp.Bind(wx.html.EVT_HTML_LINK_CLICKED,self.OnLinkClicked )
-        
+        self.lhelp.Bind(wx.html.EVT_HTML_LINK_CLICKED, self.OnLinkClicked)
         #open the help frame a the current page
-        if  pageToOpen!= None:
-            self.rhelp.LoadPage(str( pageToOpen))
-            
-        vbox.Add(self.rhelp,1, wx.EXPAND)
+        if  pageToOpen != None:
+            self.rhelp.LoadPage(str(pageToOpen))
+        vbox.Add(self.rhelp, 1, wx.EXPAND)
         vboxl.Add(self.lhelp, 1, wx.EXPAND)
         rpanel.SetSizer(vbox)
         lpanel.SetSizer(vboxl)
         lpanel.SetFocus()
-        
         vbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        vbox1.Add(splitter,1,wx.EXPAND)
+        vbox1.Add(splitter, 1, wx.EXPAND)
         splitter.AppendWindow(lpanel, 200)
         splitter.AppendWindow(rpanel)
         self.SetSizer(vbox1)
-       
         self.Centre()
         self.Show(True)
         
