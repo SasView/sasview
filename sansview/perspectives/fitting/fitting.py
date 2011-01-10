@@ -68,23 +68,18 @@ class PlotInfo:
     title= None
     info= None
     
-    
-class Plugin:
+from sans.guiframe.plugin_base import PluginBase    
+
+class Plugin(PluginBase):
     """
     Fitting plugin is used to perform fit 
     """
-    def __init__(self):
-        """
-        """
-        ## Plug-in name
-        self.sub_menu = "Fitting"
+    def __init__(self, standalone=False):
+        PluginBase.__init__(self, name="Fitting", standalone=standalone)
         
-        ## Reference to the parent window
-        self.parent = None
         #Provide list of models existing in the application
         self.menu_mng = models.ModelManager()
-        ## List of panels for the simulation perspective (names)
-        self.perspective = []
+        
         #list of panel to send to guiframe
         self.mypanels = []
         # reference to the current running thread
@@ -267,20 +262,6 @@ class Plugin:
         self.mypanels.append(self.fit_panel)
         return self.mypanels
     
-    def get_perspective(self):
-        """
-        Get the list of panel names for this perspective
-        """
-        return self.perspective
-    
-    def on_perspective(self, event):
-        """
-        Call back function for the perspective menu item.
-        We notify the parent window that the perspective
-        has changed.
-        """
-        self.parent.set_perspective(self.perspective)
-   
     def set_default_perspective(self):
         """
         Call back method that True to notify the parent that the current plug-in
@@ -289,13 +270,7 @@ class Plugin:
         default perspective setting
         """
         return True
-    
-    def post_init(self):
-        """
-        Post initialization call back to close the loose ends
-        """
-        pass
-    
+  
     def set_state(self, state=None, datainfo=None, format=None):
         """
         Call-back method for the fit page state reader.
