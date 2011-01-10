@@ -32,7 +32,7 @@ else:
     FONT_VARIANT = 1
     ON_MAC = True
     
-class BasicPage(wx.ScrolledPanel):
+class BasicPage(ScrolledPanel):
     """
     This class provide general structure of  fitpanel page
     
@@ -43,7 +43,7 @@ class BasicPage(wx.ScrolledPanel):
     window_caption = "Basic page "
     
     def __init__(self,parent, page_info=None, model_list_box=None):
-        wx.ScrolledPanel.__init__(self, parent)
+        ScrolledPanel.__init__(self, parent)
         self.SetupScrolling()
         #Set window's font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
