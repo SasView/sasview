@@ -7,6 +7,7 @@ import time
 import copy 
 import math
 import string
+from wx.lib.scrolledpanel import ScrolledPanel
 from sans.guiframe.utils import format_number
 from sans.guiframe.utils import check_float
 from sans.guicomm.events import StatusEvent
@@ -31,7 +32,7 @@ else:
     FONT_VARIANT = 1
     ON_MAC = True
     
-class BasicPage(wx.ScrolledWindow):
+class BasicPage(wx.ScrolledPanel):
     """
     This class provide general structure of  fitpanel page
     
@@ -42,8 +43,8 @@ class BasicPage(wx.ScrolledWindow):
     window_caption = "Basic page "
     
     def __init__(self,parent, page_info=None, model_list_box=None):
-        wx.ScrolledWindow.__init__(self, parent,
-                 style=wx.FULL_REPAINT_ON_RESIZE)
+        wx.ScrolledPanel.__init__(self, parent)
+        self.SetupScrolling()
         #Set window's font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         ## parent of the page
@@ -287,16 +288,9 @@ class BasicPage(wx.ScrolledWindow):
         self.vbox.Layout()
         self.vbox.Fit(self) 
         self.SetSizer(self.vbox)
-        self.set_scroll()
+       
         self.Centre()
-        
-    def set_scroll(self):
-        """
-        """
-        self.SetScrollbars(20, 20, 25, 65)
-        self.Layout()   
-        self.SetAutoLayout(True)
-         
+  
     def set_owner(self, owner):
         """ 
         set owner of fitpage
@@ -384,7 +378,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4_4.Layout()
         self.sizer4.Layout()
         self.Layout()
-        self.SetScrollbars(20, 20, 25, 65)
+        self.SetupScrolling()
         self.Refresh()
         ## saving the state of enable dispersity button
         self.state.enable_disp= self.enable_disp.GetValue()
@@ -991,7 +985,7 @@ class BasicPage(wx.ScrolledWindow):
                 self.text2.Enable()
                 items = self.structurebox.GetItems()
                 self.sizer1.Layout()
-                self.SetScrollbars(20, 20, 25, 65)
+                self.SetupScrolling()
                 for i in range(len(items)):
                     if items[i] == str(name):
                         self.structurebox.SetSelection(i)
@@ -1215,7 +1209,7 @@ class BasicPage(wx.ScrolledWindow):
         #--------------------------------------------------------
         sizer.Add(boxsizer1, 0, wx.EXPAND|wx.ALL, 10)
         sizer.Layout()
-        self.SetScrollbars(20, 20, 25, 65)
+        self.SetupScrolling()
         
     def _on_show_sld(self, event=None):
     	"""
@@ -1307,7 +1301,7 @@ class BasicPage(wx.ScrolledWindow):
         self.sizer4.Layout()
         self.Layout()
         self.Refresh()
-        self.SetScrollbars(20, 20, 25, 65)
+        self.SetupScrolling()
             
     def _populate_box(self, combobox, list):
         """
@@ -1617,7 +1611,7 @@ class BasicPage(wx.ScrolledWindow):
                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         self.sizer4_4.Layout()
         self.sizer4.Layout()
-        self.SetScrollbars(20, 20, 25, 65)
+        self.SetupScrolling()
       
     def _reset_dispersity(self):
         """
@@ -1682,7 +1676,7 @@ class BasicPage(wx.ScrolledWindow):
         wx.PostEvent(self.parent, event)
         self.sizer4_4.Layout()
         self.sizer4.Layout()
-        self.SetScrollbars(20, 20, 25, 65)
+        self.SetupScrolling()
         
     def _set_sizer_arraydispersion(self):
         """
@@ -1841,7 +1835,7 @@ class BasicPage(wx.ScrolledWindow):
         boxsizer1.Add(sizer_save)
         self.sizer6.Add(boxsizer1, 0, wx.EXPAND|wx.ALL, 10)
         self.sizer6.Layout()
-        self.SetScrollbars(20, 20, 25, 65)
+        self.SetupScrolling()
         
     def _lay_out(self):
         """

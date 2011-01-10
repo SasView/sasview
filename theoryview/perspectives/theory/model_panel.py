@@ -55,7 +55,7 @@ class ModelPanel(BasicPage, PanelBase):
         
         """
         self._on_display_description_helper()
-        self.SetScrollbars(20, 20, 25, 65)
+        self.SetupScrolling()
         self.Refresh()
 
     def _on_display_description_helper(self):
@@ -326,7 +326,7 @@ class ModelPanel(BasicPage, PanelBase):
         #self.sizer4_4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)   
         self.sizer4_4.Layout()
         self.sizer4.Layout()
-        self.SetScrollbars(20,20,25,65)
+        self.SetupScrolling()
              
  
     def _onModel2D(self, event):
@@ -578,7 +578,7 @@ class ModelPanel(BasicPage, PanelBase):
         if model ==None:
             ##no model avaiable to draw sizer 
             self.sizer3.Layout()
-            self.SetScrollbars(20,20,25,65)
+            self.SetupScrolling()
             return
         box_description= wx.StaticBox(self, -1,str("Model Parameters"))
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
@@ -776,5 +776,5 @@ class ModelPanel(BasicPage, PanelBase):
         boxsizer1.Add(sizer)
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer3.Layout()
-        self.SetScrollbars(20,20,25,65)
+        self.SetupScrolling()
                 
