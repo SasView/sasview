@@ -12,7 +12,8 @@ import wx
 import sys
 import os
 
-#from DataLoader.readers.ascii_reader import Reader
+from sans.guiframe.panel_base import PanelBase
+
 from sans.guicomm.events import StatusEvent  
 from sans.calculator.slit_length_calculator import SlitlengthCalculator  
 from calculator_widgets import OutputTextCtrl
@@ -29,7 +30,7 @@ else:
     PANEL_HEIGHT = 210
     FONT_VARIANT = 1
  
-class SlitLengthCalculatorPanel(wx.Panel):
+class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
     """
         Provides the slit length calculator GUI.
     """
@@ -42,6 +43,7 @@ class SlitLengthCalculatorPanel(wx.Panel):
     
     def __init__(self, parent, *args, **kwds):
         wx.Panel.__init__(self, parent, *args, **kwds)
+        PanelBase.__init__(self)
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         #thread to read data 

@@ -7,6 +7,8 @@ import wx
 import math
 import sys
 
+from sans.guiframe.panel_base import PanelBase
+
 from sans.guiframe.utils import format_number
 from sans.guiframe.utils import check_float
 from sans.guicomm.events import StatusEvent  
@@ -16,7 +18,6 @@ from sans.guicomm.events import StatusEvent
 from periodictable import formula
 from periodictable.xsf import xray_energy
 from periodictable.xsf import xray_sld_from_atoms
-#rom periodictable.constants import avogadro_number
 from periodictable.nsf import neutron_scattering
        
 WAVELENGTH = 6.0
@@ -34,7 +35,7 @@ else:
     PANEL_SIZE = 410
     FONT_VARIANT = 1
     
-class SldPanel(wx.Panel):
+class SldPanel(wx.Panel, PanelBase):
     """
     Provides the SLD calculator GUI.
     """
@@ -49,6 +50,7 @@ class SldPanel(wx.Panel):
         """
         """
         wx.Panel.__init__(self, parent, *args, **kwds)
+        PanelBase.__init__(self)
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         # Object that receive status event

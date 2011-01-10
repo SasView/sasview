@@ -10,9 +10,8 @@ copyright 2008, 2009, University of Tennessee
 
 import wx
 import sys
-#import os
 
-#from sans.guicomm.events import StatusEvent  
+from sans.guiframe.panel_base import PanelBase
 from sans.calculator.kiessig_calculator import KiessigThicknessCalculator 
 from calculator_widgets import OutputTextCtrl
 from calculator_widgets import InputTextCtrl
@@ -28,7 +27,7 @@ else:
     PANEL_HEIGHT = 230
     FONT_VARIANT = 1
  
-class KiessigThicknessCalculatorPanel(wx.Panel):
+class KiessigThicknessCalculatorPanel(wx.Panel, PanleBase):
     """
     Provides the Kiessig thickness calculator GUI.
     """
@@ -41,6 +40,7 @@ class KiessigThicknessCalculatorPanel(wx.Panel):
     
     def __init__(self, parent, *args, **kwds):
         wx.Panel.__init__(self, parent, *args, **kwds)
+        PanelBase.__init__(self)
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)  
         # Object that receive status event
