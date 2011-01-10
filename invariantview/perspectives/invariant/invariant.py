@@ -10,13 +10,13 @@
 #
 #copyright 2009, University of Tennessee
 ################################################################################
-#import os
+
+
 import sys
 import wx
 import copy
 import logging
-#import time
-#from sans.invariant import invariant
+
 
 from DataLoader.data_info import Data1D as LoaderData1D
 from sans.guiframe.dataFitting import Theory1D
@@ -29,51 +29,29 @@ from DataLoader.loader import Loader
 from invariant_panel import InvariantPanel
 from sans.guicomm.events import EVT_INVSTATE_UPDATE
 
-class Plugin:
+from sans.guiframe.plugin_base import PluginBase
+
+class Plugin(PluginBase):
     """
     This class defines the interface for invariant Plugin class
     that can be used by the gui_manager.       
     """
     
     def __init__(self, standalone=False):
-        """
-        Abstract class for gui_manager Plugins.
-        """
-        ## Plug-in name. It will appear on the application menu.
-        self.sub_menu = "Invariant"
+        PluginBase.__init__(self, name="Invariant", standalone=standalone)
         
-        ## Reference to the parent window. Filled by get_panels() below.
-        self.parent = None
         #dictionary containing data name and error on dy of that data 
         self.err_dy = {}
-        ## List of panels that you would like to open in AUI windows
-        #  for your plug-in. This defines your plug-in "perspective"
-        self.perspective = []
+       
         #default state objects
         self.state_reader = None 
         self.temp_state = None 
         self.__data = None 
-        """
-        # Create a CanSAS/Pr reader
-        self.state_reader = Reader(self.set_state)
-        l = Loader()
-        l.associate_file_reader('.inv', self.state_reader)  
-        """   
+       
         # Log startup
         logging.info("Invariant plug-in started")
        
-    def populate_menu(self, id, parent):
-        """
-        Create and return the list of application menu
-        items for the plug-in. 
-        
-        :param id: deprecated. Un-used.
-        :param parent: parent window
-        
-        :return: plug-in menu
-        """
-        return []
-    
+  
     def help(self, evt):
         """
         Show a general help dialog. 
@@ -112,14 +90,7 @@ class Plugin:
         loader.associate_file_reader(".svs", self.state_reader)
         # Return the list of panels
         return [self.invariant_panel]
-    
-    def get_tools(self):
-        """
-        Returns a set of menu entries for tools
-        """
-        return []
-        
-    
+  
     def get_context_menu(self, graph=None):
         """
         This method is optional.
@@ -158,38 +129,6 @@ class Plugin:
                                         self._compute_invariant]]
         return []   
 
-    
-    def get_perspective(self):
-        """
-        Get the list of panel names for this perspective
-        """
-        return self.perspective
-    
-    def on_perspective(self, event):
-        """
-        Call back function for the perspective menu item.
-        We notify the parent window that the perspective
-        has changed.
-        
-        :param event: menu event
-        """
-        self.parent.set_perspective(self.perspective)
-    
-    def post_init(self):
-        """
-        Post initialization call back to close the loose ends
-        """
-        pass
-    
-    def set_default_perspective(self):
-        """
-        Call back method that True to notify the parent that the current plug-in
-        can be set as default  perspective.
-        when returning False, the plug-in is not candidate for an automatic 
-        default perspective setting
-        """
-        return False
-    
     def copy_data(self, item, dy=None):
         """
         receive a data 1D and the list of errors on dy
