@@ -17,7 +17,7 @@ from invariant_details import InvariantContainer
 from invariant_widgets import OutputTextCtrl
 from invariant_widgets import InvTextCtrl
 from invariant_state import InvariantState as IState
-
+from sans.guiframe.panel_base import PanelBase
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM  = 1e-5
 # The maximum q-value to be used when extrapolating
@@ -50,7 +50,7 @@ else:
     FONT_VARIANT = 1
 
 
-class InvariantPanel(ScrolledPanel):
+class InvariantPanel(ScrolledPanel, PanelBase):
     """
     Provides the Invariant GUI.
     """
@@ -64,6 +64,7 @@ class InvariantPanel(ScrolledPanel):
         kwds["size"] = (PANEL_WIDTH, PANEL_HEIGHT)
         kwds["style"] = wx.FULL_REPAINT_ON_RESIZE
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
+        PanelBase.__init__(self)
         self.SetupScrolling()
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
