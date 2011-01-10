@@ -54,7 +54,7 @@ class ViewerFrame(wx.Frame):
         """
         Initialize the Frame object
         """
-        from local_perspectives.plotting import plotting
+        
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition,
                           size=(window_width, window_height))
         # Preferred window size
@@ -85,7 +85,13 @@ class ViewerFrame(wx.Frame):
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins = []
+        #add local plugin
+      
+        from sans.guiframe.local_perspectives.plotting import plotting
+        from sans.guiframe.local_perspectives.data_loader import data_loader
         self.plugins.append(plotting.Plugin())
+        self.plugins.append(data_loader.Plugin())
+        
         self.plugins += self._find_plugins()
       
         ## List of panels
@@ -374,20 +380,30 @@ class ViewerFrame(wx.Frame):
         self._mgr.Update()
         return ID
         
+    def _populate_file_menu(self):
+        """
+        Insert menu item under file menu
+        """
+        for plugin in self.plugins:
+            if len(plugin.populate_file_menu()) > 0:
+                id = wx.NewId()
+                for item in plugin.populate_file_menu():
+                    m_name, m_hint, m_handler = item
+                    self.filemenu.Append(id, m_name, m_hint)
+                    wx.EVT_MENU(self, id, m_handler)
+                self.filemenu.AppendSeparator()
+                
     def _setup_menus(self):
         """
         Set up the application menus
         """
         # Menu
-        menubar = wx.MenuBar()
+        self._menubar = wx.MenuBar()
         # File menu
         self.filemenu = wx.Menu()
         
-        id = wx.NewId()
-        self.filemenu.Append(id, '&Open', 'Load data file into the application')
-        wx.EVT_MENU(self, id, self._on_open)
-        #self.filemenu.AppendSeparator()
-        
+        # some menu of plugin to be seen under file menu
+        self._populate_file_menu()
         id = wx.NewId()
         self.filemenu.Append(id, '&Save',
                              'Save project as a SanaView (svs) file')
@@ -399,7 +415,7 @@ class ViewerFrame(wx.Frame):
         wx.EVT_MENU(self, id, self.Close)
         
         # Add sub menus
-        menubar.Append(self.filemenu, '&File')
+        self._menubar.Append(self.filemenu, '&File')
         
         # Window menu
         # Attach a menu item for each panel in our
@@ -424,7 +440,7 @@ class ViewerFrame(wx.Frame):
                         viewmenu.Append(int(item), panel.window_caption,
                                         "Show %s window" % panel.window_caption)
                         wx.EVT_MENU(self, int(item), self._on_view)
-                menubar.Append(viewmenu, '&Window')
+                self._menubar.Append(viewmenu, '&Window')
 
         # Perspective
         # Attach a menu item for each defined perspective.
@@ -442,7 +458,7 @@ class ViewerFrame(wx.Frame):
                     p_menu.Append(id, plug.sub_menu,
                                   "Switch to %s perspective" % plug.sub_menu)
                     wx.EVT_MENU(self, id, plug.on_perspective)
-            menubar.Append(p_menu, '&Perspective')
+            self._menubar.Append(p_menu, '&Perspective')
  
         # Tools menu
         # Go through plug-ins and find tools to populate the tools menu
@@ -457,7 +473,7 @@ class ViewerFrame(wx.Frame):
                     toolsmenu.Append(id, tool[0], tool[1])
                     wx.EVT_MENU(self, id, tool[2])
         if toolsmenu is not None:
-            menubar.Append(toolsmenu, '&Tools')
+            self._menubar.Append(toolsmenu, '&Tools')
  
         # Help menu
         helpmenu = wx.Menu()
@@ -493,10 +509,10 @@ class ViewerFrame(wx.Frame):
             if hasattr(item, "populate_menu"):
                 for (self.next_id, menu, name) in \
                     item.populate_menu(self.next_id, self):
-                    menubar.Append(menu, name)
+                    self._menubar.Append(menu, name)
                    
-        menubar.Append(helpmenu, '&Help')
-        self.SetMenuBar(menubar)
+        self._menubar.Append(helpmenu, '&Help')
+        self.SetMenuBar(self._menubar)
     
     def _on_status_event(self, evt):
         """
@@ -656,29 +672,6 @@ class ViewerFrame(wx.Frame):
         """
         Store info to retrieve in xml before closing the application
         """
-        try:
-            doc = xml.dom.minidom.Document()
-            main_node = doc.createElement("file Path")
-            doc.appendChild(main_node)
-        
-            for item in self.filePathList:
-                id, menuitem_name, path, title = item
-                pt1 = doc.createElement("File")
-                pt1.setAttribute("name", menuitem_name)
-                pt2 = doc.createElement("path")
-                pt2.appendChild(doc.createTextNode(str(path)))
-                pt1.appendChild(pt2)
-                pt3 = doc.createElement("title")
-                pt3.appendChild(doc.createTextNode(str(title)))
-                pt1.appendChild(pt3)
-                main_node.appendChild(pt1)
-            
-            fd = open("fileOpened.xml",'w')
-            fd.write(doc.toprettyxml())
-            fd.close()
-        except:
-            pass
-        #import sys
         wx.Exit()
         sys.exit()
                  
@@ -846,13 +839,7 @@ class ViewerFrame(wx.Frame):
             except:
                 pass
         return path
-    
-    def load_ascii_1D(self, path):
-        """
-        """
-        from .data_loader import load_ascii_1D
-        return load_ascii_1D(path)
-                  
+
 class DefaultPanel(wx.Panel):
     """
     Defines the API for a panels to work with

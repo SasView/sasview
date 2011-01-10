@@ -29,6 +29,13 @@ class Plugin(PluginBase):
         ## Plot panels
         self.plot_panels = []
        
+    def is_always_active(self):
+        """
+        return True is this plugin is always active even if the user is 
+        switching between perspectives
+        """
+        return True
+    
     def populate_menu(self, id, parent):
         """
         Create a 'Plot' menu to list the panels

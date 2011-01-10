@@ -32,6 +32,8 @@ class PluginBase:
         """
             Abstract class for gui_manager Plugins.
         """
+        # Define if the plugin is local to Viewerframe  and always active
+        self._always_active = False
         ## Plug-in name. It will appear on the application menu.
         self.sub_menu = name     
         #standalone flag
@@ -43,6 +45,24 @@ class PluginBase:
         #  for your plug-in. This defines your plug-in "perspective"
         self.perspective = []
         
+    def set_is_active(self, active=False):
+        """
+        """
+        self._always_active = active
+        
+    def is_always_active(self):
+        """
+        return True is this plugin is always active and it is local to guiframe
+        even if the user is switching between perspectives
+        """
+        return self._always_active
+    
+    def populate_file_menu(self):
+        """
+        get a menu item and append it under file menu of the application
+        return [[menu item name, menu_hint, menu handler]]
+        """
+        return []
         
     def populate_menu(self, id, parent):
         """
