@@ -10,12 +10,13 @@
 ################################################################################
 
 
-import time, os, sys
+import time
+import os
+import sys
 import logging
-import DataLoader
 from xml.dom.minidom import parse
 from lxml import etree
-
+import DataLoader
 from DataLoader.readers.cansas_reader import Reader as CansasReader
 from DataLoader.readers.cansas_reader import get_content
 
@@ -135,7 +136,8 @@ class InversionState(object):
         
         Compatible with standalone writing, or appending to an
         already existing XML document. In that case, the XML document
-        is required. An optional entry node in the XML document may also be given.
+        is required. An optional entry node in the XML document 
+        may also be given.
         
         :param file: file to write to
         :param doc: XML document object [optional]
@@ -187,7 +189,8 @@ class InversionState(object):
         
         for item in in_list:
             element = newdoc.createElement(item[0])
-            exec "element.appendChild(newdoc.createTextNode(str(self.%s)))" % item[1]
+            cmd = "element.appendChild(newdoc.createTextNode(str(self.%s)))"
+            exec  cmd % item[1]
             inputs.appendChild(element)
               
         # Outputs
@@ -196,7 +199,8 @@ class InversionState(object):
         
         for item in out_list:
             element = newdoc.createElement(item[0])
-            exec "element.appendChild(newdoc.createTextNode(str(self.%s)))" % item[1]
+            cmd = "element.appendChild(newdoc.createTextNode(str(self.%s)))"
+            exec  cmd % item[1]
             outputs.appendChild(element)
                     
         # Save output coefficients and its covariance matrix
@@ -225,10 +229,11 @@ class InversionState(object):
         
         """
         if file is not None:
-            raise RuntimeError, "InversionState no longer supports non-CanSAS format for P(r) files"
+            msg = "InversionState no longer supports non-CanSAS"
+            msg += " format for P(r) files"
+            raise RuntimeError, msg
             
-        if node.get('version')\
-            and node.get('version') == '1.0':
+        if node.get('version') and node.get('version') == '1.0':
             
             # Get file name
             entry = get_content('ns:filename', node)
@@ -241,7 +246,9 @@ class InversionState(object):
                 try:
                     self.timestamp = float(entry.get('epoch'))
                 except:
-                    logging.error("InversionState.fromXML: Could not read timestamp\n %s" % sys.exc_value)
+                    msg = "InversionState.fromXML: Could not read "
+                    msg += "timestamp\n %s" % sys.exc_value
+                    logging.error(msg)
             
             # Parse inversion inputs
             entry = get_content('ns:inputs', node)
@@ -250,7 +257,8 @@ class InversionState(object):
                     input_field = get_content('ns:%s' % item[0], entry)
                     if input_field is not None:
                         try:
-                            exec 'self.%s = float(input_field.text.strip())' % item[1]
+                            cmd = 'self.%s = float(input_field.text.strip())' 
+                            exec  cmd % item[1]
                         except:
                             exec 'self.%s = None' % item[1]
                 input_field = get_content('ns:estimate_bck', entry)
@@ -268,7 +276,8 @@ class InversionState(object):
                     input_field = get_content('ns:%s' % item[0], entry)
                     if input_field is not None:
                         try:
-                            exec 'self.%s = float(input_field.text.strip())' % item[1]
+                            cmd = 'self.%s = float(input_field.text.strip())'
+                            exec  cmd % item[1]
                         except:
                             exec 'self.%s = None' % item[1]
             
@@ -291,9 +300,12 @@ class InversionState(object):
                             pass
                     # Sanity check
                     if not len(self.coefficients) == self.nfunc:
-                        # Inconsistent number of coefficients. Don't keep the data.
-                        err_msg = "InversionState.fromXML: inconsistant number of coefficients: "
-                        err_msg += "%d %d" % (len(self.coefficients), self.nfunc)
+                        # Inconsistent number of coefficients.
+                        # Don't keep the data.
+                        err_msg = "InversionState.fromXML: inconsistant "
+                        err_msg += "number of coefficients: "
+                        err_msg += "%d %d" % (len(self.coefficients),
+                                              self.nfunc)
                         logging.error(err_msg)
                         self.coefficients = None
                 
@@ -327,7 +339,9 @@ class InversionState(object):
                     if not len(self.covariance) == self.nfunc:
                         # Inconsistent dimensions of the covariance matrix.
                         # Don't keep the data.
-                        err_msg = "InversionState.fromXML: inconsistant dimensions of the covariance matrix: "
+                        err_msg = "InversionState.fromXML: "
+                        err_msg += "inconsistant dimensions of the "
+                        err_msg += " covariance matrix: "
                         err_msg += "%d %d" % (len(self.covariance), self.nfunc)
                         logging.error(err_msg)
                         self.covariance = None
@@ -343,7 +357,7 @@ class Reader(CansasReader):
     type = ["P(r) files (*.prv)|*.prv",
             "SANSView files (*.svs)|*.svs"]
     ## List of allowed extensions
-    ext=['.prv', '.PRV', '.svs', '.SVS']  
+    ext = ['.prv', '.PRV', '.svs', '.SVS']  
     
     def __init__(self, call_back, cansas=True):
         """
@@ -405,13 +419,16 @@ class Reader(CansasReader):
         
         # Locate the P(r) node
         try:
-            nodes = entry.xpath('ns:%s' % PRNODE_NAME, namespaces={'ns': CANSAS_NS})
+            nodes = entry.xpath('ns:%s' % PRNODE_NAME,
+                                namespaces={'ns': CANSAS_NS})
             if nodes !=[]:
                 # Create an empty state
                 state =  InversionState()
                 state.fromXML(node=nodes[0])
         except:
-            logging.info("XML document does not contain P(r) information.\n %s" % sys.exc_value)
+            msg = "XML document does not contain P(r) "
+            msg += "information.\n %s" % sys.exc_value
+            logging.info(msg)
             
         return state
     
@@ -436,15 +453,16 @@ class Reader(CansasReader):
             root, extension = os.path.splitext(basename)
             #TODO: eventually remove the check for .xml once
             # the P(r) writer/reader is truly complete.
-            if  extension.lower() in self.ext or \
-                extension.lower() == '.xml':
+            if  extension.lower() in self.ext or extension.lower() == '.xml':
                 
                 tree = etree.parse(path, parser=etree.ETCompatXMLParser())
                 # Check the format version number
-                # Specifying the namespace will take care of the file format version 
+                # Specifying the namespace will take care of the file 
+                #format version 
                 root = tree.getroot()
                 
-                entry_list = root.xpath('/ns:SASroot/ns:SASentry', namespaces={'ns': CANSAS_NS})
+                entry_list = root.xpath('/ns:SASroot/ns:SASentry',
+                                        namespaces={'ns': CANSAS_NS})
 
                 for entry in entry_list:
                     sas_entry = self._parse_entry(entry)
@@ -459,9 +477,9 @@ class Reader(CansasReader):
             raise RuntimeError, "%s is not a file" % path
         
         # Return output consistent with the loader's api
-        if len(output)==0:
+        if len(output) == 0:
             return None
-        elif len(output)==1:
+        elif len(output) == 1:
             # Call back to post the new state
             self.call_back(output[0].meta_data['prstate'], datainfo = output[0])
             return output[0]
@@ -497,7 +515,9 @@ class Reader(CansasReader):
         if datainfo is None:
             datainfo = DataLoader.data_info.Data1D(x=[], y=[])    
         elif not issubclass(datainfo.__class__, DataLoader.data_info.Data1D):
-            raise RuntimeError, "The cansas writer expects a Data1D instance: %s" % str(datainfo.__class__.__name__)
+            msg = "The cansas writer expects a Data1D "
+            msg += "instance: %s" % str(datainfo.__class__.__name__)
+            raise RuntimeError, msg
     
         # Create basic XML document
         doc, sasentry = self._to_xml_doc(datainfo)

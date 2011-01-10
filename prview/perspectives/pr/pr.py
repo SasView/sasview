@@ -37,8 +37,9 @@ IQ_SMEARED_LABEL   = r"$I_{smeared}(q)$"
 import wx.lib
 (NewPrFileEvent, EVT_PR_FILE) = wx.lib.newevent.NewEvent()
 
+from sans.guiframe.plugin_base import PluginBase
 
-class Plugin:
+class Plugin(PluginBase):
     """
     """
     DEFAULT_ALPHA = 0.0001
@@ -46,20 +47,10 @@ class Plugin:
     DEFAULT_DMAX  = 140.0
     
     def __init__(self, standalone=True):
-        """
-        """
-        ## Plug-in name
-        self.sub_menu = "Pr inversion"
-        
-        ## Reference to the parent window
-        self.parent = None
-        
+        PluginBase.__init__(self, name="Pr inversion", standalone=standalone)
         ## Simulation window manager
         self.simview = None
-        
-        ## List of panels for the simulation perspective (names)
-        self.perspective = []
-        
+       
         ## State data
         self.alpha      = self.DEFAULT_ALPHA
         self.nfunc      = self.DEFAULT_NFUNC
@@ -1287,27 +1278,13 @@ class Plugin:
             panel to load a new data file.
         """
         self.control_panel._change_file(None)
-    
-    def get_perspective(self):
-        """
-            Get the list of panel names for this perspective
-        """
-        return self.perspective
-    
-    def on_perspective(self, event):
-        """
-            Call back function for the perspective menu item.
-            We notify the parent window that the perspective
-            has changed.
-        """
-        self.parent.set_perspective(self.perspective)
-    
+
     def post_init(self):
         """
             Post initialization call back to close the loose ends
             [Somehow openGL needs this call]
         """
-        if self.standalone==True:
+        if self.standalone:
             self.parent.set_perspective(self.perspective)
   
 if __name__ == "__main__":

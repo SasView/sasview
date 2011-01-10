@@ -67,7 +67,7 @@ class OutputPlot(PlotPanel):
         dy = numpy.zeros(len(self.x))
  
         # Plot area
-        self.plot = Model1D(self.x,y=y,dy=dy)
+        self.plot = Model1D(self.x, y=y, dy=dy)
         self.plot.name = DEFAULT_OUTPUT
 
         # Graph        
@@ -88,7 +88,7 @@ class OutputPlot(PlotPanel):
         # Slicer plot popup menu
         id = wx.NewId()
         slicerpop = wx.Menu()
-        slicerpop.Append(id,'&Save image', 'Save image as PNG')
+        slicerpop.Append(id, '&Save image', 'Save image as PNG')
         wx.EVT_MENU(self, id, self.onSaveImage)
         
         id = wx.NewId()
@@ -125,7 +125,8 @@ class Results:
         self.outputs['Chi2/dof'] = ["\chi^2/dof", "a.u.", self.chi2]    
         self.outputs['Oscillation parameter'] = ["Osc", "a.u.", self.osc]    
         self.outputs['Positive fraction'] = ["P^+", "a.u.", self.pos]    
-        self.outputs['1-sigma positive fraction'] = ["P^+_{1\ \sigma}", "a.u.", self.pos_err]    
+        self.outputs['1-sigma positive fraction'] = ["P^+_{1\ \sigma}", 
+                                                     "a.u.", self.pos_err]    
         self.outputs['Rg'] = ["R_g", "A", self.rg]    
         self.outputs['I(q=0)'] = ["I(q=0)", "1/A", self.iq0]    
         self.outputs['Background'] = ["Bck", "1/A", self.bck] 
@@ -156,17 +157,21 @@ class ExploreDialog(wx.Dialog):
         self.nfunc     = nfunc
         
         # Control for number of points
-        self.npts_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
+        self.npts_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
+                                   size=(60,20))
         # Control for the minimum value of D_max
-        self.dmin_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
+        self.dmin_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
+                                   size=(60,20))
         # Control for the maximum value of D_max
-        self.dmax_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60,20))
+        self.dmax_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
+                                   size=(60,20))
 
         # Output selection box for the y axis
         self.output_box = None
 
         # Create the plot object
-        self.plotpanel = OutputPlot(self._default_min, self._default_max, self, -1, style=wx.RAISED_BORDER)
+        self.plotpanel = OutputPlot(self._default_min, self._default_max,
+                                    self, -1, style=wx.RAISED_BORDER)
         
         # Create the layout of the dialog
         self.__do_layout()
@@ -257,14 +262,18 @@ class ExploreDialog(wx.Dialog):
             self.plotpanel.plot.x = self.results.d_max
             self.plotpanel.plot.y = self.results.outputs[output_type][2]
             self.plotpanel.plot.name = '_nolegend_'
-            self.plotpanel.graph.yaxis("\\rm{%s}" % self.results.outputs[output_type][0], self.results.outputs[output_type][1])
+            y_label = "\\rm{%s}" % self.results.outputs[output_type][0]
+            self.plotpanel.graph.yaxis(y_label,
+                                       self.results.outputs[output_type][1])
             
             # Redraw
             self.plotpanel.graph.render(self.plotpanel)
             self.plotpanel.subplot.figure.canvas.draw_idle()
         else:
-            msg =  "ExploreDialog: the Results object's dictionary does not contain "
-            msg += "the [%s] output type. This must be indicative of a change in the " % str(output_type)
+            msg =  "ExploreDialog: the Results object's dictionary "
+            msg += "does not contain "
+            msg += "the [%s] output type. This must be indicative of "
+            msg += "a change in the " % str(output_type)
             msg += "ExploreDialog code."
             logging.error(msg)
         
@@ -278,30 +287,36 @@ class ExploreDialog(wx.Dialog):
         
         sizer_main = wx.BoxSizer(wx.VERTICAL)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_params = wx.GridBagSizer(5,5)
+        sizer_params = wx.GridBagSizer(5, 5)
 
         iy = 0
         ix = 0
         label_npts  = wx.StaticText(self, -1, "Npts")
-        sizer_params.Add(label_npts, (iy,ix), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        sizer_params.Add(label_npts, (iy, ix), (1, 1), 
+                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer_params.Add(self.npts_ctl,   (iy,ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer_params.Add(self.npts_ctl,   (iy, ix), (1, 1), 
+                         wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.npts_ctl.SetValue("%g" % DEFAULT_NPTS)
         self.npts_ctl.Bind(wx.EVT_KILL_FOCUS, self._recalc)
         
         ix += 1
         label_dmin   = wx.StaticText(self, -1, "Min Distance [A]")
-        sizer_params.Add(label_dmin, (iy,ix), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        sizer_params.Add(label_dmin, (iy, ix), (1, 1),
+                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer_params.Add(self.dmin_ctl,   (iy,ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer_params.Add(self.dmin_ctl, (iy, ix), (1, 1),
+                         wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.dmin_ctl.SetValue(str(self._default_min))
         self.dmin_ctl.Bind(wx.EVT_KILL_FOCUS, self._recalc)
         
         ix += 1
         label_dmax = wx.StaticText(self, -1, "Max Distance [A]")
-        sizer_params.Add(label_dmax, (iy,ix), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        sizer_params.Add(label_dmax, (iy, ix), (1, 1),
+                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer_params.Add(self.dmax_ctl,   (iy,ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer_params.Add(self.dmax_ctl,   (iy, ix), (1, 1),
+                         wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         self.dmax_ctl.SetValue(str(self._default_max))
         self.dmax_ctl.Bind(wx.EVT_KILL_FOCUS, self._recalc)
 
@@ -313,15 +328,17 @@ class ExploreDialog(wx.Dialog):
             self.output_box.Append(item, "")
         self.output_box.SetStringSelection(DEFAULT_OUTPUT)
         
-        output_sizer = wx.GridBagSizer(5,5)
-        output_sizer.Add(selection_msg, (0,0), (1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
-        output_sizer.Add(self.output_box, (0,1), (1,2), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
+        output_sizer = wx.GridBagSizer(5, 5)
+        output_sizer.Add(selection_msg, (0, 0), (1, 1),
+                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
+        output_sizer.Add(self.output_box, (0, 1), (1, 2),
+                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
         
-        wx.EVT_COMBOBOX(self.output_box,-1, self._plot_output) 
+        wx.EVT_COMBOBOX(self.output_box, -1, self._plot_output) 
         sizer_main.Add(output_sizer, 0, wx.EXPAND | wx.ALL, 10)
         
         sizer_main.Add(self.plotpanel, 0, wx.EXPAND | wx.ALL, 10)
-        sizer_main.SetItemMinSize(self.plotpanel, 400,400)
+        sizer_main.SetItemMinSize(self.plotpanel, 400, 400)
         
         sizer_main.Add(sizer_params, 0, wx.EXPAND|wx.ALL, 10)
         static_line_3 = wx.StaticLine(self, -1)
@@ -356,8 +373,10 @@ class ExploreDialog(wx.Dialog):
         results = Results()
         
         # Loop over d_max values
-        for i in range(content.npts):    
-            d = content.dmin + i * (content.dmax - content.dmin)/(content.npts-1.0)
+        for i in range(content.npts): 
+            temp = (content.dmax - content.dmin)/(content.npts - 1.0)   
+            d = content.dmin + i * temp
+                
             self.pr_state.d_max = d
             try:
                 out, cov = self.pr_state.invert(self.nfunc)   
@@ -379,7 +398,9 @@ class ExploreDialog(wx.Dialog):
                 results.osc.append(osc)           
             except:
                 # This inversion failed, skip this D_max value
-                logging.error("ExploreDialog: inversion failed for D_max=%s\n%s" % (str(d), sys.exc_value))
+                msg = "ExploreDialog: inversion failed "
+                msg += "for D_max=%s\n%s" % (str(d), sys.exc_value)
+                logging.error(msg)
             
         self.results = results            
          
