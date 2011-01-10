@@ -8,8 +8,9 @@ from sans.guicomm.events import SlicerParameterEvent
 from sans.guicomm.events import EVT_SLICER_PARS
 from sans.guicomm.events import EVT_SLICER
 
+from sans.guiframe.panel_base import PanelBase
 
-class SlicerPanel(wx.Panel):
+class SlicerPanel(wx.Panel, PanelBase):
     """
     Panel class to show the slicer parameters 
     """
@@ -24,6 +25,7 @@ class SlicerPanel(wx.Panel):
     def __init__(self, parent, id=-1, type=None, base=None,
                 params=None, *args, **kwargs):
         wx.Panel.__init__(self, parent, id, *args, **kwargs)
+        PanelBase.__init__(self)
         ##  Initialization of the class     
         self.base = base
         if params is None:

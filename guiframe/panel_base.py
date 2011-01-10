@@ -17,11 +17,11 @@ class PanelBase:
     the ViewerFrame toolbar and menu bar
     """
     ## Internal nickname for the window, used by the AUI manager
-    window_name = "default"
+    #window_name = "default"
     ## Name to appear on the window title bar
-    window_caption = "Welcome panel"
+    #window_caption = "Welcome panel"
     ## Flag to tell the AUI manager to put this panel in the center pane
-    CENTER_PANE = True
+    #CENTER_PANE = True
     
     def __init__(self):
         """

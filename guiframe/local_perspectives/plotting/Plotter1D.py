@@ -31,6 +31,7 @@ from sans.guicomm.events import AddManyDataEvent
 from sans.guiframe.utils import PanelMenu
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Theory1D
+from sans.guiframe.panel_base import PanelBase
 from binder import BindArtist
 
 DEFAULT_QMAX = 0.05
@@ -39,7 +40,7 @@ DEFAULT_BEAM = 0.005
 BIN_WIDTH = 1
 
 
-class ModelPanel1D(PlotPanel):
+class ModelPanel1D(PlotPanel, PanelBase):
     """
     Plot panel for use with the GUI manager
     """
@@ -56,10 +57,8 @@ class ModelPanel1D(PlotPanel):
     
     def __init__(self, parent, id=-1, color = None,
                  dpi=None, style=wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
-        """
-        Initialize the panel
-        """
         PlotPanel.__init__(self, parent, id=id, style=style, **kwargs)
+        PanelBase.__init__(self)
         ## Reference to the parent window
         self.parent = parent
         ## Plottables
