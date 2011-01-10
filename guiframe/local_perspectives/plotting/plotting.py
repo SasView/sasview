@@ -16,25 +16,16 @@ import sys
 from sans.guicomm.events import EVT_NEW_PLOT
 from sans.guicomm.events import StatusEvent 
 
+from sans.guiframe.plugin_base import PluginBase
 
-class Plugin:
+class Plugin(PluginBase):
     """
     Plug-in class to be instantiated by the GUI manager
     """
     
-    def __init__(self):
-        """
-        Initialize the plug-in
-        """
-        ## Plug-in name
-        self.sub_menu = "Plotting"
-        
-        ## Reference to the parent window
-        self.parent = None
-        
-        ## List of panels for the simulation perspective (names)
-        self.perspective = []
-        
+    def __init__(self, standalone=False):
+        PluginBase.__init__(self, name="Plotting", standalone=standalone)
+      
         ## Plot panels
         self.plot_panels = []
        
@@ -65,28 +56,6 @@ class Plugin:
         # We have no initial panels for this plug-in
         return []
    
-    def get_perspective(self):
-        """
-        Get the list of panel names for this perspective
-        """
-        return self.perspective
-    
-    def on_perspective(self, event):
-        """
-            Call back function for the perspective menu item.
-            We notify the parent window that the perspective
-            has changed.
-            @param event: menu event
-        """
-        self.parent.set_perspective(self.perspective)
-    
-    def post_init(self):
-        """
-        Post initialization call back to close the loose ends
-        [Somehow openGL needs this call]
-        """
-        pass
-    
     def _on_show_panel(self, event):
         """show plug-in panel"""
         pass
