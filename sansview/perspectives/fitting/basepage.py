@@ -7,6 +7,7 @@ import time
 import copy 
 import math
 import string
+from sans.guiframe.panel_base import PanelBase
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.guiframe.utils import format_number,check_float
 from sans.guicomm.events import StatusEvent
@@ -30,7 +31,7 @@ else:
     FONT_VARIANT = 1
     ON_MAC = True
     
-class BasicPage(wx.ScrolledPanel, PanelBase):
+class BasicPage(ScrolledPanel, PanelBase):
     """
     This class provide general structure of  fitpanel page
     """
@@ -39,11 +40,10 @@ class BasicPage(wx.ScrolledPanel, PanelBase):
     ## Title to appear on top of the window
     window_caption = "Basic page "
     
-    def __init__(self, parent, page_info):
+    def __init__(self, parent, page_info, **kwargs):
         """
         """
-        wx.ScrolledWindow.__init__(self, parent, 
-                                   style=wx.FULL_REPAINT_ON_RESIZE)
+        ScrolledPanel.__init__(self, parent, **kwargs)
         PanelBase.__init__(self)
         self.SetupScrolling()
         #Set window's font size 

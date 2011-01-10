@@ -2178,7 +2178,7 @@ class FitPage(BasicPage):
         
         if model ==None:
             self.sizer3.Layout()
-            self.SetScrollbars(20,20,25,65)
+            self.SetupScrolling()
             return
         ## the panel is drawn using the current value of the fit engine
         if self.engine_type==None and self.manager !=None:
@@ -2515,7 +2515,8 @@ class FitPage(BasicPage):
         self.sizer3.Layout()
         self.Layout()
         self.Refresh()
-        self.SetScrollbars(20,20,25,65)
+        #self.SetScrollbars(20,20,25,65)
+        self.SetupScrolling()
         
 
 class BGTextCtrl(wx.TextCtrl):
