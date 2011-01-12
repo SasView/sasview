@@ -169,9 +169,11 @@ class Reader:
         else:
             raise RuntimeError, "%s is not a file" % path
         # Return output consistent with the loader's api
-        if len(output)==0:
-            return None
-        elif len(output)==1:
+        if len(output) == 0:
+            #cannot return none when it cannot read 
+            #return None
+            raise RuntimeError, "%s cannot be read \n" % path
+        elif len(output) == 1:
             return output[0]
         else:
             return output                
