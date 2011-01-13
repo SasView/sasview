@@ -461,6 +461,17 @@ class DataInfo:
         ## Loading errors
         self.errors = []        
         
+    def add_process(self):
+        """
+        """
+        self.process.append(Process())
+        
+    def add_notes(self, message=""):
+        """
+        Add notes to datainfo
+        """
+        self.notes.append(message)
+        
     def __str__(self):
         """
         Nice printout
