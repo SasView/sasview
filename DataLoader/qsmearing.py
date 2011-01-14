@@ -156,6 +156,8 @@ class _BaseSmearer(object):
         """
         Perform smearing
         """
+        import time
+        st = time.time()
         # If this is the first time we call for smearing,
         # initialize the C++ smearer object first
         if not self._init_complete:
@@ -173,7 +175,7 @@ class _BaseSmearer(object):
         if self.model != None:
             temp_first, temp_last = self._get_extrapolated_bin( \
                                                         first_bin, last_bin)
-            if self.nbins_low > 1:
+            if self.nbins_low > 0:
                 iq_in_low = self.model.evalDistribution( \
                                     numpy.fabs(self.qvalues[0:self.nbins_low]))
             iq_in_high = self.model.evalDistribution( \
@@ -212,7 +214,7 @@ class _BaseSmearer(object):
         temp_first += self.nbins_low
         temp_last = self.nbins - self.nbins_high
         out = iq_out[temp_first: temp_last]
-
+        print "time =", time.time() - st
         return out
     
     def _initialize_smearer(self):
@@ -548,9 +550,9 @@ def get_qextrapolate(width, data_x):
         ind += 1
     # Make a new qx array
     if nbins_low > 0:  
-    	data_x_ext = numpy.append(extra_low, data_x)
+        data_x_ext = numpy.append(extra_low, data_x)
     else:
-    	data_x_ext = data_x
+        data_x_ext = data_x
     data_x_ext = numpy.append(data_x_ext, extra_high)
     
     # Redefine extra_low and high based on corrected nbins  

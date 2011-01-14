@@ -132,66 +132,136 @@ void SlitSmearer :: compute_matrix(){
 
 	// Check the length of the data
 	if (nbins<2) return;
+	int npts_h = height>0.0 ? npts : 1;
+	int npts_w = width>0.0 ? npts : 1;
+
+	// If both height and width are great than zero,
+	// modify the number of points in each direction so
+	// that the total number of points is still what
+	// the user would expect (downgrade resolution)
+	//if(npts_h>1 && npts_w>1){
+	//	npts_h = (int)ceil(sqrt((double)npts));
+	//	npts_w = npts_h;
+	//}
+	double shift_h, shift_w, hbin_size, wbin_size;
+	// Make sure height and width are all positive (FWMH/2)
+	// Assumption; height and width are all same for all q points
+	if(npts_h == 1){
+		shift_h = 0.0;
+	} else {
+		shift_h = fabs(height);
+	}
+	if(npts_w == 1){
+		shift_w = 0.0;
+	} else {
+		shift_w = fabs(width);
+	}
+	// size of the h bin and w bin
+	hbin_size = shift_h / nbins;
+	wbin_size = shift_w / nbins;
 
 	// Loop over all q-values
 	for(int i=0; i<nbins; i++) {
-		double q, q_min, q_max;
+		// Find Weights
+		// Find q where the resolution smearing calculation of I(q) occurs
+		double q, q_min, q_max, q_0;
 		get_bin_range(i, &q, &q_min, &q_max);
-
-		// For each q-value, compute the weight of each other q-bin
-		// in the I(q) array
-		int npts_h = height>0 ? npts : 1;
-		int npts_w = width>0 ? npts : 1;
-
-		// If both height and width are great than zero,
-		// modify the number of points in each direction so
-		// that the total number of points is still what
-		// the user would expect (downgrade resolution)
-		// Never down-grade npts_h. That will give incorrect slit smearing...
-		if(npts_h>1 && npts_w>1){
-			npts_h = npts;//(int)ceil(sqrt((double)npts));
-			// In general width is much smaller than height, so smaller npt_w
-			// should work fine.
-			// Todo: It is still very expansive in time. Think about better way.
-			npts_w = (int)ceil(npts_h / 100);
+		bool last_qpoint = true;
+		// Find q[0] value to normalize the weight later,
+		//  otherwise, we will have a precision problem.
+		if (i == 0){
+			q_0 = q;
 		}
-
-		double shift_h, shift_w;
-		for(int k=0; k<npts_h; k++){
-			if(npts_h==1){
-				shift_h = 0;
-			} else {
-				shift_h = height/((double)npts_h-1.0) * (double)k;
+		// Loop over all qj-values
+		bool first_w = true;
+		for(int j=0; j<nbins; j++) {
+			double q_j, q_high, q_low;
+			// Calculate bin size of q_j
+			get_bin_range(j, &q_j, &q_low, &q_high);
+			// Check q_low that can not be negative.
+			if (q_low < 0.0){
+				q_low = 0.0;
 			}
-			for(int j=0; j<npts_w; j++){
-				if(npts_w==1){
-					shift_w = 0;
-				} else {
-					shift_w = width/((double)npts_w-1.0) * (double)j;
+			// default parameter values
+			(*weights)[i*nbins+j] = 0.0;
+			double shift_w = 0.0;
+			// Condition: zero slit smear.
+			if (npts_w == 1 && npts_h == 1){
+				if(q_j == q) {
+					(*weights)[i*nbins+j] = 1.0;
 				}
-				double q_shifted = sqrt( ((q-shift_w)*(q-shift_w) + shift_h*shift_h) );
+			}
+			//Condition:Smear weight integration for width >0 when the height (=0) does not present.
+			//Or height << width.
+			else if((npts_w!=1 && npts_h == 1)|| (npts_w!=1 && npts_h != 1 && width/height > 100.0)){
+				shift_w = width;
+				//del_w = width/((double)npts_w-1.0);
+				double q_shifted_low = q - shift_w;
+				// High limit of the resolution range
+				double q_shifted_high = q + shift_w;
+				// Go through all the q_js for weighting those points
+				if(q_j >= q_shifted_low && q_j <= q_shifted_high) {
+					// The weighting factor comes,
+					// Give some weight (delq_bin) for the q_j within the resolution range
+					// Weight should be same for all qs except
+					// for the q bin size at j.
+					// Note that the division by q_0 is only due to the precision problem
+					// where q_high - q_low gets to very small.
+					// Later, it will be normalized again.
+					(*weights)[i*nbins+j] += (q_high - q_low)/q_0 ;
+				}
+			}
+			else{
+				// Loop for width (;Height is analytical.)
+				// Condition: height >>> width, otherwise, below is not accurate enough.
+				// Smear weight numerical iteration for width >0 when the height (>0) presents.
+				// When width = 0, the numerical iteration will be skipped.
+				// The resolution calculation for the height is done by direct integration,
+				// assuming the I(q'=sqrt(q_j^2-(q+shift_w)^2)) is constant within a q' bin, [q_high, q_low].
+				// In general, this weight numerical iteration for width >0 might be a rough approximation,
+				// but it must be good enough when height >>> width.
+				for(int k=(-npts_w + 1); k<npts_w; k++){
+					if(npts_w!=1){
+						shift_w = width/((double)npts_w-1.0)*(double)k;
+					}
+					// For each q-value, compute the weight of each other q-bin
+					// in the I(q) array
+					// Low limit of the resolution range
+					double q_shift = q + shift_w;
+					if (q_shift < 0.0){
+						q_shift = 0.0;
+					}
+					double q_shifted_low = q_shift;
+					// High limit of the resolution range
+					double q_shifted_high = sqrt(q_shift * q_shift + shift_h * shift_h);
 
-				// Find in which bin this shifted value belongs
-				int q_i=nbins;
-				if (even_binning) {
-					// This is kept for backward compatibility since the binning
-					// was originally defined differently for even bins.
-					q_i = (int)(floor( (q_shifted-qmin) /((qmax-qmin)/((double)nbins -1.0)) ));
-				} else {
-					for(int t=0; t<nbins; t++) {
-						double q_t, q_high, q_low;
-						get_bin_range(t, &q_t, &q_low, &q_high);
-						if(q_shifted>=q_low && q_shifted<q_high) {
-							q_i = t;
-							break;
+
+					// Go through all the q_js for weighting those points
+					if(q_j >= q_shifted_low && q_j <= q_shifted_high) {
+						// The weighting factor comes,
+						// Give some weight (delq_bin) for the q_j within the resolution range
+						// Weight should be same for all qs except
+						// for the q bin size at j.
+						// Note that the division by q_0 is only due to the precision problem
+						// where q_high - q_low gets to very small.
+						// Later, it will be normalized again.
+
+						double q_shift_min = q - width;
+
+						double u = (q_j * q_j - (q_shift) * (q_shift));
+						// The fabs below are not necessary but in case: the weight should never be imaginary.
+						// At the edge of each sub_width. weight += u(at q_high bin) - u(0), where u(0) = 0,
+						// and weighted by (2.0* npts_w -1.0)once for each q.
+						if (q == q_j) {
+							if (k==0)
+								(*weights)[i*nbins+j] += (sqrt(fabs((q_high)*(q_high)-q_shift * q_shift)))/q_0 * (2.0*double(npts_w)-1.0);
+						}
+						// For the rest of sub_width. weight += u(at q_high bin) - u(at q_low bin)
+						else if (u > 0.0){
+							(*weights)[i*nbins+j] += (sqrt(fabs((q_high)*(q_high)- q_shift * q_shift))-sqrt(fabs((q_low)*(q_low)- q_shift * q_shift)))/q_0 ;
 						}
 					}
 				}
-
-				// Skip the entries outside our I(q) range
-				//TODO: be careful with edge effect
-				if(q_i<nbins)
-					(*weights)[i*nbins+q_i]++;
 			}
 		}
 	}
@@ -276,10 +346,10 @@ void BaseSmearer :: smear(double *iq_in, double *iq_out, int first_bin, int last
 		double counts = 0.0;
 
 		for(int i=first_bin; i<=last_bin; i++){
-			// Skip if weight is less than 1e-04(this value is much smaller than
+			// Skip if weight is less than 1e-03(this value is much smaller than
 			// the weight at the 3*sigma distance
 			// Will speed up a little bit...
-			if ((*weights)[q_i*nbins+i] < 1.0e-004){
+			if ((*weights)[q_i*nbins+i] < 1.0e-003){
 				continue;
 			}
 			sum += iq_in[i] * (*weights)[q_i*nbins+i];
@@ -287,6 +357,6 @@ void BaseSmearer :: smear(double *iq_in, double *iq_out, int first_bin, int last
 		}
 
 		// Normalize counts
-		iq_out[q_i] = (counts>0.0) ? sum/counts : 0;
+		iq_out[q_i] = (counts>0.0) ? sum/counts : 0.0;
 	}
 }
