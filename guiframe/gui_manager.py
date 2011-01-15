@@ -386,9 +386,10 @@ class ViewerFrame(wx.Frame):
         """
         for plugin in self.plugins:
             if len(plugin.populate_file_menu()) > 0:
-                id = wx.NewId()
+                
                 for item in plugin.populate_file_menu():
                     m_name, m_hint, m_handler = item
+                    id = wx.NewId()
                     self.filemenu.Append(id, m_name, m_hint)
                     wx.EVT_MENU(self, id, m_handler)
                 self.filemenu.AppendSeparator()
@@ -598,6 +599,7 @@ class ViewerFrame(wx.Frame):
         if self.defaultPanel is not None and \
             self._mgr.GetPane(self.panels["default"].window_name).IsShown():
             self.on_close_welcome_panel()
+        
             
     def _on_save(self, event):
         """
