@@ -18,8 +18,10 @@ class Plugin(PluginBase):
         hint_load_folder = "Read file(s) from a folder and load"
         hint_load_folder += " them into the application"
         hint_load_file = "Read files and load them into the application"
-        return [["Load File", hint_load_file, self._load_file],
-                ["Load Folder", hint_load_folder ,self._load_file]]
+        
+        return [["Load File", hint_load_file, self.parent._on_open],
+                 #["Load File", hint_load_file, self._load_file],
+                ["Load Folder", hint_load_folder ,self._load_folder]]
   
     def _load_file(self, event):
         """
@@ -29,3 +31,4 @@ class Plugin(PluginBase):
         """
         Load entire folder
         """
+        
