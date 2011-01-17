@@ -251,7 +251,7 @@ class InvariantState(object):
             we will append the data [optional]   
         """
         from xml.dom.minidom import getDOMImplementation
-        #import time
+        import time
         timestamp = time.time()
         # Check whether we have to write a standalone XML file
         if doc is None:
