@@ -156,8 +156,6 @@ class _BaseSmearer(object):
         """
         Perform smearing
         """
-        import time
-        st = time.time()
         # If this is the first time we call for smearing,
         # initialize the C++ smearer object first
         if not self._init_complete:
@@ -214,7 +212,7 @@ class _BaseSmearer(object):
         temp_first += self.nbins_low
         temp_last = self.nbins - self.nbins_high
         out = iq_out[temp_first: temp_last]
-        print "time =", time.time() - st
+
         return out
     
     def _initialize_smearer(self):
