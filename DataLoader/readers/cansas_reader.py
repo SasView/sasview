@@ -621,10 +621,16 @@ class Reader:
             if len(datainfo.y)>=i:
                 write_node(doc, pt, "I", datainfo.y[i],
                             {'unit':datainfo.y_unit})
-            if datainfo.dx !=None and len(datainfo.dx)>=i:
+            if datainfo.dx != None and len(datainfo.dx) >= i:
                 write_node(doc, pt, "Qdev", datainfo.dx[i],
                             {'unit':datainfo.x_unit})
-            if datainfo.dy !=None and len(datainfo.dy)>=i:
+            if datainfo.dxl != None and len(datainfo.dxl) >= i:
+                write_node(doc, pt, "dQl", datainfo.dxl[i],
+                            {'unit':datainfo.x_unit})    
+            if datainfo.dxw != None and len(datainfo.dxw) >= i:
+                write_node(doc, pt, "dQw", datainfo.dxw[i],
+                            {'unit':datainfo.x_unit})              
+            if datainfo.dy != None and len(datainfo.dy) >= i:
                 write_node(doc, pt, "Idev", datainfo.dy[i],
                             {'unit':datainfo.y_unit})
 
