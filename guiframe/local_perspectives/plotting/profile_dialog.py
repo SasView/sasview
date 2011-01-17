@@ -1,6 +1,6 @@
-
-
-
+"""
+SLD Profile Dialog for multifunctional models
+"""
 import wx
 import sys
 from copy import deepcopy
@@ -9,10 +9,12 @@ from Plotter1D import ModelPanel1D as PlotPanel
 from sans.guiframe.dataFitting import Theory1D
 import pylab
 
-DEFAULT_CMAP = pylab.cm.jet
+DEFAULT_CMAP = None#pylab.cm.jet
 _BOX_WIDTH = 76
 _STATICBOX_WIDTH = 400
-_SCALE = 1e-6
+# X Y offset on plot
+_X_OFF = 15
+_Y_OFF = 0.5
 
 #SLD panel size 
 if sys.platform.count("win32") > 0:
@@ -62,10 +64,17 @@ class SLDPanel(wx.Dialog):
             # plot
             data_plot = deepcopy(self.data)
             data_plot.dy = self._set_dy_data()
+            # unit increase to M times for users
+            data_plot.y = self._set_y_data()
+            
             self.newplot = Theory1D(data_plot.x, data_plot.y, data_plot.dy)
             self.newplot.name = 'SLD'
             self.plotpanel.add_image(self.newplot) 
-            self.Centre()
+            self.plotpanel.subplot.set_ylim(min(data_plot.y) - _Y_OFF , 
+                                                max(data_plot.y) + _Y_OFF)
+            self.plotpanel.subplot.set_xlim(min(data_plot.x) - _X_OFF, 
+                                                max(data_plot.x) + _X_OFF)
+            #self.Centre()
             self.Layout()
 
     def _set_dy_data(self): 
@@ -77,6 +86,17 @@ class SLDPanel(wx.Dialog):
         # set dy as zero
         dy = [0 for y in self.data.y]
         return dy      
+
+    def _set_y_data(self): 
+        """
+        make y data unit Mega times
+        
+        :return y_value: 
+        """
+        # changes the unit
+        y_value = [yvalue * 1e+006 for yvalue in self.data.y]
+        
+        return y_value     
     
     def _setup_layout(self):
         """
@@ -105,22 +125,7 @@ class SLDPanel(wx.Dialog):
         """
         self.Close(True)
 
-    def _draw_model(self, event):
-        """
-         on_close, update the model2d plot
-        """
-        pass
 
-    def get_context_menu(self, graph=None):
-        """
-        When the context menu of a plot is rendered, the 
-        get_context_menu method will be called to give you a 
-        chance to add a menu item to the context menu.
-        :param graph: the Graph object to which we attach the context menu
-        
-        :return: a list of menu items with call-back function
-        """
-        return []
     
 
 class SLDplotpanel(PlotPanel):
@@ -151,21 +156,21 @@ class SLDplotpanel(PlotPanel):
         """
         self.plots[plot.name] = plot
         #init graph
-        self.gaph = Graph()
+        #self.gaph = Graph()
         #add plot
         self.graph.add(plot)
         #add axes
         x1_label = self.axes_label[0]
         self.graph.xaxis('\\rm{%s} '% x1_label, 'A')
-        self.graph.yaxis('\\rm{SLD} ', 'A^{-2}')
+        self.graph.yaxis('\\rm{SLD} ', '10^{-6}A^{-2}')
         #draw
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
                 
         # For latter scale changes 
         self.plots[plot.name].xaxis('\\rm{%s} '% x1_label, 'A')
-        self.plots[plot.name].yaxis('\\rm{SLD} ', 'A^{-2}')
-
+        self.plots[plot.name].yaxis('\\rm{SLD} ', '10^{-6}A^{-2}')
+        
     def on_set_focus(self, event):
         """
         send to the parenet the current panel on focus
