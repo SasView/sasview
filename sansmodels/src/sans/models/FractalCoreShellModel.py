@@ -2,7 +2,8 @@
 from sans.models.BaseComponent import BaseComponent
 from sans.models.CoreShellModel import CoreShellModel
 from scipy.special import gammaln
-from math import exp, pow, sin, atan
+from math import exp, sin, atan
+from numpy import power
 from copy import deepcopy
 
 class FractalCoreShellModel(BaseComponent):
@@ -78,7 +79,7 @@ class FractalCoreShellModel(BaseComponent):
         r0 = self.params['radius']
         #calculate S(q)
         sq = Df*exp(gammaln(Df-1.0))*sin((Df-1.0)*atan(x*corr))
-        sq /= pow((x*r0),Df) * pow((1.0 + 1.0/(x*corr*x*corr)),((Df-1)/2))
+        sq /= power((x*r0),Df) * power((1.0 + 1.0/(x*corr*x*corr)),((Df-1)/2))
         sq += 1.0
         return sq
 

@@ -4,7 +4,7 @@ CorrLengthModel function as a BaseComponent model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from math import pow
+from numpy import power
 
 class CorrLengthModel(BaseComponent):
     """ 
@@ -56,7 +56,7 @@ class CorrLengthModel(BaseComponent):
         """
         inten = self.params['scale_p']/pow(x,self.params['exponent_p'])
         inten += self.params['scale_l']/(1.0 + \
-                pow((x*self.params['length_l']),self.params['exponent_l']))
+                power((x*self.params['length_l']),self.params['exponent_l']))
         inten += self.params['background']
 
         return inten  

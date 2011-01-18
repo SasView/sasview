@@ -4,7 +4,8 @@ BroadPeakModel function as a BaseComponent model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from math import pow, fabs
+from math import fabs
+from numpy import power
 
 class BroadPeakModel(BaseComponent):
     """ 
@@ -18,7 +19,7 @@ class BroadPeakModel(BaseComponent):
         
         # Initialize BaseComponent first, then sphere
         BaseComponent.__init__(self)
-        
+        self.counter = 0
         ## Name of the model
         self.name = "BroadPeak"
         self.description="""I(q) = scale_p/pow(q,exponent)+scale_l/
@@ -59,9 +60,11 @@ class BroadPeakModel(BaseComponent):
         """
         inten = self.params['scale_p']/pow(x,self.params['exponent_p'])
         inten += self.params['scale_l']/(1.0 + \
-                pow((fabs(x-self.params['q_peak'])*self.params['length_l']),self.params['exponent_l']))
-        inten += self.params['background']
+                power((fabs(x-self.params['q_peak'])*self.params['length_l']),\
+                    self.params['exponent_l']))
 
+        inten += self.params['background']
+        
         return inten  
    
     def run(self, x = 0.0):

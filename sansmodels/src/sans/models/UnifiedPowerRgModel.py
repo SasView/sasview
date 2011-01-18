@@ -1,6 +1,7 @@
    
 from sans.models.BaseComponent import BaseComponent
-from math import pow,exp, sqrt
+from math import exp, sqrt
+from numpy import power
 from scipy.special import erf
 max_level_n = 7
 class UnifiedPowerRgModel(BaseComponent):
@@ -73,14 +74,14 @@ class UnifiedPowerRgModel(BaseComponent):
         # rearrange the parameters for the given label no.
         for ind in range(1,l_num+1):
             # get exp term
-            exp_now = exp(-pow(x*self.params['Rg%s'% ind],2)/3.0)
+            exp_now = exp(-power(x*self.params['Rg%s'% ind],2)/3.0)
             # get erf term
             erf_now = erf(x*self.params['Rg%s'% ind]/sqrt(6.0))
             # get power term
-            pow_now = pow((erf_now*erf_now*erf_now/x),self.params['power%s'% ind])
+            pow_now = power((erf_now*erf_now*erf_now/x),self.params['power%s'% ind])
             # get next exp term only if it exists
             try:
-                exp_next = exp(-pow(x*self.params['Rg%s'% (ind+1)],2)/3.0)
+                exp_next = exp(-power(x*self.params['Rg%s'% (ind+1)],2)/3.0)
             except:
                 exp_next = 1.0
             # get to the calculation

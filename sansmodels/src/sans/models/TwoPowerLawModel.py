@@ -6,7 +6,7 @@ TwoPowerLaw function as a BaseComponent model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from math import pow
+from numpy import power
 
 class TwoPowerLawModel(BaseComponent):
     """ 
@@ -64,11 +64,11 @@ class TwoPowerLawModel(BaseComponent):
         """
         qc= self.params['qc']
         if(x<=qc):
-            inten = self.params['coef_A']*pow(x,-1.0*self.params['power1'])
+            inten = self.params['coef_A']*power(x,-1.0*self.params['power1'])
         else:
-            scale = self.params['coef_A']*pow(qc,-1.0*self.params['power1']) \
-                                    / pow(qc,-1.0*self.params['power2'])
-            inten = scale*pow(x,-1.0*self.params['power2'])
+            scale = self.params['coef_A']*power(qc,-1.0*self.params['power1']) \
+                                    / power(qc,-1.0*self.params['power2'])
+            inten = scale*power(x,-1.0*self.params['power2'])
         inten += self.params['background']
 
         return inten  

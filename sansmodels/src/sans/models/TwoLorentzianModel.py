@@ -4,7 +4,7 @@ TwoLorentzianModel function as a BaseComponent model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from math import pow
+from numpy import power
 
 class TwoLorentzianModel(BaseComponent):
     """ 
@@ -58,9 +58,9 @@ class TwoLorentzianModel(BaseComponent):
         Model definition
         """
         inten = self.params['scale_1']/(1.0 + \
-                pow((x*self.params['length_1']),self.params['exponent_1']))
+                power((x*self.params['length_1']),self.params['exponent_1']))
         inten += self.params['scale_2']/(1.0 + \
-                pow((x*self.params['length_2']),self.params['exponent_2']))
+                power((x*self.params['length_2']),self.params['exponent_2']))
         inten += self.params['background']
 
         return inten  
