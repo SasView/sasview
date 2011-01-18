@@ -16,7 +16,8 @@ class TestCylinder(unittest.TestCase):
         self.model.setParam('scale', 1.0)
         self.model.setParam('radius', 20.0)
         self.model.setParam('length', 400.0)
-        self.model.setParam('contrast', 3.e-6)
+        self.model.setParam('sldCyl', 4.e-6)
+        self.model.setParam('sldSolv', 1.e-6)
         self.model.setParam('background', 0.0)
         self.model.setParam('cyl_theta', 0.0)
         self.model.setParam('cyl_phi', 0.0)
@@ -32,6 +33,7 @@ class TestCylinder(unittest.TestCase):
         self.model.set_dispersion('radius', disp)
         self.model.dispersion['radius']['width'] = 5.0
         self.model.dispersion['radius']['npts'] = 100
+        self.model.dispersion['radius']['nsigmas'] = 2.5
         print "constant",self.model.run(0.001), self.model.dispersion
         self.assertAlmostEqual(self.model.run(0.001), 1.021051*4527.47250339, 3)
         self.assertAlmostEqual(self.model.runXY([0.001, 0.001]), 1.021048*4546.997777604715, 2)
@@ -42,6 +44,7 @@ class TestCylinder(unittest.TestCase):
         self.model.set_dispersion('radius', disp)
         self.model.dispersion['radius']['width'] = 5.0
         self.model.dispersion['radius']['npts'] = 100
+        self.model.dispersion['radius']['nsigmas'] = 2.5
         self.model.setParam('scale', 10.0)
         
         self.assertAlmostEqual(self.model.run(0.001), 1.1804794*4723.32213339, 3)
@@ -53,6 +56,7 @@ class TestCylinder(unittest.TestCase):
         self.model.set_dispersion('radius', disp)
         self.model.dispersion['radius']['width'] = 5.0
         self.model.dispersion['radius']['npts'] = 100
+        self.model.dispersion['radius']['nsigmas'] = 2.5
         self.model.setParam('scale', 10.0)
         
         new_model = self.model.clone()
@@ -67,6 +71,7 @@ class TestCylinder(unittest.TestCase):
         self.model.dispersion['radius']['width'] = 5.0
         #self.model.dispersion['radius']['width'] = 0.0
         self.model.dispersion['radius']['npts'] = 100
+        self.model.dispersion['radius']['nsigmas'] = 2.5
         #self.model.setParam('scale', 1.0)
         self.model.setParam('scale', 10.0)
         print "schulz",self.model.run(0.001), self.model.dispersion
@@ -80,6 +85,7 @@ class TestCylinder(unittest.TestCase):
         self.model.dispersion['radius']['width'] = 5.0
         #self.model.dispersion['radius']['width'] = 0.0
         self.model.dispersion['radius']['npts'] = 100
+        self.model.dispersion['radius']['nsigmas'] = 2.5
         #self.model.setParam('scale', 1.0)
         self.model.setParam('scale', 10.0)
         print "model dispersion",self.model.dispersion
@@ -93,6 +99,7 @@ class TestCylinder(unittest.TestCase):
         self.model.set_dispersion('radius', disp)
         self.model.dispersion['radius']['width'] = 0.0
         self.model.dispersion['radius']['npts'] = 100
+        self.model.dispersion['radius']['nsigmas'] = 2.5
         self.model.setParam('scale', 1.0)
         
         self.assertAlmostEqual(self.model.run(0.001), 450.355, 3)
@@ -111,8 +118,8 @@ class TestCylinder(unittest.TestCase):
         values_th = numpy.zeros(100)
         weights   = numpy.zeros(100)
         for i in range(100):
-            values_ph[i]=(2.0*math.pi/99.0*i)
-            values_th[i]=(math.pi/99.0*i)
+            values_ph[i]=(360/99.0*i)
+            values_th[i]=(180/99.0*i)
             weights[i]=(1.0)
         
         disp_ph.set_weights(values_ph, weights)
