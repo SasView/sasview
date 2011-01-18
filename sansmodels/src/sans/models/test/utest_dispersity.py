@@ -16,7 +16,8 @@ class TestCylinder(unittest.TestCase):
         self.model.setParam('scale', 1.0)
         self.model.setParam('radius', 20.0)
         self.model.setParam('length', 400.0)
-        self.model.setParam('contrast', 3.e-6)
+        self.model.setParam('sldCyl', 4.e-6)
+        self.model.setParam('sldSolv', 1.e-6)
         self.model.setParam('background', 0.0)
         self.model.setParam('cyl_theta', 0.0)
         self.model.setParam('cyl_phi', 0.0)
@@ -32,6 +33,7 @@ class TestCylinder(unittest.TestCase):
         self.model.set_dispersion('radius', disp)
         self.model.dispersion['radius']['width'] = 5.0
         self.model.dispersion['radius']['npts'] = 100
+        self.model.dispersion['radius']['nsigmas'] = 2.5
         
         self.assertAlmostEqual(self.model.run(0.001), 1.021051*4527.47250339, 3)
         self.assertAlmostEqual(self.model.runXY([0.001, 0.001]), 1.021048*4546.997777604715, 2)
@@ -42,6 +44,7 @@ class TestCylinder(unittest.TestCase):
         self.model.set_dispersion('radius', disp)
         self.model.dispersion['radius']['width'] = 5.0
         self.model.dispersion['radius']['npts'] = 100
+        self.model.dispersion['radius']['nsigmas'] = 2.5
         self.model.setParam('scale', 10.0)
         
         self.assertAlmostEqual(self.model.run(0.001), 1.1804794*4723.32213339, 3)
@@ -53,6 +56,7 @@ class TestCylinder(unittest.TestCase):
         self.model.set_dispersion('radius', disp)
         self.model.dispersion['radius']['width'] = 5.0
         self.model.dispersion['radius']['npts'] = 100
+        self.model.dispersion['radius']['nsigmas'] = 2.5
         self.model.setParam('scale', 10.0)
         
         new_model = self.model.clone()
@@ -65,6 +69,7 @@ class TestCylinder(unittest.TestCase):
         self.model.set_dispersion('radius', disp)
         self.model.dispersion['radius']['width'] = 0.0
         self.model.dispersion['radius']['npts'] = 100
+        self.model.dispersion['radius']['nsigmas'] = 2.5
         self.model.setParam('scale', 1.0)
         
         self.assertAlmostEqual(self.model.run(0.001), 450.355, 3)
@@ -83,8 +88,8 @@ class TestCylinder(unittest.TestCase):
         values_th = numpy.zeros(100)
         weights   = numpy.zeros(100)
         for i in range(100):
-            values_ph[i]=(2.0*math.pi/99.0*i)
-            values_th[i]=(math.pi/99.0*i)
+            values_ph[i]=(360/99.0*i)
+            values_th[i]=(180/99.0*i)
             weights[i]=(1.0)
         
         disp_ph.set_weights(values_ph, weights)
@@ -142,16 +147,19 @@ class TestCoreShellCylinder(unittest.TestCase):
         self.model.set_dispersion('radius', disp_rm)
         self.model.dispersion['radius']['width'] = 5.0
         self.model.dispersion['radius']['npts'] = 10
+        self.model.dispersion['radius']['nsigmas'] = 2.5
 
         disp_rr = GaussianDispersion()
         self.model.set_dispersion('thickness', disp_rr)
         self.model.dispersion['thickness']['width'] = 2.
         self.model.dispersion['thickness']['npts'] = 10
+        self.model.dispersion['thickness']['nsigmas'] = 2.5
 
         disp_len = GaussianDispersion()
         self.model.set_dispersion('length', disp_len)
         self.model.dispersion['length']['width'] = 50.0
         self.model.dispersion['length']['npts'] = 10
+        self.model.dispersion['length']['nsigmas'] = 2.5
 
         self.assertAlmostEqual(self.model.run(0.001), 1.07832610*358.44062724936009, 3)
         self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 1.07844010*360.22673635224584, 3)
@@ -170,8 +178,8 @@ class TestCoreShellCylinder(unittest.TestCase):
         values_th = numpy.zeros(100)
         weights   = numpy.zeros(100)
         for i in range(100):
-            values_ph[i]=(2.0*math.pi/99.0*i)
-            values_th[i]=(math.pi/99.0*i)
+            values_ph[i]=(360/99.0*i)
+            values_th[i]=(180/99.0*i)
             weights[i]=(1.0)
         
         disp_ph.set_weights(values_ph, weights)
@@ -227,12 +235,13 @@ class TestCoreShell(unittest.TestCase):
         self.model.set_dispersion('radius', disp_rm)
         self.model.dispersion['radius']['width'] = 10.
         self.model.dispersion['radius']['npts'] = 10
+        self.model.dispersion['radius']['nsigmas'] = 2.5
 
         disp_rr = GaussianDispersion()
         self.model.set_dispersion('thickness', disp_rr)
         self.model.dispersion['thickness']['width'] = 2.
         self.model.dispersion['thickness']['npts'] = 10
-
+        self.model.dispersion['thickness']['nsigmas'] = 2.5
 
         self.assertAlmostEqual(self.model.run(0.001), 1.16747510*407.344127907553, 3)
 
@@ -248,9 +257,10 @@ class TestEllipsoid(unittest.TestCase):
         self.model.setParam('scale', 1.0)
         self.model.setParam('radius_a', 20.0)
         self.model.setParam('radius_b', 400.0)
-        self.model.setParam('contrast', 3.e-6)
+        self.model.setParam('sldEll', 4.e-6)
+        self.model.setParam('sldSolv', 1.e-6)
         self.model.setParam('background', 0.0)
-        self.model.setParam('axis_theta', 1.57)
+        self.model.setParam('axis_theta', 89.95445)
         self.model.setParam('axis_phi', 0.0)
         
     def test_simple(self):
@@ -269,6 +279,7 @@ class TestEllipsoid(unittest.TestCase):
         from sans.models.DisperseModel import DisperseModel
         disp = DisperseModel(self.model, ['radius_a', 'radius_b'], [5, 50])
         disp.setParam('n_pts', 10)
+
         self.assertAlmostEqual(disp.run(0.001), 11948.72581312305, 3)
         self.assertAlmostEqual(disp.runXY([0.001,0.001]), 11811.972359807551, 3)
         
@@ -278,12 +289,13 @@ class TestEllipsoid(unittest.TestCase):
         self.model.set_dispersion('radius_a', disp_rm)
         self.model.dispersion['radius_a']['width'] = 5.0
         self.model.dispersion['radius_a']['npts'] = 10
+        self.model.dispersion['radius_a']['nsigmas'] = 2.5
 
         disp_rr = GaussianDispersion()
         self.model.set_dispersion('radius_b', disp_rr)
         self.model.dispersion['radius_b']['width'] = 50.
         self.model.dispersion['radius_b']['npts'] = 10
-
+        self.model.dispersion['radius_b']['nsigmas'] = 2.5
 
         self.assertAlmostEqual(self.model.run(0.001), 1.10650710*11948.72581312305, 3)
         self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 1.105898*11811.972359807551, 2)
@@ -301,8 +313,8 @@ class TestEllipsoid(unittest.TestCase):
         values_th = numpy.zeros(100)
         weights   = numpy.zeros(100)
         for i in range(100):
-            values_ph[i]=(2.0*math.pi/99.0*i)
-            values_th[i]=(math.pi/99.0*i)
+            values_ph[i]=(360/99.0*i)
+            values_th[i]=(180/99.0*i)
             weights[i]=(1.0)
         
         disp_ph.set_weights(values_ph, weights)
@@ -328,7 +340,8 @@ class TestSphere(unittest.TestCase):
         
         self.model.setParam('scale', 1.0)
         self.model.setParam('radius', 60.0)
-        self.model.setParam('contrast', 1)
+        self.model.setParam('sldSph', 2.0e-06)
+        self.model.setParam('sldSolv', 1.0e-6)
         self.model.setParam('background', 0.0)
         
     def test_simple(self):
@@ -355,6 +368,7 @@ class TestSphere(unittest.TestCase):
         self.model.set_dispersion('radius', disp_rm)
         self.model.dispersion['radius']['width'] = 10.0
         self.model.dispersion['radius']['npts'] = 10
+        self.model.dispersion['radius']['nsigmas'] = 2.5
 
         self.assertAlmostEqual(self.model.run(0.001), 1.19864810*96795008379475.25,3)
         
@@ -372,9 +386,10 @@ class TestEllipticalCylinder(unittest.TestCase):
         self.model.setParam('r_minor', 20.0)
         self.model.setParam('r_ratio', 1.5)
         self.model.setParam('length', 400.0)
-        self.model.setParam('contrast', 3.e-6)
+        self.model.setParam('sldCyl', 4.0e-6)
+        self.model.setParam('sldSolv', 1.0e-6)
         self.model.setParam('background', 0.0)
-        self.model.setParam('cyl_theta', 1.57)
+        self.model.setParam('cyl_theta', 90)
         self.model.setParam('cyl_phi', 0.0)
         self.model.setParam('cyl_psi', 0.0)
         
@@ -385,7 +400,7 @@ class TestEllipticalCylinder(unittest.TestCase):
             the update to C++ underlying class.
         """
         self.assertAlmostEqual(self.model.run(0.001), 675.50440232504991, 3)
-        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 669.5173937622792, 3)
+        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 669.5173937622792, 0)
         
     def test_dispersion(self):
         """
@@ -395,7 +410,7 @@ class TestEllipticalCylinder(unittest.TestCase):
         disp = DisperseModel(self.model, ['r_minor', 'r_ratio', 'length'], [5, 0.25, 50])
         disp.setParam('n_pts', 10)
         self.assertAlmostEqual(disp.run(0.001), 711.18048194151925, 3)
-        self.assertAlmostEqual(disp.runXY([0.001,0.001]), 704.63525988095705, 3)
+        self.assertAlmostEqual(disp.runXY([0.001,0.001]), 704.63525988095705, 0)
 
     def test_new_disp(self):
         from sans.models.dispersion_models import GaussianDispersion
@@ -403,19 +418,22 @@ class TestEllipticalCylinder(unittest.TestCase):
         self.model.set_dispersion('r_minor', disp_rm)
         self.model.dispersion['r_minor']['width'] = 5.0
         self.model.dispersion['r_minor']['npts'] = 10
+        self.model.dispersion['r_minor']['nsigmas'] = 2.5
 
         disp_rr = GaussianDispersion()
         self.model.set_dispersion('r_ratio', disp_rr)
         self.model.dispersion['r_ratio']['width'] = 0.25
         self.model.dispersion['r_ratio']['npts'] = 10
+        self.model.dispersion['r_ratio']['nsigmas'] = 2.5
 
         disp_len = GaussianDispersion()
         self.model.set_dispersion('length', disp_len)
         self.model.dispersion['length']['width'] = 50.0
         self.model.dispersion['length']['npts'] = 10
+        self.model.dispersion['length']['nsigmas'] = 2.5
 
         self.assertAlmostEqual(self.model.run(0.001), 1.23925910*711.18048194151925, 3)
-        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 1.238955*704.63525988095705, 3)
+        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 1.238955*704.63525988095705, 0)
         
 
     def test_array(self):
@@ -433,9 +451,9 @@ class TestEllipticalCylinder(unittest.TestCase):
         values_ps = numpy.zeros(100)
         weights   = numpy.zeros(100)
         for i in range(100):
-            values_ps[i]=(2.0*math.pi/99.0*i)
-            values_ph[i]=(2.0*math.pi/99.0*i)
-            values_th[i]=(math.pi/99.0*i)
+            values_ps[i]=(360/99.0*i)
+            values_ph[i]=(360/99.0*i)
+            values_th[i]=(180/99.0*i)
             weights[i]=(1.0)
         
         disp_ph.set_weights(values_ph, weights)
