@@ -59,8 +59,8 @@ class TestCyl(unittest.TestCase):
      
     def test2D(self):
         """ Test 2D model of a cylinder """ 
-        self.comp.setParam('cyl_theta', 1.0)
-        self.comp.setParam('cyl_phi', 1.0)
+        self.comp.setParam('cyl_theta', 1*180/math.pi)
+        self.comp.setParam('cyl_phi', 1*180/math.pi)
         self.assertAlmostEqual(self.comp.run([0.2, 2.5]), 
                                0.038176446608393366, 4)
        
