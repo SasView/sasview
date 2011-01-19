@@ -11,7 +11,7 @@
 ################################################################################
 
 
-import  re
+import re
 import sys
 import wx
 import logging
@@ -26,24 +26,24 @@ import models
 import fitpage
 
 from DataLoader.loader import Loader
-
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Theory1D
-
-from sans.guicomm.events import NewPlotEvent, StatusEvent  
-from sans.guicomm.events import EVT_SLICER_PANEL,ERR_DATA,EVT_REMOVE_DATA
-from sans.guicomm.events import EVT_SLICER_PARS_UPDATE
-from sans.guicomm.events import EVT_FITSTATE_UPDATE
+from sans.guiframe.events import NewPlotEvent, StatusEvent  
+from sans.guiframe.events import EVT_SLICER_PANEL
+from sans.guiframe.events import EVT_REMOVE_DATA
+from sans.guiframe.events import ERR_DATA
+from sans.guiframe.events import EVT_SLICER_PARS_UPDATE
+from sans.guiframe.events import EVT_FITSTATE_UPDATE
 
 from sans.fit.AbstractFitEngine import Model
 from sans.fit.AbstractFitEngine import FitAbort
-from console import ConsoleUpdate
-
-from fitproblem import FitProblem
-from fitpanel import FitPanel
-from fit_thread import FitThread
-from pagestate import Reader
+from .console import ConsoleUpdate
+from .fitproblem import FitProblem
+from .fitpanel import FitPanel
+from .fit_thread import FitThread
+from .pagestate import Reader
+from .fitpage import Chi2UpdateEvent
 
 DEFAULT_BEAM = 0.005
 DEFAULT_QMIN = 0.001
@@ -51,8 +51,6 @@ DEFAULT_QMAX = 0.13
 DEFAULT_NPTS = 50
 
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
-#(FitStateUpdateEvent, EVT_STATE_UPDATE)   = wx.lib.newevent.NewEvent()
-from fitpage import Chi2UpdateEvent
 
 
 class PlotInfo:
@@ -168,7 +166,7 @@ class Plugin(PluginBase):
         Create a page to access simultaneous fit option
         """
         Plugin.on_perspective(self,event=event)
-        if self.sim_page !=None:
+        if self.sim_page != None:
             msg= "Simultaneous Fit page already opened"
             wx.PostEvent(self.parent, StatusEvent(status= msg))
             return 
@@ -179,7 +177,6 @@ class Plugin(PluginBase):
         """
         Show a general help dialog. 
         """
-        
         from help_panel import  HelpWindow
         frame = HelpWindow(None, -1, 'HelpWindow')    
         frame.Show(True)
@@ -212,7 +209,8 @@ class Plugin(PluginBase):
                 return [[fit_option, fit_hint, self._onSelect]]
             else:
                 if item.name == graph.selected_plottable :
-                    if item.name in ["$I_{obs}(q)$","$I_{fit}(q)$","$P_{fit}(r)$"]:
+                    if item.name in ["$I_{obs}(q)$","$I_{fit}(q)$",
+                                     "$P_{fit}(r)$"]:
                         return [] 
                     if hasattr(item, "group_id"):
                         # if is_data is true , this in an actual data loaded
@@ -270,7 +268,17 @@ class Plugin(PluginBase):
         default perspective setting
         """
         return True
-  
+    
+    def set_data(self, data_list):
+        """
+        receive a list of data to fit
+        """
+        for data in data_list:
+            self.add_fit_page(data=data)
+            wx.PostEvent(self.parent, NewPlotEvent(plot=data, 
+                                                   title=str(data.title)))
+            
+            
     def set_state(self, state=None, datainfo=None, format=None):
         """
         Call-back method for the fit page state reader.
@@ -606,7 +614,8 @@ class Plugin(PluginBase):
             new_plot.yaxis(data._yaxis, data._yunit)
             new_plot.group_id = data.group_id
             new_plot.id = data.id + name
-            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=data.name))
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
+                                                   title=data.name))
         if theory:
             new_plot_data = Data1D(x=[], y=[], dx=None, dy=None)
             new_plot_data.name = data.name
@@ -699,7 +708,8 @@ class Plugin(PluginBase):
                                                info="info"))
             else:
                 msg = "Page was already Created"
-                wx.PostEvent(self.parent, StatusEvent(status=msg, info="warning"))
+                wx.PostEvent(self.parent, StatusEvent(status=msg,
+                                                       info="warning"))
         except:
             msg = "Creating Fit page: %s"%sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
@@ -727,7 +737,8 @@ class Plugin(PluginBase):
             return
        
         if hasattr(event.data,"is_data"):
-            if not event.data.is_data or event.data.__class__.__name__=="Data1D":
+            if not event.data.is_data or \
+                event.data.__class__.__name__=="Data1D":
                 self.fit_panel.close_page_with_data(event.data) 
         
     def _add_page_onmenu(self, name,fitproblem=None):
@@ -912,7 +923,9 @@ class Plugin(PluginBase):
                                     small_cov.append(p.stderr)
 
                     # Display result on each page 
-                    page.onsetValues(result.fitness, small_param_name,small_out,small_cov)
+                    page.onsetValues(result.fitness,
+                                      small_param_name,
+                                      small_out,small_cov)
         except:
              msg= "Simultaneous Fit completed"
              msg +=" but Following error occurred:%s"%sys.exc_value
@@ -997,13 +1010,14 @@ class Plugin(PluginBase):
         else:
             self.menu1.FindItemByPosition(0).Check(True)
             self.menu1.FindItemByPosition(1).Check(False)
-            
         ## post a message to status bar
-        wx.PostEvent(self.parent, StatusEvent(status="Engine set to: %s" % self._fit_engine))
-   
-        ## Bind every open fit page with a newevent to know the current fitting engine
-        import fitpage
-        event= fitpage.FitterTypeEvent()
+        msg = "Engine set to: %s" % self._fit_engine
+        wx.PostEvent(self.parent, 
+                     StatusEvent(status=msg))
+        ## Bind every open fit page with a newevent to 
+        #know the current fitting engine
+        #import fitpage
+        event = fitpage.FitterTypeEvent()
         event.type = self._fit_engine
         for key in self.page_finder.keys():
             wx.PostEvent(key, event)
@@ -1032,21 +1046,18 @@ class Plugin(PluginBase):
         ## make sure nothing is done on self.sim_page
         ## example trying to call set_panel on self.sim_page
         if self.current_pg != self.sim_page :
-            if self.page_finder[self.current_pg].get_model()== None:
-                
-                model.name = "M"+str(self.index_model)
+            if self.page_finder[self.current_pg].get_model() is None:
+                model.name = "M" + str(self.index_model)
                 self.index_model += 1  
             else:
                 model.name= self.page_finder[self.current_pg].get_model().name
-            
             data = self.page_finder[self.current_pg].get_fit_data()
-            
             # save the name containing the data name with the appropriate model
             self.page_finder[self.current_pg].set_model(model)
             qmin, qmax= self.current_pg.get_range()
             self.page_finder[self.current_pg].set_range(qmin=qmin, qmax=qmax)
            
-            if self.sim_page!=None:
+            if self.sim_page != None:
                 self.sim_page.draw_page()
         
     def _on_model_menu(self, evt):
@@ -1061,14 +1072,14 @@ class Plugin(PluginBase):
         # Create a model page. If a new page is created, the model
         # will be plotted automatically. If a page already exists,
         # the content will be updated and the plot refreshed
-        self.fit_panel.add_model_page(model,topmenu=True)
+        self.fit_panel.add_model_page(model, topmenu=True)
 
     def _update1D(self,x, output):
         """
         Update the output of plotting model 1D
         """
-        wx.PostEvent(self.parent, StatusEvent(status="Plot \
-        #updating ... ",type="update"))
+        msg = "Plot updating ... "
+        wx.PostEvent(self.parent, StatusEvent(status=msg,type="update"))
         self.ready_fit()
         #self.calc_thread.ready(0.01)
     
@@ -1100,20 +1111,21 @@ class Plugin(PluginBase):
         center_x      = theory.detector[0].beam_center.x/pixel_width_x
         center_y      = theory.detector[0].beam_center.y/pixel_width_y
 
-        # theory default: assume the beam center is located at the center of sqr detector
+        # theory default: assume the beam 
+        #center is located at the center of sqr detector
         xmax = qmax
         xmin = -qmax
         ymax = qmax
         ymin = -qmax
         
         x=  numpy.linspace(start= -1*qmax,
+                               stop=qmax,
+                               num=qstep,
+                               endpoint=True)  
+        y = numpy.linspace(start=-1*qmax,
                                stop= qmax,
                                num= qstep,
-                               endpoint=True )  
-        y = numpy.linspace(start= -1*qmax,
-                               stop= qmax,
-                               num= qstep,
-                               endpoint=True )
+                               endpoint=True)
          
         ## use data info instead
         new_x = numpy.tile(x, (len(y),1))
@@ -1128,7 +1140,8 @@ class Plugin(PluginBase):
         # set all True (standing for unmasked) as default
         mask    = numpy.ones(len(qx_data), dtype = bool)
         
-        # calculate the range of qx and qy: this way, it is a little more independent
+        # calculate the range of qx and qy: this way,
+        # it is a little more independent
         x_size = xmax- xmin
         y_size = ymax -ymin
         
@@ -1149,10 +1162,10 @@ class Plugin(PluginBase):
         theory.y_bins = y_bins   
         
         # max and min taking account of the bin sizes
-        theory.xmin= xmin 
-        theory.xmax= xmax
-        theory.ymin= ymin 
-        theory.ymax= ymax 
+        theory.xmin = xmin 
+        theory.xmax = xmax
+        theory.ymin = ymin 
+        theory.ymax = ymax 
         theory.group_id = "Model"
         theory.id = "Model"
         
@@ -1189,42 +1202,45 @@ class Plugin(PluginBase):
             new_plot.id = my_info.id
             new_plot.group_id = my_info.group_id
             
-            new_plot.xaxis( my_info._xaxis,  my_info._xunit)
-            new_plot.yaxis( my_info._yaxis, my_info._yunit)
-            if data!=None:
+            new_plot.xaxis(my_info._xaxis,  my_info._xunit)
+            new_plot.yaxis(my_info._yaxis, my_info._yunit)
+            if data != None:
                 if new_plot.id == data.id:
                     new_plot.id += "Model"
                 new_plot.is_data =False 
            
-            title= new_plot.name
+            title = new_plot.name
             # x, y are only in range of index 
             self.theory_data = new_plot
             #new_plot.perspective = self.get_perspective()
             # Pass the reset flag to let the plotting event handler
             # know that we are replacing the whole plot
-            if title== None:
+            if title is None:
                 title = "Analytical model 1D "
-            if data ==None:
+            if data is None:
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                              title=str(title), reset=True))
             else:
-                wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,title= str(title)))
+                wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
+                                                       title= str(title)))
             # Chisqr in fitpage
-            current_pg=self.fit_panel.get_current_page()
-            wx.PostEvent(current_pg,Chi2UpdateEvent(output=self._cal_chisqr(data=data,index=index)))
+            current_pg = self.fit_panel.get_current_page()
+            wx.PostEvent(current_pg,
+                         Chi2UpdateEvent(output=self._cal_chisqr(data=data,
+                                                                 index=index)))
             msg = "Plot 1D  complete !"
-            wx.PostEvent( self.parent, StatusEvent(status=msg , type="stop" ))
+            wx.PostEvent( self.parent, StatusEvent(status=msg, type="stop" ))
         except:
-            msg= " Error occurred when drawing %s Model 1D: "%new_plot.name
-            msg+= " %s"%sys.exc_value
-            wx.PostEvent( self.parent, StatusEvent(status= msg, type="stop"))
+            msg = " Error occurred when drawing %s Model 1D: " % new_plot.name
+            msg += " %s"  % sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
    
     def _update2D(self, output,time=None):
         """
         Update the output of plotting model
         """
         wx.PostEvent(self.parent, StatusEvent(status="Plot \
-        #updating ... ",type="update"))
+        #updating ... ", type="update"))
         self.ready_fit()
         #self.calc_thread.ready(0.01)
     
@@ -1236,42 +1252,44 @@ class Plugin(PluginBase):
         """
         err_image = numpy.zeros(numpy.shape(image))
        
-        theory= Data2D(image= image , err_image= err_image)
-        theory.name= model.name
+        theory= Data2D(image=image, err_image=err_image)
+        theory.name = model.name
         
-        if data ==None:
-            self._fill_default_model2D(theory=theory, qmax=qmax, qstep=qstep,
+        if data is None:
+            self._fill_default_model2D(theory=theory, 
+                                       qmax=qmax, 
+                                       qstep=qstep,
                                         qmin= qmin)
         
         else:
-            theory.id= data.id+"Model"
-            theory.group_id= data.name+"Model"
-            theory.x_bins= data.x_bins
-            theory.y_bins= data.y_bins
-            theory.detector= data.detector
-            theory.source= data.source
+            theory.id = data.id + "Model"
+            theory.group_id = data.name + "Model"
+            theory.x_bins = data.x_bins
+            theory.y_bins = data.y_bins
+            theory.detector = data.detector
+            theory.source = data.source
             theory.is_data = False 
             theory.qx_data = data.qx_data
             theory.qy_data = data.qy_data
             theory.q_data = data.q_data
-            theory.err_data = err_image#numpy.zeros(len(data.err_data))#data.err_data
+            #numpy.zeros(len(data.err_data))#data.err_data
+            theory.err_data = err_image
             theory.mask = data.mask
             ## plot boundaries
-            theory.ymin= data.ymin
-            theory.ymax= data.ymax
-            theory.xmin= data.xmin
-            theory.xmax= data.xmax
-            
+            theory.ymin = data.ymin
+            theory.ymax = data.ymax
+            theory.xmin = data.xmin
+            theory.xmax = data.xmax
         self.theory_data = theory
         ## plot
         wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
-                         title="Analytical model 2D ", reset=True ))
+                         title="Analytical model 2D ", reset=True))
         # Chisqr in fitpage
         current_pg = self.fit_panel.get_current_page()
         wx.PostEvent(current_pg,
-            Chi2UpdateEvent(output=self._cal_chisqr(data=data,index=index)))
+            Chi2UpdateEvent(output=self._cal_chisqr(data=data, index=index)))
         msg = "Plot 2D complete !"
-        wx.PostEvent( self.parent, StatusEvent(status=msg, type="stop" ))
+        wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
      
     def _on_data_error(self, event):
         """
@@ -1280,8 +1298,10 @@ class Plugin(PluginBase):
         """
         self.err_dy = event.err_dy
          
-    def _draw_model2D(self,model,data=None, smearer= None,description=None, enable2D=False,
-                      qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
+    def _draw_model2D(self, model, data=None, smearer=None,
+                      description=None, enable2D=False,
+                      qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX,
+                       qstep=DEFAULT_NPTS):
         """
         draw model in 2D
         
@@ -1293,45 +1313,45 @@ class Plugin(PluginBase):
         :param qstep: the number of division of Qx and Qy of the model to draw
             
         """
-        x=  numpy.linspace(start= -1*qmax,
-                               stop= qmax,
-                               num= qstep,
-                               endpoint=True )  
+        x=  numpy.linspace(start=-1*qmax,
+                               stop=qmax,
+                               num=qstep,
+                               endpoint=True)  
         y = numpy.linspace(start= -1*qmax,
-                               stop= qmax,
-                               num= qstep,
-                               endpoint=True )
+                               stop=qmax,
+                               num=qstep,
+                               endpoint=True)
         ## use data info instead
-        if data !=None:
+        if data is not None:
             ## check if data2D to plot
             if hasattr(data, "x_bins"):
                 enable2D = True
-                x= data.x_bins
-                y= data.y_bins
+                x = data.x_bins
+                y = data.y_bins
                
         if not enable2D:
-            return None,None
+            return None, None
         try:
             from model_thread import Calc2D
             ## If a thread is already started, stop it
-            if self.calc_2D != None and self.calc_2D.isrunning():
+            if (self.calc_2D is not None) and self.calc_2D.isrunning():
                 self.calc_2D.stop()
 
-            self.calc_2D = Calc2D(  x= x,
-                                    y= y,
-                                    model= model, 
-                                    data = data,
-                                    smearer = smearer,
-                                    qmin= qmin,
-                                    qmax= qmax,
-                                    qstep= qstep,
-                                    completefn= self._complete2D,
-                                    updatefn= self._update2D )
+            self.calc_2D = Calc2D(x=x,
+                                    y=y,
+                                    model=model, 
+                                    data=data,
+                                    smearer=smearer,
+                                    qmin=qmin,
+                                    qmax=qmax,
+                                    qstep=qstep,
+                                    completefn=self._complete2D,
+                                    updatefn=self._update2D)
             self.calc_2D.queue()
 
         except:
-            msg= " Error occurred when drawing %s Model 2D: " % model.name
-            msg+= " %s" % sys.exc_value
+            msg = " Error occurred when drawing %s Model 2D: " % model.name
+            msg += " %s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg))
 
     def _draw_model1D(self, model, data=None, smearer=None,
@@ -1344,12 +1364,12 @@ class Plugin(PluginBase):
         :param model: the model to plot
         
         """
-        x=  numpy.linspace(start= qmin,
-                           stop= qmax,
-                           num= qstep,
+        x=  numpy.linspace(start=qmin,
+                           stop=qmax,
+                           num=qstep,
                            endpoint=True
                            )
-        if data!=None:
+        if data is not None:
             ## check for data2D
             if hasattr(data,"x_bins"):
                 return
@@ -1358,30 +1378,27 @@ class Plugin(PluginBase):
                 qmin = min(data.x)
             if qmax == DEFAULT_QMAX:
                 qmax = max(data.x) 
-           
-        
         if not enable1D:
             return 
-    
         try:
             from model_thread import Calc1D
             ## If a thread is already started, stop it
-            if self.calc_1D!= None and self.calc_1D.isrunning():
+            if (self.calc_1D is not None) and self.calc_1D.isrunning():
                 self.calc_1D.stop()
-            self.calc_1D= Calc1D( x= x,
-                                  data = data,
-                                  model= model, 
-                                  qmin = qmin,
-                                  qmax = qmax,
-                                  smearer = smearer,
-                                  completefn = self._complete1D,
-                                  updatefn = self._update1D  )
+            self.calc_1D = Calc1D(x=x,
+                                  data=data,
+                                  model=model, 
+                                  qmin=qmin,
+                                  qmax=qmax,
+                                  smearer=smearer,
+                                  completefn=self._complete1D,
+                                  updatefn=self._update1D)
             self.calc_1D.queue()
 
         except:
-            msg= " Error occurred when drawing %s Model 1D: "%model.name
-            msg+= " %s"%sys.exc_value
-            wx.PostEvent( self.parent, StatusEvent(status= msg ))
+            msg = " Error occurred when drawing %s Model 1D: " % model.name
+            msg += " %s" % sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg))
 
     def _cal_chisqr(self, data=None, index=None): 
         """
@@ -1396,29 +1413,32 @@ class Plugin(PluginBase):
         
         # Get data: data I, theory I, and data dI in order
         if data.__class__.__name__ =="Data2D":
-            if index == None: index = numpy.ones(len(data.data),ntype=bool)
-            index = index & (data.err_data !=0 )   # get rid of zero error points
+            if index == None: 
+                index = numpy.ones(len(data.data),ntype=bool)
+            # get rid of zero error points
+            index = index & (data.err_data != 0)  
             fn = data.data[index] 
             gn = self.theory_data.data[index]
             en = data.err_data[index]
         else:
             # 1 d theory from model_thread is only in the range of index
-            if index == None: index = numpy.ones(len(data.y),ntype=bool)
-            if data.dy== None or data.dy ==[]:
+            if index == None:
+                index = numpy.ones(len(data.y), ntype=bool)
+            if data.dy == None or data.dy == []:
                 dy = numpy.ones(len(data.y))
             else:
-                ## Set consitently w/AbstractFitengine: But this should be corrected later.
+                ## Set consitently w/AbstractFitengine:
+                # But this should be corrected later.
                 dy = data.dy
                 dy[dy==0] = 1  
             fn = data.y[index] 
             gn = self.theory_data.y
             en = dy[index]
-
         # residual
         res = (fn - gn)/en
         # get chisqr only w/finite
-        chisqr = numpy.average(res[numpy.isfinite(res)]*res[numpy.isfinite(res)])
-
+        val = res[numpy.isfinite(res)]*res[numpy.isfinite(res)]
+        chisqr = numpy.average(val)
         return chisqr
     
     
