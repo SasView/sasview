@@ -16,10 +16,10 @@ import sys
 import wx
 import logging
 import numpy
-import math
+#import math
 import string
 import time
-import thread
+#import thread
 from copy import deepcopy
 
 import models
@@ -36,8 +36,8 @@ from sans.guiframe.events import ERR_DATA
 from sans.guiframe.events import EVT_SLICER_PARS_UPDATE
 from sans.guiframe.events import EVT_FITSTATE_UPDATE
 
-from sans.fit.AbstractFitEngine import Model
-from sans.fit.AbstractFitEngine import FitAbort
+#from sans.fit.AbstractFitEngine import Model
+#from sans.fit.AbstractFitEngine import FitAbort
 from .console import ConsoleUpdate
 from .fitproblem import FitProblem
 from .fitpanel import FitPanel
