@@ -811,12 +811,12 @@ class _Sector:
             
             # The type of averaging: phi,q2, or q
             # Calculate x[i]should be at the center of the bin
-            if run.lower() == 'phi': 
-                temp = self.nbins * (1.0 * i + 0.5) + self.phi_min              
-                x[i] = (self.phi_max - self.phi_min) / temp
+            if run.lower()=='phi':               
+                x[i] = (self.phi_max - self.phi_min) / self.nbins * \
+                    (1.0 * i + 0.5) + self.phi_min
             else:
-                temp = self.nbins * (1.0 * i + 0.5) + self.r_min
-                x[i] = (self.r_max - self.r_min) / temp
+                x[i] = (self.r_max - self.r_min) / self.nbins * \
+                    (1.0 * i + 0.5) + self.r_min
                 
         idx = (numpy.isfinite(y) & numpy.isfinite(y_err))
         
