@@ -67,7 +67,7 @@ public:
 class GaussianDispersion: public DispersionModel {
 public:
 	/// Number of sigmas on each side of the mean
-	int nsigmas;
+	double nsigmas;
 
 	GaussianDispersion();
 	void operator()(void *, vector<WeightPoint>&);
@@ -81,7 +81,7 @@ public:
 class SchulzDispersion: public DispersionModel {
 public:
 	/// Number of sigmas on each side of the mean
-	int nsigmas;
+	double nsigmas;
 
 	SchulzDispersion();
 	void operator()(void *, vector<WeightPoint>&);
@@ -95,7 +95,7 @@ public:
 class LogNormalDispersion: public DispersionModel {
 public:
 	/// Number of sigmas on each side of the mean
-	int nsigmas;
+	double nsigmas;
 
 	LogNormalDispersion();
 	void operator()(void *, vector<WeightPoint>&);

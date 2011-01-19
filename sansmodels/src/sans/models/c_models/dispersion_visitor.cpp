@@ -26,7 +26,7 @@ void DispersionVisitor:: gaussian_to_dict(void* dispersion, void* dictionary) {
 	PyDict_SetItemString(dict, "type",  Py_BuildValue("s", "gaussian"));
     PyDict_SetItemString(dict, "npts",  Py_BuildValue("i", disp->npts));
     PyDict_SetItemString(dict, "width", Py_BuildValue("d", disp->width));
-    PyDict_SetItemString(dict, "nsigmas", Py_BuildValue("i", disp->nsigmas));
+    PyDict_SetItemString(dict, "nsigmas", Py_BuildValue("d", disp->nsigmas));
 #endif
 }
 
@@ -38,7 +38,7 @@ void DispersionVisitor:: lognormal_to_dict(void* dispersion, void* dictionary) {
 	PyDict_SetItemString(dict, "type",  Py_BuildValue("s", "lognormal"));
     PyDict_SetItemString(dict, "npts",  Py_BuildValue("i", disp->npts));
     PyDict_SetItemString(dict, "width", Py_BuildValue("d", disp->width));
-    PyDict_SetItemString(dict, "nsigmas", Py_BuildValue("i", disp->nsigmas));
+    PyDict_SetItemString(dict, "nsigmas", Py_BuildValue("d", disp->nsigmas));
 #endif
 }
 
@@ -51,7 +51,7 @@ void DispersionVisitor:: schulz_to_dict(void* dispersion, void* dictionary) {
 	PyDict_SetItemString(dict, "type",  Py_BuildValue("s", "schulz"));
     PyDict_SetItemString(dict, "npts",  Py_BuildValue("i", disp->npts));
     PyDict_SetItemString(dict, "width", Py_BuildValue("d", disp->width));
-    PyDict_SetItemString(dict, "nsigmas", Py_BuildValue("i", disp->nsigmas));
+    PyDict_SetItemString(dict, "nsigmas", Py_BuildValue("d", disp->nsigmas));
 #endif
 }
 

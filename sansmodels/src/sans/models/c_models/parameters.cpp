@@ -62,7 +62,7 @@ void DispersionModel :: operator() (void *param, vector<WeightPoint> &weights){
 		weights.insert(weights.end(), WeightPoint(value, 1.0));
 	} else {
 		for(int i=0; i<npts; i++) {
-			double val = value + width * (1.0*i/float(npts-1) - 0.5);
+			double val = value + width * (1.0*double(i)/double(npts-1) - 0.5);
 
 			if ( ((*par).has_min==false || val>(*par).min)
 			  && ((*par).has_max==false || val<(*par).max)  )
@@ -84,7 +84,7 @@ void DispersionModel :: set_weights(int npoints, double* values, double* weights
 GaussianDispersion :: GaussianDispersion() {
 	npts  = 21;
 	width = 0.0;
-	nsigmas = 3;
+	nsigmas = 3.0;
 };
 
 void GaussianDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -114,7 +114,7 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
 	if (width<=0) {
 		width = 0.0;
 		npts  = 1;
-		nsigmas = 3;
+		nsigmas = 3.0;
 	}
 
 	Parameter* par = (Parameter*)param;
@@ -125,8 +125,7 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
 	} else {
 		for(int i=0; i<npts; i++) {
 			// We cover n(nsigmas) times sigmas on each side of the mean
-			double val = value + width * (2.0*nsigmas*i/float(npts-1) - nsigmas);
-
+			double val = value + width * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
 			if ( ((*par).has_min==false || val>(*par).min)
 			  && ((*par).has_max==false || val<(*par).max)  ) {
 				double _w = gaussian_weight(value, width, val);
@@ -144,7 +143,7 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
 LogNormalDispersion :: LogNormalDispersion() {
 	npts  = 21;
 	width = 0.0;
-	nsigmas = 3;
+	nsigmas = 3.0;
 };
 
 void LogNormalDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -156,8 +155,8 @@ void LogNormalDispersion :: accept_as_destination(DispersionVisitor* visitor, vo
 
 double lognormal_weight(double mean, double sigma, double x) {
 
-	double sigma2 = pow(sigma, 2);
-	return 1/(x*sigma2) * exp( -pow((log(x) -mean), 2) / (2*sigma2));
+	double sigma2 = pow(sigma, 2.0);
+	return 1.0/(x*sigma2) * exp( -pow((log(x) -mean), 2.0) / (2.0*sigma2));
 
 }
 
@@ -173,7 +172,7 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
 	if (width<=0) {
 		width = 0.0;
 		npts  = 1;
-		nsigmas = 3;
+		nsigmas = 3.0;
 	}
 
 	Parameter* par = (Parameter*)param;
@@ -184,7 +183,7 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
 	} else {
 		for(int i=0; i<npts; i++) {
 			// We cover n(nsigmas) times sigmas on each side of the mean
-			double val = value + width * (2.0*nsigmas*i/float(npts-1) - nsigmas);
+			double val = value + width * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
 
 			if ( ((*par).has_min==false || val>(*par).min)
 			  && ((*par).has_max==false || val<(*par).max)  ) {
@@ -204,7 +203,7 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
 SchulzDispersion :: SchulzDispersion() {
 	npts  = 21;
 	width = 0.0;
-	nsigmas = 3;
+	nsigmas = 3.0;
 };
 
 void SchulzDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -216,9 +215,9 @@ void SchulzDispersion :: accept_as_destination(DispersionVisitor* visitor, void*
 
 double schulz_weight(double mean, double sigma, double x) {
 	double vary, expo_value;
-    double z = pow(mean/ sigma, 2)-1;
+    double z = pow(mean/ sigma, 2.0)-1.0;
 	double R= x/mean;
-	double zz= z+1;
+	double zz= z+1.0;
 	double expo;
 	expo = zz*log(zz)+z*log(R)-R*zz-log(mean)-lgamma(zz);
 	return  exp(expo);
@@ -236,7 +235,7 @@ void SchulzDispersion :: operator() (void *param, vector<WeightPoint> &weights){
 	if (width<=0) {
 		width = 0.0;
 		npts  = 1;
-		nsigmas = 3;
+		nsigmas = 3.0;
 	}
 
 	Parameter* par = (Parameter*)param;
@@ -247,7 +246,7 @@ void SchulzDispersion :: operator() (void *param, vector<WeightPoint> &weights){
 	} else {
 		for(int i=0; i<npts; i++) {
 			// We cover n(nsigmas) times sigmas on each side of the mean
-			double val = value + width * (2.0*nsigmas*i/float(npts-1) - nsigmas);
+			double val = value + width * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
 
 			if ( ((*par).has_min==false || val>(*par).min)
 			  && ((*par).has_max==false || val<(*par).max)  ) {
