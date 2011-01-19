@@ -786,7 +786,7 @@ class _Sector:
                 i_bin = int(math.floor(temp_x / temp_y))
             else:
                 temp_x = (self.nbins) * (q_value - self.r_min)
-                tem_y = (self.r_max - self.r_min)
+                temp_y = (self.r_max - self.r_min)
                 i_bin = int(math.floor(temp_x / temp_y))
 
             # Take care of the edge case at phi = 2pi. 
