@@ -7,7 +7,7 @@ import sys
 import logging
 import copy
 import DataLoader
-from xml.dom.minidom import parse
+#from xml.dom.minidom import parse
 from lxml import etree
 from DataLoader.readers.cansas_reader import Reader as CansasReader
 from DataLoader.readers.cansas_reader import get_content
@@ -251,7 +251,7 @@ class InvariantState(object):
             we will append the data [optional]   
         """
         from xml.dom.minidom import getDOMImplementation
-        import time
+        #import time
         timestamp = time.time()
         # Check whether we have to write a standalone XML file
         if doc is None:
