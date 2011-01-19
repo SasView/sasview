@@ -11,12 +11,12 @@ from wx.lib.scrolledpanel import ScrolledPanel
 from sans.invariant import invariant
 from sans.guiframe.utils import format_number
 from sans.guiframe.utils import check_float
-from sans.guicomm.events import NewPlotEvent, StatusEvent
-from invariant_details import InvariantDetailsPanel
-from invariant_details import InvariantContainer
-from invariant_widgets import OutputTextCtrl
-from invariant_widgets import InvTextCtrl
-from invariant_state import InvariantState as IState
+from sans.guiframe.events import StatusEvent
+from .invariant_details import InvariantDetailsPanel
+from .invariant_details import InvariantContainer
+from .invariant_widgets import OutputTextCtrl
+from .invariant_widgets import InvTextCtrl
+from .invariant_state import InvariantState as IState
 from sans.guiframe.panel_base import PanelBase
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM  = 1e-5
@@ -140,6 +140,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             #Reset the list of states
             self.state.data = copy.deepcopy(data)
             self._reset_state_list()
+            
         return True  
     
     def set_message(self):
@@ -530,9 +531,11 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             return
         
         low_q = self.enable_low_cbox.GetValue()
-        high_q = self.enable_high_cbox.GetValue()  
+        high_q = self.enable_high_cbox.GetValue() 
+        temp_data = copy.deepcopy(self._data)
+        
         #set invariant calculator 
-        inv = invariant.InvariantCalculator(data=self._data,
+        inv = invariant.InvariantCalculator(data=temp_data,
                                             background=background,
                                             scale=scale)
         try:
@@ -617,7 +620,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 self.button_save.Enable(True)
             wx.PostEvent(self.parent,
                 StatusEvent(status='\nFinished invariant computation...'))
-            
+           
 
     def undo(self,event=None):
         """
@@ -673,7 +676,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         
         : param event: report button event
         """
-        from report_dialog import ReportDialog
+        from .report_dialog import ReportDialog
 
         self.state.set_report_string()
         report_html_str = self.state.report_str
@@ -716,8 +719,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 exec "self.%s.SetValue(%s)" % (key, value)
             except:
                 pass
-          
+        
         self.compute_invariant(event=None)
+       
         # set the input params at the state at pre_state_num
         for key in current_state:
             # set the inputs and boxes

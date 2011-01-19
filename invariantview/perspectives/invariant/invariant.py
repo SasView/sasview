@@ -22,11 +22,11 @@ from DataLoader.data_info import Data1D as LoaderData1D
 from sans.guiframe.dataFitting import Theory1D
 from sans.guiframe.dataFitting import Data1D
 
-from sans.guicomm.events import NewPlotEvent
-from sans.guicomm.events import ERR_DATA
-from invariant_state import Reader as reader
+from sans.guiframe.events import NewPlotEvent
+from sans.guiframe.events import ERR_DATA
+from .invariant_state import Reader as reader
 from DataLoader.loader import Loader
-from invariant_panel import InvariantPanel
+from .invariant_panel import InvariantPanel
 from sans.guicomm.events import EVT_INVSTATE_UPDATE
 
 from sans.guiframe.plugin_base import PluginBase
@@ -56,7 +56,7 @@ class Plugin(PluginBase):
         """
         Show a general help dialog. 
         """
-        from help_panel import  HelpWindow
+        from .help_panel import  HelpWindow
         frame = HelpWindow(None, -1)    
         frame.Show(True)
         
@@ -143,6 +143,7 @@ class Plugin(PluginBase):
         item.clone_without_data(clone=data)    
         data.dy = dy
         data.name = item.name
+        data.title = item.title
         
         ## allow to highlight data when plotted
         data.interactive = item.interactive
@@ -177,6 +178,25 @@ class Plugin(PluginBase):
                     data = plottable
                 self.compute_helper(data=data)
                 
+    def set_data(self, data_list):
+        """
+        receive a list of data and compute invariant
+        """
+        if len(data_list) > 1:
+            msg = "invariant panel does not allow more than one value"
+            msg += " at this time"
+            raise ValueError, msg
+        elif len(data_list) == 1:
+            if issubclass(data_list[0].__class__, LoaderData1D):
+                self.compute_helper(data_list[0])
+                wx.PostEvent(self.parent, NewPlotEvent(plot=data_list[0],
+                                               title=data_list[0].title))
+            else:
+                msg = "invariant cannot be computed for"
+                msg += " data of type %s" % (data_list[0].__class__.__name__)
+                raise ValueError, msg
+            
+            
     def compute_helper(self, data):
         """
         """
@@ -188,7 +208,7 @@ class Plugin(PluginBase):
             self.__data = data
             # Set the data set to be user for invariant calculation
             self.invariant_panel.set_data(data=data)
-        
+           
     def save_file(self, filepath, state=None):
         """
         Save data in provided state object.
@@ -281,16 +301,17 @@ class Plugin(PluginBase):
         new_plot.yaxis(self.__data._yaxis, self.__data._yunit)
         new_plot.group_id = self.__data.group_id
         new_plot.id = self.__data.id + name
+        new_plot.title = self.__data.title
         # Save theory_data in a state
         if data != None:
             name_head = name.split('-')
             if name_head[0] == 'Low':
                 self.invariant_panel.state.theory_lowQ = copy.deepcopy(new_plot)
             elif name_head[0] == 'High':
-                self.invariant_panel.state.theory_highQ = copy.deepcopy(new_plot)
+                self.invariant_panel.state.theory_highQ =copy.deepcopy(new_plot)
 
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                                               title=self.__data.name))
+                                               title=self.__data.title))
         
     def plot_data(self, scale, background):
         """
@@ -300,10 +321,11 @@ class Plugin(PluginBase):
         new_plot.name = self.__data.name
         new_plot.group_id = self.__data.group_id
         new_plot.id = self.__data.id 
+        new_plot.title = self.__data.title
        
         # Save data in a state: but seems to never happen 
         if new_plot != None:
             self.invariant_panel.state.data = copy.deepcopy(new_plot)
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                                               title=new_plot.name))
+                                               title=new_plot.title))
         
