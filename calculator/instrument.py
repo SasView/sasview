@@ -304,11 +304,11 @@ def validate(value = None):
     """
     try:
         val = float(value)
-        if val > 0:
+        if val >= 0:
             val = True
         else:
             val = False
     except:
         val = False
-    if not val:
-        raise ValueError, "Got improper value..."
+    #if not val:
+    #    raise ValueError, "Got improper value..."

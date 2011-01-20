@@ -386,6 +386,8 @@ class ResolutionCalculator(object):
         """
         if switch.lower() == 'off':
             return 0
+        if self.mass == 0.0:
+            return 0
         # check the singular point
         if d_distance == 0 or comp == 'x':
             return 0
@@ -850,6 +852,9 @@ class ResolutionCalculator(object):
         
         :return delta y: the beam center drop in cm
         """
+        # Check if mass == 0 (X-ray). 
+        if self.mass == 0:
+            return 0
         # Covert unit from A to cm
         unit_cm = 1e-08
         # Velocity of neutron in horizontal direction (~ actual velocity)
