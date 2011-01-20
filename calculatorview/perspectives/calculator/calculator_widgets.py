@@ -15,9 +15,9 @@ class InputTextCtrl(wx.TextCtrl):
         Text control for model and fit parameters.
         Binds the appropriate events for user interactions.
     """
-    def __init__(self, *args, **kwds):
+    def __init__(self, parent = None, *args, **kwds):
         
-        wx.TextCtrl.__init__(self, *args, **kwds)
+        wx.TextCtrl.__init__(self, parent, *args, **kwds)
         
         ## Set to True when the mouse is clicked while the whole 
         #string is selected
@@ -27,6 +27,7 @@ class InputTextCtrl(wx.TextCtrl):
         # Bind appropriate events
         self.Bind(wx.EVT_LEFT_UP, self._highlight_text)
         self.Bind(wx.EVT_SET_FOCUS, self._on_set_focus)
+        self.Bind(wx.EVT_TEXT_ENTER, parent._onparamEnter )
 
     def _on_set_focus(self, event):
         """

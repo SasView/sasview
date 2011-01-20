@@ -27,7 +27,7 @@ else:
     PANEL_HEIGHT = 230
     FONT_VARIANT = 1
  
-class KiessigThicknessCalculatorPanel(wx.Panel, PanleBase):
+class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
     """
     Provides the Kiessig thickness calculator GUI.
     """
@@ -182,7 +182,13 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanleBase):
 
         output = "%-7.4g" % value
         return output.lstrip().rstrip()   
-     
+    
+    def _onparamEnter(self, event = None):
+        """
+        On Text_enter_callback, perform compute
+        """
+        self.on_compute(event)
+             
 class KiessigWindow(wx.Frame):
     def __init__(self, parent=None, title="Kiessig Thickness Calculator",
                   size=(PANEL_WIDTH,PANEL_HEIGHT), *args, **kwds):

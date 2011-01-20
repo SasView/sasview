@@ -957,6 +957,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.det_coordinate = 'cartesian'
         self.sigma_r_txt.SetLabel('Sigma_x:')
         self.sigma_phi_txt.SetLabel('Sigma_y:')
+        self._onparamEnter()
         
     def _on_rp_coordinate(self,event=None):
         """
@@ -968,6 +969,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.det_coordinate = 'polar'
         self.sigma_r_txt.SetLabel('Sigma_r:   ')
         self.sigma_phi_txt.SetLabel('Sigma_phi:')
+        self._onparamEnter()
         
     def _status_info(self, msg = '', type = "update"):
         """
@@ -977,7 +979,14 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                 wx.PostEvent(self.parent.parent, 
                              StatusEvent(status = msg, type = type ))
 
-                  
+
+    def _onparamEnter(self, event = None):
+        """
+        On Text_enter_callback, perform compute
+        """
+        self.on_compute()
+        
+        
 class ResolutionWindow(wx.Frame):
     def __init__(self, parent = None, title = "SANS Resolution Estimator",
                   size=(PANEL_WIDTH * 2, PANEL_HEIGHT), *args, **kwds):
