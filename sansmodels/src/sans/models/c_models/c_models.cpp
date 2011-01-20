@@ -123,6 +123,25 @@ PyObject * new_gaussian_dispersion(PyObject *, PyObject *args) {
 	return PyCObject_FromVoidPtr(disp, del_gaussian_dispersion);
 }
 
+
+/**
+ * Delete a rectangle dispersion model object
+ */
+void del_rectangle_dispersion(void *ptr){
+	RectangleDispersion * disp = static_cast<RectangleDispersion *>(ptr);
+	delete disp;
+	return;
+}
+
+/**
+ * Create a rectangle dispersion model as a python object
+ */
+PyObject * new_rectangle_dispersion(PyObject *, PyObject *args) {
+	RectangleDispersion *disp = new RectangleDispersion();
+	return PyCObject_FromVoidPtr(disp, del_rectangle_dispersion);
+}
+
+
 /**
  * Delete a schulz dispersion model object
  */
@@ -202,6 +221,8 @@ static PyMethodDef module_methods[] = {
 		  "Create a new DispersionModel object"},
 	{"new_gaussian_model",   (PyCFunction)new_gaussian_dispersion, METH_VARARGS,
 		  "Create a new GaussianDispersion object"},
+	{"new_rectangle_model",   (PyCFunction)new_rectangle_dispersion, METH_VARARGS,
+		  "Create a new RectangleDispersion object"},
     {"new_lognormal_model",   (PyCFunction)new_lognormal_dispersion, METH_VARARGS,
 		  "Create a new LogNormalDispersion object"},
     {"new_schulz_model",   (PyCFunction)new_schulz_dispersion, METH_VARARGS,

@@ -76,6 +76,20 @@ public:
 };
 
 /**
+ * Flat dispersion model
+ */
+class RectangleDispersion: public DispersionModel {
+public:
+	/// Number of sigmas on each side of the mean
+	double nsigmas;
+
+	RectangleDispersion();
+	void operator()(void *, vector<WeightPoint>&);
+	void accept_as_source(DispersionVisitor*, void*, void*);
+	void accept_as_destination(DispersionVisitor*, void*, void*);
+};
+
+/**
  * Schulz dispersion model
  */
 class SchulzDispersion: public DispersionModel {

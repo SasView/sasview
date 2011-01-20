@@ -30,6 +30,18 @@ void DispersionVisitor:: gaussian_to_dict(void* dispersion, void* dictionary) {
 #endif
 }
 
+void DispersionVisitor:: rectangle_to_dict(void* dispersion, void* dictionary) {
+#ifndef __MODELS_STANDALONE__
+	RectangleDispersion * disp = (RectangleDispersion*)dispersion;
+	PyObject * dict = (PyObject*)dictionary;
+
+	PyDict_SetItemString(dict, "type",  Py_BuildValue("s", "rectangle"));
+    PyDict_SetItemString(dict, "npts",  Py_BuildValue("i", disp->npts));
+    PyDict_SetItemString(dict, "width", Py_BuildValue("d", disp->width));
+    PyDict_SetItemString(dict, "nsigmas", Py_BuildValue("d", disp->nsigmas));
+#endif
+}
+
 void DispersionVisitor:: lognormal_to_dict(void* dispersion, void* dictionary) {
 #ifndef __MODELS_STANDALONE__
 	LogNormalDispersion * disp = (LogNormalDispersion*)dispersion;
@@ -77,6 +89,17 @@ void DispersionVisitor:: dispersion_from_dict(void* dispersion, void* dictionary
 void DispersionVisitor:: gaussian_from_dict(void* dispersion, void* dictionary) {
 #ifndef __MODELS_STANDALONE__
 	GaussianDispersion * disp = (GaussianDispersion*)dispersion;
+	PyObject * dict = (PyObject*)dictionary;
+
+	disp->npts    = PyInt_AsLong( PyDict_GetItemString(dict, "npts") );
+	disp->width   = PyFloat_AsDouble( PyDict_GetItemString(dict, "width") );
+	disp->nsigmas = PyFloat_AsDouble( PyDict_GetItemString(dict, "nsigmas") );
+#endif
+}
+
+void DispersionVisitor:: rectangle_from_dict(void* dispersion, void* dictionary) {
+#ifndef __MODELS_STANDALONE__
+	RectangleDispersion * disp = (RectangleDispersion*)dispersion;
 	PyObject * dict = (PyObject*)dictionary;
 
 	disp->npts    = PyInt_AsLong( PyDict_GetItemString(dict, "npts") );

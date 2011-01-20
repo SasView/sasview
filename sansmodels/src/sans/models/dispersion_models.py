@@ -77,6 +77,22 @@ class GaussianDispersion(DispersionModel):
         message = "set_weights is not available for GaussianDispersion.\n"
         message += "  Solution: Use an ArrayDispersion object"
         raise "RuntimeError", message
+        
+class RectangleDispersion(DispersionModel):
+    """
+    Python bridge class for a dispersion model based 
+    on a Gaussian distribution.
+    """
+    def __init__(self):
+        self.cdisp = c_models.new_rectangle_model()
+        
+    def set_weights(self, values, weights):
+        """
+            Set the weights of an array dispersion
+        """
+        message = "set_weights is not available for GaussianDispersion.\n"
+        message += "  Solution: Use an ArrayDispersion object"
+        raise "RuntimeError", message 
     
 class SchulzDispersion(DispersionModel):
     """
@@ -132,10 +148,12 @@ class ArrayDispersion(DispersionModel):
         
         """
         if len(values) != len(weights):
-            raise ValueError, "ArrayDispersion.set_weights: given arrays are of different lengths"
+            raise ValueError, "ArrayDispersion.set_weights: \
+            given arrays are of different lengths"
         
         c_models.set_dispersion_weights(self.cdisp, values, weights)
- 
-models = {"gaussian":GaussianDispersion, "array":ArrayDispersion,
-          "schulz":SchulzDispersion, "lognormal":LogNormalDispersion}       
+        
+models = {"gaussian":GaussianDispersion,  "rectangula":RectangleDispersion,
+          "array":ArrayDispersion, "schulz":SchulzDispersion, 
+          "lognormal":LogNormalDispersion}       
         

@@ -97,7 +97,7 @@ void GaussianDispersion :: accept_as_destination(DispersionVisitor* visitor, voi
 double gaussian_weight(double mean, double sigma, double x) {
 	double vary, expo_value;
     vary = x-mean;
-    expo_value = -vary*vary/(2*sigma*sigma);
+    expo_value = -vary*vary/(2.0*sigma*sigma);
     //return 1.0;
     return exp(expo_value);
 }
@@ -129,6 +129,68 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
 			if ( ((*par).has_min==false || val>(*par).min)
 			  && ((*par).has_max==false || val<(*par).max)  ) {
 				double _w = gaussian_weight(value, width, val);
+				weights.insert(weights.end(), WeightPoint(val, _w));
+			}
+		}
+	}
+}
+
+
+/**
+ * Flat dispersion
+ */
+
+RectangleDispersion :: RectangleDispersion() {
+	npts  = 21;
+	width = 0.0;
+	nsigmas = 1.0;
+};
+
+void RectangleDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
+	visitor->rectangle_to_dict(from, to);
+}
+void RectangleDispersion :: accept_as_destination(DispersionVisitor* visitor, void* from, void* to) {
+	visitor->rectangle_from_dict(from, to);
+}
+
+double rectangle_weight(double mean, double sigma, double x) {
+	double vary, expo_value;
+    double sig = fabs(sigma);
+    if (x>= (mean-sig) && x<(mean+sig)){
+    	return 1.0;
+    }
+    else{
+    	return 0.0;
+    }
+}
+
+/**
+ * Flat dispersion
+ * @param mean: mean value
+ * @param sigma: half width of top hat function
+ * @param x: value at which the Flat is evaluated
+ * @return: value of the Flat
+ */
+void RectangleDispersion :: operator() (void *param, vector<WeightPoint> &weights){
+	// Check against zero width
+	if (width<=0) {
+		width = 0.0;
+		npts  = 1;
+		nsigmas = 1.0;
+	}
+
+	Parameter* par = (Parameter*)param;
+	double value = (*par)();
+
+	if (npts<2) {
+		weights.insert(weights.end(), WeightPoint(value, 1.0));
+	} else {
+		for(int i=0; i<npts; i++) {
+			// We cover n(nsigmas) times sigmas on each side of the mean
+			double val = value + width * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
+			if ( ((*par).has_min==false || val>(*par).min)
+			  && ((*par).has_max==false || val<(*par).max)  ) {
+				double _w = rectangle_weight(value, width, val);
 				weights.insert(weights.end(), WeightPoint(val, _w));
 			}
 		}
