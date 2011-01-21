@@ -52,9 +52,10 @@ class DataDialog(wx.Dialog):
             return 
         #add text
         if text.strip() == "":
-            text = "Fitting: We recommend that you load "
-            text += " no more than %s data\n" % str(self._max_data)
+            text = "Fitting: We recommend that you selected"
+            text += " no more than '%s' data\n" % str(self._max_data)
             text += "for adequate plot display size. \n" 
+            text += "unchecked data won't be send to fitting . \n" 
         text_ctrl = wx.StaticText(self, -1, str(text))
         self._sizer_txt.Add(text_ctrl)
         iy = 0
