@@ -5,6 +5,7 @@ plugin DataLoader responsible of loading data
 import os
 import sys
 import wx
+import logging
 
 from DataLoader.loader import Loader
 import DataLoader.data_info as DataInfo
@@ -191,6 +192,7 @@ class Plugin(PluginBase):
         """
         """
         message = ""
+        log_msg = ''
         output = []
         error_message = ""
         for p_file in path:
@@ -198,13 +200,17 @@ class Plugin(PluginBase):
             root, extension = os.path.splitext(basename)
             if flag:
                 if extension.lower() in EXTENSIONS:
-                    error_message = "Cannot load: %s\n" % str(p_file)
-                    error_message += "Try File -> open ...."
+                    log_msg = "Data Loader cannot "
+                    log_msg += "load: %s\n" % str(p_file)
+                    log_msg += "Try File -> open ...."
+                    logging.info(log_msg)
                     continue
             else:
                 if extension.lower() not in EXTENSIONS:
-                    error_message = "Cannot load: %s\n" % str(p_file)
-                    error_message += "Try Data -> Load ...."
+                    log_msg = "File Loader cannot"
+                    log_msg += " load: %s\n" % str(p_file)
+                    log_msg += "Try Data -> Load ...."
+                    logging.info(log_msg)
                     continue
             try:
                 temp =  self.loader.load(p_file)
@@ -222,7 +228,8 @@ class Plugin(PluginBase):
                 error_message += str(sys.exc_value) + "\n"
                 self.load_update(output=output, message=error_message)
                 
-        message = "Loading Complete!"
+        message = "Loading Complete! "
+        message += log_msg
         self.load_complete(output=output, error_message=error_message,
                        message=message, path=path)
             
