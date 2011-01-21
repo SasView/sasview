@@ -267,10 +267,10 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent, StatusEvent(status=message,
                                               info="warning",
                                               type="stop"))
-        self.parent.add_data(output)
         if error_message != "":
             self.load_error(error_message)
-            
+        self.parent.add_data(output)
+        
     def create_data(self, data, path):
         """
         Receive data from loader and create a data to use for guiframe
