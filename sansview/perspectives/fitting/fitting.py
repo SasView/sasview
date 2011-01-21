@@ -49,6 +49,7 @@ DEFAULT_BEAM = 0.005
 DEFAULT_QMIN = 0.001
 DEFAULT_QMAX = 0.13
 DEFAULT_NPTS = 50
+MAX_NBR_DATA = 4
 
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
 
@@ -273,11 +274,18 @@ class Plugin(PluginBase):
         """
         receive a list of data to fit
         """
-        for data in data_list:
+        selected_data_list = []
+        if len(data_list) > MAX_NBR_DATA :
+            from fitting_widgets import DataDialog
+            dlg = DataDialog(data_list=data_list, nb_data=MAX_NBR_DATA)
+            if dlg.ShowModal() == wx.ID_OK:
+                selected_data_list = dlg.get_data()
+        else:
+            selected_data_list = data_list
+        for data in selected_data_list:
             self.add_fit_page(data=data)
             wx.PostEvent(self.parent, NewPlotEvent(plot=data, 
                                                    title=str(data.title)))
-            
             
     def set_state(self, state=None, datainfo=None, format=None):
         """
