@@ -17,7 +17,6 @@ import wx
 import copy
 import logging
 
-
 from DataLoader.data_info import Data1D as LoaderData1D
 from sans.guiframe.dataFitting import Theory1D
 from sans.guiframe.dataFitting import Data1D
@@ -183,9 +182,21 @@ class Plugin(PluginBase):
         receive a list of data and compute invariant
         """
         if len(data_list) > 1:
-            msg = "invariant panel does not allow more than one value"
-            msg += " at this time"
-            raise ValueError, msg
+            msg = "invariant panel does not allow multiple data!\n"
+            msg += "Please select one.\n"
+            from invariant_widgets import DataDialog
+            dlg = DataDialog(data_list=data_list, text=msg)
+            if dlg.ShowModal() == wx.ID_OK:
+                data = dlg.get_data()
+                if issubclass(data.__class__, LoaderData1D):
+                    self.compute_helper(data_list[0])
+                    wx.PostEvent(self.parent, NewPlotEvent(plot=data_list[0],
+                                               title=data_list[0].title))
+                else:    
+                    msg = "invariant cannot be computed for data of "
+                    msg += "type %s" % (data_list[0].__class__.__name__)
+                    wx.PostEvent(self.parent, 
+                             StatusEvent(status=msg, info='error'))
         elif len(data_list) == 1:
             if issubclass(data_list[0].__class__, LoaderData1D):
                 self.compute_helper(data_list[0])
@@ -194,7 +205,8 @@ class Plugin(PluginBase):
             else:
                 msg = "invariant cannot be computed for"
                 msg += " data of type %s" % (data_list[0].__class__.__name__)
-                raise ValueError, msg
+                wx.PostEvent(self.parent, 
+                             StatusEvent(status=msg, info='error'))
             
             
     def compute_helper(self, data):
