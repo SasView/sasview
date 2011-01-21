@@ -13,8 +13,8 @@
 
 import wx
 import sys
-from sans.guicomm.events import EVT_NEW_PLOT
-from sans.guicomm.events import StatusEvent 
+from sans.guiframe.events import EVT_NEW_PLOT
+from sans.guiframe.events import StatusEvent 
 
 from sans.guiframe.plugin_base import PluginBase
 

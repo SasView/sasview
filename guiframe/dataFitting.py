@@ -12,6 +12,7 @@ from danse.common.plottools.plottables import Theory1D as PlotTheory1D
 from DataLoader.data_info import Data1D as LoadData1D
 from DataLoader.data_info import Data2D as LoadData2D
 
+
 class Data1D(PlotData1D, LoadData1D):
     """
     """
@@ -27,6 +28,8 @@ class Data1D(PlotData1D, LoadData1D):
         self.id = None
         self.group_id = None
         self.is_data = True
+        self.path = None
+        self.title = ""
     
     def copy_from_datainfo(self, data1d):
         """
@@ -45,6 +48,7 @@ class Data1D(PlotData1D, LoadData1D):
     
         self.xaxis(data1d._xaxis, data1d._xunit)
         self.yaxis(data1d._yaxis, data1d._yunit)
+        self.title = data1d.title
         
     def __str__(self):
         """
@@ -79,6 +83,8 @@ class Data1D(PlotData1D, LoadData1D):
             result.dy[i] = math.sqrt(math.fabs(output.variance))
         return result
     
+  
+    
 class Theory1D(PlotTheory1D, LoadData1D):
     """
     """
@@ -94,6 +100,8 @@ class Theory1D(PlotTheory1D, LoadData1D):
         self.id = None
         self.group_id = None
         self.is_data = True
+        self.path = None
+        self.title = ""
     
     def copy_from_datainfo(self, data1d):
         """
@@ -110,6 +118,7 @@ class Theory1D(PlotTheory1D, LoadData1D):
             self.dxw = copy.deepcopy(data1d.dxw)    
         self.xaxis(data1d._xaxis, data1d._xunit)
         self.yaxis(data1d._yaxis, data1d._yunit)
+        self.title = data1d.title
         
     def __str__(self):
         """
@@ -161,6 +170,10 @@ class Data2D(PlotData2D, LoadData2D):
                             qx_data=qx_data, qy_data=qy_data,
                             dqx_data=dqx_data, dqy_data=dqy_data,
                             q_data=q_data, mask=mask)
+        self.id = None
+        self.path = None
+        self.title = ""
+      
         
     def copy_from_datainfo(self, data2d):
         """
@@ -188,6 +201,7 @@ class Data2D(PlotData2D, LoadData2D):
             self.zmax = data2d.zmax
         self.xaxis(data2d._xaxis, data2d._xunit)
         self.yaxis(data2d._yaxis, data2d._yunit)
+        self.title = data2d.title
         
     def __str__(self):
         """

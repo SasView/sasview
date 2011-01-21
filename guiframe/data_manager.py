@@ -11,24 +11,57 @@
 This module manages all data loaded into the application. Data_manager makes 
 available all data loaded  for the current perspective. 
 
-All modules creating
-fake Data posts their data to data_manager . Data_manager  make these new data 
-available for all other perspectives.
+All modules "creating Data" posts their data to data_manager . 
+Data_manager  make these new data available for all other perspectives.
 """
 
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    filename='sans_app.log',
+                    filemode='w')    
+  
 class DataManager(object):
     """
-     Manage a list of data
+    Manage a list of data
     """
-    def __init__(self, parent):
+    def __init__(self):
         """
         Store opened path and data object created at the loading time
+        :param auto_plot: if True the datamanager sends data to plotting 
+                            plugin. 
+        :param auto_set_data: if True the datamanager sends to the current
+        perspective
         """
-        self.loaded_data_list = []
-        self.created_data_list = []
-        self.list_of_data = []
+        self._selected_data = []
+        self.stored_data = {}
         self.message = ""
-        self.parent = parent
+      
+    def add_data(self, data_list):
+        """
+        receive a list of 
+        """
+        self._selected_data = []
+        for data in data_list:
+            if data.id  in self.stored_data:
+                msg = "Data manager already stores %s" % str(data.name)
+                msg += ""
+                logging.info(msg)
+            self._selected_data.append(data)
+            self.stored_data[id] = data
+            
+    def set_auto_plot(self, flag=False):
+        """
+        When flag is true the data is plotted automatically
+        """
+        self._auto_set_data = flag
+        
+    def set_auto_set_data(self, flag=False):
+        """
+        When flag is true the data is send to the current perspective
+        automatically
+        """
+        self._auto_set_data = flag
         
     def get_message(self):
         """
@@ -36,35 +69,61 @@ class DataManager(object):
         """
         return self.message
     
-    def set_loaded_data(self, data_list=None):
+    def get_by_id(self, id_list=None):
+        """
+        get a list of data given a list of id
+        """
+        self._selected_data = []
+        for id in id_list:
+            if id in self.stored_data:
+                self._selected_data.append(self.stored_data[id])
+        return self._selected_data
+    
+    def delete_by_id(self, id_list=None):
         """
         save data and path
         """
-        if data_list is None:
-            return
-        for data, path in data_list:
-            if data.name not in self.list_of_data:
-                self.loaded_data_list.append((data, path))
-                self.list_of_data.append(data.name)
-            else:
-                self.message += " %s already loaded" % str(data.name)
-        
-    def set_created_data(self, data_list=None):
-        """
-        return 
-        """
-        if data_list is None:
-            return
-        for data, path in data_list:
-            for created_data, _ in self.created_data_list:
-                if data.name == created_data.name:
-                    self.message += " %s already created" % str(data.name)
-                else:
-                    self.created_data_list.append((data, path))
+        for id in id_list:
+            if id in self.stored_data:
+                data = self.stored_data[id]
+                if data in self._selected_data:
+                    self._selected_data.remove(data)
+                del self.stored_data[id]
     
-    def get_data(self):
+    def get_by_name(self, name_list=None):
         """
-        Send list of available data
+        return a list of data given a list of data names
         """
-        return self.loaded_data_list + self.created_data_list
+        self._selected_data = []
+        for selected_name in name_list:
+            for data in self.stored_data.values():
+                if data.name == selected_name:
+                    self._selected_data.append(data)
+        return self._selected_data
+    
+    def delete_by_name(self, name_list=None):
+        """
+        save data and path
+        """
+        for selected_name in name_list:
+            for data in self.stored_data.values():
+                if data.name == selected_name:
+                    if data in self._selected_data:
+                        self._selected_data.remove(data)
+                    if data.id in self.stored_data:
+                        del self.stored_data[data.id]
+
+    def get_selected_data(self):
+        """
+        Send list of selected data
+        """
+        return self._selected_data
+    
+    def get_all_data(self):
+        """
+        return list of all available data
+        """
+        return self.stored_data.values()
+    
+
         

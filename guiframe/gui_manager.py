@@ -35,22 +35,26 @@ import warnings
 warnings.simplefilter("ignore")
 
 import logging
-#from sans.guicomm.events import NewLoadedDataEvent
-from sans.guicomm.events import EVT_STATUS
-#from sans.guicomm.events import EVT_NEW_PLOT
-#from sans.guicomm.events import EVT_SLICER_PARS_UPDATE
-from sans.guicomm.events import EVT_ADD_MANY_DATA
-#from data_manager import DataManager
+
+from sans.guiframe.events import EVT_STATUS
+from sans.guiframe.events import EVT_ADD_MANY_DATA
+from sans.guiframe.events import StatusEvent
+from sans.guiframe.events import NewPlotEvent
+
 
 STATE_FILE_EXT = ['.inv', '.fitv', '.prv']
 
-
+DATA_MANAGER = False
+AUTO_PLOT = False
+AUTO_SET_DATA = True
 
 class ViewerFrame(wx.Frame):
     """
     Main application frame
     """
-    def __init__(self, parent, id, title, window_height=300, window_width=300):
+    
+    def __init__(self, parent, id, title, 
+                 window_height=300, window_width=300):
         """
         Initialize the Frame object
         """
@@ -80,6 +84,12 @@ class ViewerFrame(wx.Frame):
         ## Application manager
         self.app_manager = None
         self._mgr = None
+        #data manager
+        from .data_manager import DataManager
+        self.data_manager = DataManager()
+        #add current perpsective
+        self._current_perspective = None
+        #file menu
         self.file_menu = None
         
         ## Find plug-ins
@@ -103,25 +113,13 @@ class ViewerFrame(wx.Frame):
 
         # Default locations
         self._default_save_location = os.getcwd()        
-
+        
         # Welcome panel
         self.defaultPanel = None
         #panel on focus
         self.panel_on_focus = None
         # Check for update
         #self._check_update(None)
-        ## maximum number of opened files' paths to store
-        self.n_maxfileopen =  2
-        ## number of file open
-        self.n_fileOpen = 0
-        ## list of path of open files 
-        self.filePathList = []
-        ## list of open file with name form menu
-        #self._saveOpenData()
-        ## Dictionary of open file where keys are filename  and
-        # values are number of copy of data plotted
-        ## using the same loaded file 
-        self.indice_load_data = {}
         # Register the close event so it calls our own method
         wx.EVT_CLOSE(self, self._onClose)
         # Register to status events
@@ -187,7 +185,8 @@ class ViewerFrame(wx.Frame):
         is_loaded = False
         for item in self.plugins:
             if plugin.__class__ == item.__class__:
-                #print "Plugin %s already loaded" % plugin.__class__.__name__
+                msg = "Plugin %s already loaded" % plugin.__class__.__name__
+                logging.info(msg)
                 is_loaded = True    
         if not is_loaded:
             self.plugins.append(plugin)
@@ -226,8 +225,11 @@ class ViewerFrame(wx.Frame):
                             (file, path, info) = imp.find_module(name, path)
                             module = imp.load_module( name, file, item, info)
                         if hasattr(module, "PLUGIN_ID"):
-                            try:
-                                plugins.append(module.Plugin())
+                            try: 
+                                plug = module.Plugin()
+                                if plug.set_default_perspective():
+                                    self._current_perspective = plug
+                                plugins.append(plug)
                                 msg = "Found plug-in: %s" % module.PLUGIN_ID
                                 logging.info(msg)
                             except:
@@ -386,10 +388,9 @@ class ViewerFrame(wx.Frame):
         """
         for plugin in self.plugins:
             if len(plugin.populate_file_menu()) > 0:
-                
                 for item in plugin.populate_file_menu():
-                    m_name, m_hint, m_handler = item
                     id = wx.NewId()
+                    m_name, m_hint, m_handler = item
                     self.filemenu.Append(id, m_name, m_hint)
                     wx.EVT_MENU(self, id, m_handler)
                 self.filemenu.AppendSeparator()
@@ -406,8 +407,8 @@ class ViewerFrame(wx.Frame):
         # some menu of plugin to be seen under file menu
         self._populate_file_menu()
         id = wx.NewId()
-        self.filemenu.Append(id, '&Save',
-                             'Save project as a SanaView (svs) file')
+        self.filemenu.Append(id, '&Save state into File',
+                             'Save project as a SansView (svs) file')
         wx.EVT_MENU(self, id, self._on_save)
         #self.filemenu.AppendSeparator()
         
@@ -599,7 +600,6 @@ class ViewerFrame(wx.Frame):
         if self.defaultPanel is not None and \
             self._mgr.GetPane(self.panels["default"].window_name).IsShown():
             self.on_close_welcome_panel()
-        
             
     def _on_save(self, event):
         """
@@ -696,7 +696,6 @@ class ViewerFrame(wx.Frame):
         """
         flag = self.quit_guiframe()
         if flag:
-            #import sys
             wx.Frame.Close(self)
             wx.Exit()
             sys.exit()
@@ -761,18 +760,6 @@ class ViewerFrame(wx.Frame):
             dialog = aboutbox.DialogAbout(None, -1, "")
             dialog.ShowModal()            
             
-    def _onreloaFile(self, event):  
-        """
-        load a data previously opened 
-        """
-        from .data_loader import plot_data
-        for item in self.filePathList:
-            id, _, path, _ = item
-            if id == event.GetId():
-                if path and os.path.isfile(path):
-                    plot_data(self, path)
-                    break
-            
     def set_manager(self, manager):
         """
         Sets the application manager for this frame
@@ -802,8 +789,9 @@ class ViewerFrame(wx.Frame):
             if hasattr(item, "set_default_perspective"):
                 if item.set_default_perspective():
                     item.on_perspective(event=None)
+                    self._current_perspective = item
                     return 
-            
+        
     def set_perspective(self, panels):
         """
         Sets the perspective of the GUI.
@@ -812,6 +800,7 @@ class ViewerFrame(wx.Frame):
         
         :param panels: list of panels
         """
+       
         for item in self.panels:
             # Check whether this is a sticky panel
             if hasattr(self.panels[item], "ALWAYS_ON"):
@@ -841,6 +830,43 @@ class ViewerFrame(wx.Frame):
             except:
                 pass
         return path
+    
+    def add_data(self, data_list):
+        """
+        receive a list of data . store them its data manager if possible
+        determine if data was be plot of send to data perspectives
+        """
+        self.data_manager.add_data(data_list)
+        if AUTO_SET_DATA:
+            if self._current_perspective is not None:
+                try:
+                    self._current_perspective.set_data(data_list)
+                except:
+                    raise
+                    #msg = str(sys.exc_value)
+                    #wx.PostEvent(self, StatusEvent(status=msg,
+                    #                          info="error"))
+            else:
+                msg = "Guiframe does not have a current perspective"
+                logging.info(msg)
+        if DATA_MANAGER:
+            print "will show data panel"
+        if AUTO_PLOT:
+            self.plot_data(data_list)
+            
+    def plot_data(self, data_list):
+        """
+        send a list of data to plot
+        """
+        for new_plot in data_list:
+            wx.PostEvent(self, NewPlotEvent(plot=new_plot,
+                                                  title=str(new_plot.title)))
+            
+    def set_current_perspective(self, perspective):
+        """
+        set the current active perspective 
+        """
+        self._current_perspective = perspective
 
 class DefaultPanel(wx.Panel):
     """

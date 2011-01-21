@@ -1,16 +1,20 @@
 
 import time
 import sys
+import os
 
 from data_util.calcthread import CalcThread
 
         
+EXTENSIONS = ['.svs', '.prv', '.inv', '.fitv']
 
 class DataReader(CalcThread):
     """
     Load a data given a filename
     """
     def __init__(self, path, loader,
+                 flag=True,
+                 transform_data=None,
                  completefn=None,
                  updatefn   = None,
                  yieldtime  = 0.01,
@@ -20,6 +24,8 @@ class DataReader(CalcThread):
                  updatefn,
                  yieldtime,
                  worktime)
+        self.load_state_flag = flag
+        self.transform_data = transform_data
         self.list_path = path
         #Instantiate a loader 
         self.loader = loader
@@ -45,13 +51,24 @@ class DataReader(CalcThread):
         output = []
         error_message = ""
         for path in self.list_path:
+            basename  = os.path.basename(path)
+            root, extension = os.path.splitext(basename)
+            if self.load_state_flag:
+                if extension.lower() in EXTENSIONS:
+                    pass
+            else:
+                if extension.lower() not in EXTENSIONS:
+                    pass
             try:
                 temp =  self.loader.load(path)
                 elapsed = time.time() - self.starttime
                 if temp.__class__.__name__ == "list":
-                    output += temp
+                    for item in temp:
+                        data = self.transform_data(item, path)
+                        output.append(data)
                 else:
-                    output.append(temp)
+                    data = self.transform_data(temp, path)
+                    output.append(data)
                 message = "Loading ..." + str(path) + "\n"
                 if self.updatefn is not None:
                     self.updatefn(output=output, message=message)

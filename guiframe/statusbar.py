@@ -1,8 +1,7 @@
 import wx
 from wx import StatusBar as wxStatusB
-import wx.lib
-#from wx.lib import newevent
-(MessageEvent, EVT_MESSAGE) = wx.lib.newevent.NewEvent()
+from wx.lib import newevent
+(MessageEvent, EVT_MESSAGE) = newevent.NewEvent()
 #numner of fields of the status bar 
 NB_FIELDS = 4
 #position of the status bar's fields
@@ -253,7 +252,7 @@ class StatusBar(wxStatusB):
                 self.gauge.SetValue(int(self.progress)) 
         if type.lower() == "progress":
             self.nb_progress += 1
-            self.timer.Start(0)
+            self.timer.Start(1)
             self.gauge.Pulse()
         if type.lower() == "update":
             self.progress += 10

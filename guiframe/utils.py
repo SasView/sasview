@@ -4,6 +4,17 @@ Contains common classes and functions
 import wx
 import re
 
+def parse_name(name, expression):
+    """
+    remove "_" in front of a name
+    """
+    if re.match(expression, name) is not None:
+        word = re.split(expression, name, 1)
+        for item in word:           
+            if item.lstrip().rstrip() != '':
+                return item
+    else:
+        return name
 def format_number(value, high=False):
     """
     Return a float in a standardized, human-readable formatted string 

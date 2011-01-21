@@ -143,6 +143,7 @@ class PluginBase:
         :param event: menu event
         
         """
+        self.parent.set_current_perspective(self)
         self.parent.set_perspective(self.perspective)
     
     def post_init(self):
@@ -158,4 +159,11 @@ class PluginBase:
        when returning False, the plug-in is not candidate for an automatic 
        default perspective setting
         """
+        if self.standalone:
+            return True
         return False
+    
+    def set_data(self, data_list):
+        """
+        receive a list of data and use it in the current perspective
+        """
