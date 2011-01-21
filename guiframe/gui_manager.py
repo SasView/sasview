@@ -842,10 +842,9 @@ class ViewerFrame(wx.Frame):
                 try:
                     self._current_perspective.set_data(data_list)
                 except:
-                    raise
-                    #msg = str(sys.exc_value)
-                    #wx.PostEvent(self, StatusEvent(status=msg,
-                    #                          info="error"))
+                    msg = str(sys.exc_value)
+                    wx.PostEvent(self, StatusEvent(status=msg,
+                                              info="error"))
             else:
                 msg = "Guiframe does not have a current perspective"
                 logging.info(msg)
