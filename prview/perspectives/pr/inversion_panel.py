@@ -9,7 +9,8 @@ import os
 import sys
 import logging
 from wx.lib.scrolledpanel import ScrolledPanel
-from sans.guicomm.events import StatusEvent    
+from sans.guiframe.events import StatusEvent   
+from sans.guiframe.panel_base import PanelBase 
 from inversion_state import InversionState
 from pr_widgets import PrTextCtrl
 from pr_widgets import DataFileTextCtrl
@@ -17,7 +18,7 @@ from pr_widgets import OutputTextCtrl
 
 
 
-class InversionControl(ScrolledPanel):
+class InversionControl(ScrolledPanel, PanelBase):
     """
     """
     window_name = 'pr_control'
@@ -34,6 +35,7 @@ class InversionControl(ScrolledPanel):
         """
         """
         ScrolledPanel.__init__(self, parent, id=id, **kwargs)
+        PanelBase.__init__(self)
         self.SetupScrolling()
         
         self.plots = plots
@@ -71,20 +73,14 @@ class InversionControl(ScrolledPanel):
         ## Estimates
         self.alpha_estimate_ctl = None
         self.nterms_estimate_ctl = None
-        
         ## D_max distance explorator
         self.distance_explorator_ctl = None
-        
         ## Data manager
         self.manager   = None
-        
         ## Standalone flage
         self.standalone = standalone
-        
         ## Default file location for save
         self._default_save_location = os.getcwd()
-        
-        
         # Default width
         self._default_width = 350
         self._do_layout()
@@ -577,10 +573,10 @@ class InversionControl(ScrolledPanel):
         self.rg_ctl    = OutputTextCtrl(self, -1, size=(60,20))
         hint_msg = "Radius of gyration for the computed P(r)."
         self.rg_ctl.SetToolTipString(hint_msg)
-        self.iq0_ctl   = OutputTextCtrl(self, -1, size=(60,20))
+        self.iq0_ctl   = OutputTextCtrl(self, -1, size=(60, 20))
         hint_msg = "Scattering intensity at Q=0 for the computed P(r)."
         self.iq0_ctl.SetToolTipString(hint_msg)
-        self.bck_ctl   = OutputTextCtrl(self, -1, size=(60,20))
+        self.bck_ctl   = OutputTextCtrl(self, -1, size=(60, 20))
         self.bck_ctl.SetToolTipString("Value of estimated constant background.")
         
         label_time = wx.StaticText(self, -1, "Computation time")
@@ -591,27 +587,27 @@ class InversionControl(ScrolledPanel):
         label_pos = wx.StaticText(self, -1, "Positive fraction")
         label_pos_err = wx.StaticText(self, -1, "1-sigma positive fraction")
         
-        self.time_ctl = OutputTextCtrl(self, -1, size=(60,20))
+        self.time_ctl = OutputTextCtrl(self, -1, size=(60, 20))
         hint_msg = "Computation time for the last inversion, in seconds."
         self.time_ctl.SetToolTipString(hint_msg)
         
-        self.chi2_ctl = OutputTextCtrl(self, -1, size=(60,20))
+        self.chi2_ctl = OutputTextCtrl(self, -1, size=(60, 20))
         self.chi2_ctl.SetToolTipString("Chi^2 over degrees of freedom.")
         
         # Oscillation parameter
-        self.osc_ctl = OutputTextCtrl(self, -1, size=(60,20))
+        self.osc_ctl = OutputTextCtrl(self, -1, size=(60, 20))
         hint_msg = "Oscillation parameter. P(r) for a sphere has an "
         hint_msg += " oscillation parameter of 1.1."
         self.osc_ctl.SetToolTipString(hint_msg)
         
         # Positive fraction figure of merit
-        self.pos_ctl = OutputTextCtrl(self, -1, size=(60,20))
+        self.pos_ctl = OutputTextCtrl(self, -1, size=(60, 20))
         hint_msg = "Fraction of P(r) that is positive. "
         hint_msg += "Theoretically, P(r) is defined positive."
         self.pos_ctl.SetToolTipString(hint_msg)
         
         # 1-simga positive fraction figure of merit
-        self.pos_err_ctl = OutputTextCtrl(self, -1, size=(60,20))
+        self.pos_err_ctl = OutputTextCtrl(self, -1, size=(60, 20))
         message  = "Fraction of P(r) that is at least 1 standard deviation"
         message += " greater than zero.\n"
         message += "This figure of merit tells you about the size of the "
@@ -774,10 +770,7 @@ class InversionControl(ScrolledPanel):
         qmax  = 0
         height = 0
         width  = 0
-        
         flag = True
-        
-        
         # Read slit height
         try:
             height_str = self.sheight_ctl.GetValue()
@@ -916,27 +909,19 @@ class InversionControl(ScrolledPanel):
             message += "please submit it again."
             wx.PostEvent(self.parent, StatusEvent(status=message))
         
-    def _change_file(self, evt=None, filepath=None):
+    def _change_file(self, evt=None, filepath=None, data=None):
         """
         Choose a new input file for I(q)
         """
-        import os
-        if not self.manager==None:
-            path = self.manager.choose_file(path=filepath)
-            
-            if path and os.path.isfile(path):
-                self.plot_data.SetValue(str(path))
-                try:
-                    self.manager.show_data(path, reset=True)
-                    self._on_pars_changed(None)
-                
-                    # Perform inversion
-                    if self.standalone == True:
-                        self._on_invert(None)
-                except:
-                    # Invalid data
-                    msg = "InversionControl._change_file: %s" % sys.exc_value
-                    logging.error(msg)                    
+        if not self.manager is None:
+            self.plot_data.SetValue(str(data.name))
+            try:
+                self.manager.show_data(data=data, reset=True)
+                self._on_pars_changed(None)
+                self._on_invert(None)
+            except:
+                msg = "InversionControl._change_file: %s" % sys.exc_value
+                logging.error(msg)                    
 
 class HelpDialog(wx.Dialog):
     """
@@ -953,7 +938,7 @@ class HelpDialog(wx.Dialog):
 
         explanation = help()
            
-        label_explain = wx.StaticText(self, -1, explanation, size=(350,320))
+        label_explain = wx.StaticText(self, -1, explanation, size=(350, 320))
             
         vbox.Add(label_explain, 0, wx.ALL|wx.EXPAND, 15)
 
@@ -990,15 +975,14 @@ class PrDistDialog(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
         
         label_npts = wx.StaticText(self, -1, "Number of points")
-        self.npts_ctl = PrTextCtrl(self, -1, size=(100,20))
+        self.npts_ctl = PrTextCtrl(self, -1, size=(100, 20))
                  
-        pars_sizer = wx.GridBagSizer(5,5)
+        pars_sizer = wx.GridBagSizer(5, 5)
         iy = 0
-        pars_sizer.Add(label_npts,      (iy,0), (1,1), wx.LEFT, 15)
-        pars_sizer.Add(self.npts_ctl,   (iy,1), (1,1), wx.RIGHT, 0)
+        pars_sizer.Add(label_npts, (iy, 0), (1, 1), wx.LEFT, 15)
+        pars_sizer.Add(self.npts_ctl, (iy, 1), (1, 1), wx.RIGHT, 0)
         
         vbox.Add(pars_sizer, 0, wx.ALL|wx.EXPAND, 15)
-
 
         static_line = wx.StaticLine(self, -1)
         vbox.Add(static_line, 0, wx.EXPAND, 0)

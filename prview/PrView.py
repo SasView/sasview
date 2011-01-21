@@ -5,7 +5,7 @@ from sans.guiframe import gui_manager
 # For py2exe, import config here
 import local_config
 import sys
-from perspectives.pr.pr import NewPrFileEvent
+
 
 # Application dimensions
 APP_HEIGHT = 780
@@ -17,7 +17,8 @@ class PrFrame(gui_manager.ViewerFrame):
     def _on_open(self, event):
         """
         """
-        wx.PostEvent(self, NewPrFileEvent())
+        pass
+
 
 class PrApp(gui_manager.ViewApp):
     """

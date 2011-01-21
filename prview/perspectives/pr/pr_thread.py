@@ -1,4 +1,16 @@
-import sys, time
+
+################################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation. 
+#
+#See the license text in license.txt
+#
+#copyright 2009, University of Tennessee
+################################################################################
+
+import sys
+import time
 from data_util.calcthread import CalcThread
 
 class CalcPr(CalcThread):

@@ -18,15 +18,22 @@ import sys
 import wx
 import logging
 import time
-from sans.guiframe.dataFitting import Data1D, Theory1D
-from sans.guicomm.events import NewPlotEvent, StatusEvent    
-import math, numpy
+import copy
+import math
+import numpy
+import pylab
+from sans.guiframe.dataFitting import Data1D
+from sans.guiframe.dataFitting import Theory1D
+from sans.guiframe.events import NewPlotEvent
+from sans.guiframe.events import StatusEvent    
+
 from sans.pr.invertor import Invertor
 from DataLoader.loader import Loader
+from DataLoader.data_info import Data1D as LoaderData1D
 import DataLoader
 from sans.guiframe.data_loader import load_error 
+from sans.guiframe.plugin_base import PluginBase
 
-import copy
 
 PR_FIT_LABEL       = r"$P_{fit}(r)$"
 PR_LOADED_LABEL    = r"$P_{loaded}(r)$"
@@ -34,10 +41,10 @@ IQ_DATA_LABEL      = r"$I_{obs}(q)$"
 IQ_FIT_LABEL       = r"$I_{fit}(q)$"
 IQ_SMEARED_LABEL   = r"$I_{smeared}(q)$"
 
-import wx.lib
-(NewPrFileEvent, EVT_PR_FILE) = wx.lib.newevent.NewEvent()
+#import wx.lib
+#(NewPrFileEvent, EVT_PR_FILE) = wx.lib.newevent.NewEvent()
 
-from sans.guiframe.plugin_base import PluginBase
+
 
 class Plugin(PluginBase):
     """
@@ -168,11 +175,9 @@ class Plugin(PluginBase):
         """
         """
         from sans.pr.invertor import Invertor
-        import numpy
-        import pylab
-        import math
-        from sans.guicomm.events import NewPlotEvent            
-        from danse.common.plottools import Data1D, Theory1D
+            
+        from danse.common.plottools import Data1D as PlotData1D
+        from danse.common.plottools import Theory1D as Theory1D
         
         # Generate P(r) for sphere
         radius = 60.0
@@ -204,10 +209,11 @@ class Plugin(PluginBase):
             print "%g +- %g" % (out[i], math.sqrt(cov[i][i]))
 
         # Show input P(r)
-        new_plot = Data1D(pr.x, pr.y, dy=pr.err)
+        new_plot = PlotData1D(pr.x, pr.y, dy=pr.err)
         new_plot.name = "P_{obs}(r)"
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
+        print "_fit_pr"
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Pr"))
 
         # Show P(r) fit
@@ -220,11 +226,7 @@ class Plugin(PluginBase):
     def show_shpere(self, x, radius=70.0, x_range=70.0):
         """
         """
-        import numpy
-        import pylab
-        import math
-        from sans.guicomm.events import NewPlotEvent            
-        from danse.common.plottools import Data1D, Theory1D
+        from danse.common.plottools import Theory1D as PlotTheory1D
         # Show P(r)
         y_true = numpy.zeros(len(x))
 
@@ -236,14 +238,14 @@ class Plugin(PluginBase):
         y_true = y_true/sum_true*x_range/len(x)
         
         # Show the theory P(r)
-        new_plot = Theory1D(x, y_true)
+        new_plot = PlotTheory1D(x, y_true)
         new_plot.name = "P_{true}(r)"
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
         
-        
         #Put this call in plottables/guitools    
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Sphere P(r)"))
+       
         
     def get_npts(self):
         """
@@ -256,12 +258,8 @@ class Plugin(PluginBase):
         
     def show_iq(self, out, pr, q=None):
         """
-        """
-        import numpy
-        import pylab
-        import math
-        from sans.guicomm.events import NewPlotEvent            
-        from danse.common.plottools import Data1D, Theory1D
+        """  
+        from danse.common.plottools import Theory1D as PlotTheory1D
 
         qtemp = pr.x
         if not q==None:
@@ -293,7 +291,7 @@ class Plugin(PluginBase):
                 err[i] = 1.0
                 print "Error getting error", value, x[i]
                 
-        new_plot = Theory1D(x, y)
+        new_plot = PlotTheory1D(x, y)
         new_plot.name = IQ_FIT_LABEL
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
@@ -347,12 +345,9 @@ class Plugin(PluginBase):
         
     def show_pr(self, out, pr, cov=None):
         """
-        """
-        import numpy
-        import pylab
-        import math
-        from sans.guicomm.events import NewPlotEvent            
-        from danse.common.plottools import Data1D, Theory1D
+        """     
+        from danse.common.plottools import Data1D as PlotData1D 
+        from danse.common.plottools import Theory1D as PlotTheory1D
         
         # Show P(r)
         x = pylab.arange(0.0, pr.d_max, pr.d_max/self._pr_npts)
@@ -386,12 +381,13 @@ class Plugin(PluginBase):
             dy = dy/pmax
         
         if cov2==None:
-            new_plot = Theory1D(x, y)
+            new_plot = PlotTheory1D(x, y)
         else:
-            new_plot = Data1D(x, y, dy=dy)
+            new_plot = PlotData1D(x, y, dy=dy)
         new_plot.name = PR_FIT_LABEL
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
+        new_plot.title = "P(r) fit"
         # Make sure that the plot is linear
         new_plot.xtransform="x"
         new_plot.ytransform="y"                 
@@ -399,15 +395,8 @@ class Plugin(PluginBase):
         
         return x, pr.d_max
         
-        
-    def choose_file(self, path=None):
-        """
-        """
-        #TODO: this should be in a common module
-        return self.parent.choose_file(path=path)
                 
-                
-    def load(self, path):
+    def load(self, data):
         """
         Load data. This will eventually be replaced
         by our standard DataLoader class.
@@ -421,11 +410,11 @@ class Plugin(PluginBase):
             def __init__(self, path):
                 self.path = path
                 
-        self._current_file_data = FileData(path)
+        self._current_file_data = FileData(data.path)
         
         # Use data loader to load file
-        dataread = Loader().load(path)
-        
+        #dataread = Loader().load(path)
+        dataread = data
         # Notify the user if we could not read the file
         if dataread is None:
             raise RuntimeError, "Invalid data"
@@ -573,34 +562,43 @@ class Plugin(PluginBase):
         # Look whether this Graph contains P(r) data
         #if graph.selected_plottable==IQ_DATA_LABEL:
         for item in graph.plottables:
-            if item.name==PR_FIT_LABEL:
-                m_list = [["Add P(r) data", "Load a data file and display it on this plot", self._on_add_data],
-                       ["Change number of P(r) points", "Change the number of points on the P(r) output", self._on_pr_npts]]
+            if item.name == PR_FIT_LABEL:
+                #add_data_hint = "Load a data file and display it on this plot"
+                #["Add P(r) data",add_data_hint , self._on_add_data],
+                change_n_hint = "Change the number of"
+                change_n_hint += " points on the P(r) output"
+                change_n_label = "Change number of P(r) points"
+                m_list = [[change_n_label, change_n_hint , self._on_pr_npts]]
 
-                if self._scale_output_unity==True or self._normalize_output==True:
-                    m_list.append(["Disable P(r) scaling", 
-                                   "Let the output P(r) keep the scale of the data", 
+                if self._scale_output_unity or self._normalize_output:
+                    hint = "Let the output P(r) keep the scale of the data"
+                    m_list.append(["Disable P(r) scaling", hint, 
                                    self._on_disable_scaling])
-                
-                if self._scale_output_unity==False:
+                if not self._scale_output_unity:
                     m_list.append(["Scale P_max(r) to unity", 
                                    "Scale P(r) so that its maximum is 1", 
                                    self._on_scale_unity])
-                    
-                if self._normalize_output==False:
+                if not self._normalize_output:
                     m_list.append(["Normalize P(r) to unity", 
                                    "Normalize the integral of P(r) to 1", 
                                    self._on_normalize])
                     
                 return m_list
-                #return [["Add P(r) data", "Load a data file and display it on this plot", self._on_add_data],
-                #       ["Change number of P(r) points", "Change the number of points on the P(r) output", self._on_pr_npts]]
+                #return [["Add P(r) data", 
+                #"Load a data file and display it on this plot",
+                # self._on_add_data],
+                #       ["Change number of P(r) points",
+                # "Change the number of points on the P(r) output",
+                # self._on_pr_npts]]
 
-            elif item.name==graph.selected_plottable:
-	            #TODO: we might want to check that the units are consistent with I(q)
-	            #      before allowing this menu item
-                if not self.standalone and issubclass(item.__class__, DataLoader.data_info.Data1D):
-                    return [["Compute P(r)", "Compute P(r) from distribution", self._on_context_inversion]]      
+            elif item.name == graph.selected_plottable:
+	            #TODO: we might want to check that the units are 
+	            #     consistent with I(q) before allowing this menu item
+                if not self.standalone and \
+                issubclass(item.__class__, DataLoader.data_info.Data1D):
+                    return [["Compute P(r)", 
+                             "Compute P(r) from distribution", 
+                             self._on_context_inversion]]      
                 
         return []
 
@@ -618,8 +616,9 @@ class Plugin(PluginBase):
         # Now replot the original added data
         for plot in self._added_plots:
             self._added_plots[plot].y = numpy.copy(self._default_Iq[plot])
-            wx.PostEvent(self.parent, NewPlotEvent(plot=self._added_plots[plot], 
-                                                   title=self._added_plots[plot].name,
+            wx.PostEvent(self.parent, 
+                         NewPlotEvent(plot=self._added_plots[plot], 
+                                      title=self._added_plots[plot].name,
                                                    update=True))        
         
         # Need the update flag in the NewPlotEvent to protect against
@@ -650,8 +649,9 @@ class Plugin(PluginBase):
             new_plot.xaxis("\\rm{r}", 'A')
             new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
             
-            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, update=True,
-                                                   title=self._added_plots[plot].name))
+            wx.PostEvent(self.parent, 
+                         NewPlotEvent(plot=new_plot, update=True,
+                                         title=self._added_plots[plot].name))
         
     def _on_scale_unity(self, evt):
         """
@@ -678,8 +678,9 @@ class Plugin(PluginBase):
             new_plot.xaxis("\\rm{r}", 'A')
             new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
             
-            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, update=True,
-                                                   title=self._added_plots[plot].name))        
+            wx.PostEvent(self.parent, 
+                         NewPlotEvent(plot=new_plot, update=True,
+                                title=self._added_plots[plot].name))        
         
         
     def _on_add_data(self, evt):
@@ -713,7 +714,8 @@ class Plugin(PluginBase):
                     msg += "Only the first data set was loaded." 
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
                 else:
-                    wx.PostEvent(self.parent, StatusEvent(status="This tool can only read 1D data"))
+                    msg = "This tool can only read 1D data"
+                    wx.PostEvent(self.parent, StatusEvent(status=msg))
                     return
             
         except:
@@ -747,7 +749,9 @@ class Plugin(PluginBase):
             self.calc_thread.stop()
                 
         pr = self.pr.clone()
-        self.calc_thread = CalcPr(pr, self.nfunc, error_func=self._thread_error, completefn=self._completed, updatefn=None)
+        self.calc_thread = CalcPr(pr, self.nfunc,
+                                   error_func=self._thread_error, 
+                                   completefn=self._completed, updatefn=None)
         self.calc_thread.queue()
         self.calc_thread.ready(2.5)
     
@@ -814,7 +818,8 @@ class Plugin(PluginBase):
         # Save Pr invertor
         self.pr = pr
         
-        #message = "Computation completed in %g seconds [chi2=%g]" % (elapsed, pr.chi2)
+        #message = "Computation completed in"
+        #message +=  %g seconds [chi2=%g]" % (elapsed, pr.chi2)
         #wx.PostEvent(self.parent, StatusEvent(status=message))
 
         cov = numpy.ascontiguousarray(cov)
@@ -834,7 +839,8 @@ class Plugin(PluginBase):
         if False:
             for i in range(len(out)):
                 try:
-                    print "%d: %g +- %g" % (i, out[i], math.sqrt(math.fabs(cov[i][i])))
+                    print "%d: %g +- %g" % (i, out[i],
+                                             math.sqrt(math.fabs(cov[i][i])))
                 except: 
                     print sys.exc_value
                     print "%d: %g +- ?" % (i, out[i])        
@@ -854,9 +860,10 @@ class Plugin(PluginBase):
         x_values, x_range = self.show_pr(out, self.pr, cov)  
         
         # Popup result panel
-        #result_panel = InversionResults(self.parent, -1, style=wx.RAISED_BORDER)
+        #result_panel = InversionResults(self.parent, 
+        #-1, style=wx.RAISED_BORDER)
         
-    def show_data(self, path=None, reset=False):
+    def show_data(self, path=None, data=None, reset=False):
         """
         Show data read from a file
         
@@ -864,11 +871,14 @@ class Plugin(PluginBase):
         :param reset: if True all other plottables will be cleared
         
         """
-        if path is not None:
+        print "show_data", data.name
+        #if path is not None:
+        if data is not None:
             try:
-                pr = self._create_file_pr(path)
+                #pr = self._create_file_pr(path)
+                pr = self._create_file_pr(data)
             except:
-                status="Problem reading data: %s" % sys.exc_value
+                status = "Problem reading data: %s" % sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status=status))
                 raise RuntimeError, status
                 
@@ -877,7 +887,7 @@ class Plugin(PluginBase):
                 raise RuntimeError, "Loaded data is invalid"
             
             self.pr = pr
-              
+       
         # Make a plot of I(q) data
         if self.pr.err==None:
             new_plot = Theory1D(self.pr.x, self.pr.y)
@@ -888,7 +898,8 @@ class Plugin(PluginBase):
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.interactive = True
         #new_plot.group_id = "test group"
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="I(q)", reset=reset))
+        wx.PostEvent(self.parent, 
+                     NewPlotEvent(plot=new_plot, title="I(q)", reset=reset))
         
         self.current_plottable = new_plot
         self.current_plottable.group_id = IQ_DATA_LABEL
@@ -917,10 +928,13 @@ class Plugin(PluginBase):
         
         # Write the output to file
         # First, check that the data is of the right type
-        if issubclass(self.current_plottable.__class__, DataLoader.data_info.Data1D):
+        if issubclass(self.current_plottable.__class__,
+                       DataLoader.data_info.Data1D):
             self.state_reader.write(filepath, self.current_plottable, prstate)
         else:
-            raise RuntimeError, "pr.save_data: the data being saved is not a DataLoader.data_info.Data1D object" 
+            msg = "pr.save_data: the data being saved is not a"
+            msg += " DataLoader.data_info.Data1D object" 
+            raise RuntimeError, msg
         
         
     def setup_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None, 
@@ -944,7 +958,8 @@ class Plugin(PluginBase):
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
 
-    def estimate_plot_inversion(self, alpha, nfunc, d_max, q_min=None, q_max=None, 
+    def estimate_plot_inversion(self, alpha, nfunc, d_max, 
+                                q_min=None, q_max=None, 
                                 bck=False, height=0, width=0):
         """
         """
@@ -1015,7 +1030,8 @@ class Plugin(PluginBase):
                     scale = 0.05*math.sqrt(pr.y[i])
                     min_err = 0.01*pr.y[i]
                 err[i] = scale*math.sqrt( math.fabs(pr.y[i]) ) + min_err
-            message = "The loaded file had no error bars, statistical errors are assumed."
+            message = "The loaded file had no error bars, "
+            message += "statistical errors are assumed."
             wx.PostEvent(self.parent, StatusEvent(status=message))
 
         pr.err = err
@@ -1023,7 +1039,8 @@ class Plugin(PluginBase):
         return pr
 
           
-    def setup_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None, 
+    def setup_file_inversion(self, alpha, nfunc, d_max, data,
+                             path=None, q_min=None, q_max=None, 
                              bck=False, height=0, width=0):
         """
         """
@@ -1037,14 +1054,16 @@ class Plugin(PluginBase):
         self.slit_width  = width
         
         try:
-            pr = self._create_file_pr(path)
+            #pr = self._create_file_pr(path)
+            pr = self._create_file_pr(data)
             if not pr==None:
                 self.pr = pr
                 self.perform_inversion()
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
           
-    def estimate_file_inversion(self, alpha, nfunc, d_max, path, q_min=None, q_max=None, 
+    def estimate_file_inversion(self, alpha, nfunc, d_max, data,
+                                path=None, q_min=None, q_max=None, 
                                 bck=False, height=0, width=0):
         """
         """
@@ -1058,15 +1077,16 @@ class Plugin(PluginBase):
         self.slit_width  = width
         
         try:
-            pr = self._create_file_pr(path)
-            if not pr==None:
+            pr = self._create_file_pr(data)
+            #pr = self._create_file_pr(path)
+            if not pr is None:
                 self.pr = pr
                 self.perform_estimate()
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
                 
           
-    def _create_file_pr(self, path):
+    def _create_file_pr(self, data):
         """
         Create and prepare invertor instance from
         a file data set.
@@ -1075,66 +1095,80 @@ class Plugin(PluginBase):
         
         """
         # Load data
-        if os.path.isfile(path):
+        #if os.path.isfile(path):
+        """    
+        if self._current_file_data is not None \
+            and self._current_file_data.path==path:
+            # Protect against corrupted data from 
+            # previous failed load attempt
+            if self._current_file_data.x is None:
+                return None
+            x = self._current_file_data.x
+            y = self._current_file_data.y
+            err = self._current_file_data.err
             
-            if self._current_file_data is not None \
-                and self._current_file_data.path==path:
-                # Protect against corrupted data from 
-                # previous failed load attempt
-                if self._current_file_data.x is None:
-                    return None
-                x = self._current_file_data.x
-                y = self._current_file_data.y
-                err = self._current_file_data.err
+            message = "The data from this file has already been loaded."
+            wx.PostEvent(self.parent, StatusEvent(status=message))
+        else:
+        """
+        # Reset the status bar so that we don't get mixed up
+        # with old messages. 
+        #TODO: refactor this into a proper status handling
+        wx.PostEvent(self.parent, StatusEvent(status=''))
+        try:
+            class FileData:
+                x = None
+                y = None
+                err = None
+                path = None
+                def __init__(self, path):
+                    self.path = path
                 
-                message = "The data from this file has already been loaded."
-                wx.PostEvent(self.parent, StatusEvent(status=message))
-            else:
-                # Reset the status bar so that we don't get mixed up
-                # with old messages. 
-                #TODO: refactor this into a proper status handling
-                wx.PostEvent(self.parent, StatusEvent(status=''))
-                try:
-                    x, y, err = self.load(path)
-                except:
-                    load_error(sys.exc_value)
-                    return None
-                
-                # If the file contains no data, just return
-                if x is None or len(x)==0:
-                    load_error("The loaded file contains no data")
-                    return None
-            
-            # If we have not errors, add statistical errors
-            if err==None and y is not None:
-                err = numpy.zeros(len(y))
-                scale = None
-                min_err = 0.0
-                for i in range(len(y)):
-                    # Scale the error so that we can fit over several decades of Q
-                    if scale==None:
-                        scale = 0.05*math.sqrt(y[i])
-                        min_err = 0.01*y[i]
-                    err[i] = scale*math.sqrt( math.fabs(y[i]) ) + min_err
-                message = "The loaded file had no error bars, statistical errors are assumed."
-                wx.PostEvent(self.parent, StatusEvent(status=message))
-            
-            try:
-                # Get the data from the chosen data set and perform inversion
-                pr = Invertor()
-                pr.d_max = self.max_length
-                pr.alpha = self.alpha
-                pr.q_min = self.q_min
-                pr.q_max = self.q_max
-                pr.x = x
-                pr.y = y
-                pr.err = err
-                pr.has_bck = self.has_bck
-                pr.slit_height = self.slit_height
-                pr.slit_width = self.slit_width
-                return pr
-            except:
-                load_error(sys.exc_value)
+            self._current_file_data = FileData(data.path)
+            self._current_file_data.x = data.x
+            self._current_file_data.y = data.y
+            self._current_file_data.err = data.dy
+            x, y, err = data.x, data.y, data.dy
+        except:
+            load_error(sys.exc_value)
+            return None
+        
+        # If the file contains no data, just return
+        if x is None or len(x) == 0:
+            load_error("The loaded file contains no data")
+            return None
+        
+        # If we have not errors, add statistical errors
+        if err is not None and y is not None:
+            err = numpy.zeros(len(y))
+            scale = None
+            min_err = 0.0
+            for i in range(len(y)):
+                # Scale the error so that we can fit over several decades of Q
+                if scale == None:
+                    scale = 0.05 * math.sqrt(y[i])
+                    min_err = 0.01 * y[i]
+                err[i] = scale * math.sqrt(math.fabs(y[i])) + min_err
+            message = "The loaded file had no error bars, "
+            message += "statistical errors are assumed."
+            wx.PostEvent(self.parent, StatusEvent(status=message))
+        
+        try:
+            # Get the data from the chosen data set and perform inversion
+            pr = Invertor()
+            pr.d_max = self.max_length
+            pr.alpha = self.alpha
+            pr.q_min = self.q_min
+            pr.q_max = self.q_max
+            pr.x = x
+            pr.y = y
+            pr.err = err
+            pr.has_bck = self.has_bck
+            pr.slit_height = self.slit_height
+            pr.slit_width = self.slit_width
+            return pr
+        except:
+            load_error(sys.exc_value)
         return None
         
     def perform_estimate(self):
@@ -1144,12 +1178,14 @@ class Plugin(PluginBase):
         from copy import deepcopy
         
         # If a thread is already started, stop it
-        if self.estimation_thread != None and self.estimation_thread.isrunning():
+        if self.estimation_thread != None and \
+            self.estimation_thread.isrunning():
             self.estimation_thread.stop()
                 
         pr = self.pr.clone()
-        self.estimation_thread = EstimatePr(pr, self.nfunc, error_func=self._thread_error, 
-                                            completefn = self._estimate_completed, 
+        self.estimation_thread = EstimatePr(pr, self.nfunc,
+                                             error_func=self._thread_error, 
+                                         completefn = self._estimate_completed, 
                                             updatefn   = None)
         self.estimation_thread.queue()
         self.estimation_thread.ready(2.5)
@@ -1169,8 +1205,9 @@ class Plugin(PluginBase):
         # It slows down the application and it doesn't change the estimates
         pr.slit_height = 0.0
         pr.slit_width  = 0.0
-        self.estimation_thread = EstimateNT(pr, self.nfunc, error_func=self._thread_error, 
-                                            completefn = self._estimateNT_completed, 
+        self.estimation_thread = EstimateNT(pr, self.nfunc, 
+                                            error_func=self._thread_error, 
+                                        completefn = self._estimateNT_completed, 
                                             updatefn   = None)
         self.estimation_thread.queue()
         self.estimation_thread.ready(2.5)
@@ -1194,7 +1231,8 @@ class Plugin(PluginBase):
         
         for i in range(len(out)):
             try:
-                print "%d: %g +- %g" % (i, out[i], math.sqrt(math.fabs(cov[i][i])))
+                print "%d: %g +- %g" % (i, out[i],
+                                         math.sqrt(math.fabs(cov[i][i])))
             except: 
                 print "%d: %g +- ?" % (i, out[i])        
         
@@ -1204,25 +1242,24 @@ class Plugin(PluginBase):
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
-                
         # Show I(q) fit
         self.show_iq(out, self.pr)
-        
         # Show P(r) fit
         x_values, x_range = self.show_pr(out, self.pr, cov=cov)
         
-        
-          
     def _on_context_inversion(self, event):
+        """
+        """
         panel = event.GetEventObject()
 
         # If we have more than one displayed plot, make the user choose
-        if len(panel.plots)>1 and panel.graph.selected_plottable in panel.plots:
+        if len(panel.plots) > 1 and \
+            panel.graph.selected_plottable in panel.plots:
             dataset = panel.graph.selected_plottable
-        elif len(panel.plots)==1:
+        elif len(panel.plots) == 1:
             dataset = panel.plots.keys()[0]
         else:
-            print "Error: No data is available"
+            logging.info("Prview Error: No data is available")
             return
         
         # Store a reference to the current plottable
@@ -1232,14 +1269,14 @@ class Plugin(PluginBase):
             self.control_panel.alpha = estimate
         except:
             self.control_panel.alpha = self.alpha
-            print "No estimate yet"
+            logging.info("Prview :Alpha Not estimate yet")
             pass
         try:
             estimate = int(self.control_panel.nterms_estimate)
             self.control_panel.nfunc = estimate
         except:
             self.control_panel.nfunc = self.nfunc
-            print "No estimate yet"
+            logging.info("Prview : ntemrs Not estimate yet")
             pass
         
         self.current_plottable = panel.plots[dataset]
@@ -1263,22 +1300,27 @@ class Plugin(PluginBase):
         self.control_panel.nfunc = self.nfunc
         self.control_panel.d_max = self.max_length
         self.control_panel.alpha = self.alpha
-        
         self.perspective = []
         self.perspective.append(self.control_panel.window_name)
-        
-        self.parent.Bind(EVT_PR_FILE, self._on_new_file)
-        
+     
         return [self.control_panel]
     
-    def _on_new_file(self, evt):
+    def set_data(self, data_list):
         """
-            Called when the application manager posted an
-            EVT_PR_FILE event. Just prompt the control
-            panel to load a new data file.
+        receive a list of data to compute pr
         """
-        self.control_panel._change_file(None)
-
+        if len(data_list) > 1:
+            msg = "Pr panel does not allow more than one value"
+            msg += " at this time"
+            raise ValueError, msg
+        elif len(data_list) == 1:
+            if issubclass(data_list[0].__class__, LoaderData1D):
+                self.control_panel._change_file(evt=None, data=data_list[0])
+            else:
+                msg = "Pr cannot be computed for"
+                msg += " data of type %s" % (data_list[0].__class__.__name__)
+                raise ValueError, msg
+            
     def post_init(self):
         """
             Post initialization call back to close the loose ends
