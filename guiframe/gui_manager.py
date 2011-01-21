@@ -85,7 +85,7 @@ class ViewerFrame(wx.Frame):
         self.app_manager = None
         self._mgr = None
         #data manager
-        from .data_manager import DataManager
+        from data_manager import DataManager
         self.data_manager = DataManager()
         #add current perpsective
         self._current_perspective = None
@@ -788,8 +788,8 @@ class ViewerFrame(wx.Frame):
         for item in self.plugins:
             if hasattr(item, "set_default_perspective"):
                 if item.set_default_perspective():
-                    item.on_perspective(event=None)
                     self._current_perspective = item
+                    item.on_perspective(event=None)
                     return 
         
     def set_perspective(self, panels):
