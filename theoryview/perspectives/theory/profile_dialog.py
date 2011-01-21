@@ -38,40 +38,36 @@ class SLDPanel(wx.Dialog):
     window_caption = "SLD Profile"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
-    def __init__(self, parent=None,base=None,data =None,axes =['Radius'], id = -1, *args, **kwds):
+    def __init__(self, parent=None, base=None ,data=None,
+                 axes =['Radius'], id = -1, *args, **kwds):
         kwds["style"] =  wx.DEFAULT_DIALOG_STYLE
-        kwds["size"] = wx.Size(_STATICBOX_WIDTH*1.5,PANEL_SIZE) 
-        wx.Dialog.__init__(self, parent, id = id,  *args, **kwds)
-        if data != None:
-            
+        kwds["size"] = wx.Size(_STATICBOX_WIDTH * 1.5,PANEL_SIZE) 
+        wx.Dialog.__init__(self, parent, id=id,  *args, **kwds)
+        
+        if data is not None:
             #Font size 
-            kwds =[]
+            kwds = []
             self.SetWindowVariant(variant=FONT_VARIANT)
-
             self.SetTitle("Scattering Length Density Profile")
             self.parent = base
             self.data = data
             self.str = self.data.__str__()
-
             ## when 2 data have the same id override the 1 st plotted
             self.name = self.data.name
-            
             # Panel for plot
-            self.plotpanel    = SLDplotpanel(self, axes, -1, style=wx.TRANSPARENT_WINDOW)
+            self.plotpanel = SLDplotpanel(self, axes, -1, 
+                                             style=wx.TRANSPARENT_WINDOW)
             self.cmap = DEFAULT_CMAP
             ## Create Artist and bind it
             self.subplot = self.plotpanel.subplot
-
             self._setup_layout()
             data_plot = deepcopy(self.data)
             self.newplot=Theory1D(data_plot.x,data_plot.y)
             self.newplot.name = 'SLD'
             self.plotpanel.add_image(self.newplot) 
-
             self.Centre()
             self.Layout()
             
-    
     def _setup_layout(self):
         """
         Set up the layout
@@ -79,15 +75,17 @@ class SLDPanel(wx.Dialog):
         #  panel
         sizer = wx.GridBagSizer(14,14)
         
-        sizer.Add(self.plotpanel,(0, 0), (13, 13), wx.EXPAND | wx.LEFT| wx.RIGHT, 1)
+        sizer.Add(self.plotpanel,(0, 0), (13, 13), 
+                  wx.EXPAND|wx.LEFT| wx.RIGHT, 1)
 
         #-----Button------------1
         id = wx.NewId()
         button_reset = wx.Button(self, id, "Close")
         button_reset.SetToolTipString("Close...")
-        button_reset.Bind(wx.EVT_BUTTON, self._close, id = button_reset.GetId()) 
-        sizer.Add(button_reset, (13, 12), flag=wx.RIGHT | wx.BOTTOM, border=15)
-
+        button_reset.Bind(wx.EVT_BUTTON, self._close,
+                           id=button_reset.GetId()) 
+        sizer.Add(button_reset, (13, 12), 
+                  flag=wx.RIGHT|wx.BOTTOM, border=15)
         sizer.AddGrowableCol(2)
         sizer.AddGrowableRow(3)
         self.SetSizerAndFit(sizer)
@@ -113,10 +111,12 @@ class SLDplotpanel(PlotPanel):
     """
     Panel
     """
-    def __init__(self, parent,axes=[], id = -1, color = None, dpi = None, **kwargs):
+    def __init__(self, parent, axes=[], id=-1, color=None,
+                  dpi=None, **kwargs):
         """
         """
-        PlotPanel.__init__(self, parent, id=id, color=color, dpi=dpi, **kwargs)
+        PlotPanel.__init__(self, parent, id=id, 
+                           color=color, dpi=dpi, **kwargs)
         # Keep track of the parent Frame
         self.parent = parent
         # Internal list of plottable names (because graph 
@@ -138,10 +138,8 @@ class SLDplotpanel(PlotPanel):
         self.graph.add(plot)
         #add axes
         x1_label = self.axes_label[0]
-        self.graph.xaxis('\\rm{%s} '% x1_label, '\\AA')
+        self.graph.xaxis('\\rm{%s} ' % x1_label, '\\AA')
         self.graph.yaxis('\\rm{SLD} ', '\\AA^{-2}')
-
-
         #draw
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
@@ -180,8 +178,8 @@ class ViewerFrame(wx.Frame):
         :param parent: parent panel/container
         """
         # Initialize the Frame object
-        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, wx.Size(950,850))
-        
+        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition,
+                           wx.Size(950, 850))
         # Panel for 1D plot
         self.plotpanel    = SLDplotpanel(self, -1, style=wx.RAISED_BORDER)
 
