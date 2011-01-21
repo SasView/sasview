@@ -1,20 +1,23 @@
+
+
+
 import wx
 import sys
-
+import pylab
 from copy import deepcopy
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph
 from sans.guiframe.dataFitting import Theory1D
-import pylab
 
-DEFAULT_CMAP= pylab.cm.jet
+
+DEFAULT_CMAP = pylab.cm.jet
 
 _BOX_WIDTH = 76
 _STATICBOX_WIDTH = 400
 _SCALE = 1e-6
 
 #SLD panel size 
-if sys.platform.count("win32")>0:
+if sys.platform.count("win32") > 0:
     _STATICBOX_WIDTH = 380
     PANEL_SIZE = 475
     FONT_VARIANT = 0

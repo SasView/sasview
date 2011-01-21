@@ -1,7 +1,9 @@
+
 import time
-from data_util.calcthread import CalcThread
 import sys
-import numpy,math
+import numpy
+import math
+from data_util.calcthread import CalcThread
 
 class Calc2D(CalcThread):
     """

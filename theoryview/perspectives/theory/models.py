@@ -4,22 +4,25 @@ This module collects models from sans.models packages and orders theses models
 by categories that GUI application understands and uses.
 
 """
-import wx
-import wx.lib.newevent
-import imp
-import os,sys,math
-import os.path
 
-(ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
-from sans.guicomm.events import StatusEvent  
+import imp
+import os
+import sys
+import math
 # Time is needed by the log method
 import time
-
+import os.path
+import wx
+import wx.lib.newevent
+from sans.guiframe.events import StatusEvent  
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
 # as the base class of plug-in models.
 from sans.models.pluginmodel import Model1DPlugin
-    
+
+(ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
+
+
 def log(message):
     """
     """

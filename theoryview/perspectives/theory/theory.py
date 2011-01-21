@@ -8,8 +8,8 @@ import logging
 import models
 import model_panel
 from model_panel import ModelPanel
-from sans.guicomm.events import NewPlotEvent
-from sans.guicomm.events import StatusEvent 
+from sans.guiframe.events import NewPlotEvent
+from sans.guiframe.events import StatusEvent 
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.dataFitting import Theory1D
 

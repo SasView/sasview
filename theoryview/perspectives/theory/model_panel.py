@@ -7,7 +7,7 @@ import math
 from sans.guiframe.panel_base import PanelBase
 from sans.models.dispersion_models import ArrayDispersion
 from sans.models.dispersion_models import GaussianDispersion
-from sans.guicomm.events import StatusEvent   
+from sans.guiframe.events import StatusEvent   
 from sans.guiframe.utils import format_number
 import basepage
 from basepage import BasicPage
