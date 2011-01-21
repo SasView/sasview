@@ -1310,16 +1310,30 @@ class Plugin(PluginBase):
         receive a list of data to compute pr
         """
         if len(data_list) > 1:
-            msg = "Pr panel does not allow more than one value"
-            msg += " at this time"
-            raise ValueError, msg
+            msg = "Pr panel does not allow multiple Data.\n"
+            msg += "Please select one!\n"
+            from pr_widgets import DataDialog
+            dlg = DataDialog(data_list=data_list, text=msg)
+            if dlg.ShowModal() == wx.ID_OK:
+                data = dlg.get_data()
+                if issubclass(data.__class__, LoaderData1D):
+                    self.control_panel._change_file(evt=None, data=data)
+                else:    
+                    msg = "Pr cannot be computed for data of "
+                    msg += "type %s" % (data_list[0].__class__.__name__)
+                    wx.PostEvent(self.parent, 
+                             StatusEvent(status=msg, info='error'))
         elif len(data_list) == 1:
             if issubclass(data_list[0].__class__, LoaderData1D):
                 self.control_panel._change_file(evt=None, data=data_list[0])
             else:
                 msg = "Pr cannot be computed for"
                 msg += " data of type %s" % (data_list[0].__class__.__name__)
-                raise ValueError, msg
+                wx.PostEvent(self.parent, 
+                             StatusEvent(status=msg, info='error'))
+        else:
+            msg = "Pr contain no data"
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info='warning'))
             
     def post_init(self):
         """
