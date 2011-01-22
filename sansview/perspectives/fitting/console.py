@@ -1,7 +1,7 @@
 
 
 
-from sans.guicomm.events import StatusEvent 
+from sans.guiframe.events import StatusEvent 
 import time
 import wx
 import park

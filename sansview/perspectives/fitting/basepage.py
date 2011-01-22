@@ -10,7 +10,7 @@ import string
 from sans.guiframe.panel_base import PanelBase
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.guiframe.utils import format_number,check_float
-from sans.guicomm.events import StatusEvent
+from sans.guiframe.events import StatusEvent
 import pagestate
 from pagestate import PageState
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()

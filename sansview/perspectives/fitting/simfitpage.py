@@ -1,7 +1,7 @@
 
 import sys,re,string, wx  
 import wx.lib.newevent 
-from sans.guicomm.events import StatusEvent 
+from sans.guiframe.events import StatusEvent 
    
 #Control panel width 
 if sys.platform.count("darwin")==0:
