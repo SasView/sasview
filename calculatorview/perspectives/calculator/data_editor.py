@@ -14,7 +14,7 @@ from collimation_editor import CollimationDialog
 from console import ConsoleDialog
 
 #from sans.guiframe.utils import check_float
-from sans.guicomm.events import StatusEvent
+from sans.guiframe.events import StatusEvent
 
 
 _QMIN_DEFAULT = 0.001

@@ -11,7 +11,7 @@ from sans.guiframe.panel_base import PanelBase
 
 from sans.guiframe.utils import format_number
 from sans.guiframe.utils import check_float
-from sans.guicomm.events import StatusEvent  
+from sans.guiframe.events import StatusEvent  
 
 # the calculator default value for wavelength is 6
 #import periodictable

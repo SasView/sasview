@@ -14,7 +14,7 @@ import os
 
 from sans.guiframe.panel_base import PanelBase
 
-from sans.guicomm.events import StatusEvent  
+from sans.guiframe.events import StatusEvent  
 from sans.calculator.slit_length_calculator import SlitlengthCalculator  
 from calculator_widgets import OutputTextCtrl
 from calculator_widgets import InterActiveOutputTextCtrl
