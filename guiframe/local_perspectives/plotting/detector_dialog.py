@@ -7,8 +7,8 @@ __revision__ = "$Revision: 1193 $"
 import wx
 import sys
 from sans.guiframe.utils import format_number
-from sans.guicomm.events import StatusEvent 
-from sans.guicomm.events import NewPlotEvent
+from sans.guiframe.events import StatusEvent 
+from sans.guiframe.events import NewPlotEvent
 
 import matplotlib 
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as Canvas

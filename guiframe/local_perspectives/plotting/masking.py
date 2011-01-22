@@ -30,8 +30,8 @@ from binder import BindArtist
 from sans.guiframe.dataFitting import Data2D
 from boxMask import BoxMask
 from sectorMask import SectorMask
-from sans.guicomm.events import SlicerEvent
-from sans.guicomm.events import StatusEvent
+from sans.guiframe.events import SlicerEvent
+from sans.guiframe.events import StatusEvent
 (InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()
 
 DEFAULT_CMAP = pylab.cm.jet

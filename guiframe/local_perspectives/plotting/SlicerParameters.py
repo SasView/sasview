@@ -3,10 +3,10 @@
 import wx
 import wx.lib.newevent
 #from copy import deepcopy
-from sans.guicomm.events import EVT_SLICER_PARS
+from sans.guiframe.events import EVT_SLICER_PARS
 from sans.guiframe.utils import format_number
-from sans.guicomm.events import EVT_SLICER
-from sans.guicomm.events import SlicerParameterEvent
+from sans.guiframe.events import EVT_SLICER
+from sans.guiframe.events import SlicerParameterEvent
 
 
 class SlicerParameterPanel(wx.Dialog):

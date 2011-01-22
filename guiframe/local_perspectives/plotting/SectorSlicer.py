@@ -3,10 +3,10 @@ import math
 import wx
 #from copy import deepcopy
 from BaseInteractor import _BaseInteractor
-from sans.guicomm.events import NewPlotEvent
-from sans.guicomm.events import StatusEvent
-from sans.guicomm.events import SlicerParameterEvent
-from sans.guicomm.events import EVT_SLICER_PARS
+from sans.guiframe.events import NewPlotEvent
+from sans.guiframe.events import StatusEvent
+from sans.guiframe.events import SlicerParameterEvent
+from sans.guiframe.events import EVT_SLICER_PARS
 from sans.guiframe.dataFitting import Data1D
 
 

@@ -17,11 +17,11 @@ import pylab
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph
-from sans.guicomm.events import EVT_NEW_PLOT
-from sans.guicomm.events import EVT_SLICER_PARS
-from sans.guicomm.events import StatusEvent 
-from sans.guicomm.events import NewPlotEvent
-from sans.guicomm.events import SlicerEvent
+from sans.guiframe.events import EVT_NEW_PLOT
+from sans.guiframe.events import EVT_SLICER_PARS
+from sans.guiframe.events import StatusEvent 
+from sans.guiframe.events import NewPlotEvent
+from sans.guiframe.events import SlicerEvent
 from sans.guiframe.utils import PanelMenu
 from binder import BindArtist
 from Plotter1D import ModelPanel1D
@@ -515,7 +515,7 @@ class ModelPanel2D(ModelPanel1D):
         ## save the window_caption of the new panel in the current slicer
         self.slicer.set_panel_name(name=new_panel.window_caption)
         ## post slicer panel to guiframe to display it 
-        from sans.guicomm.events import SlicerPanelEvent
+        from sans.guiframe.events import SlicerPanelEvent
         wx.PostEvent(self.parent, SlicerPanelEvent(panel=self.panel_slicer,
                                                     main_panel=self))
 

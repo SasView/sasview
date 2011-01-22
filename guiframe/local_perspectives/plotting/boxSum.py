@@ -5,9 +5,9 @@ import math
 import wx
 from copy import deepcopy
 from BaseInteractor import _BaseInteractor
-from sans.guicomm.events import SlicerParamUpdateEvent
-from sans.guicomm.events import EVT_SLICER_PARS
-from sans.guicomm.events import StatusEvent
+from sans.guiframe.events import SlicerParamUpdateEvent
+from sans.guiframe.events import EVT_SLICER_PARS
+from sans.guiframe.events import StatusEvent
 
 
 class BoxSum(_BaseInteractor):

@@ -4,9 +4,9 @@ import wx
 import wx.lib.newevent
 #from copy import deepcopy
 from sans.guiframe.utils import format_number
-from sans.guicomm.events import SlicerParameterEvent
-from sans.guicomm.events import EVT_SLICER_PARS
-from sans.guicomm.events import EVT_SLICER
+from sans.guiframe.events import SlicerParameterEvent
+from sans.guiframe.events import EVT_SLICER_PARS
+from sans.guiframe.events import EVT_SLICER
 
 from sans.guiframe.panel_base import PanelBase
 

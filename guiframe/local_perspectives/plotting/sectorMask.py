@@ -5,7 +5,7 @@ import wx
 from BaseInteractor import _BaseInteractor
 from SectorSlicer import SideInteractor
 from SectorSlicer import LineInteractor
-from sans.guicomm.events import SlicerParameterEvent
+from sans.guiframe.events import SlicerParameterEvent
 
 class SectorMask(_BaseInteractor):
     """

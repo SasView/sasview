@@ -8,7 +8,7 @@ from BaseInteractor import _BaseInteractor
 from boxSum import PointInteractor
 from boxSum import VerticalDoubleLine
 from boxSum import HorizontalDoubleLine
-#from sans.guicomm.events import SlicerParamUpdateEvent
+#from sans.guiframe.events import SlicerParamUpdateEvent
 
 
 class BoxMask(_BaseInteractor):
