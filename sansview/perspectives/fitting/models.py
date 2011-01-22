@@ -6,7 +6,7 @@ import os,sys,math
 import os.path
 
 (ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
-from sans.guicomm.events import StatusEvent  
+from sans.guiframe.events import StatusEvent  
 # Time is needed by the log method
 import time
 
