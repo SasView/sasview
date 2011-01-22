@@ -31,7 +31,7 @@ from sans.pr.invertor import Invertor
 from DataLoader.loader import Loader
 from DataLoader.data_info import Data1D as LoaderData1D
 import DataLoader
-from sans.guiframe.data_loader import load_error 
+from pr_widgets import load_error 
 from sans.guiframe.plugin_base import PluginBase
 
 

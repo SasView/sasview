@@ -193,3 +193,20 @@ class DataDialog(wx.Dialog):
             rbox, data = item
             if rbox.GetValue():
                 return data 
+def load_error(error=None):
+    """
+    Pop up an error message.
+    
+    :param error: details error message to be displayed
+    """
+    message = "The data file you selected could not be loaded.\n"
+    message += "Make sure the content of your file is properly formatted.\n\n"
+    
+    if error is not None:
+        message += "When contacting the DANSE team, mention the"
+        message += " following:\n%s" % str(error)
+    
+    dial = wx.MessageDialog(None, message, 'Error Loading File',
+                            wx.OK | wx.ICON_EXCLAMATION)
+    dial.ShowModal()    
+
