@@ -26,7 +26,7 @@ from sans.guiframe.events import ERR_DATA
 from .invariant_state import Reader as reader
 from DataLoader.loader import Loader
 from .invariant_panel import InvariantPanel
-from sans.guicomm.events import EVT_INVSTATE_UPDATE
+from sans.guiframe.events import EVT_INVSTATE_UPDATE
 
 from sans.guiframe.plugin_base import PluginBase
 
