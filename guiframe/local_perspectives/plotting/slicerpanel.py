@@ -90,8 +90,8 @@ class SlicerPanel(wx.Panel, PanelBase):
                             flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
                     ctl = wx.TextCtrl(self, -1, size=(80, 20), 
                                       style=wx.TE_PROCESS_ENTER)
-                    hint_msg = "Modify the value of %s to change "
-                    hint_msg += "the 2D slicer" % item
+                    hint_msg = "Modify the value of %s to change " % item
+                    hint_msg += "the 2D slicer"
                     ctl.SetToolTipString(hint_msg)
                     ctl.SetValue(str(format_number(params[item])))
                     self.Bind(wx.EVT_TEXT_ENTER, self.onTextEnter)

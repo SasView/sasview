@@ -80,8 +80,8 @@ class SlicerParameterPanel(wx.Dialog):
                                  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                     ctl = wx.TextCtrl(self, -1, size=(80, 20),
                                       style=wx.TE_PROCESS_ENTER)
-                    hint_msg = "Modify the value of %s to change"
-                    hint_msg += " the 2D slicer" % item
+                    hint_msg = "Modify the value of %s to change" % item
+                    hint_msg += " the 2D slicer"
                     ctl.SetToolTipString(hint_msg)
                     ix = 1
                     ctl.SetValue(format_number(str(params[item])))
