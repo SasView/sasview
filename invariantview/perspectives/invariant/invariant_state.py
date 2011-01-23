@@ -1,7 +1,7 @@
 """
 """
 
-import time
+#import time
 import os
 import sys
 import logging
@@ -251,7 +251,7 @@ class InvariantState(object):
             we will append the data [optional]   
         """
         from xml.dom.minidom import getDOMImplementation
-        #import time
+        import time
         timestamp = time.time()
         # Check whether we have to write a standalone XML file
         if doc is None:
@@ -479,11 +479,11 @@ class InvariantState(object):
                     extra = item[1].split(";")
                     bool_0 = extra[0].split("=")
                     bool_1 = extra[1].split("=")
-                    s_7 = " " + bool_0[0] + "Q region = " + bool_0[1]
-                    s_8 = " " + bool_1[0] + "Q region = " + bool_1[1]
+                    s_8 = " " + bool_0[0] + "Q region = " + bool_0[1]
+                    s_7 = " " + bool_1[0] + "Q region = " + bool_1[1]
                 elif item[0] == "npts low":
                     s_9 = item[1]
-                elif item[0] == " npts high":
+                elif item[0] == "npts high":
                     s_10 = item[1]
                 elif item[0] == "volume fraction":
                     val=item[1].split("+-")[0].strip()
@@ -493,9 +493,9 @@ class InvariantState(object):
                     val = item[1].split("+-")[0].strip()
                     error = item[1].split("+-")[1].strip()
                     s_18 = val + " &plusmn; " + error
-                elif item[0].split("(")[0].strip() == "power high":
-                    s_11 = item[0]+" ="+item[1]
                 elif item[0].split("(")[0].strip() == "power low":
+                    s_11 = item[0]+" ="+item[1]
+                elif item[0].split("(")[0].strip() == "power high":
                     s_12 = item[0]+" ="+item[1]
                 elif item[0].split("[")[0].strip() == "Q* from low Q extrapolation":
                     #looks messy but this way the symbols +_ and % work on html
