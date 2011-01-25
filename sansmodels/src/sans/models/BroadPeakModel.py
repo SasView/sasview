@@ -47,8 +47,8 @@ class BroadPeakModel(BaseComponent):
         self.details['scale_p'] = ['', None, None]
         self.details['exponent_p'] =  ['', None, None]
         self.details['scale_l']  =  ['', None, None]
-        self.details['length_l']  =   ['A', None, None]
-        self.details['q_peak']  =  ['1/A', None, None]
+        self.details['length_l']  =   ['[A]', None, None]
+        self.details['q_peak']  =  ['[1/A]', None, None]
         self.details['exponent_l']  =   ['', None, None]
         self.details['background']   =  ['[1/cm]', None, None]
 
