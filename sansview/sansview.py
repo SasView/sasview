@@ -21,6 +21,7 @@ if hasattr(sys, 'frozen'):
     os.environ['MPLCONFIGDIR'] = mplconfigdir
 
 from sans.guiframe import gui_manager
+from sans.guiframe.gui_style import GUIFRAME
 from welcome_panel import WelcomePanel
 # For py2exe, import config here
 import local_config
@@ -29,7 +30,7 @@ import logging
 # Application dimensions
 APP_HEIGHT = 800
 APP_WIDTH  = 1000
-
+GSTYLE = GUIFRAME.MULTIPLE_APPLICATIONS
 class SansViewApp(gui_manager.ViewApp):
     """
     """
@@ -40,8 +41,11 @@ class SansViewApp(gui_manager.ViewApp):
         app_height = APP_HEIGHT if screen_size[1]>APP_HEIGHT else screen_size[1]-50
         app_width  = APP_WIDTH if screen_size[0]>APP_WIDTH else screen_size[0]-50
 
-        self.frame = gui_manager.ViewerFrame(None, -1, local_config.__appname__, 
-                             window_height=app_height, window_width=app_width)    
+        self.frame = gui_manager.ViewerFrame(None, -1, 
+                                             local_config.__appname__, 
+                                             gui_style=GSTYLE,
+                                             window_height=app_height, 
+                                             window_width=app_width)    
         self.frame.Show(True)
 
         if hasattr(self.frame, 'special'):
