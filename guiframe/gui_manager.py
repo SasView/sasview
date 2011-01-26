@@ -55,7 +55,7 @@ class ViewerFrame(wx.Frame):
     
     def __init__(self, parent, id, title, 
                  window_height=300, window_width=300,
-                 gui_style=GUIFRAME.SINGLE_APPLICATION):
+                 gui_style=GUIFRAME.DEFAULT_STYLE):
         """
         Initialize the Frame object
         """
@@ -160,27 +160,11 @@ class ViewerFrame(wx.Frame):
         # Add panel
         default_flag = wx.aui.AUI_MGR_DEFAULT| wx.aui.AUI_MGR_ALLOW_ACTIVE_PANE
         self._mgr = wx.aui.AuiManager(self, flags=default_flag)
-        """
-        if self.__gui_style in [GUIFRAME.MULTIPLE_APPLICATIONS]:
-            from data_panel import DataPanel
-            self._data_panel = DataPanel(self)
-            """
+   
         # Load panels
         self._load_panels()
         self._mgr.Update()
         
-    def _layout(self, style):
-        """
-        Layout the frame according to a style
-        """
-        if self.__gui_style == GUIFRAME.SINGLE_APPLICATION:
-            #Divide the frame into 
-            print "GUIFRAME.SINGLE_APPLICATION"
-        elif self.__gui_style == GUIFRAME.MULTIPLE_APPLICATIONS:
-            print 'GUIFRAME.MULTIPLE_APPLICATION'
-        elif self.__gui_style == GUIFRAME.FLOATING_PANEL:
-            print "GUIFRAME.FLOATING_PANEL"
-            
     def SetStatusText(self, *args, **kwds):
         """
         """
@@ -219,7 +203,12 @@ class ViewerFrame(wx.Frame):
         """
         plugins = []
         #import guiframe local plugins
-        if self.__gui_style == GUIFRAME.DATALOADER_ON:
+        #check if the style contain guiframe.dataloader
+        style1 = self.__gui_style & GUIFRAME.DATALOADER_ON
+        style2 = self.__gui_style & GUIFRAME.PLOTTIN_ON
+        style3 = self.__gui_style & (GUIFRAME.DATALOADER_ON|GUIFRAME.PLOTTIN_ON)
+       
+        if style1 == GUIFRAME.DATALOADER_ON:
             try:
                 from sans.guiframe.local_perspectives.data_loader import data_loader
                 self._data_plugin =data_loader.Plugin()
@@ -228,7 +217,7 @@ class ViewerFrame(wx.Frame):
                 msg = "ViewerFrame._find_plugins:"
                 msg += "cannot import dataloader plugin.\n %s" % sys.exc_value
                 logging.error(msg)
-        elif self.__gui_style == GUIFRAME.PLOTTIN_ON:
+        elif style2 == GUIFRAME.PLOTTIN_ON:
             try:
                 from sans.guiframe.local_perspectives.plotting import plotting
                 self._plotting_plugin = plotting.Plugin()
@@ -236,7 +225,7 @@ class ViewerFrame(wx.Frame):
             except:
                 msg = "ViewerFrame._find_plugins:"
                 msg += "cannot import plotting plugin.\n %s" % sys.exc_value
-        elif self.__gui_style in [6, 7, 8]:
+        elif style3 in (GUIFRAME.DATALOADER_ON|GUIFRAME.PLOTTIN_ON):
             try:
                 from sans.guiframe.local_perspectives.data_loader import data_loader
                 self._data_plugin =data_loader.Plugin()
@@ -361,7 +350,7 @@ class ViewerFrame(wx.Frame):
                                           Name(p.window_name).Caption(p.window_caption).
                                           CenterPane().
                                           #BestSize(wx.Size(550,600)).
-                                          #MinSize(wx.Size(500,500)).
+                                 MinSize(wx.Size(self._window_width*3/5,-1)).
                                           Hide())
             else:
                 self.panels[str(id)] = p
@@ -401,7 +390,6 @@ class ViewerFrame(wx.Frame):
         """
         ID = wx.NewId()
         self.panels[str(ID)] = p
-        
         count = 0
         for item in self.panels:
             if self.panels[item].window_name.startswith(p.window_name): 
@@ -414,23 +402,46 @@ class ViewerFrame(wx.Frame):
         p.window_name = windowname
         p.window_caption = caption
             
-        self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
-                          Name(windowname).Caption(caption).
-                          Floatable().
-                          #Float().
-                          Right().
-                          Dock().
-                          TopDockable().
-                          BottomDockable().
-                          LeftDockable().
-                          RightDockable().
-                          MinimizeButton().
-                          #Hide().
-                          #Show().
-                          Resizable(True).
-                          # Use a large best size to make sure the AUI manager
-                          # takes all the available space
-                          BestSize(wx.Size(400,400)))
+        style1 = self.__gui_style & GUIFRAME.FIXED_PANEL
+        style2 = self.__gui_style & GUIFRAME.FLOATING_PANEL
+        if style1 == GUIFRAME.FIXED_PANEL:
+            self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
+                              Name(windowname).Caption(caption).
+                              Floatable().
+                              Right().
+                              Dock().
+                              TopDockable().
+                              BottomDockable().
+                              LeftDockable().
+                              RightDockable().
+                              MinimizeButton().
+                              #Hide().
+                              #Show().
+                              Resizable(True).
+                              # Use a large best size to make sure the AUI manager
+                              # takes all the available space
+                              BestSize(wx.Size(400,400)))
+        elif style2 in GUIFRAME.FLOATING_PANEL:
+            self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
+                              Name(windowname).Caption(caption).
+                              Floatable().
+                              Float().
+                              
+                              #FloatingPosition(wx.Size(self._window_width/5,self._window_height/3)).
+                              Right().
+                              Dock().
+                              TopDockable().
+                              BottomDockable().
+                              LeftDockable().
+                              RightDockable().
+                              MinimizeButton().
+                              #Hide().
+                              #Show().
+                              Resizable(True).
+                              # Use a large best size to make sure the AUI manager
+                              # takes all the available space
+                              BestSize(wx.Size(400,400)))
+            
         pane = self._mgr.GetPane(windowname)
         self._mgr.MaximizePane(pane)
         self._mgr.RestoreMaximizedPane()
@@ -463,10 +474,6 @@ class ViewerFrame(wx.Frame):
         self._add_menu_data()
         self._add_menu_application()
         self._add_menu_window()
-       
-
-        
- 
         # Tools menu
         # Go through plug-ins and find tools to populate the tools menu
         toolsmenu = None
@@ -546,13 +553,24 @@ class ViewerFrame(wx.Frame):
             self._window_menu.Append(id,'&Welcome', '')
             
             wx.EVT_MENU(self, id, self.show_welcome_panel)
-        if self.__gui_style in [GUIFRAME.MANAGER_ON,
-                                 GUIFRAME.MULTIPLE_APPLICATIONS]:
+        style = self.__gui_style & GUIFRAME.MANAGER_ON
+        if style == GUIFRAME.MANAGER_ON:
             id = wx.NewId()
             self._window_menu.Append(id,'&Data Manager', '')
-            
             wx.EVT_MENU(self, id, self.show_data_panel)
             
+        id = wx.NewId()
+        preferences_menu = wx.Menu()
+        hint = "Plot panels will floating"
+        preferences_menu.Append(id, '&Floating Plot Panel', hint)
+        wx.EVT_MENU(self, id, self.set_plotpanel_floating)
+        id = wx.NewId()
+        hint = "Plot panels will displayed within the frame"
+        preferences_menu.Append(id, '&Fixed Plot Panel', hint)
+        wx.EVT_MENU(self, id, self.set_plotpanel_fixed)
+        id = wx.NewId()
+        self._window_menu.AppendSubMenu(preferences_menu,'&Preferences')
+        #wx.EVT_MENU(self, id, self.show_preferences_panel)   
         """
         if len(self.plugins) == 2:
             plug = self.plugins[1]
@@ -579,7 +597,8 @@ class ViewerFrame(wx.Frame):
         # Only add the perspective menu if there are more than one perspectives
         add menu application
         """
-        if self.__gui_style in [GUIFRAME.MULTIPLE_APPLICATIONS]:
+        style = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
+        if style == GUIFRAME.MULTIPLE_APPLICATIONS:
             p_menu = wx.Menu()
             for plug in self.plugins:
                 if len(plug.get_perspective()) > 0:
@@ -624,7 +643,8 @@ class ViewerFrame(wx.Frame):
         self._data_menu.Append(data_file_id, 
                          '&Load Data File(s)', data_file_hint)
         wx.EVT_MENU(self, data_file_id, self._load_data)
-        if self.__gui_style == GUIFRAME.SINGLE_APPLICATION:
+        style = self.__gui_style & GUIFRAME.SINGLE_APPLICATION
+        if style == GUIFRAME.SINGLE_APPLICATION:
             self._menubar.Append(self._data_menu, '&Data')
             return 
         else:
@@ -1020,6 +1040,15 @@ class ViewerFrame(wx.Frame):
         set the current active perspective 
         """
         self._current_perspective = perspective
+        
+    def set_plotpanel_floating(self, event):
+        """
+        make the plot panel floatable
+        """
+    def set_plotpanel_fixed(self, event):
+        """
+        make the plot panel fixed
+        """
 
 class DefaultPanel(wx.Panel):
     """

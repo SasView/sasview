@@ -86,7 +86,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.graph.yaxis("\\rm{Intensity} ", "cm^{-1}")
         self.graph.render(self)
         #bind with event to contrst context menu
-        self.parent.Bind(EVT_NEW_LOADED_DATA, self._add_new_plot)
+        #self.parent.Bind(EVT_NEW_LOADED_DATA, self._add_new_plot)
         
     def on_add_new_plot(self, event):
         """
@@ -252,6 +252,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         id = wx.NewId()
         self._slicerpop.Append(id, '&Print Preview', 'image preview for print')
         wx.EVT_MENU(self, id, self.onPrinterPreview)
+        """
         #add plot
         self._menu_add_plot = wx.Menu()
         id = wx.NewId()
@@ -261,6 +262,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         
         self._slicerpop.AppendSubMenu(self._menu_add_plot, '&Add New Plot')
         self._fill_menu_add_plot()
+        """
         self._slicerpop.AppendSeparator()
         #add menu of other plugins
         item_list = self.parent.get_context_menu(self.graph)
