@@ -28,6 +28,7 @@ from sans.guiframe.events import SlicerEvent
 from sans.guiframe.events import ErrorDataEvent
 from sans.guiframe.events import RemoveDataEvent
 from sans.guiframe.events import AddManyDataEvent
+from sans.guiframe.events import EVT_NEW_LOADED_DATA
 from sans.guiframe.utils import PanelMenu
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Theory1D
@@ -63,6 +64,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.parent = parent
         ## Plottables
         self.plots = {}
+        #context menu
+        self._slicerpop = None
+        self._menu_add_plot = None
+        self._available_data = []
+        self._menu_add_ids = []
         ## save errors dy  for each data plotted
         self.err_dy = {}
         ## flag to determine if the hide or show context menu item should
@@ -79,7 +85,36 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ", "cm^{-1}")
         self.graph.render(self)
-   
+        #bind with event to contrst context menu
+        self.parent.Bind(EVT_NEW_LOADED_DATA, self._add_new_plot)
+        
+    def on_add_new_plot(self, event):
+        """
+        """
+    def _add_new_plot(self, event):
+        """
+        Construct the context menu given available data
+        """
+        self._available_data = event.data_to_add
+    
+    def _fill_menu_add_plot(self):
+        """
+        """
+        if self._menu_add_plot is not None:
+            if self._available_data:
+                for id in self._menu_add_ids:
+                    item = self._menu_add_plot.FindItemById(id)
+                    if item is None:
+                        for data in self._available_data:
+                            new_id = wx.NewId()
+                            hint = 'Add %s to this panel' % str(data.name)
+                            self._menu_add_plot.Append(new_id, str(data.name), hint)
+                            wx.EVT_MENU(self, id, self.on_add_new_plot)
+                            self._menu_add_ids.append(new_id)
+                    else:
+                        if item.GetLabel() == 'No Loaded Data':
+                            self._menu_add_plot.RemoveItem(item)
+                        
     def set_data(self, list=None):
         """
         """
@@ -204,63 +239,75 @@ class ModelPanel1D(PlotPanel, PanelBase):
         :param event: wx context event
         
         """
-        slicerpop = PanelMenu()
-        slicerpop.set_plots(self.plots)
-        slicerpop.set_graph(self.graph)     
+        self._slicerpop = PanelMenu()
+        self._slicerpop.set_plots(self.plots)
+        self._slicerpop.set_graph(self.graph)     
         # Various plot options
         id = wx.NewId()
-        slicerpop.Append(id, '&Save image', 'Save image as PNG')
+        self._slicerpop.Append(id, '&Save image', 'Save image as PNG')
         wx.EVT_MENU(self, id, self.onSaveImage)
         id = wx.NewId()
-        slicerpop.Append(id, '&Print image', 'Print image ')
+        self._slicerpop.Append(id, '&Print image', 'Print image ')
         wx.EVT_MENU(self, id, self.onPrint)
         id = wx.NewId()
-        slicerpop.Append(id, '&Print Preview', 'image preview for print')
+        self._slicerpop.Append(id, '&Print Preview', 'image preview for print')
         wx.EVT_MENU(self, id, self.onPrinterPreview)
-        slicerpop.AppendSeparator()
+        #add plot
+        self._menu_add_plot = wx.Menu()
+        id = wx.NewId()
+        self._menu_add_plot.Append(id, '&No Loaded Data', 'Add new plot')
+        self._menu_add_plot.FindItemByPosition(0).Enable(False)
+        self._menu_add_ids.append(id)
+        
+        self._slicerpop.AppendSubMenu(self._menu_add_plot, '&Add New Plot')
+        self._fill_menu_add_plot()
+        self._slicerpop.AppendSeparator()
+        #add menu of other plugins
         item_list = self.parent.get_context_menu(self.graph)
         if (not item_list == None) and (not len(item_list) == 0):
             for item in item_list:
                 try:
                     id = wx.NewId()
-                    slicerpop.Append(id, item[0], item[1])
+                    self._slicerpop.Append(id, item[0], item[1])
                     wx.EVT_MENU(self, id, item[2])
                 except:
                     msg = "ModelPanel1D.onContextMenu: "
                     msg += "bad menu item  %s"%sys.exc_value
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
                     pass
-            slicerpop.AppendSeparator()
-        
+            self._slicerpop.AppendSeparator()
+        id = wx.NewId()
+        self._menu_add_plot = wx.Menu()
+        self._slicerpop.Append(id, '&Print image', 'Print image')
         if self.graph.selected_plottable in self.plots:
             plot = self.plots[self.graph.selected_plottable]
             id = wx.NewId()
             name = plot.name
-            slicerpop.Append(id, "&Save points" )
+            self._slicerpop.Append(id, "&Save points")
             self.action_ids[str(id)] = plot
             wx.EVT_MENU(self, id, self._onSave)
             id = wx.NewId()
-            slicerpop.Append(id, "Remove %s curve" % name)
+            self._slicerpop.Append(id, "Remove %s curve" % name)
             self.action_ids[str(id)] = plot
             wx.EVT_MENU(self, id, self._onRemove)
-            slicerpop.AppendSeparator()
+            self._slicerpop.AppendSeparator()
             # Option to hide
             #TODO: implement functionality to hide a plottable (legend click)
         if self.graph.selected_plottable in self.plots:
             selected_plot = self.plots[self.graph.selected_plottable]
             id = wx.NewId()
-            slicerpop.Append(id, '&Linear fit')
+            self._slicerpop.Append(id, '&Linear fit')
             wx.EVT_MENU(self, id, self.onFitting)
-            slicerpop.AppendSeparator()
+            self._slicerpop.AppendSeparator()
         id = wx.NewId()
-        slicerpop.Append(id, '&Change scale')
+        self._slicerpop.Append(id, '&Change scale')
         wx.EVT_MENU(self, id, self._onProperties)
         id = wx.NewId()
-        slicerpop.Append(id, '&Reset Graph')
+        self._slicerpop.Append(id, '&Reset Graph')
         wx.EVT_MENU(self, id, self.onResetGraph)  
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
-        self.PopupMenu(slicerpop, pos)
+        self.PopupMenu(self._slicerpop, pos)
         
     def _on_remove_errors(self, evt):
         """

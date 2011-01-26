@@ -45,6 +45,30 @@ class PluginBase:
         #  for your plug-in. This defines your plug-in "perspective"
         self.perspective = []
         
+    def can_load_data(self):
+        """
+        if return True, then call handler to laod data
+        """
+        return False
+    
+    def use_data(self):
+        """
+        return True if these plugin use data
+        """
+        return True
+    
+    def load_data(self, event):
+        """
+        Load  data
+        """
+        raise NotImplemented
+ 
+    def load_folder(self, event):
+        """
+        Load entire folder
+        """
+        raise NotImplemented 
+    
     def set_is_active(self, active=False):
         """
         """

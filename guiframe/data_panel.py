@@ -416,9 +416,13 @@ class DataPanel(ScrolledPanel):
         """
         self.parent._onClose()
         
+    
+from sans.guiframe.dataFitting import Data1D
+from DataLoader.loader import Loader
             
-data_list = [('Data1', 'Data1D', '07/01/2010'), 
-            ('Data2', 'Data2D', '07/03/2011'),
+list  = Loader().load('latex_smeared.xml')
+data_list = [('Data1', list[0], '07/01/2010'), 
+            ('Data2', list[1], '07/03/2011'),
             ('Data3', 'Theory1D', '06/01/2010'),
             ('Data4', 'Theory2D', '07/01/2010'),
             ('Data5', 'Theory2D', '07/02/2010')]

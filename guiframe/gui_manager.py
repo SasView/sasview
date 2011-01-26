@@ -40,8 +40,8 @@ from sans.guiframe.events import EVT_STATUS
 from sans.guiframe.events import EVT_ADD_MANY_DATA
 from sans.guiframe.events import StatusEvent
 from sans.guiframe.events import NewPlotEvent
-
-
+from sans.guiframe.gui_style import *
+from sans.guiframe.events import NewLoadedDataEvent
 STATE_FILE_EXT = ['.inv', '.fitv', '.prv']
 
 DATA_MANAGER = False
@@ -54,7 +54,8 @@ class ViewerFrame(wx.Frame):
     """
     
     def __init__(self, parent, id, title, 
-                 window_height=300, window_width=300):
+                 window_height=300, window_width=300,
+                 gui_style=GUIFRAME.SINGLE_APPLICATION):
         """
         Initialize the Frame object
         """
@@ -64,6 +65,7 @@ class ViewerFrame(wx.Frame):
         # Preferred window size
         self._window_height = window_height
         self._window_width  = window_width
+        self.__gui_style = gui_style
         
         # Logging info
         logging.basicConfig(level=logging.DEBUG,
@@ -86,22 +88,25 @@ class ViewerFrame(wx.Frame):
         self._mgr = None
         #data manager
         from data_manager import DataManager
-        self.data_manager = DataManager()
+        self._data_manager = DataManager()
+        self._data_panel = None
         #add current perpsective
         self._current_perspective = None
-        #file menu
-        self.file_menu = None
+        self._plotting_plugin = None
+        self._data_plugin = None
+        #Menu bar and item
+        self._menubar = None
+        self._file_menu = None
+        self._data_menu = None
+        self._window_menu = None
+        self._window_menu = None
+        self._help = None
         
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins = []
         #add local plugin
-      
-        from sans.guiframe.local_perspectives.plotting import plotting
-        from sans.guiframe.local_perspectives.data_loader import data_loader
-        self.plugins.append(plotting.Plugin())
-        self.plugins.append(data_loader.Plugin())
-        
+        self.plugins += self._get_local_plugins()
         self.plugins += self._find_plugins()
       
         ## List of panels
@@ -153,12 +158,29 @@ class ViewerFrame(wx.Frame):
         self.sb = StatusBar(self, wx.ID_ANY)
         self.SetStatusBar(self.sb)
         # Add panel
-        self._mgr = wx.aui.AuiManager(self)
-        self._mgr.SetDockSizeConstraint(0.5, 0.5) 
+        default_flag = wx.aui.AUI_MGR_DEFAULT| wx.aui.AUI_MGR_ALLOW_ACTIVE_PANE
+        self._mgr = wx.aui.AuiManager(self, flags=default_flag)
+        """
+        if self.__gui_style in [GUIFRAME.MULTIPLE_APPLICATIONS]:
+            from data_panel import DataPanel
+            self._data_panel = DataPanel(self)
+            """
         # Load panels
         self._load_panels()
         self._mgr.Update()
         
+    def _layout(self, style):
+        """
+        Layout the frame according to a style
+        """
+        if self.__gui_style == GUIFRAME.SINGLE_APPLICATION:
+            #Divide the frame into 
+            print "GUIFRAME.SINGLE_APPLICATION"
+        elif self.__gui_style == GUIFRAME.MULTIPLE_APPLICATIONS:
+            print 'GUIFRAME.MULTIPLE_APPLICATION'
+        elif self.__gui_style == GUIFRAME.FLOATING_PANEL:
+            print "GUIFRAME.FLOATING_PANEL"
+            
     def SetStatusText(self, *args, **kwds):
         """
         """
@@ -191,6 +213,42 @@ class ViewerFrame(wx.Frame):
         if not is_loaded:
             self.plugins.append(plugin)
       
+    def _get_local_plugins(self):
+        """
+        get plugins local to guiframe and others 
+        """
+        plugins = []
+        #import guiframe local plugins
+        if self.__gui_style == GUIFRAME.DATALOADER_ON:
+            try:
+                from sans.guiframe.local_perspectives.data_loader import data_loader
+                self._data_plugin =data_loader.Plugin()
+                plugins.append(self._data_plugin)
+            except:
+                msg = "ViewerFrame._find_plugins:"
+                msg += "cannot import dataloader plugin.\n %s" % sys.exc_value
+                logging.error(msg)
+        elif self.__gui_style == GUIFRAME.PLOTTIN_ON:
+            try:
+                from sans.guiframe.local_perspectives.plotting import plotting
+                self._plotting_plugin = plotting.Plugin()
+                plugins.append(self._plotting_plugin)
+            except:
+                msg = "ViewerFrame._find_plugins:"
+                msg += "cannot import plotting plugin.\n %s" % sys.exc_value
+        elif self.__gui_style in [6, 7, 8]:
+            try:
+                from sans.guiframe.local_perspectives.data_loader import data_loader
+                self._data_plugin =data_loader.Plugin()
+                plugins.append(self._data_plugin)
+                from sans.guiframe.local_perspectives.plotting import plotting
+                self._plotting_plugin = plotting.Plugin()
+                plugins.append(self._plotting_plugin)
+            except:
+                msg = "ViewerFrame._get_local_plugins: %s" % sys.exc_value
+                logging.error(msg)
+        return plugins
+    
     def _find_plugins(self, dir="perspectives"):
         """
         Find available perspective plug-ins
@@ -391,9 +449,9 @@ class ViewerFrame(wx.Frame):
                 for item in plugin.populate_file_menu():
                     id = wx.NewId()
                     m_name, m_hint, m_handler = item
-                    self.filemenu.Append(id, m_name, m_hint)
+                    self._filemenu.Append(id, m_name, m_hint)
                     wx.EVT_MENU(self, id, m_handler)
-                self.filemenu.AppendSeparator()
+                self._filemenu.AppendSeparator()
                 
     def _setup_menus(self):
         """
@@ -401,66 +459,13 @@ class ViewerFrame(wx.Frame):
         """
         # Menu
         self._menubar = wx.MenuBar()
-        # File menu
-        self.filemenu = wx.Menu()
-        
-        # some menu of plugin to be seen under file menu
-        self._populate_file_menu()
-        id = wx.NewId()
-        self.filemenu.Append(id, '&Save state into File',
-                             'Save project as a SansView (svs) file')
-        wx.EVT_MENU(self, id, self._on_save)
-        #self.filemenu.AppendSeparator()
-        
-        id = wx.NewId()
-        self.filemenu.Append(id, '&Quit', 'Exit') 
-        wx.EVT_MENU(self, id, self.Close)
-        
-        # Add sub menus
-        self._menubar.Append(self.filemenu, '&File')
-        
-        # Window menu
-        # Attach a menu item for each panel in our
-        # panel list that also appears in a plug-in.
-        
-        # Only add the panel menu if there is only one perspective and
-        # it has more than two panels.
-        # Note: the first plug-in is always the plotting plug-in. 
-        #The first application
-        # plug-in is always the second one in the list.
-        if len(self.plugins) == 2:
-            plug = self.plugins[1]
-            pers = plug.get_perspective()
+        self._add_menu_file()
+        self._add_menu_data()
+        self._add_menu_application()
+        self._add_menu_window()
        
-            if len(pers) > 1:
-                viewmenu = wx.Menu()
-                for item in self.panels:
-                    if item == 'default':
-                        continue
-                    panel = self.panels[item]
-                    if panel.window_name in pers:
-                        viewmenu.Append(int(item), panel.window_caption,
-                                        "Show %s window" % panel.window_caption)
-                        wx.EVT_MENU(self, int(item), self._on_view)
-                self._menubar.Append(viewmenu, '&Window')
 
-        # Perspective
-        # Attach a menu item for each defined perspective.
-        # Only add the perspective menu if there are more than one perspectives
-        n_perspectives = 0
-        for plug in self.plugins:
-            if len(plug.get_perspective()) > 0:
-                n_perspectives += 1
         
-        if n_perspectives > 1:
-            p_menu = wx.Menu()
-            for plug in self.plugins:
-                if len(plug.get_perspective()) > 0:
-                    id = wx.NewId()
-                    p_menu.Append(id, plug.sub_menu,
-                                  "Switch to %s perspective" % plug.sub_menu)
-                    wx.EVT_MENU(self, id, plug.on_perspective)
-            self._menubar.Append(p_menu, '&Perspective')
  
         # Tools menu
         # Go through plug-ins and find tools to populate the tools menu
@@ -508,7 +513,7 @@ class ViewerFrame(wx.Frame):
         # Look for plug-in menus
         # Add available plug-in sub-menus. 
         for item in self.plugins:
-            if hasattr(item, "populate_menu"):
+            if item != self._plotting_plugin:
                 for (self.next_id, menu, name) in \
                     item.populate_menu(self.next_id, self):
                     self._menubar.Append(menu, name)
@@ -516,6 +521,138 @@ class ViewerFrame(wx.Frame):
         self._menubar.Append(helpmenu, '&Help')
         self.SetMenuBar(self._menubar)
     
+    def _add_menu_window(self):
+        """
+        add a menu window to the menu bar
+        Window menu
+        Attach a menu item for each panel in our
+        panel list that also appears in a plug-in.
+        
+        Only add the panel menu if there is only one perspective and
+        it has more than two panels.
+        Note: the first plug-in is always the plotting plug-in. 
+        The first application
+        #plug-in is always the second one in the list.
+        """
+        self._window_menu = wx.Menu()
+        if self._plotting_plugin is not None:
+            for (self.next_id, menu, name) in \
+                self._plotting_plugin.populate_menu(self.next_id, self):
+                self._window_menu.AppendSubMenu(menu, name)
+        self._window_menu.AppendSeparator()
+        self._menubar.Append(self._window_menu, '&Window')
+        if self.defaultPanel is not None :
+            id = wx.NewId()
+            self._window_menu.Append(id,'&Welcome', '')
+            
+            wx.EVT_MENU(self, id, self.show_welcome_panel)
+        if self.__gui_style in [GUIFRAME.MANAGER_ON,
+                                 GUIFRAME.MULTIPLE_APPLICATIONS]:
+            id = wx.NewId()
+            self._window_menu.Append(id,'&Data Manager', '')
+            
+            wx.EVT_MENU(self, id, self.show_data_panel)
+            
+        """
+        if len(self.plugins) == 2:
+            plug = self.plugins[1]
+            pers = plug.get_perspective()
+       
+            if len(pers) > 1:
+                self._window_menu = wx.Menu()
+                for item in self.panels:
+                    if item == 'default':
+                        continue
+                    panel = self.panels[item]
+                    if panel.window_name in pers:
+                        self._window_menu.Append(int(item),
+                                                  panel.window_caption,
+                                        "Show %s window" % panel.window_caption)
+                        wx.EVT_MENU(self, int(item), self._on_view)
+                self._menubar.Append(self._window_menu, '&Window')
+                """
+                
+    def _add_menu_application(self):
+        """
+        
+        # Attach a menu item for each defined perspective or application.
+        # Only add the perspective menu if there are more than one perspectives
+        add menu application
+        """
+        if self.__gui_style in [GUIFRAME.MULTIPLE_APPLICATIONS]:
+            p_menu = wx.Menu()
+            for plug in self.plugins:
+                if len(plug.get_perspective()) > 0:
+                    id = wx.NewId()
+                    p_menu.Append(id, plug.sub_menu,
+                                  "Switch to application: %s" % plug.sub_menu)
+                    wx.EVT_MENU(self, id, plug.on_perspective)
+            self._menubar.Append(p_menu, '&Applications')
+            
+    def _add_menu_file(self):
+        """
+        add menu file
+        """
+         # File menu
+        self._filemenu = wx.Menu()
+        
+        # some menu of plugin to be seen under file menu
+        self._populate_file_menu()
+        
+        id = wx.NewId()
+        self._filemenu.Append(id, '&Save state into File',
+                             'Save project as a SansView (svs) file')
+        wx.EVT_MENU(self, id, self._on_save)
+        #self.__filemenu.AppendSeparator()
+        
+        id = wx.NewId()
+        self._filemenu.Append(id, '&Quit', 'Exit') 
+        wx.EVT_MENU(self, id, self.Close)
+        
+        # Add sub menus
+        self._menubar.Append(self._filemenu, '&File')
+        
+    def _add_menu_data(self):
+        """
+        Add menu item item data to menu bar
+        """
+        # Add menu data 
+        self._data_menu = wx.Menu()
+        #menu for data files
+        data_file_id = wx.NewId()
+        data_file_hint = "load one or more data in the application"
+        self._data_menu.Append(data_file_id, 
+                         '&Load Data File(s)', data_file_hint)
+        wx.EVT_MENU(self, data_file_id, self._load_data)
+        if self.__gui_style == GUIFRAME.SINGLE_APPLICATION:
+            self._menubar.Append(self._data_menu, '&Data')
+            return 
+        else:
+            #menu for data from folder
+            data_folder_id = wx.NewId()
+            data_folder_hint = "load multiple data in the application"
+            self._data_menu.Append(data_folder_id, 
+                             '&Load Data Folder', data_folder_hint)
+            wx.EVT_MENU(self, data_folder_id, self._load_folder)
+            self._menubar.Append(self._data_menu, '&Data')
+        
+    def _load_data(self, event):
+        """
+        connect menu item load data with the first plugin that can load data
+        """
+        for plug in self.plugins:
+            if plug.can_load_data():
+                plug.load_data(event)
+                
+    def _load_folder(self, event):
+        """
+        connect menu item load data with the first plugin that can load data and
+        folder
+        """
+        for plug in self.plugins:
+            if plug.can_load_data():
+                plug.load_folder(event)
+                
     def _on_status_event(self, evt):
         """
         Display status message
@@ -831,12 +968,27 @@ class ViewerFrame(wx.Frame):
                 pass
         return path
     
+    def show_data_panel(self, event):
+        """
+        """
+    def show_welcome_panel(self, event):
+        """
+        show welcome panel
+        """
+        
     def add_data(self, data_list):
         """
         receive a list of data . store them its data manager if possible
         determine if data was be plot of send to data perspectives
         """
-        self.data_manager.add_data(data_list)
+        #send a list of available data to plotting plugin
+        avalaible_data = []
+        if self._data_manager is not None:
+            self._data_manager.add_data(data_list)
+            avalaible_data = self._data_manager.get_all_data()
+        wx.PostEvent(self, NewLoadedDataEvent(data_to_add=avalaible_data,
+                                              data_to_remove = [])) 
+            
         if AUTO_SET_DATA:
             if self._current_perspective is not None:
                 try:
@@ -852,7 +1004,9 @@ class ViewerFrame(wx.Frame):
             print "will show data panel"
         if AUTO_PLOT:
             self.plot_data(data_list)
-            
+       
+        
+        
     def plot_data(self, data_list):
         """
         send a list of data to plot

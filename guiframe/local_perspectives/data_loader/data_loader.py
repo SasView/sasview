@@ -34,33 +34,6 @@ class Plugin(PluginBase):
         self.data_name_dict = {}
         self.loader = Loader()   
         
-    def populate_menu(self, id, owner):
-        """
-        Create a menu for the Data plug-in
-        
-        :param id: id to create a menu
-        :param owner: owner of menu
-        
-        :return: list of information to populate the main menu
-        
-        """
-        #Menu for data loader
-        self.menu = wx.Menu()
-        #menu for data files
-        data_file_id = wx.NewId()
-        data_file_hint = "load one or more data in the application"
-        self.menu.Append(data_file_id, 
-                         '&Load Data File(s)', data_file_hint)
-        wx.EVT_MENU(owner, data_file_id, self._load_data)
-        #menu for data from folder
-        data_folder_id = wx.NewId()
-        data_folder_hint = "load multiple data in the application"
-        self.menu.Append(data_folder_id, 
-                         '&Load Data Folder', data_folder_hint)
-        wx.EVT_MENU(owner, data_folder_id, self._load_folder)
-        #create  menubar items
-        return [(id, self.menu, "Data")]
-    
     def populate_file_menu(self):
         """
         get a menu item and append it under file menu of the application
@@ -68,9 +41,9 @@ class Plugin(PluginBase):
         """
         
         hint_load_file = "Read state's files and load them into the application"
-        return [["Open State from File", hint_load_file, self._load_file]]
+        return [["Open State from File", hint_load_file, self.load_file]]
   
-    def _load_data(self, event):
+    def load_data(self, event):
         """
         Load data
         """
@@ -80,7 +53,13 @@ class Plugin(PluginBase):
             return
         self.get_data(file_list, flag=flag)
         
-    def _load_file(self, event):
+    def can_load_data(self):
+        """
+        if return True, then call handler to laod data
+        """
+        return True
+    
+    def load_file(self, event):
         """
         Load  sansview defined files
         """
@@ -90,7 +69,7 @@ class Plugin(PluginBase):
             return
         self.get_data(file_list, flag=flag)
        
-    def _load_folder(self, event):
+    def load_folder(self, event):
         """
         Load entire folder
         """
@@ -100,7 +79,7 @@ class Plugin(PluginBase):
             return
         file_list = self.get_file_path(path)
         self.get_data(file_list, flag=flag)
-    
+       
     def get_wild_card(self, flag=True):
         """
         :param flag: is True load only data file, else load state file
