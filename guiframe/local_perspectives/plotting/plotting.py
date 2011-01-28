@@ -15,7 +15,6 @@ import wx
 import sys
 from sans.guiframe.events import EVT_NEW_PLOT
 from sans.guiframe.events import StatusEvent 
-
 from sans.guiframe.plugin_base import PluginBase
 
 class Plugin(PluginBase):
@@ -78,7 +77,6 @@ class Plugin(PluginBase):
         """
         # Check whether we already have a graph with the same units
         # as the plottable we just received. 
-        
         is_available = False
         for panel in self.plot_panels:
             if event.plot._xunit == panel.graph.prop["xunit_base"] \

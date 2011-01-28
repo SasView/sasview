@@ -12,157 +12,152 @@ This module provides Graphic interface for the data_manager module.
 """
 import wx
 import sys
-#import warnings
+import warnings
 from wx.lib.scrolledpanel import ScrolledPanel
-import  wx.lib.mixins.listctrl  as  listmix
-#from sans.guicomm.events import NewPlotEvent
+import  wx.lib.agw.customtreectrl as CT
+from sans.guiframe.dataFitting import Data1D
+from sans.guiframe.dataFitting import Data2D
 
-class CheckListCtrl(wx.ListCtrl, listmix.CheckListCtrlMixin, 
-                    listmix.ListCtrlAutoWidthMixin):
+PANEL_WIDTH = 200
+
+class DataTreeCtrl(CT.CustomTreeCtrl):
     """
     Check list control to be used for Data Panel
     """
-    def __init__(self, parent, *args, **kwds):
-        kwds['style'] = wx.LC_REPORT|wx.SUNKEN_BORDER
-        wx.ListCtrl.__init__(self, parent, -1, *args, **kwds)
-        listmix.CheckListCtrlMixin.__init__(self)
-        listmix.ListCtrlAutoWidthMixin.__init__(self)
+    def __init__(self, parent, size=(PANEL_WIDTH, 200), *args, **kwds):
+        kwds['style']= wx.SUNKEN_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|   \
+                    CT.TR_HAS_VARIABLE_ROW_HEIGHT|wx.WANTS_CHARS
+        kwds['size'] = size
+        CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
+        self.root = self.AddRoot("Available Data")
         
 class DataPanel(ScrolledPanel):
     """
     This panel displays data available in the application and widgets to 
     interact with data.
     """
-    def __init__(self, parent, list=None, list_of_perspective=[],
-                    *args, **kwds):
+    ## Internal name for the AUI manager
+    window_name = "Data Panel"
+    ## Title to appear on top of the window
+    window_caption = "Data Panel"
+    #type of window 
+    window_type = "Data Panel"
+    ## Flag to tell the GUI manager that this panel is not
+    #  tied to any perspective
+    #ALWAYS_ON = True
+    def __init__(self, parent, list=[],list_of_perspective=[],
+                 size=(PANEL_WIDTH,560), manager=None, *args, **kwds):
+        kwds['size']= size
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
         self.SetupScrolling()
+      
         self.parent = parent
-        self.manager = None
-        self.owner = None
-        if list is None:
-            list = []
+        self.manager = manager
         self.list_of_data = list
-        self.perspectives = []
-        #layout widgets
-        self.sizer4 = None
-        self.sizer5 = None
-        self.sizer1 = None
-        self.sizer2 = None
-        self.sizer3 = None
-        self.sizer4 = None
-        self.sizer5 = None
-        self.vbox = None
-        self.list_ctrl = None
-        self.boxsizer_2_2 = None
-        self.cb_select_data1d = None
-        self.cb_select_data2d = None
-        self.cb_select_all = None
-        self.cb_theory = None
-        self.bt_import = None
-        self.bt_plot = None
-        self.bt_close = None
-        
+        self.list_of_perspective = list_of_perspective
+        self.list_rb_perspectives= []
+        self.list_cb_data =[]
+        self.list_cb_theory =[]
+        self.owner = None
+        self.do_layout()
+        #self._default_data1d = Data1D()
+        #self._default_data1d.set_default_data()
+        #self._default_data2d = Data2D()
+        #self._default_data2d.set_default_data()
+        #data_list =[]
+        #data_list.append((self._default_data1d, None,None, None))
+        #data_list.append((self._default_data2d, None,None, None))
+        #if self.manager is not None:
+        #    self.manager.set_loaded_data(data_list)
+        #    list = self.manager.get_selected_data()
+        #    self.load_data_list(list)
+    def do_layout(self):
         self.define_panel_structure()
-        self.layout_list()
         self.layout_selection()
-        self.layout_perspective(list_of_perspective=list_of_perspective)
-        self.load_list()
-        self.layout_theory()
+        self.layout_list()
         self.layout_button()
-        
+        self.layout_batch()
+   
     def define_panel_structure(self):
         """
         Define the skeleton of the panel
         """
+        print self.parent.GetSize(), self.GetSize()
+        w, h = self.parent.GetSize()
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
         self.sizer1 = wx.BoxSizer(wx.VERTICAL)
-        
-        box_description_2 = wx.StaticBox(self, -1, "Selection Patterns")
-        self.boxsizer_2 = wx.StaticBoxSizer(box_description_2, wx.HORIZONTAL)
-        box_description_2_2 = wx.StaticBox(self, -1, "Set Active Perspective")
-        self.boxsizer_2_2 = wx.StaticBoxSizer(box_description_2_2,
-                                              wx.HORIZONTAL)
-       
-        w, h = self.parent.GetSize()
-        self.sizer2 = wx.BoxSizer(wx.HORIZONTAL)
-        self.sizer2.Add(self.boxsizer_2, 1, wx.ALL, 10)
-        self.sizer2.Add(self.boxsizer_2_2, 1, wx.ALL, 10)
-        
-        box_description_3 = wx.StaticBox(self, -1,
-                                         "Import to Active perspective")
-        self.boxsizer_3 = wx.StaticBoxSizer(box_description_3, wx.HORIZONTAL)
-        self.sizer3 = wx.BoxSizer(wx.HORIZONTAL)
-        self.sizer3.Add(self.boxsizer_3, 1, wx.ALL, 10)
-        
+        self.sizer2 = wx.BoxSizer(wx.VERTICAL)
+        self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer4 = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer5 = wx.BoxSizer(wx.HORIZONTAL)
-        self.sizer1.SetMinSize((w-10, h/3))
-        self.sizer2.SetMinSize((w-10, -1))
-        self.sizer3.SetMinSize((w-10, -1))
-        self.sizer4.SetMinSize((w-10, -1))
-        self.sizer5.SetMinSize((w-10, -1))
-        self.vbox.Add(self.sizer1)
-        self.vbox.Add(self.sizer2)
-        self.vbox.Add(self.sizer3)
-        self.vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
-        self.vbox.Add(self.sizer4)
-        self.vbox.Add(self.sizer5)
+        self.sizer3.SetMinSize((w-60, -1))
+        
+        self.vbox.Add(self.sizer5, 0,wx.EXPAND|wx.ALL,10)
+        self.vbox.Add(self.sizer1, 0,wx.EXPAND|wx.ALL,0)
+        self.vbox.Add(self.sizer2, 0,wx.EXPAND|wx.ALL,10)
+        self.vbox.Add(self.sizer3, 0,wx.EXPAND|wx.ALL,10)
+        self.vbox.Add(self.sizer4, 0,wx.EXPAND|wx.ALL,10)
+        
         self.SetSizer(self.vbox)
         
-    def GetListCtrl(self):
+    def layout_selection(self):
         """
         """
-        return self.list_ctrl
-    
-    def layout_list(self):
-        """
-        Add a listcrtl in the panel
-        """
-        self.list_ctrl = CheckListCtrl(parent=self)
-        
-        self.list_ctrl.InsertColumn(0, 'Name')
-        self.list_ctrl.InsertColumn(1, 'Type')
-        self.list_ctrl.InsertColumn(2, 'Date Modified')
-        self.sizer1.Add(self.list_ctrl, 1, wx.EXPAND|wx.ALL, 10)
-        
-    def layout_perspective(self, list_of_perspective=None):
+        select_txt = wx.StaticText(self, -1, 'Selection Options')
+        self.selection_cbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        list_of_options = ['Select all Data',
+                            'Unselect all Data',
+                           'Select all Data 1D',
+                           'Unselect all Data 1D',
+                           'Select all Data 2D',
+                           'Unselect all Data 2D' ]
+        for option in list_of_options:
+            self.selection_cbox.Append(str(option))
+        self.selection_cbox.SetValue('None')
+        wx.EVT_COMBOBOX(self.selection_cbox,-1, self._on_selection_type)
+        self.sizer5.AddMany([(select_txt,0, wx.ALL,5),
+                            (self.selection_cbox,0, wx.ALL,5)])
+    def layout_perspective(self, list_of_perspective=[]):
         """
         Layout widgets related to the list of plug-ins of the gui_manager 
         """
-        if list_of_perspective is None:
-            list_of_perspective = []
-        self.boxsizer_2_2.Clear(True)
-        self.perspectives = []
-        sizer = wx.GridBagSizer(5, 5)
-        
+        if len(list_of_perspective)==0:
+            return
+        w, h = self.parent.GetSize()
+        box_description_2= wx.StaticBox(self, -1, "Set Active Perspective")
+        self.boxsizer_2 = wx.StaticBoxSizer(box_description_2, wx.HORIZONTAL)
+        self.boxsizer_2.SetMinSize((w-60, -1))
+        self.sizer_perspective = wx.GridBagSizer(5,5)
+        self.boxsizer_2.Add(self.sizer_perspective)
+        self.sizer2.Add(self.boxsizer_2,1, wx.ALL, 10)
+        self.list_of_perspective = list_of_perspective
+        self.sizer_perspective.Clear(True)
+        self.list_rb_perspectives = []
+       
+        nb_active_perspective = 0
         if list_of_perspective:
-            item = list_of_perspective[0].sub_menu
-            rb = wx.RadioButton(self, -1, item, style=wx.RB_GROUP)
-            rb.SetToolTipString("Data will be applied to this perspective")
-            if hasattr(item, "set_default_perspective"):
-                if item.set_default_perspective():
-                    rb.SetValue(item.set_default_perspective())
-            self.Bind(wx.EVT_RADIOBUTTON, self.on_set_active_perspective,
-                                                 id=rb.GetId())
-            self.perspectives.append(rb)
             ix = 0 
             iy = 0
-            sizer.Add(rb, (iy, ix), (1, 1),
-                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
-            for index in range(1, len(list_of_perspective)):
-                item = list_of_perspective[index].sub_menu
-                rb = wx.RadioButton(self, -1, item)
-                rb.SetToolTipString("Data will be applied to this perspective")
-                self.Bind(wx.EVT_RADIOBUTTON, self.on_set_active_perspective, 
-                                        id=rb.GetId())
-                self.perspectives.append(rb)
+            for perspective_name, is_active in list_of_perspective:
+                
+                if is_active:
+                    nb_active_perspective += 1
+                if nb_active_perspective == 1:
+                    rb = wx.RadioButton(self, -1, perspective_name, style=wx.RB_GROUP)
+                    rb.SetToolTipString("Data will be applied to this perspective")
+                    rb.SetValue(is_active)
+                else:
+                    rb = wx.RadioButton(self, -1, perspective_name)
+                    rb.SetToolTipString("Data will be applied to this perspective")
+                    #only one perpesctive can be active
+                    rb.SetValue(False)
+                
+                self.Bind(wx.EVT_RADIOBUTTON, self.on_set_active_perspective,
+                                                     id=rb.GetId())
+                self.list_rb_perspectives.append(rb)
+                self.sizer_perspective.Add(rb,(iy, ix),(1,1),
+                               wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
                 iy += 1
-                sizer.Add(rb, (iy, ix), (1, 1),
-                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
-                if hasattr(item,"set_default_perspective"):
-                    if item.set_default_perspective():
-                        rb.SetValue(item.set_default_perspective())
         else:
             rb = wx.RadioButton(self, -1, 'No Perspective',
                                                       style=wx.RB_GROUP)
@@ -170,325 +165,397 @@ class DataPanel(ScrolledPanel):
             rb.Disable()
             ix = 0 
             iy = 0
-            sizer.Add(rb, (iy, ix), (1, 1),
+            self.sizer_perspective.Add(rb,(iy, ix),(1,1),
                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
-        self.boxsizer_2_2.Add(sizer)
-      
-    def layout_selection(self):
-        """
-        Layout widgets related to selection patterns
-        """
-        sizer = wx.GridBagSizer(5, 5)
-        self.cb_select_data1d = wx.CheckBox(self, -1, 
-                                "Select/Unselect Data 1D", (10, 10))
-        msg_data1d = "To check/uncheck to select/unselect all Data 1D"
-        self.cb_select_data1d.SetToolTipString(msg_data1d)
-        wx.EVT_CHECKBOX(self, self.cb_select_data1d.GetId(),
-                                        self.on_select_all_data1d)
-        self.cb_select_data2d = wx.CheckBox(self, -1, 
-                               "Select/Unselect all Data 2D", (10, 10))
-        msg_data2d = "To check/uncheck to select/unselect all Data 2D"
-        self.cb_select_data2d.SetToolTipString(msg_data2d)
-        wx.EVT_CHECKBOX(self, self.cb_select_data2d.GetId(),
-                         self.on_select_all_data2d)
-        self.cb_select_theory1d = wx.CheckBox(self, -1, 
-                                    "Select/Unselect all Theory 1D", (10, 10))
-        msg_theory1d = "To check/uncheck to select/unselect all Theory 1D"
-        self.cb_select_theory1d.SetToolTipString(msg_theory1d)
-        wx.EVT_CHECKBOX(self, self.cb_select_theory1d.GetId(),
-                         self.on_select_all_theory1d)
-        self.cb_select_theory2d = wx.CheckBox(self, -1, 
-                                    "Select/Unselect all Theory 2D", (10, 10))
-        msg_theory2d = "To check/uncheck to select/unselect all Theory 2D"
-        self.cb_select_theory2d.SetToolTipString(msg_theory2d)
-        wx.EVT_CHECKBOX(self, self.cb_select_theory2d.GetId(),
-                                self.on_select_all_theory2d)
-        self.cb_select_all = wx.CheckBox(self, -1, "Select/Unselect all",
-                                         (10, 10))
-        msg_select_all = "To check/uncheck to  select/unselect all"
-        self.cb_select_all.SetToolTipString(msg_select_all)
-        wx.EVT_CHECKBOX(self, self.cb_select_all.GetId(), self.on_select_all)
-        iy = 0
-        ix = 0
-        sizer.Add(self.cb_select_data1d, (iy, ix), (1, 1),
-                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
-        iy += 1
-        sizer.Add(self.cb_select_data2d, (iy, ix), (1, 1),
-                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
-        iy += 1
-        sizer.Add(self.cb_select_theory1d, (iy, ix), (1, 1),
-                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
-        iy += 1
-        sizer.Add( self.cb_select_theory2d, (iy, ix), (1, 1),
-                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
-        iy += 1
-        sizer.Add(self.cb_select_all,(iy, ix), (1, 1),
-                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
-        self.boxsizer_2.Add(sizer)
-       
-    def layout_theory(self):
-        """
-        Layout widget related to theory to import
-        """
-        msg = "Import the Selected Theory\n"
-        msg += "to active perspective."
-        st_description = wx.StaticText(self, -1, msg)
-        self.cb_theory = wx.ComboBox(self, -1)
-        wx.EVT_COMBOBOX(self.cb_theory,-1, self.on_select_theory) 
-        
-        self.boxsizer_3.AddMany([(st_description, 0, wx.ALL, 10),
-                             (self.cb_theory, 0, wx.ALL, 10)])
-        self.load_theory(list=[])
-        
-    def layout_button(self):
-        """
-        Layout widgets related to buttons
-        """
-        self.bt_import = wx.Button(self, wx.NewId(), "Import", (30, 10))
-        hint_msg = "Import set of Data to active perspective"
-        self.bt_import.SetToolTipString(hint_msg)
-        wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
-        
-        self.bt_plot = wx.Button(self, wx.NewId(), "Plot", (30, 10))
-        self.bt_plot.SetToolTipString("To trigger plotting")
-        wx.EVT_BUTTON(self, self.bt_plot.GetId(), self.on_plot)
-        
-        self.bt_close = wx.Button(self, wx.NewId(), "Close", (30, 10))
-        self.bt_close.SetToolTipString("close the current window")
-        wx.EVT_BUTTON(self, self.bt_close.GetId(), self.on_close)
-        
-        self.sizer5.AddMany([((40, 40), 0, wx.LEFT|wx.ADJUST_MINSIZE, 180),
-                             (self.bt_import, 0, wx.ALL,5),
-                             (self.bt_plot, 0, wx.ALL,5),
-                             (self.bt_close, 0, wx.ALL, 5 )])
-        
-    def set_manager(self, manager):
-        """
-        :param manager: object responsible of filling on empty the listcrtl of 
-        this panel. for sansview manager is data_manager
-        """
-        self.manager = manager
-        
-    def set_owner(self, owner):
-        """
-         :param owner: is the main widget creating this frame
-         for sansview owner is gui_manager
-        """
-        self.owner = owner
-        
-    def load_theory(self, list=None):
-        """
-        Recieve a list of theory name and fill the combobox with that list
-        """
-        if list is None:
-            list = []
-        for theory in list:
-            self.cb_theory.Append(theory)
-        if list:
-            self.cb_theory.Enable()
-        else:
-            self.cb_theory.Disable()
             
-    def load_list(self, list=None):
+    def _on_selection_type(self, event):
         """
-        Get a list of turple and store each string in these turples in 
-        the column of the listctrl.
-        
-        :param list: list of turples containing string only. 
+        Select data according to patterns
         """
-        if list is None:
-            return
-        for i in list:
-            index = self.list_ctrl.InsertStringItem(sys.maxint, i[0])
-            self.list_ctrl.SetStringItem(index, 1, i[1])
-            self.list_ctrl.SetStringItem(index, 2, i[2])
-       
-    def set_perspective(self, sub_menu):
-        """
-        Receive the name of the current perspective and set 
-        the active perspective
-        """
-        for item in self.perspectives:
-            if item.GetLabelText()== sub_menu:
-                item.SetValue(True)
-            else:
-                item.SetValue(False)
-                
-    def select_data_type(self, type='Data1D', check=False):
-        """
-        check item in the list according to a type.
-        :param check: if check true set checkboxes toTrue else to False
-        :param type: type of data to select
-        """
-        num = self.list_ctrl.GetItemCount()
-        for index in range(num):
-            if self.list_ctrl.GetItem(index, 1).GetText() == type:
-                self.list_ctrl.CheckItem(index, check)
-                
-    def on_select_all_data1d(self, event):
-        """
-        check/ uncheck list of all data 1D
-        """
-        ctrl = event.GetEventObject()
-        self.select_data_type(type='Data1D', check=ctrl.GetValue())
-        
-    def on_select_all_data2d(self, event):
-        """
-        check/ uncheck list of all data 2D
-        """
-        ctrl = event.GetEventObject()
-        self.select_data_type(type='Data2D', check=ctrl.GetValue())
-        
-    def on_select_all_theory1d(self, event):
-        """
-        check/ uncheck list of all theory 1D
-        """
-        ctrl = event.GetEventObject()
-        self.select_data_type(type='Theory1D', check=ctrl.GetValue())
-        
-    def on_select_all_theory2d(self, event):
-        """
-        check/ uncheck list of all theory 2D
-        """
-        ctrl = event.GetEventObject()
-        self.select_data_type(type='Theory2D', check=ctrl.GetValue())
-        
-    def on_select_all(self, event):
-        """
-        Check or uncheck all data listed 
-        """
-        ctrl = event.GetEventObject()
-        self.cb_select_data1d.SetValue(ctrl.GetValue())
-        self.cb_select_data2d.SetValue(ctrl.GetValue())
-        self.cb_select_theory1d.SetValue(ctrl.GetValue())
-        self.cb_select_theory2d.SetValue(ctrl.GetValue())
-        num = self.list_ctrl.GetItemCount()
-        for i in range(num):
-            self.list_ctrl.CheckItem(i, ctrl.GetValue())
-      
-    def on_select_theory(self, event):
-        """
-        Select the theory to import in the active perspective
-        """
-        
+        option = self.selection_cbox.GetValue()
+        if option == 'Select all Data':
+            #for item in self.tree_ctrl.
+            print "_on_selection_type"
     def on_set_active_perspective(self, event):
         """
         Select the active perspective
         """
         ctrl = event.GetEventObject()
         
+    def layout_button(self):
+        """
+        Layout widgets related to buttons
+        """
+        self.bt_import = wx.Button(self, wx.NewId(), "Send To")
+        self.bt_import.SetToolTipString("Send set of Data to active perspective")
+        wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
+        
+        self.bt_append_plot = wx.Button(self, wx.NewId(), "Append Plot To")
+        self.bt_import.SetToolTipString("Plot the selected data in the active panel")
+        #wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_append_plot)
+        
+        self.bt_plot = wx.Button(self, wx.NewId(), "New Plot")
+        self.bt_plot.SetToolTipString("To trigger plotting")
+        wx.EVT_BUTTON(self, self.bt_plot.GetId(), self.on_plot)
+        
+        self.bt_remove = wx.Button(self, wx.NewId(), "Delete Data")
+        self.bt_remove.SetToolTipString("Delete data from the application")
+        wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
+        
+        self.tctrl_perspective = wx.StaticText(self, -1, 'Active Application')
+        self.tctrl_perspective.SetToolTipString("Active Application")
+        self.tctrl_plotpanel = wx.StaticText(self, -1, 'Plot panel on focus')
+        self.tctrl_plotpanel.SetToolTipString("Active Plotting Panel")
+        #self.sizer3.AddMany([(self.bt_import,0, wx.ALL,5),
+        #                     (self.bt_append_plot,0, wx.ALL,5),
+        #                     (self.bt_plot, 0, wx.ALL,5),
+        # (self.bt_remove,0, wx.ALL,5)])
+        ix = 0
+        iy = 0
+        self.sizer3.Add(self.bt_import,( iy, ix),(1,1),  
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        self.sizer3.Add(self.tctrl_perspective,(iy, ix),(1,1),
+                          wx.EXPAND|wx.ADJUST_MINSIZE, 0)      
+        ix = 0          
+        iy += 1 
+        self.sizer3.Add(self.bt_append_plot,( iy, ix),(1,1),  
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix += 1
+        self.sizer3.Add(self.tctrl_plotpanel,(iy, ix),(1,1),
+                          wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
+        ix = 0          
+        iy += 1 
+        self.sizer3.Add(self.bt_plot,( iy, ix),(1,1),  
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix = 0          
+        iy += 1 
+        self.sizer3.Add(self.bt_remove,( iy, ix),(1,1),  
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        
+     
+    def layout_batch(self):
+        """
+        """
+       
+        self.rb_single_mode = wx.RadioButton(self, -1, 'Single Mode',
+                                             style=wx.RB_GROUP)
+        self.rb_batch_mode = wx.RadioButton(self, -1, 'Batch Mode')
+        
+        self.rb_single_mode.SetValue(True)
+        self.rb_batch_mode.SetValue(False)
+        self.sizer4.AddMany([(self.rb_single_mode,0, wx.ALL,5),
+                            (self.rb_batch_mode,0, wx.ALL,5)])
+      
+    def layout_list(self):
+        """
+        Add a listcrtl in the panel
+        """
+        w, h = self.GetSize()
+        self.tree_ctrl = DataTreeCtrl(parent=self, size=(w-10, -1))
+        self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKED, self.on_check_item)
+        self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_RIGHT_CLICK, self.on_right_click)
+        self.sizer1.Add(self.tree_ctrl,0, wx.EXPAND|wx.ALL, 20)
+
+    def on_right_click(self, event):
+        """
+        """
+        ## Create context menu for data 
+        self.popUpMenu = wx.Menu()
+        msg = "Edit %s"%str(self.tree_ctrl.GetItemText(event.GetItem()))
+        id = wx.NewId()
+        self.edit_data_mitem = wx.MenuItem(self.popUpMenu,id,msg,
+                                 "Edit meta data")
+        wx.EVT_MENU(self, id, self.on_edit_data)
+        self.popUpMenu.AppendItem(self.edit_data_mitem)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.onContextMenu)
+        
+    def on_edit_data(self, event):
+        """
+        """
+        print "editing data"
+    def onContextMenu(self, event): 
+        """
+        Retrieve the state selected state
+        """
+        # Skipping the save state functionality for release 0.9.0
+        #return
+    
+        pos = event.GetPosition()
+        pos = self.ScreenToClient(pos)
+        self.PopupMenu(self.popUpMenu, pos) 
+      
+    def on_check_item(self, event):
+        """
+        """
+        item = event.GetItem()
+        name =self.tree_ctrl.GetItemText(item)
+  
+    def load_data_list(self, list):
+        """
+        
+        """
+        if not list:
+            return
+        
+        for dstate in list.values():
+            data = dstate.get_data()
+            if data is None:
+                data_name = str(data)
+                data_class = "unkonwn"
+            else:
+                data_name = data.name
+        
+            data_class = data.__class__.__name__
+            path = dstate.get_path() 
+            theory_list = dstate.get_theory()
+            theory = None
+            if  theory_list:
+                theory = theory_list[len(theory_list)-1]
+            data_child = None
+            for item in self.list_cb_data:
+                if self.tree_ctrl.GetItemText(item) == data_name:
+                    data_child = item
+                    for process in data.process:
+                        theory_child = self.tree_ctrl.FindItem(data_child,
+                                                        "Available Theories")#,
+                        if theory is not None:
+                            av_theory_child =self.tree_ctrl.AppendItem(theory_child,
+                                                theory.name,ct_type=1)
+                            self.list_cb_theory.append(av_theory_child)
+                            av_theory_child_info =self.tree_ctrl.AppendItem(av_theory_child,
+                                                     'info')
+                            for process in theory.process:
+                                info_time_child =self.tree_ctrl.AppendItem(av_theory_child_info,
+                                         process.__str__())
+                   
+                    break
+            if data_child is None:
+                data_child =self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
+                                                   data_name,ct_type=1)
+                cb_data = self.tree_ctrl.GetFirstChild(self.tree_ctrl.root) 
+                item, id = cb_data
+                item.Check(True)
+                self.list_cb_data.append(item)                         
+                data_info_child =self.tree_ctrl.AppendItem(data_child, 'info')#,
+                                                            #wnd=data_info_txt)
+                info_class_child =self.tree_ctrl.AppendItem(data_info_child, 
+                                                            'Type: %s'%data_class)
+                path_class_child =self.tree_ctrl.AppendItem(data_info_child,
+                                                             'Path: %s'%str(path))
+                for process in data.process:
+                    info_time_child =self.tree_ctrl.AppendItem(data_info_child,process.__str__())
+                theory_child =self.tree_ctrl.AppendItem(data_child, "Available Theories")
+                
+                if  theory_list:
+                    theory = theory_list[len(theory_list)-1]
+                    if theory is not None:
+                        av_theory_child =self.tree_ctrl.AppendItem(theory_child,
+                                                    theory.name,ct_type=1)
+                        self.list_cb_theory.append(av_theory_child)
+                        av_theory_child_info =self.tree_ctrl.AppendItem(av_theory_child,
+                                                         'info')
+                        for process in theory.process:
+                            info_time_child =self.tree_ctrl.AppendItem(av_theory_child_info,
+                                             process.__str__())
+                   
     def set_data_helper(self):
         """
         """
         data_to_plot = []
+        #num = self.tree_ctrl.GetCount()
+        #print num, self.tree_ctrl
+        for item in self.list_cb_data:
+            print "set_data_helper",self.tree_ctrl.GetItemText(item), item.IsChecked()
+            if item.IsChecked():
+               data_to_plot.append(self.tree_ctrl.GetItemText(item))
         
-        num = self.list_ctrl.GetItemCount()
-        for index in range(num):
-            if self.list_ctrl.IsChecked(index):
-                data_to_plot.append(self.list_ctrl.GetItemText(index))
-        return data_to_plot
+        theory_to_plot =[]
+        for item in self.list_cb_theory:
+            if item.IsChecked():
+               theory_to_plot.append(self.tree_ctrl.GetItemText(item))
+        
+        return data_to_plot, theory_to_plot
     
+    def on_remove(self, event):
+        data_to_remove, theory_to_remove = self.set_data_helper()
+        for item in self.list_cb_data:
+            if item.IsChecked()and \
+                self.tree_ctrl.GetItemText(item) in data_to_remove:
+                self.tree_ctrl.Delete(item)
+        for i in self.list_cb_theory:
+            if item.IsChecked()and \
+                self.tree_ctrl.GetItemText(item) in theory_to_remove:
+                self.tree_ctrl.Delete(item)
+        self.manager.delete_data(data_name=data_to_remove,
+                                  theory_name=theory_to_remove)
+        
     def on_import(self, event=None):
         """
         Get all select data and set them to the current active perspetive
         """
-        data_to_plot = self.set_data_helper()
-        current_perspective = None
-        if self.perspectives:
-            for item in self.perspectives:
-                if item.GetValue():
-                    current_perspective = item.GetLabelText()
-        if self.manager is not None:
-            self.manager.post_data(data_name_list=data_to_plot,
-                        perspective=current_perspective, plot=False)
-       
+        self.post_helper(plot=False)
+        
     def on_plot(self, event=None):
         """
         Send a list of data names to plot
         """
-        data_to_plot = self.set_data_helper()
-        if self.manager is not None:
-            self.manager.post_data(data_name_list=data_to_plot, plot=True)
-      
-    def on_close(self, event):
+        self.post_helper(plot=True)
+       
+    def set_active_perspective(self, name):
         """
-        Close the current panel's parent
+        set the active perspective
         """
-        self.parent._onClose()
-        
+        self.tctrl_perspective.SetLabel(str(name))
     
-from sans.guiframe.dataFitting import Data1D
-from DataLoader.loader import Loader
-            
-list  = Loader().load('latex_smeared.xml')
-data_list = [('Data1', list[0], '07/01/2010'), 
-            ('Data2', list[1], '07/03/2011'),
-            ('Data3', 'Theory1D', '06/01/2010'),
-            ('Data4', 'Theory2D', '07/01/2010'),
-            ('Data5', 'Theory2D', '07/02/2010')]
+    def set_panel_on_focus(self, name):
+        """
+        set the plot panel on focus
+        """
+        self.tctrl_plotpanel.SetLabel(str(name))
+        
+    def get_active_perspective(self):
+        """
+        """
+        current_perspective = None
+        if self.list_rb_perspectives:
+            for item in self.list_rb_perspectives:
+                if item.GetValue():
+                    current_perspective = item.GetLabelText()
+        return current_perspective
+    
+    def post_helper(self, plot=False):
+        """
+        """
+        data_to_plot, theory_to_plot = self.set_data_helper()
+        #print "data_to_plot",data_to_plot
+        current_perspective = self.get_active_perspective()
+        
+        if self.manager is not None:
+            self.parent.post_data_helper(data_name=data_to_plot,
+                                 perspective=current_perspective, plot=plot)
+
 
 class DataFrame(wx.Frame):
-    def __init__(self, parent=None, owner=None,
-                 list_of_perspective=None, list=None,
-                  manager=None, *args, **kwds):
-        kwds['size'] = (500, 500)
+    ## Internal name for the AUI manager
+    window_name = "Data Panel"
+    ## Title to appear on top of the window
+    window_caption = "Data Panel"
+    ## Flag to tell the GUI manager that this panel is not
+    #  tied to any perspective
+    ALWAYS_ON = True
+    
+    def __init__(self, parent=None, owner=None, manager=None,size=(600, 600),
+                         list_of_perspective=[],list=[], *args, **kwds):
+        #kwds['size'] = size
         kwds['id'] = -1
-        kwds['title'] = "Loaded Data"
+        kwds['title']= "Loaded Data"
         wx.Frame.__init__(self, parent=parent, *args, **kwds)
         self.parent = parent
         self.owner = owner
         self.manager = manager
         self.panel = DataPanel(parent=self, 
+                               size=size,
                                list_of_perspective=list_of_perspective)
-        self.panel.load_list(list=list)
-        wx.EVT_CLOSE(self, self._onClose)
-        
-    def set_owner(self, owner):
-        """
-        :param owner: is the main widget creating this frame
-         for sansview owner is gui_manager
-        """
-        self.owner = owner
-        self.panel.set_owner(owner=self.owner)
-        
-    def set_manager(self, manager):
-        """
-        :param manager: object responsible of filling on empty the listcrtl of 
-         this panel. for sansview manager is data_manager
-         
-        """
-        self.manager = manager
-        self.panel.set_manager(manager=self.manager)
-        
-    def load_list(self, list=None):
+     
+    def load_data_list(self, list=[]):
         """
         Fill the list inside its panel
         """
-        self.panel.load_list(list=list)
+        self.panel.load_data_list(list=list)
         
-    def layout_perspective(self, list_of_perspective=None):
+    def layout_perspective(self, list_of_perspective=[]):
         """
-        fill the panel with list of perspective
         """
         self.panel.layout_perspective(list_of_perspective=list_of_perspective)
-    
-    def set_perspective(self, sub_menu):
-        """
-        Receive the name of the current perspective and set 
-        the active perspective
-        """
-        self.panel.set_perspective(sub_menu=sub_menu)
         
-    def _onClose(self, event=None):
-        """
-        this frame can only be hidden unless the application destroys it
-        """
-        self.Hide()
-      
+    
+from dataFitting import Data1D
+from dataFitting import Data2D, Theory1D
+from data_state import DataState
+import sys
+class State():
+    def __init__(self):
+        self.msg = ""
+    def __str__(self):
+        self.msg = "model mane : model1\n"
+        self.msg += "params : \n"
+        self.msg += "name  value\n"
+        return msg
+def set_data_state(data, path, theory, state):
+    dstate = DataState(data=data)
+    dstate.set_path(path=path)
+    dstate.set_theory(theory)
+    dstate.set_state(state)
+    return dstate
+"""'
+data_list = [1:('Data1', 'Data1D', '07/01/2010', "theory1d", "state1"), 
+            ('Data2', 'Data2D', '07/03/2011', "theory2d", "state1"), 
+            ('Data3', 'Theory1D', '06/01/2010', "theory1d", "state1"), 
+            ('Data4', 'Theory2D', '07/01/2010', "theory2d", "state1"), 
+            ('Data5', 'Theory2D', '07/02/2010', "theory2d", "state1")] 
+"""      
 if __name__ == "__main__":
+    
     app = wx.App()
-    window = DataFrame(list=data_list)
-    window.Show(True)
+    try:
+        list_of_perspective = [('perspective2', False), ('perspective1', True)]
+        data_list = {}
+        data = Data1D()
+        data.name = "data1"
+        #data.append_process()
+        #process = data.process[len(data.process)-1]
+        #process.data = "07/01/2010"
+        theory = Theory1D()
+        theory.pseudo_name = "theory1"
+        path = "path1"
+        state = State()
+        data_list['1']=set_data_state(data, path,theory, state)
+        
+        data = Data1D()
+        data.name = "data2"
+        theory = Theory1D()
+        theory.name = "CoreShell 07/24/25"
+        theory.pseudo_name = "CoreShell"
+        path = "path2"
+        state = State()
+        data_list['2']=set_data_state(data, path,theory, state)
+        data = Data1D()
+        data.name = "data2"
+        theory = Theory1D()
+        theory.name = "CoreShell"
+        theory.pseudo_name = "CoreShell"
+        #theory.append_process()
+        #process = theory.process[len(theory.process)-1]
+        #process.description = "this is my description"
+        path = "path3"
+        #data.append_process()
+        #process = data.process[len(data.process)-1]
+        #process.data = "07/22/2010"
+        data_list['4']=set_data_state(data, path,theory, state)
+        
+        data = Data2D()
+        data.name = "data3"
+        #data.append_process()
+        #process = data.process[len(data.process)-1]
+        #process.data = "07/01/2010"
+        theory = Theory1D()
+        theory.pseudo_name = "Cylinder"
+        path = "path2"
+        state = State()
+        dstate= set_data_state(data, path,theory, state)
+        theory = Theory1D()
+        theory.pseudo_name = "Sphere"
+        dstate.set_theory(theory)
+        data_list['3']=dstate
+        
+        window = DataFrame(list=data_list)
+        window.load_data_list(list=data_list)
+        window.layout_perspective(list_of_perspective=list_of_perspective)
+        window.Show(True)
+    except:
+        #raise
+        print "error",sys.exc_value
     app.MainLoop()  
     
     
