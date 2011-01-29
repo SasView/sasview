@@ -202,7 +202,7 @@ class DataPanel(ScrolledPanel):
         self.bt_remove.SetToolTipString("Delete data from the application")
         wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
         
-        self.tctrl_perspective = wx.StaticText(self, -1, 'Active Application')
+        self.tctrl_perspective = wx.StaticText(self, -1, 'No Active Application')
         self.tctrl_perspective.SetToolTipString("Active Application")
         self.tctrl_plotpanel = wx.StaticText(self, -1, 'Plot panel on focus')
         self.tctrl_plotpanel.SetToolTipString("Active Plotting Panel")
@@ -274,13 +274,13 @@ class DataPanel(ScrolledPanel):
         """
         """
         print "editing data"
+        
     def onContextMenu(self, event): 
         """
         Retrieve the state selected state
         """
         # Skipping the save state functionality for release 0.9.0
         #return
-    
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(self.popUpMenu, pos) 
@@ -289,7 +289,7 @@ class DataPanel(ScrolledPanel):
         """
         """
         item = event.GetItem()
-        name =self.tree_ctrl.GetItemText(item)
+        name = self.tree_ctrl.GetItemText(item)
   
     def load_data_list(self, list):
         """
@@ -407,23 +407,13 @@ class DataPanel(ScrolledPanel):
         set the active perspective
         """
         self.tctrl_perspective.SetLabel(str(name))
-    
+     
     def set_panel_on_focus(self, name):
         """
         set the plot panel on focus
         """
         self.tctrl_plotpanel.SetLabel(str(name))
         
-    def get_active_perspective(self):
-        """
-        """
-        current_perspective = None
-        if self.list_rb_perspectives:
-            for item in self.list_rb_perspectives:
-                if item.GetValue():
-                    current_perspective = item.GetLabelText()
-        return current_perspective
-    
     def post_helper(self, plot=False):
         """
         """

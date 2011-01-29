@@ -14,12 +14,8 @@ available all data loaded  for the current perspective.
 All modules "creating Data" posts their data to data_manager . 
 Data_manager  make these new data available for all other perspectives.
 """
-
 import logging
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename='sans_app.log',
-                    filemode='w')    
+from sans.guiframe.data_state import DataState
   
 class DataManager(object):
     """
@@ -33,7 +29,7 @@ class DataManager(object):
         :param auto_set_data: if True the datamanager sends to the current
         perspective
         """
-        self._selected_data = []
+        self._selected_data = {}
         self.stored_data = {}
         self.message = ""
       
@@ -47,8 +43,9 @@ class DataManager(object):
                 msg = "Data manager already stores %s" % str(data.name)
                 msg += ""
                 logging.info(msg)
-            self._selected_data.append(data)
-            self.stored_data[id] = data
+            data_state = DataState(data)
+            self._selected_data.append(data_state)
+            self.stored_data[id] = data_state
             
     def set_auto_plot(self, flag=False):
         """

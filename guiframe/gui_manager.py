@@ -94,7 +94,7 @@ class ViewerFrame(wx.Frame):
         from data_manager import DataManager
         self._data_manager = DataManager()
         self._data_panel = DataPanel(parent=self)
-       
+        
         #add current perpsective
         self._current_perspective = None
         self._plotting_plugin = None
@@ -105,15 +105,14 @@ class ViewerFrame(wx.Frame):
         self._data_menu = None
         self._window_menu = None
         self._window_menu = None
-        self._help = None
-        
+        self._help_menu = None
+        self._tool_menu = None
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins = []
         #add local plugin
         self.plugins += self._get_local_plugins()
         self.plugins += self._find_plugins()
-        print "self.plugins", self.plugins
         ## List of panels
         self.panels = {}
 
@@ -168,6 +167,7 @@ class ViewerFrame(wx.Frame):
    
         # Load panels
         self._load_panels()
+        self.set_default_perspective()
         self._mgr.Update()
         
     def SetStatusText(self, *args, **kwds):
@@ -429,20 +429,18 @@ class ViewerFrame(wx.Frame):
                               Name(windowname).Caption(caption).
                               MinimizeButton().
                               Resizable(True).
-                              # Use a large best size to make sure the AUI manager
-                              # takes all the available space
+                              # Use a large best size to make sure the AUI 
+                              # manager takes all the available space
                               BestSize(wx.Size(PLOPANEL_WIDTH, PLOPANEL_HEIGTH)))
-            print "GUIFRAME.FIXED_PANEL"
             self._popup_fixed_panel(p)
             
         elif style2 in GUIFRAME.FLOATING_PANEL:
-            print "GUIFRAME.Floating_PANEL"
             self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                               Name(windowname).Caption(caption).
                               MinimizeButton().
                               Resizable(True).
-                              # Use a large best size to make sure the AUI manager
-                              # takes all the available space
+                              # Use a large best size to make sure the AUI
+                              #  manager takes all the available space
                               BestSize(wx.Size(PLOPANEL_WIDTH, PLOPANEL_HEIGTH)))
             self._popup_floating_panel(p)
             
@@ -477,51 +475,37 @@ class ViewerFrame(wx.Frame):
         self._add_menu_file()
         self._add_menu_data()
         self._add_menu_application()
+        self._add_current_plugin_menu()
+        self._add_menu_tool()
         self._add_menu_window()
-        # Tools menu
-        # Go through plug-ins and find tools to populate the tools menu
-        toolsmenu = None
-        for item in self.plugins:
-            if hasattr(item, "get_tools"):
-                for tool in item.get_tools():
-                    # Only create a menu if we have at least one tool
-                    if toolsmenu is None:
-                        toolsmenu = wx.Menu()
-                    id = wx.NewId()
-                    toolsmenu.Append(id, tool[0], tool[1])
-                    wx.EVT_MENU(self, id, tool[2])
-        if toolsmenu is not None:
-            self._menubar.Append(toolsmenu, '&Tools')
- 
-        # Help menu
-        helpmenu = wx.Menu()
-        # add the welcome panel menu item
-        if self.defaultPanel is not None:
-            id = wx.NewId()
-            helpmenu.Append(id, '&Welcome', '')
-            helpmenu.AppendSeparator()
-            wx.EVT_MENU(self, id, self.show_welcome_panel)
-        # Look for help item in plug-ins 
-        for item in self.plugins:
-            if hasattr(item, "help"):
-                id = wx.NewId()
-                helpmenu.Append(id,'&%s help' % item.sub_menu, '')
-                wx.EVT_MENU(self, id, item.help)
-        if config._do_aboutbox:
-            id = wx.NewId()
-            helpmenu.Append(id,'&About', 'Software information')
-            wx.EVT_MENU(self, id, self._onAbout)
-            
-        # Checking for updates needs major refactoring to work with py2exe
-        # We need to make sure it doesn't hang the application if the server
-        # is not up. We also need to make sure there's a proper executable to
-        # run if we spawn a new background process.
-        #id = wx.NewId()
-        #helpmenu.Append(id,'&Check for update', 
-        #'Check for the latest version of %s' % config.__appname__)
-        #wx.EVT_MENU(self, id, self._check_update)
+        self._add_help_menu()
+        self.SetMenuBar(self._menubar)
         
-        # Look for plug-in menus
+    def _add_menu_tool(self):
+        """
+        Tools menu
+        Go through plug-ins and find tools to populate the tools menu
+        """
+        style = self.__gui_style & GUIFRAME.TOOL_ON
+        if style == GUIFRAME.TOOL_ON:
+            self._tool_menu = None
+            for item in self.plugins:
+                if hasattr(item, "get_tools"):
+                    for tool in item.get_tools():
+                        # Only create a menu if we have at least one tool
+                        if self._tool_menu is None:
+                            self._tool_menu = wx.Menu()
+                        id = wx.NewId()
+                        self._tool_menu.Append(id, tool[0], tool[1])
+                        wx.EVT_MENU(self, id, tool[2])
+            if self._tool_menu is not None:
+                self._menubar.Append(self._tool_menu, '&Tools')
+                
+    def _add_current_plugin_menu(self):
+        """
+        add current plugin menu
+        """
+          # Look for plug-in menus
         # Add available plug-in sub-menus. 
         for item in self.plugins:
             if item != self._plotting_plugin:
@@ -529,9 +513,39 @@ class ViewerFrame(wx.Frame):
                     item.populate_menu(self.next_id, self):
                     self._menubar.Append(menu, name)
                    
-        self._menubar.Append(helpmenu, '&Help')
-        self.SetMenuBar(self._menubar)
-    
+    def _add_help_menu(self):
+        """
+        add help menu
+        """
+        # Help menu
+        self._help_menu = wx.Menu()
+        # add the welcome panel menu item
+        if self.defaultPanel is not None:
+            id = wx.NewId()
+            self._help_menu.Append(id, '&Welcome', '')
+            self._help_menu.AppendSeparator()
+            wx.EVT_MENU(self, id, self.show_welcome_panel)
+        # Look for help item in plug-ins 
+        for item in self.plugins:
+            if hasattr(item, "help"):
+                id = wx.NewId()
+                self._help_menu.Append(id,'&%s help' % item.sub_menu, '')
+                wx.EVT_MENU(self, id, item.help)
+        if config._do_aboutbox:
+            id = wx.NewId()
+            self._help_menu.Append(id,'&About', 'Software information')
+            wx.EVT_MENU(self, id, self._onAbout)
+        
+        # Checking for updates needs major refactoring to work with py2exe
+        # We need to make sure it doesn't hang the application if the server
+        # is not up. We also need to make sure there's a proper executable to
+        # run if we spawn a new background process.
+        #id = wx.NewId()
+        #self._help_menu.Append(id,'&Check for update', 
+        #'Check for the latest version of %s' % config.__appname__)
+        #wx.EVT_MENU(self, id, self._check_update)
+        self._menubar.Append(self._help_menu, '&Help')
+            
     def _add_menu_window(self):
         """
         add a menu window to the menu bar
@@ -552,11 +566,7 @@ class ViewerFrame(wx.Frame):
                 self._window_menu.AppendSubMenu(menu, name)
         self._window_menu.AppendSeparator()
         self._menubar.Append(self._window_menu, '&Window')
-        if self.defaultPanel is not None :
-            id = wx.NewId()
-            self._window_menu.Append(id,'&Welcome', '')
-            
-            wx.EVT_MENU(self, id, self.show_welcome_panel)
+     
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style == GUIFRAME.MANAGER_ON:
             id = wx.NewId()
@@ -618,20 +628,15 @@ class ViewerFrame(wx.Frame):
         """
          # File menu
         self._filemenu = wx.Menu()
-        
         # some menu of plugin to be seen under file menu
         self._populate_file_menu()
-        
         id = wx.NewId()
         self._filemenu.Append(id, '&Save state into File',
                              'Save project as a SansView (svs) file')
         wx.EVT_MENU(self, id, self._on_save)
-        #self.__filemenu.AppendSeparator()
-        
         id = wx.NewId()
         self._filemenu.Append(id, '&Quit', 'Exit') 
         wx.EVT_MENU(self, id, self.Close)
-        
         # Add sub menus
         self._menubar.Append(self._filemenu, '&File')
         
@@ -711,14 +716,18 @@ class ViewerFrame(wx.Frame):
         if self.defaultPanel is None:
             return 
         for id in self.panels.keys():
-            if self._mgr.GetPane(self.panels[id].window_name).IsShown():
+            if id  ==  'default':
+                # Show default panel
+                if not self._mgr.GetPane(self.panels["default"].window_name).IsShown():
+                    self._mgr.GetPane(self.panels["default"].window_name).Show(True)
+            elif id == "data_panel":
+                flag = self._mgr.GetPane(self.panels["data_panel"].window_name).IsShown()
+                self._mgr.GetPane(self.panels["data_panel"].window_name).Show(flag)
+            else:
+                self._mgr.GetPane(self.panels[id].window_name).IsShown()
                 self._mgr.GetPane(self.panels[id].window_name).Hide()
-        # Show default panel
-        if not self._mgr.GetPane(self.panels["default"].window_name).IsShown():
-            self._mgr.GetPane(self.panels["default"].window_name).Show()
-        
         self._mgr.Update()
-        
+       
     def show_panel(self, uid):
         """
         Shows the panel with the given id
@@ -949,7 +958,6 @@ class ViewerFrame(wx.Frame):
         for item in self.plugins:
             if hasattr(item, "set_default_perspective"):
                 if item.set_default_perspective():
-                    self._current_perspective = item
                     item.on_perspective(event=None)
                     return 
         
@@ -1007,12 +1015,7 @@ class ViewerFrame(wx.Frame):
         if not pane.IsShown():
             pane.Show(True)
             self._mgr.Update()
-            
-    def show_welcome_panel(self, event):
-        """
-        show welcome panel
-        """
-        
+  
     def add_data(self, data_list):
         """
         receive a list of data . store them its data manager if possible
@@ -1027,24 +1030,36 @@ class ViewerFrame(wx.Frame):
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style == GUIFRAME.MANAGER_ON:
             if self._data_panel is not None:
+                data_state = self._data_manager.get_selected_data()
+                self._data_panel.load_data_list(data_state)
                 self._mgr.GetPane(self._data_panel.window_name).Show(True)
                 #wait for button press from the data panel to send data
         else:
             #automatically send that to the current perspective
             style = self.__gui_style & GUIFRAME.SINGLE_APPLICATION
             if style == GUIFRAME.SINGLE_APPLICATION:
-                if self._current_perspective is not None:
-                    try:
-                        self._current_perspective.set_data(data_list)
-                    except:
-                        msg = str(sys.exc_value)
-                        wx.PostEvent(self, StatusEvent(status=msg,
-                                                  info="error"))
-                else:
-                    msg = "Guiframe does not have a current perspective"
-                    logging.info(msg)
+                self.set_data(data_list)
+                
+    def set_data_from_panel(self, data_id):
+        """
+        receive a list of data key retreive the data from data manager and set 
+        then to the current perspective
+        """
+        
+    def set_data(self, data_list):
+        """
+        set data to current perspective
+        """
+        if self._current_perspective is not None:
+            try:
+                self._current_perspective.set_data(data_list)
+            except:
+                msg = str(sys.exc_value)
+                wx.PostEvent(self, StatusEvent(status=msg, info="error"))
+        else:
+            msg = "Guiframe does not have a current perspective"
+            logging.info(msg)
             
- 
     def plot_data(self, data_list):
         """
         send a list of data to plot
@@ -1059,7 +1074,12 @@ class ViewerFrame(wx.Frame):
         set the current active perspective 
         """
         self._current_perspective = perspective
-        
+        name = "No current Application selected"
+        if self._current_perspective is not None and \
+            self._data_panel is not None:
+            name = self._current_perspective.sub_menu
+            self._data_panel.set_active_perspective(name)
+           
     def set_plotpanel_floating(self, event):
         """
         make the plot panel floatable
