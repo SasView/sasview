@@ -117,8 +117,13 @@ class Plugin(PluginBase):
             else:
                 ##Create a new plotpanel for 2D data
                 from Plotter2D import ModelPanel2D
+                if hasattr(event.plot, "scale"):
+                    scale = event.plot.scale
+                else:
+                    scale = 'log'
                 new_panel = ModelPanel2D(self.parent, id = -1,
-                                    data2d=event.plot, style=wx.RAISED_BORDER)
+                                    data2d=event.plot, scale = scale, 
+                                    style=wx.RAISED_BORDER)
             ## Set group ID if available
             ## Assign data properties to the new create panel
             group_id_str = ''
