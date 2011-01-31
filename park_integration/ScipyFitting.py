@@ -30,6 +30,7 @@ class fitresult(object):
         self.parameters = None
         self.model = model
         self.param_list = param_list
+        self.iterations = 0
      
     def set_model(self, model):
         """
@@ -47,9 +48,10 @@ class fitresult(object):
         if self.pvec == None and self.model is None and self.param_list is None:
             return "No results"
         n = len(self.model.parameterset)
-
+        self.iterations += 1
         result_param = zip(xrange(n), self.model.parameterset)
-        msg = ["P%-3d  %s......|.....%s" % (p[0], p[1], p[1].value)\
+        msg = [" [Iteration #: %s] | P%-3d  %s......|.....%s" % \
+               (self.iterations, p[0], p[1], p[1].value)\
               for p in result_param if p[1].name in self.param_list]
         msg.append("=== goodness of fit: %s" % (str(self.fitness)))
         return "\n".join(msg)
