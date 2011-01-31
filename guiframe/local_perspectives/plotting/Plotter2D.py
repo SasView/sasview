@@ -12,6 +12,7 @@
 
 import wx
 import sys
+import os
 import math
 import pylab
 import danse.common.plottools
@@ -239,6 +240,14 @@ class ModelPanel2D(ModelPanel1D):
         slicerpop.Append(id,'&Print Preview', 'image preview for print')
         wx.EVT_MENU(self, id, self.onPrinterPreview)
         
+        # saving data
+        plot = self.data2D
+        id = wx.NewId()
+        name = plot.name
+        slicerpop.Append(id, "&Save as a file (DAT)" )
+        self.action_ids[str(id)] = plot
+        wx.EVT_MENU(self, id, self._onSave)
+
         slicerpop.AppendSeparator()
         if len(self.data2D.detector) == 1:        
             
@@ -553,4 +562,42 @@ class ModelPanel2D(ModelPanel1D):
             # Post slicer None event
             event = self._getEmptySlicerEvent()
             wx.PostEvent(self, event)
-   
+            
+    def _onSave(self, evt):
+        """
+        Save a data set to a dat(text) file
+        
+        :param evt: Menu event
+        
+        """
+        id = str(evt.GetId())
+        if id in self.action_ids:         
+            
+            path = None
+            wildcard = "IGOR/DAT 2D file in Q_map (*.dat)|*.DAT"
+            dlg = wx.FileDialog(self, "Choose a file",
+                                self._default_save_location,
+                                 "", wildcard , wx.SAVE)
+           
+            if dlg.ShowModal() == wx.ID_OK:
+                path = dlg.GetPath()
+                mypath = os.path.basename(path)
+                
+                #TODO: This is bad design. The DataLoader is designed 
+                #to recognize extensions.
+                # It should be a simple matter of calling the .
+                #save(file, data, '.xml') method
+                # of the DataLoader.loader.Loader class.
+                from DataLoader.loader import  Loader
+                #Instantiate a loader 
+                loader = Loader() 
+                data = self.data2D
+
+                format = ".dat"
+                if os.path.splitext(mypath)[1].lower() == format:
+                    loader.save(path, data, format)
+                try:
+                    self._default_save_location = os.path.dirname(path)
+                except:
+                    pass    
+            dlg.Destroy()
