@@ -151,12 +151,7 @@ class Plugin(PluginBase):
         except:
             logging.error("prview.set_state: %s" % sys.exc_value)
 
-    def populate_menu(self, id, owner):
-        """
-        Create a menu for the plug-in
-        """
-        return []
-    
+  
     def help(self, evt):
         """
         Show a general help dialog. 
