@@ -52,7 +52,6 @@ PLOPANEL_WIDTH = 400
 PLOPANEL_HEIGTH = 400
 
 
-
 class ViewerFrame(wx.Frame):
     """
     Main application frame
@@ -103,7 +102,7 @@ class ViewerFrame(wx.Frame):
         self._window_menu = None
         self._help_menu = None
         self._tool_menu = None
-        self._plugin_menu_list = []
+        self._plugin_menu = None
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins = []
@@ -371,8 +370,7 @@ class ViewerFrame(wx.Frame):
                     self.panels[str(id)] = p
                     self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                                           Name(p.window_name).Caption(p.window_caption).
-                                           Center().
-                                           CloseButton(True).
+                                           CenterPane().
                                            MinSize(wx.Size(w, h)).
                                            Hide())
             else:
@@ -476,10 +474,10 @@ class ViewerFrame(wx.Frame):
         self._add_menu_file()
         self._add_menu_data()
         self._add_menu_application()
-        self._add_current_plugin_menu()
         self._add_menu_tool()
         self._add_menu_window()
         self._add_help_menu()
+        self._add_current_plugin_menu()
         self.SetMenuBar(self._menubar)
         
     def _add_menu_tool(self):
@@ -505,15 +503,24 @@ class ViewerFrame(wx.Frame):
     def _add_current_plugin_menu(self):
         """
         add current plugin menu
+        Look for plug-in menus
+        Add available plug-in sub-menus. 
         """
-          # Look for plug-in menus
-        # Add available plug-in sub-menus. 
-        for item in self.plugins:
-            if item != self._plotting_plugin:
-                for (menu, name) in \
-                    item.populate_menu(self):
-                    self._menubar.Append(menu, name)
-                   
+        if self._menubar is None:
+            return
+        
+        pos = self._menubar.GetMenuCount()
+        if self._current_perspective is not None:
+            if self._current_perspective != self._plotting_plugin:
+                menu_list = self._current_perspective.populate_menu(self)
+                if menu_list:
+                    for (menu, name) in menu_list:
+                        self._plugin_menu = self._menubar.Append(menu, 'Others')
+                #else:
+                #    self._plugin_menu = self._menubar.Append(wx.Menu(), 'all')              
+        #else:
+        #    self._plugin_menu = self._menubar.Insert(pos, wx.Menu(), 'all')
+                        
     def _add_help_menu(self):
         """
         add help menu
@@ -975,7 +982,6 @@ class ViewerFrame(wx.Frame):
         
         :param panels: list of panels
         """
-       
         for item in self.panels:
             # Check whether this is a sticky panel
             if hasattr(self.panels[item], "ALWAYS_ON"):
@@ -1129,10 +1135,11 @@ class ViewerFrame(wx.Frame):
         """
         self._current_perspective = perspective
         name = "No current Application selected"
-        if self._current_perspective is not None and \
-            self._data_panel is not None:
-            name = self._current_perspective.sub_menu
-            self._data_panel.set_active_perspective(name)
+        if self._current_perspective is not None:
+            self._add_current_plugin_menu()
+            if self._data_panel is not None:
+                name = self._current_perspective.sub_menu
+                self._data_panel.set_active_perspective(name)
            
     def set_plotpanel_floating(self, event=None):
         """
