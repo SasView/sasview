@@ -439,7 +439,7 @@ class ViewerFrame(wx.Frame):
                               BestSize(wx.Size(PLOPANEL_WIDTH, PLOPANEL_HEIGTH)))
             self._popup_fixed_panel(p)
     
-        elif style2 in GUIFRAME.FLOATING_PANEL:
+        elif style2 == GUIFRAME.FLOATING_PANEL:
             self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                               Name(windowname).Caption(caption).
                               MinimizeButton().
@@ -1136,6 +1136,7 @@ class ViewerFrame(wx.Frame):
         """
         make the plot panel floatable
         """
+        self.__gui_style &= (~GUIFRAME.FIXED_PANEL)
         self.__gui_style |= GUIFRAME.FLOATING_PANEL
         for p in self.panels.values():
             plot_panel = self._plotting_plugin.plot_panels
@@ -1147,6 +1148,7 @@ class ViewerFrame(wx.Frame):
         """
         make the plot panel fixed
         """
+        self.__gui_style &= (~GUIFRAME.FLOATING_PANEL)
         self.__gui_style |= GUIFRAME.FIXED_PANEL
         plot_panel = []
         if self._plotting_plugin is not None:
