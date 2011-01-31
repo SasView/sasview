@@ -209,7 +209,7 @@ class _BaseSmearer(object):
             msg = "_BaseSmearer: could not smear, code = %g" % smear_output
             raise RuntimeError, msg
 
-        temp_first += self.nbins_low
+        temp_first = first_bin + self.nbins_low
         temp_last = self.nbins - self.nbins_high
         out = iq_out[temp_first: temp_last]
 
