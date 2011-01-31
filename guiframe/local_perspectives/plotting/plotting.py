@@ -35,7 +35,7 @@ class Plugin(PluginBase):
         """
         return True
     
-    def populate_menu(self, id, parent):
+    def populate_menu(self, parent):
         """
         Create a 'Plot' menu to list the panels
         available for displaying
@@ -49,7 +49,7 @@ class Plugin(PluginBase):
         self.menu.Append(wx.NewId(), "No plot available", 
                              "No plot available")
         self.menu.FindItemByPosition(0).Enable(False)
-        return [(id, self.menu, "Plot")]
+        return [(self.menu, "Plot")]
     
     def get_panels(self, parent):
         """

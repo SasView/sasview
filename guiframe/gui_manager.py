@@ -103,6 +103,7 @@ class ViewerFrame(wx.Frame):
         self._window_menu = None
         self._help_menu = None
         self._tool_menu = None
+        self._plugin_menu_list = []
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins = []
@@ -111,10 +112,6 @@ class ViewerFrame(wx.Frame):
         self.plugins += self._find_plugins()
         ## List of panels
         self.panels = {}
-
-        ## Next available ID for wx gui events 
-        #TODO:  No longer used - remove all calls to this 
-        self.next_id = 20000
 
         # Default locations
         self._default_save_location = os.getcwd()        
@@ -142,7 +139,6 @@ class ViewerFrame(wx.Frame):
         """
         Store reference to the last panel on focus
         """
-        print "set_panel_on_focus", event.panel
         self.panel_on_focus = event.panel
         if self.panel_on_focus is not None and self._data_panel is not None:
             self._data_panel.set_panel_on_focus(self.panel_on_focus.window_name)
@@ -514,8 +510,8 @@ class ViewerFrame(wx.Frame):
         # Add available plug-in sub-menus. 
         for item in self.plugins:
             if item != self._plotting_plugin:
-                for (self.next_id, menu, name) in \
-                    item.populate_menu(self.next_id, self):
+                for (menu, name) in \
+                    item.populate_menu(self):
                     self._menubar.Append(menu, name)
                    
     def _add_help_menu(self):
@@ -566,8 +562,7 @@ class ViewerFrame(wx.Frame):
         """
         self._window_menu = wx.Menu()
         if self._plotting_plugin is not None:
-            for (self.next_id, menu, name) in \
-                self._plotting_plugin.populate_menu(self.next_id, self):
+            for (menu, name) in self._plotting_plugin.populate_menu(self):
                 self._window_menu.AppendSubMenu(menu, name)
         self._window_menu.AppendSeparator()
         self._menubar.Append(self._window_menu, '&Window')

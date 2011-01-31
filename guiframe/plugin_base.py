@@ -93,12 +93,11 @@ class PluginBase:
         """
         return []
         
-    def populate_menu(self, id, parent):
+    def populate_menu(self, parent):
         """
         Create and return the list of application menu
         items for the plug-in. 
         
-        :param id: deprecated. Un-used.
         :param parent: parent window
         
         :return: plug-in menu
