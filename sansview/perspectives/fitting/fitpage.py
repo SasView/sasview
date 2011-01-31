@@ -1048,21 +1048,24 @@ class FitPage(BasicPage):
                 # set mask   
                 radius= numpy.sqrt( self.data.qx_data*self.data.qx_data + 
                                     self.data.qy_data*self.data.qy_data )
-                index_data = ((self.qmin <= radius)&(radius<= self.qmax))
+                index_data = ((self.qmin_x <= radius)& \
+                                (radius<= self.qmax_x))
                 index_data = (index_data)&(self.data.mask)
                 index_data = (index_data)&(numpy.isfinite(self.data.data))
                 if len(index_data[index_data]) < 10:
-                    msg= "Cannot Plot :No or too little npts in \
-                                        that data range!!!  "
+                    msg = "Cannot Plot :No or too little npts in"
+                    msg += " that data range!!!  "
                     wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
                     return
                 else:
                     self.data.mask = index_data
-                    self.Npts_fit.Setvalue(str(len(self.data.mask)))
+                    #self.Npts_fit.SetValue(str(len(self.data.mask)))
+                    self.set_npts2fit() 
             else:
                 index_data = ((self.qmin <= self.data.x)& \
                               (self.data.x <= self.qmax))
-                self.Npts_fit.SetValue(str(len(self.data.x[index_data])))
+                #self.Npts_fit.SetValue(str(len(self.data.x[index_data])))
+                self.set_npts2fit() 
            
         else:
            tcrtl.SetBackgroundColour("pink")
@@ -2515,7 +2518,6 @@ class FitPage(BasicPage):
         self.sizer3.Layout()
         self.Layout()
         self.Refresh()
-        #self.SetScrollbars(20,20,25,65)
         self.SetupScrolling()
         
 

@@ -2038,11 +2038,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         flag = True
 
         # q value from qx and qy
-        radius= numpy.sqrt( self.data.qx_data*self.data.qx_data + self.data.qy_data*self.data.qy_data )
+        radius= numpy.sqrt( self.data.qx_data * self.data.qx_data + 
+                            self.data.qy_data * self.data.qy_data )
         #get unmasked index
-        index_data = (float(self.qmin.GetValue()) <= radius)&(radius<= float(self.qmax.GetValue()))
-        index_data = (index_data)&(self.data.mask) 
-        index_data = (index_data)&(numpy.isfinite(self.data.data))
+        index_data = (float(self.qmin.GetValue()) <= radius) & \
+                        (radius <= float(self.qmax.GetValue()))
+        index_data = (index_data) & (self.data.mask) 
+        index_data = (index_data) & (numpy.isfinite(self.data.data))
 
         if len(index_data[index_data]) < 10:
             # change the color pink.
@@ -2404,12 +2406,12 @@ class BasicPage(ScrolledPanel, PanelBase):
             boxsizer1 = box_sizer
 
         self.qmin    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER,
-                                            text_enter_callback = self._onparamEnter)
+                                            text_enter_callback = self._onQrangeEnter)
         self.qmin.SetValue(str(self.qmin_x))
         self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
      
         self.qmax    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER,
-                                            text_enter_callback = self._onparamEnter)
+                                            text_enter_callback = self._onQrangeEnter)
         self.qmax.SetValue(str(self.qmax_x))
         self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
         
