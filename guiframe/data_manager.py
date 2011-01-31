@@ -37,16 +37,17 @@ class DataManager(object):
         """
         receive a list of 
         """
-        self._selected_data = []
+        self._selected_data = {}
         for data in data_list:
             if data.id  in self.stored_data:
                 msg = "Data manager already stores %s" % str(data.name)
                 msg += ""
                 logging.info(msg)
             data_state = DataState(data)
-            self._selected_data.append(data_state)
-            self.stored_data[id] = data_state
-            
+            self._selected_data[data.id] = data_state
+            self.stored_data[data.id] = data_state
+        print "datalist", self._selected_data    
+        
     def set_auto_plot(self, flag=False):
         """
         When flag is true the data is plotted automatically
@@ -70,10 +71,10 @@ class DataManager(object):
         """
         get a list of data given a list of id
         """
-        self._selected_data = []
+        self._selected_data = {}
         for id in id_list:
             if id in self.stored_data:
-                self._selected_data.append(self.stored_data[id])
+                self._selected_data[id] = self.stored_data[id]
         return self._selected_data
     
     def delete_by_id(self, id_list=None):
@@ -82,20 +83,19 @@ class DataManager(object):
         """
         for id in id_list:
             if id in self.stored_data:
-                data = self.stored_data[id]
-                if data in self._selected_data:
-                    self._selected_data.remove(data)
                 del self.stored_data[id]
+            if id  in self._selected_data:
+                del self._selected_data[id]
     
     def get_by_name(self, name_list=None):
         """
         return a list of data given a list of data names
         """
-        self._selected_data = []
+        self._selected_data = {}
         for selected_name in name_list:
-            for data in self.stored_data.values():
-                if data.name == selected_name:
-                    self._selected_data.append(data)
+            for id, data_state in self.stored_data.iteritems():
+                if data_state.data.name == selected_name:
+                    self._selected_data[id] = data_state
         return self._selected_data
     
     def delete_by_name(self, name_list=None):
@@ -103,12 +103,10 @@ class DataManager(object):
         save data and path
         """
         for selected_name in name_list:
-            for data in self.stored_data.values():
-                if data.name == selected_name:
-                    if data in self._selected_data:
-                        self._selected_data.remove(data)
-                    if data.id in self.stored_data:
-                        del self.stored_data[data.id]
+            for id, data_state in self.stored_data.iteritems():
+                if data_state.data.name == selected_name:
+                    del self._selected_data[id]
+                    del self.stored_data[data.id]
 
     def get_selected_data(self):
         """
@@ -120,7 +118,7 @@ class DataManager(object):
         """
         return list of all available data
         """
-        return self.stored_data.values()
+        return self.stored_data
     
 
         

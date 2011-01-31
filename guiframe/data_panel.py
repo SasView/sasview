@@ -295,6 +295,7 @@ class DataPanel(ScrolledPanel):
         """
         
         """
+        print "list", list
         if not list:
             return
         
@@ -305,7 +306,6 @@ class DataPanel(ScrolledPanel):
                 data_class = "unkonwn"
             else:
                 data_name = data.name
-        
             data_class = data.__class__.__name__
             path = dstate.get_path() 
             theory_list = dstate.get_theory()
@@ -321,7 +321,7 @@ class DataPanel(ScrolledPanel):
                                                         "Available Theories")#,
                         if theory is not None:
                             av_theory_child =self.tree_ctrl.AppendItem(theory_child,
-                                                theory.name,ct_type=1)
+                                                theory.name,ct_type=1, data=theory.id)
                             self.list_cb_theory.append(av_theory_child)
                             av_theory_child_info =self.tree_ctrl.AppendItem(av_theory_child,
                                                      'info')
@@ -332,7 +332,7 @@ class DataPanel(ScrolledPanel):
                     break
             if data_child is None:
                 data_child =self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
-                                                   data_name,ct_type=1)
+                                                   data_name,ct_type=1, data=data.id)
                 cb_data = self.tree_ctrl.GetFirstChild(self.tree_ctrl.root) 
                 item, id = cb_data
                 item.Check(True)
@@ -363,18 +363,13 @@ class DataPanel(ScrolledPanel):
         """
         """
         data_to_plot = []
-        #num = self.tree_ctrl.GetCount()
-        #print num, self.tree_ctrl
         for item in self.list_cb_data:
-            print "set_data_helper",self.tree_ctrl.GetItemText(item), item.IsChecked()
             if item.IsChecked():
-               data_to_plot.append(self.tree_ctrl.GetItemText(item))
-        
-        theory_to_plot =[]
+               data_to_plot.append(self.tree_ctrl.GetItemPyData(item))
+        theory_to_plot = []
         for item in self.list_cb_theory:
             if item.IsChecked():
-               theory_to_plot.append(self.tree_ctrl.GetItemText(item))
-        
+               theory_to_plot.append(self.tree_ctrl.GetItemPyData(item))
         return data_to_plot, theory_to_plot
     
     def on_remove(self, event):
@@ -418,12 +413,9 @@ class DataPanel(ScrolledPanel):
         """
         """
         data_to_plot, theory_to_plot = self.set_data_helper()
-        #print "data_to_plot",data_to_plot
-        current_perspective = self.get_active_perspective()
-        
-        if self.manager is not None:
-            self.parent.post_data_helper(data_name=data_to_plot,
-                                 perspective=current_perspective, plot=plot)
+      
+        if self.parent is not None:
+            self.parent.get_data_from_panel(data_id=data_to_plot, plot=plot)
 
 
 class DataFrame(wx.Frame):
@@ -493,10 +485,12 @@ if __name__ == "__main__":
         data_list = {}
         data = Data1D()
         data.name = "data1"
+        data.id = 1
         #data.append_process()
         #process = data.process[len(data.process)-1]
         #process.data = "07/01/2010"
         theory = Theory1D()
+        theory.id = 34
         theory.pseudo_name = "theory1"
         path = "path1"
         state = State()
@@ -504,17 +498,21 @@ if __name__ == "__main__":
         
         data = Data1D()
         data.name = "data2"
+        data.id = 76
         theory = Theory1D()
+        theory.id = 78
         theory.name = "CoreShell 07/24/25"
         theory.pseudo_name = "CoreShell"
         path = "path2"
         state = State()
         data_list['2']=set_data_state(data, path,theory, state)
         data = Data1D()
+        data.id = 3
         data.name = "data2"
         theory = Theory1D()
         theory.name = "CoreShell"
         theory.pseudo_name = "CoreShell"
+        theory.id = 4
         #theory.append_process()
         #process = theory.process[len(theory.process)-1]
         #process.description = "this is my description"
@@ -526,6 +524,7 @@ if __name__ == "__main__":
         
         data = Data2D()
         data.name = "data3"
+        data.id = 5
         #data.append_process()
         #process = data.process[len(data.process)-1]
         #process.data = "07/01/2010"
@@ -535,6 +534,7 @@ if __name__ == "__main__":
         state = State()
         dstate= set_data_state(data, path,theory, state)
         theory = Theory1D()
+        theory.id = 6
         theory.pseudo_name = "Sphere"
         dstate.set_theory(theory)
         data_list['3']=dstate

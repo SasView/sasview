@@ -1040,11 +1040,21 @@ class ViewerFrame(wx.Frame):
             if style == GUIFRAME.SINGLE_APPLICATION:
                 self.set_data(data_list)
                 
-    def set_data_from_panel(self, data_id):
+    def get_data_from_panel(self, data_id, plot=False):
         """
         receive a list of data key retreive the data from data manager and set 
         then to the current perspective
         """
+        data_dict = self._data_manager.get_by_id(data_id)
+        data_list = []
+        for data_state in data_dict.values():
+            data_list.append(data_state.data)
+        if plot:
+            self.plot_data(data_list)
+        else:
+            #sent data to active application
+            self.set_data(data_list=data_list)
+       
         
     def set_data(self, data_list):
         """

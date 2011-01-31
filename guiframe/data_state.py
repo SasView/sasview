@@ -19,56 +19,56 @@ class DataState(object):
         
         """
         self.parent = parent
-        self._data = data
-        self._name = ""
-        self._path = None
-        self._theory_list = []
-        self._state_list = []
-        self._message = ""
+        self.data = data
+        self.name = ""
+        self.path = None
+        self.theory_list = []
+        self.state_list = []
+        self.message = ""
         
     def set_name(self, name):
-        self._name = name
+        self.name = name
     def get_name(self):
-        return self._name
+        return self.name
     def set_data(self, data):
-        self._data = data
+        self.data = data
         
     def get_data(self):
-        return self._data
+        return self.data
     
     def set_path(self, path):
         """
         Set the path of the loaded data
         """
-        self._path = path
+        self.path = path
         
     def get_path(self):
         """
         return the path of the loaded data
         """
-        return self._path
+        return self.path
     
     def set_theory(self, theory):
         """
         """
-        self._theory_list.append(theory)
+        self.theory_list.append(theory)
         
     def get_theory(self):
-        return self._theory_list
+        return self.theory_list
     
     def set_state(self, state):
         """
         """
-        #self._theory_list.append(state)
+        #self.theory_list.append(state)
         return
         
     def get_state(self):
-        return self._state_list
+        return self.state_list
     
     def get_message(self):
         """
         return message
         """
-        return self._message
+        return self.message
     
   
