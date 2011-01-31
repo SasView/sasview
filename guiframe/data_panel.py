@@ -24,10 +24,9 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
     """
     Check list control to be used for Data Panel
     """
-    def __init__(self, parent, size=(PANEL_WIDTH, 200), *args, **kwds):
+    def __init__(self, parent,*args, **kwds):
         kwds['style']= wx.SUNKEN_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|   \
                     CT.TR_HAS_VARIABLE_ROW_HEIGHT|wx.WANTS_CHARS
-        kwds['size'] = size
         CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
         self.root = self.AddRoot("Available Data")
         
@@ -60,18 +59,10 @@ class DataPanel(ScrolledPanel):
         self.list_cb_theory =[]
         self.owner = None
         self.do_layout()
-        #self._default_data1d = Data1D()
-        #self._default_data1d.set_default_data()
-        #self._default_data2d = Data2D()
-        #self._default_data2d.set_default_data()
-        #data_list =[]
-        #data_list.append((self._default_data1d, None,None, None))
-        #data_list.append((self._default_data2d, None,None, None))
-        #if self.manager is not None:
-        #    self.manager.set_loaded_data(data_list)
-        #    list = self.manager.get_selected_data()
-        #    self.load_data_list(list)
+       
     def do_layout(self):
+        """
+        """
         self.define_panel_structure()
         self.layout_selection()
         self.layout_list()
@@ -82,15 +73,15 @@ class DataPanel(ScrolledPanel):
         """
         Define the skeleton of the panel
         """
-        print self.parent.GetSize(), self.GetSize()
         w, h = self.parent.GetSize()
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
         self.sizer1 = wx.BoxSizer(wx.VERTICAL)
+        self.sizer1.SetMinSize((w/12, h/2))
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
         self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer4 = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer5 = wx.BoxSizer(wx.HORIZONTAL)
-        self.sizer3.SetMinSize((w-60, -1))
+        #self.sizer3.SetMinSize((w-60, -1))
         
         self.vbox.Add(self.sizer5, 0,wx.EXPAND|wx.ALL,10)
         self.vbox.Add(self.sizer1, 0,wx.EXPAND|wx.ALL,0)
@@ -126,7 +117,6 @@ class DataPanel(ScrolledPanel):
         w, h = self.parent.GetSize()
         box_description_2= wx.StaticBox(self, -1, "Set Active Perspective")
         self.boxsizer_2 = wx.StaticBoxSizer(box_description_2, wx.HORIZONTAL)
-        self.boxsizer_2.SetMinSize((w-60, -1))
         self.sizer_perspective = wx.GridBagSizer(5,5)
         self.boxsizer_2.Add(self.sizer_perspective)
         self.sizer2.Add(self.boxsizer_2,1, wx.ALL, 10)
@@ -174,8 +164,8 @@ class DataPanel(ScrolledPanel):
         """
         option = self.selection_cbox.GetValue()
         if option == 'Select all Data':
-            #for item in self.tree_ctrl.
-            print "_on_selection_type"
+            print "on select"
+            
     def on_set_active_perspective(self, event):
         """
         Select the active perspective
@@ -251,11 +241,10 @@ class DataPanel(ScrolledPanel):
         """
         Add a listcrtl in the panel
         """
-        w, h = self.GetSize()
-        self.tree_ctrl = DataTreeCtrl(parent=self, size=(w-10, -1))
+        self.tree_ctrl = DataTreeCtrl(parent=self)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKED, self.on_check_item)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_RIGHT_CLICK, self.on_right_click)
-        self.sizer1.Add(self.tree_ctrl,0, wx.EXPAND|wx.ALL, 20)
+        self.sizer1.Add(self.tree_ctrl,1, wx.EXPAND|wx.ALL, 20)
 
     def on_right_click(self, event):
         """

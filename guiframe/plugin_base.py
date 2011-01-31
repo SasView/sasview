@@ -57,6 +57,11 @@ class PluginBase:
         """
         return True
     
+    def delete_data(self, data_id):
+        """
+        Delete all references of data which id are in data_list. 
+        """
+        
     def load_data(self, event):
         """
         Load  data

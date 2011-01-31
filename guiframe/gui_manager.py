@@ -128,7 +128,7 @@ class ViewerFrame(wx.Frame):
         self._data_manager = DataManager()
         self._data_panel = DataPanel(parent=self)
         if self.panel_on_focus is not None:
-            self._data_panel.set_panel_on_focus(self.panel_on_focus.window_name)
+            self._data_panel.set_panel_on_focus(self.panel_on_focus.window_caption)
         # Check for update
         #self._check_update(None)
         # Register the close event so it calls our own method
@@ -313,12 +313,12 @@ class ViewerFrame(wx.Frame):
         panel_width_min = self._window_width 
         style = self.__gui_style & (GUIFRAME.MANAGER_ON)
         if self._data_panel is not None  and (p == self._data_panel):
-            panel_width_min = self._window_width * 4/25 
+            panel_width_min = self._window_width * 2/25 
             return panel_width_min, panel_height_min
         if hasattr(p, "CENTER_PANE") and p.CENTER_PANE:
             style = self.__gui_style & (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON)
             if style == (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON):
-                panel_width_min = self._window_width * 13/25 
+                panel_width_min = self._window_width * 17/25 
             return panel_width_min, panel_height_min
         return panel_width_min, panel_height_min
     
@@ -677,9 +677,10 @@ class ViewerFrame(wx.Frame):
         for plug in self.plugins:
             if plug.can_load_data():
                 plug.load_data(event)
-        self.show_data_panel(event=None)
-        print "_load_data"
-                
+        style = self.__gui_style & GUIFRAME.MANAGER_ON
+        if style == GUIFRAME.MANAGER_ON:
+            self.show_data_panel(event=None)
+        
     def _load_folder(self, event):
         """
         connect menu item load data with the first plugin that can load data and
@@ -688,7 +689,9 @@ class ViewerFrame(wx.Frame):
         for plug in self.plugins:
             if plug.can_load_data():
                 plug.load_folder(event)
-        self.show_data_panel(event=None)
+        style = self.__gui_style & GUIFRAME.MANAGER_ON
+        if style == GUIFRAME.MANAGER_ON:
+            self.show_data_panel(event=None)
                 
     def _on_status_event(self, evt):
         """
@@ -1088,7 +1091,8 @@ class ViewerFrame(wx.Frame):
             return 
         for new_plot in data_list:
             if append:
-                if self.panel_on_focus is None:
+                if self.panel_on_focus is None or \
+                    not self.enable_add_data(new_plot):
                     message = "cannot append plot. No plot panel on focus!"
                     message += "please click on any available plot to set focus"
                     wx.PostEvent(self, StatusEvent(status=message, 
@@ -1120,6 +1124,9 @@ class ViewerFrame(wx.Frame):
         self._data_manager.delete_data(data_id=data_id, 
                                        theory_id=theory_id, 
                                        delete_all=delete_all)
+        for plug in self.plugins:
+            plug.delete_data(data_id)
+            
         
     def set_current_perspective(self, perspective):
         """

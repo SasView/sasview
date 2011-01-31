@@ -87,7 +87,11 @@ class DataManager(object):
     def delete_data(self, data_id, theory_id, delete_all):
         """
         """
-        #for id in 
+        if data_id in self.stored_data:
+            del self.stored_data[data_id]
+        if data_id in self._selected_data:
+            del self._selected_data
+            
     def delete_by_id(self, id_list=None):
         """
         save data and path
