@@ -44,6 +44,32 @@ class Reader:
     type = ["IGOR/DAT 2D file in Q_map (*.dat)|*.DAT"]
     ## Extension
     ext=['.DAT', '.dat']
+    
+    def write(self, filename, data):
+        """
+        Write to .dat
+        
+        :param filename: file name to write
+        :param data: data2D 
+        """
+        import time
+        st = time.time()
+        # Write the file
+        fd = open(filename, 'w')
+        t = time.localtime()
+        time_str = time.strftime("%H:%M on %b %d %y", t)
+        
+        header_str = "Data columns are Qx - Qy - I(Qx,Qy)\n\nASCII data"
+        header_str += " created at %s \n\n" % time_str
+        # simple 2D header
+        fd.write(header_str)
+        # write qx qy I values
+        for i in range(len(data.data)):
+            fd.write("%g  %g  %g\n" % (data.qx_data[i], 
+                                        data.qy_data[i],
+                                       data.data[i]))
+        # close
+        fd.close()                 
 
     def read(self,filename=None):
         """ Read file """
