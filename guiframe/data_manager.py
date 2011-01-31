@@ -46,8 +46,7 @@ class DataManager(object):
             data_state = DataState(data)
             self._selected_data[data.id] = data_state
             self.stored_data[data.id] = data_state
-        print "datalist", self._selected_data    
-        
+      
     def set_auto_plot(self, flag=False):
         """
         When flag is true the data is plotted automatically
@@ -77,6 +76,18 @@ class DataManager(object):
                 self._selected_data[id] = self.stored_data[id]
         return self._selected_data
     
+    def append_theory(self, data_id, theory):
+        """
+        """
+        print "append theory", self.stored_data, data_id
+        if data_id in self.stored_data:
+            data_state = self.stored_data[data_id]
+            data_state.set_theory(theory)
+            
+    def delete_data(self, data_id, theory_id, delete_all):
+        """
+        """
+        #for id in 
     def delete_by_id(self, id_list=None):
         """
         save data and path

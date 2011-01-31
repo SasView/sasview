@@ -52,6 +52,7 @@ PLOPANEL_WIDTH = 400
 PLOPANEL_HEIGTH = 400
 
 
+
 class ViewerFrame(wx.Frame):
     """
     Main application frame
@@ -90,11 +91,6 @@ class ViewerFrame(wx.Frame):
         ## Application manager
         self.app_manager = None
         self._mgr = None
-        #data manager
-        from data_manager import DataManager
-        self._data_manager = DataManager()
-        self._data_panel = DataPanel(parent=self)
-        
         #add current perpsective
         self._current_perspective = None
         self._plotting_plugin = None
@@ -127,6 +123,12 @@ class ViewerFrame(wx.Frame):
         self.defaultPanel = None
         #panel on focus
         self.panel_on_focus = None
+         #data manager
+        from data_manager import DataManager
+        self._data_manager = DataManager()
+        self._data_panel = DataPanel(parent=self)
+        if self.panel_on_focus is not None:
+            self._data_panel.set_panel_on_focus(self.panel_on_focus.window_name)
         # Check for update
         #self._check_update(None)
         # Register the close event so it calls our own method
@@ -140,8 +142,11 @@ class ViewerFrame(wx.Frame):
         """
         Store reference to the last panel on focus
         """
+        print "set_panel_on_focus", event.panel
         self.panel_on_focus = event.panel
-        
+        if self.panel_on_focus is not None and self._data_panel is not None:
+            self._data_panel.set_panel_on_focus(self.panel_on_focus.window_name)
+            
     def build_gui(self):
         """
         """
@@ -433,7 +438,7 @@ class ViewerFrame(wx.Frame):
                               # manager takes all the available space
                               BestSize(wx.Size(PLOPANEL_WIDTH, PLOPANEL_HEIGTH)))
             self._popup_fixed_panel(p)
-            
+    
         elif style2 in GUIFRAME.FLOATING_PANEL:
             self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                               Name(windowname).Caption(caption).
@@ -672,6 +677,8 @@ class ViewerFrame(wx.Frame):
         for plug in self.plugins:
             if plug.can_load_data():
                 plug.load_data(event)
+        self.show_data_panel(event=None)
+        print "_load_data"
                 
     def _load_folder(self, event):
         """
@@ -681,6 +688,7 @@ class ViewerFrame(wx.Frame):
         for plug in self.plugins:
             if plug.can_load_data():
                 plug.load_folder(event)
+        self.show_data_panel(event=None)
                 
     def _on_status_event(self, evt):
         """
@@ -1007,14 +1015,14 @@ class ViewerFrame(wx.Frame):
                 pass
         return path
     
-    def show_data_panel(self, event):
+    def show_data_panel(self, event=None):
         """
         show the data panel
         """
         pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
-        if not pane.IsShown():
-            pane.Show(True)
-            self._mgr.Update()
+        #if not pane.IsShown():
+        pane.Show(True)
+        self._mgr.Update()
   
     def add_data(self, data_list):
         """
@@ -1040,7 +1048,7 @@ class ViewerFrame(wx.Frame):
             if style == GUIFRAME.SINGLE_APPLICATION:
                 self.set_data(data_list)
                 
-    def get_data_from_panel(self, data_id, plot=False):
+    def get_data_from_panel(self, data_id, plot=False,append=False):
         """
         receive a list of data key retreive the data from data manager and set 
         then to the current perspective
@@ -1050,7 +1058,7 @@ class ViewerFrame(wx.Frame):
         for data_state in data_dict.values():
             data_list.append(data_state.data)
         if plot:
-            self.plot_data(data_list)
+            self.plot_data(data_list, append=append)
         else:
             #sent data to active application
             self.set_data(data_list=data_list)
@@ -1070,15 +1078,49 @@ class ViewerFrame(wx.Frame):
             msg = "Guiframe does not have a current perspective"
             logging.info(msg)
             
-    def plot_data(self, data_list):
+    def plot_data(self, data_list, append=False):
         """
         send a list of data to plot
         """
+        if not data_list:
+            message = "Please check data to plot or append"
+            wx.PostEvent(self, StatusEvent(status=message, info='warning'))
+            return 
         for new_plot in data_list:
-            
+            if append:
+                if self.panel_on_focus is None:
+                    message = "cannot append plot. No plot panel on focus!"
+                    message += "please click on any available plot to set focus"
+                    wx.PostEvent(self, StatusEvent(status=message, 
+                                                   info='warning'))
+                    return 
+                else:
+                    if self.enable_add_data(new_plot):
+                        new_plot.group_id = self.panel_on_focus.group_id
             wx.PostEvent(self, NewPlotEvent(plot=new_plot,
                                                   title=str(new_plot.title)))
             
+    def add_theory(self, data_id, theory):
+        """
+        """
+        self._data_manager.append_theory(data_id, theory)
+        style = self.__gui_style & GUIFRAME.MANAGER_ON
+        if style == GUIFRAME.MANAGER_ON:
+            if self._data_panel is not None:
+                data_state = self._data_manager.get_by_id([data_id])
+                self._data_panel.load_data_list(data_state)
+                
+    def delete_data(self, data_id, theory_id=None, delete_all=True):
+        """
+        Delete data state if data_id is provide
+        delete theory created with data of id data_id if theory_id is provide
+        if delete all true: delete the all state
+        else delete theory
+        """
+        self._data_manager.delete_data(data_id=data_id, 
+                                       theory_id=theory_id, 
+                                       delete_all=delete_all)
+        
     def set_current_perspective(self, perspective):
         """
         set the current active perspective 
@@ -1090,7 +1132,7 @@ class ViewerFrame(wx.Frame):
             name = self._current_perspective.sub_menu
             self._data_panel.set_active_perspective(name)
            
-    def set_plotpanel_floating(self, event):
+    def set_plotpanel_floating(self, event=None):
         """
         make the plot panel floatable
         """
@@ -1101,7 +1143,7 @@ class ViewerFrame(wx.Frame):
                 if p in plot_panel:
                     self._popup_floating_panel(p)
         
-    def set_plotpanel_fixed(self, event):
+    def set_plotpanel_fixed(self, event=None):
         """
         make the plot panel fixed
         """
@@ -1139,6 +1181,27 @@ class ViewerFrame(wx.Frame):
             flag = self._mgr.GetPane(p.window_name).IsShown()
             self._mgr.GetPane(p.window_name).Show(flag)
             self._mgr.Update()
+            
+    def enable_add_data(self, new_plot):
+        """
+        Enable append data on a plot panel
+        """
+        is_theory = len(self.panel_on_focus.plots) <= 1 and \
+            self.panel_on_focus.plots.values()[0].__class__.__name__ == "Theory1D"
+            
+        is_data2d = hasattr(new_plot, 'data')
+        is_data1d = self.panel_on_focus.__class__.__name__ == "ModelPanel1D"\
+            and self.panel_on_focus.group_id is not None
+        has_meta_data = hasattr(new_plot, 'meta_data')
+        
+        #disable_add_data if the data is being recovered from  a saved state file.
+        is_state_data = False
+        if has_meta_data:
+            if 'invstate' in new_plot.meta_data: is_state_data = True
+            if  'prstate' in new_plot.meta_data: is_state_data = True
+            if  'fitstate' in new_plot.meta_data: is_state_data = True
+    
+        return is_data1d and not is_data2d and not is_theory and not is_state_data
         
 class DefaultPanel(wx.Panel):
     """

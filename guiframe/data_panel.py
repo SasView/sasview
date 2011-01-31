@@ -191,8 +191,8 @@ class DataPanel(ScrolledPanel):
         wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
         
         self.bt_append_plot = wx.Button(self, wx.NewId(), "Append Plot To")
-        self.bt_import.SetToolTipString("Plot the selected data in the active panel")
-        #wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_append_plot)
+        self.bt_append_plot.SetToolTipString("Plot the selected data in the active panel")
+        wx.EVT_BUTTON(self, self.bt_append_plot.GetId(), self.on_append_plot)
         
         self.bt_plot = wx.Button(self, wx.NewId(), "New Plot")
         self.bt_plot.SetToolTipString("To trigger plotting")
@@ -204,8 +204,8 @@ class DataPanel(ScrolledPanel):
         
         self.tctrl_perspective = wx.StaticText(self, -1, 'No Active Application')
         self.tctrl_perspective.SetToolTipString("Active Application")
-        self.tctrl_plotpanel = wx.StaticText(self, -1, 'Plot panel on focus')
-        self.tctrl_plotpanel.SetToolTipString("Active Plotting Panel")
+        self.tctrl_plotpanel = wx.StaticText(self, -1, 'No Plot panel on focus')
+        self.tctrl_plotpanel.SetToolTipString("Active Plot Panel")
         #self.sizer3.AddMany([(self.bt_import,0, wx.ALL,5),
         #                     (self.bt_append_plot,0, wx.ALL,5),
         #                     (self.bt_plot, 0, wx.ALL,5),
@@ -295,7 +295,6 @@ class DataPanel(ScrolledPanel):
         """
         
         """
-        print "list", list
         if not list:
             return
         
@@ -365,11 +364,12 @@ class DataPanel(ScrolledPanel):
         data_to_plot = []
         for item in self.list_cb_data:
             if item.IsChecked():
+                
                data_to_plot.append(self.tree_ctrl.GetItemPyData(item))
         theory_to_plot = []
         for item in self.list_cb_theory:
             if item.IsChecked():
-               theory_to_plot.append(self.tree_ctrl.GetItemPyData(item))
+                theory_to_plot.append(self.tree_ctrl.GetItemPyData(item))
         return data_to_plot, theory_to_plot
     
     def on_remove(self, event):
@@ -378,19 +378,29 @@ class DataPanel(ScrolledPanel):
             if item.IsChecked()and \
                 self.tree_ctrl.GetItemText(item) in data_to_remove:
                 self.tree_ctrl.Delete(item)
-        for i in self.list_cb_theory:
+        for item in self.list_cb_theory:
             if item.IsChecked()and \
                 self.tree_ctrl.GetItemText(item) in theory_to_remove:
                 self.tree_ctrl.Delete(item)
-        self.manager.delete_data(data_name=data_to_remove,
-                                  theory_name=theory_to_remove)
+        delete_all = False
+        if data_to_remove:
+            delete_all = True
+        self.parent.delete_data(data_id=data_to_remove,
+                                  theory_id=theory_to_remove,
+                                  delete_all=delete_all)
         
     def on_import(self, event=None):
         """
         Get all select data and set them to the current active perspetive
         """
         self.post_helper(plot=False)
-        
+       
+    def on_append_plot(self, event=None):
+        """
+        append plot to plot panel on focus
+        """
+        self.post_helper(plot=True, append=True)
+   
     def on_plot(self, event=None):
         """
         Send a list of data names to plot
@@ -409,13 +419,14 @@ class DataPanel(ScrolledPanel):
         """
         self.tctrl_plotpanel.SetLabel(str(name))
         
-    def post_helper(self, plot=False):
+    def post_helper(self, plot=False, append=False):
         """
         """
         data_to_plot, theory_to_plot = self.set_data_helper()
       
         if self.parent is not None:
-            self.parent.get_data_from_panel(data_id=data_to_plot, plot=plot)
+            self.parent.get_data_from_panel(data_id=data_to_plot, plot=plot,
+                                            append=append)
 
 
 class DataFrame(wx.Frame):
