@@ -68,10 +68,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double lamellarPS_HG_analytical_1D(LamellarPSHGParameters *pars, double q);
+//double lamellarPS_HG_analytical_1D(LamellarPSHGParameters *pars, double q);
 
 /// 2D scattering function
-double lamellarPS_HG_analytical_2D(LamellarPSHGParameters *pars, double q, double phi);
-double lamellarPS_HG_analytical_2DXY(LamellarPSHGParameters *pars, double qx, double qy);
+//double lamellarPS_HG_analytical_2D(LamellarPSHGParameters *pars, double q, double phi);
+//double lamellarPS_HG_analytical_2DXY(LamellarPSHGParameters *pars, double qx, double qy);
 
 #endif

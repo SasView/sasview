@@ -47,10 +47,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double core_shell_analytical_1D(CoreShellParameters *pars, double q);
+//double core_shell_analytical_1D(CoreShellParameters *pars, double q);
 
 /// 2D scattering function
-double core_shell_analytical_2D(CoreShellParameters *pars, double q, double phi);
-double core_shell_analytical_2DXY(CoreShellParameters *pars, double qx, double qy);
+//double core_shell_analytical_2D(CoreShellParameters *pars, double q, double phi);
+//double core_shell_analytical_2DXY(CoreShellParameters *pars, double qx, double qy);
 
 #endif

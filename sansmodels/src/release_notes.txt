@@ -48,7 +48,8 @@ Package name: sans.models
 2- Downloading and Installing
 
 	2.1- System Requirements:
-		- Python version >= 2.4 should be running on the system
+		- Python version >= 2.5 and < 3.0 should be running on the system
+
 
 	2.2- Installing:
 		- Get the code from svn://danse.us/sans/releases/sansmodels-0.4.3

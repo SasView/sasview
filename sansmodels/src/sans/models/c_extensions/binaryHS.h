@@ -57,10 +57,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double binaryHS_analytical_1D(BinaryHSParameters *pars, double q);
+//double binaryHS_analytical_1D(BinaryHSParameters *pars, double q);
 
 /// 2D scattering function
-double binaryHS_analytical_2D(BinaryHSParameters *pars, double q, double phi);
-double binaryHS_analytical_2DXY(BinaryHSParameters *pars, double qx, double qy);
+//double binaryHS_analytical_2D(BinaryHSParameters *pars, double q, double phi);
+//double binaryHS_analytical_2DXY(BinaryHSParameters *pars, double qx, double qy);
 
 #endif

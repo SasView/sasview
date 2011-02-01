@@ -45,10 +45,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double vesicle_analytical_1D(VesicleParameters *pars, double q);
+//double vesicle_analytical_1D(VesicleParameters *pars, double q);
 
 /// 2D scattering function
-double vesicle_analytical_2D(VesicleParameters *pars, double q, double phi);
-double vesicle_analytical_2DXY(VesicleParameters *pars, double qx, double qy);
+//double vesicle_analytical_2D(VesicleParameters *pars, double q, double phi);
+//double vesicle_analytical_2DXY(VesicleParameters *pars, double qx, double qy);
 
 #endif

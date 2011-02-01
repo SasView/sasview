@@ -57,10 +57,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double multishell_analytical_1D(MultiShellParameters *pars, double q);
+//double multishell_analytical_1D(MultiShellParameters *pars, double q);
 
 /// 2D scattering function
-double multishell_analytical_2D(MultiShellParameters *pars, double q, double phi);
-double multishell_analytical_2DXY(MultiShellParameters *pars, double qx, double qy);
+//double multishell_analytical_2D(MultiShellParameters *pars, double q, double phi);
+//double multishell_analytical_2DXY(MultiShellParameters *pars, double qx, double qy);
 
 #endif

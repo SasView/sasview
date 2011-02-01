@@ -49,10 +49,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double lamellarPC_analytical_1D(LamellarPCParameters *pars, double q);
+//double lamellarPC_analytical_1D(LamellarPCParameters *pars, double q);
 
 /// 2D scattering function
-double lamellarPC_analytical_2D(LamellarPCParameters *pars, double q, double phi);
-double lamellarPC_analytical_2DXY(LamellarPCParameters *pars, double qx, double qy);
+//double lamellarPC_analytical_2D(LamellarPCParameters *pars, double q, double phi);
+//double lamellarPC_analytical_2DXY(LamellarPCParameters *pars, double qx, double qy);
 
 #endif

@@ -54,10 +54,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double fractal_analytical_1D(FractalParameters *pars, double q);
+//double fractal_analytical_1D(FractalParameters *pars, double q);
 
 /// 2D scattering function
-double fractal_analytical_2D(FractalParameters *pars, double q, double phi);
-double fractal_analytical_2DXY(FractalParameters *pars, double qx, double qy);
+//double fractal_analytical_2D(FractalParameters *pars, double q, double phi);
+//double fractal_analytical_2DXY(FractalParameters *pars, double qx, double qy);
 
 #endif

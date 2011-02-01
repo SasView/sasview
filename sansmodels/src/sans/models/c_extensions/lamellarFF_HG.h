@@ -43,10 +43,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double lamellarFF_HG_analytical_1D(LamellarFF_HGParameters *pars, double q);
+//double lamellarFF_HG_analytical_1D(LamellarFF_HGParameters *pars, double q);
 
 /// 2D scattering function
-double lamellarFF_HG_analytical_2D(LamellarFF_HGParameters *pars, double q, double phi);
-double lamellarFF_HG_analytical_2DXY(LamellarFF_HGParameters *pars, double qx, double qy);
+//double lamellarFF_HG_analytical_2D(LamellarFF_HGParameters *pars, double q, double phi);
+//double lamellarFF_HG_analytical_2DXY(LamellarFF_HGParameters *pars, double qx, double qy);
 
 #endif
