@@ -159,7 +159,7 @@ class ViewerFrame(wx.Frame):
         Set up the layout
         """
         # Status bar
-        from statusbar import StatusBar
+        from gui_statusbar import StatusBar
         self.sb = StatusBar(self, wx.ID_ANY)
         self.SetStatusBar(self.sb)
         # Add panel
