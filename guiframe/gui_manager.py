@@ -516,8 +516,7 @@ class ViewerFrame(wx.Frame):
             menu_list = self._current_perspective.populate_menu(self)
             if menu_list:
                 for (menu, _) in menu_list:
-                    hidden_menu = self._menubar.Replace(self._plugin_menu_pos,
-                                                         menu, name)  
+                    hidden_menu = self._menubar.Replace(pos, menu, name)  
             else:
                 hidden_menu = self._menubar.Remove(pos)
             #get the position of the menu when it first added
