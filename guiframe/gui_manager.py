@@ -52,6 +52,7 @@ PLOPANEL_WIDTH = 400
 PLOPANEL_HEIGTH = 400
 GUIFRAME_WIDTH = 1000
 GUIFRAME_HEIGHT = 800
+PROG_SPLASH_SCREEN = "images/danse_logo.png" 
 
 class ViewerFrame(wx.Frame):
     """
@@ -59,7 +60,7 @@ class ViewerFrame(wx.Frame):
     """
     
     def __init__(self, parent, title, 
-                 size=(GUIFRAME_WIDTH,GUIFRAME_HEIGHT),
+                 size=(GUIFRAME_WIDTH, GUIFRAME_HEIGHT),
                  gui_style=GUIFRAME.DEFAULT_STYLE, 
                  pos=wx.DefaultPosition):
         """
@@ -580,7 +581,6 @@ class ViewerFrame(wx.Frame):
         if self._plotting_plugin is not None:
             for (menu, name) in self._plotting_plugin.populate_menu(self):
                 self._window_menu.AppendSubMenu(menu, name)
-        self._window_menu.AppendSeparator()
         self._menubar.Append(self._window_menu, '&Window')
      
         style = self.__gui_style & GUIFRAME.MANAGER_ON
@@ -589,17 +589,20 @@ class ViewerFrame(wx.Frame):
             self._window_menu.Append(id,'&Data Manager', '')
             wx.EVT_MENU(self, id, self.show_data_panel)
             
-        id = wx.NewId()
-        preferences_menu = wx.Menu()
-        hint = "Plot panels will floating"
-        preferences_menu.Append(id, '&Floating Plot Panel', hint)
-        wx.EVT_MENU(self, id, self.set_plotpanel_floating)
-        id = wx.NewId()
-        hint = "Plot panels will displayed within the frame"
-        preferences_menu.Append(id, '&Fixed Plot Panel', hint)
-        wx.EVT_MENU(self, id, self.set_plotpanel_fixed)
-        id = wx.NewId()
-        self._window_menu.AppendSubMenu(preferences_menu,'&Preferences')
+        style = self.__gui_style & GUIFRAME.PLOTTING_ON
+        if style == GUIFRAME.PLOTTING_ON:
+            self._window_menu.AppendSeparator()
+            id = wx.NewId()
+            preferences_menu = wx.Menu()
+            hint = "Plot panels will floating"
+            preferences_menu.Append(id, '&Floating Plot Panel', hint)
+            wx.EVT_MENU(self, id, self.set_plotpanel_floating)
+            id = wx.NewId()
+            hint = "Plot panels will displayed within the frame"
+            preferences_menu.Append(id, '&Fixed Plot Panel', hint)
+            wx.EVT_MENU(self, id, self.set_plotpanel_fixed)
+            id = wx.NewId()
+            self._window_menu.AppendSubMenu(preferences_menu,'&Preferences')
         #wx.EVT_MENU(self, id, self.show_preferences_panel)   
         """
         if len(self.plugins) == 2:
@@ -669,7 +672,7 @@ class ViewerFrame(wx.Frame):
                          '&Load Data File(s)', data_file_hint)
         wx.EVT_MENU(self, data_file_id, self._load_data)
         style = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
-        style1 = self.__gui_style & GUIFRAME.SINGLE_APPLICATION
+        style1 = self.__gui_style & GUIFRAME.DATALOADER_ON
         if style == GUIFRAME.MULTIPLE_APPLICATIONS:
             #menu for data from folder
             data_folder_id = wx.NewId()
@@ -678,7 +681,7 @@ class ViewerFrame(wx.Frame):
                              '&Load Data Folder', data_folder_hint)
             wx.EVT_MENU(self, data_folder_id, self._load_folder)
             self._menubar.Append(self._data_menu, '&Data')
-        elif style1 == GUIFRAME.SINGLE_APPLICATION:
+        elif style1 == GUIFRAME.DATALOADER_ON:
             self._menubar.Append(self._data_menu, '&Data')
         
     def _load_data(self, event):
@@ -1235,7 +1238,7 @@ class DefaultPanel(wx.Panel):
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
 
-PROG_SPLASH_SCREEN = "images/danse_logo.png" 
+
 # Toy application to test this Frame
 class ViewApp(wx.App):
     """

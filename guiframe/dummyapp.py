@@ -3,15 +3,21 @@ Dummy application.
 Allows the user to set an external data manager
 """
 import gui_manager
+from sans.guiframe.gui_style import GUIFRAME
+from sans.guiframe.plugin_base import PluginBase
 
-class TestPlugin(gui_manager.Plugin):
+class DummyView(gui_manager.ViewApp):
+    """
+    """
+    PROG_SPLASH_PATH = None
+    STYLE = GUIFRAME.SINGLE_APPLICATION
     
-    def populate_menu(self, id, parent):
+class TestPlugin(PluginBase):
+    
+    def populate_menu(self, parent):
         """
         Create and return the list of application menu
         items for the plug-in. 
-        
-        :param id: deprecated. Un-used.
         :param parent: parent window
         
         :return: plug-in menu
@@ -31,7 +37,7 @@ class TestPlugin(gui_manager.Plugin):
         wx.EVT_MENU(self.parent, id, _on_do_something)
     
         # Returns the menu and a name for it.
-        return [(id, plug_menu, "DummyApp")]    
+        return [(plug_menu, "DummyApp")]    
     
     def get_panels(self, parent):
         """
@@ -102,7 +108,7 @@ class SansView():
         """
         Initialization
         """
-        self.gui = gui_manager.ViewApp(0)
+        self.gui = DummyView(0)
         
         fitting_plug = TestPlugin()
         self.gui.add_perspective(fitting_plug)
