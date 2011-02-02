@@ -119,6 +119,16 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                                       type="stop")) 
         return flag
     
+    def get_data(self):
+        """
+        """
+        return self._manager.get_data()
+    
+    def get_state(self):
+        """
+        """
+        return self.state
+    
     def set_data(self, data):
         """
         Set the data

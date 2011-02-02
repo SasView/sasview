@@ -44,13 +44,13 @@ class Plugin(PluginBase):
        
         #default state objects
         self.state_reader = None 
+        self._extensions = '.inv'
         self.temp_state = None 
         self.__data = None 
        
         # Log startup
         logging.info("Invariant plug-in started")
        
-  
     def help(self, evt):
         """
         Show a general help dialog. 
@@ -59,6 +59,11 @@ class Plugin(PluginBase):
         frame = HelpWindow(None, -1)    
         frame.Show(True)
         
+    def get_data(self):
+        """
+        """
+        return self.__data
+    
     def get_panels(self, parent):
         """
         Create and return the list of wx.Panels for your plug-in.
