@@ -10,7 +10,7 @@ import sys
 # Application dimensions
 APP_HEIGHT = 780
 APP_WIDTH  = 850
-
+PROG_SPLASH_SCREEN = "images/ball.png"
 class PrFrame(gui_manager.ViewerFrame):
     """
     """
@@ -23,25 +23,11 @@ class PrFrame(gui_manager.ViewerFrame):
 class PrApp(gui_manager.ViewApp):
     """
     """
-    def OnInit(self):
-        """
-        """
-        # Check the size of the screen
-        # Add some padding to make sure to clear any OS tool bar
-        screen_size = wx.GetDisplaySize()
-        app_height = APP_HEIGHT if screen_size[1]>APP_HEIGHT else screen_size[1]-50
-        app_width  = APP_WIDTH if screen_size[0]>APP_WIDTH else screen_size[0]-50
-        
-        self.frame = PrFrame(None, -1, local_config.__appname__, 
-                             window_height=app_height, window_width=app_width)    
-        self.frame.Show(True)
-
-        if hasattr(self.frame, 'special'):
-            self.frame.special.SetCurrent()
-        self.SetTopWindow(self.frame)
-        return True
+    SIZE = (APP_WIDTH, APP_HEIGHT)
+    TITLE = local_config.__appname__
+    PROG_SPLASH_PATH = None
     
-class SansView():
+class PrView():
     """
     """
     def __init__(self):
@@ -50,7 +36,6 @@ class SansView():
         #from gui_manager import ViewApp
         #self.gui = gui_manager.ViewApp(0) 
         self.gui = PrApp(0)
-        
         # Add perspectives to the basic application
         # Additional perspectives can still be loaded
         # dynamically
@@ -69,4 +54,4 @@ class SansView():
         
 
 if __name__ == "__main__": 
-    sansview = SansView()
+    sansview = PrView()
