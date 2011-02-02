@@ -16,14 +16,11 @@ from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.utils import parse_name
 
-STATE_FILE_EXT = ['P(r) files (*.prv)|*.prv',
-                  'P(r) files (*.sav)|*.sav',
-                  'P(r) files (*.svs)|*.svs',
+STATE_FILE_EXT = ['SansView files (*.svs)|*.svs',
+                  'P(r) files (*.prv)|*.prv',
                   'Fitting files (*.fitv)|*.fitv',
-                  'Fitting files (*.svs)|*.svs',
-                  'Invariant files (*.inv)|*.inv',
-                  'Invariant files (*.svs)|*.svs']
-EXTENSIONS = ['.svs', '.prv', '.inv', '.fitv']
+                  'Invariant files (*.inv)|*.inv']
+EXTENSIONS = ['.svs', '.prv','.fitv', '.inv']
 
 class Plugin(PluginBase):
     
@@ -194,15 +191,18 @@ class Plugin(PluginBase):
             try:
                 temp =  self.loader.load(p_file)
                 if temp.__class__.__name__ == "list":
+                    print "list", temp
                     for item in temp:
                         data = self.create_data(item, p_file)
                         output.append(data)
                 else:
+                    print "list", temp
                     data = self.create_data(temp, p_file)
                     output.append(data)
                 message = "Loading ..." + str(p_file) + "\n"
                 self.load_update(output=output, message=message)
             except:
+                raise
                 error_message = "Error while loading: %s\n" % str(p_file)
                 error_message += str(sys.exc_value) + "\n"
                 self.load_update(output=output, message=error_message)
@@ -210,7 +210,7 @@ class Plugin(PluginBase):
         message = "Loading Complete! "
         message += log_msg
         self.load_complete(output=output, error_message=error_message,
-                       message=message, path=path)
+                       message=message, path=path, flag=flag)
             
    
     def old_get_data(self, path, format=None, flag=True):
@@ -239,7 +239,8 @@ class Plugin(PluginBase):
                                                   type="progress",
                                                    info="warning"))
         
-    def load_complete(self, output, message="", error_message="", path=None):
+    def load_complete(self, output, message="", error_message="", 
+                      path=None, flag=True):
         """
          post message to  status bar and return list of data
         """
@@ -248,7 +249,7 @@ class Plugin(PluginBase):
                                               type="stop"))
         if error_message != "":
             self.load_error(error_message)
-        self.parent.add_data(output)
+        self.parent.add_data(output, flag=flag)
         
     def create_data(self, data, path):
         """

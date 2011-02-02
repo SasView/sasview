@@ -40,11 +40,19 @@ class PluginBase:
         self.standalone = standalone
         ## Reference to the parent window. Filled by get_panels() below.
         self.parent = None
-        
+        #plugin state reader
+        self.state_reader = None 
+        self._extensions = ''
         ## List of panels that you would like to open in AUI windows
         #  for your plug-in. This defines your plug-in "perspective"
         self.perspective = []
         
+    def get_extensions(self):
+        """
+        return state reader and its extensions
+        """
+        return self.state_reader, self._extensions
+    
     def can_load_data(self):
         """
         if return True, then call handler to laod data
@@ -195,3 +203,8 @@ class PluginBase:
         """
         receive a list of data and use it in the current perspective
         """
+    def on_set_state_helper(self, event):
+        """
+        update state
+        """
+    

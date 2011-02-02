@@ -129,7 +129,7 @@ class ViewerFrame(wx.Frame):
         # Check for update
         #self._check_update(None)
         # Register the close event so it calls our own method
-        wx.EVT_CLOSE(self, self._onClose)
+        wx.EVT_CLOSE(self, self.Close)
         # Register to status events
         self.Bind(EVT_STATUS, self._on_status_event)
         #Register add extra data on the same panel event on load
@@ -462,9 +462,9 @@ class ViewerFrame(wx.Frame):
                 for item in plugin.populate_file_menu():
                     id = wx.NewId()
                     m_name, m_hint, m_handler = item
-                    self._filemenu.Append(id, m_name, m_hint)
+                    self._file_menu.Append(id, m_name, m_hint)
                     wx.EVT_MENU(self, id, m_handler)
-                self._filemenu.AppendSeparator()
+                self._file_menu.AppendSeparator()
                 
     def _setup_menus(self):
         """
@@ -646,18 +646,24 @@ class ViewerFrame(wx.Frame):
         add menu file
         """
          # File menu
-        self._filemenu = wx.Menu()
+        self._file_menu = wx.Menu()
         # some menu of plugin to be seen under file menu
         self._populate_file_menu()
         id = wx.NewId()
-        self._filemenu.Append(id, '&Save state into File',
-                             'Save project as a SansView (svs) file')
-        wx.EVT_MENU(self, id, self._on_save)
+        self._file_menu.Append(id, '&Save Application',
+                             'Save state of the current active application')
+        wx.EVT_MENU(self, id, self._on_save_application)
         id = wx.NewId()
-        self._filemenu.Append(id, '&Quit', 'Exit') 
+        self._file_menu.Append(id, '&Save Project',
+                             'Save the state of the whole application')
+        wx.EVT_MENU(self, id, self._on_save_project)
+        self._file_menu.AppendSeparator()
+        
+        id = wx.NewId()
+        self._file_menu.Append(id, '&Quit', 'Exit') 
         wx.EVT_MENU(self, id, self.Close)
         # Add sub menus
-        self._menubar.Append(self._filemenu, '&File')
+        self._menubar.Append(self._file_menu, '&File')
         
     def _add_menu_data(self):
         """
@@ -775,9 +781,7 @@ class ViewerFrame(wx.Frame):
         path = self.choose_file()
         if path is None:
             return
-        
-        from data_loader import plot_data
-        from sans.perspectives import invariant
+
         if path and os.path.isfile(path):
             basename  = os.path.basename(path)
             if  basename.endswith('.svs'):
@@ -796,17 +800,18 @@ class ViewerFrame(wx.Frame):
             self._mgr.GetPane(self.panels["default"].window_name).IsShown():
             self.on_close_welcome_panel()
             
-    def _on_save(self, event):
+    def _on_save_application(self, event):
         """
-        Save state into a file
+        save the state of the current active application
         """
-        # Ask the user the location of the file to write to.
-        
         ## Default file location for save
         self._default_save_location = os.getcwd()
+        if self._current_perspective is  None:
+            return
+        reader, ext = self._current_perspective.get_extensions()
         path = None
         dlg = wx.FileDialog(self, "Choose a file",
-                            self._default_save_location, "", "*.svs", wx.SAVE)
+                            self._default_save_location, "", ext, wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
@@ -817,61 +822,64 @@ class ViewerFrame(wx.Frame):
             return
         # default cansas xml doc
         doc = None
-        for item in self.panels:
-            try:
-                if self.panels[item].window_name == 'Invariant':
-                    data = self.panels[item]._data
-                    if data != None:
-                        state = self.panels[item].state
-                        manager = self.panels[item]._manager
-                        new_doc = manager.state_reader.write_toXML(data, state)
-                        if hasattr(doc, "firstChild"):
-                            child = new_doc.firstChild.firstChild
-                            doc.firstChild.appendChild(child)  
-                        else:
-                            doc = new_doc 
-                elif self.panels[item].window_name == 'pr_control':
-                    data = self.panels[item].manager.current_plottable
-                    if data != None:
-                        state = self.panels[item].get_state()
-                        manager = self.panels[item].manager
-                        new_doc = manager.state_reader.write_toXML(data, state)
-                        if hasattr(doc, "firstChild"):
-                            child = new_doc.firstChild.firstChild
-                            doc.firstChild.appendChild(child)  
-                        else:
-                            doc = new_doc 
-                elif self.panels[item].window_name == 'Fit panel':
-                    for index in range(self.panels[item].GetPageCount()):
-                        selected_page = self.panels[item].GetPage(index) 
-                        if hasattr(selected_page,"get_data"):
-                            data = selected_page.get_data()
-                            state = selected_page.state
-                            reader = selected_page.manager.state_reader
-                            new_doc = reader.write_toXML(data, state)
-                            if doc != None and hasattr(doc, "firstChild"):
-                                child = new_doc.firstChild.firstChild
-                                doc.firstChild.appendChild(child)
-                            else:
-                                doc = new_doc
-            except: 
-                pass
+        for panel in self._current_perspective.get_perspective():
+            doc = on_save_helper(doc, reader, panel, path)
+            
+    def _on_save_project(self, event):
+        """
+        save the state of the current active application
+        """
+        ## Default file location for save
+        self._default_save_location = os.getcwd()
+        if self._current_perspective is  None:
+            return
+        reader, ext = self._current_perspective.get_extensions()
+        path = None
+        dlg = wx.FileDialog(self, "Choose a file",
+                            self._default_save_location, "", '.svs', wx.SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            self._default_save_location = os.path.dirname(path)
+        else:
+            return None
+        dlg.Destroy()
+        if path is None:
+            return
+        # default cansas xml doc
+        doc = None
+        for panel in self.panels.values():
+            doc = self.on_save_helper(doc, reader, panel, path)
+        
+            
+    def on_save_helper(self, doc, reader, panel, path):
+        """
+        Save state into a file
+        """
+        try:
+            data = panel.get_data()
+            state = panel.get_state()
+            if reader is not None:
+                if data is not None:
+                    new_doc = reader.write_toXML(data, state)
+                    if hasattr(doc, "firstChild"):
+                        child = new_doc.firstChild.firstChild
+                        doc.firstChild.appendChild(child)  
+                    else:
+                        doc = new_doc 
+        except: 
+            raise
+            #pass
         # Write the XML document
         if doc != None:
             fd = open(path, 'w')
             fd.write(doc.toprettyxml())
             fd.close()
         else:
+            raise
             #print "Nothing to save..."
-            raise RuntimeError, "%s is not a SansView (.svs) file..." % path
+            #raise RuntimeError, "%s is not a SansView (.svs) file..." % path
+        return doc
 
-    def _onClose(self, event):
-        """
-        Store info to retrieve in xml before closing the application
-        """
-        wx.Exit()
-        sys.exit()
-                 
     def quit_guiframe(self):
         """
         Pop up message to make sure the user wants to quit the application
@@ -889,9 +897,8 @@ class ViewerFrame(wx.Frame):
         """
         Quit the application
         """
-        flag = self.quit_guiframe()
-        if flag:
-            wx.Frame.Close(self)
+        #flag = self.quit_guiframe()
+        if True:
             wx.Exit()
             sys.exit()
 
@@ -1014,23 +1021,6 @@ class ViewerFrame(wx.Frame):
                         self._mgr.GetPane(self.panels[item].window_name).Hide()
         self._mgr.Update()
         
-    def choose_file(self, path=None):
-        """ 
-        Functionality that belongs elsewhere
-        Should add a hook to specify the preferred file type/extension.
-        """
-        #TODO: clean this up
-        from .data_loader import choose_data_file
-        # Choose a file path
-        if path == None:
-            path = choose_data_file(self, self._default_save_location)
-        if not path == None:
-            try:
-                self._default_save_location = os.path.dirname(path)
-            except:
-                pass
-        return path
-    
     def show_data_panel(self, event=None):
         """
         show the data panel
@@ -1040,7 +1030,7 @@ class ViewerFrame(wx.Frame):
         pane.Show(True)
         self._mgr.Update()
   
-    def add_data(self, data_list):
+    def add_data(self, data_list, flag=False):
         """
         receive a list of data . store them its data manager if possible
         determine if data was be plot of send to data perspectives
@@ -1051,6 +1041,10 @@ class ViewerFrame(wx.Frame):
             self._data_manager.add_data(data_list)
             avalaible_data = self._data_manager.get_all_data()
             
+        if flag:
+            #reading a state file
+            for plug in self.plugins:
+                plug.on_set_state_helper(event=None)
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style == GUIFRAME.MANAGER_ON:
             if self._data_panel is not None:

@@ -17,6 +17,7 @@ from wx.lib.scrolledpanel import ScrolledPanel
 import  wx.lib.agw.customtreectrl as CT
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
+from sans.guiframe.panel_base import PanelBase
 
 PANEL_WIDTH = 200
 
@@ -30,7 +31,7 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
         CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
         self.root = self.AddRoot("Available Data")
         
-class DataPanel(ScrolledPanel):
+class DataPanel(ScrolledPanel, PanelBase):
     """
     This panel displays data available in the application and widgets to 
     interact with data.
@@ -48,6 +49,7 @@ class DataPanel(ScrolledPanel):
                  size=(PANEL_WIDTH,560), manager=None, *args, **kwds):
         kwds['size']= size
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
+        PanelBase.__init__(self)
         self.SetupScrolling()
       
         self.parent = parent

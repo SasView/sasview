@@ -27,6 +27,9 @@ class PanelBase:
         """
         Initialize some flag that Viewerframe used
         """
+        #panel manager
+        self._manager = None
+        
         self._print_flag = False
         self._undo_flag = False
         self._redo_flag = False
@@ -228,4 +231,24 @@ class PanelBase:
         The  derivative class is on focus if implemented
         """
         
-   
+    def get_data(self):
+        """
+        return list of current data
+        """
+        return
+    
+    def get_state(self):
+        """
+         return the current state
+        """
+        return
+
+    def set_manager(self, manager):
+        """
+        """
+        self._manager = manager 
+        
+    def get_manager(self):
+        """
+        """
+        return self._manager
