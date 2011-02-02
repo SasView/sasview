@@ -107,13 +107,19 @@ class Plugin(PluginBase):
          
         # Create a CanSAS/Pr reader
         self.state_reader = Reader(self.set_state)
+        self._extensions = '.prv'
         l = Loader()
         l.associate_file_reader('.prv', self.state_reader)
-        l.associate_file_reader(".sav", self.state_reader)
+        l.associate_file_reader(".svs", self.state_reader)
                 
         # Log startup
         logging.info("Pr(r) plug-in started")
         
+    def get_data(self):
+        """
+        """
+        return self.current_plottable
+    
     def set_state(self, state, datainfo=None):
         """
         Call-back method for the inversion state reader.

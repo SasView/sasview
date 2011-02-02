@@ -76,7 +76,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         ## D_max distance explorator
         self.distance_explorator_ctl = None
         ## Data manager
-        self.manager   = None
+        self._manager   = None
         ## Standalone flage
         self.standalone = standalone
         ## Default file location for save
@@ -254,9 +254,14 @@ class InversionControl(ScrolledPanel, PanelBase):
         
         state = self.get_state()
             
-        self.manager.save_data(filepath=path, prstate=state)
+        self._manager.save_data(filepath=path, prstate=state)
         
         return state
+    
+    def get_data(self):
+        """
+        """
+        return self._manager.get_data()
     
     def get_state(self):
         """
@@ -361,7 +366,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             self._on_invert(None)    
         
     def set_manager(self, manager):
-        self.manager = manager
+        self._manager = manager
         
     def _do_layout(self):
         vbox = wx.GridBagSizer(0,0)
@@ -719,9 +724,9 @@ class InversionControl(ScrolledPanel, PanelBase):
         """
         Resets inversion parameters
         """
-        self.nfunc = self.manager.DEFAULT_NFUNC
-        self.d_max = self.manager.DEFAULT_DMAX
-        self.alpha = self.manager.DEFAULT_ALPHA
+        self.nfunc = self._manager.DEFAULT_NFUNC
+        self.d_max = self._manager.DEFAULT_DMAX
+        self.alpha = self._manager.DEFAULT_ALPHA
         self.qmin_ctl.SetValue("")
         self.qmax_ctl.SetValue("")
         self.time_ctl.SetValue("")
@@ -753,7 +758,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             self.alpha_estimate_ctl.Enable(False)
             
             dataset = self.plot_data.GetValue()
-            self.manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc, 
+            self._manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc, 
                                                  d_max=dmax,
                                                  q_min=qmin, q_max=qmax,
                                                  bck=has_bck, 
@@ -822,11 +827,11 @@ class InversionControl(ScrolledPanel, PanelBase):
         # Read nfunc
         try:
             nfunc = int(self.nfunc_ctl.GetValue())
-            npts = self.manager.get_npts()
+            npts = self._manager.get_npts()
             if npts > 0 and nfunc > npts:
                 message = "Number of function terms should be smaller "
                 message += "than the number of points"
-                wx.PostEvent(self.manager.parent, StatusEvent(status=message))
+                wx.PostEvent(self._manager.parent, StatusEvent(status=message))
                 raise ValueError, message
             self.nfunc_ctl.SetBackgroundColour(wx.WHITE)
             self.nfunc_ctl.Refresh()
@@ -870,13 +875,13 @@ class InversionControl(ScrolledPanel, PanelBase):
         Invoke the d_max exploration dialog
         """
         from explore_dialog import ExploreDialog
-        if self.manager._last_pr is not None:
-            pr = self.manager._create_plot_pr()
+        if self._manager._last_pr is not None:
+            pr = self._manager._create_plot_pr()
             dialog = ExploreDialog(pr, 10, None, -1, "")
             dialog.ShowModal()
         else:
             message = "No data to analyze. Please load a data set to proceed."
-            wx.PostEvent(self.manager.parent, StatusEvent(status=message))
+            wx.PostEvent(self._manager.parent, StatusEvent(status=message))
             
     def _on_invert(self, evt):
         """
@@ -896,9 +901,9 @@ class InversionControl(ScrolledPanel, PanelBase):
             if dataset==None or len(dataset.strip())==0:
                 message = "No data to invert. Select a data set before"
                 message += " proceeding with P(r) inversion."
-                wx.PostEvent(self.manager.parent, StatusEvent(status=message))
+                wx.PostEvent(self._manager.parent, StatusEvent(status=message))
             else:
-                self.manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc, 
+                self._manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc, 
                                                   d_max=dmax,
                                                   q_min=qmin, q_max=qmax,
                                                   bck=has_bck,
@@ -913,10 +918,10 @@ class InversionControl(ScrolledPanel, PanelBase):
         """
         Choose a new input file for I(q)
         """
-        if not self.manager is None:
+        if not self._manager is None:
             self.plot_data.SetValue(str(data.name))
             try:
-                self.manager.show_data(data=data, reset=True)
+                self._manager.show_data(data=data, reset=True)
                 self._on_pars_changed(None)
                 self._on_invert(None)
             except:
