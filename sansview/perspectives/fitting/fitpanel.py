@@ -136,7 +136,7 @@ class PageInfo(object):
         """
         self.data = data
         self.model= model
-        self.manager= manager
+        self._manager= manager
         self.event_owner= event_owner
         self.model_list_box = model_list_box
         self.name=None
@@ -168,7 +168,7 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
                     wx.CLIP_CHILDREN)
         PanelBase.__init__(self)
     
-        self.manager = None
+        self._manager = None
         self.parent = parent
         self.event_owner = None
         
@@ -197,6 +197,22 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
         self.Update()
         self.Center()
         
+    def get_data(self):
+        """
+        get the data in the current page
+        """
+        pos = self.GetSelection()
+        selected_page = self.GetPage(pos)
+        return selected_page.get_data()
+    
+    def get_state(self):
+        """
+         return the state of the current selected page
+        """
+        pos = self.GetSelection()
+        selected_page = self.GetPage(pos)
+        return selected_page.get_state()
+    
     def add_default_pages(self):
         """
         Add default pages such as a hint page and an empty fit page
@@ -246,7 +262,7 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
                 panel = self.add_fit_page(data=state.data)
                 # add data associated to the page created
                 if panel is not None:  
-                    self.manager.store_page(page=panel, data=state.data)
+                    self._manager.store_page(page=panel, data=state.data)
                     panel.reset_page(state=state)
                     panel.save_current_state()
                     
@@ -257,7 +273,7 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
         if format == '.svs':
             #close all panels only when svs file opened
             self.close_all()
-            self.manager.mypanels = []
+            self._manager.mypanels = []
                        
     def on_close_page(self, event=None):
         """
@@ -298,7 +314,7 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
         :param manager: instance of plugin fitting
         
         """
-        self.manager = manager
+        self._manager = manager
 
         
     def set_owner(self,owner):
@@ -331,11 +347,11 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
         Add the simultaneous fit page
         """
         from simfitpage import SimultaneousFitPage
-        page_finder= self.manager.get_page_finder()
+        page_finder= self._manager.get_page_finder()
         self.sim_page = SimultaneousFitPage(self,page_finder=page_finder, id=-1)
         
         self.AddPage(self.sim_page,caption="Simultaneous Fit",select=True)
-        self.sim_page.set_manager(self.manager)
+        self.sim_page.set_manager(self._manager)
         return self.sim_page
         
     def get_page_info(self, data=None):
@@ -357,7 +373,7 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
                     type = 'Theory1D'
         page_info = PageInfo(data=data, name=name)
         page_info.event_owner = self.event_owner 
-        page_info.manager = self.manager
+        page_info.manager = self._manager
         page_info.window_name = name
         page_info.window_caption = name
         page_info.type = type
@@ -370,6 +386,7 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
         page_info = self.get_page_info()
         from fitpage import FitPage
         panel = FitPage(parent=self, page_info=page_info)
+        panel.set_manager(self._manager)
         self.AddPage(page=panel, caption=page_info.window_name, select=True)
         self.opened_pages[page_info.type] = [page_info.window_name, panel]
         return panel 
@@ -380,6 +397,7 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
         """
         from fitpage import FitPage
         panel = FitPage(parent=self, page_info=page_info)
+        panel.set_manager(self._manager)
         self.AddPage(page=panel, caption=page_info.window_name, select=True)
         index = self.GetPageIndex(panel)
         self.change_page_content(data=page_info.data, index=index)
@@ -439,7 +457,7 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
             if not type.lower() in ['data']:
                 #delete the previous theory page and add a new one
                 name, panel = self.opened_pages[type]
-                #self.manager.reset_plot_panel(panel.get_data())
+                #self._manager.reset_plot_panel(panel.get_data())
                 #delete the existing page and replace it
                 index = self.GetPageIndex(panel)
                 panel = self.replace_page(index=index, page_info=page_info, type=type)
@@ -502,13 +520,13 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
             return
         ## removing sim_page
         if selected_page == self.sim_page :
-            self.manager.sim_page=None 
+            self._manager.sim_page=None 
             return
         
         ## closing other pages
         state = selected_page.createMemento()
         page_name = selected_page.window_name
-        page_finder = self.manager.get_page_finder() 
+        page_finder = self._manager.get_page_finder() 
         fitproblem = None
         ## removing fit page
         data = selected_page.get_data()
@@ -523,9 +541,9 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
                 name = str(list[0])
                 if flag and selected_page.window_name == name:
                     if type.lower() in ['theory1d', 'theory2d']:
-                        self.manager.remove_plot(selected_page, theory=True)
+                        self._manager.remove_plot(selected_page, theory=True)
                     else:
-                        self.manager.remove_plot(selected_page, theory=False)
+                        self._manager.remove_plot(selected_page, theory=False)
                     break 
             del page_finder[selected_page]
         ##remove the check box link to the model name of this page (selected_page)

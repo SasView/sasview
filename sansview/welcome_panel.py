@@ -18,13 +18,14 @@ import os.path
 import os, sys
 import local_config as config
 
+from sans.guiframe.panel_base import PanelBase
 #Font size width 
 if sys.platform.count("win32")>0:
     FONT_VARIANT = 0
 else:
     FONT_VARIANT = 1 
  
-class WelcomePanel(wx.aui.AuiNotebook):
+class WelcomePanel(wx.aui.AuiNotebook, PanelBase):
     """
         Panel created like about box  as a welcome page
         Shows product name, current version, authors, and link to the product page.
@@ -42,6 +43,7 @@ class WelcomePanel(wx.aui.AuiNotebook):
         kwds["style"] = wx.aui.AUI_NB_DEFAULT_STYLE
         
         wx.aui.AuiNotebook.__init__(self, parent, *args, **kwds)
+        PanelBase.__init__(self)
         #For sansview the parent is guiframe
         self.parent = parent
        

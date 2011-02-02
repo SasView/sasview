@@ -111,6 +111,7 @@ class Plugin(PluginBase):
         self.theory_data = None  
         #Create a reader for fit page's state
         self.state_reader = None 
+        self._extensions = '.fitv'
         self.temp_state = []
         self.state_index = 0
         self.sfile_ext = None
@@ -245,6 +246,7 @@ class Plugin(PluginBase):
         self.parent._mgr.Bind(wx.aui.EVT_AUI_PANE_CLOSE,self._onclearslicer)    
         #Create reader when fitting panel are created
         self.state_reader = Reader(self.set_state)   
+       
         #append that reader to list of available reader 
         loader = Loader()
         loader.associate_file_reader(".fitv", self.state_reader)
@@ -280,6 +282,7 @@ class Plugin(PluginBase):
             self.add_fit_page(data=data)
             wx.PostEvent(self.parent, NewPlotEvent(plot=data, 
                                                    title=str(data.title)))
+   
             
     def set_state(self, state=None, datainfo=None, format=None):
         """
@@ -299,7 +302,7 @@ class Plugin(PluginBase):
         # state file format
         self.sfile_ext = format
 
-    def  on_set_state_helper(self,event=None):
+    def on_set_state_helper(self,event=None):
         """
         Set_state_helper. This actually sets state after plotting data from state file.
         

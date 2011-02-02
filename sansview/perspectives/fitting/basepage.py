@@ -355,6 +355,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.event_owner = owner    
         self.state.event_owner = owner
         
+    def get_state(self):
+        """
+        """
+        return self.state
     def get_data(self):
         """
         return the current data 
