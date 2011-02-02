@@ -30,28 +30,15 @@ import logging
 # Application dimensions
 APP_HEIGHT = 800
 APP_WIDTH  = 1000
-GSTYLE = GUIFRAME.MULTIPLE_APPLICATIONS
+GSTYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.TOOL_ON
+
 class SansViewApp(gui_manager.ViewApp):
     """
     """
-    def OnInit(self):
-        """
-        """
-        screen_size = wx.GetDisplaySize()
-        app_height = APP_HEIGHT if screen_size[1]>APP_HEIGHT else screen_size[1]-50
-        app_width  = APP_WIDTH if screen_size[0]>APP_WIDTH else screen_size[0]-50
-
-        self.frame = gui_manager.ViewerFrame(None, -1, 
-                                             local_config.__appname__, 
-                                             gui_style=GSTYLE,
-                                             window_height=app_height, 
-                                             window_width=app_width)    
-        self.frame.Show(True)
-
-        if hasattr(self.frame, 'special'):
-            self.frame.special.SetCurrent()
-        self.SetTopWindow(self.frame)
-        return True
+    SIZE = (APP_WIDTH, APP_HEIGHT)
+    TITLE = local_config.__appname__
+    PROG_SPLASH_PATH = os.path.join("images","SVwelcome.png")
+    STYLE = GSTYLE
 
 class SansView():
     """
