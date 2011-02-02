@@ -117,7 +117,7 @@ class Plugin(PluginBase):
         # Log startup
         logging.info("Fitting plug-in started") 
         
-    def populate_menu(self, id, owner):
+    def populate_menu(self, owner):
         """
         Create a menu for the Fitting plug-in
         
@@ -150,23 +150,16 @@ class Plugin(PluginBase):
         self.menu1.Append(id1, '&Simultaneous Page',simul_help)
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
        
-        #menu for model
-        menu2 = wx.Menu()
-        self.menu_mng.populate_menu(menu2, owner)
-        id2 = wx.NewId()
-        owner.Bind(models.EVT_MODEL,self._on_model_menu)
-      
         self.fit_panel.set_owner(owner)
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
    
         #create  menubar items
-        return [(id, self.menu1, "Fitting")]
+        return [(self.menu1, "Fitting")]
                
     def on_add_sim_page(self, event):
         """
         Create a page to access simultaneous fit option
         """
-        Plugin.on_perspective(self,event=event)
         if self.sim_page != None:
             msg= "Simultaneous Fit page already opened"
             wx.PostEvent(self.parent, StatusEvent(status= msg))
@@ -951,7 +944,6 @@ class Plugin(PluginBase):
         """ 
         set engine to park
         """
-        Plugin.on_perspective(self,event=event)
         self._on_change_engine('park')
        
     def _onset_engine_scipy(self,event):
