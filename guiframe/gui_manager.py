@@ -50,25 +50,25 @@ AUTO_PLOT = False
 AUTO_SET_DATA = True
 PLOPANEL_WIDTH = 400
 PLOPANEL_HEIGTH = 400
-
+GUIFRAME_WIDTH = 1000
+GUIFRAME_HEIGHT = 800
 
 class ViewerFrame(wx.Frame):
     """
     Main application frame
     """
     
-    def __init__(self, parent, id, title, 
-                 window_height=300, window_width=300,
-                 gui_style=GUIFRAME.DEFAULT_STYLE):
+    def __init__(self, parent, title, 
+                 size=(GUIFRAME_WIDTH,GUIFRAME_HEIGHT),
+                 gui_style=GUIFRAME.DEFAULT_STYLE, 
+                 pos=wx.DefaultPosition):
         """
         Initialize the Frame object
         """
         
-        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition,
-                          size=(window_width, window_height))
+        wx.Frame.__init__(self, parent=parent, title=title, pos=pos,size=size)
         # Preferred window size
-        self._window_height = window_height
-        self._window_width  = window_width
+        self._window_width, self._window_height = size
         self.__gui_style = gui_style
         
         # Logging info
@@ -1235,15 +1235,35 @@ class DefaultPanel(wx.Panel):
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
 
-  
+PROG_SPLASH_SCREEN = "images/danse_logo.png" 
 # Toy application to test this Frame
 class ViewApp(wx.App):
     """
     """
+    SIZE = (GUIFRAME_WIDTH,GUIFRAME_HEIGHT)
+    TITLE = config.__appname__
+    PROG_SPLASH_PATH = PROG_SPLASH_SCREEN
+    STYLE = GUIFRAME.DEFAULT_STYLE
     def OnInit(self):
         """
         """
-        self.frame = ViewerFrame(None, -1, config.__appname__)    
+        pos, size = self.window_placement(self.SIZE)
+        self.frame = ViewerFrame(parent=None, 
+                                 title=self.TITLE, 
+                                 pos=pos, 
+                                 gui_style = self.STYLE,
+                                 size=size) 
+         # Display a splash screen on top of the frame.
+        if len(sys.argv) > 1 and '--time' in sys.argv[1:]:
+            log_time("Starting to display the splash screen")
+        if self.PROG_SPLASH_PATH is not None and \
+            os.path.isfile(self.PROG_SPLASH_PATH):
+            try:
+                self.display_splash_screen(parent=self.frame, path=self.PROG_SPLASH_PATH)   
+            except:
+                msg = "Cannot display splash screen\n"
+                msg += str (sys.exc_value)
+                logging.error(msg)
         self.frame.Show(True)
 
         if hasattr(self.frame, 'special'):
@@ -1279,6 +1299,82 @@ class ViewApp(wx.App):
         Manually add a perspective to the application GUI
         """
         self.frame.add_perspective(perspective)
+    
+    def window_placement(self, size):
+        """
+        Determines the position and size of the application frame such that it
+        fits on the user's screen without obstructing (or being obstructed by)
+        the Windows task bar.  The maximum initial size in pixels is bounded by
+        WIDTH x HEIGHT.  For most monitors, the application
+        will be centered on the screen; for very large monitors it will be
+        placed on the left side of the screen.
+        """
+        window_width, window_height = size
+        screen_size = wx.GetDisplaySize()
+        window_height = window_height if screen_size[1]>window_height else screen_size[1]-50
+        window_width  = window_width if screen_size[0]> window_width else screen_size[0]-50
+        xpos = ypos = 0
+
+        # Note that when running Linux and using an Xming (X11) server on a PC
+        # with a dual  monitor configuration, the reported display size may be
+        # that of both monitors combined with an incorrect display count of 1.
+        # To avoid displaying this app across both monitors, we check for
+        # screen 'too big'.  If so, we assume a smaller width which means the
+        # application will be placed towards the left hand side of the screen.
+
+        _, _, x, y = wx.Display().GetClientArea() # size excludes task bar
+        if len(sys.argv) > 1 and '--platform' in sys.argv[1:]:
+            w, h = wx.DisplaySize()  # size includes task bar area
+            print "*** Reported screen size including taskbar is %d x %d"%(w, h)
+            print "*** Reported screen size excluding taskbar is %d x %d"%(x, y)
+
+        if x > 1920: x = 1280  # display on left side, not centered on screen
+        if x > window_width:  xpos = (x - window_width)/2
+        if y > window_height: ypos = (y - window_height)/2
+
+        # Return the suggested position and size for the application frame.
+        return (xpos, ypos), (min(x, window_width), min(y, window_height))
+    
+    def display_splash_screen(self, parent, path=PROG_SPLASH_SCREEN):
+        """Displays the splash screen.  It will exactly cover the main frame."""
+
+        # Prepare the picture.  On a 2GHz intel cpu, this takes about a second.
+        x, y = parent.GetSizeTuple()
+        image = wx.Image(path, wx.BITMAP_TYPE_PNG)
+        image.Rescale(x, y, wx.IMAGE_QUALITY_HIGH)
+        bm = image.ConvertToBitmap()
+
+        # Create and show the splash screen.  It will disappear only when the
+        # program has entered the event loop AND either the timeout has expired
+        # or the user has left clicked on the screen.  Thus any processing
+        # performed in this routine (including sleeping) or processing in the
+        # calling routine (including doing imports) will prevent the splash
+        # screen from disappearing.
+        #
+        # Note that on Linux, the timeout appears to occur immediately in which
+        # case the splash screen disappears upon entering the event loop.
+        wx.SplashScreen(bitmap=bm,
+                        splashStyle=(wx.SPLASH_CENTRE_ON_PARENT|
+                                     wx.SPLASH_TIMEOUT|
+                                     wx.STAY_ON_TOP),
+                        milliseconds=4000,
+                        parent=parent,
+                        id=wx.ID_ANY)
+
+        # Keep the splash screen up a minimum amount of time for non-Windows
+        # systems.  This is a workaround for Linux and possibly MacOS that
+        # appear to ignore the splash screen timeout option.
+        if '__WXMSW__' not in wx.PlatformInfo:
+            if len(sys.argv) > 1 and '--time' in sys.argv[1:]:
+                log_time("Starting sleep of 2 secs")
+            time.sleep(2)
+
+        # A call to wx.Yield does not appear to be required.  If used on
+        # Windows, the cursor changes from 'busy' to 'ready' before the event
+        # loop is reached which is not desirable.  On Linux it seems to have
+        # no effect.
+        #wx.Yield()
+
         
 
 if __name__ == "__main__": 
