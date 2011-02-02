@@ -11,14 +11,6 @@ import sys
 APP_HEIGHT = 780
 APP_WIDTH  = 850
 PROG_SPLASH_SCREEN = "images/ball.png"
-class PrFrame(gui_manager.ViewerFrame):
-    """
-    """
-    def _on_open(self, event):
-        """
-        """
-        pass
-
 
 class PrApp(gui_manager.ViewApp):
     """
