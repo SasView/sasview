@@ -102,7 +102,7 @@ class ViewerFrame(wx.Frame):
         self._window_menu = None
         self._help_menu = None
         self._tool_menu = None
-        self._plugin_menu = None
+        self._plugin_menu_pos = -1
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins = []
@@ -475,9 +475,9 @@ class ViewerFrame(wx.Frame):
         self._add_menu_data()
         self._add_menu_application()
         self._add_menu_tool()
+        self._add_current_plugin_menu()
         self._add_menu_window()
         self._add_help_menu()
-        self._add_current_plugin_menu()
         self.SetMenuBar(self._menubar)
         
     def _add_menu_tool(self):
@@ -506,21 +506,30 @@ class ViewerFrame(wx.Frame):
         Look for plug-in menus
         Add available plug-in sub-menus. 
         """
-        if self._menubar is None:
+        if (self._menubar is None) or (self._current_perspective is None):
             return
-        
-        pos = self._menubar.GetMenuCount()
-        if self._current_perspective is not None:
-            if self._current_perspective != self._plotting_plugin:
-                menu_list = self._current_perspective.populate_menu(self)
-                if menu_list:
-                    for (menu, name) in menu_list:
-                        self._plugin_menu = self._menubar.Append(menu, 'Others')
-                #else:
-                #    self._plugin_menu = self._menubar.Append(wx.Menu(), 'all')              
-        #else:
-        #    self._plugin_menu = self._menubar.Insert(pos, wx.Menu(), 'all')
-                        
+        #replace or add a new menu for the current plugin
+        name = 'Others'
+        pos = self._menubar.FindMenu(name)
+        if pos != -1:
+            menu_list = self._current_perspective.populate_menu(self)
+            if menu_list:
+                for (menu, _) in menu_list:
+                    hidden_menu = self._menubar.Replace(self._plugin_menu_pos,
+                                                         menu, name)  
+            else:
+                hidden_menu = self._menubar.Remove(pos)
+            #get the position of the menu when it first added
+            self._plugin_menu_pos = pos 
+        else:
+            menu_list = self._current_perspective.populate_menu(self)
+            if menu_list:
+                for (menu, _) in menu_list:
+                    if self._plugin_menu_pos == -1:
+                        self._menubar.Append(menu, name)
+                    else:
+                        self._menubar.Insert(self._plugin_menu_pos, menu, name)
+                  
     def _add_help_menu(self):
         """
         add help menu
