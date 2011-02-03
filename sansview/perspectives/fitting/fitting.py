@@ -1382,10 +1382,13 @@ class Plugin(PluginBase):
             if hasattr(data,"x_bins"):
                 return
             x = data.x
-            if qmin == DEFAULT_QMIN :
-                qmin = min(data.x)
-            if qmax == DEFAULT_QMAX:
-                qmax = max(data.x) 
+            
+            if qmin == None :
+                qmin == DEFAULT_QMIN
+
+            if qmax == None:
+                qmax == DEFAULT_QMAX 
+                
         if not enable1D:
             return 
         try:

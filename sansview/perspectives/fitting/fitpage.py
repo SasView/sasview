@@ -1062,10 +1062,10 @@ class FitPage(BasicPage):
                     #self.Npts_fit.SetValue(str(len(self.data.mask)))
                     self.set_npts2fit() 
             else:
-                index_data = ((self.qmin <= self.data.x)& \
-                              (self.data.x <= self.qmax))
-                #self.Npts_fit.SetValue(str(len(self.data.x[index_data])))
-                self.set_npts2fit() 
+                index_data = ((self.qmin_x <= self.data.x)& \
+                              (self.data.x <= self.qmax_x))
+                self.Npts_fit.SetValue(str(len(self.data.x[index_data])))
+
            
         else:
            tcrtl.SetBackgroundColour("pink")
