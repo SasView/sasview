@@ -530,7 +530,7 @@ class ModelManager:
             model = MultiplicationModel(model1, model2)    
         else:
             model= self.struct_factor_dict[str(evt.GetId())]()
-        evt = ModelEvent( model= model )
+        evt = ModelEvent(model=model)
         wx.PostEvent(self.event_owner, evt)
         
     def _get_multifunc_models(self):

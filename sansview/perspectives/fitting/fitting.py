@@ -130,7 +130,11 @@ class Plugin(PluginBase):
         """
         #Menu for fitting
         self.menu1 = wx.Menu()
-        
+           #menu for model
+        menu2 = wx.Menu()
+        self.menu_mng.populate_menu(menu2, owner)
+        id2 = wx.NewId()
+        owner.Bind(models.EVT_MODEL,self._on_model_menu)
         #Set park engine
         id3 = wx.NewId()
         scipy_help= "Scipy Engine: Perform Simple fit. More in Help window...."
