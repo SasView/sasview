@@ -103,7 +103,8 @@ class ViewerFrame(wx.Frame):
         self._window_menu = None
         self._help_menu = None
         self._tool_menu = None
-        self._plugin_menu_pos = -1
+        self._applications_menu_pos = -1
+        self._applications_menu = None
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins = []
@@ -525,10 +526,10 @@ class ViewerFrame(wx.Frame):
             menu_list = self._current_perspective.populate_menu(self)
             if menu_list:
                 for (menu, _) in menu_list:
-                    if self._plugin_menu_pos == -1:
+                    if self._applications_menu_pos == -1:
                         self._menubar.Append(menu, name)
                     else:
-                        self._menubar.Insert(self._plugin_menu_pos, menu, name)
+                        self._menubar.Insert(self._applications_menu_pos, menu, name)
                   
     def _add_help_menu(self):
         """
@@ -631,14 +632,26 @@ class ViewerFrame(wx.Frame):
         """
         style = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
         if style == GUIFRAME.MULTIPLE_APPLICATIONS:
-            p_menu = wx.Menu()
+            plug_data_count = False
+            plug_no_data_count = False
+            self._applications_menu = wx.Menu()
+            separator = self._applications_menu.AppendSeparator()
             for plug in self.plugins:
                 if len(plug.get_perspective()) > 0:
                     id = wx.NewId()
-                    p_menu.Append(id, plug.sub_menu,
-                                  "Switch to application: %s" % plug.sub_menu)
+                    if plug.use_data():
+                        self._applications_menu.InsertCheckItem(0, id, plug.sub_menu,
+                                      "Switch to application: %s" % plug.sub_menu)
+                        plug_data_count = True
+                    else:
+                        plug_no_data_count = True
+                        self._applications_menu.AppendCheckItem(id, plug.sub_menu,
+                                      "Switch to application: %s" % plug.sub_menu)
                     wx.EVT_MENU(self, id, plug.on_perspective)
-            self._menubar.Append(p_menu, '&Applications')
+            if not (plug_data_count and  plug_no_data_count):
+                self._applications_menu.RemoveItem(separator)
+            self._menubar.Append(self._applications_menu, '&Applications')
+            self._check_applications_menu()
             
     def _add_menu_file(self):
         """
@@ -1145,6 +1158,21 @@ class ViewerFrame(wx.Frame):
             if self._data_panel is not None:
                 name = self._current_perspective.sub_menu
                 self._data_panel.set_active_perspective(name)
+                self._check_applications_menu()
+                
+    def _check_applications_menu(self):
+        """
+        check the menu of the current application
+        """
+        if self._applications_menu is not None:
+            for menu in self._applications_menu.GetMenuItems():
+                if self._current_perspective is not None:
+                    name = self._current_perspective.sub_menu
+                    if menu.IsCheckable():
+                        if menu.GetLabel() == name:
+                            menu.Check(True)
+                        else:
+                             menu.Check(False) 
            
     def set_plotpanel_floating(self, event=None):
         """
