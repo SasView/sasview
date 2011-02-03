@@ -1040,7 +1040,7 @@ class ViewerFrame(wx.Frame):
             self._data_manager.add_data(data_list)
             avalaible_data = self._data_manager.get_all_data()
             
-        if flag:
+        if True:
             #reading a state file
             for plug in self.plugins:
                 plug.on_set_state_helper(event=None)

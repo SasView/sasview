@@ -64,7 +64,7 @@ class Plugin(PluginBase):
         file_list = self.choose_data_file(flag)
         if not file_list or file_list[0] is None:
             return
-        self.get_data(file_list, flag=flag)
+        self.get_state(file_list)
        
     def load_folder(self, event):
         """
@@ -164,6 +164,24 @@ class Plugin(PluginBase):
             return [os.path.join(os.path.abspath(path),
                                   file) for file in os.listdir(path)]
     
+    def get_state(self, path, format=None):
+        """
+        read state
+        """
+        output = []
+        for p_file in path:
+            basename  = os.path.basename(p_file)
+            root, extension = os.path.splitext(basename)
+            for extension in EXTENSIONS:
+                temp = self.loader.load(p_file, extension)
+                if temp.__class__.__name__ == "list":
+                    for item in temp:
+                        data = self.create_data(item, p_file)
+                else:
+                    data = self.create_data(temp, p_file)
+                output.append(data)
+            self.load_complete(output=output, path=path)
+                   
     def get_data(self, path, format=None, flag=True):
         """
         """
@@ -189,14 +207,14 @@ class Plugin(PluginBase):
                     logging.info(log_msg)
                     continue
             try:
-                temp =  self.loader.load(p_file)
+                temp =  self.loader.load(p_file, format)
                 if temp.__class__.__name__ == "list":
                     print "list", temp
                     for item in temp:
                         data = self.create_data(item, p_file)
                         output.append(data)
                 else:
-                    print "list", temp
+                    print "not list", [temp]
                     data = self.create_data(temp, p_file)
                     output.append(data)
                 message = "Loading ..." + str(p_file) + "\n"
@@ -213,23 +231,6 @@ class Plugin(PluginBase):
                        message=message, path=path, flag=flag)
             
    
-    def old_get_data(self, path, format=None, flag=True):
-        """
-        :param flag: is True load only data file, else load state file
-        Receive a list of file paths and return a list of Data objects
-        """
-        from .load_thread import DataReader
-        message = "Start Loading \n"
-        wx.PostEvent(self.parent, StatusEvent(status=message,
-                                              info="info", type="progress"))
-        calc_load = DataReader(loader=self.loader,
-                               path=path,
-                               flag=flag,
-                               transform_data=self.create_data,
-                               updatefn=self.load_update,
-                               completefn=self.load_complete)
-        calc_load.queue()
-        
     def load_update(self, output=None, message=""):
         """
         print update on the status bar
