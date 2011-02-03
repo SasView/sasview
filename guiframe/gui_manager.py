@@ -40,10 +40,12 @@ from sans.guiframe.events import EVT_STATUS
 from sans.guiframe.events import EVT_ADD_MANY_DATA
 from sans.guiframe.events import StatusEvent
 from sans.guiframe.events import NewPlotEvent
-from sans.guiframe.gui_style import *
+from sans.guiframe.gui_style import GUIFRAME
+from sans.guiframe.gui_style import GUIFRAME_ID
 from sans.guiframe.events import NewLoadedDataEvent
 from sans.guiframe.data_panel import DataPanel
 from sans.guiframe.panel_base import PanelBase
+from sans.guiframe.gui_toolbar import GUIToolBar
 
 STATE_FILE_EXT = ['.inv', '.fitv', '.prv']
 DATA_MANAGER = False
@@ -107,6 +109,8 @@ class ViewerFrame(wx.Frame):
         self._applications_menu_pos = -1
         self._applications_menu = None
         self._edit_menu = None
+        #tool bar
+        self._toolbar = None
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins = []
@@ -141,19 +145,27 @@ class ViewerFrame(wx.Frame):
     def set_panel_on_focus(self, event):
         """
         Store reference to the last panel on focus
+        update the toolbar if available
+        update edit menu if available
         """
         self.panel_on_focus = event.panel
         if self.panel_on_focus is not None and self._data_panel is not None:
-            self._data_panel.set_panel_on_focus(self.panel_on_focus.window_name)
+            name = self.panel_on_focus.window_name
+            self._data_panel.set_panel_on_focus()
+            if self._toolbar is not None:
+                self.update_button(self.panel_on_focus)
+            #update edit menu
+            self.enable_edit_menu()
             
     def build_gui(self):
         """
         """
         # Set up the layout
         self._setup_layout()
-        
         # Set up the menu
         self._setup_menus()
+        # set tool bar
+        self._setup_tool_bar()
         #self.Fit()
         #self._check_update(None)
              
@@ -481,12 +493,25 @@ class ViewerFrame(wx.Frame):
         self._add_menu_file()
         self._add_menu_data()
         self._add_menu_application()
+        self._add_menu_edit()
         self._add_menu_tool()
         self._add_current_plugin_menu()
         self._add_menu_window()
         self._add_help_menu()
         self.SetMenuBar(self._menubar)
         
+    def _setup_tool_bar(self):
+        """
+        add toolbar to the frame
+        """
+        #set toolbar
+        self._toolbar = GUIToolBar(self, -1)
+        self.SetToolBar(self._toolbar)
+        self._toolbar.update_button()
+        if self._current_perspective is not None:
+            name = self._current_perspective.sub_menu
+            self._toolbar.set_active_perspective(name)
+          
     def _add_menu_tool(self):
         """
         Tools menu
@@ -696,52 +721,44 @@ class ViewerFrame(wx.Frame):
         """
         # Edit Menu
         self._edit_menu = wx.Menu()
-        
-        id = wx.NewId()
-        self._edit_menu.Append(id, '&Undo', 'Undo the previous action')
-        wx.EVT_MENU(self, id, self.on_undo_panel)
-        
-        id = wx.NewId()
-        self._edit_menu.Append(id, '&Redo', 'Redo the previous action')
-        wx.EVT_MENU(self, id, self.on_redo_panel)
+        self._edit_menu.Append(GUIFRAME_ID.UNDO_ID, '&Undo', 
+                               'Undo the previous action')
+        wx.EVT_MENU(self, GUIFRAME_ID.UNDO_ID, self.on_undo_panel)
+        self._edit_menu.Append(GUIFRAME_ID.REDO_ID, '&Redo', 
+                               'Redo the previous action')
+        wx.EVT_MENU(self, GUIFRAME_ID.REDO_ID, self.on_redo_panel)
         self._edit_menu.AppendSeparator()
-        id = wx.NewId()
-        self._edit_menu.Append(id, '&Bookmark', 'bookmark current panel')
-        wx.EVT_MENU(self, id, self.on_bookmark_panel)
-        
-        id = wx.NewId()
-        self._edit_menu.Append(id, '&Save As', 'Save current panel into file')
-        wx.EVT_MENU(self, id, self.on_save_panel)
+        self._edit_menu.Append(GUIFRAME_ID.BOOKMARK_ID, '&Bookmark', 
+                               'bookmark current panel')
+        wx.EVT_MENU(self, GUIFRAME_ID.BOOKMARK_ID, self.on_bookmark_panel)
+        self._edit_menu.Append(GUIFRAME_ID.SAVE_ID, '&Save As', 
+                               'Save current panel into file')
+        wx.EVT_MENU(self, GUIFRAME_ID.SAVE_ID, self.on_save_panel)
         self._edit_menu.AppendSeparator()
-        id = wx.NewId()
-        self._edit_menu.Append(id, '&Print Preview', 'Preview current panel')
-        wx.EVT_MENU(self, id, self.on_preview_panel)
-        
-        id = wx.NewId()
-        self._edit_menu.Append(id, '&Print', 'Print current panel')
-        wx.EVT_MENU(self, id, self.on_print_panel)
+        self._edit_menu.Append(GUIFRAME_ID.PREVIEW_ID, '&Print Preview',
+                               'Preview current panel')
+        wx.EVT_MENU(self, GUIFRAME_ID.PREVIEW_ID, self.on_preview_panel)
+        self._edit_menu.Append(GUIFRAME_ID.PRINT_ID, '&Print',
+                               'Print current panel')
+        wx.EVT_MENU(self, GUIFRAME_ID.PRINT_ID, self.on_print_panel)
         self._edit_menu.AppendSeparator()
-        id = wx.NewId()
-        self._edit_menu.Append(id, '&Zoom', 'Zoom current panel')
-        wx.EVT_MENU(self, id, self.on_zoom_panel)
-        
-        id = wx.NewId()
-        self._edit_menu.Append(id, '&Zoom In', 'Zoom in current panel')
-        wx.EVT_MENU(self, id, self.on_zoom_in_panel)
-       
-        id = wx.NewId()
-        self._edit_menu.Append(id, '&Zoom Out', 'Zoom out current panel')
-        wx.EVT_MENU(self, id, self.on_zoom_out_panel)
-        
-        id = wx.NewId()
-        self._edit_menu.Append(id, '&Drag', 'Drag current panel')
-        wx.EVT_MENU(self, id, self.on_drag_panel)
-        
-        id = wx.NewId()
-        self._edit_menu.Append(id, '&Reset', 'Reset current panel')
-        wx.EVT_MENU(self, id, self.on_reset_panel)
-        
-        self.menubar.Append(self._edit_menu,  '&Edit')
+        self._edit_menu.Append(GUIFRAME_ID.ZOOM_ID, '&Zoom',
+                               'Zoom current panel')
+        wx.EVT_MENU(self, GUIFRAME_ID.ZOOM_ID, self.on_zoom_panel)
+        self._edit_menu.Append(GUIFRAME_ID.ZOOM_IN_ID, '&Zoom In',
+                               'Zoom in current panel')
+        wx.EVT_MENU(self, GUIFRAME_ID.ZOOM_IN_ID, self.on_zoom_in_panel)
+        self._edit_menu.Append(GUIFRAME_ID.ZOOM_OUT_ID, '&Zoom Out', 
+                               'Zoom out current panel')
+        wx.EVT_MENU(self, GUIFRAME_ID.ZOOM_OUT_ID, self.on_zoom_out_panel)
+        self._edit_menu.Append(GUIFRAME_ID.DRAG_ID, '&Drag',
+                               'Drag current panel')
+        wx.EVT_MENU(self, GUIFRAME_ID.DRAG_ID, self.on_drag_panel)
+        self._edit_menu.Append(GUIFRAME_ID.RESET_ID, '&Reset', 
+                               'Reset current panel')
+        wx.EVT_MENU(self, GUIFRAME_ID.RESET_ID, self.on_reset_panel)
+        self._menubar.Append(self._edit_menu,  '&Edit')
+        self.enable_edit_menu()
         
     def _add_menu_data(self):
         """
@@ -1218,14 +1235,18 @@ class ViewerFrame(wx.Frame):
         """
         set the current active perspective 
         """
+        
         self._current_perspective = perspective
         name = "No current Application selected"
         if self._current_perspective is not None:
             self._add_current_plugin_menu()
+            name = self._current_perspective.sub_menu
             if self._data_panel is not None:
-                name = self._current_perspective.sub_menu
                 self._data_panel.set_active_perspective(name)
                 self._check_applications_menu()
+            #update tool bar
+            if self._toolbar is not None:
+                self._toolbar.set_active_perspective(name)
                 
     def _check_applications_menu(self):
         """
@@ -1314,51 +1335,123 @@ class ViewerFrame(wx.Frame):
     
         return is_data1d and not is_data2d and not is_theory and not is_state_data
     
+    def enable_edit_menu(self):
+        """
+        enable menu item under edit menu depending on the panel on focus
+        """
+        if self.panel_on_focus is not None and self._edit_menu is not None:
+            flag = panel_on_focus.get_undo_flag()
+            self._edit_menu.Enable(GUIFRAME_ID.UNDO_ID, flag)
+            flag = panel_on_focus.get_redo_flag()
+            self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
+            flag = panel_on_focus.get_bookmark_flag()
+            self._edit_menu.Enable(GUIFRAME_ID.BOOKMARK_ID, flag)
+            flag = panel_on_focus.get_save_flag()
+            self._edit_menu.Enable(GUIFRAME_ID.SAVE_ID, flag)
+            flag = panel_on_focus.get_print_flag()
+            self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
+            flag = panel_on_focus.get_prieview_flag()
+            self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
+            flag = panel_on_focus.get_zoom_flag()
+            self._edit_menu.Enable(GUIFRAME_ID.ZOOM_ID, flag)
+            flag = panel_on_focus.get_zoom_in_flag()
+            self._edit_menu.Enable(GUIFRAME_ID.ZOOM_IN_ID, flag)
+            flag = panel_on_focus.get_zoom_out_flag()
+            self._edit_menu.Enable(GUIFRAME_ID.ZOOM_OUT_ID, flag)
+            flag = panel_on_focus.get_drag_flag()
+            self._edit_menu.Enable(GUIFRAME_ID.DRAG_ID, flag)
+            flag = panel_on_focus.get_reset_flag()
+            self._edit_menu.Enable(GUIFRAME_ID.RESET_ID, flag)
+        else:
+            flag = False
+            self._edit_menu.Enable(GUIFRAME_ID.UNDO_ID, flag)
+            self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
+            self._edit_menu.Enable(GUIFRAME_ID.BOOKMARK_ID, flag)
+            self._edit_menu.Enable(GUIFRAME_ID.SAVE_ID, flag)
+            self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
+            self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
+            self._edit_menu.Enable(GUIFRAME_ID.ZOOM_ID, flag)
+            self._edit_menu.Enable(GUIFRAME_ID.ZOOM_IN_ID, flag)
+            self._edit_menu.Enable(GUIFRAME_ID.ZOOM_OUT_ID, flag)
+            self._edit_menu.Enable(GUIFRAME_ID.DRAG_ID, flag)
+            self._edit_menu.Enable(GUIFRAME_ID.RESET_ID, flag)
+            
     def on_undo_panel(self, event=None):
         """
         undo previous action of the last panel on focus if possible
         """
+        if self.panel_on_focus is not None:
+            self.panel_on_focus.on_undo(event)
+            
     def on_redo_panel(self, event=None):
         """
         redo the last cancel action done on the last panel on focus
         """
+        if self.panel_on_focus is not None:
+            self.panel_on_focus.on_redo(event)
+            
     def on_bookmark_panel(self, event=None):
         """
         Bookmark available information of the panel on focus
         """
+        if self.panel_on_focus is not None:
+            self.panel_on_focus.on_bookmark(event)
+            
     def on_save_panel(self, event=None):
         """
         save possible information on the current panel
         """
+        if self.panel_on_focus is not None:
+            self.panel_on_focus.on_save(event)
+            
     def on_preview_panel(self, event=None):
         """
         preview information on the panel on focus
         """
+        if self.panel_on_focus is not None:
+            self.panel_on_focus.on_preview(event)
+            
     def on_print_panel(self, event=None):
         """
         print available information on the last panel on focus
         """
+        if self.panel_on_focus is not None:
+            self.panel_on_focus.on_print(event)
+            
     def on_zoom_panel(self, event=None):
         """
         zoom on the current panel if possible
         """
+        if self.panel_on_focus is not None:
+            self.panel_on_focus.on_zoom(event)
+            
     def on_zoom_in_panel(self, event=None):
         """
         zoom in of the panel on focus
         """
+        if self.panel_on_focus is not None:
+            self.panel_on_focus.on_zoom_in(event)
+            
     def on_zoom_out_panel(self, event=None):
         """
         zoom out on the panel on focus
         """
+        if self.panel_on_focus is not None:
+            self.panel_on_focus.on_zoom_out(event)
+            
     def on_drag_panel(self, event=None):
         """
         drag apply to the panel on focus
         """
+        if self.panel_on_focus is not None:
+            self.panel_on_focus.on_drag(event)
+            
     def on_reset_panel(self, event=None):
         """
         reset the current panel
         """
-        
+        if self.panel_on_focus is not None:
+            self.panel_on_focus.on_reset(event)
         
 class DefaultPanel(wx.Panel, PanelBase):
     """

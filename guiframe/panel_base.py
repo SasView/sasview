@@ -42,7 +42,7 @@ class PanelBase:
         self._drag_flag = False
         self._reset_flag = False
         
-    def set_print_flag(self, flag=True):
+    def _set_print_flag(self, flag=True):
         """
         The derivative class sets the print flag value to indicate that it can 
         be printed
@@ -55,7 +55,7 @@ class PanelBase:
         """
         return self._print_flag
     
-    def set_undo_flag(self, flag=True):
+    def _set_undo_flag(self, flag=True):
         """
         The derivative class sets the undo flag value to indicate that the 
         current action done can be canceled
@@ -68,7 +68,7 @@ class PanelBase:
         """
         return self._undo_flag
     
-    def set_redo_flag(self, flag=True):
+    def _set_redo_flag(self, flag=True):
         """
         The derivative class sets the redo flag value to indicate that the 
         action done can be recovered
@@ -81,7 +81,7 @@ class PanelBase:
         """
         return self._redo_flag
     
-    def set_zoomed_in_flag(self, flag=True):
+    def _set_zoomed_in_flag(self, flag=True):
         """
         The derivative class sets the zoom in flag value to indicate that it
         can be zoomed in
@@ -94,7 +94,7 @@ class PanelBase:
         """
         return self._zoom_in_flag
     
-    def set_zoomed_out_flag(self, flag=True):
+    def _set_zoomed_out_flag(self, flag=True):
         """
         The derivative class sets the zoom out flag value to indicate that it
         can be zoomed out
@@ -107,7 +107,7 @@ class PanelBase:
         """
         return self._zoom_out_flag
     
-    def set_zoom_flag(self, flag=True):
+    def _set_zoom_flag(self, flag=True):
         """
         The derivative class sets the zoom flag value to indicate that it
         can be zoomed
@@ -120,7 +120,7 @@ class PanelBase:
         """
         return self._zoom_flag
     
-    def set_bookmark_flag(self, flag=True):
+    def _set_bookmark_flag(self, flag=True):
         """
         The derivative class sets the bookmark flag value to indicate that it
         can be bookmarked
@@ -133,7 +133,7 @@ class PanelBase:
         """
         return self._bookmark_flag
     
-    def set_preview_flag(self, flag=True):
+    def _set_preview_flag(self, flag=True):
         """
         The derivative class sets the preview flag value to indicate that it
         can be previewed
@@ -146,7 +146,7 @@ class PanelBase:
         """
         return self._preview_flag
     
-    def set_save_flag(self, flag=True):
+    def _set_save_flag(self, flag=True):
         """
         The derivative class sets the drag flag value to indicate that it
         can be saved
@@ -159,7 +159,7 @@ class PanelBase:
         """
         return self._save_flag
     
-    def set_drag_flag(self, flag=True):
+    def _set_drag_flag(self, flag=True):
         """
         The derivative class sets the drag flag value to indicate that 
         dragging motion is possible
@@ -172,7 +172,7 @@ class PanelBase:
         """
         return self._drag_flag
     
-    def set_reset_flag(self, flag=True):
+    def _set_reset_flag(self, flag=True):
         """
         The derivative class sets the reset flag value to indicate that it
         can be reset
