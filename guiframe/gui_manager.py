@@ -43,6 +43,7 @@ from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.gui_style import *
 from sans.guiframe.events import NewLoadedDataEvent
 from sans.guiframe.data_panel import DataPanel
+from sans.guiframe.panel_base import PanelBase
 
 STATE_FILE_EXT = ['.inv', '.fitv', '.prv']
 DATA_MANAGER = False
@@ -105,6 +106,7 @@ class ViewerFrame(wx.Frame):
         self._tool_menu = None
         self._applications_menu_pos = -1
         self._applications_menu = None
+        self._edit_menu = None
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins = []
@@ -355,10 +357,13 @@ class ViewerFrame(wx.Frame):
                               Left().
                               MinimizeButton().
                               MinSize(wx.Size(w, h)).
-                              Show())
+                              Hide())
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style != GUIFRAME.MANAGER_ON:
             self._mgr.GetPane(self.panels["data_panel"].window_name).Hide()
+            print "manager_on"
+        else:
+            self._mgr.GetPane(self.panels["data_panel"].window_name).Show()
             
         # Add the panels to the AUI manager
         for panel_class in panels:
@@ -537,12 +542,14 @@ class ViewerFrame(wx.Frame):
         """
         # Help menu
         self._help_menu = wx.Menu()
-        # add the welcome panel menu item
-        if self.defaultPanel is not None:
-            id = wx.NewId()
-            self._help_menu.Append(id, '&Welcome', '')
-            self._help_menu.AppendSeparator()
-            wx.EVT_MENU(self, id, self.show_welcome_panel)
+        style = self.__gui_style & GUIFRAME.WELCOME_PANEL_ON
+        if style == GUIFRAME.WELCOME_PANEL_ON:
+            # add the welcome panel menu item
+            if self.defaultPanel is not None:
+                id = wx.NewId()
+                self._help_menu.Append(id, '&Welcome', '')
+                self._help_menu.AppendSeparator()
+                wx.EVT_MENU(self, id, self.show_welcome_panel)
         # Look for help item in plug-ins 
         for item in self.plugins:
             if hasattr(item, "help"):
@@ -603,6 +610,9 @@ class ViewerFrame(wx.Frame):
             wx.EVT_MENU(self, id, self.set_plotpanel_fixed)
             id = wx.NewId()
             self._window_menu.AppendSubMenu(preferences_menu,'&Preferences')
+        if self._window_menu.GetMenuItemCount() == 0:
+            pos = self._menubar.FindMenu('Window')
+            self._menubar.Remove(pos)
         #wx.EVT_MENU(self, id, self.show_preferences_panel)   
         """
         if len(self.plugins) == 2:
@@ -657,25 +667,81 @@ class ViewerFrame(wx.Frame):
         """
         add menu file
         """
+        
          # File menu
         self._file_menu = wx.Menu()
-        # some menu of plugin to be seen under file menu
-        self._populate_file_menu()
-        id = wx.NewId()
-        self._file_menu.Append(id, '&Save Application',
-                             'Save state of the current active application')
-        wx.EVT_MENU(self, id, self._on_save_application)
-        id = wx.NewId()
-        self._file_menu.Append(id, '&Save Project',
-                             'Save the state of the whole application')
-        wx.EVT_MENU(self, id, self._on_save_project)
-        self._file_menu.AppendSeparator()
+        style = self.__gui_style & GUIFRAME.DATALOADER_ON
+        if style == GUIFRAME.DATALOADER_ON:
+            # some menu of plugin to be seen under file menu
+            self._populate_file_menu()
+            id = wx.NewId()
+            self._file_menu.Append(id, '&Save Application',
+                                 'Save state of the current active application')
+            wx.EVT_MENU(self, id, self._on_save_application)
+            id = wx.NewId()
+            self._file_menu.Append(id, '&Save Project',
+                                 'Save the state of the whole application')
+            wx.EVT_MENU(self, id, self._on_save_project)
+            self._file_menu.AppendSeparator()
         
         id = wx.NewId()
         self._file_menu.Append(id, '&Quit', 'Exit') 
         wx.EVT_MENU(self, id, self.Close)
         # Add sub menus
         self._menubar.Append(self._file_menu, '&File')
+        
+    def _add_menu_edit(self):
+        """
+        add menu edit
+        """
+        # Edit Menu
+        self._edit_menu = wx.Menu()
+        
+        id = wx.NewId()
+        self._edit_menu.Append(id, '&Undo', 'Undo the previous action')
+        wx.EVT_MENU(self, id, self.on_undo_panel)
+        
+        id = wx.NewId()
+        self._edit_menu.Append(id, '&Redo', 'Redo the previous action')
+        wx.EVT_MENU(self, id, self.on_redo_panel)
+        self._edit_menu.AppendSeparator()
+        id = wx.NewId()
+        self._edit_menu.Append(id, '&Bookmark', 'bookmark current panel')
+        wx.EVT_MENU(self, id, self.on_bookmark_panel)
+        
+        id = wx.NewId()
+        self._edit_menu.Append(id, '&Save As', 'Save current panel into file')
+        wx.EVT_MENU(self, id, self.on_save_panel)
+        self._edit_menu.AppendSeparator()
+        id = wx.NewId()
+        self._edit_menu.Append(id, '&Print Preview', 'Preview current panel')
+        wx.EVT_MENU(self, id, self.on_preview_panel)
+        
+        id = wx.NewId()
+        self._edit_menu.Append(id, '&Print', 'Print current panel')
+        wx.EVT_MENU(self, id, self.on_print_panel)
+        self._edit_menu.AppendSeparator()
+        id = wx.NewId()
+        self._edit_menu.Append(id, '&Zoom', 'Zoom current panel')
+        wx.EVT_MENU(self, id, self.on_zoom_panel)
+        
+        id = wx.NewId()
+        self._edit_menu.Append(id, '&Zoom In', 'Zoom in current panel')
+        wx.EVT_MENU(self, id, self.on_zoom_in_panel)
+       
+        id = wx.NewId()
+        self._edit_menu.Append(id, '&Zoom Out', 'Zoom out current panel')
+        wx.EVT_MENU(self, id, self.on_zoom_out_panel)
+        
+        id = wx.NewId()
+        self._edit_menu.Append(id, '&Drag', 'Drag current panel')
+        wx.EVT_MENU(self, id, self.on_drag_panel)
+        
+        id = wx.NewId()
+        self._edit_menu.Append(id, '&Reset', 'Reset current panel')
+        wx.EVT_MENU(self, id, self.on_reset_panel)
+        
+        self.menubar.Append(self._edit_menu,  '&Edit')
         
     def _add_menu_data(self):
         """
@@ -1118,7 +1184,8 @@ class ViewerFrame(wx.Frame):
                                                    info='warning'))
                     return 
                 else:
-                    if self.enable_add_data(new_plot):
+                    if self.enable_add_data(new_plot) and \
+                    hasattr(self.panel_on_focus, 'group_id'):
                         new_plot.group_id = self.panel_on_focus.group_id
             wx.PostEvent(self, NewPlotEvent(plot=new_plot,
                                                   title=str(new_plot.title)))
@@ -1246,8 +1313,54 @@ class ViewerFrame(wx.Frame):
             if  'fitstate' in new_plot.meta_data: is_state_data = True
     
         return is_data1d and not is_data2d and not is_theory and not is_state_data
+    
+    def on_undo_panel(self, event=None):
+        """
+        undo previous action of the last panel on focus if possible
+        """
+    def on_redo_panel(self, event=None):
+        """
+        redo the last cancel action done on the last panel on focus
+        """
+    def on_bookmark_panel(self, event=None):
+        """
+        Bookmark available information of the panel on focus
+        """
+    def on_save_panel(self, event=None):
+        """
+        save possible information on the current panel
+        """
+    def on_preview_panel(self, event=None):
+        """
+        preview information on the panel on focus
+        """
+    def on_print_panel(self, event=None):
+        """
+        print available information on the last panel on focus
+        """
+    def on_zoom_panel(self, event=None):
+        """
+        zoom on the current panel if possible
+        """
+    def on_zoom_in_panel(self, event=None):
+        """
+        zoom in of the panel on focus
+        """
+    def on_zoom_out_panel(self, event=None):
+        """
+        zoom out on the panel on focus
+        """
+    def on_drag_panel(self, event=None):
+        """
+        drag apply to the panel on focus
+        """
+    def on_reset_panel(self, event=None):
+        """
+        reset the current panel
+        """
         
-class DefaultPanel(wx.Panel):
+        
+class DefaultPanel(wx.Panel, PanelBase):
     """
     Defines the API for a panels to work with
     the GUI manager
@@ -1258,6 +1371,7 @@ class DefaultPanel(wx.Panel):
     window_caption = "Welcome panel"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
+    
 
 
 # Toy application to test this Frame
@@ -1267,7 +1381,7 @@ class ViewApp(wx.App):
     SIZE = (GUIFRAME_WIDTH,GUIFRAME_HEIGHT)
     TITLE = config.__appname__
     PROG_SPLASH_PATH = PROG_SPLASH_SCREEN
-    STYLE = GUIFRAME.DEFAULT_STYLE
+    STYLE = GUIFRAME.SINGLE_APPLICATION
     def OnInit(self):
         """
         """

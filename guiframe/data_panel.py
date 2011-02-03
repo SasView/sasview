@@ -190,8 +190,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_plot.SetToolTipString("To trigger plotting")
         wx.EVT_BUTTON(self, self.bt_plot.GetId(), self.on_plot)
         
-        self.bt_remove = wx.Button(self, wx.NewId(), "Delete Data")
-        self.bt_remove.SetToolTipString("Delete data from the application")
+        self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data")
+        self.bt_remove.SetToolTipString("Remove data from the application")
         wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
         
         self.tctrl_perspective = wx.StaticText(self, -1, 'No Active Application')
