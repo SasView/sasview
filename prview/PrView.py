@@ -1,7 +1,7 @@
 import wx
 #import gui_manager
 from sans.guiframe import gui_manager
-
+from sans.guiframe.gui_style import GUIFRAME
 # For py2exe, import config here
 import local_config
 import sys
