@@ -166,6 +166,7 @@ void SlitSmearer :: compute_matrix(){
 		// Find q where the resolution smearing calculation of I(q) occurs
 		double q, q_min, q_max, q_0;
 		get_bin_range(i, &q, &q_min, &q_max);
+
 		bool last_qpoint = true;
 		// Find q[0] value to normalize the weight later,
 		//  otherwise, we will have a precision problem.
@@ -178,12 +179,17 @@ void SlitSmearer :: compute_matrix(){
 			double q_j, q_high, q_low;
 			// Calculate bin size of q_j
 			get_bin_range(j, &q_j, &q_low, &q_high);
+
 			// Check q_low that can not be negative.
 			if (q_low < 0.0){
 				q_low = 0.0;
 			}
 			// default parameter values
 			(*weights)[i*nbins+j] = 0.0;
+			// protect for negative q
+			if (q <= 0.0 || q_j <= 0.0){
+					continue;
+			}
 			double shift_w = 0.0;
 			// Condition: zero slit smear.
 			if (npts_w == 1 && npts_h == 1){

@@ -191,7 +191,7 @@ class _BaseSmearer(object):
             temp_first = first_bin
             temp_last = last_bin
             #iq_in_temp = iq_in
-        
+
         # Sanity check
         if len(iq_in_temp) != self.nbins:
             msg = "Invalid I(q) vector: inconsistent array "
@@ -436,8 +436,8 @@ class _QSmearer(_BaseSmearer):
         _qmax_unsmeared = q_max 
         try:
             offset = 3.0 * max(self.width)
-            _qmin_unsmeared = max([self.min, q_min - offset])
-            _qmax_unsmeared = min([self.max, q_max + offset])
+            _qmin_unsmeared = self.min
+            _qmax_unsmeared = self.max
         except:
             logging.error("_QSmearer.get_bin_range: %s" % sys.exc_value)
         return _qmin_unsmeared, _qmax_unsmeared
@@ -563,7 +563,7 @@ def get_qextrapolate(width, data_x):
     new_width = numpy.append(new_width, extra_high)
     
     # nbins corrections due to the negative q value
-    nbins_low = nbins_low - len(data_x_ext[data_x_ext<0])
+    nbins_low = nbins_low - len(data_x_ext[data_x_ext<=0])
     return  nbins_low, nbins_high, \
              new_width[data_x_ext>0], data_x_ext[data_x_ext>0]
     
