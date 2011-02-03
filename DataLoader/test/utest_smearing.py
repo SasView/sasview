@@ -8,7 +8,7 @@ import numpy, math
 from DataLoader.loader import  Loader
 from DataLoader.data_info import Data1D, Data2D
 from DataLoader.qsmearing import SlitSmearer, QSmearer, smear_selection
-from sans.models.SphereModel import SphereModel
+ 
 import os.path
 
 class smear_tests(unittest.TestCase):
@@ -53,19 +53,11 @@ class smear_tests(unittest.TestCase):
         
         input = 12.0-numpy.arange(1,11)
         output = s(input)
-        # The following commented line was the correct output for even bins 
-        # [see smearer.cpp for details] 
-        #answer = [ 9.666,  9.056,  8.329,  7.494,  6.642,  5.721,  4.774, \
-        #  3.824,  2.871, 2.   ]
-        # The following answer was from numerical weighting algorithm.
-        #answer = [ 9.2302,  8.6806,  7.9533,  7.1673,  6.2889,  5.4,   \
-        #  4.5028,  3.5744,  2.6083, 2.    ]
-        # For the new analytical algorithm, the small difference between 
-        #these two could be from the first edge of the q bin size. 
-        answer = [ 9.0618,  8.64018,  8.11868,  7.13916,  6.15285,  5.55556,  \
-                     4.55842,  3.56061,  2.56235, 2.    ]
+        # The following commented line was the correct output for even bins [see smearer.cpp for details] 
+        #answer = [ 9.666,  9.056,  8.329,  7.494,  6.642,  5.721,  4.774,  3.824,  2.871, 2.   ]
+        answer = [ 9.0618,  8.6401,  8.1186,  7.1391,  6.1528,  5.5555,     4.5584,  3.5606,  2.5623, 2.    ]
         for i in range(len(input)):
-            self.assertAlmostEqual(answer[i], output[i], 2)
+            self.assertAlmostEqual(answer[i], output[i], 3)
         
     def test_q(self):
         """
@@ -97,83 +89,8 @@ class smear_tests(unittest.TestCase):
                   5.00093415,   4.01898292,   3.15008701,   2.55214921]
         for i in range(len(input)):
             self.assertAlmostEqual(answer[i], output[i], 2)
-            
-class smear_slit_h_w_tests(unittest.TestCase):
-    
-    def setUp(self):
-        self.data = Loader().load("1000A_sphere_sm.xml")
-        self.model = SphereModel()
-        # The answer could be improved by developing better algorithm.
-        self.answer1 = Loader().load("slit_1000A_sphere_sm_w_0_0002.txt")
-        self.answer2 = Loader().load("slit_1000A_sphere_sm_h.txt")
-        self.answer3 = Loader().load("slit_1000A_sphere_sm_w_0_0001.txt")
-        # Get inputs
-        self.model.params['scale'] = 0.05
-        self.model.params['background'] = 0.01
-        self.model.params['radius'] = 10000.0
-        self.model.params['sldSolv'] = 6.3e-006
-        self.model.params['sldSph'] = 3.4e-006
-        
-    def test_slit_h_w(self):
-        """
-            Test identity slit smearing w/ h=0.117 w = 0.002
-        """
-        # Set params and dQl
-        data = self.data
-        data.dxw = 0.0002 * numpy.ones(len(self.data.x))
-        data.dxl = 0.117 * numpy.ones(len(self.data.x))
-        # Create smearer for our data
-        s = SlitSmearer(data, self.model)
-        # Get smear
-        input  = self.model.evalDistribution(data.x)
-        output = s(input)
-        # Get pre-calculated values
-        answer = self.answer1.y
-        # Now compare
-        for i in range(len(input)):
-            self.assertAlmostEqual(answer[i], output[i], 0)
-     
-    def test_slit_h(self):
-        """
-            Test identity slit smearing w/ h=0.117 w = 0.0
-        """
-        # Set params and dQl
-        data = self.data
-        data.dxw = 0.0 * numpy.ones(len(self.data.x))
-        data.dxl = 0.117 * numpy.ones(len(self.data.x))
-        # Create smearer for our data
-        s = SlitSmearer(data, self.model)
-        # Get smear
-        input  = self.model.evalDistribution(data.x)
-        output = s(input)
-        # Get pre-calculated values
-        answer = self.answer2.y
-        # Now compare
-        for i in range(len(input)):
-            self.assertAlmostEqual(answer[i], output[i], 0)
-     
-    def test_slit_w(self):
-        """
-            Test identity slit smearing w/ h=0.0 w = 0.001
-        """
-        # Set params and dQl
-        data = self.data
-        data.dxw = 0.0001 * numpy.ones(len(self.data.x))
-        data.dxl = 0.0 * numpy.ones(len(self.data.x))
-        # Create smearer for our data
-        s = SlitSmearer(data, self.model)
-        # Get smear
-        input  = self.model.evalDistribution(data.x)
-        output = s(input)
-        # Get pre-calculated values
-        answer = self.answer3.y
-        # Now compare
-        for i in range(len(input)):
-             if i <= 40:
-                 self.assertAlmostEqual(answer[i], output[i], -3)    
-             else:
-                self.assertAlmostEqual(answer[i], output[i], 0)       
-                
+      
+
 if __name__ == '__main__':
     unittest.main()
    
