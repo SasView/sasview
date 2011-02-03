@@ -18,6 +18,7 @@ class PrApp(gui_manager.ViewApp):
     SIZE = (APP_WIDTH, APP_HEIGHT)
     TITLE = local_config.__appname__
     PROG_SPLASH_PATH = None
+    STYLE = GUIFRAME.DEFAULT_STYLE
     
 class PrView():
     """
