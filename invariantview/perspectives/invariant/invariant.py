@@ -290,7 +290,6 @@ class Plugin(PluginBase):
         self.temp_state = None
         
         
-        
     def plot_theory(self, data=None, name=None):
         """
         Receive a data set and post a NewPlotEvent to parent.
