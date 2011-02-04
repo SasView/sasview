@@ -5,6 +5,7 @@ import wx
 import wx.aui
 
 from sans.guiframe.panel_base import PanelBase
+from sans.guiframe.events import PanelOnFocusEvent
 import basepage
 
 _BOX_WIDTH = 80
@@ -166,7 +167,7 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
                     style= wx.aui.AUI_NB_WINDOWLIST_BUTTON|
                     wx.aui.AUI_NB_DEFAULT_STYLE|
                     wx.CLIP_CHILDREN)
-        PanelBase.__init__(self)
+        PanelBase.__init__(self, parent)
     
         self._manager = None
         self.parent = parent
@@ -187,15 +188,23 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
         self.Bind(basepage.EVT_PAGE_INFO, self._onGetstate)
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
         self.Bind(basepage.EVT_NEXT_STATE, self._onRedo)
-        
+       
         #add default pages
         self.add_default_pages()
-        
+     
         # increment number for model name
         self.count = 0
         #updating the panel
         self.Update()
         self.Center()
+        
+    def on_set_focus(self, event):
+        """
+        """
+        pos = self.GetSelection()
+        selected_page = self.GetPage(pos)
+        print "panel on fogus", selected_page.window_name
+        wx.PostEvent(self.parent, PanelOnFocusEvent(panel=selected_page))
         
     def get_data(self):
         """
@@ -221,7 +230,7 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
         from hint_fitpage import HintFitPage
         self.hint_page = HintFitPage(self) 
         self.AddPage(page=self.hint_page, caption="Hint")
-         
+        self.hint_page.set_manager(self._manager)
         #Add the first fit page
         self.add_empty_page()
 
@@ -315,6 +324,10 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
         
         """
         self._manager = manager
+        for pos in range(self.GetPageCount()):
+            page = self.GetPage(pos)
+            if page is not None:
+                page.set_manager(self._manager)
 
         
     def set_owner(self,owner):

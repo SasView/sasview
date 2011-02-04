@@ -1,7 +1,7 @@
 import wx
+from sans.guiframe.panel_base import PanelBase
 
-
-class HintFitPage(wx.ScrolledWindow):
+class HintFitPage(wx.ScrolledWindow, PanelBase):
     """
         This class provide general structure of  fitpanel page
     """
@@ -12,8 +12,8 @@ class HintFitPage(wx.ScrolledWindow):
     
     def __init__(self, parent):
         wx.ScrolledWindow.__init__(self, parent,
-                 style= wx.FULL_REPAINT_ON_RESIZE )
-        
+                 style= wx.FULL_REPAINT_ON_RESIZE)
+        PanelBase.__init__(self, parent)
         msg = "right click on the data when it is highlighted "
         msg += "the select option to fit for futher options"
         self.do_layout()

@@ -10,6 +10,7 @@ import string
 from sans.guiframe.panel_base import PanelBase
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.guiframe.utils import format_number,check_float
+from sans.guiframe.events import PanelOnFocusEvent
 from sans.guiframe.events import StatusEvent
 import pagestate
 from pagestate import PageState
@@ -52,7 +53,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## parent of the page
         self.parent = parent
         ## manager is the fitting plugin
-        self.manager = None
         ## owner of the page (fitting plugin)
         self.event_owner = None
          ## current model
@@ -171,6 +171,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## layout
         self.set_layout()
         
+    def on_set_focus(self, event):
+        """
+        """
+        print "fitting panel", self.window_name
+        if self._manager is not None:
+            wx.PostEvent(self._manager.parent, PanelOnFocusEvent(panel=self))
+        
     class ModelTextCtrl(wx.TextCtrl):
         """
         Text control for model and fit parameters.
@@ -266,7 +273,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         ##window_caption
         self.window_caption = page_info.window_caption
         ## manager is the fitting plugin
-        self.manager= page_info.manager
+        self._manager= page_info.manager
         ## owner of the page (fitting plugin)
         self.event_owner= page_info.event_owner
          ## current model
@@ -372,7 +379,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param manager: instance of plugin fitting
         
         """
-        self.manager = manager  
+        print "manager", manager
+        self._manager = manager  
         self.state.manager = manager
         
     def populate_box(self, dict):
@@ -600,7 +608,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             ## reset state of checkbox,textcrtl  and  regular parameters value
             self.reset_page(previous_state)      
          
-    def on_save_state(self, event):   
+    def on_save(self, event):   
         """
         Save the current state into file
         """  
@@ -616,7 +624,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         else:
             return None
         #the manager write the state into file
-        self.manager.save_fit_state(filepath=path, fitstate=new_state)
+        self._manager.save_fit_state(filepath=path, fitstate=new_state)
         return new_state  
     
     def on_bookmark(self, event):
@@ -667,8 +675,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         #Remember fit engine_type for fit panel
         if self.engine_type == None: 
             self.engine_type = "scipy"
-        if self.manager !=None:
-            self.manager._on_change_engine(engine=self.engine_type)
+        if self._manager !=None:
+            self._manager._on_change_engine(engine=self.engine_type)
         
             self.state.engine_type = self.engine_type
 
@@ -972,8 +980,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         #draw the pnael according to the new model parameter 
         self._on_select_model(event=None)
        
-        if self.manager !=None:
-            self.manager._on_change_engine(engine=self.engine_type)
+        if self._manager !=None:
+            self._manager._on_change_engine(engine=self.engine_type)
         ## set the select all check box to the a given state
         self.cb1.SetValue(state.cb1)
      
@@ -1329,7 +1337,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.fitrange = True
         is_modified = False
 
-        wx.PostEvent(self.manager.parent, StatusEvent(status=" \
+        wx.PostEvent(self._manager.parent, StatusEvent(status=" \
         updating ... ",type="update"))
 
         ##So make sure that update param values on_Fit.
@@ -1362,11 +1370,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                     elif self.pinhole_smearer.GetValue():
                         flag = self.update_pinhole_smear()
                     else:
-                        self.manager.set_smearer_nodraw(smearer=temp_smearer,
+                        self._manager.set_smearer_nodraw(smearer=temp_smearer,
                                                      qmin=float(self.qmin_x),
                                                       qmax=float(self.qmax_x))
                 elif not self._is_2D():
-                    self.manager.set_smearer(smearer=temp_smearer,
+                    self._manager.set_smearer(smearer=temp_smearer,
                                               qmin=float(self.qmin_x),
                                                  qmax= float(self.qmax_x))
                     index_data = ((self.qmin_x <= self.data.x)&\
@@ -1631,7 +1639,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if not self.disable_smearer.GetValue():
                     temp_smear= self.current_smearer
             
-            self.manager.draw_model(self.model, 
+            self._manager.draw_model(self.model, 
                                     data=self.data,
                                     smearer= temp_smear,
                                     qmin=float(self.qmin_x), 
@@ -2172,7 +2180,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.disable_disp.SetValue(True)
             msg="Please select a Model first..."
             wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self.manager.parent, StatusEvent(status=\
+            wx.PostEvent(self._manager.parent, StatusEvent(status=\
                             "Polydispersion: %s"%msg))
             return
 
@@ -2474,8 +2482,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         
         self.btSave_title = wx.StaticText(self, -1, 'Save the current Model')
         self.btSave = wx.Button(self,wx.NewId(),'Save')
-        self.btSave.Bind(wx.EVT_BUTTON, self.on_save_state,id= self.btSave.GetId())
+        self.btSave.Bind(wx.EVT_BUTTON, self.on_save,id= self.btSave.GetId())
         self.btSave.SetToolTipString("Save the current Model")
+        self._set_save_flag(True)
         
         sizer_save.Add(self.btSave_title)  
         sizer_save.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,80)  
