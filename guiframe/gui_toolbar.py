@@ -55,11 +55,16 @@ class GUIToolBar(Tbar):
         redo_bmp =  wx.ArtProvider.GetBitmap(wx.ART_REDO, wx.ART_TOOLBAR,
                                              size=tbar_size)
         self.AddLabelTool(GUIFRAME_ID.REDO_ID, 'Redo', redo_bmp,shortHelp='Redo')
-        self.button = wx.Button(self, -1, 'Welcome')
-        self.button.SetForegroundColour('black')
-        self.button.SetBackgroundColour('#1874CD')
-        #self.button.Disable()
-        self.AddControl(self.button)
+        #add button for the current application
+        self.button_application = wx.Button(self, -1, 'Welcome')
+        self.button_application.SetForegroundColour('black')
+        self.button_application.SetBackgroundColour('#1874CD')
+        self.AddControl(self.button_application)
+         #add button for the panel on focus
+        self.button_panel = wx.Button(self, -1, 'No Panel')
+        self.button_panel.SetForegroundColour('black')
+        self.button_panel.SetBackgroundColour('#90EE90')
+        self.AddControl(self.button_panel)
     
         self.SetToolBitmapSize(tbar_size)
         self.Realize()
@@ -91,12 +96,13 @@ class GUIToolBar(Tbar):
             self.parent.Bind(wx.EVT_TOOL, self.parent.on_print_panel,
                              id=GUIFRAME_ID.PRINT_ID)
             
-    def set_active_perspective(self, name=''):
+    def update_button(self, application_name='', panel_name=''):
         """
         """
-        self.button.SetLabel(str(name))
-        
-    def update_button(self, panel=None):
+        self.button_application.SetLabel(str(application_name))
+        self.button_panel.SetLabel(str(panel_name))
+        print "update_button", application_name, panel_name
+    def update_toolbar(self, panel=None):
         """
         """
         if panel is None:

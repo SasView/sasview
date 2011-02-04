@@ -10,6 +10,8 @@
 #copyright 2008, University of Tennessee
 ################################################################################
 
+from sans.guiframe.events import PanelOnFocusEvent
+import wx
 
 class PanelBase:
     """
@@ -23,7 +25,7 @@ class PanelBase:
     ## Flag to tell the AUI manager to put this panel in the center pane
     #CENTER_PANE = True
     
-    def __init__(self):
+    def __init__(self, parent=None):
         """
         Initialize some flag that Viewerframe used
         """
@@ -41,13 +43,19 @@ class PanelBase:
         self._save_flag = False
         self._drag_flag = False
         self._reset_flag = False
-        
+        self.parent = parent
+        self.Bind(wx.EVT_LEFT_DOWN, self.on_set_focus)
+        self.Bind(wx.EVT_TEXT_ENTER, self.on_set_focus)
+        self.Bind(wx.EVT_MIDDLE_DOWN, self.on_set_focus)
+        self.Bind(wx.EVT_RIGHT_DOWN, self.on_set_focus)
+
     def _set_print_flag(self, flag=True):
         """
         The derivative class sets the print flag value to indicate that it can 
         be printed
         """
         self._print_flag = flag
+        self.on_set_focus(event=None)
     
     def get_print_flag(self):
         """
@@ -61,7 +69,8 @@ class PanelBase:
         current action done can be canceled
         """
         self._undo_flag = flag
-        
+        self.on_set_focus(event=None)
+       
     def get_undo_flag(self):
         """
         Get the undo flag to update appropriately the tool bar
@@ -74,12 +83,14 @@ class PanelBase:
         action done can be recovered
         """
         self._redo_flag = flag
-     
+        self.on_set_focus(event=None)
+    
     def get_redo_flag(self):
         """
         Get the redo flag to update appropriately the tool bar
         """
         return self._redo_flag
+    
     
     def _set_zoomed_in_flag(self, flag=True):
         """
@@ -87,6 +98,8 @@ class PanelBase:
         can be zoomed in
         """
         self._zoom_in_flag = flag
+        self.on_set_focus(event=None)
+
         
     def get_zoom_in_flag(self):
         """
@@ -100,6 +113,7 @@ class PanelBase:
         can be zoomed out
         """
         self._zoom_out_flag = flag
+        self.on_set_focus(event=None)
         
     def get_zoom_out_flag(self):
         """
@@ -113,7 +127,8 @@ class PanelBase:
         can be zoomed
         """
         self._zoom_flag = flag
-        
+        self.on_set_focus(event=None)
+    
     def get_zoom_flag(self):
         """
         Get the zoom flag to update appropriately the tool bar
@@ -126,7 +141,8 @@ class PanelBase:
         can be bookmarked
         """
         self._bookmark_flag = flag
-        
+        self.on_set_focus(event=None)
+       
     def get_bookmark_flag(self):
         """
         Get the bookmark flag to update appropriately the tool bar
@@ -139,6 +155,7 @@ class PanelBase:
         can be previewed
         """
         self._preview_flag = flag
+        self.on_set_focus(event=None)
         
     def get_preview_flag(self):
         """
@@ -152,7 +169,8 @@ class PanelBase:
         can be saved
         """
         self._save_flag = flag
-        
+        self.on_set_focus(event=None)
+
     def get_save_flag(self):
         """
         Get the save flag to update appropriately the tool bar
@@ -165,7 +183,7 @@ class PanelBase:
         dragging motion is possible
         """
         self._drag_flag = flag
-        
+       
     def get_drag_flag(self):
         """
         Get the drag flag to update appropriately the tool bar
@@ -178,7 +196,7 @@ class PanelBase:
         can be reset
         """
         self._reset_flag = flag
-        
+      
     def get_reset_flag(self):
         """
         Get the reset flag to update appropriately the tool bar
@@ -226,10 +244,13 @@ class PanelBase:
         The derivative class is on zoom mode (using pane)
         if zoom mode is implemented
         """
-    def on_set_focus(self, event):
+    def on_set_focus(self, event=None):
         """
         The  derivative class is on focus if implemented
         """
+        if self.parent is not None:
+            print "on_set_focus", self.window_name, self.parent
+            wx.PostEvent(self.parent, PanelOnFocusEvent(panel=self))
         
     def get_data(self):
         """

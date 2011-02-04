@@ -27,7 +27,7 @@ from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.events import SlicerEvent
 from sans.guiframe.events import ErrorDataEvent
 from sans.guiframe.events import RemoveDataEvent
-from sans.guiframe.events import AddManyDataEvent
+from sans.guiframe.events import PanelOnFocusEvent
 from sans.guiframe.events import EVT_NEW_LOADED_DATA
 from sans.guiframe.utils import PanelMenu
 from sans.guiframe.dataFitting import Data1D
@@ -59,7 +59,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
     def __init__(self, parent, id=-1, color = None,
                  dpi=None, style=wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
         PlotPanel.__init__(self, parent, id=id, style=style, **kwargs)
-        PanelBase.__init__(self)
+        PanelBase.__init__(self, parent)
         ## Reference to the parent window
         self.parent = parent
         ## Plottables
@@ -209,7 +209,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             wx.PostEvent(self.parent, StatusEvent(status=position))
             
         #post nd event to notify guiframe that this panel is on focus
-        wx.PostEvent(self.parent, AddManyDataEvent(panel=self))
+        wx.PostEvent(self.parent, PanelOnFocusEvent(panel=self))
         
     def _onRemove(self, event):
         """

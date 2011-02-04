@@ -37,7 +37,7 @@ warnings.simplefilter("ignore")
 import logging
 
 from sans.guiframe.events import EVT_STATUS
-from sans.guiframe.events import EVT_ADD_MANY_DATA
+from sans.guiframe.events import EVT_PANEL_ON_FOCUS
 from sans.guiframe.events import StatusEvent
 from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.gui_style import GUIFRAME
@@ -109,6 +109,7 @@ class ViewerFrame(wx.Frame):
         self._applications_menu_pos = -1
         self._applications_menu = None
         self._edit_menu = None
+        self._toolbar_menu = None
         #tool bar
         self._toolbar = None
         ## Find plug-ins
@@ -140,7 +141,7 @@ class ViewerFrame(wx.Frame):
         # Register to status events
         self.Bind(EVT_STATUS, self._on_status_event)
         #Register add extra data on the same panel event on load
-        self.Bind(EVT_ADD_MANY_DATA, self.set_panel_on_focus)
+        self.Bind(EVT_PANEL_ON_FOCUS, self.set_panel_on_focus)
         
     def set_panel_on_focus(self, event):
         """
@@ -149,13 +150,16 @@ class ViewerFrame(wx.Frame):
         update edit menu if available
         """
         self.panel_on_focus = event.panel
+        panel_name = 'No panel on focus'
+        application_name = 'No Selected Application'
         if self.panel_on_focus is not None and self._data_panel is not None:
-            name = self.panel_on_focus.window_name
-            self._data_panel.set_panel_on_focus()
-            if self._toolbar is not None:
-                self.update_button(self.panel_on_focus)
-            #update edit menu
-            self.enable_edit_menu()
+            panel_name = self.panel_on_focus.window_caption
+            self._data_panel.set_panel_on_focus(panel_name)
+        #update toolbar
+        self._update_toolbar_helper()
+        #update edit menu
+        self.enable_edit_menu()
+        print "set_panel_on_focus", event.panel.window_caption
             
     def build_gui(self):
         """
@@ -178,7 +182,7 @@ class ViewerFrame(wx.Frame):
         self.sb = StatusBar(self, wx.ID_ANY)
         self.SetStatusBar(self.sb)
         # Add panel
-        default_flag = wx.aui.AUI_MGR_DEFAULT| wx.aui.AUI_MGR_ALLOW_ACTIVE_PANE
+        default_flag = wx.aui.AUI_MGR_DEFAULT#| wx.aui.AUI_MGR_ALLOW_ACTIVE_PANE
         self._mgr = wx.aui.AuiManager(self, flags=default_flag)
    
         # Load panels
@@ -355,7 +359,8 @@ class ViewerFrame(wx.Frame):
         self._mgr.AddPane(self.defaultPanel, wx.aui.AuiPaneInfo().
                               Name("default").
                               Center().
-                              CloseButton(True).
+                              CloseButton(False).
+                              MinimizeButton(False).
                               # This is where we set the size of
                               # the application window
                               BestSize(wx.Size(self._window_width, 
@@ -373,7 +378,6 @@ class ViewerFrame(wx.Frame):
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style != GUIFRAME.MANAGER_ON:
             self._mgr.GetPane(self.panels["data_panel"].window_name).Hide()
-            print "manager_on"
         else:
             self._mgr.GetPane(self.panels["data_panel"].window_name).Show()
             
@@ -389,7 +393,10 @@ class ViewerFrame(wx.Frame):
                     self.panels[str(id)] = p
                     self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                                           Name(p.window_name).Caption(p.window_caption).
-                                           CenterPane().
+                                           #CenterPane().
+                                            Center().
+                                            CloseButton(False).
+                                            MinimizeButton(False).
                                            MinSize(wx.Size(w, h)).
                                            Hide())
             else:
@@ -507,11 +514,23 @@ class ViewerFrame(wx.Frame):
         #set toolbar
         self._toolbar = GUIToolBar(self, -1)
         self.SetToolBar(self._toolbar)
-        self._toolbar.update_button()
+        self._update_toolbar_helper()
+        #self._on_hide_toolbar(event=None)
+    
+    def _update_toolbar_helper(self):
+        """
+        """
+        application_name = 'No Selected Application'
+        panel_name = 'No Panel on Focus'
+        self._toolbar.update_toolbar(self.panel_on_focus)
         if self._current_perspective is not None:
-            name = self._current_perspective.sub_menu
-            self._toolbar.set_active_perspective(name)
-          
+            application_name = self._current_perspective.sub_menu
+        if self.panel_on_focus is not None:
+            panel_name = self.panel_on_focus.window_caption
+        self._toolbar.update_button(application_name=application_name, 
+                                        panel_name=panel_name)
+        self._toolbar.Realize()
+        
     def _add_menu_tool(self):
         """
         Tools menu
@@ -634,6 +653,11 @@ class ViewerFrame(wx.Frame):
             preferences_menu.Append(id, '&Fixed Plot Panel', hint)
             wx.EVT_MENU(self, id, self.set_plotpanel_fixed)
             id = wx.NewId()
+            style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
+            if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
+                id = wx.NewId()
+                self._toolbar_menu = preferences_menu.Append(id,'&Hide Toolbar', '')
+                wx.EVT_MENU(self, id, self._on_hide_toolbar)
             self._window_menu.AppendSubMenu(preferences_menu,'&Preferences')
         if self._window_menu.GetMenuItemCount() == 0:
             pos = self._menubar.FindMenu('Window')
@@ -808,6 +832,22 @@ class ViewerFrame(wx.Frame):
         if style == GUIFRAME.MANAGER_ON:
             self.show_data_panel(event=None)
                 
+    def _on_hide_toolbar(self, event=None):
+        """
+        hide or show toolbar
+        """
+        if self._toolbar is None:
+            return
+        if self._toolbar.IsShown():
+            if self._toolbar_menu is not None:
+                self._toolbar_menu.SetItemLabel('Show Toolbar')
+            self._toolbar.Hide()
+        else:
+            if self._toolbar_menu is not None:
+                self._toolbar_menu.SetItemLabel('Hide Toolbar')
+            self._toolbar.Show()
+        self._toolbar.Realize()
+        
     def _on_status_event(self, evt):
         """
         Display status message
@@ -1240,13 +1280,22 @@ class ViewerFrame(wx.Frame):
         name = "No current Application selected"
         if self._current_perspective is not None:
             self._add_current_plugin_menu()
+            for panel in self.panels.values():
+                if hasattr(panel, 'CENTER_PANE') and panel.CENTER_PANE:
+                    for name in self._current_perspective.get_perspective():
+                        print "current",name.lower(),panel.window_name.lower(), name == panel.window_name
+                        if name == panel.window_name:
+                            panel.on_set_focus(event=None)
+                            print "panel", name,  panel.window_name,  panel.window_caption
+                            break
+                           
             name = self._current_perspective.sub_menu
             if self._data_panel is not None:
                 self._data_panel.set_active_perspective(name)
                 self._check_applications_menu()
-            #update tool bar
-            if self._toolbar is not None:
-                self._toolbar.set_active_perspective(name)
+            ##update tool bar
+            #if self._toolbar is not None:
+            #    self._update_toolbar_helper()
                 
     def _check_applications_menu(self):
         """
@@ -1340,27 +1389,27 @@ class ViewerFrame(wx.Frame):
         enable menu item under edit menu depending on the panel on focus
         """
         if self.panel_on_focus is not None and self._edit_menu is not None:
-            flag = panel_on_focus.get_undo_flag()
+            flag = self.panel_on_focus.get_undo_flag()
             self._edit_menu.Enable(GUIFRAME_ID.UNDO_ID, flag)
-            flag = panel_on_focus.get_redo_flag()
+            flag = self.panel_on_focus.get_redo_flag()
             self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
-            flag = panel_on_focus.get_bookmark_flag()
+            flag = self.panel_on_focus.get_bookmark_flag()
             self._edit_menu.Enable(GUIFRAME_ID.BOOKMARK_ID, flag)
-            flag = panel_on_focus.get_save_flag()
+            flag = self.panel_on_focus.get_save_flag()
             self._edit_menu.Enable(GUIFRAME_ID.SAVE_ID, flag)
-            flag = panel_on_focus.get_print_flag()
+            flag = self.panel_on_focus.get_print_flag()
             self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
-            flag = panel_on_focus.get_prieview_flag()
+            flag = self.panel_on_focus.get_preview_flag()
             self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
-            flag = panel_on_focus.get_zoom_flag()
+            flag = self.panel_on_focus.get_zoom_flag()
             self._edit_menu.Enable(GUIFRAME_ID.ZOOM_ID, flag)
-            flag = panel_on_focus.get_zoom_in_flag()
+            flag = self.panel_on_focus.get_zoom_in_flag()
             self._edit_menu.Enable(GUIFRAME_ID.ZOOM_IN_ID, flag)
-            flag = panel_on_focus.get_zoom_out_flag()
+            flag = self.panel_on_focus.get_zoom_out_flag()
             self._edit_menu.Enable(GUIFRAME_ID.ZOOM_OUT_ID, flag)
-            flag = panel_on_focus.get_drag_flag()
+            flag = self.panel_on_focus.get_drag_flag()
             self._edit_menu.Enable(GUIFRAME_ID.DRAG_ID, flag)
-            flag = panel_on_focus.get_reset_flag()
+            flag = self.panel_on_focus.get_reset_flag()
             self._edit_menu.Enable(GUIFRAME_ID.RESET_ID, flag)
         else:
             flag = False
