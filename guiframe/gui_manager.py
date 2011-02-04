@@ -110,6 +110,7 @@ class ViewerFrame(wx.Frame):
         self._applications_menu = None
         self._edit_menu = None
         self._toolbar_menu = None
+        self._save_appl_menu = None
         #tool bar
         self._toolbar = None
         ## Find plug-ins
@@ -159,8 +160,7 @@ class ViewerFrame(wx.Frame):
         self._update_toolbar_helper()
         #update edit menu
         self.enable_edit_menu()
-        print "set_panel_on_focus", event.panel.window_caption
-            
+       
     def build_gui(self):
         """
         """
@@ -724,7 +724,8 @@ class ViewerFrame(wx.Frame):
             # some menu of plugin to be seen under file menu
             self._populate_file_menu()
             id = wx.NewId()
-            self._file_menu.Append(id, '&Save Application',
+            self._save_appl_menu = self._file_menu.Append(id, 
+                                                          '&Save Application',
                                  'Save state of the current active application')
             wx.EVT_MENU(self, id, self._on_save_application)
             id = wx.NewId()
@@ -939,26 +940,8 @@ class ViewerFrame(wx.Frame):
         """
         save the state of the current active application
         """
-        ## Default file location for save
-        self._default_save_location = os.getcwd()
-        if self._current_perspective is  None:
-            return
-        reader, ext = self._current_perspective.get_extensions()
-        path = None
-        dlg = wx.FileDialog(self, "Choose a file",
-                            self._default_save_location, "", ext, wx.SAVE)
-        if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
-            self._default_save_location = os.path.dirname(path)
-        else:
-            return None
-        dlg.Destroy()
-        if path is None:
-            return
-        # default cansas xml doc
-        doc = None
-        for panel in self._current_perspective.get_perspective():
-            doc = on_save_helper(doc, reader, panel, path)
+        if self.panel_on_focus is not None:
+            self.panel_on_focus.on_save(event)
             
     def _on_save_project(self, event):
         """
