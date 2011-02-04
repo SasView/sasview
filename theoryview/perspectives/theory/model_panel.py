@@ -34,7 +34,7 @@ class ModelPanel(BasicPage, PanelBase):
     
     def __init__(self, parent, page_info, model_list_box):
         BasicPage.__init__(self, parent, page_info, model_list_box)
-        PanelBase.__init__(self)
+        PanelBase.__init__(self, parent)
         """ 
         Initialization of the Panel
         """

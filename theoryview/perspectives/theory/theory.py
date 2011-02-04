@@ -54,6 +54,12 @@ class Plugin(PluginBase):
         self.calc_2D = None
         self.calc_1D = None
    
+    def use_data(self):
+        """
+        return True if these plugin use data
+        """
+        return False
+    
     def get_panels(self, parent):
         """
         Create and return the list of wx.Panels for your plug-in.
