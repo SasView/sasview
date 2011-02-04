@@ -35,7 +35,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         """
         """
         ScrolledPanel.__init__(self, parent, id=id, **kwargs)
-        PanelBase.__init__(self)
+        PanelBase.__init__(self, parent)
         self.SetupScrolling()
         
         self.plots = plots
@@ -234,7 +234,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         else:
             return wx.Panel.__getattribute__(self, name)
         
-    def _save_state(self, evt=None):
+    def on_save(self, evt=None):
         """
         Method used to create a memento of the current state
             
@@ -674,8 +674,8 @@ class InversionControl(ScrolledPanel, PanelBase):
         id = wx.NewId()
         button_Save = wx.Button(self, id, "Save")
         button_Save.SetToolTipString("Save the current P(r) work to file.")
-        self.Bind(wx.EVT_BUTTON, self._save_state, id=id)   
-        
+        self.Bind(wx.EVT_BUTTON, self.on_save, id=id)   
+        self._set_save_flag(True)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         sizer_button.Add(button_Save, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
