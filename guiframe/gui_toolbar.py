@@ -19,11 +19,16 @@ class GUIToolBar(Tbar):
                                              size=tbar_size)
         self.AddLabelTool(GUIFRAME_ID.SAVE_ID, 'Save', save_bmp, shortHelp='Save')
         self.AddSeparator()
+        self.image_book = wx.Image('images/bookmarks_list_add.png',
+                                 wx.BITMAP_TYPE_PNG)
+        bookmark_bmp =self.image_book.ConvertToBitmap()
+      
        
-        bookmark_bmp =  wx.ArtProvider.GetBitmap(wx.ART_ADD_BOOKMARK, wx.ART_TOOLBAR,
-                                                 size=tbar_size)
-        self.AddLabelTool(GUIFRAME_ID.BOOKMARK_ID, 'Bookmark', bookmark_bmp,shortHelp='Bookmark')
+        self.AddLabelTool(GUIFRAME_ID.BOOKMARK_ID, 'Bookmark', bookmark_bmp,
+                          shortHelp='Bookmark')
+       
         self.AddSeparator()
+        
         zoom_in_bmp = wx.ArtProvider.GetBitmap(wx.ART_GO_UP, wx.ART_TOOLBAR,
                                                 size=tbar_size)
         self.AddLabelTool(GUIFRAME_ID.ZOOM_IN_ID, 'Zoom in', zoom_in_bmp,shortHelp='Zoom in')
@@ -103,12 +108,11 @@ class GUIToolBar(Tbar):
         """
         self.button_application.SetLabel(str(application_name))
         self.button_panel.SetLabel(str(panel_name))
-        print "update_button", application_name, panel_name
+       
     def update_toolbar(self, panel=None):
         """
         """
         if panel is None:
-            #self.Disable()
             self.EnableTool(GUIFRAME_ID.PRINT_ID, False)
             self.EnableTool(GUIFRAME_ID.UNDO_ID,False)
             self.EnableTool(GUIFRAME_ID.REDO_ID, False)
