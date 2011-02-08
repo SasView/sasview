@@ -33,10 +33,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double DiamEllips_analytical_1D(DiamEllipsParameters *pars, double q);
+//double DiamEllips_analytical_1D(DiamEllipsParameters *pars, double q);
 
 /// 2D scattering function
-double DiamEllips_analytical_2D(DiamEllipsParameters *pars, double q, double phi);
-double DiamEllips_analytical_2DXY(DiamEllipsParameters *pars, double qx, double qy);
+//double DiamEllips_analytical_2D(DiamEllipsParameters *pars, double q, double phi);
+//double DiamEllips_analytical_2DXY(DiamEllipsParameters *pars, double qx, double qy);
 
 #endif

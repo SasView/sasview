@@ -29,10 +29,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double DiamCyld_analytical_1D(DiamCyldParameters *pars, double q);
+//double DiamCyld_analytical_1D(DiamCyldParameters *pars, double q);
 
 /// 2D scattering function
-double DiamCyld_analytical_2D(DiamCyldParameters *pars, double q, double phi);
-double DiamCyld_analytical_2DXY(DiamCyldParameters *pars, double qx, double qy);
+//double DiamCyld_analytical_2D(DiamCyldParameters *pars, double q, double phi);
+//double DiamCyld_analytical_2DXY(DiamCyldParameters *pars, double qx, double qy);
 
 #endif

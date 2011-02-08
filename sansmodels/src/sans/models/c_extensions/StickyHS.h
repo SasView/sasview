@@ -45,10 +45,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double StickyHS_analytical_1D(StickyHSParameters *pars, double q);
+//double StickyHS_analytical_1D(StickyHSParameters *pars, double q);
 
 /// 2D scattering function
-double StickyHS_analytical_2D(StickyHSParameters *pars, double q, double phi);
-double StickyHS_analytical_2DXY(StickyHSParameters *pars, double qx, double qy);
+//double StickyHS_analytical_2D(StickyHSParameters *pars, double q, double phi);
+//double StickyHS_analytical_2DXY(StickyHSParameters *pars, double qx, double qy);
 
 #endif

@@ -48,10 +48,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double SquareWell_analytical_1D(SquareWellParameters *pars, double q);
+//double SquareWell_analytical_1D(SquareWellParameters *pars, double q);
 
 /// 2D scattering function
-double SquareWell_analytical_2D(SquareWellParameters *pars, double q, double phi);
-double SquareWell_analytical_2DXY(SquareWellParameters *pars, double qx, double qy);
+//double SquareWell_analytical_2D(SquareWellParameters *pars, double q, double phi);
+//double SquareWell_analytical_2DXY(SquareWellParameters *pars, double qx, double qy);
 
 #endif

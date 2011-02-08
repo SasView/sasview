@@ -39,10 +39,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double polygausscoil_analytical_1D(PolyGaussCoilParameters *pars, double q);
+//double polygausscoil_analytical_1D(PolyGaussCoilParameters *pars, double q);
 
 /// 2D scattering function
-double polygausscoil_analytical_2D(PolyGaussCoilParameters *pars, double q, double phi);
-double polygausscoil_analytical_2DXY(PolyGaussCoilParameters *pars, double qx, double qy);
+//double polygausscoil_analytical_2D(PolyGaussCoilParameters *pars, double q, double phi);
+//double polygausscoil_analytical_2DXY(PolyGaussCoilParameters *pars, double qx, double qy);
 
 #endif

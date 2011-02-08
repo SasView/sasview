@@ -35,10 +35,10 @@ typedef struct {
 
 
 /// 1D scattering function
-double Hardsphere_analytical_1D(HardsphereParameters *pars, double q);
+//double Hardsphere_analytical_1D(HardsphereParameters *pars, double q);
 
 /// 2D scattering function
-double Hardsphere_analytical_2D(HardsphereParameters *pars, double q, double phi);
-double Hardsphere_analytical_2DXY(HardsphereParameters *pars, double qx, double qy);
+//double Hardsphere_analytical_2D(HardsphereParameters *pars, double q, double phi);
+//double Hardsphere_analytical_2DXY(HardsphereParameters *pars, double qx, double qy);
 
 #endif

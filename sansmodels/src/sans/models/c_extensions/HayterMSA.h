@@ -50,10 +50,10 @@ typedef struct {
 } HayterMSAParameters;
 
 /// 1D scattering function
-double HayterMSA_analytical_1D(HayterMSAParameters *pars, double q);
+//double HayterMSA_analytical_1D(HayterMSAParameters *pars, double q);
 
 /// 2D scattering function
-double HayterMSA_analytical_2D(HayterMSAParameters *pars, double q, double phi);
-double HayterMSA_analytical_2DXY(HayterMSAParameters *pars, double qx, double qy);
+//double HayterMSA_analytical_2D(HayterMSAParameters *pars, double q, double phi);
+//double HayterMSA_analytical_2DXY(HayterMSAParameters *pars, double qx, double qy);
 
 #endif
