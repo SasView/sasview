@@ -17,7 +17,6 @@
  * The classes use the IGOR library found in
  *   sansmodels/src/libigor
  *
- *	TODO: refactor so that we pull in the old sansmodels.c_extensions
  */
 
 #include <math.h>
@@ -86,44 +85,9 @@ double DiamEllipFunc :: operator()(double q) {
  * @return: function value
  */
 double DiamEllipFunc :: operator()(double qx, double qy) {
-	DiamEllipsParameters dp;
-	// Fill parameter array
-	dp.radius_a      = radius_a();
-	dp.radius_b      = radius_b();
-
-	// Get the dispersion points for the radius a
-	vector<WeightPoint> weights_rad_a;
-	radius_a.get_weights(weights_rad_a);
-
-	// Get the dispersion points for the radius b
-	vector<WeightPoint> weights_rad_b;
-	radius_b.get_weights(weights_rad_b);
-
-
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
-
-	// Loop over radius weight points
-	for(int i=0; i<weights_rad_a.size(); i++) {
-		dp.radius_a = weights_rad_a[i].value;
-		// Loop over length weight points
-		for(int j=0; j<weights_rad_b.size(); j++) {
-			dp.radius_b = weights_rad_b[j].value;
-
-			double _ptvalue = weights_rad_a[i].weight
-				*weights_rad_b[j].weight* DiamEllips_analytical_2DXY(&dp, qx, qy);
-			sum += _ptvalue;
-
-			norm += weights_rad_a[i].weight*weights_rad_b[j].weight;
-		}
-	}
-	// Averaging in theta needs an extra normalization
-	// factor to account for the sin(theta) term in the
-	// integration (see documentation).
-	return sum/norm;
+	double q = sqrt(qx*qx + qy*qy);
+	return (*this).operator()(q);
 }
-
 /**
  * Function to evaluate 2D scattering function
  * @param pars: parameters of the cylinder

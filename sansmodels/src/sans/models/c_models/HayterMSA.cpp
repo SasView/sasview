@@ -87,37 +87,8 @@ double HayterMSAStructure :: operator()(double q) {
  * @return: function value
  */
 double HayterMSAStructure :: operator()(double qx, double qy) {
-	HayterMSAParameters dp;
-	// Fill parameter array
-	dp.effect_radius      = effect_radius();
-	dp.charge      = charge();
-	dp.volfraction = volfraction();
-	dp.temperature   = temperature();
-	dp.saltconc   = saltconc();
-	dp.dielectconst   = dielectconst();
-
-	// Get the dispersion points for the radius
-	vector<WeightPoint> weights_rad;
-	effect_radius.get_weights(weights_rad);
-
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
-
-	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
-		dp.effect_radius = weights_rad[i].value;
-
-		double _ptvalue = weights_rad[i].weight
-			* HayterMSA_analytical_2DXY(&dp, qx, qy);
-		sum += _ptvalue;
-
-		norm += weights_rad[i].weight;
-	}
-	// Averaging in theta needs an extra normalization
-	// factor to account for the sin(theta) term in the
-	// integration (see documentation).
-	return sum/norm;
+	double q = sqrt(qx*qx + qy*qy);
+	return (*this).operator()(q);
 }
 
 /**

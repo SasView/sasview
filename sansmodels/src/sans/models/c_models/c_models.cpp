@@ -289,11 +289,11 @@ initc_models(void)
 	addCHollowCylinderModel(m);
 	addCMultiShellModel(m);
 	addCBinaryHSModel(m);
-	addDisperser(m);
-	addCGaussian(m);
-	addCSchulz(m);
-	addCLogNormal(m);
-	addCLorentzian(m);
+	//addDisperser(m);
+	//addCGaussian(m);
+	//addCSchulz(m);
+	//addCLogNormal(m);
+	//addCLorentzian(m);
 	addCVesicleModel(m);
 	addCPoly_GaussCoil(m);
 	addCRPAModel(m);

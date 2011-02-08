@@ -87,43 +87,8 @@ double DiamCylFunc :: operator()(double q) {
  * @return: function value
  */
 double DiamCylFunc :: operator()(double qx, double qy) {
-	DiamCyldParameters dp;
-	// Fill parameter array
-	dp.radius     = radius();
-	dp.length     = length();
-
-	// Get the dispersion points for the radius
-	vector<WeightPoint> weights_rad;
-	radius.get_weights(weights_rad);
-
-	// Get the dispersion points for the length
-	vector<WeightPoint> weights_len;
-	length.get_weights(weights_len);
-
-
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
-
-	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
-		dp.radius = weights_rad[i].value;
-
-		// Loop over length weight points
-		for(int j=0; j<weights_len.size(); j++) {
-			dp.length = weights_len[j].value;
-			double _ptvalue = weights_rad[i].weight
-				* weights_len[j].weight
-				* DiamCyld_analytical_2DXY(&dp, qx, qy);
-			sum += _ptvalue;
-
-			norm += weights_rad[i].weight
-				* weights_len[j].weight;
-
-
-			}
-		}
-	return sum/norm;
+	double q = sqrt(qx*qx + qy*qy);
+	return (*this).operator()(q);
 }
 
 /**
