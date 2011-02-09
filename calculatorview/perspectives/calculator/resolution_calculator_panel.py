@@ -22,7 +22,7 @@ from matplotlib.figure import Figure
 
 #from sans.guicomm.events import StatusEvent  
 from sans.calculator.resolution_calculator import ResolutionCalculator 
-from sans.guicomm.events import StatusEvent  
+from sans.guiframe.events import StatusEvent  
 from calculator_widgets import OutputTextCtrl
 from calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel
