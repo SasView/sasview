@@ -127,31 +127,29 @@ class ScipyFit(FitEngine):
         #try:
         functor = SansAssembly(self.param_list, model, data, handler=handler,
                          fitresult=result, curr_thread= self.curr_thread)
-        out, cov_x, _, _, success = optimize.leastsq(functor,
+        out, cov_x, _, mesg, success = optimize.leastsq(functor,
                                             model.get_params(self.param_list),
+                                                    ftol = 0.001,
                                                     full_output=1,
                                                     warning=True)
-        
-        #chisqr = functor.chisq(out)
+  
         chisqr = functor.chisq()
         if cov_x is not None and numpy.isfinite(cov_x).all():
             stderr = numpy.sqrt(numpy.diag(cov_x))
         else:
             stderr = None
-        if not (numpy.isnan(out).any()) or (cov_x != None):
+
+        if not (numpy.isnan(out).any()) and (cov_x != None):
             result.fitness = chisqr
             result.stderr  = stderr
             result.pvec = out
             result.success = success
-            #print result
             if q is not None:
-                #print "went here"
                 q.put(result)
-                #print "get q scipy fit enfine",q.get()
                 return q
             return result
         else:  
-            raise ValueError, "SVD did not converge" + str(success)
+            raise ValueError, "SVD did not converge" + str(mesg)
     
 
 
