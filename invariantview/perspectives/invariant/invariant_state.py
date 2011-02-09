@@ -1,7 +1,7 @@
 """
 """
 
-import time
+#import time
 import os
 import sys
 import logging
@@ -251,6 +251,7 @@ class InvariantState(object):
             we will append the data [optional]   
         """
         from xml.dom.minidom import getDOMImplementation
+        import time
         timestamp = time.time()
         # Check whether we have to write a standalone XML file
         if doc is None:
@@ -318,7 +319,7 @@ class InvariantState(object):
         item_list = ['time','date','state','comp_state']
         for name, value_list in self.bookmark_list.iteritems():
             element = newdoc.createElement('mark_'+ str(name))
-            _,date,state,comp_state = value_list
+            time,date,state,comp_state = value_list
             time_element = newdoc.createElement('time')
             time_element.appendChild(newdoc.createTextNode(str(value_list[0])))
             date_element = newdoc.createElement('date')
@@ -642,6 +643,7 @@ class Reader(CansasReader):
         self.call_back = call_back
         ## CanSAS format flag
         self.cansas = cansas
+        self.state = None
 
     def read(self, path):
         """ 
@@ -741,13 +743,15 @@ class Reader(CansasReader):
             return None
         elif len(output) == 1:
             # Call back to post the new state
-
-            self.call_back(state=output[0].meta_data['invstate'],
-                           datainfo = output[0])
+            self.state = output[0].meta_data['invstate']
+            #self.call_back(state=output[0].meta_data['invstate'],
+            #               datainfo = output[0])
             return output[0]
         else:
             return output                
     
+    def get_state(self):
+        return self.state
     
     def write(self, filename, datainfo=None, invstate=None):
         """

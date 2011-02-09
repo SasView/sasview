@@ -630,6 +630,9 @@ class Reader(CansasReader):
         self.call_back = call_back
         ## CanSAS format flag
         self.cansas = cansas
+        self.state = None
+    def get_state(self):
+        return self.state
         
     def read(self, path):
         """ 
@@ -1169,11 +1172,13 @@ class Reader(CansasReader):
                         name=original_fname
                     state.data.group_id = name
                     #store state in fitting
-                    self.call_back(state=state, datainfo=output[ind],format=ext)
+                    #self.call_back(state=state, datainfo=output[ind],format=ext)
+                    self.state= state
                 return output
               
         except:
-            self.call_back(format=ext)
+            #self.call_back(format=ext)
+            self.state= state
             raise
            
     def write(self, filename, datainfo=None, fitstate=None):

@@ -130,11 +130,7 @@ class Plugin(PluginBase):
         """
         #Menu for fitting
         self.menu1 = wx.Menu()
-           #menu for model
-        menu2 = wx.Menu()
-        self.menu_mng.populate_menu(menu2, owner)
-        id2 = wx.NewId()
-        owner.Bind(models.EVT_MODEL,self._on_model_menu)
+        
         #Set park engine
         id3 = wx.NewId()
         scipy_help= "Scipy Engine: Perform Simple fit. More in Help window...."
@@ -155,6 +151,12 @@ class Plugin(PluginBase):
         self.menu1.Append(id1, '&Simultaneous Page',simul_help)
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
        
+        #menu for model
+        menu2 = wx.Menu()
+        self.menu_mng.populate_menu(menu2, owner)
+        id2 = wx.NewId()
+        owner.Bind(models.EVT_MODEL,self._on_model_menu)
+      
         self.fit_panel.set_owner(owner)
         self.fit_panel.set_model_list(self.menu_mng.get_model_list())
    
@@ -230,7 +232,7 @@ class Plugin(PluginBase):
         Create and return a list of panel objects
         """
         self.parent = parent
-        self.parent.Bind(EVT_FITSTATE_UPDATE, self.on_set_state_helper)
+        #self.parent.Bind(EVT_FITSTATE_UPDATE, self.on_set_state_helper)
         # Creation of the fit panel
         self.fit_panel = FitPanel(self.parent, -1)
         #Set the manager for the main panel
@@ -250,14 +252,14 @@ class Plugin(PluginBase):
         self.parent._mgr.Bind(wx.aui.EVT_AUI_PANE_CLOSE,self._onclearslicer)    
         #Create reader when fitting panel are created
         self.state_reader = Reader(self.set_state)   
-       
         #append that reader to list of available reader 
         loader = Loader()
         loader.associate_file_reader(".fitv", self.state_reader)
         loader.associate_file_reader(".svs", self.state_reader)
+        from sans.perspectives.calculator.sld_panel import SldPanel
         #Send the fitting panel to guiframe
         self.mypanels.append(self.fit_panel) 
-      
+        self.mypanels.append(SldPanel(parent=self.parent, base=self.parent))
         return self.mypanels
     
     def set_default_perspective(self):
@@ -285,7 +287,6 @@ class Plugin(PluginBase):
             self.add_fit_page(data=data)
             wx.PostEvent(self.parent, NewPlotEvent(plot=data, 
                                                    title=str(data.title)))
-   
             
     def set_state(self, state=None, datainfo=None, format=None):
         """
@@ -295,6 +296,7 @@ class Plugin(PluginBase):
         : param state: PageState object
         : param datainfo: data
         """
+        state = self.state_reader.get_state()
         if state != None:
             # store fitting state in temp_state
             self.temp_state.append(state) 
@@ -304,8 +306,10 @@ class Plugin(PluginBase):
         self.state_index = 0
         # state file format
         self.sfile_ext = format
+        
+        self.on_set_state_helper(event=None)
 
-    def on_set_state_helper(self,event=None):
+    def  on_set_state_helper(self,event=None):
         """
         Set_state_helper. This actually sets state after plotting data from state file.
         
@@ -324,14 +328,23 @@ class Plugin(PluginBase):
             #panel state should have model selection to set_state
             if state.formfactorcombobox != None:
                 #set state
+                data = self.parent.create_gui_data(state.data)
+                data.group_id = state.data.group_id
+                wx.PostEvent(self.parent, NewPlotEvent(plot=data,
+                                        title=data.title))
                 page = self.fit_panel.set_state(state)   
             else:
+                wx.PostEvent(self.parent, NewPlotEvent(plot=data,
+                                        title=data.title))
                 #just set data because set_state won't work
-                page_info = self.fit_panel.get_page_info(data=state.data)
+                data = self.parent.create_gui_data(state.data)
+                data.group_id = state.data.group_id
+                page_info = self.fit_panel.get_page_info(data=data)
                 panel = self.fit_panel.add_page(page_info)
-                self.store_page(page=panel, data=state.data)
+                self.store_page(page=panel, data=data)
                 self.mypanels.append(panel) 
                 
+               
             # get ready for the next set_state
             self.state_index += 1
 
@@ -341,7 +354,8 @@ class Plugin(PluginBase):
                 self.temp_state = []
                 #self.state_index = 0
                 # Make sure the user sees the fitting panel after loading
-                self.parent.set_perspective(self.perspective) 
+                #self.parent.set_perspective(self.perspective) 
+                self.on_perspective(event=None)
         except:
             self.state_index==0
             self.temp_state = []
@@ -1381,13 +1395,10 @@ class Plugin(PluginBase):
             if hasattr(data,"x_bins"):
                 return
             x = data.x
-            
-            if qmin == None :
-                qmin == DEFAULT_QMIN
-
-            if qmax == None:
-                qmax == DEFAULT_QMAX 
-                
+            if qmin == DEFAULT_QMIN :
+                qmin = min(data.x)
+            if qmax == DEFAULT_QMAX:
+                qmax = max(data.x) 
         if not enable1D:
             return 
         try:

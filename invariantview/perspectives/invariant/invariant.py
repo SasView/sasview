@@ -26,7 +26,7 @@ from sans.guiframe.events import ERR_DATA
 from .invariant_state import Reader as reader
 from DataLoader.loader import Loader
 from .invariant_panel import InvariantPanel
-from sans.guiframe.events import EVT_INVSTATE_UPDATE
+#from sans.guiframe.events import EVT_INVSTATE_UPDATE
 
 from sans.guiframe.plugin_base import PluginBase
 
@@ -81,7 +81,7 @@ class Plugin(PluginBase):
         self.parent = parent
         #add error back to the data
         self.parent.Bind(ERR_DATA, self._on_data_error)
-        self.parent.Bind(EVT_INVSTATE_UPDATE, self.on_set_state_helper)
+        #self.parent.Bind(EVT_INVSTATE_UPDATE, self.on_set_state_helper)
         
         self.invariant_panel = InvariantPanel(parent=self.parent)
         self.invariant_panel.set_manager(manager=self)
@@ -194,9 +194,9 @@ class Plugin(PluginBase):
             if dlg.ShowModal() == wx.ID_OK:
                 data = dlg.get_data()
                 if issubclass(data.__class__, LoaderData1D):
-                    self.compute_helper(data_list[0])
                     wx.PostEvent(self.parent, NewPlotEvent(plot=data_list[0],
                                                title=data_list[0].title))
+                    self.compute_helper(data_list[0])
                 else:    
                     msg = "invariant cannot be computed for data of "
                     msg += "type %s" % (data_list[0].__class__.__name__)
@@ -204,9 +204,9 @@ class Plugin(PluginBase):
                              StatusEvent(status=msg, info='error'))
         elif len(data_list) == 1:
             if issubclass(data_list[0].__class__, LoaderData1D):
-                self.compute_helper(data_list[0])
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data_list[0],
                                                title=data_list[0].title))
+                self.compute_helper(data_list[0])
             else:
                 msg = "invariant cannot be computed for"
                 msg += " data of type %s" % (data_list[0].__class__.__name__)
@@ -244,7 +244,7 @@ class Plugin(PluginBase):
             msg += " not a DataLoader.data_info.Data1D object" 
             raise RuntimeError, msg
 
-    def set_state(self, state, datainfo=None):    
+    def set_state(self, state=None, datainfo=None):    
         """
         Call-back method for the state reader.
         This method is called when a .inv/.svs file is loaded.
@@ -253,31 +253,37 @@ class Plugin(PluginBase):
         """
         self.temp_state = None
         try:
-            
-            if datainfo is None:
+            if datainfo.__class__.__name__ == 'list':
+                data = datainfo[0]
+            if data is None:
                 msg = "invariant.set_state: datainfo parameter cannot"
                 msg += " be None in standalone mode"
                 raise RuntimeError, msg
             
-            name = datainfo.meta_data['invstate'].file
-            datainfo.meta_data['invstate'].file = name
-            datainfo.name = name
-            datainfo.filename = name
-            self.__data = datainfo
-            self.__data.group_id = datainfo.filename
-            self.__data.id = datainfo.filename
-
-            temp_state = copy.deepcopy(state)
+            name = data.meta_data['invstate'].file
+            data.meta_data['invstate'].file = name
+            data.name = name
+            data.filename = name
+            #datainfo = self.parent.create_gui_data(datainfo,None)
+            #self.__data = datainfo
+            #self.__data.group_id = data.filename
+            #self.__data.id = datainfo.filename
+            self.__data = data
+            wx.PostEvent(self.parent, NewPlotEvent(plot=self.__data,
+                                        reset=True, title=self.__data.title))
+            #temp_state = copy.deepcopy(state)
+            temp_state = self.state_reader.get_state()
             # set state
             self.invariant_panel.is_state_data = True
             
             # Make sure the user sees the invariant panel after loading
-            self.parent.set_perspective(self.perspective)
+            #self.parent.set_perspective(self.perspective)
+            self.on_perspective(event=None)
             # Load the invariant states
             self.temp_state = temp_state
-            #self.invariant_panel.set_state(state=temp_state,data=self.__data)         
-            
-        except:
+            self.invariant_panel.set_state(state=temp_state,data=self.__data)         
+           
+        except: 
             logging.error("invariant.set_state: %s" % sys.exc_value)
             
     def on_set_state_helper(self, event=None):

@@ -373,6 +373,7 @@ class Reader(CansasReader):
         self.call_back = call_back
         ## CanSAS format flag
         self.cansas = cansas
+        self.state = None
         
     def read(self, path):
         """ 
@@ -403,9 +404,12 @@ class Reader(CansasReader):
         state.fromXML(file=path)
         
         # Call back to post the new state
-        self.call_back(state)
+        self.state = state
+        #self.call_back(state)
         return None
     
+    def get_state(self):
+        return self.state
     def _parse_prstate(self, entry):
         """
         Read a p(r) inversion result from an XML node
@@ -481,7 +485,8 @@ class Reader(CansasReader):
             return None
         elif len(output) == 1:
             # Call back to post the new state
-            self.call_back(output[0].meta_data['prstate'], datainfo = output[0])
+            #self.call_back(output[0].meta_data['prstate'], datainfo = output[0])
+            self.state = output[0].meta_data['prstate']
             return output[0]
         else:
             return output                

@@ -23,7 +23,7 @@ class PanelBase:
     ## Name to appear on the window title bar
     #window_caption = "Welcome panel"
     ## Flag to tell the AUI manager to put this panel in the center pane
-    #CENTER_PANE = True
+    group_id = None
     
     def __init__(self, parent=None):
         """

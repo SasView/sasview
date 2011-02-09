@@ -16,6 +16,7 @@ Data_manager  make these new data available for all other perspectives.
 """
 import logging
 from sans.guiframe.data_state import DataState
+from sans.guiframe.utils import parse_name
   
 class DataManager(object):
     """
@@ -32,7 +33,27 @@ class DataManager(object):
         self._selected_data = {}
         self.stored_data = {}
         self.message = ""
+        self.data_name_dict = {}
       
+    def rename(self, name):
+        """
+        rename data
+        """
+        ## name of the data allow to differentiate data when plotted
+        name = parse_name(name=name, expression="_")
+        
+        max_char = name.find("[")
+        if max_char < 0:
+            max_char = len(name)
+        name = name[0:max_char]
+        
+        if name not in self.data_name_dict:
+            self.data_name_dict[name] = 0
+        else:
+            self.data_name_dict[name] += 1
+            name = name + " [" + str(self.data_name_dict[name]) + "]"
+        return name
+    
     def add_data(self, data_list):
         """
         receive a list of 

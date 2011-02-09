@@ -120,7 +120,7 @@ class Plugin(PluginBase):
         """
         return self.current_plottable
     
-    def set_state(self, state, datainfo=None):
+    def set_state(self, state=None, datainfo=None):
         """
         Call-back method for the inversion state reader.
         This method is called when a .prv file is loaded.
@@ -130,32 +130,39 @@ class Plugin(PluginBase):
         
         """
         try:
-            if datainfo is None:
+            if datainfo.__class__.__name__ == 'list':
+                if len(datainfo) == 1:
+                    data = datainfo[0]
+            if data is None:
                 raise RuntimeError, "Pr.set_state: datainfo parameter cannot be None in standalone mode"
-
+            """
             # Ensuring that plots are coordinated correctly
-            t = time.localtime(datainfo.meta_data['prstate'].timestamp)
+            t = time.localtime(data.meta_data['prstate'].timestamp)
             time_str = time.strftime("%b %d %H:%M", t)
             
             # Check that no time stamp is already appended
-            max_char = datainfo.meta_data['prstate'].file.find("[")
+            max_char = data.meta_data['prstate'].file.find("[")
             if max_char < 0:
-                max_char = len(datainfo.meta_data['prstate'].file)
+                max_char = len(data.meta_data['prstate'].file)
             
-            datainfo.meta_data['prstate'].file = datainfo.meta_data['prstate'].file[0:max_char] +' [' + time_str + ']'
-            datainfo.filename = datainfo.meta_data['prstate'].file
-                
-            self.current_plottable = datainfo
-            self.current_plottable.group_id = datainfo.meta_data['prstate'].file
+            data.meta_data['prstate'].file = data.meta_data['prstate'].file[0:max_char] +' [' + time_str + ']'
+            data.filename = data.meta_data['prstate'].file
+             """   
+            self.current_plottable = data
+            # self.current_plottable.group_id = data.meta_data['prstate'].file
+            
+            # Make sure the user sees the P(r) panel after loading
+            #self.parent.set_perspective(self.perspective)  
+            self.on_perspective(event=None)   
             
             # Load the P(r) results
+            state = self.state_reader.get_state()
+            wx.PostEvent(self.parent, NewPlotEvent(plot=self.current_plottable,
+                                        title=self.current_plottable.title))
             self.control_panel.set_state(state)
-                        
-            # Make sure the user sees the P(r) panel after loading
-            self.parent.set_perspective(self.perspective)            
-
         except:
-            logging.error("prview.set_state: %s" % sys.exc_value)
+            raise
+            #logging.error("prview.set_state: %s" % sys.exc_value)
 
   
     def help(self, evt):
@@ -390,8 +397,8 @@ class Plugin(PluginBase):
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
         new_plot.title = "P(r) fit"
         # Make sure that the plot is linear
-        new_plot.xtransform="x"
-        new_plot.ytransform="y"                 
+        new_plot.xtransform = "x"
+        new_plot.ytransform = "y"                 
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="P(r) fit"))
         
         return x, pr.d_max

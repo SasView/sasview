@@ -46,16 +46,20 @@ from sans.guiframe.events import NewLoadedDataEvent
 from sans.guiframe.data_panel import DataPanel
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.gui_toolbar import GUIToolBar
+from sans.guiframe.dataFitting import Data1D
+from sans.guiframe.dataFitting import Data2D
+from DataLoader.loader import Loader
 
-STATE_FILE_EXT = ['.inv', '.fitv', '.prv']
-DATA_MANAGER = False
-AUTO_PLOT = False
-AUTO_SET_DATA = True
+from DataLoader.loader import Loader
+import DataLoader.data_info as DataInfo
+
+
 PLOPANEL_WIDTH = 400
 PLOPANEL_HEIGTH = 400
 GUIFRAME_WIDTH = 1000
 GUIFRAME_HEIGHT = 800
 PROG_SPLASH_SCREEN = "images/danse_logo.png" 
+EXTENSIONS =  ['.inv', '.fitv', '.prv', '.svs']
 
 class ViewerFrame(wx.Frame):
     """
@@ -129,6 +133,7 @@ class ViewerFrame(wx.Frame):
         self.defaultPanel = None
         #panel on focus
         self.panel_on_focus = None
+        self.loader = Loader()   
          #data manager
         from data_manager import DataManager
         self._data_manager = DataManager()
@@ -478,19 +483,6 @@ class ViewerFrame(wx.Frame):
         self._mgr.Update()
         return ID
         
-    def _populate_file_menu(self):
-        """
-        Insert menu item under file menu
-        """
-        for plugin in self.plugins:
-            if len(plugin.populate_file_menu()) > 0:
-                for item in plugin.populate_file_menu():
-                    id = wx.NewId()
-                    m_name, m_hint, m_handler = item
-                    self._file_menu.Append(id, m_name, m_hint)
-                    wx.EVT_MENU(self, id, m_handler)
-                self._file_menu.AppendSeparator()
-                
     def _setup_menus(self):
         """
         Set up the application menus
@@ -722,7 +714,12 @@ class ViewerFrame(wx.Frame):
         style = self.__gui_style & GUIFRAME.DATALOADER_ON
         if style == GUIFRAME.DATALOADER_ON:
             # some menu of plugin to be seen under file menu
-            self._populate_file_menu()
+            hint_load_file = "Read state's files and load"
+            hint_load_file += " them into the application"
+            id = wx.NewId()
+            self._save_appl_menu = self._file_menu.Append(id, 
+                                    '&Open State from File', hint_load_file)
+            wx.EVT_MENU(self, id, self._on_open_state)
             id = wx.NewId()
             self._save_appl_menu = self._file_menu.Append(id, 
                                                           '&Save Application',
@@ -785,54 +782,21 @@ class ViewerFrame(wx.Frame):
         self._menubar.Append(self._edit_menu,  '&Edit')
         self.enable_edit_menu()
         
+    def get_style(self):
+        """
+        """
+        return  self.__gui_style
+    
     def _add_menu_data(self):
         """
         Add menu item item data to menu bar
         """
-        # Add menu data 
-        self._data_menu = wx.Menu()
-        #menu for data files
-        data_file_id = wx.NewId()
-        data_file_hint = "load one or more data in the application"
-        self._data_menu.Append(data_file_id, 
-                         '&Load Data File(s)', data_file_hint)
-        wx.EVT_MENU(self, data_file_id, self._load_data)
-        style = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
-        style1 = self.__gui_style & GUIFRAME.DATALOADER_ON
-        if style == GUIFRAME.MULTIPLE_APPLICATIONS:
-            #menu for data from folder
-            data_folder_id = wx.NewId()
-            data_folder_hint = "load multiple data in the application"
-            self._data_menu.Append(data_folder_id, 
-                             '&Load Data Folder', data_folder_hint)
-            wx.EVT_MENU(self, data_folder_id, self._load_folder)
-            self._menubar.Append(self._data_menu, '&Data')
-        elif style1 == GUIFRAME.DATALOADER_ON:
-            self._menubar.Append(self._data_menu, '&Data')
-        
-    def _load_data(self, event):
-        """
-        connect menu item load data with the first plugin that can load data
-        """
-        for plug in self.plugins:
-            if plug.can_load_data():
-                plug.load_data(event)
-        style = self.__gui_style & GUIFRAME.MANAGER_ON
-        if style == GUIFRAME.MANAGER_ON:
-            self.show_data_panel(event=None)
-        
-    def _load_folder(self, event):
-        """
-        connect menu item load data with the first plugin that can load data and
-        folder
-        """
-        for plug in self.plugins:
-            if plug.can_load_data():
-                plug.load_folder(event)
-        style = self.__gui_style & GUIFRAME.MANAGER_ON
-        if style == GUIFRAME.MANAGER_ON:
-            self.show_data_panel(event=None)
-                
+        if self._data_plugin is not None:
+            menu_list = self._data_plugin.populate_menu(self)
+            if menu_list:
+                for (menu, name) in menu_list:
+                    self._menubar.Append(menu, name)
+            
     def _on_hide_toolbar(self, event=None):
         """
         hide or show toolbar
@@ -910,14 +874,163 @@ class ViewerFrame(wx.Frame):
                 # Hide default panel
                 self._mgr.GetPane(self.panels["default"].window_name).Hide()
             self._mgr.Update()
-   
-    def _on_open(self, event):
+    
+    def clear_panel(self):
         """
         """
-        path = self.choose_file()
-        if path is None:
+        for item in self.panels:
+            try:
+                self.panels[item].clear_panel()
+            except:
+                pass
+            
+    def create_gui_data(self, data, path=None):
+        """
+        Receive data from loader and create a data to use for guiframe
+        """
+        
+        if issubclass(DataInfo.Data2D, data.__class__):
+            new_plot = Data2D(image=None, err_image=None) 
+        else: 
+            new_plot = Data1D(x=[], y=[], dx=None, dy=None)
+           
+        new_plot.copy_from_datainfo(data) 
+        data.clone_without_data(clone=new_plot)  
+        #creating a name for data
+        name = ""
+        title = ""
+        file_name = ""
+        if path is not None:
+            file_name = os.path.basename(path)
+        if data.run:
+            name = data.run[0]
+        if name == "":
+            name = file_name
+        name = self._data_manager.rename(name)
+        #find title
+        if data.title.strip():
+            title = data.title
+        if title.strip() == "":
+            title = file_name
+        
+        if new_plot.filename.strip() == "":
+            new_plot.filename = file_name
+        
+        new_plot.name = name
+        new_plot.title = title
+        ## allow to highlight data when plotted
+        new_plot.interactive = True
+        ## when 2 data have the same id override the 1 st plotted
+        new_plot.id = name
+        ##group_id specify on which panel to plot this data
+        new_plot.group_id = name
+        new_plot.is_data = True
+        new_plot.path = path
+        ##post data to plot
+        # plot data
+        return new_plot
+ 
+    def get_data(self, path, format=None):
+        """
+        """
+        message = ""
+        log_msg = ''
+        output = []
+        error_message = ""
+        basename  = os.path.basename(path)
+        root, extension = os.path.splitext(basename)
+        if extension.lower() not in EXTENSIONS:
+            log_msg = "File Loader cannot "
+            log_msg += "load: %s\n" % str(basename)
+            log_msg += "Try Data opening...."
+            logging.info(log_msg)
+            self.load_complete(output=output, error_message=error_message,
+                   message=log_msg, path=path)    
             return
-
+        try:
+            temp =  self.loader.load(path, extension)
+            if temp.__class__.__name__ == "list":
+                for item in temp:
+                    data = self.create_gui_data(item, path)
+                    output.append(data)
+            else:
+                data = self.create_gui_data(temp, path)
+                output.append(data)
+            message = "Loading File..." + str(basename) + "\n"
+            self.load_update(output=output, message=message)
+        except:
+            raise
+            error_message = "Error while loading: %s\n" % str(p_file)
+            error_message += str(sys.exc_value) + "\n"
+            self.load_update(output=output, message=error_message)
+            
+        message = "Loading Complete! "
+        self.load_complete(output=output, error_message=error_message,
+                   message=message, path=path, extension=extension)    
+        
+    def load_update(self, output=None, message=""):
+        """
+        print update on the status bar
+        """
+        if message != "":
+            wx.PostEvent(self, StatusEvent(status=message,
+                                                  type="progress",
+                                                   info="warning"))
+        
+    def load_complete(self, output, message="", error_message="", 
+                      extension=None, path=None):
+        """
+         post message to  status bar and return list of data
+        """
+        wx.PostEvent(self, StatusEvent(status=message,
+                                              info="warning",
+                                              type="stop"))
+        if error_message != "":
+            self.load_error(error_message)
+        #send a list of available data to plotting plugin
+        available_data = []
+        if self._data_manager is not None:
+            self._data_manager.add_data(output)
+            temp = self._data_manager.get_selected_data()
+            for data_state in temp.values():
+                available_data.append(data_state.data)
+        #reading a state file
+        for plug in self.plugins:
+            #plug.on_set_state_helper(event=None)
+            _, ext = plug.get_extensions()
+            if extension == ext:
+                plug.set_state(state=None, datainfo=available_data)
+            elif extension == '.svs':
+                plug.set_state(state=None, datainfo=available_data)
+                
+        style = self.__gui_style & GUIFRAME.MANAGER_ON
+        if style == GUIFRAME.MANAGER_ON:
+            if self._data_panel is not None:
+                data_state = self._data_manager.get_selected_data()
+                self._data_panel.load_data_list(data_state)
+                self._mgr.GetPane(self._data_panel.window_name).Show(True)
+        
+    def _on_open_state(self, event):
+        """
+        """
+        path = None
+        if self._default_save_location == None:
+            self._default_save_location = os.getcwd()
+ 
+        wlist = ['SansView files (*.svs)|*.svs',
+                  'P(r) files (*.prv)|*.prv',
+                  'Fitting files (*.fitv)|*.fitv',
+                  'Invariant files (*.inv)|*.inv']
+        wlist = '|'.join(wlist)
+        dlg = wx.FileDialog(self, 
+                            "Choose a file", 
+                            self._default_save_location, "",
+                             wlist)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            if path is not None:
+                self._default_save_location = os.path.dirname(path)
+        dlg.Destroy()
         if path and os.path.isfile(path):
             basename  = os.path.basename(path)
             if  basename.endswith('.svs'):
@@ -927,15 +1040,12 @@ class ViewerFrame(wx.Frame):
                         self.panels[item].clear_panel()
                     except:
                         pass
-                #reset states and plot data 
-                for item in STATE_FILE_EXT:
-                    exec "plot_data(self, path,'%s')" % str(item)
-            else:
-                plot_data(self, path)
+            self.get_data(path)
+                
         if self.defaultPanel is not None and \
             self._mgr.GetPane(self.panels["default"].window_name).IsShown():
             self.on_close_welcome_panel()
-            
+    
     def _on_save_application(self, event):
         """
         save the state of the current active application
@@ -953,7 +1063,7 @@ class ViewerFrame(wx.Frame):
             return
         reader, ext = self._current_perspective.get_extensions()
         path = None
-        dlg = wx.FileDialog(self, "Choose a file",
+        dlg = wx.FileDialog(self, "Save Project file",
                             self._default_save_location, "", '.svs', wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
@@ -1143,12 +1253,14 @@ class ViewerFrame(wx.Frame):
         """
         show the data panel
         """
-        pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
-        #if not pane.IsShown():
-        pane.Show(True)
-        self._mgr.Update()
-  
-    def add_data(self, data_list, flag=False):
+        style = self.__gui_style & GUIFRAME.MANAGER_ON
+        if style == GUIFRAME.MANAGER_ON:
+            pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
+            #if not pane.IsShown():
+            pane.Show(True)
+            self._mgr.Update()
+ 
+    def add_data(self, data_list):
         """
         receive a list of data . store them its data manager if possible
         determine if data was be plot of send to data perspectives
@@ -1158,11 +1270,7 @@ class ViewerFrame(wx.Frame):
         if self._data_manager is not None:
             self._data_manager.add_data(data_list)
             avalaible_data = self._data_manager.get_all_data()
-            
-        if True:
-            #reading a state file
-            for plug in self.plugins:
-                plug.on_set_state_helper(event=None)
+
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style == GUIFRAME.MANAGER_ON:
             if self._data_panel is not None:
@@ -1258,7 +1366,7 @@ class ViewerFrame(wx.Frame):
         """
         set the current active perspective 
         """
-        
+        print "set_current_perspective", perspective
         self._current_perspective = perspective
         name = "No current Application selected"
         if self._current_perspective is not None:

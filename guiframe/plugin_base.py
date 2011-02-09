@@ -93,14 +93,7 @@ class PluginBase:
         even if the user is switching between perspectives
         """
         return self._always_active
-    
-    def populate_file_menu(self):
-        """
-        get a menu item and append it under file menu of the application
-        return [[menu item name, menu_hint, menu handler]]
-        """
-        return []
-        
+
     def populate_menu(self, parent):
         """
         Create and return the list of application menu
@@ -132,6 +125,11 @@ class PluginBase:
         
         # Return the list of panels
         return []
+    
+    def clear_panel(self):
+        """
+        reset all panels
+        """
     
     def get_tools(self):
         """
@@ -170,7 +168,7 @@ class PluginBase:
         """
         return self.perspective
     
-    def on_perspective(self, event):
+    def on_perspective(self, event=None):
         """
         Call back function for the perspective menu item.
         We notify the parent window that the perspective
@@ -199,6 +197,10 @@ class PluginBase:
             return True
         return False
     
+    def set_state(self, state=None, datainfo=None):    
+        """
+        update state
+        """
     def set_data(self, data_list):
         """
         receive a list of data and use it in the current perspective
