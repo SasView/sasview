@@ -272,5 +272,12 @@ setup(
         #srcdir+"/lorentzian.c",
         #"sans/models/c_models/CLorentzian.cpp"
             ],
-         include_dirs=[igordir,srcdir,"sans/models/c_models",numpy_incl_path])])
+         include_dirs=[igordir,srcdir,"sans/models/c_models",numpy_incl_path]),       
+         # Smearer extension
+         Extension("sans_extension.smearer",
+                   sources = [
+        "sans/models/c_smearer/smearer_module.cpp",
+        "sans/models/c_smearer/smearer.cpp",
+        ],
+        include_dirs=["sans/models/c_smearer",numpy_incl_path])])
         
