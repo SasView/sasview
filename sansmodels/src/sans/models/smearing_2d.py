@@ -139,6 +139,10 @@ class Smearer2D:
         valid = self.get_data()
         if valid == None:
             return valid
+        # all zero values of dq
+        if numpy.all(self.dqx_data <= 1.1e-10) and \
+                        numpy.all(self.dqy_data <= 1.1e-10):
+            self.smearer = False
         if self.smearer == False:
             return self.model.evalDistribution([self.qx_data,self.qy_data]) 
         st = time.time()
