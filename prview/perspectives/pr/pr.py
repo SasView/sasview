@@ -131,8 +131,12 @@ class Plugin(PluginBase):
         """
         try:
             if datainfo.__class__.__name__ == 'list':
-                if len(datainfo) == 1:
+                if len(datainfo) >= 1:
                     data = datainfo[0]
+                else:
+                    data = None
+            else:
+                data = datainfo
             if data is None:
                 raise RuntimeError, "Pr.set_state: datainfo parameter cannot be None in standalone mode"
             """
