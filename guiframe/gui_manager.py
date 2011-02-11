@@ -948,14 +948,28 @@ class ViewerFrame(wx.Frame):
                    message=log_msg, path=path)    
             return
         try:
-            temp =  self.loader.load(path, extension)
-            if temp.__class__.__name__ == "list":
-                for item in temp:
-                    data = self.create_gui_data(item, path)
-                    output.append(data)
+            if extension == '.svs':
+                for plug in self.plugins:
+                    temp =  self.loader.load(path)
+                    if temp.__class__.__name__ == "list":
+                        for item in temp:
+                            data = self.create_gui_data(item, path)
+                            output.append(data)
+                    else:
+                        data = self.create_gui_data(temp, path)
+                        output.append(data)
+                    
+                    message = "Loading File..." + str(basename) + "\n"
+                    self.load_update(output=output, message=message)
             else:
-                data = self.create_gui_data(temp, path)
-                output.append(data)
+                temp =  self.loader.load(path, extension)
+                if temp.__class__.__name__ == "list":
+                    for item in temp:
+                        data = self.create_gui_data(item, path)
+                        output.append(data)
+                else:
+                    data = self.create_gui_data(temp, path)
+                    output.append(data)
             message = "Loading File..." + str(basename) + "\n"
             self.load_update(output=output, message=message)
         except:
@@ -1366,7 +1380,6 @@ class ViewerFrame(wx.Frame):
         """
         set the current active perspective 
         """
-        print "set_current_perspective", perspective
         self._current_perspective = perspective
         name = "No current Application selected"
         if self._current_perspective is not None:
@@ -1374,20 +1387,15 @@ class ViewerFrame(wx.Frame):
             for panel in self.panels.values():
                 if hasattr(panel, 'CENTER_PANE') and panel.CENTER_PANE:
                     for name in self._current_perspective.get_perspective():
-                        print "current",name.lower(),panel.window_name.lower(), name == panel.window_name
                         if name == panel.window_name:
                             panel.on_set_focus(event=None)
-                            print "panel", name,  panel.window_name,  panel.window_caption
                             break
                            
             name = self._current_perspective.sub_menu
             if self._data_panel is not None:
                 self._data_panel.set_active_perspective(name)
                 self._check_applications_menu()
-            ##update tool bar
-            #if self._toolbar is not None:
-            #    self._update_toolbar_helper()
-                
+  
     def _check_applications_menu(self):
         """
         check the menu of the current application
@@ -1699,9 +1707,6 @@ class ViewApp(wx.App):
         _, _, x, y = wx.Display().GetClientArea() # size excludes task bar
         if len(sys.argv) > 1 and '--platform' in sys.argv[1:]:
             w, h = wx.DisplaySize()  # size includes task bar area
-            print "*** Reported screen size including taskbar is %d x %d"%(w, h)
-            print "*** Reported screen size excluding taskbar is %d x %d"%(x, y)
-
         if x > 1920: x = 1280  # display on left side, not centered on screen
         if x > window_width:  xpos = (x - window_width)/2
         if y > window_height: ypos = (y - window_height)/2

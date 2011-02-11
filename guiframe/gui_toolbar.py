@@ -166,7 +166,6 @@ class GUIToolBar(Tbar):
         """
         self.button_application.SetLabel(str(application_name))
         self.button_panel.SetLabel(str(panel_name))
-        print "update_button", application_name, panel_name
         
     def update_toolbar(self, panel=None):
         """
