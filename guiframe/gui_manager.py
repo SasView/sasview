@@ -149,6 +149,7 @@ class ViewerFrame(wx.Frame):
         #Register add extra data on the same panel event on load
         self.Bind(EVT_PANEL_ON_FOCUS, self.set_panel_on_focus)
         
+  
     def set_panel_on_focus(self, event):
         """
         Store reference to the last panel on focus
@@ -948,40 +949,19 @@ class ViewerFrame(wx.Frame):
                    message=log_msg, path=path)    
             return
         try:
-            if extension == '.svs':
-                for plug in self.plugins:
-                    temp =  self.loader.load(path)
-                    if temp.__class__.__name__ == "list":
-                        for item in temp:
-                            data = self.create_gui_data(item, path)
-                            output.append(data)
-                    else:
-                        data = self.create_gui_data(temp, path)
-                        output.append(data)
-                    
-                    message = "Loading File..." + str(basename) + "\n"
-                    self.load_update(output=output, message=message)
-            else:
-                temp =  self.loader.load(path, extension)
-                if temp.__class__.__name__ == "list":
-                    for item in temp:
-                        data = self.create_gui_data(item, path)
-                        output.append(data)
-                else:
-                    data = self.create_gui_data(temp, path)
-                    output.append(data)
-            message = "Loading File..." + str(basename) + "\n"
-            self.load_update(output=output, message=message)
+            #reading a state file
+            for plug in self.plugins:
+                reader, ext = plug.get_extensions()
+                if reader is not None:
+                    #read the state of the single plugin
+                    if extension == ext:
+                        reader.read(path)
+                        return
+                    elif extension == '.svs':
+                        reader.read(path)
         except:
             raise
-            error_message = "Error while loading: %s\n" % str(p_file)
-            error_message += str(sys.exc_value) + "\n"
-            self.load_update(output=output, message=error_message)
-            
-        message = "Loading Complete! "
-        self.load_complete(output=output, error_message=error_message,
-                   message=message, path=path, extension=extension)    
-        
+                        
     def load_update(self, output=None, message=""):
         """
         print update on the status bar
@@ -1012,10 +992,8 @@ class ViewerFrame(wx.Frame):
         for plug in self.plugins:
             #plug.on_set_state_helper(event=None)
             _, ext = plug.get_extensions()
-            if extension == ext:
-                plug.set_state(state=None, datainfo=available_data)
-            elif extension == '.svs':
-                plug.set_state(state=None, datainfo=available_data)
+            plug.set_state(state=None, datainfo=available_data)
+            
                 
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style == GUIFRAME.MANAGER_ON:
