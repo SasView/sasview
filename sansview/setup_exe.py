@@ -87,6 +87,8 @@ data_files += calculator.data_files()
 
 import sans.perspectives.invariant as invariant
 data_files += invariant.data_files()
+import sans.guiframe as guiframe
+data_files += guiframe.data_files()
 
 for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
