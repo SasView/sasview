@@ -249,7 +249,6 @@ class PanelBase:
         The  derivative class is on focus if implemented
         """
         if self.parent is not None:
-            print "on_set_focus", self.window_name, self.parent
             wx.PostEvent(self.parent, PanelOnFocusEvent(panel=self))
         
     def get_data(self):
