@@ -1,73 +1,136 @@
 
 import wx
+import os
 from wx import ToolBar as Tbar
-from sans.guiframe.gui_style import GUIFRAME_ID
 
+
+from sans.guiframe.gui_style import GUIFRAME_ID
+from sans.guiframe.gui_style import GUIFRAME_ICON
+
+
+def clear_image(image):
+    w, h = image.GetSize()
+    factor = 155
+    compress = lambda x: int(x * factor/255.) + factor
+    for y in range(h):
+        for x in range(w):
+            grey = compress(image.GetGreen(x, y))
+            image.SetRGB(x, y, grey, grey, grey)
+    if image.HasAlpha():
+        image.ConvertAlphaToMask()
+    return image
 
 class GUIToolBar(Tbar):
+    """
+    Implement toolbar for guiframe
+    """
     def __init__(self, parent,  *args, **kwds):
         Tbar.__init__(self, parent,  *args, **kwds)
         self.parent = parent
         self.do_layout()
         self.on_bind_button()
-        
+       
     def do_layout(self):
         """
         """
-        tbar_size = (-1,-1)
-        save_bmp =  wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE, wx.ART_TOOLBAR,
-                                             size=tbar_size)
-        self.AddLabelTool(GUIFRAME_ID.SAVE_ID, 'Save', save_bmp, shortHelp='Save')
+        tbar_size = (22, 22)
+        button_type =  wx.ITEM_NORMAL
+        save_im = GUIFRAME_ICON.SAVE_ICON
+        save_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        save_bmp = save_im.ConvertToBitmap()
+        #disable_save_bmp = clear_image(save_im).ConvertToBitmap()
+        disable_save_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.SAVE_ID, 'Save', save_bmp, 
+                          disable_save_bmp,button_type, shortHelp='Save')
         self.AddSeparator()
-       
-        bookmark_bmp =  wx.ArtProvider.GetBitmap(wx.ART_ADD_BOOKMARK, wx.ART_TOOLBAR,
-                                                 size=tbar_size)
-        self.AddLabelTool(GUIFRAME_ID.BOOKMARK_ID, 'Bookmark', bookmark_bmp,shortHelp='Bookmark')
+        bookmark_im = GUIFRAME_ICON.BOOKMARK_ICON
+        bookmark_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        bookmark_bmp = bookmark_im.ConvertToBitmap()
+        #disable_bookmark_bmp = clear_image(bookmark_im).ConvertToBitmap()
+        disable_bookmark_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.BOOKMARK_ID, 'Bookmark', bookmark_bmp,
+                   disable_bookmark_bmp, button_type,'Bookmark')
         self.AddSeparator()
-        zoom_in_bmp = wx.ArtProvider.GetBitmap(wx.ART_GO_UP, wx.ART_TOOLBAR,
-                                                size=tbar_size)
-        self.AddLabelTool(GUIFRAME_ID.ZOOM_IN_ID, 'Zoom in', zoom_in_bmp,shortHelp='Zoom in')
+        zoom_in_im = GUIFRAME_ICON.ZOOM_IN_ICON
+        zoom_in_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        zoom_in_bmp = zoom_in_im.ConvertToBitmap()
+        #disable_zoom_in_bmp = clear_image(zoom_in_im).ConvertToBitmap()
+        disable_zoom_in_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.ZOOM_IN_ID, 'Zoom In', zoom_in_bmp,
+                   disable_zoom_in_bmp, button_type,'Zoom In')
         self.AddSeparator()
-        zoom_out_bmp = wx.ArtProvider.GetBitmap(wx.ART_GO_DOWN, wx.ART_TOOLBAR,
-                                                 size=tbar_size)
-        self.AddLabelTool(GUIFRAME_ID.ZOOM_OUT_ID,'Zoom out',zoom_out_bmp,shortHelp='Zoom out')
+        zoom_out_im = GUIFRAME_ICON.ZOOM_OUT_ICON
+        zoom_out_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        zoom_out_bmp = zoom_out_im.ConvertToBitmap()
+        #disable_zoom_out_bmp = clear_image(zoom_out_im).ConvertToBitmap()
+        disable_zoom_out_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.ZOOM_OUT_ID, 'Zoom Out', zoom_out_bmp,
+                   disable_zoom_out_bmp, button_type,'Zoom Out')
         self.AddSeparator()
-        zoom_bmp =  wx.ArtProvider.GetBitmap(wx.ART_GO_FORWARD, wx.ART_TOOLBAR,
-                                             size=tbar_size)
-        self.AddLabelTool(GUIFRAME_ID.ZOOM_ID, 'Zoom', zoom_bmp,shortHelp='Zoom')
+        zoom_im = GUIFRAME_ICON.ZOOM_ICON
+        zoom_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        zoom_bmp = zoom_im.ConvertToBitmap()
+        #disable_zoom_bmp = clear_image(zoom_im).ConvertToBitmap()
+        disable_zoom_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.ZOOM_ID, 'Zoom', zoom_bmp,
+                   disable_zoom_bmp, button_type,'Zoom In')
         self.AddSeparator()
-        drag_bmp =  wx.ArtProvider.GetBitmap(wx.ART_REMOVABLE, wx.ART_TOOLBAR,
-                                             size=tbar_size)
-        self.AddLabelTool(GUIFRAME_ID.DRAG_ID, 'Drag', drag_bmp,shortHelp='Drag')
+        drag_im = GUIFRAME_ICON.DRAG_ICON
+        drag_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        drag_bmp = drag_im.ConvertToBitmap()
+        #disable_drag_bmp = clear_image(drag_im).ConvertToBitmap()
+        disable_drag_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.DRAG_ID, 'Drag', drag_bmp,
+                   disable_drag_bmp, button_type,'Drag')
         self.AddSeparator()
-        preview_bmp =  wx.ArtProvider.GetBitmap(wx.ART_REPORT_VIEW, wx.ART_TOOLBAR,
-                                                size=tbar_size)
-        self.AddLabelTool(GUIFRAME_ID.PREVIEW_ID, 'Preview', preview_bmp,shortHelp='Report')
+        report_im = GUIFRAME_ICON.REPORT_ICON
+        report_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        report_bmp = report_im.ConvertToBitmap()
+        #disable_report_bmp = clear_image(report_im).ConvertToBitmap()
+        disable_report_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.PREVIEW_ID, 'Report', report_bmp,
+                   disable_report_bmp, button_type,'Report')
         self.AddSeparator()
-        print_bmp =  wx.ArtProvider.GetBitmap(wx.ART_PRINT, wx.ART_TOOLBAR,
-                                              size=tbar_size)
-        self.AddLabelTool(GUIFRAME_ID.PRINT_ID, 'Print', print_bmp,shortHelp='Print')
+        print_im = GUIFRAME_ICON.PRINT_ICON
+        print_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        print_bmp = print_im.ConvertToBitmap()
+        #disable_print_bmp = clear_image(print_im).ConvertToBitmap()
+        disable_print_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.PRINT_ID, 'Print', print_bmp,
+                          disable_print_bmp, button_type, 'Print')
         self.AddSeparator()
-        undo_bmp =  wx.ArtProvider.GetBitmap(wx.ART_UNDO, wx.ART_TOOLBAR,
-                                             size=tbar_size)
-        self.AddLabelTool(GUIFRAME_ID.UNDO_ID, 'Undo', undo_bmp,shortHelp='Undo')
+        undo_im = GUIFRAME_ICON.UNDO_ICON
+        undo_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        undo_bmp = undo_im.ConvertToBitmap()
+        #disable_undo_bmp = clear_image(undo_im).ConvertToBitmap()
+        disable_undo_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.UNDO_ID, 'Undo', undo_bmp,
+                          disable_undo_bmp, button_type,'Undo')
         self.AddSeparator()
-        redo_bmp =  wx.ArtProvider.GetBitmap(wx.ART_REDO, wx.ART_TOOLBAR,
-                                             size=tbar_size)
-        self.AddLabelTool(GUIFRAME_ID.REDO_ID, 'Redo', redo_bmp,shortHelp='Redo')
+        redo_im = GUIFRAME_ICON.REDO_ICON
+        redo_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        redo_bmp = redo_im.ConvertToBitmap()
+        #disable_redo_bmp = clear_image(redo_im).ConvertToBitmap()
+        disable_redo_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.REDO_ID, 'Redo', redo_bmp,
+                          disable_redo_bmp, button_type,'Redo')
         self.AddSeparator()
         #add button for the current application
         self.button_application = wx.StaticText(self, -1, 'Welcome')
         self.button_application.SetForegroundColour('black')
         self.button_application.SetBackgroundColour('#1874CD')
+        hint = 'Active Application'
+        self.button_application.SetToolTipString(hint)
         self.AddControl(self.button_application)
         self.AddSeparator()
          #add button for the panel on focus
         self.button_panel = wx.StaticText(self, -1, 'No Panel')
         self.button_panel.SetForegroundColour('black')
         self.button_panel.SetBackgroundColour('#90EE90')
+        hint = 'Panel on Focus'
+        self.button_panel.SetToolTipString(hint)
         self.AddControl(self.button_panel)
-    
+       
         self.SetToolBitmapSize(tbar_size)
         self.Realize()
         
@@ -104,11 +167,11 @@ class GUIToolBar(Tbar):
         self.button_application.SetLabel(str(application_name))
         self.button_panel.SetLabel(str(panel_name))
         print "update_button", application_name, panel_name
+        
     def update_toolbar(self, panel=None):
         """
         """
         if panel is None:
-            #self.Disable()
             self.EnableTool(GUIFRAME_ID.PRINT_ID, False)
             self.EnableTool(GUIFRAME_ID.UNDO_ID,False)
             self.EnableTool(GUIFRAME_ID.REDO_ID, False)
@@ -121,7 +184,6 @@ class GUIToolBar(Tbar):
             self.EnableTool(GUIFRAME_ID.DRAG_ID, False)
             self.EnableTool(GUIFRAME_ID.RESET_ID, False)
         else:
-            self.Enable()
             self.EnableTool(GUIFRAME_ID.PRINT_ID, panel.get_print_flag())
             self.EnableTool(GUIFRAME_ID.UNDO_ID, panel.get_undo_flag())
             self.EnableTool(GUIFRAME_ID.REDO_ID, panel.get_redo_flag())
@@ -133,7 +195,7 @@ class GUIToolBar(Tbar):
             self.EnableTool(GUIFRAME_ID.SAVE_ID, panel.get_save_flag())
             self.EnableTool(GUIFRAME_ID.DRAG_ID, panel.get_drag_flag())
             self.EnableTool(GUIFRAME_ID.RESET_ID, panel.get_reset_flag())
-
+        self.Realize()
   
 
               

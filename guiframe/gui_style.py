@@ -3,6 +3,9 @@
 Provide the style for guiframe
 """
 import wx
+import os
+from sans.guiframe import get_data_path
+
 
 class GUIFRAME:
     MANAGER_ON = 1
@@ -29,6 +32,33 @@ class GUIFRAME_ID:
     PREVIEW_ID = wx.NewId()
     PRINT_ID = wx.NewId()
     CURRENT_APPLICATION = wx.NewId()
+    
+class GUIFRAME_ICON:
+    PATH = get_data_path(media='images')
+    SAVE_ICON_PATH = os.path.join(PATH, 'save.png')
+    UNDO_ICON_PATH = os.path.join(PATH, 'undo.png')
+    REDO_ICON_PATH = os.path.join(PATH, 'redo.png')
+    BOOKMARK_ICON_PATH = os.path.join(PATH, 'bookmark.png')
+    ZOOM_IN_ID_PATH = os.path.join(PATH, 'zoom_in.png')
+    ZOOM_OUT_ID_PATH = os.path.join(PATH, 'zoom_out.png')
+    ZOOM_ID_PATH = os.path.join(PATH, 'search_pan.png')
+    DRAG_ID_PATH = os.path.join(PATH, 'drag_hand.png')
+    RESET_ID_PATH = os.path.join(PATH, 'reset.png')
+    PREVIEW_ID_PATH = os.path.join(PATH, 'report.png')
+    PRINT_ID_PATH = os.path.join(PATH, 'printer.png')
+    
+    SAVE_ICON = wx.Image(os.path.join(PATH, 'save.png'))
+    UNDO_ICON = wx.Image(os.path.join(PATH, 'undo.png'))
+    REDO_ICON = wx.Image(os.path.join(PATH, 'redo.png'))
+    BOOKMARK_ICON = wx.Image(os.path.join(PATH, 'bookmark.png'))
+    ZOOM_IN_ICON = wx.Image(os.path.join(PATH, 'zoom_in.png'))
+    ZOOM_OUT_ICON = wx.Image(os.path.join(PATH, 'zoom_out.png'))
+    ZOOM_ICON = wx.Image(os.path.join(PATH, 'search_pan.png'))
+    DRAG_ICON = wx.Image(os.path.join(PATH, 'drag_hand.png'))
+    RESET_ICON = wx.Image(os.path.join(PATH, 'reset.png'))
+    REPORT_ICON = wx.Image(os.path.join(PATH, 'report.png'))
+    PREVIEW_ICON = wx.Image(os.path.join(PATH, 'preview.png'))
+    PRINT_ICON = wx.Image(os.path.join(PATH, 'printer.png'))
 
 if __name__ == "__main__":
   
