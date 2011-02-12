@@ -485,8 +485,8 @@ class Reader(CansasReader):
             return None
         elif len(output) == 1:
             # Call back to post the new state
-            #self.call_back(output[0].meta_data['prstate'], datainfo = output[0])
-            self.state = output[0].meta_data['prstate']
+            self.call_back(output[0].meta_data['prstate'], datainfo = output[0])
+            #self.state = output[0].meta_data['prstate']
             return output[0]
         else:
             return output                

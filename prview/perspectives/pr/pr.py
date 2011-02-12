@@ -139,7 +139,7 @@ class Plugin(PluginBase):
                 data = datainfo
             if data is None:
                 raise RuntimeError, "Pr.set_state: datainfo parameter cannot be None in standalone mode"
-            """
+            
             # Ensuring that plots are coordinated correctly
             t = time.localtime(data.meta_data['prstate'].timestamp)
             time_str = time.strftime("%b %d %H:%M", t)
@@ -149,18 +149,18 @@ class Plugin(PluginBase):
             if max_char < 0:
                 max_char = len(data.meta_data['prstate'].file)
             
-            data.meta_data['prstate'].file = data.meta_data['prstate'].file[0:max_char] +' [' + time_str + ']'
+            datainfo.meta_data['prstate'].file = data.meta_data['prstate'].file[0:max_char] +' [' + time_str + ']'
             data.filename = data.meta_data['prstate'].file
-             """   
-            self.current_plottable = data
-            # self.current_plottable.group_id = data.meta_data['prstate'].file
+             
+            self.current_plottable = self.parent.create_gui_data(data,None)
+            self.current_plottable.group_id = data.meta_data['prstate'].file
             
             # Make sure the user sees the P(r) panel after loading
             #self.parent.set_perspective(self.perspective)  
             self.on_perspective(event=None)   
             
             # Load the P(r) results
-            state = self.state_reader.get_state()
+            #state = self.state_reader.get_state()
             wx.PostEvent(self.parent, NewPlotEvent(plot=self.current_plottable,
                                         title=self.current_plottable.title))
             self.control_panel.set_state(state)
