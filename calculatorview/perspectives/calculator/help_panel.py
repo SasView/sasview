@@ -68,6 +68,8 @@ class HelpWindow(wx.Frame):
             target ="showframe">Slit Size Calculator</a><br></li>
             <li><a href ="kiessig_calculator_help.html" 
             target ="showframe">Kiessig Thickness Calculator</a><br></li>
+            <li><a href ="resolution_calculator_help.html" 
+            target ="showframe">Resolution Estimator</a><br></li>
             </ul>
             </body>
             </html>"""
