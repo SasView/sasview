@@ -11,108 +11,6 @@ import basepage
 _BOX_WIDTH = 80
 
 
-class StateIterator(object):
-    """
-    Contains all saved state of a given page.
-    Provide position of the current state of a page, the first save state
-    and the last state for a given page. 
-    Allow easy undo or redo for a given page  
-    """
-    def __init__(self):
-        """
-        """
-        self._current=0
-       
-    def __iter__(self):
-        """
-        """
-        return self
-    
-    def first(self):
-        """
-        """
-        self._current =0
-        return self._current
-    
-    def next(self, max ):
-        """
-        """
-        if self._current < max:
-            self._current += 1
-        return self._current
-    
-    def previous(self):
-        """
-        """
-        if self._current > 0:
-            self._current = self._current -1
-        return self._current
-    
-    def currentPosition(self):
-        """
-        """
-        return self._current
-    
-    def setPosition(self, value):
-        """
-        """
-        if value >=0:
-            self._current = int(value)
-        
-    
-class ListOfState(list):    
-    """
-    """ 
-    def __init__(self, *args, **kw):
-        list.__init__(self, *args, **kw)
-        self.iterator = StateIterator()
-        
-    def appendItem(self, x):
-        """
-        """
-        self.append(x)
-        self.iterator.setPosition(value= len(self)-1)
-        
-    def removeItem(self, x):
-        """
-        """
-        self.iterator.previous()
-        self.remove(x)
-        
-    def getPreviousItem(self):
-        """
-        """
-        position = self.iterator.previous()
-        
-        if position < 0:
-            return None
-        else:
-            return self[position]
-        
-    def getNextItem(self):
-        """
-        """
-        position = self.iterator.next(max= len(self)-1)
-        if position >= len(self):
-            return None
-        else:
-            return self[position]
-        
-    def getCurrentItem(self):
-        """
-        """
-        postion = self.iterator.currentPosition()
-        if postion >= 0 and position < len(self):
-            return self[postion]
-        else:
-            return None
-        
-    def getCurrentPosition(self):
-        """
-        """
-        return self.iterator.currentPosition()
-          
-
 class PageInfo(object):
     """
     this class contains the minimum numbers of data members
@@ -188,6 +86,7 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
         self.Bind(basepage.EVT_PAGE_INFO, self._onGetstate)
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
         self.Bind(basepage.EVT_NEXT_STATE, self._onRedo)
+        self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_page_changing)
        
         #add default pages
         self.add_default_pages()
@@ -198,29 +97,36 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
         self.Update()
         self.Center()
         
+    def on_page_changing(self, event):
+        pos = self.GetSelection()
+        if pos != -1:
+            selected_page = self.GetPage(pos)
+            wx.PostEvent(self.parent, PanelOnFocusEvent(panel=selected_page))
     def on_set_focus(self, event):
         """
         """
         pos = self.GetSelection()
-        selected_page = self.GetPage(pos)
-        print "panel on fogus", selected_page.window_name
-        wx.PostEvent(self.parent, PanelOnFocusEvent(panel=selected_page))
+        if pos != -1:
+            selected_page = self.GetPage(pos)
+            wx.PostEvent(self.parent, PanelOnFocusEvent(panel=selected_page))
         
     def get_data(self):
         """
         get the data in the current page
         """
         pos = self.GetSelection()
-        selected_page = self.GetPage(pos)
-        return selected_page.get_data()
+        if pos != -1:
+            selected_page = self.GetPage(pos)
+            return selected_page.get_data()
     
     def get_state(self):
         """
          return the state of the current selected page
         """
         pos = self.GetSelection()
-        selected_page = self.GetPage(pos)
-        return selected_page.get_state()
+        if pos != -1:
+            selected_page = self.GetPage(pos)
+            return selected_page.get_state()
     
     def add_default_pages(self):
         """
@@ -239,15 +145,19 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
         """
         remove all pages, used when a svs file is opened
         """
+        
         #get number of pages
         nop = self.GetPageCount()
         #use while-loop, for-loop will not do the job well.
         while (nop>0):
             #delete the first page until no page exists
             page = self.GetPage(0)
+            if self._manager.parent.panel_on_focus == page:
+                self._manager.parent.panel_on_focus = None
             self._close_helper(selected_page=page)
             self.DeletePage(0)
             nop = nop - 1
+            
         ## save the title of the last page tab added
         self.fit_page_name = {}
         ## list of existing fit page
@@ -275,14 +185,15 @@ class FitPanel(wx.aui.AuiNotebook, PanelBase):
                     panel.reset_page(state=state)
                     panel.save_current_state()
                     
-    def clear_panel(self, format='.svs'):
+    def clear_panel(self):
         """
         Clear and close all panels, used by guimanager
         """
-        if format == '.svs':
-            #close all panels only when svs file opened
-            self.close_all()
-            self._manager.mypanels = []
+       
+        #close all panels only when svs file opened
+        self.close_all()
+        self._manager.mypanels = []
+        
                        
     def on_close_page(self, event=None):
         """

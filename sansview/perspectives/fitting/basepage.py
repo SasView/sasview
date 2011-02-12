@@ -174,7 +174,6 @@ class BasicPage(ScrolledPanel, PanelBase):
     def on_set_focus(self, event):
         """
         """
-        print "fitting panel", self.window_name
         if self._manager is not None:
             wx.PostEvent(self._manager.parent, PanelOnFocusEvent(panel=self))
         
@@ -379,7 +378,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param manager: instance of plugin fitting
         
         """
-        print "manager", manager
         self._manager = manager  
         self.state.manager = manager
         

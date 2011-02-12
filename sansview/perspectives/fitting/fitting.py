@@ -34,10 +34,8 @@ from sans.guiframe.events import EVT_SLICER_PANEL
 from sans.guiframe.events import EVT_REMOVE_DATA
 from sans.guiframe.events import ERR_DATA
 from sans.guiframe.events import EVT_SLICER_PARS_UPDATE
-from sans.guiframe.events import EVT_FITSTATE_UPDATE
 
-#from sans.fit.AbstractFitEngine import Model
-#from sans.fit.AbstractFitEngine import FitAbort
+
 from .console import ConsoleUpdate
 from .fitproblem import FitProblem
 from .fitpanel import FitPanel
@@ -262,6 +260,11 @@ class Plugin(PluginBase):
         self.mypanels.append(SldPanel(parent=self.parent, base=self.parent))
         return self.mypanels
     
+    def clear_panel(self):
+        """
+        """
+        self.fit_panel.clear_panel(format=format)
+        
     def set_default_perspective(self):
         """
         Call back method that True to notify the parent that the current plug-in
@@ -296,7 +299,7 @@ class Plugin(PluginBase):
         : param state: PageState object
         : param datainfo: data
         """
-        state = self.state_reader.get_state()
+        #state = self.state_reader.get_state()
         if state != None:
             # store fitting state in temp_state
             self.temp_state.append(state) 

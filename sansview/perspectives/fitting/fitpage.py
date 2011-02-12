@@ -795,7 +795,7 @@ class FitPage(BasicPage):
         if self.model ==None:
             msg="Please select a Model first..."
             wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self.manager.parent, StatusEvent(status=\
+            wx.PostEvent(self._manager.parent, StatusEvent(status=\
                             "Fit: %s"%msg))
             return
 
@@ -820,13 +820,13 @@ class FitPage(BasicPage):
         # when y(q=0)=None at x[0].         
         self.qmin_x = float(self.qmin.GetValue())
         self.qmax_x = float( self.qmax.GetValue())
-        self.manager._reset_schedule_problem( value=0)
-        self.manager.schedule_for_fit( value=1,page=self,fitproblem =None) 
-        self.manager.set_fit_range(page= self,qmin= self.qmin_x, 
+        self._manager._reset_schedule_problem( value=0)
+        self._manager.schedule_for_fit( value=1,page=self,fitproblem =None) 
+        self._manager.set_fit_range(page= self,qmin= self.qmin_x, 
                                    qmax= self.qmax_x)
         
         #single fit 
-        self.manager.onFit()
+        self._manager.onFit()
         ## allow stopping the fit 
         #if self.engine_type=="scipy":
         #    self.btFit.SetLabel("Stop")
@@ -844,7 +844,7 @@ class FitPage(BasicPage):
         """
         self.btFit.SetLabel("Fit")
         if self.engine_type=="scipy":
-            self.manager.stop_fit()
+            self._manager.stop_fit()
         self.btFit.Unbind(event=wx.EVT_BUTTON, id=self.btFit.GetId())
         self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit,
                         id=self.btFit.GetId())
@@ -899,7 +899,7 @@ class FitPage(BasicPage):
             else:   
                  evt = ModelEventbox(model = self.model)
           
-            self.manager._on_model_panel(evt = evt)
+            self._manager._on_model_panel(evt = evt)
             self.state.model = self.model.clone()
             self.state.model.name = self.model.name
             if event is not None:
@@ -918,7 +918,7 @@ class FitPage(BasicPage):
         if self.model ==None:
             msg="Please select a Model first..."
             wx.MessageBox(msg, 'Info')
-            #wx.PostEvent(self.manager.parent, StatusEvent(status=\
+            #wx.PostEvent(self._manager.parent, StatusEvent(status=\
             #                "Parameters: %s"%msg))
             return
 
@@ -927,7 +927,7 @@ class FitPage(BasicPage):
         self.fitrange = True
         #get event object
         tcrtl= event.GetEventObject()
-        wx.PostEvent(self.manager.parent, StatusEvent(status=" \
+        wx.PostEvent(self._manager.parent, StatusEvent(status=" \
                                 updating ... ",type="update"))
         #Clear msg if previously shown.
         msg= ""
@@ -949,7 +949,7 @@ class FitPage(BasicPage):
                         flag1 = self.update_pinhole_smear()
                         flag = flag or flag1
                 elif self.data.__class__.__name__ !="Data2D":
-                    self.manager.set_smearer(smearer=temp_smearer, 
+                    self._manager.set_smearer(smearer=temp_smearer, 
                                              qmin= float(self.qmin_x),
                                             qmax= float(self.qmax_x)) 
                 if flag:   
@@ -1433,7 +1433,7 @@ class FitPage(BasicPage):
         #wx.PostEvent(self.event_owner, evt)  
    
         if self.engine_type != None:
-            self.manager._on_change_engine(engine=self.engine_type)
+            self._manager._on_change_engine(engine=self.engine_type)
 
         self.select_param(event = None) 
         #Save state_fit
@@ -1622,7 +1622,7 @@ class FitPage(BasicPage):
         self._lay_out()      
         #PostStatusEvent     
         msg = "Fit completed! "
-        wx.PostEvent(self.manager.parent, StatusEvent(status=msg))
+        wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
 
     def onPinholeSmear(self, event):
         """
@@ -1640,7 +1640,7 @@ class FitPage(BasicPage):
             self.disable_smearer.SetValue(True)
             msg="Please select a Model first..."
             wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self.manager.parent, StatusEvent(status=\
+            wx.PostEvent(self._manager.parent, StatusEvent(status=\
                             "Smear: %s"%msg))
             return
 
@@ -1775,12 +1775,12 @@ class FitPage(BasicPage):
                                                   self.smear2d_accuracy)
 
         if msg != None:
-            wx.PostEvent(self.manager.parent, StatusEvent(status = msg ))
+            wx.PostEvent(self._manager.parent, StatusEvent(status = msg ))
         else:
             get_pin_min.SetBackgroundColour("white")
             get_pin_max.SetBackgroundColour("white")
         ## set smearing value whether or not the data contain the smearing info
-        self.manager.set_smearer(smearer=self.current_smearer, qmin= \
+        self._manager.set_smearer(smearer=self.current_smearer, qmin= \
                                  float(self.qmin_x),qmax= float(self.qmax_x))
         return msg
         
@@ -1819,7 +1819,7 @@ class FitPage(BasicPage):
             
             msg="Please select a Model first..."
             wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self.manager.parent, StatusEvent(status=\
+            wx.PostEvent(self._manager.parent, StatusEvent(status=\
                             "Smear: %s"%msg))
             return
 
@@ -1861,7 +1861,7 @@ class FitPage(BasicPage):
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
         if msg != None:
-            wx.PostEvent(self.manager.parent, StatusEvent(status = msg))
+            wx.PostEvent(self._manager.parent, StatusEvent(status = msg))
 
     def _is_changed_slit(self):  
         """
@@ -1950,7 +1950,7 @@ class FitPage(BasicPage):
         self.current_smearer = smear_selection(data, self.model)
         #temp_smearer = self.current_smearer
         ## set smearing value whether or not the data contain the smearing info
-        self.manager.set_smearer(smearer=self.current_smearer, qmin= \
+        self._manager.set_smearer(smearer=self.current_smearer, qmin= \
                                  float(self.qmin_x), qmax= float(self.qmax_x)) 
         return msg
     
@@ -1988,7 +1988,7 @@ class FitPage(BasicPage):
             self.disable_smearer.SetValue(True)
             msg="Please select a Model first..."
             wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self.manager.parent, StatusEvent(status=\
+            wx.PostEvent(self._manager.parent, StatusEvent(status=\
                             "Smear: %s"%msg))
             return
         
@@ -2017,10 +2017,10 @@ class FitPage(BasicPage):
             if hasattr(self.data,"dxw"):
                 msg= ": Slit smearing parameters"
             if self.smearer ==None:
-                wx.PostEvent(self.manager.parent, StatusEvent(status=\
+                wx.PostEvent(self._manager.parent, StatusEvent(status=\
                             "Data contains no smearing information"))
             else:
-                wx.PostEvent(self.manager.parent, StatusEvent(status=\
+                wx.PostEvent(self._manager.parent, StatusEvent(status=\
                             "Data contains smearing information"))
 
             #self.smear_description_dqdata.Show(True)
@@ -2035,7 +2035,7 @@ class FitPage(BasicPage):
         self.sizer_set_smearer.Layout()
         self.Layout()
         ## set smearing value whether or not the data contain the smearing info
-        self.manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
+        self._manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
                                      qmax= float(self.qmax_x)) 
 
         ##Calculate chi2
@@ -2184,8 +2184,8 @@ class FitPage(BasicPage):
             self.SetupScrolling()
             return
         ## the panel is drawn using the current value of the fit engine
-        if self.engine_type==None and self.manager !=None:
-            self.engine_type= self.manager._return_engine_type()
+        if self.engine_type==None and self._manager !=None:
+            self.engine_type= self._manager._return_engine_type()
 
         box_description= wx.StaticBox(self, -1,str("Model Parameters"))
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)

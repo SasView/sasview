@@ -1172,7 +1172,7 @@ class Reader(CansasReader):
                         name=original_fname
                     state.data.group_id = name
                     #store state in fitting
-                    #self.call_back(state=state, datainfo=output[ind],format=ext)
+                    self.call_back(state=state, datainfo=output[ind],format=ext)
                     self.state= state
                 return output
               
