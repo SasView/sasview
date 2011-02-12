@@ -23,6 +23,4 @@ import wx.lib.newevent
 (AddManyDataEvent, EVT_ADD_MANY_DATA)   = wx.lib.newevent.NewEvent()
 ##event for the panel on focus
 (PanelOnFocusEvent, EVT_PANEL_ON_FOCUS)   = wx.lib.newevent.NewEvent()
-# event to update state of each perspectives after state file is loaded
-(InvStateUpdateEvent, EVT_INVSTATE_UPDATE)   = wx.lib.newevent.NewEvent()
-(FitStateUpdateEvent, EVT_FITSTATE_UPDATE)   = wx.lib.newevent.NewEvent()
+

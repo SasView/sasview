@@ -195,6 +195,45 @@ class GUIToolBar(Tbar):
             self.EnableTool(GUIFRAME_ID.DRAG_ID, panel.get_drag_flag())
             self.EnableTool(GUIFRAME_ID.RESET_ID, panel.get_reset_flag())
         self.Realize()
-  
+        
+    def enable_undo(self, panel):
+        self.EnableTool(GUIFRAME_ID.PRINT_ID, panel.get_print_flag())
+        self.Realize()
+        
+    def enable_redo(self, panel):
+        self.EnableTool(GUIFRAME_ID.REDO_ID, panel.get_redo_flag())
+        self.Realize()
+        
+    def enable_print(self, panel):
+        self.EnableTool(GUIFRAME_ID.PRINT_ID, panel.get_print_flag())
+        self.Realize()
+    
+    def enable_zoom(self, panel):
+        self.EnableTool(GUIFRAME_ID.ZOOM_ID, panel.get_zoom_flag())
+        self.Realize()
+        
+    def enable_zoom_in(self, panel):
+        self.EnableTool(GUIFRAME_ID.ZOOM_IN_ID, panel.get_zoom_in_flag())
+        self.Realize()
+        
+    def enable_zoom_out(self, panel):
+        self.EnableTool(GUIFRAME_ID.ZOOM_OUT_ID, panel.get_zoom_out_flag())
+        self.Realize()
+        
+    def enable_bookmark(self, panel):
+        self.EnableTool(GUIFRAME_ID.BOOKMARK_ID, panel.get_bookmark_flag())
+        self.Realize()
+        
+    def enable_save(self, panel):
+        self.EnableTool(GUIFRAME_ID.SAVE_ID, panel.get_save_flag())
+        self.Realize()
+        
+    def enable_reset(self, panel):
+        self.EnableTool(GUIFRAME_ID.RESET_ID, panel.get_reset_flag())
+        self.Realize()
+    
+    def enable_preview(self, panel):
+        self.EnableTool(GUIFRAME_ID.PREVIEW_ID, panel.get_preview_flag())
+        self.Realize()
 
               

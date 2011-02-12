@@ -148,8 +148,12 @@ class ViewerFrame(wx.Frame):
         self.Bind(EVT_STATUS, self._on_status_event)
         #Register add extra data on the same panel event on load
         self.Bind(EVT_PANEL_ON_FOCUS, self.set_panel_on_focus)
-        
-  
+    
+    def get_toolbar(self):
+        """
+        """
+        return self._toolbar
+    
     def set_panel_on_focus(self, event):
         """
         Store reference to the last panel on focus
@@ -162,10 +166,10 @@ class ViewerFrame(wx.Frame):
         if self.panel_on_focus is not None and self._data_panel is not None:
             panel_name = self.panel_on_focus.window_caption
             self._data_panel.set_panel_on_focus(panel_name)
-        #update toolbar
-        self._update_toolbar_helper()
-        #update edit menu
-        self.enable_edit_menu()
+            #update toolbar
+            self._update_toolbar_helper()
+            #update edit menu
+            self.enable_edit_menu()
        
     def build_gui(self):
         """
@@ -931,7 +935,7 @@ class ViewerFrame(wx.Frame):
         # plot data
         return new_plot
  
-    def get_data(self, path, format=None):
+    def get_data(self, path):
         """
         """
         message = ""
@@ -948,60 +952,25 @@ class ViewerFrame(wx.Frame):
             self.load_complete(output=output, error_message=error_message,
                    message=log_msg, path=path)    
             return
-        try:
-            #reading a state file
-            for plug in self.plugins:
-                reader, ext = plug.get_extensions()
-                if reader is not None:
-                    #read the state of the single plugin
-                    if extension == ext:
-                        reader.read(path)
-                        return
-                    elif extension == '.svs':
-                        reader.read(path)
-        except:
-            raise
-                        
-    def load_update(self, output=None, message=""):
-        """
-        print update on the status bar
-        """
-        if message != "":
-            wx.PostEvent(self, StatusEvent(status=message,
-                                                  type="progress",
-                                                   info="warning"))
         
-    def load_complete(self, output, message="", error_message="", 
-                      extension=None, path=None):
-        """
-         post message to  status bar and return list of data
-        """
-        wx.PostEvent(self, StatusEvent(status=message,
-                                              info="warning",
-                                              type="stop"))
-        if error_message != "":
-            self.load_error(error_message)
-        #send a list of available data to plotting plugin
-        available_data = []
-        if self._data_manager is not None:
-            self._data_manager.add_data(output)
-            temp = self._data_manager.get_selected_data()
-            for data_state in temp.values():
-                available_data.append(data_state.data)
         #reading a state file
         for plug in self.plugins:
-            #plug.on_set_state_helper(event=None)
-            _, ext = plug.get_extensions()
-            plug.set_state(state=None, datainfo=available_data)
-            
-                
+            reader, ext = plug.get_extensions()
+            if reader is not None:
+                #read the state of the single plugin
+                if extension == ext:
+                    reader.read(path)
+                    return
+                elif extension == '.svs':
+                    reader.read(path)
+        
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style == GUIFRAME.MANAGER_ON:
             if self._data_panel is not None:
                 data_state = self._data_manager.get_selected_data()
                 self._data_panel.load_data_list(data_state)
                 self._mgr.GetPane(self._data_panel.window_name).Show(True)
-        
+                        
     def _on_open_state(self, event):
         """
         """
@@ -1027,11 +996,10 @@ class ViewerFrame(wx.Frame):
             basename  = os.path.basename(path)
             if  basename.endswith('.svs'):
                 #remove panels for new states
-                for item in self.panels:
-                    try:
-                        self.panels[item].clear_panel()
-                    except:
-                        pass
+                for plug in self.plugins:
+                    plug.clear_panel()
+                    self.panel_on_focus = None
+                
             self.get_data(path)
                 
         if self.defaultPanel is not None and \
@@ -1578,6 +1546,83 @@ class ViewerFrame(wx.Frame):
         """
         if self.panel_on_focus is not None:
             self.panel_on_focus.on_reset(event)
+            
+    def enable_undo(self):
+        """
+        enable undo related control
+        """
+        if self.panel_on_focus is not None:
+            self._toolbar.enable_undo(self.panel_on_focus)
+            
+    def enable_redo(self):
+        """
+        enable redo 
+        """
+        if self.panel_on_focus is not None:
+            self._toolbar.enable_redo(self.panel_on_focus)
+            
+    def enable_bookmark(self):
+        """
+        Bookmark 
+        """
+        if self.panel_on_focus is not None:
+            self._toolbar.enable_bookmark(self.panel_on_focus)
+            
+    def enable_save(self):
+        """
+        save 
+        """
+        if self.panel_on_focus is not None:
+            self._toolbar.enable_save(self.panel_on_focus)
+            
+    def enable_preview(self):
+        """
+        preview 
+        """
+        if self.panel_on_focus is not None:
+            self._toolbar.enable_preview(self.panel_on_focus)
+            
+    def enable_print(self):
+        """
+        print 
+        """
+        if self.panel_on_focus is not None:
+            self._toolbar.enable_print(self.panel_on_focus)
+            
+    def enable_zoom(self):
+        """
+        zoom 
+        """
+        if self.panel_on_focus is not None:
+            self._toolbar.enable_zoom(self.panel_on_focus)
+            
+    def enable_zoom_in(self):
+        """
+        zoom in 
+        """
+        if self.panel_on_focus is not None:
+            self._toolbar.enable_zoom_in(self.panel_on_focus)
+            
+    def enable_zoom_out(self):
+        """
+        zoom out 
+        """
+        if self.panel_on_focus is not None:
+            self._toolbar.enable_zoom_out(self.panel_on_focus)
+            
+    def enable_drag(self, event=None):
+        """
+        drag 
+        """
+        if self.panel_on_focus is not None:
+            self._toolbar.enable_drag(self.panel_on_focus)
+            
+    def enable_reset(self):
+        """
+        reset the current panel
+        """
+        if self.panel_on_focus is not None:
+            self._toolbar.enable_reset(self.panel_on_focus)
         
 class DefaultPanel(wx.Panel, PanelBase):
     """

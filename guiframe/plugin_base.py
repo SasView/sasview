@@ -47,6 +47,10 @@ class PluginBase:
         #  for your plug-in. This defines your plug-in "perspective"
         self.perspective = []
         
+    def clear_panel(self):
+        """
+        clear all related panels
+        """
     def get_extensions(self):
         """
         return state reader and its extensions
