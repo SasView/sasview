@@ -62,6 +62,8 @@ class FitPage(BasicPage):
         self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
         self.Bind(EVT_FIT_STOP,self._on_fit_complete)
         self.Bind(EVT_CHI2_UPDATE, self.on_complete_chisqr)
+        self._set_bookmark_flag(False)
+        self._set_save_flag(False)
 
     def _on_fit_complete(self, event):
         """
@@ -857,6 +859,9 @@ class FitPage(BasicPage):
         self._on_select_model_helper() 
         self.set_model_param_sizer(self.model)                   
         
+        if self.model is None:
+            self._set_bookmark_flag(False)
+            self._set_save_flag(False)
         self.enable_disp.SetValue(False)
         self.disable_disp.SetValue(True)
         try:
@@ -873,6 +878,8 @@ class FitPage(BasicPage):
         self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
       
         if self.model != None:
+            self._set_bookmark_flag(True)
+            self._set_save_flag(True)
             # Reset smearer, model and data
             self.set_data(self.data)
             # update smearer sizer
@@ -1369,7 +1376,11 @@ class FitPage(BasicPage):
             data_name = ""
             self.formfactorbox.Disable()
             self.structurebox.Disable()
+            self._set_bookmark_flag(False)
+            self._set_save_flag(False)
         else:
+            self._set_bookmark_flag(True)
+            self._set_save_flag(True)
             self.smearer = smear_selection(self.data, self.model)
             self.disable_smearer.SetValue(True)
             if self.smearer == None:
