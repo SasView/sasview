@@ -75,6 +75,14 @@ class GUIToolBar(Tbar):
         self.AddLabelTool(GUIFRAME_ID.ZOOM_ID, 'Zoom', zoom_bmp,
                    disable_zoom_bmp, button_type,'Zoom In')
         self.AddSeparator()
+        reset_im = GUIFRAME_ICON.RESET_ICON
+        reset_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        reset_bmp = reset_im.ConvertToBitmap()
+        #disable_reset_bmp = clear_image(reset_im).ConvertToBitmap()
+        disable_reset_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.RESET_ID, 'Reset', reset_bmp,
+                   disable_reset_bmp, button_type,'Reset In')
+        self.AddSeparator()
         drag_im = GUIFRAME_ICON.DRAG_ICON
         drag_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
         drag_bmp = drag_im.ConvertToBitmap()
