@@ -12,6 +12,7 @@ from wx.lib.scrolledpanel import ScrolledPanel
 from sans.guiframe.utils import format_number,check_float
 from sans.guiframe.events import PanelOnFocusEvent
 from sans.guiframe.events import StatusEvent
+from sans.guiframe.events import AppendBookmarkEvent
 import pagestate
 from pagestate import PageState
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
@@ -154,6 +155,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                                  " Keep the panel status to recall it later")
         self.popUpMenu.AppendItem(self._keep)
         self._keep.Enable(True)
+        self._set_bookmark_flag(False)
+        self._set_save_flag(False)
         wx.EVT_MENU(self, id, self.on_bookmark)
         self.popUpMenu.AppendSeparator()
     
@@ -167,7 +170,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.define_page_structure()
         ## drawing Initial dispersion parameters sizer 
         self.set_dispers_sizer()
-        self._set_save_flag(True)
+        
         ## layout
         self.set_layout()
         
@@ -593,12 +596,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Reset model state
         """
+        menu = event.GetEventObject()
         ## post help message for the selected model 
-        msg = self.popUpMenu.GetHelpString(event.GetId())
+        msg = menu.GetHelpString(event.GetId())
         msg +=" reloaded"
-        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
         
-        name= self.popUpMenu.GetLabel(event.GetId())
+        name = menu.GetLabel(event.GetId())
         self._on_select_model_helper()
         
         if name in self.saved_states.keys():
@@ -625,6 +629,16 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._manager.save_fit_state(filepath=path, fitstate=new_state)
         return new_state  
     
+    def _get_time_stamp(self):
+        """
+        return time and date stings
+        """
+        # date and time 
+        year, month, day,hour,minute,second,tda,ty,tm_isdst= time.localtime()
+        current_time= str(hour)+":"+str(minute)+":"+str(second)
+        current_date= str( month)+"/"+str(day)+"/"+str(year)
+        return current_time, current_date
+      
     def on_bookmark(self, event):
         """
         save history of the data and model
@@ -637,23 +651,25 @@ class BasicPage(ScrolledPanel, PanelBase):
         new_state = self.state.clone()
         ##Add model state on context menu
         self.number_saved_state += 1
+        current_time, current_date = self._get_time_stamp()
         #name= self.model.name+"[%g]"%self.number_saved_state 
-        name= self.model.__class__.__name__+"[%g]"%self.number_saved_state 
+        name = "Fitting: %g]" % self.number_saved_state 
+        name += self.model.__class__.__name__ 
+        name += "bookmarked at %s on %s" % (current_time, current_date)
         self.saved_states[name]= new_state
         
         ## Add item in the context menu
-        
-        year, month, day,hour,minute,second,tda,ty,tm_isdst= time.localtime()
-        my_time= str(hour)+" : "+str(minute)+" : "+str(second)+" "
-        date= str( month)+"|"+str(day)+"|"+str(year)
-        msg=  "Model saved at %s on %s"%(my_time, date)
+        msg =  "Model saved at %s on %s"%(current_time, current_date)
          ## post help message for the selected model 
         msg +=" Saved! right click on this page to retrieve this model"
         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         
-        id = wx.NewId()
-        self.popUpMenu.Append(id,name,str(msg))
-        wx.EVT_MENU(self, id, self.onResetModel)
+        #id = wx.NewId()
+        #self.popUpMenu.Append(id,name,str(msg))
+        #wx.EVT_MENU(self, id, self.onResetModel)
+        wx.PostEvent(self.parent.parent, 
+                     AppendBookmarkEvent(title=name, 
+                                         hint=str(msg), handler=self.onResetModel))
         
     def old_on_bookmark(self, event):
         """
