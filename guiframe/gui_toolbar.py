@@ -75,7 +75,7 @@ class GUIToolBar(Tbar):
         #disable_reset_bmp = clear_image(reset_im).ConvertToBitmap()
         disable_reset_bmp = wx.NullBitmap
         self.AddLabelTool(GUIFRAME_ID.RESET_ID, 'Reset', reset_bmp,
-                   disable_reset_bmp, button_type,'Reset In')
+                   disable_reset_bmp, button_type,'Reset')
         self.AddSeparator()
         drag_im = GUIFRAME_ICON.DRAG_ICON
         drag_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)

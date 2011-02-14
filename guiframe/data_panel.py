@@ -82,9 +82,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
         self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer4 = wx.BoxSizer(wx.HORIZONTAL)
-        self.sizer5 = wx.BoxSizer(wx.HORIZONTAL)
-        #self.sizer3.SetMinSize((w-60, -1))
-        
+        self.sizer5 = wx.BoxSizer(wx.VERTICAL)
+       
         self.vbox.Add(self.sizer5, 0,wx.EXPAND|wx.ALL,10)
         self.vbox.Add(self.sizer1, 0,wx.EXPAND|wx.ALL,0)
         self.vbox.Add(self.sizer2, 0,wx.EXPAND|wx.ALL,10)
@@ -106,7 +105,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                            'Unselect all Data 2D' ]
         for option in list_of_options:
             self.selection_cbox.Append(str(option))
-        self.selection_cbox.SetValue('None')
+        self.selection_cbox.SetValue('Select all Data')
         wx.EVT_COMBOBOX(self.selection_cbox,-1, self._on_selection_type)
         self.sizer5.AddMany([(select_txt,0, wx.ALL,5),
                             (self.selection_cbox,0, wx.ALL,5)])
@@ -164,10 +163,41 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Select data according to patterns
         """
+        
+        list_of_options = ['Select all Data',
+                            'Unselect all Data',
+                           'Select all Data 1D',
+                           'Unselect all Data 1D',
+                           'Select all Data 2D',
+                           'Unselect all Data 2D' ]
         option = self.selection_cbox.GetValue()
-        if option == 'Select all Data':
-            print "on select"
-            
+        
+        pos = self.selection_cbox.GetSelection()
+        if pos == wx.NOT_FOUND:
+            return 
+        option = self.selection_cbox.GetString(pos)
+        for item in self.list_cb_data:
+            data_id, data_class = self.tree_ctrl.GetItemPyData(item) 
+            if option == 'Select all Data':
+                self.tree_ctrl.CheckItem(item, True) 
+            elif option == 'Unselect all Data':
+                self.tree_ctrl.CheckItem(item, False)
+            elif option == 'Select all Data 1D':
+                if data_class == 'Data1D':
+                    self.tree_ctrl.CheckItem(item, True) 
+            elif option == 'Unselect all Data 1D':
+                if data_class in ['Data1D', 'Theory1D']:
+                    self.tree_ctrl.CheckItem(item, False) 
+            elif option == 'Select all Data 1D':
+                if data_class == ['Data1D', 'Theory1D']:
+                    self.tree_ctrl.CheckItem(item, True) 
+            elif option == 'Select all Data 2D':
+                if data_class == 'Data2D':
+                    self.tree_ctrl.CheckItem(item, True) 
+            elif option == 'Unselect all Data 2D':
+                if data_class == 'Data2D':
+                    self.tree_ctrl.CheckItem(item, False) 
+               
     def on_set_active_perspective(self, event):
         """
         Select the active perspective
@@ -198,10 +228,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.tctrl_perspective.SetToolTipString("Active Application")
         self.tctrl_plotpanel = wx.StaticText(self, -1, 'No Plot panel on focus')
         self.tctrl_plotpanel.SetToolTipString("Active Plot Panel")
-        #self.sizer3.AddMany([(self.bt_import,0, wx.ALL,5),
-        #                     (self.bt_append_plot,0, wx.ALL,5),
-        #                     (self.bt_plot, 0, wx.ALL,5),
-        # (self.bt_remove,0, wx.ALL,5)])
+    
         ix = 0
         iy = 0
         self.sizer3.Add(self.bt_import,( iy, ix),(1,1),  
@@ -224,6 +251,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         iy += 1 
         self.sizer3.Add(self.bt_remove,( iy, ix),(1,1),  
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        
         
      
     def layout_batch(self):
@@ -308,7 +336,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                     data_child = item
                     for process in data.process:
                         theory_child = self.tree_ctrl.FindItem(data_child,
-                                                        "Available Theories")#,
+                                                        "Available Theories"),
                         if theory is not None:
                             av_theory_child =self.tree_ctrl.AppendItem(theory_child,
                                                 theory.name,ct_type=1, data=theory.id)
@@ -322,7 +350,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                     break
             if data_child is None:
                 data_child =self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
-                                                   data_name,ct_type=1, data=data.id)
+                                                   data_name,ct_type=1, data=(data.id, data_class))
                 cb_data = self.tree_ctrl.GetFirstChild(self.tree_ctrl.root) 
                 item, id = cb_data
                 item.Check(True)
@@ -355,15 +383,19 @@ class DataPanel(ScrolledPanel, PanelBase):
         data_to_plot = []
         for item in self.list_cb_data:
             if item.IsChecked():
-                
-               data_to_plot.append(self.tree_ctrl.GetItemPyData(item))
+               data_id, data_class = self.tree_ctrl.GetItemPyData(item) 
+               data_to_plot.append(self.tree_ctrl.GetItemPyData(data_id))
         theory_to_plot = []
         for item in self.list_cb_theory:
             if item.IsChecked():
-                theory_to_plot.append(self.tree_ctrl.GetItemPyData(item))
+                data_id, data_class = self.tree_ctrl.GetItemPyData(item)
+                theory_to_plot.append(self.tree_ctrl.GetItemPyData(data_id))
         return data_to_plot, theory_to_plot
     
     def on_remove(self, event):
+        """
+        remove data from application
+        """
         data_to_remove, theory_to_remove = self.set_data_helper()
         for item in self.list_cb_data:
             if item.IsChecked()and \
@@ -376,7 +408,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         delete_all = False
         if data_to_remove:
             delete_all = True
-        self.parent.delete_data(data_id=data_to_remove,
+        self.parent.remove_data(data_id=data_to_remove,
                                   theory_id=theory_to_remove,
                                   delete_all=delete_all)
         

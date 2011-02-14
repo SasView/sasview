@@ -340,12 +340,12 @@ class ViewerFrame(wx.Frame):
         panel_width_min = self._window_width 
         style = self.__gui_style & (GUIFRAME.MANAGER_ON)
         if self._data_panel is not None  and (p == self._data_panel):
-            panel_width_min = self._window_width * 2/25 
+            panel_width_min = self._window_width * 5/25 
             return panel_width_min, panel_height_min
         if hasattr(p, "CENTER_PANE") and p.CENTER_PANE:
             style = self.__gui_style & (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON)
             if style == (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON):
-                panel_width_min = self._window_width * 17/25 
+                panel_width_min = self._window_width * 15/25 
             return panel_width_min, panel_height_min
         return panel_width_min, panel_height_min
     
@@ -385,7 +385,11 @@ class ViewerFrame(wx.Frame):
                               Name(self._data_panel.window_name).
                               Left().
                               MinimizeButton().
-                              MinSize(wx.Size(w, h)).
+                              TopDockable(False).
+                              BottomDockable(False).
+                              LeftDockable(True).
+                              RightDockable(False).
+                              BestSize(wx.Size(w, h)).
                               Hide())
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style != GUIFRAME.MANAGER_ON:
@@ -1310,7 +1314,7 @@ class ViewerFrame(wx.Frame):
                 data_state = self._data_manager.get_by_id([data_id])
                 self._data_panel.load_data_list(data_state)
                 
-    def delete_data(self, data_id, theory_id=None, delete_all=True):
+    def remove_data(self, data_id, theory_id=None, delete_all=True):
         """
         Delete data state if data_id is provide
         delete theory created with data of id data_id if theory_id is provide
