@@ -37,6 +37,7 @@ warnings.simplefilter("ignore")
 import logging
 
 from sans.guiframe.events import EVT_STATUS
+from sans.guiframe.events import EVT_APPEND_BOOKMARK
 from sans.guiframe.events import EVT_PANEL_ON_FOCUS
 from sans.guiframe.events import StatusEvent
 from sans.guiframe.events import NewPlotEvent
@@ -148,6 +149,7 @@ class ViewerFrame(wx.Frame):
         self.Bind(EVT_STATUS, self._on_status_event)
         #Register add extra data on the same panel event on load
         self.Bind(EVT_PANEL_ON_FOCUS, self.set_panel_on_focus)
+        self.Bind(EVT_APPEND_BOOKMARK, self.append_bookmark)
     
     def get_toolbar(self):
         """
@@ -754,10 +756,10 @@ class ViewerFrame(wx.Frame):
         self._edit_menu.Append(GUIFRAME_ID.REDO_ID, '&Redo', 
                                'Redo the previous action')
         wx.EVT_MENU(self, GUIFRAME_ID.REDO_ID, self.on_redo_panel)
-        self._edit_menu.AppendSeparator()
-        self._edit_menu.Append(GUIFRAME_ID.BOOKMARK_ID, '&Bookmark', 
-                               'bookmark current panel')
-        wx.EVT_MENU(self, GUIFRAME_ID.BOOKMARK_ID, self.on_bookmark_panel)
+        #self._edit_menu.AppendSeparator()
+        #self._edit_menu.Append(GUIFRAME_ID.BOOKMARK_ID, '&Bookmark', 
+        #                       'bookmark current panel')
+        #wx.EVT_MENU(self, GUIFRAME_ID.BOOKMARK_ID, self.append_bookmark)
         self._edit_menu.Append(GUIFRAME_ID.SAVE_ID, '&Save As', 
                                'Save current panel into file')
         wx.EVT_MENU(self, GUIFRAME_ID.SAVE_ID, self.on_save_panel)
@@ -1438,8 +1440,8 @@ class ViewerFrame(wx.Frame):
             self._edit_menu.Enable(GUIFRAME_ID.UNDO_ID, flag)
             flag = self.panel_on_focus.get_redo_flag()
             self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
-            flag = self.panel_on_focus.get_bookmark_flag()
-            self._edit_menu.Enable(GUIFRAME_ID.BOOKMARK_ID, flag)
+            #flag = self.panel_on_focus.get_bookmark_flag()
+            #self._edit_menu.Enable(GUIFRAME_ID.BOOKMARK_ID, flag)
             flag = self.panel_on_focus.get_save_flag()
             self._edit_menu.Enable(GUIFRAME_ID.SAVE_ID, flag)
             flag = self.panel_on_focus.get_print_flag()
@@ -1460,7 +1462,7 @@ class ViewerFrame(wx.Frame):
             flag = False
             self._edit_menu.Enable(GUIFRAME_ID.UNDO_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
-            self._edit_menu.Enable(GUIFRAME_ID.BOOKMARK_ID, flag)
+            #self._edit_menu.Enable(GUIFRAME_ID.BOOKMARK_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.SAVE_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
@@ -1486,10 +1488,16 @@ class ViewerFrame(wx.Frame):
             
     def on_bookmark_panel(self, event=None):
         """
-        Bookmark available information of the panel on focus
+        bookmark panel
         """
         if self.panel_on_focus is not None:
             self.panel_on_focus.on_bookmark(event)
+            
+    def append_bookmark(self, event=None):
+        """
+        Bookmark available information of the panel on focus
+        """
+        self._toolbar.append_bookmark(event)
             
     def on_save_panel(self, event=None):
         """

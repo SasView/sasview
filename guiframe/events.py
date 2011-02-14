@@ -23,4 +23,6 @@ import wx.lib.newevent
 (AddManyDataEvent, EVT_ADD_MANY_DATA)   = wx.lib.newevent.NewEvent()
 ##event for the panel on focus
 (PanelOnFocusEvent, EVT_PANEL_ON_FOCUS)   = wx.lib.newevent.NewEvent()
+#book mark event
+(AppendBookmarkEvent, EVT_APPEND_BOOKMARK) = wx.lib.newevent.NewEvent()
 
