@@ -665,21 +665,10 @@ class InversionControl(ScrolledPanel, PanelBase):
         button_OK.SetToolTipString("Perform P(r) inversion.")
         self.Bind(wx.EVT_BUTTON, self._on_invert, id = id)   
         
-        id = wx.NewId()
-        button_Reset = wx.Button(self, id, "Reset")
-        button_Reset.SetToolTipString("Reset inversion parameters to default.")
-        self.Bind(wx.EVT_BUTTON, self._on_reset, id = id)   
-        #button_Cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
-        
-        id = wx.NewId()
-        button_Save = wx.Button(self, id, "Save")
-        button_Save.SetToolTipString("Save the current P(r) work to file.")
-        self.Bind(wx.EVT_BUTTON, self.on_save, id=id)   
+        self._set_reset_flag(True)
         self._set_save_flag(True)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        sizer_button.Add(button_Save, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
-        sizer_button.Add(button_Reset, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
         sizer_button.Add(button_OK, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
        
         iy_vb += 1
@@ -720,7 +709,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             print "InversionControl._on_accept_nterms: %s" % sys.exc_value
             pass
         
-    def _on_reset(self, evt):
+    def on_reset(self, event):
         """
         Resets inversion parameters
         """
