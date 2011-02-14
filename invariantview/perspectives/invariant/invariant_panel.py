@@ -12,6 +12,7 @@ from sans.invariant import invariant
 from sans.guiframe.utils import format_number
 from sans.guiframe.utils import check_float
 from sans.guiframe.events import StatusEvent
+from sans.guiframe.events import AppendBookmarkEvent
 from .invariant_details import InvariantDetailsPanel
 from .invariant_details import InvariantContainer
 from .invariant_widgets import OutputTextCtrl
@@ -79,7 +80,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self._bmark = None
         self.bookmark_num = 0
         
-        self._set_bookmark_menu()
+        #self._set_bookmark_menu()
         #Init state
         self.set_state()
         # default flags for state
@@ -100,25 +101,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             
         ## Default file location for save
         self._default_save_location = os.getcwd()
+        self._set_bookmark_flag(False)
         
-    def err_check_on_data(self):
-        """
-        Check if data is valid for further computation
-        """
-        flag = False
-        self.hint_msg_txt.SetLabel('')
-        #edit the panel
-        if self._data is not None:
-            if len(self._data.x[self._data.x==0]) > 0:
-                flag = True
-                msg = "Invariant: one of your q-values is zero. "
-                msg += "Delete that entry before proceeding"
-                self.hint_msg_txt.SetLabel(msg)
-                wx.PostEvent(self.parent, StatusEvent(status=msg,
-                                                      info="warning",
-                                                      type="stop")) 
-        return flag
-    
     def get_data(self):
         """
         """
@@ -136,7 +120,6 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self._data = data
         #edit the panel
         if self._data is not None:
-            self.err_check_on_data()
             self.get_state_by_num(0)
             data_name = self._data.name
             data_qmin = min (self._data.x)
@@ -195,10 +178,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
 
             num = self.state.saved_state['state_num']
             if num > 0 :
-                self._undo_enable()
                 self._set_undo_flag(True)
             if num < len(state.state_list) - 1:
-                self._redo_enable()
                 self._set_redo_flag(True)
                 
             # get bookmarks
@@ -224,30 +205,30 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.new_state = False 
             self.is_state_data = False
 
-    def clear_panel(self, format='.svs'):
+    def clear_panel(self):
         """
         Clear panel to defaults, used by set_state of manager
         """
-        if format == '.svs':
-            self._data = None
-            # default data testctrl
-            self.hint_msg_txt.SetLabel('')
-            data_name = ''
-            data_qmin = ''
-            data_qmax = ''
-            self.data_name_tcl.SetValue(str(data_name))
-            self.data_min_tcl.SetValue(str(data_qmin))
-            self.data_max_tcl.SetValue(str(data_qmax))
-            #reset output textctrl
-            self._reset_output()
-            #reset panel
-            self.reset_panel()
-            #reset state w/o data
-            self.set_state()
-            # default flags for state
-            self.new_state = False
-            self.is_state_data = False
-            self.is_power_out = False
+        
+        self._data = None
+        # default data testctrl
+        self.hint_msg_txt.SetLabel('')
+        data_name = ''
+        data_qmin = ''
+        data_qmax = ''
+        self.data_name_tcl.SetValue(str(data_name))
+        self.data_min_tcl.SetValue(str(data_qmin))
+        self.data_max_tcl.SetValue(str(data_qmax))
+        #reset output textctrl
+        self._reset_output()
+        #reset panel
+        self.reset_panel()
+        #reset state w/o data
+        self.set_state()
+        # default flags for state
+        self.new_state = False
+        self.is_state_data = False
+        self.is_power_out = False
 
     def get_background(self):
         """
@@ -524,15 +505,14 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         # set a state for this computation for saving
         elif event != None: 
             self._set_compute_state(state='compute')
-            self.button_bookmark.Enable(True)
             self._set_bookmark_flag(True)
             msg= "\n\nStarting a new invariant computation..."            
             wx.PostEvent(self.parent, StatusEvent(status=msg))
             
 
-        if self._data is None or self.err_check_on_data():
+        if self._data is None:
             return
-        
+        self.button_details.Enable()
         #clear outputs textctrl 
         self._reset_output()
         try:
@@ -624,15 +604,11 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             wx.PostEvent(self.parent, StatusEvent(status = msg ))
 
         #enable the button_ok for more details
-        self.button_details.Enable()
+        self._set_preview_flag(True)
         
         if event != None: 
-            if not self.button_report.IsEnabled():
-                self.button_report.Enable(True)
-                self._set_preview_flag(True)
-            if not self.button_save.IsEnabled():
-                self.button_save.Enable(True)
-                self._set_save_flag(True)
+            self._set_preview_flag(True)
+            self._set_save_flag(True)
             wx.PostEvent(self.parent,
                 StatusEvent(status='\nFinished invariant computation...'))
             
@@ -652,13 +628,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.get_state_by_num(state_num=str(pre_state_num))
         
         if float(pre_state_num) <= 0:
-            self._undo_disable()
             self._set_undo_flag(False)
         else:
-            self._undo_enable()
             self._set_undo_flag(True)
-
-        self._redo_enable()
         self._set_redo_flag(True)
         self.is_power_out = False  
         self._info_state_num()
@@ -679,13 +651,10 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.get_state_by_num(state_num=str(next_state_num))
         
         if float(next_state_num)+2 > len(self.state.state_list):
-            self._redo_disable()
             self._set_redo_flag(False)
         else:
-            self._redo_enable()
-            self._set_redo_flag(FTrue)
-        
-        self._undo_enable()
+            self._set_redo_flag(True)
+    
         self._set_undo_flag(True)
         self.is_power_out = False
         self._info_state_num()
@@ -829,15 +798,10 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         #Change the state of txtcrtl to enable/disable
         self._enable_high_q_section()
         self._reset_output()
-        self.button_undo.Disable()
         self._set_undo_flag(False)
-        self.button_redo.Disable()
         self._set_redo_flag(False)
-        self.button_bookmark.Disable()
         self._set_bookmark_flag(False)
-        self.button_report.Disable()
         self._set_preview_flag(False)
-        self.button_save.Disable() 
         self._set_save_flag(False)
         self.button_calculate.SetFocus()
         #self.SetupScrolling()
@@ -885,9 +849,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             pass
 
         event.Skip()
-        self._undo_enable()
         self._set_undo_flag(True)
-        self._redo_disable()
         self._set_redo_flag(False)
             
     def _set_compute_state(self,state=None):
@@ -929,9 +891,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             except: 
                 pass
         # Enable the undo button if it was not
-        self._undo_enable()
         self._set_undo_flag(True)
-        self._redo_disable()
         self._set_redo_flag(False)
         
     def _reset_state_list(self, data=None):
@@ -960,7 +920,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         # Put only the current state in the list
         #copy.deepcopy(self.state.saved_state)
         self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
-        self._undo_disable()
+        self._set_undo_flag(False)
         
     def _on_text(self, event):
         """
@@ -1010,16 +970,11 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             pass
 
         event.Skip()
-        self._undo_enable()
         self._set_undo_flag(True)
-        self._redo_disable()
         self._set_redo_flag(False)
-        self.button_bookmark.Enable(True)
         self._set_bookmark_flag(True)
-        self.button_report.Disable()
         self._set_preview_flag(False)
        
-        
     def _on_out_text(self, event):     
         """
         Catch ouput text change to add the state 
@@ -1086,12 +1041,12 @@ class InvariantPanel(ScrolledPanel, PanelBase):
          ## post help message for the selected model 
         msg +=" Right click on the panel to retrieve this state"
         #wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-        name = "%d] bookmarked at %s on %s"%(self.bookmark_num,my_time, date)
+        name = "%d] bookmarked at %s on %s"%(self.bookmark_num, my_time, date)
         
         # append it to menu
-        id = wx.NewId()
-        self.popUpMenu.Append(id,name,str(msg))
-        wx.EVT_MENU(self, id, self._back_to_bookmark )
+        #id = wx.NewId()
+        #self.popUpMenu.Append(id,name,str(msg))
+        #wx.EVT_MENU(self, id, self._back_to_bookmark)
         state = self.state.clone_state()
         comp_state = copy.deepcopy(self.state.state_list[str(compute_num)])
         self.state.bookmark_list[self.bookmark_num] = [my_time, date,
@@ -1099,6 +1054,10 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.state.toXML(self, doc=None, entry_node=None)
         
         wx.PostEvent(self.parent,StatusEvent(status=msg,info="info"))
+        wx.PostEvent(self.parent, 
+                     AppendBookmarkEvent(title=name, 
+                                         hint=str(msg),
+                                          handler=self._back_to_bookmark))
 
     def _back_to_bookmark(self,event):
         """
@@ -1106,12 +1065,15 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         context menu event
         and set it as a new state
         """
+        self._manager.on_perspective(event)
+        menu = event.GetEventObject()
         ## post help message for the selected model 
-        msg = self.popUpMenu.GetHelpString(event.GetId())
+        msg = menu.GetHelpString(event.GetId())
         msg +=" reloaded"
         wx.PostEvent(self.parent, StatusEvent(status = msg ))
         
-        name= self.popUpMenu.GetLabel(event.GetId())
+        name= menu.GetLabel(event.GetId())
+        
         num,time = name.split(']')
         current_state_num = self.state.state_num  
         self.get_bookmark_by_num(num)
@@ -1121,7 +1083,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         #copy.deepcopy(self.state.saved_state)
         self.state.state_list[str(state_num)] = self.state.clone_state()
         self.state.state_num = state_num
-        self._undo_enable()
+       
         self._set_undo_flag(True)
         self._info_bookmark_num(event)
         
@@ -1133,7 +1095,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         if event == None: return
         # get the object
-        item = self.popUpMenu.FindItemById(event.GetId())
+        menu = event.GetEventObject()
+        item = menu.FindItemById(event.GetId())
         text = item.GetText()
         num = text.split(']')[0]
         msg = "bookmark num = %s "% num
@@ -1158,34 +1121,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         my_time= str(hour)+":"+str(minute)+":"+str(second)
         date= str( month)+"/"+str(day)+"/"+str(year)
         return my_time, date
-      
-    def _undo_enable(self):
-        """
-        Enable undo button
-        """
-        if not self.button_undo.IsEnabled():
-            self.button_undo.Enable(True)
-
-    def _undo_disable(self):
-        """
-        Disable undo button
-        """
-        if self.button_undo.IsEnabled():
-            self.button_undo.Disable()
-
-    def _redo_enable(self):
-        """
-        Enable redo button
-        """
-        if not self.button_redo.IsEnabled():
-            self.button_redo.Enable(True)
-
-    def _redo_disable(self):
-        """
-        Disable redo button
-        """
-        if self.button_redo.IsEnabled():
-            self.button_redo.Disable()
+   
             
     def on_save(self, evt=None): 
         """
@@ -1302,9 +1238,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         Draw widgets related to data's name
         """
         #Sizer hint 
-        hint_msg = "First open data file from 'File' menu."
-        hint_msg += "Then Highlight and right click on the data plot. \n"
-        hint_msg += "Finally, select 'Compute Invariant'."
+        hint_msg = ""
+        
         self.hint_msg_txt = wx.StaticText(self, -1, hint_msg)  
         self.hint_msg_txt.SetForegroundColour("red")
         msg = "Highlight = mouse the mouse's cursor on the data until"
@@ -1392,12 +1327,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         Enable and disable the power value editing
         """
         if event != None: 
-            self.button_bookmark.Enable(True)
             self._set_bookmark_flag(True)
-            self.button_report.Disable()
             self._set_preview_flag(False)
-            print "enable fit==>event!=None"
-
+    
         if self.fix_enable_low.IsEnabled():
             
             if self.fix_enable_low.GetValue():
@@ -1413,9 +1345,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         Disable or enable some button if the user enable low q extrapolation
         """
         if event != None: 
-            self.button_bookmark.Enable(True)
             self._set_bookmark_flag(True)
-            self.button_report.Disable()
             self._set_preview_flag(False)
             
         if self.enable_low_cbox.GetValue():
@@ -1442,9 +1372,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         Enable editing power law section at low q range
         """
         if event != None: 
-            self.button_bookmark.Enable(True)
             self._set_bookmark_flag(True)
-            self.button_report.Disable()
             self._set_preview_flag(False)
         if self.guinier.GetValue():
             self.power_law_low.SetValue(False)
@@ -1545,9 +1473,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         Enable and disable the power value editing
         """
         if event != None: 
-            self.button_bookmark.Enable(True)
             self._set_bookmark_flag(True)
-            self.button_report.Disable()
+    
             self._set_preview_flag(False)
         if self.fix_enable_high.IsEnabled():
             if self.fix_enable_high.GetValue():
@@ -1563,9 +1490,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         Disable or enable some button if the user enable high q extrapolation
         """
         if event != None: 
-            self.button_bookmark.Enable(True)
             self._set_bookmark_flag(True)
-            self.button_report.Disable()
             self._set_preview_flag(False)
         if self.enable_high_cbox.GetValue():
             self.npts_high_tcl.Enable()
@@ -1838,77 +1763,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                     wx.RIGHT|wx.BOTTOM|wx.TOP, 10),
                                    (self.button_details, 0 , wx.ALL, 10),
                         (self.button_calculate, 0 ,
-                         wx.RIGHT|wx.TOP|wx.BOTTOM, 10)])#,
-                                   #(self.button_undo, 0 , wx.ALL, 10),
-                                   #(self.button_redo, 0 , wx.ALL, 10)])
-    def _layout_save_button(self):  
-        """
-        Do the layout for the save button widgets
-        """ 
-        import sans.perspectives.invariant as inv
-
-        path = inv.get_data_path(media='media')
-        self.undo_png = os.path.join(path,"undo.png")
-        self.redo_png = os.path.join(path,"redo.png")
-        self.bookmark_png = os.path.join(path,"bookmark.png")
-        self.report_png = os.path.join(path,"report.png")
-        self.save_png = os.path.join(path,"save.png")
-        #undo button
-        id = wx.NewId()
-        #wx.Button(self, id, "Undo",size=(50,20))
-        self.button_undo = wx.BitmapButton(self, id,wx.Bitmap(self.undo_png))
-        self.button_undo.SetToolTipString("Undo")
-        
-        #self.button_undo.SetBackgroundColour('#c2e6f8')
-        self.Bind(wx.EVT_BUTTON, self.on_undo, id=id)
-        self._undo_disable()
-        #redo button
-        id = wx.NewId()
-        #wx.Button(self, id, "Redo",size=(50,20))
-        self.button_redo = wx.BitmapButton(self, id,wx.Bitmap(self.redo_png))
-        self.button_redo.SetToolTipString("Redo")
-        self.Bind(wx.EVT_BUTTON, self.on_redo, id=id)
-        self._redo_disable()   
-        self._set_redo_flag(False)
-        #bookmark button
-        id = wx.NewId()
-        #wx.Button(self, id, "Undo",size=(50,20))
-        self.button_bookmark = wx.BitmapButton(self, id,
-                                               wx.Bitmap(self.bookmark_png))
-        hint_msg = "Bookmark: right-click on the panel to retrieve it"
-        self.button_bookmark.SetToolTipString(hint_msg)
-        self.Bind(wx.EVT_BUTTON, self.on_bookmark, id=id)
-        #report button
-        id = wx.NewId()
-        #wx.Button(self, id, "Redo",size=(50,20))
-        self.button_report = wx.BitmapButton(self, id,
-                                             wx.Bitmap(self.report_png))
-        hint_msg = "Report the result of the computation"
-        self.button_report.SetToolTipString(hint_msg)
-        self.Bind(wx.EVT_BUTTON, self.on_preview, id=id)
-        #self.button_report.Disable()   
-        #self._set_preview_flag(False)   
-        #save button
-        id = wx.NewId()
-        #wx.Button(self, id, "Save", name ='Save_invariant' )
-        self.button_save = wx.BitmapButton(self, id, wx.Bitmap(self.save_png),
-                                           name='Save_invariant')
-        self.button_save.SetToolTipString("Save as a file")
-        self.Bind(wx.EVT_BUTTON, self.on_save, id=id)   
-        self.button_save.Disable()  
-        self._set_save_flag(False)
-        self.save_button_sizer.AddMany([((PANEL_WIDTH/2,20), 1 ,
-                                         wx.EXPAND|wx.ADJUST_MINSIZE,0),
-                                   (self.button_undo, 0 ,
-                                    wx.LEFT|wx.ADJUST_MINSIZE, 10),
-                                   (self.button_redo, 0 ,
-                                    wx.LEFT|wx.ADJUST_MINSIZE, 10),
-                                   (self.button_bookmark, 0 ,
-                                    wx.LEFT|wx.ADJUST_MINSIZE, 10),
-                                   (self.button_report, 0 ,
-                                    wx.LEFT|wx.ADJUST_MINSIZE, 10),
-                                   (self.button_save, 0 ,
-                                    wx.LEFT|wx.ADJUST_MINSIZE, 10)])        
+                         wx.RIGHT|wx.TOP|wx.BOTTOM, 10)])
     def _do_layout(self):
         """
         Draw window content
@@ -1919,7 +1774,6 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self._layout_inputs_sizer()
         self._layout_outputs_sizer()
         self._layout_button()
-        self._layout_save_button()
         self.main_sizer.AddMany([(self.data_name_boxsizer,0, wx.ALL, 10),
                                   (self.outputs_sizer, 0,
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
@@ -1928,8 +1782,6 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                  (self.inputs_sizer, 0,
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
                                   (self.extrapolation_sizer, 0,
-                                  wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),\
-                                  (self.save_button_sizer,0,
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10)])
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)

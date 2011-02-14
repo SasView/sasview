@@ -207,7 +207,8 @@ class InvariantState(object):
             except:
                 # other outputs than Q*
                 name = item[0] + "_tcl"
-                exec "value = self.saved_state['%s']" % name
+                if name in self.saved_state.keys():
+                    exec "value = self.saved_state['%s']" % name
                 
             # Exclude the outputs w/''    
             if value == '':
@@ -227,7 +228,8 @@ class InvariantState(object):
                 state += "\n%s:   %s " % (item[1], 
                                         format_number(value, high=True))
         # Include warning msg
-        state += "\n\nNote:\n" + self.container.warning_msg
+        if self.container is not None:
+            state += "\n\nNote:\n" + self.container.warning_msg
         return state
 
     def clone_state(self):
@@ -744,8 +746,8 @@ class Reader(CansasReader):
         elif len(output) == 1:
             # Call back to post the new state
             self.state = output[0].meta_data['invstate']
-            #self.call_back(state=output[0].meta_data['invstate'],
-            #               datainfo = output[0])
+            self.call_back(state=output[0].meta_data['invstate'],
+                          datainfo = output[0])
             return output[0]
         else:
             return output                

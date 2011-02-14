@@ -214,6 +214,9 @@ class Plugin(PluginBase):
                              StatusEvent(status=msg, info='error'))
             
             
+    def clear_panel(self):
+        self.invariant_panel.clear_panel()
+        
     def compute_helper(self, data):
         """
         """
@@ -255,6 +258,8 @@ class Plugin(PluginBase):
         try:
             if datainfo.__class__.__name__ == 'list':
                 data = datainfo[0]
+            else:
+                data = datainfo
             if data is None:
                 msg = "invariant.set_state: datainfo parameter cannot"
                 msg += " be None in standalone mode"
@@ -264,7 +269,7 @@ class Plugin(PluginBase):
             data.meta_data['invstate'].file = name
             data.name = name
             data.filename = name
-            #datainfo = self.parent.create_gui_data(datainfo,None)
+            data = self.parent.create_gui_data(data,None)
             #self.__data = datainfo
             #self.__data.group_id = data.filename
             #self.__data.id = datainfo.filename
@@ -272,7 +277,7 @@ class Plugin(PluginBase):
             wx.PostEvent(self.parent, NewPlotEvent(plot=self.__data,
                                         reset=True, title=self.__data.title))
             #temp_state = copy.deepcopy(state)
-            temp_state = self.state_reader.get_state()
+            #temp_state = self.state_reader.get_state()
             # set state
             self.invariant_panel.is_state_data = True
             
@@ -280,8 +285,8 @@ class Plugin(PluginBase):
             #self.parent.set_perspective(self.perspective)
             self.on_perspective(event=None)
             # Load the invariant states
-            self.temp_state = temp_state
-            self.invariant_panel.set_state(state=temp_state,data=self.__data)         
+            self.temp_state = state
+            self.invariant_panel.set_state(state=state,data=self.__data)         
            
         except: 
             logging.error("invariant.set_state: %s" % sys.exc_value)
