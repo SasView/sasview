@@ -167,7 +167,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.define_page_structure()
         ## drawing Initial dispersion parameters sizer 
         self.set_dispers_sizer()
-        self._fill_save_sizer()
+        self._set_save_flag(True)
         ## layout
         self.set_layout()
         
@@ -2469,28 +2469,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.sizer5.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer5.Layout()
 
-    def _fill_save_sizer(self):
-        """
-        Draw the layout for saving option
-        """
-        self.sizer6.Clear(True)
-        box_description= wx.StaticBox(self, -1,"Save Model")
-        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-        sizer_save = wx.BoxSizer(wx.HORIZONTAL)
-        
-        self.btSave_title = wx.StaticText(self, -1, 'Save the current Model')
-        self.btSave = wx.Button(self,wx.NewId(),'Save')
-        self.btSave.Bind(wx.EVT_BUTTON, self.on_save,id= self.btSave.GetId())
-        self.btSave.SetToolTipString("Save the current Model")
-        self._set_save_flag(True)
-        
-        sizer_save.Add(self.btSave_title)  
-        sizer_save.Add((20,20),0, wx.LEFT|wx.RIGHT|wx.EXPAND,80)  
-        sizer_save.Add(self.btSave)     
-        boxsizer1.Add(sizer_save)
-        self.sizer6.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
-        self.sizer6.Layout()
-    
     def _lay_out(self):
         """
         returns self.Layout
