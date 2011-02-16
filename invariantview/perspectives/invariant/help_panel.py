@@ -89,7 +89,7 @@ class HelpWindow(wx.Frame):
         page = """<html>
             <body>
             <ul>
-            <li><a href =%s target ="showframe">Invariant</a><br></li>
+            <li><a href ="%s" target ="showframe">Invariant</a><br></li>
             </ul>
             </body>
             </html>""" % self.path

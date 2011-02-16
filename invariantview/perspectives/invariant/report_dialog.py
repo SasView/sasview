@@ -94,20 +94,21 @@ class ReportDialog(wx.Dialog):
         hbox.Add(button_save)     
         
         # panel for report page
-        panel = wx.Panel(self, -1)
+        #panel = wx.Panel(self, -1)
         vbox = wx.BoxSizer(wx.VERTICAL)
         # html window
-        self.hwindow = html.HtmlWindow(panel,style=wx.BORDER,size=(700,500))
+        self.hwindow = html.HtmlWindow(self,style=wx.BORDER)
         # set the html page with the report string
         self.hwindow.SetPage(self.report_html)
         
         # add panels to boxsizers
-        vbox.Add(hbox, 30)
-        vbox.Add(panel, 500, wx.EXPAND|wx.ALL)
+        vbox.Add(hbox)
+        vbox.Add(self.hwindow, 1, wx.EXPAND|wx.ALL,0)
 
-        self.SetSizerAndFit(vbox)
+        self.SetSizer(vbox)
         self.Centre()
         self.Show(True)
+
 
     def onSave(self, event=None):
         """
