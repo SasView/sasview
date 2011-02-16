@@ -362,8 +362,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             self.bck     = state.bck
 
         # Perform inversion
-        if self.standalone == False:
-            self._on_invert(None)    
+        self._on_invert(None)    
         
     def set_manager(self, manager):
         self._manager = manager
