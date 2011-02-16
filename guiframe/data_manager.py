@@ -15,8 +15,12 @@ All modules "creating Data" posts their data to data_manager .
 Data_manager  make these new data available for all other perspectives.
 """
 import logging
+import os
 from sans.guiframe.data_state import DataState
 from sans.guiframe.utils import parse_name
+import DataLoader.data_info as DataInfo
+from sans.guiframe.dataFitting import Data1D
+from sans.guiframe.dataFitting import Data2D
   
 class DataManager(object):
     """
@@ -35,6 +39,52 @@ class DataManager(object):
         self.message = ""
         self.data_name_dict = {}
       
+    def create_gui_data(self, data, path=None):
+        """
+        Receive data from loader and create a data to use for guiframe
+        """
+        
+        if issubclass(DataInfo.Data2D, data.__class__):
+            new_plot = Data2D(image=None, err_image=None) 
+        else: 
+            new_plot = Data1D(x=[], y=[], dx=None, dy=None)
+           
+        new_plot.copy_from_datainfo(data) 
+        data.clone_without_data(clone=new_plot)  
+        #creating a name for data
+        name = ""
+        title = ""
+        file_name = ""
+        if path is not None:
+            file_name = os.path.basename(path)
+        if data.run:
+            name = data.run[0]
+        if name == "":
+            name = file_name
+        name = self.rename(name)
+        #find title
+        if data.title.strip():
+            title = data.title
+        if title.strip() == "":
+            title = file_name
+        
+        if new_plot.filename.strip() == "":
+            new_plot.filename = file_name
+        
+        new_plot.name = name
+        new_plot.title = title
+        ## allow to highlight data when plotted
+        new_plot.interactive = True
+        ## when 2 data have the same id override the 1 st plotted
+        new_plot.id = name
+        ##group_id specify on which panel to plot this data
+        new_plot.group_id = name
+        new_plot.is_data = True
+        new_plot.path = path
+        ##post data to plot
+        # plot data
+        return new_plot
+ 
     def rename(self, name):
         """
         rename data

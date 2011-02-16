@@ -25,7 +25,6 @@ class Plugin(PluginBase):
         PluginBase.__init__(self, name="DataLoader", standalone=standalone)
         #Default location
         self._default_save_location = None  
-        self.data_name_dict = {}
         self.loader = Loader()  
         self._data_menu = None 
         
