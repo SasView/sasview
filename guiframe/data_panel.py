@@ -384,12 +384,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         for item in self.list_cb_data:
             if item.IsChecked():
                data_id, data_class = self.tree_ctrl.GetItemPyData(item) 
-               data_to_plot.append(self.tree_ctrl.GetItemPyData(data_id))
+               data_to_plot.append(data_id)
         theory_to_plot = []
         for item in self.list_cb_theory:
             if item.IsChecked():
                 data_id, data_class = self.tree_ctrl.GetItemPyData(item)
-                theory_to_plot.append(self.tree_ctrl.GetItemPyData(data_id))
+                theory_to_plot.append(data_id)
         return data_to_plot, theory_to_plot
     
     def on_remove(self, event):
