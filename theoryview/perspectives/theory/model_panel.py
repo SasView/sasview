@@ -1,4 +1,4 @@
-
+import os
 import wx
 import wx.lib.newevent
 import numpy
@@ -527,12 +527,16 @@ class ModelPanel(BasicPage, PanelBase):
         On 'More details' button
         """
         from help_panel import  HelpWindow
+        import sans.models as models 
+        # Get models help model_function path
+        path = models.get_data_path(media='media')
+        model_path = os.path.join(path,"model_functions.html")
         
         if self.model == None:
             name = 'FuncHelp'
         else:
             name = self.model.name
-        frame = HelpWindow(None, -1,  pageToOpen="media/model_functions.html")    
+        frame = HelpWindow(None, -1,  pageToOpen=model_path)    
         frame.Show(True)
         if frame.rhelp.HasAnchor(name):
             frame.rhelp.ScrollToAnchor(name)
@@ -540,6 +544,7 @@ class ModelPanel(BasicPage, PanelBase):
            msg= "Model does not contains an available description "
            msg +="Please.Search in the Help window"
            wx.PostEvent(self.parent, StatusEvent(status = msg ))
+
                      
     def set_range(self, qmin_x, qmax_x, npts):
         """

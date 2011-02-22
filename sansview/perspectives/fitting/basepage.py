@@ -2567,23 +2567,29 @@ class BasicPage(ScrolledPanel, PanelBase):
         #Re draw plot
         self._draw_model()
 
+
     def on_model_help_clicked(self,event):
         """
         on 'More details' button
         """
         from help_panel import  HelpWindow
+        import sans.models as models 
         
+        # Get models help model_function path
+        path = models.get_data_path(media='media')
+        model_path = os.path.join(path,"model_functions.html")
         if self.model == None:
             name = 'FuncHelp'
         else:
             name = self.model.origin_name
 
-        frame = HelpWindow(None, -1,  pageToOpen="media/model_functions.html")    
+        frame = HelpWindow(None, -1,  pageToOpen=model_path)    
         frame.Show(True)
         if frame.rhelp.HasAnchor(name):
             frame.rhelp.ScrollToAnchor(name)
         else:
            msg= "Model does not contains an available description "
            msg +="Please try searching in the Help window"
-           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))                    
+           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))      
+                    
                 

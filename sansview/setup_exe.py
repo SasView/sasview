@@ -90,6 +90,9 @@ data_files += invariant.data_files()
 import sans.guiframe as guiframe
 data_files += guiframe.data_files()
 
+import sans.models as models
+data_files += models.data_files()
+
 for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
     data_files.append((os.path.split(dirname)[0], [f]))
