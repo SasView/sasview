@@ -88,10 +88,12 @@ setup(
     #ext_package = "sans",
     
     # Use the pure python modules
-    package_dir = {"sans_extension":"sans/models/c_extensions"},
-    
+    package_dir = {"sans_extension":"sans/models/c_extensions",
+                   "sans.models.media":"media"},
+    package_data={'sans.models.media': ['*']},
     packages = ["sans","sans.models","sans.models.test",
-                "sans_extension","sans.models.pyre"],
+                "sans_extension","sans.models.pyre",
+                "sans.models.media"],
     
     ext_modules = [ Extension("sans_extension.c_models",
      sources = [
