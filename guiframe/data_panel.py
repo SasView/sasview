@@ -134,7 +134,8 @@ class DataPanel(ScrolledPanel, PanelBase):
                 if is_active:
                     nb_active_perspective += 1
                 if nb_active_perspective == 1:
-                    rb = wx.RadioButton(self, -1, perspective_name, style=wx.RB_GROUP)
+                    rb = wx.RadioButton(self, -1, perspective_name,
+                                        style=wx.RB_GROUP)
                     rb.SetToolTipString("Data will be applied to this perspective")
                     rb.SetValue(is_active)
                 else:
@@ -274,7 +275,10 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.tree_ctrl = DataTreeCtrl(parent=self)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKED, self.on_check_item)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_RIGHT_CLICK, self.on_right_click)
-        self.sizer1.Add(self.tree_ctrl,1, wx.EXPAND|wx.ALL, 20)
+        label = wx.StaticText(self, -1, "LOADED DATA")
+        label.SetForegroundColour('blue')
+        self.sizer1.Add(label, 0, wx.LEFT, 10)
+        self.sizer1.Add(self.tree_ctrl,1, wx.EXPAND|wx.ALL, 10)
 
     def on_right_click(self, event):
         """
