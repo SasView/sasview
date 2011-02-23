@@ -263,7 +263,7 @@ class Plugin(PluginBase):
     def clear_panel(self):
         """
         """
-        self.fit_panel.clear_panel(format=format)
+        self.fit_panel.clear_panel()
         
     def set_default_perspective(self):
         """
