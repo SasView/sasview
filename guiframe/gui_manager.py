@@ -103,7 +103,7 @@ class ViewerFrame(wx.Frame):
         self._file_menu = None
         self._data_menu = None
         self._window_menu = None
-        self._window_menu = None
+        self._data_panel_menu = None
         self._help_menu = None
         self._tool_menu = None
         self._applications_menu_pos = -1
@@ -380,6 +380,7 @@ class ViewerFrame(wx.Frame):
                               Name(self._data_panel.window_name).
                               Left().
                               MinimizeButton().
+                              CloseButton(False).
                               TopDockable(False).
                               BottomDockable(False).
                               LeftDockable(True).
@@ -633,10 +634,14 @@ class ViewerFrame(wx.Frame):
         self._menubar.Append(self._window_menu, '&Window')
      
         style = self.__gui_style & GUIFRAME.MANAGER_ON
+        id = wx.NewId()
+        self._data_panel_menu = self._window_menu.Append(id,
+                                                '&Data Explorer ON', '')
+        wx.EVT_MENU(self, id, self.show_data_panel)
         if style == GUIFRAME.MANAGER_ON:
-            id = wx.NewId()
-            self._window_menu.Append(id,'&Data Manager', '')
-            wx.EVT_MENU(self, id, self.show_data_panel)
+            self._data_panel_menu.SetText('Data Explorer OFF')
+        else:
+            self._data_panel_menu.SetText('Data Explorer ON')
             
         style = self.__gui_style & GUIFRAME.PLOTTING_ON
         if style == GUIFRAME.PLOTTING_ON:
@@ -1173,12 +1178,23 @@ class ViewerFrame(wx.Frame):
         """
         show the data panel
         """
-        style = self.__gui_style & GUIFRAME.MANAGER_ON
-        if style == GUIFRAME.MANAGER_ON:
+        label = self._data_panel_menu.GetText()
+        if label == 'Data Explorer ON':
             pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
             #if not pane.IsShown():
             pane.Show(True)
             self._mgr.Update()
+            self.__gui_style = self.__gui_style | GUIFRAME.MANAGER_ON
+            
+            self._data_panel_menu.SetText('Data Explorer OFF')
+        else:
+            pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
+            #if not pane.IsShown():
+            pane.Show(False)
+            self._mgr.Update()
+            #self.__gui_style = self.__gui_style | GUIFRAME.MANAGER_ON
+            self.__gui_style = self.__gui_style & (~GUIFRAME.MANAGER_ON)
+            self._data_panel_menu.SetText('Data Explorer ON')
  
     def add_data(self, data_list):
         """
@@ -1197,12 +1213,11 @@ class ViewerFrame(wx.Frame):
                 data_state = self._data_manager.get_selected_data()
                 self._data_panel.load_data_list(data_state)
                 self._mgr.GetPane(self._data_panel.window_name).Show(True)
+                self._mgr.Update()
                 #wait for button press from the data panel to send data
         else:
             #automatically send that to the current perspective
-            style = self.__gui_style & GUIFRAME.SINGLE_APPLICATION
-            if style == GUIFRAME.SINGLE_APPLICATION:
-                self.set_data(data_list)
+            self.set_data(data_list)
                 
     def get_data_from_panel(self, data_id, plot=False,append=False):
         """

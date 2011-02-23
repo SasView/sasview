@@ -56,6 +56,7 @@ class Plugin(PluginBase):
         """
         Load data
         """
+        path = None
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
         
@@ -71,12 +72,13 @@ class Plugin(PluginBase):
             file_list = dlg.GetPaths()
             if len(file_list) >= 0 and not(file_list[0]is None):
                 self._default_save_location = os.path.dirname(file_list[0])
+                path = self._default_save_location
         dlg.Destroy()
         
-        if not file_list or file_list[0] is None:
+        if path is None or not file_list or file_list[0] is None:
             return
         self.get_data(file_list)
-        self.parent.show_data_panel(event=None)
+        
         
     def can_load_data(self):
         """
@@ -89,6 +91,7 @@ class Plugin(PluginBase):
         """
         Load entire folder
         """
+        path = None
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
         dlg = wx.DirDialog(self.parent, "Choose a directory", 
@@ -104,9 +107,7 @@ class Plugin(PluginBase):
             return    
         file_list = self.get_file_path(path)
         self.get_data(file_list)
-        self.parent.show_data_panel(event=None)
-   
-   
+        
     def load_error(self, error=None):
         """
         Pop up an error message.
