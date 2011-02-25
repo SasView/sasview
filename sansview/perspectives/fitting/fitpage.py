@@ -477,9 +477,10 @@ class FitPage(BasicPage):
         self.sizer4_4.Add(disp,( iy, ix),(1,1), 
                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1 
-        values = wx.StaticText(self, -1, 'Sigma [A]')
-        values.SetToolTipString(\
-        "Sigma(STD) in the A unit; the standard deviation from the mean value.")
+        values = wx.StaticText(self, -1, 'PD[ratio] ')
+        polytext = "Polydispersity (= STD/mean); "
+        polytext +=  "the standard deviation over the mean value."
+        values.SetToolTipString(polytext)
 
         self.sizer4_4.Add(values,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 
                           0)
@@ -512,7 +513,7 @@ class FitPage(BasicPage):
         nsigmas.SetToolTipString("   Number of sigmas between which the range\n\
          of the distribution function will be used for weighting. \n\
         The value '3' covers 99.5% for Gaussian distribution \n\
-        function.")
+        function. Note: Not recommended to change this value.")
         self.sizer4_4.Add(nsigmas,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE,
                            0)
         
@@ -546,9 +547,11 @@ class FitPage(BasicPage):
                         value= self.model.getParam(name1)
                         ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20)
                                                   ,style=wx.TE_PROCESS_ENTER)
-                        ctl1.SetToolTipString("Absolute Sigma: \n\
-                        1) It is the STD (ratio*mean) of '%s' distribution.\n \
-                        2) It should not exceed Mean/(2*Nsigmas)." %item)
+                        ctl1.SetLabel('PD[ratio]')
+                        poly_text = "Polydispersity (STD/mean) of %s\n" % item
+                        poly_text += "STD: the standard deviation"
+                        poly_text += " from the mean value."
+                        ctl1.SetToolTipString(poly_text)
                         ctl1.SetValue(str (format_number(value)))
                         self.sizer4_4.Add(ctl1, (iy,ix),(1,1),wx.EXPAND)
                         ## text to show error sign
@@ -660,16 +663,20 @@ class FitPage(BasicPage):
                         value= self.model.getParam(name1)
                         ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,
                                         20),style=wx.TE_PROCESS_ENTER)
-                        ctl1.SetToolTipString("Absolute Sigma: \n\
-                        1) It is the STD (ratio*mean) of '%s' distribution."% \
-                        item)
+                        poly_tip = "Absolute Sigma for %s." % item
+                        ctl1.SetToolTipString(poly_tip)
                         ctl1.SetValue(str (format_number(value)))
                         if self.data.__class__.__name__ =="Data2D":
                             if first_orient:
-                                values.SetLabel('Sigma [A (or deg)]')
-                                values.SetToolTipString(\
-                                "Sigma(STD) in the A or deg(for angles) unit;\n\
-                                the standard deviation from the mean value.")
+                                values.SetLabel('PD[ratio], Sig[deg]')
+                                poly_text = "PD(polydispersity for lengths):\n"
+                                poly_text +=  "It should be a value between"
+                                poly_text +=  "0 and 1\n"
+                                poly_text += "Sigma for angles: \n"
+                                poly_text += "It is the STD (ratio*mean)"
+                                poly_text += " of the distribution.\n " % item
+                            
+                                values.SetToolTipString(poly_text)
                                 first_orient = False
                             ctl1.Show(True)
                         elif ctl1.IsShown():

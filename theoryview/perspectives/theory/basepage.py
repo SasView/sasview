@@ -1606,7 +1606,8 @@ class BasicPage(ScrolledPanel):
         self.model_disp.Hide()
         self.disp_box.Hide()
         self.sizer4_4.Clear(True)
-        model_disp = wx.StaticText(self, -1, 'No PolyDispersity for this model')
+        text = "No polydispersity available for this model"
+        model_disp = wx.StaticText(self, -1, text)
         self.sizer4_4.Add(model_disp,(iy, ix), (1,1), 
                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         self.sizer4_4.Layout()
