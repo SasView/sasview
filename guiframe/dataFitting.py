@@ -26,9 +26,11 @@ class Data1D(PlotData1D, LoadData1D):
         PlotData1D.__init__(self, x, y, dx, dy)
         LoadData1D.__init__(self, x, y, dx, dy)
         self.id = None
-        self.group_id = None
+        self.group_id = []
         self.is_data = True
         self.path = None
+        self.xtransform = None
+        self.ytransform = None
         self.title = ""
     
     def copy_from_datainfo(self, data1d):
@@ -98,9 +100,11 @@ class Theory1D(PlotTheory1D, LoadData1D):
         PlotTheory1D.__init__(self, x, y, dy)
         LoadData1D.__init__(self, x, y, dy)
         self.id = None
-        self.group_id = None
+        self.group_id = []
         self.is_data = True
         self.path = None
+        self.xtransform = None
+        self.ytransform = None
         self.title = ""
     
     def copy_from_datainfo(self, data1d):
@@ -173,7 +177,8 @@ class Data2D(PlotData2D, LoadData2D):
         self.id = None
         self.path = None
         self.title = ""
-      
+        self.scale = None
+        self.group_id = []
         
     def copy_from_datainfo(self, data2d):
         """
