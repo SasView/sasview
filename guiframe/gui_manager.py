@@ -107,6 +107,7 @@ class ViewerFrame(wx.Frame):
         self._help_menu = None
         self._tool_menu = None
         self._applications_menu_pos = -1
+        self._applications_menu_name = None
         self._applications_menu = None
         self._edit_menu = None
         self._toolbar_menu = None
@@ -145,6 +146,11 @@ class ViewerFrame(wx.Frame):
         #Register add extra data on the same panel event on load
         self.Bind(EVT_PANEL_ON_FOCUS, self.set_panel_on_focus)
         self.Bind(EVT_APPEND_BOOKMARK, self.append_bookmark)
+    
+    def get_data_manager(self):
+        """
+        """
+        return self._data_manager
     
     def get_toolbar(self):
         """
@@ -189,7 +195,7 @@ class ViewerFrame(wx.Frame):
         self.sb = StatusBar(self, wx.ID_ANY)
         self.SetStatusBar(self.sb)
         # Add panel
-        default_flag = wx.aui.AUI_MGR_DEFAULT#| wx.aui.AUI_MGR_ALLOW_ACTIVE_PANE
+        default_flag = wx.aui.AUI_MGR_DEFAULT| wx.aui.AUI_MGR_ALLOW_ACTIVE_PANE
         self._mgr = wx.aui.AuiManager(self, flags=default_flag)
    
         # Load panels
@@ -559,25 +565,30 @@ class ViewerFrame(wx.Frame):
         if (self._menubar is None) or (self._current_perspective is None):
             return
         #replace or add a new menu for the current plugin
-        name = 'Others'
-        pos = self._menubar.FindMenu(name)
+       
+        pos = self._menubar.FindMenu(str(self._applications_menu_name))
         if pos != -1:
             menu_list = self._current_perspective.populate_menu(self)
             if menu_list:
-                for (menu, _) in menu_list:
-                    hidden_menu = self._menubar.Replace(pos, menu, name)  
+                for (menu, name) in menu_list:
+                    hidden_menu = self._menubar.Replace(pos, menu, name) 
+                    self._applications_menu_name = name 
+                #self._applications_menu_pos = pos
             else:
                 hidden_menu = self._menubar.Remove(pos)
+                self._applications_menu_name = None
             #get the position of the menu when it first added
-            self._plugin_menu_pos = pos 
+            self._applications_menu_pos = pos 
+            
         else:
             menu_list = self._current_perspective.populate_menu(self)
             if menu_list:
-                for (menu, _) in menu_list:
+                for (menu,name) in menu_list:
                     if self._applications_menu_pos == -1:
                         self._menubar.Append(menu, name)
                     else:
                         self._menubar.Insert(self._applications_menu_pos, menu, name)
+                    self._applications_menu_name = name
                   
     def _add_help_menu(self):
         """
@@ -1269,7 +1280,10 @@ class ViewerFrame(wx.Frame):
                 else:
                     if self.enable_add_data(new_plot) and \
                     hasattr(self.panel_on_focus, 'group_id'):
-                        new_plot.group_id = self.panel_on_focus.group_id
+                        new_plot.group_id.append(self.panel_on_focus.group_id)
+            else:
+                #if not append then new plot
+                new_plot.group_id.append(wx.NewId())
             wx.PostEvent(self, NewPlotEvent(plot=new_plot,
                                                   title=str(new_plot.title)))
             
