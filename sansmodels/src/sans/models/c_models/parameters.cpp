@@ -57,13 +57,21 @@ void DispersionModel :: operator() (void *param, vector<WeightPoint> &weights){
 
 	Parameter* par = (Parameter*)param;
 	double value = (*par)();
-
+	double sig;
 	if (npts<2) {
 		weights.insert(weights.end(), WeightPoint(value, 1.0));
 	} else {
 		for(int i=0; i<npts; i++) {
-			double val = value + width * (1.0*double(i)/double(npts-1) - 0.5);
 
+			if ((*par).has_min==false){
+				// width = sigma for angles
+				sig = width;
+			}
+			else{
+				//width = polydispersity (=sigma/value) for length
+				sig = width * value;
+			}
+			double val = value + sig * (1.0*double(i)/double(npts-1) - 0.5);
 			if ( ((*par).has_min==false || val>(*par).min)
 			  && ((*par).has_max==false || val<(*par).max)  )
 				weights.insert(weights.end(), WeightPoint(val, 1.0));
@@ -82,9 +90,9 @@ void DispersionModel :: set_weights(int npoints, double* values, double* weights
  */
 
 GaussianDispersion :: GaussianDispersion() {
-	npts  = 21;
+	npts  = 11;
 	width = 0.0;
-	nsigmas = 3.0;
+	nsigmas = 2.5;
 };
 
 void GaussianDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -114,21 +122,29 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
 	if (width<=0) {
 		width = 0.0;
 		npts  = 1;
-		nsigmas = 3.0;
+		nsigmas = 2.5;
 	}
 
 	Parameter* par = (Parameter*)param;
 	double value = (*par)();
-
+	double sig;
 	if (npts<2) {
 		weights.insert(weights.end(), WeightPoint(value, 1.0));
 	} else {
 		for(int i=0; i<npts; i++) {
+			if ((*par).has_min==false){
+				// width = sigma for angles
+				sig = width;
+			}
+			else{
+				//width = polydispersity (=sigma/value) for length
+				sig = width * value;
+			}
 			// We cover n(nsigmas) times sigmas on each side of the mean
-			double val = value + width * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
+			double val = value + sig * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
 			if ( ((*par).has_min==false || val>(*par).min)
 			  && ((*par).has_max==false || val<(*par).max)  ) {
-				double _w = gaussian_weight(value, width, val);
+				double _w = gaussian_weight(value, sig, val);
 				weights.insert(weights.end(), WeightPoint(val, _w));
 			}
 		}
@@ -141,7 +157,7 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
  */
 
 RectangleDispersion :: RectangleDispersion() {
-	npts  = 21;
+	npts  = 11;
 	width = 0.0;
 	nsigmas = 1.0;
 };
@@ -181,16 +197,24 @@ void RectangleDispersion :: operator() (void *param, vector<WeightPoint> &weight
 
 	Parameter* par = (Parameter*)param;
 	double value = (*par)();
-
+	double sig;
 	if (npts<2) {
 		weights.insert(weights.end(), WeightPoint(value, 1.0));
 	} else {
 		for(int i=0; i<npts; i++) {
+			if ((*par).has_min==false){
+				// width = sigma for angles
+				sig = width;
+			}
+			else{
+				//width = polydispersity (=sigma/value) for length
+				sig = width * value;
+			}
 			// We cover n(nsigmas) times sigmas on each side of the mean
-			double val = value + width * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
+			double val = value + sig * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
 			if ( ((*par).has_min==false || val>(*par).min)
 			  && ((*par).has_max==false || val<(*par).max)  ) {
-				double _w = rectangle_weight(value, width, val);
+				double _w = rectangle_weight(value, sig, val);
 				weights.insert(weights.end(), WeightPoint(val, _w));
 			}
 		}
@@ -203,7 +227,7 @@ void RectangleDispersion :: operator() (void *param, vector<WeightPoint> &weight
  */
 
 LogNormalDispersion :: LogNormalDispersion() {
-	npts  = 21;
+	npts  = 11;
 	width = 0.0;
 	nsigmas = 3.0;
 };
@@ -239,17 +263,25 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
 
 	Parameter* par = (Parameter*)param;
 	double value = (*par)();
-
+	double sig;
 	if (npts<2) {
 		weights.insert(weights.end(), WeightPoint(value, 1.0));
 	} else {
 		for(int i=0; i<npts; i++) {
+			if ((*par).has_min==false){
+				// width = sigma for angles
+				sig = width;
+			}
+			else{
+				//width = polydispersity (=sigma/value) for length
+				sig = width * value;
+			}
 			// We cover n(nsigmas) times sigmas on each side of the mean
-			double val = value + width * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
+			double val = value + sig * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
 
 			if ( ((*par).has_min==false || val>(*par).min)
 			  && ((*par).has_max==false || val<(*par).max)  ) {
-				double _w = lognormal_weight(value, width, val);
+				double _w = lognormal_weight(value, sig, val);
 				weights.insert(weights.end(), WeightPoint(val, _w));
 			}
 		}
@@ -263,7 +295,7 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
  */
 
 SchulzDispersion :: SchulzDispersion() {
-	npts  = 21;
+	npts  = 11;
 	width = 0.0;
 	nsigmas = 3.0;
 };
@@ -302,17 +334,25 @@ void SchulzDispersion :: operator() (void *param, vector<WeightPoint> &weights){
 
 	Parameter* par = (Parameter*)param;
 	double value = (*par)();
-
+	double sig;
 	if (npts<2) {
 		weights.insert(weights.end(), WeightPoint(value, 1.0));
 	} else {
 		for(int i=0; i<npts; i++) {
+			if ((*par).has_min==false){
+				// width = sigma for angles
+				sig = width;
+			}
+			else{
+				//width = polydispersity (=sigma/value) for length
+				sig = width * value;
+			}
 			// We cover n(nsigmas) times sigmas on each side of the mean
-			double val = value + width * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
+			double val = value + sig * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
 
 			if ( ((*par).has_min==false || val>(*par).min)
 			  && ((*par).has_max==false || val<(*par).max)  ) {
-				double _w = schulz_weight(value, width, val);
+				double _w = schulz_weight(value, sig, val);
 				weights.insert(weights.end(), WeightPoint(val, _w));
 			}
 		}
@@ -345,6 +385,7 @@ void ArrayDispersion :: operator() (void *param, vector<WeightPoint> &weights) {
 	} else {
 		for(int i=0; i<npts; i++) {
 			double val = _values[i]; //+ value;  //ToDo: Talk to Paul and put back the 'value'.
+
 			if ( ((*par).has_min==false || val>(*par).min)
 			  && ((*par).has_max==false || val<(*par).max)  )
 				weights.insert(weights.end(), WeightPoint(val, _weights[i]));
