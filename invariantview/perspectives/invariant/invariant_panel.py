@@ -599,7 +599,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.container = copy.deepcopy(self.inv_container)
             self.state.timestamp= self._get_time_stamp()
             msg = self.state.__str__()
-            self.state.set_report_string()
+            #self.state.set_report_string()
             self.is_power_out = False
             wx.PostEvent(self.parent, StatusEvent(status = msg ))
 
