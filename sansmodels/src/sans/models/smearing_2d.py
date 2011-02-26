@@ -7,7 +7,8 @@
 ######################################################################
 
 ## TODO: Need test,and check Gaussian averaging
-import numpy, math,time
+import numpy
+import math
 ## Singular point
 SIGMA_ZERO = 1.0e-010
 ## Limit of how many sigmas to be covered for the Gaussian smearing
@@ -145,7 +146,7 @@ class Smearer2D:
             self.smearer = False
         if self.smearer == False:
             return self.model.evalDistribution([self.qx_data,self.qy_data]) 
-        st = time.time()
+
         nr = self.nr[self.accuracy]
         nphi = self.nphi[self.accuracy]
 
